@@ -111,6 +111,20 @@ describe('redactParticipantsForViewer', () => {
         expect(stub.battleData).toEqual({ reserved: true });
         expect(summon.combatStats.maxHp).toBe(100);
     });
+
+    it('pending: ДМ бачить той самий масив без змін', () => {
+        const reserved = { ...foe(), battleData: { ...foe().battleData, reserved: true } };
+
+        const pending = [reserved, foe()];
+
+        expect(
+            redactPendingForViewer({ ...player, isDM: true }, pending, DEFAULT_RULES)
+        ).toBe(pending);
+    });
+
+    it('pending: порожній список лишається порожнім', () => {
+        expect(redactPendingForViewer(player, [], DEFAULT_RULES)).toEqual([]);
+    });
 });
 
 describe('redactPatchesForViewer', () => {
