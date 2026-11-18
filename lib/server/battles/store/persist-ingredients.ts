@@ -8,6 +8,7 @@ import {
     InventoryLogKind,
 } from '@/lib/constants/inventory';
 import { lockCampaignArtifacts } from '@/lib/server/artifacts/lock';
+import { toInputJson } from '@/lib/utils/common/json';
 import { normalizeItems } from '@/lib/utils/inventory/items';
 import {
     spendCoins,
@@ -127,7 +128,7 @@ export async function persistIngredients(
         await tx.characterInventory.update({
             where: { characterId },
             data: {
-                items: items as unknown as Prisma.InputJsonValue,
+                items: toInputJson(items),
                 gold: wallet.gold,
                 silver: wallet.silver,
                 copper: wallet.copper,

@@ -48,6 +48,7 @@ import {
     headerForOtherMap,
     materializeEdges,
 } from '@/lib/utils/battle/map-storage/relink-scene';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { BattleAudioState } from '@/types/audio';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -158,7 +159,7 @@ async function linkedMapFor(
     return {
         mapId,
         version: meta.version,
-        header: meta.header as unknown as Prisma.InputJsonObject,
+        header: toInputJson(meta.header),
     };
 }
 
@@ -191,7 +192,7 @@ async function relinkData(
             throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_MANY_EDGES, 422);
 
         return {
-            map: inline as unknown as Prisma.InputJsonObject,
+            map: toInputJson(inline),
             mapId: null,
             mapVersion: null,
         };
@@ -217,7 +218,7 @@ async function relinkData(
     }
 
     return {
-        map: header as unknown as Prisma.InputJsonObject,
+        map: toInputJson(header),
         mapId,
         mapVersion: linked.version,
     };
@@ -289,7 +290,7 @@ export async function writeBattleRecord(
                     description: data.description,
                     status: 'prepared',
                     participants:
-                        data.participants as unknown as Prisma.InputJsonValue,
+                        toInputJson(data.participants),
                     currentRound: 1,
                     currentTurnIndex: 0,
                     turnTimerSeconds: data.turnTimerSeconds ?? null,
@@ -389,14 +390,14 @@ export async function writeBattleRecord(
 
         const map =
             row.mapId && written && pinned
-                ? ({
+                ? toInputJson({
                       ...withoutEdges(written),
                       cols: pinned.cols,
                       rows: pinned.rows,
                       blocked: pinned.blocked,
-                  } as unknown as Prisma.InputJsonObject)
+                  })
                 : row.mapId && written
-                  ? (withoutEdges(written) as unknown as Prisma.InputJsonObject)
+                  ? (toInputJson(withoutEdges(written)))
                   : written;
 
         const unlink = row.mapId && map === null;
@@ -414,7 +415,7 @@ export async function writeBattleRecord(
                     ...rest,
                     ...(rest.participants && {
                         participants:
-                            rest.participants as unknown as Prisma.InputJsonValue,
+                            toInputJson(rest.participants),
                     }),
                     ...(relink
                         ? relink
@@ -484,7 +485,7 @@ export async function writeBattleRecord(
                 ? { path: ['seq'], equals: prev.seq }
                 : { equals: Prisma.DbNull },
         },
-        data: { audio: next as unknown as Prisma.InputJsonValue },
+        data: { audio: toInputJson(next) },
     });
 
     if (!count) throw new ContentError(API_ERRORS.BATTLE_AUDIO_CONFLICT, 409);

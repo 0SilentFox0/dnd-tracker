@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import type { UpdateRaceInput } from '@/lib/schemas';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
+import { toInputJson } from '@/lib/utils/common/json';
 
 // characters.race and skill_trees.race reference the race by name
 export async function updateRaceCascade(
@@ -40,7 +41,7 @@ export async function updateRaceCascade(
                         ? abilitiesJson(data.abilities)
                         : undefined,
                 ...(data.choices !== undefined && {
-                    choices: data.choices as unknown as Prisma.InputJsonValue,
+                    choices: toInputJson(data.choices),
                 }),
             },
         });

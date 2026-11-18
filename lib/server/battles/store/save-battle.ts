@@ -42,6 +42,7 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store/types';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapState } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
@@ -146,9 +147,9 @@ async function writeMapState(
 
     const data = {
         removedEdges: state.removedEdges as Prisma.InputJsonValue,
-        doors: state.doors as unknown as Prisma.InputJsonValue,
+        doors: toInputJson(state.doors),
         fog: state.fog
-            ? (state.fog as unknown as Prisma.InputJsonValue)
+            ? (toInputJson(state.fog))
             : Prisma.DbNull,
     };
 
@@ -315,7 +316,7 @@ export async function saveBattle(
                 }),
                 ...(patch.sceneState !== undefined && {
                     systemState: patch.sceneState
-                        ? (patch.sceneState as unknown as Prisma.InputJsonValue)
+                        ? (toInputJson(patch.sceneState))
                         : Prisma.DbNull,
                 }),
                 ...(patch.startedAt !== undefined && {
@@ -363,7 +364,7 @@ export async function saveBattle(
                     ...p.columns,
                     battleId: scene.id,
                     snapshot: p.snapshot as Prisma.InputJsonValue,
-                    state: p.state as unknown as Prisma.InputJsonValue,
+                    state: toInputJson(p.state),
                     snapshotHash: p.snapshotHash,
                 })),
             });
@@ -411,7 +412,7 @@ export async function saveBattle(
                     {
                         battleId: scene.id,
                         seq: events[0].seq,
-                        state: buildSnapshotState(
+                        state: toInputJson(buildSnapshotState(
                             scene,
                             beforeStored,
                             diff,
@@ -421,7 +422,7 @@ export async function saveBattle(
                                 mapRef: before.meta.mapRef,
                                 mapStateChanged: patch.mapState !== undefined,
                             }
-                        ) as unknown as Prisma.InputJsonValue,
+                        )),
                     },
                 ],
             });

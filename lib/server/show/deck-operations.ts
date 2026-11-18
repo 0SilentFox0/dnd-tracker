@@ -6,6 +6,7 @@ import { MAX_DECKS_PER_CAMPAIGN } from '@/lib/constants/show';
 import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
 import { withCampaignRuntimeWrite } from '@/lib/server/content/write';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { Slide } from '@/types/show';
 
 /** Native HTTP and actor adapters share these writes and their CAS/limits. */
@@ -43,7 +44,7 @@ export async function saveDeckRecord(
                 where: { id: deckId, campaignId, updatedAt },
                 data: {
                     title,
-                    slides: slides as unknown as Prisma.InputJsonValue,
+                    slides: toInputJson(slides),
                 },
             });
         } catch (error) {

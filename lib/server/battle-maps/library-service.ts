@@ -31,6 +31,7 @@ import {
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
 import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
@@ -62,12 +63,8 @@ const payloadOf = (input: BattleMapInput) => {
     return {
         header,
         chunks,
-        headerJson: header as unknown as Prisma.InputJsonObject,
-        payloadJson: {
-            header,
-            chunks,
-            tileLayers: {},
-        } as unknown as Prisma.InputJsonObject,
+        headerJson: toInputJson(header),
+        payloadJson: toInputJson({ header, chunks, tileLayers: {} }),
     };
 };
 

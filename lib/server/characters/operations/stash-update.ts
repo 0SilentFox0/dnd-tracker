@@ -30,6 +30,7 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { findHolder } from '@/lib/utils/artifacts/ownership';
 import { classesEnabled as hasClasses } from '@/lib/utils/characters/classes/classes-enabled';
+import { toInputJson } from '@/lib/utils/common/json';
 import { normalizeStash } from '@/lib/utils/inventory/items';
 import { canStashAction } from '@/lib/utils/inventory/permissions';
 import {
@@ -341,7 +342,7 @@ async function applyStashCore(
             data: {
                 equipped: result.state.equipped,
                 stash: result.state.stash,
-                items: result.state.items as unknown as Prisma.InputJsonValue,
+                items: toInputJson(result.state.items),
                 ...purseColumns(result.state.purse),
                 attuned: result.state.attuned ?? [],
             },

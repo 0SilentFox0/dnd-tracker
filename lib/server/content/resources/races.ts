@@ -26,6 +26,7 @@ import {
     choiceSpellIds,
     readChoices,
 } from '@/lib/utils/characters/choices/read';
+import { toInputJson } from '@/lib/utils/common/json';
 
 async function assertNameFree(
     campaignId: string,
@@ -94,7 +95,7 @@ export const racesResource = defineResource<
                     abilities: abilitiesJson(data.abilities),
                 }),
                 ...(data.choices && {
-                    choices: data.choices as unknown as Prisma.InputJsonValue,
+                    choices: toInputJson(data.choices),
                 }),
             },
         });

@@ -37,6 +37,7 @@ import {
 import { pruneVersions, snapshotIfDue } from '@/lib/server/scenario/versions';
 import { toSlideDeck } from '@/lib/server/show/deck-store';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
+import { toInputJson } from '@/lib/utils/common/json';
 import { applyAiOps } from '@/lib/utils/scenario/ai-ops';
 import {
     acquaintanceMentionIds,
@@ -86,7 +87,7 @@ export async function createProposal(
             threadId: ctx.threadId,
             pageId,
             summary,
-            ops: ops as unknown as Prisma.InputJsonValue,
+            ops: toInputJson(ops),
         },
         select: SELECT,
     });
@@ -544,7 +545,7 @@ async function applySlideOps(
 
     const { count } = await tx.slideDeck.updateMany({
         where: { id: deck.id, updatedAt: deck.updatedAt },
-        data: { slides: merged as unknown as Prisma.InputJsonValue },
+        data: { slides: toInputJson(merged) },
     });
 
     if (count === 0)

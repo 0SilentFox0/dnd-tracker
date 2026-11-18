@@ -34,6 +34,7 @@ import { lockCampaignRow } from '@/lib/server/campaigns/lock';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
 import { runContentWriteContext } from '@/lib/server/content/write-context';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
+import { toInputJson } from '@/lib/utils/common/json';
 
 export type IntentTransactionOutcome =
     | { kind: 'receipt'; receipt: AssistantReceipt; effects?: DurableEffect[] }
@@ -296,11 +297,11 @@ async function applyAction(
         ...receiptBase(row),
         status: 'applied',
         result: result as Prisma.InputJsonValue,
-        effects: {
+        effects: toInputJson({
             items: effects,
             completed: [],
             ...(done && { external: readExternalState(done.effects) }),
-        } as unknown as Prisma.InputJsonValue,
+        }),
         effectsStatus: effects.length ? 'pending' : 'complete',
     };
 

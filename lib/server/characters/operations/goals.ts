@@ -1,5 +1,3 @@
-import type { Prisma } from '@prisma/client';
-
 import { requireCharacterSelect } from '../access';
 import {
     characterRoute,
@@ -11,6 +9,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { parseGoals, putGoalsSchema } from '@/lib/schemas/character-goals';
 import { mergeDmGoals, mergePlayerGoals } from '@/lib/utils/characters/goals';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { CharacterGoal } from '@/types/characters';
 
 export const goalsOperation = defineCharacterOperation({
@@ -38,7 +37,7 @@ export const goalsOperation = defineCharacterOperation({
 
         const updated = await prisma.character.update({
             where: { id: character.id },
-            data: { goals: goals as unknown as Prisma.InputJsonValue },
+            data: { goals: toInputJson(goals) },
             select: { goals: true },
         });
 
