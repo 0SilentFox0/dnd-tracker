@@ -36,7 +36,8 @@ export function DemoTourTooltip(props: TooltipRenderProps) {
                     </div>
                 </div>
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     {...closeProps}
                     className="-mt-1 -mr-1 shrink-0 rounded-md p-1 text-hud-muted transition-colors hover:text-hud-ink"
