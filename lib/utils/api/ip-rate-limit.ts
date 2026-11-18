@@ -14,9 +14,16 @@ const PUBLIC_API_PATHS = [
     '/api/health',
     '/api/locale',
     '/api/theme',
+    '/api/csp-report',
 ];
 
+function trustsProxyHeaders(): boolean {
+    return Boolean(process.env.VERCEL) || process.env.TRUST_PROXY === '1';
+}
+
 export function clientIp(headers: Headers): string {
+    if (!trustsProxyHeaders()) return 'untrusted-proxy';
+
     const forwarded = headers.get('x-forwarded-for')?.split(',')[0]?.trim();
 
     return headers.get('x-real-ip')?.trim() || forwarded || 'unknown';

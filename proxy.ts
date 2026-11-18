@@ -2,10 +2,27 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { LOCALE_COOKIE } from '@/lib/i18n/config';
 import { landingRewriteTarget } from '@/lib/i18n/landing-rewrite';
+import {
+    newNonce,
+    nonceCsp,
+    nonceCspHeaderName,
+    usesNonce,
+} from '@/lib/security/csp';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function proxy(request: NextRequest) {
+    const nonce = usesNonce(request.nextUrl.pathname) ? newNonce() : null;
+
+    if (nonce) {
+        // Next reads the nonce from the forwarded request CSP header and stamps it on its scripts
+        request.headers.set(nonceCspHeaderName(), nonceCsp(nonce));
+    }
+
     const response = await updateSession(request);
+
+    if (nonce && !response.headers.has('location')) {
+        response.headers.set(nonceCspHeaderName(), nonceCsp(nonce));
+    }
 
     const target = landingRewriteTarget({
         pathname: request.nextUrl.pathname,

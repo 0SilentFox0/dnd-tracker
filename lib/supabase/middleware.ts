@@ -13,7 +13,7 @@ import {
 const SIGN_OUT_PATH = '/auth/signout';
 
 /** Non-browser calls without a cookie session: MCP (Bearer) and cron (Bearer CRON_SECRET). */
-const NO_ORIGIN_PREFIXES = ['/api/mcp/', '/api/cron/'];
+const NO_ORIGIN_PREFIXES = ['/api/mcp/', '/api/cron/', '/api/csp-report/'];
 
 export function rejectCrossOriginMutation(
     request: NextRequest
