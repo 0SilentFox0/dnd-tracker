@@ -1,10 +1,6 @@
 import type { TileRenderState } from './tiles/TileCanvas';
 
-import type {
-    EdgeEditing,
-    MapDoorsTool,
-    ModeTools,
-} from '@/lib/hooks/battle';
+import type { EdgeEditing, MapDoorsTool, ModeTools } from '@/lib/hooks/battle';
 import type { FogBrush } from '@/lib/hooks/battle/useMapFogTool';
 import type { BattleParticipant } from '@/types/battle';
 import type {

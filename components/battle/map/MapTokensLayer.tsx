@@ -56,7 +56,9 @@ export function MapTokensLayer({
                     selected={view?.selectedId === p.basicInfo.id}
                     current={view?.currentId === p.basicInfo.id}
                     onClick={onTokenClick}
-                    onHover={painting || !onCellHover ? undefined : onTokenHover}
+                    onHover={
+                        painting || !onCellHover ? undefined : onTokenHover
+                    }
                     passThrough={passAll || movingId === p.basicInfo.id}
                     impact={view?.impactFor?.(p.basicInfo.id)}
                     effects={view?.effects?.get(p.basicInfo.id)}
@@ -75,8 +77,7 @@ export function MapTokensLayer({
                         placement={placement}
                         exact={hud?.exact ?? false}
                         raised={
-                            view?.selectedId === id ||
-                            view?.currentId === id
+                            view?.selectedId === id || view?.currentId === id
                         }
                         impact={view?.impactFor?.(id)}
                         effects={view?.effects?.get(id)}

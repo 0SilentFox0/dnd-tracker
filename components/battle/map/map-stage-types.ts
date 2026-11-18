@@ -2,11 +2,7 @@ import type { PointerEvent, RefObject } from 'react';
 
 import type { TileRenderState } from './tiles/TileCanvas';
 
-import type {
-    EdgeEditing,
-    MapDoorsTool,
-    ModeTools,
-} from '@/lib/hooks/battle';
+import type { EdgeEditing, MapDoorsTool, ModeTools } from '@/lib/hooks/battle';
 import type { GridWindow } from '@/lib/utils/battle/grid';
 import type { BattleParticipant } from '@/types/battle';
 import type {

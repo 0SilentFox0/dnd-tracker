@@ -81,7 +81,15 @@ export function useBattleMapFrame(
             content: { width: fitAll.width, height: fitAll.height },
             bounds: cameraBounds(fitAll.width / win.cols),
         };
-    }, [cameraMode, avail, fit.width, fit.height, fitAll.width, fitAll.height, win.cols]);
+    }, [
+        cameraMode,
+        avail,
+        fit.width,
+        fit.height,
+        fitAll.width,
+        fitAll.height,
+        win.cols,
+    ]);
 
     return {
         win,

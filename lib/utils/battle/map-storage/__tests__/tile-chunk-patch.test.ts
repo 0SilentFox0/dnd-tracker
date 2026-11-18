@@ -83,10 +83,7 @@ describe('planTileChunkWrites', () => {
         const plan = planTileChunkWrites(
             [{ layer: 'ground', cx: 0, cy: 0, data: null }],
             new Map([
-                [
-                    '0:0',
-                    { data: EMPTY_EDGE_CHUNK, layers: { ground: 'x' } },
-                ],
+                ['0:0', { data: EMPTY_EDGE_CHUNK, layers: { ground: 'x' } }],
             ])
         );
 

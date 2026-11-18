@@ -160,7 +160,16 @@ export function BattleMap({
             window: gridWindow,
             tiles,
         }),
-        [win, size, pxPerUnit, cameraMode, fit.rotated, phone, gridWindow, tiles]
+        [
+            win,
+            size,
+            pxPerUnit,
+            cameraMode,
+            fit.rotated,
+            phone,
+            gridWindow,
+            tiles,
+        ]
     );
 
     const interaction = useMemo(
