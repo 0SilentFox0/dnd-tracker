@@ -4,7 +4,7 @@ import {
     poolLeft,
     withinCountLimits,
 } from '@/lib/utils/abilities/engine/core/usage';
-import { lairAbilities, lairBlocker } from '@/lib/utils/battle/actions/lair';
+import { lairOf } from '@/lib/utils/battle/actions/access';
 import {
     legendaryAbilities,
     legendaryBlocker,
@@ -32,8 +32,10 @@ export function resolveSpellSource(
     spell: CastableSpell,
     data: SpellSourceRequest
 ) {
+    const lair = lairOf(ctx.meta.rules);
+
     const legendaryAbility = data.legendaryKey
-        ? [...legendaryAbilities(caster), ...lairAbilities(caster)].find(
+        ? [...legendaryAbilities(caster), ...lair.abilities(caster)].find(
               (a) =>
                   a.key === data.legendaryKey &&
                   a.perform?.kind === 'spell' &&
@@ -49,7 +51,7 @@ export function resolveSpellSource(
             );
 
         const blocker = legendaryAbility.limits?.lair
-            ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key)
+            ? lair.blocker(caster, ctx.scene.round, legendaryAbility.key)
             : legendaryBlocker(
                   caster,
                   currentOf(ctx),

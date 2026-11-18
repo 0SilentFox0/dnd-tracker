@@ -1,21 +1,23 @@
-import { actionReason } from './reasons';
+import { lairStateData, lairStateOf, resistSpentOf } from './state';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
+import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import { hasCondition } from '@/lib/utils/battle/conditions/query';
+import type { LairRules } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-export const lairAbilities = (p: BattleParticipant) =>
+const abilities: LairRules['abilities'] = (p) =>
     p.battleData.resolvedAbilities.filter((a) => a.limits?.lair);
 
-export function lairBlocker(
+const blocker = (
     p: BattleParticipant,
     round: number,
     key: string
-): LogLine | null {
-    const lair = p.battleData.lair;
+): LogLine | null => {
+    const lair = lairStateOf(p);
 
     if (!lair?.active) return textRef(API_ERRORS.LAIR_NOT_ACTIVE);
 
@@ -31,34 +33,30 @@ export function lairBlocker(
     return lair.usedRound === round - 1 && lair.lastKey === key
         ? textRef(API_ERRORS.LAIR_REPEAT)
         : null;
-}
+};
 
-export function spendLair(
+const spend = (
     p: BattleParticipant,
     round: number,
     key: string
-): BattleParticipant {
-    const lair = p.battleData.lair;
+): BattleParticipant => {
+    const lair = lairStateOf(p);
 
     return lair
         ? {
               ...p,
               battleData: {
                   ...p.battleData,
-                  lair: { ...lair, usedRound: round, lastKey: key },
+                  ...lairStateData(p, { ...lair, usedRound: round, lastKey: key }),
               },
           }
         : p;
-}
+};
 
-export function toggleLair(
-    p: BattleParticipant,
-    active: boolean
-): BattleParticipant {
-    const lair = p.battleData.lair ?? {
+const toggle = (p: BattleParticipant, active: boolean): BattleParticipant => {
+    const lair = lairStateOf(p) ?? {
         active: false,
         baseResistances: p.battleData.legendary?.resistLeft ?? 0,
-        resistSpent: 0,
     };
 
     const maximum = active
@@ -71,15 +69,32 @@ export function toggleLair(
         resistLeft: 0,
     };
 
-    return {
+    const next: BattleParticipant = {
         ...p,
         battleData: {
             ...p.battleData,
-            lair: { ...lair, active },
             legendary: {
                 ...legendary,
-                resistLeft: Math.max(0, maximum - lair.resistSpent),
+                resistSpent: resistSpentOf(p),
+                resistLeft: Math.max(0, maximum - resistSpentOf(p)),
             },
         },
     };
-}
+
+    return {
+        ...next,
+        battleData: {
+            ...next.battleData,
+            ...lairStateData(next, { ...lair, active }),
+        },
+    };
+};
+
+export const LAIR_RULES: LairRules = {
+    abilities,
+    blocker,
+    spend,
+    toggle,
+    present: (p) => !!lairStateOf(p) || abilities(p).length > 0,
+    active: (p) => !!lairStateOf(p)?.active,
+};

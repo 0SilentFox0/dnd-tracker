@@ -4,6 +4,7 @@ import { legendaryAttack } from '@/lib/utils/battle/actions/legendary-attack';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import type {
+    LairRules,
     RuleSystemActions,
     RuleSystemReactions,
 } from '@/lib/utils/rules/systems/types';
@@ -30,6 +31,16 @@ export const noActions: RuleSystemActions = {
     legendaryAttack,
     move: disabled,
     releaseInvalidGrapples: (participants) => ({ participants, messages: [] }),
+};
+
+/** A system without lairs: no lair actions, nothing to toggle */
+export const noLair: LairRules = {
+    abilities: () => [],
+    blocker: () => null,
+    spend: (p) => p,
+    toggle: (p) => p,
+    present: () => false,
+    active: () => false,
 };
 
 export const noReactions: RuleSystemReactions = {

@@ -297,13 +297,6 @@ function unitBattleData(
         abilityUsage: {},
         pendingExtraActions: 0,
         ...(legendary && { legendary }),
-        ...(monster && {
-            lair: {
-                active: false,
-                baseResistances: unit.legendaryResistances,
-                resistSpent: 0,
-            },
-        }),
         ...(statblock.lairResistances !== undefined && {
             lairResistances: statblock.lairResistances,
         }),

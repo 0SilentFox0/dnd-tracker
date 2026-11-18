@@ -12,7 +12,7 @@ export function RetaliationItem({ form }: { form: RulesFormState }) {
         <SwitchField
             id="rules-actions-retaliation"
             label={t('sections.actions.retaliation')}
-            checked={actions.retaliation}
+            checked={actions.retaliation !== false}
             onCheckedChange={(v) =>
                 form.set('actions', { ...actions, retaliation: v })
             }

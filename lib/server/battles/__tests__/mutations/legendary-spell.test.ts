@@ -8,6 +8,7 @@ import { castSpellSchema } from '@/lib/schemas/battles';
 import { createLegendaryMutation } from '@/lib/server/battles/mutations/core-action/legendary-mutation';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
+import { lairStateData, lairStateOf } from '@/systems/lair/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const row = {
@@ -181,10 +182,9 @@ describe('lair spell references', () => {
         p.battleData.resolvedAbilities = [
             { ...ability, limits: { lair: true } },
         ];
-        p.battleData.lair = {
-            active: true,
-            baseResistances: 0,
-            resistSpent: 0,
+        p.battleData = {
+            ...p.battleData,
+            ...lairStateData(p, { active: true, baseResistances: 0 }),
         };
         p.battleData.legendary = { actions: 3, actionsLeft: 0, resistLeft: 0 };
 
@@ -194,7 +194,7 @@ describe('lair spell references', () => {
     it('uses normal targeting through spell route and spends the lair round rather than legendary budget', async () => {
         const out = await cast(lairCaster(), {}, true, 1);
 
-        expect(actor(out).battleData.lair).toMatchObject({
+        expect(lairStateOf(actor(out))).toMatchObject({
             usedRound: 1,
             lastKey: ability.key,
         });
@@ -218,7 +218,7 @@ describe('lair spell references', () => {
             },
         });
 
-        expect(actor(out).battleData.lair?.usedRound).toBe(1);
+        expect(lairStateOf(actor(out))?.usedRound).toBe(1);
         expect(out.participants[0].combatStats.currentHp).toBeLessThan(
             goblin.combatStats.currentHp
         );

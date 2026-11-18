@@ -138,8 +138,8 @@ function roundTransition(
 
     st.order = roundResult.updatedInitiativeOrder;
     st.log.push(
-        ...roundResult.lairMessages.map((text) =>
-            systemEntry(st, env, st.round, text, 'lair')
+        ...roundResult.hookMessages.map((text) =>
+            systemEntry(st, env, st.round, text, 'round-hook')
         )
     );
 

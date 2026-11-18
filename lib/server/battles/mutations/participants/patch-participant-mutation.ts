@@ -3,7 +3,7 @@ import { CombatStatus } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import { resolveDowned } from '@/lib/utils/abilities/engine/core/run-abilities';
-import { toggleLair } from '@/lib/utils/battle/actions/lair';
+import { lairOf } from '@/lib/utils/battle/actions/access';
 import { settleStatusChange } from '@/lib/utils/battle/damage/consequences';
 import { lineText } from '@/lib/utils/battle/log/lines';
 import {
@@ -42,7 +42,7 @@ export function patchParticipantMutation(
         if (!actor)
             throw new BattleAccessError(404, API_ERRORS.MEMBER_NOT_FOUND);
 
-        const updated = toggleLair(actor, data.lairActive);
+        const updated = lairOf(ctx.meta.rules).toggle(actor, data.lairActive);
 
         return {
             participants: ctx.participants.map((p) =>

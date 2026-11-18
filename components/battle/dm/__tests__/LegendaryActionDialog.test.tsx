@@ -29,6 +29,7 @@ import { LegendaryActionDialog } from '@/components/battle/dm/LegendaryActionDia
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
+import { lairStateData } from '@/systems/lair/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 vi.unmock('next-intl');
@@ -155,10 +156,9 @@ it('offers lair actions independently of legendary budget and sends kind lair', 
     const { wrapper, dragon, coreAction } = sceneWithDragon(false);
 
     dragon.battleData.legendary = { actions: 3, actionsLeft: 0, resistLeft: 0 };
-    dragon.battleData.lair = {
-        active: true,
-        baseResistances: 0,
-        resistSpent: 0,
+    dragon.battleData = {
+        ...dragon.battleData,
+        ...lairStateData(dragon, { active: true, baseResistances: 0 }),
     };
     dragon.battleData.resolvedAbilities = [
         resolved({

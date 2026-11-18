@@ -13,6 +13,7 @@ import {
 } from '@/lib/utils/battle/store/split-participant';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { lairStateOf } from '@/systems/lair/rules/state';
 
 const homm = (over: Partial<UnitFromPrisma> = {}) =>
     ({
@@ -410,10 +411,6 @@ it('snapshots lair resistance baseline even without legendary actions', async ()
         })
     );
 
-    expect(p.battleData.lair).toEqual({
-        active: false,
-        baseResistances: 2,
-        resistSpent: 0,
-    });
+    expect(lairStateOf(p)).toEqual({ active: false, baseResistances: 2 });
     expect(p.battleData.lairResistances).toBe(4);
 });

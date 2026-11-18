@@ -1,4 +1,4 @@
-import { noActions, noReactions } from './none';
+import { noActions, noLair, noReactions } from './none';
 
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -15,6 +15,9 @@ export const reactionsOf = (rules: Pick<Ruleset, 'system'>) =>
 
 export const actionEconomyOf = (rules: Pick<Ruleset, 'system'>) =>
     ruleSystemOf(rules).combat.actionEconomy ?? NO_ACTION_ECONOMY;
+
+export const lairOf = (rules: Pick<Ruleset, 'system'>) =>
+    ruleSystemOf(rules).combat.lair ?? noLair;
 
 export const coreActionsOn = (rules?: Ruleset | null): boolean =>
     !!rules && actionsOf(rules).enabled(rules);

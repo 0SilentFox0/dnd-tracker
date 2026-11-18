@@ -15,7 +15,7 @@ import type { Rng } from '@/lib/utils/abilities/engine/core/types';
 import { recordUse } from '@/lib/utils/abilities/engine/core/usage';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
 import { reactionsOf } from '@/lib/utils/battle/actions/access';
-import { spendLair } from '@/lib/utils/battle/actions/lair';
+import { lairOf } from '@/lib/utils/battle/actions/access';
 import {
     legendaryCostOf,
     spendLegendary,
@@ -807,7 +807,11 @@ async function finalizeCast(
                 );
 
                 return legendaryAbility.limits?.lair
-                    ? spendLair(used, ctx.scene.round, legendaryAbility.key)
+                    ? lairOf(ctx.meta.rules).spend(
+                          used,
+                          ctx.scene.round,
+                          legendaryAbility.key
+                      )
                     : spendLegendary(used, legendaryCostOf(legendaryAbility));
             }
         );

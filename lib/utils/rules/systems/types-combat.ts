@@ -28,6 +28,7 @@ import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import type { ExtractedAttack } from '@/lib/utils/battle/types/participant';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
@@ -188,6 +189,20 @@ export interface OffHandRules {
     arm(attacker: BattleParticipant, attack: BattleAttack): BattleParticipant;
 }
 
+export interface LairRules {
+    /** Lair actions the participant has, offered next to its legendary ones */
+    abilities(p: BattleParticipant): ResolvedAbility[];
+    /** Why the lair action cannot be used now; null when it can */
+    blocker(p: BattleParticipant, round: number, key: string): LogLine | null;
+    /** Records that the lair action `key` was used in `round` */
+    spend(p: BattleParticipant, round: number, key: string): BattleParticipant;
+    /** The DM moves the creature into or out of its lair */
+    toggle(p: BattleParticipant, active: boolean): BattleParticipant;
+    /** The lair toggle is shown for the participant */
+    present(p: BattleParticipant): boolean;
+    active(p: BattleParticipant): boolean;
+}
+
 export interface AttackAbilityResult {
     key: AbilityKey;
     roll: number;
@@ -270,6 +285,8 @@ export interface RuleSystemCombat {
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
     /** Off-hand attacks; absent means never */
     offHand?: OffHandRules;
+    /** Lair actions and the lair toggle; absent means none */
+    lair?: LairRules;
     /** Ability of an attack and its roll and damage modifiers; absent means the attack type's default ability */
     attackAbility?(
         p: BattleParticipant,

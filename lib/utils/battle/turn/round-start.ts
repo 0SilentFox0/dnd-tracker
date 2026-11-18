@@ -33,7 +33,7 @@ export function processStartOfRound(
     updatedInitiativeOrder: BattleParticipant[];
     message: LogLine;
     triggerMessages: LogLine[];
-    lairMessages: LogLine[];
+    hookMessages: LogLine[];
     psychology: { lines: LogLine[]; targets: BattleAction['targets'] };
 } {
     // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
@@ -95,6 +95,6 @@ export function processStartOfRound(
         message: textRef('battleLog.round.start', { round: currentRound }),
         triggerMessages: messages,
         psychology,
-        lairMessages: hooked.messages,
+        hookMessages: hooked.messages,
     };
 }

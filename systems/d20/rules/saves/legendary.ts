@@ -19,14 +19,11 @@ export function resolveSave<T extends { success: boolean }>(
             ...participant,
             battleData: {
                 ...participant.battleData,
-                legendary: { ...legendary, resistLeft },
-                ...(participant.battleData.lair && {
-                    lair: {
-                        ...participant.battleData.lair,
-                        resistSpent:
-                            participant.battleData.lair.resistSpent + 1,
-                    },
-                }),
+                legendary: {
+                    ...legendary,
+                    resistLeft,
+                    resistSpent: (legendary.resistSpent ?? 0) + 1,
+                },
             },
         },
         message: textRef('battleLog.saves.legendaryResist', {

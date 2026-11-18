@@ -12,7 +12,7 @@ export function OpportunityItem({ form }: { form: RulesFormState }) {
         <SwitchField
             id="rules-actions-oa"
             label={t('sections.actions.opportunityAttacks')}
-            checked={actions.opportunityAttacks}
+            checked={actions.opportunityAttacks !== false}
             onCheckedChange={(v) =>
                 form.set('actions', { ...actions, opportunityAttacks: v })
             }
