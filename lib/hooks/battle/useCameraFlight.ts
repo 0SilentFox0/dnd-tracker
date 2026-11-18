@@ -40,7 +40,11 @@ export function useCameraFlight(frameRef: RefObject<Frame | null>) {
 
     const updateCamera = useCallback((next: Camera) => {
         cameraRef.current = next;
-        setCameraState(next);
+        setCameraState((prev) =>
+            prev.zoom === next.zoom && prev.x === next.x && prev.y === next.y
+                ? prev
+                : next
+        );
     }, []);
 
     const fly = useCallback(

@@ -24,6 +24,7 @@ export interface MapCameraOptions {
     frame: Frame | null;
     containerRef: RefObject<HTMLDivElement | null>;
     panLocked: boolean;
+    modeKey?: unknown;
     /** wheel scrolls the page container until zoomed; zoom needs Ctrl/Cmd */
     wheelScrolls?: boolean;
     follow: {
@@ -41,6 +42,7 @@ export function useMapCamera({
     frame,
     containerRef,
     panLocked,
+    modeKey,
     wheelScrolls = false,
     follow,
 }: MapCameraOptions) {
@@ -58,7 +60,11 @@ export function useMapCamera({
         flight;
 
     const markMoved = useCallback(() => {
-        setMovedTurn({ turnId: follow.currentId });
+        setMovedTurn((prev) =>
+            prev?.turnId === follow.currentId
+                ? prev
+                : { turnId: follow.currentId }
+        );
     }, [follow.currentId]);
 
     const onPan = useCallback(
@@ -147,7 +153,15 @@ export function useMapCamera({
         onWheel,
     });
 
-    useCameraFollow({ enabled, frame, frameRef, userMoved, follow, flight });
+    useCameraFollow({
+        enabled,
+        modeKey,
+        frame,
+        frameRef,
+        userMoved,
+        follow,
+        flight,
+    });
 
     const focusPoint = useCallback(
         (

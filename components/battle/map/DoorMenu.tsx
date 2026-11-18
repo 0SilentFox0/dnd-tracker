@@ -35,7 +35,14 @@ export function DoorMenu({
     const root = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        root.current?.querySelector('button')?.focus();
+        const previous = document.activeElement;
+
+        root.current?.querySelector('button')?.focus({ preventScroll: true });
+
+        return () => {
+            if (previous instanceof HTMLElement && previous.isConnected)
+                previous.focus({ preventScroll: true });
+        };
     }, [edge]);
 
     return (

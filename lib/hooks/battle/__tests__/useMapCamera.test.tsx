@@ -210,6 +210,30 @@ describe('useMapCamera', () => {
         expect((resizedFrame.avail.height / 2 - result.current.camera.y) / result.current.camera.zoom).toBeCloseTo(center.y);
     });
 
+    it('re-initializes the camera when the mode key changes', () => {
+        const { result, rerender, containerRef } = setup({ modeKey: true });
+
+        expect(result.current.camera.zoom).toBeGreaterThan(1);
+
+        const fitFrame = {
+            avail: { width: 400, height: 300 },
+            content: { width: 400, height: 300 },
+            bounds: { min: 1, max: 1 },
+        };
+
+        rerender({
+            enabled: true,
+            modeKey: false,
+            frame: fitFrame,
+            containerRef,
+            panLocked: false,
+            follow: { currentId: 'p1', target: null, self: null, enabled: false },
+        });
+        act(() => vi.advanceTimersByTime(16));
+
+        expect(result.current.camera.zoom).toBe(1);
+    });
+
     it('applies follow immediately when reduced motion is enabled', () => {
         const { result, rerender, containerRef } = setup();
 

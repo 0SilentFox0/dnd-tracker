@@ -223,6 +223,7 @@ export function BattleMap({
 
     const camera = useMapCamera({
         enabled: true,
+        modeKey: cameraMode,
         frame,
         containerRef,
         panLocked: drawing || !!modeTools?.panLocked,
