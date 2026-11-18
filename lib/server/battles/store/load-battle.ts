@@ -58,6 +58,21 @@ const TILE_PROPERTIES = Object.fromEntries(
     ])
 );
 
+const sceneStateSchema = storedRecord<SystemSlot>();
+
+/** A malformed slot is dropped (the legacy column still applies) instead of failing the whole battle load */
+function sceneStateOf(raw: unknown): SystemSlot | undefined {
+    if (!raw) return undefined;
+
+    const parsed = sceneStateSchema.safeParse(raw);
+
+    if (parsed.success) return parsed.data;
+
+    console.error('battle scene system_state ignored: not a record');
+
+    return undefined;
+}
+
 function rowToParticipant(row: ParticipantRow): BattleParticipant {
     const { battleId, snapshot, state, snapshotHash, ...columns } = row;
 
@@ -259,6 +274,8 @@ export async function loadBattle(
 
     if (!row) return null;
 
+    const storedSceneState = sceneStateOf(row.systemState);
+
     const scene: BattleSceneState = {
         id: row.id,
         campaignId: row.campaignId,
@@ -268,9 +285,7 @@ export async function loadBattle(
         version: row.version,
         eventSeq: row.eventSeq,
         pendingChoice: pendingFromStored(row.pendingCritChoice),
-        ...(row.systemState && {
-            sceneState: storedRecord<SystemSlot>().parse(row.systemState),
-        }),
+        ...(storedSceneState && { sceneState: storedSceneState }),
         startedAt: row.startedAt,
         turnStartedAt: row.turnStartedAt,
         completedAt: row.completedAt,

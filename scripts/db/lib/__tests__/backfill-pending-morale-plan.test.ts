@@ -59,4 +59,18 @@ describe('planPendingMorale', () => {
         });
         expect(skipped).toEqual(['b']);
     });
+
+    it('skips a row whose slot belongs to another base', () => {
+        const { changes, skipped } = planPendingMorale([
+            {
+                id: 'w',
+                version: 1,
+                pendingMoraleCheck: payload,
+                systemState: { key: 'wfrp', data: {} },
+            },
+        ]);
+
+        expect(changes).toEqual([]);
+        expect(skipped).toEqual(['w']);
+    });
 });
