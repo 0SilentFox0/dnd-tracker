@@ -2,10 +2,9 @@
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Printer } from 'lucide-react';
 
+import { PrintPageShell } from '@/components/common/PrintPageShell';
 import { SkillCard } from '@/components/skills/list/SkillCard';
-import { Button } from '@/components/ui/button';
 import { groupDisplayName } from '@/lib/constants/ungrouped';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
@@ -53,128 +52,92 @@ export function PrintSkillsPageClient({
     }, [initialSkills, mainSkills]);
 
     return (
-        <div>
-            <div className="no-print mb-6 flex items-center justify-between gap-4 border-b pb-4">
-                <div>
-                    <h1 className="text-2xl font-bold">
-                        {t('title', { campaign: campaignName })}
-                    </h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {t('hint')}
-                    </p>
-                </div>
-                <Button
-                    onClick={() => window.print()}
-                    variant="outline"
-                    className="shrink-0"
-                >
-                    <Printer className="mr-2 h-4 w-4" />
-                    {t('button')}
-                </Button>
-            </div>
+        <PrintPageShell
+            title={t('title', { campaign: campaignName })}
+            hint={t('hint')}
+            button={t('button')}
+            empty={groupedByMainSkill.length === 0 ? t('empty') : null}
+        >
+            {groupedByMainSkill.map(([groupName, groupSkills]) => {
+                const mainSkill = mainSkills.find(
+                    (ms) => ms.name === groupName
+                );
 
-            <header className="mb-6 hidden print:block">
-                <h1 className="text-2xl font-bold">
-                    {t('title', { campaign: campaignName })}
-                </h1>
-            </header>
+                const byGroup = new Map<
+                    number,
+                    { label: string; skills: typeof groupSkills }
+                >();
 
-            {groupedByMainSkill.length === 0 ? (
-                <p className="text-muted-foreground">{t('empty')}</p>
-            ) : (
-                groupedByMainSkill.map(([groupName, groupSkills]) => {
-                    const mainSkill = mainSkills.find(
-                        (ms) => ms.name === groupName
-                    );
+                for (const skill of groupSkills) {
+                    const place = positions.get(skill.id) ?? PLACEMENT_UNPLACED;
 
-                    const byGroup = new Map<
-                        number,
-                        { label: string; skills: typeof groupSkills }
-                    >();
+                    const entry = byGroup.get(place.group) ?? {
+                        label: tRoot(place.label, place.params),
+                        skills: [],
+                    };
 
-                    for (const skill of groupSkills) {
-                        const place =
-                            positions.get(skill.id) ?? PLACEMENT_UNPLACED;
+                    entry.skills.push(skill);
+                    byGroup.set(place.group, entry);
+                }
 
-                        const entry = byGroup.get(place.group) ?? {
-                            label: tRoot(place.label, place.params),
-                            skills: [],
-                        };
-
-                        entry.skills.push(skill);
-                        byGroup.set(place.group, entry);
-                    }
-
-                    return (
-                        <section
-                            key={groupName}
-                            className="print-section mb-4"
-                            style={
-                                mainSkill?.color
-                                    ? {
-                                          borderTop: `4px solid ${mainSkill.color}`,
-                                      }
-                                    : undefined
-                            }
-                        >
-                            <div className="flex items-center gap-2 py-1.5">
-                                <div className="leading-tight">
-                                    <h2 className="text-base font-semibold">
-                                        {groupDisplayName(
-                                            groupName,
-                                            tGroup('ungrouped')
-                                        )}
-                                    </h2>
-                                    {mainSkill?.spellGroupName && (
-                                        <p className="text-xs text-muted-foreground">
-                                            {t('school', {
-                                                group: mainSkill.spellGroupName,
-                                            })}
-                                        </p>
+                return (
+                    <section
+                        key={groupName}
+                        className="print-section mb-4"
+                        style={
+                            mainSkill?.color
+                                ? {
+                                      borderTop: `4px solid ${mainSkill.color}`,
+                                  }
+                                : undefined
+                        }
+                    >
+                        <div className="flex items-center gap-2 py-1.5">
+                            <div className="leading-tight">
+                                <h2 className="text-base font-semibold">
+                                    {groupDisplayName(
+                                        groupName,
+                                        tGroup('ungrouped')
                                     )}
-                                </div>
-                            </div>
-
-                            {[...byGroup.entries()]
-                                .sort(([a], [b]) => a - b)
-                                .map(
-                                    ([
-                                        group,
-                                        { label, skills: levelSkills },
-                                    ]) => {
-                                        return (
-                                            <div key={group} className="mb-2">
-                                                <p className="mb-1 text-xs tracking-wide text-muted-foreground uppercase">
-                                                    {label}
-                                                </p>
-                                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                                    {levelSkills.map(
-                                                        (skill) => (
-                                                            <div
-                                                                key={skill.id}
-                                                                className="print-card"
-                                                            >
-                                                                <SkillCard
-                                                                    skill={
-                                                                        skill
-                                                                    }
-                                                                    campaignId={
-                                                                        campaignId
-                                                                    }
-                                                                    printMode
-                                                                />
-                                                            </div>
-                                                        )
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
+                                </h2>
+                                {mainSkill?.spellGroupName && (
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('school', {
+                                            group: mainSkill.spellGroupName,
+                                        })}
+                                    </p>
                                 )}
-                        </section>
-                    );
-                })
-            )}
-        </div>
+                            </div>
+                        </div>
+
+                        {[...byGroup.entries()]
+                            .sort(([a], [b]) => a - b)
+                            .map(([group, { label, skills: levelSkills }]) => {
+                                return (
+                                    <div key={group} className="mb-2">
+                                        <p className="mb-1 text-xs tracking-wide text-muted-foreground uppercase">
+                                            {label}
+                                        </p>
+                                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                            {levelSkills.map((skill) => (
+                                                <div
+                                                    key={skill.id}
+                                                    className="print-card"
+                                                >
+                                                    <SkillCard
+                                                        skill={skill}
+                                                        campaignId={campaignId}
+                                                        printMode
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                    </section>
+                );
+            })}
+        </PrintPageShell>
     );
 }
