@@ -1,6 +1,7 @@
 import { BattleStatus } from '@/lib/constants/battle';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
+import { storedRecord, storedRecordList } from '@/lib/schemas/stored-json';
 import { getPinnedGeometry } from '@/lib/server/battle-maps/library-service';
 import { getPinnedTileChunks } from '@/lib/server/battle-maps/tiles-service';
 import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
@@ -268,7 +269,7 @@ export async function loadBattle(
         pendingMoraleCheck: row.pendingMoraleCheck ?? null,
         pendingChoice: pendingFromStored(row.pendingCritChoice),
         ...(row.systemState && {
-            sceneState: row.systemState as unknown as SystemSlot,
+            sceneState: storedRecord<SystemSlot>().parse(row.systemState),
         }),
         startedAt: row.startedAt,
         turnStartedAt: row.turnStartedAt,
@@ -314,8 +315,7 @@ export async function loadBattle(
         meta: {
             name: row.name,
             description: row.description,
-            setup: (row.participants ??
-                []) as unknown as BattlePreparationParticipant[],
+            setup: storedRecordList<BattlePreparationParticipant>().parse(row.participants),
             friendlyFire: row.campaign.friendlyFire ?? false,
             rules,
             critChoiceByDm: row.campaign.critChoiceByDm,

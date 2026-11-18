@@ -14,6 +14,7 @@ import {
     turnTimerSecondsSchema,
 } from '@/lib/schemas';
 import { battleAudioCommandSchema } from '@/lib/schemas/music';
+import { storedRecord } from '@/lib/schemas/stored-json';
 import type { ActionExecutionContext } from '@/lib/server/assistant/types';
 import { loadAudioLibrary } from '@/lib/server/audio/track-store';
 import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
@@ -200,7 +201,7 @@ async function relinkData(
 
     const linked = await linkedMapFor(db, campaignId, mapId);
 
-    const library = linked.header as unknown as BattleMapConfig;
+    const library = storedRecord<BattleMapConfig>().parse(linked.header);
 
     let header = headerForOtherMap(pinned, library);
 
@@ -384,9 +385,7 @@ export async function writeBattleRecord(
             : await mapForWrite(rawMap, campaignId, row.map);
 
         const pinned =
-            row.map && typeof row.map === 'object' && !Array.isArray(row.map)
-                ? (row.map as unknown as BattleMapConfig)
-                : null;
+            storedRecord<BattleMapConfig>().safeParse(row.map).data ?? null;
 
         const map =
             row.mapId && written && pinned

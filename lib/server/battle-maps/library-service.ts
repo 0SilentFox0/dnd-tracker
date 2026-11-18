@@ -15,6 +15,7 @@ import type {
     BattleMapInput,
     BattleMapSaveInput,
 } from '@/lib/schemas/battle-maps';
+import { storedRecord } from '@/lib/schemas/stored-json';
 import {
     backgroundOf,
     removeUnreferencedBackgrounds,
@@ -239,7 +240,7 @@ export async function getMapMeta(
               version: row.mapVersion,
               cols: row.cols,
               rows: row.rows,
-              header: row.header as unknown as Header,
+              header: storedRecord<Header>().parse(row.header),
           }
         : null;
 }
@@ -254,10 +255,10 @@ async function loadVersionGeometry(
 
     if (!snapshot) return null;
 
-    const payload = snapshot.payload as unknown as {
+    const payload = storedRecord<{
         header: Header;
         chunks: Record<string, string>;
-    };
+    }>().parse(snapshot.payload);
 
     return assembleGeometry(payload.header, payload.chunks);
 }
