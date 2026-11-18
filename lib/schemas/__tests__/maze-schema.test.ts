@@ -139,6 +139,7 @@ describe('mazeActionSchema illusion', () => {
         const group = (ids: string[]) => ({
             heroes: ids.map((id) => ({ id, disguise })),
         });
+
         expect(
             mazeActionSchema.safeParse({
                 op: 'illusion',

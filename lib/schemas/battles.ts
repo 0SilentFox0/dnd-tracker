@@ -86,6 +86,7 @@ const illusionGroupSchema = z.object({
                 });
         }),
 });
+
 const illusionGroupsSchema = z.array(illusionGroupSchema).max(8);
 
 export const mazeSchema = z.object({
