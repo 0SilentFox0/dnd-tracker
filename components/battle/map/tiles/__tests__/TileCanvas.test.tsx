@@ -29,6 +29,7 @@ describe('TileCanvas', () => {
 
         const context = {
             setTransform: vi.fn(),
+            clearRect: vi.fn(),
         } as unknown as CanvasRenderingContext2D;
 
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
