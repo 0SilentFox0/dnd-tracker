@@ -27,7 +27,11 @@ vi.mock('@/lib/supabase/admin', () => ({
     }),
 }));
 vi.mock('@/lib/utils/api/as-dm', () => ({
-    withDM: (_id: string, _action: string, handler: () => unknown) => handler(),
+    withDM: (
+        _id: string,
+        _action: string,
+        handler: (access: { userId: string }) => unknown
+    ) => handler({ userId: 'u1' }),
 }));
 
 // ensureBucket memoizes per module instance, so each test imports a fresh route

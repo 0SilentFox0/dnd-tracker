@@ -186,32 +186,41 @@ export async function createMap(
 ): Promise<BattleMapBrief> {
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
 
-    if (
-        (await prisma.battleMap.count({ where: { campaignId } })) >=
-        MAP_LIMITS.maxPerCampaign
-    )
-        throw new ContentError(API_ERRORS.BATTLE_MAP_LIMIT, 409, undefined, {
-            max: MAP_LIMITS.maxPerCampaign,
-        });
+    const row = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`battle-map-create:${campaignId}`}))`;
 
-    const row = await prisma.battleMap.create({
-        data: {
-            campaignId,
-            name: input.name,
-            cols: header.cols,
-            rows: header.rows,
-            header: headerJson,
-            chunks: { create: chunkRowsWithTiles(chunks, tileLayers) },
-            versions: {
-                create: {
-                    version: 1,
-                    payload: {
-                        ...payloadJson,
-                        tileLayers,
-                    } as Prisma.InputJsonObject,
+        if (
+            (await tx.battleMap.count({ where: { campaignId } })) >=
+            MAP_LIMITS.maxPerCampaign
+        )
+            throw new ContentError(
+                API_ERRORS.BATTLE_MAP_LIMIT,
+                409,
+                undefined,
+                {
+                    max: MAP_LIMITS.maxPerCampaign,
+                }
+            );
+
+        return tx.battleMap.create({
+            data: {
+                campaignId,
+                name: input.name,
+                cols: header.cols,
+                rows: header.rows,
+                header: headerJson,
+                chunks: { create: chunkRowsWithTiles(chunks, tileLayers) },
+                versions: {
+                    create: {
+                        version: 1,
+                        payload: {
+                            ...payloadJson,
+                            tileLayers,
+                        } as Prisma.InputJsonObject,
+                    },
                 },
             },
-        },
+        });
     });
 
     return toBrief(row);

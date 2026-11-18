@@ -14,6 +14,7 @@ const ability = (id: string, school?: string) => ({
             kind: 'damageBonus',
             filter: { kind: 'magic', ...(school && { school }) },
             flat: 2,
+            duration: { rounds: 1 },
         },
     ],
 });
