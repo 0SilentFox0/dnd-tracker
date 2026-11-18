@@ -1,16 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {useQueryClient} from '@tanstack/react-query';
 
-import { contentImportKeys, importInvalidateKeys } from './keys';
+import {importInvalidateKeys} from './keys';
 import { type ImportPart, postChunks } from './post-chunks';
+import { useImportAiMapping } from './useImportAiMapping';
 
-import {
-    contentExampleUrl,
-    getImportAiAvailability,
-    suggestImportMapping,
-} from '@/lib/api/content-import';
+import {contentExampleUrl} from '@/lib/api/content-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { downloadText } from '@/lib/utils/common/download-text';
 import { errorMessage } from '@/lib/utils/common/error-message';
@@ -25,15 +22,7 @@ import {
     parseTable,
 } from '@/lib/utils/content/import';
 import { AggregateImportFileError } from '@/lib/utils/content/import/table';
-import {
-    aiSample,
-    loadStoredMapping,
-    mergeReports,
-    readImportFile,
-    reportToCsv,
-    saveStoredMapping,
-    statusKey,
-} from '@/lib/utils/content/import/wizard';
+import {loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping, statusKey} from '@/lib/utils/content/import/wizard';
 import type {
     ImportKind,
     ImportMapping,
@@ -78,15 +67,13 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
 
     const [error, setError] = useState<string | null>(null);
 
-    const [aiBusy, setAiBusy] = useState(false);
-
-    const [aiNotes, setAiNotes] = useState<string[]>([]);
-
-    const ai = useQuery({
-        queryKey: contentImportKeys.aiAvailability(campaignId, kind),
-        queryFn: () => getImportAiAvailability(campaignId, kind),
-        staleTime: 5 * 60_000,
+    const ai = useImportAiMapping({
+        campaignId,
+        kind,
         enabled: step === 'columns',
+        table: file.table,
+        setMapping,
+        setError,
     });
 
     const records = (table: ParsedTable): ImportRecord[] =>
@@ -107,7 +94,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
             });
             setPreview(null);
             setResult(null);
-            setAiNotes([]);
+            ai.clearNotes();
             setStep('columns');
         } catch (e) {
             if (e instanceof AggregateImportFileError) {
@@ -210,37 +197,6 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
             );
     }
 
-    async function suggestAi() {
-        const { table } = file;
-
-        if (!table) return;
-
-        setAiBusy(true);
-        setError(null);
-
-        try {
-            const res = await suggestImportMapping(campaignId, kind, {
-                headers: table.headers.slice(0, IMPORT_LIMITS.aiHeaders),
-                sample: aiSample(table),
-            });
-
-            setMapping((current) => ({
-                ...current,
-                ...Object.fromEntries(
-                    Object.entries(res.mapping).filter(
-                        ([header, key]) =>
-                            key !== null && Object.hasOwn(current, header)
-                    )
-                ),
-            }));
-            setAiNotes(res.notes);
-        } catch (e) {
-            setError(errorMessage(e, t('contentImport.errors.aiFailed')));
-        } finally {
-            setAiBusy(false);
-        }
-    }
-
     function reset() {
         setAggregateFile(null);
         setStep('file');
@@ -252,7 +208,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
         setBusy(false);
         setProgress(null);
         setError(null);
-        setAiNotes([]);
+        ai.clearNotes();
     }
 
     function downloadErrors() {
@@ -284,10 +240,10 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
             missing: missingRequired(spec.fields, mapping),
         },
         ai: {
-            available: ai.data?.available ?? false,
-            busy: aiBusy,
-            notes: aiNotes,
-            suggest: suggestAi,
+            available: ai.available,
+            busy: ai.busy,
+            notes: ai.notes,
+            suggest: ai.suggest,
         },
         mode: {
             value: mode,
