@@ -808,3 +808,157 @@ describe('редакція учасників за глядачем', () => {
         expect(JSON.stringify(msgs[1].payload)).toContain('"armorClass":17');
     });
 });
+
+describe('server-side fog', () => {
+    const at = (p: ReturnType<typeof createMockParticipant>, x: number) => ({
+        ...p,
+        battleData: { ...p.battleData, position: { x, y: 2 }, facing: 'n' as const },
+    });
+
+    const fogMeta = {
+        ...meta,
+        map: { cols: 20, rows: 5, background: null, opacity: 1 },
+        mapState: {
+            removedEdges: [],
+            doors: {},
+            fog: { mode: 'vision' as const, revealed: [], visionRadius: 3 },
+        },
+    };
+
+    const near = at(goblin, 3);
+
+    const far = {
+        ...at(goblin, 15),
+        basicInfo: { ...goblin.basicInfo, id: 'far' },
+    };
+
+    const mine = at(hero, 1);
+
+    const log = { mode: 'full' as const, entries: [] };
+
+    it('GET: a fogged enemy loses its position, visible ones keep it', () => {
+        const b = toBattleResponse(
+            { meta: fogMeta },
+            scene,
+            [mine, near, far],
+            [],
+            log,
+            { userId: 'u-player' }
+        );
+
+        const byId = Object.fromEntries(b.initiativeOrder.map((p) => [p.basicInfo.id, p]));
+
+        expect(byId.far.battleData.position).toBeUndefined();
+        expect(byId.far.battleData.facing).toBeUndefined();
+        expect(byId.gob.battleData.position).toEqual({ x: 3, y: 2 });
+        expect(byId.hero.battleData.position).toEqual({ x: 1, y: 2 });
+        expect(b.initiativeOrder).toHaveLength(3);
+    });
+
+    it('GET: the DM keeps every position', () => {
+        const b = toBattleResponse({ meta: fogMeta }, scene, [mine, far], [], log, { isDM: true });
+
+        expect(b.initiativeOrder[1].battleData.position).toEqual({ x: 15, y: 2 });
+    });
+
+    const ctx = { map: fogMeta.map, fog: fogMeta.mapState.fog };
+
+    const fog = (beforeParticipants: typeof mine[]) => ({
+        before: ctx,
+        after: ctx,
+        beforeParticipants,
+    });
+
+    const delta = (over: Partial<ClientBattleDelta>) =>
+        ({ battleId: 'b1', version: 4, upserted: [], log: [], removed: [], ...over }) as unknown as ClientBattleDelta;
+
+    it('delta: a hidden enemy upsert and patch lose the position, marked changed', () => {
+        const all = [mine, near, far];
+
+        const out = redactDeltaForPlayers(
+            delta({
+                upserted: [far],
+                patched: [{ id: 'far', battleData: { position: { x: 14, y: 2 }, dying: true } }],
+            }),
+            all,
+            DEFAULT_RULES,
+            { userId: 'u-player', isDM: false, readOnly: true, canSeeEnemyHp: false },
+            fog(all)
+        );
+
+        expect(out.changed).toBe(true);
+        expect(out.delta.upserted[0].battleData.position).toBeUndefined();
+        expect(out.delta.patched?.[0].battleData).toEqual({ dying: true });
+    });
+
+    it('delta: an enemy that steps out of sight is upserted without position', () => {
+        const before = [mine, { ...far, ...at(goblin, 4), basicInfo: far.basicInfo }];
+
+        const after = [mine, far];
+
+        const out = redactDeltaForPlayers(
+            delta({}),
+            after,
+            DEFAULT_RULES,
+            { userId: 'u-player', isDM: false, readOnly: true, canSeeEnemyHp: false },
+            fog(before)
+        );
+
+        expect(out.delta.upserted.map((p) => p.basicInfo.id)).toEqual(['far']);
+        expect(out.delta.upserted[0].battleData.position).toBeUndefined();
+    });
+
+    it('delta: an enemy that comes into sight is upserted with position', () => {
+        const before = [mine, far];
+
+        const after = [mine, { ...at(goblin, 4), basicInfo: far.basicInfo }];
+
+        const out = redactDeltaForPlayers(
+            delta({}),
+            after,
+            DEFAULT_RULES,
+            { userId: 'u-player', isDM: false, readOnly: true, canSeeEnemyHp: false },
+            fog(before)
+        );
+
+        expect(out.delta.upserted[0].battleData.position).toEqual({ x: 4, y: 2 });
+    });
+
+    it('public pusher delta hides what no player sees; DM twin stays full', () => {
+        const all = [mine, near, far];
+
+        const msgs = buildPusherMessages({
+            before: scene,
+            after: { ...scene, version: 4 },
+            participants: all,
+            rules: DEFAULT_RULES,
+            delta: delta({ upserted: [far] }),
+            fog: fog(all),
+        });
+
+        const pub = msgs[0].payload as ClientBattleDelta;
+
+        const dm = msgs[1].payload as ClientBattleDelta;
+
+        expect(pub.upserted[0].battleData.position).toBeUndefined();
+        expect(dm.upserted[0].battleData.position).toEqual({ x: 15, y: 2 });
+    });
+
+    it('fog off: delta untouched', () => {
+        const all = [mine, far];
+
+        const d = delta({ upserted: [far] });
+
+        const off = { map: fogMeta.map };
+
+        const out = redactDeltaForPlayers(
+            d,
+            all,
+            DEFAULT_RULES,
+            { userId: 'u-player', isDM: false, readOnly: true, canSeeEnemyHp: false },
+            { before: off, after: off, beforeParticipants: all }
+        );
+
+        expect(out.delta.upserted[0].battleData.position).toEqual({ x: 15, y: 2 });
+    });
+});

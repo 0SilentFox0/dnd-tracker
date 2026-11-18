@@ -9,6 +9,11 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
+import {
+    type FogContext,
+    fogHiddenIds,
+    withoutPosition,
+} from '@/lib/utils/battle/fog/participant-visibility';
 import { clientMapOf } from '@/lib/utils/battle/map-storage/persisted-map';
 import { publicSetup, reserveOf } from '@/lib/utils/battle/participant/reserve';
 import type { BattleSceneState, LoadedBattle } from '@/lib/utils/battle/store';
@@ -60,6 +65,66 @@ export interface PusherMessage {
     payload: unknown;
 }
 
+export interface DeltaFog {
+    before: FogContext;
+    after: FogContext;
+    beforeParticipants: BattleParticipant[];
+}
+
+export const fogContextOf = (
+    meta: Pick<LoadedBattle['meta'], 'map' | 'mapState'>
+): FogContext => ({ map: meta.map, fog: meta.mapState?.fog });
+
+const playerViewerIds = (participants: BattleParticipant[]) => {
+    const ids = new Set(
+        participants
+            .map((p) => p.basicInfo.controlledBy)
+            .filter((id) => id !== CONTROLLED_BY_DM)
+    );
+
+    return ids.size ? [...ids] : [null];
+};
+
+function fogFilterDelta(
+    delta: ClientBattleDelta,
+    fog: DeltaFog,
+    participants: BattleParticipant[],
+    viewerIds: (string | null)[]
+): ClientBattleDelta {
+    const hidden = fogHiddenIds(fog.after, participants, viewerIds);
+
+    const hiddenBefore = fogHiddenIds(
+        fog.before,
+        fog.beforeParticipants,
+        viewerIds
+    );
+
+    if (!hidden.size && !hiddenBefore.size) return delta;
+
+    const upsertedIds = new Set(delta.upserted.map((p) => p.basicInfo.id));
+
+    const flipped = participants.filter(
+        (p) =>
+            hidden.has(p.basicInfo.id) !== hiddenBefore.has(p.basicInfo.id) &&
+            !upsertedIds.has(p.basicInfo.id)
+    );
+
+    const upserted = [...delta.upserted, ...flipped].map((p) =>
+        hidden.has(p.basicInfo.id) ? withoutPosition(p) : p
+    );
+
+    const patched = delta.patched?.map((patch) =>
+        hidden.has(patch.id) ? withoutPosition(patch) : patch
+    );
+
+    const same =
+        !flipped.length &&
+        upserted.every((p, i) => p === delta.upserted[i]) &&
+        (!patched || patched.every((p, i) => p === delta.patched?.[i]));
+
+    return same ? delta : { ...delta, upserted, ...(patched && { patched }) };
+}
+
 function mapFields(meta: LoadedBattle['meta']) {
     const { mapRef, mapState } = meta;
 
@@ -68,6 +133,24 @@ function mapFields(meta: LoadedBattle['meta']) {
         ...(mapRef && { mapRef }),
         ...(mapState && { mapState }),
     };
+}
+
+function fogRedacted(
+    participants: BattleParticipant[],
+    viewer: Viewer,
+    meta: Pick<LoadedBattle['meta'], 'map' | 'mapState'>
+): BattleParticipant[] {
+    if (viewer.isDM) return participants;
+
+    const hidden = fogHiddenIds(fogContextOf(meta), participants, [
+        viewer.userId,
+    ]);
+
+    if (!hidden.size) return participants;
+
+    return participants.map((p) =>
+        hidden.has(p.basicInfo.id) ? withoutPosition(p) : p
+    );
 }
 
 export function toBattleResponse(
@@ -103,7 +186,11 @@ export function toBattleResponse(
         currentRound: scene.round,
         currentTurnIndex: scene.turnIndex,
         initiativeOrder: viewer
-            ? redactParticipantsForViewer(viewer, participants, meta.rules)
+            ? fogRedacted(
+                  redactParticipantsForViewer(viewer, participants, meta.rules),
+                  viewer,
+                  meta
+              )
             : participants,
         ...(viewer &&
             !viewer.isDM &&
@@ -137,18 +224,33 @@ export function redactDeltaForPlayers(
     delta: ClientBattleDelta,
     participants: BattleParticipant[],
     rules: Ruleset,
-    viewer: Viewer = PLAYER_VIEWER
+    viewer: Viewer = PLAYER_VIEWER,
+    fog?: DeltaFog
 ): { delta: ClientBattleDelta; changed: boolean } {
     const { entries, changed: logChanged } = redactLogForPlayers(delta.log, {
         participants,
         rules,
     });
 
-    const upserted = redactParticipantsForViewer(viewer, delta.upserted, rules);
+    const fogged =
+        fog && !viewer.isDM
+            ? fogFilterDelta(
+                  delta,
+                  fog,
+                  participants,
+                  viewer.userId ? [viewer.userId] : playerViewerIds(participants)
+              )
+            : delta;
+
+    const upserted = redactParticipantsForViewer(
+        viewer,
+        fogged.upserted,
+        rules
+    );
 
     const patched =
-        delta.patched &&
-        redactPatchesForViewer(viewer, delta.patched, participants, rules);
+        fogged.patched &&
+        redactPatchesForViewer(viewer, fogged.patched, participants, rules);
 
     const pending =
         delta.pending && redactPendingForViewer(viewer, delta.pending, rules);
@@ -211,6 +313,7 @@ export function buildPusherMessages(args: {
     pending?: BattleParticipant[];
     wasAwaiting?: boolean;
     delta: ClientBattleDelta;
+    fog?: DeltaFog;
 }): PusherMessage[] {
     const {
         before,
@@ -220,6 +323,7 @@ export function buildPusherMessages(args: {
         pending = [],
         wasAwaiting = false,
         delta,
+        fog,
     } = args;
 
     const channel = battleChannelName(after.id);
@@ -227,7 +331,9 @@ export function buildPusherMessages(args: {
     const { delta: redactedDelta, changed } = redactDeltaForPlayers(
         delta,
         participants,
-        rules
+        rules,
+        PLAYER_VIEWER,
+        fog
     );
 
     const publicDelta: ClientBattleDelta = changed

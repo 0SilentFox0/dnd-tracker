@@ -17,17 +17,43 @@ import type {
     BattleParticipantCombatStats,
 } from '@/types/battle';
 
-const SECRET_BATTLE_KEYS = [
-    'hpMultiplier',
-    'damageMultiplier',
-    'lairResistances',
-    'senses',
-    'languages',
-    'telepathy',
-    'pendingHits',
-    'ingredientStock',
-    'legendary',
+const PUBLIC_BATTLE_KEYS = [
+    'attacks',
+    'position',
+    'facing',
+    'turnStartPosition',
+    'dying',
+    'summonedBy',
+    'phantomOf',
+    'object',
+    'dismissed',
+    'extraTurnActive',
+    'reserved',
+    'revealPending',
+    'escaped',
+    'dormant',
+    'auraZones',
+    'airborne',
+    'attacksLeft',
+    'pendingExtraActions',
+    'movementUsed',
+    'readied',
+    'returnedThisTurn',
+    'mazeWakeRound',
+    'hazardHitRound',
+    'zoneHits',
 ] as const satisfies readonly (keyof BattleParticipantBattleData)[];
+
+const PUBLIC_BATTLE_KEY_SET: ReadonlySet<string> = new Set(PUBLIC_BATTLE_KEYS);
+
+function publicBattleFields<T extends object>(data: T): Partial<T> {
+    return Object.fromEntries(
+        Object.entries(data).filter(
+            ([key, value]) =>
+                value !== undefined && PUBLIC_BATTLE_KEY_SET.has(key)
+        )
+    ) as Partial<T>;
+}
 
 const PUBLIC_ABILITY_KEYS = [
     'level',
@@ -125,11 +151,11 @@ function redactAbilities(abilities: ResolvedAbility[]): ResolvedAbility[] {
                 )
         );
 
-        if (effects.length === a.effects.length) return [a];
+        if (!effects.length && a.effects.length) return [];
 
-        return effects.length
-            ? [{ ...a, effects, description: '', details: undefined }]
-            : [];
+        const { key, name, label, source, trigger } = a;
+
+        return [{ key, name, label, source, trigger, effects } as ResolvedAbility];
     });
 }
 
@@ -146,20 +172,15 @@ function redactOne(
     p: BattleParticipant,
     redact: SlotRedact
 ): BattleParticipant {
-    const { activeEffects, system, ...battleRest } = p.battleData;
+    const { activeEffects, system, resolvedAbilities } = p.battleData;
 
-    const battleData = { ...battleRest } as BattleParticipantBattleData;
-
-    for (const key of SECRET_BATTLE_KEYS) delete battleData[key];
-
-    battleData.activeEffects = withoutConcealed(activeEffects);
-
-    battleData.attacks = (battleData.attacks ?? []).map(redactAttack);
-
-    if (battleData.resolvedAbilities)
-        battleData.resolvedAbilities = redactAbilities(
-            battleData.resolvedAbilities
-        );
+    const battleData = {
+        ...publicBattleFields(p.battleData),
+        activeEffects: withoutConcealed(activeEffects),
+        attacks: (p.battleData.attacks ?? []).map(redactAttack),
+        equippedArtifacts: [],
+        resolvedAbilities: redactAbilities(resolvedAbilities ?? []),
+    } as BattleParticipantBattleData;
 
     const slot = redact(system, 'battle');
 
@@ -288,16 +309,15 @@ function redactPatch(
     }
 
     if (battleData) {
-        const { activeEffects, system, ...data } = battleData;
+        const { activeEffects, system, resolvedAbilities } = battleData;
 
-        const next: Partial<BattleParticipantBattleData> = { ...data };
+        const next: Partial<BattleParticipantBattleData> =
+            publicBattleFields(battleData);
 
-        for (const key of SECRET_BATTLE_KEYS) delete next[key];
+        if (resolvedAbilities)
+            next.resolvedAbilities = redactAbilities(resolvedAbilities);
 
         if (next.attacks) next.attacks = next.attacks.map(redactAttack);
-
-        if (next.resolvedAbilities)
-            next.resolvedAbilities = redactAbilities(next.resolvedAbilities);
 
         if (activeEffects) next.activeEffects = withoutConcealed(activeEffects);
 

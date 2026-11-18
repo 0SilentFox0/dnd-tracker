@@ -267,3 +267,111 @@ describe('statblock numbers (L8b M1/morale)', () => {
         expect(patch.battleData?.attacks?.[0].attackBonus).toBe(0);
     });
 });
+
+describe('enemy battleData allowlist', () => {
+    const LEAKY = {
+        hpMultiplier: 2,
+        damageMultiplier: 2,
+        lairResistances: 1,
+        senses: { darkvision: 60 },
+        languages: 'abyssal',
+        telepathy: 120,
+        pendingHits: [],
+        ingredientStock: { x: 1 },
+        legendary: { actions: 3 },
+        equippedArtifacts: [{ artifactId: 'a1' }],
+        artifactSets: [{ setId: 's1' }],
+        pools: { mana: { current: 3, max: 9 } },
+        abilityUsage: { k: { battle: 1, round: 1, turn: 1 } },
+        pendingCast: { spellId: 'fireball' },
+        transform: { formId: 'bear' },
+        schoolMastery: { fire: 'expert' },
+        movement: { fly: 60 },
+        ammo: { a: 3 },
+        reload: { a: 1 },
+        charmReturn: { side: 'enemy', controlledBy: 'dm' },
+        extraMovement: 10,
+        brandNewSecretKey: 'nope',
+    };
+
+    const withLeaks = (): BattleParticipant => {
+        const p = foe();
+
+        return {
+            ...p,
+            battleData: {
+                ...p.battleData,
+                ...LEAKY,
+                position: { x: 1, y: 2 },
+                dying: true,
+            },
+        } as unknown as BattleParticipant;
+    };
+
+    it.each(Object.keys(LEAKY))('ворог: %s не витікає', (key) => {
+        const [p] = redactParticipantsForViewer(player, [withLeaks()], DEFAULT_RULES);
+
+        expect(p.battleData[key as keyof typeof p.battleData]).toEqual(
+            key === 'equippedArtifacts' ? [] : undefined
+        );
+    });
+
+    it('невідомий ключ не проходить, публічні лишаються', () => {
+        const [p] = redactParticipantsForViewer(player, [withLeaks()], DEFAULT_RULES);
+
+        expect(p.battleData).not.toHaveProperty('brandNewSecretKey');
+        expect(p.battleData).toMatchObject({ position: { x: 1, y: 2 }, dying: true });
+        expect(p.battleData.equippedArtifacts).toEqual([]);
+    });
+
+    it('resolvedAbilities зводяться до публічного підмножини', () => {
+        const p = withLeaks();
+
+        p.battleData.resolvedAbilities = [
+            {
+                key: 'k',
+                name: 'n',
+                description: 'secret text',
+                details: 'secret',
+                cost: { x: 1 },
+                trigger: { event: 'passive' },
+                effects: [{ flag: 'guaranteedHit' }],
+                source: { type: 'unit', id: 'u', name: 'U' },
+            },
+        ] as unknown as BattleParticipant['battleData']['resolvedAbilities'];
+
+        const [out] = redactParticipantsForViewer(player, [p], DEFAULT_RULES);
+
+        const [ability] = out.battleData.resolvedAbilities as unknown as Record<string, unknown>[];
+
+        expect(Object.keys(ability).filter((k) => ability[k] !== undefined).sort()).toEqual([
+            'effects',
+            'key',
+            'name',
+            'source',
+            'trigger',
+        ]);
+    });
+
+    it('патч: те саме обмеження ключів', () => {
+        const [patch] = redactPatchesForViewer(
+            player,
+            [{ id: 'foe', battleData: { ...LEAKY, dying: true } as never }],
+            [foe()],
+            DEFAULT_RULES
+        );
+
+        expect(patch.battleData).toEqual({ dying: true });
+    });
+
+    it('союзник лишається цілим', () => {
+        const ally = {
+            ...withLeaks(),
+            basicInfo: { ...foe().basicInfo, side: ParticipantSide.ALLY },
+        };
+
+        const all = [ally];
+
+        expect(redactParticipantsForViewer(player, all, DEFAULT_RULES)).toBe(all);
+    });
+});

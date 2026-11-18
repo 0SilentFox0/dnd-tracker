@@ -3,6 +3,8 @@ import type { ZodType } from 'zod';
 import type { PusherMessage } from './battle-response';
 import {
     buildPusherMessages,
+    type DeltaFog,
+    fogContextOf,
     redactDeltaForPlayers,
     toBattleResponse,
     viewerOf,
@@ -582,6 +584,18 @@ export async function runGuardedBattleOperationCore<TBody>(
         mapRef: result.scene?.mapRef,
     });
 
+    const fog: DeltaFog = {
+        before: fogContextOf(loaded.meta),
+        after: fogContextOf({
+            map: result.scene?.map !== undefined ? result.scene.map : loaded.meta.map,
+            mapState:
+                result.scene?.mapState !== undefined
+                    ? result.scene.mapState
+                    : loaded.meta.mapState,
+        }),
+        beforeParticipants: loaded.participants,
+    };
+
     if (
         loaded.scene.status === BattleStatus.ACTIVE &&
         after.status !== BattleStatus.ACTIVE
@@ -597,6 +611,7 @@ export async function runGuardedBattleOperationCore<TBody>(
             pending: result.pending,
             wasAwaiting: awaiting !== null,
             delta: clientDelta,
+            fog,
         })
     );
 
@@ -606,7 +621,8 @@ export async function runGuardedBattleOperationCore<TBody>(
               clientDelta,
               result.participants,
               loaded.meta.rules,
-              viewerOf({ userId }, result.participants)
+              viewerOf({ userId }, result.participants),
+              fog
           ).delta;
 
     return {

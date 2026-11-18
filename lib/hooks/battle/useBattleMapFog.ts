@@ -6,7 +6,7 @@ import type { BattleMapScene } from './useBattleMapScene';
 import { useFogMemory } from './useFogMemory';
 
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
-import { fogView } from '@/lib/utils/battle/fog/fog-view';
+import { fogModeOf, fogViewOf } from '@/lib/utils/battle/fog/participant-visibility';
 import { deriveTileCells } from '@/lib/utils/battle/tiles/derive';
 
 const TILE_CATALOG_CELLS = Object.fromEntries(
@@ -20,8 +20,6 @@ const TILE_CATALOG_CELLS = Object.fromEntries(
     ])
 );
 
-const DEFAULT_VISION_RADIUS = 8;
-
 export function useBattleMapFog(scene: BattleMapScene) {
     const { map, participants, battle, viewer, fogTool, tileChunks } = scene;
 
@@ -31,7 +29,7 @@ export function useBattleMapFog(scene: BattleMapScene) {
 
     const fogState = battle.mapState?.fog;
 
-    const fogMode = map.maze ? 'off' : (fogState?.mode ?? 'off');
+    const fogMode = fogModeOf({ map, fog: fogState });
 
     const viewAsParticipant = participants.find(
         (participant) => participant.basicInfo.id === viewAsParticipantId
@@ -60,18 +58,13 @@ export function useBattleMapFog(scene: BattleMapScene) {
 
     const view = useMemo(
         () =>
-            fogView({
-                map,
-                participants,
-                mode: fogMode,
+            fogViewOf({ map, fog: fogState }, participants, {
                 viewerId: viewAsUserId,
                 isDM: dmEditing,
-                revealed: fogState?.revealed ?? [],
-                radius: fogState?.visionRadius ?? DEFAULT_VISION_RADIUS,
                 tileBlocksSight,
                 shareAllies: shareVision,
             }),
-        [map, participants, fogMode, viewAsUserId, dmEditing, fogState, tileBlocksSight, shareVision]
+        [map, participants, viewAsUserId, dmEditing, fogState, tileBlocksSight, shareVision]
     );
 
     const remembers =
