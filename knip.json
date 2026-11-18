@@ -1,7 +1,8 @@
 {
   "entry": [
-    "scripts/**/*.{ts,mjs}",
-    "tests/**/*.ts"
+    "scripts/**/*.{ts,tsx,mjs,mts}",
+    "systems/*/index.ts",
+    "lib/i18n/request.ts"
   ],
   "project": [
     "**/*.{ts,tsx,mjs,mts}"
@@ -15,15 +16,12 @@
     "vercel"
   ],
   "rules": {
-    "exports": "off",
-    "types": "off",
+    "exports": "warn",
+    "types": "warn",
     "nsExports": "off",
     "nsTypes": "off",
     "enumMembers": "off",
     "classMembers": "off",
     "duplicates": "off"
-  },
-  "ignore": [
-    ".claude/**"
-  ]
+  }
 }

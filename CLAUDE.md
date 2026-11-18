@@ -24,7 +24,7 @@ pnpm exec prisma migrate dev --name X  # create + apply a migration locally
 - **Reuse before writing.** Before a spec/plan, search `lib/utils`, `lib/hooks`, `components/common`, `components/ui`, `components/hud` and `lib/utils/api` for an existing solution, and list in the spec what is reused (and why something new is needed). Duplication here comes mostly from parallel sessions solving the same thing twice.
 - **End of branch:** run `/simplify` on the branch diff (besides the review), then update the touched `docs/architecture/*.md` and `docs/STATUS.md`.
 - **Specs/plans:** active ones in `docs/superpowers/{specs,plans}`; when the feature is merged, `git mv` them to `docs/archive/superpowers/` in the merge commit.
-- **CRUD routes** (`races`, `spells`, `main-skills`, `units`, `artifact-sets`, …) are not refactored on main: a shared CRUD route factory is the first step of constructor stage 2 (`feat/constructor`). Keep new CRUD logic in schemas/helpers, not in `route.ts` bodies.
+- **CRUD routes**: the shared factory exists (`lib/server/content/{define-resource,content-routes,service}.ts`, resources in `lib/server/content/resources/`); the `ContentKind` routes (`units`, `races`, `classes`, `feats`, `backgrounds`, `careers`, `spells`, `main-skills`, `skills`, `artifacts`, `artifact-sets`, `tracks`, …) run on it. New content CRUD = a resource + schema, not a hand-written `route.ts` body; CRUD outside `ContentKind` (`acquaintances`, `decks`, `maps`, …) is still hand-written, keep its logic in schemas/helpers.
 - **D&D rule constants** (abilities, alignments, spell slots, hero scaling, critical effects, artifacts) live in `lib/constants/` — reuse before adding.
 
 ## Architecture

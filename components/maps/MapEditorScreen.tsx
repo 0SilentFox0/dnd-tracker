@@ -3,7 +3,7 @@
 import { type CSSProperties,useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import {
     ArrowLeft,
     Biohazard,
@@ -66,8 +66,6 @@ import {
     MIN_SIDE,
 } from '@/lib/utils/battle/grid';
 import { parseUvtt, UvttImportError } from '@/lib/utils/battle/uvtt/parse';
-import enTileLabels from '@/messages/en/tile-labels.json';
-import ukTileLabels from '@/messages/uk/tile-labels.json';
 import type { BattleMapFull, BattleMapTileChunks } from '@/types/battle-map';
 
 function BackLink({ campaignId }: { campaignId: string }) {
@@ -279,12 +277,12 @@ function EditorContent({
 
     const tileTranslations = useTranslations('maps.editor.tiles');
 
-    const locale = useLocale() === 'uk' ? 'uk' : 'en';
-
-    const tileLabels = locale === 'uk' ? ukTileLabels : enTileLabels;
+    const tileLabelTranslations = useTranslations('maps.tileLabels');
 
     const tileLabel = (key: string) =>
-        (tileLabels as Record<string, string>)[key] ?? key;
+        tileLabelTranslations.has(key as never)
+            ? tileLabelTranslations(key as never)
+            : key;
 
     const previewMap = paintingTiles
         ? { ...map, background: null }

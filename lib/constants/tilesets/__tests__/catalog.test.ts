@@ -7,8 +7,8 @@ import {
 } from '../catalog';
 import snapshot from './catalog-snapshot.json';
 
-import enTileLabels from '@/messages/en/tile-labels.json';
-import ukTileLabels from '@/messages/uk/tile-labels.json';
+import enMaps from '@/messages/en/maps.json';
+import ukMaps from '@/messages/uk/maps.json';
 
 describe('tile catalog', () => {
     it('has unique ids, keys, and local raster asset files', () => {
@@ -59,10 +59,10 @@ describe('tile catalog', () => {
     it('has Ukrainian and English labels for every tile', () => {
         for (const tile of TILE_CATALOG) {
             expect(
-                ukTileLabels[tile.key as keyof typeof ukTileLabels]
+                ukMaps.tileLabels[tile.key as keyof typeof ukMaps.tileLabels]
             ).toBeTruthy();
             expect(
-                enTileLabels[tile.key as keyof typeof enTileLabels]
+                enMaps.tileLabels[tile.key as keyof typeof enMaps.tileLabels]
             ).toBeTruthy();
         }
     });
