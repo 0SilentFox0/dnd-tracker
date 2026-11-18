@@ -108,6 +108,13 @@ export async function readShowState(
 const json = (v: unknown) =>
     v === null ? Prisma.DbNull : (v as Prisma.InputJsonValue);
 
+/** An untouched field is not written back: a stored value dropped as invalid on read must not be wiped by the next write */
+const unchangedOr = (
+    prev: ShowState | null,
+    next: ShowState,
+    key: 'battle' | 'cover' | 'world'
+) => (prev && prev[key] === next[key] ? {} : { [key]: json(next[key] ?? null) });
+
 /** Оптимістичне блокування за seq; рядок створюється лише першим записом і ніколи не видаляється. */
 export async function writeShowState(
     campaignId: string,
@@ -124,10 +131,10 @@ export async function writeShowState(
         ),
         nextImageUrl: next.nextImageUrl,
         audio: json(next.audio),
-        battle: json(next.battle ?? null),
-        cover: json(next.cover ?? null),
+        ...unchangedOr(prev, next, 'battle'),
+        ...unchangedOr(prev, next, 'cover'),
         curtain: !!next.curtain,
-        world: json(next.world ?? null),
+        ...unchangedOr(prev, next, 'world'),
         seq: next.seq,
         ...(prev && prev.trail === next.trail
             ? {}

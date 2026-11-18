@@ -293,6 +293,9 @@ async function applyClaimed(
 
     const ops = readProposalOps(proposal.ops);
 
+    if (ops.length === 0 && Array.isArray(proposal.ops) && proposal.ops.length > 0)
+        throw new Error('ai proposal ops are unreadable');
+
     const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === 'addSlide');
 
     if (slideOps.length > 0)
