@@ -15,6 +15,7 @@ import { HudButton } from '@/components/hud';
 import { AddYoutubeTrackDialog } from '@/components/music/AddYoutubeTrackDialog';
 import { TrackTitleInput } from '@/components/music/TrackTitleInput';
 import { UploadTrackButton } from '@/components/music/UploadTrackButton';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import {
@@ -231,16 +232,20 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                         <UploadTrackButton
                             pending={library.isBusy}
                             onFile={(file) => void library.upload(file)}
+                            size="sm"
+                            className="min-w-0 flex-1"
                         />
-                        <HudButton
+                        <Button
                             type="button"
+                            variant="outline"
+                            size="sm"
                             disabled={library.isBusy}
                             onClick={() => setYoutubeOpen(true)}
-                            className="flex h-7 items-center gap-1 rounded border border-hud-rule px-2 text-xs hover:bg-white/10 disabled:opacity-40"
+                            className="min-w-0 flex-1"
                         >
-                            <Plus className="size-3.5" />
+                            <Plus />
                             {t('music.youtube.add')}
-                        </HudButton>
+                        </Button>
                     </div>
                     <AddYoutubeTrackDialog
                         open={youtubeOpen}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { type ComponentProps, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Upload } from 'lucide-react';
 
@@ -11,9 +11,13 @@ import { TRACK_FILE_ACCEPT } from '@/lib/constants/music';
 export function UploadTrackButton({
     onFile,
     pending,
+    size,
+    className,
 }: {
     onFile: (file: File) => void;
     pending: boolean;
+    size?: ComponentProps<typeof Button>['size'];
+    className?: string;
 }) {
     const t = useTranslations('music');
 
@@ -38,9 +42,10 @@ export function UploadTrackButton({
             <Button
                 onClick={() => input.current?.click()}
                 disabled={pending}
-                className="flex items-center gap-2"
+                size={size}
+                className={className}
             >
-                <Upload className="h-4 w-4" />
+                <Upload />
                 {pending ? t('upload.pending') : t('upload.button')}
             </Button>
         </>
