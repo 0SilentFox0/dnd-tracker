@@ -7,7 +7,7 @@ import type { BattleAttack, BattleParticipant } from '@/types/battle';
 export const canOffHandAttack = (
     p: BattleParticipant,
     rules: Ruleset
-): boolean => !!ruleSystemOf(rules).combat.offHand?.ready(p);
+): boolean => !!ruleSystemOf(rules).combat.secondaryAttack?.ready(p);
 
 export function spendAttack(
     p: BattleParticipant,
@@ -17,5 +17,7 @@ export function spendAttack(
 ): BattleParticipant {
     const next = spendFromPool(p, participants);
 
-    return ruleSystemOf(rules).combat.offHand?.arm(next, attack) ?? next;
+    return (
+        ruleSystemOf(rules).combat.secondaryAttack?.arm(next, attack) ?? next
+    );
 }

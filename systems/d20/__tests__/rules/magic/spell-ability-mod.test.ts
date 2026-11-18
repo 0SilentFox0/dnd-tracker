@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -39,8 +39,8 @@ describe('d20 offHand and spellAbilityMod', () => {
         (_n, rules) => {
             const { combat } = ruleSystemOf(rules);
 
-            expect(combat.offHand?.allowed(withModel('5e'))).toBe(true);
-            expect(combat.offHand?.allowed(withModel())).toBe(false);
+            expect(combat.secondaryAttack?.allowed(withModel('5e'))).toBe(true);
+            expect(combat.secondaryAttack?.allowed(withModel())).toBe(false);
         }
     );
 

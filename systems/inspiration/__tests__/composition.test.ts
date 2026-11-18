@@ -28,7 +28,7 @@ describe('inspiration module composition', () => {
     it('the module adds the combat hook and both participant parts', () => {
         const { combat, participant } = ruleSystemOf(dnd5eRules());
 
-        expect(combat.inspiration).toBeDefined();
+        expect(combat.rerollToken).toBeDefined();
         expect(participant?.fromStored).toHaveLength(1);
         expect(participant?.persist).toHaveLength(1);
     });
@@ -36,7 +36,7 @@ describe('inspiration module composition', () => {
     it('bare d20 has none of them', () => {
         const { combat, participant } = ruleSystemOf(bareD20Rules());
 
-        expect(combat.inspiration).toBeUndefined();
+        expect(combat.rerollToken).toBeUndefined();
         expect(participant?.fromStored ?? []).toHaveLength(0);
         expect(participant?.persist ?? []).toHaveLength(0);
     });

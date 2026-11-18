@@ -1,3 +1,4 @@
+import './ext-codec';
 import type { PersistPart, StoredPart } from '@/lib/utils/rules/systems/types';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 

@@ -1,3 +1,4 @@
+import './ext-codec';
 import { AttackType } from '@/lib/constants/battle';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { hasTrait } from '@/lib/utils/battle/common/weapon-trait';

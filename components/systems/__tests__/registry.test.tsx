@@ -22,7 +22,7 @@ describe('system ui registry', () => {
             battle: hommBattle,
             dmPages: hommPages,
             fx: hommFx,
-            artifactSets: hommArtifactSets,
+            itemGroups: hommArtifactSets,
             ...hommRest
         } = systemUiOf('homm');
 

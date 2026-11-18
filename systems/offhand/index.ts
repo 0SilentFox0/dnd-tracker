@@ -5,7 +5,7 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
 export const OFFHAND_MODULE = defineAddon<RuleSystemDefinition>(() => ({
     combat: {
-        offHand: OFF_HAND_RULES,
+        secondaryAttack: OFF_HAND_RULES,
         turn: { resetState: [offHandResetState] },
     },
 }));

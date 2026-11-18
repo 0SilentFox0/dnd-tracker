@@ -17,15 +17,13 @@ export const D20_BALANCE: SystemBalance = {
             new Set([built.basicInfo.id])
         );
 
+        const progress = (character.row as { skillTreeProgress?: unknown })
+            .skillTreeProgress;
+
         const treeRow = campaignContext?.skillTreeByRace[character.race];
 
         const levels = treeRow
-            ? branchLevels(
-                  resolveLearned(
-                      normalizeTree(treeRow),
-                      character.skillTreeProgress
-                  )
-              )
+            ? branchLevels(resolveLearned(normalizeTree(treeRow), progress))
             : {};
 
         const mainSkills = campaignContext?.mainSkills ?? [];

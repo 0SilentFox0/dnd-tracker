@@ -88,7 +88,7 @@ function assertOffHand(
     if (attacker.actionFlags.hasUsedBonusAction)
         throw new BattleRuleError('action_used', API_ERRORS.BONUS_ACTION_USED);
 
-    if (!ruleSystemOf(rules).combat.offHand?.ready(attacker))
+    if (!ruleSystemOf(rules).combat.secondaryAttack?.ready(attacker))
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.OFF_HAND_NEEDS_ATTACK
@@ -178,7 +178,10 @@ export function validateAttackRequest(
             targetCount: chosenTargets.length,
         });
 
-    if (data.offHand && !ruleSystemOf(rules).combat.offHand?.allowed(attacker))
+    if (
+        data.offHand &&
+        !ruleSystemOf(rules).combat.secondaryAttack?.allowed(attacker)
+    )
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.OFF_HAND_NOT_ALLOWED

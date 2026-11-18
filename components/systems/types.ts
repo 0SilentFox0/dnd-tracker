@@ -266,7 +266,7 @@ export interface SystemUi {
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
     /** Link and panel of the DM artifacts page for item sets */
-    artifactSets?: {
+    itemGroups?: {
         Link: ComponentType<ArtifactSetsLinkProps>;
         Panel: ComponentType<ArtifactSetsPanelProps>;
     };

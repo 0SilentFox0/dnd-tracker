@@ -1,5 +1,5 @@
 import type { SystemSlot } from './slot';
-import type { ArmourGear,SystemInputCtx } from './types';
+import type { ArmourGear, SystemInputCtx } from './types';
 import type {
     InitiativeScore,
     RuleSystemActions,
@@ -284,9 +284,9 @@ export interface RuleSystemCombat {
     /** Validates the system's input of an attack or a cast before it runs */
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
     /** Off-hand attacks; absent means never */
-    offHand?: OffHandRules;
+    secondaryAttack?: OffHandRules;
     /** Lair actions and the lair toggle; absent means none */
-    lair?: LairRules;
+    sceneActions?: LairRules;
     /** Ability of an attack and its roll and damage modifiers; absent means the attack type's default ability */
     attackAbility?(
         p: BattleParticipant,
@@ -298,7 +298,7 @@ export interface RuleSystemCombat {
     /** Extra dice and flat damage of an attack, base first, then modules */
     damageParts?: readonly DamagePart[];
     /** A spendable boost to one attack roll; absent means none */
-    inspiration?: InspirationRules;
+    rerollToken?: InspirationRules;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
     judge: 'client' | 'server';
     attack?: RuleSystemAttackHooks;

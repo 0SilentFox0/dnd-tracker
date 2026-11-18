@@ -98,7 +98,8 @@ export interface SystemBalance {
     heroPower(input: {
         built: BattleParticipant;
         rules: Ruleset;
-        character: { race: string; skillTreeProgress?: unknown };
+        /** `row` is the character row; the module reads its own columns */
+        character: { race: string; row: unknown };
         campaignContext: CampaignSpellContext | undefined;
     }): {
         levels: ReturnType<typeof branchLevels>;

@@ -13,14 +13,14 @@ describe('offhand module composition', () => {
     it('the module adds the off-hand hook and the turn reset', () => {
         const { combat } = ruleSystemOf(dnd5eRules());
 
-        expect(combat.offHand).toBeDefined();
+        expect(combat.secondaryAttack).toBeDefined();
         expect(combat.turn?.resetState).toHaveLength(1);
     });
 
     it('bare d20 has neither', () => {
         const { combat } = ruleSystemOf(bareD20Rules());
 
-        expect(combat.offHand).toBeUndefined();
+        expect(combat.secondaryAttack).toBeUndefined();
         expect(combat.turn?.resetState ?? []).toHaveLength(0);
     });
 

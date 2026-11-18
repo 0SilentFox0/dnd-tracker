@@ -65,7 +65,10 @@ export async function scaleEnemiesForFairBattle(
                 const { dpr, hp } = balance.heroPower({
                     built: built[i],
                     rules,
-                    character: slot.character,
+                    character: {
+                        race: slot.character.race,
+                        row: slot.character,
+                    },
                     campaignContext,
                 }).stats;
 
@@ -82,7 +85,10 @@ export async function scaleEnemiesForFairBattle(
                     balance.heroPower({
                         built: built[i],
                         rules,
-                        character: slot.character,
+                        character: {
+                            race: slot.character.race,
+                            row: slot.character,
+                        },
                         campaignContext,
                     }).stats
                 ),

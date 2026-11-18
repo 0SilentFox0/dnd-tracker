@@ -6,6 +6,9 @@ import { defineAddon } from '@/lib/utils/rules/systems/compose';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
 export const LAIR_MODULE = defineAddon<RuleSystemDefinition>(() => ({
-    combat: { lair: LAIR_RULES, turn: { onRoundStart: [lairRoundStart] } },
+    combat: {
+        sceneActions: LAIR_RULES,
+        turn: { onRoundStart: [lairRoundStart] },
+    },
     participant: { fromUnit: [lairUnitPart] },
 }));

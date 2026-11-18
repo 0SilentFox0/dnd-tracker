@@ -14,7 +14,7 @@ export function canUseInspiration(
         !!p &&
         !!rules &&
         inspirationOn(rules) &&
-        !!ruleSystemOf(rules).combat.inspiration?.available(p)
+        !!ruleSystemOf(rules).combat.rerollToken?.available(p)
     );
 }
 
@@ -23,7 +23,7 @@ export function spendInspiration(
     id: string,
     rules: Ruleset
 ): BattleParticipant[] {
-    const hook = ruleSystemOf(rules).combat.inspiration;
+    const hook = ruleSystemOf(rules).combat.rerollToken;
 
     return hook
         ? ps.map((p) => (p.basicInfo.id === id ? hook.spend(p) : p))

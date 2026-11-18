@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import type { BattleBadgeProps } from '@/components/systems/types';
-import { d20State } from '@/systems/d20/rules/state';
+import { deathSavesOf } from '@/systems/deathsaves/rules/state';
 
 function Pips({
     count,
@@ -33,7 +33,7 @@ function Pips({
 export function DeathSaveBadge({ participant, place }: BattleBadgeProps) {
     const t = useTranslations('battle.participant');
 
-    const saves = d20State(participant).deathSaves;
+    const saves = deathSavesOf(participant);
 
     if (place !== 'row' || !saves) return null;
 

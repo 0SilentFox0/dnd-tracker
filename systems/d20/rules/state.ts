@@ -4,42 +4,26 @@ import type { BattleParticipant } from '@/types/battle';
 
 type BattleData = BattleParticipant['battleData'];
 
-export interface DeathSaves {
-    successes: number;
-    failures: number;
-    stable: boolean;
+/** Addons add their own fields through module augmentation and register an ext codec */
+ 
+export interface D20ParticipantState {}
+
+export interface D20ExtCodec {
+    key: string;
+    /** Flat pre-ext fields of the slot this codec reads as a fallback and drops on the next write */
+    legacy?: readonly string[];
+    read(
+        ext: unknown,
+        raw: Record<string, unknown>
+    ): Partial<D20ParticipantState>;
+    write(state: D20ParticipantState): unknown;
 }
 
-export interface D20ParticipantState {
-    deathSaves?: DeathSaves;
-    inspiration?: true;
-    inspirationSpent?: true;
-    attackedWithLight?: true;
-}
+const codecs = new Map<string, D20ExtCodec>();
 
-const finite = (v: unknown): v is number =>
-    typeof v === 'number' && Number.isFinite(v);
-
-const parseDeathSaves = (raw: unknown): DeathSaves | undefined =>
-    isRecord(raw) && finite(raw.successes) && finite(raw.failures)
-        ? {
-              successes: raw.successes,
-              failures: raw.failures,
-              stable: raw.stable === true,
-          }
-        : undefined;
-
-const flag = (raw: unknown): true | undefined =>
-    raw === true ? true : undefined;
-
-const EXT_KEYS = ['deathsaves', 'inspiration', 'offhand'] as const;
-
-const LEGACY_KEYS = [
-    'deathSaves',
-    'inspiration',
-    'inspirationSpent',
-    'attackedWithLight',
-] as const;
+export const registerD20Ext = (codec: D20ExtCodec): void => {
+    codecs.set(codec.key, codec);
+};
 
 /** Module state sits in `ext`; the flat fields are the pre-ext shape, read as a fallback and dropped on the next write */
 const parseState = (raw: unknown): D20ParticipantState | undefined => {
@@ -47,32 +31,10 @@ const parseState = (raw: unknown): D20ParticipantState | undefined => {
 
     const ext = isRecord(raw.ext) ? raw.ext : {};
 
-    const inspiration = isRecord(ext.inspiration) ? ext.inspiration : undefined;
-
-    const offhand = isRecord(ext.offhand) ? ext.offhand : undefined;
-
-    const deathSaves = parseDeathSaves(
-        ext.deathsaves !== undefined ? ext.deathsaves : raw.deathSaves
-    );
-
-    const available = inspiration
-        ? flag(inspiration.available)
-        : flag(raw.inspiration);
-
-    const spent = inspiration
-        ? flag(inspiration.spent)
-        : flag(raw.inspirationSpent);
-
-    const attackedWithLight = offhand
-        ? flag(offhand.attackedWithLight)
-        : flag(raw.attackedWithLight);
-
-    return {
-        ...(deathSaves && { deathSaves }),
-        ...(available && { inspiration: true as const }),
-        ...(spent && { inspirationSpent: true as const }),
-        ...(attackedWithLight && { attackedWithLight: true as const }),
-    };
+    return Object.assign(
+        {},
+        ...[...codecs.values()].map((c) => c.read(ext[c.key], raw))
+    ) as D20ParticipantState;
 };
 
 export const D20_STATE = defineSlot<D20ParticipantState>('d20', parseState);
@@ -84,7 +46,9 @@ const omit = (
     source: Record<string, unknown>,
     keys: readonly string[]
 ): Record<string, unknown> =>
-    Object.fromEntries(Object.entries(source).filter(([k]) => !keys.includes(k)));
+    Object.fromEntries(
+        Object.entries(source).filter(([k]) => !keys.includes(k))
+    );
 
 /** A `patch` key set to `undefined` drops the field; an empty state is never written into a missing slot */
 export function d20StateData(
@@ -106,22 +70,22 @@ export function d20StateData(
     const base =
         prev?.key === D20_STATE.key && isRecord(prev.data) ? prev.data : {};
 
+    const all = [...codecs.values()];
+
     const ext = {
-        ...omit(isRecord(base.ext) ? base.ext : {}, EXT_KEYS),
-        ...(state.deathSaves && { deathsaves: state.deathSaves }),
-        ...((state.inspiration || state.inspirationSpent) && {
-            inspiration: {
-                ...(state.inspiration && { available: true }),
-                ...(state.inspirationSpent && { spent: true }),
-            },
-        }),
-        ...(state.attackedWithLight && {
-            offhand: { attackedWithLight: true },
-        }),
+        ...omit(
+            isRecord(base.ext) ? base.ext : {},
+            all.map((c) => c.key)
+        ),
+        ...Object.fromEntries(
+            all
+                .map((c) => [c.key, c.write(state)] as const)
+                .filter(([, v]) => v !== undefined)
+        ),
     };
 
     const data = {
-        ...omit(base, [...LEGACY_KEYS, 'ext']),
+        ...omit(base, [...all.flatMap((c) => c.legacy ?? []), 'ext']),
         ...(Object.keys(ext).length > 0 && { ext }),
     };
 

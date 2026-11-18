@@ -38,7 +38,7 @@ export function DMArtifactsPageClient({
 
     const catalog = useArtifactsCatalog(campaignId);
 
-    const setsUi = systemUiOf(system.key, system.modules).artifactSets;
+    const setsUi = systemUiOf(system.key, system.modules).itemGroups;
 
     const { search } = catalog;
 
