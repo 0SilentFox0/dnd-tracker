@@ -23,7 +23,7 @@ export type AiModelOption = {
     tier: 'fast' | 'smart';
 };
 
-// перший fast / перший smart у списку — дефолти
+// first fast / first smart in the list are the defaults
 export const AI_MODELS: Record<AiProvider, AiModelOption[]> = {
     anthropic: [
         {

@@ -24,7 +24,7 @@ export type CriticalEffectType =
     | 'extra_action';
 
 export interface CriticalEffect {
-    id: number; // 1-10 для d10
+    id: number;
     type: 'success' | 'fail';
     flavorCount: number;
     effect: {
@@ -35,9 +35,6 @@ export interface CriticalEffect {
     };
 }
 
-/**
- * Критична Удача (Natural 20 на d20) - випадковий ефект з d10
- */
 export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     {
         id: 1,
@@ -73,7 +70,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
         effect: {
             type: 'ac_debuff',
             value: -2,
-            duration: 1, // до наступного ходу цілі
+            duration: 1,
             target: 'target',
         },
     },
@@ -138,9 +135,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     },
 ];
 
-/**
- * Критична Невдача (Natural 1 на d20) - випадковий ефект з d10
- */
 export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     {
         id: 1,
@@ -243,9 +237,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     },
 ];
 
-/**
- * Отримати критичний ефект по ID та типу
- */
 export function getCriticalEffect(
     id: number,
     type: 'success' | 'fail'
@@ -256,9 +247,6 @@ export function getCriticalEffect(
     return effects.find((effect) => effect.id === id);
 }
 
-/**
- * Отримати випадковий критичний ефект (для автоматичної генерації)
- */
 export function getRandomCriticalEffect(
     type: 'success' | 'fail',
     rng: () => number = Math.random,

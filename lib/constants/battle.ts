@@ -80,9 +80,6 @@ export const BattleActionType = {
     RETALIATION: 'retaliation',
 } as const;
 
-/**
- * Глобальні константи бою
- */
 export const BATTLE_CONSTANTS = {
     MIN_DAMAGE: 0,
 
@@ -96,13 +93,10 @@ export const BATTLE_CONSTANTS = {
 
     MAX_HP_PERCENT: 100,
 
-    /** Загальний дільник для percent → fraction (e.g. 25% → 0.25). */
     PERCENT_DIVISOR: 100,
 
-    /** Жорсткий cap відсоткового опору в бою (skill+racial sum ≤ 100%). */
     RESISTANCE_PERCENT_CAP: 100,
 
-    /** Множник для конвертації fraction → percent (e.g. 0.25 → 25). */
     FRACTION_TO_PERCENT: 100,
 } as const;
 
@@ -122,7 +116,7 @@ export const BATTLE_LOG_PAGE_SIZE = 50;
 
 export const BATTLE_LOG_PAGE_MAX = 100;
 
-// відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
+// rollback is allowed for a finished battle too, so snapshots stay, but not all of them
 export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
 /** Writes the rendered log into `resultText` so a rollback to pre-`log` code still shows text; see STATUS. */
@@ -141,7 +135,7 @@ export const FIRE_WAVE_NO_MAP_VICTIMS = 2;
 
 export const AURA_RADIUS_CELLS = 2;
 
-// одиночні заклинання, розширені вмінням (spellTargeting area), на карті наводяться колом; «all» б'є всю сторону
+// single-target spells widened by an ability (spellTargeting area) aim as a circle on the map; "all" hits the whole side
 export const SKILL_AREA_RADIUS_FEET = 10;
 
 export const DEFAULT_MAP_BACKGROUND = '/battle-maps/nicolas-tomb.webp';

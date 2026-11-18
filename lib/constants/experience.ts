@@ -63,7 +63,6 @@ export const DEFAULT_XP_DIFFICULTY = {
     '2024': 'moderate',
 } as const satisfies Record<XpEdition, XpDifficulty>;
 
-// DMG 2014: пороги XP на героя — легкий, середній, складний, смертельний
 export const THRESHOLDS_2014: Record<number, readonly number[]> = {
     1: [25, 50, 75, 100],
     2: [50, 100, 150, 200],
@@ -87,7 +86,6 @@ export const THRESHOLDS_2014: Record<number, readonly number[]> = {
     20: [2800, 5700, 8500, 12700],
 };
 
-// DMG 2024: бюджет XP на героя — низька, помірна, висока
 export const BUDGET_2024: Record<number, readonly number[]> = {
     1: [50, 75, 100],
     2: [100, 150, 200],

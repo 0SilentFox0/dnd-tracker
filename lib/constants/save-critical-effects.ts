@@ -1,6 +1,5 @@
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
 
-/** Нат. 20 на рятівному кидку цілі; `{attacker}` — кастер, `{target}` — ціль, що кидала. */
 export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
     {
         id: 1,
@@ -44,7 +43,6 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
     },
 ];
 
-/** Нат. 1 на рятівному кидку цілі. */
 export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
     {
         id: 1,

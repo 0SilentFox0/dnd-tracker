@@ -27,7 +27,6 @@ export const TRACK_FORMATS_LABEL = TRACK_EXTENSIONS.map((e) =>
     e.toUpperCase()
 ).join(' / ');
 
-/** accept для <input type="file"> */
 export const TRACK_FILE_ACCEPT = [
     ...TRACK_EXTENSIONS.map((e) => `.${e}`),
     ...TRACK_CONTENT_TYPES,
@@ -37,7 +36,6 @@ export const AUDIO_DRIFT_TOLERANCE_SEC = 1.5;
 
 export const AUDIO_DRIFT_CHECK_MS = 10_000;
 
-/** Мінімум YouTube Required Minimum Functionality */
 export const YOUTUBE_PLAYER_PX = 200;
 
 export const YOUTUBE_NOCOOKIE_HOST = 'https://www.youtube-nocookie.com';

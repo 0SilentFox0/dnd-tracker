@@ -14,7 +14,6 @@ export const CLASS_COLUMN_KEY_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const MAX_CLASS_COLUMNS = 12;
 
-/** Мультикласова таблиця слотів за рівнем заклинача (індекс = рівень − 1, значення = слоти рівнів 1…). */
 export const MULTICLASS_SLOTS: readonly (readonly number[])[] = [
     [2],
     [3],
@@ -61,7 +60,6 @@ export const PACT_SLOTS: readonly { max: number; level: number }[] = [
     { max: 4, level: 5 },
 ];
 
-/** Скільки рівнів класу дає один рівень заклинача (full = 1, half = 2, third = 3). */
 export const CASTER_LEVEL_DIVISOR: Partial<Record<ClassCaster, number>> = {
     full: 1,
     half: 2,

@@ -1,7 +1,3 @@
-/**
- * На кого діють бонуси повного сету / артефакта з нестандартною «аурою».
- */
-
 const ARTIFACT_EFFECT_SELF = 'self' as const;
 
 const ARTIFACT_EFFECT_ALL_ALLIES = 'all_allies' as const;
@@ -35,7 +31,6 @@ function parseImmuneSpellIds(raw: unknown): string[] {
     return [...new Set(out)];
 }
 
-/** Об'єкт `effectScope` у JSON сету або в `passiveAbility` артефакта. */
 export function parseEffectScopeObject(scope: unknown): {
     effectAudience?: ArtifactEffectAudience;
     immuneSpellIds?: string[];

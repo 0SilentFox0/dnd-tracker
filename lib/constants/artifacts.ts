@@ -1,10 +1,3 @@
-/**
- * Єдині константи, типи та enum для артефактів.
- * Використовувати цей файл у формах, API та сітці слотів.
- */
-
-// ─── Рідкість ─────────────────────────────────────────────────────────────
-
 export enum ArtifactRarity {
     COMMON = 'common',
     UNCOMMON = 'uncommon',
@@ -30,8 +23,6 @@ export const ARTIFACT_RARITY_COLOR: Partial<Record<string, string>> = {
     [ArtifactRarity.EPIC]: 'border-[#c08ff0]',
     [ArtifactRarity.LEGENDARY]: 'border-hud-gold-strong',
 };
-
-// ─── Слот артефакта (тип обладнання) ───────────────────────────────────────
 
 export enum ArtifactSlot {
     WEAPON = 'weapon',
@@ -60,8 +51,6 @@ export const ARTIFACT_SLOT_VALUES: readonly [ArtifactSlot, ...ArtifactSlot[]] =
         ArtifactSlot.ITEM,
     ];
 
-// ─── Сітка 3×3 слотів на персонажі (ключ у equipped + тип артефакта) ───────
-
 export const ARTIFACT_GRID_9 = [
     { key: 'ring1' as const, slotType: ArtifactSlot.RING },
     { key: 'helmet' as const, slotType: ArtifactSlot.HELMET },
@@ -75,8 +64,6 @@ export const ARTIFACT_GRID_9 = [
 ] as const;
 
 export type ArtifactGridSlotKey = (typeof ARTIFACT_GRID_9)[number]['key'];
-
-// ─── Модифікатори артефактів (зброя тощо) ──────────────────────────────────
 
 export enum ArtifactModifierType {
     DAMAGE_DICE = 'damageDice',
@@ -92,7 +79,7 @@ export enum ArtifactModifierType {
     WEAPON_CATEGORY = 'weaponCategory',
 }
 
-// окремо від ArtifactModifierType: weaponStatsFromRow бере лише свої типи
+// separate from ArtifactModifierType: weaponStatsFromRow takes only its own types
 export enum ArmorModifierType {
     CATEGORY = 'armorCategory',
     BASE = 'armorBase',
@@ -107,7 +94,7 @@ export const ARMOR_LIMITS = {
     strength: [1, 30],
 } as const;
 
-// окремо: weaponStatsFromRow/armorStatsFromRow беруть лише свої типи
+// separate: weaponStatsFromRow/armorStatsFromRow take only their own types
 export enum ItemModifierType {
     STATS = 'itemStats',
 }
