@@ -53,7 +53,9 @@ describe('verifyApiToken locale', () => {
     ])('owner locale %s -> %s', async (stored, expected) => {
         db.locale = stored;
 
-        expect((await verifyApiToken('dndt_x'))?.locale).toBe(expected);
+        const result = await verifyApiToken('dndt_x');
+
+        expect(typeof result === 'object' && result?.locale).toBe(expected);
     });
 
     it('allows the Demo owner token without inventing DM membership', async () => {

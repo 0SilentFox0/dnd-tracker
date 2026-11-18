@@ -151,6 +151,13 @@ export const createApiToken = (
 export const revokeApiToken = (campaignId: string, tokenId: string) =>
     campaignDelete<{ ok: true }>(campaignId, `/api-tokens/${tokenId}`);
 
+export const rotateApiToken = (campaignId: string, tokenId: string) =>
+    campaignPost<CreatedApiToken>(
+        campaignId,
+        `/api-tokens/${tokenId}/rotate`,
+        {}
+    );
+
 export interface AiRunRecovery {
     intents?: { id: string; status: string; summary: string }[];
     runs: {

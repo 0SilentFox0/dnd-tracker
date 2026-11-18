@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { aiKeys } from './keys';
 
-import { createApiToken, getApiTokens, revokeApiToken } from '@/lib/api/ai';
+import {
+    createApiToken,
+    getApiTokens,
+    revokeApiToken,
+    rotateApiToken,
+} from '@/lib/api/ai';
 import { useOptionalNotify } from '@/lib/hooks/common';
 import type { CreateApiTokenInput, CreatedApiToken } from '@/types/ai';
 
@@ -36,11 +41,18 @@ export function useApiTokens(campaignId: string) {
         ...options,
     });
 
+    const rotateMutation = useMutation({
+        mutationFn: (id: string) => rotateApiToken(campaignId, id),
+        ...options,
+    });
+
     return {
         query,
         tokens: query.data ?? [],
         create: (input: CreateApiTokenInput): Promise<CreatedApiToken | null> =>
             createMutation.mutateAsync(input).catch(() => null),
+        rotate: (id: string): Promise<CreatedApiToken | null> =>
+            rotateMutation.mutateAsync(id).catch(() => null),
         revoke: (id: string) =>
             revokeMutation.mutateAsync(id).then(
                 () => true,

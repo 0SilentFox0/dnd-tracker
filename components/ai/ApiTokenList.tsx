@@ -22,6 +22,7 @@ import type {
 interface ApiTokenListActions {
     onCreate: (input: CreateApiTokenInput) => Promise<CreatedApiToken | null>;
     onRevoke: (id: string) => void;
+    onRotate: (id: string) => Promise<CreatedApiToken | null>;
 }
 
 interface ApiTokenListProps {
@@ -78,6 +79,15 @@ export function ApiTokenList({
         if (result) setCreated(result);
     };
 
+    const rotate = async (token: ApiTokenSummary) => {
+        const result = await actions.onRotate(token.id);
+
+        if (result) {
+            setCreated(result);
+            setOpen(true);
+        }
+    };
+
     const revoke = async (token: ApiTokenSummary) => {
         const ok = await confirm({
             title: t('tokens.revokeConfirm.title'),
@@ -110,6 +120,13 @@ export function ApiTokenList({
                                       timeStyle: 'short',
                                   })
                                 : t('tokens.neverUsed')}
+                            {token.expiresAt &&
+                                ` · ${t('tokens.expiresAt', {
+                                    date: format.dateTime(
+                                        new Date(token.expiresAt),
+                                        { dateStyle: 'short' }
+                                    ),
+                                })}`}
                         </p>
                         {campaignId && (
                             <AssistantPolicyControl
@@ -128,9 +145,20 @@ export function ApiTokenList({
                             ))}
                         </div>
                     </div>
-                    <Button variant="ghost" onClick={() => void revoke(token)}>
-                        {t('tokens.revoke')}
-                    </Button>
+                    <div className="flex shrink-0 gap-1">
+                        <Button
+                            variant="ghost"
+                            onClick={() => void rotate(token)}
+                        >
+                            {t('tokens.rotate')}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            onClick={() => void revoke(token)}
+                        >
+                            {t('tokens.revoke')}
+                        </Button>
+                    </div>
                 </HudCard>
             ))}
             <Button onClick={() => setOpen(true)}>{t('tokens.create')}</Button>

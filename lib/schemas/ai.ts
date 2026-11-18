@@ -157,6 +157,11 @@ export const createApiTokenSchema = z.object({
         .array(z.enum(API_TOKEN_SCOPES))
         .min(1)
         .transform((s) => [...new Set(s)]),
+    expiresAt: z
+        .string()
+        .datetime()
+        .refine((v) => new Date(v).getTime() > Date.now())
+        .nullish(),
 });
 
 export const generateSlideImageSchema = z.object({
