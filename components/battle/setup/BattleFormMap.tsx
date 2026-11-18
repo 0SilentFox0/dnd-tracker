@@ -33,6 +33,8 @@ import { clamp } from '@/lib/utils/common/clamp';
 
 const MARGIN_KEYS: (keyof Margins)[] = ['top', 'right', 'bottom', 'left'];
 
+const FULL_HEIGHT = { className: 'h-full' };
+
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
     const t = useTranslations('battleSetup.map');
 
@@ -195,7 +197,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 map={previewMap}
                                 participants={[]}
                                 actions={{ onStroke: actions.onStroke }}
-                                className="h-full"
+                                look={FULL_HEIGHT}
                                 editing={{
                                     clickableBlocked: cellTool,
                                     strokeTool: cellTool,

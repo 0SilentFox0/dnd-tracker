@@ -1,3 +1,5 @@
+import { decodeBitmap } from '@/lib/utils/common/image-decode';
+
 export class ImageResizeError extends Error {
     constructor(
         readonly key:
@@ -28,7 +30,7 @@ async function drawResized(
     maxSide: number,
     maxPixels?: number
 ): Promise<HTMLCanvasElement> {
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await decodeBitmap(file);
 
     const { width, height } = fitWithin(
         bitmap.width,

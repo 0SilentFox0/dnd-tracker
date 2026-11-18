@@ -35,7 +35,7 @@ afterEach(() => {
 function renderDialog(onImport = vi.fn().mockResolvedValue({ id: 'map-1' })) {
     vi.mocked(useMapCatalog).mockReturnValue({
         data: [entry],
-        isLoading: false,
+        isPending: false,
         isError: false,
     } as never);
 
@@ -111,8 +111,9 @@ describe('MapCatalogDialog', () => {
 
         vi.mocked(useMapCatalog).mockReturnValue({
             data: undefined,
-            isLoading: false,
+            isPending: false,
             isError: true,
+            error: new Error('boom'),
             refetch,
         } as never);
         await renderWithIntl(
@@ -120,7 +121,7 @@ describe('MapCatalogDialog', () => {
             { locale: 'en', namespaces: ['common', 'maps'] }
         );
         fireEvent.click(
-            screen.getByRole('button', { name: 'maps.catalog.retry' })
+            screen.getByRole('button', { name: 'common.states.retry' })
         );
         expect(refetch).toHaveBeenCalled();
     });

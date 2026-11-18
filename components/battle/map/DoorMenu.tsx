@@ -1,16 +1,18 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { doorCentre } from './DoorsLayer';
 
+import { Button } from '@/components/ui/button';
 import type { MapDoorsTool } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { UNIT } from '@/lib/utils/battle/grid';
 import type { DoorState } from '@/types/battle-grid';
 
 const BUTTON =
-    'h-8 rounded-md border border-hud-rule bg-black/80 px-2 text-xs text-hud-gold-bright hover:bg-black';
+    'h-8 border-hud-rule bg-black/80 px-2 text-xs text-hud-gold-bright hover:bg-black';
 
 /** DM menu over a door: open/close and lock/unlock; positioned in map pixels, kept upright on a rotated map. */
 export function DoorMenu({
@@ -30,11 +32,24 @@ export function DoorMenu({
 
     const c = doorCentre(edge);
 
+    const root = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        root.current?.querySelector('button')?.focus();
+    }, [edge]);
+
     return (
         <div
+            ref={root}
             data-door-menu={edge}
-            role="menu"
+            role="group"
             aria-label={t('menu')}
+            onKeyDown={(event) => {
+                if (event.key !== 'Escape') return;
+
+                event.stopPropagation();
+                tool.close();
+            }}
             className={cn('absolute z-20 flex gap-1', rotated && '-rotate-90')}
             style={{
                 left: c.x * pxPerUnit,
@@ -42,21 +57,21 @@ export function DoorMenu({
                 transform: 'translateX(-50%)',
             }}
         >
-            <button
-                type="button"
+            <Button
+                variant="outline"
                 className={BUTTON}
                 onClick={() => tool.act(edge, { open: !door.open })}
             >
                 {door.open ? t('close') : t('open')}
-            </button>
+            </Button>
             {!door.open && (
-                <button
-                    type="button"
+                <Button
+                    variant="outline"
                     className={BUTTON}
                     onClick={() => tool.act(edge, { locked: !door.locked })}
                 >
                     {door.locked ? t('unlock') : t('lock')}
-                </button>
+                </Button>
             )}
         </div>
     );

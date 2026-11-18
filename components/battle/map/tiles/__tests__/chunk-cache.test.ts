@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { TileRasterChunkCache } from '../chunk-cache';
+import { rasterSignature, TileRasterChunkCache } from '../chunk-cache';
+import type { TileRasterAssets } from '../painter';
 
 describe('TileRasterChunkCache', () => {
     it('перемальовує лише чанк зі зміненим вмістом між версіями карти', () => {
@@ -83,5 +84,43 @@ describe('TileRasterChunkCache', () => {
 
         expect(cache.getOrCreate(key, () => raster)).toBe(raster);
         expect(close).not.toHaveBeenCalled();
+    });
+
+    describe('rasterSignature', () => {
+        const chunks = { ground: { '0:0': new Uint16Array([1, 1, 0]) } };
+
+        const asset = { image: {} } as TileRasterAssets[number];
+
+        it('ignores loaded textures that the chunk does not use', () => {
+            const before = rasterSignature(chunks, 'ground', 0, 0, {}, 64, 's');
+
+            const unrelated = rasterSignature(
+                chunks,
+                'ground',
+                0,
+                0,
+                { 99: asset },
+                64,
+                's'
+            );
+
+            expect(unrelated).toBe(before);
+        });
+
+        it('changes once a texture the chunk uses has loaded', () => {
+            const before = rasterSignature(chunks, 'ground', 0, 0, {}, 64, 's');
+
+            const after = rasterSignature(
+                chunks,
+                'ground',
+                0,
+                0,
+                { 1: asset },
+                64,
+                's'
+            );
+
+            expect(after).not.toBe(before);
+        });
     });
 });

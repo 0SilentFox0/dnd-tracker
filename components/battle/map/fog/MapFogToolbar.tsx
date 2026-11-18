@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import { HudToggleChip } from '@/components/hud';
+import { Slider } from '@/components/ui/slider';
 import type { MapFogTool } from '@/lib/hooks/battle';
 import { FOG_MAX_VISION_RADIUS } from '@/lib/utils/battle/fog/constants';
 
@@ -19,27 +21,24 @@ export function MapFogToolbar({ tool }: { tool: MapFogTool }) {
         >
             <div role="group" aria-label={t('mode')} className="flex flex-wrap gap-1">
                 {MODES.map((mode) => (
-                    <button
+                    <HudToggleChip
                         key={mode}
-                        type="button"
-                        aria-pressed={tool.mode === mode}
+                        active={tool.mode === mode}
                         onClick={() => tool.setMode(mode)}
-                        className="h-7 rounded-md border border-hud-rule px-2 text-hud-muted aria-pressed:border-[var(--gold)] aria-pressed:text-hud-gold-bright"
                     >
                         {t(`modes.${mode}`)}
-                    </button>
+                    </HudToggleChip>
                 ))}
             </div>
             {tool.mode === 'vision' && (
                 <label className="flex items-center gap-1 text-hud-muted">
                     {t('radius')}
-                    <input
+                    <Slider
                         aria-label={t('radius')}
-                        type="range"
                         min={1}
                         max={FOG_MAX_VISION_RADIUS}
                         value={tool.radius}
-                        onChange={(event) => tool.setRadius(Number(event.target.value))}
+                        onValueChange={tool.setRadius}
                         onPointerUp={tool.commitRadius}
                         onKeyUp={tool.commitRadius}
                     />
@@ -48,15 +47,13 @@ export function MapFogToolbar({ tool }: { tool: MapFogTool }) {
             )}
             <div role="group" aria-label={t('brush')} className="flex flex-wrap gap-1">
                 {BRUSHES.map((brush) => (
-                    <button
+                    <HudToggleChip
                         key={brush}
-                        type="button"
-                        aria-pressed={tool.brush === brush}
+                        active={tool.brush === brush}
                         onClick={() => tool.setBrush(brush)}
-                        className="h-7 rounded-md border border-hud-rule px-2 text-hud-muted aria-pressed:border-[var(--gold)] aria-pressed:text-hud-gold-bright"
                     >
                         {t(`brushes.${brush}`)}
-                    </button>
+                    </HudToggleChip>
                 ))}
             </div>
         </section>

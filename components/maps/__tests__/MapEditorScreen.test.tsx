@@ -350,10 +350,44 @@ describe('MapEditorScreen', () => {
         expect(screen.getByRole('button', { name: 'maps.editor.save' }).hasAttribute('disabled')).toBe(false);
     });
 
+    it('reports skipped UVTT geometry after an import', async () => {
+        touch.value = false;
+        query.value = {
+            isPending: false,
+            isError: false,
+            data: {
+                id: 'm1', name: 'Cave', cols: 10, rows: 8, version: 1,
+                updatedAt: '', map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
+                walls: [], bars: [],
+            },
+        };
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <ConfirmContext.Provider value={vi.fn() as never}>
+                    <MapEditorScreen campaignId="c1" mapId="m1" />
+                </ConfirmContext.Provider>
+            </QueryClientProvider>
+        );
+
+        fireEvent.mouseDown(screen.getByRole('tab', { name: 'maps.editor.panels.background' }));
+
+        const content = JSON.stringify({
+            image: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAK',
+            resolution: { map_origin: [0, 0], map_size: { x: 8, y: 6 }, pixels_per_grid: 10 },
+            line_of_sight: [[20, 10, 40, 10], [0, 0, 30, 30]],
+        });
+
+        fireEvent.change(screen.getByLabelText('maps.editor.import.chooseFile'), {
+            target: { files: [new File([content], 'scene.uvtt', { type: 'application/json' })] },
+        });
+
+        expect(await screen.findByText('maps.editor.import.warnings.diagonal')).toBeTruthy();
+    });
+
     it('filters texture cards by their localized label', () => {
         renderTileEditor();
 
-        const search = screen.getByRole('textbox', {
+        const search = screen.getByRole('searchbox', {
             name: 'maps.editor.tiles.search',
         });
 
@@ -387,7 +421,7 @@ describe('MapEditorScreen', () => {
             name: 'maps.editor.tiles.save',
         }) as HTMLButtonElement;
 
-        const search = screen.getByRole('textbox', {
+        const search = screen.getByRole('searchbox', {
             name: 'maps.editor.tiles.search',
         });
 

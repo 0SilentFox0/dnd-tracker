@@ -11,6 +11,10 @@ import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 
+const CATALOG_BY_ID = Object.fromEntries(
+    TILE_CATALOG.map((definition) => [definition.id, definition])
+);
+
 export interface TileRenderState {
     mapId: string;
     version: number;
@@ -32,22 +36,26 @@ export function TileCanvas({
 
     const [loadedAssets, setLoadedAssets] = useState<TileRasterAssets>({});
 
+    const requested = useRef(new Set<number>());
+
     const visibleTileIds = useMemo(
         () => (viewport ? getVisibleTileIds(tiles.chunks, viewport) : []),
         [tiles.chunks, viewport]
     );
 
-    const visibleTileKey = visibleTileIds.join(',');
-
     useEffect(() => {
-        let cancelled = false;
-
         const definitions = visibleTileIds
+            .filter((id) => !requested.current.has(id))
             .map((id) => tileDefinition(id))
             .filter(
                 (definition): definition is TileDefinition =>
                     definition !== undefined && definition.assetFile !== null
             );
+
+        if (definitions.length === 0) return;
+
+        for (const definition of definitions)
+            requested.current.add(definition.id);
 
         void Promise.all(
             definitions.map(async (definition) => {
@@ -56,24 +64,23 @@ export function TileCanvas({
 
                     return [definition.id, { image }] as const;
                 } catch {
+                    requested.current.delete(definition.id);
+
                     return null;
                 }
             })
         ).then((entries) => {
-            if (cancelled) return;
-
             const next = {} as Record<number, TileRasterAssets[number]>;
 
             for (const entry of entries) {
                 if (entry) next[entry[0]] = entry[1];
             }
-            setLoadedAssets(next);
-        });
 
-        return () => {
-            cancelled = true;
-        };
-    }, [visibleTileKey, visibleTileIds]);
+            if (Object.keys(next).length === 0) return;
+
+            setLoadedAssets((previous) => ({ ...previous, ...next }));
+        });
+    }, [visibleTileIds]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -96,9 +103,7 @@ export function TileCanvas({
             version: tiles.version,
             chunks: tiles.chunks,
             assets: { ...loadedAssets, ...tiles.assets },
-            catalog: Object.fromEntries(
-                TILE_CATALOG.map((definition) => [definition.id, definition])
-            ),
+            catalog: CATALOG_BY_ID,
             window: viewport,
             cellPx,
             pixelRatio,

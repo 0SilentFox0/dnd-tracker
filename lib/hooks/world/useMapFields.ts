@@ -10,6 +10,7 @@ import { useWorldMapUpload } from './useWorldMapUpload';
 import { REVEAL_RADIUS_RANGE } from '@/lib/constants/world';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
+import { imageSizeOf } from '@/lib/utils/common/image-decode';
 import { subtreeMapIds } from '@/lib/utils/world/tree';
 import type { WorldMapDetail, WorldMapSummary } from '@/types/world';
 
@@ -69,14 +70,12 @@ export function useMapFields({
     };
 
     const replaceImage = async (file: File) => {
-        const bitmap = await createImageBitmap(file).catch(() => null);
+        const size = await imageSizeOf(file).catch(() => null);
 
-        const changed = bitmap
-            ? Math.abs(bitmap.width / bitmap.height - map.width / map.height) >
+        const changed = size
+            ? Math.abs(size.width / size.height - map.width / map.height) >
               ASPECT_TOLERANCE
             : false;
-
-        bitmap?.close();
 
         const ok = await confirm({
             title: t('replace.title'),

@@ -17,6 +17,7 @@ import {
     useUnsavedChangesGuard,
 } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
+import { imageSizeOf } from '@/lib/utils/common/image-decode';
 import { fitWithin } from '@/lib/utils/common/image-resize';
 import { randomPuzzleSeed } from '@/lib/utils/puzzle/generate';
 import {
@@ -95,15 +96,13 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
 
     const addPuzzle = useCallback(
         async (file: File) => {
-            const bitmap = await createImageBitmap(file);
+            const size = await imageSizeOf(file);
 
             const { width, height } = fitWithin(
-                bitmap.width,
-                bitmap.height,
+                size.width,
+                size.height,
                 SLIDE_MAX_EDGE_PX
             );
-
-            bitmap.close();
 
             const [slide] = await upload([file]);
 

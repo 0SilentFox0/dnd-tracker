@@ -48,7 +48,14 @@
       "chooseFile": "Choose a .dd2vtt or .uvtt file",
       "help": "Imports the map image, grid scale, walls and doors into this draft. Save the map to persist it.",
       "invalidExtension": "Choose a .dd2vtt or .uvtt file.",
-      "failed": "Could not read this map file."
+      "failed": "Could not read this map file.",
+      "warnings": {
+        "outOfBounds": "{count, plural, one {# wall segment outside the map was skipped} other {# wall segments outside the map were skipped}}",
+        "border": "{count, plural, one {# wall on the map border was skipped} other {# walls on the map border were skipped}}",
+        "zeroLength": "{count, plural, one {# zero-length wall was skipped} other {# zero-length walls were skipped}}",
+        "diagonal": "{count, plural, one {# diagonal wall was skipped (only grid-aligned walls are supported)} other {# diagonal walls were skipped (only grid-aligned walls are supported)}}",
+        "portalSpan": "{count, plural, one {# door spanning several cells was skipped} other {# doors spanning several cells were skipped}}"
+      }
     },
     "panels": {
       "background": "Background",
@@ -126,9 +133,6 @@
     "title": "Map catalog",
     "description": "Choose a community map to add a campaign-owned copy.",
     "search": "Search by map or category",
-    "loading": "Loading maps…",
-    "loadFailed": "Could not load the map catalog.",
-    "retry": "Retry",
     "noResults": "No maps match your search.",
     "loadingPreview": "Loading preview…",
     "previewFailed": "Could not load or validate this map preview.",

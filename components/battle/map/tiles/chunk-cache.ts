@@ -140,7 +140,7 @@ function hasNearbyChunk(
     return false;
 }
 
-function rasterSignature(
+export function rasterSignature(
     chunks: TileLayerChunks,
     layer: TileLayer,
     cx: number,
@@ -149,28 +149,23 @@ function rasterSignature(
     cellPx: number,
     seed: string
 ): string {
-    const parts = [
-        `assets:${Object.keys(assets).sort().join(',')}`,
-        `cell:${cellPx}`,
-        `seed:${seed}`,
-    ];
+    const used = new Set<number>();
 
-    const relevantLayers: readonly TileLayer[] =
-        layer === 'ground' ? ['ground'] : [layer];
+    const parts: string[] = [];
 
-    for (const currentLayer of relevantLayers) {
-        for (let y = cy - 1; y <= cy + 1; y++) {
-            for (let x = cx - 1; x <= cx + 1; x++) {
-                const values = chunks[currentLayer]?.[`${x}:${y}`];
+    for (let y = cy - 1; y <= cy + 1; y++) {
+        for (let x = cx - 1; x <= cx + 1; x++) {
+            const values = chunks[layer]?.[`${x}:${y}`];
 
-                parts.push(
-                    values ? `${x}:${y}:${values.join(',')}` : `${x}:${y}:`
-                );
-            }
+            if (values) for (const id of values) if (assets[id]) used.add(id);
+
+            parts.push(`${x}:${y}:${values ? values.join(',') : ''}`);
         }
     }
 
-    return parts.join('|');
+    const loaded = [...used].sort((a, b) => a - b).join(',');
+
+    return `assets:${loaded}|cell:${cellPx}|seed:${seed}|${parts.join('|')}`;
 }
 
 export function drawCachedTileViewport(

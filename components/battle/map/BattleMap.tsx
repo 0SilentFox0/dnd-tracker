@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { MapCameraControls } from './camera/MapCameraControls';
 import { MapMinimap } from './camera/MapMinimap';
@@ -20,7 +20,7 @@ import {
     useScrollToCurrent,
     useStrokePaint,
 } from '@/lib/hooks/battle';
-import { useViewport } from '@/lib/hooks/common';
+import { useElementSize } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 import {
     cameraBounds,
@@ -51,11 +51,15 @@ export interface BattleMapProps {
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
-    tiles?: TileRenderState;
-    className?: string;
+    look?: BattleMapLook;
     editing?: BattleMapEditing;
     /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
     phone?: boolean;
+}
+
+export interface BattleMapLook {
+    tiles?: TileRenderState;
+    className?: string;
 }
 
 export interface BattleMapEditing {
@@ -86,6 +90,12 @@ export interface BattleMapEditing {
 
 const NO_EDITING: BattleMapEditing = {};
 
+const NO_LOOK: BattleMapLook = {};
+
+const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
+
+const ZOOM_STEP = 1.2;
+
 // на десктопі карта може бути вищою за область (до цього множника), щоб розтягнутись по ширині; зайве прокручується
 const DESKTOP_MAX_TALLER = 1.4;
 
@@ -94,11 +104,12 @@ export function BattleMap({
     participants,
     view,
     actions,
-    tiles,
-    className,
+    look = NO_LOOK,
     editing = NO_EDITING,
     phone = false,
 }: BattleMapProps) {
+    const { tiles, className } = look;
+
     const { clickableBlocked, showBlocked, strokeTool, showDefaultBackground } =
         editing;
 
@@ -127,30 +138,9 @@ export function BattleMap({
 
     const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
 
-    const outerRef = useRef<HTMLDivElement>(null);
-
-    const [avail, setAvail] = useState({ width: 0, height: 0 });
-
-    useEffect(() => {
-        const el = outerRef.current;
-
-        if (!el) return;
-
-        const rect = el.getBoundingClientRect();
-
-        setAvail({ width: rect.width, height: rect.height });
-
-        const observer = new ResizeObserver(([entry]) =>
-            setAvail({
-                width: entry.contentRect.width,
-                height: entry.contentRect.height,
-            })
-        );
-
-        observer.observe(el);
-
-        return () => observer.disconnect();
-    }, []);
+    const { ref: outerRef, size: avail } = useElementSize<HTMLDivElement>({
+        contentBox: true,
+    });
 
     const onPaintStroke = useCallback(
         (cells: import('@/types/battle-grid').GridPoint[]) => {
@@ -208,37 +198,38 @@ export function BattleMap({
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const viewport = useViewport({
-        panLocked: drawing || !!modeTools?.panLocked,
-        wheelScrolls: scrolls,
-        enabled: !cameraMode,
-        containerRef,
-    });
-
     const pxPerUnit = renderedFit.width / (win.cols * UNIT);
 
     const frame = useMemo<Frame | null>(() => {
-        if (!cameraMode || avail.width <= 0 || avail.height <= 0) return null;
+        if (avail.width <= 0 || avail.height <= 0) return null;
+
+        if (!cameraMode)
+            return {
+                avail: { width: fit.width, height: fit.height },
+                content: { width: fit.width, height: fit.height },
+                bounds: FIT_ZOOM_BOUNDS,
+            };
 
         return {
             avail,
             content: { width: fitAll.width, height: fitAll.height },
             bounds: cameraBounds(fitAll.width / win.cols),
         };
-    }, [cameraMode, avail, fitAll.width, fitAll.height, win.cols]);
+    }, [cameraMode, avail, fit.width, fit.height, fitAll.width, fitAll.height, win.cols]);
 
     const cameraTarget = followTarget(view?.currentId ?? null, participants);
 
     const selfTarget = followTarget(view?.camera?.selfId ?? null, participants);
 
     const camera = useMapCamera({
-        enabled: cameraMode,
+        enabled: true,
         frame,
         containerRef,
         panLocked: drawing || !!modeTools?.panLocked,
+        wheelScrolls: !cameraMode && scrolls,
         follow: {
             currentId: view?.currentId ?? null,
-            target: cameraTarget
+            target: cameraMode && cameraTarget
                 ? {
                       point: cellPointPx(
                           cameraTarget.anchor,
@@ -248,7 +239,7 @@ export function BattleMap({
                       ),
                   }
                 : null,
-            self: selfTarget
+            self: cameraMode && selfTarget
                 ? {
                       point: cellPointPx(
                           selfTarget.anchor,
@@ -258,19 +249,15 @@ export function BattleMap({
                       ),
                   }
                 : null,
-            enabled: view?.camera?.follow ?? false,
+            enabled: cameraMode && (view?.camera?.follow ?? false),
         },
     });
 
-    const zoom = cameraMode ? camera.camera.zoom : viewport.zoom;
+    const { zoom, x, y } = camera.camera;
 
-    const offset = cameraMode
-        ? { x: camera.camera.x, y: camera.camera.y }
-        : viewport.offset;
+    const offset = useMemo(() => ({ x, y }), [x, y]);
 
-    const bind = cameraMode ? camera.bind : viewport.bind;
-
-    const wasDragged = cameraMode ? camera.wasDragged : viewport.wasDragged;
+    const { bind, wasDragged } = camera;
 
     const modeView = view?.mode;
 
@@ -297,8 +284,9 @@ export function BattleMap({
             rotated: cameraMode ? false : fit.rotated,
             phone,
             window: gridWindow,
+            tiles,
         }),
-        [win, size, pxPerUnit, cameraMode, fit.rotated, phone, gridWindow]
+        [win, size, pxPerUnit, cameraMode, fit.rotated, phone, gridWindow, tiles]
     );
 
     const interaction = useMemo(
@@ -316,6 +304,7 @@ export function BattleMap({
             doorLocks,
             showDefaultBackground,
             fogActive: !!editing.fog?.active,
+            fog: editing.fog,
         }),
         [
             clickableBlocked,
@@ -325,7 +314,7 @@ export function BattleMap({
             doors,
             doorLocks,
             showDefaultBackground,
-            editing.fog?.active,
+            editing.fog,
         ]
     );
 
@@ -411,8 +400,7 @@ export function BattleMap({
                             participants={participants}
                             view={view}
                             actions={actions}
-                            tiles={tiles}
-                            editing={{ ...stageEditing, fog: editing.fog }}
+                            editing={stageEditing}
                             layout={layout}
                             interaction={interaction}
                         />
@@ -426,34 +414,26 @@ export function BattleMap({
                 )}
                 <WeatherLayer weather={map.weather} phone={phone} />
             </div>
-            {cameraMode && frame && (
-                <>
-                    <MapCameraControls
-                        onZoomIn={() => camera.zoomBy(1.2)}
-                        onZoomOut={() => camera.zoomBy(1 / 1.2)}
-                        onRecenter={camera.recenter}
-                        canRecenter={!!selfTarget || !!cameraTarget}
-                        userMoved={camera.userMoved}
-                        phone={phone}
-                    />
-                    <MapMinimap
-                        map={map}
-                        win={win}
-                        participants={participants}
-                        viewport={minimapViewport(camera.camera, frame)}
-                        onPick={camera.flyToMinimap}
-                        hiddenCells={[]}
-                        phone={phone}
-                    />
-                </>
-            )}
-            {!cameraMode && (
+            {frame && (
                 <MapCameraControls
-                    onZoomIn={() => viewport.zoomBy(1.2)}
-                    onZoomOut={() => viewport.zoomBy(1 / 1.2)}
-                    onRecenter={() => viewport.reset()}
-                    canRecenter={viewport.zoom > 1}
-                    userMoved={viewport.zoom > 1}
+                    onZoomIn={() => camera.zoomBy(ZOOM_STEP)}
+                    onZoomOut={() => camera.zoomBy(1 / ZOOM_STEP)}
+                    onRecenter={camera.recenter}
+                    canRecenter={
+                        cameraMode ? !!selfTarget || !!cameraTarget : zoom > 1
+                    }
+                    userMoved={cameraMode ? camera.userMoved : zoom > 1}
+                    phone={phone}
+                />
+            )}
+            {cameraMode && frame && (
+                <MapMinimap
+                    map={map}
+                    win={win}
+                    participants={participants}
+                    viewport={minimapViewport(camera.camera, frame)}
+                    onPick={camera.flyToMinimap}
+                    hiddenCells={[]}
                     phone={phone}
                 />
             )}

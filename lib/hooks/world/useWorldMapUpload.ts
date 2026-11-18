@@ -9,6 +9,7 @@ import {
     WORLD_MAP_MAX_EDGE_PX,
     WORLD_MAP_MAX_PIXELS,
 } from '@/lib/constants/world';
+import { imageSizeOf } from '@/lib/utils/common/image-decode';
 import {
     fitWithin,
     ImageResizeError,
@@ -30,16 +31,14 @@ export function useWorldMapUpload(campaignId: string) {
             setUploading(true);
 
             try {
-                const bitmap = await createImageBitmap(file);
+                const size = await imageSizeOf(file);
 
                 const { width, height } = fitWithin(
-                    bitmap.width,
-                    bitmap.height,
+                    size.width,
+                    size.height,
                     WORLD_MAP_MAX_EDGE_PX,
                     WORLD_MAP_MAX_PIXELS
                 );
-
-                bitmap.close();
 
                 const imageUrl = await uploadWorldMapImage(
                     campaignId,

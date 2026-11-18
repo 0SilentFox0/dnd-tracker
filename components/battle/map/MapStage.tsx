@@ -60,6 +60,7 @@ export interface MapStageLayout {
     rotated: boolean;
     phone: boolean;
     window: GridWindow | null;
+    tiles?: TileRenderState;
 }
 
 export interface MapStageInteraction {
@@ -88,12 +89,11 @@ export interface MapStageEditing {
     };
 }
 
-interface MapStageProps {
+export interface MapStageProps {
     map: BattleMapConfig;
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
-    tiles?: TileRenderState;
     editing: MapStageEditing;
     layout: MapStageLayout;
     interaction: MapStageInteraction;
@@ -105,14 +105,13 @@ function MapStageImpl({
     participants,
     view,
     actions,
-    tiles,
     editing,
     layout,
     interaction,
 }: MapStageProps) {
     const { win, size, pxPerUnit, rotated, phone } = layout;
 
-    const gridWindow = layout.window;
+    const { tiles, window: gridWindow } = layout;
 
     const { painting, preview, svgRef, onStrokeStart, wasDragged } =
         interaction;

@@ -1,6 +1,7 @@
 import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
+import { loadImage } from '@/lib/utils/common/image-decode';
 
 const CHUNK_SIDE = 16;
 
@@ -86,15 +87,9 @@ export function loadTileImage(
 
     if (cached) return cached;
 
-    const promise = new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-
-        image.onload = () => resolve(image);
-        image.onerror = () => {
-            imagePromises.delete(url);
-            reject(new Error(url));
-        };
-        image.src = url;
+    const promise = loadImage(url).catch((error: unknown) => {
+        imagePromises.delete(url);
+        throw error;
     });
 
     imagePromises.set(url, promise);
