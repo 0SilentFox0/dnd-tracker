@@ -46,7 +46,6 @@ function ReserveList() {
     });
 }
 
-/** Резерв поза картою: у вигляді «Карта» ДМ бачить і вводить його тут (roster.reserve порожній для гравців). */
 export function ReserveGroup() {
     const t = useTranslations('battle.reserve');
 

@@ -2,7 +2,6 @@ import type { BattleMapView } from '@/types/battle-grid';
 
 type AttackKind = NonNullable<BattleMapView['trajectory']>['kind'];
 
-// контури lucide sword / bow-arrow; темна підкладка, щоб курсор читався на будь-якому фоні
 const PATHS: Record<AttackKind, string[]> = {
     melee: [
         'm11 19-6-6',
@@ -26,7 +25,6 @@ function cursorSvg(paths: string[]): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">${layer('#000', 4.5)}${layer('#f2c14e', 2)}</svg>`;
 }
 
-// гаряча точка — вістря (21, 3) у сітці 24 → (28, 4) у 32 px
 export const ATTACK_CURSOR: Record<AttackKind, string> = {
     melee: `url("data:image/svg+xml,${encodeURIComponent(cursorSvg(PATHS.melee))}") 28 4, pointer`,
     ranged: `url("data:image/svg+xml,${encodeURIComponent(cursorSvg(PATHS.ranged))}") 28 4, pointer`,

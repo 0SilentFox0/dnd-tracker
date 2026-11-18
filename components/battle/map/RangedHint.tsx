@@ -12,7 +12,6 @@ interface RangedHintProps {
     trajectory: NonNullable<BattleMapView['trajectory']>;
 }
 
-/** Пунктир пострілу до цілі; укриття на шляху підсвічені й ріжуть шкоду вдвічі. */
 export function RangedHint({ from, trajectory }: RangedHintProps) {
     const end = cellCenter(trajectory.to);
 

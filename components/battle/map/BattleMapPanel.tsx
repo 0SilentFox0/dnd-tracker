@@ -108,7 +108,6 @@ function BattleMapPanelContent({
         ] as const);
 
     const tools = placement && terrainTool && palettes && (
-        // на телефоні карта займає всю ширину, тож кнопки йдуть рядком над нею, а не поверх клітинок
         <div
             className={cn(
                 'z-20 flex flex-col items-start gap-1.5',
@@ -168,7 +167,6 @@ function BattleMapPanelContent({
                 )}
             </div>
             {(terrainTool.active || palettes.some((p) => p.tool.active) || fogTool?.active) && (
-                // у рядку над картою палітра звисає вниз на карту, не зсуваючи й не перекриваючи перемикач вигляду
                 <div
                     className={cn(
                         'flex flex-col items-start gap-1.5',

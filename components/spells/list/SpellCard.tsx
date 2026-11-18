@@ -32,7 +32,6 @@ interface SpellCardProps {
         onMoveToGroup?: (spellId: string, groupId: string | null) => void;
     };
     canEdit?: boolean;
-    /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
     printMode?: boolean;
     'data-tour'?: string;
 }
@@ -184,7 +183,6 @@ export function SpellCard({
             <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
                 <GroupIcon className="size-3 shrink-0" />
                 <span className="truncate">{groupName}</span>
-                {/* Тимчасово: ID заклинання та копіювання */}
                 <code
                     className="ml-auto max-w-[45%] truncate font-mono text-[10px]"
                     title={spell.id}

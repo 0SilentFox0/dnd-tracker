@@ -42,7 +42,6 @@ const JOYRIDE = {
     TOUR_END: 'tour:end',
 } as const;
 
-// темний UI: 50% дефолтного оверлею не виділяє ціль, тому затемнення сильніше + золота рамка вирізу
 const TOUR_STYLES: DemoTourRunnerProps['styles'] = {
     overlay: { backgroundColor: 'rgba(0, 0, 0, 0.78)' },
     spotlight: { stroke: 'var(--color-hud-gold-strong)', strokeWidth: 2 },
@@ -91,7 +90,6 @@ export function DemoTourCoordinator({
 
     const lastStepShown = useRef(false);
 
-    // цілі на весь екран (сцена бою, довгі списки): прив'язаний тултіп вилітає за вікно — такі кроки центруємо
     const [centeredSteps, setCenteredSteps] = useState<ReadonlySet<string>>(
         () => new Set()
     );

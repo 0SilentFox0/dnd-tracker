@@ -17,7 +17,6 @@ interface MapHitFloatProps {
     impact?: FxImpact | null;
 }
 
-/** «−N/+N» над жетоном; окремо від HUD, бо смертельний удар прибирає жетон із карти. */
 function MapHitFloatImpl({
     participant,
     placement,

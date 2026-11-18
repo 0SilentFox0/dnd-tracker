@@ -16,7 +16,6 @@ import type { BattleMapConfig, MapMotion } from '@/types/battle-grid';
 
 const REST_PX_PER_S = 0.5;
 
-/** Фон, що їде під нерухомою сіткою: дзеркально зациклена доріжка тайлів, фаза крутиться локально в rAF. */
 export function MotionBackground({
     map,
     motion,

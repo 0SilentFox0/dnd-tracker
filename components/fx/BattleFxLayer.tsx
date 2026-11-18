@@ -25,7 +25,6 @@ const DICE_BUDGET_MS = FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300;
 
 const NO_IMPACT = new Set(['dice', 'death']);
 
-// таймер не скасовується: пізній сигнал нешкідливий, а ранній «done» його б загубив
 function impactStarter(spec: FxSpec): (() => void) | undefined {
     const { actionId } = spec;
 
@@ -139,7 +138,6 @@ export function BattleFxLayer({ fx }: { fx?: SystemFx }) {
             .finally(() => {
                 window.clearTimeout(guard);
 
-                // play() міг повернутись без onStart (інша епоха шару, немає якорів): без сигналу декорації чекали б запобіжник
                 if (
                     !cancelled &&
                     current.actionId &&
@@ -159,7 +157,7 @@ export function BattleFxLayer({ fx }: { fx?: SystemFx }) {
 
     return (
         <>
-            {/* «fixed» обходить .battle-hud > :not(.fixed) { position: relative }, інакше шар стоїть під екраном */}
+            {/* "fixed" bypasses .battle-hud > :not(.fixed) { position: relative }, otherwise the layer sits under the screen */}
             <div ref={layer} className="fx-layer fixed" aria-hidden />
             <DiceStage ref={dice} />
         </>

@@ -7,7 +7,6 @@ import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { useParticipantFace } from '@/lib/hooks/battle';
 import type { ActiveEffect } from '@/types/battle';
 
-/** Персональне вміння — портрет героя-джерела; інакше іконка ефекту, без неї — портрет того, хто наклав, далі іскра. */
 export function EffectIcon({
     effect,
     size,

@@ -122,7 +122,6 @@ describe('ефекти погоди', () => {
         }
     );
 
-    // дощ, сніг і гробниця загортаються по краях; запас — довжина струменя чи радіус пластівця
     it.each<WeatherKind>(['rain', 'storm', 'snow', 'blizzard', 'crypt'])(
         '%s: частинки лишаються в рамці',
         (kind) => {
@@ -205,7 +204,6 @@ describe('ефекти погоди', () => {
     ])('гроза (rand=%s): спалах на %s с і гасне за FLASH_SEC', (r, at) => {
         const sim = createStorm(size, 10, fixed(r));
 
-        // спалах — друга заливка на всю рамку поверх затемнення дощу
         const lit = () => fullFrames(frame(sim)).length > 1;
 
         sim.step(at - 0.1);
@@ -241,7 +239,6 @@ describe('ефекти погоди', () => {
             );
 
         expect(darkness('storm')).toBeGreaterThan(darkness('rain'));
-        // затемнення шару не густіше за третину
         expect(darkness('storm') * WEATHER_EFFECTS.storm.opacity).toBeLessThan(
             0.34
         );
@@ -339,7 +336,6 @@ describe('ефекти погоди', () => {
         expect(b.y).toBeGreaterThan(a.y);
         expect(b.x).not.toBeCloseTo(a.x, 0);
 
-        // зсув за однакові пів секунди в різні моменти різний — це пориви, а не рівний вітер
         sim.step(2);
 
         const c = flake();

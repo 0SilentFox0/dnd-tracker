@@ -47,7 +47,6 @@ const entry = (actorId: string, targets: string[] = []): BattleAction =>
         isCancelled: false,
     }) as unknown as BattleAction;
 
-/** Фрейда (0,0) дивиться на схід; гоблін (0,5) — позаду поля зору; Годрік (7,5) — далеко. */
 function mazeScene({ isDM = false, maze = true, playerView = false } = {}) {
     const s = fakeScene({
         isDM,

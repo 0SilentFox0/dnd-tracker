@@ -27,7 +27,6 @@ interface ChoicesEditorProps {
     refs: ChoiceRefsView;
     hero: ChoiceHero;
     issues?: ChoiceIssue[];
-    /** збережені вибори, чий приріст уже входить у hero.scores */
     saved?: ChoicesState;
     only?: { classId: string; level: number; multiclass?: boolean };
 }

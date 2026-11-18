@@ -128,7 +128,6 @@ export function DmParticipantRow({
                 controlled && 'bg-[var(--gold)]/[.08]'
             )}
         >
-            {/* ім’я цілком + селект «Керує» зверху (селект переноситься на новий рядок, коли не вміщується), усі іконки під ними */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <SideDot side={participant.basicInfo.side} />
                 <div className="min-w-0 flex-1 basis-32">

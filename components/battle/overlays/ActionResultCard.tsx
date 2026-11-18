@@ -24,7 +24,7 @@ const TONE = {
     miss: 'text-[#8f8f96]',
 } as const;
 
-// десктоп завжди рендерить картку в CornerStack, тож «fixed» — лише телефон до появи стеку сповіщень
+// desktop always renders the card in CornerStack, so "fixed" only applies on phones before the stack appears
 const PLACEMENT = {
     slot: 'mb-1',
     stack: '',
@@ -196,7 +196,6 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: 'spell' }> }) {
     );
 }
 
-/** Підсумок дії в кутку, а не поверх карти: анімація на токенах лишається видимою, клік повз картку йде на карту. */
 export function ActionResultCard() {
     const t = useTranslations('battle.result');
 

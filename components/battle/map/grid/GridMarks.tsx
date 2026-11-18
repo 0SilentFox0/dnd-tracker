@@ -64,7 +64,6 @@ function zonePaths(keys: string[]) {
         : null;
 }
 
-/** Позначки поверх карти: зони руху контурами, поза дальністю одним evenodd-шляхом, розріджені цілі поштучно, лінії сітки під маскою. */
 export const GridMarks = memo(function GridMarks({
     map,
     blocked,

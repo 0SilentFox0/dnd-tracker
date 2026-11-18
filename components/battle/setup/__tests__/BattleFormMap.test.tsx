@@ -66,7 +66,6 @@ const hit = (c: HTMLElement) =>
 
 const CELL_PX = 10;
 
-// сітка в тестах 10 px на клітинку: штрих рахує клітинки з координат вказівника
 function press(c: HTMLElement, key: string) {
     const svg = hit(c).ownerSVGElement as SVGSVGElement;
 

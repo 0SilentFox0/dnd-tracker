@@ -42,7 +42,7 @@ interface ParticipantDetailsProps {
     participant: BattleParticipant;
 }
 
-/** Ключ за id: при виборі іншого учасника стан FX не переноситься, і зміна HP не спливає чужою цифрою. */
+/** Keyed by id so FX state doesn't carry over to another participant and an HP change doesn't float someone else's number. */
 export function ParticipantDetails({ participant }: ParticipantDetailsProps) {
     return (
         <ParticipantDetailsBody

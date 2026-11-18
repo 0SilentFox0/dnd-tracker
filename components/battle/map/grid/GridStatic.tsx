@@ -132,7 +132,6 @@ interface GridStaticProps {
     showBlocked?: boolean;
 }
 
-/** Місцевість, жар і заблоковані клітинки: кілька злитих шляхів, кількість елементів не залежить від площі карти. */
 export const GridStatic = memo(function GridStatic({
     map,
     blocked,

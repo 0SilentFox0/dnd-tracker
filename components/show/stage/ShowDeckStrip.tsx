@@ -50,7 +50,6 @@ const deckGroups = (
     };
 };
 
-/** Набір для перегляду: поточний показу, інакше перший набір сцени. */
 export function ShowDeckStrip({
     campaignId,
     show,

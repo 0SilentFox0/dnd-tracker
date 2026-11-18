@@ -13,7 +13,6 @@ export const FLAME_ID = 'battle-map-flame';
 
 export const FLAME_SIZE = UNIT * 0.42;
 
-// приглушено: яскрава заливка перекривала фон карти; від недосяжних клітинок відрізняє контур
 export const ZONE = {
     move: {
         fill: 'rgba(90,210,80,.07)',

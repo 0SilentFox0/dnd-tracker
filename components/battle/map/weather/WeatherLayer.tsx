@@ -8,7 +8,6 @@ import { useWeatherCanvas } from './use-weather-canvas';
 import { usePageHidden, useReducedMotion } from '@/lib/hooks/common';
 import type { WeatherKind } from '@/types/battle-grid';
 
-/** Поза шаром зуму й повороту: частинки летять в екранних координатах і на повернутій телефонній карті. */
 export const WeatherLayer = memo(function WeatherLayer({
     weather,
     phone,

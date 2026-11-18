@@ -39,7 +39,7 @@ let desktopLayout: DesktopLayout | null = null;
 
 let desktopLoad: Promise<void> | null = null;
 
-// телефони завжди на мобільному макеті: він у entry-чанку, десктопний вантажиться лише на широких екранах
+// phones always use the mobile layout (in the entry chunk); the desktop one loads only on wide screens
 function loadDesktopLayout() {
     desktopLoad ??= import('./DesktopBattleLayout').then((m) => {
         desktopLayout = m.DesktopBattleLayout;
@@ -135,7 +135,7 @@ export function BattleScreen() {
     const { notices: systemNotices, dialogs: systemDialogs } =
         useSystemBattleUi();
 
-    // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
+    // first HTML is the mobile layout so phones see no swap after hydration
     const fx = useSystemFx();
 
     const wide = useMediaQuery(DESKTOP_QUERY);
@@ -148,7 +148,7 @@ export function BattleScreen() {
         if (readOnly) setCompleteOpen(false);
     }, [readOnly]);
 
-    // як на телефоні: новий хід згортає плеєр, інакше розгорнута панель лежить на кнопках моралі й дій
+    // as on phones: a new turn collapses the player, otherwise the expanded panel covers the morale and action buttons
     const turnKey =
         hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
@@ -168,7 +168,7 @@ export function BattleScreen() {
             .catch(() => undefined);
     }, [fxOn]);
 
-    // один провайдер на обидві гілки: <audio> у ньому переживає «Почати бій»
+    // one provider for both branches: its <audio> survives "Start battle"
     return (
         <BattleAudioProvider>
             {battle.status === BattleStatus.PREPARED ? (
@@ -224,7 +224,6 @@ export function BattleScreen() {
                         {systemNotices?.map((Notice, i) => (
                             <Notice key={i} />
                         ))}
-                        {/* не над мапою у свій хід і не для глядачів; ДМ бачить свою підказку на підготовці */}
                         {!isDM && hero && !isMyTurn && (
                             <OnboardingHint id="player.battle" />
                         )}

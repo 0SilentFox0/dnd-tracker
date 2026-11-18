@@ -3,7 +3,6 @@ import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
 
 const HALF = EDGE_WALL_WIDTH / 2;
 
-/** Прямокутник ребра "x:y:e" / "x:y:s" із кінцями, що заходять у кути. */
 export function edgeRect(
     edge: string,
     width = EDGE_WALL_WIDTH

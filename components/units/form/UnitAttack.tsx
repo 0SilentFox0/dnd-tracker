@@ -13,7 +13,6 @@ import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import type { UnitAttack as UnitAttackValue } from '@/types/units';
 
-// "фт" in user-entered ranges
 const FIVE_FEET = /^5\s*(\u0444\u0442|ft)/i;
 
 interface UnitAttackProps {

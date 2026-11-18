@@ -31,7 +31,6 @@ vi.mock('@/lib/api/client', async (orig) => ({
     campaignPost: vi.fn(),
 }));
 
-// обгортка рахує коміти, зберігаючи memo оригіналу
 function counted<P extends object>(
     original: FunctionComponent<P> | MemoExoticComponent<FunctionComponent<P>>,
     onCommit: (props: P) => void
@@ -191,7 +190,7 @@ const delta: ClientBattleDelta = {
     log: [hit],
 };
 
-// TanStack Query сповіщає підписників через setTimeout(0)
+// TanStack Query notifies subscribers via setTimeout(0)
 const settle = () => new Promise((resolve) => setTimeout(resolve, 10));
 
 const probe: { scene: BattleSceneValue | null } = { scene: null };
@@ -248,7 +247,6 @@ describe('рендери на атаку', () => {
 
         let sent: Promise<unknown> | undefined;
 
-        // кожна фаза — окремий коміт, як у браузері: очікування відповіді, дельта, результат майстра
         await act(async () => {
             sent = probe.scene?.actions.attack.mutateAsync({
                 attackerId: 'me',

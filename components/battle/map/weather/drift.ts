@@ -11,10 +11,8 @@ export interface DriftOptions {
     vy: number;
     color: string;
     clear: string;
-    /** радіус — частка більшої сторони рамки */
     minR: number;
     maxR: number;
-    /** смуга висоти [від, до] у частках рамки; без неї — уся рамка */
     band?: [number, number];
 }
 

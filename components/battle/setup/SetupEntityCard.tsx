@@ -19,7 +19,6 @@ interface SetupEntityCardProps {
     };
     state: { isSelected: boolean; isEnemy?: boolean; badge?: ReactNode };
     onToggle: () => void;
-    /** Панель під карткою, видима лише для вибраного. */
     children?: ReactNode;
 }
 

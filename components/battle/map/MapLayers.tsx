@@ -54,7 +54,6 @@ export const StrokeLayer = memo(function StrokeLayer({
 const pulseStep = (from: GridPoint | null | undefined, p: GridPoint) =>
     from ? cellDistance(from, p) : 0;
 
-/** Хвиля від центру (або вершини конуса/лінії) до країв: затримка анімації росте з відстанню клітинки. */
 export const TemplateLayer = memo(function TemplateLayer({
     marks,
     aim,
@@ -78,7 +77,7 @@ export const TemplateLayer = memo(function TemplateLayer({
 
     const wave = `${pulseFrom ? cellKey(pulseFrom) : ''}/${aim ? cellKey(aim) : ''}`;
 
-    // новий ключ при зміні точки перезапускає анімацію всіх клітинок разом, а не лише нових
+    // a new key on point change restarts the animation of all cells together, not just the new ones
     return (
         <g key={wave} data-template-layer={wave} pointerEvents="none">
             {cells.map((k) => (

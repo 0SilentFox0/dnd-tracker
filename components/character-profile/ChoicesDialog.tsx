@@ -15,7 +15,6 @@ interface ChoicesDialogProps {
     onOpenChange: (open: boolean) => void;
     campaignId: string;
     characterId: string;
-    /** pick.key зі «Шляху»: відкрити майстер на цьому виборі (`subclass` — крок підкласу) */
     startAt?: string;
 }
 

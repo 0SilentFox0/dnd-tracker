@@ -5,14 +5,12 @@ import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface MapModeUi {
-    /** Шари всередині трансформованої карти (над місцевістю, під жетонами). */
     MapLayers?: ComponentType<{
         map: BattleMapConfig;
         view: ModeView | null;
         rotated: boolean;
         editing: unknown;
     }>;
-    /** Поверх карти (поза трансформацією). */
     MapOverlay?: ComponentType<{
         view: ModeView | null;
         participants: BattleParticipant[];
@@ -24,7 +22,6 @@ export interface MapModeUi {
         checked: boolean;
         onChange: (on: boolean) => void;
     }>;
-    /** Провайдери всіх режимів реєстру вкладені завжди; без свого конфігу кожен нейтральний. */
     SceneProvider?: ComponentType<{ children: ReactNode }>;
     hidesTerrain: boolean;
 }

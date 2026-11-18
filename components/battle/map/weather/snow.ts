@@ -22,11 +22,9 @@ export interface SnowOptions {
     maxSpeed: number;
     color: string;
     haze?: string;
-    /** пориви: до wind додається до ±gust px/с, що повільно змінюється в часі */
     gust?: number;
 }
 
-/** Сила пориву −1..1: дві несинхронні хвилі, щоб вітер не був рівномірним. */
 export const gustAt = (t: number) =>
     Math.sin(t * 0.55) * (0.6 + 0.4 * Math.sin(t * 1.7 + 1));
 

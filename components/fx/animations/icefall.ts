@@ -46,7 +46,6 @@ interface Shard extends Debris {
     shape: FxPoint[];
 }
 
-/** Кристал вістрям униз: центральний «олівець» і бічні уламки, грані світлі зверху й темні знизу. */
 function drawCrystal(
     g: CanvasRenderingContext2D,
     x: number,
@@ -384,7 +383,6 @@ async function fall(
     );
 }
 
-/** Крижаний болт: над ціллю збирається іній, кристал падає згори й меншає (віддаляється вглиб), удар — спалах, струс, уламки, шипи з землі, хвиля інею. */
 export const icefall: FxAnimation = (run) =>
     perTarget(
         run.stage,

@@ -174,7 +174,7 @@ export function MobileBattleLayout() {
                         </HudButton>
                     )}
                 </div>
-                {/* док — шар над картою/списком: панель не може вилізти за верх області, а на будь-якій вкладці лишається змонтованою (звук іде) */}
+                {/* dock is a layer over the map/list: the panel can't exceed the area top and stays mounted on every tab (audio keeps playing) */}
                 <div className="relative flex min-h-0 flex-1 flex-col">
                     {mapTab ? (
                         <div className="min-h-0 flex-1">
@@ -194,7 +194,7 @@ export function MobileBattleLayout() {
                         collapseTick={expandTick}
                     />
                 </div>
-                {/* обгортка й MyTurnControls на тих самих місцях на всіх вкладках: перемонтування вбило б відкритий майстер і наведення */}
+                {/* wrapper and MyTurnControls stay in place on every tab: remounting would kill an open wizard and aiming */}
                 {(hero || mapTab) && (
                     <div
                         className={cn(

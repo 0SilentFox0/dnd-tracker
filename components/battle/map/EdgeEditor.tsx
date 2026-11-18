@@ -13,7 +13,6 @@ interface Props {
     editing: EdgeEditing;
 }
 
-/** Один прозорий шар на всю карту: ребро знаходиться за координатою вказівника, а не окремим елементом на ребро. */
 export const EdgeEditor = memo(function EdgeEditor({ map, editing }: Props) {
     const { cols, rows } = map;
 

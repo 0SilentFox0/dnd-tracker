@@ -56,7 +56,6 @@ function anchor(
     return el;
 }
 
-/** Обгортка карти на телефоні: прокручуваний div → [data-fx-clip] */
 function mapClip(viewport: Rect, scrolls: boolean) {
     const scroller = document.createElement('div');
 

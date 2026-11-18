@@ -14,7 +14,6 @@ interface MapAimPanelProps {
     footer: ReactNode;
 }
 
-/** На телефоні панель стоїть у смузі під картою, а не поверх неї. */
 export function MapAimPanel({
     ariaLabel,
     title,

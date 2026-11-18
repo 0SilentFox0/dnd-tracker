@@ -8,7 +8,7 @@ const PROVIDERS = Object.values(MAP_MODE_UI).flatMap((ui) =>
     ui.SceneProvider ? [ui.SceneProvider] : []
 );
 
-/** Фіксований порядок: режим бою може змінитися без перемонтування сцени. */
+/** Fixed order: the battle mode may change without remounting the scene. */
 export function ModeSceneProvider({ children }: { children: ReactNode }) {
     return PROVIDERS.reduceRight(
         (acc, Provider) => <Provider>{acc}</Provider>,

@@ -13,7 +13,6 @@ import { Slider } from '@/components/ui/slider';
 import { usePlayerAudio } from '@/lib/hooks/audio';
 import { cn } from '@/lib/utils';
 
-/** capped — висота не більше пів екрана з прокруткою, заголовок липкий */
 export function AudioPlayerPanel({
     view,
     children,

@@ -14,7 +14,6 @@ const SIZES = {
 
 interface SpellRowExtras {
     formula?: string;
-    /** вміння заклинателя розширює ціль заклинання */
     badge?: string;
 }
 
