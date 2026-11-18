@@ -15,7 +15,7 @@ const versionOf = (v: unknown) =>
         ? (v as { version: number }).version
         : undefined;
 
-// перемонтування повторно віддає дані першого HTML — не затираємо ними новішу версію з дельт
+// a remount replays the first-HTML data: do not overwrite a newer version from deltas
 function notNewer(data: unknown, cached: unknown): boolean {
     const a = versionOf(data);
 
@@ -24,7 +24,7 @@ function notNewer(data: unknown, cached: unknown): boolean {
     return a !== undefined && b !== undefined && a <= b;
 }
 
-// серверні мітки порівнюємо лише з серверними: годинник клієнта може бути зсунутий
+// server stamps are compared only with server stamps: the client clock may be skewed
 const lastSeeds = new WeakMap<QueryClient, Map<string, number>>();
 
 function seedsOf(queryClient: QueryClient) {
@@ -63,7 +63,7 @@ export function SeedQuery({
 
         const cached = queryClient.getQueryData(queryKey);
 
-        // Back відтворює payload з router cache — він не новіший за вже покладений, а кеш міг оновитись після нього
+        // Back replays a router-cache payload: it is no newer than what is already stored, and the cache may have updated after it
         const replay =
             cached !== undefined &&
             (notNewer(data, cached) ||

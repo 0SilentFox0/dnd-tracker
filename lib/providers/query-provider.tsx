@@ -6,14 +6,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setGlobalApiErrorHandler } from '@/lib/api/client';
 import { handleApiError } from '@/lib/providers/api-error-handler';
 
-/** staleTime для довідкових даних (spells, units, races, main-skills) */
-export const REFERENCE_STALE_MS = 5 * 60 * 1000; // 5 хвилин
+export const REFERENCE_STALE_MS = 5 * 60 * 1000;
 
-/** staleTime для персонажів та кампаній */
-export const ENTITY_STALE_MS = 2 * 60 * 1000; // 2 хвилини
+export const ENTITY_STALE_MS = 2 * 60 * 1000;
 
-/** gcTime — скільки тримати в кеші після "unmount" */
-const GC_TIME_MS = 10 * 60 * 1000; // 10 хвилин
+const GC_TIME_MS = 10 * 60 * 1000;
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
@@ -25,7 +22,7 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             new QueryClient({
                 defaultOptions: {
                     queries: {
-                        staleTime: 60 * 1000, // 1 хвилина (default)
+                        staleTime: 60 * 1000,
                         gcTime: GC_TIME_MS,
                         refetchOnWindowFocus: false,
                         retry: 1,
