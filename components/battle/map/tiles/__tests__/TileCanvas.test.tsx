@@ -65,4 +65,54 @@ describe('TileCanvas', () => {
         );
         expect(loadTileImage).toHaveBeenCalledTimes(1);
     });
+
+    it('keeps loaded textures when the viewport moves and does not reload them', async () => {
+        const cells = new Uint16Array(256);
+
+        cells[0] = 1;
+
+        const tiles = {
+            mapId: 'map-1',
+            version: 1,
+            seed: 'map-1',
+            chunks: { ground: { '0:0': cells } },
+            assets: {},
+        };
+
+        const { rerender } = render(
+            <TileCanvas
+                tiles={tiles}
+                viewport={{ x: 0, y: 0, cols: 1, rows: 1 }}
+                cellPx={64}
+            />
+        );
+
+        await waitFor(() => expect(loadTileImage).toHaveBeenCalledTimes(1));
+
+        rerender(
+            <TileCanvas
+                tiles={tiles}
+                viewport={{ x: 20, y: 20, cols: 1, rows: 1 }}
+                cellPx={64}
+            />
+        );
+
+        rerender(
+            <TileCanvas
+                tiles={tiles}
+                viewport={{ x: 0, y: 0, cols: 1, rows: 1 }}
+                cellPx={64}
+            />
+        );
+
+        await waitFor(() =>
+            expect(drawCachedTileViewport).toHaveBeenLastCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    assets: { 1: expect.anything() },
+                })
+            )
+        );
+        expect(loadTileImage).toHaveBeenCalledTimes(1);
+    });
 });

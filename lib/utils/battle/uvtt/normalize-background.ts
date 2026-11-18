@@ -1,4 +1,5 @@
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import { imageSizeOf } from '@/lib/utils/common/image-decode';
 import { resizeImageToBlob } from '@/lib/utils/common/image-resize';
 
 export async function normalizeUvttBackground(dataUrl: string): Promise<Blob> {
@@ -8,14 +9,12 @@ export async function normalizeUvttBackground(dataUrl: string): Promise<Blob> {
 
     const source = await response.blob();
 
-    const bitmap = await createImageBitmap(source);
+    const { width, height } = await imageSizeOf(source);
 
     const needsResize =
-        bitmap.width > 2400 ||
-        bitmap.height > 2400 ||
+        width > 2400 ||
+        height > 2400 ||
         source.size > MAP_LIMITS.backgroundUploadBytes;
-
-    bitmap.close();
 
     if (!needsResize) return source;
 

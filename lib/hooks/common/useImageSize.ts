@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import type { ImageSize } from '@/lib/utils/battle/grid';
+import { loadImage } from '@/lib/utils/common/image-decode';
 
 /** Природний розмір зображення за src; null, поки не завантажилось чи без src. */
 export function useImageSize(src: string | null): ImageSize | null {
@@ -16,19 +17,18 @@ export function useImageSize(src: string | null): ImageSize | null {
 
         let live = true;
 
-        const img = new window.Image();
-
-        img.onload = () => {
-            if (live && img.naturalWidth > 0 && img.naturalHeight > 0)
-                setLoaded({
-                    src,
-                    size: {
-                        width: img.naturalWidth,
-                        height: img.naturalHeight,
-                    },
-                });
-        };
-        img.src = src;
+        loadImage(src)
+            .then((img) => {
+                if (live && img.naturalWidth > 0 && img.naturalHeight > 0)
+                    setLoaded({
+                        src,
+                        size: {
+                            width: img.naturalWidth,
+                            height: img.naturalHeight,
+                        },
+                    });
+            })
+            .catch(() => undefined);
 
         return () => {
             live = false;
