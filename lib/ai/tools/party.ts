@@ -1,73 +1,17 @@
-import { z } from 'zod';
-
-import { AiToolError, defineTool } from './define';
+import { defineTool } from './define';
+import { readAlias } from './read-alias';
 
 import 'server-only';
 import '@/lib/server/systems/registry';
-import { API_ERRORS } from '@/lib/constants/api-errors';
-import { ACTIVE_CHARACTER, CharacterType } from '@/lib/constants/characters';
-import { prisma } from '@/lib/db';
-import { loadRules } from '@/lib/server/campaigns/rules';
-import { readContent } from '@/lib/server/scenario/page-store';
-import { systemServerOf, withSystemNotes } from '@/lib/server/systems/lookup';
-import type { Ruleset } from '@/lib/utils/rules/schema';
-import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
-import { docText } from '@/lib/utils/scenario/doc';
-
-const PARTY_SELECT = {
-    id: true,
-    name: true,
-    level: true,
-    class: true,
-    race: true,
-    armorClass: true,
-    characteristics: true,
-    notes: true,
-} as const;
-
-const flatRow = <T extends object>(row: T) => {
-    const { characteristics: _stored, ...rest } = withStoredColumns(
-        row
-    ) as T & {
-        characteristics?: unknown;
-    };
-
-    return rest;
-};
-
-export type PartyMember = {
-    id: string;
-    name: string;
-    level: number;
-    race: string;
-    notes: string | null;
-} & Record<string, unknown>;
-
-export async function partySummary(
-    campaignId: string,
-    limit?: number,
-    rules?: Ruleset
-): Promise<PartyMember[]> {
-    const resolved = rules ?? (await loadRules(campaignId));
-
-    const query = {
-        where: { campaignId, type: CharacterType.PLAYER, ...ACTIVE_CHARACTER },
-        orderBy: { name: 'asc' as const },
-        ...(limit !== undefined && { take: limit }),
-    };
-
-    const ai = systemServerOf(resolved).ai;
-
-    if (ai?.party) return (await ai.party(campaignId, query)) as PartyMember[];
-
-    return (
-        await prisma.character.findMany({ ...query, select: PARTY_SELECT })
-    ).map(flatRow);
-}
+import {
+    partyInput,
+    readCharacterInput,
+} from '@/lib/server/assistant/reads/party';
+import { withSystemNotes } from '@/lib/server/systems/lookup';
 
 export const getPartyTool = defineTool({
     name: 'get_party',
-    scopes: ['ai'],
+    scopes: ['characters:read'],
     title: 'Party',
     get description() {
         return withSystemNotes(
@@ -75,13 +19,13 @@ export const getPartyTool = defineTool({
             'get_party'
         );
     },
-    input: z.object({}),
-    handler: async (ctx) => partySummary(ctx.campaignId),
+    input: partyInput,
+    handler: readAlias('characters.party'),
 });
 
 export const readCharacterTool = defineTool({
     name: 'read_character',
-    scopes: ['ai'],
+    scopes: ['characters:read'],
     title: 'Character sheet',
     get description() {
         return withSystemNotes(
@@ -89,60 +33,6 @@ export const readCharacterTool = defineTool({
             'read_character'
         );
     },
-    input: z.object({ id: z.string().min(1).max(200) }),
-    handler: async (ctx, { id }) => {
-        const ai = systemServerOf(await loadRules(ctx.campaignId)).ai;
-
-        const common = {
-            type: true,
-            subclass: true,
-            alignment: true,
-            background: true,
-            goals: true,
-        } as const;
-
-        const c = await prisma.character.findFirst({
-            where: { id, campaignId: ctx.campaignId, ...ACTIVE_CHARACTER },
-            select: ai?.heroSelect
-                ? { ...ai.heroSelect, ...common }
-                : {
-                      ...PARTY_SELECT,
-                      ...common,
-                      strength: true,
-                      dexterity: true,
-                      constitution: true,
-                      intelligence: true,
-                      wisdom: true,
-                      charisma: true,
-                      speed: true,
-                      morale: true,
-                  },
-        });
-
-        if (!c)
-            throw new AiToolError(API_ERRORS.CHARACTER_NOT_IN_CAMPAIGN, { id });
-
-        const bio = await prisma.scenarioPage.findFirst({
-            where: {
-                campaignId: ctx.campaignId,
-                characterId: id,
-                kind: 'hero',
-            },
-            select: { content: true },
-        });
-
-        const biography = bio
-            ? readContent(bio.content)
-                  .sections.map(
-                      (s) =>
-                          `${s.title}: ${s.rows.map((r) => docText(r.story)).join(' ')}`
-                  )
-                  .join('\n')
-            : null;
-
-        if (ai?.hero && ai.heroSelect)
-            return { ...(await ai.hero(ctx.campaignId, c)), biography };
-
-        return { ...flatRow(c), biography };
-    },
+    input: readCharacterInput,
+    handler: readAlias('characters.sheet-read'),
 });

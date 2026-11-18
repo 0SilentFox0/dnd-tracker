@@ -1,30 +1,14 @@
-import { z } from 'zod';
+import { defineTool } from './define';
+import { readAlias } from './read-alias';
 
-import { AiToolError, defineTool } from './define';
-
-import 'server-only';
-import { API_ERRORS } from '@/lib/constants/api-errors';
-import { prisma } from '@/lib/db';
+import { campaignBriefInput } from '@/lib/server/assistant/reads/campaign';
 
 export const getCampaignBriefTool = defineTool({
     name: 'get_campaign_brief',
-    scopes: ['ai'],
+    scopes: ['campaign:read'],
     title: 'Campaign description',
     description:
         "Campaign name, description and the DM's standing instructions (tone, atmosphere, setting rules). Call this first when starting work from an external client.",
-    input: z.object({}),
-    handler: async (ctx) => {
-        const campaign = await prisma.campaign.findUnique({
-            where: { id: ctx.campaignId },
-            select: { name: true, description: true, aiInstructions: true },
-        });
-
-        if (!campaign) throw new AiToolError(API_ERRORS.CAMPAIGN_NOT_FOUND);
-
-        return {
-            name: campaign.name,
-            description: campaign.description,
-            instructions: campaign.aiInstructions,
-        };
-    },
+    input: campaignBriefInput,
+    handler: readAlias('campaign.brief'),
 });

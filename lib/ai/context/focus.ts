@@ -1,8 +1,8 @@
 import 'server-only';
-import { AiToolError } from '@/lib/ai/tools/define';
-import { loadPageForAi } from '@/lib/ai/tools/scenario-read';
 import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
+import { loadPageForAi } from '@/lib/server/assistant/reads/scenario';
+import { ContentError } from '@/lib/server/content/errors';
 import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type { AiFocus } from '@/types/ai';
 
@@ -73,7 +73,8 @@ export async function loadFocus(campaignId: string, focus: AiFocus) {
 
         return { kind: 'scenario' as const, page, focus };
     } catch (e) {
-        if (e instanceof AiToolError) return { kind: 'unavailable' as const };
+        if (e instanceof ContentError && e.status === 404)
+            return { kind: 'unavailable' as const };
 
         throw e;
     }

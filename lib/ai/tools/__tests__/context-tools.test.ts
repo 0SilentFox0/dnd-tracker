@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { chatToolCtx } from './helpers/direct-dispatch';
+
 import { prisma } from '@/lib/db';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
@@ -7,6 +9,9 @@ import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { readCharacteristics } from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
+vi.mock('@/lib/server/assistant/execute', async () =>
+    (await import('./helpers/direct-dispatch')).directDispatchModule()
+);
 vi.mock('@/lib/db', () => ({
     prisma: {
         character: { findMany: vi.fn(), findFirst: vi.fn() },
@@ -19,7 +24,9 @@ vi.mock('@/lib/db', () => ({
 }));
 vi.mock('@/lib/server/campaigns/rules', () => ({ loadRules: vi.fn() }));
 vi.mock('@/lib/server/show/show-store', () => ({ readShowState: vi.fn() }));
-vi.mock('@/lib/server/battles/store/load-battle', () => ({ loadBattle: vi.fn() }));
+vi.mock('@/lib/server/battles/store/load-battle', () => ({
+    loadBattle: vi.fn(),
+}));
 vi.mock('@/lib/cache/reference-data', () => ({
     getCachedUnits: vi.fn(async () => [
         {
@@ -48,13 +55,7 @@ vi.mock('@/lib/cache/reference-data', () => ({
     getCachedRaces: vi.fn(async () => []),
 }));
 
-const ctx = {
-    campaignId: 'camp1',
-    userId: 'dm',
-    scopes: ['ai'] as const,
-    threadId: null,
-    locale: 'uk' as const,
-};
+const ctx = chatToolCtx();
 
 describe('context tools', () => {
     beforeEach(() => {
@@ -110,7 +111,9 @@ describe('context tools', () => {
     });
 
     it('get_battle_state: учасники з hp у форматі cur/max', async () => {
-        const { loadBattle } = await import('@/lib/server/battles/store/load-battle');
+        const { loadBattle } = await import(
+            '@/lib/server/battles/store/load-battle'
+        );
 
         const part = (
             name: string,
@@ -157,7 +160,9 @@ describe('context tools', () => {
     });
 
     it('get_battle_state wfrp: wounds and characteristics, no hp/ac', async () => {
-        const { loadBattle } = await import('@/lib/server/battles/store/load-battle');
+        const { loadBattle } = await import(
+            '@/lib/server/battles/store/load-battle'
+        );
 
         vi.mocked(loadBattle).mockResolvedValue({
             isDM: true,
@@ -203,7 +208,9 @@ describe('context tools', () => {
     });
 
     it('get_battle_state rejects lost DM membership without exposing participants', async () => {
-        const { loadBattle } = await import('@/lib/server/battles/store/load-battle');
+        const { loadBattle } = await import(
+            '@/lib/server/battles/store/load-battle'
+        );
 
         vi.mocked(loadBattle).mockResolvedValue({
             isDM: false,
@@ -286,14 +293,14 @@ describe('context tools', () => {
         ).toMatchObject({ systemStats: { kind: 'weapon' } });
     });
 
-    it('read_reference: чужий id — AiToolError', async () => {
+    it('read_reference: чужий id — ContentError 404', async () => {
         const { readReferenceTool } = await import('@/lib/ai/tools/reference');
 
-        const { AiToolError } = await import('@/lib/ai/tools/define');
+        const { ContentError } = await import('@/lib/server/content/errors');
 
         await expect(
             readReferenceTool.handler(ctx, { kind: 'unit', id: 'nope' })
-        ).rejects.toBeInstanceOf(AiToolError);
+        ).rejects.toBeInstanceOf(ContentError);
     });
 
     it('read_reference: skill читається повним рядком у межах кампанії', async () => {

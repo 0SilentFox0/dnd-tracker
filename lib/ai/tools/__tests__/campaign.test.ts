@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { chatToolCtx } from './helpers/direct-dispatch';
+
 import { prisma } from '@/lib/db';
 
+vi.mock('@/lib/server/assistant/execute', async () =>
+    (await import('./helpers/direct-dispatch')).directDispatchModule()
+);
 vi.mock('@/lib/db', () => ({ prisma: { campaign: { findUnique: vi.fn() } } }));
 
 describe('get_campaign_brief', () => {
@@ -20,17 +25,7 @@ describe('get_campaign_brief', () => {
 
         const { runTool } = await import('@/lib/ai/tools/define');
 
-        const out = await runTool(
-            getCampaignBriefTool,
-            {
-                campaignId: 'camp1',
-                userId: 'dm',
-                scopes: ['ai'] as const,
-                threadId: null,
-                locale: 'uk' as const,
-            },
-            {}
-        );
+        const out = await runTool(getCampaignBriefTool, chatToolCtx(), {});
 
         expect(JSON.parse(out).data).toEqual({
             name: 'Асхан',

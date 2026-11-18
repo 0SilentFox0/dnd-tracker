@@ -9,7 +9,6 @@ import { API_ERRORS, type ErrorParams } from '@/lib/constants/api-errors';
 import type { Locale } from '@/lib/i18n/config';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { getTranslator } from '@/lib/i18n/translator';
-import { authorizeLegacyAssistantRead } from '@/lib/server/assistant/authorize';
 import type { AssistantCaller } from '@/lib/server/assistant/types';
 import { ContentError } from '@/lib/server/content/errors';
 import { translateErrorBody } from '@/lib/utils/api/translate-error';
@@ -18,8 +17,8 @@ import { publicToolData } from '@/lib/utils/common/public-tool-data';
 export type AiToolContext = {
     caller?: AssistantCaller;
     toolCallId?: string;
-    requestKey?: string;
-    mcpSessionId?: string;
+    /** Derived idempotency keys (current, previous window) for MCP writes without a client requestId. */
+    requestKeys?: readonly [string, string];
     campaignId: string;
     userId: string;
     scopes: readonly ApiTokenScope[];
@@ -32,7 +31,8 @@ export type AiToolContext = {
 export class AiToolError extends Error {
     constructor(
         message: string,
-        readonly params?: ErrorParams
+        readonly params?: ErrorParams,
+        readonly status: 403 | 404 | 422 = 422
     ) {
         super(message);
     }
@@ -55,8 +55,7 @@ export type AiToolDef<S extends z.ZodObject = z.ZodObject> = {
 
 export const defineTool = <S extends z.ZodObject>(def: AiToolDef<S>) => def;
 
-const isReadScope = (scope: ApiTokenScope) =>
-    scope === 'ai' || scope.endsWith(':read');
+const isReadScope = (scope: ApiTokenScope) => scope.endsWith(':read');
 
 export const toolEffect = (def: AiToolDef): ToolEffect =>
     def.effect ?? (def.scopes.every(isReadScope) ? 'read' : 'write');
@@ -121,7 +120,8 @@ export function clip(value: unknown): string {
 }
 
 function boundedOutput(value: unknown): unknown {
-    if (JSON.stringify(value ?? null).length < AI_LIMITS.toolOutputBoundChars) return value;
+    if (JSON.stringify(value ?? null).length < AI_LIMITS.toolOutputBoundChars)
+        return value;
 
     if (value && typeof value === 'object' && 'kind' in value) {
         if (value.kind === 'pending' && 'intent' in value) {
@@ -194,18 +194,12 @@ export async function runToolResult(
     try {
         ctx.abortSignal?.throwIfAborted();
 
-        if (ctx.caller && def.scopes.includes('ai')) {
-            if (
-                ctx.caller.actor.campaignId !== ctx.campaignId ||
-                ctx.caller.actor.userId !== ctx.userId
-            )
-                throw new ContentError(
-                    API_ERRORS.ASSISTANT_ACTION_FORBIDDEN,
-                    403
-                );
-
-            await authorizeLegacyAssistantRead(ctx.caller);
-        }
+        if (
+            ctx.caller &&
+            (ctx.caller.actor.campaignId !== ctx.campaignId ||
+                ctx.caller.actor.userId !== ctx.userId)
+        )
+            throw new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403);
 
         return {
             version: 2,
@@ -241,7 +235,7 @@ export async function runToolResult(
                 kind: 'error',
                 error: {
                     code: toolErrorCode(error.message),
-                    status: error instanceof ContentError ? error.status : 422,
+                    status: error.status,
                     message: translateErrorBody(t, {
                         error: error.message,
                         params: error.params,

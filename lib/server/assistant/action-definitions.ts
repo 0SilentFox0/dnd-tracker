@@ -7,6 +7,7 @@ import { HANDOFF_ACTIONS } from './actions/handoffs';
 import { SCENARIO_ACTIONS } from './actions/scenario';
 import { SHOW_ACTIONS } from './actions/show';
 import { WORLD_ACTIONS } from './actions/world';
+import { AI_READ_ACTIONS } from './reads';
 
 /** The sole executable catalog, assembled from the completed domain adapters. */
 export const ASSISTANT_ACTIONS = [
@@ -19,4 +20,5 @@ export const ASSISTANT_ACTIONS = [
     ...SHOW_ACTIONS,
     ...WORLD_ACTIONS,
     ...HANDOFF_ACTIONS,
+    ...AI_READ_ACTIONS,
 ];

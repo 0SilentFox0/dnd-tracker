@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { POST } from '@/app/api/mcp/route';
 import { hashToken } from '@/lib/ai/api-tokens';
@@ -12,6 +12,8 @@ vi.mock('@/lib/cache/tags', async (importOriginal) => ({
 }));
 
 const things = vi.hoisted(() => new Map<string, Record<string, unknown>>());
+
+const intents = vi.hoisted(() => new Map<string, Record<string, unknown>>());
 
 const mcpContext = vi.hoisted(() => ({
     campaign: {
@@ -134,12 +136,22 @@ vi.mock('@/lib/db', async () => {
             },
             assistantReceipt: { findFirst: vi.fn(async () => null) },
             assistantIntent: {
-                upsert: vi.fn(async ({ create }) => ({
-                    id: 'intent',
-                    ...create,
-                    createdAt: new Date(),
-                    expiresAt: new Date(Date.now() + 900000),
-                })),
+                findFirst: vi.fn(
+                    async ({ where }) => intents.get(where.requestId) ?? null
+                ),
+                upsert: vi.fn(async ({ where, create }) => {
+                    const key = where.userId_originKey_requestId.requestId;
+
+                    if (!intents.has(key))
+                        intents.set(key, {
+                            id: `intent-${intents.size + 1}`,
+                            ...create,
+                            createdAt: new Date(),
+                            expiresAt: new Date(Date.now() + 900000),
+                        });
+
+                    return intents.get(key);
+                }),
             },
         }),
     };
@@ -233,7 +245,7 @@ describe('API tokens + MCP', () => {
             userId: 'dm',
             revokedAt: new Date(),
             lastUsedAt: null,
-            scopes: ['ai'],
+            scopes: ['scenario:read'],
         } as never);
 
         expect((await POST(mcpReq('dndt_abc'))).status).toBe(401);
@@ -246,7 +258,7 @@ describe('API tokens + MCP', () => {
             userId: 'dm',
             revokedAt: null,
             lastUsedAt: null,
-            scopes: ['ai'],
+            scopes: ['scenario:read'],
         } as never);
         vi.mocked(prisma.campaignMember.findMany).mockResolvedValue([
             { userId: 'dm', role: 'player' },
@@ -262,7 +274,7 @@ describe('API tokens + MCP', () => {
             userId: 'dm',
             revokedAt: null,
             lastUsedAt: new Date(),
-            scopes: ['ai'],
+            scopes: ['scenario:read'],
         } as never);
 
         const res = await POST(mcpReq('dndt_abc'));
@@ -277,7 +289,7 @@ describe('API tokens + MCP', () => {
             campaignId: 'camp1',
             userId: 'dm',
             revokedAt: null,
-            scopes: ['ai'],
+            scopes: ['scenario:read'],
         } as never);
 
         const request = mcpReq('dndt_abc');
@@ -293,7 +305,7 @@ describe('API tokens + MCP', () => {
             campaignId: 'camp1',
             userId: 'dm',
             revokedAt: null,
-            scopes: ['ai'],
+            scopes: ['scenario:read'],
         } as never);
 
         let pulls = 0;
@@ -353,7 +365,7 @@ describe('API tokens + MCP', () => {
             campaignId: 'camp1',
             userId: 'dm',
             revokedAt: null,
-            scopes: ['ai'],
+            scopes: ['scenario:read'],
         } as never);
 
         const prefix =
@@ -424,7 +436,7 @@ describe('API tokens + MCP', () => {
         });
     });
 
-    it('токен без права ai на MCP — 200, ai-інструментів немає', async () => {
+    it('токен без права scenario:read — 200, сценарних інструментів немає', async () => {
         vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({
             id: 'k1',
             campaignId: 'camp1',
@@ -437,7 +449,7 @@ describe('API tokens + MCP', () => {
         const res = await POST(mcpReq('dndt_abc'));
 
         expect(res.status).toBe(200);
-        expect(await res.text()).not.toContain('search_reference');
+        expect(await res.text()).not.toContain('read_scenario_page');
     });
 
     it('serves scoped Resources and Prompts through the MCP JSON-RPC protocol', async () => {
@@ -527,7 +539,10 @@ describe('API tokens + MCP', () => {
             ).result.content[0].text;
         };
 
-        beforeEach(() => things.clear());
+        beforeEach(() => {
+            things.clear();
+            intents.clear();
+        });
 
         it('content:read — читальні інструменти без write і ai', async () => {
             const names = await toolNames(['content:read']);
@@ -543,25 +558,23 @@ describe('API tokens + MCP', () => {
                 ])
             );
             expect(names).not.toContain('content_create');
-            expect(names).not.toContain('search_reference');
+            expect(names).toContain('search_reference');
+            expect(names).not.toContain('read_scenario_page');
         });
 
         it('content:write — плюс запис', async () => {
             const names = await toolNames(['content:write']);
 
             expect(names).toEqual(
-                expect.arrayContaining([
-                    'assistant_action',
-                    'content_list',
-                ])
+                expect.arrayContaining(['assistant_action', 'content_list'])
             );
             expect(names).not.toContain('content_create');
             expect(names).not.toContain('update_rules');
         });
 
-        it('ai — без content_*', async () => {
+        it('scenario:read — без content_*', async () => {
             expect(
-                (await toolNames(['ai'])).filter((n) =>
+                (await toolNames(['scenario:read'])).filter((n) =>
                     n.startsWith('content_')
                 )
             ).toEqual([]);
@@ -645,6 +658,115 @@ describe('API tokens + MCP', () => {
 
             expect(things.size).toBe(0);
             expect(prisma.assistantIntent.upsert).toHaveBeenCalled();
+        });
+
+        describe('idempotency and isolation through the route', () => {
+            const create = (extra: Record<string, unknown> = {}, id = 2) =>
+                POST(
+                    rpc(
+                        'tools/call',
+                        id,
+                        {
+                            name: 'assistant_action',
+                            arguments: {
+                                actionId: 'content.units.create',
+                                input: { data: { name: 'Гоблін' } },
+                                ...extra,
+                            },
+                        },
+                        'dndt_abc'
+                    )
+                ).then(async (res) => {
+                    const text = await res.text();
+
+                    const line =
+                        text.split('\n').find((l) => l.startsWith('data:')) ??
+                        text;
+
+                    return JSON.parse(line.replace(/^data:\s*/, '')).result
+                        .structuredContent as {
+                        kind: string;
+                        data?: { intent?: { id: string } };
+                    };
+                });
+
+            const requestIds = () =>
+                vi
+                    .mocked(prisma.assistantIntent.upsert)
+                    .mock.calls.map(
+                        (c) =>
+                            c[0]?.where?.userId_originKey_requestId
+                                ?.requestId as string
+                    );
+
+            afterEach(() => vi.useRealTimers());
+
+            it('the same client requestId twice creates one intent', async () => {
+                asToken(['content:write']);
+
+                const first = await create({ requestId: 'client-1' });
+
+                const second = await create({ requestId: 'client-1' }, 3);
+
+                expect(first.data?.intent?.id).toBe(second.data?.intent?.id);
+                expect(new Set(requestIds())).toEqual(new Set(['client-1']));
+                expect(intents.size).toBe(1);
+            });
+
+            it('without requestId a retry (even with a new JSON-RPC id) still creates one intent', async () => {
+                asToken(['content:write']);
+
+                const first = await create({}, 10);
+
+                const second = await create({}, 11);
+
+                expect(first.data?.intent?.id).toBe(second.data?.intent?.id);
+                expect(requestIds()[0]).toMatch(/^mcpd_/);
+                expect(intents.size).toBe(1);
+            });
+
+            it('different arguments or the same call after the window are separate actions', async () => {
+                asToken(['content:write']);
+                vi.useFakeTimers({ toFake: ['Date'] });
+                vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
+
+                await create();
+                await create({ input: { data: { name: 'Орк' } } });
+                expect(intents.size).toBe(2);
+
+                vi.setSystemTime(new Date('2026-01-01T10:25:00Z'));
+                await create();
+                expect(intents.size).toBe(3);
+            });
+
+            it("a token of campaign A cannot read or change campaign B's entity", async () => {
+                asToken(['content:write']);
+                things.set('u-b', {
+                    id: 'u-b',
+                    campaignId: 'camp2',
+                    name: 'Secret of B',
+                });
+
+                const read = await call('content_get', {
+                    kind: 'units',
+                    id: 'u-b',
+                });
+
+                expect(JSON.parse(read)).toMatchObject({
+                    kind: 'error',
+                    error: { status: 404 },
+                });
+                expect(read).not.toContain('Secret of B');
+
+                const write = await call('assistant_action', {
+                    actionId: 'content.units.update',
+                    input: { id: 'u-b', patch: { name: 'Hijacked' } },
+                });
+
+                expect(JSON.parse(write).data?.kind).not.toBe('result');
+                expect(write).not.toContain('Secret of B');
+                expect(things.get('u-b')?.name).toBe('Secret of B');
+            });
         });
 
         it('невалідні дані → текст зі шляхом поля', async () => {

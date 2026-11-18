@@ -30,21 +30,22 @@ describe('AI tool registry', () => {
         );
     });
 
-    it('кожен інструмент має scopes; наявні — ai', async () => {
+    it('кожен інструмент має scopes; наявні — read-scopes каталогу', async () => {
         const { AI_TOOLS, toolsFor } = preloadedModule0;
 
         for (const t of AI_TOOLS) expect(t.scopes.length).toBeGreaterThan(0);
-        expect(toolsFor(['ai']).map((t) => t.name)).toContain(
+        expect(AI_TOOLS.some((t) => t.scopes.includes('ai'))).toBe(false);
+        expect(toolsFor(['content:read']).map((t) => t.name)).toContain(
             'search_reference'
         );
     });
 
-    it('content:read не бачить ai-інструментів', async () => {
+    it('content:read не бачить сценарних інструментів', async () => {
         const { toolsFor } = preloadedModule0;
 
         expect(
             toolsFor(['content:read']).some(
-                (t) => t.name === 'search_reference'
+                (t) => t.name === 'read_scenario_page'
             )
         ).toBe(false);
     });
@@ -80,7 +81,9 @@ describe('AI tool registry', () => {
             campaignId: 'c',
             userId: 'u',
             scopes: [
-                'ai',
+                'campaign:read',
+                'characters:read',
+                'battles:read',
                 'content:write',
                 'scenario:write',
                 'show:write',
@@ -90,10 +93,10 @@ describe('AI tool registry', () => {
             locale: 'uk' as const,
         };
 
-        const chatCtx = { ...ctx, scopes: ['ai'] as const };
+        const chatCtx = { ...ctx, scopes: ['scenario:read'] as const };
 
         expect(Object.keys(toAiSdkTools(chatCtx)).sort()).toEqual(
-            toolsFor(['ai'])
+            toolsFor(['scenario:read'])
                 .map((t) => t.name)
                 .sort()
         );
@@ -195,7 +198,9 @@ describe('AI tool registry', () => {
 
     it('every input is an object schema that serializes to JSON Schema', () => {
         for (const t of preloadedModule0.AI_TOOLS) {
-            expect(t.input, t.name).toBeInstanceOf(preloadedModule2.z.ZodObject);
+            expect(t.input, t.name).toBeInstanceOf(
+                preloadedModule2.z.ZodObject
+            );
 
             const schema = preloadedModule2.z.toJSONSchema(t.input, {
                 io: 'input',

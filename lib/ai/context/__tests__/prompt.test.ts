@@ -32,7 +32,7 @@ vi.mock('@/lib/db', () => ({
         scenarioPage: { findFirst: vi.fn() },
     },
 }));
-vi.mock('@/lib/ai/tools/party', () => ({
+vi.mock('@/lib/server/assistant/reads/party', () => ({
     partySummary: vi.fn(async () => [
         {
             id: 'c1',
@@ -45,7 +45,7 @@ vi.mock('@/lib/ai/tools/party', () => ({
         },
     ]),
 }));
-vi.mock('@/lib/ai/tools/show', () => ({
+vi.mock('@/lib/server/assistant/reads/show', () => ({
     showSummary: vi.fn(async () => 'Слайд: Собор'),
 }));
 vi.mock('@/lib/server/scenario/summary-store', () => ({
@@ -131,7 +131,9 @@ describe('buildInstructions', () => {
     it('d20 prompt has no rule system line; wfrp adds it and the wounds party', async () => {
         const { buildInstructions } = await import('@/lib/ai/context/prompt');
 
-        const { partySummary } = await import('@/lib/ai/tools/party');
+        const { partySummary } = await import(
+            '@/lib/server/assistant/reads/party'
+        );
 
         expect(
             await buildInstructions({

@@ -43,7 +43,7 @@ export const getWorldMapTool = defineTool({
     title: 'Read world map',
     description:
         'Reads a DM map with its markers, hero positions, and public notes. DM-only notes on markers are included.',
-    input: z.strictObject({ mapId: z.string().min(1) }),
+    input: z.strictObject({ mapId: z.string().min(1).max(200) }),
     handler: async (ctx, { mapId }) => {
         const caller = callerOf(ctx);
 
@@ -56,7 +56,11 @@ export const getWorldMapTool = defineTool({
         const detail = await readWorldMapDetail(mapId);
 
         if (!detail || detail.campaignId !== ctx.campaignId)
-            throw new AiToolError(API_ERRORS.WORLD_MAP_NOT_FOUND);
+            throw new AiToolError(
+                API_ERRORS.WORLD_MAP_NOT_FOUND,
+                undefined,
+                404
+            );
 
         const [heroes, notes] = await Promise.all([
             listHeroesOnMap(ctx.campaignId, mapId),

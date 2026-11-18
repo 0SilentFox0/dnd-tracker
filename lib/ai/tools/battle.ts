@@ -1,14 +1,13 @@
-import { z } from 'zod';
-
 import { defineTool } from './define';
+import { readAlias } from './read-alias';
 
 import 'server-only';
-import { readLegacyBattleState } from '@/lib/server/battles/read-service';
+import { battleStateInput } from '@/lib/server/assistant/reads/battle';
 import { withSystemNotes } from '@/lib/server/systems/lookup';
 
 export const getBattleStateTool = defineTool({
     name: 'get_battle_state',
-    scopes: ['ai'],
+    scopes: ['battles:read'],
     title: 'Battle state',
     get description() {
         return withSystemNotes(
@@ -16,6 +15,6 @@ export const getBattleStateTool = defineTool({
             'get_battle_state'
         );
     },
-    input: z.object({ battleId: z.string().min(1).optional() }),
-    handler: (ctx, { battleId }) => readLegacyBattleState(ctx, battleId),
+    input: battleStateInput,
+    handler: readAlias('battles.state'),
 });

@@ -34,10 +34,10 @@ vi.mock('@/lib/server/assistant/actions/compendium-reads', () => ({
 vi.mock('@/lib/server/scenario/summary-store', () => ({
     loadDigestItems: vi.fn(async () => []),
 }));
-vi.mock('@/lib/ai/tools/party', () => ({
+vi.mock('@/lib/server/assistant/reads/party', () => ({
     partySummary: vi.fn(async () => []),
 }));
-vi.mock('@/lib/ai/tools/show', () => ({
+vi.mock('@/lib/server/assistant/reads/show', () => ({
     showSummary: vi.fn(async () => null),
 }));
 
@@ -310,7 +310,7 @@ it('all assembled blocks fit, summarize large data, redact signed URLs and prese
         rules: { system: { key: 'homm' } },
     } as never);
 
-    const { partySummary } = await import('@/lib/ai/tools/party');
+    const { partySummary } = await import('@/lib/server/assistant/reads/party');
 
     vi.mocked(partySummary).mockResolvedValue(
         Array.from({ length: 20 }, (_, i) => ({

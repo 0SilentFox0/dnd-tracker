@@ -73,7 +73,7 @@ describe('world MCP tools', () => {
             mapId: 'foreign-map',
         });
 
-        expect(result).toMatchObject({ kind: 'error', error: { status: 422 } });
+        expect(result).toMatchObject({ kind: 'error', error: { status: 404 } });
         expect(mocks.listHeroesOnMap).not.toHaveBeenCalled();
         expect(mocks.listPublicMapNotes).not.toHaveBeenCalled();
     });

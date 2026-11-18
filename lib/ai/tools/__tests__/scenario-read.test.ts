@@ -1,9 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { chatToolCtx } from './helpers/direct-dispatch';
+
 import { prisma } from '@/lib/db';
 import { pageIdsMatching } from '@/lib/server/scenario/search';
 import { mentionPrefixes } from '@/lib/utils/scenario/mentions';
 
+vi.mock('@/lib/server/assistant/execute', async () =>
+    (await import('./helpers/direct-dispatch')).directDispatchModule()
+);
 vi.mock('@/lib/db', () => ({
     prisma: { scenarioPage: { findMany: vi.fn(), findFirst: vi.fn() } },
 }));
@@ -19,13 +24,7 @@ vi.mock('@/lib/server/scenario/search', () => ({
     ]),
 }));
 
-const ctx = {
-    campaignId: 'camp1',
-    userId: 'dm',
-    scopes: ['ai'] as const,
-    threadId: null,
-    locale: 'uk' as const,
-};
+const ctx = chatToolCtx();
 
 const content = {
     legend: [{ kind: 'read', label: 'Читати' }],
@@ -97,18 +96,18 @@ describe('scenario read tools', () => {
         ).toMatchObject({ where: { id: 'p1', campaignId: 'camp1' } });
     });
 
-    it('сторінка іншої кампанії — AiToolError', async () => {
+    it('сторінка іншої кампанії — ContentError 404', async () => {
         vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(null);
 
         const { readScenarioPageTool } = await import(
             '@/lib/ai/tools/scenario-read'
         );
 
-        const { AiToolError } = await import('@/lib/ai/tools/define');
+        const { ContentError } = await import('@/lib/server/content/errors');
 
         await expect(
             readScenarioPageTool.handler(ctx, { pageId: 'x' })
-        ).rejects.toBeInstanceOf(AiToolError);
+        ).rejects.toBeInstanceOf(ContentError);
     });
 
     it('sectionId обмежує вивід одним розділом', async () => {

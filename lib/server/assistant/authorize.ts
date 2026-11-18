@@ -4,7 +4,7 @@ import type { AssistantCaller } from './types';
 
 import 'server-only';
 import { isTokenActive } from '@/lib/ai/api-tokens';
-import { hasScope, isApiTokenScope } from '@/lib/constants/ai';
+import { isApiTokenScope } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { assertCan } from '@/lib/server/content/access';
@@ -17,7 +17,7 @@ type AuthorizationDb = Pick<
     'campaignMember' | 'apiToken'
 >;
 
-/** Reusable identity recheck, also for the pre-existing narrow ai read tools. */
+/** Reusable identity recheck. */
 export async function revalidateAssistantCaller(
     caller: AssistantCaller,
     db: AuthorizationDb = prisma
@@ -74,19 +74,6 @@ export async function revalidateAssistantCaller(
         throw forbidden();
 
     return { ...actor, scopes: token.scopes.filter(isApiTokenScope) };
-}
-
-export async function authorizeLegacyAssistantRead(
-    caller: AssistantCaller
-): Promise<void> {
-    const live = await revalidateAssistantCaller(caller);
-
-    if (
-        caller.actor.via === 'token' &&
-        (!hasScope(caller.actor.scopes ?? [], 'ai') ||
-            !hasScope(live.scopes ?? [], 'ai'))
-    )
-        throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 }
 
 export async function authorizeAssistant(

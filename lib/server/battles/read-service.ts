@@ -11,7 +11,6 @@ import { systemServerOf } from '@/lib/server/systems/lookup';
 import { decodeStoredLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
 
-/** Legacy read remains available on ai; no new write transport is activated here. */
 export async function readLegacyBattleState(
     ctx: { campaignId: string; userId: string },
     battleId?: string

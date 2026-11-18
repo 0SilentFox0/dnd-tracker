@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { chatToolCtx } from './helpers/direct-dispatch';
+
 import { prisma } from '@/lib/db';
 
+vi.mock('@/lib/server/assistant/execute', async () =>
+    (await import('./helpers/direct-dispatch')).directDispatchModule()
+);
 vi.mock('@/lib/db', () => ({
     prisma: { scenarioPage: { findMany: vi.fn(), findFirst: vi.fn() } },
 }));
@@ -10,13 +15,7 @@ vi.mock('@/lib/server/scenario/search', () => ({
     searchScenarioPages: vi.fn(),
 }));
 
-const ctx = {
-    campaignId: 'camp1',
-    userId: 'dm',
-    scopes: ['ai'] as const,
-    threadId: null,
-    locale: 'uk' as const,
-};
+const ctx = chatToolCtx();
 
 const para = (t: string) => ({
     type: 'paragraph',

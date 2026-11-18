@@ -15,7 +15,7 @@ vi.mock('@/lib/db', () => ({
 }));
 vi.mock('@/lib/server/campaigns/rules', () => ({ loadRules: vi.fn() }));
 
-import { partySummary } from '@/lib/ai/tools/party';
+import { partySummary } from '@/lib/server/assistant/reads/party';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
