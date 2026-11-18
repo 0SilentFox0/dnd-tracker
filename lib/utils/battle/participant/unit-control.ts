@@ -14,7 +14,6 @@ const isRealPlayer = (p: BattleParticipant, dmUserId: string | null) =>
     p.basicInfo.sourceType === ParticipantSourceType.CHARACTER &&
     !controlledByDm(p, dmUserId);
 
-// прикликаний належить тому, хто прикликав; зачарований — тому, хто зачарував
 const isSideUnit = (p: BattleParticipant) =>
     p.basicInfo.sourceType === ParticipantSourceType.UNIT &&
     !p.battleData.summonedBy &&

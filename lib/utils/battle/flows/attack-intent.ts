@@ -62,11 +62,9 @@ export interface ParticipantClickScene {
     >;
     turn: { current: BattleParticipant | null; isMyTurn: boolean };
     anyPending: boolean;
-    /** Фаза ходу героя дозволяє атаку (не мораль і не кінець ходу) — інакше намір ніхто не підхопить */
     attackReady: boolean;
 }
 
-/** Клік по ворогу в списку — атака тією ж зброєю, що й на карті; null — лише вибір. */
 export function participantAttackIntent(
     {
         battle,

@@ -288,7 +288,6 @@ describe('Темрява — бібліотечні заклинання', () =>
         for (let i = 0; i < 3; i++)
             ps = cast('frailty', ['orc'], ps).allParticipantsUpdated;
 
-        // AC 14 − 6 = 8: d20 1… бонус 9 — беремо d20 2 → 11 < 14, але ≥ 8
         expect(hit(find(ps, 'mage'), find(ps, 'orc'), ps, 2).success).toBe(
             true
         );
@@ -378,7 +377,6 @@ describe('Темрява — бібліотечні заклинання', () =>
     it('Страждання: −3 до кидка атаки ворога', () => {
         const ps = cast('suffering', ['orc'], world()).allParticipantsUpdated;
 
-        // бонус 5 + СИЛ 2 + майстерність 2 = 9; AC 14: d20 6 → 15 влучає, з −3 = 12 — ні
         expect(hit(unit('orc'), hero(), world(), 6).success).toBe(true);
         expect(hit(find(ps, 'orc'), find(ps, 'mage'), ps, 6).success).toBe(
             false
@@ -537,7 +535,7 @@ describe('Темрява — бібліотечні заклинання', () =>
         });
     });
 
-    it("Шал діє на героїв і юнітів", () => {
+    it('Шал діє на героїв і юнітів', () => {
         const ps = cast('berserk', ['orc'], world()).allParticipantsUpdated;
 
         expect(find(ps, 'orc').battleData.activeEffects[0].effects[0]).toEqual({
@@ -620,7 +618,11 @@ describe('Темрява — бібліотечні заклинання', () =>
             sourceType: ParticipantSourceType.CHARACTER,
         };
 
-        const ps = cast('puppet-master', ['godric'], [hero(), godric]).allParticipantsUpdated;
+        const ps = cast(
+            'puppet-master',
+            ['godric'],
+            [hero(), godric]
+        ).allParticipantsUpdated;
 
         const controlledGodric = find(ps, 'godric');
 
@@ -680,8 +682,12 @@ describe('Темрява — бібліотечні заклинання', () =>
                     (effect) =>
                         effect.kind === 'flag' &&
                         effect.flag === 'conditionImmunity' &&
-                        ['disable_melee_attacks', 'disable_ranged_attacks', 'disable_spell_casting'].every(
-                            (condition) => effect.conditions?.includes(condition)
+                        [
+                            'disable_melee_attacks',
+                            'disable_ranged_attacks',
+                            'disable_spell_casting',
+                        ].every((condition) =>
+                            effect.conditions?.includes(condition)
                         )
                 )
             ) === true
@@ -707,7 +713,11 @@ describe('Темрява — бібліотечні заклинання', () =>
             },
         } as unknown as BattleParticipant;
 
-        const ps = cast('blindness', ['orc'], [base[0], undead, base[2]]).allParticipantsUpdated;
+        const ps = cast(
+            'blindness',
+            ['orc'],
+            [base[0], undead, base[2]]
+        ).allParticipantsUpdated;
 
         expect(find(ps, 'orc').battleData.activeEffects).toHaveLength(0);
     });

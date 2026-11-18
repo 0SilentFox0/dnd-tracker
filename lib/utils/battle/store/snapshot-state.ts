@@ -36,11 +36,7 @@ export const rowToMapState = (
         : null;
 
 export interface SnapshotState {
-    /** terrain і конфіги режимів лише для боїв із картою; старі знімки без поля — цю частину карти при відкаті не чіпаємо */
-    scene: Pick<
-        BattleSceneState,
-        'round' | 'turnIndex' | 'status'
-    > & {
+    scene: Pick<BattleSceneState, 'round' | 'turnIndex' | 'status'> & {
         sceneState?: SystemSlot;
         /** Legacy snapshots only: read through `upgradeScene`, never written */
         pendingMoraleCheck?: unknown;

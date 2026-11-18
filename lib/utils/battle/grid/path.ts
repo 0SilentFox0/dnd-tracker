@@ -20,7 +20,6 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
-/** Швидкість у клітинках без Ривка; 0, якщо знерухомлений. */
 export function baseMovement(p: BattleParticipant, rules: Ruleset): number {
     if (hasEffectMarker(p, EffectMarker.IMMOBILIZED)) return 0;
 
@@ -56,7 +55,6 @@ export interface PathSearch {
     parent: Map<string, GridPoint>;
 }
 
-// союзники прохідні, вороги — стіна; стати можна лише на вільне місце; avoid — клітинки, які footprint не зачіпає
 export function reachable(
     map: BattleMapConfig,
     participants: BattleParticipant[],
@@ -67,7 +65,6 @@ export function reachable(
     return searchPaths(map, participants, mover, budget, opts).cost;
 }
 
-/** Клітинки від першого кроку до `to` включно за готовим пошуком; null, якщо `to` недосяжна. */
 export function pathFrom(
     { cost, parent }: PathSearch,
     mover: BattleParticipant,
@@ -153,7 +150,6 @@ export function searchPaths(
 
     const seen = new Map([[cellKey(start), 0]]);
 
-    // кошики за вартістю: Дейкстра без черги з пріоритетом, вартість кроку лише 1 або 2
     const buckets: GridPoint[][] = [[start]];
 
     for (let cost = 0; cost < buckets.length && cost < budget; cost++) {
@@ -187,7 +183,6 @@ export function searchPaths(
     return { cost: result, parent };
 }
 
-/** Учасник ДМ (не персонаж гравця) у його хід ходить без ліміту швидкості (як фігура на столі), але не далі за MAP_LIMITS.dmMoveCap клітинок вартості; решта — залишок руху. dmUserId — id ДМ, якщо ходить ДМ, інакше null. */
 export function moveBudget(
     {
         map,
@@ -206,7 +201,6 @@ export function moveBudget(
     return Math.min(map.cols * map.rows, MAP_LIMITS.dmMoveCap);
 }
 
-/** Наляканий не може наблизитись до живого джерела страху. */
 export function frightenedBlocksMove(
     map: BattleMapConfig | null | undefined,
     participants: BattleParticipant[],

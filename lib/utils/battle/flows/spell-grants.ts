@@ -39,7 +39,6 @@ export const canCastFromSlot = (
     );
 };
 
-/** Обраний грант: за ключем, а без обраного ключа — єдиний грант закляття. */
 export function selectedGrantOf(
     grants: SpellGrant[],
     pick: { slotKey?: string; grantKey?: string }
@@ -56,7 +55,6 @@ export function selectedGrantOf(
     );
 }
 
-/** Грант, що підставляється при виборі закляття: єдиний, якщо слот не конкурує з ним. */
 export function defaultGrant(
     grants: SpellGrant[],
     opts: { hasSlotChoices: boolean; spellLevel: number }
@@ -265,7 +263,6 @@ export function inlineGrantLabel(
     });
 }
 
-/** Живі inline-гранти носія як плитки книги: власне визначення замість бібліотечного заклинання. */
 export function inlineSpellTiles(
     caster: BattleParticipant | null,
     library: BookSpell[],

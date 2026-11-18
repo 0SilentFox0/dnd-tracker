@@ -88,7 +88,6 @@ const OBSCURED_TARGET_LABEL = textRef('battleLog.rollMode.obscuredTarget');
 
 const labels = (entries: { label: LogLine }[]) => entries.map((e) => e.label);
 
-/** Що з навичок/ефектів дає перевагу чи недолік — назви джерел. */
 export function rollModeReasonsOf(
     sys: AttackMathSystem,
     attacker: BattleParticipant,
@@ -243,7 +242,6 @@ export function rollModeReasonsOf(
     };
 }
 
-/** Режим кидка з навичок; forced — якщо хоч одне джерело є (взаємне скасування теж вирішене навичками). */
 export function forcedRollMode(r: RollModeReasons): {
     mode: RollMode;
     forced: boolean;

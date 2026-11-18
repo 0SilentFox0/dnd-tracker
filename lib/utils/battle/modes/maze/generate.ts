@@ -94,7 +94,6 @@ function pickExit(
 
 type Attempt<T> = T | { error: string } | null;
 
-/** Спроби з послідовними зернами: null — повторити, { error } — здатися одразу. */
 function retrySeeded<T>(
     seed: number,
     attempt: (rnd: Rng) => Attempt<T>
@@ -183,7 +182,6 @@ export function reshuffleMaze(
                 ? scatterAll({ ...grid, maze: base }, input.participantIds, rnd)
                 : input.positions;
 
-        // розкидання не залежить від стін — повтор із новим зерном не допоможе
         if (!positions) return { error: MAZE_TEXTS.scatterNoRoom };
 
         const points = Object.values(positions);

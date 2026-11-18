@@ -135,7 +135,6 @@ const BASE_EFFECT_REGISTRY: {
         kind: 'note',
         static: true,
         fields: [{ name: 'text', input: 'text' }],
-        // ✋ — механіку відпрацьовує DM вручну (рушій її не автоматизує)
         describe: (e) => [
             seg(
                 /\bDM\b/.test(e.text)

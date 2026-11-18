@@ -9,7 +9,6 @@ export const canOffHandAttack = (
     rules: Ruleset
 ): boolean => !!ruleSystemOf(rules).combat.offHand?.ready(p);
 
-/** Атака дією «Атака». */
 export function spendAttack(
     p: BattleParticipant,
     participants: BattleParticipant[],

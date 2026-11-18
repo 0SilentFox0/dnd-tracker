@@ -86,7 +86,6 @@ export function initiativeSlot(
     return at === -1 ? order.length : at;
 }
 
-/** Порядок: initiative (desc) → baseInitiative (desc) → dexterity / system tie-break stat (desc). */
 export function sortByInitiative(
     participants: BattleParticipant[],
     rules: InitiativeRules

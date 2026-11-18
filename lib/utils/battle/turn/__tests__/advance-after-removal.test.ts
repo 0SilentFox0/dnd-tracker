@@ -33,7 +33,6 @@ const burn = resolved({
 });
 
 describe('advanceAfterRemoval', () => {
-    // учасник на ході (індекс 1) уже прибраний: у черзі лишились prev і next
     const prev = makeParticipant({
         id: 'prev',
         side: ParticipantSide.ALLY,
@@ -150,18 +149,28 @@ it('removal з відкладеною мораллю скидає слот у п
     const sceneState = pendingSlot({
         participantId: 'ghost',
         d10Roll: 1,
-        moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, moralePositive: true, message: '' },
+        moraleResult: {
+            shouldSkipTurn: false,
+            hasExtraTurn: false,
+            moralePositive: true,
+            message: '',
+        },
     });
 
     const scene0 = { ...scene, sceneState };
 
     const out = advanceAfterRemoval({
         rules,
-        participants: [makeParticipant({ id: 'a' }), makeParticipant({ id: 'b' })],
+        participants: [
+            makeParticipant({ id: 'a' }),
+            makeParticipant({ id: 'b' }),
+        ],
         pending: [],
         scene: scene0,
         before: 1,
     });
 
-    expect(pendingMoraleOf(applyScenePatch(scene0, out.scene).sceneState)).toBeNull();
+    expect(
+        pendingMoraleOf(applyScenePatch(scene0, out.scene).sceneState)
+    ).toBeNull();
 });

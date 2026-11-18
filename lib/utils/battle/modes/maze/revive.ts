@@ -7,7 +7,6 @@ import { occupiedBy } from '@/lib/utils/battle/grid/occupancy';
 import type { BattleParticipant } from '@/types/battle';
 import type { GridPoint } from '@/types/battle-grid';
 
-/** Воскреслий стає на свою клітинку або найближчу вільну за кроками лабіринту (стіни, без виходу й телепортів). */
 export function nearestMazeCell(
     grid: MazeGrid,
     participants: BattleParticipant[],

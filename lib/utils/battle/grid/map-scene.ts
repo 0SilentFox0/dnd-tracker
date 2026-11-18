@@ -52,11 +52,9 @@ export interface MapAim {
     range?: number;
     aim?: GridPoint;
     onAim(cell: GridPoint): void;
-    /** точка прев'ю під курсором (null — поза дальністю чи поза картою) для живого списку зачеплених */
     onHover?(cell: GridPoint | null): void;
 }
 
-/** Вибір цілей заклинання кліком по токенах: кого можна обрати, хто вже обраний. */
 export interface MapPick {
     casterId: string;
     targets: { id: string; reachable: boolean; filteredOut?: boolean }[];
@@ -64,17 +62,14 @@ export interface MapPick {
     onPick(id: string): void;
 }
 
-/** Хто дивиться на карту й чи може зараз ходити. */
 export interface MapSceneActor {
     current: BattleParticipant | null;
     viewer: Viewer;
     canAct: boolean;
     isDM: boolean;
-    /** Фаза ходу дозволяє атаку; інакше клік по ворогу — вибір, а цілі не підсвічуються */
     attackReady: boolean;
 }
 
-/** Режим кліку по карті: розстановка DM, інструмент місцевості або наведення шаблону. */
 export interface MapSceneMode {
     placing: boolean;
     placingId: string | null;
@@ -199,7 +194,6 @@ export interface AimScene {
     rules: Ruleset;
 }
 
-/** Клітинки шаблону в точці `at`; null — заклинатель поза картою, точка поза дальністю або шаблон без клітинок. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
 export function aimView(
     { map, participants, rules }: AimScene,
     aim: MapAim,
@@ -249,7 +243,6 @@ export function aimView(
     };
 }
 
-// footprintDistance — відстань Чебишова, тож область дальності — прямокутник
 function rangeWindow(
     map: BattleMapConfig,
     origin: GridPoint[],

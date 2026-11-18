@@ -554,14 +554,12 @@ export async function runGuardedBattleOperationCore<TBody>(
 
     const entries = delta.events.map((e) => eventToBattleAction(e, battleId));
 
-    // clear (reset/start) нумерує події з 1 — клієнт має відкинути весь старий журнал
     const cancelledFrom = !result.history
         ? undefined
         : 'cancelFromSeq' in result.history
           ? result.history.cancelFromSeq
           : 0;
 
-    // одне читання на сервері замість повного GET у кожного гравця після відкату
     const knowledge =
         cancelledFrom === undefined
             ? undefined

@@ -8,7 +8,6 @@ import type {
 } from '@/types/scenario';
 import type { ShowState, Slide } from '@/types/show';
 
-/** current — позиція показу на цьому слайді; active — і гравці його бачать (не під заглушкою). */
 export type RowSlideState =
     | { kind: 'none' }
     | { kind: 'loading' }
@@ -22,9 +21,7 @@ export type RowBattleState =
     | { kind: 'ready'; battle: BattleBrief; called: boolean };
 
 export interface PlayLookup {
-    /** відсутній ключ — ще вантажиться; null — набору немає */
     decks: ReadonlyMap<string, Slide[] | null>;
-    /** null — список боїв ще не завантажено */
     battles: ReadonlyMap<string, BattleBrief> | null;
     show: ShowState | null;
 }
@@ -119,14 +116,12 @@ const slideState = (row: ScenarioRow, lookup: PlayLookup) => {
     return state.kind === 'ready' ? state : null;
 };
 
-/** Рядок, на чиєму слайді стоїть показ (перший, якщо таких кілька). */
 export const currentSlideRow = (
     content: ScenarioContent,
     lookup: PlayLookup
 ): ScenarioRow | null =>
     slideRows(content).find((r) => slideState(r, lookup)?.current) ?? null;
 
-/** Перший невидимий гравцям доступний рядок, починаючи з поточного: під заглушкою — сам поточний. */
 export function nextSlideRow(
     content: ScenarioContent,
     lookup: PlayLookup
@@ -144,7 +139,6 @@ export function nextSlideRow(
     );
 }
 
-/** Трек розділу, який треба ввімкнути перед слайдом рядка: слайд зі своїм треком його перебиває, той самий трек не чіпаємо. */
 export function sectionTrackToPlay(
     section: ScenarioSection,
     row: ScenarioRow,

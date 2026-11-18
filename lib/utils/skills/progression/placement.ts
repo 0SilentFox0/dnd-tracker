@@ -39,7 +39,6 @@ function placementOf(node: ProgressionNode): SkillPlacement {
     }
 }
 
-/** Де стоїть кожен скіл бібліотеки в деревах кампанії (перше входження виграє). */
 export function skillPlacements(
     rows: Array<{ id: string; skills: unknown }>
 ): Map<string, SkillPlacement> {

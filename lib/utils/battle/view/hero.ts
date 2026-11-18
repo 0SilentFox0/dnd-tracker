@@ -84,7 +84,6 @@ export function pactSlot(
         : null;
 }
 
-/** Чи лишилося заклинання за бонусну дію з вільним слотом (слоти — як у castSpell). */
 export function canCastBonusSpell(
     p: BattleParticipant,
     spells: { level: number; cost?: string | null }[]
@@ -251,7 +250,6 @@ export function usableAbilities(
         .map((o) => o.ability);
 }
 
-/** Маневри на карті цілять клітинкою або власним оточенням, тож ціль-учасник потрібна лише без карти. */
 export function abilityOnMap(
     map: BattleMapConfig | null | undefined,
     p: BattleParticipant

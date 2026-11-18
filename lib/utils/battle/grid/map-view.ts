@@ -58,7 +58,6 @@ function closerStep(a: MoveStep, b: MoveStep, from: GridPoint): boolean {
     return i !== -1 && da[i] < db[i];
 }
 
-/** Клітинка зони → якір, куди ставити токен: велика істота клікає будь-яку клітинку нового footprint, а не лише його лівий верхній кут. */
 export function moveSteps(
     map: BattleMapConfig,
     participants: BattleParticipant[],

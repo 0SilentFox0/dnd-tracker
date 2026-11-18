@@ -54,7 +54,6 @@ export interface ModifierEntry {
     atLeast?: number;
     flag?: FlagEffect;
     icon?: string | null;
-    /** назва вміння, раси, артефакту чи ефекту, що дав модифікатор */
     source?: LogLine;
     condition?: string;
 }

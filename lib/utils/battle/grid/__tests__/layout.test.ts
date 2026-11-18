@@ -208,7 +208,6 @@ describe('cellAtScreenPoint', () => {
     });
 
     it('поворот на 90° за годинниковою: верхній рядок карти — праворуч', () => {
-        // rotate(90deg) + translateX(висота сітки 200 px): (x, y) → (200 − y, x)
         const ctm = { a: 0, b: 1, c: -1, d: 0, e: 200, f: 0 };
 
         expect(cellAtScreenPoint(map, ctm, 190, 10)).toEqual({ x: 0, y: 0 });

@@ -9,7 +9,6 @@ export function mergeAudio(
     return !cached || incoming.seq > cached.seq ? incoming : cached;
 }
 
-/** Стан — лише за seq, годинник — лише з HTTP-відповіді; без змін повертає prev, щоб не будити спостерігачів. */
 export type AudioIncoming = {
     audio: BattleAudioState | null | undefined;
     clockOffsetMs?: number | null;

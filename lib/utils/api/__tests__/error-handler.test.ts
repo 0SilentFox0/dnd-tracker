@@ -1,8 +1,3 @@
-/**
- * Тести handleApiError: status codes для ZodError, Prisma errors, generic errors,
- * і structured лог з контекстом.
- */
-
 import { Prisma } from '@prisma/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';

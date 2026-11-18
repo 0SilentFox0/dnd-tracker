@@ -90,7 +90,6 @@ function composeDoors(
 const hasDoorState = (state: BattleMapState | null | undefined) =>
     !!state && Object.keys(state.doors ?? {}).length > 0;
 
-/** Базова карта + ребра бібліотеки − видалені ребра стану; двері бази поверх яких лежить стан (виламані зникають); модові стіни не чіпає. Результат стабільний за ідентичністю входів. */
 export function composeEffectiveMap(
     base: BattleMapConfig,
     state: BattleMapState | null | undefined,

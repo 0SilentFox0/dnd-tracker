@@ -30,7 +30,6 @@ export function berserkBonusOf(p: BattleParticipant): number | undefined {
 
 interface BerserkTurnParams {
     participants: BattleParticipant[];
-    /** стан учасника на початку ходу: з нього читаються заборони */
     restrictedBy: BattleParticipant;
     participantId: string;
     bonusPercent: number;
@@ -65,7 +64,6 @@ function note(
     };
 }
 
-/** Автоматичний хід теж закінчується: спрацьовують turnEnd-вміння, зачарований повертається на свій бік. */
 function finishTurn(
     participants: BattleParticipant[],
     actions: BattleAction[],

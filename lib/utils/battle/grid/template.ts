@@ -27,7 +27,6 @@ export function feetToCells(feet: number, rules: Ruleset): number {
     return Math.max(1, Math.floor(feet / cellFeetOf(rules)));
 }
 
-/** Коло на карті — квадрат 3×3 до 15 фт і 5×5 від 20 фт, щоб площа читалася на сітці. */
 export function areaRadiusCells(feet: number): number {
     return Math.max(1, Math.floor(feet / 10));
 }
@@ -241,7 +240,6 @@ export function participantsInCells(
 export const isCenteredTemplate = (t: SpellTemplate) =>
     t.shape === 'circle' || t.shape === 'cube' || t.shape === 'cross';
 
-/** Клітинка шаблону, найближча до його центроїда. */
 export function areaCentre(cells: string[]): GridPoint | undefined {
     const points = cells.map(parseCellKey);
 
@@ -258,7 +256,6 @@ export function areaCentre(cells: string[]): GridPoint | undefined {
     );
 }
 
-/** Центр для FX: у кола, куба й хреста — точка прицілу, у конуса й лінії вона лише напрямок. */
 export function templateCentre(
     template: SpellTemplate,
     aim: GridPoint,
@@ -267,7 +264,6 @@ export function templateCentre(
     return isCenteredTemplate(template) ? aim : areaCentre(cells);
 }
 
-/** Конус і лінія задають лише напрямок, тож дальність стосується тільки кола, куба й хреста. */
 export function templateAimAllowed(
     origin: GridPoint[],
     template: SpellTemplate,

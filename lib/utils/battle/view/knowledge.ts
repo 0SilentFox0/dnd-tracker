@@ -120,7 +120,6 @@ export interface EnemyKnowledge {
 
 export type BattleKnowledge = Record<string, EnemyKnowledge>;
 
-// кроки шкоди (риси цілі) пишуть і заклинання, AC — лише атаки
 export const KNOWLEDGE_EVENT_TYPES = [
     ...AC_EVENT_TYPES,
     BattleActionType.SPELL,

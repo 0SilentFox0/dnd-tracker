@@ -26,7 +26,6 @@ import { inPlay } from '@/lib/utils/abilities/engine/core/participants';
 import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
-// хуки рушія викликаються лише для карти з лабіринтом
 const gridOf = (map: BattleMapConfig) => mazeGridOf(map)!;
 
 export const mazeMode: MapModeDefinition<MazeConfig> = {

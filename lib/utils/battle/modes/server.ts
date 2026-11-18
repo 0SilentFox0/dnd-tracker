@@ -67,7 +67,6 @@ export function modeAutoSkipText(map: BattleMapConfig | null): LogLine | null {
     return active?.mode.server.autoSkipText?.(active.config) ?? null;
 }
 
-/** null — режим не перехоплює розстановку. */
 export function modePlaceAll(
     map: BattleMapConfig | null,
     participants: BattleParticipant[]
@@ -102,7 +101,6 @@ export function modePlaceOne(
     );
 }
 
-/** undefined — режим не веде власного пошуку; null — вільних клітинок немає. */
 export function modePlaceRevived(
     map: BattleMapConfig | null,
     args: {
@@ -142,7 +140,6 @@ export function modeReset(map: BattleMapConfig): BattleMapConfig {
         : map;
 }
 
-/** { [mode.key]: config | null } для всіх режимів — формат знімка в БД. */
 export function modeSnapshotSlice(
     map: BattleMapConfig
 ): Record<string, unknown> {
@@ -151,7 +148,6 @@ export function modeSnapshotSlice(
     );
 }
 
-/** Ключ відсутній у знімку — не чіпати; null при наявному конфігу — вимкнути; значення — поставити. */
 export function restoreModeSlices(
     map: BattleMapConfig,
     scene: Record<string, unknown>

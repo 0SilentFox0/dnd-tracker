@@ -44,7 +44,6 @@ function inCone(from: Viewpoint, dx: number, dy: number): boolean {
 
 const visionCache = new WeakMap<MazeConfig, Map<string, ReadonlySet<string>>>();
 
-// конус перевіряє кожну клітинку лінією зору; ті самі точки огляду питають багато разів за дію чи рендер
 export function mazeVision(
     grid: MazeGrid,
     from: Viewpoint

@@ -1,8 +1,3 @@
-/**
- * Rate limiting через `@upstash/ratelimit` (sliding window).
- * Fail-open: без Upstash запит пропускається, крім викликів з `memoryFallback` — вони рахуються в пам'яті інстанса.
- * У production без Upstash один раз на процес пишеться console.error (сигнал для логів).
- */
 import type { NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 
@@ -11,32 +6,21 @@ import { getRedisClient } from '@/lib/redis';
 import { apiErrorJson } from '@/lib/utils/api/translate-error';
 
 export interface RateLimitInput {
-    /** Хто робить запит — зазвичай userId з сесії. */
     userId: string;
-    /** Який endpoint лімітуємо ("attack", "spell", "next-turn", тощо). */
     scope: string;
-    /** Контекст для гранулярності — battleId, campaignId. */
     battleId?: string;
-    /** Максимум запитів у вікні. */
     limit: number;
-    /** Тривалість вікна (секунди). */
     windowSeconds: number;
-    /** Без Redis рахувати вікно в пам'яті інстанса замість fail-open (для платних викликів). */
     memoryFallback?: boolean;
 }
 
 export interface RateLimitResult {
     allowed: boolean;
-    /** Скільки запитів вже зроблено. */
     count: number;
-    /** Ліміт. */
     limit: number;
-    /** Скільки секунд до reset вікна. */
     retryAfterSeconds: number;
 }
 
-// Cache Ratelimit instances по комбінації limit+window — щоб не створювати
-// новий instance для кожного запиту (вони shared у межах процесу).
 const ratelimiterCache = new Map<string, Ratelimit>();
 
 function getRatelimiter(
@@ -176,9 +160,6 @@ export async function checkRateLimit(
     }
 }
 
-/**
- * Convenience: 429 response з Retry-After header.
- */
 export function rateLimitResponse(rl: RateLimitResult): NextResponse {
     return apiErrorJson(
         {
@@ -198,63 +179,36 @@ export function rateLimitResponse(rl: RateLimitResult): NextResponse {
     );
 }
 
-/**
- * Дефолтні пресети для battle endpoints.
- * Підлаштувати залежно від реального юзкейсу.
- */
 export const BATTLE_RATE_LIMITS = {
-    /** Будь-яка mutation у бою — захист від спаму. */
     default: { limit: 30, windowSeconds: 10 },
-    /** Атака — найчастіша операція. */
     attack: { limit: 30, windowSeconds: 10 },
-    /** Заклинання — повільніший процес. */
     spell: { limit: 30, windowSeconds: 10 },
-    /** Бонус-дія. */
     bonusAction: { limit: 30, windowSeconds: 10 },
-    /** Вміння як основна дія. */
     abilityAction: { limit: 30, windowSeconds: 10 },
-    /** Рух по карті — кілька кроків поспіль за хід. */
     move: { limit: 60, windowSeconds: 10 },
-    /** Місцевість на карті (ДМ) — штрих за штрихом. */
     mapTerrain: { limit: 60, windowSeconds: 10 },
-    /** Стіни й ґрати на карті (ДМ) — штрих за штрихом. */
     mapWalls: { limit: 60, windowSeconds: 10 },
-    /** Видалення ребер карти в бою (ДМ). */
     mapEdgeRemove: { limit: 60, windowSeconds: 10 },
-    /** Відчинення/зачинення дверей. */
     mapDoor: { limit: 30, windowSeconds: 10 },
-    /** Оновлення бібліотечної карти бою (ДМ) — рідко. */
     mapUpdate: { limit: 5, windowSeconds: 10 },
-    /** Правка лабіринту (ДМ). */
     maze: { limit: 60, windowSeconds: 10 },
-    /** Мітка гравця в лабіринті. */
     mazeMark: { limit: 30, windowSeconds: 10 },
-    /** Рух карти (ДМ). */
     mapMotion: { limit: 20, windowSeconds: 10 },
-    /** Зміна фону карти (ДМ) — рідко, з можливим завантаженням файлу. */
     mapBackground: { limit: 5, windowSeconds: 10 },
-    /** Погода на карті (ДМ) — рідко. */
     mapWeather: { limit: 10, windowSeconds: 10 },
-    /** Музика бою (ДМ): перемикання треків. */
     audio: { limit: 20, windowSeconds: 10 },
-    /** Показ слайдів (ДМ): гортання і музика. */
     show: { limit: 30, windowSeconds: 10 },
-    /** Пазл у показі (гравці й ДМ): grab/drop/return/keepAlive. */
     puzzle: { limit: 30, windowSeconds: 10 },
-    /** Next-turn — DM advance, рідше викликається. */
     nextTurn: { limit: 20, windowSeconds: 10 },
-    /** PATCH HP / remove participant — DM-only, частіше OK. */
     participantPatch: { limit: 60, windowSeconds: 10 },
 } as const;
 
-/** AI на ключі DM, який викликають гравці (передісторія, портрет): 10 викликів / 10 хв на користувача й кампанію. */
 export const AI_PLAYER_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
 
 export const DEMO_READ_RATE_LIMIT = { limit: 120, windowSeconds: 60 } as const;
 
 export const JOIN_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
 
-/** Per-IP, перед auth: /api/mcp і публічні маршрути. */
 export const IP_RATE_LIMITS = {
     mcp: { limit: 300, windowSeconds: 60 },
     public: { limit: 60, windowSeconds: 60 },

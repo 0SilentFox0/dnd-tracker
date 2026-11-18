@@ -76,8 +76,6 @@ export function resolveSpellSource(
             );
     }
 
-    // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя
-
     const free = ctx.isDM && data.free === true;
 
     const ownGrants = free

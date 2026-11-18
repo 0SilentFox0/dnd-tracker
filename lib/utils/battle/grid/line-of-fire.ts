@@ -16,11 +16,8 @@ import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface LineOfFire {
-    /** Укриття (×0.5): істоти, бар'єри, закриті клітинки, ворота режиму; стіна — окремо у `wallBlocked`. */
     blocked: boolean;
-    /** Стіна ребром на лінії: постріл неможливий. */
     wallBlocked: boolean;
-    /** Клітинки, що заважають (для підсвітки); стіна лабіринту клітинки не має. */
     cells: string[];
 }
 

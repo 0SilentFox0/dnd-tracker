@@ -8,7 +8,6 @@ type PatchableFields = {
     [K in keyof BattleParticipant]?: ReadonlyArray<keyof BattleParticipant[K]>;
 };
 
-// поля, які зберігаються в колонках і state (див. splitParticipant); решта — у знімку й приходить повним учасником
 const CORE_PATCHABLE_FIELDS = {
     basicInfo: ['side', 'controlledBy'],
     abilities: ['initiative'],
@@ -75,7 +74,6 @@ export function buildParticipantPatch(
             if (stableStringify(prev[field]) === stableStringify(next[field]))
                 continue;
 
-            // undefined не переживає JSON — клієнт не дізнається про видалення поля
             if (next[field] === undefined) return FULL_PARTICIPANT;
 
             patch[section] = { ...patch[section], [field]: next[field] };

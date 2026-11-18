@@ -9,7 +9,6 @@ export type AttackMode = 'normal' | 'advantage' | 'disadvantage';
 
 export type RollOutcome = 'hit' | 'crit' | 'miss' | 'critFail';
 
-/** Режим, який задають навички/ефекти (зокрема взаємне скасування) — гравець його не змінює */
 export interface ForcedMode {
     mode: AttackMode;
     reason: LogLine;
@@ -29,7 +28,6 @@ export interface AttackOutcomeSummary {
     targetId: string;
     damage: number;
     downed: boolean;
-    /** Вторинна шкода (вогняна хвиля, стріла сили), не удар */
     splash?: boolean;
 }
 
@@ -53,9 +51,7 @@ export interface AttackFlowState {
     index: number;
     error?: LogLine;
     results: AttackOutcomeSummary[];
-    /** сервер зупинив атаку: ДМ обирає ефект крита */
     waitingCrit?: boolean;
-    /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
     picked?: boolean;
     offHand?: boolean;
     inspiration?: boolean;
@@ -454,7 +450,6 @@ export function attackPayload(
 
     const hits = s.strikes.filter(isHit);
 
-    // промахи теж ідуть на сервер з кидками: їх видно в журналі й спрацьовують реакції цілей
     return {
         ...base,
         targetIds: s.strikes.map((st) => st.targetId),

@@ -41,7 +41,6 @@ export function heroMagicMultiplier(p: BattleParticipant): number {
     return clampHeroDamageMultiplier(p.abilities.magicMultiplier);
 }
 
-/** Після модифікаторів скілів/артефактів; перед дробленням по цілях / опором. */
 export function applyHeroDmDamageMultiplier(
     attacker: BattleParticipant,
     attackType: AttackType,

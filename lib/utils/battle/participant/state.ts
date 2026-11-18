@@ -13,7 +13,6 @@ export function isUp(p: BattleParticipant): boolean {
     );
 }
 
-// DM-зміна HP: kill — смерть; 0 HP не «оживляє» мертвого; HP > 0 піднімає непритомного
 export function statusForHp(
     p: BattleParticipant,
     hp: number,

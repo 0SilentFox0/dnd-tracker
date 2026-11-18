@@ -20,7 +20,6 @@ export const MODE_MAP_KEYS = Object.keys(
 export const isModeMapKey = (key: string): key is MapModeKey =>
     (MODE_MAP_KEYS as readonly string[]).includes(key);
 
-/** Патчі режимів для дельти: { [key]: зміни } або null — потрібна повна карта. */
 export function modeDeltas(
     before: BattleMapConfig,
     after: BattleMapConfig
@@ -43,7 +42,6 @@ export function modeDeltas(
         if (change !== undefined) patches[mode.key] = change;
     }
 
-    // форма патча кожного режиму — його deltaOf; реєстр перебирається без звуження ключа
     return patches as ModeDeltas;
 }
 

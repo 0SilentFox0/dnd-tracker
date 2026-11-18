@@ -20,7 +20,6 @@ interface StrikeStepsInput {
     viewer: Viewer;
 }
 
-/** Кроки шкоди одного влучання так, як їх бачить глядач (з урахуванням прихованих цілей і укриття). */
 export function strikeDamageSteps({
     attacker,
     target,

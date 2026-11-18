@@ -11,17 +11,11 @@ import type { LogLine } from '@/types/text';
 export interface ResistanceOptions {
     participants?: BattleParticipant[];
     fromSpell?: boolean;
-    /** вид атаки, що завдає шкоди; опір з attackKind діє лише на нього */
     attackKind?: AttackKind;
-    /** модифікатори поточної дії для цілі (фаза before) */
     extra?: StaticEffect[];
-    /** школа заклинання; опір зі school діє лише на нього */
     school?: string | null;
 }
 
-/**
- * Результат застосування імунітетів/опору
- */
 export interface ResistanceResult {
     finalDamage: number;
     immunityApplied: boolean;
@@ -30,7 +24,6 @@ export interface ResistanceResult {
     steps: DamageStep[];
 }
 
-/** Текст для логу, коли шкоду повністю зняв імунітет: «⛔ Дракон: Імунітет до вогню». */
 export function immunityNote(targetName: string, steps: DamageStep[]): LogLine {
     const step = steps.find((s) => s.kind === 'immunity');
 
@@ -102,7 +95,6 @@ export function hasImmunity(
     );
 }
 
-/** Сумарний відсоток опору (−100…100; від'ємний = вразливість) з прапорців resistance. */
 export function getCombinedResistancePercent(
     target: BattleParticipant,
     damageType: string,
@@ -116,15 +108,6 @@ export function getCombinedResistancePercent(
     return clampPercent(total);
 }
 
-/**
- * Застосовує імунітети та опір до урону (расовий + скіловий з extras.resistances).
- * Для фізичних типів (slashing, piercing, bludgeoning, physical) враховується extras.resistances.physical,
- * для spell — extras.resistances.spell; потім додається расовий опір за damageType (кеп 100%).
- * @param target - ціль атаки
- * @param damage - початковий урон
- * @param damageType - тип урону
- * @returns результат з фінальним уроном та breakdown
- */
 export function applyResistance(
     target: BattleParticipant,
     damage: number,

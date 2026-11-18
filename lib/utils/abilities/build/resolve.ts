@@ -30,7 +30,6 @@ function isLevelLine(source: AbilitySource): boolean {
     return source.line?.levelNode === true;
 }
 
-// «Найвищий рівень у лінії»: рівні гілки групуються за mainSkillId, решта — за власним id.
 export function pickHighestPerLine<T>(
     items: { item: T; source: AbilitySource }[]
 ): { item: T; source: AbilitySource }[] {

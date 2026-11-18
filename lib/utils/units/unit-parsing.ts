@@ -14,21 +14,18 @@ import type {
 } from '@/types/import';
 import type { UnitAttack } from '@/types/units';
 
-// "8 (+1)" або "8"
 export function parseAbilityScore(value: string): number {
     const match = value.match(/(\d+)/);
 
     return match ? parseInt(match[1], 10) : 10;
 }
 
-// "12" або "12 (natural armor)"
 export function parseArmorClass(value: string): number {
     const match = value.match(/(\d+)/);
 
     return match ? parseInt(match[1], 10) : 10;
 }
 
-// "18 (4к6 + 4)" або "18"
 export function parseMaxHp(value: string): number {
     const beforeParentheses = value.match(/^(\d+)\s*\(/);
 
@@ -53,7 +50,6 @@ export function parseLevel(value: string): number {
     return match ? parseInt(match[1], 10) : 1;
 }
 
-// "Укус +5, 1к6 колючий. Кігті +6, 2к6 рублячий" — атаки через крапку
 function parseLegacyAttacks(value: string): UnitAttack[] {
     if (!value || value.trim() === LEGACY_NO_ATTACKS || value.trim() === '') {
         return [];

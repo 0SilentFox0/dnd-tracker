@@ -16,10 +16,6 @@ import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
 import { isStaticEffect } from '@/lib/utils/abilities/schema/kinds';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
-/**
- * Пасивні персональні вміння героїв, що діють на `p` (свої — на себе, аури — на союзників чи ворогів),
- * як постійні ефекти для чипів: у activeEffects їх немає, бо вони не мають тривалості.
- */
 export function personalPassiveEffects(
     p: BattleParticipant,
     order: BattleParticipant[]
@@ -100,7 +96,6 @@ export function personalPassiveEffects(
     return [...out, ...[...auras.values()].map((x) => x.effect)];
 }
 
-/** Ефекти для показу: персональні пасивки + ті, що діють (без зон мертвих власників), злиті по вміннях. */
 export function displayEffects(
     p: BattleParticipant,
     order: BattleParticipant[]

@@ -5,7 +5,6 @@ import type { CharacterFromPrisma } from '../types/participant';
 import type { SkillEntry } from '@/lib/utils/abilities/build/collect';
 import { normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
 
-/** Скіли, на які посилаються вивчені вузли дерева раси персонажів і їхні personalSkillId. */
 export function referencedSkillIds(
     characters: Array<
         Pick<

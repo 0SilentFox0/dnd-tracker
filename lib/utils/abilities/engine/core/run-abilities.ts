@@ -150,7 +150,6 @@ export function runAbilities(
                 ability.limits?.chance !== undefined &&
                 ctx.rng() * 100 >= ability.limits.chance
             ) {
-                // лише вміння самого діяча: чужі шансові тригери на кожну подію засмітили б журнал
                 if ('actorId' in event && event.actorId === ownerId)
                     messages.push(
                         textRef('abilityText.log.chanceMissed', {

@@ -82,7 +82,6 @@ export function unitRowStats(
         : stats;
 }
 
-/** Id юнітів, яких прикликають (`summon` з `unitId` в ефектах заклять чи вміннях). */
 export function summonedUnitIds(sources: unknown[]): Set<string> {
     const out = new Set<string>();
 

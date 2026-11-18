@@ -97,7 +97,6 @@ export function hasDisadvantage(
     );
 }
 
-// Тригери з шансом < 100 % не передбачаємо — їх кидає сервер.
 const CERTAIN_ONLY = () => 0.9999;
 
 function previewBefore(
@@ -142,7 +141,6 @@ export type PredictedAttack = {
     reasons: RollModeReasons;
 };
 
-/** Прогноз влучання на клієнті — ті самі числа, що рахує сервер, з одного перегляду фази before (тригери з шансом не враховуємо). */
 export function predictAttack(
     attacker: BattleParticipant,
     target: BattleParticipant,

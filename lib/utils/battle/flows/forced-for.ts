@@ -12,7 +12,6 @@ export interface AttackContext {
     rules: Ruleset;
 }
 
-/** Режим кидка, нав'язаний умовами (перевага/недолік), або undefined, якщо гравець обирає сам. */
 export function forcedFor(
     attacker: BattleParticipant,
     target: BattleParticipant,

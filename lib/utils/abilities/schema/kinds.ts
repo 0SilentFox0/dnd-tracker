@@ -21,7 +21,6 @@ export const ABILITY_TARGETS = [
     'nearbyEnemies',
 ] as const;
 
-/** Аури в області: без позицій на полі ціль обирає власник на початку свого ходу. */
 export const AREA_TARGETS = ['nearbyAllies', 'nearbyEnemies'] as const;
 
 export type AreaTarget = (typeof AREA_TARGETS)[number];

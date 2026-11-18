@@ -38,7 +38,6 @@ function castIdTaken(
     );
 }
 
-/** Перший вільний seq: два касти одного заклинання кастером у раунді не ділять castId, поки перший живий. */
 export function uniqueCastId(
     ps: BattleParticipant[],
     map: BattleMapConfig | null | undefined,

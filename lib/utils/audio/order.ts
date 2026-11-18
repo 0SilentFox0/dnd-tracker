@@ -12,7 +12,6 @@ export function moveTrack(ids: string[], index: number, dir: -1 | 1): string[] {
     return next;
 }
 
-/** Міняє трек місцями з найближчим сусідом тієї ж групи в потрібний бік; немає сусіда — null */
 export function moveTrackInGroup(
     tracks: { id: string; title: string }[],
     id: string,

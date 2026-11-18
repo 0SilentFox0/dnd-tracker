@@ -20,8 +20,6 @@ import { resolveItemRow } from '@/lib/utils/items/resolve';
 import { type Ruleset } from '@/lib/utils/rules';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 
-// 5e: безоружний удар = 1 + Сил (плоска «1»)
-// Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
 const defaultAttacks = (
     names: Ruleset['defaultAttacks'],
     classMode: boolean

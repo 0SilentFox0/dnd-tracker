@@ -88,7 +88,6 @@ function polygonPiece(id: string, poly: Pt[]): PuzzlePiece {
     return piece;
 }
 
-/** Ребро як ламана кубічних кривих [p0, c1, c2, p1, c1, c2, p2, …]; розворот = reverse масиву. */
 function straightEdge(a: Pt, b: Pt): Pt[] {
     return [a, lerp(a, b, 1 / 3), lerp(a, b, 2 / 3), b];
 }

@@ -7,7 +7,6 @@ import type { DamageRow, DamageStep } from '@/types/battle-actions';
 
 export const WEAPON_FLAT_LABEL = textRef('battleLog.damage.steps.weaponBonus');
 
-/** «+N» формули зброї й +N магічного предмета: кубики рівня героя їх не містять (`mergeDiceFormulas` відкидає flat). */
 export function weaponFlatOf(attack: BattleAttack): number {
     return (
         (parseDice(attack.damageDice ?? '')?.flat ?? 0) +

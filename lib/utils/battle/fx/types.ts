@@ -77,13 +77,11 @@ export type FxElement = (typeof FX_ELEMENTS)[number];
 
 export interface FxSpec {
     key: string;
-    /** Дія журналу, з якої ця FX; кадр влучання токенів чекає її удару. */
     actionId?: string;
     archetype: FxArchetype;
     element: FxElement;
     actorId: string;
     actorSide: 'ally' | 'enemy';
-    /** Звідки летить снаряд, якщо не від актора (стрибок ланцюга, сплеш від цілі). */
     originId?: string;
     targetIds: string[];
     hit: boolean;

@@ -69,7 +69,6 @@ export const areIllusionFoes = (
         (p) => (p.a === aId && p.b === bId) || (p.a === bId && p.b === aId)
     );
 
-/** маска для глядача `viewerId`: ким він бачить `targetId` (undefined — справжнім) */
 export const disguiseFor = (
     pairs: IllusionPair[],
     viewerId: string,
@@ -84,7 +83,6 @@ export const disguiseFor = (
     return undefined;
 };
 
-// подія потрібна, щоб зміну лабіринту можна було відкотити (знімок пишеться лише з подією)
 export function mazeOpEvent(
     round: number,
     text: LogLine,
@@ -104,7 +102,6 @@ interface PruneOutcome {
     scene?: ScenePatch;
 }
 
-/** Знімає пари, де хтось загинув, пішов з мапи, або бій уже не активний. */
 export function pruneIllusion<T extends PruneOutcome>(
     map: BattleMapConfig | null,
     scene: { status: BattleStatus; round: number },

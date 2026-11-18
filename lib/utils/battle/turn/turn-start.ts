@@ -45,18 +45,14 @@ import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
-/**
- * Результат обробки початку ходу
- */
 export interface StartOfTurnResult {
     participant: BattleParticipant;
-    /** повний список: вміння turnStart і смерть від DOT можуть змінити інших */
     participants: BattleParticipant[];
     damageMessages: LogLine[];
     expiredEffects: LogLine[];
     abilityMessages: LogLine[];
     rechargeMessages: LogLine[];
-    statusChanged: boolean; // чи змінився статус (unconscious/dead)
+    statusChanged: boolean;
     /** an onTurnStart hook skips this turn / holds it for a decision */
     skipTurn?: true;
     pending?: true;
@@ -131,7 +127,6 @@ interface StartOfTurnDamage {
     systemPending: boolean;
 }
 
-// DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
 function applyStartOfTurnDamage(
     participant: BattleParticipant,
     allParticipants: BattleParticipant[],
@@ -336,7 +331,6 @@ function applyStartOfTurnDamage(
     };
 }
 
-// Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
 function resetTurnFlags(
     updated: BattleParticipant,
     original: BattleParticipant,
@@ -374,7 +368,6 @@ function resetTurnFlags(
         battleData: resetTurnState(updated, { rules }),
     };
 
-    // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn
     return {
         participant: setExtraActionPool(
             flagged,
@@ -416,7 +409,6 @@ export function processStartOfTurn(
 
     let updatedParticipant = damage.participant;
 
-    // 1. Перевіряємо чи учасник впав в непритомність або помер (після DoT)
     let statusChanged = false;
 
     if (

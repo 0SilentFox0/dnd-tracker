@@ -11,7 +11,6 @@ export const OTHER_TRACK_GROUP = '__other';
 
 export interface PlaylistFilter {
     query: string;
-    /** null — усі групи */
     group: string | null;
     kind: TrackKind | null;
 }
@@ -39,7 +38,6 @@ const isBattleTitle = (title: string) => {
     );
 };
 
-/** Група — частина назви до « - » («Люди - Місто» → «Люди»); усі «<раса> - Битва N» — в одній групі «Битва» */
 export function trackGroupName(title: string): string {
     if (isBattleTitle(title)) return BATTLE_TRACK_GROUP;
 
@@ -67,7 +65,6 @@ export const trackGroupLabel = (
     return key ? t(key) : name;
 };
 
-/** Назва без префікса групи; у групі «Битва» префікс — раса, тож назва лишається повною */
 export function trackLabelInGroup(title: string): string {
     const group = trackGroupName(title);
 
@@ -80,7 +77,6 @@ export function trackLabelInGroup(title: string): string {
     );
 }
 
-/** Групи в порядку першої появи в бібліотеці, «Інше» — в кінці */
 export function listTrackGroups(tracks: { title: string }[]): string[] {
     const names = [...new Set(tracks.map((t) => trackGroupName(t.title)))];
 
@@ -125,7 +121,6 @@ export function groupTracks<T extends { title: string }>(
     }));
 }
 
-/** Поля редагування: префікс до першого « - » і решта; «Раса - Битва N» → «Раса» + «Битва N», щоб збирання не губило расу */
 export function splitTrackTitle(title: string): {
     group: string;
     name: string;
@@ -150,7 +145,6 @@ export function joinTrackTitle(group: string, name: string): string {
         : n;
 }
 
-/** Підказки для поля «Група»: усі префікси назв, включно з расами битв */
 export function listGroupPrefixes(tracks: { title: string }[]): string[] {
     return [
         ...new Set(

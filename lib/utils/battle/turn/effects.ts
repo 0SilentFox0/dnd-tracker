@@ -88,7 +88,6 @@ export function applyHOTEffects(participant: BattleParticipant): {
     return { newHp: currentHp, healMessages };
 }
 
-// ініціатива/швидкість (Поспіх, Сповільнення): «N раундів» = N наступних сортувань черги на початку раунду
 const isRoundCounted = (e: ActiveEffect) =>
     !!e.abilityEffects?.length &&
     e.effects.length === 0 &&
@@ -98,7 +97,6 @@ const isRoundCounted = (e: ActiveEffect) =>
             (s.stat === 'initiative' || s.stat === 'speed')
     );
 
-/** Позначає ефекти, що вже є на учаснику на початку його ходу: саме їм цей хід зараховується. */
 export function armEffects(effects: ActiveEffect[]): ActiveEffect[] {
     return effects.map((e) =>
         e.armed || e.permanent || e.countdownAtTurnStart || isRoundCounted(e)
@@ -107,7 +105,6 @@ export function armEffects(effects: ActiveEffect[]): ActiveEffect[] {
     );
 }
 
-/** Після сортування черги на початку раунду: відлік для ефектів ініціативи й швидкості. */
 export function countDownRoundEffects(p: BattleParticipant): BattleParticipant {
     if (!p.battleData.activeEffects.some(isRoundCounted)) return p;
 
@@ -122,7 +119,6 @@ export function countDownRoundEffects(p: BattleParticipant): BattleParticipant {
     return { ...p, battleData: { ...p.battleData, activeEffects } };
 }
 
-/** Початок ходу власника: відлік для countdownAtTurnStart. */
 export function countDownAtTurnStart(effects: ActiveEffect[]): {
     kept: ActiveEffect[];
     expired: LogLine[];
@@ -140,10 +136,6 @@ export function countDownAtTurnStart(effects: ActiveEffect[]): {
     return { kept, expired };
 }
 
-/**
- * Кінець ходу власника: «N раундів» = N його ходів. Накладені під час цього ходу ефекти (не armed)
- * не втрачають тривалість, expireAtTurnEnd знімається після першого повного ходу.
- */
 export function decreaseEffectDurations(participant: BattleParticipant): {
     updatedEffects: ActiveEffect[];
     expiredEffects: LogLine[];
@@ -175,13 +167,6 @@ export function decreaseEffectDurations(participant: BattleParticipant): {
     };
 }
 
-/**
- * Додає новий активний ефект до учасника
- * @param participant - учасник бою
- * @param effect - новий ефект для застосування
- * @param currentRound - поточний раунд
- * @returns оновлені активні ефекти
- */
 export function addActiveEffect(
     participant: BattleParticipant,
     effect: Omit<ActiveEffect, 'appliedAt'>,

@@ -12,7 +12,6 @@ export interface RoutePoint {
 
 const SEARCH_BUDGET = 200;
 
-/** Центри жетона вздовж ходу від старої клітинки до нової; шлях обходить стіни, інакше — пряма. */
 export function moveRoutes(
     map: BattleMapConfig,
     prev: readonly BattleParticipant[],

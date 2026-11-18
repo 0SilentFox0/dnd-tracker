@@ -158,10 +158,6 @@ export function bakePassives(p: BattleParticipant): BattleParticipant {
         .reduce((acc, { effect }) => bakeOne(acc, effect, p), p);
 }
 
-/**
- * Аури (allAllies/allEnemies) запікаються в учасника один раз на ключ аури — як у collectModifiers:
- * та сама аура кількох власників діє лише найсильнішою; уже запечену (стара пара власник–ціль) не дублюємо.
- */
 export function applyBakedAuras(
     ps: BattleParticipant[],
     newIds: Set<string>

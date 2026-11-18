@@ -41,19 +41,14 @@ export type MazeRole = 'dm' | 'player' | 'spectator';
 
 export interface MazeView extends ModeView {
     role: MazeRole;
-    /** Лише для ДМ: що зараз бачать усі герої на полі разом */
     partyCells: ReadonlySet<string> | null;
-    /** Стіна на межі видимої клітинки (для гравця) */
     showWalls: (edge: string) => boolean;
     showTeleportLinks: boolean;
     showFog: boolean;
     showExit: boolean;
     mazeDark: boolean;
-    /** ким глядач бачить цілі під ілюзією (undefined — нікого не маскує) */
     disguiseOf?: DisguiseOf;
-    /** справжнє ім'я → маска для кожного, кого глядач бачить під маскою */
     disguiseNames?: ReadonlyMap<string, string>;
-    /** для ДМ без «як герой»: хто зараз під маскою (позначка в інтерфейсі) */
     maskedIds: ReadonlySet<string>;
 }
 
@@ -77,7 +72,6 @@ const isLiveHero = (p: BattleParticipant) =>
     !isEscaped(p) &&
     isPlaced(p);
 
-// непритомний герой живий: гравець лишається гравцем зі своїм полем зору, а не глядачем
 const isOwnOnField = (p: BattleParticipant) =>
     p.basicInfo.side === ParticipantSide.ALLY &&
     p.combatStats.status !== CombatStatus.DEAD &&
@@ -233,7 +227,6 @@ const nameTokens = (name: string) =>
             (t) => t.length >= 3 && /^\p{Lu}/u.test(t) && !NAME_TITLES.has(t)
         );
 
-/** Повне ім'я й його окремі слова («Годрик» з «Лорд Годрик Єдиноріг»), крім слів, що є й в інших учасників; імена решти — самі в себе, щоб довше ім'я перемагало */
 const disguiseNamesOf = (
     participants: BattleParticipant[],
     disguiseOf: DisguiseOf
@@ -286,7 +279,6 @@ const SERVICE_ACTORS: ReadonlySet<string> = new Set([
     SYSTEM_ACTOR.actorId,
 ]);
 
-/** Гравець у лабіринті бачить лише своїх і тих, хто зараз у полі зору; ДМ і глядач — усіх. */
 export const mazeVisible = (
     view: MazeView | null | undefined,
     p: BattleParticipant
@@ -304,7 +296,6 @@ const anyTargetKnown = (
     known: (id: string) => boolean
 ) => (e.targets ?? []).some((t) => known(t.participantId));
 
-/** Журнал гравця: записи своїх і видимих; «помітив» — лише своїх героїв; зміни лабіринту ДМом приховані. Перетасовку не бачить ніхто. */
 export function mazeLogVisible(
     view: MazeView | null | undefined,
     e: BattleAction
@@ -325,14 +316,12 @@ export function mazeLogVisible(
             anyTargetKnown(view, e, (id) => knows(view, id))
         );
 
-    // удар по своєму героєві гравець відчуває, навіть якщо нападника не видно
     return (
         knows(view, e.actorId) ||
         anyTargetKnown(view, e, (id) => view.ownIds.has(id))
     );
 }
 
-/** FX: лише коли видно виконавця або хоч одну ціль. */
 export function mazeFxVisible(
     view: MazeView | null | undefined,
     e: BattleAction
@@ -347,7 +336,6 @@ export function mazeFxVisible(
     );
 }
 
-/** FX-копія запису для гравця: рятунки невидимих не показуються, імена невидимих — «невідомий». */
 export function maskMazeFxAction(
     view: MazeView | null | undefined,
     action: BattleAction
@@ -395,7 +383,6 @@ export interface MazeMaskable {
     roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
 }
 
-/** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
 export function maskMazeScene<T extends MazeMaskable>(
     input: T,
     view: MazeView | null | undefined

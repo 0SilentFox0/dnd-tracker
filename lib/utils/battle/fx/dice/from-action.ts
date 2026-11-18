@@ -22,7 +22,6 @@ const toDie = (group: DiceRollGroup) => {
 
 type RollKind = DiceRollGroup['kind'];
 
-// влучання і шкода в одній пачці нечитабельні — кожна фаза кидається окремо, у порядку подій
 const PHASES: RollKind[][] = [
     ['attack'],
     ['save'],

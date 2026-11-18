@@ -44,7 +44,6 @@ export const campaignTrack = (
     ...over,
 });
 
-/** happy-dom не відтворює медіа: play/pause/load — заглушки на прототипі */
 export function stubMediaElement(): void {
     vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(

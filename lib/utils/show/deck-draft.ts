@@ -36,7 +36,6 @@ export const sameDraft = (a: DeckDraft, b: DeckDraft) =>
         a.slides.length === b.slides.length &&
         a.slides.every((s, i) => sameSlide(s, b.slides[i])));
 
-/** Правки, зроблені під час збереження, лишаються; сервер міг лише віддзеркалити зовнішні картинки — їх переносимо в незмінені слайди. */
 function rebaseOnSaved(
     state: DeckDraft,
     sent: DeckDraft,

@@ -44,12 +44,9 @@ export interface AttackTargets {
     targets: BattleParticipant[];
     expanded: boolean;
     piercing: boolean;
-    /** Кожна ціль — окремий удар з власними кубиками; основна — повна шкода, решта — за falloff. */
     volley: boolean;
     falloff: number;
-    /** З цього індексу d20 і кубики шкоди кидає сервер (автоцілі розщеплення). */
     serverRolledFrom: number;
-    /** `percent` — частка шкоди попереднього пострілу на кожен стрибок. */
     chain: { jumps: number; percent: number } | null;
 }
 
@@ -58,7 +55,6 @@ const enemyOf =
     (t: BattleParticipant) =>
         isHostile(map, attacker, t) && isAttackable(t);
 
-/** Центральна ціль плюс вороги в радіусі `radius` клітинок навколо неї. */
 function blastTargets({
     map,
     order,

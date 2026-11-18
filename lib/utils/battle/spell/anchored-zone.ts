@@ -78,7 +78,6 @@ interface AnchorResult {
     messages: LogLine[];
 }
 
-/** Тригер входу в ауру: рухається істота в радіусі носія або сам носій наближається до інших. */
 export function anchorMove({
     participants,
     moved,
@@ -174,7 +173,6 @@ export function anchorMove({
     return { participants: ps, messages };
 }
 
-/** Початок ходу: поза аурою ефекти знімаються (endsWhenStartOutside), у ній спрацьовує onTurnStart. */
 export function anchorTurnStart(
     participants: BattleParticipant[],
     targetId: string,
@@ -242,7 +240,6 @@ export function anchorTurnStart(
     return { participants: ps, messages };
 }
 
-/** Ефекти, накладені аурою, що зникла, знімаються; той самий масив — нічого не змінилось. */
 export function sweepOrphanedAnchored(
     ps: BattleParticipant[]
 ): BattleParticipant[] {

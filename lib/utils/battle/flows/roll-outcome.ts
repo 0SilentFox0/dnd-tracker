@@ -13,7 +13,6 @@ export interface RollInput {
     mode: AttackMode;
 }
 
-/** Результат кидка атаки проти поточного КБ цілі. */
 export function rollOutcomeOf(
     attacker: BattleParticipant,
     target: BattleParticipant,

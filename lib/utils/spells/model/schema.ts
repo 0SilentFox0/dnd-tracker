@@ -64,7 +64,6 @@ export const TEMPLATE_SHAPES = [
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
-/** Тригер зони: атака заклинанням власника (влучання — ефекти) або рятівний кидок проти СК (провал — ефекти й тяга до центру); без перевірки ефекти діють завжди. */
 export const ZoneTriggerSchema = z.object({
     save: z.object({ ability: z.enum(ABILITY_KEYS) }).optional(),
     effects: z.array(NonRandomEffectSchema).max(4),
@@ -179,7 +178,6 @@ const ChooseOneSchema = z.object({
     options: z.array(NonRandomEffectSchema).min(2).max(7),
 });
 
-/** Кубики заклинання = число з введення кастера (обрізане до max); у ефекти рушія не потрапляє. */
 const InputDiceSchema = z.object({
     kind: z.literal('inputDice'),
     label: z.string().trim().min(1).max(40),
@@ -199,7 +197,6 @@ const ATTACK_TARGET_ISSUE = {
     path: ['resolution'],
 };
 
-/** Вкладене визначення підкасту: `grantCast` у ньому неможливий, бо NonRandomEffect його не містить. */
 export const InlineCastSchema = z
     .object({
         targeting: SpellTargetingSchema,
@@ -219,7 +216,6 @@ export const InlineCastSchema = z
 
 export const GRANT_CAST_COSTS = ['action', 'bonusAction', 'reaction'] as const;
 
-/** Тимчасовий підкаст: носій (кастер або ціль) отримує окрему плитку з власним визначенням. */
 const GrantCastSchema = z.object({
     kind: z.literal('grantCast'),
     label: z.string().trim().min(1).max(60),
@@ -230,7 +226,6 @@ const GrantCastSchema = z.object({
     cast: InlineCastSchema,
 });
 
-/** Заряди додаткової шкоди на носії: кожне влучання (чи будь-яка атака) відповідного виду витрачає один заряд. */
 const HitRiderSchema = z.object({
     kind: z.literal('hitRider'),
     attackKind: z.enum(['melee', 'ranged', 'any']),
@@ -249,13 +244,11 @@ const HitRiderSchema = z.object({
     target: z.enum(['self', 'eventTarget']).optional(),
 });
 
-/** Кастер переміщується в найближчу вільну клітинку біля першої цілі; без атак при відході. */
 const MoveSelfSchema = z.object({
     kind: z.literal('moveSelf'),
     to: z.literal('adjacentToTarget'),
 });
 
-/** Стіна чи складна місцевість із шаблону касту: cell — клітинки області, line — лінія від кастера до першої цілі. */
 const CreateTerrainSchema = z.object({
     kind: z.literal('createTerrain'),
     terrain: z.enum(['wall', 'difficult']),
@@ -264,7 +257,6 @@ const CreateTerrainSchema = z.object({
     rounds: z.number().int().min(1).max(100),
 });
 
-/** Аура на цілі заклинання: істоти в радіусі за тригером (вхід / початок ходу) отримують ефекти; усе зникає разом з аурою. */
 export const AnchoredZoneSchema = z.object({
     kind: z.literal('anchoredZone'),
     radiusFeet: z.number().int().min(5).max(60),
@@ -291,7 +283,6 @@ const InlineAttackSchema = z.object({
     range: z.string().trim().min(1).max(20).optional(),
 });
 
-/** Викликає нерухомого учасника з мапи заклинання (без запису в БД); hp null — предмет: не ціль, не рахується в перемозі. aura — тригери на ворогів поруч. */
 const SummonInlineSchema = z.object({
     kind: z.literal('summonInline'),
     name: z.string().trim().min(1).max(60),
@@ -312,7 +303,6 @@ const SummonInlineSchema = z.object({
     duration: DurationSchema,
 });
 
-/** Ціль набуває форми юніта кампанії (HP, КЗ, фізичні характеристики, атаки, швидкість); на 0 HP форми — відкат, надлишок шкоди йде в звичайну форму. */
 const TransformSchema = z.object({
     kind: z.literal('transform'),
     unitId: z.string().trim().min(1).max(64),
@@ -320,7 +310,6 @@ const TransformSchema = z.object({
     duration: DurationSchema,
 });
 
-/** Фантом: ціль заклинання отримує двійника (ті ж характеристики й вміння) на боці кастера, з 1 HP; кастер ним керує. */
 const PhantomSchema = z.object({ kind: z.literal('phantom') });
 
 const SPELL_ONLY_EFFECTS = [

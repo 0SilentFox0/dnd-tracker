@@ -17,11 +17,9 @@ export type PlacedParticipant = BattleParticipant & {
 export const isPlaced = (p: BattleParticipant): p is PlacedParticipant =>
     p.battleData.position !== undefined;
 
-/** Стоїть на полі лабіринту: має клітинку, живий, не в резерві й не вибрався. */
 export const onMazeField = (p: BattleParticipant): p is PlacedParticipant =>
     isPlaced(p) && !p.battleData.reserved && !isEscaped(p) && isActive(p);
 
-/** Герої, що ще в лабіринті (зокрема без клітинки — їх розставить карта). */
 export const mazeHeroes = (ps: BattleParticipant[]): BattleParticipant[] =>
     ps.filter(
         (p) =>

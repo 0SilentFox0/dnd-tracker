@@ -29,7 +29,6 @@ const moveCache = new WeakMap<
 
 const EMPTY: readonly string[] = [];
 
-/** Зачинені (не `open`) двері: блокують як стіни; стабільне посилання за ідентичністю `map.doors`. */
 export function closedDoorsOf(
     map: Pick<BattleMapConfig, 'doors'>
 ): readonly string[] {
@@ -126,7 +125,6 @@ export function passesWalls(mover?: BattleParticipant): boolean {
     );
 }
 
-/** Блокує перехід між сусідніми клітинками (діагональ — якщо закритий хоч один кутовий шлях). */
 export function edgeBlocks(
     map: EdgeMap,
     a: GridPoint,
@@ -166,7 +164,6 @@ function edgeBlocksPlain(
     return false;
 }
 
-/** Чи є хоч одна пара клітинок (з `from` у `to`) по прямій лінії без блокуючих ребер. */
 export function cellsConnected(
     map: EdgeMap,
     kind: EdgeKind,

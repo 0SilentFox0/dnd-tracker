@@ -4,7 +4,6 @@ import { cellsOf, isAdjacent } from './occupancy';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
-/** Хоч одна пара сусідніх клітинок без стіни між ними (ґрати удар не зупиняють). */
 export function cellsAdjacentOnMap(
     map: BattleMapConfig | null | undefined,
     aCells: GridPoint[],
@@ -22,7 +21,6 @@ export function cellsAdjacentOnMap(
     );
 }
 
-/** `isAdjacent` плюс стіни карти. */
 export function isAdjacentOnMap(
     map: BattleMapConfig | null | undefined,
     a: BattleParticipant,

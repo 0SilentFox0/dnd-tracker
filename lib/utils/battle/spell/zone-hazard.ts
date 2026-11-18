@@ -48,7 +48,6 @@ const zoneIdOf = (
     castKey?: string
 ) => `${castKey ?? `${casterId ?? 'dm'}:${spell.id}`}@${round}`;
 
-/** Мапа з небезпекою, туманом чи складною місцевістю, яку лишає zone-закляття шаблоном, або null. */
 export function spellZoneHazard({
     map,
     spell,
@@ -67,7 +66,6 @@ export function spellZoneHazard({
 
     if (!zone || !map) return null;
 
-    // постійну небезпеку, яку намалював ДМ, зона не перезаписує: інакше вона зникла б разом із зоною
     const zoneCells = cells?.filter(
         (k) =>
             !(
@@ -167,7 +165,6 @@ function createTerrainCells(
         .slice(0, effect.cells);
 }
 
-/** Місцевість, яку створює заклинання (createTerrain), або null. Стіна не займає клітинки з учасниками. */
 export function spellTerrainEffects(
     input: TerrainEffectInput
 ): BattleMapConfig | null {

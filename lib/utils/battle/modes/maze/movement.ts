@@ -39,7 +39,6 @@ export interface Reach {
 export const mazeBudgetLeft = (p: BattleParticipant): number =>
     Math.max(0, MAZE_STEPS_PER_TURN - (p.battleData.movementUsed ?? 0));
 
-/** Шлях включно зі стартовою клітинкою; сама стартова в результат не потрапляє. */
 export function mazeReachable(
     grid: MazeGrid,
     { participants, mover, budget, limit }: ReachableArgs
@@ -125,7 +124,6 @@ export function applyMazeMove(
 
     const teleported = partner !== null && !blocked.has(cellKey(partner));
 
-    // вихід — лише для героїв; для ворогів це звичайна клітинка, інакше бій не закінчився б перемогою
     const escaped =
         mover.basicInfo.side === ParticipantSide.ALLY &&
         !!grid.maze.exit &&

@@ -82,7 +82,6 @@ const spellOf = (
     },
 });
 
-// усі кубики = 3 (rng 0.4 на d6): сума = кількість кубиків × 3
 const cast = (
     spell: CastableSpell,
     target: BattleParticipant,

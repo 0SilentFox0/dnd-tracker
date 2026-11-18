@@ -1,7 +1,6 @@
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { isRecord } from '@/lib/utils/common/is-record';
 
-/** CSV «Навички/Здібності» юніта → вміння-нотатки; бонусна дія не виконується автоматично. */
 export function specialAbilitiesToAbilities(list: unknown): Ability[] {
     const abilities: Ability[] = [];
 

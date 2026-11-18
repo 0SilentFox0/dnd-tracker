@@ -1,8 +1,3 @@
-/**
- * `logger.error("event", { ids }, error)`: короткий event-style message, bag контексту, error для warn/error.
- * Помилки серіалізуються безпечно (ZodError → issues, Prisma → code/meta, Error → name/message/stack).
- */
-
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
@@ -10,11 +5,6 @@ export interface LogContext {
     [key: string]: unknown;
 }
 
-/**
- * Серіалізує будь-який thrown value у JSON-friendly запис.
- * Повертає або `Record<string, unknown>` (для відомих кідних класів),
- * або просту string (для не-Error значень).
- */
 export function serializeError(
     error: unknown
 ): Record<string, unknown> | string {

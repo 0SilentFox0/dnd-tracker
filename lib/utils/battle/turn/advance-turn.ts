@@ -22,7 +22,10 @@ import {
     dropBattleFlag,
     reserveOf,
 } from '@/lib/utils/battle/participant/reserve';
-import { resetSceneState, sceneResetPatch } from '@/lib/utils/battle/scene-state';
+import {
+    resetSceneState,
+    sceneResetPatch,
+} from '@/lib/utils/battle/scene-state';
 import type { BattleSceneState, ScenePatch } from '@/lib/utils/battle/store';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
@@ -48,7 +51,6 @@ export interface AdvanceTurnOutput {
 }
 
 export interface AdvanceAfterRemovalInput extends AdvanceTurnInput {
-    /** скільки учасників, що лишились у черзі, стояли перед прибраним */
     before: number;
 }
 
@@ -56,7 +58,6 @@ export function advanceTurn(input: AdvanceTurnInput): AdvanceTurnOutput {
     return advanceFrom(input, false);
 }
 
-/** Учасника на ході прибрали з черги: хід переходить до наступного без повторного кінця ходу попереднього. */
 export function advanceAfterRemoval({
     before,
     scene,
@@ -119,7 +120,6 @@ function advanceFrom(
 
     const ending = skipEnding || before.skipTurn ? undefined : current0;
 
-    // невикористані додаткові дії згорають разом із ходом
     if (ending)
         order = replaceParticipant(order, setExtraActionPool(ending, 0));
 
@@ -201,7 +201,6 @@ function advanceFrom(
     if (extraIndex >= 0) {
         const taker = order[extraIndex];
 
-        // без processStartOfTurn: DoT уже спрацював, а тривалості зменшилися наприкінці звичайного ходу
         order = order.map((p, i) =>
             i === extraIndex
                 ? {
@@ -241,7 +240,6 @@ function advanceFrom(
 
     const loop = runAdvanceTurnLoop({
         initiativeOrder: order,
-        // після додаткового ходу раунд закінчено: з останнього індексу цикл переходить у новий раунд
         currentTurnIndex: endingExtraTurn ? order.length - 1 : scene.turnIndex,
         currentRound: scene.round,
         battleId: scene.id,

@@ -9,7 +9,6 @@ function invalid(
     throw new BattleRuleError('invalid_dice', message, params);
 }
 
-/** Невідомий запис кубиків (вільний текст у формі юніта) не перевіряється — клієнт кидає його по-своєму. */
 export function assertRollsWithinFormula(
     formula: string,
     rolls: number[],
@@ -30,7 +29,6 @@ export function assertRollsWithinFormula(
     }
 }
 
-/** formula — те, що реально кидає клієнт (для героя — зброя плюс кубики рівня). */
 export function assertAttackRolls(
     formula: string,
     body: { damageRolls: number[]; targetCount: number }
@@ -42,7 +40,6 @@ export function assertAttackRolls(
     );
 }
 
-/** Гравець кидає рівно кубики формули заклинання для свого касту: кількість і грані мусять збігатися. */
 export function assertSpellRolls(
     expected: { count: number; sides: number },
     rolls: number[]

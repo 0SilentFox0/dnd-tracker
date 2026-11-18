@@ -110,7 +110,6 @@ export function applyStatic(
                     timedKey,
                     source: effectSource(owner, ability),
                     name: ability.name,
-                    // дебафф області на союзнику лишається дебаффом: інакше Очищення його не знімає, а токен світиться як бафф
                     type:
                         nature ??
                         (target.basicInfo.side === owner?.basicInfo.side

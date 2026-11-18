@@ -16,7 +16,6 @@ function seesCell(
     return !!view && mazeVision(grid, view).has(cellKey(cell));
 }
 
-/** Ціль без позиції (поза картою) не перевіряється — як і дальність. */
 export function seesTarget(
     grid: MazeGrid,
     viewer: BattleParticipant,
@@ -43,7 +42,6 @@ export function meleeWallBetween(
     return !!a && !!b && !canStep(grid, wallSet(grid.maze), a, b);
 }
 
-/** У лабіринті приціл — лише в полі зору; сама зона тонкими стінами не зупиняється. */
 export function mazeAimHidden(
     map: BattleMapConfig | null | undefined,
     caster: BattleParticipant,

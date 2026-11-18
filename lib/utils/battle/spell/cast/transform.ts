@@ -8,7 +8,6 @@ import type {
 const isTransform = (e: SpellEffect): e is TransformEffect =>
     e.kind === 'transform';
 
-/** Перетворюються цілі, яких заклинання зачепило (не пройшли кидок, не втекли від криту). */
 export function transformRequests(
     state: SpellCastState,
     effects: SpellEffect[],

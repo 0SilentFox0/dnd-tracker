@@ -69,7 +69,6 @@ describe('клієнтські хуки режиму', () => {
     it('mergeModeDeltas зливає патч; без конфігу в кеші — refetch', () => {
         off = registerTestMode(fake as MapModeDefinition<unknown>);
 
-        // фіктивного режиму немає в MapModeKey
         const patch = { fake: { b: 5 } } as ModeDeltas;
 
         expect(

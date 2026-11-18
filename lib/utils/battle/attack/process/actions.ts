@@ -119,7 +119,6 @@ export function buildBattleActionForCriticalFail(
 }
 
 export interface BuildMissActionParams extends AttackActionBase {
-    /** Ціль після гарантованої шкоди промаху */
     targetAfter: BattleParticipant;
     guaranteedDamage: number;
 }
@@ -270,7 +269,6 @@ export function buildBattleActionForHit(p: BuildHitActionParams): BattleAction {
     );
 }
 
-/** Ціль загинула від умінь до кидка атаки. */
 export function buildAbortedAttackAction(
     attacker: BattleParticipant,
     target: BattleParticipant,

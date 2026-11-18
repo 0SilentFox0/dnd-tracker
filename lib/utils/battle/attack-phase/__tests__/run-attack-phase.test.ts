@@ -1,12 +1,3 @@
-/**
- * Тести для runAttackPhase (CODE_AUDIT 5.9) — фокус на validation
- * branches, які кидають BattleRuleError (400-ті) або BattleAccessError (403/404).
- *
- * Сам processAttack не мокається — у success-path він запуститься,
- * але це лише 1 simple smoke-test. Решта 10 — validation-only,
- * які короткозамикають до processAttack.
- */
-
 import { describe, expect, it } from 'vitest';
 
 import { findAttack, requestedTargetIds } from '../request';
@@ -154,7 +145,6 @@ describe('runAttackPhase — error path validation', () => {
     });
 
     it('DM може атакувати незалежно від userId', () => {
-        // success-path до processAttack — побічні ефекти не перевіряємо
         expect(() =>
             runAttackPhase(makeInput({ userId: 'anyone', isDM: true }))
         ).not.toThrow();
@@ -187,9 +177,9 @@ describe('runAttackPhase — error path validation', () => {
                     battle: {
                         initiativeOrder: [makeAttacker(), makeTarget()],
                         currentRound: 1,
-                        currentTurnIndex: 1, // target's turn, не attacker
+                        currentTurnIndex: 1,
                     },
-                    isDM: true, // bypass auth, але turn mismatch перевіряється все одно
+                    isDM: true,
                 })
             );
             throw new Error('should not reach');
@@ -294,7 +284,6 @@ describe('runAttackPhase — error path validation', () => {
             },
         });
 
-        // single-target attack, але 2 цілі
         try {
             runAttackPhase(
                 makeInput({
@@ -338,8 +327,6 @@ describe('runAttackPhase — error path validation', () => {
             );
             throw new Error('should not reach');
         } catch (e) {
-            // d20Roll=0 → falsy → перший check спрацює (немає d20Roll)
-            // Або loop range check. У будь-якому випадку — 400.
             expect(e).toBeInstanceOf(BattleRuleError);
         }
     });
@@ -411,7 +398,6 @@ describe('runAttackPhase — happy path smoke', () => {
         });
 
         // Multi-target ranged attacker: maxTargets=2 + ranged-type attack.
-        // makeAttacker() clobbers attacks, тому будуємо напряму.
         const baseAttacker = makeAttacker();
 
         const attacker: BattleParticipant = {

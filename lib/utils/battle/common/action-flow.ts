@@ -19,7 +19,6 @@ import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
-/** Стан однієї дії (атака, закляття): свіжий список учасників і накопичений лог умінь. */
 export interface ActionFlow {
     ps: BattleParticipant[];
     messages: LogLine[];
@@ -75,7 +74,6 @@ export function applyFlowDamage(
     flow.messages.push(...r.messages);
 }
 
-/** Летальна шкода й вбивство для учасника, що щойно впав. */
 export function settleDowned(
     flow: ActionFlow,
     victimId: string,
@@ -92,7 +90,6 @@ export function settleDowned(
     flow.summons.push(...r.summons);
 }
 
-/** Дописує в дію зміни HP, які зробили вміння іншим учасникам. */
 export function appendHpChanges(
     action: BattleAction,
     before: BattleParticipant[],

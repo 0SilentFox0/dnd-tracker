@@ -75,7 +75,6 @@ function weaponFor(
         : null;
 }
 
-/** Удар у відповідь основної цілі: без дії, без тригерів «перед/після атаки», без нових відсічей; правило відсічі (ліміти, облік) — у модулі `retaliation`. */
 export function counterStrike(
     input: CounterStrikeInput
 ): CounterStrikeResult | null {

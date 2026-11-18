@@ -20,7 +20,6 @@ export type NudgeUnit = 'px' | 'cell';
 
 const frac = (v: number) => ((v % 1) + 1) % 1;
 
-/** Обведено клітинку (або квадрат n×n клітинок) у px зображення → масштаб фону й зсув сітки. */
 export function fromCellRect(
     img: ImageSize,
     rect: PixelRect,
@@ -37,7 +36,6 @@ export function fromCellRect(
     };
 }
 
-/** Зсув сітки по фону: px — частка impliedCellPx, cell — частка клітинки; обгортається в [0, 1). */
 export function nudge(
     map: Pick<BattleMapConfig, 'gridOffset'>,
     dx: number,

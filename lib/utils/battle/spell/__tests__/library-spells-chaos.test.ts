@@ -170,7 +170,6 @@ const scene = (turnIndex: number, round = 1): BattleSceneState => ({
     completedAt: null,
 });
 
-/** Ганяє next-turn, поки не настане хід `id` (до maxSteps переходів). */
 function advanceTo(
     order: BattleParticipant[],
     s: BattleSceneState,

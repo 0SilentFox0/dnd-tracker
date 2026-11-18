@@ -2,8 +2,6 @@ export const DICE_PATTERN = /^(\d+)d(\d+)([+-]\d+)?$/;
 
 export const DICE_TERM_PATTERN = /^(\d+)d(\d+)$/i;
 
-/** Нормалізує запис кісток: без пробілів, нижній регістр, кириличні к/д і латинська k → d. */
-
 export const normalizeDiceText = (raw: string): string =>
     raw.toLowerCase().replace(/\s+/g, '').replace(/[кkд]/g, 'd');
 
@@ -104,7 +102,6 @@ export function diceSlots(formula: string): number[] {
     );
 }
 
-/** Імпорт пише кубики вільним текстом («2d8 + MOD»), тому береться лише перша група. */
 export function leadingDice(text: string): DiceGroup | null {
     const m = /^\s*(\d*)\s*d(\d+)/i.exec(text);
 
@@ -117,7 +114,6 @@ export function leadingDice(text: string): DiceGroup | null {
     return count >= 1 && size >= 1 ? { count, size } : null;
 }
 
-/** Юніти зберігають атаки вільним текстом («2d6 + STR»): розбір → перша група кубиків → 1d6. */
 export function parseDiceLenient(formula: string): DiceFormula {
     const strict = parseDice(formula);
 
@@ -168,7 +164,6 @@ export function rollDie(
     return Math.floor(rng() * sides) + 1;
 }
 
-/** Кидки гравця в браузері — криптографічний генератор. */
 export function cryptoRandom(): number {
     const buf = new Uint32Array(1);
 
@@ -177,7 +172,6 @@ export function cryptoRandom(): number {
     return buf[0] / 2 ** 32;
 }
 
-/** Випадковий елемент непорожнього списку; rng() === 1 дає останній, а не вихід за межі. */
 export function pickOne<T>(
     list: readonly T[],
     rng: () => number = Math.random
@@ -185,7 +179,6 @@ export function pickOne<T>(
     return list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
 }
 
-/** Прибирає `n` кубиків із першої групи формули «NdM…». */
 export function forgoDice<T>(amount: T, n: number): T | 0 {
     if (n <= 0 || typeof amount !== 'string') return amount;
 

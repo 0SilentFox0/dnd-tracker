@@ -141,7 +141,6 @@ function cast(
 const byId = (ps: BattleParticipant[], id: string) =>
     ps.find((p) => p.basicInfo.id === id) as BattleParticipant;
 
-/** Передає хід, поки не почнеться хід `id` (його старт уже оброблено: DoT, тривалості). */
 function toTurnOf(
     id: string,
     ps: BattleParticipant[],
@@ -504,7 +503,6 @@ describe('Дух лісу (forest-spirit)', () => {
 
         const { order: after } = toTurnOf('a1', o);
 
-        // 20 HP − 5 (отрута з опором) + 5 (регенерація)
         expect(byId(after, 'a1').combatStats.currentHp).toBe(20);
     });
 });

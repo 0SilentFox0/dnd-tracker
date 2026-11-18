@@ -66,7 +66,6 @@ export function refreshFromSource(
             Object.entries(fresh.battleData.pools).map(([key, pool]) => {
                 const liveLabel = live.battleData.pools?.[key]?.label;
 
-                // Збирач юніта має лише ID заклинань; назву розв'язує успішний каст.
                 return [
                     key,
                     key === spellPoolKey(pool.label) && liveLabel

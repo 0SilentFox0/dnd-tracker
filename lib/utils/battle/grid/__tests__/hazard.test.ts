@@ -259,7 +259,6 @@ describe('hazardOnMove', () => {
 
         const mover = at({ x: 0, y: 1 });
 
-        // 0:2 не на шляху, але в радіусі 2 — консервативно береться найсильніша
         expect(
             hazardOnMove(m, [mover], mover, { x: 2, y: 1 }, 2, DEFAULT_RULES)
         ).toEqual(acid);

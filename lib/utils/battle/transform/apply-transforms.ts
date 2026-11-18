@@ -38,7 +38,6 @@ function savedForm(p: BattleParticipant): TransformState['saved'] {
     };
 }
 
-/** Ментальні характеристики, рятівні кидки й вміння лишаються своїми; змінюються HP, КЗ, СИЛ/СПР/ВИТ, атаки, швидкість. */
 function intoForm(
     p: BattleParticipant,
     form: BattleParticipant,

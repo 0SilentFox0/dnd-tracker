@@ -14,7 +14,6 @@ export const MAX_CELL_PX = 200;
 
 export const MAX_GRID_OFFSET = 0.99;
 
-/** Сітка під клітинку фону в px джерела; ширина фону в клітинках зберігається, щоб клітинка фону дорівнювала клітинці сітки й після округлення. */
 export function gridForCellSize(
     img: ImageSize,
     cellPx: number
@@ -26,7 +25,6 @@ export function gridForCellSize(
     };
 }
 
-/** Ширина фону в клітинках: збережена або «contain» у cols×rows (старі карти й ручний розмір). */
 export function backgroundColsOf(
     map: Pick<BattleMapConfig, 'cols' | 'rows' | 'backgroundCols'>,
     img: ImageSize
@@ -37,7 +35,6 @@ export function backgroundColsOf(
     );
 }
 
-/** Висота фону в клітинках: збережена або з пропорцій зображення при квадратних клітинках. */
 export function backgroundRowsOf(
     map: Pick<
         BattleMapConfig,
@@ -65,7 +62,6 @@ export interface BackgroundBox {
     height: number;
 }
 
-/** Рамка фону в px відносно всієї карти; поки пропорції фону невідомі — уся карта (зображення вписується «contain» від лівого верхнього кута). */
 export function backgroundBox(
     map: Pick<
         BattleMapConfig,

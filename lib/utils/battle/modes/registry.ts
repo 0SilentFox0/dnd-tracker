@@ -18,7 +18,6 @@ export const allMapModes = (): MapModeDefinition<unknown>[] => [
     ...testModes,
 ];
 
-/** Лише для тестів: зареєструвати фіктивний режим; повертає функцію зняття. */
 export function registerTestMode(mode: MapModeDefinition<unknown>): () => void {
     testModes.push(mode);
 
@@ -40,7 +39,6 @@ export function activeMapMode(
     );
 }
 
-/** Активний режим разом із його конфігом (для викликів хуків). */
 export function activeModeWithConfig(map: BattleMapConfig | null | undefined): {
     mode: MapModeDefinition<unknown>;
     config: unknown;

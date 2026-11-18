@@ -143,7 +143,6 @@ function roundTransition(
         )
     );
 
-    // індекс обрано за старим порядком; після пересортування раунд починається з початку
     st.index = 0;
 
     if (roundResult.triggerMessages.length > 0) {
@@ -223,7 +222,6 @@ function startTurnEntries(
         );
     }
 
-    // запис DOT закінчується до шкоди небезпеки — вона має власний запис
     const dotHpAfter =
         turnResult.hazard?.hpBefore ?? participant.combatStats.currentHp;
 
@@ -255,7 +253,6 @@ function startTurnEntries(
 
     const hazard = turnResult.hazard;
 
-    // кінцеве HP: після HoT і вмінь на кшталт lethalDamage → survive
     const hazardHpAfter = participant.combatStats.currentHp;
 
     if (hazard) {
@@ -426,7 +423,6 @@ export function runAdvanceTurnLoop(
         }
 
         if (sitsOutTurn(nextParticipant, st.round)) {
-            // ніхто з живих не ходить цього раунду: зупиняємось на його початку, ходи пропустить клієнт/ДМ
             if (!st.order.some((p) => takesTurn(p, st.round))) {
                 st.index = idleTurnIndex(st.order);
 
@@ -461,7 +457,6 @@ export function runAdvanceTurnLoop(
             continue;
         }
 
-        // у очікуванні рішення ДМ автоматичні дії не виконуються; цикл лише шукає живого поточного
         if (beforeAuto.awaiting) {
             if (!st.order.some(isActive)) break;
 

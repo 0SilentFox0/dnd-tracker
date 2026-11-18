@@ -8,7 +8,6 @@ type HpChange = {
     change: number;
 };
 
-/** Сумарна зміна HP на учасника: шкода > 0, лікування < 0. */
 export function hpTotals(
     changes: HpChange[]
 ): { name: string; change: number }[] {

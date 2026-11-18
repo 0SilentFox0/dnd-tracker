@@ -34,7 +34,6 @@ export interface CastSpellParams {
     saveRolls?: Array<{ participantId: string; roll: number }>;
     attackRolls?: Array<{ participantId: string; roll: number }>;
     dice?: SpellDice;
-    /** DM накладає з сайдбару — не витрачати spell slot */
     isDMCast?: boolean;
     isLegendaryCast?: boolean;
     slotKey?: string;
@@ -48,7 +47,6 @@ export interface CastSpellParams {
     /** an ingredient was spent on this cast (optional-ingredient systems) */
     ingredientUsed?: boolean;
     castTest?: { roll?: number; serverRoll?: true; system?: SystemSlot };
-    /** прев'ю: без кидка тесту й без списань */
     dryRun?: boolean;
 }
 
@@ -58,15 +56,11 @@ export interface CastSpellResult {
     allParticipantsUpdated: BattleParticipant[];
     battleAction: BattleAction;
     summons: SummonRequest[];
-    /** перетворення цілей: застосовуються асинхронно (потрібен юніт кампанії) */
     transforms?: TransformRequest[];
     messages: LogLine[];
     reason?: 'systemMismatch';
-    /** тест провалено: ціна витрачена, ефектів немає */
     fizzled?: boolean;
     details?: SystemSlot;
-    /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
     spellDamage?: TerrainDamage;
-    /** мітка концентрації цього касту — для зони, що згасає разом із нею */
     concentration?: { casterId: string; castId: string };
 }

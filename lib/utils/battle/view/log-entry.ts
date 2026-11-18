@@ -25,7 +25,6 @@ export interface LogRoundGroup {
     entries: BattleAction[];
 }
 
-/** Послідовні записи одного раунду; порядок вхідного списку зберігається. */
 export function groupLogByRound(entries: BattleAction[]): LogRoundGroup[] {
     const groups: LogRoundGroup[] = [];
 
@@ -59,7 +58,6 @@ export function logParts(e: Pick<BattleAction, 'log' | 'resultText'>): {
     };
 }
 
-/** Запис журналу для показу: перший сегмент — заголовок, решта — підрядки; зміни HP — окремо (шкода з мінусом). */
 export function logEntryView(e: BattleAction): LogEntryView {
     const { headline, lines, isTrigger } = logParts(e);
 

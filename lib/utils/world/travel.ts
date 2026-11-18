@@ -93,7 +93,6 @@ export function planExit(args: {
 
 const DEDUPE_DISTANCE = 1e-3;
 
-/** Дублікат лише коли точка (майже) збігається з наявною фігурою, а не просто лежить у її радіусі. */
 export function dedupePoint(
     existing: RevealShape[],
     p: MapPoint,

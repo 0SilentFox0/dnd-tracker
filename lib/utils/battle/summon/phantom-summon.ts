@@ -110,7 +110,6 @@ const isPhantomOf = (p: BattleParticipant, ownerId: string) =>
     (p.basicInfo.id.startsWith('phantom:') &&
         p.battleData.summonedBy === ownerId);
 
-/** `keepCastId`: фантоми цього касту лишаються (мультицільовий каст = кілька запитів одного власника). */
 export function dismissPhantoms(
     order: BattleParticipant[],
     ownerId: string,

@@ -18,12 +18,10 @@ import { createRng } from './rng';
 
 export const THROW_MS = 1400;
 
-// гравці мають встигнути прочитати значення, тож кубики лежать ~2.3 с після приземлення
 export const DICE_HOLD_MS = 2350;
 
 export const DICE_FADE_MS = 400;
 
-// останній кубик стартує до 0.3 с пізніше (planThrow) — все одно встигає лягти в межах показу
 export const DICE_TOTAL_MS = THROW_MS + DICE_HOLD_MS + DICE_FADE_MS;
 
 export const DIE_RADIUS = 0.9;

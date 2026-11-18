@@ -40,7 +40,6 @@ export const withDM = (
     run: (access: CampaignAccessResult) => Promise<NextResponse>
 ) => withAccess(campaignId, action, run, true);
 
-/** DM-сторінка, яку демо-відвідувач лише читає; гравцям закрита. */
 export async function withDMOrDemo(
     campaignId: string,
     action: string,

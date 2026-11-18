@@ -31,6 +31,5 @@ export interface CritPendingHidden {
 
 export interface CritResume {
     seed: number;
-    /** key тригера → id ефекту */
     choices: Record<string, number>;
 }

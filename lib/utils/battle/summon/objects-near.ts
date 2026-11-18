@@ -5,7 +5,6 @@ import { isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Живі предмети цього заклинання, викликані власником, у межах feet від цілі. */
 export function objectsNear(
     ps: BattleParticipant[],
     ownerId: string,

@@ -24,7 +24,6 @@ export const DurationSchema = z.object({
 
 export const FormulaSchema = z.object({ formula: z.string().min(1) });
 
-/** Значення з колонки таблиці класу; розв'язується при збиранні вмінь класу. */
 export const ScaleSchema = z.object({
     scale: z.string().regex(CLASS_COLUMN_KEY_RE).max(40),
 });

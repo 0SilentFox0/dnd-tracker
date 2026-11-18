@@ -189,7 +189,6 @@ function riderDamage(
     );
 }
 
-/** Заряди додаткової шкоди від заклинань: після влучання кожен відповідного виду завдає шкоду, може змусити до кидка й витрачається. */
 export function applyHitRiders(
     flow: ActionFlow,
     a: {

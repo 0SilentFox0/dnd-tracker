@@ -16,7 +16,6 @@ const clears = (p: BattleParticipant, keeps?: Keeps) =>
     isFallen(p) &&
     p.battleData.activeEffects.length > keptEffects(p, keeps).length;
 
-/** Полеглий втрачає всі баффи, дебаффи й зони (непритомний лишає те, що тримає система правил); пасивки відновлюються з вмінь при воскресінні. */
 export function clearFallenEffects(
     participants: BattleParticipant[],
     rules?: Ruleset
@@ -27,7 +26,6 @@ export function clearFallenEffects(
 
     if (!participants.some((p) => clears(p, keeps))) return participants;
 
-    // чари знімаються через restoreCharm, інакше зачарований назавжди лишився б на чужому боці
     return participants.map((p) => {
         if (!clears(p, keeps)) return p;
 

@@ -32,7 +32,6 @@ export function parseArmorProficiency(
     };
 }
 
-/** "Martial weapons that have the Finesse or Light property" — мартіал лише з цими властивостями. */
 export function parseWeaponProficiency(
     lines: readonly string[]
 ): WeaponProficiency {
@@ -71,7 +70,6 @@ export function isShieldProficient(p: BattleParticipant): boolean {
     return !prof || parseArmorProficiency(prof.armor).shield;
 }
 
-/** Броня або щит без володіння: перешкода на Сил/Спр, без заклинань. */
 export function armorPenalty(p: BattleParticipant): boolean {
     const prof = listed(p);
 

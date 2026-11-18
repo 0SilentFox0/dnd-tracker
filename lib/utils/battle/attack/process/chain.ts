@@ -21,7 +21,6 @@ export interface ChainStep {
     order: BattleParticipant[];
     attacker: BattleParticipant;
     attack: BattleAttack;
-    /** Попередня ціль (може бути вже мертвою — стрибок іде від її клітинки). */
     from: BattleParticipant;
     hit: ReadonlySet<string>;
     rules: Ruleset;

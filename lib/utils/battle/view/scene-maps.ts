@@ -13,10 +13,8 @@ export interface ParticipantFace {
     avatar?: string;
 }
 
-/** Спільний порожній список: учасник без ефектів не ламає memo-рядки новим `[]`. */
 export const NO_EFFECTS: readonly ActiveEffect[] = Object.freeze([]);
 
-/** Список ефектів лишається тим самим масивом, поки його вміст не змінився, — memo-рядки не перемальовуються. */
 export function buildDisplayEffects(
     order: BattleParticipant[],
     prev?: Map<string, DisplayEffect[]>,

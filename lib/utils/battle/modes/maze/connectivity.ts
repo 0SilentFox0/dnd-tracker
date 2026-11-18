@@ -40,10 +40,6 @@ export function mazeDistances(
     return dist;
 }
 
-/**
- * Клітинки, з яких можна дійти до виходу. Як у русі: телепорт не пройти наскрізь — ступив на нього, і тебе переносить до пари.
- * Один зворотний пошук на всю карту замість окремого пошуку від кожного учасника.
- */
 function exitReachers(grid: MazeGrid, exitKey: string): ReadonlySet<string> {
     const walls = wallSet(grid.maze);
 

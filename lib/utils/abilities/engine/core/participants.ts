@@ -55,7 +55,6 @@ export function isActive(p: BattleParticipant): boolean {
 export const isAirborne = (p: BattleParticipant): boolean =>
     !!p.battleData.airborne;
 
-// сплячий і вибулий не діють і не зачіпаються масовими вміннями; ставить лише режим карти
 export const isDormant = (p: BattleParticipant): boolean =>
     !!p.battleData.dormant;
 
@@ -77,7 +76,6 @@ export const sitsOutTurn = (p: BattleParticipant, round: number): boolean =>
 export const takesTurn = (p: BattleParticipant, round: number): boolean =>
     isActive(p) && !sitsOutTurn(p, round);
 
-/** Хто стоїть на ходу, коли ніхто не ходить: перший у грі, інакше перший живий, інакше 0. */
 export function idleTurnIndex(order: BattleParticipant[]): number {
     const firstInPlay = order.findIndex(inPlay);
 
@@ -94,7 +92,6 @@ export const isDying = (p: BattleParticipant): boolean =>
     p.combatStats.status === CombatStatus.UNCONSCIOUS &&
     p.battleData.dying === true;
 
-/** Ціль атаки: як isTargetable, але героя, що вмирає за 5e, теж можна бити (кожне влучання — провал кидка смерті). */
 export const isAttackable = (p: BattleParticipant): boolean =>
     (isActive(p) || isDying(p)) &&
     !isAirborne(p) &&
@@ -114,7 +111,6 @@ export function participantNames(
         .join(', ');
 }
 
-// Гарантує, що в списку саме свіжа версія p (читачі часто отримують оновлений об'єкт окремо від списку).
 export function withSelf(
     ps: BattleParticipant[],
     p: BattleParticipant

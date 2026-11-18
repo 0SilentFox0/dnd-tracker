@@ -19,7 +19,6 @@ interface PendingCtx {
     rules: Ruleset;
 }
 
-/** Відкладені удари кастера, що прибули (atRound ≤ round): число вже кинуте при касті, rng лише для наслідків шкоди. */
 export function resolvePendingHits(
     ps: BattleParticipant[],
     casterId: string,

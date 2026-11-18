@@ -3,7 +3,6 @@ import type { ActiveBattleRef } from '@/types/campaigns';
 export const battleHref = (b: ActiveBattleRef) =>
     `/campaigns/${b.campaignId}/battles/${b.id}`;
 
-/** Ціль кнопки в шапці: сесія поточної кампанії має пріоритет; на її сторінці кнопка не потрібна */
 export function pickActiveTarget<T extends { campaignId: string }>(
     items: T[],
     pathname: string | null,

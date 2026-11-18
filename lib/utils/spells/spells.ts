@@ -2,9 +2,6 @@ import { UNGROUPED_KEY } from '@/lib/constants/ungrouped';
 import { groupBy } from '@/lib/utils/common/collections';
 import type { Spell } from '@/types/spells';
 
-/**
- * Групує заклинання по групах
- */
 export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
     const grouped = groupBy(
         spells,
@@ -22,9 +19,6 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
     return grouped;
 }
 
-/**
- * Групує заклинання спочатку по групах, потім по рівнях
- */
 export function groupSpellsByGroupAndLevel(
     spells: Spell[]
 ): Map<string, Map<number, Spell[]>> {
@@ -49,18 +43,12 @@ export function groupSpellsByGroupAndLevel(
     return groupedSpellsMap;
 }
 
-/**
- * Сортує рівні заклинань для відображення
- */
 export function sortSpellLevels(
     levels: [number, Spell[]][]
 ): [number, Spell[]][] {
     return [...levels].sort(([levelA], [levelB]) => levelA - levelB);
 }
 
-/**
- * Конвертує Map з групами та рівнями в масив для рендеру
- */
 export function convertGroupedSpellsToArray(
     groupedSpellsMap: Map<string, Map<number, Spell[]>>
 ): [string, [number, Spell[]][]][] {
@@ -75,9 +63,6 @@ export function convertGroupedSpellsToArray(
     );
 }
 
-/**
- * Фільтрує заклинання за вибраними ID
- */
 export function filterSelectedSpells(
     spells: Spell[],
     selectedSpellIds: string[]
@@ -85,9 +70,6 @@ export function filterSelectedSpells(
     return spells.filter((spell) => selectedSpellIds.includes(spell.id));
 }
 
-/**
- * Обчислює загальну кількість заклинань у групі
- */
 export function calculateTotalSpellsInGroup(
     levels: [number, Spell[]][]
 ): number {

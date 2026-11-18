@@ -13,7 +13,6 @@ import type {
     TerrainDiff,
 } from '@/types/battle-grid';
 
-/** Шкода небезпеки ДМ; порожні чи некоректні кубики — без шкоди (лише підсвітка). */
 export function hazardDamage(
     dice: string,
     type: string
@@ -38,7 +37,6 @@ export function isObscured(
     );
 }
 
-/** Зона заклинання без шкоди (туман, тригер-зона) небезпекою не вважається. */
 export const isDamagingCell = (c: TerrainCell) =>
     c.kind === 'hazard' && (!!c.damage || !c.zoneId);
 
@@ -128,7 +126,6 @@ export function replaceTerrain(
     );
 }
 
-// барʼєр без строку не має жити вічно: прибирається на першому ж переході раунду; решта місцевості без строку — постійна
 function isExpired(c: TerrainCell, round: number): boolean {
     if (c.kind === 'barrier')
         return c.untilRound === undefined || c.untilRound < round;

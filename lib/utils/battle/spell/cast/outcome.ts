@@ -139,8 +139,7 @@ function resolveSpellAttack(
     const { roll, rolls, crit, fumble, hit } = attackRoll({
         mode,
         rng: state.rng,
-        presetRoll: state.attackRolls.find((a) => a.participantId === id)
-            ?.roll,
+        presetRoll: state.attackRolls.find((a) => a.participantId === id)?.roll,
         bonus,
         ac,
         critOn: critThresholdOf(flow.ctx.rules, mods, caster.basicInfo.id),
@@ -412,7 +411,6 @@ export function resolveOutcome(
             vsSpell: true,
         });
 
-        // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
         const { roll, mod, bonus, total } = r;
 
         const natural =
@@ -424,7 +422,6 @@ export function resolveOutcome(
 
         const saveCrit = natural !== null;
 
-        // нат. 20/1 визначають результат лише там, де діють криті; Легендарний опір діє вже на цей результат
         const base = saveCrit ? { ...r, success: natural === 'success' } : r;
 
         const resisted = isHostile(flow.ctx.map, state.caster, target)
@@ -514,7 +511,6 @@ export function resolveOutcome(
     return { skip: false, factor, raceMultiplier: race.multiplier };
 }
 
-// ефекти не на цілі заклинання (всі вороги тощо): імунітети ворожих цілей діють і тут, збереження — лише для цілей каста
 export function outcomeFor(state: SpellCastState, id: string): Outcome {
     const known = state.outcomes.get(id);
 

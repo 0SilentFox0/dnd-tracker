@@ -13,7 +13,6 @@ const uniqueLines = (lines: LogLine[]): LogLine[] =>
             lines.findIndex((other) => lineKey(other) === lineKey(line)) === i
     );
 
-/** Що саме робить ефект: опис або описи його модифікаторів (без повторів). */
 export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
     if (e.description) return [e.description];
 
@@ -35,7 +34,6 @@ export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
     ]);
 }
 
-/** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */
 export function effectSummary(e: ActiveEffect, t: Translator): LogLine[] {
     const what = effectLines(e, t);
 
@@ -93,7 +91,6 @@ const displayKey = (e: ActiveEffect) =>
           ].join('|')
         : null;
 
-/** Кілька ефектів одного вміння з однаковою тривалістю (напр. «Сурми світанку»: ініціатива і шкода) — один запис для показу. */
 export function mergeEffectsForDisplay(
     effects: ActiveEffect[]
 ): ActiveEffect[] {

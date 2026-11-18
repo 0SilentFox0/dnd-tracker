@@ -227,7 +227,6 @@ export function withInputCount(pick: SpellPick, count: number): SpellPick {
     };
 }
 
-/** Кого зачіпає наведення в точці: та сама функція, що й на сервері. */
 export function spellAimTargets(
     scene: AimScene,
     pick: SpellPick,
@@ -275,7 +274,6 @@ export function spellTargetCandidates(
     });
 }
 
-/** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає; ціль за стіною недосяжна. */
 export function spellTargetInRange(
     map: BattleMapConfig | null,
     caster: BattleParticipant | null,
@@ -317,7 +315,6 @@ export function spellSaveTargets(
     );
 }
 
-/** Одиночне заклинання, яке вміння заклинателя б'є по кількох цілях, — з назвою вміння. */
 export function spellWidening(
     order: BattleParticipant[],
     caster: BattleParticipant | null,

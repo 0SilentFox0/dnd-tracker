@@ -19,9 +19,7 @@ export interface ProcessAttackParams {
     d20Roll: number;
     advantageRoll?: number;
     disadvantageRoll?: number;
-    /** Вибір гравця; діє лише коли навички не задають перевагу/недолік */
     rollMode?: 'normal' | 'advantage' | 'disadvantage';
-    /** Натхнення дає перевагу цьому кидку */
     inspiration?: boolean;
     damageRolls: number[];
     allParticipants: BattleParticipant[];
@@ -30,25 +28,18 @@ export interface ProcessAttackParams {
     damageMultiplier?: number;
     bonusPercent?: number;
     bonusLabel?: LogLine;
-    /** Наступні удари залпу: основну дію вже витратив перший удар */
     actionSpent?: boolean;
-    /** Атака другою рукою: витрачає бонусну дію, а не дію/лічильник атак */
     offHand?: boolean;
-    /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike?: StrikeRiderEffect[];
     system?: SystemSlot;
-    /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
     obstacle?: boolean;
     rng?: () => number;
     sceneState?: SystemSlot;
     crit?: CritPicker;
-    /** Лише основна фаза атаки пише кубики в журнал (Шал та інші внутрішні удари — ні) */
     recordDice?: boolean;
-    /** Що з кубиків докинув сервер: d20 і шкода від цього індексу */
     serverRolled?: { d20?: boolean; damageFrom?: number };
     map?: BattleMapConfig | null;
     rules: Ruleset;
-    /** Лише текст і зміни учасників: summons і зона закляття на влучання не застосовуються (зараз це Dark 1-3) */
     hitSpells?: ReadonlyMap<string, CastableSpell>;
 }
 

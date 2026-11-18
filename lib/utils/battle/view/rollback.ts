@@ -5,10 +5,6 @@ import {
 import type { BattleScene } from '@/types/api';
 import type { BattleAction } from '@/types/battle-actions';
 
-/**
- * Після завершення бою лишаються останні N знімків; кожна дія з подіями пише хоча б одну подію,
- * тож останні N нескасованих подій гарантовано мають знімок для відкату.
- */
 export function canRollbackEntry(
     battle: Pick<BattleScene, 'status' | 'battleLog'>,
     entry: BattleAction

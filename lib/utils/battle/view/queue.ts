@@ -89,7 +89,6 @@ export function turnsUntil(
     return null;
 }
 
-/** Стабільні ключі для анімації: учасник + номер його появи в черзі, межа раунду — одна. */
 export function queueKeys(queue: QueueEntry[]): string[] {
     const seen = new Map<string, number>();
 

@@ -6,7 +6,6 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import { diceCount, diceSlots, rollDie } from '@/lib/utils/common/dice';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
-// volley: основна ціль — повна шкода, додаткові — за falloff; інакше — damageDistribution або порівну
 export function damageFractions(
     targets: BattleParticipant[],
     attack: BattleAttack,
@@ -63,11 +62,9 @@ export function strikeRoll(
 
 export interface StrikeDice {
     rolls: number[];
-    /** Кубики, яких клієнт не надіслав і які докинув сервер; null — сервер нічого не кидав */
     serverRolled: number[] | null;
 }
 
-// кожне влучання мультицільової атаки бере свій блок кубиків повної формули, по черзі влучань
 export function damageDiceCursor(
     sent: number[],
     formula: string | null,

@@ -32,10 +32,8 @@ export interface AttackRequest {
     attackId?: string;
     d20Roll?: number;
     attackRoll?: number;
-    /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
     attackRolls?: number[];
     serverRoll?: boolean;
-    /** Сирі другі d20 на ціль (null — без другого); сервер вирішує перевагу/недолік сам */
     secondRolls?: (number | null)[];
     advantageRoll?: number;
     disadvantageRoll?: number;

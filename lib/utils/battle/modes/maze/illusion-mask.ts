@@ -9,7 +9,6 @@ const NO_NAMES: ReadonlyMap<string, string> = new Map();
 
 export type DisguiseOf = (targetId: string) => IllusionDisguise | undefined;
 
-/** Замаскований партнер для глядача — ворог: інакше ростер, кільце портрета й точні стати видають союзника */
 export const maskParticipant = (
     p: BattleParticipant,
     d: IllusionDisguise
@@ -23,7 +22,6 @@ export const maskParticipant = (
     },
 });
 
-/** Ефект, накладений замаскованим партнером, показує маску, а не справжнє ім'я джерела */
 const maskEffects = <E extends ActiveEffect>(
     effects: readonly E[],
     disguiseOf: DisguiseOf,
@@ -152,7 +150,6 @@ const namesRegex = (names: ReadonlyMap<string, string>): RegExp | null => {
     return re;
 };
 
-/** Імена як окремі токени (не частина довшого слова); один прохід, довші першими — маска не підміняється вдруге */
 const maskPlain = (
     text: string,
     names: ReadonlyMap<string, string>
@@ -162,7 +159,6 @@ const maskPlain = (
     return re ? text.replace(re, (m) => names.get(m) ?? m) : text;
 };
 
-/** Імена в params (рекурсивно) міняються на маску; рядки без TextRef лишаються як є */
 const maskLogLine = (
     line: LogLine,
     names: ReadonlyMap<string, string>
@@ -174,7 +170,6 @@ const maskLogLine = (
         : (maskArg(line, names) as LogLine);
 };
 
-/** `viewerNames` — справжнє ім'я → маска для всіх записів (системні/DM-події без цілей теж згадують партнера) */
 export function maskAction(
     e: BattleAction,
     disguiseOf: DisguiseOf,
@@ -221,7 +216,6 @@ export function maskAction(
     };
 }
 
-/** Імперативне читання кешу (readBattle) теж віддає імена під маскою */
 export const maskBattleBy = <
     T extends {
         initiativeOrder: BattleParticipant[];

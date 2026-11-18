@@ -78,7 +78,6 @@ export function placeParticipants(
 
         const size = sizeOf(p);
 
-        // великі істоти: якір лівий верхній, тож ворожий край зсуваємо на розмір
         const shift = (a: GridPoint) =>
             p.basicInfo.side === ParticipantSide.ENEMY
                 ? { x: a.x - size + 1, y: a.y }

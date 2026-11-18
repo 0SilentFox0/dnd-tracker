@@ -1,11 +1,3 @@
-/**
- * Тести для logger + serializeError.
- *
- * Перевіряємо контракт: shape payload (key/value bag), безпечну
- * серіалізацію відомих error класів і fallback на String() для
- * не-Error значень.
- */
-
 import { Prisma } from '@prisma/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -112,7 +104,6 @@ describe('logger', () => {
 
         const [, payload] = errorSpy.mock.calls[0];
 
-        // нема error key коли error не передано
         expect(Object.keys(payload as Record<string, unknown>)).toEqual([
             'reason',
         ]);

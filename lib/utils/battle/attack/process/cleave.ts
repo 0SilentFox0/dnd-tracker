@@ -27,7 +27,6 @@ const FACINGS: GridPoint[] = [
     { x: -1, y: -1 },
 ];
 
-/** Три клітинки напрямку: сторона — ряд із трьох, діагональ — кутик (клітинка і два її сусіди). */
 function facingCells(at: GridPoint, { x: dx, y: dy }: GridPoint): GridPoint[] {
     if (dx === 0) return [-1, 0, 1].map((i) => ({ x: at.x + i, y: at.y + dy }));
 
@@ -43,7 +42,6 @@ function facingCells(at: GridPoint, { x: dx, y: dy }: GridPoint): GridPoint[] {
 const touches = (p: BattleParticipant, cells: GridPoint[]) =>
     cellsOf(p).some((c) => cells.some((f) => f.x === c.x && f.y === c.y));
 
-/** Додаткові цілі багатоголової атаки: голови б'ють лише 3 клітинки в одному напрямку (з основною ціллю); обирається напрямок із найбільшою кількістю цілей, за ініціативою. */
 export function cleaveTargets(
     map: BattleMapConfig | null | undefined,
     order: BattleParticipant[],

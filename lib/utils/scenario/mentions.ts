@@ -55,7 +55,6 @@ function queryTokens(query: string): string[] {
 
 type TokenParts = { head: string; alt: string; literal: boolean };
 
-// the last stem letter alternates (г/з, к/ц, х/с) only when a case ending was actually dropped
 function tokenParts(token: string): TokenParts {
     if (Array.from(token).length < MIN_STEM)
         return { head: token, alt: '', literal: true };

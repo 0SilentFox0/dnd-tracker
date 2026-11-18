@@ -25,7 +25,6 @@ const expired = (
     );
 };
 
-/** Предмет заклинання зникає (не гине) із закінченням тривалості чи концентрації; той самий масив — нічого не змінилось. */
 export function dismissExpiredSummons(
     ps: BattleParticipant[],
     round: number,

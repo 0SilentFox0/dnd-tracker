@@ -17,7 +17,6 @@ export function createCritGate(opts: {
     const seen = new Map<string, number>();
 
     const pick: CritPicker = (info) => {
-        // завжди рівно один rng(), щоб потік кидків не залежав від вибору
         const random = randomCritEffect(
             info.source,
             info.kind,

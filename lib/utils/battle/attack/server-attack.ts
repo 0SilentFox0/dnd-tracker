@@ -102,7 +102,6 @@ function judgeServer(
     };
 }
 
-/** Мутує `flow.ps`; без дії та тригерів «перед/після атаки». */
 export function resolveServerAttack(input: ServerAttackInput): {
     battleAction: BattleAction;
     hit: boolean;

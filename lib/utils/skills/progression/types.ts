@@ -28,7 +28,6 @@ export const RACIAL_MIN_LEVEL: Record<BranchLevel, number> = {
     expert: 15,
 };
 
-/** Експертом будь-якої гілки можна стати не раніше 9 рівня (тоді ж з'являються слоти 5-го кола). */
 export const BRANCH_MIN_LEVEL: Record<BranchLevel, number> = {
     basic: 1,
     advanced: 1,

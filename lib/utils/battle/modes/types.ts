@@ -9,14 +9,12 @@ import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
-/** Що бачить глядач у режимі; null у хуках — бачить усе. */
 export interface ModeView {
     cells: ReadonlySet<string> | null;
     visibleIds: ReadonlySet<string>;
     ownIds: ReadonlySet<string>;
     showDormant: boolean;
     dark: boolean;
-    /** Позначка в інтерфейсі ДМ: хто під ілюзією */
     maskedIds?: ReadonlySet<string>;
 }
 
@@ -32,37 +30,30 @@ export interface ModeAwareOutcome {
 }
 
 export interface ModeServerHooks<C> {
-    /** Учасники на старті й перший хід (сон, погляд); турн-індекс — перший, хто ходить. */
     onStart?(args: {
         map: BattleMapConfig;
         config: C;
         order: BattleParticipant[];
     }): { participants: BattleParticipant[]; turnIndex: number };
-    /** Після кожної не-dryRun мутації (пробудження, події «помітили»). */
     afterMutation?<T extends ModeAwareOutcome>(args: {
         map: BattleMapConfig;
         config: C;
         scene: { status: BattleSceneState['status']; round: number };
         result: T;
     }): T;
-    /** Після afterMutation і перевірки перемоги (статус уже остаточний), лише не-dryRun. */
     afterSettle?<T extends ModeAwareOutcome>(args: {
         map: BattleMapConfig;
         config: C;
         scene: { status: BattleSceneState['status']; round: number };
         result: T;
     }): T;
-    /** Текст відмови для роутів з опцією blockedByMode, або null. */
     blockedText?(config: C): string | null;
-    /** Хід пропускається з цим записом журналу, або null. */
     autoSkipText?(config: C): LogLine | null;
-    /** Розставити всіх (заміщує звичайну розстановку). */
     placeAll?(args: {
         map: BattleMapConfig;
         config: C;
         participants: BattleParticipant[];
     }): BattleParticipant[];
-    /** Поставити одного на клітинку; кидає BattleRuleError з текстом відмови. */
     placeOne?(args: {
         map: BattleMapConfig;
         config: C;
@@ -70,7 +61,6 @@ export interface ModeServerHooks<C> {
         mover: BattleParticipant;
         to: GridPoint;
     }): BattleParticipant;
-    /** Найближча вільна клітинка для воскреслого (спершу сама `from`); null — вільних немає. */
     placeRevived?(args: {
         map: BattleMapConfig;
         config: C;
@@ -78,69 +68,57 @@ export interface ModeServerHooks<C> {
         mover: BattleParticipant;
         from: GridPoint;
     }): GridPoint | null;
-    /** Учасник з'являється в бою (додано ДМ чи відкрито резерв). */
     onEnter?(args: {
         config: C;
         participant: BattleParticipant;
     }): BattleParticipant;
-    /** Конфіг після скидання бою. */
     onReset?(config: C): C;
-    /** Поля battleData режиму для дельти (додаються до PATCHABLE_PARTICIPANT_FIELDS). */
     patchableFields?: readonly string[];
 }
 
 export interface ModeEngineHooks<C> {
-    /** Власник бачить ціль (масові вміння, заклинання «всім»). Відсутній — бачить. */
     sees?(args: {
         config: C;
         map: BattleMapConfig;
         viewer: BattleParticipant;
         target: BattleParticipant;
     }): boolean;
-    /** Чи ворогують учасники всупереч сторонам (true — так, undefined — за сторонами). */
     areHostile?(args: {
         config: C;
         map: BattleMapConfig;
         a: BattleParticipant;
         b: BattleParticipant;
     }): boolean | undefined;
-    /** Текст відмови, якщо клітинку прицілу не видно. */
     aimHiddenText?(args: {
         config: C;
         map: BattleMapConfig;
         caster: BattleParticipant;
         cell: GridPoint;
     }): LogLine | null;
-    /** Текст відмови, якщо хоч одну ціль не видно. */
     targetHiddenText?(args: {
         config: C;
         map: BattleMapConfig;
         caster: BattleParticipant;
         targets: BattleParticipant[];
     }): LogLine | null;
-    /** Ближня атака заблокована (стіна) — текст або null. */
     meleeBlockedText?(args: {
         config: C;
         map: BattleMapConfig;
         attacker: BattleParticipant;
         target: BattleParticipant;
     }): LogLine | null;
-    /** Чи «зв'язує» сусід стрільця (звичайно — isActive). */
     engages?(args: {
         config: C;
         map: BattleMapConfig;
         attacker: BattleParticipant;
         neighbour: BattleParticipant;
     }): boolean;
-    /** Ребра-стіни режиму, що додаються до core `map.walls`; масив має бути стабільним за посиланням (memo `wallsOf` за ідентичністю). */
     walls?(args: { config: C; map: BattleMapConfig }): readonly string[];
-    /** Лінія вогню (сусідні клітинки по черзі) перетинає стіну режиму. Відсутній — ні. */
     lineBlocked?(args: {
         config: C;
         map: BattleMapConfig;
         line: GridPoint[];
     }): boolean;
-    /** Зона ходу замість звичайної; `seen` — учасники, яких бачить глядач. */
     moveZone?(args: {
         config: C;
         map: BattleMapConfig;
@@ -151,7 +129,6 @@ export interface ModeEngineHooks<C> {
 }
 
 export interface ModeClientHooks<C> {
-    /** Поля, що змінились (без важких), undefined — без змін, null — потрібна повна карта. */
     deltaOf?(
         before: C | null | undefined,
         after: C | null | undefined
@@ -164,9 +141,7 @@ export interface ModeClientHooks<C> {
 export interface MapModeDefinition<C = unknown> {
     key: string;
     configOf(map: BattleMapConfig | null | undefined): C | null;
-    /** Карта з новим конфігом (null — вимкнути режим). */
     withConfig(map: BattleMapConfig, config: C | null): BattleMapConfig;
-    /** Початковий конфіг при вмиканні режиму в налаштуваннях бою. */
     emptyConfig?(): C;
     server: ModeServerHooks<C>;
     engine: ModeEngineHooks<C>;

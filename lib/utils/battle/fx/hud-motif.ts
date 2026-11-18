@@ -58,7 +58,6 @@ const MOTIF: Record<FxAuraKind, HudMotif> = {
     lifedome: 'life',
 };
 
-/** Мотиви плашки HP на карті — з тих самих топ-аур, що й портрет, без дублів. */
 export function hudMotifsOf(effects: readonly ActiveEffect[]): HudMotif[] {
     return [...new Set(aurasOf(effects).map((k) => MOTIF[k]))];
 }

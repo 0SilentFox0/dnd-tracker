@@ -625,7 +625,6 @@ describe("effects from the attacker's own abilities stay active during the volle
     });
 });
 
-// герой L1: повна формула удару — 1d6 зброї + 1d4 рівня, тож по 2 кубики на кожне влучання
 describe('pick order and multiTargetFalloff', () => {
     const bow = (maxTargets: number) => {
         const p = makeParticipant({

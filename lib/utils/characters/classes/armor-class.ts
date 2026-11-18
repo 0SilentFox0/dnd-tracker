@@ -122,7 +122,6 @@ export function armorPenalties(p: BattleParticipant): ResolvedAbility | null {
     };
 }
 
-// запікання вже минуло, тож −10 швидкості пишемо одразу, а вміння лише показує джерело
 export function applyClassArmor(p: BattleParticipant): BattleParticipant {
     const penalty = armorPenalties(p);
 

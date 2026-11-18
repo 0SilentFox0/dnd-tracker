@@ -6,7 +6,6 @@ const isFormula = (v: unknown): v is { formula: string } =>
     typeof v === 'object' &&
     typeof (v as { formula?: unknown }).formula === 'string';
 
-/** Після запікання: perRest.uses { formula } → число (мінімум 1) від запечених модифікаторів. */
 export function resolveLimitFormulas(p: BattleParticipant): BattleParticipant {
     const list = p.battleData.resolvedAbilities;
 

@@ -34,7 +34,6 @@ const itemText = (t: Translator, i: LogDetailItem) =>
           ? `${formatText(t, i.label)}: ${formatText(t, i.text)}`
           : formatText(t, i.text);
 
-/** Рядки розгорнутого блоку деталей запису логу */
 export function getLogEntryDetailLines(
     action: BattleAction,
     t: Translator,

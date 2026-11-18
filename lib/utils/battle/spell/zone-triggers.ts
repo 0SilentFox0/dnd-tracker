@@ -46,7 +46,6 @@ export function zonesAt(
     return new Set(ids);
 }
 
-/** Прибирає клітинки зон, чия концентрація скінчилась; null — нічого не змінилось. */
 export function sweepDeadZones(
     map: BattleMapConfig | null | undefined,
     participants: BattleParticipant[],
@@ -177,7 +176,6 @@ export interface ZoneMoveResult {
     messages: LogLine[];
 }
 
-/** Тригери зон на шляху: вхід, вихід (невдалий кидок із pull зупиняє мувера біля центру). `path` — клітинки після старту. */
 export function zoneMove(
     args: {
         map: BattleMapConfig;

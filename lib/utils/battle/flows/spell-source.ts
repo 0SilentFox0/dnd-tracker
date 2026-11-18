@@ -19,7 +19,6 @@ import type { BattleParticipant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 import type { LogLine } from '@/types/text';
 
-/** Звідки платить за заклинання (слот чи дар), які рівні накладання доступні і формула кісток. */
 export function spellSourceModel(
     caster: BattleParticipant | null,
     flow: SpellFlowState,

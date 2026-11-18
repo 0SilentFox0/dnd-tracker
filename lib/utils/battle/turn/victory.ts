@@ -27,7 +27,6 @@ export interface VictoryCheckResult {
     message: LogLine;
 }
 
-/** Перевіряє умови перемоги. */
 export function checkVictoryConditions(
     initiativeOrder: BattleParticipant[],
     reserve: BattleParticipant[],
@@ -38,7 +37,6 @@ export function checkVictoryConditions(
     const reserveHas = (side: ParticipantSide) =>
         reserve.some((p) => p.basicInfo.side === side);
 
-    // слот екстра-ходу — не окремий учасник
     const real = initiativeOrder.filter(
         (p) => !p.basicInfo.isExtraTurnSlot && !p.battleData.object
     );
@@ -82,7 +80,6 @@ export function checkVictoryConditions(
         };
     }
 
-    // escaped ставить лише режим карти (вихід), тож окремий прапорець режиму не потрібен
     if (
         allies.some(isEscaped) &&
         !allies.some((a) => isActive(a) && !isEscaped(a))
@@ -129,7 +126,6 @@ const revivesOnVictory = (p: BattleParticipant) =>
     p.basicInfo.side === ParticipantSide.ALLY &&
     p.combatStats.status === CombatStatus.UNCONSCIOUS;
 
-/** Завершує бій: знімає чари, при перемозі відроджує непритомних союзників. */
 export function completeBattle(
     initiativeOrder: BattleParticipant[],
     result: 'victory' | 'defeat',

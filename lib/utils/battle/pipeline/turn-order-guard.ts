@@ -7,11 +7,6 @@ import type { BattleParticipant } from '@/types/battle';
 
 const ids = (ps: BattleParticipant[]) => ps.map((p) => p.basicInfo.id);
 
-/**
- * Порядок ініціативи змінюють лише старт/скидання/відкат (history), кидок/ручний порядок (reordered) і новий раунд.
- * Будь-яка інша мутація, що переставила наявних учасників, — баг рушія: повертаємо їхній порядок
- * (додані/видалені лишаються на своїх місцях) і пишемо помилку в лог.
- */
 export function guardTurnOrder<T extends BattleMutationOutcome>(
     scene: BattleSceneState,
     before: BattleParticipant[],

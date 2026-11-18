@@ -2,10 +2,8 @@ import { HARMFUL_FLAGS } from './harmful-flags';
 
 import type { Effect, StaticEffect } from '@/lib/utils/abilities/schema';
 
-// менший поріг криту — частіше крит, тобто вигода
 const LOWER_IS_BETTER = new Set(['critThreshold']);
 
-// без isStaticEffect зі схеми: модуль у клієнтському графі бою, а схема тягне zod
 const STATIC_KINDS = new Set(['modifyStat', 'damageBonus', 'flag']);
 
 const isStatic = (e: Effect): e is StaticEffect => STATIC_KINDS.has(e.kind);
@@ -13,7 +11,6 @@ const isStatic = (e: Effect): e is StaticEffect => STATIC_KINDS.has(e.kind);
 const signOf = (v: unknown): number | null =>
     typeof v === 'number' && v !== 0 ? Math.sign(v) : null;
 
-/** Шкідливий чи корисний ефект сам по собі; null — не визначити (формула), тоді вирішує сторона цілі. */
 export function staticEffectNature(
     effect: StaticEffect
 ): 'buff' | 'debuff' | null {
@@ -36,7 +33,6 @@ export function staticEffectNature(
     return good ? 'buff' : 'debuff';
 }
 
-/** Природа здатності цілком: дебафф/бафф лише коли всі її статичні ефекти однакові, змішана (компроміс) — null. */
 export function abilityNature(
     effects: readonly Effect[]
 ): 'buff' | 'debuff' | null {

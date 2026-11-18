@@ -125,7 +125,6 @@ const isStandardConditionEffect = (e: ActiveEffect) =>
     (isCustomConditionKey(e.effects[0]?.type) ||
         allConditionKeys().includes(e.effects[0]?.type));
 
-/** Ефекти-стани 5e: перший маркер ефекту — власний ключ стану (решта — наслідки через implies). */
 export function conditionEffects(
     p: BattleParticipant
 ): { key: StandardConditionKey | CustomConditionKey; effect: ActiveEffect }[] {
