@@ -1,10 +1,11 @@
+import type { useTranslations } from 'next-intl';
 import type { UIMessage } from 'ai';
 
 import type { getAiRunRecovery } from '@/lib/api/ai';
 
 type RecoveryState = Awaited<ReturnType<typeof getAiRunRecovery>>;
 
-type Translate = (key: string, values?: Record<string, string>) => string;
+type Translate = ReturnType<typeof useTranslations<'ai'>>;
 
 export const freshestLease = (state: RecoveryState) =>
     state.runs

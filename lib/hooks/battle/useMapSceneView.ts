@@ -93,7 +93,7 @@ export function useMapSceneView({
             scene,
             map,
             rules: rules,
-            current,
+            current: current ?? null,
             hover: { cell: hoverCell, preview: hovered },
             overlay: {
                 returnId,

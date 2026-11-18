@@ -67,7 +67,7 @@ export function enqueue(queue: MapTerrainData[], next: MapTerrainData) {
 }
 
 export function terrainOfBrush(
-    b: TerrainBrush,
+    b: Exclude<TerrainBrush, EdgeBrush | StateBrush>,
     {
         rounds: r,
         label: l,

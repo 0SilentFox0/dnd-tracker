@@ -2,6 +2,7 @@
 
 import { useMemo, useReducer, useState } from 'react';
 
+import { slotCostLabelOf } from './spell-book-labels';
 import { spellBookActions } from './spellBookActions';
 import { useBattleRules } from './useBattleRules';
 import { useBattleScene } from './useBattleScene';
@@ -10,7 +11,6 @@ import { useIngredientPlan } from './useIngredientPlan';
 import { useSpellBookTargets } from './useSpellBookTargets';
 import { useSpellCastSubmit } from './useSpellCastSubmit';
 
-import { joinLines, textRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import { reactionBlockerOf } from '@/lib/utils/battle/actions/access';
 import {
@@ -26,7 +26,6 @@ import {
     spellDefinition,
     spellFlow,
     spellSaveTargets,
-    spellSlotCostLabel,
     spellSlotsLeft,
     spellSourceModel,
     spellWidening,
@@ -38,7 +37,6 @@ import {
 } from '@/lib/utils/spells/group-by-level';
 import type { BattleParticipant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
-import type { LogLine } from '@/types/text';
 
 export {
     useBonusSpells,
@@ -234,23 +232,17 @@ export function useSpellBook(
                 bypassCost ||
                     spells.some((s) => s.level === level && !!grantOf(s))
             ),
-        slotCostLabel: (s: BookSpell) => {
-            const parts = [
-                special
-                    ? textRef('battleWizards.flow.cost.special')
-                    : undefined,
-                labelOf(s),
-            ].filter((p): p is LogLine => p !== undefined && p !== '');
-
-            return parts.length > 0
-                ? joinLines(parts, ' · ')
-                : spellSlotCostLabel(s, {
-                      free,
-                      universal: universalSlot,
-                      chosen: slotChoices.find((o) => o.key === state.slotKey)
-                          ?.label,
-                  });
-        },
+        slotCostLabel: (s: BookSpell) =>
+            slotCostLabelOf(s, {
+                special: !!special,
+                grantLabel: labelOf(s),
+                fallback: {
+                    free,
+                    universal: universalSlot,
+                    chosen: slotChoices.find((o) => o.key === state.slotKey)
+                        ?.label,
+                },
+            }),
         slot: { options: slotChoices, value: state.slotKey },
         noSlot: (s: BookSpell) =>
             !canSlot(s) &&

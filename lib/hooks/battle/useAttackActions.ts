@@ -34,10 +34,10 @@ export interface AttackActionsContext {
     scene: Scene;
     targets: {
         enemies: BattleParticipant[];
-        unreachable: Set<string>;
+        unreachable: { has(id: string): boolean };
         visible(p: BattleParticipant): boolean;
     };
-    cunningOffer: RiderOffer | null;
+    cunningOffer: RiderOffer | null | undefined;
     mode: AttackMode;
     attackCtx: Parameters<typeof rollOutcomeOf>[3];
     serverJudged: boolean;

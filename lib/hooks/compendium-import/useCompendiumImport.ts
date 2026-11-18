@@ -85,11 +85,9 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
     const startRequest = () => {
         controller.current?.abort();
 
-        const abort = new AbortController();
+        controller.current = new AbortController();
 
-        controller.current = abort;
-
-        return abort;
+        return controller.current;
     };
 
     const changeOptions = (value: CompendiumOptions) => {
@@ -252,12 +250,6 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
         opening: requests.openRun.isPending,
     });
 
-    const shownError = failure
-        ? compendiumErrorMessage(t, failure.error, failure.key)
-        : requests.targets.isError && preview
-          ? t('errors.optionsLoadFailed')
-          : '';
-
     return {
         state: {
             root,
@@ -273,7 +265,11 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
             phase,
             media: media.progress,
             mediaPaused: media.paused,
-            error: shownError,
+            error: failure
+                ? compendiumErrorMessage(t, failure.error, failure.key)
+                : requests.targets.isError && preview
+                  ? t('errors.optionsLoadFailed')
+                  : '',
         },
         actions: {
             selectFile,

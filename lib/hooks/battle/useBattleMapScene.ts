@@ -11,6 +11,8 @@ import { useBattleScene } from './useBattleScene';
 import { useExclusivePalettes } from './useExclusivePalettes';
 import { useFollowTurnSetting } from './useFollowTurnSetting';
 import { useMapCellActions } from './useMapCellActions';
+import { useMapDmTools } from './useMapDmTools';
+import { useMapEdgeSources } from './useMapEdgeSources';
 import { useMapFogTool } from './useMapFogTool';
 import { useMapPlacing } from './useMapPlacing';
 import { useMapSceneView } from './useMapSceneView';

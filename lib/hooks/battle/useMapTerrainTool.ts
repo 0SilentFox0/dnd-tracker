@@ -9,8 +9,7 @@ import {
     type TerrainBrushSettings,
     terrainOfBrush,
 } from './terrain-brush';
-
-import { MAP_EDGES_PER_OP } from '@/lib/constants/battle';
+import { sendEdgeBatches } from './terrain-edge-batches';
 
 export {
     type EdgeBrush,
@@ -212,14 +211,8 @@ export function useMapTerrainTool({
         [inFlightEdges]
     );
 
-    const commitEdges = useCallback((add: string[], remove: string[]) => {
-        const {
-            brush: b,
-            edgeSource: src,
-            stateEdgeSource: state,
-        } = latest.current;
-
-        const send = (
+    const send = useCallback(
+        (
             shown: { add: string[]; remove: string[] },
             run: () => Promise<unknown>
         ) => {
@@ -231,53 +224,15 @@ export function useMapTerrainTool({
                 .finally(() =>
                     setInFlightEdges((list) => list.filter((d) => d !== shown))
                 );
-        };
+        },
+        []
+    );
 
-        if (b.kind === 'edge-break' || b.kind === 'edge-restore') {
-            if (!state) return;
-
-            for (let i = 0; i < remove.length; i += MAP_EDGES_PER_OP) {
-                const edges = remove.slice(i, i + MAP_EDGES_PER_OP);
-
-                send({ add: [], remove: edges }, () =>
-                    state.mutate({
-                        edges,
-                        ...(b.kind === 'edge-restore' && { restore: true }),
-                    })
-                );
-            }
-
-            return;
-        }
-
-        if (!src) return;
-
-        const batches = (
-            kind: MapWallsData['kind'],
-            a: string[],
-            r: string[]
-        ) => {
-            const n = Math.max(a.length, r.length);
-
-            for (let i = 0; i < n; i += MAP_EDGES_PER_OP) {
-                const data: MapWallsData = {
-                    kind,
-                    add: a.slice(i, i + MAP_EDGES_PER_OP),
-                    remove: r.slice(i, i + MAP_EDGES_PER_OP),
-                };
-
-                send(data, () => src.mutate(data));
-            }
-        };
-
-        if (b.kind === 'edge-erase') {
-            batches('both', [], remove);
-
-            return;
-        }
-
-        batches(b.kind === 'edge-wall' ? 'walls' : 'bars', add, remove);
-    }, []);
+    const commitEdges = useCallback(
+        (add: string[], remove: string[]) =>
+            sendEdgeBatches(latest.current, { add, remove }, send),
+        [send]
+    );
 
     const edges = useMemo<EdgeEditing | null>(() => {
         if (!active || !isEdgeBrush(brush.kind)) return null;
