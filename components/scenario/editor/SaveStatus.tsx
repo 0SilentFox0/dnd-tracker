@@ -35,7 +35,8 @@ export function SaveStatus({
             {state === 'error' && error ? error.message : t(state)}
             {state === 'error' && error?.retryable !== false && (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     className="toggle"
                     style={{ marginLeft: 8 }}
@@ -51,7 +52,8 @@ export function SaveStatus({
                         {t('conflictNote')} {error?.message}
                     </span>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle"
                         style={{ marginLeft: 8 }}
@@ -61,7 +63,8 @@ export function SaveStatus({
                     </Button>
                     {onRetain && (
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             className="toggle"
                             onClick={onRetain}

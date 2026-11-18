@@ -88,7 +88,8 @@ export function SlidePickerDialog({
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {deck.slides.map((slide, i) => (
                                 <Button
-                                    variant="bare"
+                                    variant="plain"
+                                    size="auto"
                                     key={slide.id}
                                     type="button"
                                     aria-label={

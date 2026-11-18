@@ -86,7 +86,8 @@ export function ScenarioPageView({
 
                     const playedButton = progress && (
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             className="toggle played"
                             aria-pressed={done}
@@ -121,7 +122,8 @@ export function ScenarioPageView({
                             {collapsed && (
                                 <div className="sb-sec-collapsed">
                                     <Button
-                                        variant="bare"
+                                        variant="plain"
+                                        size="auto"
                                         type="button"
                                         className="sb-sec-expand"
                                         aria-expanded={false}

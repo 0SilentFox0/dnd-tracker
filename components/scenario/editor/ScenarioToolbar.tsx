@@ -21,7 +21,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { CALLOUT_KINDS } from '@/lib/constants/scenario';
 import type { CalloutKind } from '@/types/scenario';
 
@@ -40,7 +40,8 @@ function Tool({
 }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             className="toggle"
             title={label}
@@ -159,13 +160,13 @@ export function ScenarioToolbar({
             >
                 <MessageSquareQuote className="size-4" />
             </Tool>
-            <NativeSelect
+            <SelectField
                 aria-label={t('callout')}
                 disabled={off}
                 value={state?.callout ? state.calloutKind : ''}
-                onChange={(ev) =>
+                onValueChange={(v) =>
                     run((e) => {
-                        const kind = ev.target.value as CalloutKind | '';
+                        const kind = v as CalloutKind | '';
 
                         if (!kind)
                             return void e.chain().focus().lift('callout').run();
@@ -186,14 +187,14 @@ export function ScenarioToolbar({
                             .run();
                     })
                 }
-            >
-                <option value="">{t('calloutPlaceholder')}</option>
-                {CALLOUT_KINDS.map((k) => (
-                    <option key={k} value={k}>
-                        {tCallouts(k)}
-                    </option>
-                ))}
-            </NativeSelect>
+                allowNone
+                noneLabel={t('calloutPlaceholder')}
+                options={CALLOUT_KINDS.map((k) => ({
+                    value: k,
+                    label: tCallouts(k),
+                }))}
+                triggerClassName="min-h-9 w-auto rounded border-[var(--rule)] bg-[var(--page)] px-2 py-1.5 text-sm text-[var(--ink)] shadow-none data-[size=default]:h-9 dark:bg-[var(--page)] dark:hover:bg-[var(--page)]"
+            />
             {state?.callout && (
                 <Input
                     aria-label={t('calloutTitle')}

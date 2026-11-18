@@ -120,7 +120,8 @@ export function RevealSettings({
                 </>
             )}
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 className="toggle"
                 aria-pressed={revealed}

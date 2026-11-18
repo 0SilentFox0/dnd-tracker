@@ -44,7 +44,8 @@ export function MarkerChip({
             {action?.(available)}
             {onRemove && (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={t('unbind')}
                     onClick={onRemove}

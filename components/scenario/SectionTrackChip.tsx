@@ -33,7 +33,8 @@ export function SectionTrackChip({
             </span>
             {onPlay && track && (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     className="toggle"
                     aria-label={t('play')}
@@ -45,7 +46,8 @@ export function SectionTrackChip({
             )}
             {onRemove && (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={t('unbind')}
                     onClick={onRemove}

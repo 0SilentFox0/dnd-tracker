@@ -16,7 +16,8 @@ export function OrderButtons({
     return (
         <>
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 className="toggle"
                 aria-label={labels.up}
@@ -25,7 +26,8 @@ export function OrderButtons({
                 <ArrowUp className="size-4" />
             </Button>
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 className="toggle"
                 aria-label={labels.down}
@@ -34,7 +36,8 @@ export function OrderButtons({
                 <ArrowDown className="size-4" />
             </Button>
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 className="toggle"
                 aria-label={labels.remove}

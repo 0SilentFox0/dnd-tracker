@@ -69,7 +69,8 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                         deck && t('slideMissing')
                     )}
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('unbindSlide')}
                         onClick={() => onChange.slide(undefined)}
@@ -79,7 +80,8 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                 </span>
             ) : (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     className="toggle"
                     aria-label={t('bindSlide')}
@@ -99,7 +101,8 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                         briefs && t('battleMissing')
                     )}
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('unbindBattle')}
                         onClick={() => onChange.battle(undefined)}
@@ -109,7 +112,8 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                 </span>
             ) : (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     className="toggle"
                     aria-label={t('bindBattle')}
@@ -126,7 +130,8 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                 />
             ) : (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     className="toggle"
                     aria-label={t('bindMarker')}

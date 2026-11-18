@@ -43,7 +43,8 @@ function IndexRow({
             {onMove && (
                 <span className="mv">
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('index.up', { title: page.title })}
                         onClick={() => onMove(page.id, -1, siblings)}
@@ -51,7 +52,8 @@ function IndexRow({
                         <ChevronUp className="size-4" />
                     </Button>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('index.down', { title: page.title })}
                         onClick={() => onMove(page.id, 1, siblings)}

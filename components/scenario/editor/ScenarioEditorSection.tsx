@@ -154,7 +154,8 @@ export function ScenarioEditorSection({
                 </div>
             ))}
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 className="toggle sans"
                 style={{ marginTop: 12 }}

@@ -59,7 +59,8 @@ export function SectionHeaderEditor({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle sb-icon-pick"
                         aria-label={t('icon', {
@@ -114,7 +115,8 @@ export function SectionHeaderEditor({
                 />
             ) : (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     className="toggle"
                     aria-label={t('bindMarker')}
@@ -131,7 +133,8 @@ export function SectionHeaderEditor({
                 />
             )}
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 className="toggle"
                 aria-label={t('bindTrack')}

@@ -217,7 +217,8 @@ export function ScenarioEditor({
                         onRetain={draft.retainLocal}
                     />
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle"
                         onClick={() => setPropsOpen(true)}
@@ -225,7 +226,8 @@ export function ScenarioEditor({
                         {t('properties')}
                     </Button>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle"
                         onClick={() => void finish()}
@@ -260,7 +262,8 @@ export function ScenarioEditor({
                         />
                     ))}
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle sans"
                         style={{ marginTop: 40 }}

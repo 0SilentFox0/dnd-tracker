@@ -84,7 +84,8 @@ export function GraphListPanel({
                                 {group.items.map((item) => (
                                     <li key={item.id}>
                                         <Button
-                                            variant="bare"
+                                            variant="plain"
+                                            size="auto"
                                             type="button"
                                             data-list-id={item.id}
                                             aria-current={

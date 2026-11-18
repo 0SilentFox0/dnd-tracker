@@ -49,7 +49,8 @@ export function ScenarioBar({ title, notes, toc, nav, actions, menu }: Props) {
                 )}
                 {toc && (
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle sb-bar-toc"
                         aria-label={t('sections')}
@@ -64,7 +65,8 @@ export function ScenarioBar({ title, notes, toc, nav, actions, menu }: Props) {
                 <strong>{title}</strong>
                 <div className="sb-bar-btns">
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle"
                         aria-pressed={notes.hidden}

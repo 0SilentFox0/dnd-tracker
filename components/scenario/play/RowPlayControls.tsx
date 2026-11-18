@@ -40,7 +40,8 @@ export function MarkerPlay({
                     <span className="sb-bind-live">{t('onScreen')}</span>
                 ) : play.readOnly ? null : (
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle"
                         aria-label={t('showOnMap')}
@@ -100,7 +101,8 @@ export function RowPlayControls({
                         <span className="sb-bind-live">{t('onScreen')}</span>
                     ) : play.readOnly ? null : (
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             className="toggle"
                             aria-label={t('showSlide')}
@@ -157,7 +159,8 @@ export function RowPlayControls({
                     </span>
                     {action !== 'none' && !play.readOnly && (
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             className="toggle"
                             disabled={play.pending}
@@ -183,7 +186,8 @@ export function RowPlayControls({
                     {action === 'none' &&
                         battle.battle.status === BattleStatus.COMPLETED && (
                             <Button
-                                variant="bare"
+                                variant="plain"
+                                size="auto"
                                 type="button"
                                 className="toggle"
                                 disabled

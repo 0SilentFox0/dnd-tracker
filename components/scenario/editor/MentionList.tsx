@@ -64,7 +64,8 @@ export function MentionList({
             )}
             {items.map((item, i) => (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     key={`${item.type}-${item.id}`}
                     type="button"
                     role="option"

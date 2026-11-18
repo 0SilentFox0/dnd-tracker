@@ -43,7 +43,8 @@ export function ScenarioPageActions({
             {!flags.editing && flags.canEdit && (
                 <>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         className="toggle is-primary"
                         onClick={on.edit}

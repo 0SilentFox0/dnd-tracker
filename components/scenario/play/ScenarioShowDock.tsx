@@ -85,7 +85,8 @@ function OnScreen({
 
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             className="sb-show-now"
             data-curtain={(cover && !!show?.deckId) || undefined}
