@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Music, Play, X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useTracks } from '@/lib/hooks/music';
 
 export function SectionTrackChip({
@@ -32,9 +32,7 @@ export function SectionTrackChip({
                 {track?.title ?? (tracks ? t('missing') : t('loading'))}
             </span>
             {onPlay && track && (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     className="toggle"
                     aria-label={t('play')}
@@ -42,18 +40,16 @@ export function SectionTrackChip({
                     onClick={onPlay}
                 >
                     <Play className="size-3" /> {t('play')}
-                </Button>
+                </HudButton>
             )}
             {onRemove && (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     aria-label={t('unbind')}
                     onClick={onRemove}
                 >
                     <X className="size-3" />
-                </Button>
+                </HudButton>
             )}
         </span>
     );

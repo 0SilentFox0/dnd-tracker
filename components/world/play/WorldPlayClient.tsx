@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Map as MapIcon } from 'lucide-react';
 
 import { EmptyState, QueryState } from '@/components/common/states';
+import { HudButton } from '@/components/hud';
 import {
     HudChipTabs,
     HudPage,
@@ -172,9 +173,7 @@ export function WorldPlayClient({
                                             <ul className="flex flex-col gap-1">
                                                 {places.map((m) => (
                                                     <li key={m.id}>
-                                                        <Button
-                                                            variant="plain"
-                                                            size="auto"
+                                                        <HudButton
                                                             type="button"
                                                             className="text-sm text-hud-gold underline-offset-2 hover:text-hud-gold-bright hover:underline"
                                                             onClick={() =>
@@ -184,7 +183,7 @@ export function WorldPlayClient({
                                                             }
                                                         >
                                                             {m.name}
-                                                        </Button>
+                                                        </HudButton>
                                                     </li>
                                                 ))}
                                             </ul>

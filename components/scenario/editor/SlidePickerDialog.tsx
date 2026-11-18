@@ -6,6 +6,7 @@ import { Images } from 'lucide-react';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { EmptyState, LoadingState } from '@/components/common/states';
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useDeck, useDecks } from '@/lib/hooks/show';
@@ -87,9 +88,7 @@ export function SlidePickerDialog({
                     {deck && (
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {deck.slides.map((slide, i) => (
-                                <Button
-                                    variant="plain"
-                                    size="auto"
+                                <HudButton
                                     key={slide.id}
                                     type="button"
                                     aria-label={
@@ -111,7 +110,7 @@ export function SlidePickerDialog({
                                         height={54}
                                         className="aspect-video w-full object-cover"
                                     />
-                                </Button>
+                                </HudButton>
                             ))}
                         </div>
                     )}

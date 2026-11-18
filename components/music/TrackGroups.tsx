@@ -11,6 +11,7 @@ import {
 import { TrackList, type TrackListActions } from './TrackList';
 
 import { SearchInput } from '@/components/common/SearchInput';
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { usePlaylistView } from '@/lib/hooks/audio';
 import { useTrackPreview } from '@/lib/hooks/music';
@@ -82,9 +83,7 @@ export function TrackGroups({
                             aria-label={groupLabel}
                             className="flex flex-col gap-2"
                         >
-                            <Button
-                                variant="plain"
-                                size="auto"
+                            <HudButton
                                 type="button"
                                 aria-expanded={!folded}
                                 onClick={() => view.collapsed.toggle(g.name)}
@@ -101,7 +100,7 @@ export function TrackGroups({
                                 <span className="text-xs text-hud-muted">
                                     {g.tracks.length}
                                 </span>
-                            </Button>
+                            </HudButton>
                             {!folded && (
                                 <TrackList
                                     tracks={g.tracks}

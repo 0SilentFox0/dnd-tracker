@@ -8,7 +8,7 @@ import { ScenarioRichText } from './ScenarioRichText';
 import { SectionIcon } from './SectionIcon';
 import { SectionTrackChip } from './SectionTrackChip';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { ScenarioPlay, SectionCollapse } from '@/lib/hooks/scenario';
 import { cn } from '@/lib/utils';
 import { isDocEmpty } from '@/lib/utils/scenario/doc';
@@ -85,9 +85,7 @@ export function ScenarioPageView({
                     const icon = sectionIcon(s);
 
                     const playedButton = progress && (
-                        <Button
-                            variant="plain"
-                            size="auto"
+                        <HudButton
                             type="button"
                             className="toggle played"
                             aria-pressed={done}
@@ -107,7 +105,7 @@ export function ScenarioPageView({
                                 : done
                                   ? t('playedDone')
                                   : t('played')}
-                        </Button>
+                        </HudButton>
                     );
 
                     return (
@@ -121,9 +119,7 @@ export function ScenarioPageView({
                         >
                             {collapsed && (
                                 <div className="sb-sec-collapsed">
-                                    <Button
-                                        variant="plain"
-                                        size="auto"
+                                    <HudButton
                                         type="button"
                                         className="sb-sec-expand"
                                         aria-expanded={false}
@@ -136,7 +132,7 @@ export function ScenarioPageView({
                                         />
                                         <span>{s.title}</span>
                                         <span aria-hidden>▸</span>
-                                    </Button>
+                                    </HudButton>
                                     {playedButton}
                                 </div>
                             )}

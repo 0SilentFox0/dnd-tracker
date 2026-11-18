@@ -8,7 +8,7 @@ import { Pause, Play, SkipBack, SkipForward, Square } from 'lucide-react';
 import { DmPlaylist } from './DmPlaylist';
 import { SeekBar } from './SeekBar';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { type PlayerAudioDm, usePlayerAudio } from '@/lib/hooks/audio';
 
 function IconButton({
@@ -23,9 +23,7 @@ function IconButton({
     children: ReactNode;
 }) {
     return (
-        <Button
-            variant="plain"
-            size="auto"
+        <HudButton
             type="button"
             aria-label={label}
             title={label}
@@ -34,7 +32,7 @@ function IconButton({
             className="flex size-8 items-center justify-center rounded border border-hud-rule hover:bg-white/10 disabled:opacity-40"
         >
             {children}
-        </Button>
+        </HudButton>
     );
 }
 

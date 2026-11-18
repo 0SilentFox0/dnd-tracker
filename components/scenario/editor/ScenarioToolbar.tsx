@@ -19,7 +19,7 @@ import {
     VenetianMask,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { CALLOUT_KINDS } from '@/lib/constants/scenario';
@@ -39,9 +39,7 @@ function Tool({
     children: ReactNode;
 }) {
     return (
-        <Button
-            variant="plain"
-            size="auto"
+        <HudButton
             type="button"
             className="toggle"
             title={label}
@@ -52,7 +50,7 @@ function Tool({
             onClick={onClick}
         >
             {children}
-        </Button>
+        </HudButton>
     );
 }
 

@@ -7,7 +7,7 @@ import { Lock, Music, Star, X } from 'lucide-react';
 import { SHOW_TONE, ShowButton } from './show-ui';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';
 import { type ShowControl, useDeck, useDecks } from '@/lib/hooks/show';
 import { cn } from '@/lib/utils';
@@ -151,9 +151,7 @@ export function ShowDeckStrip({
                                 ref={current ? currentRef : undefined}
                                 className="group relative w-28 shrink-0"
                             >
-                                <Button
-                                    variant="plain"
-                                    size="auto"
+                                <HudButton
                                     type="button"
                                     aria-current={current || undefined}
                                     aria-label={
@@ -190,7 +188,7 @@ export function ShowDeckStrip({
                                         {i + 1}.{' '}
                                         {slide.title ?? t('deckStrip.untitled')}
                                     </span>
-                                </Button>
+                                </HudButton>
                                 {slide.audience && (
                                     <Lock
                                         aria-label={t('deckStrip.audience', {
@@ -206,9 +204,7 @@ export function ShowDeckStrip({
                                     />
                                 )}
                                 {!slide.audience && (
-                                    <Button
-                                        variant="plain"
-                                        size="auto"
+                                    <HudButton
                                         type="button"
                                         aria-pressed={isCover}
                                         aria-label={
@@ -244,7 +240,7 @@ export function ShowDeckStrip({
                                                 isCover && 'fill-current'
                                             )}
                                         />
-                                    </Button>
+                                    </HudButton>
                                 )}
                             </li>
                         );

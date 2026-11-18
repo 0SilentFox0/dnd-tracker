@@ -13,6 +13,7 @@ import {
     X,
 } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -175,16 +176,14 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
                         }
                     />
                     {search.value && (
-                        <Button
-                            variant="plain"
-                            size="auto"
+                        <HudButton
                             type="button"
                             onClick={() => search.set('')}
                             className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-hud-ink"
                             aria-label={t('search.clear')}
                         >
                             <X className="h-4 w-4" />
-                        </Button>
+                        </HudButton>
                     )}
                 </div>
 
@@ -208,9 +207,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
                 />
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         onClick={() => panel.setOpen((o) => !o)}
                         className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold)] md:hidden"
@@ -227,7 +224,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
                         ) : (
                             <ChevronDown className="h-4 w-4" />
                         )}
-                    </Button>
+                    </HudButton>
                     {hasActive && (
                         <Button
                             type="button"

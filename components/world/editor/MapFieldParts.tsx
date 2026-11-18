@@ -6,7 +6,7 @@ import { ChevronRight } from 'lucide-react';
 
 import { ICON_OPTIONS } from './marker-icon-options';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { REVEAL_RADIUS_RANGE } from '@/lib/constants/world';
@@ -61,9 +61,7 @@ export function ChildMapList({
         <ul className="space-y-1">
             {maps.map((m) => (
                 <li key={m.id}>
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         onClick={() => onOpen(m.id)}
                         className={cn(
@@ -76,7 +74,7 @@ export function ChildMapList({
                             className="size-4 shrink-0 text-hud-muted"
                             aria-hidden
                         />
-                    </Button>
+                    </HudButton>
                 </li>
             ))}
         </ul>
@@ -131,9 +129,7 @@ export function MarkerIconGrid({
             {...aria}
         >
             {ICON_OPTIONS.map(({ value: option, Icon }) => (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     key={option}
                     type="button"
                     title={t(`markerKinds.${option}`)}
@@ -149,7 +145,7 @@ export function MarkerIconGrid({
                     )}
                 >
                     <Icon className="size-5" aria-hidden />
-                </Button>
+                </HudButton>
             ))}
         </div>
     );

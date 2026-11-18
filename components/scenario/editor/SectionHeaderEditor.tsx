@@ -8,10 +8,10 @@ import { MarkerPickerDialog } from './MarkerPickerDialog';
 import { OrderButtons } from './OrderButtons';
 import { SectionTrackDialog } from './SectionTrackDialog';
 
+import { HudButton } from '@/components/hud';
 import { MarkerChip } from '@/components/scenario/MarkerChip';
 import { SectionIcon } from '@/components/scenario/SectionIcon';
 import { SectionTrackChip } from '@/components/scenario/SectionTrackChip';
-import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -58,9 +58,7 @@ export function SectionHeaderEditor({
         <h2 className="sb-sec-edit">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle sb-icon-pick"
                         aria-label={t('icon', {
@@ -73,7 +71,7 @@ export function SectionHeaderEditor({
                             name={sectionIcon(section)}
                             className="sb-sec-icon"
                         />
-                    </Button>
+                    </HudButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                     <DropdownMenuItem
@@ -114,16 +112,14 @@ export function SectionHeaderEditor({
                     onRemove={() => actions.onMarker(undefined)}
                 />
             ) : (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     className="toggle"
                     aria-label={t('bindMarker')}
                     onClick={() => setPicking(true)}
                 >
                     <MapPin className="size-3.5" />
-                </Button>
+                </HudButton>
             )}
             {section.trackId && (
                 <SectionTrackChip
@@ -132,16 +128,14 @@ export function SectionHeaderEditor({
                     onRemove={() => actions.onTrack(undefined)}
                 />
             )}
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 className="toggle"
                 aria-label={t('bindTrack')}
                 onClick={() => setPickingTrack(true)}
             >
                 <Music className="size-3.5" />
-            </Button>
+            </HudButton>
             {pickingTrack && (
                 <SectionTrackDialog
                     campaignId={campaignId}

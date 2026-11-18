@@ -11,10 +11,10 @@ import {
     X,
 } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { AddYoutubeTrackDialog } from '@/components/music/AddYoutubeTrackDialog';
 import { TrackTitleInput } from '@/components/music/TrackTitleInput';
 import { UploadTrackButton } from '@/components/music/UploadTrackButton';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import {
@@ -57,9 +57,7 @@ function TrackRow({
                     className="h-auto rounded border-hud-rule bg-black/60 px-1.5 py-1 text-xs text-hud-bone md:text-xs"
                 />
             ) : (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     aria-current={current || undefined}
                     disabled={disabled}
@@ -72,12 +70,10 @@ function TrackRow({
                 >
                     {track.kind === 'youtube' ? '▶ ' : '♪ '}
                     {label}
-                </Button>
+                </HudButton>
             )}
             {!editing && (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     aria-label={t('playlist.renameLabel', {
                         title: track.title,
@@ -87,7 +83,7 @@ function TrackRow({
                     className="flex size-7 shrink-0 items-center justify-center text-hud-muted hover:text-hud-bone"
                 >
                     <Pencil className="size-3.5" />
-                </Button>
+                </HudButton>
             )}
         </li>
     );
@@ -160,9 +156,7 @@ function PlaylistFilters({
                     triggerClassName={SELECT}
                 />
                 {active && (
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         aria-label={t('music.playlist.resetFilters')}
                         title={t('music.playlist.resetFilters')}
@@ -170,7 +164,7 @@ function PlaylistFilters({
                         className="flex size-7 shrink-0 items-center justify-center text-hud-muted hover:text-hud-bone"
                     >
                         <X className="size-3.5" />
-                    </Button>
+                    </HudButton>
                 )}
             </div>
             {active && (
@@ -216,9 +210,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
 
     return (
         <div className="mt-2" data-tour="music.playlist">
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 aria-expanded={open}
                 onClick={() => set(!open)}
@@ -232,7 +224,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                 <span className="hud-sc tracking-[.08em]">
                     {t('music.playlist.title')}
                 </span>
-            </Button>
+            </HudButton>
             {open && (
                 <>
                     <div className="mt-2 flex items-center gap-1">
@@ -240,9 +232,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                             pending={library.isBusy}
                             onFile={(file) => void library.upload(file)}
                         />
-                        <Button
-                            variant="plain"
-                            size="auto"
+                        <HudButton
                             type="button"
                             disabled={library.isBusy}
                             onClick={() => setYoutubeOpen(true)}
@@ -250,7 +240,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                         >
                             <Plus className="size-3.5" />
                             {t('music.youtube.add')}
-                        </Button>
+                        </HudButton>
                     </div>
                     <AddYoutubeTrackDialog
                         open={youtubeOpen}
@@ -279,9 +269,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
 
                                   return (
                                       <li key={g.name}>
-                                          <Button
-                                              variant="plain"
-                                              size="auto"
+                                          <HudButton
                                               type="button"
                                               aria-expanded={!folded}
                                               onClick={() =>
@@ -300,7 +288,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                                               <span className="text-hud-muted">
                                                   {g.tracks.length}
                                               </span>
-                                          </Button>
+                                          </HudButton>
                                           {!folded && (
                                               <ul aria-label={groupLabel}>
                                                   {g.tracks.map(row)}

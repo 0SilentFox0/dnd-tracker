@@ -9,7 +9,7 @@ import {
     ActionsMenu,
     type ActionsMenuItem,
 } from '@/components/common/ActionsMenu';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useCssVarHeight } from '@/lib/hooks/common';
 
 type NavTarget = { href: string; title: string };
@@ -48,9 +48,7 @@ export function ScenarioBar({ title, notes, toc, nav, actions, menu }: Props) {
                     </Link>
                 )}
                 {toc && (
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle sb-bar-toc"
                         aria-label={t('sections')}
@@ -60,20 +58,18 @@ export function ScenarioBar({ title, notes, toc, nav, actions, menu }: Props) {
                         <span className="sb-bar-toc-label">
                             {t('sections')}
                         </span>
-                    </Button>
+                    </HudButton>
                 )}
                 <strong>{title}</strong>
                 <div className="sb-bar-btns">
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle"
                         aria-pressed={notes.hidden}
                         onClick={notes.toggle}
                     >
                         {notes.hidden ? t('showNotes') : t('hideNotes')}
-                    </Button>
+                    </HudButton>
                     {actions}
                     {menu.length > 0 && (
                         <ActionsMenu

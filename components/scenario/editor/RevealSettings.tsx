@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';
 import { useScenarioPage, useScenarioPages } from '@/lib/hooks/scenario';
 import type { RevealRule } from '@/types/scenario';
@@ -119,16 +119,14 @@ export function RevealSettings({
                     />
                 </>
             )}
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 className="toggle"
                 aria-pressed={revealed}
                 onClick={onToggleRevealed}
             >
                 {revealed ? t('revealed') : t('revealNow')}
-            </Button>
+            </HudButton>
         </div>
     );
 }

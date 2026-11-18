@@ -17,7 +17,7 @@ import {
 
 import { useWorldEditorContext } from './WorldEditorContext';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     Tooltip,
     TooltipContent,
@@ -56,9 +56,7 @@ function ToolButton({
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     aria-label={label}
                     aria-pressed={active}
@@ -71,7 +69,7 @@ function ToolButton({
                     )}
                 >
                     <Icon className="size-5" aria-hidden />
-                </Button>
+                </HudButton>
             </TooltipTrigger>
             <TooltipContent side="bottom">
                 {label}
@@ -155,9 +153,7 @@ export function WorldToolbar({
                                     aria-hidden
                                     className="mx-0.5 h-6 w-px shrink-0 bg-hud-rule"
                                 />
-                                <Button
-                                    variant="plain"
-                                    size="auto"
+                                <HudButton
                                     type="button"
                                     aria-label={t('toParent', {
                                         name: parent.name,
@@ -175,7 +171,7 @@ export function WorldToolbar({
                                     <span className="truncate">
                                         {parent.name}
                                     </span>
-                                </Button>
+                                </HudButton>
                             </>
                         ) : null}
                         {onSettings ? (

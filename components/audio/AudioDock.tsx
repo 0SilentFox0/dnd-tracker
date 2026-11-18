@@ -9,7 +9,7 @@ import { PlayerErrorBoundary } from './PlayerErrorBoundary';
 import { UnlockSoundButton } from './UnlockSoundButton';
 import { YoutubePlayer } from './YoutubePlayer';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { usePlayerAudio } from '@/lib/hooks/audio';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
@@ -119,9 +119,7 @@ export function AudioDock({
                         {track && !sound.unlocked && (
                             <UnlockSoundButton className="px-3" />
                         )}
-                        <Button
-                            variant="plain"
-                            size="auto"
+                        <HudButton
                             type="button"
                             data-tour="music.expand"
                             aria-label={t('player.expand', {
@@ -133,7 +131,7 @@ export function AudioDock({
                             <NowPlayingLabel
                                 title={track?.title ?? t('player.label')}
                             />
-                        </Button>
+                        </HudButton>
                     </div>
                 )}
             </div>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     Popover,
     PopoverContent,
@@ -46,9 +46,7 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
 
     if (rest.length === 0) {
         return (
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 aria-label={top.name}
                 data-own={top.own}
@@ -65,16 +63,14 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                 onDoubleClick={(e) => e.stopPropagation()}
             >
                 {avatar}
-            </Button>
+            </HudButton>
         );
     }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     aria-label={t('heroCluster', {
                         name: top.name,
@@ -95,13 +91,11 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                     <span aria-hidden className="atlas-hero-badge">
                         +{rest.length}
                     </span>
-                </Button>
+                </HudButton>
             </PopoverTrigger>
             <PopoverContent className="flex w-48 flex-col gap-1 p-1">
                 {cluster.heroes.map((h) => (
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         key={h.id}
                         type="button"
                         className="flex items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm hover:bg-accent"
@@ -117,7 +111,7 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                             className="size-6 shrink-0 rounded-full"
                         />
                         <span className="truncate">{h.name}</span>
-                    </Button>
+                    </HudButton>
                 ))}
             </PopoverContent>
         </Popover>

@@ -4,7 +4,7 @@ import { type Ref, useImperativeHandle, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { MentionNodeAttrs } from '@tiptap/extension-mention';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { MentionOption } from '@/types/scenario';
 
 export type MentionListHandle = {
@@ -63,9 +63,7 @@ export function MentionList({
                 </div>
             )}
             {items.map((item, i) => (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     key={`${item.type}-${item.id}`}
                     type="button"
                     role="option"
@@ -78,7 +76,7 @@ export function MentionList({
                     <span className="shrink-0 text-xs text-hud-muted">
                         {t(`mentionTypes.${item.type}`)}
                     </span>
-                </Button>
+                </HudButton>
             ))}
         </div>
     );

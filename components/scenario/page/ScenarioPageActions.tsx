@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronDown, Loader2, MessageSquare, RefreshCw } from 'lucide-react';
 
 import { AiProposalBadge } from '@/components/ai';
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -42,15 +43,13 @@ export function ScenarioPageActions({
         <>
             {!flags.editing && flags.canEdit && (
                 <>
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle is-primary"
                         onClick={on.edit}
                     >
                         {t('edit')}
-                    </Button>
+                    </HudButton>
                     <Link
                         className="toggle sb-hide-sm"
                         href={`/campaigns/${campaignId}/show`}

@@ -8,7 +8,7 @@ import { RowBindings } from './RowBindings';
 import type { CellColumn } from './ScenarioCell';
 import { SectionHeaderEditor } from './SectionHeaderEditor';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     addRow,
     moveRow,
@@ -153,16 +153,14 @@ export function ScenarioEditorSection({
                     </aside>
                 </div>
             ))}
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 className="toggle sans"
                 style={{ marginTop: 12 }}
                 onClick={() => setContent((c) => addRow(c, s.id))}
             >
                 {t('addRow')}
-            </Button>
+            </HudButton>
         </section>
     );
 }

@@ -22,6 +22,7 @@ import { type CellColumn, ScenarioCell } from './ScenarioCell';
 import { ScenarioEditorSection } from './ScenarioEditorSection';
 import { ScenarioToolbar } from './ScenarioToolbar';
 
+import { HudButton } from '@/components/hud';
 import { ScenarioLayout } from '@/components/scenario/ScenarioLayout';
 import { ScenarioLegend } from '@/components/scenario/ScenarioLegend';
 import {
@@ -29,7 +30,6 @@ import {
     type TocControl,
     tocItems,
 } from '@/components/scenario/ScenarioToc';
-import { Button } from '@/components/ui/button';
 import { useConfirm, useCssVarHeight } from '@/lib/hooks/common';
 import {
     useMentionSearch,
@@ -216,24 +216,20 @@ export function ScenarioEditor({
                         onReload={() => void draft.reload()}
                         onRetain={draft.retainLocal}
                     />
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle"
                         onClick={() => setPropsOpen(true)}
                     >
                         {t('properties')}
-                    </Button>
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    </HudButton>
+                    <HudButton
                         type="button"
                         className="toggle"
                         onClick={() => void finish()}
                     >
                         {t('done')}
-                    </Button>
+                    </HudButton>
                     {toolbarActions}
                 </div>
             </div>
@@ -261,9 +257,7 @@ export function ScenarioEditor({
                             ops={sectionOps}
                         />
                     ))}
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle sans"
                         style={{ marginTop: 40 }}
@@ -277,7 +271,7 @@ export function ScenarioEditor({
                         }
                     >
                         {t('addSection')}
-                    </Button>
+                    </HudButton>
                 </main>
             </ScenarioLayout>
             {acquaintance && (

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { DraftError, DraftState } from '@/lib/hooks/scenario';
 
 export function SaveStatus({
@@ -34,16 +34,14 @@ export function SaveStatus({
         >
             {state === 'error' && error ? error.message : t(state)}
             {state === 'error' && error?.retryable !== false && (
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     className="toggle"
                     style={{ marginLeft: 8 }}
                     onClick={onRetry}
                 >
                     {t('retry')}
-                </Button>
+                </HudButton>
             )}
             {state === 'conflict' && (
                 <>
@@ -51,26 +49,22 @@ export function SaveStatus({
                         {' '}
                         {t('conflictNote')} {error?.message}
                     </span>
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         className="toggle"
                         style={{ marginLeft: 8 }}
                         onClick={onReload}
                     >
                         {t('discard')}
-                    </Button>
+                    </HudButton>
                     {onRetain && (
-                        <Button
-                            variant="plain"
-                            size="auto"
+                        <HudButton
                             type="button"
                             className="toggle"
                             onClick={onRetain}
                         >
                             {t('keepLocal')}
-                        </Button>
+                        </HudButton>
                     )}
                 </>
             )}

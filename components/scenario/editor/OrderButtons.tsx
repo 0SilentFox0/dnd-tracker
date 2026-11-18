@@ -2,7 +2,7 @@
 
 import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 
 export function OrderButtons({
     labels,
@@ -15,36 +15,30 @@ export function OrderButtons({
 }) {
     return (
         <>
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 className="toggle"
                 aria-label={labels.up}
                 onClick={() => onMove(-1)}
             >
                 <ArrowUp className="size-4" />
-            </Button>
-            <Button
-                variant="plain"
-                size="auto"
+            </HudButton>
+            <HudButton
                 type="button"
                 className="toggle"
                 aria-label={labels.down}
                 onClick={() => onMove(1)}
             >
                 <ArrowDown className="size-4" />
-            </Button>
-            <Button
-                variant="plain"
-                size="auto"
+            </HudButton>
+            <HudButton
                 type="button"
                 className="toggle"
                 aria-label={labels.remove}
                 onClick={onRemove}
             >
                 <Trash2 className="size-4" />
-            </Button>
+            </HudButton>
         </>
     );
 }

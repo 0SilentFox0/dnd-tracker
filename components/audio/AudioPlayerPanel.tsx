@@ -8,7 +8,7 @@ import { DmAudioControls } from './DmAudioControls';
 import { NowPlayingLabel } from './NowPlayingLabel';
 import { UnlockSoundButton } from './UnlockSoundButton';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { Slider } from '@/components/ui/slider';
 import { usePlayerAudio } from '@/lib/hooks/audio';
 import { cn } from '@/lib/utils';
@@ -49,9 +49,7 @@ export function AudioPlayerPanel({
                     <span className="text-hud-muted">{t('player.paused')}</span>
                 )}
                 {state?.track?.kind === 'youtube' && (
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         aria-pressed={prefs.video.shown}
                         onClick={() => prefs.video.set(!prefs.video.shown)}
@@ -64,11 +62,9 @@ export function AudioPlayerPanel({
                     >
                         <Video className="size-3.5" />
                         {t('player.video')}
-                    </Button>
+                    </HudButton>
                 )}
-                <Button
-                    variant="plain"
-                    size="auto"
+                <HudButton
                     type="button"
                     data-tour="music.collapse"
                     aria-label={t('player.collapse')}
@@ -76,13 +72,11 @@ export function AudioPlayerPanel({
                     className="text-hud-muted hover:text-hud-bone"
                 >
                     <ChevronDown className="size-4" />
-                </Button>
+                </HudButton>
             </header>
             {sound.unlocked ? (
                 <div className="mt-2 flex items-center gap-2">
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         aria-label={
                             prefs.muted
@@ -97,7 +91,7 @@ export function AudioPlayerPanel({
                         ) : (
                             <Volume2 className="size-4" />
                         )}
-                    </Button>
+                    </HudButton>
                     <Slider
                         aria-label={t('player.volume')}
                         min={0}

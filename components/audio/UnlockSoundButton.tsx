@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { usePlayerAudio } from '@/lib/hooks/audio';
 import { cn } from '@/lib/utils';
 
@@ -13,9 +13,7 @@ export function UnlockSoundButton({ className }: { className?: string }) {
     const { sound } = usePlayerAudio();
 
     return (
-        <Button
-            variant="plain"
-            size="auto"
+        <HudButton
             type="button"
             className={cn(
                 'hud-sc flex h-8 items-center justify-center bg-[var(--enemy,#9c2a1d)] text-sm text-[#fffaf0]',
@@ -24,6 +22,6 @@ export function UnlockSoundButton({ className }: { className?: string }) {
             onClick={sound.unlock}
         >
             {t('player.unlock')}
-        </Button>
+        </HudButton>
     );
 }

@@ -4,6 +4,7 @@ import { type KeyboardEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Send, Square, X } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AI_LIMITS, type AiThreadMode } from '@/lib/constants/ai';
@@ -60,15 +61,13 @@ export function AiComposer({
             {focusLabel ? (
                 <div className="flex items-center justify-between gap-2 rounded-md bg-muted px-2 py-1 text-xs">
                     <span>{focusLabel}</span>
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         aria-label={t('composer.clearFocus')}
                         onClick={actions.onClearFocus}
                     >
                         <X className="size-3.5" aria-hidden />
-                    </Button>
+                    </HudButton>
                 </div>
             ) : null}
             {mode === 'live' && !busy ? (

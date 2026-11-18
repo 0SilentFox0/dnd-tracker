@@ -20,6 +20,7 @@ import { NewWorldMapDialog } from './NewWorldMapDialog';
 import { useWorldEditorContext } from './WorldEditorContext';
 
 import { ColorSwatch } from '@/components/common/ColorSwatch';
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import {
     Popover,
@@ -78,9 +79,7 @@ export function MarkerStrip({
             {marker.kind === 'point' ? (
                 <Popover open={iconOpen} onOpenChange={setIconOpen}>
                     <PopoverTrigger asChild>
-                        <Button
-                            variant="plain"
-                            size="auto"
+                        <HudButton
                             type="button"
                             aria-label={t('editor.icon')}
                             title={t('editor.icon')}
@@ -88,7 +87,7 @@ export function MarkerStrip({
                         >
                             <Icon className="size-4" aria-hidden />
                             {t('editor.icon')}
-                        </Button>
+                        </HudButton>
                     </PopoverTrigger>
                     <PopoverContent className={POPOVER}>
                         <MarkerIconGrid
@@ -155,7 +154,7 @@ export function MarkerStrip({
             </Button>
             <Popover onOpenChange={(o) => !o && commitNote()}>
                 <PopoverTrigger asChild>
-                    <Button variant="plain" size="auto" type="button" className={CHIP}>
+                    <HudButton type="button" className={CHIP}>
                         <NotebookPen className="size-4" aria-hidden />
                         {t('editor.note')}
                         {note.trim() ? (
@@ -164,7 +163,7 @@ export function MarkerStrip({
                                 className="size-1.5 rounded-full bg-[var(--gold)]"
                             />
                         ) : null}
-                    </Button>
+                    </HudButton>
                 </PopoverTrigger>
                 <PopoverContent className={cn(POPOVER, 'w-72')}>
                     <Textarea
@@ -179,10 +178,10 @@ export function MarkerStrip({
             </Popover>
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="plain" size="auto" type="button" className={CHIP}>
+                    <HudButton type="button" className={CHIP}>
                         <MessagesSquare className="size-4" aria-hidden />
                         {t('editor.playerNotes')}
-                    </Button>
+                    </HudButton>
                 </PopoverTrigger>
                 <PopoverContent
                     className={cn(POPOVER, 'max-h-96 w-80 overflow-y-auto')}

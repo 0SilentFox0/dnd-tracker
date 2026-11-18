@@ -3,7 +3,7 @@
 import { Component, type ErrorInfo, Fragment, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 
 interface Props {
     /** новий трек — нова спроба */
@@ -26,16 +26,14 @@ function PlayerFailedNotice({ onRestart }: { onRestart(): void }) {
             className="mt-2 flex items-center gap-2 text-[var(--enemy)]"
         >
             {t('player.failedTitle')}
-            <Button
-                variant="plain"
-                size="auto"
+            <HudButton
                 type="button"
                 aria-label={t('player.restartLabel')}
                 onClick={onRestart}
                 className="underline"
             >
                 {t('player.restart')}
-            </Button>
+            </HudButton>
         </p>
     );
 }

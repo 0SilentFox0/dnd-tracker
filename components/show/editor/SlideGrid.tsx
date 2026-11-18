@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { DeckDraftAction } from '@/lib/utils/show/deck-draft';
 import type { Slide } from '@/types/show';
 
@@ -28,9 +28,7 @@ function IconButton({
     onClick(): void;
 }) {
     return (
-        <Button
-            variant="plain"
-            size="auto"
+        <HudButton
             type="button"
             aria-label={label}
             disabled={disabled}
@@ -38,7 +36,7 @@ function IconButton({
             className="flex size-7 items-center justify-center rounded text-hud-muted hover:bg-white/10 hover:text-hud-bone disabled:opacity-30"
         >
             <Icon className="size-4" />
-        </Button>
+        </HudButton>
     );
 }
 
@@ -60,9 +58,7 @@ export function SlideGrid({
                     key={slide.id}
                     className="overflow-hidden rounded border border-hud-rule bg-black/40"
                 >
-                    <Button
-                        variant="plain"
-                        size="auto"
+                    <HudButton
                         type="button"
                         aria-label={t('slide', { index: i + 1 })}
                         onClick={() => edit(slide.id)}
@@ -94,7 +90,7 @@ export function SlideGrid({
                                 <Music className="size-3.5" />
                             </span>
                         )}
-                    </Button>
+                    </HudButton>
                     <div className="flex items-center gap-1 px-1.5 py-1">
                         <span
                             className="min-w-0 flex-1 truncate text-xs text-hud-bone"
