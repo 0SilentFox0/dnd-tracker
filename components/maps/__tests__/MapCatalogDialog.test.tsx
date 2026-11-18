@@ -11,6 +11,7 @@ import type { MapCatalogEntry } from '@/types/map-catalog';
 vi.mock('@/lib/hooks/battle-maps/useMapCatalog', () => ({
     useMapCatalog: vi.fn(),
 }));
+
 const entry: MapCatalogEntry = {
     id: 'maps/cave/Room.dd2vtt',
     category: 'cave / rooms',
@@ -37,6 +38,7 @@ function renderDialog(onImport = vi.fn().mockResolvedValue({ id: 'map-1' })) {
         isLoading: false,
         isError: false,
     } as never);
+
     const onOpenChange = vi.fn();
 
     const view = renderWithIntl(

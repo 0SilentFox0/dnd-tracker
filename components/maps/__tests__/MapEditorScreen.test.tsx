@@ -339,7 +339,7 @@ describe('MapEditorScreen', () => {
     it('filters texture cards by their localized label', () => {
         renderTileEditor();
 
-        const search = screen.getByRole('textbox', {
+        const search = screen.getByRole('searchbox', {
             name: 'maps.editor.tiles.search',
         });
 
@@ -373,7 +373,7 @@ describe('MapEditorScreen', () => {
             name: 'maps.editor.tiles.save',
         }) as HTMLButtonElement;
 
-        const search = screen.getByRole('textbox', {
+        const search = screen.getByRole('searchbox', {
             name: 'maps.editor.tiles.search',
         });
 
