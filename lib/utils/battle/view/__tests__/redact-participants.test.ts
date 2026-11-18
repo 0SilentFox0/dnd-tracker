@@ -72,7 +72,7 @@ describe('redactParticipantsForViewer', () => {
     });
 
     it('проєкція зберігає healthState для кожного відра', () => {
-        for (const currentHp of [40, 30, 15, 6, 0]) {
+        for (const currentHp of [40, 39, 21, 20, 11, 10, 1, 0]) {
             const raw = foe({ currentHp });
 
             const [p] = redactParticipantsForViewer(player, [raw], DEFAULT_RULES);
