@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { HudToggleChip, HudToolbar } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
 import { SelectField } from '@/components/ui/select-field';
@@ -13,7 +14,6 @@ import {
     type TerrainBrush,
 } from '@/lib/hooks/battle';
 import { useCoarsePointer } from '@/lib/hooks/common';
-import { cn } from '@/lib/utils';
 
 const BRUSHES: TerrainBrush[] = [
     'wall',
@@ -77,23 +77,16 @@ export function MapTerrainToolbar({
     }));
 
     return (
-        <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
+        <HudToolbar className="max-w-[calc(100%-1rem)]">
             {brushes.map((value) => (
-                <button
+                <HudToggleChip
                     key={value}
-                    type="button"
-                    aria-pressed={brush.kind === value}
+                    active={brush.kind === value}
                     disabled={edgesInMode && EDGE_BRUSHES.includes(value)}
                     onClick={() => setBrush({ kind: value })}
-                    className={cn(
-                        'h-7 rounded-md border bg-black/60 px-2 hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50',
-                        brush.kind === value
-                            ? 'border-[var(--gold)] text-hud-gold-bright'
-                            : 'border-hud-rule text-hud-muted'
-                    )}
                 >
                     {t(`brushes.${value}`)}
-                </button>
+                </HudToggleChip>
             ))}
             {edgeNotice && (
                 <p role="status" className="w-full text-hud-muted">
@@ -156,6 +149,6 @@ export function MapTerrainToolbar({
                     </label>
                 </>
             )}
-        </div>
+        </HudToolbar>
     );
 }

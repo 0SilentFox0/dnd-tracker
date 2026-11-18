@@ -4,7 +4,7 @@ import { type CSSProperties, memo } from 'react';
 
 import { tileDefinition } from '@/lib/constants/tilesets/catalog';
 import type { MapSpellEffect } from '@/lib/constants/tilesets/types';
-import { type GridWindow, UNIT } from '@/lib/utils/battle/grid';
+import type { GridWindow } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { BattleMapConfig } from '@/types/battle-grid';
 

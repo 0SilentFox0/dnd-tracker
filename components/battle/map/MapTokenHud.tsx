@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
+import { Button } from '@/components/ui/button';
 import {
     useDamageShake,
     useFxEnabled,
@@ -128,10 +129,11 @@ function MapTokenHudImpl({
             style={{ ...tokenBoxStyle(box, mapSize), zIndex: raised ? 20 : 10 }}
         >
             {onReturn && (
-                <button
+                <Button
                     type="button"
+                    variant="outline"
                     data-map-return
-                    className="hud-sc pointer-events-auto absolute top-0 left-1/2 z-10 -translate-x-1/2 rounded-md border border-white/20 bg-black/80 px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-[var(--ink)] hover:bg-black"
+                    className="hud-sc pointer-events-auto absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 rounded-md border-white/20 bg-black/80 px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-[var(--ink)] shadow-none hover:bg-black hover:text-[var(--ink)]"
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                         e.stopPropagation();
@@ -139,7 +141,7 @@ function MapTokenHudImpl({
                     }}
                 >
                     {t('returnToToken')}
-                </button>
+                </Button>
             )}
             {showHud && (
                 <div

@@ -156,27 +156,7 @@
         "count": 1
     },
     {
-        "file": "components/battle/map/fog/MapFogToolbar.tsx",
-        "count": 3
-    },
-    {
-        "file": "components/battle/map/MapMotionPanel.tsx",
-        "count": 6
-    },
-    {
-        "file": "components/battle/map/MapTerrainToolbar.tsx",
-        "count": 1
-    },
-    {
         "file": "components/battle/map/MapToken.tsx",
-        "count": 1
-    },
-    {
-        "file": "components/battle/map/MapTokenHud.tsx",
-        "count": 1
-    },
-    {
-        "file": "components/battle/map/MapWeatherPicker.tsx",
         "count": 1
     },
     {
@@ -526,10 +506,6 @@
     {
         "file": "components/layout/Header.tsx",
         "count": 2
-    },
-    {
-        "file": "components/maps/MapCatalogDialog.tsx",
-        "count": 1
     },
     {
         "file": "components/music/TrackGroups.tsx",
