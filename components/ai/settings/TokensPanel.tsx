@@ -32,6 +32,7 @@ export function TokensPanel({
                         scopes={scopes}
                         actions={{
                             onCreate: tokens.create,
+                            onRotate: tokens.rotate,
                             onRevoke: (id) => void tokens.revoke(id),
                         }}
                     />

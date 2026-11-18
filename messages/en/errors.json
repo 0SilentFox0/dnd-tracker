@@ -223,6 +223,7 @@
   "deckCorrupt": "The deck slides are corrupted and cannot be extended — open the deck and save it again",
   "aiImageNotOwned": "This image does not belong to the campaign",
   "aiProposalDone": "The proposal has already been applied or rejected",
+  "apiTokenExpired": "The token has expired — rotate or create a new one",
   "apiTokenNotFound": "Token not found",
   "apiTokenScopeMissing": "The token lacks the required permission",
   "apiTokenWrongCampaign": "The token belongs to another campaign",

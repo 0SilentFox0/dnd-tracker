@@ -4,6 +4,7 @@ import {
     createApiToken,
     listApiTokens,
     revokeApiToken,
+    rotateApiToken,
 } from '@/lib/ai/api-tokens';
 import { guarded } from '@/lib/ai/guarded';
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -51,4 +52,21 @@ export const revokeApiTokenHandler = (campaignId: string, tokenId: string) =>
             (await revokeApiToken(campaignId, access.userId, tokenId))
                 ? NextResponse.json({ ok: true })
                 : errorResponse(API_ERRORS.API_TOKEN_NOT_FOUND, 404)
+    );
+
+export const rotateApiTokenHandler = (campaignId: string, tokenId: string) =>
+    guarded(
+        'rotate api token',
+        () => requireDM(campaignId),
+        async (access) => {
+            const rotated = await rotateApiToken(
+                campaignId,
+                access.userId,
+                tokenId
+            );
+
+            return rotated
+                ? NextResponse.json(rotated, { status: 201 })
+                : errorResponse(API_ERRORS.API_TOKEN_NOT_FOUND, 404);
+        }
     );

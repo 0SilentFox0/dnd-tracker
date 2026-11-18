@@ -152,6 +152,8 @@
   "tokens": {
     "neverUsed": "never used",
     "revoke": "Revoke",
+    "rotate": "Rotate",
+    "expiresAt": "expires {date}",
     "create": "Create token",
     "revokeConfirm": {
       "title": "Revoke the token?",

@@ -77,6 +77,18 @@ describe('resolveActor', () => {
         expect(apiAuth.requireCampaignAccess).not.toHaveBeenCalled();
     });
 
+    it('прострочений токен — 401 без відкату до сесії', async () => {
+        vi.mocked(verifyApiToken).mockResolvedValue('expired');
+
+        const res = await resolveActor(withBearer('Bearer dndt_old'), 'c1', {
+            access: 'member',
+            scope: 'content:read',
+        });
+
+        expect(status(res)).toBe(401);
+        expect(apiAuth.requireCampaignAccess).not.toHaveBeenCalled();
+    });
+
     it.each(['Bearer', 'Bearer   ', 'Basic abc'])(
         'заголовок «%s» — 401',
         async (value) => {

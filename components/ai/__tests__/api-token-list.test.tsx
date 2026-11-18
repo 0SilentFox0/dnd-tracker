@@ -12,6 +12,7 @@ const token = {
     prefix: 'dndt_ab12',
     scopes: ['ai'] as ApiTokenScope[],
     lastUsedAt: null,
+    expiresAt: null,
     createdAt: '2026-10-21T00:00:00Z',
 };
 
@@ -29,7 +30,7 @@ describe('ApiTokenList', () => {
             <ApiTokenList
                 tokens={[token]}
                 scopes={API_TOKEN_SCOPES}
-                actions={{ onCreate, onRevoke: vi.fn() }}
+                actions={{ onCreate, onRevoke: vi.fn(), onRotate: vi.fn() }}
             />
         );
 
@@ -73,7 +74,7 @@ describe('ApiTokenList', () => {
             <ApiTokenList
                 tokens={[token]}
                 scopes={API_TOKEN_SCOPES}
-                actions={{ onCreate, onRevoke: vi.fn() }}
+                actions={{ onCreate, onRevoke: vi.fn(), onRotate: vi.fn() }}
             />
         );
 
@@ -118,7 +119,11 @@ describe('ApiTokenList', () => {
             <ApiTokenList
                 tokens={[]}
                 scopes={['content:read', 'content:write']}
-                actions={{ onCreate: vi.fn(), onRevoke: vi.fn() }}
+                actions={{
+                    onCreate: vi.fn(),
+                    onRevoke: vi.fn(),
+                    onRotate: vi.fn(),
+                }}
             />
         );
         fireEvent.click(
@@ -127,5 +132,26 @@ describe('ApiTokenList', () => {
         expect(
             screen.queryByRole('checkbox', { name: 'ai.tokenScopes.ai' })
         ).toBeNull();
+    });
+
+    it('оновлення показує новий токен у діалозі', async () => {
+        const onRotate = vi.fn(async () => ({
+            ...token,
+            id: 'k3',
+            token: 'dndt_ROTATED',
+        }));
+
+        renderWithConfirm(
+            <ApiTokenList
+                tokens={[token]}
+                scopes={API_TOKEN_SCOPES}
+                actions={{ onCreate: vi.fn(), onRevoke: vi.fn(), onRotate }}
+            />
+        );
+        fireEvent.click(
+            screen.getByRole('button', { name: 'ai.tokens.rotate' })
+        );
+        expect(await screen.findByText('dndt_ROTATED')).toBeTruthy();
+        expect(onRotate).toHaveBeenCalledWith('k1');
     });
 });

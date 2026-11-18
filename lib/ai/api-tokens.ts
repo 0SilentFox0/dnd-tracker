@@ -24,6 +24,7 @@ const SELECT = {
     scopes: true,
     executionMode: true,
     lastUsedAt: true,
+    expiresAt: true,
     createdAt: true,
 } as const;
 
@@ -41,6 +42,7 @@ const toSummary = (r: {
     prefix: string;
     scopes: string[];
     lastUsedAt: Date | null;
+    expiresAt: Date | null;
     createdAt: Date;
     executionMode?: string;
 }): ApiTokenSummary => ({
@@ -48,13 +50,15 @@ const toSummary = (r: {
     executionMode: r.executionMode === 'auto' ? 'auto' : 'review',
     scopes: knownScopes(r.scopes),
     lastUsedAt: r.lastUsedAt?.toISOString() ?? null,
+    expiresAt: r.expiresAt?.toISOString() ?? null,
     createdAt: r.createdAt.toISOString(),
 });
 
 export async function createApiToken(
     campaignId: string,
     userId: string,
-    { name, scopes }: CreateApiTokenInput
+    { name, scopes, expiresAt }: CreateApiTokenInput,
+    executionMode?: string
 ): Promise<CreatedApiToken> {
     const token = `${API_TOKEN_PREFIX}${randomBytes(32).toString('base64url')}`;
 
@@ -66,6 +70,8 @@ export async function createApiToken(
             tokenHash: hashToken(token),
             prefix: token.slice(0, API_TOKEN_PREFIX.length + 4),
             scopes: [...scopes],
+            expiresAt: expiresAt ? new Date(expiresAt) : null,
+            ...(executionMode && { executionMode }),
         },
         select: SELECT,
     });
@@ -101,13 +107,52 @@ export async function revokeApiToken(
     );
 }
 
-export async function verifyApiToken(raw: string): Promise<{
+export async function rotateApiToken(
+    campaignId: string,
+    userId: string,
+    tokenId: string
+): Promise<CreatedApiToken | null> {
+    const old = await prisma.apiToken.findFirst({
+        where: { id: tokenId, campaignId, userId, revokedAt: null },
+        select: { ...SELECT },
+    });
+
+    if (!old) return null;
+
+    const ttlMs = old.expiresAt
+        ? old.expiresAt.getTime() - old.createdAt.getTime()
+        : null;
+
+    const created = await createApiToken(
+        campaignId,
+        userId,
+        {
+            name: old.name,
+            scopes: knownScopes(old.scopes),
+            expiresAt:
+                ttlMs === null
+                    ? null
+                    : new Date(Date.now() + ttlMs).toISOString(),
+        },
+        old.executionMode
+    );
+
+    await revokeApiToken(campaignId, userId, tokenId);
+
+    return created;
+}
+
+export type VerifiedApiToken = {
     id: string;
     campaignId: string;
     userId: string;
     scopes: ApiTokenScope[];
     locale: Locale;
-} | null> {
+};
+
+export async function verifyApiToken(
+    raw: string
+): Promise<VerifiedApiToken | 'expired' | null> {
     if (!raw.startsWith(API_TOKEN_PREFIX)) return null;
 
     const row = await prisma.apiToken.findUnique({
@@ -117,12 +162,16 @@ export async function verifyApiToken(raw: string): Promise<{
             campaignId: true,
             userId: true,
             revokedAt: true,
+            expiresAt: true,
             scopes: true,
             campaign: { select: { kind: true, dmUserId: true } },
         },
     });
 
     if (!row || row.revokedAt) return null;
+
+    if (row.expiresAt && row.expiresAt.getTime() <= Date.now())
+        return 'expired';
 
     const [members, owner] = await Promise.all([
         prisma.campaignMember.findMany({

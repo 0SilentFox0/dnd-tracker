@@ -241,6 +241,7 @@ export const API_ERRORS = {
     DECK_CORRUPT: 'errors.deckCorrupt',
     AI_IMAGE_NOT_OWNED: 'errors.aiImageNotOwned',
     AI_PROPOSAL_DONE: 'errors.aiProposalDone',
+    API_TOKEN_EXPIRED: 'errors.apiTokenExpired',
     API_TOKEN_NOT_FOUND: 'errors.apiTokenNotFound',
     API_TOKEN_SCOPE_MISSING: 'errors.apiTokenScopeMissing',
     API_TOKEN_WRONG_CAMPAIGN: 'errors.apiTokenWrongCampaign',

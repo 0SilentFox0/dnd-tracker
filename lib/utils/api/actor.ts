@@ -64,6 +64,9 @@ export async function verifyBearer(
 > {
     const token = raw ? await verifyApiToken(raw) : null;
 
+    if (token === 'expired')
+        return errorResponse(API_ERRORS.API_TOKEN_EXPIRED, 401);
+
     if (!token) return errorResponse(API_ERRORS.UNAUTHORIZED, 401);
 
     if (campaignId !== null && token.campaignId !== campaignId)

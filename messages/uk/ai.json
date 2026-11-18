@@ -152,6 +152,8 @@
   "tokens": {
     "neverUsed": "ще не використовувався",
     "revoke": "Відкликати",
+    "rotate": "Оновити",
+    "expiresAt": "діє до {date}",
     "create": "Створити токен",
     "revokeConfirm": {
       "title": "Відкликати токен?",

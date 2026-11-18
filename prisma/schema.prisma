@@ -1094,6 +1094,7 @@ model ApiToken {
   scopes           String[]
   lastUsedAt       DateTime?
   revokedAt        DateTime?
+  expiresAt        DateTime?
   createdAt        DateTime          @default(now())
   campaign         Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 

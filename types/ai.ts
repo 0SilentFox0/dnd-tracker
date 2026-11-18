@@ -163,12 +163,14 @@ export interface ApiTokenSummary {
     prefix: string;
     scopes: ApiTokenScope[];
     lastUsedAt: string | null;
+    expiresAt: string | null;
     createdAt: string;
 }
 
 export interface CreateApiTokenInput {
     name: string;
     scopes: ApiTokenScope[];
+    expiresAt?: string | null;
 }
 
 export interface CreatedApiToken extends ApiTokenSummary {
