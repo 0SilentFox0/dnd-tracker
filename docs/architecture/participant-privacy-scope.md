@@ -69,3 +69,17 @@
 - **Версії та відкат**: дельти й `cancelledFrom` припускають, що клієнтський кеш збігається зі станом; різні проєкції для ДМ/гравця вимагають окремих тестів на злив і resync.
 - **Кеш SSR**: `PrefetchedQuery` кладе відповідь у HTML; редагована відповідь залежить від користувача, тож її не можна кешувати спільно.
 - **Верифікація**: жива Pusher-дельта гравцю не перевірена (немає другого акаунта).
+
+## Реалізація (L8b-1)
+
+`redactParticipantsForViewer(viewer, participants)` / `redactPatchesForViewer` / `redactPendingForViewer` (`lib/utils/battle/view/redact-participants.ts`), чисті функції; точки виходу: `toBattleResponse` (GET, SSR, відповідь ДМ-сервісу), `redactDeltaForPlayers` (відповідь мутації й публічна Pusher-дельта). ДМ і dm-канал бачать усе.
+
+Рішення для учасника, який не точний для глядача (`canSeeExactStats` + власні герої за `controlledBy`):
+
+- `currentHp`/`maxHp`: проєкція на відро `healthState` (`maxHp = 100`; 100/75/40/10/0), тож UI грубого стану не змінюється; `tempHp` та `armorClass` = 0;
+- `abilities`: лише `level`, `initiative`, `baseInitiative`, `race(Id)`; бали й модифікатори нейтральні; слот `system` без `ext` (мораль, лігво, d20 death saves);
+- `battleData`: без `hpMultiplier`, `damageMultiplier`, `lairResistances`, `senses`, `languages`, `telepathy`, `pendingHits`, `ingredientStock`, `legendary`; слот `system` без `ext`; concealed-ефекти знято;
+- `spellcasting` порожній; `attacks`, `resolvedAbilities`, активні ефекти лишаються (потрібні карті, аурам і досяжності клієнта) — свідомий залишок;
+- патчі (`patched`) проєктуються за `maxHp`/`status` власника, секретні ключі відкидаються.
+
+Публічна Pusher-дельта використовує найсуворішого глядача. Гравець, у якого кожен герой має `seeEnemyHp` (`alwaysSeesEnemyStats`), точні дані бере з GET/відповіді мутації; на `redacted` дельту `usePusherBattleSync` лише інвалідує сцену. `snapshot`/`snapshotHash` у клієнтські типи не потрапляють (лишаються на сервері).

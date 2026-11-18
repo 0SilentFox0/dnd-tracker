@@ -9,7 +9,7 @@ import {
     hiddenTargetSteps,
     PLAYER_VIEWER,
     redactLogForPlayers,
-    redactParticipantsForPlayers,
+    redactParticipantsForViewer,
     sanitizeLogEntry,
 } from '@/lib/utils/battle/view';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -421,19 +421,23 @@ describe('видимість', () => {
             effect('own', true),
         ]);
 
-        const [redactedFoe, redactedFriend] = redactParticipantsForPlayers([
-            foe,
-            friend,
-        ]);
+        const [redactedFoe, redactedFriend] = redactParticipantsForViewer(
+            PLAYER_VIEWER,
+            [foe, friend]
+        );
 
         expect(redactedFoe.battleData.activeEffects.map((e) => e.id)).toEqual([
             'keep',
         ]);
         expect(redactedFriend).toBe(friend);
 
-        const clean = withEffects(ParticipantSide.ENEMY, 'c', [effect('keep')]);
+        const allyClean = withEffects(ParticipantSide.ALLY, 'c', [
+            effect('keep'),
+        ]);
 
-        expect(redactParticipantsForPlayers([clean])[0]).toBe(clean);
+        expect(redactParticipantsForViewer(PLAYER_VIEWER, [allyClean])[0]).toBe(
+            allyClean
+        );
     });
 
     it('кроки цілі ховаються, доки не помічені в журналі', () => {

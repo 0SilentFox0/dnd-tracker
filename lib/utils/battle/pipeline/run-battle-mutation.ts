@@ -5,6 +5,7 @@ import {
     buildPusherMessages,
     redactDeltaForPlayers,
     toBattleResponse,
+    viewerOf,
 } from './battle-response';
 import { buildClientDelta } from './client-delta';
 import { guardTurnOrder } from './turn-order-guard';
@@ -375,7 +376,7 @@ async function buildScenePreview(
         result.participants,
         result.pending,
         { mode: 'full', entries },
-        { isDM: loaded.isDM }
+        { isDM: loaded.isDM, userId }
     );
 
     return knowledge ? { ...battle, knowledge } : battle;
@@ -606,7 +607,8 @@ export async function runGuardedBattleOperationCore<TBody>(
         : redactDeltaForPlayers(
               clientDelta,
               result.participants,
-              loaded.meta.rules
+              loaded.meta.rules,
+              viewerOf({ userId }, result.participants)
           ).delta;
 
     return {

@@ -12,8 +12,9 @@ import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { splitParticipant } from '@/lib/utils/battle/store';
 import {
+    PLAYER_VIEWER,
     redactLogForPlayers,
-    redactParticipantsForPlayers,
+    redactParticipantsForViewer,
 } from '@/lib/utils/battle/view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
@@ -258,7 +259,7 @@ describe('wfrp magic end to end (engine)', () => {
             true
         );
 
-        const shown = redactParticipantsForPlayers(out.participants).find(
+        const shown = redactParticipantsForViewer(PLAYER_VIEWER, out.participants).find(
             (p) => p.basicInfo.id === 'foe'
         ) as BattleParticipant;
 
