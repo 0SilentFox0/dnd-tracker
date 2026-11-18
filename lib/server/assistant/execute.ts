@@ -189,10 +189,10 @@ async function dispatchActionWith(
     if (action.effect === 'paid' && !caller.runId)
         throw new ContentError(API_ERRORS.ASSISTANT_RUN_ID_REQUIRED, 409);
 
-    const { request, originKey, requestHash } = identifyActionRequest(
-        caller,
-        { ...raw, input }
-    );
+    const { request, originKey, requestHash } = identifyActionRequest(caller, {
+        ...raw,
+        input,
+    });
 
     const prior = await priorResult(db, caller, {
         originKey,
@@ -219,11 +219,8 @@ async function dispatchActionWith(
     });
 
     if (
-        confirmationFor(
-            action,
-            await executionModeFor(caller, db),
-            preview
-        ) === 'none'
+        confirmationFor(action, await executionModeFor(caller, db), preview) ===
+        'none'
     ) {
         const receipt = await executeIntent(
             deps,
@@ -284,7 +281,12 @@ export function createAssistantExecutor(options: Options = {}) {
     async function rejectIntent(caller: AssistantCaller, id: string) {
         const callbacks: Array<() => void> = [];
 
-        const result = await rejectIntentTransaction(deps, caller, id, callbacks);
+        const result = await rejectIntentTransaction(
+            deps,
+            caller,
+            id,
+            callbacks
+        );
 
         for (const callback of callbacks) await callback();
 

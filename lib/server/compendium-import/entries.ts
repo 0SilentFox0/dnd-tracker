@@ -3,7 +3,10 @@ import { normalizeMediaUrl } from './media/url';
 import { type ImportIssue, issue } from './types';
 
 import { isRecord } from '@/lib/utils/common/is-record';
-import { byteLength, CompendiumError } from '@/lib/utils/compendium-import/parse';
+import {
+    byteLength,
+    CompendiumError,
+} from '@/lib/utils/compendium-import/parse';
 
 const refs = new Set([
     'spell',
@@ -210,9 +213,9 @@ function walkEntries(
     if (typeof type === 'string' && !RENDERED_TYPES.has(type))
         issues.push(issue('UNSUPPORTED_ENTRY', at));
 
-    const rendered = RENDERED_KEYS.filter((key) => v[key] !== undefined).flatMap(
-        (key) => walkEntries(v[key], `${at}.${key}`, issues)
-    );
+    const rendered = RENDERED_KEYS.filter(
+        (key) => v[key] !== undefined
+    ).flatMap((key) => walkEntries(v[key], `${at}.${key}`, issues));
 
     if (rendered.length > 0) return rendered;
 

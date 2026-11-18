@@ -153,63 +153,62 @@ function characterCreateData({
     split: ReturnType<typeof splitColumnView>;
 }): Prisma.CharacterUncheckedCreateInput {
     return {
-                campaignId,
-                type: data.type,
-                controlledBy: owner.controlledBy,
-                name: data.name,
-                level: fromClasses?.level ?? data.level,
-                class: fromClasses?.class ?? data.class ?? '',
-                subclass: fromClasses ? fromClasses.subclass : data.subclass,
-                classes: toInputJson(data.classes ?? []),
-                archetype: data.archetype ?? null,
-                race: data.race,
-                subrace: data.subrace,
-                alignment: data.alignment,
-                background: data.background,
-                avatar: avatar.avatar ?? undefined,
+        campaignId,
+        type: data.type,
+        controlledBy: owner.controlledBy,
+        name: data.name,
+        level: fromClasses?.level ?? data.level,
+        class: fromClasses?.class ?? data.class ?? '',
+        subclass: fromClasses ? fromClasses.subclass : data.subclass,
+        classes: toInputJson(data.classes ?? []),
+        archetype: data.archetype ?? null,
+        race: data.race,
+        subrace: data.subrace,
+        alignment: data.alignment,
+        background: data.background,
+        avatar: avatar.avatar ?? undefined,
 
-                ...{
-                    strength: data.strength,
-                    dexterity: data.dexterity,
-                    constitution: data.constitution,
-                    intelligence: data.intelligence,
-                    wisdom: data.wisdom,
-                    charisma: data.charisma,
-                    armorClass: data.armorClass,
-                    initiative,
-                    speed: data.speed,
-                },
+        ...{
+            strength: data.strength,
+            dexterity: data.dexterity,
+            constitution: data.constitution,
+            intelligence: data.intelligence,
+            wisdom: data.wisdom,
+            charisma: data.charisma,
+            armorClass: data.armorClass,
+            initiative,
+            speed: data.speed,
+        },
 
-                savingThrows: data.savingThrows as Record<string, boolean>,
-                skills: data.skills as Record<string, boolean>,
+        savingThrows: data.savingThrows as Record<string, boolean>,
+        skills: data.skills as Record<string, boolean>,
 
-                spellcastingAbility:
-                    fromClasses?.spellcastingAbility ??
-                    data.spellcastingAbility,
-                spellSlots,
-                knownSpells: data.knownSpells,
+        spellcastingAbility:
+            fromClasses?.spellcastingAbility ?? data.spellcastingAbility,
+        spellSlots,
+        knownSpells: data.knownSpells,
 
-                languages: data.languages,
-                immunities: data.immunities || [],
-                proficiencies: data.proficiencies,
+        languages: data.languages,
+        immunities: data.immunities || [],
+        proficiencies: data.proficiencies,
 
-                personalSkillId: data.personalSkillId ?? null,
-                primaryAbility: data.primaryAbility ?? null,
+        personalSkillId: data.personalSkillId ?? null,
+        primaryAbility: data.primaryAbility ?? null,
 
-                skillTreeProgress: {},
-                characteristics: (split.characteristics ??
-                    data.characteristics ??
-                    system.characteristics.defaults()) as
-                    | Prisma.InputJsonObject
-                    | undefined,
-                ...(system.resources?.seed &&
-                    data.characteristics && {
-                        resources: system.resources.seed(
-                            data.characteristics
-                        ) as Prisma.InputJsonObject,
-                    }),
-                ...(choices?.ok && choices.fields),
-            };
+        skillTreeProgress: {},
+        characteristics: (split.characteristics ??
+            data.characteristics ??
+            system.characteristics.defaults()) as
+            | Prisma.InputJsonObject
+            | undefined,
+        ...(system.resources?.seed &&
+            data.characteristics && {
+                resources: system.resources.seed(
+                    data.characteristics
+                ) as Prisma.InputJsonObject,
+            }),
+        ...(choices?.ok && choices.fields),
+    };
 }
 
 async function createCharacterCore(

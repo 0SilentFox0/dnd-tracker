@@ -417,8 +417,14 @@ function resolveCharacterAbilities(
     >,
     rules: Ruleset
 ) {
-    const { skills, artifactRows, consumables, completed, resolvedClasses, race } =
-        refs;
+    const {
+        skills,
+        artifactRows,
+        consumables,
+        completed,
+        resolvedClasses,
+        race,
+    } = refs;
 
     return [
         ...collectCharacterAbilities(
@@ -452,11 +458,17 @@ function participantAbilities(a: {
     rules: Ruleset;
     race: Awaited<ReturnType<typeof loadCharacterBuildRefs>>['race'];
     resolvedClasses: ResolvedClasses;
-    baseStats: ReturnType<NonNullable<RuleSystem['combat']['baseStats']>> | undefined;
-    equipmentGear: ReturnType<NonNullable<RuleSystem['equipment']>['armourAp']> | undefined;
+    baseStats:
+        | ReturnType<NonNullable<RuleSystem['combat']['baseStats']>>
+        | undefined;
+    equipmentGear:
+        | ReturnType<NonNullable<RuleSystem['equipment']>['armourAp']>
+        | undefined;
     primaryAbility: AbilityKey | undefined;
     proficiencyBonus: number;
-    classProficiency: ReturnType<ReturnType<typeof proficiencyOf>['fromClasses']> | undefined;
+    classProficiency:
+        | ReturnType<ReturnType<typeof proficiencyOf>['fromClasses']>
+        | undefined;
     saveProficiencies: AbilityKey[];
     dndSkillProficiencies: NonNullable<
         BattleParticipant['abilities']['skillProficiencies']
@@ -524,11 +536,11 @@ function ingredientStockOf(character: CharacterFromPrisma, rules: Ruleset) {
     return rules.spellIngredients.enabled &&
         character.controlledBy &&
         character.controlledBy !== CONTROLLED_BY_DM
-            ? buildIngredientStock(character.inventory, {
-                  withPurse: rules.spellIngredients.autoPay,
-                  value: currencyValueOf(rules),
-              })
-            : undefined;
+        ? buildIngredientStock(character.inventory, {
+              withPurse: rules.spellIngredients.autoPay,
+              value: currencyValueOf(rules),
+          })
+        : undefined;
 }
 
 function basicInfoOf(
@@ -538,19 +550,19 @@ function basicInfoOf(
     instanceNumber?: number
 ): BattleParticipant['basicInfo'] {
     return {
-            id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
-            battleId,
-            sourceId: character.id,
-            sourceType: ParticipantSourceType.CHARACTER,
-            instanceNumber: instanceNumber || undefined,
-            instanceId: instanceNumber
-                ? `${character.id}-${instanceNumber - 1}`
-                : undefined,
-            name: character.name,
-            avatar: character.avatar || undefined,
-            side,
-            controlledBy: character.controlledBy || CONTROLLED_BY_DM,
-        };
+        id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
+        battleId,
+        sourceId: character.id,
+        sourceType: ParticipantSourceType.CHARACTER,
+        instanceNumber: instanceNumber || undefined,
+        instanceId: instanceNumber
+            ? `${character.id}-${instanceNumber - 1}`
+            : undefined,
+        name: character.name,
+        avatar: character.avatar || undefined,
+        side,
+        controlledBy: character.controlledBy || CONTROLLED_BY_DM,
+    };
 }
 
 function combatStatsOf(
@@ -559,18 +571,17 @@ function combatStatsOf(
     computedMaxHp: number
 ): BattleParticipant['combatStats'] {
     return {
-            maxHp: computedMaxHp,
-            currentHp: computedMaxHp,
-            tempHp: 0,
-            armorClass: character.armorClass,
-            speed: baseStats?.speed ?? character.speed,
-            morale: (character as { morale?: number }).morale || 0,
-            moraleCap: 0,
-            status:
-                computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
-            minTargets: character.minTargets ?? 1,
-            maxTargets: character.maxTargets ?? 1,
-        };
+        maxHp: computedMaxHp,
+        currentHp: computedMaxHp,
+        tempHp: 0,
+        armorClass: character.armorClass,
+        speed: baseStats?.speed ?? character.speed,
+        morale: (character as { morale?: number }).morale || 0,
+        moraleCap: 0,
+        status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
+        minTargets: character.minTargets ?? 1,
+        maxTargets: character.maxTargets ?? 1,
+    };
 }
 
 export async function createBattleParticipantFromCharacter(

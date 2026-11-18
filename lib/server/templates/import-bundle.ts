@@ -69,7 +69,10 @@ function buildIdMap(tx: TemplateDb, bundle: ParsedBundle, layer?: ImportLayer) {
                 );
 
             seen.add(row.id);
-            idMap.set(row.id, isOverrideId(layer, row.id) ? row.id : newContentId());
+            idMap.set(
+                row.id,
+                isOverrideId(layer, row.id) ? row.id : newContentId()
+            );
         }
     }
 

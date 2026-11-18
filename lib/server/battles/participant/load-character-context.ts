@@ -55,54 +55,54 @@ async function loadLibrary(campaignId: string, needs: LearnedNeeds) {
     if (!(needs.skillIds.length > 0 || needs.learned)) return null;
 
     return prisma.campaign.findUnique({
-                  where: { id: campaignId },
-                  select: {
-                      ...(needs.skillIds.length > 0 && {
-                          skills: { where: { id: { in: needs.skillIds } } },
-                      }),
-                      ...(needs.learned && {
-                          mainSkills: {
-                              where: { id: { in: needs.branchIds } },
-                              select: {
-                                  id: true,
-                                  spellGroupId: true,
-                                  name: true,
-                                  role: true,
-                              },
-                          },
-                          spells: {
-                              where: {
-                                  OR: [
-                                      { groupId: { in: needs.branchGroupIds } },
-                                      {
-                                          spellGroup: {
-                                              mainSkills: {
-                                                  some: {
-                                                      id: {
-                                                          in: needs.branchIds,
-                                                      },
-                                                  },
-                                              },
-                                          },
-                                      },
-                                      {
-                                          spellGroup: {
-                                              skills: {
-                                                  some: {
-                                                      id: {
-                                                          in: needs.skillIds,
-                                                      },
-                                                  },
-                                              },
-                                          },
-                                      },
-                                  ],
-                              },
-                              select: { id: true, level: true, groupId: true },
-                          },
-                      }),
-                  },
-              });
+        where: { id: campaignId },
+        select: {
+            ...(needs.skillIds.length > 0 && {
+                skills: { where: { id: { in: needs.skillIds } } },
+            }),
+            ...(needs.learned && {
+                mainSkills: {
+                    where: { id: { in: needs.branchIds } },
+                    select: {
+                        id: true,
+                        spellGroupId: true,
+                        name: true,
+                        role: true,
+                    },
+                },
+                spells: {
+                    where: {
+                        OR: [
+                            { groupId: { in: needs.branchGroupIds } },
+                            {
+                                spellGroup: {
+                                    mainSkills: {
+                                        some: {
+                                            id: {
+                                                in: needs.branchIds,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                            {
+                                spellGroup: {
+                                    skills: {
+                                        some: {
+                                            id: {
+                                                in: needs.skillIds,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    select: { id: true, level: true, groupId: true },
+                },
+            }),
+        },
+    });
 }
 
 function indexArtifacts(

@@ -29,7 +29,11 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { armorStatsFromRow } from '@/lib/utils/artifacts/armor-stats';
 import { weaponStatsFromRow } from '@/lib/utils/artifacts/weapon-stats';
 import { asRecord, jsonContentInput } from '@/lib/utils/common/json';
-import { CompendiumError, type JsonRecord, normalized } from '@/lib/utils/compendium-import/parse';
+import {
+    CompendiumError,
+    type JsonRecord,
+    normalized,
+} from '@/lib/utils/compendium-import/parse';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';

@@ -342,24 +342,34 @@ async function checkApplied(
             where: { campaignId, id: { in: foreign } },
         })) !== foreign.length
     )
-        return { ok: false as const, failure: {
-            ok: false,
-            status: 404,
-            error: API_ERRORS.ACQUAINTANCE_NOT_FOUND,
-        } };
+        return {
+            ok: false as const,
+            failure: {
+                ok: false,
+                status: 404,
+                error: API_ERRORS.ACQUAINTANCE_NOT_FOUND,
+            },
+        };
 
     if (!scenarioContentSchema.safeParse(content).success)
-        return { ok: false as const, failure: {
-            ok: false,
-            status: 400,
-            error: API_ERRORS.AI_PROPOSAL_INVALID,
-        } };
+        return {
+            ok: false as const,
+            failure: {
+                ok: false,
+                status: 400,
+                error: API_ERRORS.AI_PROPOSAL_INVALID,
+            },
+        };
 
-    if (
-        Buffer.byteLength(JSON.stringify(content)) >
-        SCENARIO_MAX_CONTENT_BYTES
-    )
-        return { ok: false as const, failure: { ok: false, status: 413, error: API_ERRORS.SCENARIO_TOO_LARGE } };
+    if (Buffer.byteLength(JSON.stringify(content)) > SCENARIO_MAX_CONTENT_BYTES)
+        return {
+            ok: false as const,
+            failure: {
+                ok: false,
+                status: 413,
+                error: API_ERRORS.SCENARIO_TOO_LARGE,
+            },
+        };
 
     const sources = new Map(
         created.map((n) => [
@@ -369,11 +379,14 @@ async function checkApplied(
     );
 
     if ([...sources.values()].some((v) => !v))
-        return { ok: false as const, failure: {
-            ok: false,
-            status: 400,
-            error: API_ERRORS.AI_PROPOSAL_INVALID,
-        } };
+        return {
+            ok: false as const,
+            failure: {
+                ok: false,
+                status: 400,
+                error: API_ERRORS.AI_PROPOSAL_INVALID,
+            },
+        };
 
     return { ok: true as const, sources };
 }
@@ -389,7 +402,11 @@ async function applyClaimed(
 
     const ops = readProposalOps(proposal.ops);
 
-    if (ops.length === 0 && Array.isArray(proposal.ops) && proposal.ops.length > 0)
+    if (
+        ops.length === 0 &&
+        Array.isArray(proposal.ops) &&
+        proposal.ops.length > 0
+    )
         throw new Error('ai proposal ops are unreadable');
 
     const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === 'addSlide');

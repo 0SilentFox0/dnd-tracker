@@ -144,7 +144,10 @@ export function assistantRoute(mode: RouteMode) {
             const receiptRateChecked = mode === 'receipt' && !!intentId;
 
             if (mode === 'receipt' && intentId) {
-                const early = await deletionReceiptResponse(campaignId, intentId);
+                const early = await deletionReceiptResponse(
+                    campaignId,
+                    intentId
+                );
 
                 if (early) return early;
             }

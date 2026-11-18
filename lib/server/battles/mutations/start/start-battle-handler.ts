@@ -84,19 +84,19 @@ async function loadSetupRows(
 type SetupRows = Awaited<ReturnType<typeof loadSetupRows>>;
 
 type ParticipantSlot =
-        | {
-              type: typeof ParticipantSourceType.CHARACTER;
-              character: SetupRows['characters'][number];
-              side: ParticipantSide;
-              reserved: boolean;
-          }
-        | {
-              type: typeof ParticipantSourceType.UNIT;
-              unit: SetupRows['units'][number];
-              side: ParticipantSide;
-              instanceNumber: number;
-              reserved: boolean;
-          };
+    | {
+          type: typeof ParticipantSourceType.CHARACTER;
+          character: SetupRows['characters'][number];
+          side: ParticipantSide;
+          reserved: boolean;
+      }
+    | {
+          type: typeof ParticipantSourceType.UNIT;
+          unit: SetupRows['units'][number];
+          side: ParticipantSide;
+          instanceNumber: number;
+          reserved: boolean;
+      };
 
 function buildSlots(
     participants: SetupParticipant[],

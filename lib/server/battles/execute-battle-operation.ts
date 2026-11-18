@@ -41,7 +41,13 @@ export type BattleOperationCommand = {
     serverDice?: boolean;
 };
 
-const RECORD_OPERATIONS = ['create', 'patch', 'delete', 'clear-history', 'audio'];
+const RECORD_OPERATIONS = [
+    'create',
+    'patch',
+    'delete',
+    'clear-history',
+    'audio',
+];
 
 function runRecordOperation(
     actor: Actor,
@@ -51,52 +57,52 @@ function runRecordOperation(
     execution?: ActionExecutionContext
 ) {
     return runGuardedBattleRecordOperation(
-            actor,
-            async () => {
-                if (!['create', 'clear-history'].includes(command.operation)) {
-                    const row = await battleRecord(
-                        actor.campaignId,
-                        command.battleId
-                    );
-
-                    if (row.version !== command.expectedVersion)
-                        throw new ContentError(
-                            API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN,
-                            409
-                        );
-                }
-
-                const data = await writeBattleRecord(
+        actor,
+        async () => {
+            if (!['create', 'clear-history'].includes(command.operation)) {
+                const row = await battleRecord(
                     actor.campaignId,
-                    actor.userId,
-                    command.operation as RecordOperation,
-                    command.battleId,
-                    input,
-                    execution
+                    command.battleId
                 );
 
-                const battleId =
-                    command.operation === 'create' && 'id' in data
-                        ? data.id
-                        : command.battleId;
+                if (row.version !== command.expectedVersion)
+                    throw new ContentError(
+                        API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN,
+                        409
+                    );
+            }
 
-                return {
-                    data: {
-                        operation: command.operation,
-                        battleId,
-                        ...('version' in data ? { version: data.version } : {}),
-                    } as Prisma.JsonValue,
-                    affected: [
-                        {
-                            domain: 'battles',
-                            id: battleId || actor.campaignId,
-                            name: resultLabel(locale, 'battle'),
-                        },
-                    ],
-                    warnings: [],
-                };
-            },
-            execution
+            const data = await writeBattleRecord(
+                actor.campaignId,
+                actor.userId,
+                command.operation as RecordOperation,
+                command.battleId,
+                input,
+                execution
+            );
+
+            const battleId =
+                command.operation === 'create' && 'id' in data
+                    ? data.id
+                    : command.battleId;
+
+            return {
+                data: {
+                    operation: command.operation,
+                    battleId,
+                    ...('version' in data ? { version: data.version } : {}),
+                } as Prisma.JsonValue,
+                affected: [
+                    {
+                        domain: 'battles',
+                        id: battleId || actor.campaignId,
+                        name: resultLabel(locale, 'battle'),
+                    },
+                ],
+                warnings: [],
+            };
+        },
+        execution
     );
 }
 

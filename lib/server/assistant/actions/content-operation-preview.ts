@@ -113,7 +113,9 @@ const PREVIEWS: Partial<Record<ContentOperationId, (c: PreviewCtx) => void>> = {
             field('spells', row, 'groupId', null);
     },
     'spells.delete-by-level': ({ rows, field, changes, state, body }) => {
-        const selected = rows('spells').filter((row) => row.level === body.level);
+        const selected = rows('spells').filter(
+            (row) => row.level === body.level
+        );
 
         for (const row of selected) field('spells', row, '$record', null);
         changes.push(

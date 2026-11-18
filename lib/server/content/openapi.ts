@@ -206,57 +206,57 @@ function operationOf(
 ): OpenApiOperation {
     const scope = spec.need.scope;
 
-        const codes = [
-            ...new Set([
-                ...BASE_ERRORS,
-                ...((spec.notFound ?? true) ? [404] : []),
-                ...(spec.errors ?? []),
-            ]),
-        ].sort((a, b) => a - b);
+    const codes = [
+        ...new Set([
+            ...BASE_ERRORS,
+            ...((spec.notFound ?? true) ? [404] : []),
+            ...(spec.errors ?? []),
+        ]),
+    ].sort((a, b) => a - b);
 
-        const bodyId = spec.body && idBySchema.get(spec.body);
+    const bodyId = spec.body && idBySchema.get(spec.body);
 
     const operation: OpenApiOperation = {
-            operationId: spec.id,
-            summary: spec.summary,
-            ...(spec.description || spec.need.access === 'dm'
-                ? {
-                      description: [
-                          spec.description,
-                          spec.need.access === 'dm' ? 'DM only.' : '',
-                      ]
-                          .filter(Boolean)
-                          .join('\n'),
-                  }
-                : {}),
-            tags: [spec.tag],
-            'x-scopes': [scope],
-            ...((spec.pathEnums || spec.query) && {
-                parameters: [
-                    ...pathParams(p, spec.pathEnums).filter(
-                        (param) =>
-                            'schema' in param &&
-                            param.schema &&
-                            'enum' in param.schema
-                    ),
-                    ...queryParams(spec.query),
-                ],
-            }),
-            ...(bodyId && {
-                requestBody: {
-                    required: true,
-                    content: { 'application/json': { schema: ref(bodyId) } },
-                },
-            }),
-            responses: {
-                [spec.status ?? 200]: responseRef(
-                    SUCCESS_RESPONSES[spec.response].id
+        operationId: spec.id,
+        summary: spec.summary,
+        ...(spec.description || spec.need.access === 'dm'
+            ? {
+                  description: [
+                      spec.description,
+                      spec.need.access === 'dm' ? 'DM only.' : '',
+                  ]
+                      .filter(Boolean)
+                      .join('\n'),
+              }
+            : {}),
+        tags: [spec.tag],
+        'x-scopes': [scope],
+        ...((spec.pathEnums || spec.query) && {
+            parameters: [
+                ...pathParams(p, spec.pathEnums).filter(
+                    (param) =>
+                        'schema' in param &&
+                        param.schema &&
+                        'enum' in param.schema
                 ),
-                ...Object.fromEntries(
-                    codes.map((c) => [c, responseRef(ERROR_RESPONSES[c].id)])
-                ),
+                ...queryParams(spec.query),
+            ],
+        }),
+        ...(bodyId && {
+            requestBody: {
+                required: true,
+                content: { 'application/json': { schema: ref(bodyId) } },
             },
-        };
+        }),
+        responses: {
+            [spec.status ?? 200]: responseRef(
+                SUCCESS_RESPONSES[spec.response].id
+            ),
+            ...Object.fromEntries(
+                codes.map((c) => [c, responseRef(ERROR_RESPONSES[c].id)])
+            ),
+        },
+    };
 
     return operation;
 }
@@ -265,76 +265,74 @@ function openApiComponents(
     entries: Array<readonly [ZodType, string]>
 ): OpenApiDocument['components'] {
     return {
-            responses: {
-                ...Object.fromEntries(
-                    Object.values(ERROR_RESPONSES).map(
-                        ({ id, description }) => [
-                            id,
-                            {
-                                description,
-                                content: {
-                                    'application/json': {
-                                        schema: ref('Error'),
-                                    },
-                                },
+        responses: {
+            ...Object.fromEntries(
+                Object.values(ERROR_RESPONSES).map(({ id, description }) => [
+                    id,
+                    {
+                        description,
+                        content: {
+                            'application/json': {
+                                schema: ref('Error'),
                             },
-                        ]
-                    )
-                ),
-                ...Object.fromEntries(
-                    Object.values(SUCCESS_RESPONSES).map(
-                        ({ id, schema, contentType = 'application/json' }) => [
-                            id,
-                            {
-                                description: 'Success',
-                                content: { [contentType]: { schema } },
-                            },
-                        ]
-                    )
-                ),
-            },
-            parameters: {
-                CampaignId: {
-                    name: 'id',
-                    in: 'path',
-                    required: true,
-                    schema: { type: 'string' },
-                    description: 'Campaign id',
-                },
-            },
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    description:
-                        'Token from /dm/ai (content:read / content:write scopes).',
-                },
-            },
-            schemas: {
-                ...toJsonSchemas(entries),
-                ContentItem: {
-                    type: 'object',
-                    required: ['id', 'name'],
-                    properties: {
-                        id: { type: 'string' },
-                        name: { type: 'string' },
+                        },
                     },
-                    additionalProperties: true,
+                ])
+            ),
+            ...Object.fromEntries(
+                Object.values(SUCCESS_RESPONSES).map(
+                    ({ id, schema, contentType = 'application/json' }) => [
+                        id,
+                        {
+                            description: 'Success',
+                            content: { [contentType]: { schema } },
+                        },
+                    ]
+                )
+            ),
+        },
+        parameters: {
+            CampaignId: {
+                name: 'id',
+                in: 'path',
+                required: true,
+                schema: { type: 'string' },
+                description: 'Campaign id',
+            },
+        },
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                description:
+                    'Token from /dm/ai (content:read / content:write scopes).',
+            },
+        },
+        schemas: {
+            ...toJsonSchemas(entries),
+            ContentItem: {
+                type: 'object',
+                required: ['id', 'name'],
+                properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
                 },
-                Ok: {
-                    type: 'object',
-                    required: ['ok'],
-                    properties: { ok: { type: 'boolean', const: true } },
-                },
-                Error: {
-                    type: 'object',
-                    required: ['error'],
-                    properties: {
-                        error: { type: 'string' },
-                        issues: { type: 'array', items: {} },
-                    },
+                additionalProperties: true,
+            },
+            Ok: {
+                type: 'object',
+                required: ['ok'],
+                properties: { ok: { type: 'boolean', const: true } },
+            },
+            Error: {
+                type: 'object',
+                required: ['error'],
+                properties: {
+                    error: { type: 'string' },
+                    issues: { type: 'array', items: {} },
                 },
             },
+        },
     };
 }
 

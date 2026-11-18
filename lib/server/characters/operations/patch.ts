@@ -322,7 +322,10 @@ function updateWriter({
 
 type PatchWriteCtx = {
     gate: Gate;
-    data: Extract<Awaited<ReturnType<typeof editableData>>, { data: unknown }>['data'];
+    data: Extract<
+        Awaited<ReturnType<typeof editableData>>,
+        { data: unknown }
+    >['data'];
     resolved: Awaited<ReturnType<typeof resolveClasses>>;
     computed: Awaited<ReturnType<typeof computeUpdate>>['computed'];
     writeUpdate: ReturnType<typeof updateWriter>;
@@ -352,65 +355,59 @@ async function patchWithFresh(
 
     const characterId = character.id;
 
-                  await lockCharacters(tx, [characterId]);
+    await lockCharacters(tx, [characterId]);
 
-                  const fresh = await tx.character.findUnique({
-                      where: { id: characterId },
-                  });
+    const fresh = await tx.character.findUnique({
+        where: { id: characterId },
+    });
 
-                  if (!fresh)
-                      throw new ContentError(
-                          API_ERRORS.CHARACTER_NOT_FOUND,
-                          404
-                      );
+    if (!fresh) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
-                  const classes = data.classes
-                      ? keepStoredPicks(data.classes, fresh.classes)
-                      : undefined;
+    const classes = data.classes
+        ? keepStoredPicks(data.classes, fresh.classes)
+        : undefined;
 
-                  const before = choicesStateOf(fresh);
+    const before = choicesStateOf(fresh);
 
-                  const choices = changesBackground
-                      ? await resolveCharacterChoices({
-                            db: tx,
-                            campaignId,
-                            rules: campaign.rules,
-                            isDM,
-                            character: {
-                                ...withColumnView(fresh, system),
-                                ...computed.abilityScores,
-                                level: resolved.finalLevel,
-                            },
-                            before,
-                            after: {
-                                ...before,
-                                ...mergeBackground(before, data),
-                                classes: classes ?? before.classes,
-                            },
-                        })
-                      : null;
+    const choices = changesBackground
+        ? await resolveCharacterChoices({
+              db: tx,
+              campaignId,
+              rules: campaign.rules,
+              isDM,
+              character: {
+                  ...withColumnView(fresh, system),
+                  ...computed.abilityScores,
+                  level: resolved.finalLevel,
+              },
+              before,
+              after: {
+                  ...before,
+                  ...mergeBackground(before, data),
+                  classes: classes ?? before.classes,
+              },
+          })
+        : null;
 
-                  if (choices && !choices.ok) throw choices.error;
+    if (choices && !choices.ok) throw choices.error;
 
-                  const characteristics =
-                      guardsLedger && data.characteristics
-                          ? ruleSystemOf(
-                                campaign.rules
-                            ).characteristics.reconcile?.(
-                                fresh.characteristics,
-                                data.characteristics,
-                                { isDM, baseline: data.systemBaseline }
-                            )
-                          : undefined;
+    const characteristics =
+        guardsLedger && data.characteristics
+            ? ruleSystemOf(campaign.rules).characteristics.reconcile?.(
+                  fresh.characteristics,
+                  data.characteristics,
+                  { isDM, baseline: data.systemBaseline }
+              )
+            : undefined;
 
-                  return writeUpdate(
-                      tx,
-                      classes,
-                      choices?.ok ? choices.fields : undefined,
-                      characteristics,
-                      fresh.characteristics
-                  );
-              }
+    return writeUpdate(
+        tx,
+        classes,
+        choices?.ok ? choices.fields : undefined,
+        characteristics,
+        fresh.characteristics
+    );
+}
 
 async function patchPlain(
     tx: Prisma.TransactionClient,
@@ -418,24 +415,18 @@ async function patchPlain(
 ) {
     const characterId = gate.character.id;
 
-                  const fresh = (await lockCharacters(tx, [characterId])).get(
-                      characterId
-                  );
+    const fresh = (await lockCharacters(tx, [characterId])).get(characterId);
 
-                  if (!fresh)
-                      throw new ContentError(
-                          API_ERRORS.CHARACTER_NOT_FOUND,
-                          404
-                      );
+    if (!fresh) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
-                  return writeUpdate(
-                      tx,
-                      resolved.classesInput,
-                      undefined,
-                      undefined,
-                      fresh.characteristics
-                  );
-              }
+    return writeUpdate(
+        tx,
+        resolved.classesInput,
+        undefined,
+        undefined,
+        fresh.characteristics
+    );
+}
 
 async function patchCore(gate: Gate, parsed: Parsed) {
     const system = ruleSystemOf(gate.access.campaign.rules);
@@ -444,8 +435,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         where: { id: gate.character.id },
     });
 
-    if (!stored)
-        throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+    if (!stored) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
     gate = { ...gate, character: withColumnView(stored, system) };
 
