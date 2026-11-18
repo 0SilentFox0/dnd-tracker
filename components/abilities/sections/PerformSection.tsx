@@ -7,7 +7,7 @@ import { useAbilityEditor, useErrorsUnder } from '../editor-context';
 import { FieldErrors } from '../FieldErrors';
 import { SectionTitle } from './SectionTitle';
 
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 
 export function PerformSection({
     ability,
@@ -23,7 +23,7 @@ export function PerformSection({
     if (!ability.limits?.legendaryCost && !ability.limits?.lair) return null;
 
     const fieldClass =
-        'h-9 rounded-md border border-hud-line bg-hud-field px-2 text-sm';
+        'h-9 w-auto rounded-md border border-hud-line bg-hud-field px-2 text-sm';
 
     const changeKind = (kind: string) => {
         const { perform: _p, ...rest } = ability;
@@ -64,55 +64,55 @@ export function PerformSection({
     return (
         <div className="space-y-2">
             <SectionTitle>{t('title')}</SectionTitle>
-            <NativeSelect
+            <SelectField
                 aria-label={t('kindAria')}
-                className={fieldClass}
+                triggerClassName={fieldClass}
                 value={ability.perform?.kind ?? ''}
-                onChange={(e) => changeKind(e.target.value)}
-            >
-                <option value="">{t('effects')}</option>
-                <option value="attack">{t('attack')}</option>
-                <option value="spell">{t('spell')}</option>
-            </NativeSelect>
+                onValueChange={changeKind}
+                allowNone
+                noneLabel={t('effects')}
+                options={[
+                    { value: 'attack', label: t('attack') },
+                    { value: 'spell', label: t('spell') },
+                ]}
+            />
             {ability.perform?.kind === 'attack' && (
-                <NativeSelect
+                <SelectField
                     aria-label={t('attackAria')}
-                    className={fieldClass}
+                    triggerClassName={fieldClass}
                     value={ability.perform.attack}
-                    onChange={(e) =>
+                    onValueChange={(attack) =>
                         onChange({
                             ...ability,
-                            perform: { kind: 'attack', attack: e.target.value },
+                            perform: { kind: 'attack', attack },
                         })
                     }
-                >
-                    <option value="">{t('pickAttack')}</option>
-                    {performChoices?.attacks.map((a, i) => (
-                        <option key={i} value={a.name}>
-                            {a.name}
-                        </option>
-                    ))}
-                </NativeSelect>
+                    allowNone
+                    noneLabel={t('pickAttack')}
+                    options={(performChoices?.attacks ?? []).map((a) => ({
+                        value: a.name,
+                        label: a.name,
+                    }))}
+                />
             )}
             {ability.perform?.kind === 'spell' && (
-                <NativeSelect
+                <SelectField
                     aria-label={t('spellAria')}
-                    className={fieldClass}
+                    triggerClassName={fieldClass}
                     value={ability.perform.spellId}
-                    onChange={(e) =>
+                    onValueChange={(spellId) =>
                         onChange({
                             ...ability,
-                            perform: { kind: 'spell', spellId: e.target.value },
+                            perform: { kind: 'spell', spellId },
                         })
                     }
-                >
-                    <option value="">{t('pickSpell')}</option>
-                    {performChoices?.spells.map((s) => (
-                        <option key={s.id} value={s.id}>
-                            {s.name}
-                        </option>
-                    ))}
-                </NativeSelect>
+                    allowNone
+                    noneLabel={t('pickSpell')}
+                    options={(performChoices?.spells ?? []).map((s) => ({
+                        value: s.id,
+                        label: s.name,
+                    }))}
+                />
             )}
             <FieldErrors errors={errors} />
         </div>

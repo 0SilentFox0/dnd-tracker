@@ -7,6 +7,7 @@ import { useFieldErrors } from '@/components/abilities/editor-context';
 import { FieldErrors } from '@/components/abilities/FieldErrors';
 import { EffectListEditor } from '@/components/spells/form/effects/EffectListEditor';
 import { SpellTargetingFields } from '@/components/spells/form/SpellTargetingFields';
+import { Disclosure } from '@/components/ui/disclosure';
 import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { GRANT_CAST_COSTS } from '@/lib/utils/spells/model/schema';
@@ -113,10 +114,11 @@ export function GrantCastEditor({
                     }
                 />
             </div>
-            <details className="col-span-6">
-                <summary className="cursor-pointer text-xs text-muted-foreground">
-                    {t('spellEffects.fields.grantCast.advanced')}
-                </summary>
+            <Disclosure
+                className="col-span-6"
+                triggerClassName="text-xs text-muted-foreground"
+                summary={<>{t('spellEffects.fields.grantCast.advanced')}</>}
+            >
                 <div className="mt-2 grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
                     {field('cast.anchorMarkId', 'text')}
                     {field('cast.perObjectFeet', 'number')}
@@ -127,7 +129,7 @@ export function GrantCastEditor({
                         true
                     )}
                 </div>
-            </details>
+            </Disclosure>
         </>
     );
 }

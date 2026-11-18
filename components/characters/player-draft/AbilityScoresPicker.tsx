@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import type { usePlayerDraftForm } from '@/lib/hooks/characters';
 import { cn } from '@/lib/utils';
@@ -102,20 +102,18 @@ export function AbilityScoresPicker({
                                     {shown(key)}
                                 </span>
                             ) : method === 'standard' ? (
-                                <NativeSelect
+                                <SelectField
                                     id={`score-${key}`}
-                                    value={values[key]}
-                                    onChange={(e) =>
-                                        setScore(key, Number(e.target.value))
+                                    value={String(values[key])}
+                                    onValueChange={(v) =>
+                                        setScore(key, Number(v))
                                     }
-                                    className="h-9 w-16 rounded-md border border-input bg-transparent px-2 text-base tabular-nums"
-                                >
-                                    {STANDARD_ARRAY.map((n) => (
-                                        <option key={n} value={n}>
-                                            {n}
-                                        </option>
-                                    ))}
-                                </NativeSelect>
+                                    triggerClassName="w-20 tabular-nums"
+                                    options={STANDARD_ARRAY.map((n) => ({
+                                        value: String(n),
+                                        label: String(n),
+                                    }))}
+                                />
                             ) : (
                                 <div className="flex items-center gap-1">
                                     <Button

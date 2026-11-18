@@ -4,6 +4,7 @@ import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { Disclosure } from '@/components/ui/disclosure';
 import {
     chosenSubclassId,
     pathSummary,
@@ -43,36 +44,39 @@ export function ClassSection({
 
     return (
         <section className="mb-3">
-            <details
+            <Disclosure
                 open={open}
-                onToggle={(e) => setOpen(e.currentTarget.open)}
+                onOpenChange={setOpen}
                 className="space-y-2"
+                triggerClassName="flex-wrap items-baseline gap-2"
+                summary={
+                    <>
+                        <EntityIcon
+                            src={progression.icon}
+                            name={progression.className}
+                            className="size-6 text-xs"
+                        />
+                        <h3 className="inline">{progression.className}</h3>
+                        {level !== null ? (
+                            <span className="text-sm text-hud-muted">
+                                {t('sectionLevel', { level })}
+                            </span>
+                        ) : null}
+                        {subclass ? (
+                            <span className="inline-flex items-center gap-1 text-sm text-hud-muted">
+                                <EntityIcon
+                                    src={chosenSubclass?.icon}
+                                    name={subclass}
+                                    className="size-5 text-[10px]"
+                                />
+                                {t('sectionSubclass', { subclass })}
+                            </span>
+                        ) : null}
+                    </>
+                }
             >
-                <summary className="flex cursor-pointer flex-wrap items-baseline gap-2">
-                    <EntityIcon
-                        src={progression.icon}
-                        name={progression.className}
-                        className="size-6 text-xs"
-                    />
-                    <h3 className="inline">{progression.className}</h3>
-                    {level !== null ? (
-                        <span className="text-sm text-hud-muted">
-                            {t('sectionLevel', { level })}
-                        </span>
-                    ) : null}
-                    {subclass ? (
-                        <span className="inline-flex items-center gap-1 text-sm text-hud-muted">
-                            <EntityIcon
-                                src={chosenSubclass?.icon}
-                                name={subclass}
-                                className="size-5 text-[10px]"
-                            />
-                            {t('sectionSubclass', { subclass })}
-                        </span>
-                    ) : null}
-                </summary>
                 <div className="mt-2 space-y-2">{children}</div>
-            </details>
+            </Disclosure>
         </section>
     );
 }

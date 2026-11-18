@@ -58,10 +58,14 @@ describe('CharacterPath', () => {
             container.querySelector('section[data-state="next"]')
         ).toHaveTextContent('Extra Attack');
         expect(
-            container.querySelector('details section[data-state="reached"]')
+            container.querySelector(
+                '[data-slot="disclosure"] section[data-state="reached"]'
+            )
         ).toHaveTextContent('Second Wind');
         expect(
-            container.querySelector('details section[data-state="future"]')
+            container.querySelector(
+                '[data-slot="disclosure"] section[data-state="future"]'
+            )
         ).toHaveTextContent('Indomitable');
     });
 
@@ -182,7 +186,7 @@ describe('CharacterPath summary', () => {
             <CharacterPath progression={late} actions={{ onPick: vi.fn() }} />
         );
 
-        expect(container.querySelector('details')).toBeNull();
+        expect(container.querySelector('[data-slot="disclosure"]')).toBeNull();
         expect(screen.getByRole('button', { name: /Order/ })).toBeTruthy();
     });
 });
@@ -388,10 +392,10 @@ describe('CharacterPath subclass', () => {
         );
 
         const row = container.querySelector(
-            'details section[data-state="future"]'
+            '[data-slot="disclosure"] section[data-state="future"]'
         ) as HTMLElement;
 
-        expect(row.querySelector('details')).toHaveTextContent(
+        expect(row.querySelector('[data-slot="disclosure"]')).toHaveTextContent(
             'characterProfile.path.subclassOptions'
         );
         expect(row).toHaveTextContent('Champion');

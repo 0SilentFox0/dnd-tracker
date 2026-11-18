@@ -7,6 +7,7 @@ import { Info } from 'lucide-react';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import { DND_SKILLS, type DndSkill } from '@/lib/constants/skills';
 import { cn } from '@/lib/utils';
 import {
@@ -46,8 +47,10 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
     const preview = useMemo(() => subclassPreview(progression), [progression]);
 
     return (
-        <details className="mt-1 text-xs text-hud-muted">
-            <summary className="cursor-pointer">{t('subclassOptions')}</summary>
+        <Disclosure
+            className="mt-1 text-xs text-hud-muted"
+            summary={<>{t('subclassOptions')}</>}
+        >
             <ul className="mt-1 space-y-1">
                 {preview.map((sub) => (
                     <li key={sub.id}>
@@ -73,7 +76,7 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
                     </li>
                 ))}
             </ul>
-        </details>
+        </Disclosure>
     );
 }
 

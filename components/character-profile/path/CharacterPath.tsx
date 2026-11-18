@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { PathRowCard } from './PathRowCard';
 
 import { HudPill } from '@/components/hud/page';
+import { Disclosure } from '@/components/ui/disclosure';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import {
     chosenSubclassId,
@@ -53,12 +54,12 @@ export function CharacterPath({
 
     const group = (rows: ProgressionRow[], label: string) =>
         rows.length > 0 ? (
-            <details>
-                <summary className="cursor-pointer text-sm text-hud-muted">
-                    {label}
-                </summary>
+            <Disclosure
+                triggerClassName="text-sm text-hud-muted"
+                summary={<>{label}</>}
+            >
                 <div className="mt-2 space-y-2">{rows.map(card)}</div>
-            </details>
+            </Disclosure>
         ) : null;
 
     return (

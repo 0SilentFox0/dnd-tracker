@@ -13,6 +13,7 @@ import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Radio } from '@/components/ui/radio';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import type { useSpellBook } from '@/lib/hooks/battle';
@@ -210,9 +211,7 @@ function OptionPicker({ book }: { book: Book }) {
             </legend>
             {text.lines(state.pick.options).map((label, i) => (
                 <label key={i} className="flex items-start gap-2">
-                    <Input
-                        bare
-                        type="radio"
+                    <Radio
                         name="spell-option"
                         checked={state.optionIndex === i}
                         onChange={() => actions.setOption(i)}

@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
+import { pickOption } from '@/components/ui/__tests__/radix-select';
 
 const h = vi.hoisted(() => ({ mutateAsync: vi.fn(async () => ({})) }));
 
@@ -130,9 +131,10 @@ describe('GrantArtifactDialog: magic items', () => {
         fireEvent.click(screen.getByRole('button', { name: /Spell Scroll/ }));
 
         expect(screen.getByText('inventory.grant.spellNote')).toBeTruthy();
-        fireEvent.change(screen.getByLabelText('inventory.grant.spell'), {
-            target: { value: 'spell-light' },
-        });
+        await pickOption(
+            screen.getByLabelText('inventory.grant.spell'),
+            /spellOption|Light/
+        );
         fireEvent.change(screen.getByLabelText('inventory.grant.quantity'), {
             target: { value: '3' },
         });
@@ -155,9 +157,10 @@ describe('GrantArtifactDialog: magic items', () => {
         fireEvent.click(
             screen.getByRole('button', { name: /Armor of Resistance/ })
         );
-        fireEvent.change(screen.getByLabelText('inventory.grant.parameter'), {
-            target: { value: 'fire' },
-        });
+        await pickOption(
+            screen.getByLabelText('inventory.grant.parameter'),
+            'Fire'
+        );
         fireEvent.click(
             screen.getByRole('button', { name: 'inventory.grant.submit' })
         );

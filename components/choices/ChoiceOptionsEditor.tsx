@@ -9,6 +9,7 @@ import { AbilityListEditor } from '@/components/abilities';
 import { MarkdownLite } from '@/components/common/MarkdownLite';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Disclosure } from '@/components/ui/disclosure';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -63,14 +64,13 @@ export function ChoiceOptionsEditor({
                 const optionKey = `${errors.prefix}-o${keys[i]}`;
 
                 return (
-                    <details
+                    <Disclosure
                         key={keys[i]}
-                        open={!option.name}
                         className="rounded-md border border-hud-line/40"
+                        triggerClassName="px-3 py-2 text-sm"
+                        defaultOpen={!option.name}
+                        summary={<>{option.name || t('options.unnamed')}</>}
                     >
-                        <summary className="cursor-pointer px-3 py-2 text-sm">
-                            {option.name || t('options.unnamed')}
-                        </summary>
                         <div className="space-y-2 p-3 pt-1">
                             <div className="flex items-end gap-2">
                                 <div className="flex-1 space-y-1">
@@ -203,10 +203,11 @@ export function ChoiceOptionsEditor({
                                     }
                                 />
                             )}
-                            <details className="rounded-md border border-hud-line/30 px-3 py-2 text-sm">
-                                <summary className="cursor-pointer text-hud-muted">
-                                    {t('header.technical')}
-                                </summary>
+                            <Disclosure
+                                className="rounded-md border border-hud-line/30 px-3 py-2 text-sm"
+                                triggerClassName="text-hud-muted"
+                                summary={<>{t('header.technical')}</>}
+                            >
                                 <div className="mt-2 w-56 space-y-1">
                                     <Label htmlFor={`${optionKey}-id`}>
                                         {t('options.id')}
@@ -222,9 +223,9 @@ export function ChoiceOptionsEditor({
                                         {t('options.idHint')}
                                     </p>
                                 </div>
-                            </details>
+                            </Disclosure>
                         </div>
-                    </details>
+                    </Disclosure>
                 );
             })}
             <Button

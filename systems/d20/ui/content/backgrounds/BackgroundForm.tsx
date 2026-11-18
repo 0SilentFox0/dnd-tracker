@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { DND_SKILLS } from '@/lib/constants/skills';
 import { useBackgroundForm } from '@/lib/hooks/backgrounds';
@@ -133,28 +133,24 @@ export function BackgroundForm({
                                 <Label htmlFor="background-origin">
                                     {t('form.origin')}
                                 </Label>
-                                <NativeSelect
+                                <SelectField
                                     id="background-origin"
-                                    className={HUD_SELECT_CLASS}
+                                    triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                                     value={data.originFeatId ?? ''}
-                                    onChange={(e) =>
+                                    onValueChange={(originFeatId) =>
                                         patch({
-                                            originFeatId:
-                                                e.target.value || null,
+                                            originFeatId: originFeatId || null,
                                         })
                                     }
-                                >
-                                    <option value="">
-                                        {t('form.noOrigin')}
-                                    </option>
-                                    {feats
+                                    allowNone
+                                    noneLabel={t('form.noOrigin')}
+                                    options={feats
                                         .filter((f) => f.type === 'origin')
-                                        .map((f) => (
-                                            <option key={f.id} value={f.id}>
-                                                {f.name}
-                                            </option>
-                                        ))}
-                                </NativeSelect>
+                                        .map((f) => ({
+                                            value: f.id,
+                                            label: f.name,
+                                        }))}
+                                />
                                 <Label htmlFor="background-equipment">
                                     {t('form.equipment')}
                                 </Label>

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { pickOption } from '@/components/ui/__tests__/radix-select';
 import { ClassColumnsEditor } from '@/systems/d20/ui/content/classes/ClassColumnsEditor';
 import type { ClassColumn } from '@/types/classes';
 
@@ -38,7 +39,7 @@ describe('ClassColumnsEditor', () => {
         ]);
     });
 
-    it('edits key, label, values (comma list) and the pool switch', () => {
+    it('edits key, label, values (comma list) and the pool switch', async () => {
         render(
             <Harness
                 initial={[
@@ -84,9 +85,9 @@ describe('ClassColumnsEditor', () => {
             pool: { rest: 'long' },
         });
 
-        fireEvent.change(
+        await pickOption(
             screen.getByLabelText('classes.columns.restLabel {"n":1}'),
-            { target: { value: 'short' } }
+            'classes.columns.restShort'
         );
 
         expect(out()[0].pool).toEqual({ rest: 'short' });
