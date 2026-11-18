@@ -32,6 +32,7 @@ import {
 } from '@/lib/utils/characters/choices/class-skills';
 import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
+import { toInputJson } from '@/lib/utils/common/json';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
     columnViewDto,
@@ -190,8 +191,7 @@ async function createCharacterCore(
                 level: fromClasses?.level ?? data.level,
                 class: fromClasses?.class ?? data.class ?? '',
                 subclass: fromClasses ? fromClasses.subclass : data.subclass,
-                classes: (data.classes ??
-                    []) as unknown as Prisma.InputJsonValue,
+                classes: toInputJson(data.classes ?? []),
                 archetype: data.archetype ?? null,
                 race: data.race,
                 subrace: data.subrace,

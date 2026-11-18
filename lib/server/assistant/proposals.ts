@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { discardSlideFiles, slideUrls } from './proposal-media';
 
 import 'server-only';
+import { readProposalOps } from '@/lib/ai/proposal-ops';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { SCENARIO_MAX_CONTENT_BYTES } from '@/lib/constants/scenario';
 import {
@@ -37,6 +38,7 @@ import {
 import { pruneVersions, snapshotIfDue } from '@/lib/server/scenario/versions';
 import { toSlideDeck } from '@/lib/server/show/deck-store';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
+import { toInputJson } from '@/lib/utils/common/json';
 import { applyAiOps } from '@/lib/utils/scenario/ai-ops';
 import {
     acquaintanceMentionIds,
@@ -69,7 +71,7 @@ type Row = Prisma.AiProposalGetPayload<{ select: typeof SELECT }>;
 
 const toProposal = (r: Row): AiProposal => ({
     ...r,
-    ops: r.ops as unknown as AiProposalOp[],
+    ops: readProposalOps(r.ops),
     status: r.status as AiProposalStatus,
     createdAt: r.createdAt.toISOString(),
 });
@@ -86,7 +88,7 @@ export async function createProposal(
             threadId: ctx.threadId,
             pageId,
             summary,
-            ops: ops as unknown as Prisma.InputJsonValue,
+            ops: toInputJson(ops),
         },
         select: SELECT,
     });
@@ -289,7 +291,7 @@ async function applyClaimed(
 ): Promise<ApplyResult | Settled> {
     const proposalId = proposal.id;
 
-    const ops = proposal.ops as unknown as AiProposalOp[];
+    const ops = readProposalOps(proposal.ops);
 
     const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === 'addSlide');
 
@@ -544,7 +546,7 @@ async function applySlideOps(
 
     const { count } = await tx.slideDeck.updateMany({
         where: { id: deck.id, updatedAt: deck.updatedAt },
-        data: { slides: merged as unknown as Prisma.InputJsonValue },
+        data: { slides: toInputJson(merged) },
     });
 
     if (count === 0)
@@ -592,7 +594,7 @@ export async function rejectProposal(
             afterContentCommit(() =>
                 discardSlideFiles(
                     campaignId,
-                    slideUrls(row.ops as unknown as AiProposalOp[])
+                    slideUrls(readProposalOps(row.ops))
                 )
             );
 

@@ -1,6 +1,7 @@
 import { BattleStatus } from '@/lib/constants/battle';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
+import { storedRecord, storedRecordList } from '@/lib/schemas/stored-json';
 import { getPinnedGeometry } from '@/lib/server/battle-maps/library-service';
 import { getPinnedTileChunks } from '@/lib/server/battle-maps/tiles-service';
 import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
@@ -8,6 +9,10 @@ import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-ma
 import { upgradeSceneState } from '@/lib/utils/battle/scene-state';
 import { BattleMapVersionMissingError } from '@/lib/utils/battle/store/errors';
 import { snapshotCache } from '@/lib/utils/battle/store/snapshot-cache';
+import {
+    participantSnapshotSchema,
+    participantStateSchema,
+} from '@/lib/utils/battle/store/snapshot-schema';
 import { rowToMapState } from '@/lib/utils/battle/store/snapshot-state';
 import { joinParticipant } from '@/lib/utils/battle/store/split-participant';
 import type {
@@ -15,8 +20,6 @@ import type {
     BattleSceneState,
     LoadedBattle,
     ParticipantColumns,
-    ParticipantSnapshot,
-    ParticipantState,
 } from '@/lib/utils/battle/store/types';
 import {
     deriveTileCells,
@@ -61,8 +64,8 @@ function rowToParticipant(row: ParticipantRow): BattleParticipant {
     return joinParticipant(
         {
             columns,
-            snapshot: snapshot as ParticipantSnapshot,
-            state: state as ParticipantState,
+            snapshot: participantSnapshotSchema.parse(snapshot),
+            state: participantStateSchema.parse(state),
             snapshotHash,
         },
         battleId
@@ -117,7 +120,7 @@ async function withSnapshots(
 
     for (const f of fetched) {
         snapshotCache.remember(f.snapshotHash, f.snapshot);
-        known.set(f.id, f.snapshot as ParticipantSnapshot);
+        known.set(f.id, participantSnapshotSchema.parse(f.snapshot));
         hashes.set(f.id, f.snapshotHash);
     }
 
@@ -266,7 +269,7 @@ export async function loadBattle(
         eventSeq: row.eventSeq,
         pendingChoice: pendingFromStored(row.pendingCritChoice),
         ...(row.systemState && {
-            sceneState: row.systemState as unknown as SystemSlot,
+            sceneState: storedRecord<SystemSlot>().parse(row.systemState),
         }),
         startedAt: row.startedAt,
         turnStartedAt: row.turnStartedAt,
@@ -318,8 +321,7 @@ export async function loadBattle(
         meta: {
             name: row.name,
             description: row.description,
-            setup: (row.participants ??
-                []) as unknown as BattlePreparationParticipant[],
+            setup: storedRecordList<BattlePreparationParticipant>().parse(row.participants),
             friendlyFire: row.campaign.friendlyFire ?? false,
             rules,
             critChoiceByDm: row.campaign.critChoiceByDm,

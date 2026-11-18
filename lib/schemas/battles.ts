@@ -29,6 +29,10 @@ const MAP_BACKGROUND_PATTERN =
 /** castId = `<caster>:<spell>@<round>#<seq>` з uuid-id, зона додає `@<round>` або `#<i>`; id призваних — `inline:<castId>:<n>` */
 const SPELL_ID_MAX = 200;
 
+export const battleVersionBodySchema = z.object({
+    expectedVersion: z.number().optional().catch(undefined),
+});
+
 export const weatherKindSchema = z.enum(WEATHER_KINDS);
 
 export const mapCellSchema = z.object({

@@ -64,35 +64,275 @@ export type RunClaim = {
     };
 };
 
+type RunStoreEnv = { db: PrismaClient; now: () => Date };
+
+async function ownThread(
+    db: PrismaClient,
+    caller: AssistantCaller,
+    tx: Prisma.TransactionClient | PrismaClient = db
+) {
+    if (!caller.threadId || caller.actor.via !== 'session')
+        throw new ContentError(API_ERRORS.ASSISTANT_THREAD_UNAVAILABLE, 403);
+
+    await revalidateAssistantCaller(caller, tx);
+
+    const thread = await tx.aiThread.findFirst({
+        where: { id: caller.threadId, ...intentOwner(caller) },
+        select: { id: true },
+    });
+
+    if (!thread) throw new ContentError(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
+
+    return thread.id;
+}
+
+async function reconcileExpiredRun(
+    { db, now }: RunStoreEnv,
+    caller: AssistantCaller
+) {
+    const active = await db.assistantRun.findFirst({
+        where: { activeThreadId: caller.threadId },
+    });
+
+    if (!active || active.expiresAt > now()) return;
+
+    const receipts = await db.assistantReceipt.findMany({
+        where: {
+            ...intentOwner(caller),
+            requestId: { startsWith: `${active.id}_` },
+        },
+    });
+
+    const executor = createAssistantExecutor({ db });
+
+    for (const receipt of receipts)
+        if (receipt.effectsStatus !== 'complete')
+            await executor.reconcileEffects(caller, receipt.intentId);
+}
+
+async function releaseClaimedRun(
+    tx: Prisma.TransactionClient,
+    caller: AssistantCaller,
+    claimed: NonNullable<
+        Awaited<ReturnType<Prisma.TransactionClient['assistantRun']['findFirst']>>
+    >,
+    now: () => Date
+) {
+    if (claimed.expiresAt > now())
+        throw new ContentError(API_ERRORS.ASSISTANT_THREAD_BUSY, 409);
+
+    const unsettled = await tx.assistantIntent.findMany({
+        where: {
+            ...intentOwner(caller),
+            requestId: { startsWith: `${claimed.id}_` },
+            status: { in: ['executing', 'unknown'] },
+        },
+        select: { id: true },
+    });
+
+    const uncertain = await tx.assistantReceipt.findMany({
+        where: {
+            ...intentOwner(caller),
+            requestId: { startsWith: `${claimed.id}_` },
+            OR: [
+                { status: { in: ['executing', 'unknown'] } },
+                { effectsStatus: 'unknown' },
+            ],
+        },
+        select: { id: true },
+    });
+
+    if (unsettled.length || uncertain.length)
+        throw new ContentError(API_ERRORS.ASSISTANT_PREVIOUS_RESULT_PENDING, 409);
+
+    await tx.assistantRun.update({
+        where: { id: claimed.id },
+        data: {
+            activeThreadId: null,
+            ...(claimed.status === 'running' && {
+                status: terminalStatus(claimed.resultRefs) ?? 'failed',
+                errorCode: claimed.errorCode ?? 'INTERRUPTED',
+            }),
+        },
+    });
+}
+
+async function claimRun(
+    env: RunStoreEnv,
+    caller: AssistantCaller,
+    threadId: string,
+    requestId: string,
+    input?: RunInput
+): Promise<RunClaim> {
+    const { db, now } = env;
+
+    return db.$transaction(async (tx) => {
+        await ownThread(db, caller, tx);
+        await lockCampaignRow(tx, caller.actor.campaignId);
+        await tx.$queryRaw`SELECT id FROM ai_threads WHERE id = ${caller.threadId} FOR UPDATE`;
+
+        const existing = await tx.assistantRun.findUnique({
+            where: { threadId_requestId: { threadId, requestId } },
+        });
+
+        const requestHash = requestDigest(input ?? {});
+
+        if (existing) {
+            if (existing.requestHash !== requestHash)
+                throw new ContentError(
+                    API_ERRORS.ASSISTANT_REQUEST_ID_CONTENT_MISMATCH,
+                    409
+                );
+
+            return { replayed: true, run: existing };
+        }
+
+        const claimed = await tx.assistantRun.findFirst({
+            where: { activeThreadId: caller.threadId },
+        });
+
+        if (claimed) await releaseClaimedRun(tx, caller, claimed, now);
+
+        const run = await tx.assistantRun.create({
+            data: {
+                threadId,
+                requestId,
+                requestHash,
+                activeThreadId: caller.threadId,
+                expiresAt: new Date(
+                    now().getTime() + AI_LIMITS.requestDeadlineMs + RUN_GRACE_MS
+                ),
+                resultRefs: {
+                    usage: {
+                        inputTokens: null,
+                        outputTokens: null,
+                        partial: true,
+                    },
+                },
+            },
+        });
+
+        if (input)
+            await appendMessageInTransaction(tx, threadId, {
+                id: `user-${run.id}`,
+                role: 'user',
+                parts: [{ type: 'text', text: input.text }],
+            });
+
+        return { replayed: false, run };
+    });
+}
+
+const requestIdsOf = (rows: { id: string }[]) =>
+    rows.map((r) => ({ requestId: { startsWith: `${r.id}_` } }));
+
+async function loadRunActivity(
+    db: PrismaClient,
+    caller: AssistantCaller,
+    rows: { id: string }[]
+) {
+    const receipts = await db.assistantReceipt.findMany({
+        where: { ...intentOwner(caller), OR: requestIdsOf(rows) },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+        select: {
+            id: true,
+            intentId: true,
+            status: true,
+            effectsStatus: true,
+            result: true,
+        },
+    });
+
+    const intents = await db.assistantIntent.findMany({
+        where: {
+            ...intentOwner(caller),
+            OR: requestIdsOf(rows),
+            status: { in: ['pending', 'executing', 'unknown'] },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+        select: {
+            id: true,
+            actionId: true,
+            status: true,
+            summary: true,
+            targets: true,
+            expiresAt: true,
+            channel: true,
+            createdAt: true,
+            legacyProposalId: true,
+        },
+    });
+
+    return { receipts, intents };
+}
+
+async function readRuns(
+    { db, now }: RunStoreEnv,
+    caller: AssistantCaller,
+    requestId?: string
+) {
+    if (
+        requestId !== undefined &&
+        !assistantRequestIdSchema.safeParse(requestId).success
+    )
+        throw new ContentError(API_ERRORS.INVALID_REQUEST_ID, 400);
+
+    const threadId = await ownThread(db, caller);
+
+    const rows = await db.assistantRun.findMany({
+        where: { threadId, ...(requestId && { requestId }) },
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+        select: {
+            id: true,
+            requestId: true,
+            status: true,
+            expiresAt: true,
+            abortRequested: true,
+            resultRefs: true,
+        },
+    });
+
+    if (!rows.length) return { runs: [], receipts: [], intents: [] };
+
+    const { receipts, intents } = await loadRunActivity(db, caller, rows);
+
+    return {
+        intents: intents.map(intentSummary),
+        runs: rows.map((r) => ({
+            requestId: r.requestId,
+            status:
+                r.status === 'running' &&
+                !terminalStatus(r.resultRefs) &&
+                r.expiresAt <= now()
+                    ? 'interrupted'
+                    : publicRunStatus(r.status, r.resultRefs),
+            abortRequested: r.abortRequested,
+            expiresAt: r.expiresAt.toISOString(),
+        })),
+        receipts: receipts.map((r) => ({
+            id: r.id,
+            intentId: r.intentId,
+            status: r.status,
+            effectsStatus: r.effectsStatus,
+            result: actionResultSchema.safeParse(r.result).success
+                ? publicToolData(actionResultSchema.parse(r.result))
+                : null,
+        })),
+    };
+}
+
 export function createAssistantRunStore(
     options: { db?: PrismaClient; now?: () => Date } = {}
 ) {
-    const db = options.db ?? prisma;
+    const env: RunStoreEnv = {
+        db: options.db ?? prisma,
+        now: options.now ?? (() => new Date()),
+    };
 
-    const now = options.now ?? (() => new Date());
-
-    async function own(
-        caller: AssistantCaller,
-        tx: Prisma.TransactionClient = db
-    ) {
-        if (!caller.threadId || caller.actor.via !== 'session')
-            throw new ContentError(
-                API_ERRORS.ASSISTANT_THREAD_UNAVAILABLE,
-                403
-            );
-
-        await revalidateAssistantCaller(caller, tx);
-
-        const thread = await tx.aiThread.findFirst({
-            where: { id: caller.threadId, ...intentOwner(caller) },
-            select: { id: true },
-        });
-
-        if (!thread)
-            throw new ContentError(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
-
-        return thread.id;
-    }
+    const { db } = env;
 
     async function beginAssistantRun(
         caller: AssistantCaller,
@@ -103,131 +343,11 @@ export function createAssistantRunStore(
             throw new ContentError(API_ERRORS.INVALID_REQUEST_ID, 400);
 
         // Recovery may settle effects, but must never retry a business write or external charge.
-        const threadId = await own(caller);
+        const threadId = await ownThread(db, caller);
 
-        const active = await db.assistantRun.findFirst({
-            where: { activeThreadId: caller.threadId },
-        });
+        await reconcileExpiredRun(env, caller);
 
-        if (active && active.expiresAt <= now()) {
-            const receipts = await db.assistantReceipt.findMany({
-                where: {
-                    ...intentOwner(caller),
-                    requestId: { startsWith: `${active.id}_` },
-                },
-            });
-
-            const executor = createAssistantExecutor({ db });
-
-            for (const receipt of receipts)
-                if (receipt.effectsStatus !== 'complete')
-                    await executor.reconcileEffects(caller, receipt.intentId);
-        }
-
-        return db.$transaction(async (tx) => {
-            await own(caller, tx);
-            await lockCampaignRow(tx, caller.actor.campaignId);
-            await tx.$queryRaw`SELECT id FROM ai_threads WHERE id = ${caller.threadId} FOR UPDATE`;
-
-            const existing = await tx.assistantRun.findUnique({
-                where: {
-                    threadId_requestId: { threadId: threadId, requestId },
-                },
-            });
-
-            const requestHash = requestDigest(input ?? {});
-
-            if (existing) {
-                if (existing.requestHash !== requestHash)
-                    throw new ContentError(
-                        API_ERRORS.ASSISTANT_REQUEST_ID_CONTENT_MISMATCH,
-                        409
-                    );
-
-                return { replayed: true, run: existing };
-            }
-
-            const claimed = await tx.assistantRun.findFirst({
-                where: { activeThreadId: caller.threadId },
-            });
-
-            if (claimed) {
-                if (claimed.expiresAt > now())
-                    throw new ContentError(
-                        API_ERRORS.ASSISTANT_THREAD_BUSY,
-                        409
-                    );
-
-                const unsettled = await tx.assistantIntent.findMany({
-                    where: {
-                        ...intentOwner(caller),
-                        requestId: { startsWith: `${claimed.id}_` },
-                        status: { in: ['executing', 'unknown'] },
-                    },
-                    select: { id: true },
-                });
-
-                const uncertain = await tx.assistantReceipt.findMany({
-                    where: {
-                        ...intentOwner(caller),
-                        requestId: { startsWith: `${claimed.id}_` },
-                        OR: [
-                            { status: { in: ['executing', 'unknown'] } },
-                            { effectsStatus: 'unknown' },
-                        ],
-                    },
-                    select: { id: true },
-                });
-
-                if (unsettled.length || uncertain.length)
-                    throw new ContentError(
-                        API_ERRORS.ASSISTANT_PREVIOUS_RESULT_PENDING,
-                        409
-                    );
-
-                await tx.assistantRun.update({
-                    where: { id: claimed.id },
-                    data: {
-                        activeThreadId: null,
-                        ...(claimed.status === 'running' && {
-                            status:
-                                terminalStatus(claimed.resultRefs) ?? 'failed',
-                            errorCode: claimed.errorCode ?? 'INTERRUPTED',
-                        }),
-                    },
-                });
-            }
-
-            const run = await tx.assistantRun.create({
-                data: {
-                    threadId: threadId,
-                    requestId,
-                    requestHash,
-                    activeThreadId: caller.threadId,
-                    expiresAt: new Date(
-                        now().getTime() +
-                            AI_LIMITS.requestDeadlineMs +
-                            RUN_GRACE_MS
-                    ),
-                    resultRefs: {
-                        usage: {
-                            inputTokens: null,
-                            outputTokens: null,
-                            partial: true,
-                        },
-                    },
-                },
-            });
-
-            if (input)
-                await appendMessageInTransaction(tx, threadId, {
-                    id: `user-${run.id}`,
-                    role: 'user',
-                    parts: [{ type: 'text', text: input.text }],
-                });
-
-            return { replayed: false, run };
-        });
+        return claimRun(env, caller, threadId, requestId, input);
     }
 
     async function recordAssistantRunUsage(
@@ -264,108 +384,17 @@ export function createAssistantRunStore(
         });
     }
 
-    async function readAssistantRuns(
-        caller: AssistantCaller,
-        requestId?: string
-    ) {
-        if (
-            requestId !== undefined &&
-            !assistantRequestIdSchema.safeParse(requestId).success
-        )
-            throw new ContentError(API_ERRORS.INVALID_REQUEST_ID, 400);
-
-        const threadId = await own(caller);
-
-        const rows = await db.assistantRun.findMany({
-            where: { threadId: threadId, ...(requestId && { requestId }) },
-            orderBy: { createdAt: 'desc' },
-            take: 30,
-            select: {
-                id: true,
-                requestId: true,
-                status: true,
-                expiresAt: true,
-                abortRequested: true,
-                resultRefs: true,
-            },
-        });
-
-        if (!rows.length) return { runs: [], receipts: [], intents: [] };
-
-        const receipts = await db.assistantReceipt.findMany({
-            where: {
-                ...intentOwner(caller),
-                OR: rows.map((r) => ({
-                    requestId: { startsWith: `${r.id}_` },
-                })),
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 100,
-            select: {
-                id: true,
-                intentId: true,
-                status: true,
-                effectsStatus: true,
-                result: true,
-            },
-        });
-
-        const intents = await db.assistantIntent.findMany({
-            where: {
-                ...intentOwner(caller),
-                OR: rows.map((r) => ({
-                    requestId: { startsWith: `${r.id}_` },
-                })),
-                status: { in: ['pending', 'executing', 'unknown'] },
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 100,
-            select: {
-                id: true,
-                actionId: true,
-                status: true,
-                summary: true,
-                targets: true,
-                expiresAt: true,
-                channel: true,
-                createdAt: true,
-                legacyProposalId: true,
-            },
-        });
-
-        return {
-            intents: intents.map(intentSummary),
-            runs: rows.map((r) => ({
-                requestId: r.requestId,
-                status:
-                    r.status === 'running' &&
-                    !terminalStatus(r.resultRefs) &&
-                    r.expiresAt <= now()
-                        ? 'interrupted'
-                        : publicRunStatus(r.status, r.resultRefs),
-                abortRequested: r.abortRequested,
-                expiresAt: r.expiresAt.toISOString(),
-            })),
-            receipts: receipts.map((r) => ({
-                id: r.id,
-                intentId: r.intentId,
-                status: r.status,
-                effectsStatus: r.effectsStatus,
-                result: actionResultSchema.safeParse(r.result).success
-                    ? publicToolData(actionResultSchema.parse(r.result))
-                    : null,
-            })),
-        };
-    }
+    const readAssistantRuns = (caller: AssistantCaller, requestId?: string) =>
+        readRuns(env, caller, requestId);
 
     async function cancelAssistantRun(
         caller: AssistantCaller,
         requestId: string
     ) {
-        const threadId = await own(caller);
+        const threadId = await ownThread(db, caller);
 
         await db.assistantRun.updateMany({
-            where: { threadId: threadId, requestId, status: 'running' },
+            where: { threadId, requestId, status: 'running' },
             data: { abortRequested: true },
         });
 

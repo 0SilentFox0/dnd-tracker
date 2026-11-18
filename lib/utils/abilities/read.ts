@@ -8,6 +8,7 @@ import {
     parseAbilities,
 } from '@/lib/utils/abilities/schema';
 import { readChoices } from '@/lib/utils/characters/choices/read';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { Choice } from '@/types/choices';
 import type { ClassFeature } from '@/types/classes';
 
@@ -70,7 +71,7 @@ export const abilitySpellIds = (
     );
 
 export function abilitiesJson(abilities: Ability[]): Prisma.InputJsonValue {
-    return abilities as unknown as Prisma.InputJsonValue;
+    return toInputJson(abilities);
 }
 
 export function readAbilities(

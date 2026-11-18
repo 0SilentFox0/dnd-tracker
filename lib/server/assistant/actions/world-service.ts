@@ -102,6 +102,255 @@ const parsedInput = (operation: WorldOperation, input: unknown) =>
 
 const getCampaignId = (caller: AssistantCaller) => caller.actor.campaignId;
 
+type RestRules = {
+    outOfCombat: ReturnType<typeof parseRules>['outOfCombat'];
+    classesEnabled: boolean;
+};
+
+type StateArgs = {
+    caller: AssistantCaller;
+    campaignId: string;
+    operation: WorldOperation;
+    input: Record<string, unknown>;
+    restRules?: RestRules;
+};
+
+type TargetsState = {
+    targets: { mapIds: string[]; markerIds: string[] };
+    files: string[];
+};
+
+const byId = <T extends { id: string }>(rows: T[]) =>
+    rows.sort((a, b) => a.id.localeCompare(b.id));
+
+const mapNotFound = () =>
+    new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
+
+const markerNotFound = () =>
+    new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
+
+async function subtreeState(
+    campaignId: string,
+    mapId: string
+): Promise<TargetsState> {
+    const [targets, files] = await Promise.all([
+        subtreeTargets(campaignId, mapId),
+        orphanedImagesOfSubtree(campaignId, mapId),
+    ]);
+
+    return {
+        targets: {
+            mapIds: targets.mapIds.sort(),
+            markerIds: targets.markerIds.sort(),
+        },
+        files: files.sort(),
+    };
+}
+
+const findMap = (campaignId: string, mapId: unknown) =>
+    prisma.worldMap.findFirst({ where: { id: String(mapId), campaignId } });
+
+async function loadRestRules(
+    campaignId: string,
+    operation: WorldOperation,
+    input: Record<string, unknown>
+): Promise<RestRules | undefined> {
+    const restKind =
+        operation === 'rest'
+            ? input.kind
+            : ['travel', 'enter', 'exit'].includes(operation)
+              ? input.rest
+              : 'none';
+
+    if (restKind === 'none') return undefined;
+
+    const campaign = await prisma.campaign.findUnique({
+        where: { id: campaignId },
+        select: { rules: true },
+    });
+
+    if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
+
+    const rules = parseRules(campaign.rules);
+
+    return {
+        outOfCombat: rules.outOfCombat,
+        classesEnabled: classesEnabled(rules),
+    };
+}
+
+async function mapsCreateState({ campaignId, input }: StateArgs) {
+    const [maps, parent] = await Promise.all([
+        prisma.worldMap.findMany({
+            where: { campaignId },
+            select: { id: true, parentMarkerId: true },
+        }),
+        input.parentMarkerId
+            ? prisma.worldMarker.findFirst({
+                  where: {
+                      id: String(input.parentMarkerId),
+                      map: { campaignId },
+                  },
+                  include: { childMap: { select: { id: true } } },
+              })
+            : null,
+    ]);
+
+    return {
+        mapCount: maps.length,
+        rootExists: maps.some((map) => map.parentMarkerId === null),
+        parent: parent
+            ? { id: parent.id, childMapId: parent.childMap?.id ?? null }
+            : null,
+    };
+}
+
+async function mapsUpdateState({ campaignId, input }: StateArgs) {
+    const row = await findMap(campaignId, input.mapId);
+
+    if (!row) throw mapNotFound();
+
+    return row;
+}
+
+async function mapsDeleteState({ campaignId, input }: StateArgs) {
+    const row = await findMap(campaignId, input.mapId);
+
+    if (!row) throw mapNotFound();
+
+    return { row, ...(await subtreeState(campaignId, row.id)) };
+}
+
+async function markersCreateState({ campaignId, input }: StateArgs) {
+    const row = await prisma.worldMap.findFirst({
+        where: { id: String(input.mapId), campaignId },
+        select: { id: true, markers: { select: { sortOrder: true } } },
+    });
+
+    if (!row) throw mapNotFound();
+
+    return {
+        mapId: row.id,
+        markerCount: row.markers.length,
+        maxSortOrder: Math.max(
+            -1,
+            ...row.markers.map((marker) => marker.sortOrder)
+        ),
+    };
+}
+
+async function markerMutationState({
+    campaignId,
+    input,
+    operation,
+}: StateArgs) {
+    const row = await prisma.worldMarker.findFirst({
+        where: { id: String(input.markerId), map: { campaignId } },
+        include: { map: true, childMap: { select: { id: true } } },
+    });
+
+    if (!row) throw markerNotFound();
+
+    if (operation === 'markers.delete' && row.childMap)
+        return { row, ...(await subtreeState(campaignId, row.childMap.id)) };
+
+    return row;
+}
+
+async function notesCreateState({ campaignId, input }: StateArgs) {
+    const marker = await prisma.worldMarker.findFirst({
+        where: { id: String(input.markerId), map: { campaignId } },
+    });
+
+    if (!marker) throw markerNotFound();
+
+    return marker;
+}
+
+async function noteMutationState({
+    caller,
+    campaignId,
+    input,
+    operation,
+}: StateArgs) {
+    const note = await prisma.worldNote.findFirst({
+        where: {
+            id: String(input.noteId),
+            marker: { map: { campaignId } },
+        },
+        include: { ...noteInclude, marker: { include: { map: true } } },
+    });
+
+    if (
+        !note ||
+        (note.visibility === 'private' &&
+            note.authorUserId !== caller.actor.userId)
+    )
+        throw new ContentError(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
+
+    if (
+        operation === 'notes.update' &&
+        note.authorUserId !== caller.actor.userId
+    )
+        throw new ContentError(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
+
+    return note;
+}
+
+const withRestRules = (restRules: RestRules | undefined) =>
+    restRules ? { restRules } : {};
+
+const loadRestCharacters = (
+    campaignId: string,
+    ids: string[],
+    needed: boolean
+) =>
+    needed
+        ? prisma.character.findMany({
+              where: { id: { in: ids }, campaignId },
+              select: { id: true, resources: true, classes: true },
+          })
+        : [];
+
+const loadReveals = (mapId: string, ids: string[]) =>
+    prisma.worldReveal.findMany({
+        where: { mapId, characterId: { in: ids } },
+        select: { id: true, characterId: true, shape: true },
+    });
+
+async function travelState({ campaignId, input, restRules }: StateArgs) {
+    const ids = input.characterIds as string[];
+
+    const [map, heroes, positions] = await Promise.all([
+        findMap(campaignId, input.mapId),
+        activePlayerHeroes(campaignId, { id: { in: ids } }),
+        readPositions(ids),
+    ]);
+
+    if (!map) throw mapNotFound();
+
+    const [marker, reveals, characters] = await Promise.all([
+        input.toMarkerId
+            ? prisma.worldMarker.findFirst({
+                  where: { id: String(input.toMarkerId), mapId: map.id },
+                  select: { id: true },
+              })
+            : null,
+        loadReveals(map.id, ids),
+        loadRestCharacters(campaignId, ids, input.rest !== 'none'),
+    ]);
+
+    return {
+        map,
+        marker,
+        heroes: byId(heroes),
+        positions: [...positions].sort(([a], [b]) => a.localeCompare(b)),
+        reveals: byId(reveals),
+        characters: byId(characters),
+        ...withRestRules(restRules),
+    };
+}
+
 async function mapTransitionState(
     campaignId: string,
     input: Record<string, unknown>,
@@ -115,26 +364,91 @@ async function mapTransitionState(
 
     const [reveals, characters] = destMapId
         ? await Promise.all([
-              prisma.worldReveal.findMany({
-                  where: { mapId: destMapId, characterId: { in: ids } },
-                  select: { id: true, characterId: true, shape: true },
-              }),
-              input.rest !== 'none'
-                  ? prisma.character.findMany({
-                        where: { id: { in: ids }, campaignId },
-                        select: { id: true, resources: true, classes: true },
-                    })
-                  : [],
+              loadReveals(destMapId, ids),
+              loadRestCharacters(campaignId, ids, input.rest !== 'none'),
           ])
         : [[], []];
 
     return {
-        heroes: heroes.sort((a, b) => a.id.localeCompare(b.id)),
+        heroes: byId(heroes),
         positions: [...positions].sort(([a], [b]) => a.localeCompare(b)),
-        reveals: reveals.sort((a, b) => a.id.localeCompare(b.id)),
-        characters: characters.sort((a, b) => a.id.localeCompare(b.id)),
+        reveals: byId(reveals),
+        characters: byId(characters),
     };
 }
+
+async function enterState({ campaignId, input, restRules }: StateArgs) {
+    const marker = await prisma.worldMarker.findFirst({
+        where: { id: String(input.markerId), map: { campaignId } },
+        include: { childMap: true },
+    });
+
+    if (!marker) throw markerNotFound();
+
+    const state = await mapTransitionState(
+        campaignId,
+        input,
+        marker.childMap?.id
+    );
+
+    return { marker, ...state, ...withRestRules(restRules) };
+}
+
+async function exitState({ campaignId, input, restRules }: StateArgs) {
+    const map = await prisma.worldMap.findFirst({
+        where: { id: String(input.mapId), campaignId },
+        include: { parentMarker: true },
+    });
+
+    if (!map) throw mapNotFound();
+
+    const state = await mapTransitionState(
+        campaignId,
+        input,
+        map.parentMarker?.mapId
+    );
+
+    return { map, ...state, ...withRestRules(restRules) };
+}
+
+async function restState({ campaignId, input, restRules }: StateArgs) {
+    const ids = input.characterIds as string[];
+
+    const [map, heroes, positions] = await Promise.all([
+        findMap(campaignId, input.mapId),
+        activePlayerHeroes(campaignId, { id: { in: ids } }),
+        readPositions(ids),
+    ]);
+
+    if (!map) throw mapNotFound();
+
+    const characters = await loadRestCharacters(campaignId, ids, true);
+
+    return {
+        map,
+        heroes: byId(heroes),
+        positions: [...positions].sort(([a], [b]) => a.localeCompare(b)),
+        characters: byId(characters),
+        ...withRestRules(restRules),
+    };
+}
+
+const WORLD_STATE: Record<WorldOperation, (args: StateArgs) => Promise<unknown>> =
+    {
+        'maps.create': mapsCreateState,
+        'maps.update': mapsUpdateState,
+        'maps.delete': mapsDeleteState,
+        'markers.create': markersCreateState,
+        'markers.update': markerMutationState,
+        'markers.delete': markerMutationState,
+        'notes.create': notesCreateState,
+        'notes.update': noteMutationState,
+        'notes.delete': noteMutationState,
+        travel: travelState,
+        enter: enterState,
+        exit: exitState,
+        rest: restState,
+    };
 
 async function worldState(
     caller: AssistantCaller,
@@ -143,299 +457,15 @@ async function worldState(
 ) {
     const campaignId = getCampaignId(caller);
 
-    const restKind =
-        operation === 'rest'
-            ? input.kind
-            : ['travel', 'enter', 'exit'].includes(operation)
-              ? input.rest
-              : 'none';
+    const restRules = await loadRestRules(campaignId, operation, input);
 
-    let restRules:
-        | {
-              outOfCombat: ReturnType<typeof parseRules>['outOfCombat'];
-              classesEnabled: boolean;
-          }
-        | undefined;
-
-    if (restKind !== 'none') {
-        const campaign = await prisma.campaign.findUnique({
-            where: { id: campaignId },
-            select: { rules: true },
-        });
-
-        if (!campaign)
-            throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
-
-        const rules = parseRules(campaign.rules);
-
-        restRules = {
-            outOfCombat: rules.outOfCombat,
-            classesEnabled: classesEnabled(rules),
-        };
-    }
-
-    switch (operation) {
-        case 'maps.create': {
-            const [maps, parent] = await Promise.all([
-                prisma.worldMap.findMany({
-                    where: { campaignId },
-                    select: { id: true, parentMarkerId: true },
-                }),
-                input.parentMarkerId
-                    ? prisma.worldMarker.findFirst({
-                          where: {
-                              id: String(input.parentMarkerId),
-                              map: { campaignId },
-                          },
-                          include: { childMap: { select: { id: true } } },
-                      })
-                    : null,
-            ]);
-
-            return {
-                mapCount: maps.length,
-                rootExists: maps.some((map) => map.parentMarkerId === null),
-                parent: parent
-                    ? { id: parent.id, childMapId: parent.childMap?.id ?? null }
-                    : null,
-            };
-        }
-        case 'maps.update': {
-            const row = await prisma.worldMap.findFirst({
-                where: { id: String(input.mapId), campaignId },
-            });
-
-            if (!row)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            return row;
-        }
-        case 'maps.delete': {
-            const row = await prisma.worldMap.findFirst({
-                where: { id: String(input.mapId), campaignId },
-            });
-
-            if (!row)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            const [targets, files] = await Promise.all([
-                subtreeTargets(campaignId, row.id),
-                orphanedImagesOfSubtree(campaignId, row.id),
-            ]);
-
-            return {
-                row,
-                targets: {
-                    mapIds: targets.mapIds.sort(),
-                    markerIds: targets.markerIds.sort(),
-                },
-                files: files.sort(),
-            };
-        }
-        case 'markers.create': {
-            const row = await prisma.worldMap.findFirst({
-                where: { id: String(input.mapId), campaignId },
-                select: { id: true, markers: { select: { sortOrder: true } } },
-            });
-
-            if (!row)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            return {
-                mapId: row.id,
-                markerCount: row.markers.length,
-                maxSortOrder: Math.max(
-                    -1,
-                    ...row.markers.map((marker) => marker.sortOrder)
-                ),
-            };
-        }
-        case 'markers.update':
-        case 'markers.delete': {
-            const row = await prisma.worldMarker.findFirst({
-                where: { id: String(input.markerId), map: { campaignId } },
-                include: { map: true, childMap: { select: { id: true } } },
-            });
-
-            if (!row)
-                throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-
-            if (operation === 'markers.delete' && row.childMap) {
-                const [targets, files] = await Promise.all([
-                    subtreeTargets(campaignId, row.childMap.id),
-                    orphanedImagesOfSubtree(campaignId, row.childMap.id),
-                ]);
-
-                return {
-                    row,
-                    targets: {
-                        mapIds: targets.mapIds.sort(),
-                        markerIds: targets.markerIds.sort(),
-                    },
-                    files: files.sort(),
-                };
-            }
-
-            return row;
-        }
-        case 'notes.create': {
-            const marker = await prisma.worldMarker.findFirst({
-                where: { id: String(input.markerId), map: { campaignId } },
-            });
-
-            if (!marker)
-                throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-
-            return marker;
-        }
-        case 'notes.update':
-        case 'notes.delete': {
-            const note = await prisma.worldNote.findFirst({
-                where: {
-                    id: String(input.noteId),
-                    marker: { map: { campaignId } },
-                },
-                include: { ...noteInclude, marker: { include: { map: true } } },
-            });
-
-            if (
-                !note ||
-                (note.visibility === 'private' &&
-                    note.authorUserId !== caller.actor.userId)
-            )
-                throw new ContentError(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
-
-            if (
-                operation === 'notes.update' &&
-                note.authorUserId !== caller.actor.userId
-            )
-                throw new ContentError(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
-
-            return note;
-        }
-        case 'travel': {
-            const ids = input.characterIds as string[];
-
-            const [map, heroes, positions] = await Promise.all([
-                prisma.worldMap.findFirst({
-                    where: { id: String(input.mapId), campaignId },
-                }),
-                activePlayerHeroes(campaignId, { id: { in: ids } }),
-                readPositions(ids),
-            ]);
-
-            if (!map)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            const [marker, reveals, characters] = await Promise.all([
-                input.toMarkerId
-                    ? prisma.worldMarker.findFirst({
-                          where: {
-                              id: String(input.toMarkerId),
-                              mapId: map.id,
-                          },
-                          select: { id: true },
-                      })
-                    : null,
-                prisma.worldReveal.findMany({
-                    where: { mapId: map.id, characterId: { in: ids } },
-                    select: { id: true, characterId: true, shape: true },
-                }),
-                input.rest !== 'none'
-                    ? prisma.character.findMany({
-                          where: { id: { in: ids }, campaignId },
-                          select: { id: true, resources: true, classes: true },
-                      })
-                    : [],
-            ]);
-
-            return {
-                map,
-                marker,
-                heroes: heroes.sort((a, b) => a.id.localeCompare(b.id)),
-                positions: [...positions].sort(([a], [b]) =>
-                    a.localeCompare(b)
-                ),
-                reveals: reveals.sort((a, b) => a.id.localeCompare(b.id)),
-                characters: characters.sort((a, b) => a.id.localeCompare(b.id)),
-                ...(restRules ? { restRules } : {}),
-            };
-        }
-        case 'enter': {
-            const marker = await prisma.worldMarker.findFirst({
-                where: { id: String(input.markerId), map: { campaignId } },
-                include: { childMap: true },
-            });
-
-            if (!marker)
-                throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-
-            const state = await mapTransitionState(
-                campaignId,
-                input,
-                marker.childMap?.id
-            );
-
-            return {
-                marker,
-                ...state,
-                ...(restRules ? { restRules } : {}),
-            };
-        }
-        case 'exit': {
-            const map = await prisma.worldMap.findFirst({
-                where: { id: String(input.mapId), campaignId },
-                include: { parentMarker: true },
-            });
-
-            if (!map)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            const state = await mapTransitionState(
-                campaignId,
-                input,
-                map.parentMarker?.mapId
-            );
-
-            return {
-                map,
-                ...state,
-                ...(restRules ? { restRules } : {}),
-            };
-        }
-        case 'rest': {
-            const [map, heroes, positions] = await Promise.all([
-                prisma.worldMap.findFirst({
-                    where: { id: String(input.mapId), campaignId },
-                }),
-                activePlayerHeroes(campaignId, {
-                    id: { in: input.characterIds as string[] },
-                }),
-                readPositions(input.characterIds as string[]),
-            ]);
-
-            if (!map)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            const characters = await prisma.character.findMany({
-                where: {
-                    id: { in: input.characterIds as string[] },
-                    campaignId,
-                },
-                select: { id: true, resources: true, classes: true },
-            });
-
-            return {
-                map,
-                heroes: heroes.sort((a, b) => a.id.localeCompare(b.id)),
-                positions: [...positions].sort(([a], [b]) =>
-                    a.localeCompare(b)
-                ),
-                characters: characters.sort((a, b) => a.id.localeCompare(b.id)),
-                ...(restRules ? { restRules } : {}),
-            };
-        }
-    }
+    return WORLD_STATE[operation]({
+        caller,
+        campaignId,
+        operation,
+        input,
+        restRules,
+    });
 }
 
 async function requireOwnedMap(campaignId: string, mapId: string) {
@@ -552,6 +582,399 @@ export async function prepareWorldAction(
     };
 }
 
+type WriteArgs = {
+    ctx: ActionExecutionContext;
+    campaignId: string;
+    input: Record<string, unknown>;
+    before: unknown;
+    emitWorldChanged: (mapId: string | null) => void;
+};
+
+type WriteResult = { data: unknown; affected: TargetRef[] };
+
+const mapRef = (row: { id: string; name: string }): TargetRef => ({
+    domain: 'world-map',
+    id: row.id,
+    name: row.name,
+});
+
+const markerRef = (row: { id: string; name: string }): TargetRef => ({
+    domain: 'world-marker',
+    id: row.id,
+    name: row.name,
+});
+
+const noteRef = (id: string): TargetRef => ({
+    domain: 'world-note',
+    id,
+    name: 'World note',
+});
+
+async function assertCanCreateMap(
+    campaignId: string,
+    body: z.infer<typeof createWorldMapSchema>
+) {
+    if (!ownedWorldMapPath(campaignId, body.imageUrl))
+        throw new ContentError(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
+
+    if (
+        (await prisma.worldMap.count({ where: { campaignId } })) >=
+        MAX_WORLD_MAPS
+    )
+        throw new ContentError(API_ERRORS.WORLD_MAPS_LIMIT, 409);
+
+    if (body.parentMarkerId) {
+        const parent = await requireOwnedMarker(campaignId, body.parentMarkerId);
+
+        if (!parent || parent.childMap)
+            throw new ContentError(API_ERRORS.WORLD_NESTED_EXISTS, 409);
+    } else if (
+        await prisma.worldMap.findFirst({
+            where: { campaignId, parentMarkerId: null },
+            select: { id: true },
+        })
+    )
+        throw new ContentError(API_ERRORS.WORLD_ROOT_EXISTS, 409);
+}
+
+async function writeMapsCreate({
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const body = createWorldMapSchema.parse(input);
+
+    await assertCanCreateMap(campaignId, body);
+
+    const row = await prisma.worldMap.create({
+        data: {
+            campaignId,
+            name: body.name,
+            imageUrl: body.imageUrl,
+            width: body.width,
+            height: body.height,
+            parentMarkerId: body.parentMarkerId ?? null,
+        },
+        include: { parentMarker: { select: { mapId: true } } },
+    });
+
+    emitWorldChanged(row.id);
+
+    return { data: toWorldMap(row), affected: [mapRef(row)] };
+}
+
+async function writeMapsUpdate({
+    ctx,
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const body = input.patch as Record<string, unknown>;
+
+    const old = await requireOwnedMap(campaignId, String(input.mapId));
+
+    const newImage =
+        body.imageUrl !== undefined && body.imageUrl !== old.imageUrl
+            ? String(body.imageUrl)
+            : null;
+
+    if (newImage && !ownedWorldMapPath(campaignId, newImage))
+        throw new ContentError(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
+
+    const row = await prisma.worldMap.update({
+        where: { id: old.id },
+        data: body,
+        include: { parentMarker: { select: { mapId: true } } },
+    });
+
+    if (
+        newImage &&
+        (await prisma.worldMap.count({
+            where: { campaignId, imageUrl: old.imageUrl },
+        })) === 0
+    )
+        ctx.afterCommit({
+            key: `world-file:${ctx.intentId}`,
+            kind: 'media-cleanup',
+            payload: jsonContent({ campaignId, worldMapUrls: [old.imageUrl] }),
+        });
+
+    emitWorldChanged(row.id);
+
+    return { data: toWorldMap(row), affected: [mapRef(row)] };
+}
+
+async function writeMapsDelete({
+    ctx,
+    campaignId,
+    input,
+    before,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const id = String(input.mapId);
+
+    const {
+        targets: gone,
+        files,
+        row: old,
+    } = before as TargetsState & { row: { name: string } };
+
+    await prisma.worldMap.delete({ where: { id } });
+    ctx.afterCommit({
+        key: `world-delete:${ctx.intentId}`,
+        kind: 'world-delete',
+        payload: jsonContent({ campaignId, ...gone, files }),
+    });
+    emitWorldChanged(null);
+
+    return {
+        data: { ok: true, removed: gone.mapIds.length },
+        affected: [mapRef({ id, name: old.name })],
+    };
+}
+
+async function writeMarkersCreate({
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const body = createWorldMarkerSchema.parse(input);
+
+    await requireOwnedMap(campaignId, body.mapId);
+
+    const zone = body.kind === 'zone' && body.polygon ? body.polygon : null;
+
+    const point = zone ? polygonCentroid(zone) : body;
+
+    const row = await prisma.$transaction(async (tx) => {
+        await lockWorldMap(tx, body.mapId);
+
+        const { _count, _max } = await tx.worldMarker.aggregate({
+            where: { mapId: body.mapId },
+            _count: true,
+            _max: { sortOrder: true },
+        });
+
+        if (_count >= MAX_MARKERS_PER_MAP)
+            throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
+
+        return tx.worldMarker.create({
+            data: {
+                mapId: body.mapId,
+                kind: body.kind,
+                ...point,
+                polygon: body.polygon ?? undefined,
+                name: body.name,
+                icon: body.icon ?? null,
+                color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+                sortOrder: (_max.sortOrder ?? -1) + 1,
+            },
+        });
+    });
+
+    emitWorldChanged(body.mapId);
+
+    return { data: toWorldMarker(row), affected: [markerRef(row)] };
+}
+
+function markerUpdateData(
+    owned: { kind: string },
+    body: z.infer<typeof updateWorldMarkerSchema>
+): Prisma.WorldMarkerUpdateInput {
+    const { x, y, polygon, ...rest } = body;
+
+    const update: Prisma.WorldMarkerUpdateInput = { ...rest };
+
+    if (owned.kind === 'zone') {
+        if (polygon === null)
+            throw new ContentError(API_ERRORS.WORLD_POLYGON_INVALID, 400);
+
+        if (polygon)
+            Object.assign(update, { polygon, ...polygonCentroid(polygon) });
+    } else if (polygon !== undefined)
+        throw new ContentError(API_ERRORS.WORLD_POLYGON_INVALID, 400);
+    else {
+        if (x !== undefined) update.x = x;
+
+        if (y !== undefined) update.y = y;
+    }
+
+    return update;
+}
+
+async function writeMarkersUpdate({
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const id = String(input.markerId);
+
+    const body = updateWorldMarkerSchema.parse(input.patch);
+
+    const owned = await prisma.worldMarker.findFirst({
+        where: { id, map: { campaignId } },
+    });
+
+    if (!owned) throw markerNotFound();
+
+    const row = await prisma.worldMarker.update({
+        where: { id },
+        data: markerUpdateData(owned, body),
+        include: { childMap: { select: { id: true } } },
+    });
+
+    emitWorldChanged(owned.mapId);
+
+    return {
+        data: toWorldMarker(row),
+        affected: [markerRef({ id, name: row.name })],
+    };
+}
+
+async function writeMarkersDelete({
+    ctx,
+    campaignId,
+    input,
+    before,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const id = String(input.markerId);
+
+    const marker = await prisma.worldMarker.findFirst({
+        where: { id, map: { campaignId } },
+        include: { childMap: { select: { id: true } } },
+    });
+
+    if (!marker) throw markerNotFound();
+
+    const oldState = before as Partial<TargetsState>;
+
+    const gone = oldState.targets ?? { mapIds: [], markerIds: [] };
+
+    await prisma.worldMarker.delete({ where: { id } });
+    ctx.afterCommit({
+        key: `world-delete:${ctx.intentId}`,
+        kind: 'world-delete',
+        payload: jsonContent({
+            campaignId,
+            mapIds: gone.mapIds,
+            markerIds: [id, ...gone.markerIds],
+            files: oldState.files ?? [],
+        }),
+    });
+    emitWorldChanged(marker.mapId);
+
+    return { data: { ok: true }, affected: [markerRef(marker)] };
+}
+
+async function writeNotesCreate({
+    ctx,
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const body = createPublicWorldNoteSchema.parse(input);
+
+    const marker = await requireOwnedMarker(campaignId, body.markerId);
+
+    const row = await prisma.worldNote.create({
+        data: {
+            markerId: marker.id,
+            authorUserId: ctx.caller.actor.userId,
+            characterId: null,
+            visibility: 'public',
+            text: body.text,
+        },
+        include: noteInclude,
+    });
+
+    emitWorldChanged(marker.mapId);
+
+    return {
+        data: toNote(row, ctx.caller.actor.userId),
+        affected: [noteRef(row.id)],
+    };
+}
+
+async function writeNotesUpdate({
+    ctx,
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const id = String(input.noteId);
+
+    const body = updatePublicWorldNoteSchema.parse(input.patch);
+
+    const row = await prisma.worldNote.findFirst({
+        where: { id, marker: { map: { campaignId } } },
+        include: { ...noteInclude, marker: true },
+    });
+
+    if (!row || row.authorUserId !== ctx.caller.actor.userId)
+        throw new ContentError(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
+
+    const updated = await prisma.worldNote.update({
+        where: { id },
+        data: body,
+        include: noteInclude,
+    });
+
+    emitWorldChanged(row.marker.mapId);
+
+    return {
+        data: toNote(updated, ctx.caller.actor.userId),
+        affected: [noteRef(id)],
+    };
+}
+
+async function writeNotesDelete({
+    ctx,
+    campaignId,
+    input,
+    emitWorldChanged,
+}: WriteArgs): Promise<WriteResult> {
+    const id = String(input.noteId);
+
+    const row = await prisma.worldNote.findFirst({
+        where: { id, marker: { map: { campaignId } } },
+        include: { marker: true },
+    });
+
+    if (
+        !row ||
+        (row.visibility === 'private' &&
+            row.authorUserId !== ctx.caller.actor.userId)
+    )
+        throw new ContentError(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
+
+    if (
+        row.visibility !== 'public' &&
+        row.authorUserId !== ctx.caller.actor.userId
+    )
+        throw new ContentError(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
+
+    await prisma.worldNote.delete({ where: { id } });
+
+    if (row.visibility === 'public') emitWorldChanged(row.marker.mapId);
+
+    return { data: { ok: true }, affected: [noteRef(id)] };
+}
+
+const WORLD_WRITERS: Partial<
+    Record<WorldOperation, (args: WriteArgs) => Promise<WriteResult>>
+> = {
+    'maps.create': writeMapsCreate,
+    'maps.update': writeMapsUpdate,
+    'maps.delete': writeMapsDelete,
+    'markers.create': writeMarkersCreate,
+    'markers.update': writeMarkersUpdate,
+    'markers.delete': writeMarkersDelete,
+    'notes.create': writeNotesCreate,
+    'notes.update': writeNotesUpdate,
+    'notes.delete': writeNotesDelete,
+};
+
 export async function runWorldAction(
     ctx: ActionExecutionContext,
     operation: WorldOperation,
@@ -570,517 +993,189 @@ export async function runWorldAction(
     )
         throw conflict();
 
-    const mapIdForEvent = (mapId: string | null) =>
+    const emitWorldChanged = (mapId: string | null) =>
         ctx.afterCommit({
             key: `world-event:${ctx.intentId}`,
             kind: 'world-changed',
             payload: jsonContent({ campaignId, mapId }),
         });
 
-    let data: unknown;
+    const write = WORLD_WRITERS[operation];
 
-    let affected: TargetRef[] = [];
+    if (write) {
+        const { data, affected } = await write({
+            ctx,
+            campaignId,
+            input,
+            before,
+            emitWorldChanged,
+        });
 
-    switch (operation) {
-        case 'maps.create': {
-            const body = createWorldMapSchema.parse(input);
-
-            if (!ownedWorldMapPath(campaignId, body.imageUrl))
-                throw new ContentError(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
-
-            if (
-                (await prisma.worldMap.count({ where: { campaignId } })) >=
-                MAX_WORLD_MAPS
-            )
-                throw new ContentError(API_ERRORS.WORLD_MAPS_LIMIT, 409);
-
-            if (body.parentMarkerId) {
-                const parent = await requireOwnedMarker(
-                    campaignId,
-                    body.parentMarkerId
-                );
-
-                if (!parent || parent.childMap)
-                    throw new ContentError(API_ERRORS.WORLD_NESTED_EXISTS, 409);
-            } else if (
-                await prisma.worldMap.findFirst({
-                    where: { campaignId, parentMarkerId: null },
-                    select: { id: true },
-                })
-            )
-                throw new ContentError(API_ERRORS.WORLD_ROOT_EXISTS, 409);
-
-            const row = await prisma.worldMap.create({
-                data: {
-                    campaignId,
-                    name: body.name,
-                    imageUrl: body.imageUrl,
-                    width: body.width,
-                    height: body.height,
-                    parentMarkerId: body.parentMarkerId ?? null,
-                },
-                include: { parentMarker: { select: { mapId: true } } },
-            });
-
-            data = toWorldMap(row);
-            affected = [{ domain: 'world-map', id: row.id, name: row.name }];
-            mapIdForEvent(row.id);
-            break;
-        }
-        case 'maps.update': {
-            const body = input.patch as Record<string, unknown>;
-
-            const old = await prisma.worldMap.findFirst({
-                where: { id: String(input.mapId), campaignId },
-            });
-
-            if (!old)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            const newImage =
-                body.imageUrl !== undefined && body.imageUrl !== old.imageUrl
-                    ? String(body.imageUrl)
-                    : null;
-
-            if (newImage && !ownedWorldMapPath(campaignId, newImage))
-                throw new ContentError(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
-
-            const row = await prisma.worldMap.update({
-                where: { id: old.id },
-                data: body,
-                include: { parentMarker: { select: { mapId: true } } },
-            });
-
-            data = toWorldMap(row);
-            affected = [{ domain: 'world-map', id: row.id, name: row.name }];
-
-            if (
-                newImage &&
-                (await prisma.worldMap.count({
-                    where: { campaignId, imageUrl: old.imageUrl },
-                })) === 0
-            )
-                ctx.afterCommit({
-                    key: `world-file:${ctx.intentId}`,
-                    kind: 'media-cleanup',
-                    payload: jsonContent({
-                        campaignId,
-                        worldMapUrls: [old.imageUrl],
-                    }),
-                });
-
-            mapIdForEvent(row.id);
-            break;
-        }
-        case 'maps.delete': {
-            const id = String(input.mapId);
-
-            const { targets: gone, files } = before as {
-                targets: { mapIds: string[]; markerIds: string[] };
-                files: string[];
-            };
-
-            const old = (before as { row: { name: string } }).row;
-
-            await prisma.worldMap.delete({ where: { id } });
-            data = { ok: true, removed: gone.mapIds.length };
-            affected = [{ domain: 'world-map', id, name: old.name }];
-            ctx.afterCommit({
-                key: `world-delete:${ctx.intentId}`,
-                kind: 'world-delete',
-                payload: jsonContent({ campaignId, ...gone, files }),
-            });
-            mapIdForEvent(null);
-            break;
-        }
-        case 'markers.create': {
-            const body = createWorldMarkerSchema.parse(input);
-
-            const map = await prisma.worldMap.findFirst({
-                where: { id: body.mapId, campaignId },
-            });
-
-            if (!map)
-                throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-            const zone =
-                body.kind === 'zone' && body.polygon ? body.polygon : null;
-
-            const point = zone ? polygonCentroid(zone) : body;
-
-            const row = await prisma.$transaction(async (tx) => {
-                await lockWorldMap(tx, body.mapId);
-
-                const { _count, _max } = await tx.worldMarker.aggregate({
-                    where: { mapId: body.mapId },
-                    _count: true,
-                    _max: { sortOrder: true },
-                });
-
-                if (_count >= MAX_MARKERS_PER_MAP)
-                    throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
-
-                return tx.worldMarker.create({
-                    data: {
-                        mapId: body.mapId,
-                        kind: body.kind,
-                        ...point,
-                        polygon: body.polygon ?? undefined,
-                        name: body.name,
-                        icon: body.icon ?? null,
-                        color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
-                        sortOrder: (_max.sortOrder ?? -1) + 1,
-                    },
-                });
-            });
-
-            data = toWorldMarker(row);
-            affected = [{ domain: 'world-marker', id: row.id, name: row.name }];
-            mapIdForEvent(body.mapId);
-            break;
-        }
-        case 'markers.update': {
-            const id = String(input.markerId);
-
-            const body = updateWorldMarkerSchema.parse(input.patch);
-
-            const owned = await prisma.worldMarker.findFirst({
-                where: { id, map: { campaignId } },
-            });
-
-            if (!owned)
-                throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-
-            const { x, y, polygon, ...rest } = body;
-
-            const update: Prisma.WorldMarkerUpdateInput = { ...rest };
-
-            if (owned.kind === 'zone') {
-                if (polygon === null)
-                    throw new ContentError(
-                        API_ERRORS.WORLD_POLYGON_INVALID,
-                        400
-                    );
-
-                if (polygon)
-                    Object.assign(update, {
-                        polygon,
-                        ...polygonCentroid(polygon),
-                    });
-            } else if (polygon !== undefined)
-                throw new ContentError(API_ERRORS.WORLD_POLYGON_INVALID, 400);
-            else {
-                if (x !== undefined) update.x = x;
-
-                if (y !== undefined) update.y = y;
-            }
-
-            const row = await prisma.worldMarker.update({
-                where: { id },
-                data: update,
-                include: { childMap: { select: { id: true } } },
-            });
-
-            data = toWorldMarker(row);
-            affected = [{ domain: 'world-marker', id, name: row.name }];
-            mapIdForEvent(owned.mapId);
-            break;
-        }
-        case 'markers.delete': {
-            const id = String(input.markerId);
-
-            const marker = await prisma.worldMarker.findFirst({
-                where: { id, map: { campaignId } },
-                include: { childMap: { select: { id: true } } },
-            });
-
-            if (!marker)
-                throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-
-            const oldState = before as {
-                targets?: { mapIds: string[]; markerIds: string[] };
-                files?: string[];
-            };
-
-            const gone = oldState.targets ?? { mapIds: [], markerIds: [] };
-
-            const files = oldState.files ?? [];
-
-            await prisma.worldMarker.delete({ where: { id } });
-            data = { ok: true };
-            affected = [{ domain: 'world-marker', id, name: marker.name }];
-            ctx.afterCommit({
-                key: `world-delete:${ctx.intentId}`,
-                kind: 'world-delete',
-                payload: jsonContent({
-                    campaignId,
-                    mapIds: gone.mapIds,
-                    markerIds: [id, ...gone.markerIds],
-                    files,
-                }),
-            });
-            mapIdForEvent(marker.mapId);
-            break;
-        }
-        case 'notes.create': {
-            const body = createPublicWorldNoteSchema.parse(input);
-
-            const marker = await requireOwnedMarker(campaignId, body.markerId);
-
-            if (!marker)
-                throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-
-            const row = await prisma.worldNote.create({
-                data: {
-                    markerId: marker.id,
-                    authorUserId: ctx.caller.actor.userId,
-                    characterId: null,
-                    visibility: 'public',
-                    text: body.text,
-                },
-                include: noteInclude,
-            });
-
-            data = toNote(row, ctx.caller.actor.userId);
-            affected = [
-                { domain: 'world-note', id: row.id, name: 'World note' },
-            ];
-            mapIdForEvent(marker.mapId);
-            break;
-        }
-        case 'notes.update': {
-            const id = String(input.noteId);
-
-            const body = updatePublicWorldNoteSchema.parse(input.patch);
-
-            const row = await prisma.worldNote.findFirst({
-                where: { id, marker: { map: { campaignId } } },
-                include: { ...noteInclude, marker: true },
-            });
-
-            if (!row || row.authorUserId !== ctx.caller.actor.userId)
-                throw new ContentError(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
-
-            const updated = await prisma.worldNote.update({
-                where: { id },
-                data: body,
-                include: noteInclude,
-            });
-
-            data = toNote(updated, ctx.caller.actor.userId);
-            affected = [{ domain: 'world-note', id, name: 'World note' }];
-            mapIdForEvent(row.marker.mapId);
-            break;
-        }
-        case 'notes.delete': {
-            const id = String(input.noteId);
-
-            const row = await prisma.worldNote.findFirst({
-                where: { id, marker: { map: { campaignId } } },
-                include: { marker: true },
-            });
-
-            if (
-                !row ||
-                (row.visibility === 'private' &&
-                    row.authorUserId !== ctx.caller.actor.userId)
-            )
-                throw new ContentError(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
-
-            if (
-                row.visibility !== 'public' &&
-                row.authorUserId !== ctx.caller.actor.userId
-            )
-                throw new ContentError(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
-
-            await prisma.worldNote.delete({ where: { id } });
-            data = { ok: true };
-            affected = [{ domain: 'world-note', id, name: 'World note' }];
-
-            if (row.visibility === 'public') mapIdForEvent(row.marker.mapId);
-
-            break;
-        }
-        case 'travel':
-        case 'enter':
-        case 'exit':
-        case 'rest': {
-            const access = await dmAccess(ctx.caller);
-
-            const result = await runTravelOperation(access, operation, input);
-
-            data = result.data;
-            affected = result.affected;
-
-            if (result.mapId) mapIdForEvent(result.mapId);
-
-            break;
-        }
+        return { data: jsonContent(data), affected, warnings: [] };
     }
 
-    return { data: jsonContent(data), affected, warnings: [] };
+    const access = await dmAccess(ctx.caller);
+
+    const result = await runTravelOperation(access, operation, input);
+
+    if (result.mapId) emitWorldChanged(result.mapId);
+
+    return {
+        data: jsonContent(result.data),
+        affected: result.affected,
+        warnings: [],
+    };
 }
 
-async function runTravelOperation(
-    access: CampaignAccessResult,
-    operation: WorldOperation,
-    input: Record<string, unknown>
-): Promise<{ data: unknown; affected: TargetRef[]; mapId: string | null }> {
-    const campaignId = access.campaign.id;
+type TravelResult = {
+    data: unknown;
+    affected: TargetRef[];
+    mapId: string | null;
+};
 
-    const ids = input.characterIds as string[];
+type TravelArgs = {
+    access: CampaignAccessResult;
+    campaignId: string;
+    input: Record<string, unknown>;
+    ids: string[];
+    heroes: Awaited<ReturnType<typeof activePlayerHeroes>>;
+    positions: Awaited<ReturnType<typeof readPositions>>;
+};
 
-    const heroes = await activePlayerHeroes(campaignId, { id: { in: ids } });
+const heroTargets = (heroes: TravelArgs['heroes']): TargetRef[] =>
+    heroes.map((h) => ({ domain: 'character', id: h.id, name: h.name }));
 
-    if (heroes.length !== ids.length)
+function travelOutcome(
+    args: TravelArgs,
+    destMapId: string,
+    plan: { moves: { characterId: string; to: { x: number; y: number } }[] }
+): TravelResult {
+    const at = new Map(
+        plan.moves.map((m) => [
+            m.characterId,
+            { mapId: destMapId, x: m.to.x, y: m.to.y },
+        ])
+    );
+
+    return {
+        data: {
+            ok: true,
+            positions: toDmHeroes(args.heroes, (id) => at.get(id)),
+        },
+        affected: heroTargets(args.heroes),
+        mapId: destMapId,
+    };
+}
+
+async function runRest(args: TravelArgs): Promise<TravelResult> {
+    const { access, campaignId, input, ids, heroes, positions } = args;
+
+    const body = restWorldSchema.parse(input);
+
+    const map = await requireOwnedMap(campaignId, body.mapId);
+
+    const first = positions.get(ids[0]);
+
+    if (!first || ids.some((id) => positions.get(id)?.mapId !== map.id))
         throw new ContentError(API_ERRORS.WORLD_HERO_INVALID, 400);
 
-    const positions = await readPositions(ids);
+    const { applied } = await applyWorldRest(access, body.kind, ids);
 
-    if (operation === 'rest') {
-        const body = restWorldSchema.parse(input);
-
-        const map = await requireOwnedMap(campaignId, body.mapId);
-
-        const first = positions.get(ids[0]);
-
-        if (!first || ids.some((id) => positions.get(id)?.mapId !== map.id))
-            throw new ContentError(API_ERRORS.WORLD_HERO_INVALID, 400);
-
-        const { applied } = await applyWorldRest(access, body.kind, ids);
-
-        if (applied)
-            await writeRestLog({
-                campaignId,
-                userId: access.userId,
-                mapId: map.id,
-                kind: body.kind,
-                characterIds: ids,
-                at: { x: first.x, y: first.y },
-            });
-
-        return {
-            data: { ok: true, applied },
-            affected: heroes.map((h) => ({
-                domain: 'character',
-                id: h.id,
-                name: h.name,
-            })),
-            mapId: applied ? map.id : null,
-        };
-    }
-
-    if (operation === 'travel') {
-        const body = travelSchema.parse(input);
-
-        const map = await prisma.worldMap.findFirst({
-            where: { id: body.mapId, campaignId },
-        });
-
-        if (!map) throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-        if (body.rest !== 'none') await applyWorldRest(access, body.rest, ids);
-
-        const marker = body.toMarkerId
-            ? await prisma.worldMarker.findFirst({
-                  where: { id: body.toMarkerId, mapId: map.id },
-                  select: { id: true },
-              })
-            : null;
-
-        const plan = planTravel({
-            positions,
+    if (applied)
+        await writeRestLog({
+            campaignId,
+            userId: access.userId,
+            mapId: map.id,
+            kind: body.kind,
             characterIds: ids,
-            mapId: map.id,
-            to: body.to,
-            radius: map.revealRadius,
-            aspect: map.width / map.height,
+            at: { x: first.x, y: first.y },
         });
 
-        await commitTravel({
-            campaignId,
-            userId: access.userId,
-            dest: map,
-            plan,
-            positions,
-            rest: body.rest,
-            toMarkerId: marker?.id ?? null,
-            kind: 'travel',
-        });
+    return {
+        data: { ok: true, applied },
+        affected: heroTargets(heroes),
+        mapId: applied ? map.id : null,
+    };
+}
 
-        const at = new Map(
-            plan.moves.map((m) => [
-                m.characterId,
-                { mapId: map.id, x: m.to.x, y: m.to.y },
-            ])
-        );
+async function runTravel(args: TravelArgs): Promise<TravelResult> {
+    const { access, campaignId, input, ids, positions } = args;
 
-        return {
-            data: {
-                ok: true,
-                positions: toDmHeroes(heroes, (id) => at.get(id)),
-            },
-            affected: heroes.map((h) => ({
-                domain: 'character',
-                id: h.id,
-                name: h.name,
-            })),
-            mapId: map.id,
-        };
-    }
+    const body = travelSchema.parse(input);
 
-    if (operation === 'enter') {
-        const body = enterSchema.parse(input);
+    const map = await prisma.worldMap.findFirst({
+        where: { id: body.mapId, campaignId },
+    });
 
-        const marker = await requireOwnedMarker(campaignId, body.markerId);
+    if (!map) throw mapNotFound();
 
-        if (!marker)
-            throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
+    if (body.rest !== 'none') await applyWorldRest(access, body.rest, ids);
 
-        const child = marker.childMap
-            ? await prisma.worldMap.findUnique({
-                  where: { id: marker.childMap.id },
-              })
-            : null;
+    const marker = body.toMarkerId
+        ? await prisma.worldMarker.findFirst({
+              where: { id: body.toMarkerId, mapId: map.id },
+              select: { id: true },
+          })
+        : null;
 
-        if (!child)
-            throw new ContentError(API_ERRORS.WORLD_MARKER_NO_CHILD, 409);
+    const plan = planTravel({
+        positions,
+        characterIds: ids,
+        mapId: map.id,
+        to: body.to,
+        radius: map.revealRadius,
+        aspect: map.width / map.height,
+    });
 
-        if (body.rest !== 'none') await applyWorldRest(access, body.rest, ids);
+    await commitTravel({
+        campaignId,
+        userId: access.userId,
+        dest: map,
+        plan,
+        positions,
+        rest: body.rest,
+        toMarkerId: marker?.id ?? null,
+        kind: 'travel',
+    });
 
-        const plan = planEnter({ marker, childMap: child, characterIds: ids });
+    return travelOutcome(args, map.id, plan);
+}
 
-        await commitTravel({
-            campaignId,
-            userId: access.userId,
-            dest: child,
-            plan,
-            positions,
-            rest: body.rest,
-            toMarkerId: null,
-            kind: 'enter',
-        });
+async function runEnter(args: TravelArgs): Promise<TravelResult> {
+    const { access, campaignId, input, ids, positions } = args;
 
-        const at = new Map(
-            plan.moves.map((m) => [
-                m.characterId,
-                { mapId: child.id, x: m.to.x, y: m.to.y },
-            ])
-        );
+    const body = enterSchema.parse(input);
 
-        return {
-            data: {
-                ok: true,
-                positions: toDmHeroes(heroes, (id) => at.get(id)),
-            },
-            affected: heroes.map((h) => ({
-                domain: 'character',
-                id: h.id,
-                name: h.name,
-            })),
-            mapId: child.id,
-        };
-    }
+    const marker = await requireOwnedMarker(campaignId, body.markerId);
+
+    const child = marker.childMap
+        ? await prisma.worldMap.findUnique({
+              where: { id: marker.childMap.id },
+          })
+        : null;
+
+    if (!child) throw new ContentError(API_ERRORS.WORLD_MARKER_NO_CHILD, 409);
+
+    if (body.rest !== 'none') await applyWorldRest(access, body.rest, ids);
+
+    const plan = planEnter({ marker, childMap: child, characterIds: ids });
+
+    await commitTravel({
+        campaignId,
+        userId: access.userId,
+        dest: child,
+        plan,
+        positions,
+        rest: body.rest,
+        toMarkerId: null,
+        kind: 'enter',
+    });
+
+    return travelOutcome(args, child.id, plan);
+}
+
+async function runExit(args: TravelArgs): Promise<TravelResult> {
+    const { access, campaignId, input, ids, positions } = args;
 
     const body = exitSchema.parse(input);
 
@@ -1102,7 +1197,7 @@ async function runTravelOperation(
         where: { id: parentMarker.mapId },
     });
 
-    if (!dest) throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
+    if (!dest) throw mapNotFound();
 
     if (body.rest !== 'none') await applyWorldRest(access, body.rest, ids);
 
@@ -1122,20 +1217,39 @@ async function runTravelOperation(
         kind: 'exit',
     });
 
-    const at = new Map(
-        plan.moves.map((m) => [
-            m.characterId,
-            { mapId: dest.id, x: m.to.x, y: m.to.y },
-        ])
-    );
+    return travelOutcome(args, dest.id, plan);
+}
 
-    return {
-        data: { ok: true, positions: toDmHeroes(heroes, (id) => at.get(id)) },
-        affected: heroes.map((h) => ({
-            domain: 'character',
-            id: h.id,
-            name: h.name,
-        })),
-        mapId: dest.id,
-    };
+const TRAVEL_RUNNERS: Partial<
+    Record<WorldOperation, (args: TravelArgs) => Promise<TravelResult>>
+> = { rest: runRest, travel: runTravel, enter: runEnter, exit: runExit };
+
+async function runTravelOperation(
+    access: CampaignAccessResult,
+    operation: WorldOperation,
+    input: Record<string, unknown>
+): Promise<TravelResult> {
+    const campaignId = access.campaign.id;
+
+    const ids = input.characterIds as string[];
+
+    const heroes = await activePlayerHeroes(campaignId, { id: { in: ids } });
+
+    if (heroes.length !== ids.length)
+        throw new ContentError(API_ERRORS.WORLD_HERO_INVALID, 400);
+
+    const positions = await readPositions(ids);
+
+    const run = TRAVEL_RUNNERS[operation];
+
+    if (!run) throw new Error(`Unsupported world operation: ${operation}`);
+
+    return run({
+        access,
+        campaignId,
+        input,
+        ids,
+        heroes,
+        positions,
+    });
 }

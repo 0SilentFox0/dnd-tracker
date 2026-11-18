@@ -34,7 +34,7 @@ export function remapIds<T>(value: T, idMap: ReadonlyMap<string, string>): T {
                     ),
                 } as T;
             } catch {
-                /* legacy malformed records remain unchanged */
+                console.warn('[templates] malformed itemStats left unchanged');
             }
         }
 
@@ -64,7 +64,7 @@ export function collectKeysAndStrings(
             try {
                 collectKeysAndStrings(JSON.parse(value.value), out);
             } catch {
-                /* legacy malformed records have no refs */
+                console.warn('[templates] malformed itemStats has no refs');
             }
         }
 

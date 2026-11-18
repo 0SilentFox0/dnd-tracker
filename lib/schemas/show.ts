@@ -13,6 +13,7 @@ import {
 } from '@/lib/constants/show';
 import { battleAudioCommandSchema } from '@/lib/schemas/music';
 import { isBundledStaticAsset, isHttpUrl } from '@/lib/utils/common/image-url';
+import { isRecord } from '@/lib/utils/common/is-record';
 import type { Slide } from '@/types/show';
 
 const optionalText = (max: number) =>
@@ -132,3 +133,24 @@ export function readSlides(json: unknown): Slide[] {
 
     return parsed.success ? parsed.data : [];
 }
+
+const storedSlideSchema = z.custom<Slide>(isRecord, 'show.validation.slide');
+
+export const storedShowBattleSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+});
+
+export const storedShowWorldSchema = z.object({
+    mapId: z.string(),
+    focusMarkerId: z.string().optional(),
+});
+
+export const storedShowCoverSchema = z.object({
+    deckId: z.string(),
+    slide: storedSlideSchema,
+});
+
+export const storedSlideTrailSchema = z.array(
+    z.object({ slide: storedSlideSchema })
+);

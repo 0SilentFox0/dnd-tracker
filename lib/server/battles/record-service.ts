@@ -14,6 +14,7 @@ import {
     turnTimerSecondsSchema,
 } from '@/lib/schemas';
 import { battleAudioCommandSchema } from '@/lib/schemas/music';
+import { storedRecord } from '@/lib/schemas/stored-json';
 import type { ActionExecutionContext } from '@/lib/server/assistant/types';
 import { loadAudioLibrary } from '@/lib/server/audio/track-store';
 import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
@@ -48,6 +49,7 @@ import {
     headerForOtherMap,
     materializeEdges,
 } from '@/lib/utils/battle/map-storage/relink-scene';
+import { toInputJson } from '@/lib/utils/common/json';
 import type { BattleAudioState } from '@/types/audio';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -158,7 +160,7 @@ async function linkedMapFor(
     return {
         mapId,
         version: meta.version,
-        header: meta.header as unknown as Prisma.InputJsonObject,
+        header: toInputJson(meta.header),
     };
 }
 
@@ -191,7 +193,7 @@ async function relinkData(
             throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_MANY_EDGES, 422);
 
         return {
-            map: inline as unknown as Prisma.InputJsonObject,
+            map: toInputJson(inline),
             mapId: null,
             mapVersion: null,
         };
@@ -199,7 +201,7 @@ async function relinkData(
 
     const linked = await linkedMapFor(db, campaignId, mapId);
 
-    const library = linked.header as unknown as BattleMapConfig;
+    const library = storedRecord<BattleMapConfig>().parse(linked.header);
 
     let header = headerForOtherMap(pinned, library);
 
@@ -217,7 +219,7 @@ async function relinkData(
     }
 
     return {
-        map: header as unknown as Prisma.InputJsonObject,
+        map: toInputJson(header),
         mapId,
         mapVersion: linked.version,
     };
@@ -253,205 +255,202 @@ export async function prepareHttpBattleRecord(
     };
 }
 
-/** Called only inside runGuardedBattleRecordOperation, by HTTP and assistant alike. */
-export async function writeBattleRecord(
-    campaignId: string,
-    userId: string,
-    operation: RecordOperation,
-    battleId: string | undefined,
-    raw: unknown,
-    execution?: ActionExecutionContext,
-    preparedMap = false
+type RecordRow = NonNullable<Awaited<ReturnType<typeof battleRecord>>>;
+
+type Scope = {
+    campaignId: string;
+    userId: string;
+    execution?: ActionExecutionContext;
+    preparedMap: boolean;
+};
+
+async function createBattleRecord(
+    { campaignId, preparedMap }: Scope,
+    input: unknown
 ) {
-    const input = parseInput(recordSchemas[operation] as z.ZodType, raw);
+    const data = input as z.infer<typeof createBattleSchema>;
 
-    if (operation === 'create') {
-        const data = input as z.infer<typeof createBattleSchema>;
+    const map = data.mapId
+        ? null
+        : preparedMap
+          ? data.map
+          : await mapForWrite(data.map, campaignId);
 
-        const map = data.mapId
-            ? null
-            : preparedMap
-              ? data.map
-              : await mapForWrite(data.map, campaignId);
+    await assertParticipantSources(campaignId, data.participants);
 
-        await assertParticipantSources(campaignId, data.participants);
+    const createScene = (
+        db: Pick<Prisma.TransactionClient, 'battleScene'>,
+        linked?: Awaited<ReturnType<typeof linkedMapFor>>
+    ) => {
+        const stored = linked ? linked.header : map;
 
-        const createScene = (
-            db: Pick<Prisma.TransactionClient, 'battleScene'>,
-            linked?: Awaited<ReturnType<typeof linkedMapFor>>
-        ) => {
-            const stored = linked ? linked.header : map;
-
-            return db.battleScene.create({
-                data: {
-                    campaignId,
-                    name: data.name,
-                    description: data.description,
-                    status: 'prepared',
-                    participants:
-                        data.participants as unknown as Prisma.InputJsonValue,
-                    currentRound: 1,
-                    currentTurnIndex: 0,
-                    turnTimerSeconds: data.turnTimerSeconds ?? null,
-                    ...(stored && { map: stored }),
-                    ...(linked && {
-                        mapId: linked.mapId,
-                        mapVersion: linked.version,
-                    }),
-                },
-            });
-        };
-
-        const { mapId } = data;
-
-        if (!mapId) return createScene(prisma);
-
-        return prisma.$transaction(async (tx) => {
-            await lockMapRow(tx, mapId, 'share');
-
-            return createScene(tx, await linkedMapFor(tx, campaignId, mapId));
-        });
-    }
-
-    if (operation === 'clear-history' || operation === 'delete') {
-        const rows =
-            operation === 'delete'
-                ? [await battleRecord(campaignId, requireBattleId(battleId))]
-                : await prisma.battleScene.findMany({
-                      where: { campaignId },
-                      select: { id: true },
-                  });
-
-        const result = await prisma.battleScene.deleteMany({
-            where: { campaignId, id: { in: rows.map((row) => row.id) } },
-        });
-
-        for (const row of rows) {
-            if (execution)
-                execution.afterCommit({
-                    key: `${execution.intentId}:battle-delete:${row.id}`,
-                    kind: 'invalidate',
-                    payload: {
-                        campaignId,
-                        battleId: row.id,
-                        battleLeftActive: true,
-                    },
-                });
-        }
-
-        if (!execution)
-            afterContentCommit(() =>
-                after(async () => {
-                    for (const row of rows)
-                        await clearShowBattle(campaignId, row.id);
-                })
-            );
-
-        return operation === 'delete'
-            ? { success: true }
-            : { success: true, deletedCount: result.count };
-    }
-
-    const row =
-        operation === 'audio'
-            ? await prisma.battleScene.findFirst({
-                  where: { id: requireBattleId(battleId), campaignId },
-              })
-            : await battleRecord(campaignId, requireBattleId(battleId));
-
-    if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
-
-    if (operation === 'patch') {
-        const {
-            map: rawMap,
-            mapId: relinkId,
-            ...rest
-        } = input as z.infer<typeof patchBattleSchema>;
-
-        if (relinkId !== undefined && row.status !== 'prepared')
-            throw new ContentError(API_ERRORS.BATTLE_MAP_RELINK_STARTED, 409);
-
-        if (rest.participants)
-            await assertParticipantSources(
+        return db.battleScene.create({
+            data: {
                 campaignId,
-                rest.participants,
-                sourceIdsOf(row.participants)
-            );
+                name: data.name,
+                description: data.description,
+                status: 'prepared',
+                participants: toInputJson(data.participants),
+                currentRound: 1,
+                currentTurnIndex: 0,
+                turnTimerSeconds: data.turnTimerSeconds ?? null,
+                ...(stored && { map: stored }),
+                ...(linked && {
+                    mapId: linked.mapId,
+                    mapVersion: linked.version,
+                }),
+            },
+        });
+    };
 
-        const written = preparedMap
-            ? rawMap
-            : await mapForWrite(rawMap, campaignId, row.map);
+    const { mapId } = data;
 
-        const pinned =
-            row.map && typeof row.map === 'object' && !Array.isArray(row.map)
-                ? (row.map as unknown as BattleMapConfig)
-                : null;
+    if (!mapId) return createScene(prisma);
 
-        const map =
-            row.mapId && written && pinned
-                ? ({
-                      ...withoutEdges(written),
-                      cols: pinned.cols,
-                      rows: pinned.rows,
-                      blocked: pinned.blocked,
-                  } as unknown as Prisma.InputJsonObject)
-                : row.mapId && written
-                  ? (withoutEdges(written) as unknown as Prisma.InputJsonObject)
-                  : written;
+    return prisma.$transaction(async (tx) => {
+        await lockMapRow(tx, mapId, 'share');
 
-        const unlink = row.mapId && map === null;
+        return createScene(tx, await linkedMapFor(tx, campaignId, mapId));
+    });
+}
 
-        const save = (
-            db: Pick<
-                Prisma.TransactionClient,
-                'battleScene' | 'battleMapState'
-            >,
-            relink?: Awaited<ReturnType<typeof relinkData>>
-        ) =>
-            db.battleScene.update({
-                where: { id: row.id, version: row.version },
-                data: {
-                    ...rest,
-                    ...(rest.participants && {
-                        participants:
-                            rest.participants as unknown as Prisma.InputJsonValue,
-                    }),
-                    ...(relink
-                        ? relink
-                        : {
-                              ...(map !== undefined && {
-                                  map: map ?? Prisma.DbNull,
-                              }),
-                              ...(unlink && { mapId: null, mapVersion: null }),
-                          }),
-                    version: { increment: 1 },
+async function deleteBattleRecords(
+    { campaignId, execution }: Scope,
+    operation: 'delete' | 'clear-history',
+    battleId: string | undefined
+) {
+    const rows =
+        operation === 'delete'
+            ? [await battleRecord(campaignId, requireBattleId(battleId))]
+            : await prisma.battleScene.findMany({
+                  where: { campaignId },
+                  select: { id: true },
+              });
+
+    const result = await prisma.battleScene.deleteMany({
+        where: { campaignId, id: { in: rows.map((row) => row.id) } },
+    });
+
+    for (const row of rows) {
+        if (execution)
+            execution.afterCommit({
+                key: `${execution.intentId}:battle-delete:${row.id}`,
+                kind: 'invalidate',
+                payload: {
+                    campaignId,
+                    battleId: row.id,
+                    battleLeftActive: true,
                 },
             });
-
-        if (relinkId === undefined) await save(prisma);
-        else
-            await prisma.$transaction(async (tx) => {
-                if (relinkId) await lockMapRow(tx, relinkId, 'share');
-
-                const relink = await relinkData(
-                    tx,
-                    campaignId,
-                    row,
-                    pinned,
-                    relinkId
-                );
-
-                await save(tx, relink ?? undefined);
-
-                if (relink && row.mapId !== relinkId)
-                    await tx.battleMapState.deleteMany({
-                        where: { battleId: row.id },
-                    });
-            });
-
-        return { id: row.id, version: row.version + 1 };
     }
 
+    if (!execution)
+        afterContentCommit(() =>
+            after(async () => {
+                for (const row of rows)
+                    await clearShowBattle(campaignId, row.id);
+            })
+        );
+
+    return operation === 'delete'
+        ? { success: true }
+        : { success: true, deletedCount: result.count };
+}
+
+async function patchBattleRecord(
+    { campaignId, preparedMap }: Scope,
+    row: RecordRow,
+    input: unknown
+) {
+    const {
+        map: rawMap,
+        mapId: relinkId,
+        ...rest
+    } = input as z.infer<typeof patchBattleSchema>;
+
+    if (relinkId !== undefined && row.status !== 'prepared')
+        throw new ContentError(API_ERRORS.BATTLE_MAP_RELINK_STARTED, 409);
+
+    if (rest.participants)
+        await assertParticipantSources(
+            campaignId,
+            rest.participants,
+            sourceIdsOf(row.participants)
+        );
+
+    const written = preparedMap
+        ? rawMap
+        : await mapForWrite(rawMap, campaignId, row.map);
+
+    const pinned =
+        storedRecord<BattleMapConfig>().safeParse(row.map).data ?? null;
+
+    const map =
+        row.mapId && written && pinned
+            ? toInputJson({
+                  ...withoutEdges(written),
+                  cols: pinned.cols,
+                  rows: pinned.rows,
+                  blocked: pinned.blocked,
+              })
+            : row.mapId && written
+              ? toInputJson(withoutEdges(written))
+              : written;
+
+    const unlink = row.mapId && map === null;
+
+    const save = (
+        db: Pick<Prisma.TransactionClient, 'battleScene' | 'battleMapState'>,
+        relink?: Awaited<ReturnType<typeof relinkData>>
+    ) =>
+        db.battleScene.update({
+            where: { id: row.id, version: row.version },
+            data: {
+                ...rest,
+                ...(rest.participants && {
+                    participants: toInputJson(rest.participants),
+                }),
+                ...(relink
+                    ? relink
+                    : {
+                          ...(map !== undefined && {
+                              map: map ?? Prisma.DbNull,
+                          }),
+                          ...(unlink && { mapId: null, mapVersion: null }),
+                      }),
+                version: { increment: 1 },
+            },
+        });
+
+    if (relinkId === undefined) await save(prisma);
+    else
+        await prisma.$transaction(async (tx) => {
+            if (relinkId) await lockMapRow(tx, relinkId, 'share');
+
+            const relink = await relinkData(
+                tx,
+                campaignId,
+                row,
+                pinned,
+                relinkId
+            );
+
+            await save(tx, relink ?? undefined);
+
+            if (relink && row.mapId !== relinkId)
+                await tx.battleMapState.deleteMany({
+                    where: { battleId: row.id },
+                });
+        });
+
+    return { id: row.id, version: row.version + 1 };
+}
+
+async function audioBattleRecord(
+    { campaignId, userId, execution }: Scope,
+    row: RecordRow,
+    input: unknown
+) {
     const rate = await checkRateLimit({
         userId,
         scope: 'audio',
@@ -484,7 +483,7 @@ export async function writeBattleRecord(
                 ? { path: ['seq'], equals: prev.seq }
                 : { equals: Prisma.DbNull },
         },
-        data: { audio: next as unknown as Prisma.InputJsonValue },
+        data: { audio: toInputJson(next) },
     });
 
     if (!count) throw new ContentError(API_ERRORS.BATTLE_AUDIO_CONFLICT, 409);
@@ -515,4 +514,37 @@ export async function writeBattleRecord(
         );
 
     return { audio: next };
+}
+
+/** Called only inside runGuardedBattleRecordOperation, by HTTP and assistant alike. */
+export async function writeBattleRecord(
+    campaignId: string,
+    userId: string,
+    operation: RecordOperation,
+    battleId: string | undefined,
+    raw: unknown,
+    execution?: ActionExecutionContext,
+    preparedMap = false
+) {
+    const input = parseInput(recordSchemas[operation] as z.ZodType, raw);
+
+    const scope: Scope = { campaignId, userId, execution, preparedMap };
+
+    if (operation === 'create') return createBattleRecord(scope, input);
+
+    if (operation === 'clear-history' || operation === 'delete')
+        return deleteBattleRecords(scope, operation, battleId);
+
+    const row =
+        operation === 'audio'
+            ? await prisma.battleScene.findFirst({
+                  where: { id: requireBattleId(battleId), campaignId },
+              })
+            : await battleRecord(campaignId, requireBattleId(battleId));
+
+    if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+    if (operation === 'patch') return patchBattleRecord(scope, row, input);
+
+    return audioBattleRecord(scope, row, input);
 }

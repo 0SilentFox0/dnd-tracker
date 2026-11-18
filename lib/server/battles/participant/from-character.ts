@@ -372,6 +372,154 @@ function finalizeCharacter(
     );
 }
 
+type Character = CharacterFromPrisma;
+
+type ResolvedClasses = Awaited<
+    ReturnType<typeof loadCharacterBuildRefs>
+>['resolvedClasses'];
+
+function characterProficiencies(
+    character: Character,
+    resolvedClasses: ResolvedClasses,
+    rules: Ruleset
+) {
+    const rawSaves = character.savingThrows;
+
+    const saveProficiencies = resolvedClasses
+        ? classSaves(resolvedClasses, rawSaves)
+        : rawSaves && typeof rawSaves === 'object' && !Array.isArray(rawSaves)
+          ? ABILITY_KEYS.filter(
+                (k) => (rawSaves as Record<string, unknown>)[k] === true
+            )
+          : [];
+
+    const classProficiency = resolvedClasses
+        ? proficiencyOf(rules).fromClasses(resolvedClasses.map((e) => e.class))
+        : undefined;
+
+    const rawSkills = character.skills;
+
+    const dndSkillProficiencies =
+        rawSkills && typeof rawSkills === 'object' && !Array.isArray(rawSkills)
+            ? DND_SKILLS.filter(
+                  (k) => (rawSkills as Record<string, unknown>)[k] === true
+              )
+            : [];
+
+    return { saveProficiencies, classProficiency, dndSkillProficiencies };
+}
+
+function resolveCharacterAbilities(
+    character: Character,
+    refs: Awaited<ReturnType<typeof loadCharacterBuildRefs>>,
+    choiceGroups: NonNullable<
+        Parameters<typeof collectCharacterAbilities>[0]['choiceGroups']
+    >,
+    rules: Ruleset
+) {
+    const { skills, artifactRows, consumables, completed, resolvedClasses, race } =
+        refs;
+
+    return [
+        ...collectCharacterAbilities(
+            {
+                skills,
+                race,
+                artifacts: uniqueById(
+                    artifactRows.map(({ row, slot }) => ({ ...row, slot }))
+                ),
+                completedSets: completed.sets,
+                consumables: consumables.map(({ itemId, row }) => ({
+                    itemId,
+                    row,
+                })),
+                ...(resolvedClasses && { classes: resolvedClasses }),
+                ...(choiceGroups.length > 0 && { choiceGroups }),
+            },
+            composition(rules.system)
+        ),
+        ...immunityAbilities(getCharacterImmunities(character), {
+            type: 'character',
+            id: character.id,
+        }),
+    ];
+}
+
+type RuleSystem = ReturnType<typeof ruleSystemOf>;
+
+function participantAbilities(a: {
+    character: Character;
+    rules: Ruleset;
+    race: Awaited<ReturnType<typeof loadCharacterBuildRefs>>['race'];
+    resolvedClasses: ResolvedClasses;
+    baseStats: ReturnType<NonNullable<RuleSystem['combat']['baseStats']>> | undefined;
+    equipmentGear: ReturnType<NonNullable<RuleSystem['equipment']>['armourAp']> | undefined;
+    primaryAbility: AbilityKey | undefined;
+    proficiencyBonus: number;
+    classProficiency: ReturnType<ReturnType<typeof proficiencyOf>['fromClasses']> | undefined;
+    saveProficiencies: AbilityKey[];
+    dndSkillProficiencies: NonNullable<
+        BattleParticipant['abilities']['skillProficiencies']
+    >;
+}): BattleParticipant['abilities'] {
+    const {
+        character,
+        rules,
+        race,
+        resolvedClasses,
+        baseStats,
+        equipmentGear,
+        primaryAbility,
+        proficiencyBonus,
+        classProficiency,
+        saveProficiencies,
+        dndSkillProficiencies,
+    } = a;
+
+    const modifiers = {
+        strength: getAbilityModifier(character.strength),
+        dexterity: getAbilityModifier(character.dexterity),
+        constitution: getAbilityModifier(character.constitution),
+        intelligence: getAbilityModifier(character.intelligence),
+        wisdom: getAbilityModifier(character.wisdom),
+        charisma: getAbilityModifier(character.charisma),
+    };
+
+    return {
+        level: character.level,
+        initiative: baseStats?.initiative ?? character.initiative,
+        baseInitiative: baseStats?.initiative ?? character.initiative,
+        strength: character.strength,
+        dexterity: character.dexterity,
+        constitution: character.constitution,
+        intelligence: character.intelligence,
+        wisdom: character.wisdom,
+        charisma: character.charisma,
+        modifiers,
+        proficiencyBonus,
+        race: character.race,
+        creatureType:
+            isRecord(race?.passiveAbility) &&
+            typeof race.passiveAbility.creatureType === 'string'
+                ? race.passiveAbility.creatureType.trim().toLowerCase()
+                : 'humanoid',
+        raceId: (race as { id?: string } | null)?.id,
+        ...(resolvedClasses && { damageModel: '5e' as const }),
+        ...systemSlotOf(
+            ruleSystemOf(rules).combat.participantFields?.(
+                character,
+                equipmentGear
+            )
+        ),
+        primaryAbility,
+        ...(classProficiency && { proficiencies: classProficiency }),
+        ...(saveProficiencies.length && { saveProficiencies }),
+        ...(dndSkillProficiencies.length && {
+            skillProficiencies: dndSkillProficiencies,
+        }),
+    };
+}
+
 export async function createBattleParticipantFromCharacter(
     row: CharacterFromPrisma,
     battleId: string,
@@ -386,15 +534,6 @@ export async function createBattleParticipantFromCharacter(
 
     const character = withColumnView(row, ruleSystemOf(rules));
 
-    const modifiers = {
-        strength: getAbilityModifier(character.strength),
-        dexterity: getAbilityModifier(character.dexterity),
-        constitution: getAbilityModifier(character.constitution),
-        intelligence: getAbilityModifier(character.intelligence),
-        wisdom: getAbilityModifier(character.wisdom),
-        charisma: getAbilityModifier(character.charisma),
-    };
-
     const refs = await loadCharacterBuildRefs(
         character,
         rules,
@@ -403,9 +542,7 @@ export async function createBattleParticipantFromCharacter(
     );
 
     const {
-        skills,
         artifactRows,
-        consumables,
         equippedArtifacts,
         completed,
         resolvedClasses,
@@ -443,28 +580,8 @@ export async function createBattleParticipantFromCharacter(
         ? (character.primaryAbility as AbilityKey)
         : undefined;
 
-    const rawSaves = character.savingThrows;
-
-    const saveProficiencies = resolvedClasses
-        ? classSaves(resolvedClasses, rawSaves)
-        : rawSaves && typeof rawSaves === 'object' && !Array.isArray(rawSaves)
-          ? ABILITY_KEYS.filter(
-                (k) => (rawSaves as Record<string, unknown>)[k] === true
-            )
-          : [];
-
-    const classProficiency = resolvedClasses
-        ? proficiencyOf(rules).fromClasses(resolvedClasses.map((e) => e.class))
-        : undefined;
-
-    const rawSkills = character.skills;
-
-    const dndSkillProficiencies =
-        rawSkills && typeof rawSkills === 'object' && !Array.isArray(rawSkills)
-            ? DND_SKILLS.filter(
-                  (k) => (rawSkills as Record<string, unknown>)[k] === true
-              )
-            : [];
+    const { saveProficiencies, classProficiency, dndSkillProficiencies } =
+        characterProficiencies(character, resolvedClasses, rules);
 
     const computedMaxHp = characterBaseHp(character, {
         entries: resolvedClasses,
@@ -477,29 +594,12 @@ export async function createBattleParticipantFromCharacter(
         ...(await characterTalentGroups(character, rules, context)),
     ];
 
-    const resolvedAbilities = [
-        ...collectCharacterAbilities(
-            {
-                skills,
-                race,
-                artifacts: uniqueById(
-                    artifactRows.map(({ row, slot }) => ({ ...row, slot }))
-                ),
-                completedSets: completed.sets,
-                consumables: consumables.map(({ itemId, row }) => ({
-                    itemId,
-                    row,
-                })),
-                ...(resolvedClasses && { classes: resolvedClasses }),
-                ...(choiceGroups.length > 0 && { choiceGroups }),
-            },
-            composition(rules.system)
-        ),
-        ...immunityAbilities(getCharacterImmunities(character), {
-            type: 'character',
-            id: character.id,
-        }),
-    ];
+    const resolvedAbilities = resolveCharacterAbilities(
+        character,
+        refs,
+        choiceGroups,
+        rules
+    );
 
     const ingredientStock =
         rules.spellIngredients.enabled &&
@@ -533,39 +633,19 @@ export async function createBattleParticipantFromCharacter(
             side,
             controlledBy: character.controlledBy || CONTROLLED_BY_DM,
         },
-        abilities: {
-            level: character.level,
-            initiative: baseStats?.initiative ?? character.initiative,
-            baseInitiative: baseStats?.initiative ?? character.initiative,
-            strength: character.strength,
-            dexterity: character.dexterity,
-            constitution: character.constitution,
-            intelligence: character.intelligence,
-            wisdom: character.wisdom,
-            charisma: character.charisma,
-            modifiers,
-            proficiencyBonus,
-            race: character.race,
-            creatureType:
-                isRecord(race?.passiveAbility) &&
-                typeof race.passiveAbility.creatureType === 'string'
-                    ? race.passiveAbility.creatureType.trim().toLowerCase()
-                    : 'humanoid',
-            raceId: (race as { id?: string } | null)?.id,
-            ...(resolvedClasses && { damageModel: '5e' as const }),
-            ...systemSlotOf(
-                ruleSystemOf(rules).combat.participantFields?.(
-                    character,
-                    equipmentGear
-                )
-            ),
+        abilities: participantAbilities({
+            character,
+            rules,
+            race,
+            resolvedClasses,
+            baseStats,
+            equipmentGear,
             primaryAbility,
-            ...(classProficiency && { proficiencies: classProficiency }),
-            ...(saveProficiencies.length && { saveProficiencies }),
-            ...(dndSkillProficiencies.length && {
-                skillProficiencies: dndSkillProficiencies,
-            }),
-        },
+            proficiencyBonus,
+            classProficiency,
+            saveProficiencies,
+            dndSkillProficiencies,
+        }),
         combatStats: {
             maxHp: computedMaxHp,
             currentHp: computedMaxHp,

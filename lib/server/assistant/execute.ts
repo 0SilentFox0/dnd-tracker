@@ -34,6 +34,104 @@ import type { Actor } from '@/lib/utils/api/actor';
 
 type Options = Partial<ExecutorDeps>;
 
+type Action = ReturnType<ExecutorDeps['catalog']['getAction']>;
+
+async function dispatchImmediate(
+    caller: AssistantCaller,
+    action: Extract<Action, { effect: 'read' | 'handoff' }>,
+    input: unknown
+): Promise<DispatchResult> {
+    if (action.effect === 'read') {
+        const handoff = await action.handoff?.(caller, input);
+
+        if (handoff) return { kind: 'handoff', ...handoff };
+
+        return {
+            kind: 'result',
+            result: parseInput(
+                actionResultSchema,
+                await action.execute(caller, input)
+            ),
+        };
+    }
+
+    return { kind: 'handoff', ...(await action.execute(caller, input)) };
+}
+
+async function priorResult(
+    db: ExecutorDeps['db'],
+    caller: AssistantCaller,
+    key: { originKey: string; requestId: string; requestHash: string }
+): Promise<DispatchResult | null> {
+    const prior = await db.assistantReceipt.findFirst({
+        where: {
+            ...intentOwner(caller),
+            originKey: key.originKey,
+            requestId: key.requestId,
+        },
+    });
+
+    if (!prior) return null;
+
+    if (prior.requestHash !== key.requestHash) throw conflict();
+
+    if (prior.status !== 'applied' || prior.result === null) throw conflict();
+
+    return {
+        kind: 'result',
+        result: parseInput(actionResultSchema, prior.result),
+    };
+}
+
+async function rejectIntentTransaction(
+    deps: ExecutorDeps,
+    caller: AssistantCaller,
+    id: string,
+    callbacks: Array<() => void>
+) {
+    return deps.db.$transaction(async (tx) => {
+        const row = await tx.assistantIntent.findFirst({
+            where: { id, ...intentOwner(caller) },
+        });
+
+        if (!row) throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
+
+        await authorizeAssistant(
+            caller,
+            deps.catalog.getAction(row.actionId).need,
+            'prepare',
+            tx
+        );
+        await lockCampaignRow(tx, caller.actor.campaignId);
+        await tx.$queryRaw`SELECT id FROM assistant_intents WHERE id = ${id} FOR UPDATE`;
+
+        const fresh = await tx.assistantIntent.findFirst({
+            where: { id, ...intentOwner(caller) },
+        });
+
+        if (!fresh || !['pending', 'stale', 'expired'].includes(fresh.status))
+            throw conflict();
+
+        const legacyProposalId = fresh.legacyProposalId;
+
+        if (legacyProposalId) {
+            await runContentWriteContext(
+                caller.actor.campaignId,
+                tx,
+                () => rejectProposal(caller.actor.campaignId, legacyProposalId),
+                callbacks
+            );
+        }
+
+        return intentSummary(
+            await tx.assistantIntent.update({
+                where: { id },
+                data: { status: 'rejected' },
+            })
+        );
+    });
+}
+
 export function createAssistantExecutor(options: Options = {}) {
     const db = options.db ?? prisma;
 
@@ -89,25 +187,8 @@ export function createAssistantExecutor(options: Options = {}) {
 
         const input = parseInput(action.input, raw.input);
 
-        if (action.effect === 'read') {
-            const handoff = await action.handoff?.(caller, input);
-
-            if (handoff) return { kind: 'handoff', ...handoff };
-
-            return {
-                kind: 'result',
-                result: parseInput(
-                    actionResultSchema,
-                    await action.execute(caller, input)
-                ),
-            };
-        }
-
-        if (action.effect === 'handoff')
-            return {
-                kind: 'handoff',
-                ...(await action.execute(caller, input)),
-            };
+        if (action.effect === 'read' || action.effect === 'handoff')
+            return dispatchImmediate(caller, action, input);
 
         if (action.effect === 'paid' && !action.external)
             throw new ContentError(
@@ -123,25 +204,13 @@ export function createAssistantExecutor(options: Options = {}) {
             { ...raw, input }
         );
 
-        const prior = await db.assistantReceipt.findFirst({
-            where: {
-                ...intentOwner(caller),
-                originKey,
-                requestId: request.requestId,
-            },
+        const prior = await priorResult(db, caller, {
+            originKey,
+            requestId: request.requestId,
+            requestHash,
         });
 
-        if (prior) {
-            if (prior.requestHash !== requestHash) throw conflict();
-
-            if (prior.status !== 'applied' || prior.result === null)
-                throw conflict();
-
-            return {
-                kind: 'result',
-                result: parseInput(actionResultSchema, prior.result),
-            };
-        }
+        if (prior) return prior;
 
         const preview = parseInput(
             actionPreviewSchema,
@@ -203,55 +272,7 @@ export function createAssistantExecutor(options: Options = {}) {
     async function rejectIntent(caller: AssistantCaller, id: string) {
         const callbacks: Array<() => void> = [];
 
-        const result = await db.$transaction(async (tx) => {
-            const row = await tx.assistantIntent.findFirst({
-                where: { id, ...intentOwner(caller) },
-            });
-
-            if (!row)
-                throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
-
-            await authorizeAssistant(
-                caller,
-                catalog.getAction(row.actionId).need,
-                'prepare',
-                tx
-            );
-            await lockCampaignRow(tx, caller.actor.campaignId);
-            await tx.$queryRaw`SELECT id FROM assistant_intents WHERE id = ${id} FOR UPDATE`;
-
-            const fresh = await tx.assistantIntent.findFirst({
-                where: { id, ...intentOwner(caller) },
-            });
-
-            if (
-                !fresh ||
-                !['pending', 'stale', 'expired'].includes(fresh.status)
-            )
-                throw conflict();
-
-            const legacyProposalId = fresh.legacyProposalId;
-
-            if (legacyProposalId) {
-                await runContentWriteContext(
-                    caller.actor.campaignId,
-                    tx,
-                    () =>
-                        rejectProposal(
-                            caller.actor.campaignId,
-                            legacyProposalId
-                        ),
-                    callbacks
-                );
-            }
-
-            return intentSummary(
-                await tx.assistantIntent.update({
-                    where: { id },
-                    data: { status: 'rejected' },
-                })
-            );
-        });
+        const result = await rejectIntentTransaction(deps, caller, id, callbacks);
 
         for (const callback of callbacks) await callback();
 

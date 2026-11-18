@@ -15,6 +15,7 @@ import type {
     BattleMapInput,
     BattleMapSaveInput,
 } from '@/lib/schemas/battle-maps';
+import { storedRecord } from '@/lib/schemas/stored-json';
 import {
     backgroundOf,
     removeUnreferencedBackgrounds,
@@ -31,6 +32,7 @@ import {
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
 import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
+import { toInputJsonObject } from '@/lib/utils/common/json';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
@@ -62,12 +64,8 @@ const payloadOf = (input: BattleMapInput) => {
     return {
         header,
         chunks,
-        headerJson: header as unknown as Prisma.InputJsonObject,
-        payloadJson: {
-            header,
-            chunks,
-            tileLayers: {},
-        } as unknown as Prisma.InputJsonObject,
+        headerJson: toInputJsonObject(header),
+        payloadJson: toInputJsonObject({ header, chunks, tileLayers: {} }),
     };
 };
 
@@ -242,7 +240,7 @@ export async function getMapMeta(
               version: row.mapVersion,
               cols: row.cols,
               rows: row.rows,
-              header: row.header as unknown as Header,
+              header: storedRecord<Header>().parse(row.header),
           }
         : null;
 }
@@ -257,10 +255,10 @@ async function loadVersionGeometry(
 
     if (!snapshot) return null;
 
-    const payload = snapshot.payload as unknown as {
+    const payload = storedRecord<{
         header: Header;
         chunks: Record<string, string>;
-    };
+    }>().parse(snapshot.payload);
 
     return assembleGeometry(payload.header, payload.chunks);
 }

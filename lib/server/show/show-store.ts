@@ -1,10 +1,17 @@
 import { Prisma } from '@prisma/client';
+import { z } from 'zod';
 
 import 'server-only';
 import { prisma } from '@/lib/db';
 import { SHOW_STATE_EVENT, showChannelName } from '@/lib/pusher/channels';
 import { safePusherTrigger } from '@/lib/pusher/safe-trigger';
 import { pusherServer } from '@/lib/pusher/server';
+import {
+    storedShowBattleSchema,
+    storedShowCoverSchema,
+    storedShowWorldSchema,
+    storedSlideTrailSchema,
+} from '@/lib/schemas/show';
 import { isRestricted, toClientShow } from '@/lib/utils/show/player-view';
 import {
     withoutBattle,
@@ -13,13 +20,9 @@ import {
 import type { BattleAudioState } from '@/types/audio';
 import type {
     PuzzleState,
-    ShowBattle,
-    ShowCover,
     ShowEvent,
     ShowState,
-    ShowWorld,
     Slide,
-    SlideTrailEntry,
 } from '@/types/show';
 
 const SHOW_SELECT = {
@@ -52,6 +55,24 @@ function splitSlide(raw: unknown): {
     return { slide, ...(puzzleState ? { puzzle: puzzleState } : {}) };
 }
 
+function optionalField<K extends string, T>(
+    key: K,
+    schema: z.ZodType<T>,
+    value: unknown
+): { [P in K]?: T } {
+    if (!value) return {};
+
+    const parsed = schema.safeParse(value);
+
+    if (!parsed.success) {
+        console.warn(`[show] invalid stored ${key} dropped`);
+
+        return {};
+    }
+
+    return { [key]: parsed.data } as { [P in K]?: T };
+}
+
 export function toShowState(row: ShowRow): ShowState {
     const { slide, puzzle } = splitSlide(row.slide);
 
@@ -61,13 +82,13 @@ export function toShowState(row: ShowRow): ShowState {
         slide,
         nextImageUrl: row.nextImageUrl,
         audio: (row.audio ?? null) as BattleAudioState | null,
-        ...(row.battle ? { battle: row.battle as unknown as ShowBattle } : {}),
-        ...(row.cover ? { cover: row.cover as unknown as ShowCover } : {}),
+        ...optionalField('battle', storedShowBattleSchema, row.battle),
+        ...optionalField('cover', storedShowCoverSchema, row.cover),
         ...(row.curtain ? { curtain: true as const } : {}),
-        ...(row.world ? { world: row.world as unknown as ShowWorld } : {}),
+        ...optionalField('world', storedShowWorldSchema, row.world),
         ...(puzzle ? { puzzle } : {}),
         ...(Array.isArray(row.trail) && row.trail.length > 0
-            ? { trail: row.trail as unknown as SlideTrailEntry[] }
+            ? optionalField('trail', storedSlideTrailSchema, row.trail)
             : {}),
         seq: row.seq,
     };

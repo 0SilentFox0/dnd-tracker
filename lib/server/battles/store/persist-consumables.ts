@@ -4,6 +4,7 @@ import { persistedHeroes } from './persist-resources';
 
 import { InventoryLogKind } from '@/lib/constants/inventory';
 import { lockCampaignArtifacts } from '@/lib/server/artifacts/lock';
+import { toInputJson } from '@/lib/utils/common/json';
 import { normalizeItems } from '@/lib/utils/inventory/items';
 import {
     consumableSpend,
@@ -63,7 +64,7 @@ export async function persistConsumables(
 
         await tx.characterInventory.update({
             where: { characterId },
-            data: { items: items as unknown as Prisma.InputJsonValue },
+            data: { items: toInputJson(items) },
         });
 
         if (campaign)

@@ -15,6 +15,7 @@ import { AI_LIMITS } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { receiptEffectsSchema } from '@/lib/schemas/assistant';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
+import { toInputJson } from '@/lib/utils/common/json';
 
 /** Continue only after the claim/domain transaction committed. Resume uses the same executor. */
 export async function completeIntentOutcome(
@@ -95,13 +96,13 @@ export async function completeIntentOutcome(
             where: { intentId },
             data: {
                 effectsStatus: effects.status,
-                effects: {
+                effects: toInputJson({
                     items: outcome.effects,
                     completed: effects.completed,
                     ...(readExternalState(outcome.receipt.effects) && {
                         external: readExternalState(outcome.receipt.effects),
                     }),
-                } as unknown as Prisma.InputJsonValue,
+                }),
             },
         });
     }

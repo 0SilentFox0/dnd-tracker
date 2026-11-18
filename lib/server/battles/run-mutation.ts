@@ -5,6 +5,7 @@ import { defaultPipelineDeps } from './pipeline-deps';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
+import { battleVersionBodySchema } from '@/lib/schemas/battles';
 import { ContentError } from '@/lib/server/content/errors';
 import { systemBattleOperation } from '@/lib/server/systems/registry';
 import { errorResponse } from '@/lib/utils/api/api-response';
@@ -114,13 +115,8 @@ export async function runBattleMutation<TBody>(
 
         const raw: unknown = await req.json().catch(() => undefined);
 
-        const expectedVersion =
-            raw &&
-            typeof raw === 'object' &&
-            typeof (raw as { expectedVersion?: unknown }).expectedVersion ===
-                'number'
-                ? (raw as { expectedVersion: number }).expectedVersion
-                : undefined;
+        const expectedVersion = battleVersionBodySchema.safeParse(raw).data
+            ?.expectedVersion;
 
         const write = {
             logLocale: await (deps.logLocale ?? getRequestLocale)(),

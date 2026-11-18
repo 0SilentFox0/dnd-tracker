@@ -17,6 +17,8 @@ import {
     SpellTargetingSchema,
 } from './schema';
 
+import { toInputJson } from '@/lib/utils/common/json';
+
 type SpellRulesRow = {
     id: string;
     executionMode?: string | null;
@@ -196,10 +198,10 @@ export function spellDefinitionColumns(def: SpellDefinition) {
         dice: def.dice,
         cost: def.cost,
         casting: def.casting as Prisma.InputJsonValue | undefined,
-        targeting: def.targeting as unknown as Prisma.InputJsonValue,
-        resolution: def.resolution as unknown as Prisma.InputJsonValue,
-        spellEffects: def.effects as unknown as Prisma.InputJsonValue,
-        raceModifiers: def.raceModifiers as unknown as Prisma.InputJsonValue,
+        targeting: toInputJson(def.targeting),
+        resolution: toInputJson(def.resolution),
+        spellEffects: toInputJson(def.effects),
+        raceModifiers: toInputJson(def.raceModifiers),
         stackable: def.stackable === true,
         maxStacks: def.stackable ? (def.maxStacks ?? null) : null,
         concentration: def.concentration === true,

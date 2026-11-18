@@ -135,6 +135,347 @@ interface CastPlan {
     system: SystemSlot | undefined;
 }
 
+type SpellDefinition = Spellcast['definition'];
+
+function assertSpellRequestAllowed(
+    ctx: BattleMutationContext,
+    data: SpellRequestData,
+    definition: SpellDefinition
+) {
+    if (definition.executionMode === 'manual' && !data.cancelCasting)
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_SPELL_CONFIGURE_OR_MANUAL
+        );
+
+    if (
+        !data.cancelCasting &&
+        !optionInRange(definition.effects, data.optionIndex)
+    )
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_SPELL_OPTION_REQUIRED
+        );
+
+    if (data.legendaryKey && !ctx.isDM)
+        throw new BattleAccessError(403, API_ERRORS.BATTLE_LEGENDARY_DM_ONLY);
+
+    if (data.legendaryKey && (data.free || data.slotKey))
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_LEGENDARY_CAST_NO_SLOT
+        );
+}
+
+function cancelCast(
+    ctx: BattleMutationContext,
+    order: BattleParticipant[],
+    caster: BattleParticipant
+): MutationResult {
+    const dropped = ruleSystemOf(ctx.meta.rules).magic.sustain.drop(
+        order,
+        caster.basicInfo.id,
+        textRef('battleLog.concentration.reasons.castCancelled')
+    );
+
+    const cleared = updateParticipant(
+        dropped.participants,
+        caster.basicInfo.id,
+        (p) =>
+            p.battleData.pendingCast
+                ? {
+                      ...p,
+                      battleData: { ...p.battleData, pendingCast: undefined },
+                  }
+                : p
+    );
+
+    return {
+        participants: cleared,
+        pending: ctx.pending,
+        events: [
+            systemEvent(
+                ctx.scene.round,
+                textRef('battleLog.spell.castCancelled', {
+                    name: caster.basicInfo.name,
+                })
+            ),
+        ],
+    };
+}
+
+async function assertCasterMayCast(
+    ctx: BattleMutationContext,
+    data: SpellRequestData,
+    caster: BattleParticipant,
+    spell: Spellcast,
+    source: SpellSource,
+    serverRolls: boolean
+) {
+    const { definition } = spell;
+
+    const { legendaryAbility, free, grant } = source;
+
+    const tested =
+        !!ruleSystemOf(ctx.meta.rules).magic.tested &&
+        !free &&
+        !legendaryAbility &&
+        !grant;
+
+    if (
+        tested &&
+        (!definition.casting?.magic ||
+            definition.resolution.kind !== 'auto' ||
+            definition.cost === 'long')
+    )
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH
+        );
+
+    const system = await parseSystemInput(
+        ctx.meta.rules,
+        'castInput',
+        data,
+        serverRolls || !!data.serverRoll
+    );
+
+    if (system)
+        ruleSystemOf(ctx.meta.rules).combat.input?.assert(system, {
+            kind: 'cast',
+            actor: caster,
+            free: !!data.free,
+            tested,
+        });
+
+    if (!data.preview && !legendaryAbility)
+        assertActionAvailable(ctx, caster, spell, free);
+
+    if (hasEffectMarker(caster, 'disable_spell_casting')) {
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_CASTER_CANNOT_CAST
+        );
+    }
+
+    if (armorPenalty(caster))
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_CASTER_ARMOR_NOT_PROFICIENT
+        );
+
+    return system;
+}
+
+function chooseSlot(
+    ctx: BattleMutationContext,
+    data: SpellRequestData,
+    caster: BattleParticipant,
+    spell: Spellcast,
+    source: SpellSource
+): ChosenSlot {
+    const { legendaryAbility, free, grant } = source;
+
+    const resource = ruleSystemOf(ctx.meta.rules).magic.resource;
+
+    const chosen =
+        resource &&
+        !free &&
+        !legendaryAbility &&
+        !grant &&
+        data.slotKey &&
+        resource.picksSlot(caster)
+            ? resource.canCast(caster, {
+                  level: spell.level,
+                  slotKey: data.slotKey,
+              })
+            : null;
+
+    if (chosen && !chosen.ok) throw ruleErrorOf('action_rejected', chosen.error);
+
+    return chosen;
+}
+
+function assertTargetsNotPacified(
+    ctx: BattleMutationContext,
+    order: BattleParticipant[],
+    caster: BattleParticipant,
+    targeting: Parameters<typeof pacifiedBlock>[2],
+    targetIds: Parameters<typeof pacifiedBlock>[3]
+) {
+    const pacified = pacifiedBlock(
+        order,
+        caster,
+        targeting,
+        targetIds,
+        ctx.meta.map
+    );
+
+    if (pacified)
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_CASTER_PACIFIED,
+            pacified
+        );
+}
+
+function assertObjectsNear(
+    ctx: BattleMutationContext,
+    order: BattleParticipant[],
+    caster: BattleParticipant,
+    spell: Spellcast,
+    targetIds: string[],
+    reach: number
+) {
+    const orphan = targetIds.some((id) => {
+        const t = findParticipant(order, id);
+
+        return (
+            !t ||
+            objectsNear(
+                order,
+                caster.basicInfo.id,
+                spell.id,
+                t,
+                reach,
+                ctx.meta.rules
+            ).length === 0
+        );
+    });
+
+    if (orphan)
+        throw new BattleRuleError(
+            'invalid_target',
+            API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR
+        );
+}
+
+function resolveCastTargets(
+    ctx: BattleMutationContext,
+    data: SpellRequestData,
+    order: BattleParticipant[],
+    caster: BattleParticipant,
+    spell: Spellcast,
+    source: SpellSource,
+    castLevel: number | undefined
+): Resolution {
+    const { definition } = spell;
+
+    const { legendaryAbility } = source;
+
+    assertTargetsNotPacified(
+        ctx,
+        order,
+        caster,
+        definition.targeting,
+        data.targetIds
+    );
+
+    const resolution = resolveSpellTargets(
+        order,
+        caster,
+        spell,
+        definition.targeting,
+        data.targetIds,
+        {
+            map: ctx.meta.map,
+            rules: ctx.meta.rules,
+            targetCell: data.targetCell,
+            castLevel,
+            upcastTargets: definition.upcastTargets,
+        }
+    );
+
+    if (!resolution.ok) throw ruleErrorOf('invalid_target', resolution.error);
+
+    if (definition.perObjectFeet && !data.preview)
+        assertObjectsNear(
+            ctx,
+            order,
+            caster,
+            spell,
+            resolution.targetIds,
+            definition.perObjectFeet
+        );
+
+    assertTargetsNotPacified(
+        ctx,
+        order,
+        caster,
+        { kind: 'self' },
+        resolution.targetIds
+    );
+
+    if (
+        legendaryAbility?.condition &&
+        !evaluateCondition(legendaryAbility.condition, {
+            owner: caster,
+            event: {
+                type: 'action',
+                actorId: caster.basicInfo.id,
+                abilityKey: legendaryAbility.key,
+                targetIds: resolution.targetIds,
+            },
+            participants: order,
+            sourceId: legendaryAbility.source.id,
+            adjacent: adjacencyOf(ctx.meta.map),
+        })
+    )
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET
+        );
+
+    return resolution;
+}
+
+function prepareCastDice(
+    ctx: BattleMutationContext,
+    data: SpellRequestData,
+    caster: BattleParticipant,
+    spell: Spellcast,
+    castLevel: number | undefined,
+    serverRolls: boolean
+) {
+    const { definition } = spell;
+
+    const inputDice = inputDiceOf(definition.effects);
+
+    if (inputDice && data.inputCount === undefined && !data.preview)
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_SPELL_INPUT_REQUIRED
+        );
+
+    const sized = casterSpellDice(
+        caster,
+        {
+            dice: definition.dice,
+            groupId: spell.groupId,
+            level: spell.level,
+            dieSides: definition.dieSides,
+            upcastDice: definition.upcastDice,
+            fixedDice: definition.fixedDice,
+        },
+        ctx.meta.rules,
+        castLevel
+    );
+
+    const expected = inputDice
+        ? { ...sized, count: Math.min(data.inputCount ?? 1, inputDice.max) }
+        : sized;
+
+    // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
+    const diceRolls =
+        (data.preview || serverRolls) && data.diceRolls.length === 0
+            ? rollDiceList(`${expected.count}d${expected.sides}`, rngOf(ctx))
+            : data.diceRolls;
+
+    assertSpellRolls(expected, diceRolls);
+
+    return { expected, diceRolls };
+}
+
 export function createSpellMutation(
     deps: SpellMutationDeps = defaultDeps,
     options: { serverRolls?: boolean } = {}
@@ -150,32 +491,7 @@ export function createSpellMutation(
 
         const { definition } = spell;
 
-        if (definition.executionMode === 'manual' && !data.cancelCasting)
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_SPELL_CONFIGURE_OR_MANUAL
-            );
-
-        if (
-            !data.cancelCasting &&
-            !optionInRange(definition.effects, data.optionIndex)
-        )
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_SPELL_OPTION_REQUIRED
-            );
-
-        if (data.legendaryKey && !ctx.isDM)
-            throw new BattleAccessError(
-                403,
-                API_ERRORS.BATTLE_LEGENDARY_DM_ONLY
-            );
-
-        if (data.legendaryKey && (data.free || data.slotKey))
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_LEGENDARY_CAST_NO_SLOT
-            );
+        assertSpellRequestAllowed(ctx, data, definition);
 
         let caster = requireActor(ctx, data.casterId, {
             anyTurn: definition.cost === 'reaction',
@@ -187,111 +503,22 @@ export function createSpellMutation(
             },
         });
 
-        if (data.cancelCasting) {
-            const dropped = ruleSystemOf(ctx.meta.rules).magic.sustain.drop(
-                order,
-                caster.basicInfo.id,
-                textRef('battleLog.concentration.reasons.castCancelled')
-            );
-
-            const cleared = updateParticipant(
-                dropped.participants,
-                caster.basicInfo.id,
-                (p) =>
-                    p.battleData.pendingCast
-                        ? {
-                              ...p,
-                              battleData: {
-                                  ...p.battleData,
-                                  pendingCast: undefined,
-                              },
-                          }
-                        : p
-            );
-
-            return {
-                participants: cleared,
-                pending: ctx.pending,
-                events: [
-                    systemEvent(
-                        ctx.scene.round,
-                        textRef('battleLog.spell.castCancelled', {
-                            name: caster.basicInfo.name,
-                        })
-                    ),
-                ],
-            };
-        }
+        if (data.cancelCasting) return cancelCast(ctx, order, caster);
 
         const source = resolveSpellSource(ctx, caster, spell, data);
 
-        const { legendaryAbility, free, grant } = source;
+        const { free, grant } = source;
 
-        const tested =
-            !!ruleSystemOf(ctx.meta.rules).magic.tested &&
-            !free &&
-            !legendaryAbility &&
-            !grant;
-
-        if (
-            tested &&
-            (!definition.casting?.magic ||
-                definition.resolution.kind !== 'auto' ||
-                definition.cost === 'long')
-        )
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH
-            );
-
-        const system = await parseSystemInput(
-            ctx.meta.rules,
-            'castInput',
+        const system = await assertCasterMayCast(
+            ctx,
             data,
-            !!options.serverRolls || !!data.serverRoll
+            caster,
+            spell,
+            source,
+            !!options.serverRolls
         );
 
-        if (system)
-            ruleSystemOf(ctx.meta.rules).combat.input?.assert(system, {
-                kind: 'cast',
-                actor: caster,
-                free: !!data.free,
-                tested,
-            });
-
-        if (!data.preview && !legendaryAbility)
-            assertActionAvailable(ctx, caster, spell, free);
-
-        if (hasEffectMarker(caster, 'disable_spell_casting')) {
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_CASTER_CANNOT_CAST
-            );
-        }
-
-        if (armorPenalty(caster))
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_CASTER_ARMOR_NOT_PROFICIENT
-            );
-
-        const resource = ruleSystemOf(ctx.meta.rules).magic.resource;
-
-        const chosen =
-            resource &&
-            !free &&
-            !legendaryAbility &&
-            !grant &&
-            data.slotKey &&
-            resource.picksSlot(caster)
-                ? resource.canCast(caster, {
-                      level: spell.level,
-                      slotKey: data.slotKey,
-                  })
-                : null;
-
-        if (chosen && !chosen.ok)
-            throw ruleErrorOf('action_rejected', chosen.error);
+        const chosen = chooseSlot(ctx, data, caster, spell, source);
 
         const castLevel =
             (grant ? data.castLevel : undefined) ??
@@ -328,139 +555,24 @@ export function createSpellMutation(
                 API_ERRORS.BATTLE_TIME_ONLY_DURATION_CAST
             );
 
-        const pacified = pacifiedBlock(
-            order,
-            caster,
-            definition.targeting,
-            data.targetIds,
-            ctx.meta.map
-        );
-
-        if (pacified)
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_CASTER_PACIFIED,
-                pacified
-            );
-
-        const resolution = resolveSpellTargets(
+        const resolution = resolveCastTargets(
+            ctx,
+            data,
             order,
             caster,
             spell,
-            definition.targeting,
-            data.targetIds,
-            {
-                map: ctx.meta.map,
-                rules: ctx.meta.rules,
-                targetCell: data.targetCell,
-                castLevel,
-                upcastTargets: definition.upcastTargets,
-            }
-        );
-
-        if (!resolution.ok)
-            throw ruleErrorOf('invalid_target', resolution.error);
-
-        if (definition.perObjectFeet && !data.preview) {
-            const reach = definition.perObjectFeet;
-
-            const orphan = resolution.targetIds.some((id) => {
-                const t = findParticipant(order, id);
-
-                return (
-                    !t ||
-                    objectsNear(
-                        order,
-                        caster.basicInfo.id,
-                        spell.id,
-                        t,
-                        reach,
-                        ctx.meta.rules
-                    ).length === 0
-                );
-            });
-
-            if (orphan)
-                throw new BattleRuleError(
-                    'invalid_target',
-                    API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR
-                );
-        }
-
-        const pacifiedHit = pacifiedBlock(
-            order,
-            caster,
-            { kind: 'self' },
-            resolution.targetIds,
-            ctx.meta.map
-        );
-
-        if (pacifiedHit)
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_CASTER_PACIFIED,
-                pacifiedHit
-            );
-
-        if (
-            legendaryAbility?.condition &&
-            !evaluateCondition(legendaryAbility.condition, {
-                owner: caster,
-                event: {
-                    type: 'action',
-                    actorId: caster.basicInfo.id,
-                    abilityKey: legendaryAbility.key,
-                    targetIds: resolution.targetIds,
-                },
-                participants: order,
-                sourceId: legendaryAbility.source.id,
-                adjacent: adjacencyOf(ctx.meta.map),
-            })
-        )
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET
-            );
-
-        const inputDice = inputDiceOf(definition.effects);
-
-        if (inputDice && data.inputCount === undefined && !data.preview)
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_SPELL_INPUT_REQUIRED
-            );
-
-        const sized = casterSpellDice(
-            caster,
-            {
-                dice: definition.dice,
-                groupId: spell.groupId,
-                level: spell.level,
-                dieSides: definition.dieSides,
-                upcastDice: definition.upcastDice,
-                fixedDice: definition.fixedDice,
-            },
-            ctx.meta.rules,
+            source,
             castLevel
         );
 
-        const expected = inputDice
-            ? { ...sized, count: Math.min(data.inputCount ?? 1, inputDice.max) }
-            : sized;
-
-        // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
-
-        const diceRolls =
-            (data.preview || options.serverRolls) && data.diceRolls.length === 0
-                ? rollDiceList(
-                      `${expected.count}d${expected.sides}`,
-                      rngOf(ctx)
-                  )
-                : data.diceRolls;
-
-        assertSpellRolls(expected, diceRolls);
-
-        const saves = splitSaveRolls(ctx, order, data.saveRolls);
+        const { expected, diceRolls } = prepareCastDice(
+            ctx,
+            data,
+            caster,
+            spell,
+            castLevel,
+            !!options.serverRolls
+        );
 
         const plan: CastPlan = {
             ctx,
@@ -476,7 +588,7 @@ export function createSpellMutation(
             resolution,
             expected,
             diceRolls,
-            saves,
+            saves: splitSaveRolls(ctx, order, data.saveRolls),
             serverRolls: !!options.serverRolls,
             system,
         };
