@@ -59,16 +59,4 @@ describe('buildToolContext locale', () => {
             actor: { isDM: true, via: 'token', campaignId: 'c', userId: 'u' },
         });
     });
-
-    it('keeps a well-formed Mcp-Session-Id and drops a malformed one', () => {
-        expect(
-            buildToolContext(auth, reqWith({ 'mcp-session-id': 'abc-123' }))
-                .mcpSessionId
-        ).toBe('abc-123');
-        expect(
-            buildToolContext(auth, reqWith({ 'mcp-session-id': 'a b' }))
-                .mcpSessionId
-        ).toBeUndefined();
-        expect(buildToolContext(auth, reqWith({})).mcpSessionId).toBeUndefined();
-    });
 });

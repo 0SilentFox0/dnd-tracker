@@ -3,10 +3,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerMcpTools } from '@/lib/ai/tools';
 import { assistantActionTool } from '@/lib/ai/tools/assistant';
 import type { AiToolContext } from '@/lib/ai/tools/define';
-import { mcpRequestKey } from '@/lib/ai/tools/request-key';
+import { mcpDerivedKeys } from '@/lib/ai/tools/request-key';
 import { dispatchAction } from '@/lib/server/assistant/execute';
 
 vi.mock('server-only', () => ({}));
+
+const used = vi.hoisted(() => ({ ids: new Set<string>() }));
+
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        assistantIntent: {
+            findFirst: vi.fn(async ({ where }) =>
+                used.ids.has(where.requestId) ? { id: 'x' } : null
+            ),
+        },
+    },
+}));
 vi.mock('@/lib/server/assistant/execute', () => ({
     dispatchAction: vi.fn(async () => ({
         kind: 'pending',
@@ -45,7 +57,7 @@ type Handler = (
     isError: boolean;
 }>;
 
-function register(session?: string) {
+function register() {
     const registered: Record<string, { config: unknown; cb: Handler }> = {};
 
     registerMcpTools(
@@ -55,7 +67,7 @@ function register(session?: string) {
             },
         } as never,
         [assistantActionTool],
-        session ? { ...base, mcpSessionId: session } : base
+        base
     );
 
     return registered.assistant_action;
@@ -69,50 +81,117 @@ const keys = () =>
 beforeEach(() => vi.mocked(dispatchAction).mockClear());
 
 describe('MCP write idempotency', () => {
-    it('within an Mcp-Session-Id a retry with the same JSON-RPC id and arguments reuses the key', async () => {
-        const { cb } = register('sess-1');
+    beforeEach(() => used.ids.clear());
+
+    it('without a client requestId identical calls share a derived key, whatever the JSON-RPC id', async () => {
+        const { cb } = register();
 
         await cb(payload, { mcpReq: { id: 7 } });
-        await cb(payload, { mcpReq: { id: 7 } });
+        await cb(payload, { mcpReq: { id: 8 } });
 
         const [first, second] = keys();
 
         expect(first).toBe(second);
         expect(first).toBe(
-            mcpRequestKey('tok', 'sess-1', 7, 'assistant_action', payload)
+            mcpDerivedKeys('tok', 'assistant_action', payload)[0]
         );
         expect(first).toMatch(/^[a-zA-Z0-9_-]{1,100}$/);
     });
 
-    it('without a session or client requestId every call gets a fresh key', async () => {
-        const { cb } = register();
+    it('arguments key order does not change the key', () => {
+        const a = mcpDerivedKeys('tok', 't', { x: 1, y: { a: 1, b: 2 } }, 5);
 
-        await cb(payload, { mcpReq: { id: 7 } });
-        await cb(payload, { mcpReq: { id: 7 } });
+        const b = mcpDerivedKeys('tok', 't', { y: { b: 2, a: 1 }, x: 1 }, 5);
 
-        const [first, second] = keys();
-
-        expect(first).not.toBe(second);
+        expect(a).toEqual(b);
     });
 
-    it('a different session, id, token or arguments gives a different key', () => {
-        const a = mcpRequestKey('tok', 's', 7, 'assistant_action', payload);
+    it('a different token, tool or arguments gives a different key', () => {
+        const [a] = mcpDerivedKeys('tok', 'assistant_action', payload, 5);
 
-        expect(mcpRequestKey('tok', 's2', 7, 'assistant_action', payload)).not.toBe(a);
-        expect(mcpRequestKey('tok', 's', 8, 'assistant_action', payload)).not.toBe(a);
-        expect(mcpRequestKey('other', 's', 7, 'assistant_action', payload)).not.toBe(a);
         expect(
-            mcpRequestKey('tok', 's', 7, 'assistant_action', { ...payload, input: 1 })
+            mcpDerivedKeys('other', 'assistant_action', payload, 5)[0]
+        ).not.toBe(a);
+        expect(
+            mcpDerivedKeys('tok', 'propose_scenario_edit', payload, 5)[0]
+        ).not.toBe(a);
+        expect(
+            mcpDerivedKeys(
+                'tok',
+                'assistant_action',
+                { ...payload, input: 1 },
+                5
+            )[0]
         ).not.toBe(a);
     });
 
-    it('the client requestId wins over the JSON-RPC derived key', async () => {
+    it('the same call after the dedupe window gets a new key; the previous bucket key is exposed for boundary retries', () => {
+        const w = 600_000;
+
+        const [now, prev] = mcpDerivedKeys('tok', 't', payload, 10 * w + 1);
+
+        const [later, laterPrev] = mcpDerivedKeys(
+            'tok',
+            't',
+            payload,
+            12 * w + 1
+        );
+
+        expect(later).not.toBe(now);
+        expect(laterPrev).not.toBe(now);
+        expect(mcpDerivedKeys('tok', 't', payload, 11 * w + 1)[1]).toBe(now);
+        expect(prev).not.toBe(now);
+    });
+
+    it('reuses the previous bucket key when its intent already exists (retry across a boundary)', async () => {
         const { cb } = register();
 
-        await cb({ ...payload, requestId: 'client-key-1' }, { mcpReq: { id: 1 } });
-        await cb({ ...payload, requestId: 'client-key-1' }, { mcpReq: { id: 2 } });
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(600_000 * 10 + 1000);
+
+        await cb(payload, { mcpReq: { id: 1 } });
+
+        const [first] = keys();
+
+        vi.setSystemTime(600_000 * 11 + 1000);
+        used.ids.add(first);
+        await cb(payload, { mcpReq: { id: 2 } });
+        vi.useRealTimers();
+
+        expect(keys()[1]).toBe(first);
+    });
+
+    it('the client requestId wins over the derived key', async () => {
+        const { cb } = register();
+
+        await cb(
+            { ...payload, requestId: 'client-key-1' },
+            { mcpReq: { id: 1 } }
+        );
+        await cb(
+            { ...payload, requestId: 'client-key-1' },
+            { mcpReq: { id: 2 } }
+        );
 
         expect(keys()).toEqual(['client-key-1', 'client-key-1']);
+    });
+
+    it('reads get no derived key', async () => {
+        const registered: Record<string, { cb: Handler }> = {};
+
+        registerMcpTools(
+            {
+                registerTool: (name: string, _c: unknown, cb: Handler) => {
+                    registered[name] = { cb };
+                },
+            } as never,
+            [{ ...assistantActionTool, effect: 'read' }],
+            base
+        );
+
+        await registered.assistant_action.cb(payload, { mcpReq: { id: 1 } });
+
+        expect(keys()[0]).not.toMatch(/^mcpd_/);
     });
 
     it('rejects a malformed client requestId before dispatch', async () => {

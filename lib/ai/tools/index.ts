@@ -1,6 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/server';
 import { tool, type ToolSet } from 'ai';
-import type { z } from 'zod';
 
 import { ASSISTANT_TOOLS } from './assistant';
 import { getBattleStateTool } from './battle';
@@ -12,12 +11,13 @@ import {
     runTool,
     runToolResult,
     toolAnnotations,
+    toolEffect,
     toolOutputSchema,
 } from './define';
 import { getPartyTool, readCharacterTool } from './party';
 import { proposeScenarioEditTool } from './propose';
 import { readReferenceTool, searchReferenceTool } from './reference';
-import { mcpRequestKey } from './request-key';
+import { mcpDerivedKeys } from './request-key';
 import {
     findScenarioMentionsTool,
     listScenarioPagesTool,
@@ -86,23 +86,21 @@ export function registerMcpTools(
             {
                 title: def.title,
                 description: def.description,
-                inputSchema: def.input as z.ZodObject,
+                inputSchema: def.input,
                 outputSchema: toolOutputSchema,
                 annotations: toolAnnotations(def),
             },
-            async (input: unknown, extra) => {
+            async (input: unknown) => {
                 const tokenId = base.caller?.tokenId;
 
                 const result = await runToolResult(
                     def,
                     {
                         ...ctx,
-                        ...(tokenId && base.mcpSessionId && extra?.mcpReq
+                        ...(tokenId && toolEffect(def) !== 'read'
                             ? {
-                                  requestKey: mcpRequestKey(
+                                  requestKeys: mcpDerivedKeys(
                                       tokenId,
-                                      base.mcpSessionId,
-                                      extra.mcpReq.id,
                                       def.name,
                                       input
                                   ),

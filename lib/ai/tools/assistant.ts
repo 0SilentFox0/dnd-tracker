@@ -4,7 +4,7 @@ import { authorizeDiscovery, callerOf } from './assistant-caller';
 import { assistantRejectTool, assistantStatusTool } from './assistant-status';
 import { defineTool } from './define';
 import { project } from './projection';
-import { toolRequestId } from './request-key';
+import { toolRequestId, writeRequestId } from './request-key';
 
 import { API_TOKEN_SCOPES } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -137,10 +137,10 @@ export const assistantActionTool = defineTool({
     description:
         'Calls the single dispatcher with review/auto policy. Pending and handoff do not mean the change was made; confirmation is by a human in the UI only.',
     input: actionRequest,
-    handler: (ctx, { requestId, ...input }) =>
+    handler: async (ctx, { requestId, ...input }) =>
         dispatchAction(
             callerOf(ctx),
-            { ...input, requestId: toolRequestId(ctx, requestId) },
+            { ...input, requestId: await writeRequestId(ctx, requestId) },
             ctx.abortSignal
         ),
 });

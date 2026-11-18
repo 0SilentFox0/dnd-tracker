@@ -2,7 +2,9 @@ import { beforeEach, expect, it, vi } from 'vitest';
 
 const dispatch = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/db', () => ({ prisma: {} }));
+vi.mock('@/lib/db', () => ({
+    prisma: { assistantIntent: { findFirst: vi.fn(async () => null) } },
+}));
 vi.mock('@/lib/server/assistant/execute', () => ({
     dispatchAction: dispatch,
     rejectIntent: vi.fn(),
@@ -65,4 +67,48 @@ it('malformed ops fail before dispatch', async () => {
         )
     ).toMatchObject({ kind: 'error', error: { status: 400 } });
     expect(dispatch).not.toHaveBeenCalled();
+});
+it('a client requestId is the idempotency key and is not part of the action input', async () => {
+    dispatch.mockResolvedValue({
+        kind: 'pending',
+        intent: {},
+        reviewUrl: '/r',
+    });
+
+    const input = {
+        pageId: 'p',
+        summary: 'Edit',
+        ops: [{ op: 'renameSection', sectionId: 's', title: 'Title' }],
+    };
+
+    await runTool(proposeScenarioEditTool, ctx, { ...input, requestId: 'k-1' });
+    await runTool(proposeScenarioEditTool, ctx, { ...input, requestId: 'k-1' });
+
+    expect(dispatch.mock.calls.map((c) => c[1])).toEqual([
+        expect.objectContaining({ requestId: 'k-1', input }),
+        expect.objectContaining({ requestId: 'k-1', input }),
+    ]);
+});
+it('an MCP retry without requestId reuses the derived key', async () => {
+    dispatch.mockResolvedValue({
+        kind: 'pending',
+        intent: {},
+        reviewUrl: '/r',
+    });
+
+    const input = {
+        pageId: 'p',
+        summary: 'Edit',
+        ops: [{ op: 'renameSection', sectionId: 's', title: 'Title' }],
+    };
+
+    const keyed = { ...ctx, requestKeys: ['mcpd_cur', 'mcpd_prev'] as const };
+
+    await runTool(proposeScenarioEditTool, keyed, input);
+    await runTool(proposeScenarioEditTool, keyed, input);
+
+    expect(dispatch.mock.calls.map((c) => c[1].requestId)).toEqual([
+        'mcpd_cur',
+        'mcpd_cur',
+    ]);
 });

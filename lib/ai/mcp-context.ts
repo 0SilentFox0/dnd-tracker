@@ -22,17 +22,12 @@ export function buildToolContext(auth: McpAuth, req: Request): AiToolContext {
 
     const { campaignId, userId, scopes } = auth;
 
-    const session = req.headers.get('mcp-session-id');
-
     return {
         campaignId,
         userId,
         scopes,
         threadId: null,
         locale,
-        ...(session && /^[\x21-\x7e]{1,128}$/.test(session)
-            ? { mcpSessionId: session }
-            : {}),
         caller: {
             actor: { campaignId, userId, isDM: true, via: 'token', scopes },
             channel: 'mcp',
