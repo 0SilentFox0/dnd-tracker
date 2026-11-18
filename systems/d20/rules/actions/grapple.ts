@@ -450,7 +450,6 @@ function grapplerIds(p: BattleParticipant): Set<string> {
     return ids;
 }
 
-/** Без захоплень повертає той самий масив. */
 export function releaseInvalidGrapples(
     ps: BattleParticipant[],
     map?: BattleMapConfig | null
@@ -509,7 +508,6 @@ export interface DragPlan {
     blocked: string[];
 }
 
-/** Схоплені стають на клітинку шляху перед призначенням (або на стару клітинку схоплювача). */
 export function planDrag(input: {
     map: BattleMapConfig;
     participants: BattleParticipant[];

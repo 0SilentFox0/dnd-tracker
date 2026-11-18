@@ -62,7 +62,7 @@ export function calculateAttackRoll(
         rollModeReasonsOf(D20_MATH, attacker, attack, participants, opts)
     );
 
-    // вибір гравця діє лише тоді, коли навички нічого не вирішують
+    // the player's choice applies only when the skills decide nothing
     const mode = forced.forced ? forced.mode : (opts.manualMode ?? 'normal');
 
     const manual = !forced.forced && mode !== 'normal';

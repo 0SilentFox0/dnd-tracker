@@ -54,7 +54,7 @@ export async function loadProgressionContext(
 
     return {
         character: { ...character, skillTreeProgress: read ?? {} },
-        // колонка NOT NULL, але JSON-значення null можливе; умова має збігтися з прочитаним
+        // column is NOT NULL but JSON null is possible; the condition must match what was read
         progressRead:
             read === null ? Prisma.JsonNull : (read as Prisma.InputJsonValue),
         treeRow,

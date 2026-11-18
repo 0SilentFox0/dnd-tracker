@@ -80,7 +80,7 @@ export function useSkillTreeEditor(campaignId: string) {
         };
     }, [seedKey, activeRace, serverRow, races, mainSkills]);
 
-    // правки живуть у чернетці свого ключа (раса + id дерева); рефетч оновлює лише незмінене
+    // edits live in a draft keyed by race + tree id; a refetch only updates untouched ones
     const current = draft && draft.key === seedKey ? draft : seeded;
 
     const baseline = useMemo(

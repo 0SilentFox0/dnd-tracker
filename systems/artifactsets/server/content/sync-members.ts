@@ -9,9 +9,6 @@ export class SyncArtifactSetError extends Error {
     }
 }
 
-/**
- * Очищає setId у всіх артефактів цього сету і призначає setId обраним id.
- */
 export async function syncArtifactSetMembers(
     campaignId: string,
     setId: string,

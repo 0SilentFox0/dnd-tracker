@@ -16,7 +16,7 @@ const die =
 const cta =
     'hud-sc mt-8 flex h-[52px] w-full max-w-xs items-center justify-center text-[17px] font-bold tracking-[.06em]';
 
-/** Мораль — на весь екран: вона визначає хід. Підсумки атак і заклинань — у кутовій картці (ActionResultCard). */
+/** Morale goes full screen because it decides the turn; attack and spell results stay in the corner card (ActionResultCard). */
 export function MoraleResultOverlay() {
     const t = useTranslations('battleMorale');
 

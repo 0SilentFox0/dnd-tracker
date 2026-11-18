@@ -13,7 +13,7 @@ export const wfrpOnSkippedTurn: TurnHook<TurnSubjectCtx> = (ctx) => {
 
     const bleed = wfrpSkippedTurn(ctx.participants, ctx.id, ctx);
 
-    // збитий ворог без кровотечі щоразу не засмічує журнал
+    // a downed enemy without bleeding does not clutter the log every time
     const quiet =
         p.basicInfo.side === ParticipantSide.ENEMY &&
         bleed.messages.length === 0;

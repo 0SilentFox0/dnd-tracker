@@ -128,7 +128,6 @@ describe('contest', () => {
 
         const weak = mk('t', 'enemy', 1, 0, -1);
 
-        // СК = 8 + 5 + 2 = 15; d20 при rng 0.5 = 11, мод. −1 → 10
         expect(
             contest({
                 attacker: strong,

@@ -11,7 +11,6 @@ import {
     uniqueSkills,
 } from '@/lib/utils/skills/progression';
 
-/** Вивчені вузли дерева раси + personalSkillId → рядки скілів з лінією для бою. */
 export async function resolveCharacterSkillEntries(
     character: CharacterFromPrisma,
     campaignId: string,
@@ -104,10 +103,6 @@ export async function resolveCharacterSkillEntries(
     return entries;
 }
 
-/**
- * Підтягує spellGroupId з MainSkill (школа магії як вузол дерева).
- * Робимо одним додатковим запитом, щоб не міняти контракт preloadedSkillsById.
- */
 async function loadMainSkillSpellGroups(
     campaignId: string,
     fetchedSkills: Prisma.SkillGetPayload<object>[]

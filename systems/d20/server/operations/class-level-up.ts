@@ -61,7 +61,6 @@ interface ClassLevelUpInput {
     pick: LevelUpPick;
 }
 
-/** null — клас-шлях не застосовний (HOMM) */
 export async function classLevelUp({
     campaign,
     character,

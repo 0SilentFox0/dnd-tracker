@@ -23,7 +23,6 @@ export function spellcastingModifier(p: BattleParticipant): {
     };
 }
 
-/** Предмет-зброя із заклинання: мод. від характеристики кастера, а без неї — від кращої з STR/DEX власника. */
 export function weaponModifier(p: BattleParticipant): {
     mod: number;
     label: string;

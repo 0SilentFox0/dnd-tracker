@@ -131,7 +131,6 @@ function proficiencyBonus(
     return byRules || byFlag ? target.abilities.proficiencyBonus : 0;
 }
 
-/** Краща з двох характеристик за бонусом кидка (при рівності — перша). */
 export function bestSaveAbility(
     target: BattleParticipant,
     [first, second]: [AbilityKey, AbilityKey],

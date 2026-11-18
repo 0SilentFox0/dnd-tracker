@@ -4,7 +4,6 @@ export interface MoraleCheckResult {
     shouldSkipTurn: boolean;
     hasExtraTurn: boolean;
     message: LogLine;
-    /** true = перевірка на додатковий хід (+мораль), false = перевірка на пропуск (-мораль) */
     moralePositive: boolean;
 }
 
@@ -14,7 +13,6 @@ export interface PendingMoraleCheckPayload {
     moraleResult: MoraleCheckResult;
 }
 
-/** Межа d10: позитивна мораль +N — додатковий хід на ≥ 11−N, кожні повні 10 % лідерства знижують її на грань; негативна −N — пропуск на ≤ N. */
 export function moraleThreshold(
     value: number,
     bonusPercent = 0

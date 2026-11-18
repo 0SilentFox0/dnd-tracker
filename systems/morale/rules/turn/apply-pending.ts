@@ -73,7 +73,7 @@ export function applyPendingMoraleCheck({
         };
     }
 
-    // без клона: учасник ходить ще раз наприкінці раунду (advanceTurn); з додаткового ходу — не ланцюжком
+    // no clone: the participant acts again at round end (advanceTurn); an extra turn does not chain
     const grantsExtraTurn =
         moraleResult.hasExtraTurn &&
         !participant.battleData.extraTurnActive &&
@@ -86,7 +86,7 @@ export function applyPendingMoraleCheck({
                   actionFlags: {
                       ...p.actionFlags,
                       ...(grantsExtraTurn && { hasExtraTurn: true }),
-                      // паніка: до власного наступного ходу не відповідає на удари (скидання — на початку ходу)
+                      // panic: no answering blows until its own next turn (reset at turn start)
                       ...(moraleResult.shouldSkipTurn && {
                           hasUsedReaction: true,
                       }),
