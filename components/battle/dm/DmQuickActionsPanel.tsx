@@ -23,7 +23,7 @@ import { DmParticipantRow } from './DmParticipantRow';
 import { LegendaryActionDialog } from './LegendaryActionDialog';
 
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
-import { HUD_SURFACE, HudButton } from '@/components/hud';
+import { HUD_SURFACE, HudButton, HudIconButton } from '@/components/hud';
 import { BattleStatus } from '@/lib/constants/battle';
 import {
     type BattlePageDialogs,
@@ -177,15 +177,15 @@ export function DmQuickActionsPanel({
                     <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
                         {t('panel.title')}
                     </span>
-                    <HudButton
+                    <HudIconButton
                         type="button"
-                        className="flex size-8 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
+                        tone="muted"
                         onClick={closePanel}
                         data-tour="battle.dm-close"
                         aria-label={t('panel.close')}
                     >
                         <ChevronLeft className="size-5 rotate-180" />
-                    </HudButton>
+                    </HudIconButton>
                 </div>
 
                 <div className="flex-1 space-y-2 overflow-y-auto p-4">

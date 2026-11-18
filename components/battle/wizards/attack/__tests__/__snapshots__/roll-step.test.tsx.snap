@@ -12,24 +12,21 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
   >
     <button
       class="cursor-pointer border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed bg-white/10 font-bold text-[var(--ink)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       Звичайний
     </button>
     <button
       class="cursor-pointer border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed text-hud-soft"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       Перевага
     </button>
     <button
       class="cursor-pointer border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed text-hud-soft"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       Недолік
@@ -40,160 +37,140 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
   >
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[#c98a7c]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       1
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       2
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       3
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       4
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       5
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       6
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       7
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       8
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       9
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       10
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       11
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       12
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       13
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       14
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       15
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       16
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       17
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       18
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       19
     </button>
     <button
       class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[#e8c77a]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       20
@@ -204,8 +181,7 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
   >
     <button
       class="cursor-pointer hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-[15px] font-bold tracking-[.04em] whitespace-nowrap border-white/25 text-[var(--bone)]"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       <svg
@@ -249,8 +225,7 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
     </button>
     <button
       class="cursor-pointer hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] border-white/25"
-      data-slot="button"
-      data-variant="bare"
+      data-slot="hud-button"
       type="button"
     >
       Назад

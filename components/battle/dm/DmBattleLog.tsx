@@ -6,7 +6,7 @@ import { ScrollText, Trash2 } from 'lucide-react';
 
 import { BattleLogLoadEarlier } from '@/components/battle/log/BattleLogLoadEarlier';
 import { LogTimeline } from '@/components/battle/log/LogTimeline';
-import { HudButton } from '@/components/hud';
+import { HudButton, HudIconButton } from '@/components/hud';
 import { useBattleRules, useBattleScene } from '@/lib/hooks/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import { canRollbackEntry } from '@/lib/utils/battle/view';
@@ -28,9 +28,10 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
 
     const renderActions = (entry: BattleAction) =>
         viewer.isDM && canRollbackEntry(battle, entry) ? (
-            <HudButton
+            <HudIconButton
                 type="button"
-                className="flex size-8 items-center justify-center text-hud-danger transition-colors hover:bg-hud-danger/15"
+                tone="danger"
+                className="transition-colors"
                 title={t('rollback')}
                 onClick={async () => {
                     if (
@@ -46,7 +47,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
                 }}
             >
                 <Trash2 className="size-3.5" />
-            </HudButton>
+            </HudIconButton>
         ) : null;
 
     return (

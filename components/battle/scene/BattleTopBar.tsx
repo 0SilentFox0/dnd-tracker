@@ -5,7 +5,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 
 import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
 
-import { HudButton } from '@/components/hud';
+import { HudButton, HudIconButton } from '@/components/hud';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleScene, useFxEnabled, useTurnTimer } from '@/lib/hooks/battle';
 import { useConfirm } from '@/lib/hooks/common';
@@ -61,7 +61,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
                     {t('yourTurn')}
                 </span>
             )}
-            <HudButton
+            <HudIconButton
                 type="button"
                 disabled={!motionAllowed}
                 title={fxHint}
@@ -69,12 +69,12 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
                 aria-label={fxOn ? t('fxOn') : t('fxOff')}
                 aria-pressed={fxOn}
                 className={cn(
-                    'ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
+                    'ml-auto hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
                     fxOn ? 'text-[var(--gold)]' : 'text-hud-muted'
                 )}
             >
                 <Sparkles className="size-4" />
-            </HudButton>
+            </HudIconButton>
             <BattlePlayerViewToggle />
             <span className="hud-sc flex items-center gap-2 text-sm text-hud-soft">
                 {t('round', { round: battle.currentRound })}

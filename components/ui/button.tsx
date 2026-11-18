@@ -43,22 +43,10 @@ function Button({
     asChild = false,
     ...props
 }: React.ComponentProps<'button'> &
-    Omit<VariantProps<typeof buttonVariants>, 'variant'> & {
-        variant?: VariantProps<typeof buttonVariants>['variant'] | 'bare';
+    VariantProps<typeof buttonVariants> & {
         asChild?: boolean;
     }) {
     const Comp = asChild ? Slot : 'button';
-
-    if (variant === 'bare') {
-        return (
-            <Comp
-                data-slot="button"
-                data-variant="bare"
-                className={cn('cursor-pointer', className)}
-                {...props}
-            />
-        );
-    }
 
     return (
         <Comp
