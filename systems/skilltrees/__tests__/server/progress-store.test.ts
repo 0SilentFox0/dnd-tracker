@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -15,7 +14,7 @@ function makeDb(
         skillTreeProgress: {
             findMany: vi.fn().mockResolvedValue(rows),
             upsert: vi.fn().mockResolvedValue({}),
-            create: vi.fn().mockResolvedValue({}),
+            createMany: vi.fn().mockResolvedValue({ count: 1 }),
             updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         character: {
@@ -85,18 +84,14 @@ describe('writeProgress', () => {
         expect(db.character.update).not.toHaveBeenCalled();
     });
 
-    it('maps a duplicate insert at expectedVersion 0 to a conflict', async () => {
+    it('maps a skipped duplicate insert at expectedVersion 0 to a conflict', async () => {
         const db = makeDb([], []);
 
-        db.skillTreeProgress.create.mockRejectedValue(
-            new Prisma.PrismaClientKnownRequestError('dup', {
-                code: 'P2002',
-                clientVersion: 'x',
-            })
-        );
+        db.skillTreeProgress.createMany.mockResolvedValue({ count: 0 });
 
         await expect(
             writeProgress(db as never, 'a', {}, { expectedVersion: 0 })
         ).rejects.toBeInstanceOf(ProgressVersionConflictError);
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 });

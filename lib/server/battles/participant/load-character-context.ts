@@ -24,6 +24,7 @@ export interface CharacterContext {
     context: CampaignSpellContext;
     race: Prisma.RaceGetPayload<object> | null;
     tree: Prisma.SkillTreeGetPayload<object> | null;
+    progress: unknown;
     classEntries: ResolvedClassEntry[];
 }
 
@@ -95,6 +96,8 @@ export async function loadCharacterContext(
     const tree = (contributions.find((c) => c.tree !== undefined)?.tree ??
         null) as CharacterContext['tree'];
 
+    const progress = contributions.find((c) => c.progress !== undefined)?.progress;
+
     const withClasses = classesEnabled(rules);
 
     const classesById = withClasses
@@ -135,6 +138,7 @@ export async function loadCharacterContext(
     return {
         race,
         tree,
+        progress,
         classEntries,
         context: {
             ext: Object.assign({}, ...contributions.map((c) => c.ext)),

@@ -9,6 +9,7 @@ import type {
     CharacterRow,
 } from '@/lib/server/characters/access';
 import { assertNotInActiveBattle } from '@/lib/server/characters/battle-lock';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
@@ -23,10 +24,11 @@ export async function setInspiration(
     await assertNotInActiveBattle(character.campaignId, [character.id]);
 
     await prisma.$transaction(async (tx) => {
-        const fresh = await tx.character.findUniqueOrThrow({
-            where: { id: character.id },
-            select: { characteristics: true },
-        });
+        const fresh = (await lockCharacters(tx, [character.id])).get(
+            character.id
+        );
+
+        if (!fresh) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
         await tx.character.update({
             where: { id: character.id },

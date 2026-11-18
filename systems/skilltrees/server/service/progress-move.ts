@@ -1,11 +1,20 @@
 import type { Prisma } from '@prisma/client';
 
+import {
+    ProgressVersionConflictError,
+    readProgressRow,
+    writeProgress,
+} from '../progress-store';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
 
 const MOVE_ATTEMPTS = 3;
 
-type ProgressDb = Pick<Prisma.TransactionClient, 'character'>;
+type ProgressDb = Pick<
+    Prisma.TransactionClient,
+    'character' | 'skillTreeProgress'
+>;
 
 // old progress was keyed by the id from the tree JSON; after saving, JSON id = row id, so the key is moved
 export async function moveSkillTreeProgress(
@@ -17,47 +26,27 @@ export async function moveSkillTreeProgress(
 ) {
     const characters = await tx.character.findMany({
         where: { campaignId, race },
-        select: { id: true, skillTreeProgress: true },
+        select: { id: true },
     });
 
-    for (const c of characters)
-        await moveOne(tx, c.id, c.skillTreeProgress, from, to);
+    for (const c of characters) await moveOne(tx, c.id, from, to);
 }
 
-async function moveOne(
-    tx: ProgressDb,
-    id: string,
-    read: unknown,
-    from: string,
-    to: string
-) {
-    let progress = read;
-
+async function moveOne(tx: ProgressDb, id: string, from: string, to: string) {
     for (let attempt = 0; attempt < MOVE_ATTEMPTS; attempt++) {
-        const next = movedProgress(progress, from, to);
+        const row = await readProgressRow(id, tx);
 
-        if (!next) return;
+        const next = movedProgress(row?.progress, from, to);
 
-        const { count } = await tx.character.updateMany({
-            where: {
-                id,
-                skillTreeProgress: {
-                    equals: progress as Prisma.InputJsonValue,
-                },
-            },
-            data: { skillTreeProgress: next },
-        });
+        if (!row || !next) return;
 
-        if (count > 0) return;
+        try {
+            await writeProgress(tx, id, next, { expectedVersion: row.version });
 
-        const fresh = await tx.character.findUnique({
-            where: { id },
-            select: { skillTreeProgress: true },
-        });
-
-        if (!fresh) return;
-
-        progress = fresh.skillTreeProgress;
+            return;
+        } catch (e) {
+            if (!(e instanceof ProgressVersionConflictError)) throw e;
+        }
     }
 
     throw new ContentError(API_ERRORS.SKILL_TREE_PROGRESS_CHANGED, 409);

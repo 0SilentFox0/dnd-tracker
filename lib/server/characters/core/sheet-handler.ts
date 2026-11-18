@@ -152,7 +152,7 @@ export async function buildSheetFor(
     viewer: CharacterSheet['viewer'],
     campaign: { maxLevel: number; rules: Ruleset; allowPlayerEdit?: boolean }
 ): Promise<CharacterSheet> {
-    const { context, race, tree, participant } =
+    const { context, race, tree, progress, participant } =
         await buildCharacterParticipant(character, campaign);
 
     const known = participant.spellcasting.knownSpells ?? [];
@@ -232,7 +232,7 @@ export async function buildSheetFor(
             freePoints: normalized
                 ? skillPoints(
                       normalized,
-                      readUnlocked(normalized, character.skillTreeProgress),
+                      readUnlocked(normalized, progress),
                       character.level
                   ).free
                 : 0,

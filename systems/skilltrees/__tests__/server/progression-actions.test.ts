@@ -1,9 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const db = vi.hoisted(() => ({
-    character: { findFirst: vi.fn(), updateMany: vi.fn() },
-    skillTree: { findFirst: vi.fn() },
-}));
+const db = vi.hoisted(() => {
+    const mock = {
+        character: {
+            findFirst: vi.fn(),
+            findUnique: vi.fn(),
+            updateMany: vi.fn(),
+            update: vi.fn(),
+        },
+        skillTree: { findFirst: vi.fn() },
+        skillTreeProgress: {
+            findUnique: vi.fn(),
+            createMany: vi.fn(),
+            updateMany: vi.fn(),
+        },
+        $transaction: vi.fn(),
+    };
+
+    mock.$transaction.mockImplementation(async (fn) => fn(mock));
+
+    return mock;
+});
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
@@ -36,6 +53,8 @@ const character = (over: object = {}) => ({
     ...over,
 });
 
+let stored: unknown = {};
+
 const asUser = (userId: string, isDM = false) =>
     ({ userId, isDM }) as unknown as CampaignAccessResult;
 
@@ -44,14 +63,25 @@ const run = (
     action: Parameters<typeof runProgressionAction>[3]
 ) => runProgressionAction(access, 'camp', 'ch', action);
 
-const savedProgress = () => db.character.updateMany.mock.calls[0][0].data;
+const tableWrite = () =>
+    db.skillTreeProgress.createMany.mock.calls[0][0].data[0];
+
+const columnWrite = () => db.character.update.mock.calls[0][0].data;
 
 describe('runProgressionAction', () => {
     beforeEach(() => {
         vi.resetAllMocks();
+        stored = {};
+        db.$transaction.mockImplementation(async (fn) => fn(db));
         db.character.findFirst.mockResolvedValue(character());
+        db.character.findUnique.mockImplementation(async () => ({
+            skillTreeProgress: stored,
+        }));
+        db.skillTreeProgress.findUnique.mockResolvedValue(null);
         db.skillTree.findFirst.mockResolvedValue(treeRow);
         db.character.updateMany.mockResolvedValue({ count: 1 });
+        db.character.update.mockResolvedValue({});
+        db.skillTreeProgress.createMany.mockResolvedValue({ count: 1 });
     });
 
     it('404 for a character of another campaign', async () => {
@@ -63,7 +93,7 @@ describe('runProgressionAction', () => {
         });
 
         expect(res.status).toBe(404);
-        expect(db.character.updateMany).not.toHaveBeenCalled();
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('403 for a player who neither owns the character nor is DM', async () => {
@@ -84,11 +114,13 @@ describe('runProgressionAction', () => {
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ unlocked: ['attack_basic_level'] });
-        expect(savedProgress()).toEqual({
-            skillTreeProgress: {
-                row: { unlockedSkills: ['attack_basic_level'] },
-            },
-        });
+
+        const progress = {
+            row: { unlockedSkills: ['attack_basic_level'] },
+        };
+
+        expect(tableWrite()).toMatchObject({ characterId: 'ch', progress });
+        expect(columnWrite()).toEqual({ skillTreeProgress: progress });
     });
 
     it('a blocked learn answers 422 with the reason and writes nothing', async () => {
@@ -99,18 +131,12 @@ describe('runProgressionAction', () => {
 
         expect(res.status).toBe(422);
         expect(await res.json()).toEqual({ reason: 'notInTree' });
-        expect(db.character.updateMany).not.toHaveBeenCalled();
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('no points left blocks learning', async () => {
-        db.character.findFirst.mockResolvedValue(
-            character({
-                level: 1,
-                skillTreeProgress: {
-                    row: { unlockedSkills: ['attack_basic_level'] },
-                },
-            })
-        );
+        db.character.findFirst.mockResolvedValue(character({ level: 1 }));
+        stored = { row: { unlockedSkills: ['attack_basic_level'] } };
 
         const res = await run(asUser('owner'), { type: 'learn', nodeId: 'o1' });
 
@@ -144,17 +170,11 @@ describe('runProgressionAction', () => {
             expect(res.status).toBe(403);
         }
 
-        expect(db.character.updateMany).not.toHaveBeenCalled();
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('the DM unlearns a learned node', async () => {
-        db.character.findFirst.mockResolvedValue(
-            character({
-                skillTreeProgress: {
-                    row: { unlockedSkills: ['attack_basic_level'] },
-                },
-            })
-        );
+        stored = { row: { unlockedSkills: ['attack_basic_level'] } };
 
         const res = await run(asUser('dm', true), {
             type: 'unlearn',
@@ -163,6 +183,10 @@ describe('runProgressionAction', () => {
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ unlocked: [] });
+        expect(tableWrite()).toMatchObject({ characterId: 'ch' });
+        expect(columnWrite()).toEqual({
+            skillTreeProgress: { row: { unlockedSkills: [] } },
+        });
     });
 
     it('unlearning a node that was not learned answers 422', async () => {
@@ -182,10 +206,12 @@ describe('runProgressionAction', () => {
 
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ unlocked: [] });
-        expect(savedProgress()).toEqual({ skillTreeProgress: {} });
+        expect(tableWrite()).toMatchObject({ characterId: 'ch', progress: {} });
+        expect(columnWrite()).toEqual({ skillTreeProgress: {} });
+        expect(db.character.update).toHaveBeenCalledTimes(1);
     });
 
-    it('a concurrent change (no row updated) answers 409', async () => {
+    it('a concurrent level change answers 409 and writes nothing', async () => {
         db.character.updateMany.mockResolvedValue({ count: 0 });
 
         const res = await run(asUser('owner'), {
@@ -197,5 +223,26 @@ describe('runProgressionAction', () => {
         expect(await res.json()).toMatchObject({
             error: API_ERRORS.CHARACTER_PROGRESS_CHANGED,
         });
+    });
+
+    it('a progress version conflict answers 409 and keeps the column untouched', async () => {
+        db.skillTreeProgress.findUnique.mockResolvedValue({
+            progress: {},
+            version: 3,
+        });
+        db.skillTreeProgress.updateMany.mockResolvedValue({ count: 0 });
+
+        const res = await run(asUser('owner'), {
+            type: 'learn',
+            nodeId: 'attack_basic_level',
+        });
+
+        expect(res.status).toBe(409);
+        expect(db.skillTreeProgress.updateMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { characterId: 'ch', version: 3 },
+            })
+        );
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 });

@@ -269,8 +269,16 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
 describe('module queries', () => {
     const ids = ['morale', 'retaliation', 'skilltrees'];
 
-    it('finds none in core', () => {
-        expect(scanModuleQueries()).toEqual({});
+    // the ext backfill scripts name their slots; they go away with the backfills (P16)
+    const BACKFILL_SCRIPTS: Record<string, number> = {
+        'scripts/db/backfill-inspiration-ext.ts': 1,
+        'scripts/db/backfill-morale-ext.ts': 2,
+        'scripts/db/lib/backfill-inspiration-ext-plan.ts': 4,
+        'scripts/db/lib/backfill-morale-ext-plan.ts': 4,
+    };
+
+    it('finds none in core beyond the ext backfill scripts', () => {
+        expect(scanModuleQueries()).toEqual(BACKFILL_SCRIPTS);
     });
 
     it.each([

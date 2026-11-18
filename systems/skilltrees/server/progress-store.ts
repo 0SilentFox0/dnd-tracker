@@ -4,7 +4,10 @@ import { prisma } from '@/lib/db';
 
 type ReadDb = Pick<Prisma.TransactionClient, 'skillTreeProgress' | 'character'>;
 
-type WriteDb = Pick<Prisma.TransactionClient, 'skillTreeProgress' | 'character'>;
+type WriteDb = Pick<
+    Prisma.TransactionClient,
+    'skillTreeProgress' | 'character'
+>;
 
 export class ProgressVersionConflictError extends Error {
     constructor(readonly characterId: string) {
@@ -39,6 +42,60 @@ export async function readProgress(
     return result;
 }
 
+export async function overlayProgress(
+    characters: { id: string; skillTreeProgress?: unknown }[],
+    db: Pick<Prisma.TransactionClient, 'skillTreeProgress'> = prisma
+): Promise<Map<string, unknown>> {
+    const result = new Map<string, unknown>();
+
+    if (characters.length === 0) return result;
+
+    const rows = await db.skillTreeProgress.findMany({
+        where: { characterId: { in: characters.map((c) => c.id) } },
+    });
+
+    for (const c of characters) result.set(c.id, c.skillTreeProgress);
+
+    for (const r of rows) result.set(r.characterId, r.progress);
+
+    return result;
+}
+
+export async function readProgressTable(
+    characterId: string,
+    db: Pick<Prisma.TransactionClient, 'skillTreeProgress'> = prisma
+): Promise<unknown> {
+    const row = await db.skillTreeProgress.findUnique({
+        where: { characterId },
+        select: { progress: true },
+    });
+
+    return row?.progress;
+}
+
+export async function readProgressRow(
+    characterId: string,
+    db: ReadDb = prisma
+): Promise<{ progress: unknown; version: number } | null> {
+    const row = await db.skillTreeProgress.findUnique({
+        where: { characterId },
+    });
+
+    if (row) return { progress: row.progress, version: row.version };
+
+    const column = await db.character.findUnique({
+        where: { id: characterId },
+        select: { skillTreeProgress: true },
+    });
+
+    return column ? { progress: column.skillTreeProgress, version: 0 } : null;
+}
+
+export const resetProgress = (
+    tx: WriteDb,
+    characterId: string
+): Promise<void> => writeProgress(tx, characterId, {});
+
 export async function writeProgress(
     tx: WriteDb,
     characterId: string,
@@ -52,19 +109,12 @@ export async function writeProgress(
             update: { progress, version: { increment: 1 } },
         });
     } else if (expectedVersion === 0) {
-        try {
-            await tx.skillTreeProgress.create({
-                data: { characterId, progress, version: 1 },
-            });
-        } catch (e) {
-            if (
-                e instanceof Prisma.PrismaClientKnownRequestError &&
-                e.code === 'P2002'
-            )
-                throw new ProgressVersionConflictError(characterId);
+        const { count } = await tx.skillTreeProgress.createMany({
+            data: [{ characterId, progress, version: 1 }],
+            skipDuplicates: true,
+        });
 
-            throw e;
-        }
+        if (count === 0) throw new ProgressVersionConflictError(characterId);
     } else {
         const { count } = await tx.skillTreeProgress.updateMany({
             where: { characterId, version: expectedVersion },

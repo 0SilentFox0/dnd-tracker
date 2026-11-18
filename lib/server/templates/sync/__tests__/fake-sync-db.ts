@@ -33,6 +33,8 @@ export function createFakeSyncDb() {
 
     const syncs = new Map<string, Row>();
 
+    const progressRows = new Map<string, Row>();
+
     const updates: Array<{ delegate: string; data: Row }> = [];
 
     const published = new Map<string, number>();
@@ -143,7 +145,8 @@ export function createFakeSyncDb() {
                 where,
             }: {
                 where: {
-                    campaignId: string;
+                    campaignId?: string;
+                    id?: { in: string[] };
                     race?: string;
                     backgroundId?: string;
                 };
@@ -151,7 +154,10 @@ export function createFakeSyncDb() {
                 (store.get('character') ?? [])
                     .filter(
                         (r) =>
-                            r.campaignId === where.campaignId &&
+                            (!where.campaignId ||
+                                r.campaignId === where.campaignId) &&
+                            (!where.id ||
+                                where.id.in.includes(r.id as string)) &&
                             (!where.race || r.race === where.race) &&
                             (!where.backgroundId ||
                                 r.backgroundId === where.backgroundId)
@@ -177,6 +183,66 @@ export function createFakeSyncDb() {
                 if (c) Object.assign(c, copy(data));
 
                 return { count: c ? 1 : 0 };
+            },
+            update: async ({
+                where,
+                data,
+            }: {
+                where: { id: string };
+                data: Row;
+            }) => {
+                const c = (store.get('character') ?? []).find(
+                    (r) => r.id === where.id
+                );
+
+                if (c) Object.assign(c, copy(data));
+
+                return c ? copy(c) : null;
+            },
+        },
+        skillTreeProgress: {
+            findMany: async ({
+                where,
+            }: {
+                where: { characterId: { in: string[] } };
+            }) =>
+                [...progressRows.values()]
+                    .filter((r) =>
+                        where.characterId.in.includes(r.characterId as string)
+                    )
+                    .map(copy),
+            findUnique: async ({ where }: { where: { characterId: string } }) =>
+                readCopy(progressRows.get(where.characterId)),
+            createMany: async ({ data }: { data: Row[] }) => {
+                let count = 0;
+
+                for (const d of data) {
+                    if (progressRows.has(d.characterId as string)) continue;
+
+                    progressRows.set(d.characterId as string, copy(d));
+                    count++;
+                }
+
+                return { count };
+            },
+            updateMany: async ({
+                where,
+                data,
+            }: {
+                where: { characterId: string; version: number };
+                data: Row;
+            }) => {
+                const r = progressRows.get(where.characterId);
+
+                if (!r || r.version !== where.version) return { count: 0 };
+
+                progressRows.set(where.characterId, {
+                    ...r,
+                    progress: copy(data.progress),
+                    version: where.version + 1,
+                });
+
+                return { count: 1 };
             },
         },
     };

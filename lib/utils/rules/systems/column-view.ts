@@ -8,7 +8,7 @@ import {
     STORED_COLUMN_ENTRIES,
 } from '@/lib/utils/rules/systems/stored-columns';
 
-/** For loaders without a ruleset; same rule as the d20 codec: stored number, else the column. */
+/** For loaders without a ruleset; same rule as the d20 codec: stored value, else the column. */
 export function withStoredColumns<T extends object>(row: T): T {
     const stored = (row as { characteristics?: unknown }).characteristics;
 
@@ -18,7 +18,9 @@ export function withStoredColumns<T extends object>(row: T): T {
         STORED_COLUMN_ENTRIES.flatMap(({ column, path }) => {
             const value = getAtPath(stored, path);
 
-            return typeof value === 'number' ? [[column, value]] : [];
+            return typeof value === 'number' || typeof value === 'boolean'
+                ? [[column, value]]
+                : [];
         })
     );
 
@@ -62,15 +64,18 @@ export function columnViewDto<T extends object>(
 ): T {
     const view = system.characteristics.columnView;
 
-    const flat = withColumnView(row, system) as T & {
+    const flat = withStoredColumns(withColumnView(row, system)) as T & {
         characteristics?: unknown;
     };
 
     if (!view || !isRecord(flat.characteristics)) return flat;
 
-    const rest = Object.fromEntries(
-        Object.entries(flat.characteristics).filter(
-            ([key]) => !view.columns.includes(key)
+    const rest = STORED_COLUMN_ENTRIES.reduce<Record<string, unknown>>(
+        (acc, { path }) => omitAtPath(acc, path),
+        Object.fromEntries(
+            Object.entries(flat.characteristics).filter(
+                ([key]) => !view.columns.includes(key)
+            )
         )
     );
 

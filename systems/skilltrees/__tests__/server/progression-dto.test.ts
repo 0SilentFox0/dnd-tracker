@@ -38,7 +38,7 @@ const ctx = (over: Partial<ProgressionContext> = {}): ProgressionContext => ({
         seenLevel: 3,
         controlledBy: 'owner',
     },
-    progressRead: {},
+    progressVersion: 0,
     treeRow: treeRow as unknown as ProgressionContext['treeRow'],
     isDM: false,
     isOwner: true,

@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
 
+import { readProgressTable } from '../progress-store';
 import { skillTreeContext } from './context';
 
 import { prisma } from '@/lib/db';
@@ -10,16 +11,20 @@ import { normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
 
 type Tree = Prisma.SkillTreeGetPayload<object>;
 
-function learnedNeeds(character: CharacterFromPrisma, tree: Tree | null) {
+function learnedNeeds(
+    character: CharacterFromPrisma,
+    tree: Tree | null,
+    progress: unknown
+) {
     const normalized = tree ? normalizeTree(tree) : null;
 
-    const learned = normalized
-        ? resolveLearned(normalized, character.skillTreeProgress)
-        : [];
+    const learned = normalized ? resolveLearned(normalized, progress) : [];
 
     return {
         learned: learned.length > 0,
-        skillIds: referencedSkillIds([character], tree ? [tree] : []),
+        skillIds: referencedSkillIds([character], tree ? [tree] : [], {
+            [character.id]: progress,
+        }),
         branchIds: normalized?.branches.map((b) => b.id) ?? [],
         branchGroupIds: (normalized?.branches ?? []).flatMap((b) =>
             b.spellGroupId ? [b.spellGroupId] : []
@@ -81,9 +86,13 @@ export const skillTreeCharacterContext: CharacterContextLoader = {
             where: { campaignId, race: character.race },
         });
 
+        const progress =
+            (await readProgressTable(character.id)) ??
+            character.skillTreeProgress;
+
         const library = await loadLibrary(
             campaignId,
-            learnedNeeds(character, tree)
+            learnedNeeds(character, tree, progress)
         );
 
         const holder = { ext: {} };
@@ -91,11 +100,13 @@ export const skillTreeCharacterContext: CharacterContextLoader = {
         skillTreeContext.write(holder, {
             treeByRace: { [character.race]: tree },
             mainSkills: library?.mainSkills ?? [],
+            progress: { [character.id]: progress },
         });
 
         return {
             ext: holder.ext,
             tree,
+            progress,
             skills: library?.skills ?? [],
             spells: (library?.spells ?? []).map((s) => ({
                 id: s.id,

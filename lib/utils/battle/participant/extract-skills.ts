@@ -9,10 +9,11 @@ export function referencedSkillIds(
     characters: Array<
         Pick<
             CharacterFromPrisma,
-            'race' | 'skillTreeProgress' | 'personalSkillId'
+            'id' | 'race' | 'skillTreeProgress' | 'personalSkillId'
         >
     >,
-    trees: Array<Prisma.SkillTreeGetPayload<object>>
+    trees: Array<Prisma.SkillTreeGetPayload<object>>,
+    progressById?: Record<string, unknown>
 ): string[] {
     const treeByRace = new Map(trees.map((t) => [t.race, t]));
 
@@ -24,7 +25,7 @@ export function referencedSkillIds(
         if (tree) {
             for (const n of resolveLearned(
                 normalizeTree(tree),
-                c.skillTreeProgress
+                progressById?.[c.id] ?? c.skillTreeProgress
             ))
                 if (n.skillId) ids.add(n.skillId);
         }

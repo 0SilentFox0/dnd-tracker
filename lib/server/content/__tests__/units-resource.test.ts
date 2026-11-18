@@ -72,12 +72,14 @@ describe('unitsResource', () => {
             { id: 'u1', knownSpells: [] } as never,
             input
         );
-        expect(db.unit.create.mock.calls[1][0].data.characteristics).toEqual(
-            DEFAULT_CHARACTERISTICS
-        );
-        expect(db.unit.update.mock.calls[1][0].data.characteristics).toEqual(
-            DEFAULT_CHARACTERISTICS
-        );
+        expect(db.unit.create.mock.calls[1][0].data.characteristics).toEqual({
+            ...DEFAULT_CHARACTERISTICS,
+            ext: { morale: { value: 0 } },
+        });
+        expect(db.unit.update.mock.calls[1][0].data.characteristics).toEqual({
+            ...DEFAULT_CHARACTERISTICS,
+            ext: { morale: { value: 0 } },
+        });
     });
 
     it('rejects wfrp effects outside the composition (422) before writing, accepts them in wfrp', async () => {

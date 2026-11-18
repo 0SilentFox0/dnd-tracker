@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
     db: {
-        character: { findFirst: vi.fn(), updateMany: vi.fn() },
+        character: {
+            findFirst: vi.fn(),
+            findUnique: vi.fn(),
+            updateMany: vi.fn(),
+        },
+        skillTreeProgress: { findUnique: vi.fn() },
         skillTree: { findFirst: vi.fn() },
         race: { findFirst: vi.fn() },
         skill: { findMany: vi.fn() },
@@ -95,6 +100,8 @@ describe('skilltrees character operations', () => {
             seenLevel: 3,
             controlledBy: 'owner',
         });
+        h.db.character.findUnique.mockResolvedValue({ skillTreeProgress: {} });
+        h.db.skillTreeProgress.findUnique.mockResolvedValue(null);
         h.db.skillTree.findFirst.mockResolvedValue(tree);
         h.db.race.findFirst.mockResolvedValue(null);
         h.db.skill.findMany.mockResolvedValue([]);

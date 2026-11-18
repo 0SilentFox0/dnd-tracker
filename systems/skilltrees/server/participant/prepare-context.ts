@@ -1,3 +1,4 @@
+import { overlayProgress } from '../progress-store';
 import { skillTreeContext } from './context';
 
 import { prisma } from '@/lib/db';
@@ -25,7 +26,9 @@ export const prepareSkillTreeContext: ContextPreparer = async (
 
     for (const race of races) treeByRace[race] ??= null;
 
-    const skillIds = referencedSkillIds(characters, trees);
+    const progress = Object.fromEntries(await overlayProgress(characters));
+
+    const skillIds = referencedSkillIds(characters, trees, progress);
 
     const branchIds = [
         ...new Set(
@@ -57,5 +60,5 @@ export const prepareSkillTreeContext: ContextPreparer = async (
         ...context.skillsById,
         ...Object.fromEntries(skills.map((s) => [s.id, s])),
     };
-    skillTreeContext.write(context, { treeByRace, mainSkills });
+    skillTreeContext.write(context, { treeByRace, mainSkills, progress });
 };

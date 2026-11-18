@@ -12,6 +12,7 @@ export interface SkillTreeContextBranch {
 export interface SkillTreeContext {
     treeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
     mainSkills: SkillTreeContextBranch[];
+    progress?: Record<string, unknown>;
 }
 
 export const skillTreeContext =

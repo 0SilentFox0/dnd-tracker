@@ -180,6 +180,8 @@ export interface CharacterContribution {
     spells?: CampaignSpellContext['spells'];
     /** Row the character sheet reads next to the participant */
     tree?: object | null;
+    /** Progress the sheet reads next to `tree` */
+    progress?: unknown;
 }
 
 /** Single-character path: `select` joins the one campaign read, `load` may add its own reads */
@@ -262,8 +264,15 @@ export type SystemDmPageResolver = (input: {
     rest: string[];
 }) => Promise<SystemDmPageView>;
 
+/** Server side of a module's `levelResets`: resets what the pure column reset cannot reach (module tables) */
+export type LevelResetWriter = (
+    tx: Prisma.TransactionClient,
+    characterId: string
+) => Promise<void>;
+
 export interface SystemServer {
     schemas: SystemSchemas;
+    levelResets?: readonly LevelResetWriter[];
     contentKinds?: Record<string, ContentKindServer>;
     contentRefs?: readonly ContentRefSource[];
     /** Operations, ability owners, template hooks and assistant surface of the module's content */

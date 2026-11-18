@@ -34,6 +34,7 @@ export type SyncDb = TemplateDb &
         | 'character'
         | 'characterInventory'
         | 'characterSkills'
+        | 'skillTreeProgress'
     >;
 
 const asState = (v: unknown): SyncState => {

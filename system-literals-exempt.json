@@ -1,4 +1,7 @@
 {
+  "lib/utils/rules/morale-store.ts": 1,
+  "scripts/db/backfill-morale-ext.ts": 1,
+  "scripts/db/lib/backfill-morale-ext-plan.ts": 1,
   "scripts/db/lib/backfill-pending-morale-plan.ts": 1,
   "scripts/db/lib/backfill-rule-modules-plan.ts": 5
 }

@@ -1,10 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { RACES } from '@/data/library/races';
 import { collectCharacterAbilities } from '@/lib/utils/abilities/build/collect';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { buildTreeJson, racialNodeId } from '@/lib/utils/skills/progression';
 import { resolveCharacterSkillEntries } from '@/systems/skilltrees/server/participant/skill-entries';
+
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        skillTreeProgress: { findMany: vi.fn(async () => []) },
+        character: { findMany: vi.fn(async () => []) },
+    },
+}));
 
 async function learnedRacial(
     raceKey: string,
@@ -40,6 +47,7 @@ async function learnedRacial(
     };
 
     const character = {
+        id: 'c',
         race: race.name,
         personalSkillId: null,
         skillTreeProgress: { t1: { unlockedSkills: levels.map(racialNodeId) } },

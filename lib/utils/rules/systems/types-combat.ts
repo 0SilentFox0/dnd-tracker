@@ -244,6 +244,19 @@ export interface InspirationRules {
     ): { inspiration: boolean; characteristics: Record<string, unknown> };
 }
 
+export interface MoraleStoreRules {
+    /** Stored morale of a unit or character row (dual store: ext first, then the column) */
+    stored(row: {
+        morale?: number | null;
+        characteristics?: unknown;
+    }): number | undefined;
+    /** Update data that sets morale in every store */
+    store(
+        row: { characteristics?: unknown },
+        value: number
+    ): { morale: number; characteristics: Record<string, unknown> };
+}
+
 export type CritRules = Pick<
     Ruleset['criticals'],
     'critOn' | 'fumbleOn' | 'effects' | 'disabledSuccess' | 'disabledFail'
@@ -311,6 +324,8 @@ export interface RuleSystemCombat {
     damageParts?: readonly DamagePart[];
     /** A spendable boost to one attack roll; absent means none */
     rerollToken?: InspirationRules;
+    /** Dual-store access to the morale value; absent means the column only */
+    moraleStore?: MoraleStoreRules;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
     judge: 'client' | 'server';
     attack?: RuleSystemAttackHooks;

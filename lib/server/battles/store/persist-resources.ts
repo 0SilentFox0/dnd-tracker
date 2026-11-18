@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { CharacterLogKind } from '@/lib/constants/character-log';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import {
     type CharacterLogInput,
     writeCharacterLog,
@@ -37,7 +38,10 @@ export function persistedHeroes(
 }
 
 export async function persistCharacterResources(
-    tx: Pick<Prisma.TransactionClient, 'character' | 'characterLog'>,
+    tx: Pick<
+        Prisma.TransactionClient,
+        'character' | 'characterLog' | '$queryRaw'
+    >,
     battle: { campaignId: string; battleId: string; rules: Ruleset },
     participants: BattleParticipant[]
 ): Promise<void> {
@@ -93,11 +97,18 @@ export async function persistCharacterResources(
 
         const token = ruleSystemOf(battle.rules).combat.rerollToken;
 
-        if (outcome.clearInspiration && token?.stored(row))
-            await tx.character.update({
-                where: { id: row.id },
-                data: token.store(row, false) as Prisma.CharacterUpdateInput,
-            });
+        if (outcome.clearInspiration && token) {
+            const locked = (await lockCharacters(tx, [row.id])).get(row.id);
+
+            if (locked && token.stored(locked))
+                await tx.character.update({
+                    where: { id: row.id },
+                    data: token.store(
+                        locked,
+                        false
+                    ) as Prisma.CharacterUpdateInput,
+                });
+        }
 
         if (persistResources)
             logs.push({

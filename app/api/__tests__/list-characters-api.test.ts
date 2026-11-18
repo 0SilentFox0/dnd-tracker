@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { prisma } from '@/lib/db';
 import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock('@/lib/db', () => ({ prisma: { character: { findMany: vi.fn() } } }));
@@ -28,6 +29,7 @@ describe('listCharacters status filter', () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
             userId: 'u',
             isDM: false,
+            campaign: { rules: DEFAULT_RULES },
         } as never);
 
         await list();
@@ -41,6 +43,7 @@ describe('listCharacters status filter', () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
             userId: 'u',
             isDM: false,
+            campaign: { rules: DEFAULT_RULES },
         } as never);
 
         expect((await list('?status=pending')).status).toBe(403);
@@ -51,6 +54,7 @@ describe('listCharacters status filter', () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
             userId: 'u',
             isDM: true,
+            campaign: { rules: DEFAULT_RULES },
         } as never);
 
         await list('?status=pending');

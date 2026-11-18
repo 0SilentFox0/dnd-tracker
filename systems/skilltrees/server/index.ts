@@ -6,12 +6,14 @@ import { resolveLearnedSpellsAndMastery } from './participant/learned-spells';
 import { prepareSkillTreeContext } from './participant/prepare-context';
 import { loadSkillEntries } from './participant/skill-entries';
 import { SKILLTREES_OPERATIONS } from './operations';
+import { resetProgress } from './progress-store';
 
 import type { SystemServer } from '@/lib/server/systems/types';
 import { defineAddon } from '@/lib/utils/rules/systems/compose';
 
 export const SKILLTREES_MODULE_SERVER = defineAddon<SystemServer>(() => ({
     operations: SKILLTREES_OPERATIONS,
+    levelResets: [resetProgress],
     content: SKILLTREES_CONTENT,
     contentKinds: {
         'main-skills': { resource: mainSkillsResource },

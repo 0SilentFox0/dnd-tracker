@@ -8,6 +8,8 @@ vi.mock('@/lib/db', () => ({
         skillTree: { findFirst: vi.fn() },
         skill: { findMany: vi.fn() },
         mainSkill: { findMany: vi.fn() },
+        skillTreeProgress: { findMany: vi.fn(async () => []) },
+        character: { findMany: vi.fn(async () => []) },
     },
 }));
 

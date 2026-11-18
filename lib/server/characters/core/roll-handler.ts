@@ -9,6 +9,7 @@ import type { SheetRollInput } from '@/lib/schemas/out-of-combat';
 import type { CharacterGate } from '@/lib/server/characters/access';
 import { loadBattleEffects } from '@/lib/server/characters/battle-effects';
 import { assertNotInActiveBattle } from '@/lib/server/characters/battle-lock';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { ContentError } from '@/lib/server/content/errors';
@@ -112,23 +113,16 @@ export async function rollForSheet(
         if (inspired) {
             const token = system.combat.rerollToken;
 
-            const row = await tx.character.findUnique({
-                where: { id: character.id },
-                select: {
-                    inspiration: true,
-                    characteristics: true,
-                    updatedAt: true,
-                },
-            });
+            const row = (await lockCharacters(tx, [character.id])).get(
+                character.id
+            );
 
             if (!row || !token?.stored(row)) return false;
 
-            const { count } = await tx.character.updateMany({
-                where: { id: character.id, updatedAt: row.updatedAt },
+            await tx.character.update({
+                where: { id: character.id },
                 data: token.store(row, false) as Prisma.CharacterUpdateInput,
             });
-
-            if (count === 0) return false;
         }
 
         await writeCharacterLog(tx, [

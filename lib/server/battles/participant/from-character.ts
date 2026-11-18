@@ -56,6 +56,7 @@ import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { attunedRefs } from '@/lib/utils/items/resolve';
 import { type Ruleset } from '@/lib/utils/rules';
+import { storedMorale } from '@/lib/utils/rules/morale-store';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { withColumnView } from '@/lib/utils/rules/systems/column-view';
@@ -568,7 +569,8 @@ function basicInfoOf(
 function combatStatsOf(
     character: CharacterFromPrisma,
     baseStats: { speed?: number } | undefined,
-    computedMaxHp: number
+    computedMaxHp: number,
+    rules: Ruleset
 ): BattleParticipant['combatStats'] {
     return {
         maxHp: computedMaxHp,
@@ -576,7 +578,7 @@ function combatStatsOf(
         tempHp: 0,
         armorClass: character.armorClass,
         speed: baseStats?.speed ?? character.speed,
-        morale: (character as { morale?: number }).morale || 0,
+        morale: storedMorale(rules, character),
         moraleCap: 0,
         status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
         minTargets: character.minTargets ?? 1,
@@ -689,7 +691,7 @@ export async function createBattleParticipantFromCharacter(
             saveProficiencies,
             dndSkillProficiencies,
         }),
-        combatStats: combatStatsOf(character, baseStats, computedMaxHp),
+        combatStats: combatStatsOf(character, baseStats, computedMaxHp, rules),
         spellcasting,
         battleData: {
             attacks,

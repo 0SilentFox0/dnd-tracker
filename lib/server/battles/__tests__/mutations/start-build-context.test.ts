@@ -11,6 +11,7 @@ const db = vi.hoisted(() => ({
         })),
     },
     skillTree: { findMany: vi.fn(async () => []) },
+    skillTreeProgress: { findMany: vi.fn(async () => []) },
     mainSkill: { findMany: vi.fn(async () => []) },
     spell: { findMany: vi.fn(async () => []) },
     skill: { findMany: vi.fn(async () => []) },

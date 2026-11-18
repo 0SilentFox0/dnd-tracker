@@ -87,6 +87,8 @@ const build = (row: object) =>
         rules
     );
 
+const ZERO_MORALE = { ext: { morale: { value: 0 } } };
+
 describe('units d20 columnView', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -131,7 +133,7 @@ describe('units d20 columnView', () => {
 
         const data = db.unit.create.mock.calls[0][0].data;
 
-        expect(data.characteristics).toEqual(STATS);
+        expect(data.characteristics).toEqual({ ...STATS, ...ZERO_MORALE });
         expect(data).toMatchObject(STATS);
     });
 
@@ -159,7 +161,11 @@ describe('units d20 columnView', () => {
 
         await unitsResource.update(
             actor,
-            { id: 'u1', knownSpells: [], characteristics: { extra: 1 } } as never,
+            {
+                id: 'u1',
+                knownSpells: [],
+                characteristics: { extra: 1 },
+            } as never,
             { armorClass: 18 } as never
         );
 
@@ -167,7 +173,9 @@ describe('units d20 columnView', () => {
             where: { id: 'u1' },
             select: { characteristics: true },
         });
-        expect(db.unit.update.mock.calls.at(-1)?.[0].data.characteristics).toEqual({
+        expect(
+            db.unit.update.mock.calls.at(-1)?.[0].data.characteristics
+        ).toEqual({
             intelligence: 17,
             armorClass: 18,
         });
@@ -184,9 +192,10 @@ describe('units d20 columnView', () => {
             }) as never
         );
 
-        expect(db.unit.create.mock.calls[0][0].data.characteristics).toEqual(
-            DEFAULT_CHARACTERISTICS
-        );
+        expect(db.unit.create.mock.calls[0][0].data.characteristics).toEqual({
+            ...DEFAULT_CHARACTERISTICS,
+            ...ZERO_MORALE,
+        });
     });
 
     it('unitCreateData / toUnitCreateData with a system write characteristics and the columns', () => {
@@ -198,7 +207,7 @@ describe('units d20 columnView', () => {
 
         const created = unitCreateData('c1', parsed, ruleSystemOf(rules));
 
-        expect(created.characteristics).toEqual(STATS);
+        expect(created.characteristics).toEqual({ ...STATS, ...ZERO_MORALE });
         expect(created.strength).toBe(STATS.strength);
         expect(
             toUnitCreateData(

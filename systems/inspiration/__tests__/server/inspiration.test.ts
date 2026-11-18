@@ -13,13 +13,18 @@ vi.mock('@/lib/db', () => {
     const prisma = {
         character: {
             update: vi.fn(),
-            findUniqueOrThrow: vi.fn(async () => ({
-                characteristics: { strength: 12, ext: { other: { a: 1 } } },
-            })),
         },
         characterLog: { createMany: vi.fn() },
         battleParticipant: { findFirst: vi.fn(async () => null) },
-        $queryRaw: vi.fn(async () => []),
+        $queryRaw: vi.fn(async () => [
+            {
+                id: 'ch',
+                resources: {},
+                experience: 0,
+                inspiration: false,
+                characteristics: { strength: 12, ext: { other: { a: 1 } } },
+            },
+        ]),
         $transaction: vi.fn(),
     };
 

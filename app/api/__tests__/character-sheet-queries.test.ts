@@ -219,7 +219,7 @@ describe('лист персонажа: запити до БД', () => {
         };
     });
 
-    it('персонаж із деревом, артефактами, особистим скілом і заклинаннями — не більше 6 викликів Prisma', async () => {
+    it('персонаж із деревом, артефактами, особистим скілом і заклинаннями — не більше 7 викликів Prisma', async () => {
         const loaded = await loadSheetCharacter('ch');
 
         const sheet = await buildSheetFor(
@@ -228,7 +228,7 @@ describe('лист персонажа: запити до БД', () => {
             { maxLevel: 20, rules: DEFAULT_RULES }
         );
 
-        expect(total()).toBeLessThanOrEqual(6);
+        expect(total()).toBeLessThanOrEqual(7);
         expect(db.calls['race.findFirst']).toBeUndefined();
         expect(db.calls['skillTree.findFirst']).toBe(1);
         expect(db.calls['campaign.findUnique']).toBe(2);

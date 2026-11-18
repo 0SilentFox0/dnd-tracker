@@ -6,6 +6,9 @@ export const INSPIRATION_META = {
     keys: [],
     requires: ['d20'],
     toggle: 'free',
+    characteristicsColumns: [
+        { column: 'inspiration', path: ['ext', 'inspiration', 'available'] },
+    ],
     i18n: {
         campaign: ['inspiration'],
         rules: ['rulesInspiration'],

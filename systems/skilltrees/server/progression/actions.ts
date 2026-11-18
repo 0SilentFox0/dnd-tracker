@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
+import { ProgressVersionConflictError, writeProgress } from '../progress-store';
 import { loadProgressionContext } from './context';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -64,7 +65,7 @@ export async function runProgressionAction(
 
     if (ctx instanceof NextResponse) return ctx;
 
-    const { character, treeRow, isDM, progressRead } = ctx;
+    const { character, treeRow, isDM, progressVersion } = ctx;
 
     if (action.type !== 'learn' && !isDM)
         return errorResponse(API_ERRORS.FORBIDDEN, 403);
@@ -103,17 +104,26 @@ export async function runProgressionAction(
         ) as Prisma.InputJsonValue;
     }
 
-    const { count } = await prisma.character.updateMany({
-        where: {
-            id: character.id,
-            level: character.level,
-            skillTreeProgress: { equals: progressRead },
-        },
-        data: { skillTreeProgress: nextProgress },
-    });
+    try {
+        await prisma.$transaction(async (tx) => {
+            // same-value update takes the row lock and checks the level the action was computed for
+            const { count } = await tx.character.updateMany({
+                where: { id: character.id, level: character.level },
+                data: { level: character.level },
+            });
 
-    if (count === 0)
-        return errorResponse(API_ERRORS.CHARACTER_PROGRESS_CHANGED, 409);
+            if (count === 0) throw new ProgressVersionConflictError(character.id);
+
+            await writeProgress(tx, character.id, nextProgress, {
+                expectedVersion: progressVersion,
+            });
+        });
+    } catch (e) {
+        if (e instanceof ProgressVersionConflictError)
+            return errorResponse(API_ERRORS.CHARACTER_PROGRESS_CHANGED, 409);
+
+        throw e;
+    }
 
     return NextResponse.json({ unlocked });
 }

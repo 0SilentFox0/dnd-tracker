@@ -102,6 +102,7 @@ describe('PATCH персонажа: рівень і слоти', () => {
                             id,
                             resources: {},
                             experience: 0,
+                            inspiration: false,
                             characteristics: null,
                         },
                     ])
@@ -187,6 +188,7 @@ describe('PATCH персонажа: рівень і слоти', () => {
                         id: 'ch',
                         resources: {},
                         experience: 0,
+                        inspiration: false,
                         characteristics: {
                             strength: 10,
                             intelligence: 22,

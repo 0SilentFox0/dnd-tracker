@@ -214,6 +214,17 @@ runTurnHooks(hooks, { participants, id, round: 1, rng, rules });
    - `combat.attack.riderOptions?`/`hitRiders?` — ризи атаки (cunning strike); немає `hitRiders` = запит із ризами відхиляється (`cunningUnavailable`, `request.ts`), оферу немає.
    - `magic.attackRoll?` — кидок атаки закляттям; немає = закляття з атакою влучає без кидка. `magic.saveCrit?` — нат. результат, що вирішує порятунок; немає = `null`. `magic.attackDice?` — кубик клієнта для атаки закляттям; немає = клієнт не кидає. `combat.zoneAttack?` — кидок зони проти цілі; немає = зона влучає без кидка.
    - Обов'язкові, але no-op за замовчуванням (`noActions`, `noMagic`): `combat.actions.releaseInvalidGrapples`, `magic.sustain.dropOrphaned` — пайплайн викликає їх безумовно.
+## Модульний словник і дані модулів (хвиля 4, слайси 2–3)
+
+- **Словник (`moduleVocab`).** Поняття модуля, потрібні ядру (імена полів, ключі станів, стати), ядро бере зі `vocab` у `systems/<id>/meta.ts` через `lib/utils/rules/systems/vocab.ts`, а не літералом (ratchet `system-literals`). `meta.importLinks` — зв'язки імпорту контенту модуля (замість ключів модуля в ядрі імпорту).
+- **Лог.** `SystemI18n.log` — i18n-scope записів журналу модуля; `legacyKeys` — старі ключі, що лишаються читабельними (збережені рядки не змінюються).
+- **Контекст учасника.** `ctx.ext` — стан модулів у контексті побудови учасника; модуль додає його через `prepareContext` / `characterContext`, ядро читає лише `ctx.ext.<module>`.
+- **Вбудовані рядки.** `content.embeds` (`RowEmbed`) — вкладені в рядок контенту дані модуля; `columnRefs` — колонки, на які посилається модуль (замість схемних імен у ядрі).
+- **Диспетчер.** Маршрути контенту модулів — один `app/api/campaigns/[id]/[kind]/[[...rest]]` (9 окремих `route.ts` видалено); модуль реєструє обробники у своєму `server`.
+- **Prisma multi-file.** `prisma/schema/core.prisma` + `prisma/schema/systems/<module>.prisma` (`prisma.config.ts`); `migrate diff --to-schema-datamodel prisma/schema`. Деталі — `.claude/rules/db-deploy.md`.
+- **Згортання збережених колонок.** `STORED_COLUMN_ENTRIES` (`lib/utils/rules/systems/stored-columns.ts`) і `characteristicsColumns` у формі шляху (`{ column:'morale', path:['ext','morale','value'] }`): `contentRowHash` і `column-view` згортають шлях `ext.<module>.<key>`, тож хеш мігрованого рядка = хешу легасі-рядка.
+- **Dual-write шви.** `InspirationRules.stored` / `store` (читання `ext.inspiration.available ?? колонка`, запис в обидва місця), `MoraleStoreRules` (`readMorale`/`writeMorale`, `ext.morale.value`); `skill_tree_progress` — `systems/skilltrees/server/progress-store.ts` (`readProgress`, `writeProgress` з `expectedVersion`, `таблиця ?? колонка`). Колонки лишаються бекапом до D3.
+- **`SystemServer.levelResets`.** Хук модуля на де-левел/скидання прогресу (скидання дерев тощо); ядро викликає його, не знаючи про skilltrees.
 ## Wfrp: що де лежить
 
 `systems/wfrp/`: `meta.ts`, `index.ts` (`WFRP_MODULE`), `rules/` (`percentile`, `characteristics`, `skills`, `conditions`, `magic`, `tables`, `traits`, `downtime`, `corruption`, `advancement`, `creation`, `equipment`, `combat`, `slots.ts`, `state.ts`, `sections.ts`, `rules-preset.ts`), `constants/`, `server/` (`WFRP_MODULE_SERVER`, `operations/`, `draft/`, `*-handler.ts`), `api/`, `hooks/`, `ui/` (`WFRP_MODULE_UI`), `__tests__/`; пакет Grim d100 — `scripts/templates/systems/wfrp/`. Межі й нечислові припущення рушія (перелік «Звірити з книгою») — в архівному файлі історії.

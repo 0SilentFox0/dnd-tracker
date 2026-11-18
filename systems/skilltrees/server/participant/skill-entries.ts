@@ -1,11 +1,15 @@
 import type { Prisma } from '@prisma/client';
 
 import { skillTreeContext } from './context';
+import { loadCharacterProgress } from './progress';
 
 import { prisma } from '@/lib/db';
 import type { SkillEntriesLoader } from '@/lib/server/systems/types';
 import type { SkillRowEntry } from '@/lib/utils/battle/participant/extract-skills';
-import type { CharacterFromPrisma } from '@/lib/utils/battle/types/participant';
+import type {
+    CampaignSpellContext,
+    CharacterFromPrisma,
+} from '@/lib/utils/battle/types/participant';
 import {
     normalizeTree,
     RACIAL_BRANCH_ID,
@@ -18,7 +22,8 @@ export async function resolveCharacterSkillEntries(
     campaignId: string,
     preloadedSkillsById?: Record<string, Prisma.SkillGetPayload<object>>,
     preloadedMainSkillGroups?: Map<string, string | null>,
-    preloadedTree?: Prisma.SkillTreeGetPayload<object> | null
+    preloadedTree?: Prisma.SkillTreeGetPayload<object> | null,
+    context?: CampaignSpellContext
 ): Promise<SkillRowEntry[]> {
     const treeRow =
         preloadedTree !== undefined
@@ -31,7 +36,7 @@ export async function resolveCharacterSkillEntries(
         ? uniqueSkills(
               resolveLearned(
                   normalizeTree(treeRow),
-                  character.skillTreeProgress
+                  await loadCharacterProgress(character, context)
               )
           ).flatMap((n) => (n.skillId ? [{ ...n, skillId: n.skillId }] : []))
         : [];
@@ -146,5 +151,6 @@ export const loadSkillEntries: SkillEntriesLoader = ({ character, context }) =>
         context
             ? (skillTreeContext.read(context)?.treeByRace[character.race] ??
                   null)
-            : undefined
+            : undefined,
+        context
     );

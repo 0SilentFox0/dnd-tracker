@@ -16,12 +16,25 @@ vi.mock('@/lib/server/characters/participant', () => ({
         participant: createMockParticipant(),
     })),
 }));
+
+const locked = vi.hoisted(() => ({
+    id: 'ch',
+    resources: {},
+    experience: 0,
+    inspiration: true,
+    characteristics: {},
+}));
+
 vi.mock('@/lib/db', () => {
     const prisma = {
-        character: { updateMany: vi.fn(async () => ({ count: 1 })) },
+        character: {
+            update: vi.fn(async () => ({})),
+        },
         characterLog: { createMany: vi.fn() },
         battleParticipant: { findFirst: vi.fn(async () => null) },
-        $queryRaw: vi.fn(async () => []),
+        $queryRaw: vi.fn(async (strings: TemplateStringsArray) =>
+            strings.join('').includes('FROM characters') ? [locked] : []
+        ),
         $transaction: vi.fn(),
     };
 
@@ -62,7 +75,10 @@ const post = async (body: object) => {
 };
 
 describe('POST roll', () => {
-    beforeEach(() => vi.clearAllMocks());
+    beforeEach(() => {
+        vi.clearAllMocks();
+        locked.inspiration = true;
+    });
 
     it('skill check without inspiration: result + log, inspiration untouched', async () => {
         gate(true);
@@ -74,7 +90,7 @@ describe('POST roll', () => {
         expect(res.status).toBe(200);
         expect(json).toMatchObject({ mode: 'normal', inspirationUsed: false });
         expect(json.total).toBe(json.roll + json.mod + json.bonus);
-        expect(prisma.character.updateMany).not.toHaveBeenCalled();
+        expect(prisma.character.update).not.toHaveBeenCalled();
         expect(prisma.characterLog.createMany).toHaveBeenCalledWith({
             data: [expect.objectContaining({ kind: 'check' })],
         });
@@ -96,9 +112,9 @@ describe('POST roll', () => {
             inspirationUsed: true,
         });
         expect(json.rolls).toHaveLength(2);
-        expect(prisma.character.updateMany).toHaveBeenCalledWith({
-            where: { id: 'ch', inspiration: true },
-            data: { inspiration: false },
+        expect(prisma.character.update).toHaveBeenCalledWith({
+            where: { id: 'ch' },
+            data: expect.objectContaining({ inspiration: false }),
         });
         expect(prisma.characterLog.createMany).toHaveBeenCalledWith({
             data: [expect.objectContaining({ kind: 'save' })],
@@ -107,9 +123,7 @@ describe('POST roll', () => {
 
     it('no inspiration left → 409, nothing logged', async () => {
         gate(true);
-        vi.mocked(prisma.character.updateMany).mockResolvedValueOnce({
-            count: 0,
-        } as never);
+        locked.inspiration = false;
 
         const res = await post({
             kind: 'check',
@@ -160,7 +174,7 @@ describe('POST roll', () => {
         expect((await blocked.json()).error).toBe(
             API_ERRORS.CHARACTER_IN_BATTLE
         );
-        expect(prisma.character.updateMany).not.toHaveBeenCalled();
+        expect(prisma.character.update).not.toHaveBeenCalled();
         expect((await post({ kind: 'check', skill: 'stealth' })).status).toBe(
             200
         );

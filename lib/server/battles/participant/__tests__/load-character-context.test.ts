@@ -17,6 +17,7 @@ vi.mock('@/lib/db', () => ({
         artifact: { findMany: mocks.artifacts },
         skill: { findFirst: mocks.skill },
         skillTree: { findFirst: mocks.skillTree },
+        skillTreeProgress: { findUnique: vi.fn(async () => null) },
         artifactSet: { findMany: mocks.artifactSets },
     },
 }));
@@ -34,6 +35,7 @@ import { parseRules } from '@/lib/utils/rules/schema';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 const character = {
+    id: 'ch',
     campaignId: 'own-campaign',
     race: 'Elf',
     classes: [{ classId: sorcerer.id, level: 4 }],
@@ -252,7 +254,11 @@ describe('loadCharacterContext module slices', () => {
         });
 
         expect(context.ext).toEqual({
-            skilltrees: { treeByRace: { Elf: null }, mainSkills: [] },
+            skilltrees: {
+                treeByRace: { Elf: null },
+                mainSkills: [],
+                progress: { ch: undefined },
+            },
             artifactsets: {
                 artifactSetsById: {
                     s1: {

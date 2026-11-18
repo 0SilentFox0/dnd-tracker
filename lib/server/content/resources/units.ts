@@ -24,10 +24,12 @@ import {
     abilitySpellIds,
     withAbilityIssues,
 } from '@/lib/utils/abilities/read';
+import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
 import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
+import { keepStoredColumns } from '@/lib/utils/rules/systems/stored-columns';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { toUnit } from '@/lib/utils/units/to-unit';
 import { unitCreateData } from '@/lib/utils/units/unit-create-data';
@@ -134,6 +136,26 @@ export const unitsResource = defineResource<
             current?.characteristics
         ).characteristics;
 
+        const supplied = unitCharacteristics(loaded, data.characteristics);
+
+        const characteristics =
+            view ??
+            (supplied === undefined || supplied === null
+                ? supplied
+                : keepStoredColumns(supplied, current?.characteristics));
+
+        const moraleData =
+            data.morale === undefined
+                ? undefined
+                : moraleUpdate(
+                      loaded.system,
+                      {
+                          characteristics:
+                              characteristics ?? current?.characteristics,
+                      },
+                      data.morale
+                  );
+
         const unit = await prisma.unit.update({
             where: { id: existing.id },
             data: {
@@ -159,7 +181,7 @@ export const unitsResource = defineResource<
                         : undefined,
                 immunities: toJsonInput(data.immunities),
                 knownSpells: toJsonInput(data.knownSpells),
-                morale: data.morale,
+                morale: moraleData?.morale,
                 minTargets: data.minTargets,
                 maxTargets: data.maxTargets,
                 avatar: data.avatar,
@@ -172,7 +194,7 @@ export const unitsResource = defineResource<
                 statblock: toJsonInput(data.statblock),
                 spellcasting: toJsonInput(data.spellcasting),
                 characteristics: toJsonInput(
-                    view ?? unitCharacteristics(loaded, data.characteristics)
+                    moraleData?.characteristics ?? characteristics
                 ),
             },
         });

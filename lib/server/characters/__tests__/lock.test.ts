@@ -11,6 +11,7 @@ describe('lockCharacters', () => {
                     id: 'a',
                     resources: { hp: 3, junk: 1 },
                     experience: 40,
+                    inspiration: true,
                     characteristics: null,
                 },
             ]),
@@ -22,6 +23,7 @@ describe('lockCharacters', () => {
             id: 'a',
             resources: { hp: 3 },
             experience: 40,
+            inspiration: true,
             characteristics: null,
         });
     });

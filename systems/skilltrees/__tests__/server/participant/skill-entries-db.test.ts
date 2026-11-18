@@ -7,6 +7,8 @@ const db = vi.hoisted(() => ({
     skillTree: { findFirst: vi.fn() },
     skill: { findMany: vi.fn() },
     mainSkill: { findMany: vi.fn() },
+    skillTreeProgress: { findMany: vi.fn() },
+    character: { findMany: vi.fn() },
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: db }));
@@ -41,7 +43,11 @@ const character = (extra: Record<string, unknown> = {}) =>
     }) as never;
 
 describe('resolveCharacterSkillEntries without preloaded data', () => {
-    beforeEach(() => vi.resetAllMocks());
+    beforeEach(() => {
+        vi.resetAllMocks();
+        db.skillTreeProgress.findMany.mockResolvedValue([]);
+        db.character.findMany.mockResolvedValue([]);
+    });
 
     it('loads tree, skills and main skill spell groups from the database', async () => {
         db.skillTree.findFirst.mockResolvedValue(TREE);

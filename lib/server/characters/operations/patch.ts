@@ -31,6 +31,7 @@ import { updateCharacterSchema } from '@/lib/server/characters/core/update-chara
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { ContentError } from '@/lib/server/content/errors';
 import { notifyCharacterOwners } from '@/lib/server/notifications/notify';
+import { systemLevelResetWriters } from '@/lib/server/systems/registry';
 import { PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
 import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
 import type { Actor } from '@/lib/utils/api/actor';
@@ -45,12 +46,14 @@ import {
     levelNotificationEvents,
     spellNotificationEvents,
 } from '@/lib/utils/notifications/events';
+import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
     columnViewDto,
     splitColumnView,
     withColumnView,
 } from '@/lib/utils/rules/systems/column-view';
+import { keepStoredColumns } from '@/lib/utils/rules/systems/stored-columns';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
@@ -264,8 +267,8 @@ function updateWriter({
         }),
     };
 
-    return (
-        db: Pick<Prisma.TransactionClient, 'character'>,
+    return async (
+        db: Prisma.TransactionClient,
         classes: ClassesResult['classesInput'],
         choiceFields?: ChoiceFields,
         characteristics?: unknown,
@@ -277,13 +280,29 @@ function updateWriter({
             prev
         );
 
-        return db.character.update({
+        const kept = (value: unknown) =>
+            value === undefined ? undefined : keepStoredColumns(value, prev);
+
+        const nextCharacteristics =
+            kept(characteristics) ??
+            view.characteristics ??
+            kept(data.characteristics);
+
+        const moraleData =
+            typeof columns.morale === 'number'
+                ? moraleUpdate(
+                      system,
+                      { characteristics: nextCharacteristics ?? prev },
+                      columns.morale
+                  )
+                : undefined;
+
+        const updated = await db.character.update({
             where: { id: character.id },
             data: {
                 ...columns,
-                characteristics: (characteristics ??
-                    view.characteristics ??
-                    data.characteristics) as Prisma.InputJsonValue | undefined,
+                characteristics: (moraleData?.characteristics ??
+                    nextCharacteristics) as Prisma.InputJsonValue | undefined,
                 backgroundChoices: undefined,
                 backgroundFeatPicks: undefined,
                 classes:
@@ -317,6 +336,12 @@ function updateWriter({
             include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
             omit: { notes: true },
         });
+
+        if (computed.finalLevel < character.level)
+            for (const reset of systemLevelResetWriters())
+                await reset(db, character.id);
+
+        return updated;
     };
 }
 

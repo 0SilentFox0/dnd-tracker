@@ -1,4 +1,5 @@
 import { skillTreeContext } from './context';
+import { loadCharacterProgress } from './progress';
 
 import { prisma } from '@/lib/db';
 import type { LearnedSpellsLoader } from '@/lib/server/systems/types';
@@ -67,7 +68,10 @@ export const resolveLearnedSpellsAndMastery: LearnedSpellsLoader = async ({
 
         const tree = normalizeTree(treeRow);
 
-        const learned = resolveLearned(tree, character.skillTreeProgress);
+        const learned = resolveLearned(
+            tree,
+            await loadCharacterProgress(character, context)
+        );
 
         if (learned.length === 0) return none();
 

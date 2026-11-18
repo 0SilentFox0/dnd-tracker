@@ -12,7 +12,12 @@ vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
 
 vi.mock('@/lib/db', () => ({
     prisma: {
-        character: { findFirst: vi.fn(), updateMany: vi.fn() },
+        character: {
+            findFirst: vi.fn(),
+            findUnique: vi.fn(),
+            updateMany: vi.fn(),
+        },
+        skillTreeProgress: { findUnique: vi.fn() },
         skillTree: { findFirst: vi.fn() },
         race: { findFirst: vi.fn() },
         skill: { findMany: vi.fn() },
@@ -75,6 +80,10 @@ describe('GET progression', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(prisma.character.findFirst).mockResolvedValue(CHAR as never);
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            skillTreeProgress: CHAR.skillTreeProgress,
+        } as never);
+        vi.mocked(prisma.skillTreeProgress.findUnique).mockResolvedValue(null);
         vi.mocked(prisma.skillTree.findFirst).mockResolvedValue(
             TREE_ROW as never
         );

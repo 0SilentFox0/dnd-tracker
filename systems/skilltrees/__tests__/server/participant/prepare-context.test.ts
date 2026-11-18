@@ -4,6 +4,7 @@ const db = vi.hoisted(() => ({
     skillTree: { findMany: vi.fn() },
     skill: { findMany: vi.fn() },
     mainSkill: { findMany: vi.fn() },
+    skillTreeProgress: { findMany: vi.fn() },
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: db }));
@@ -39,6 +40,7 @@ describe('prepareSkillTreeContext', () => {
         db.skillTree.findMany.mockResolvedValue([tree]);
         db.skill.findMany.mockResolvedValue([]);
         db.mainSkill.findMany.mockResolvedValue([]);
+        db.skillTreeProgress.findMany.mockResolvedValue([]);
     });
 
     it('reads only the trees of the party races and the branches of those trees', async () => {
@@ -90,6 +92,30 @@ describe('prepareSkillTreeContext', () => {
         expect(skillTreeContext.read(ctx as never)).toEqual({
             treeByRace: {},
             mainSkills: [],
+            progress: {},
+        });
+    });
+
+    it('puts the table progress into the ext slot, falling back to the column', async () => {
+        db.skillTreeProgress.findMany.mockResolvedValue([
+            { characterId: 'a', progress: { t: ['table'] } },
+        ]);
+
+        const ctx = context();
+
+        await prepareSkillTreeContext('c1', ctx, {
+            characters: [
+                hero('Ельф', { id: 'a', skillTreeProgress: { t: ['column'] } }),
+                hero('Ельф', {
+                    id: 'b',
+                    skillTreeProgress: { t: ['column-b'] },
+                }),
+            ],
+        });
+
+        expect(skillTreeContext.read(ctx as never)?.progress).toEqual({
+            a: { t: ['table'] },
+            b: { t: ['column-b'] },
         });
     });
 });

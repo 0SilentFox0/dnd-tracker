@@ -3,6 +3,7 @@ import type { z } from 'zod';
 
 import type { createUnitSchema } from '@/lib/schemas/units';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
+import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
@@ -30,9 +31,13 @@ export function unitCreateData(
     data: CreateUnitData,
     system?: RuleSystemDefinition
 ): Prisma.UnitUncheckedCreateInput {
-    const characteristics =
+    const base =
         (system && splitColumnView(data, system).characteristics) ??
         data.characteristics;
+
+    const { morale, characteristics } = system
+        ? moraleUpdate(system, { characteristics: base }, data.morale)
+        : { morale: data.morale, characteristics: base };
 
     return {
         campaignId,
@@ -49,7 +54,7 @@ export function unitCreateData(
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         immunities: data.immunities as Prisma.InputJsonValue,
         knownSpells: data.knownSpells,
-        morale: data.morale,
+        morale,
         avatar: data.avatar ?? null,
         cr: data.cr ?? null,
         xp: data.xp ?? null,

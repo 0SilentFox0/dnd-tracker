@@ -15,6 +15,7 @@ import {
 const skillTreeContext = defineContextExt<{
     treeByRace: Record<string, Parameters<typeof normalizeTree>[0] | null>;
     mainSkills: Parameters<typeof magicMainSkillIds>[0];
+    progress?: Record<string, unknown>;
 }>('skilltrees');
 
 export const D20_BALANCE: SystemBalance = {
@@ -24,10 +25,13 @@ export const D20_BALANCE: SystemBalance = {
             new Set([built.basicInfo.id])
         );
 
-        const progress = (character.row as { skillTreeProgress?: unknown })
-            .skillTreeProgress;
-
         const treeCtx = skillTreeContext.read(campaignContext);
+
+        const row = character.row as { id?: string; skillTreeProgress?: unknown };
+
+        const progress =
+            (row.id ? treeCtx?.progress?.[row.id] : undefined) ??
+            row.skillTreeProgress;
 
         const treeRow = treeCtx?.treeByRace[character.race];
 

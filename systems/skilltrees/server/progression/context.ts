@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+
+import { readProgressRow } from '../progress-store';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
@@ -15,7 +17,7 @@ export interface ProgressionContext {
         seenLevel: number | null;
         controlledBy: string;
     };
-    progressRead: Prisma.InputJsonValue | typeof Prisma.JsonNull;
+    progressVersion: number;
     treeRow: Prisma.SkillTreeGetPayload<object> | null;
     isDM: boolean;
     isOwner: boolean;
@@ -32,7 +34,6 @@ export async function loadProgressionContext(
             id: true,
             level: true,
             race: true,
-            skillTreeProgress: true,
             seenLevel: true,
             controlledBy: true,
         },
@@ -50,13 +51,14 @@ export async function loadProgressionContext(
         where: { campaignId, race: character.race },
     });
 
-    const read = character.skillTreeProgress;
+    const stored = await readProgressRow(character.id);
 
     return {
-        character: { ...character, skillTreeProgress: read ?? {} },
-        // column is NOT NULL but JSON null is possible; the condition must match what was read
-        progressRead:
-            read === null ? Prisma.JsonNull : (read as Prisma.InputJsonValue),
+        character: {
+            ...character,
+            skillTreeProgress: stored?.progress ?? {},
+        },
+        progressVersion: stored?.version ?? 0,
         treeRow,
         isDM,
         isOwner,

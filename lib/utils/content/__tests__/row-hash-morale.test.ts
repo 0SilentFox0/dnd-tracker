@@ -56,3 +56,44 @@ describe('contentRowHash morale fold', () => {
         ).toBe(contentRowHash('Character', legacy));
     });
 });
+
+describe('contentRowHash inspiration fold', () => {
+    const legacyHero = { name: 'Hero', inspiration: true, characteristics: {} };
+
+    const migratedHero = {
+        name: 'Hero',
+        characteristics: { ext: { inspiration: { available: true } } },
+    };
+
+    it('legacy and migrated characters hash alike', () => {
+        expect(contentRowHash('Character', migratedHero)).toBe(
+            contentRowHash('Character', legacyHero)
+        );
+        expect(
+            contentRowHash('Character', { ...migratedHero, inspiration: true })
+        ).toBe(contentRowHash('Character', legacyHero));
+    });
+
+    it('both stored values fold together', () => {
+        expect(
+            contentRowHash('Character', {
+                name: 'Hero',
+                inspiration: true,
+                morale: 2,
+                characteristics: {
+                    ext: {
+                        inspiration: { available: true },
+                        morale: { value: 2 },
+                    },
+                },
+            })
+        ).toBe(
+            contentRowHash('Character', {
+                name: 'Hero',
+                inspiration: true,
+                morale: 2,
+                characteristics: {},
+            })
+        );
+    });
+});

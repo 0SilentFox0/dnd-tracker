@@ -6,6 +6,7 @@ const db = vi.hoisted(() => ({
     race: { findMany: vi.fn(async () => []) },
     campaign: { findUnique: vi.fn() },
     skillTree: { findMany: vi.fn(async () => []) },
+    skillTreeProgress: { findMany: vi.fn(async () => []) },
     mainSkill: { findMany: vi.fn(async () => []) },
     spell: { findMany: vi.fn(async () => []) },
     skill: { findMany: vi.fn(async () => []) },

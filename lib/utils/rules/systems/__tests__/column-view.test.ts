@@ -163,3 +163,59 @@ describe('ext path columns', () => {
         ).toEqual({ morale: 4, characteristics: null });
     });
 });
+
+describe('columnViewDto with stored-column modules', () => {
+    const base = { strength: 12, morale: 0, inspiration: false };
+
+    it('keeps the response shape: ext keys of stored-column modules leave characteristics', () => {
+        const legacy = columnViewDto({ ...base, characteristics: null }, d20);
+
+        const migrated = columnViewDto(
+            {
+                ...base,
+                characteristics: {
+                    ext: {
+                        morale: { value: 0 },
+                        inspiration: { available: false },
+                    },
+                },
+            },
+            d20
+        );
+
+        expect(migrated).toEqual(legacy);
+        expect(migrated.characteristics).toBeNull();
+    });
+
+    it('folds ext values into the columns', () => {
+        const dto = columnViewDto(
+            {
+                ...base,
+                characteristics: {
+                    ext: {
+                        morale: { value: 3 },
+                        inspiration: { available: true },
+                    },
+                },
+            },
+            d20
+        );
+
+        expect(dto).toMatchObject({ morale: 3, inspiration: true });
+        expect(dto.characteristics).toBeNull();
+    });
+
+    it('keeps foreign ext keys', () => {
+        const dto = columnViewDto(
+            {
+                ...base,
+                characteristics: {
+                    ext: { morale: { value: 3 }, other: { a: 1 } },
+                },
+            },
+            d20
+        );
+
+        expect(dto.characteristics).toEqual({ ext: { other: { a: 1 } } });
+    });
+});

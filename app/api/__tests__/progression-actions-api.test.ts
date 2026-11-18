@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { Prisma } from '@prisma/client';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getResponseJson } from './helpers';
@@ -35,6 +34,11 @@ vi.mock('@/lib/db', () => ({
             findFirst: vi.fn(),
             findUnique: vi.fn(),
             update: vi.fn(),
+            updateMany: vi.fn(),
+        },
+        skillTreeProgress: {
+            findUnique: vi.fn(),
+            createMany: vi.fn(),
             updateMany: vi.fn(),
         },
         campaign: { findUnique: vi.fn() },
@@ -116,6 +120,10 @@ const post = async (action: string, body?: unknown) => {
     return mod.POST(request, params(action)) as Promise<NextResponse>;
 };
 
+let table: { progress: unknown; version: number } | null = null;
+
+let column: unknown = null;
+
 describe('progression actions', () => {
     beforeAll(async () => {
         await import('@/app/api/campaigns/[id]/characters/[characterId]/route');
@@ -139,9 +147,56 @@ describe('progression actions', () => {
         vi.mocked(prisma.character.updateMany).mockResolvedValue({
             count: 1,
         } as never);
+        table = null;
+        column = CHAR.skillTreeProgress;
+        vi.mocked(prisma.character.findUnique).mockImplementation(
+            (async () => ({
+                skillTreeProgress: column,
+            })) as never
+        );
+        vi.mocked(prisma.character.update).mockImplementation((async ({
+            data,
+        }: {
+            data: { skillTreeProgress?: unknown };
+        }) => {
+            if (data.skillTreeProgress !== undefined)
+                column = data.skillTreeProgress;
+
+            return {};
+        }) as never);
+        vi.mocked(prisma.skillTreeProgress.findUnique).mockImplementation(
+            (async () => table) as never
+        );
+        vi.mocked(prisma.skillTreeProgress.createMany).mockImplementation((async ({
+            data,
+        }: {
+            data: { progress: unknown; version: number }[];
+        }) => {
+            if (table) return { count: 0 };
+
+            table = { progress: data[0].progress, version: data[0].version };
+
+            return { count: 1 };
+        }) as never);
+        vi.mocked(prisma.skillTreeProgress.updateMany).mockImplementation(
+            (async ({
+                where,
+                data,
+            }: {
+                where: { version: number };
+                data: { progress: unknown };
+            }) => {
+                if (!table || table.version !== where.version)
+                    return { count: 0 };
+
+                table = { progress: data.progress, version: table.version + 1 };
+
+                return { count: 1 };
+            }) as never
+        );
     });
 
-    it('власник без allowPlayerEdit вчить; запис під id рядка з guard на прочитаний прогрес і рівень', async () => {
+    it('власник без allowPlayerEdit вчить; запис під id рядка в таблицю й колонку', async () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('owner', 'player')
         );
@@ -153,28 +208,22 @@ describe('progression actions', () => {
             unlocked: ['attack_basic_level', 'o1'],
         });
 
-        const call = vi.mocked(prisma.character.updateMany).mock.calls[0][0];
+        const written = {
+            'row-id': { unlockedSkills: ['attack_basic_level', 'o1'] },
+        };
 
-        expect(call.where).toEqual({
-            id: 'ch',
-            level: 3,
-            skillTreeProgress: { equals: CHAR.skillTreeProgress },
-        });
-        expect(call.data).toEqual({
-            skillTreeProgress: {
-                'row-id': { unlockedSkills: ['attack_basic_level', 'o1'] },
-            },
-        });
+        expect(table).toEqual({ progress: written, version: 1 });
+        expect(column).toEqual(written);
+        expect(
+            vi.mocked(prisma.character.updateMany).mock.calls[0][0].where
+        ).toEqual({ id: 'ch', level: 3 });
     });
 
-    it("JSON null у прогресі ('null'::jsonb): вивчення працює, guard порівнює з JsonNull", async () => {
+    it("JSON null у колонці ('null'::jsonb): вивчення працює", async () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('owner', 'player')
         );
-        vi.mocked(prisma.character.findFirst).mockResolvedValue({
-            ...CHAR,
-            skillTreeProgress: null,
-        } as never);
+        column = null;
 
         const res = await post('learn', { nodeId: 'attack_basic_level' });
 
@@ -183,17 +232,8 @@ describe('progression actions', () => {
             unlocked: ['attack_basic_level'],
         });
 
-        const call = vi.mocked(prisma.character.updateMany).mock.calls[0][0];
-
-        expect(call.where).toEqual({
-            id: 'ch',
-            level: 3,
-            skillTreeProgress: { equals: Prisma.JsonNull },
-        });
-        expect(call.data).toEqual({
-            skillTreeProgress: {
-                'row-id': { unlockedSkills: ['attack_basic_level'] },
-            },
+        expect(column).toEqual({
+            'row-id': { unlockedSkills: ['attack_basic_level'] },
         });
     });
 
@@ -212,7 +252,8 @@ describe('progression actions', () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('owner', 'player')
         );
-        vi.mocked(prisma.character.updateMany).mockResolvedValue({
+        table = { progress: CHAR.skillTreeProgress, version: 2 };
+        vi.mocked(prisma.skillTreeProgress.updateMany).mockResolvedValue({
             count: 0,
         } as never);
 
@@ -245,27 +286,20 @@ describe('progression actions', () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('dm', 'dm')
         );
-        vi.mocked(prisma.character.findFirst).mockResolvedValue({
-            ...CHAR,
-            skillTreeProgress: {
-                'json-id': {
-                    unlockedSkills: ['attack_basic_level', 'gone-1', 'gone-2'],
-                },
+        column = {
+            'json-id': {
+                unlockedSkills: ['attack_basic_level', 'gone-1', 'gone-2'],
             },
-        } as never);
+        };
 
         const res = await post('unlearn', { nodeIds: ['gone-1', 'gone-2'] });
 
         expect(await getResponseJson(res)).toEqual({
             unlocked: ['attack_basic_level'],
         });
-        expect(prisma.character.updateMany).toHaveBeenCalledTimes(1);
-        expect(
-            vi.mocked(prisma.character.updateMany).mock.calls[0][0].data
-        ).toEqual({
-            skillTreeProgress: {
-                'row-id': { unlockedSkills: ['attack_basic_level'] },
-            },
+        expect(prisma.skillTreeProgress.createMany).toHaveBeenCalledTimes(1);
+        expect(column).toEqual({
+            'row-id': { unlockedSkills: ['attack_basic_level'] },
         });
     });
 
@@ -283,7 +317,7 @@ describe('progression actions', () => {
         );
 
         expect((await post('learn', { nodeId: 'o1' })).status).toBe(403);
-        expect(prisma.character.updateMany).not.toHaveBeenCalled();
+        expect(prisma.skillTreeProgress.createMany).not.toHaveBeenCalled();
     });
 
     it('PATCH персонажа з тим самим, потім вищим рівнем не ламає guard — learn після кожного → 200', async () => {
@@ -333,14 +367,10 @@ describe('progression actions', () => {
             where,
             data,
         }: {
-            where: { level?: number; skillTreeProgress?: { equals: unknown } };
+            where: { level?: number };
             data: Record<string, unknown>;
         }) => {
-            const ok =
-                (where.level === undefined || where.level === row.level) &&
-                JSON.stringify(
-                    where.skillTreeProgress?.equals ?? row.skillTreeProgress
-                ) === JSON.stringify(row.skillTreeProgress);
+            const ok = where.level === undefined || where.level === row.level;
 
             if (ok) row = { ...row, ...data };
 
