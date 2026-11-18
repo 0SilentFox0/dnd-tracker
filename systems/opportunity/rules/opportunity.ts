@@ -57,7 +57,6 @@ const canProvoke = (e: BattleParticipant, moverId: string) =>
     isOnMap(e) &&
     !conditionSourceIds(e, 'charmed').includes(moverId);
 
-/** `stopAt` — клітинка, де мувер упав. */
 export function resolveOpportunityAttacks(
     input: OpportunityInput
 ): OpportunityResult {

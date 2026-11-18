@@ -40,7 +40,7 @@ export function useLevelUpCelebration(campaignId: string, characterId: string) {
         null
     );
 
-    // після markLevelSeen наступний лист приходить уже з seenLevel = level: відкритий оверлей тримається до закриття
+    // after markLevelSeen the next payload arrives with seenLevel = level: the open overlay stays until closed
     if (
         pending &&
         seenLevel !== null &&

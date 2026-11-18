@@ -14,7 +14,7 @@ import { schoolMasteryFromLearned } from '@/lib/utils/spells/model/dice';
 import { learnedSpellIdsFromNodes } from '@/systems/skilltrees/rules/spells/spell-learning-from-tree';
 import { toSpellSkillInfo } from '@/systems/skilltrees/rules/spells/spell-learning-internals';
 
-// персональне вміння не лежить у дереві, тож його закляття додаємо окремо
+// a personal skill is not in the tree, so its spells are added separately
 async function personalSpellIds(
     character: CharacterFromPrisma,
     context?: CampaignSpellContext

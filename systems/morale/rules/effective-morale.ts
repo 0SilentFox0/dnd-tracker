@@ -7,7 +7,6 @@ import {
 } from '@/systems/morale/rules/effects';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Лідерські бонуси до шансу додаткового ходу (прапорець moraleChance), %. */
 export function moraleChanceBonus(
     p: BattleParticipant,
     participants: BattleParticipant[]

@@ -11,10 +11,6 @@ export const SKILL_LEVEL_ORDER: Record<SkillLevelType, number> = {
     [SkillLevel.EXPERT]: 3,
 };
 
-/**
- * Рівні магії (кумулятивно) за рівнем школи.
- * Базовий → [1,2], Просунутий → [1,2,3,4], Експертний → [1,2,3,4,5].
- */
 export function getSpellLevelsForSkillLevel(
     skillLevel: SkillLevelType
 ): number[] {

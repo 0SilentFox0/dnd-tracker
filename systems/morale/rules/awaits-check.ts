@@ -10,7 +10,7 @@ export interface MoraleScope {
     scene: { turnIndex: number; sceneState?: SystemSlot };
 }
 
-// мораль могла змінитися посеред ходу (вбивство, вміння) — перевірка потрібна лише до першої дії
+// morale may change mid-turn (kill, ability); the check is needed only before the first action
 const hasActedThisTurn = (p: BattleParticipant) =>
     p.actionFlags.hasUsedAction ||
     p.actionFlags.hasUsedBonusAction ||

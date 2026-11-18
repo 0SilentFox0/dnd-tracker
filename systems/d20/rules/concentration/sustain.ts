@@ -226,7 +226,6 @@ function mapCarriesCast(
     );
 }
 
-/** Заклинання, чиї ефекти, зони, предмети й гранти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
 export function dropOrphanedConcentration(
     ps: BattleParticipant[],
     map?: BattleMapConfig | null,

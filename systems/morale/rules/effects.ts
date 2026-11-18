@@ -24,7 +24,7 @@ export function ownTimedMoraleFlat(
     return sum;
 }
 
-// Без ps (формули, рекурсія) зони мертвих власників відфільтрувати не можна — лише дедуп однакових аур.
+// Without ps (formulas, recursion) dead owners' zones cannot be filtered; only identical auras are deduped.
 function ownMinMorale(p: BattleParticipant): number | undefined {
     const values = [
         ...resolvedAbilitiesOf(p).flatMap((a) =>
@@ -42,7 +42,7 @@ function ownMinMorale(p: BattleParticipant): number | undefined {
     return values.length ? Math.max(...values) : undefined;
 }
 
-// Лише власні прапорці без аур союзників: формули не можуть викликати collectModifiers (рекурсія).
+// Own flags only, no ally auras: formulas cannot call collectModifiers (recursion).
 function ownHasFlag(p: BattleParticipant, flag: FlagKey): boolean {
     const passive = resolvedAbilitiesOf(p).some(
         (a) =>

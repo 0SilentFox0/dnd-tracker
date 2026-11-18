@@ -5,7 +5,6 @@ import {
 import { moraleThreshold } from '@/systems/morale/rules/threshold';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Значення d10, на яких спрацює мораль: додатковий хід (позитивна) чи пропуск ходу (негативна). */
 export function moraleTriggerRolls(
     participant: BattleParticipant,
     participants: BattleParticipant[] = [participant]

@@ -74,7 +74,6 @@ export function cunningStrikeOffer(
     };
 }
 
-/** Повертає вартість у кубиках, або текст відмови. */
 export function cunningStrikeCost(
     offer: CunningStrikeOffer | null,
     effects: StrikeRiderEffect[]
