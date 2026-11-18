@@ -24,7 +24,7 @@ const svc = vi.hoisted(() => ({
 
 vi.mock('@/lib/server/battle-maps/library-service', () => svc);
 
-const access = vi.hoisted(() => ({ requireMapReadAccess: vi.fn() }));
+const access = vi.hoisted(() => ({ resolveMapReadVersion: vi.fn() }));
 
 vi.mock('@/lib/server/battle-maps/player-access', () => access);
 
@@ -69,7 +69,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     auth.requireDM.mockResolvedValue({ userId: 'dm', isDM: true });
     auth.requireCampaignAccess.mockResolvedValue({ userId: 'p', isDM: false });
-    access.requireMapReadAccess.mockResolvedValue(null);
+    access.resolveMapReadVersion.mockResolvedValue({ version: undefined });
     svc.getMap.mockResolvedValue(full);
     svc.getMapMeta.mockResolvedValue(full);
 });
@@ -87,10 +87,10 @@ describe('maps routes', () => {
     });
 
     it('GET one by a player without a battle on the map is 403', async () => {
-        access.requireMapReadAccess.mockResolvedValue(forbidden());
+        access.resolveMapReadVersion.mockResolvedValue(forbidden());
 
         expect((await GET(send('GET'), ctx)).status).toBe(403);
-        expect(access.requireMapReadAccess).toHaveBeenCalledWith(
+        expect(access.resolveMapReadVersion).toHaveBeenCalledWith(
             'c1',
             'm1',
             false,

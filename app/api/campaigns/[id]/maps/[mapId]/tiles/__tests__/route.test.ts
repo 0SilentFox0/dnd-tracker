@@ -27,7 +27,7 @@ const limits = vi.hoisted(() => ({ campaignMapMaxSide: vi.fn() }));
 
 vi.mock('@/lib/server/battle-maps/campaign-limits', () => limits);
 
-const access = vi.hoisted(() => ({ requireMapReadAccess: vi.fn() }));
+const access = vi.hoisted(() => ({ resolveMapReadVersion: vi.fn() }));
 
 vi.mock('@/lib/server/battle-maps/player-access', () => access);
 
@@ -52,7 +52,7 @@ beforeEach(() => {
     auth.requireDM.mockResolvedValue({ isDM: true });
     auth.requireCampaignAccess.mockResolvedValue({ isDM: false });
     library.getMapMeta.mockResolvedValue(meta);
-    access.requireMapReadAccess.mockResolvedValue(null);
+    access.resolveMapReadVersion.mockResolvedValue({ version: undefined });
     limits.campaignMapMaxSide.mockResolvedValue(200);
     service.getTileChunks.mockResolvedValue({ ground: {} });
     service.patchTileChunks.mockResolvedValue(3);
@@ -71,7 +71,7 @@ describe('tile chunk API', () => {
     });
 
     it('hides tile chunks from a player without a battle on the map', async () => {
-        access.requireMapReadAccess.mockResolvedValueOnce(
+        access.resolveMapReadVersion.mockResolvedValueOnce(
             NextResponse.json({}, { status: 403 })
         );
 

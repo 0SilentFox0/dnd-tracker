@@ -10,7 +10,7 @@ import {
     saveMap,
     withStoredBackground,
 } from '@/lib/server/battle-maps/library-service';
-import { requireMapReadAccess } from '@/lib/server/battle-maps/player-access';
+import { resolveMapReadVersion } from '@/lib/server/battle-maps/player-access';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
 import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
@@ -33,24 +33,29 @@ export async function GET(req: Request, { params }: Ctx) {
 
     const raw = new URL(req.url).searchParams.get('version');
 
-    const version = raw === null ? undefined : Number(raw);
+    const requested = raw === null ? undefined : Number(raw);
 
-    if (version !== undefined && !(Number.isInteger(version) && version >= 1))
+    if (
+        requested !== undefined &&
+        !(Number.isInteger(requested) && requested >= 1)
+    )
         return errorResponse(API_ERRORS.INVALID_BODY, 400);
 
     const meta = await loadOwned(getMapMeta(mapId), id);
 
     if (meta instanceof NextResponse) return meta;
 
-    const denied = await requireMapReadAccess(
+    const resolved = await resolveMapReadVersion(
         id,
         mapId,
         access.isDM,
-        version,
+        requested,
         meta.version
     );
 
-    if (denied) return denied;
+    if (resolved instanceof NextResponse) return resolved;
+
+    const { version } = resolved;
 
     if (version === undefined) {
         const notModified = ifNoneMatch(req, weakEtag(mapId, meta.version));

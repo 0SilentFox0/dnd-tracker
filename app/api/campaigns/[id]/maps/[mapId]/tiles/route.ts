@@ -6,7 +6,7 @@ import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { battleMapTilePatchSchema } from '@/lib/schemas/battle-maps';
 import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import { getMapMeta } from '@/lib/server/battle-maps/library-service';
-import { requireMapReadAccess } from '@/lib/server/battle-maps/player-access';
+import { resolveMapReadVersion } from '@/lib/server/battle-maps/player-access';
 import {
     getTileChunks,
     patchTileChunks,
@@ -34,20 +34,25 @@ export async function GET(req: Request, { params }: Ctx) {
 
     const rawVersion = new URL(req.url).searchParams.get('version');
 
-    const version = rawVersion === null ? meta.version : Number(rawVersion);
+    const requested = rawVersion === null ? undefined : Number(rawVersion);
 
-    if (!(Number.isInteger(version) && version >= 1))
+    if (
+        requested !== undefined &&
+        !(Number.isInteger(requested) && requested >= 1)
+    )
         return errorResponse(API_ERRORS.INVALID_BODY, 400);
 
-    const denied = await requireMapReadAccess(
+    const resolved = await resolveMapReadVersion(
         id,
         mapId,
         access.isDM,
-        version,
+        requested,
         meta.version
     );
 
-    if (denied) return denied;
+    if (resolved instanceof NextResponse) return resolved;
+
+    const version = resolved.version ?? meta.version;
 
     const chunks = await getTileChunks(mapId, version);
 
