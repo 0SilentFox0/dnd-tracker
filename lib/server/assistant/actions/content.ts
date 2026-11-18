@@ -100,58 +100,59 @@ function validatedBody(
     return parsed;
 }
 
-export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
-    const resources = deps.resources ?? CONTENT_RESOURCES;
+type Ports = {
+    snapshot: NonNullable<Deps['snapshot']>;
+    preview: NonNullable<Deps['preview']>;
+    guard: NonNullable<Deps['guard']>;
+};
 
-    const snapshot = deps.snapshot ?? contentSnapshot;
+type Verb = 'create' | 'update' | 'delete' | 'delete-all';
 
-    const preview =
+type WriteInput = { id?: string; data?: unknown; patch?: unknown };
+
+type Scope = {
+    kind: string;
+    resource: AnyContentResource;
+    base: { title: string; description: string; contentKind: string };
+    target: (
+        id: string,
+        row?: Record<string, unknown>,
+        label?: string
+    ) => TargetRef;
+};
+
+const resolvePorts = (deps: Deps): Ports => ({
+    snapshot: deps.snapshot ?? contentSnapshot,
+    preview:
         deps.preview ??
         (deps.snapshot
-            ? async (_actor: Actor, state: unknown) => state
-            : (
-                  actor: Actor,
-                  _state: unknown,
-                  kind: string,
-                  id: string | undefined,
-                  body: unknown
-              ) => contentPreviewState(actor, kind, id, body));
-
-    const guard =
+            ? async (_actor, state) => state
+            : (actor, _state, kind, id, body) =>
+                  contentPreviewState(actor, kind, id, body)),
+    guard:
         deps.guard ??
         ((campaignId, callback) =>
-            withCampaignRuntimeWrite(campaignId, callback));
+            withCampaignRuntimeWrite(campaignId, callback)),
+});
 
-    const actions: AssistantActionDef[] = [];
+const createScope = (kind: string, resource: AnyContentResource): Scope => ({
+    kind,
+    resource,
+    base: {
+        title: resource.label,
+        description: resource.description,
+        contentKind: kind,
+    },
+    target: (id, row, label = resource.label) => ({
+        domain: kind,
+        id,
+        name: String(row?.name ?? row?.title ?? label),
+    }),
+});
 
-    for (const [kind, resource] of Object.entries(resources)) {
-        if (!resource) continue;
-
-        const base = {
-            title: resource.label,
-            description: resource.description,
-            contentKind: kind,
-        };
-
-        const target = (
-            id: string,
-            row?: Record<string, unknown>,
-            label: string = resource.label
-        ): TargetRef => ({
-            domain: kind,
-            id,
-            name: String(row?.name ?? row?.title ?? label),
-        });
-
-        const found = async (caller: AssistantCaller, id: string) => {
-            const row = await resource.find(caller.actor, id, 'write');
-
-            if (!row) throw new ContentError(resource.notFound, 404);
-
-            return row as Record<string, unknown>;
-        };
-
-        actions.push({
+function readActions({ kind, resource, base }: Scope): AssistantActionDef[] {
+    return [
+        {
             ...base,
             id: `content.${kind}.get`,
             need: NEED.read(resource.access.item),
@@ -165,8 +166,8 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
                         (input as { id: string }).id
                     )
                 ),
-        });
-        actions.push({
+        },
+        {
             ...base,
             id: `content.${kind}.list`,
             need: NEED.read(resource.access.list),
@@ -203,212 +204,201 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
                     })),
                 });
             },
-        });
+        },
+    ];
+}
 
-        const createSchema = z.object({
+async function prepareWrite(
+    { kind, resource, target }: Scope,
+    ports: Ports,
+    verb: Verb,
+    caller: AssistantCaller,
+    input: unknown
+): Promise<ActionPreview> {
+    const value = input as WriteInput;
+
+    const deleting = verb.startsWith('delete');
+
+    const t = await getTranslator(caller.locale, 'assistant');
+
+    let before: Record<string, unknown> | null = null;
+
+    if (value.id) {
+        const row = await resource.find(caller.actor, value.id, 'write');
+
+        if (!row) throw new ContentError(resource.notFound, 404);
+
+        before = row as Record<string, unknown>;
+    }
+
+    const body =
+        verb === 'create' || verb === 'update'
+            ? validatedBody(resource, value.data ?? value.patch, verb === 'update')
+            : null;
+
+    const state = await ports.snapshot(caller.actor);
+
+    const targets = [
+        target(
+            value.id ?? (verb === 'create' ? 'new' : 'all'),
+            before ?? body ?? undefined,
+            t(`contentKinds.${kind}`)
+        ),
+    ];
+
+    const changes = body
+        ? Object.entries(body).map(([path, after]) => ({
+              target: targets[0],
+              path,
+              before: jsonContent(before?.[path]),
+              after: jsonContent(after),
+          }))
+        : [
+              {
+                  target: targets[0],
+                  path: '$record',
+                  before: jsonContent(before ?? state),
+                  after: null,
+              },
+          ];
+
+    const shown = await ports.preview(caller.actor, state, kind, value.id, body);
+
+    const dependencies = contentDependencies(shown, kind, value.id, body);
+
+    changes.push({
+        target: targets[0],
+        path: '$dependencies',
+        before: jsonContent(dependencies),
+        after: jsonContent(dependencies),
+    });
+
+    if (deleting) {
+        const ids = value.id ? [value.id] : contentIds(shown, kind);
+
+        changes.push(...contentDeleteCascades(shown, kind, ids));
+    }
+
+    const summary = t('summary.content', {
+        label: t(`contentKinds.${kind}`),
+        verb,
+    });
+
+    return {
+        summary,
+        targets,
+        changes,
+        warnings: deleting ? [t('warnings.contentCascades')] : [],
+        effects: [
+            {
+                kind:
+                    verb === 'create'
+                        ? 'create'
+                        : verb === 'update'
+                          ? 'update'
+                          : 'delete',
+                targets,
+                description: summary,
+            },
+        ],
+        preconditions: {
+            snapshot: snapshotHash(state),
+            before: snapshotHash(before),
+            body: jsonContent(body),
+        },
+    };
+}
+
+async function executeWrite(
+    { resource, target }: Scope,
+    verb: Verb,
+    caller: AssistantCaller,
+    input: unknown
+): Promise<ActionResult> {
+    const value = input as WriteInput;
+
+    if (verb === 'create') {
+        const created = (await createContent(
+            resource,
+            caller.actor,
+            validatedBody(resource, value.data, false)
+        )) as Record<string, unknown>;
+
+        return contentResult(created, [target(String(created.id), created)]);
+    }
+
+    if (verb === 'update')
+        return contentResult(
+            await updateContent(
+                resource,
+                caller.actor,
+                value.id!,
+                validatedBody(resource, value.patch, true)
+            ),
+            [target(value.id!)]
+        );
+
+    if (verb === 'delete-all')
+        return contentResult(
+            { deleted: await removeAllContent(resource, caller.actor) },
+            [target('all')]
+        );
+
+    await removeContent(resource, caller.actor, value.id!);
+
+    return contentResult({ ok: true }, [target(value.id!)]);
+}
+
+function writeActions(scope: Scope, ports: Ports): AssistantWriteAction[] {
+    const { kind, resource, base } = scope;
+
+    const schemas = {
+        create: z.object({
             data: resource.schemas.apiCreate ?? resource.schemas.create,
-        });
+        }),
+        update: z.object({ id: idSchema, patch: resource.schemas.update }),
+        delete: z.object({ id: idSchema }),
+        'delete-all': empty,
+    };
 
-        const updateSchema = z.object({
-            id: idSchema,
-            patch: resource.schemas.update,
-        });
+    const verbs: Verb[] = [
+        'create',
+        'update',
+        'delete',
+        ...(resource.removeAll ? (['delete-all'] as const) : []),
+    ];
 
-        for (const verb of [
-            'create',
-            'update',
-            'delete',
-            ...(resource.removeAll ? (['delete-all'] as const) : []),
-        ] as const) {
-            const schema =
-                verb === 'create'
-                    ? createSchema
-                    : verb === 'update'
-                      ? updateSchema
-                      : verb === 'delete'
-                        ? z.object({ id: idSchema })
-                        : empty;
+    return verbs.map((verb) => ({
+        ...base,
+        id: `content.${kind}.${verb}`,
+        need: verb === 'delete-all' ? NEED.writeAll : NEED.write,
+        input: schemas[verb],
+        effect: 'write',
+        confirmation: verb.startsWith('delete') ? 'always' : 'standard',
+        prepare: async (caller, input) =>
+            ports.guard(caller.actor.campaignId, () =>
+                prepareWrite(scope, ports, verb, caller, input)
+            ),
+        execute: async (ctx, input) =>
+            withContentEffects(ctx, resource.invalidates, () =>
+                executeWrite(scope, verb, ctx.caller, input)
+            ),
+    }));
+}
 
-            const action: AssistantWriteAction = {
-                ...base,
-                id: `content.${kind}.${verb}`,
-                need: verb === 'delete-all' ? NEED.writeAll : NEED.write,
-                input: schema,
-                effect: 'write',
-                confirmation: verb.startsWith('delete') ? 'always' : 'standard',
-                prepare: async (caller, input) =>
-                    guard(
-                        caller.actor.campaignId,
-                        async (): Promise<ActionPreview> => {
-                            const value = input as {
-                                id?: string;
-                                data?: unknown;
-                                patch?: unknown;
-                            };
+export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
+    const resources = deps.resources ?? CONTENT_RESOURCES;
 
-                            const t = await getTranslator(
-                                caller.locale,
-                                'assistant'
-                            );
+    const ports = resolvePorts(deps);
 
-                            const before = value.id
-                                ? await found(caller, value.id)
-                                : null;
+    const actions: AssistantActionDef[] = [];
 
-                            const body =
-                                verb === 'create' || verb === 'update'
-                                    ? validatedBody(
-                                          resource,
-                                          value.data ?? value.patch,
-                                          verb === 'update'
-                                      )
-                                    : null;
+    for (const [kind, resource] of Object.entries(resources)) {
+        if (!resource) continue;
 
-                            const state = await snapshot(caller.actor);
+        const scope = createScope(kind, resource);
 
-                            const targets = [
-                                target(
-                                    value.id ??
-                                        (verb === 'create' ? 'new' : 'all'),
-                                    before ?? body ?? undefined,
-                                    t(`contentKinds.${kind}`)
-                                ),
-                            ];
-
-                            const changes = body
-                                ? Object.entries(body).map(([path, after]) => ({
-                                      target: targets[0],
-                                      path,
-                                      before: jsonContent(before?.[path]),
-                                      after: jsonContent(after),
-                                  }))
-                                : [
-                                      {
-                                          target: targets[0],
-                                          path: '$record',
-                                          before: jsonContent(before ?? state),
-                                          after: null,
-                                      },
-                                  ];
-
-                            const shown = await preview(
-                                caller.actor,
-                                state,
-                                kind,
-                                value.id,
-                                body
-                            );
-
-                            const dependencies = contentDependencies(
-                                shown,
-                                kind,
-                                value.id,
-                                body
-                            );
-
-                            changes.push({
-                                target: targets[0],
-                                path: '$dependencies',
-                                before: jsonContent(dependencies),
-                                after: jsonContent(dependencies),
-                            });
-
-                            if (verb.startsWith('delete')) {
-                                const ids = value.id
-                                    ? [value.id]
-                                    : contentIds(shown, kind);
-
-                                changes.push(
-                                    ...contentDeleteCascades(shown, kind, ids)
-                                );
-                            }
-
-                            const summary = t('summary.content', {
-                                label: t(`contentKinds.${kind}`),
-                                verb,
-                            });
-
-                            return {
-                                summary,
-                                targets,
-                                changes,
-                                warnings: verb.startsWith('delete')
-                                    ? [t('warnings.contentCascades')]
-                                    : [],
-                                effects: [
-                                    {
-                                        kind:
-                                            verb === 'create'
-                                                ? 'create'
-                                                : verb === 'update'
-                                                  ? 'update'
-                                                  : 'delete',
-                                        targets,
-                                        description: summary,
-                                    },
-                                ],
-                                preconditions: {
-                                    snapshot: snapshotHash(state),
-                                    before: snapshotHash(before),
-                                    body: jsonContent(body),
-                                },
-                            };
-                        }
-                    ),
-                execute: async (ctx, input) =>
-                    withContentEffects(ctx, resource.invalidates, async () => {
-                        const value = input as {
-                            id?: string;
-                            data?: unknown;
-                            patch?: unknown;
-                        };
-
-                        if (verb === 'create') {
-                            const created = (await createContent(
-                                resource,
-                                ctx.caller.actor,
-                                validatedBody(resource, value.data, false)
-                            )) as Record<string, unknown>;
-
-                            return contentResult(created, [
-                                target(String(created.id), created),
-                            ]);
-                        }
-
-                        if (verb === 'update')
-                            return contentResult(
-                                await updateContent(
-                                    resource,
-                                    ctx.caller.actor,
-                                    value.id!,
-                                    validatedBody(resource, value.patch, true)
-                                ),
-                                [target(value.id!)]
-                            );
-
-                        if (verb === 'delete-all')
-                            return contentResult(
-                                {
-                                    deleted: await removeAllContent(
-                                        resource,
-                                        ctx.caller.actor
-                                    ),
-                                },
-                                [target('all')]
-                            );
-
-                        await removeContent(
-                            resource,
-                            ctx.caller.actor,
-                            value.id!
-                        );
-
-                        return contentResult({ ok: true }, [target(value.id!)]);
-                    }),
-            };
-
-            actions.push(action);
-        }
+        actions.push(...readActions(scope), ...writeActions(scope, ports));
     }
 
     if (!deps.resources)
