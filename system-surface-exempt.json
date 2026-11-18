@@ -6,7 +6,7 @@
     "lib/ai/tools/party.ts": 1,
     "lib/constants/import-aliases.ts": 2,
     "lib/hooks/battle/mock-participants.ts": 1,
-    "lib/hooks/battle/useAttackWizard.ts": 1,
+    "lib/hooks/battle/useAttackActions.ts": 1,
     "lib/hooks/battle/useBattleRules.ts": 1,
     "lib/hooks/battle/useLegendaryAction.ts": 1,
     "lib/schemas/units.ts": 2,
