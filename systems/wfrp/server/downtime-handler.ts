@@ -214,6 +214,128 @@ export async function setDowntime(
     });
 }
 
+type Campaign = CampaignAccessResult['campaign'];
+
+type Planned = ReturnType<typeof planPeriod>;
+
+type HeroRow = Awaited<ReturnType<typeof loadActiveHeroes>>['rows'][number];
+
+type Locked = Awaited<ReturnType<typeof lockCharacters>>;
+
+async function loadCareerStatuses(campaignId: string, rows: HeroRow[]) {
+    const careerIds = [
+        ...new Set(
+            rows.flatMap((c) => readCharacteristics(c).career?.careerId ?? [])
+        ),
+    ];
+
+    const careers = careerIds.length
+        ? await prisma.career.findMany({
+              where: { id: { in: careerIds }, campaignId },
+          })
+        : [];
+
+    const careerById = new Map(careers.map((row) => [row.id, row]));
+
+    return (c: Hero) => {
+        const state = c.characteristics.career;
+
+        const row = state && careerById.get(state.careerId);
+
+        return row
+            ? toCareerData(row).tiers[state.tier - 1]?.status
+            : undefined;
+    };
+}
+
+function periodHeroes(
+    rows: HeroRow[],
+    locked: Locked,
+    campaign: Campaign,
+    statusOf: (c: Hero) => PeriodHero['status']
+): PeriodHero[] {
+    return rows.map((row) => {
+        const fresh = locked.get(row.id);
+
+        const hero: Hero = {
+            id: row.id,
+            resources: fresh?.resources ?? {},
+            characteristics: readCharacteristics(fresh ?? row),
+        };
+
+        return {
+            ...hero,
+            maxHp: characterBaseHp(row, {
+                rules: campaign.rules,
+                characteristics: hero.characteristics,
+            }).total,
+            status: statusOf(hero),
+        };
+    });
+}
+
+async function gainPeriodIncomes(
+    tx: Tx,
+    campaignId: string,
+    planned: Planned
+): Promise<Income[]> {
+    const incomes: Income[] = [];
+
+    if (!planned.some((p) => p.coins)) return incomes;
+
+    await lockCampaignArtifacts(tx, campaignId);
+
+    for (const p of planned) {
+        if (!p.coins) continue;
+
+        const result = applyStashAction(
+            await loadStashState(tx, p.id),
+            { action: 'gain', amount: p.coins.amount, coin: p.coins.coin },
+            { newItemId: randomUUID() }
+        );
+
+        if (!result.ok) throw new ContentError(API_ERRORS.MONEY_OVERFLOW, 409);
+
+        incomes.push({ id: p.id, state: result.state, log: result.log });
+    }
+
+    return incomes;
+}
+
+async function persistPeriod(
+    tx: Tx,
+    access: CampaignAccessResult,
+    periodId: string,
+    days: number,
+    planned: Planned,
+    incomes: Income[]
+) {
+    const campaignId = access.campaign.id;
+
+    if (incomes.length)
+        await saveIncomes(tx, campaignId, access.userId, incomes);
+
+    for (const p of planned)
+        await tx.character.update({
+            where: { id: p.id },
+            data: {
+                resources: p.resources as Prisma.InputJsonValue,
+                characteristics: characteristicsJson(p.characteristics),
+            },
+        });
+
+    await writeCharacterLog(
+        tx,
+        planned.map((p) => ({
+            campaignId,
+            characterId: p.id,
+            actorUserId: access.userId,
+            kind: CharacterLogKind.DOWNTIME,
+            data: { periodId, days, summary: p.summary },
+        }))
+    );
+}
+
 export async function passPeriod(
     access: CampaignAccessResult,
     input: DowntimePeriodInput
@@ -230,56 +352,15 @@ export async function passPeriod(
 
     const { ids, rows } = await loadActiveHeroes(access, input.characterIds);
 
-    const careerIds = [
-        ...new Set(
-            rows.flatMap((c) => readCharacteristics(c).career?.careerId ?? [])
-        ),
-    ];
-
-    const careers = careerIds.length
-        ? await prisma.career.findMany({
-              where: { id: { in: careerIds }, campaignId: campaign.id },
-          })
-        : [];
-
-    const careerById = new Map(careers.map((row) => [row.id, row]));
-
-    const statusOf = (c: Hero) => {
-        const state = c.characteristics.career;
-
-        const row = state && careerById.get(state.careerId);
-
-        return row
-            ? toCareerData(row).tiers[state.tier - 1]?.status
-            : undefined;
-    };
+    const statusOf = await loadCareerStatuses(campaign.id, rows);
 
     const periodId = randomUUID();
 
     return prisma.$transaction(async (tx) => {
         const locked = await lockCharacters(tx, ids);
 
-        const heroes: PeriodHero[] = rows.map((row) => {
-            const fresh = locked.get(row.id);
-
-            const hero: Hero = {
-                id: row.id,
-                resources: fresh?.resources ?? {},
-                characteristics: readCharacteristics(fresh ?? row),
-            };
-
-            return {
-                ...hero,
-                maxHp: characterBaseHp(row, {
-                    rules: campaign.rules,
-                    characteristics: hero.characteristics,
-                }).total,
-                status: statusOf(hero),
-            };
-        });
-
         const planned = system.planPeriod({
-            heroes,
+            heroes: periodHeroes(rows, locked, campaign, statusOf),
             days: input.days,
             rules: campaign.rules,
             rng: Math.random,
@@ -287,57 +368,9 @@ export async function passPeriod(
             now: new Date().toISOString(),
         });
 
-        const incomes: Income[] = [];
+        const incomes = await gainPeriodIncomes(tx, campaign.id, planned);
 
-        if (planned.some((p) => p.coins)) {
-            await lockCampaignArtifacts(tx, campaign.id);
-
-            for (const p of planned) {
-                if (!p.coins) continue;
-
-                const result = applyStashAction(
-                    await loadStashState(tx, p.id),
-                    {
-                        action: 'gain',
-                        amount: p.coins.amount,
-                        coin: p.coins.coin,
-                    },
-                    { newItemId: randomUUID() }
-                );
-
-                if (!result.ok)
-                    throw new ContentError(API_ERRORS.MONEY_OVERFLOW, 409);
-
-                incomes.push({
-                    id: p.id,
-                    state: result.state,
-                    log: result.log,
-                });
-            }
-        }
-
-        if (incomes.length)
-            await saveIncomes(tx, campaign.id, access.userId, incomes);
-
-        for (const p of planned)
-            await tx.character.update({
-                where: { id: p.id },
-                data: {
-                    resources: p.resources as Prisma.InputJsonValue,
-                    characteristics: characteristicsJson(p.characteristics),
-                },
-            });
-
-        await writeCharacterLog(
-            tx,
-            planned.map((p) => ({
-                campaignId: campaign.id,
-                characterId: p.id,
-                actorUserId: access.userId,
-                kind: CharacterLogKind.DOWNTIME,
-                data: { periodId, days: input.days, summary: p.summary },
-            }))
-        );
+        await persistPeriod(tx, access, periodId, input.days, planned, incomes);
 
         return {
             periodId,
@@ -349,6 +382,128 @@ export async function passPeriod(
             })),
         };
     });
+}
+
+function checkUndoable(locked: Locked, ids: string[], periodId: string) {
+    const stale = () => new ContentError(API_ERRORS.DOWNTIME_STALE, 409);
+
+    return ids.map((id) => {
+        const hero = locked.get(id);
+
+        const d = hero && readCharacteristics(hero).downtime;
+
+        const snapshot = d?.lastPeriod;
+
+        if (!hero || !d || !snapshot || snapshot.id !== periodId) throw stale();
+
+        const sameIds =
+            JSON.stringify([...d.ailments.map((a) => a.id)].sort()) ===
+            JSON.stringify([...snapshot.after.ailmentIds].sort());
+
+        if (
+            hero.resources.hp !== snapshot.after.hp ||
+            !sameIds ||
+            JSON.stringify(d.training) !==
+                JSON.stringify(snapshot.after.training)
+        )
+            throw stale();
+
+        return { id, hero, d, snapshot };
+    });
+}
+
+type Checked = ReturnType<typeof checkUndoable>;
+
+async function refundPeriodIncomes(
+    tx: Tx,
+    campaign: Campaign,
+    checked: Checked
+): Promise<Income[]> {
+    const incomes: Income[] = [];
+
+    if (!checked.some((c) => c.snapshot.coins)) return incomes;
+
+    const coinValue = ruleSystemOf(campaign.rules).currency?.value;
+
+    await lockCampaignArtifacts(tx, campaign.id);
+
+    for (const { id, snapshot } of checked) {
+        if (!snapshot.coins) continue;
+
+        const result = applyStashAction(
+            await loadStashState(tx, id),
+            {
+                action: 'spend',
+                amount: snapshot.coins.amount,
+                coin: snapshot.coins.coin,
+                note: '',
+            },
+            { newItemId: randomUUID(), coinValue }
+        );
+
+        if (!result.ok) throw new ContentError(API_ERRORS.DOWNTIME_STALE, 409);
+
+        incomes.push({ id, state: result.state, log: result.log });
+    }
+
+    return incomes;
+}
+
+function restoredHeroes(checked: Checked) {
+    return checked.map(({ id, hero, d, snapshot }) => {
+        const { before } = snapshot;
+
+        const resources =
+            before.hp === undefined
+                ? withoutHp(hero.resources)
+                : { ...hero.resources, hp: before.hp };
+
+        const downtime: DowntimeState = {
+            ...(d.endeavour ? { endeavour: d.endeavour } : {}),
+            ailments: before.ailments,
+            ...(before.training ? { training: before.training } : {}),
+        };
+
+        return {
+            id,
+            resources,
+            downtime,
+            characteristics: { ...readCharacteristics(hero), downtime },
+        };
+    });
+}
+
+async function persistUndo(
+    tx: Tx,
+    access: CampaignAccessResult,
+    periodId: string,
+    restored: ReturnType<typeof restoredHeroes>,
+    incomes: Income[]
+) {
+    const campaignId = access.campaign.id;
+
+    if (incomes.length)
+        await saveIncomes(tx, campaignId, access.userId, incomes);
+
+    for (const r of restored)
+        await tx.character.update({
+            where: { id: r.id },
+            data: {
+                resources: r.resources as Prisma.InputJsonValue,
+                characteristics: characteristicsJson(r.characteristics),
+            },
+        });
+
+    await writeCharacterLog(
+        tx,
+        restored.map((r) => ({
+            campaignId,
+            characterId: r.id,
+            actorUserId: access.userId,
+            kind: CharacterLogKind.DOWNTIME,
+            data: { periodId, undo: true },
+        }))
+    );
 }
 
 export async function undoPeriod(
@@ -363,107 +518,16 @@ export async function undoPeriod(
 
     const { ids } = await loadActiveHeroes(access, input.characterIds);
 
-    const stale = () => new ContentError(API_ERRORS.DOWNTIME_STALE, 409);
-
     return prisma.$transaction(async (tx) => {
         const locked = await lockCharacters(tx, ids);
 
-        const coinValue = ruleSystemOf(campaign.rules).currency?.value;
+        const checked = checkUndoable(locked, ids, periodId);
 
-        const checked = ids.map((id) => {
-            const hero = locked.get(id);
+        const incomes = await refundPeriodIncomes(tx, campaign, checked);
 
-            const d = hero && readCharacteristics(hero).downtime;
+        const restored = restoredHeroes(checked);
 
-            const snapshot = d?.lastPeriod;
-
-            if (!hero || !d || !snapshot || snapshot.id !== periodId)
-                throw stale();
-
-            const sameIds =
-                JSON.stringify([...d.ailments.map((a) => a.id)].sort()) ===
-                JSON.stringify([...snapshot.after.ailmentIds].sort());
-
-            if (
-                hero.resources.hp !== snapshot.after.hp ||
-                !sameIds ||
-                JSON.stringify(d.training) !==
-                    JSON.stringify(snapshot.after.training)
-            )
-                throw stale();
-
-            return { id, hero, d, snapshot };
-        });
-
-        const incomes: Income[] = [];
-
-        if (checked.some((c) => c.snapshot.coins)) {
-            await lockCampaignArtifacts(tx, campaign.id);
-
-            for (const { id, snapshot } of checked) {
-                if (!snapshot.coins) continue;
-
-                const result = applyStashAction(
-                    await loadStashState(tx, id),
-                    {
-                        action: 'spend',
-                        amount: snapshot.coins.amount,
-                        coin: snapshot.coins.coin,
-                        note: '',
-                    },
-                    { newItemId: randomUUID(), coinValue }
-                );
-
-                if (!result.ok) throw stale();
-
-                incomes.push({ id, state: result.state, log: result.log });
-            }
-        }
-
-        if (incomes.length)
-            await saveIncomes(tx, campaign.id, access.userId, incomes);
-
-        const restored = checked.map(({ id, hero, d, snapshot }) => {
-            const { before } = snapshot;
-
-            const resources =
-                before.hp === undefined
-                    ? withoutHp(hero.resources)
-                    : { ...hero.resources, hp: before.hp };
-
-            const downtime: DowntimeState = {
-                ...(d.endeavour ? { endeavour: d.endeavour } : {}),
-                ailments: before.ailments,
-                ...(before.training ? { training: before.training } : {}),
-            };
-
-            return {
-                id,
-                resources,
-                downtime,
-                characteristics: { ...readCharacteristics(hero), downtime },
-            };
-        });
-
-        for (const r of restored)
-            await tx.character.update({
-                where: { id: r.id },
-                data: {
-                    resources: r.resources as Prisma.InputJsonValue,
-                    characteristics: characteristicsJson(r.characteristics),
-                },
-            });
-
-        await writeCharacterLog(
-            tx,
-            restored.map((r) => ({
-                campaignId: campaign.id,
-                characterId: r.id,
-                actorUserId: access.userId,
-                kind: CharacterLogKind.DOWNTIME,
-                data: { periodId, undo: true },
-            }))
-        );
+        await persistUndo(tx, access, periodId, restored, incomes);
 
         return {
             periodId,

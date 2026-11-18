@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { spellLevelRoman } from '@/lib/constants/spells';
-import { useSpellMechanics } from '@/lib/hooks/spells/useSpellMechanics';
+import { useSpellMechanics } from '@/lib/hooks/spells';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { getSpellGroupIcon } from '@/lib/utils/spells/spell-icons';
 import type { Spell } from '@/types/spells';

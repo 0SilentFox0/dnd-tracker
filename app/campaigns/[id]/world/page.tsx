@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { WorldPageClient } from './page-client';
 
 import { ErrorState } from '@/components/common/states';
-import { worldKeys } from '@/lib/hooks/world/keys';
+import { worldKeys } from '@/lib/hooks/world';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';

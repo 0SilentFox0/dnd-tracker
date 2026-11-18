@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 
-import { CampaignKind, CampaignStatus } from '@/lib/constants/campaigns';
-import { prisma } from '@/lib/db';
+import { listActiveSessions } from '@/lib/server/campaigns/active-sessions';
 import { requireAuth } from '@/lib/utils/api/api-auth';
 import { handleApiError } from '@/lib/utils/api/error-handler';
-import type { ActiveSessions } from '@/types/campaigns';
 
 /**
  * GET /api/campaigns/active-battles
@@ -24,35 +22,7 @@ export async function GET(request: Request) {
         const withShows =
             new URL(request.url).searchParams.get('withShows') === '1';
 
-        const visibleCampaigns = {
-            OR: [
-                { members: { some: { userId } } },
-                { kind: CampaignKind.DEMO },
-            ],
-        };
-
-        const [battles, shows] = await Promise.all([
-            prisma.battleScene.findMany({
-                where: {
-                    campaign: visibleCampaigns,
-                    status: CampaignStatus.ACTIVE,
-                },
-                select: { id: true, campaignId: true },
-            }),
-            withShows
-                ? prisma.campaignShow.findMany({
-                      where: {
-                          deckId: { not: null },
-                          campaign: visibleCampaigns,
-                      },
-                      select: { campaignId: true },
-                  })
-                : null,
-        ]);
-
-        return NextResponse.json(
-            shows ? ({ battles, shows } satisfies ActiveSessions) : battles
-        );
+        return NextResponse.json(await listActiveSessions(userId, withShows));
     } catch (error) {
         return handleApiError(error, { action: 'list active battles' });
     }

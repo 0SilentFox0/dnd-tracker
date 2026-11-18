@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { prisma } from '@/lib/db';
 import { updateCampaignSchema } from '@/lib/schemas';
 import {
     deleteCampaign,
     updateCampaignSettings,
 } from '@/lib/server/campaigns/action-service';
-import {
-    CAMPAIGN_INCLUDE,
-    CAMPAIGN_OMIT,
-} from '@/lib/server/campaigns/create-campaign';
+import { readCampaign } from '@/lib/server/campaigns/read-campaign';
 import { sessionDmActor } from '@/lib/utils/api/actor';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
@@ -32,13 +28,7 @@ export async function GET(
             return accessResult;
         }
 
-        const campaign = await prisma.campaign.findUnique({
-            where: { id },
-            include: CAMPAIGN_INCLUDE,
-            omit: accessResult.isDM
-                ? CAMPAIGN_OMIT
-                : { ...CAMPAIGN_OMIT, inviteCode: true },
-        });
+        const campaign = await readCampaign(id, accessResult.isDM);
 
         if (!campaign) {
             return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);

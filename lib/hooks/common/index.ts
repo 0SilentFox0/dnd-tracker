@@ -1,5 +1,7 @@
+export type { ConfirmOptions } from './confirm-context';
 export { ConfirmContext, type ConfirmFn } from './confirm-context';
 export { prefersReducedMotion } from './media-query';
+export { shortcutBlocked } from './shortcut-guard';
 export {
     createSessionFlag,
     createStorageFlag,
@@ -30,7 +32,7 @@ export { useFileImport } from './useFileImport';
 export { useFlip } from './useFlip';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
-export { DESKTOP_QUERY } from './useIsMobile';
+export { DESKTOP_QUERY, useIsMobile } from './useIsMobile';
 export { useLibraryList } from './useLibraryList';
 export { useMediaQuery } from './useMediaQuery';
 export { useNavigateFresh } from './useNavigateFresh';

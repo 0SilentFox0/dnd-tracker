@@ -3,13 +3,13 @@
 import { useCallback, useMemo } from 'react';
 
 import { useSearch } from '@/lib/hooks/common';
-import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
+import { useMainSkills } from '@/lib/hooks/skills';
 import {
     useDeleteAllSkills,
     useDeleteSkill,
     useDuplicateSkill,
     useSkills,
-} from '@/lib/hooks/skills/useSkills';
+} from '@/lib/hooks/skills';
 import {
     convertGroupedSkillsToArray,
     groupSkillsByMainSkill,

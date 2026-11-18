@@ -35,8 +35,8 @@ import {
     useAiThreadMessages,
     useAiThreads,
 } from '@/lib/hooks/ai';
-import { useAssistantContext } from '@/lib/hooks/ai/useAssistantContext';
-import { useAssistantEffects } from '@/lib/hooks/ai/useAssistantEffects';
+import { useAssistantContext } from '@/lib/hooks/ai';
+import { useAssistantEffects } from '@/lib/hooks/ai';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { focusLabelOf } from '@/lib/utils/ai/focus';

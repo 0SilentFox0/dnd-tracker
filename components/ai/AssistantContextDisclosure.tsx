@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { AI_LIMITS } from '@/lib/constants/ai';
-import type { useAssistantContext } from '@/lib/hooks/ai/useAssistantContext';
+import type { useAssistantContext } from '@/lib/hooks/ai';
 
 type Context = ReturnType<typeof useAssistantContext>;
 

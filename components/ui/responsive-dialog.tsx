@@ -14,7 +14,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
-import { useIsMobile } from '@/lib/hooks/common/useIsMobile';
+import { useIsMobile } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 
 const SIZE_CLASS = {

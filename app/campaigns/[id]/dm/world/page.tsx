@@ -1,7 +1,7 @@
 import { WorldEditorPageClient } from './page-client';
 
 import { prisma } from '@/lib/db';
-import { worldKeys } from '@/lib/hooks/world/keys';
+import { worldKeys } from '@/lib/hooks/world';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 import {

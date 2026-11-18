@@ -10,7 +10,7 @@ import { TravelPanel } from '@/components/world/travel/TravelPanel';
 import { WorldCrumbs } from '@/components/world/WorldCrumbs';
 import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
-import { DESKTOP_QUERY } from '@/lib/hooks/common/useIsMobile';
+import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import {
     type TravelMoved,
     useMoveTarget,

@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 
 import { getSessionUserId } from '@/lib/auth';
-import { prisma } from '@/lib/db';
 import { readLocaleCookie, setLocaleCookie } from '@/lib/i18n/cookie';
 import { localeSchema } from '@/lib/schemas/locale';
-import { syncUserLocale } from '@/lib/server/users/locale';
+import { saveUserPreferences, syncUserLocale } from '@/lib/server/users/locale';
 import { getProfileTimeZone } from '@/lib/server/users/time-zone';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';
 import { handleApiError } from '@/lib/utils/api/error-handler';
@@ -43,10 +42,7 @@ export async function PUT(req: Request) {
         const userId = await getSessionUserId();
 
         if (userId) {
-            await prisma.user.updateMany({
-                where: { id: userId },
-                data: { locale: body.locale, timeZone: body.timeZone },
-            });
+            await saveUserPreferences(userId, body);
         }
 
         const res = NextResponse.json({

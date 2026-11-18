@@ -8,7 +8,7 @@ import { FieldErrors } from './FieldErrors';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
-import { useRecipeText } from '@/lib/hooks/abilities/useRecipeText';
+import { useRecipeText } from '@/lib/hooks/abilities';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type {
     ParamDef,

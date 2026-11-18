@@ -1,6 +1,6 @@
 import { DMRacesPageClient } from './page-client';
 
-import { raceKeys } from '@/lib/hooks/races/keys';
+import { raceKeys } from '@/lib/hooks/races';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { readRaces } from '@/lib/server/races/read-races';

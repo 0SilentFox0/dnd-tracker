@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { characterKeys, characterWriteKeys } from '@/lib/hooks/characters/keys';
+import { characterKeys, characterWriteKeys } from '@/lib/hooks/characters';
 import { useCrudMutation, useOptionalNotify } from '@/lib/hooks/common';
 import {
     postCorruptionGrant,

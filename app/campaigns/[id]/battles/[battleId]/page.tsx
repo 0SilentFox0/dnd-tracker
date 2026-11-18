@@ -2,8 +2,8 @@ import { BattlePageClient } from './page-client';
 
 import { PlayerViewGuard } from '@/components/common/PlayerViewGuard';
 import { getSessionUserId } from '@/lib/auth';
-import { battleMapKeys } from '@/lib/hooks/battle-maps/keys';
-import { battleQueryKey } from '@/lib/hooks/battles/keys';
+import { battleMapKeys } from '@/lib/hooks/battle-maps';
+import { battleQueryKey } from '@/lib/hooks/battles';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { getMap } from '@/lib/server/battle-maps/library-service';
 import { getTileChunks } from '@/lib/server/battle-maps/tiles-service';

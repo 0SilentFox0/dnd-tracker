@@ -2,9 +2,9 @@
 
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { useRaces } from '@/lib/hooks/races';
-import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
-import { useSkills } from '@/lib/hooks/skills/useSkills';
-import { useSaveSkillTree, useSkillTrees } from '@/lib/hooks/skills/useSkillTrees';
+import { useMainSkills } from '@/lib/hooks/skills';
+import { useSkills } from '@/lib/hooks/skills';
+import { useSaveSkillTree, useSkillTrees } from '@/lib/hooks/skills';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { useTranslator } from '@/lib/i18n/use-translator';

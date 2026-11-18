@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { useNavigateFresh } from '@/lib/hooks/common';
-import { useUpdateMainSkill } from '@/lib/hooks/skills/useMainSkills';
+import { useUpdateMainSkill } from '@/lib/hooks/skills';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { MainSkill, MainSkillFormData } from '@/types/main-skills';

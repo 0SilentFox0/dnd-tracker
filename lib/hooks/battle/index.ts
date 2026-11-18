@@ -3,6 +3,7 @@ export { fireFxImpact, onFxImpact } from './fx-impact';
 export * from './modes';
 export { isSystemActionPending } from './system-action';
 export type { TurnGateControls } from './types';
+export type { BattleSceneValue } from './types';
 export { useAbilityMapAim } from './useAbilityMapAim';
 export { useAbilityPicker } from './useAbilityPicker';
 export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
@@ -11,6 +12,10 @@ export { useAttackWizard } from './useAttackWizard';
 export { type AuraZoneStep, useAuraZones } from './useAuraZones';
 export { useBattleAudioHost } from './useBattleAudioHost';
 export { useBattleFxQueue } from './useBattleFxQueue';
+export {
+    type BattleMapPlaygroundMode,
+    useBattleMapPlayground,
+} from './useBattleMapPlayground';
 export { type BattleMapScene, useBattleMapScene } from './useBattleMapScene';
 export {
     type BattlePageDialogs,
@@ -44,6 +49,7 @@ export {
     useDownedHeroPrompt,
 } from './useDownedHeroPrompt';
 export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
+export { useFogMemory } from './useFogMemory';
 export { useFollowTurnSetting } from './useFollowTurnSetting';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
@@ -51,6 +57,7 @@ export { useGearSwap } from './useGearSwap';
 export { useGridWindow } from './useGridWindow';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
+export type { IngredientLine } from './useIngredientPlan';
 export { useInitiativeDrag } from './useInitiativeDrag';
 export { useInitiativeOrder, useTrackReorder } from './useInitiativeOrder';
 export { type LegendaryChoice, useLegendaryAction } from './useLegendaryAction';
@@ -101,6 +108,7 @@ export {
     useSpellBookPrefetch,
 } from './useSpellBook';
 export { type FxRunner, useSpellFxPlayback } from './useSpellFxPlayback';
+export { useSpellMapTargeting } from './useSpellMapTargeting';
 export { useStrokePaint } from './useStrokePaint';
 export { type GlideFrame, useTokenGlide } from './useTokenGlide';
 export { useTurnCountdown, useTurnTimer } from './useTurnTimer';

@@ -1,6 +1,6 @@
 import { DMArtifactsPageClient } from './page-client';
 
-import { artifactKeys } from '@/lib/hooks/artifacts/keys';
+import { artifactKeys } from '@/lib/hooks/artifacts';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { readArtifacts } from '@/lib/server/artifacts/read-artifacts';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';

@@ -16,7 +16,7 @@ import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist
 import { SystemGate } from '@/components/systems/SystemGate';
 import { dashboardHiddenKeys } from '@/lib/constants/campaign-dashboard';
 import { CampaignKind } from '@/lib/constants/campaigns';
-import { onboardingKeys } from '@/lib/hooks/onboarding/keys';
+import { onboardingKeys } from '@/lib/hooks/onboarding';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';

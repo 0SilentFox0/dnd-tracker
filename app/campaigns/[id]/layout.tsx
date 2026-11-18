@@ -5,7 +5,7 @@ import { NotificationsHost } from '@/components/notifications/NotificationsHost'
 import { DemoTourCoordinator } from '@/components/onboarding/DemoTourCoordinator';
 import { getSessionUserId } from '@/lib/auth';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
-import { campaignKeys } from '@/lib/hooks/campaigns/keys';
+import { campaignKeys } from '@/lib/hooks/campaigns';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { systemScope } from '@/lib/i18n/system-scope';

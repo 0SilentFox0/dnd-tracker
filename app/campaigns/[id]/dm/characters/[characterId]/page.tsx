@@ -1,6 +1,6 @@
 import { CharacterProfile } from '@/components/character-profile';
-import { campaignKeys } from '@/lib/hooks/campaigns/keys';
-import { characterKeys } from '@/lib/hooks/characters/keys';
+import { campaignKeys } from '@/lib/hooks/campaigns';
+import { characterKeys } from '@/lib/hooks/characters';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { systemScope } from '@/lib/i18n/system-scope';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';

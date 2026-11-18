@@ -4,16 +4,12 @@ import '@/lib/server/systems/registry';
 import { campaignListKey } from '@/lib/cache/campaign-list';
 import { kvGet, kvSet } from '@/lib/cache/kv';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { CampaignKind } from '@/lib/constants/campaigns';
-import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { createCampaignSchema } from '@/lib/schemas';
-import {
-    CAMPAIGN_OMIT,
-    createCampaignForUser,
-} from '@/lib/server/campaigns/create-campaign';
+import { createCampaignForUser } from '@/lib/server/campaigns/create-campaign';
+import { listUserCampaigns } from '@/lib/server/campaigns/read-campaign';
 import { bundleErrorResponse } from '@/lib/server/templates/bundle-error';
-import { ensureDbUser, PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
+import { ensureDbUser } from '@/lib/server/users/db-user';
 import { requireAuth, requireAuthUser } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';
@@ -79,17 +75,7 @@ export async function GET() {
             });
         }
 
-        const campaigns = await prisma.campaign.findMany({
-            where: {
-                kind: CampaignKind.CAMPAIGN,
-                members: { some: { userId } },
-            },
-            include: {
-                members: { include: { user: { select: PUBLIC_USER_SELECT } } },
-            },
-            omit: CAMPAIGN_OMIT,
-            orderBy: { updatedAt: 'desc' },
-        });
+        const campaigns = await listUserCampaigns(userId);
 
         await kvSet(cacheKey, campaigns);
 

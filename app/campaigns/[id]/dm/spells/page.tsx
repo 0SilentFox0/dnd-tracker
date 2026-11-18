@@ -1,6 +1,6 @@
 import { DMSpellsPageClient } from './page-client';
 
-import { spellKeys } from '@/lib/hooks/spells/keys';
+import { spellKeys } from '@/lib/hooks/spells';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { readSpells } from '@/lib/server/spells/read-spells';

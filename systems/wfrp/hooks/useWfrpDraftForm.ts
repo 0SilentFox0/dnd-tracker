@@ -15,10 +15,10 @@ import { useWfrpDraftSubmit } from './useWfrpDraftSubmit';
 import { useWfrpSpecies } from './useWfrpSpecies';
 
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import { useRollReveal } from '@/lib/hooks/characters/useRollReveal';
+import { useRollReveal } from '@/lib/hooks/characters';
 import { useFeats } from '@/lib/hooks/feats';
 import { useRaces } from '@/lib/hooks/races';
-import { useRuleSystem } from '@/lib/hooks/systems/useRuleSystem';
+import { useRuleSystem } from '@/lib/hooks/systems';
 import { cryptoRandom } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { WfrpDraftIdentityInput } from '@/systems/wfrp/api/types';

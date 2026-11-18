@@ -2,7 +2,7 @@ import type { ComponentType, ReactNode } from 'react';
 
 import type { SpellFormFieldsProps } from '@/components/spells/form/SpellFormBasicFields';
 import type { useAttackWizard, useSpellBook } from '@/lib/hooks/battle';
-import type { TurnGateControls } from '@/lib/hooks/battle/types';
+import type { TurnGateControls } from '@/lib/hooks/battle';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows';

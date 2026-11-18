@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { useMapCatalog } from '@/lib/hooks/battle-maps/useMapCatalog';
+import { useMapCatalog } from '@/lib/hooks/battle-maps';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 
 const EMPTY_ENTRIES: MapCatalogEntry[] = [];

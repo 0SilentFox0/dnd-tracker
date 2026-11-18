@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { AcquaintancesPageClient } from './page-client';
 
-import { acquaintanceKeys } from '@/lib/hooks/acquaintances/keys';
+import { acquaintanceKeys } from '@/lib/hooks/acquaintances';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { readAcquaintances } from '@/lib/server/acquaintances/store';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';

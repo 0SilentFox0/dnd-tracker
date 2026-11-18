@@ -1,3 +1,4 @@
+export { artifactSetKeys } from './keys';
 export { useArtifactsCatalog } from './useArtifactsCatalog';
 export {
     type ArtifactSetFormInitial,

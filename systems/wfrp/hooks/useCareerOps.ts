@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import { characterKeys } from '@/lib/hooks/characters/keys';
+import { characterKeys } from '@/lib/hooks/characters';
 import { useCrudMutation } from '@/lib/hooks/common';
 import {
     advanceCharacterCareer,

@@ -9,10 +9,10 @@ import {
     unlearnNodes,
 } from '@/lib/api/character-progression';
 import { ApiError } from '@/lib/api/client';
-import { battleKeys } from '@/lib/hooks/battles/keys';
-import { characterKeys } from '@/lib/hooks/characters/keys';
+import { battleKeys } from '@/lib/hooks/battles';
+import { characterKeys } from '@/lib/hooks/characters';
 import { useNotify, useSingleFlight } from '@/lib/hooks/common';
-import { skillKeys } from '@/lib/hooks/skills/keys';
+import { skillKeys } from '@/lib/hooks/skills';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
     BRANCH_MIN_LEVEL,
