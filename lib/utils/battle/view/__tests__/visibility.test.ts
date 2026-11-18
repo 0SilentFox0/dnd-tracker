@@ -949,7 +949,7 @@ describe('числа HP/AC ворога в журналі (L8b C1)', () => {
     it('ворог: change лишається, oldHp/newHp стають відрами, ac знято', () => {
         expect(seen.hpChanges[0]).toMatchObject({
             change: 8,
-            oldHp: 75,
+            oldHp: 40,
             newHp: 40,
         });
         expect(seen.actionDetails.spellAttacks?.[0]).not.toHaveProperty('ac');

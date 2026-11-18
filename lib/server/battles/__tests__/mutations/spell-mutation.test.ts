@@ -429,7 +429,11 @@ describe('spell mutation', () => {
             combatStats: { ...goblin.combatStats, currentHp: 30, maxHp: 50 },
         };
 
-        const row = { ...spellRow, dice: 2, damageBonus: 3 } as unknown as Spell;
+        const row = {
+            ...spellRow,
+            dice: 2,
+            damageBonus: 3,
+        } as unknown as Spell;
 
         const hp = async (isDM: boolean) =>
             (
@@ -705,7 +709,10 @@ describe('spell mutation', () => {
 
         await expect(
             mutation()(
-                { ...ctx, scene: { ...ctx.scene, sceneState: pendingSlot(panic) } },
+                {
+                    ...ctx,
+                    scene: { ...ctx.scene, sceneState: pendingSlot(panic) },
+                },
                 body() as never
             )
         ).rejects.toMatchObject({ code: 'action_used' });
@@ -933,10 +940,18 @@ describe('spell mutation', () => {
             expect(cells).toHaveLength(49);
             expect(cells).toContain('10:6');
             expect(cells).not.toContain('9:9');
+            const strip = (list: unknown[]) =>
+                (list as { participantId: string; change: number }[]).map(
+                    ({ participantId, change }) => ({ participantId, change })
+                );
+
+            // the preview goes to the player view: oldHp/newHp are health buckets there
             expect(
-                (preview.response?.battleAction as { hpChanges: unknown[] })
-                    .hpChanges
-            ).toEqual(cast.events[0].hpChanges);
+                strip(
+                    (preview.response?.battleAction as { hpChanges: unknown[] })
+                        .hpChanges
+                )
+            ).toEqual(strip(cast.events[0].hpChanges));
         });
 
         it('шаблон: цілі визначає сервер за точкою, обрані ігноруються', async () => {

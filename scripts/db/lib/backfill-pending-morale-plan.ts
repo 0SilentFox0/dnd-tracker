@@ -1,5 +1,8 @@
 import '@/lib/utils/rules/systems/registry';
-import { resetSceneState, upgradeSceneState } from '@/lib/utils/battle/scene-state';
+import {
+    resetSceneState,
+    upgradeSceneState,
+} from '@/lib/utils/battle/scene-state';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
@@ -18,9 +21,10 @@ export interface PendingMoraleChange {
     systemState: SystemSlot;
 }
 
-const RULES = defaultRulesFor({ key: FALLBACK_SYSTEM_KEY, modules: ['morale'] });
-
-const D20_SLOT_KEY = 'd20';
+const RULES = defaultRulesFor({
+    key: FALLBACK_SYSTEM_KEY,
+    modules: ['morale'],
+});
 
 const slotOf = (raw: unknown): SystemSlot | undefined =>
     isRecord(raw) && typeof raw.key === 'string'
@@ -28,12 +32,16 @@ const slotOf = (raw: unknown): SystemSlot | undefined =>
         : undefined;
 
 /** Effective pending state: a slot already on the new form wins over the legacy column */
-export function hasPendingMorale(column: unknown, systemState: unknown): boolean {
+export function hasPendingMorale(
+    column: unknown,
+    systemState: unknown
+): boolean {
     const slot = slotOf(systemState);
 
-    const effective = column === null
-        ? slot
-        : upgradeSceneState(RULES, slot, { pendingMoraleCheck: column });
+    const effective =
+        column === null
+            ? slot
+            : upgradeSceneState(RULES, slot, { pendingMoraleCheck: column });
 
     return !!effective && resetSceneState(RULES, effective) !== effective;
 }
@@ -52,11 +60,14 @@ export function planPendingMorale(rows: PendingMoraleRow[]): {
 
         const slot = slotOf(row.systemState);
 
-        const next = upgradeSceneState(RULES, slot, {
-            pendingMoraleCheck: row.pendingMoraleCheck,
-        });
+        const legacy = { pendingMoraleCheck: row.pendingMoraleCheck };
 
-        if (slot && slot.key !== D20_SLOT_KEY) {
+        const next = upgradeSceneState(RULES, slot, legacy);
+
+        // the key the composition itself writes; a slot of another system is never overwritten
+        const ownKey = upgradeSceneState(RULES, undefined, legacy)?.key;
+
+        if (slot && slot.key !== ownKey) {
             skipped.push(row.id);
 
             continue;
