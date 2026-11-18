@@ -3,12 +3,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useSaveSkillTree, useSkillTrees } from './useSkillTrees';
-
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { useRaces } from '@/lib/hooks/races';
 import { useCreateMainSkill, useMainSkills } from '@/lib/hooks/skills/useMainSkills';
 import { useSkills } from '@/lib/hooks/skills/useSkills';
+import { useSaveSkillTree, useSkillTrees } from '@/lib/hooks/skills/useSkillTrees';
 import type { RawTree } from '@/lib/utils/skills/progression';
 import { RACIAL_BRANCH_ID } from '@/lib/utils/skills/progression';
 import * as edit from '@/lib/utils/skills/progression';

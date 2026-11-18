@@ -1,5 +1,8 @@
 import { branchLevelNodeId, racialNodeId } from '@/lib/utils/skills/progression/ids';
-import { skillPoints } from '@/lib/utils/skills/progression/progress';
+import {
+    learnedInTree,
+    skillPoints,
+} from '@/lib/utils/skills/progression/progress';
 import { canLearn } from '@/lib/utils/skills/progression/rules';
 import type {
     BranchGrid,

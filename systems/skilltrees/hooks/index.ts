@@ -6,5 +6,4 @@ export { useProgressionActions } from './useProgressionActions';
 export { useSkillForm } from './useSkillForm';
 export { type SkillListGroup, useSkillsList } from './useSkillsList';
 export { useSkillTreeEditor } from './useSkillTreeEditor';
-export { useSaveSkillTree, useSkillTrees } from './useSkillTrees';
 export { useSkillTreeTransfer } from './useSkillTreeTransfer';

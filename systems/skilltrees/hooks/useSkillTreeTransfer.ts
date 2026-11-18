@@ -1,11 +1,10 @@
 'use client';
 
-import { useSaveSkillTree, useSkillTrees } from './useSkillTrees';
-
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { useRaces } from '@/lib/hooks/races';
 import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
 import { useSkills } from '@/lib/hooks/skills/useSkills';
+import { useSaveSkillTree, useSkillTrees } from '@/lib/hooks/skills/useSkillTrees';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { useTranslator } from '@/lib/i18n/use-translator';
