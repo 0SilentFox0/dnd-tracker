@@ -2,21 +2,16 @@
 
 import {
     type CSSProperties,
-    type KeyboardEvent,
-    type PointerEvent,
     type ReactNode,
-    useCallback,
-    useRef,
     useState,
 } from 'react';
 import Link from 'next/link';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { KeyRound } from 'lucide-react';
 
-import { AiComposer } from './AiComposer';
-import { AiMessageList } from './AiMessageList';
+import { ResizeHandle } from './AiResizeHandle';
+import { AiThreadChat, type RenderProposal } from './AiThreadChat';
 import { AiThreadHeader } from './AiThreadHeader';
-import { AssistantContextDisclosure } from './AssistantContextDisclosure';
 
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
@@ -27,26 +22,18 @@ import {
     LEGACY_THREAD_TITLE,
 } from '@/lib/constants/ai';
 import {
-    AI_PANEL_WIDTH,
-    useAiChat,
     useAiCredentials,
     useAiPanelWidth,
     useAiProposals,
-    useAiThreadMessages,
     useAiThreads,
 } from '@/lib/hooks/ai';
-import { useAssistantContext } from '@/lib/hooks/ai';
-import { useAssistantEffects } from '@/lib/hooks/ai';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { focusLabelOf } from '@/lib/utils/ai/focus';
-import type { AiChatMessage, AiFocus, AiThread } from '@/types/ai';
+import type { AiFocus } from '@/types/ai';
 import type { ScenarioPage } from '@/types/scenario';
 
-export type RenderProposal = (
-    proposalId: string,
-    helpers: { send?: (text: string) => void }
-) => ReactNode;
+export type { RenderProposal };
 
 interface AiPanelProps {
     campaignId: string;
@@ -61,180 +48,6 @@ interface AiPanelProps {
     campaignName?: string;
     embedded?: boolean;
     actions: { onClose: () => void };
-}
-
-interface ThreadChatProps {
-    campaignId: string;
-    thread: AiThread;
-    focus?: AiFocus;
-    focusLabel: string | null;
-    renderProposal?: RenderProposal;
-    actions: { onFinish: () => void; onClearFocus: () => void };
-}
-
-function AiThreadChat({
-    campaignId,
-    thread,
-    focus,
-    focusLabel,
-    renderProposal,
-    actions,
-}: ThreadChatProps) {
-    const { query, messages } = useAiThreadMessages(campaignId, thread.id);
-
-    if (query.isError)
-        return (
-            <p className="text-sm text-destructive">{query.error.message}</p>
-        );
-
-    if (!messages) return <LoadingState rows={2} />;
-
-    return (
-        <AiThreadChatBody
-            key={thread.id}
-            campaignId={campaignId}
-            thread={thread}
-            initialMessages={messages}
-            focus={focus}
-            focusLabel={focusLabel}
-            renderProposal={renderProposal}
-            actions={actions}
-        />
-    );
-}
-
-function AiThreadChatBody({
-    campaignId,
-    thread,
-    initialMessages,
-    focus,
-    focusLabel,
-    renderProposal,
-    actions,
-}: ThreadChatProps & { initialMessages: AiChatMessage[] }) {
-    const t = useTranslations('ai');
-
-    const format = useFormatter();
-
-    const getFocus = useCallback(() => focus, [focus]);
-
-    const context = useAssistantContext(
-        campaignId,
-        thread.id,
-        focus,
-        `${thread.provider}:${thread.model}`
-    );
-
-    const { consumeReceipt } = useAssistantEffects(campaignId);
-
-    const chat = useAiChat({
-        campaignId,
-        thread,
-        initialMessages,
-        getFocus,
-        getSessionContext: context.getSessionContext,
-        onReceipt: consumeReceipt,
-        onFinish: actions.onFinish,
-    });
-
-    const busy = chat.status === 'streaming' || chat.status === 'submitted';
-
-    const redo = () => {
-        void chat.recover();
-    };
-
-    return (
-        <>
-            <div className="min-h-0 flex-1 overflow-y-auto py-2">
-                <AiMessageList
-                    campaignId={campaignId}
-                    messages={chat.messages}
-                    error={chat.error?.message}
-                    renderProposal={
-                        renderProposal &&
-                        ((id) =>
-                            renderProposal(id, {
-                                send: (text) => void context.requestSend(text),
-                            }))
-                    }
-                    onRedo={redo}
-                />
-            </div>
-            {chat.blockedUntil && (
-                <p role="status" className="text-sm">
-                    {t('panel.blockedUntil', {
-                        time: format.dateTime(new Date(chat.blockedUntil), {
-                            timeStyle: 'medium',
-                        }),
-                    })}
-                </p>
-            )}
-            <AssistantContextDisclosure context={context} onSend={chat.send} />
-            <AiComposer
-                mode={thread.mode}
-                busy={busy}
-                focusLabel={focusLabel}
-                actions={{
-                    onSend: (text) => void context.requestSend(text),
-                    onStop: chat.stop,
-                    onClearFocus: actions.onClearFocus,
-                }}
-            />
-        </>
-    );
-}
-
-function ResizeHandle({
-    panel,
-}: {
-    panel: ReturnType<typeof useAiPanelWidth>;
-}) {
-    const t = useTranslations('ai');
-
-    const drag = useRef<{ startX: number; startWidth: number } | null>(null);
-
-    const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-        e.currentTarget.setPointerCapture?.(e.pointerId);
-        drag.current = { startX: e.clientX, startWidth: panel.width };
-    };
-
-    const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-        if (drag.current)
-            panel.setWidth(
-                drag.current.startWidth + drag.current.startX - e.clientX
-            );
-    };
-
-    const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-
-        e.preventDefault();
-        panel.setWidth(
-            panel.width +
-                (e.key === 'ArrowLeft'
-                    ? AI_PANEL_WIDTH.step
-                    : -AI_PANEL_WIDTH.step)
-        );
-    };
-
-    return (
-        <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-label={t('panel.resizeLabel')}
-            aria-valuenow={panel.width}
-            aria-valuemin={AI_PANEL_WIDTH.min}
-            aria-valuemax={panel.max}
-            tabIndex={0}
-            className="absolute inset-y-0 -left-1 z-10 w-2 cursor-col-resize touch-none hover:bg-primary/30 focus-visible:bg-primary/40 focus-visible:outline-none"
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={() => (drag.current = null)}
-            onPointerCancel={() => (drag.current = null)}
-            onDoubleClick={panel.reset}
-            onKeyDown={onKeyDown}
-        />
-    );
 }
 
 export function AiPanel({
