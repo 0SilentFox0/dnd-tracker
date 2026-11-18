@@ -858,8 +858,10 @@ describe('usePusherBattleSync: dm-канал', () => {
         ).toContain('прихований');
     });
 
-    it('поки dm-канал не підписаний, ДМ приймає redacted дельту', async () => {
+    it('поки dm-канал не підписаний, ДМ не пише redacted дельту в кеш, а інвалідує сцену', async () => {
         const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
 
         qc.setQueryData(key, makeBattlePayload({ version: 4 }));
         render(
@@ -887,11 +889,46 @@ describe('usePusherBattleSync: dm-канал', () => {
             )
         );
         await waitFor(() =>
-            expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5)
+            expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
         );
+        expect(qc.getQueryData<BattleScene>(key)?.version).toBe(4);
     });
 
-    it('помилка підписки dm-каналу: unavailable і знову приймає redacted', async () => {
+    it('redacted дельта не новіша за кеш не викликає інвалідацію', async () => {
+        const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        qc.setQueryData(key, makeBattlePayload({ version: 5 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        invalidate.mockClear();
+
+        act(() =>
+            simulateTrigger(
+                'private-battle-battle-1',
+                'battle-delta',
+                delta([entry('прихований')], true)
+            )
+        );
+        expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+    });
+
+    it('помилка підписки dm-каналу: unavailable і redacted дельта лише інвалідує сцену', async () => {
         const qc = new QueryClient();
 
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -939,6 +976,8 @@ describe('usePusherBattleSync: dm-канал', () => {
 
         expect(screen.getByTestId('state').textContent).toBe('unavailable');
 
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
         act(() =>
             simulateTrigger(
                 'private-battle-battle-1',
@@ -947,7 +986,7 @@ describe('usePusherBattleSync: dm-канал', () => {
             )
         );
         await waitFor(() =>
-            expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5)
+            expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
         );
         warn.mockRestore();
     });

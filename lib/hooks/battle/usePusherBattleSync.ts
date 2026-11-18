@@ -93,21 +93,23 @@ export function usePusherBattleSync(
 
         const cachedVersion = cached?.version;
 
-        // the shared channel carries projected enemy stats; a viewer who sees exact stats reads them from the scene
+        if (cachedVersion !== undefined && signal.version <= cachedVersion)
+            return;
+
+        // the shared channel carries projected enemy stats: a GM without the dm channel, or a viewer who sees exact stats, reads them from the scene
+        const projected = 'redacted' in signal && signal.redacted;
+
         if (
-            'redacted' in signal &&
-            signal.redacted &&
-            currentUserId &&
-            cached &&
-            alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId)
+            projected &&
+            (isDM ||
+                (currentUserId &&
+                    cached &&
+                    alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId)))
         ) {
             void queryClient.invalidateQueries({ queryKey: key });
 
             return;
         }
-
-        if (cachedVersion !== undefined && signal.version <= cachedVersion)
-            return;
 
         void writeBattleDelta(queryClient, key, signal);
     };

@@ -105,6 +105,9 @@ export function toBattleResponse(
         initiativeOrder: viewer
             ? redactParticipantsForViewer(viewer, participants, meta.rules)
             : participants,
+        ...(viewer &&
+            !viewer.isDM &&
+            !viewer.canSeeEnemyHp && { redacted: true as const }),
         pendingSummons: viewer ? redactPendingForViewer(viewer, pending, meta.rules) : pending,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),

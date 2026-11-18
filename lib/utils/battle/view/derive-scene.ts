@@ -49,7 +49,7 @@ export function deriveScene(
             userId: readOnly ? null : userId,
             isDM,
             readOnly,
-            canSeeEnemyHp: canSeeEnemyHp(hero, order),
+            canSeeEnemyHp: !battle.redacted && canSeeEnemyHp(hero, order),
         },
         turn: { current, isMyTurn, queue },
         roster: {
