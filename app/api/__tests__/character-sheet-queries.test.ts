@@ -192,7 +192,6 @@ describe('лист персонажа: запити до БД', () => {
         db.args = {};
         db.results = {
             'character.findUnique': character,
-            // перший виклик — раса й дерево, другий — скіли, школи й заклинання для вивчених вузлів
             'campaign.findUnique': (arg: {
                 select: Record<string, unknown>;
             }) =>

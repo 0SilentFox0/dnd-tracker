@@ -89,7 +89,6 @@ async function main() {
             );
     }
 
-    // власні AI-іконки, не Forgotten Adventures: --allow-official не потрібен
     const data = readSrdData();
 
     const { picked, templateOnly, catalogOnly } = mapToTemplate(

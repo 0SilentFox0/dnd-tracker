@@ -1,9 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Read-only: рядки видів контенту, що лежать у кампаніях, де вид поза композицією (D15: приховані, не видалені).
- *
- *   pnpm exec tsx scripts/db/content-kinds-report.ts [--json] [--allow-remote]
- */
 import '@/lib/utils/rules/systems/registry';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 

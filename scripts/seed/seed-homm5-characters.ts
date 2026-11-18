@@ -1,14 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Створює героїв і NPC кампанії «HoMM5: Імперія Грифона» з heroes.json / npcs.json + портрети.
- * Ідемпотентно: персонажа шукає за іменем у кампанії → оновлює біографію/цілі/параметри, інакше створює.
- * Портрет завантажується в bucket avatars лише якщо в персонажа ще немає аватара (або --force-avatars).
- *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-homm5-characters.ts \
- *     [--campaign <id>] [--heroes <file>] [--npcs <file>] [--photos <dir>] [--only <keys>] [--initiative-only] [--dry-run] [--force-avatars] [--allow-remote]
- *
- * --only markel,tieru — лише вказані ключі (id з json). Без --campaign береться єдина кампанія, в назві якої є «HoMM».
- */
 import type { Prisma } from '@prisma/client';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -104,14 +94,12 @@ type Build = {
     className?: string;
     archetype: HeroArchetypeKey | null;
     primary: Ability;
-    /** Стандартний набір 15/14/13/12/10/8 у цьому порядку. */
     order: [Ability, Ability, Ability, Ability, Ability, Ability];
     saves: Ability[];
     casting: 'intelligence' | 'wisdom' | 'charisma' | null;
     ac: number;
     speed?: number;
     photo?: string;
-    /** Назва персонального вміння в кампанії. */
     personalSkill?: string;
 };
 
@@ -366,7 +354,6 @@ const BUILDS: Record<string, Build> = {
     },
 };
 
-// Маркела немає в npcs.json — чернетка за лором HoMM5, майстер поправить у профілі
 const EXTRA_NPCS: Npc[] = [
     {
         id: 'markel',
@@ -402,10 +389,8 @@ function arg(name: string): string | undefined {
 
 const flag = (name: string) => process.argv.includes(`--${name}`);
 
-// у json «Раілаг», у кампанії й бібліотеці — «Раїлаг» (після голосної — ї)
 const fixNames = (raw: string) => raw.replaceAll('Раілаг', 'Раїлаг');
 
-// Розмітка BiographyText: «# заголовок», «> цитата», «• пункт», **жирне**
 const section = (title: string, lines: string[]) =>
     lines.length ? [`# ${title}\n${lines.join('\n')}`] : [];
 
@@ -463,7 +448,6 @@ const KINDS = new Set<string>(Object.values(GoalKind));
 
 const STATUSES = new Set<string>(Object.values(GoalStatus));
 
-// heroes.json v2 має goals; Раїлаг у npcs.json досі у форматі quests — одна мета на квест
 function heroGoals(h: Hero): CharacterGoal[] {
     const source =
         h.goals ??
@@ -520,7 +504,7 @@ function photoDataUrl(dir: string, name: string): string | null {
         `${name}.jpg`
     );
 
-    // 3 МБ оригінали → ~100 КБ: аватари віддаються через next/image, egress Supabase обмежений
+    // 3 MB originals -> ~100 KB: avatars are served via next/image, Supabase egress is limited
     execFileSync(
         'sips',
         [

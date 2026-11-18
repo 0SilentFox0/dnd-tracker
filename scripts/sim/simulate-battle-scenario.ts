@@ -1,7 +1,3 @@
-/**
- * Дані сценарію для `pnpm simulate-battle`: персонажі з різними прокачками й артефактами,
- * юніти з різними вміннями.
- */
 import type { Prisma } from '@prisma/client';
 
 import '@/lib/utils/rules/systems/registry';
@@ -73,7 +69,7 @@ export const RACES = {
             }),
         ]),
     },
-    // імунітет до отрути — з опису пасивки раси (race-effects)
+    // poison immunity comes from the race passive description (race-effects)
     dwarf: {
         name: 'Дварф',
         abilities: json([]),
@@ -362,7 +358,6 @@ const noRefs = {
     spells: new Map<string, string>(),
 };
 
-// Без раси: сценарії самі вирішують, чи потрібна раса Демонів.
 function libraryDemon(key: string) {
     const unit = LIBRARY_SOURCE.units.find((u) => u.key === key);
 
@@ -371,7 +366,6 @@ function libraryDemon(key: string) {
     return unitRow({ ...unit, raceKey: null }, noRefs, new Map());
 }
 
-/** Базові Демони Tier 1/4/7 з бібліотеки: масштабування видно майже в чистому вигляді. */
 export const FAIR_UNITS = ['demons-imp', 'demons-succubus', 'demons-devil'].map(
     libraryDemon
 );

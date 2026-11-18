@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Оновлює лише ініціативу юнітів кампанії за бібліотекою (data/library/units), зіставляючи за назвою.
- * Інші поля юнітів не змінює. Лише локальна БД без --allow-remote.
- *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/sync-unit-initiative.ts <campaignId> [--dry-run] [--allow-remote]
- */
 import '@/lib/utils/rules/systems/registry';
 import { buildLibrary } from '@/data/library/build';
 import { prisma } from '@/lib/db';
@@ -60,7 +54,10 @@ async function main() {
 
                 await tx.unit.update({
                     where: { id: u.id },
-                    data: d20RowData({ initiative: next }, current?.characteristics),
+                    data: d20RowData(
+                        { initiative: next },
+                        current?.characteristics
+                    ),
                 });
             });
     }

@@ -9,7 +9,6 @@ export function describeRoot(r: ExistingRoot): string {
     return `«${r.name}» (вкладених карт: ${r.maps - 1}, маркерів: ${r.markers})`;
 }
 
-/** Повертає корені до видалення; без --replace будь-який наявний корінь блокує сід. */
 export function rootsToReplace(
     roots: ExistingRoot[],
     replace: boolean

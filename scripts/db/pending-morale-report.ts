@@ -1,9 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Read-only: скільки battle_scenes мають відкладений кидок моралі (колонка pendingMoraleCheck або слот ext модуля моралі) — за статусом і rules.system (знімок сцени, інакше правила кампанії).
- *
- *   pnpm exec tsx scripts/db/pending-morale-report.ts [--json] [--allow-remote]
- */
 import '@/lib/utils/rules/systems/registry';
 import { hasPendingMorale } from '@/scripts/db/lib/backfill-pending-morale-plan';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';

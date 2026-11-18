@@ -1,9 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Розпаковує бандл портретів юнітів ({ data: { unitKey: dataUrl } }) у assets/unit-icons/<unitKey>.webp.
- *
- *   pnpm import-unit-icons <bundle.json>
- */
 import * as fs from 'fs';
 import * as path from 'path';
 

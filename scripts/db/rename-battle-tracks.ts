@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Перейменовує бойові треки бібліотеки в «<Раса> - Битва N» (група «Битва» виводиться з назви;
- * номер лише серед треків з однаковою назвою — раса + примітка). Ідемпотентно; за замовчуванням лише показує зміни.
- *
- *   pnpm rename-battle-tracks [campaignId] [--apply] [--allow-remote]
- */
 import { assertSeedTarget } from '../seed/seed-library-lib';
 
 import '@/lib/utils/rules/systems/registry';

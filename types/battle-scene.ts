@@ -4,7 +4,6 @@ import type { RetaliationOutcome } from '@/lib/utils/battle/view/retaliation';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Удар по одній цілі багатоцільової атаки */
 export interface StrikeFx {
     targetName: string;
     kind: 'hit' | 'crit' | 'miss';

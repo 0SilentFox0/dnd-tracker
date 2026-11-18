@@ -8,7 +8,7 @@ import type { PackKind } from '@/lib/utils/templates/manifest';
 const depsOf = (kind: PackKind, present: ReadonlySet<PackKind>): PackKind[] => {
     if (!isImportKind(kind)) return [];
 
-    // artifacts <-> artifact-sets: sets go after artifacts; the artifact setId is written in a second pass (D10)
+    // artifacts <-> artifact-sets: sets go after artifacts; the artifact setId is written in a second pass
     return refKindsOf(IMPORT_SPECS[kind]).filter(
         (dep) =>
             dep !== kind &&

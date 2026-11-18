@@ -3,7 +3,6 @@ import type { AbilityCore } from '../lib/abilities';
 import type { DndSkill } from '@/lib/constants/skills';
 import type { Choice, FeatType } from '@/types/choices';
 
-/** ключ — хвіст id вміння без «-<рівень>» */
 export const FEAT_FEATURES: Record<
     string,
     { featTypes: FeatType[]; embedded?: true }
@@ -14,7 +13,6 @@ export const FEAT_FEATURES: Record<
     'additional-fighting-style': { featTypes: ['fightingStyle'] },
 };
 
-/** ключ — "<клас>:<хвіст>" */
 export const EXPERTISE_FEATURES: Record<
     string,
     { count: number; skills?: DndSkill[]; keepAbility?: true }
@@ -73,7 +71,6 @@ const strike = (damageType: string): AbilityCore => ({
     ],
 });
 
-/** бінарні вибори з жирних абзаців; механіка — за id опції */
 export const BINARY_FEATURES: Record<string, Record<string, AbilityCore>> = {
     'divine-order': {},
     'primal-order': {},
@@ -110,7 +107,6 @@ export const RESISTANCE_FEATURES: Record<string, string[]> = {
     ],
 };
 
-/** вибори без вміння-носія в даних (рівень повторення фічі) */
 export const EXTRA_CHOICES: Record<string, Choice[]> = {
     'srd-2024_warlock': [6, 7, 8, 9].map((level, i) => ({
         id: `mystic-arcanum-${level}`,

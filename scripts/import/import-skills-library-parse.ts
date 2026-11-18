@@ -1,7 +1,3 @@
-/**
- * Завантаження та парсинг SKILLS.md для import-skills-library
- */
-
 import * as fs from 'fs';
 import * as path from 'path';
 

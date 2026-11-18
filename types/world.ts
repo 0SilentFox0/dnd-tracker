@@ -123,7 +123,6 @@ export interface WorldNote {
     updatedAt: string;
 }
 
-/** Pusher `world-changed`: без назв, координат і нотаток. */
 export interface WorldChangedEvent {
     campaignId: string;
     mapId: string | null;

@@ -1,11 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Кампаніям без rules.defaultAttacks, чий ДМ має locale "uk", проставляє українські назви базових атак
- * (інакше після i18n вони б мали англійські). en/null locale не чіпає. Ідемпотентно.
- *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-default-attacks.ts [--apply] [--allow-remote]
- *   Без --apply — лише підрахунок (dry-run).
- */
 import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';

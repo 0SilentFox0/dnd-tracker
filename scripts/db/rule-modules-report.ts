@@ -1,9 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Read-only: рядки campaigns.rules / battle_scenes.rules з базою d20 і явним масивом modules (розбивка за повнотою набору пресета).
- *
- *   pnpm exec tsx scripts/db/rule-modules-report.ts [--json] [--allow-remote] [--expect-zero]
- */
 import '@/lib/utils/rules/systems/registry';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 

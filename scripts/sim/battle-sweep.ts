@@ -1,19 +1,5 @@
 #!/usr/bin/env tsx
-/* eslint-disable @typescript-eslint/no-explicit-any -- сценарій ганяє сирі JSON-відповіді API */
-/**
- * Наскрізна перевірка бою на копії прод-БД героїчної кампанії: усі герої на 9 рівні (з 9-го можна стати Експертом гілки), три ротації білдів дерев
- * (дві легальні для L9 і одна примусова — расові «Просунутий/Експерт» та ультимати), сети артефактів,
- * 5-раундові бої проти всіх юнітів через справжні мутації API (runBattleMutation), цільові сценарії
- * (рідкісні тригери), контроль юнітів і закляття 5-го рівня від імені гравця.
- * Змінює героїв і створює бої в БД — лише локальна копія (`scripts/db/prodcopy-db.sh`).
- *
- *   DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep [--template <ключ шаблону>] [--mode all|sweep|targeted|control|level5|system] [--campaign <id>] [--out <dir>] [--consistency] [--keep-battles]
- *
- * Без --template проганяє всі шаблони з реєстру (srd-5.2, grim-d100, …) окремими процесами; профіль — scripts/sim/battle-sweep/profiles.
- * Для шаблонів без героїв герої сидяться з контенту шаблону й видаляються після прогону.
- * Звіт: <out>/<шаблон>/battle-sweep.md (+ data.json, log.txt). Код виходу 1, якщо є помилки.
- * Створені бої видаляються після прогону; --keep-battles лишає їх для огляду в браузері.
- */
+/* eslint-disable @typescript-eslint/no-explicit-any -- the scenario drives raw JSON API responses */
 import { spawnSync } from 'node:child_process';
 import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -251,7 +237,6 @@ let state: any;
 
 let battleLabel = '';
 
-/** Тільки в цільових пробах: кожен шансовий тригер проходить (rng()·100 < chance завжди) */
 let forceChance = false;
 
 const deps: any = {
@@ -271,7 +256,6 @@ const deps: any = {
     logLocale: async () => 'uk',
 };
 
-// ---------- журнали ----------
 const issues: Array<{ level: 'error' | 'warn'; where: string; text: string }> =
     [];
 
@@ -781,7 +765,6 @@ const MAZE_MARK = {
 
 const KILL = (id: string) => ({ ...PATCH(id), allowWhileAwaitingDm: true });
 
-// ---------- підготовка ----------
 const HEROES = [
     'Лорд Годрик Єдиноріг',
     'Ізабель Грейхаунд',
@@ -965,7 +948,6 @@ async function prepare() {
     }))
         trees[row.race] = normalizeTree(row);
 
-    // статична перевірка: кожне дерево можна вивчити повністю (без обмеження очок) у правильному порядку
     for (const t of Object.values(trees)) {
         const learned: string[] = [];
 
@@ -1092,7 +1074,6 @@ async function applyRotation(r: number) {
     return lines;
 }
 
-// ---------- покриття ----------
 function recordCoverage(probe = false) {
     for (const p of P()) {
         for (const a of p.battleData.resolvedAbilities ?? []) {
@@ -1108,7 +1089,6 @@ function recordCoverage(probe = false) {
     }
 }
 
-/** Запис покриття для вміння учасника; спільний для recordCoverage / recordPassives / доказів аур. */
 function covEntry(p: any, a: any): any {
     const owner =
         p.basicInfo.sourceType === ParticipantSourceType.UNIT
@@ -1171,7 +1151,6 @@ function recordPassives() {
     }
 }
 
-/** Аура «поруч» діє не через passive-запис, а зоною: після aura-zone ціль має отримати запис у collectModifiers від ефекту зони (однакові аури з одним id діляться ключем — підпис може бути іншого власника). */
 function proveAreaAura(owner: any, aura: any, targetIds: string[]) {
     const c = covEntry(owner, aura.ability);
 
@@ -1193,7 +1172,7 @@ function proveAreaAura(owner: any, aura: any, targetIds: string[]) {
             ).includes(n)
         );
 
-    // perMark-ефект діє лише по відміченій цілі, тож collectModifiers без позначки його не дає: доказ — сам ефект зони на цілі
+    // a perMark effect applies only to a marked target, so collectModifiers without a mark yields nothing
     const inZone = (id: string) =>
         (byId(id)?.battleData.activeEffects ?? []).some(
             (x: any) =>
@@ -1251,7 +1230,6 @@ const BAKED = new Set([
 
 const TARGET_STATS = new Set(['morale', 'minTargets', 'maxTargets']);
 
-/** Сума запечених плоских бонусів стату для учасника: власні + аури allAllies/allEnemies (однакова аура — раз, найсильніша), як у bakePassives/applyBakedAuras. */
 function expectedBakedFlat(x: any, stat: string): number {
     let sum = 0;
 
@@ -1452,8 +1430,6 @@ function passiveViaModifiers(p: any, a: any): boolean {
     return false;
 }
 
-// ---------- дії ----------
-/** Ключі рядків логу «ціль імунна / не діє на героїв» — каст без змін через них не помилка */
 const IMMUNITY_LINE =
     /abilityText\.log\.(?:immune|immuneTo|notOnHeroes)\b|battleActions\.[\w.]*[iI]mmune\b|battleLog\.[\w.]*immunityNote\b/;
 
@@ -1942,7 +1918,6 @@ async function runBattle(
     return `${label}: раундів ${Math.min(state.currentRound, ROUNDS)}${state.status === 'completed' ? ' (завершено)' : ''}; союзники живі ${allies.filter(alive).length}/${allies.length}, вороги живі ${enemies.filter(alive).length}/${enemies.length}`;
 }
 
-/** Герої й юніти на обох сторонах; герой міняє сторону від бою до бою, щоб кожен побув і союзником, і ворогом. */
 function mixedSides(unitIds: string[], battleNo: number) {
     const heroes = heroRows.map((h, i) => ({
         id: h.id,
@@ -1960,7 +1935,6 @@ function mixedSides(unitIds: string[], battleNo: number) {
     return [...heroes, ...units];
 }
 
-/** Юніти по черзі з різних рас, щоб у кожній пачці зустрілися різні раси. */
 function interleaveByRace(units: { id: string; raceId: string | null }[]) {
     const byRace = new Map<string, string[]>();
 
@@ -2112,7 +2086,6 @@ function coverageReport(): string[] {
     return out;
 }
 
-// Синтетичні заклинання P1–P4 (зони, стіна, аура, відкладений удар) — без тексту книг; ідемпотентно за назвою.
 const SYNTHETIC_SPELLS = [
     {
         name: 'SYN Відкладений удар',
@@ -2405,7 +2378,6 @@ async function main() {
     process.exit(errors.length ? 1 : 0);
 }
 
-// ---------- цільові сценарії ----------
 const targetedResults: string[] = [];
 
 const tcheck = (name: string, ok: boolean, detail: string) => {
@@ -2440,7 +2412,6 @@ function moraleModuleChecks() {
         );
 }
 
-/** Сценарій не склався (напр., бій уже завершився) — пропуск із поясненням замість хибного провалу. */
 const tskip = (name: string, detail: string) => {
     targetedResults.push(`⏭️ ${name} — пропущено: ${detail}`);
 
@@ -2661,7 +2632,7 @@ async function hitBy(
 
     const w = a.battleData.attacks[0];
 
-    // HP ставимо вже на ходу атакувальника: регенерація на старті ходу не встигне підлікувати
+    // HP is set on the attacker's turn: start-of-turn regeneration cannot heal it in time
     if (hpBeforeHit !== undefined)
         await call('participants', PATCH(target.basicInfo.id), {
             currentHp: hpBeforeHit,
@@ -2686,7 +2657,6 @@ async function hitBy(
     return r;
 }
 
-// ---------- проби рідкісних тригерів ----------
 const usageOf = (p: any, name: string) =>
     (p?.battleData.resolvedAbilities ?? [])
         .filter((a: any) => a.name === name)
@@ -2721,7 +2691,6 @@ const heal = (p: any) =>
         currentHp: p.combatStats.maxHp,
     });
 
-/** Здобич лучника: другий дальній постріл по відміченій цілі додає шкоду (мітка від першого влучання). */
 async function preyProbe() {
     const ivan = byName('Айвен');
 
@@ -2775,7 +2744,6 @@ async function preyProbe() {
     );
 }
 
-/** Пасивки з умовою «союзник має < N % HP»: без умови запису немає, з умовою — є (collectModifiers, канал, яким читає атака). */
 async function lowAllyPassiveProbe() {
     for (const p of P().filter(alive)) await heal(p);
 
@@ -2839,7 +2807,6 @@ async function lowAllyPassiveProbe() {
     }
 }
 
-/** Некромант (Експерт): підняття мертвих — ціль-мертвий союзник, дія героя. */
 async function raiseDeadProbe() {
     const nec = byName('Маркел');
 
@@ -2894,7 +2861,6 @@ async function raiseDeadProbe() {
     );
 }
 
-/** Тригерні вміння юнітів, що не спрацювали у випадкових боях: окремий міні-бій із примусовим шансом і сценарієм під подію. */
 async function unitTriggerProbes(spells: Map<string, any>) {
     const todo = [...coverage.values()].filter(
         (c) =>
@@ -3088,7 +3054,6 @@ async function unitTriggerProbes(spells: Map<string, any>) {
     void spells;
 }
 
-/** Аури «поруч», яких випадкові бої жодного разу не задали: власник задає зону на всіх можливих цілях, перевіряємо запис у collectModifiers. */
 async function areaAuraProbes() {
     const todo = [...coverage.values()].filter(
         (c) => c.area && c.passiveOk === 0 && c.passiveMiss === 0
@@ -3177,7 +3142,6 @@ async function areaAuraProbes() {
     battleLabel = '';
 }
 
-/** «Світле відлуння» єдинорога: союзний герой кастує баф заклинанням школи тригера — єдиноріг отримує копію. */
 async function copyBuffsProbe(spells: Map<string, any>) {
     const todo = [...coverage.values()].filter(
         (c) => c.source === 'unit' && c.event === 'spellCast' && c.fired === 0
@@ -3329,7 +3293,6 @@ async function targeted(spells: Map<string, any>) {
 
     await mkBattle('ЦІЛЬ-1');
 
-    // Битва до останнього (Семгрун, Захист middle)
     let sem = byName('Семгрун');
 
     let logs: string[] = [];
@@ -3342,12 +3305,10 @@ async function targeted(spells: Map<string, any>) {
         `HP ${sem.combatStats.currentHp}, статус ${sem.combatStats.status}; ${logs.join(' | ').slice(0, 300)}`
     );
 
-    // Супротив: HP < 15 %, негативний ефект, удар → очищення
     await call('participants', PATCH(sem.basicInfo.id), {
         currentHp: Math.max(2, Math.floor(sem.combatStats.maxHp * 0.1)),
     });
 
-    // not Сповільнення: Семгрун's Helm of the Dwarven Kings makes the party immune to it (and Сліпота)
     const dark = [...spells.values()].find((s: any) => s.name === 'Немічність');
 
     await nextOnly();
@@ -3395,7 +3356,6 @@ async function targeted(spells: Map<string, any>) {
         `до: [${fxBefore}] після: [${fxAfter}]; ${logs.join(' | ').slice(0, 300)}`
     );
 
-    // Друге серце (Намисто лева на Аграїлі)
     logs = [];
     await hitBy(byName('Аграїл'), logs, 1);
 
@@ -3409,7 +3369,6 @@ async function targeted(spells: Map<string, any>) {
         `HP ${agr2.combatStats.currentHp}/${agr2.combatStats.maxHp}; ${logs.join(' | ').slice(0, 300)}`
     );
 
-    // Світло корони: Зехір (Корона Сар-Ісси) кастує заклинання Світла
     const light = [...spells.values()].find((s: any) => s.name === 'Поспіх');
 
     const zeh = byName('Зехір');
@@ -3450,7 +3409,6 @@ async function targeted(spells: Map<string, any>) {
             )} ${lr.status !== 200 ? JSON.stringify(lr.body).slice(0, 200) : ''}`
     );
 
-    // Вибух мани: ворог кастує в Зехіра (шанс 50 %, до 2 разів)
     const bolt = [...spells.values()].find(
         (s: any) => s.name === 'Потойбічна стріла'
     );
@@ -3503,7 +3461,6 @@ async function targeted(spells: Map<string, any>) {
     await lowAllyPassiveProbe();
     recordCoverage(true);
 
-    // Ангел Хранитель (ультимат Людей) — ротація 3
     await applyRotation(2);
     await mkBattle('ЦІЛЬ-2');
 
@@ -3643,7 +3600,6 @@ async function controlCheck(spells: Map<string, any>) {
             .join(', ')
     );
 
-    // хід союзного юніта: інший гравець — 403, власник — 200
     const other = realPlayers.find((h) => h.controlledBy !== top.controlledBy);
 
     await untilTurnOf(
@@ -3700,7 +3656,6 @@ async function controlCheck(spells: Map<string, any>) {
         `${nt.status} ${nt.status !== 200 ? JSON.stringify(nt.body).slice(0, 150) : ''}`
     );
 
-    // прикликання гравцем: Айвен (Природа) кастує Призив Фенікса як гравець
     const ivan = hero('Айвен');
 
     await untilTurnOf((p) => p.basicInfo.name === 'Айвен');
@@ -3742,7 +3697,6 @@ async function controlCheck(spells: Map<string, any>) {
         `${sr.status} нові: ${summoned.map((s) => `${s.basicInfo.name}→${s.basicInfo.controlledBy.slice(0, 8)}`).join(', ')} pending: ${pend.map((x) => `${x.n}→${String(x.controlledBy).slice(0, 8)}`).join(', ')}; Айвен=${ivan.controlledBy.slice(0, 8)} ${sr.status !== 200 ? JSON.stringify(sr.body).slice(0, 150) : ''}`
     );
 
-    // бій без гравців: усі союзні юніти й герої DM
     const dmOnly = [
         ...heroRows
             .filter((h) => h.controlledBy === dmId)
@@ -3823,7 +3777,6 @@ async function level5Check(spells: Map<string, any>) {
         });
     }
 
-    // раси, на які діють усі закляття (Слово світла не карає Людей, Ельфів, Гномів і Магів)
     const exposed = new Set(
         races
             .filter((r) =>
@@ -3970,7 +3923,6 @@ async function level5Check(spells: Map<string, any>) {
             );
         }
     }
-    // другий каст 5-го рівня в тому ж бою — немає слота
     await call('next-turn', NEXT);
     await untilTurnOf((p) => p.basicInfo.name === 'Аграїл');
 
@@ -3997,7 +3949,6 @@ async function level5Check(spells: Map<string, any>) {
         `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`
     );
 
-    // Аватар Маркела
     await applyRotation(0);
     battleLabel = 'Аватар';
 
@@ -4081,7 +4032,6 @@ async function level5Check(spells: Map<string, any>) {
         });
 }
 
-// Аура страху Кошмару: зона на двох героях, решта без штрафу; гравець не може задати зону ворожому юніту
 async function auraZoneCheck() {
     await applyRotation(0);
     battleLabel = 'Зона аури';
@@ -4464,7 +4414,7 @@ async function mapCheck(spells: Map<string, any>) {
             DEFAULT_RULES
         );
 
-    // мінімальні кубики — щоб куля не завершила бій до перевірки небезпеки
+    // minimal dice so the bolt does not end the battle before the danger check
     const fr =
         fire && fdice && foe && targetCell
             ? await call('spell', SPELL, {
@@ -4546,7 +4496,6 @@ async function mapCheck(spells: Map<string, any>) {
 
     const change = entry?.hpChanges?.[0];
 
-    // change > 0 — шкода (oldHp − newHp), як у решти журналу
     const signOk =
         !!change &&
         change.change === change.oldHp - change.newHp &&
@@ -4653,7 +4602,6 @@ async function mapWallsCheck() {
     );
 }
 
-/** Шар стану карти: ефективна карта пропускає видалене ребро й тримає сусіднє, ребра бібліотеки проходять кодек, відкат стану дає базу. */
 function mapStateCheck() {
     const name =
         'Карта (стан): removed-ребро відкриває прохід, сусіднє тримає, відкат стану — база';
@@ -4715,7 +4663,6 @@ function mapStateCheck() {
     );
 }
 
-/** Двері: зачинені блокують рух/зір/вогонь, відчинені (стан) — ні, ДМ-замок і відкат стану, двері в шапці linked-карти, виламані зникають. */
 function mapDoorsCheck() {
     const name =
         'Карта (двері): зачинені блокують, відчинення відкриває прохід, відкат — зачинені, виламані зникають';
@@ -4782,7 +4729,6 @@ function mapDoorsCheck() {
     );
 }
 
-/** Вміння «all» на карті: одиночне вороже заклинання б'є всю ворожу сторону без точки й дальності. */
 async function mapSkillAllCheck(spells: Map<string, any>) {
     const name = 'Карта: вміння «all» — уся ворожа сторона без наведення';
 
@@ -4852,7 +4798,6 @@ async function mapSkillAllCheck(spells: Map<string, any>) {
     );
 }
 
-/** Кільце «Коло зими» по зайнятому центру й «Вогняна куля» в порожню зону: обидва — каст з aimCell. */
 async function mapRingAndEmptyCheck(spells: Map<string, any>) {
     const ringName = 'Карта: кільце «Коло зими» — центр не ціль, кільце — цілі';
 
@@ -5076,7 +5021,6 @@ if (WORKER) PROFILE = parseTemplateKeys(argv)[0];
 
 (WORKER ? main() : orchestrate()).catch(failWorker);
 
-// ---------- лабіринт ----------
 const mazeGrid = (): MazeGrid => mazeGridOf(state.map) as MazeGrid;
 
 const posOf = (p: any) =>
@@ -5086,7 +5030,6 @@ const onField = (p: any) => onMazeField(p);
 
 const isMazeAlly = (p: any) => p.basicInfo.side === 'ally' && onField(p);
 
-/** Вільна для кроку клітинка: не зайнята учасником на полі, не вихід і не телепорт. */
 const freeMazeCell = (key: string) =>
     !featureKeys(mazeGrid().maze).has(key) &&
     !P()
@@ -5096,7 +5039,6 @@ const freeMazeCell = (key: string) =>
 const logText = (log: any[]) =>
     log.map((e: any) => resultTextOf(e) ?? '').join(' | ');
 
-/** Сплять рівно ті вороги, яких не бачить жоден герой. */
 function sleepersMatchSight() {
     const grid = mazeGrid();
 
@@ -5125,7 +5067,6 @@ function sleepersMatchSight() {
     };
 }
 
-/** Стоячий на шляху учасник (прокинутий ворог не рухається сам) — ДМ переставляє його подалі від виходу. */
 async function mazeClearBlocker(mover: any) {
     const grid = mazeGrid();
 
@@ -5622,7 +5563,6 @@ async function mazeCheck() {
     );
 }
 
-/** «1 тунель»: вороги в резерві, герої рядом у тунелі від центру, вихід у кінці тунелю; якщо ДМ має вирішити — вводить резерв і бій триває. */
 async function mazeTunnelCheck() {
     const reserve = () =>
         (state.pendingSummons ?? []).filter((p: any) => p.battleData.reserved);

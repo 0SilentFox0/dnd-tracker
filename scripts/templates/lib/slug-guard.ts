@@ -5,7 +5,7 @@ export interface ExistingRow {
     key: string;
 }
 
-/** Slugs of pack rows the importer would create: no row carries the slug and no unslugged row matches by key (D3). */
+/** Slugs of pack rows the importer would create: no row carries the slug and no unslugged row matches by key. */
 export function slugsToCreate(
     rows: readonly PackRow[],
     keyOf: (row: PackRow) => string,

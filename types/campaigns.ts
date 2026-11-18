@@ -55,7 +55,6 @@ export type TemplateSelection = {
     contentLocale?: TemplateContentLocale;
 };
 
-/** Рядок campaign_members з user-relation (сторінка кампанії). */
 export interface CampaignMembership {
     id: string;
     userId: string;
@@ -69,7 +68,6 @@ export interface PublicUser {
     avatar: string | null;
 }
 
-/** Рядок GET /members: `id` — userId; `email` лише для DM. */
 export interface CampaignMember {
     id: string;
     displayName: string;

@@ -1,9 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Read-only: персонажі без класу в d20-кампаніях без модуля heroscaling (їхнє HP стане 1, Ч10 ризик 2).
- *
- *   pnpm exec tsx scripts/db/classless-d20-report.ts [--json] [--allow-remote]
- */
 import '@/lib/utils/rules/systems/registry';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 

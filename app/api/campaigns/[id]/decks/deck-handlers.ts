@@ -48,7 +48,6 @@ const ownedDeck = (campaignId: string, deckId: string) =>
         API_ERRORS.DECK_NOT_FOUND
     );
 
-/** Картинка на екрані і картинки інших наборів лишаються. */
 async function removeUnusedFiles(
     campaignId: string,
     deckId: string,
@@ -70,7 +69,6 @@ async function removeUnusedFiles(
     if (urls.length > 0) await removeSlideFiles(campaignId, urls);
 }
 
-/** Повертає стан показу після оновлення — з нього рахується, які файли ще на екрані. */
 async function refreshShownDeck(
     campaignId: string,
     show: ShowState | null,
@@ -80,7 +78,7 @@ async function refreshShownDeck(
     const next =
         show && refreshShowSlide(show, saved, { before, now: Date.now() });
 
-    // конфлікт з командою ДМ не страшний: наступне перемикання візьме свіжий набір
+    // a conflict with a DM command is harmless: the next switch picks a fresh deck
     if (!next || !(await writeShowState(campaignId, show, next))) return show;
 
     await publishShow(campaignId, next);
@@ -90,7 +88,6 @@ async function refreshShownDeck(
 
 const END_SHOW_ATTEMPTS = 3;
 
-/** Показ не лишається вказувати на видалений набір. */
 async function endShowOfDeck(
     campaignId: string,
     deckId: string
@@ -196,7 +193,6 @@ export function saveDeckHandler(
         );
 
         if (!row) {
-            // копії, зроблені цим запитом, нікуди не записані
             const mirrored = removedSlideUrls(slides.value, body.slides, []);
 
             if (mirrored.length > 0)

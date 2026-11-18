@@ -1,12 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * СКИДАННЯ МОК ДАНИХ ДЛЯ ТЕСТУВАННЯ БОЙОВОЇ СИСТЕМИ
- *
- * Цей скрипт спочатку видаляє всі моки, а потім створює їх знову.
- *
- * ВИКОРИСТАННЯ:
- *   npm run reset-mock-battle YOUR_CAMPAIGN_ID
- */
 import { execSync } from 'child_process';
 
 import { DEFAULT_CAMPAIGN_ID } from '@/scripts/shared/default-campaign';
@@ -22,7 +14,6 @@ if (!CAMPAIGN_ID || CAMPAIGN_ID === 'YOUR_CAMPAIGN_ID') {
 console.log('🔄 Скидання мок даних...\n');
 
 try {
-    // Спочатку видаляємо
     console.log('🗑️  Крок 1: Видалення старих моків...');
     execSync(`tsx scripts/seed/delete-mock-battle-data.ts ${CAMPAIGN_ID}`, {
         stdio: 'inherit',

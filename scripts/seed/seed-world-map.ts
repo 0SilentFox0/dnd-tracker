@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Створює у кампанії корінь «Ashan» із зонами королівств, містами та вкладеними картами-фрагментами.
- * Відмовляє, якщо у кампанії вже є будь-яка коренева карта; з --replace видаляє наявні корені (з піддеревом і файлами). Лише локальна БД без --allow-remote.
- *
- *   pnpm seed-world-map <campaignId> [--dry-run] [--replace] [--allow-remote]
- */
 import sharp from 'sharp';
 
 import { assertSeedTarget } from './seed-library-lib';

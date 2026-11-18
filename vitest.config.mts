@@ -5,9 +5,7 @@ export default defineConfig({
     test: {
         environment: 'node',
         setupFiles: ['./vitest-setup.ts'],
-        // Integration тести виключаються з default-запуску (pnpm test, vitest).
-        // Вони потребують .env.local credentials і запускаються через
-        // окремий config: `pnpm test:integration` (vitest.integration.config.mts).
+        // Integration tests are excluded from the default run: they need .env.local credentials (pnpm test:integration)
         exclude: [
             '**/node_modules/**',
             '**/dist/**',

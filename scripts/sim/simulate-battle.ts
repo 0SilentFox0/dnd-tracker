@@ -1,11 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Наскрізна симуляція бою на локальній БД: створює окрему кампанію з персонажами, юнітами,
- * скілами, артефактами й сетом, а потім проганяє бій через ті самі mutation-функції, що й API
- * (runBattleMutation + loadBattle/saveBattle). Підмінено лише авторизацію, rate-limit і Pusher.
- *
- *   pnpm simulate-battle [--keep-battles]   # лише локальна БД (localhost); без прапорця SIM-кампанії видаляються після прогону
- */
 import type { Prisma } from '@prisma/client';
 
 import { resultTextOf } from './log-text';
@@ -128,8 +121,6 @@ const deps: PipelineDeps = {
     rng: () => rolls.shift() ?? 0.5,
 };
 
-// ---------- перевірки ----------
-
 const results: Array<{ ok: boolean; name: string; detail: string }> = [];
 
 function check(name: string, ok: boolean, detail = '') {
@@ -138,8 +129,6 @@ function check(name: string, ok: boolean, detail = '') {
         `   ${ok ? '✅' : '❌'} ${name}${detail ? ` — ${detail}` : ''}`
     );
 }
-
-// ---------- seed ----------
 
 async function seed() {
     await prisma.campaign.deleteMany({
@@ -445,8 +434,6 @@ async function seed() {
     };
 }
 
-// ---------- виклик мутацій ----------
-
 type Ctx = Awaited<ReturnType<typeof seed>>;
 
 let ctx: Ctx;
@@ -589,8 +576,6 @@ function printState(title: string) {
         );
     }
 }
-
-// ---------- сценарій ----------
 
 const START = {
     access: 'dm' as const,
@@ -1417,8 +1402,6 @@ async function scenario() {
     void lastEvent;
 }
 
-// ---------- рівні бої ----------
-
 const FAIR_SEEDS = [11, 23, 37, 41, 58, 64, 79];
 
 const mulberry32 = (seed: number) => () => {
@@ -1673,8 +1656,6 @@ async function fairBattleRuns() {
     );
 }
 
-// ---------- нові механіки вмінь ----------
-
 async function newMechanics() {
     const u = (name: string) => `${name} #1`;
 
@@ -1928,8 +1909,6 @@ async function newMechanics() {
         `Новачок ${by(u('Новачок')).combatStats.status}, Дуелянт HP ${duelistHp} → ${hp(by(u('Дуелянт')))}`
     );
 }
-
-// ---------- расові механіки ----------
 
 async function racialMechanics() {
     console.info(
@@ -2217,7 +2196,6 @@ async function racialMechanics() {
     );
 }
 
-/** Усі кампанії тестового DM — лише цього скрипта; бої, юніти й закляття йдуть каскадом. */
 async function removeSimCampaigns() {
     await prisma.campaign.deleteMany({ where: { dmUserId: SIM_USER.id } });
 }
@@ -2231,8 +2209,6 @@ main().catch(async (e) => {
     await prisma.$disconnect();
     process.exit(1);
 });
-
-// ---------- нова модель заклинань ----------
 
 async function spellModel() {
     console.info(
@@ -2420,7 +2396,6 @@ async function spellModel() {
             throw new Error(`Не дійшли до ходу ${name}`);
     };
 
-    // кубики юніта: 2 + ⌊6/2⌋ = 5, грані к8 з 5 рівня (Архімаг L6)
     const fireDice = dice('Архімаг', spells.fireball.id);
 
     const wrongCount = await cast(
@@ -2640,7 +2615,6 @@ async function spellModel() {
 
     const charmed = P('Маріонетка').basicInfo;
 
-    // каст посеред ходу діє з наступного ходу цілі
     await nextTurn();
     await reachTurn('Маріонетка');
 

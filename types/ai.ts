@@ -41,7 +41,6 @@ export interface AiMessageMetadata {
     error?: string;
 }
 
-/** Збережене повідомлення у форматі UIMessage AI SDK (parts як є). */
 export interface AiChatMessage {
     id: string;
     role: 'user' | 'assistant';

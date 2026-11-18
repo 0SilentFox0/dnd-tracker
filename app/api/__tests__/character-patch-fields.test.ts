@@ -17,10 +17,14 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
     requireDM: vi.fn(),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
-        new Map(
-            ids.map((id) => [id, { id, resources: {}, experience: 0, characteristics: null }])
-        )
+    lockCharacters: vi.fn(
+        async (_tx: unknown, ids: string[]) =>
+            new Map(
+                ids.map((id) => [
+                    id,
+                    { id, resources: {}, experience: 0, characteristics: null },
+                ])
+            )
     ),
 }));
 
@@ -157,9 +161,9 @@ describe('PATCH archetype', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(prisma.$transaction).mockImplementation(
-            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
-        );
+        vi.mocked(prisma.$transaction).mockImplementation(((
+            fn: (tx: unknown) => unknown
+        ) => fn(prisma)) as never);
         vi.mocked(prisma.character.findUnique).mockResolvedValue({
             id: 'ch',
             campaignId: 'camp',
@@ -225,7 +229,6 @@ describe('PATCH archetype', () => {
     });
 });
 
-// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

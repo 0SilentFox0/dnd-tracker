@@ -35,9 +35,6 @@ export { AttackType, ParticipantSide };
 
 export { SkillLevel };
 
-/**
- * Типи для активних ефектів
- */
 export interface HitRiderState {
     attackKind: 'melee' | 'ranged' | 'any';
     extraDice: string;
@@ -51,25 +48,23 @@ export interface HitRiderState {
 export interface ActiveEffect {
     id: string;
     name: string;
-    /** Engine-made effects: shown instead of `name` (translated per viewer) */
     label?: LogLine;
     type: 'buff' | 'debuff' | 'condition';
     description?: LogLine;
     icon?: string;
-    duration: number; // кількість раундів що залишилось
+    duration: number;
     appliedAt: {
         round: number;
         timestamp: Date;
     };
     effects: Array<{
-        type: string; // attack_bonus, ac_bonus, poison_damage, тощо
+        type: string;
         value: number;
         isPercentage?: boolean;
-        damageType?: string; // для DOT: fire, poison, тощо
+        damageType?: string;
     }>;
     dotDamage?: {
         damagePerRound: number;
-        /** Кубики, що кидаються щоразу на початку ходу; damagePerRound — перший кидок для показу. */
         dice?: string;
         damageType: string;
         fromSpell?: boolean;
@@ -77,15 +72,12 @@ export interface ActiveEffect {
     hotHeal?: {
         healPerRound: number;
     };
-    /** Сирий тип шкоди заклинання, що наклало ефект (для візуалу ауры) */
     fxElement?: string;
     fxAura?: FxAuraKind;
     breakOnDamage?: boolean;
     consumeOn?: 'ownAttack' | 'ownHit' | 'attackAgainst';
     expireAtTurnEnd?: boolean;
-    /** Старий відлік: тривалість зменшується на початку ходу власника (мітки «раз за раунд», ефекти критів «до наступного ходу цілі») */
     countdownAtTurnStart?: boolean;
-    /** Був на власнику на початку його поточного ходу: наприкінці ходу тривалість зменшується */
     armed?: boolean;
     charmOrigin?: { side: ParticipantSide; controlledBy: string };
     abilityKey?: string;
@@ -99,46 +91,30 @@ export interface ActiveEffect {
         icon?: string | null;
         personal?: boolean;
     };
-    /** постійний ефект (пасивне персональне вміння, зона аури) — без відліку раундів */
     permanent?: boolean;
-    /** ефект зони аури: діє, поки власник живий; key — спільний для однакових аур різних власників */
     zone?: { ownerId: string; key: string };
-    /** стан закінчується, коли власник проходить рятівний кидок наприкінці свого ходу */
     saveEnds?: { ability: AbilityKey; dc: number };
-    /** СК «Вирватися» для схоплення від заклинання (замість змагання з Атлетикою схоплювача) */
     escapeDc?: number;
-    /** ефект знімається разом з ефектом цього id на тому ж власнику */
     linkedTo?: string;
-    /** ефект, що тримається поки кастер концентрується на закляттi castId */
     concentrationOf?: { casterId: string; castId: string };
-    /** заряди додаткової шкоди від заклинання (hitRider); на нуль ефект знімається */
     hitRider?: HitRiderState;
-    /** аура на носії (заклинання anchoredZone): тригери для істот у радіусі */
     anchoredZone?: AnchoredZoneState;
-    /** ефект накладений аурою: зникає, коли ефект-аура з цим id зникає (може бути на іншому учаснику) */
     anchorOf?: string;
-    /** маркер концентрації на самому кастері */
     concentration?: {
         castId: string;
         spellName: string;
-        /** є ефекти заклинання з concentrationOf: без живих концентрація знімається */ tracksEffects?: true;
+        tracksEffects?: true;
     };
-    /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
     exhaustionHpHalved?: number;
-    /** варіант правил виснаження на момент накладання (для перерахунку за сумарним рівнем) */
     exhaustionVariant?: RulesEdition;
 }
 
-/**
- * Типи для екіпірованих артефактів
- */
 export interface EquippedArtifact {
     artifactId: string;
     name: string;
     slot: string; // weapon, shield, cloak, ring, helmet, amulet, item
-    /** FK на ArtifactSet — для перевірки повного сету в бою */
     setId?: string | null;
-    bonuses: Record<string, number>; // бонуси до статів
+    bonuses: Record<string, number>;
     modifiers: Array<{
         type: string;
         value: number | string;
@@ -146,32 +122,24 @@ export interface EquippedArtifact {
     }>;
 }
 
-/**
- * Типи для атак
- */
 export interface BattleAttack {
     id?: string;
     name: string;
     type: AttackType;
-    attackBonus: number; // базовий бонус
-    damageDice: string; // "2d6", "1d8+3" тощо
-    damageType: string; // slashing, piercing, fire, тощо
-    range?: string; // для ranged
-    properties?: string; // спеціальні властивості
-    /** Тип цілі: одна ціль або AOE (область) */
+    attackBonus: number;
+    damageDice: string;
+    damageType: string;
+    range?: string;
+    properties?: string;
     targetType?: 'target' | 'aoe';
     minTargets?: number;
     maxTargets?: number;
-    /** Розподіл шкоди по цілях (%): [50, 30, 20] — перша 50%, друга 30%, третя 20%. Сума = 100. */
     damageDistribution?: number[];
-    /** Гарантована шкода — застосовується навіть при промаху. */
     guaranteedDamage?: number;
     traits?: WeaponTrait[];
     versatileDice?: string;
     hand?: 'off';
-    /** +N до шкоди цією зброєю (магічний предмет) */
     damageBonus?: number;
-    /** Категорія зброї 5e (з опису предмета); відсутня — вважається володінням */
     weaponCategory?: 'simple' | 'martial';
     /** Opaque rule-system data (the system's codec narrows it) */
     system?: SystemSlot;
@@ -184,32 +152,21 @@ export interface BattleAttack {
     noLevelDice?: true;
 }
 
-/**
- * Повна структура учасника бою (BattleParticipant)
- * Містить всі дані персонажа/юніта для бою
- */
-/**
- * Базова інформація про учасника бою
- */
 export interface BattleParticipantBasicInfo {
-    id: string; // унікальний ID учасника В ЦІЙ БИТВІ
-    battleId: string; // ID битви
-    sourceId: string; // оригінальний ID character/unit
+    id: string;
+    battleId: string;
+    sourceId: string;
     sourceType: ParticipantSourceTypeValue;
-    instanceNumber?: number; // номер копії (для units: 1, 2, 3...)
-    instanceId?: string; // унікальний ID інстансу (для units)
+    instanceNumber?: number;
+    instanceId?: string;
     name: string;
     avatar?: string;
     side: ParticipantSide;
-    controlledBy: string; // userId (для players) або CONTROLLED_BY_DM (для NPC/units)
-    isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
-    /** XP за перемогу над учасником (юніт з CR або ручним XP) */
+    controlledBy: string;
+    isExtraTurnSlot?: boolean;
     xp?: number;
 }
 
-/**
- * Характеристики учасника бою
- */
 export interface BattleParticipantAbilities {
     /** Opaque rule-system data (the system's codec narrows it) */
     system?: SystemSlot;
@@ -217,9 +174,9 @@ export interface BattleParticipantAbilities {
     cr?: number;
     damageModel?: '5e';
     level: number;
-    initiative: number; // поточна ініціатива (з урахуванням бонусів)
-    baseInitiative: number; // базова ініціатива (без тимчасових бонусів)
-    initiativeBonus?: number; // запечені пасивні бонуси ініціативи (у `roll` додаються до d20 + DEX)
+    initiative: number;
+    baseInitiative: number;
+    initiativeBonus?: number;
     strength: number;
     dexterity: number;
     constitution: number;
@@ -236,22 +193,17 @@ export interface BattleParticipantAbilities {
     };
     proficiencyBonus: number;
     race: string;
-    /** Race.id для расових модифікаторів заклинань */
     raceId?: string;
     primaryAbility?: AbilityKey;
-    /** Множник шкоди ближнього бою від архетипу (лише character) */
     meleeMultiplier?: number;
     rangedMultiplier?: number;
     magicMultiplier?: number;
     archetypeKey?: HeroArchetypeKey | 'universal';
     /** Legacy snapshots */
     archetypeName?: string;
-    /** Характеристики з майстерністю рятівних кидків (лише герої, якщо є) */
-    /** Володіння бронею й зброєю класу 5e (вільні рядки SRD); відсутнє — без перевірок */
     proficiencies?: { armor: string[]; weapons: string[] };
     saveProficiencies?: AbilityKey[];
     skillProficiencies?: DndSkill[];
-    /** Таблиці кубиків героя з правил кампанії; відсутнє — типова прогресія */
     heroDice?: {
         melee?: Record<number, string>;
         ranged?: Record<number, string>;
@@ -260,7 +212,6 @@ export interface BattleParticipantAbilities {
 
 export interface SpellGrant {
     spellId: string;
-    /** стабільне джерело каста (відокремлено від spellId) */
     key?: string;
     label?: LogLine;
     via?: 'grant' | 'slotOrGrant';
@@ -273,50 +224,36 @@ export interface SpellGrant {
     attackBonus?: number;
     upcast?: { maxLevel: number; extraCost: number };
     legendaryOnly?: true;
-    /** Власне визначення підкасту (grantCast): плитка замість бібліотечного заклинання. */
     inline?: InlineCast;
     expiresRound?: number;
     concentrationOf?: { casterId: string; castId: string };
     castCost?: SpellCost;
 }
 
-/**
- * Бойові параметри учасника.
- * На початку бою currentHp = maxHp. Під час бою maxHp може тимчасово знижуватись
- * (наприклад, лікування -10% maxHP на час бою); після завершення бою стан не зберігається.
- */
 export interface BattleParticipantCombatStats {
     maxHp: number;
     currentHp: number;
     tempHp: number;
     armorClass: number;
-    speed: number; // швидкість переміщення
-    /** Сторона footprint у клітинках (1–3); немає = 1 */
+    speed: number;
     gridSize?: number;
-    morale: number; // від -3 до +3, default 0
-    /** Межа моралі кампанії; 0 — мораль вимкнена, відсутнє — 3 */
+    morale: number;
     moraleCap?: number;
     status: CombatStatusType;
     minTargets: number;
     maxTargets: number;
 }
 
-/**
- * Дані про заклинання учасника
- */
 export interface BattleParticipantSpellcasting {
     spellcastingAbility?: AbilityKey;
     spellSaveDC?: number;
     spellAttackBonus?: number;
     spellSlots: StoredSpellSlots;
-    knownSpells: string[]; // масив ID заклинань
-    slotSpells?: string[]; // незалежне право слотного каста, без знання лише з предметів/грантів
+    knownSpells: string[];
+    slotSpells?: string[]; // independent slotted-cast right, not knowledge from items/grants only
     grants?: SpellGrant[];
 }
 
-/**
- * Бойові дані учасника
- */
 export interface AirborneState {
     landAt?: GridPoint;
     targetId?: string;
@@ -344,7 +281,6 @@ export interface AbilityPool {
     recharge?: 4 | 5 | 6;
 }
 
-/** Звичайна форма цілі, поки на ній чужа форма заклинання: відновлюється при відкаті */
 export interface TransformState {
     unitId: string;
     castId: string;
@@ -409,72 +345,44 @@ export interface BattleParticipantBattleData {
     activeEffects: ActiveEffect[];
     equippedArtifacts: EquippedArtifact[];
     artifactSets?: SetProgress[];
-    /** Пул додаткових дій: поповнюється ефектом grantAction, а на початку власного ходу скидається до суми actionsPerTurn; споживається при використанні основної дії */
     pendingExtraActions?: number;
-    /** Атаки дії «Атака», що лишилися цього ходу */
     attacksLeft?: number;
     /** The participant lies at 0 HP rolling death saves; set by the system together with its slot */
     dying?: true;
-    /** Хто прикликав або підняв учасника здібністю */
     summonedBy?: string;
-    /** Двійник заклинання Phantom: id кастера; у кастера лише один живий */
     phantomOf?: string;
-    /** Предмет заклинання: не ціль, не ходить, не рахується в перемозі; зникає за expiresRound чи з концентрацією */
     object?: {
         spellId: string;
         expiresRound?: number;
         concentrationOf?: { casterId: string; castId: string };
     };
-    /** Цільова форма заклинання перетворення; немає — своя форма */
     transform?: TransformState;
-    /** Предмет зник (а не загинув) */
     dismissed?: boolean;
-    /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
     extraTurnActive?: boolean;
-    /** Учасник у резерві бою: ще не на полі, бачить лише ДМ */
     reserved?: boolean;
-    /** Щойно введений з резерву: ходить після поточного, у порядку введення */
     revealPending?: boolean;
     resolvedAbilities: ResolvedAbility[];
     abilityUsage?: Record<string, AbilityUsageCounter>;
-    /** Спільні пули вмінь класу (ключ pool:<classId>:<колонка>); витрачено — abilityUsage[ключ].battle */
     pools?: Record<string, AbilityPool>;
-    /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
     charmReturn?: { side: ParticipantSide; controlledBy: string };
-    /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */
     schoolMastery?: Record<string, 'basic' | 'advanced' | 'expert'>;
-    /** Раунд, у якому власник востаннє вказав зону кожної аури в області (auraId → раунд), навіть порожню */
     auraZones?: Record<string, number>;
-    /** Якір (лівий верхній кут footprint) на карті бою; немає — учасник поза картою */
     position?: GridPoint;
-    /** Лабіринт: учасник спить, поки його не розбудять */
     dormant?: boolean;
     facing?: Direction8;
     escaped?: boolean;
     mazeWakeRound?: number;
-    /** Клітинок пройдено в поточному ході */
     movementUsed?: number;
-    /** Додаткові клітинки руху цього ходу (Ривок) */
     extraMovement?: number;
-    /** Підготовлена атака: чекає тригера до початку наступного ходу власника */
     readied?: { kind: 'attack'; round: number };
-    /** Якір на початок поточного ходу (для «Удару і повернення») */
     turnStartPosition?: GridPoint;
-    /** Вже поверталася на стартову клітинку цього ходу */
     returnedThisTurn?: boolean;
-    /** Злетів «Пікіруванням»: поза картою й поза досяжністю до початку свого наступного ходу */
     airborne?: AirborneState;
-    /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
     hazardHitRound?: number;
-    /** Відкладені удари заклинань кастера: число вже кинуте, прибувають на початку його ходу в раунді atRound */
     pendingHits?: PendingHit[];
-    /** Раунд останнього входу/виходу зони заклинання за ключем "zoneId:in|out": раз на зону за раунд */
     zoneHits?: Record<string, number>;
-    /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
     damageMultiplier?: number;
-    /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */
     hpMultiplier?: number;
-    /** Легендарні дії й опір монстра 5e; actionsLeft відновлюється на початку його ходу */
     legendary?: LegendaryState;
     lairResistances?: number;
     senses?: {
@@ -495,9 +403,6 @@ export interface BattleParticipantBattleData {
     telepathy?: number;
 }
 
-/**
- * Флаги дій учасника
- */
 export interface BattleParticipantActionFlags {
     hasUsedAction: boolean;
     hasUsedBonusAction: boolean;
@@ -505,9 +410,6 @@ export interface BattleParticipantActionFlags {
     hasExtraTurn: boolean;
 }
 
-/**
- * Повна структура учасника бою
- */
 export interface BattleParticipant {
     basicInfo: BattleParticipantBasicInfo;
     abilities: BattleParticipantAbilities;
@@ -517,14 +419,10 @@ export interface BattleParticipant {
     actionFlags: BattleParticipantActionFlags;
 }
 
-/**
- * Тип для участі в підготовці бою (при створенні)
- */
 export interface BattlePreparationParticipant {
     id: string;
     type: ParticipantSourceTypeValue;
     side: ParticipantSide;
     quantity?: number;
-    /** Скільки з quantity (герой — 0 або 1) у резерві */
     reserved?: number;
 }

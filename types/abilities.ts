@@ -26,7 +26,6 @@ export interface AbilitySource {
     label?: LogLine;
     icon?: string | null;
     line?: { mainSkillId: string; level: string; levelNode?: boolean };
-    /** персональне вміння героя (поза деревом) */
     personal?: boolean;
 }
 

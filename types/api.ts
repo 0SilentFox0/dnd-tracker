@@ -80,14 +80,11 @@ export interface BattleScene {
     /** The server projected enemy stats for this viewer: exact numbers are never in the cache */
     redacted?: true;
     rules: Ruleset;
-    /** Призвані істоти (з’являться на початку наступного раунду) */
     pendingSummons?: BattleParticipant[];
     battleLog: BattleAction[];
     createdAt: string;
     startedAt?: string;
-    /** Таймер ходу цього бою, секунд (немає — вимкнено) */
     turnTimerSeconds?: number | null;
-    /** Початок поточного ходу (ISO) — відлік таймера ходу */
     turnStartedAt?: string;
     completedAt?: string;
     campaign?: {
@@ -97,21 +94,15 @@ export interface BattleScene {
     userRole?: CampaignRoleValue;
     isDM?: boolean;
     version?: number;
-    /** Журнал у цій відповіді — лише нові записи, які треба доклеїти до кешу */
     battleLogMode?: 'append';
-    /** Записи з actionIndex ≥ цього значення скасовано відкатом */
     battleLogCancelledFrom?: number;
     /** Public part of a pause the system is waiting on; its shape belongs to the system */
     pendingChoice?: unknown;
-    /** Стан сцени, яким керує система; відсутнє = немає */
     system?: SystemSlot;
     map?: BattleMapConfig | null;
-    /** Бій linked: map без walls/bars, ребра клієнт бере з бібліотеки за mapRef */
     mapRef?: BattleMapRef;
     mapState?: BattleMapState;
-    /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
     audio?: BattleAudioState | null;
-    /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */
     knowledge?: BattleKnowledge;
 }
 
@@ -132,25 +123,16 @@ export interface ClientBattleDelta {
         round: number;
         turnIndex: number;
         pendingChoice: unknown;
-        /** відсутнє = без змін, null = стан скинуто */
         system?: SystemSlot | null;
-        /** null — дату скинуто (reset, відкат завершеного бою) */
         startedAt?: string | null;
-        /** коли почався поточний хід (для таймера ходу) */
         turnStartedAt?: string | null;
         completedAt?: string | null;
-        /** лише коли змінилось щось, крім місцевості */
         map?: BattleMapConfig | null;
-        /** зміни місцевості, коли решта карти та сама */
         terrain?: TerrainDiff;
-        /** зміни стін і ґрат, коли решта карти та сама */
         walls?: EdgeDiff;
         bars?: EdgeDiff;
-        /** зміни стану карти (видалені ребра, двері); карта в такій дельті не їде */
         mapState?: MapStateDelta;
-        /** map-update: нова pinned-версія бібліотечної карти */
         mapRef?: BattleMapRef;
-        /** змінені поля лабіринту без стін, коли стіни й решта карти ті самі */
         maze?: Partial<Omit<MazeConfig, 'walls'>>;
     } & Partial<Record<Exclude<MapModeKey, 'maze'>, unknown>>;
     upserted: BattleParticipant[];
@@ -161,9 +143,7 @@ export interface ClientBattleDelta {
     setup?: BattlePreparationParticipant[];
     log: BattleAction[];
     cancelledFrom?: number;
-    /** зведення знань після відкату: вікно журналу клієнта не бачить подій за його межами */
     knowledge?: BattleKnowledge;
-    /** публічна дельта з журналом, відредагованим для гравців; ДМ бере повну з dm-каналу */
     redacted?: true;
 }
 
@@ -197,7 +177,6 @@ export interface BattleRefetchSignal {
     battleId: string;
     version: number;
     refetch: true;
-    /** публічний сигнал при редакції журналу: ДМ чекає свій dm-сигнал, а не рефетчить двічі */
     redacted?: true;
 }
 
@@ -224,7 +203,6 @@ export type MoveParticipantData = z.infer<typeof moveSchema>;
 export type MapTerrainData = z.infer<typeof mapTerrainSchema>;
 
 export interface MapTerrainResponse {
-    /** зайняті або поза полем клітинки, які сервер пропустив */
     skipped: string[];
 }
 

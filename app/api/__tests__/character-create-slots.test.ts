@@ -85,7 +85,6 @@ describe('створення персонажа: слоти за прогрес�
     });
 });
 
-// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

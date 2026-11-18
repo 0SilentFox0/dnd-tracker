@@ -12,10 +12,14 @@ vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
-        new Map(
-            ids.map((id) => [id, { id, resources: {}, experience: 0, characteristics: null }])
-        )
+    lockCharacters: vi.fn(
+        async (_tx: unknown, ids: string[]) =>
+            new Map(
+                ids.map((id) => [
+                    id,
+                    { id, resources: {}, experience: 0, characteristics: null },
+                ])
+            )
     ),
 }));
 vi.mock('@/lib/utils/api/api-auth', () => ({
@@ -320,7 +324,6 @@ describe('PATCH персонажа: рівень і слоти', () => {
     });
 });
 
-// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

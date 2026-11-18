@@ -60,7 +60,7 @@ export default async function CampaignDetailPage({
     const [dm, player, onboarding] = await Promise.all([
         isDM && !isTemplate ? readDmDashboard(id).catch(() => null) : null,
         isPlayer ? readPlayerDashboard(id, user.id).catch(() => null) : null,
-        // онбординг не має валити сторінку кампанії
+        // onboarding must not break the campaign page
         hasMembership
             ? readCampaignOnboarding(id, user.id, isDM).catch(() => null)
             : null,

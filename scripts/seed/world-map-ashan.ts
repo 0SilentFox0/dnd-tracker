@@ -48,7 +48,6 @@ function cropAround(points: Pt[]): CropBox {
     };
 }
 
-/** Координати ASHAN_* — 0..1 від Ашана; у вкладеній карті вони перераховуються відносно фрагмента. */
 function kingdom(
     name: string,
     color: string,

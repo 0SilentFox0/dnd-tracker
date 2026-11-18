@@ -19,13 +19,13 @@ vi.mock('next/font/google', () => ({
     EB_Garamond: () => ({ variable: '' }),
 }));
 
-// підказки онбордингу тягнуть TanStack Query й мережу; у тестах екранів вони не потрібні (власний тест робить vi.unmock)
+// onboarding hints pull TanStack Query and the network; screen tests do not need them (their own test does vi.unmock)
 vi.mock('@/components/onboarding/OnboardingHint', () => ({
     OnboardingHint: () => null,
     PlayerSheetHint: () => null,
 }));
 
-// next-intl у тестах повертає ключ з префіксом namespace; справжні переклади — через renderWithIntl (lib/i18n/test)
+// next-intl in tests returns the key with a namespace prefix; real translations go through renderWithIntl
 vi.mock('next-intl', async () => {
     const { makeT } = await import('@/lib/i18n/test/mock-t');
 
@@ -69,5 +69,5 @@ vi.mock('@/lib/i18n/request-locale', () => ({
     getRequestLocale: async () => 'uk',
 }));
 
-// lib/db створює PrismaClient під час імпорту; без URL падають навіть тести, що не ходять у БД
+// lib/db creates PrismaClient on import; without a URL even tests that never hit the DB fail
 process.env.DATABASE_URL ??= 'postgresql://test:test@127.0.0.1:1/test';

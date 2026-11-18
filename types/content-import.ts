@@ -43,7 +43,6 @@ export interface ImportField {
     ref?: ImportKind;
     /** Explicit unresolved references fail the row instead of dropping benefits. */
     strictRef?: boolean;
-    /** json: глибоко замінює назви на id у властивості `key` (напр. spellId у виборах раси) */
     nestedRef?: { kind: ImportKind; key: string };
     required?: boolean;
 }

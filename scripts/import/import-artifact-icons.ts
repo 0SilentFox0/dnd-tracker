@@ -58,7 +58,7 @@ async function main() {
             continue;
         }
 
-        // без path-prefix CDN віддає 404; з ним — webp
+        // without the path prefix the CDN returns 404; with it, webp
         const res = await fetch(
             `${url.split('?')[0]}?path-prefix=en&format=webp`,
             { headers: UA }

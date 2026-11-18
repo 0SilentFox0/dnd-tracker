@@ -10,7 +10,6 @@ export interface BattleMapBrief {
     updatedAt: string;
 }
 
-/** map — шапка без walls/bars; ребра окремо, вони живуть у чанках */
 export interface BattleMapFull extends BattleMapBrief {
     map: Omit<BattleMapConfig, 'walls' | 'bars'>;
     walls: string[];

@@ -1,11 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * AI-треди зі старою авто-назвою «Новий тред» → порожня назва (UI показує thread.untitled; title не nullable, "" — звичайний «без назви»).
- * Ідемпотентно. Після запуску на проді можна прибрати LEGACY_THREAD_TITLE з lib/constants/ai.ts.
- *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/rename-legacy-ai-threads.ts [--apply] [--allow-remote]
- *   Без --apply — лише підрахунок (dry-run).
- */
 import '@/lib/utils/rules/systems/registry';
 import { LEGACY_THREAD_TITLE } from '@/lib/constants/ai';
 import { prisma } from '@/lib/db';

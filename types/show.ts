@@ -52,16 +52,13 @@ export interface Slide {
     trackId?: string;
     kind?: 'puzzle';
     puzzle?: PuzzleSpec;
-    /** id героїв, яким видно слайд; відсутнє — усім. */
     audience?: string[];
 }
 
-/** Знімок слайда для стежки показу; лише на сервері. */
 export interface SlideTrailEntry {
     slide: Slide;
 }
 
-/** Заглушка кампанії: знімок обраного слайда (без треку). */
 export interface ShowCover {
     deckId: string;
     slide: Slide;
@@ -108,22 +105,17 @@ export interface SaveDeckData {
     expectedUpdatedAt: string;
 }
 
-/** Те, що бачать усі учасники: лише поточний слайд і картинка наступного (без набору — спойлери). */
 export interface ShowState {
     deckId: string | null;
     deckTitle: string | null;
     slide: Slide | null;
     nextImageUrl: string | null;
     audio: BattleAudioState | null;
-    /** Бій, до якого кличуть гравців; відсутнє — нікого не кличемо. */
     battle?: ShowBattle;
     cover?: ShowCover;
-    /** Гравці бачать заглушку замість слайда; позиція в наборі й музика лишаються. */
     curtain?: true;
-    /** Карта світу на екрані гравців: лише id, вигляд кожен клієнт дочитує сам. */
     world?: ShowWorld;
     puzzle?: PuzzleState;
-    /** Лише серверне: ніколи не віддається клієнтам. */
     trail?: SlideTrailEntry[];
     seq: number;
 }
@@ -153,7 +145,6 @@ export interface ShowSnapshot {
 /** Pusher `show-state` */
 export interface ShowEvent {
     campaignId: string;
-    /** Відсутній, коли показ обмежений: клієнт перечитує власний вигляд. */
     show?: ShowState;
     seq: number;
 }

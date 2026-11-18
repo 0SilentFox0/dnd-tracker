@@ -203,7 +203,6 @@ export function unitRow(
 ): Omit<Prisma.UnitUncheckedCreateInput, 'campaignId'> {
     const scores = abilityScores(unit);
 
-    // Рушій додає до attackBonus атаки модифікатор характеристики й майстерність, а `unit.attackBonus` — уже повний бонус влучання.
     const weaponBonus = (type: string) =>
         unit.attackBonus -
         proficiencyForTier(unit.tier) -

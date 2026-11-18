@@ -23,9 +23,7 @@ export interface Subclass {
 export interface ClassColumn {
     key: string;
     label: string;
-    /** рівно 20 клітинок: "2", "+2", "1d6", "D8", "+10 ft.", "" */
     values: string[];
-    /** колонка — максимум спільного пулу вмінь класу */
     pool?: { rest: 'short' | 'long' };
 }
 
@@ -37,7 +35,6 @@ export interface GameClassData {
     hitDie: HitDie;
     savingThrows: AbilityKey[];
     proficiencies: { armor: string[]; weapons: string[]; tools: string[] };
-    /** що клас додає, коли береться не першим (SRD «Multiclass proficiencies»); відсутнє — нічого */
     multiclassProficiencies?: {
         armor: string[];
         weapons: string[];
@@ -66,7 +63,6 @@ export interface ClassLevelUpPick {
     choices?: Picks;
 }
 
-/** запис персонажа з розв'язаним класом; class === null — клас не знайдено */
 export interface ResolvedClassEntry extends CharacterClassEntry {
     class: GameClassData | null;
     subclass: Subclass | null;
@@ -89,7 +85,6 @@ export interface ProgressionPick {
     required: number;
     done: number | null;
     status: 'open' | 'done' | 'locked' | 'template';
-    /** що обрано: назви опцій, де клас їх знає, інакше id (заклинання, риси, навички) */
     chosen?: string[];
 }
 
