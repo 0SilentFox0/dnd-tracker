@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useMapFogTool } from '../useMapFogTool';
 
-import type { BattleMapConfig } from '@/types/battle-grid';
+import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = { cols: 6, rows: 4, background: null, opacity: 0.3 };
 
@@ -30,7 +30,7 @@ describe('useMapFogTool', () => {
         expect(setup({ isDM: false }).view.result.current).toBeNull();
         expect(setup({ map: null }).view.result.current).toBeNull();
         expect(
-            setup({ map: { ...map, maze: true } as BattleMapConfig }).view.result
+            setup({ map: { ...map, maze: {} as MazeConfig } }).view.result
                 .current
         ).toBeNull();
     });
