@@ -1,4 +1,5 @@
 import 'server-only';
+import { readProposalOps } from '@/lib/ai/proposal-ops';
 import { prisma } from '@/lib/db';
 import { urlsUsedElsewhere } from '@/lib/server/show/deck-store';
 import { removeSlideFiles } from '@/lib/supabase/scene-slide-storage';
@@ -30,5 +31,5 @@ export async function pendingSlideUrls(
         select: { ops: true },
     });
 
-    return rows.flatMap((r) => slideUrls(r.ops as unknown as AiProposalOp[]));
+    return rows.flatMap((r) => slideUrls(readProposalOps(r.ops)));
 }

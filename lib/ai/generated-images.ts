@@ -1,3 +1,5 @@
+import { readProposalOps } from './proposal-ops';
+
 import 'server-only';
 import { prisma } from '@/lib/db';
 import { urlsUsedElsewhere } from '@/lib/server/show/deck-store';
@@ -5,7 +7,6 @@ import {
     ownedSlidePath,
     removeSlideFiles,
 } from '@/lib/supabase/scene-slide-storage';
-import type { AiProposalOp } from '@/types/ai';
 
 export type DiscardOutcome = 'removed' | 'kept' | 'foreign';
 
@@ -26,7 +27,7 @@ export async function discardGeneratedImage(
 
     if (
         open.some((r) =>
-            (r.ops as unknown as AiProposalOp[]).some(
+            readProposalOps(r.ops).some(
                 (o) => o.op === 'addSlide' && o.slide.imageUrl === url
             )
         )

@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { discardSlideFiles, slideUrls } from './proposal-media';
 
 import 'server-only';
+import { readProposalOps } from '@/lib/ai/proposal-ops';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { SCENARIO_MAX_CONTENT_BYTES } from '@/lib/constants/scenario';
 import {
@@ -70,7 +71,7 @@ type Row = Prisma.AiProposalGetPayload<{ select: typeof SELECT }>;
 
 const toProposal = (r: Row): AiProposal => ({
     ...r,
-    ops: r.ops as unknown as AiProposalOp[],
+    ops: readProposalOps(r.ops),
     status: r.status as AiProposalStatus,
     createdAt: r.createdAt.toISOString(),
 });
@@ -290,7 +291,7 @@ async function applyClaimed(
 ): Promise<ApplyResult | Settled> {
     const proposalId = proposal.id;
 
-    const ops = proposal.ops as unknown as AiProposalOp[];
+    const ops = readProposalOps(proposal.ops);
 
     const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === 'addSlide');
 
@@ -593,7 +594,7 @@ export async function rejectProposal(
             afterContentCommit(() =>
                 discardSlideFiles(
                     campaignId,
-                    slideUrls(row.ops as unknown as AiProposalOp[])
+                    slideUrls(readProposalOps(row.ops))
                 )
             );
 
