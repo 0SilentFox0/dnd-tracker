@@ -2,11 +2,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const ticket = vi.hoisted(() => vi.fn());
 
+const rate = vi.hoisted(() => vi.fn());
+
 vi.mock('@/lib/server/battle-maps/background-upload', () => ({
     createBattleMapBackgroundUploadTicket: ticket,
 }));
 vi.mock('@/lib/utils/api/as-dm', () => ({
-    withDM: (_id: string, _action: string, handler: () => unknown) => handler(),
+    withDM: (
+        _id: string,
+        _action: string,
+        handler: (access: { userId: string }) => unknown
+    ) => handler({ userId: 'u1' }),
+}));
+vi.mock('@/lib/utils/api/rate-limit', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/utils/api/rate-limit')>()),
+    checkRateLimit: rate,
 }));
 
 import { POST } from '../route';
@@ -19,7 +29,28 @@ const request = (body: unknown) =>
     });
 
 describe('battle map background upload ticket', () => {
-    beforeEach(() => vi.clearAllMocks());
+    beforeEach(() => {
+        vi.clearAllMocks();
+        rate.mockResolvedValue({ allowed: true });
+    });
+
+    it('answers 429 and issues no ticket once the rate limit is exhausted', async () => {
+        rate.mockResolvedValue({
+            allowed: false,
+            retryAfterSeconds: 30,
+            count: 21,
+            limit: 20,
+        });
+
+        const response = await POST(
+            request({ size: 100, contentType: 'image/png' }),
+            { params: Promise.resolve({ id: 'c' }) }
+        );
+
+        expect(response.status).toBe(429);
+        expect(ticket).not.toHaveBeenCalled();
+    });
+
     it('issues a campaign scoped ticket for supported image types', async () => {
         ticket.mockResolvedValue({
             ok: true,

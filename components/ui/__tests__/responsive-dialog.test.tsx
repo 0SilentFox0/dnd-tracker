@@ -314,6 +314,22 @@ describe('ResponsiveDialog portal class', () => {
         ).toBe(false);
     });
 
+    it('HUD-поверхня через className теж дає HUD-клас випадайці', () => {
+        mockMatchMedia(false);
+        render(
+            <ResponsiveDialog
+                open
+                title="Т"
+                className="hud-surface border-white/25"
+                onOpenChange={vi.fn()}
+            >
+                <Menu />
+            </ResponsiveDialog>
+        );
+
+        expect(content()?.className).toContain('hud-surface');
+    });
+
     it('без hud скидає клас, успадкований від HUD-сторінки', () => {
         mockMatchMedia(false);
         render(

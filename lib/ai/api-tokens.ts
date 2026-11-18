@@ -63,11 +63,12 @@ export async function createApiToken(
     campaignId: string,
     userId: string,
     { name, scopes, expiresAt }: CreateApiTokenInput,
-    executionMode?: string
+    executionMode?: string,
+    db: Pick<typeof prisma, 'apiToken'> = prisma
 ): Promise<CreatedApiToken> {
     const token = `${API_TOKEN_PREFIX}${randomBytes(32).toString('base64url')}`;
 
-    const row = await prisma.apiToken.create({
+    const row = await db.apiToken.create({
         data: {
             campaignId,
             userId,
@@ -128,23 +129,30 @@ export async function rotateApiToken(
         ? old.expiresAt.getTime() - old.createdAt.getTime()
         : null;
 
-    const created = await createApiToken(
-        campaignId,
-        userId,
-        {
-            name: old.name,
-            scopes: knownScopes(old.scopes),
-            expiresAt:
-                ttlMs === null
-                    ? null
-                    : new Date(Date.now() + ttlMs).toISOString(),
-        },
-        old.executionMode
-    );
+    return prisma.$transaction(async (tx) => {
+        // the conditional revoke is the claim: a parallel rotate of the same token matches no row and rolls back
+        const claimed = await tx.apiToken.updateMany({
+            where: { id: tokenId, campaignId, userId, revokedAt: null },
+            data: { revokedAt: new Date() },
+        });
 
-    await revokeApiToken(campaignId, userId, tokenId);
+        if (claimed.count === 0) return null;
 
-    return created;
+        return createApiToken(
+            campaignId,
+            userId,
+            {
+                name: old.name,
+                scopes: knownScopes(old.scopes),
+                expiresAt:
+                    ttlMs === null
+                        ? null
+                        : new Date(Date.now() + ttlMs).toISOString(),
+            },
+            old.executionMode,
+            tx
+        );
+    });
 }
 
 export type VerifiedApiToken = {

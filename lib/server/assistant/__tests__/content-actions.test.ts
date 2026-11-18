@@ -121,15 +121,7 @@ describe('content action review policy', () => {
     it('legacyCreateReturnsPending: review writes no content before confirmation', async () => {
         const { executor, rows, state } = fixture();
 
-        expect(
-            await dispatchContentAlias(
-                executor.dispatchAction,
-                caller,
-                'content_create',
-                { kind: 'units', data: { name: 'Гоблін' } },
-                'request'
-            )
-        ).toMatchObject({
+        expect(await executor.dispatchAction(caller, request)).toMatchObject({
             kind: 'pending',
             intent: { actionId: 'content.units.create' },
         });
@@ -326,6 +318,20 @@ it('spell-group deletion exposes the exact SetNull cascade', async () => {
     });
 });
 
+it('write aliases are not routed: the dispatcher answers 404', async () => {
+    const { executor } = fixture();
+
+    await expect(
+        dispatchContentAlias(
+            executor.dispatchAction,
+            caller,
+            'content_create',
+            { kind: 'units', data: { name: 'Гоблін' } },
+            'legacy'
+        )
+    ).rejects.toMatchObject({ status: 404 });
+});
+
 it('read aliases use the same catalog without creating intents', async () => {
     const { db, state } = executorDatabase();
 
@@ -365,7 +371,7 @@ it('read aliases use the same catalog without creating intents', async () => {
     expect(state.intents.size).toBe(0);
 });
 
-it('media alias hands off to the existing campaign editor without an intent', async () => {
+it('media action hands off to the existing campaign editor without an intent', async () => {
     const { db, state } = executorDatabase();
 
     const executor = createAssistantExecutor({
@@ -374,16 +380,11 @@ it('media alias hands off to the existing campaign editor without an intent', as
     });
 
     expect(
-        await dispatchContentAlias(
-            executor.dispatchAction,
-            caller,
-            'content_create',
-            {
-                kind: 'artifacts',
-                data: { name: 'Меч', icon: 'data:image/png;base64,eA==' },
-            },
-            'media'
-        )
+        await executor.dispatchAction(caller, {
+            actionId: 'content.media',
+            requestId: 'media',
+            input: { kind: 'artifacts' },
+        })
     ).toEqual({
         kind: 'handoff',
         href: '/campaigns/campaign/dm/artifacts',
