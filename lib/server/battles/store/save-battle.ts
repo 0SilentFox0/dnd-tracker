@@ -363,7 +363,7 @@ export async function saveBattle(
                 data: diff.created.map((p) => ({
                     ...p.columns,
                     battleId: scene.id,
-                    snapshot: p.snapshot as Prisma.InputJsonValue,
+                    snapshot: toInputJson(p.snapshot),
                     state: toInputJson(p.state),
                     snapshotHash: p.snapshotHash,
                 })),
