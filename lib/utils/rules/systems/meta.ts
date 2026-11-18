@@ -46,6 +46,8 @@ export interface SystemMeta {
     /** Absent means "base" until every folder declares it */
     kind?: SystemKind;
     keys: readonly string[];
+    /** Extra spellings the surface scanner looks for (camelCase words the id cannot show) */
+    aliases?: readonly string[];
     preset?: { base: string; modules: readonly string[] };
     requires?: readonly string[];
     conflicts?: readonly string[];

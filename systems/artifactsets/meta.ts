@@ -4,6 +4,7 @@ export const ARTIFACTSETS_META = {
     module: 'artifactsets',
     kind: 'addon',
     keys: [],
+    aliases: ['artifactSet'],
     requires: ['d20'],
     i18n: {},
     dmSections: ['artifact-sets'],

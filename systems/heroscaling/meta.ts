@@ -4,6 +4,7 @@ export const HEROSCALING_META = {
     module: 'heroscaling',
     kind: 'addon',
     keys: [],
+    aliases: ['heroScaling'],
     requires: ['d20'],
     claims: ['progression.maxHp'],
     toggle: 'setup',

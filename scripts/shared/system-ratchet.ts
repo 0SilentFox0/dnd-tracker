@@ -72,7 +72,10 @@ export const literalTokens = (): LiteralTokens => {
     ];
 
     const keysAndModules = (SYSTEM_META as readonly SystemMeta[]).flatMap(
-        (m) => (m.kind === 'addon' ? [...m.keys] : [...m.keys, m.module])
+        (m) =>
+            m.kind === 'addon'
+                ? [...m.keys, m.module, ...(m.aliases ?? [])]
+                : [...m.keys, m.module]
     );
 
     return {
@@ -123,7 +126,8 @@ export const isLiteralAllowed = (
 ): boolean => {
     if (
         SYSTEM_ROOTS.includes(file) ||
-        file === 'lib/utils/templates/registry.ts'
+        file === 'lib/utils/templates/registry.ts' ||
+        file === 'scripts/shared/system-ratchet.ts'
     )
         return true;
 
@@ -229,45 +233,134 @@ export interface SurfaceExempt {
     messages: string[];
 }
 
-const SCHEMA_FILE = 'prisma/schema.prisma';
+const SCHEMA_FILES = ['prisma/schema.prisma', 'prisma/schema/core.prisma'];
 
-const MESSAGE_LOCALE = 'en';
+const MESSAGE_LOCALES = ['uk', 'en'] as const;
 
-const nameRe = (ids: readonly string[]) =>
-    new RegExp(ids.map((id) => escapeRe(id).replace(/s$/, '')).join('|'), 'i');
+const words = (name: string): string[] =>
+    name
+        .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+        .toLowerCase()
+        .split(/[\s_-]+/)
+        .filter(Boolean);
 
-/** `case` labels, object keys and kebab operation names that carry a module id */
-export const countModuleSurface = (
-    text: string,
-    ids: readonly string[]
-): number => {
-    if (ids.length === 0) return 0;
-
-    const alt = ids.map(escapeRe).join('|');
+/** Id, singular stem and aliases of every addon, deduplicated */
+export const moduleNames = (meta: SystemMeta): string[] => {
+    const base = [meta.module, ...(meta.aliases ?? [])];
 
     return [
-        new RegExp(`\\bcase\\s*${Q}(?:${alt})${Q}`, 'g'),
-        new RegExp(`(?<!\\bcase\\s*)${Q}(?:${alt})${Q}\\s*:`, 'g'),
-        new RegExp(`^\\s*(?:${alt})\\s*:`, 'gm'),
-        new RegExp(`${Q}(?:${alt})-[a-z-]+${Q}`, 'g'),
-        new RegExp(`${Q}[a-z]+-(?:${alt})${Q}`, 'g'),
-    ].reduce((sum, re) => sum + (text.match(re) ?? []).length, 0);
+        ...new Set(
+            base.flatMap((n) => (n.endsWith('s') ? [n, n.slice(0, -1)] : [n]))
+        ),
+    ];
+};
+
+export const allModuleNames = (): string[] => [
+    ...new Set(
+        (SYSTEM_META as readonly SystemMeta[])
+            .filter((m) => m.kind === 'addon')
+            .flatMap(moduleNames)
+    ),
+];
+
+const nameVariants = (names: readonly string[]): string[] => [
+    ...new Set(
+        names.flatMap((n) => {
+            const w = words(n);
+
+            return [w.join(''), w.join('-'), w.join('_')];
+        })
+    ),
+];
+
+const fragmentRe = (names: readonly string[]): RegExp | null =>
+    names.length === 0
+        ? null
+        : new RegExp(
+              nameVariants(names)
+                  .sort((a, b) => b.length - a.length)
+                  .map(escapeRe)
+                  .join('|'),
+              'gi'
+          );
+
+/** A lowercase fragment glued to a preceding letter ("flair") is not a hit; "skipMorale" is */
+const fragmentHits = (text: string, re: RegExp | null): number => {
+    if (!re) return 0;
+
+    let n = 0;
+
+    for (const m of text.matchAll(re)) {
+        const prev = text[(m.index ?? 0) - 1] ?? '';
+
+        const first = m[0][0];
+
+        if (
+            !/[a-z]/i.test(prev) ||
+            (first === first.toUpperCase() && first !== first.toLowerCase())
+        )
+            n += 1;
+    }
+
+    return n;
+};
+
+const stripComments = (text: string): string =>
+    text
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/(^|[^:"'`\\])\/\/.*$/gm, '$1');
+
+export const countModuleSurface = (
+    text: string,
+    names: readonly string[]
+): number => fragmentHits(stripComments(text), fragmentRe(names));
+
+/** Prisma models that belong to a module, keyed by the delegate name */
+export const MODULE_MODELS: Record<string, string> = {
+    skillTree: 'skilltrees',
+    skillTreeBase: 'skilltrees',
+    characterSkills: 'skilltrees',
+    mainSkill: 'skilltrees',
+    mainSkillBase: 'skilltrees',
+    skill: 'skilltrees',
+    skillBase: 'skilltrees',
+    artifactSet: 'artifactsets',
+    artifactSetBase: 'artifactsets',
+};
+
+export const countModuleModelAccess = (
+    text: string,
+    file = '',
+    models: Record<string, string> = MODULE_MODELS
+): number => {
+    const own = (model: string) => file.startsWith(`systems/${models[model]}/`);
+
+    const names = Object.keys(models).filter((m) => !own(m));
+
+    if (names.length === 0) return 0;
+
+    return (
+        stripComments(text).match(
+            new RegExp(`\\b(?:prisma|tx|db)\\.(?:${names.join('|')})\\b`, 'g')
+        ) ?? []
+    ).length;
 };
 
 export const scanModuleSurface = (): Record<string, number> => {
     const tokens = literalTokens();
 
-    const ids = moduleIds();
+    const names = allModuleNames();
 
     const out: Record<string, number> = {};
 
     for (const file of sourceFiles()) {
         if (isLiteralAllowed(file, tokens)) continue;
 
-        const count = countModuleSurface(
-            fs.readFileSync(path.join(ROOT, file), 'utf8'),
-            ids
-        );
+        const text = fs.readFileSync(path.join(ROOT, file), 'utf8');
+
+        const count =
+            countModuleSurface(text, names) +
+            countModuleModelAccess(text, file);
 
         if (count > 0) out[file] = count;
     }
@@ -275,30 +368,41 @@ export const scanModuleSurface = (): Record<string, number> => {
     return out;
 };
 
+/** A string is schema text, an array is a list of files relative to the repo root */
 export const scanSchemaColumns = (
-    text: string = fs.readFileSync(path.join(ROOT, SCHEMA_FILE), 'utf8'),
-    ids: readonly string[] = moduleIds()
+    input: string | readonly string[] = SCHEMA_FILES,
+    names: readonly string[] = allModuleNames()
 ): string[] => {
-    const re = nameRe(ids);
+    const re = fragmentRe(names);
 
     const hits: string[] = [];
 
+    const lines = (
+        typeof input === 'string'
+            ? [input]
+            : input
+                  .filter((f) => fs.existsSync(path.join(ROOT, f)))
+                  .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8'))
+    ).flatMap((t) => [...t.split('\n'), '}']);
+
     let model = '';
 
-    for (const line of text.split('\n')) {
+    for (const line of lines) {
+        if (line === '}') model = '';
+
         const open = /^model\s+(\w+)/.exec(line);
 
         if (open) {
             model = open[1];
 
-            if (re.test(model)) hits.push(`model ${model}`);
+            if (fragmentHits(model, re)) hits.push(`model ${model}`);
 
             continue;
         }
 
         const field = /^\s+(\w+)\s/.exec(line);
 
-        if (model && field && re.test(field[1]))
+        if (model && field && fragmentHits(field[1], re))
             hits.push(`${model}.${field[1]}`);
     }
 
@@ -314,26 +418,33 @@ const jsonKeyPaths = (value: unknown, prefix: string): string[] =>
         : [];
 
 export const scanCoreMessageKeys = (
-    ids: readonly string[] = moduleIds()
+    names: readonly string[] = allModuleNames()
 ): string[] => {
-    const re = new RegExp(`^(?:${ids.map(escapeRe).join('|')})$`, 'i');
+    const re = fragmentRe(names);
 
     const owned = new Set(systemNamespaces());
 
-    const dir = path.join(ROOT, 'messages', MESSAGE_LOCALE);
+    return MESSAGE_LOCALES.flatMap((locale) => {
+        const dir = path.join(ROOT, 'messages', locale);
 
-    return fs
-        .readdirSync(dir)
-        .filter((f) => f.endsWith('.json') && !owned.has(f.slice(0, -5)))
-        .flatMap((f) =>
-            jsonKeyPaths(
-                JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')),
-                f.slice(0, -5)
-            )
-        )
-        .filter((p) => !p.startsWith('gameTerms.module.'))
-        .filter((p) => re.test(p.slice(p.lastIndexOf('.') + 1)))
-        .sort();
+        return fs
+            .readdirSync(dir)
+            .filter((f) => f.endsWith('.json') && !owned.has(f.slice(0, -5)))
+            .flatMap((f) => {
+                const ns = f.slice(0, -5);
+
+                const keys = jsonKeyPaths(
+                    JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')),
+                    ns
+                ).filter((p) => !p.startsWith('gameTerms.module.'));
+
+                return [ns, ...keys]
+                    .filter((p) =>
+                        fragmentHits(p.slice(p.lastIndexOf('.') + 1), re)
+                    )
+                    .map((p) => `${locale}:${p}`);
+            });
+    }).sort();
 };
 
 export const readSurfaceExempt = (): SurfaceExempt =>
