@@ -155,26 +155,35 @@ export function redactDeltaForPlayers(
 
     const setup = delta.setup && publicSetup(delta.setup);
 
-    const changed =
+    const touched =
         logChanged ||
         upserted !== delta.upserted ||
         patched !== delta.patched ||
         pending !== delta.pending ||
         setup !== delta.setup;
 
-    return {
-        delta: changed
-            ? {
-                  ...delta,
-                  log: entries,
-                  upserted,
-                  ...(patched && { patched }),
-                  ...(pending && { pending }),
-                  ...(setup && { setup }),
-              }
-            : delta,
-        changed,
-    };
+    const projected: ClientBattleDelta = touched
+        ? {
+              ...delta,
+              log: entries,
+              upserted,
+              ...(patched && { patched }),
+              ...(pending && { pending }),
+              ...(setup && { setup }),
+          }
+        : delta;
+
+    // a projection that serialises to the same payload leaks nothing and needs no dm twin
+    const changed = touched && !sameDeltaPayload(delta, projected);
+
+    return { delta: changed ? projected : delta, changed };
+}
+
+function sameDeltaPayload(a: ClientBattleDelta, b: ClientBattleDelta): boolean {
+    const pick = ({ log, upserted, patched, pending, setup }: ClientBattleDelta) =>
+        JSON.stringify([log, upserted, patched, pending, setup]);
+
+    return pick(a) === pick(b);
 }
 
 function fitOrRefetch(

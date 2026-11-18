@@ -321,6 +321,38 @@ describe('buildPusherMessages', () => {
             expect(messages[0].payload).not.toHaveProperty('redacted');
         });
 
+        it('патч ворога без прихованих полів — без redacted і без dm-дубля', () => {
+            const messages = buildPusherMessages({
+                ...args,
+                delta: {
+                    ...payload,
+                    log: [],
+                    upserted: [],
+                    patched: [{ id: 'gob', combatStats: { speed: 5 } }],
+                },
+            });
+
+            expect(messages.map((m) => m.channel)).toEqual([
+                'private-battle-b1',
+            ]);
+            expect(messages[0].payload).not.toHaveProperty('redacted');
+        });
+
+        it('патч ворога з HP — redacted і dm-повідомлення', () => {
+            const messages = buildPusherMessages({
+                ...args,
+                delta: {
+                    ...payload,
+                    log: [],
+                    upserted: [],
+                    patched: [{ id: 'gob', combatStats: { currentHp: 3 } }],
+                },
+            });
+
+            expect(messages).toHaveLength(2);
+            expect(messages[0].payload).toHaveProperty('redacted', true);
+        });
+
         it('зі змінами — публічне redacted з appliedHidden і повне dm-повідомлення', () => {
             const full = { ...payload, log: [action([applied])] };
 
