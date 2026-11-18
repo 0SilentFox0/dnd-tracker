@@ -47,9 +47,6 @@ export interface CharacterGoal {
     author: GoalAuthorValue;
 }
 
-/**
- * Згрупована структура даних персонажа (як використовується в формі)
- */
 export interface CharacterFormData {
     characteristics?: SystemData | null;
     systemBaseline?: unknown;
@@ -102,7 +99,6 @@ export interface CharacterFormData {
         proficiencies: Record<string, string[]>;
         immunities?: string[];
     };
-    /** Уміння: скіл з групи «Персональні» */
     abilities: {
         personalSkillId: string;
     };
@@ -112,9 +108,6 @@ export interface CharacterFormData {
     };
 }
 
-/**
- * Плоска структура персонажа (як зберігається в БД та повертається з API)
- */
 export interface Character {
     id: string;
     campaignId: string;
@@ -161,7 +154,6 @@ export interface Character {
     archetype?: string | null;
     characteristics?: SystemData | null;
     experience?: number;
-    /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
     skillTreeProgress?: Record<
         string,
         { level?: string; unlockedSkills?: string[] }
@@ -181,7 +173,6 @@ export interface Character {
     };
 }
 
-/** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
     Character,
     | 'id'
@@ -403,11 +394,8 @@ export interface CharacterResources {
     hp?: number;
     tempHp?: number;
     dead?: boolean;
-    /** ключі "1".."9" і "pact" */
     slotsSpent?: Record<string, number>;
-    /** classId → витрачено */
     hitDiceSpent?: Record<string, number>;
-    /** ключ вміння (ResolvedAbility.key) → використання perRest */
     charges?: Record<
         string,
         {

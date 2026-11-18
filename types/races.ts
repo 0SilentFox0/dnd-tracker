@@ -4,14 +4,14 @@ import type { Ability, ConversionIssue } from '@/lib/utils/abilities/schema';
 import type { Choice } from '@/types/choices';
 
 export interface StatModifier {
-    bonus?: boolean; // Дає + (бонус)
-    nonNegative?: boolean; // Зробити невід'ємним (мінімум 0)
-    alwaysZero?: boolean; // Завжди 0
+    bonus?: boolean;
+    nonNegative?: boolean;
+    alwaysZero?: boolean;
 }
 
 export interface SpellSlotProgression {
-    level: number; // Рівень магії (1-5)
-    slots: number; // Максимальна кількість слотів
+    level: number;
+    slots: number;
 }
 
 export interface RacePassiveAbility {
@@ -21,7 +21,6 @@ export interface RacePassiveAbility {
     description: string;
     appearanceDescription?: string;
     statImprovements?: string;
-    // ключ — характеристика (strength, dexterity, …)
     statModifiers?: Record<string, StatModifier>;
 }
 

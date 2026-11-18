@@ -35,12 +35,9 @@ export interface ChoiceOption {
     id: string;
     name: string;
     description?: string;
-    /** рівень власника: у класі — рівень у класі, у расі — загальний */
     minLevel?: number;
-    /** id інших опцій цього ж вибору */
     requires?: string[];
     abilities: Ability[];
-    /** лише раса: відомі з загального рівня `level` */
     spells?: { level: number; spellId: string; grant?: SpellGrantPolicy }[];
 }
 
@@ -65,7 +62,6 @@ export interface Choice {
 
 export interface ChoicePick {
     id: string;
-    /** лише пік риси: вкладені вибори цієї риси */
     picks?: Picks;
 }
 
@@ -80,7 +76,6 @@ export interface CharacterFeat {
 export interface FeatPrerequisite {
     manualText?: string[];
     level?: number;
-    /** «будь-яка з» характеристик не нижче `min` */
     scores?: { abilities: AbilityKey[]; min: number };
     text?: string;
 }
@@ -178,7 +173,6 @@ export interface SheetBackground {
 export interface SheetChoices {
     background?: SheetBackground;
     pending: number;
-    /** ДМ, або власник при allowPlayerEdit і не на розгляді */
     canEdit?: boolean;
     lineage: string | null;
     feats: Array<{

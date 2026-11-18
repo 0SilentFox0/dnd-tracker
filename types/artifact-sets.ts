@@ -12,7 +12,6 @@ export interface ArtifactSetRow {
     name: string;
     description: string | null;
     setBonus: unknown;
-    /** URL іконки для HUD бою (статус повного сету). */
     icon?: string | null;
     createdAt: string;
     artifacts?: ArtifactSetSummaryArtifact[];

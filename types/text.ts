@@ -6,5 +6,4 @@ export interface TextRef {
     params?: Record<string, TextArg>;
 }
 
-/** `string` = legacy or content text, shown as is. */
 export type LogLine = string | TextRef;

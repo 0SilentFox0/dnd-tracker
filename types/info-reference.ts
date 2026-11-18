@@ -31,13 +31,11 @@ export interface SpellForReference {
     name: string;
     level: number;
     targeting: SpellTargeting;
-    /** стабільний id цілей для фільтра довідника */
     facetKey: string;
     cost: SpellCost;
     resolution: SpellResolution;
     dice: number;
     description: string | null;
-    /** описи ефектів із моделі вмінь як сегменти (мовонезалежні, рендер на клієнті) */
     effects: Segment[][];
     appearanceDescription: string | null;
     groupName: string | null;

@@ -44,7 +44,6 @@ export interface SuggestedEnemy {
     xp?: number;
 }
 
-/** Детальний розклад DPR персонажа (з balance API) */
 export interface CharacterDprBreakdown {
     physicalDpr: number;
     meleeAvg: number;
@@ -68,7 +67,6 @@ export interface EntityStats {
     dprBreakdown?: CharacterDprBreakdown;
 }
 
-/** Найкраще закляття юніта, коли воно сильніше за зброю (баланс зважує рятунки, опір партії і слоти). */
 export interface UnitSpellPower {
     dpr: number;
     damageType: string;

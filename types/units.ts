@@ -15,7 +15,6 @@ export interface UnitAttack {
     range?: string;
     properties?: string;
     maxTargets?: number;
-    // per-target damage share in %, e.g. [50, 30, 20]
     damageDistribution?: number[];
     // applied even on a miss
     guaranteedDamage?: number;
