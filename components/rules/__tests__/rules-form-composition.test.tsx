@@ -42,8 +42,17 @@ vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
 
 afterEach(cleanup);
 
+const LABELS: Record<string, string> = {
+    morale: 'rulesMorale',
+    heroScaling: 'rulesHeroScaling',
+};
+
 const tab = (key: string) =>
-    screen.queryByRole('tab', { name: `rules.mechanics.${key}.label` });
+    screen.queryByRole('tab', {
+        name: LABELS[key]
+            ? `${LABELS[key]}.label`
+            : `rules.mechanics.${key}.label`,
+    });
 
 describe('RulesForm tabs follow the composition sections', () => {
     it('homm preset: module sections are tabs', () => {

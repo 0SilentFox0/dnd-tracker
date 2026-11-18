@@ -96,6 +96,9 @@ describe('useArtifactSetForm', () => {
                 icon: null,
             })
         );
-        expect(nav).toEqual(['push /campaigns/c1/dm/artifact-sets', 'refresh']);
+        expect(nav).toEqual([
+            'push /campaigns/c1/dm/system/artifact-sets',
+            'refresh',
+        ]);
     });
 });

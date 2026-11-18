@@ -33,6 +33,11 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useSheetRoll: () => h.roll,
 }));
+vi.mock('@/lib/hooks/systems', () => ({
+    useCampaignSystem: (_id: string, key: string) => ({
+        system: { key, modules: key === 'homm' ? ['inspiration'] : undefined },
+    }),
+}));
 vi.mock('@/components/dice/DiceStage', () => ({
     DiceStage: () => null,
 }));

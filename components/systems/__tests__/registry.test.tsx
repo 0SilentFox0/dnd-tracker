@@ -67,9 +67,11 @@ describe('system ui registry', () => {
             expect.arrayContaining(['morale', 'heroScaling'])
         );
         expect(Object.keys(dndItems ?? {})).toEqual([
+            'outOfCombat.inspiration',
             'actions.opportunityAttacks',
         ]);
         expect(Object.keys(hommItems ?? {})).toEqual([
+            'outOfCombat.inspiration',
             'actions.opportunityAttacks',
             'actions.retaliation',
         ]);

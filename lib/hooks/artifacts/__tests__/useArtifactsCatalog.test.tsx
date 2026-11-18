@@ -79,11 +79,9 @@ describe('useArtifactsCatalog', () => {
             { wrapper }
         );
 
-        await waitFor(() =>
-            expect(result.current.catalog.view.groups).toHaveLength(1)
-        );
+        await waitFor(() => expect(result.current.catalog.count).toBe(2));
 
-        expect(result.current.catalog.count).toBe(2);
+        expect(result.current.catalog.view.groups).toHaveLength(1);
         expect(
             result.current.catalog.view.groups[0].artifacts.map((a) => a.id)
         ).toEqual(['a2']);
@@ -126,7 +124,7 @@ describe('useArtifactsCatalog', () => {
             }
         );
 
-        await waitFor(() => expect(result.current.view.groups).toHaveLength(1));
+        await waitFor(() => expect(result.current.count).toBe(2));
 
         act(() => result.current.search.query.set('луска'));
 

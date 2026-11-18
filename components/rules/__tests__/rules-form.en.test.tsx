@@ -53,7 +53,16 @@ describe('RulesForm (en)', () => {
             </ConfirmProvider>,
             {
                 locale: 'en',
-                namespaces: ['common', 'validation', 'rules', 'battleTerms'],
+                namespaces: [
+                    'common',
+                    'validation',
+                    'rules',
+                    'rulesMorale',
+                    'rulesHeroScaling',
+                    'rulesDeathSaves',
+                    'rulesInspiration',
+                    'battleTerms',
+                ],
             }
         );
 

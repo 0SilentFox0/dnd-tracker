@@ -138,7 +138,7 @@ describe('message scope size', () => {
         expect(gzipKb).toBeLessThan(ROOT_LIMIT_KB);
     });
 
-    it('a d20 campaign gets no system namespace', () => {
+    it('a d20 campaign gets only the namespaces of its modules', () => {
         for (const slot of [
             'battle',
             'campaign',
@@ -151,7 +151,9 @@ describe('message scope size', () => {
             'draft',
         ] as const) {
             expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual([]);
-            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual([]);
+            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual(
+                slot === 'campaign' ? ['inspiration'] : []
+            );
             expect(systemScope(null, slot)).toEqual([]);
         }
     });

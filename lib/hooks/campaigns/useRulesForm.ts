@@ -8,7 +8,6 @@ import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useNotify } from '@/lib/hooks/common';
 import { sameJson } from '@/lib/utils/common/json';
 import { type Ruleset, type RulesetPatch } from '@/lib/utils/rules';
-import { ALL_SECTIONS } from '@/lib/utils/rules/section-registry';
 
 export const HERO_LEVELS = Array.from(
     { length: MAX_CLASS_LEVEL },
@@ -71,6 +70,11 @@ export function useRulesForm(campaignId: string) {
 
     const save = async () => {
         if (!data || dirtyKeys.length === 0) return true;
+
+        // Lazy: the registry pulls every system's rules into the battle entry chunk
+        const { ALL_SECTIONS } = await import(
+            '@/lib/utils/rules/section-registry'
+        );
 
         const patchValue = (key: keyof Ruleset) => {
             const prepare = ALL_SECTIONS[key]?.prepareSave;

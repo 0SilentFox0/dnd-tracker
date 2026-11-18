@@ -21,9 +21,11 @@ describe('dashboard sections', () => {
             const pageOf = (r: string) =>
                 path.join(process.cwd(), 'app/campaigns/[id]', r, 'page.tsx');
 
+            const catchAll = '/dm/system/[section]/[[...rest]]';
+
             const moduleSection = rel.replace(
                 /^\/dm\/system\/[^/]+$/,
-                '/dm/system/[section]'
+                catchAll
             );
 
             expect(
