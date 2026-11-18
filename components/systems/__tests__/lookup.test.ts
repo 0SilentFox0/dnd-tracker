@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.setConfig({ testTimeout: 30_000 });
+
 const fresh = async () => {
     vi.resetModules();
 

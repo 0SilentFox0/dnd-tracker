@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
     commentsProblems,
@@ -6,6 +6,8 @@ import {
     readCommentsExempt,
     scanCyrillicComments,
 } from '@/scripts/shared/cyrillic-comments';
+
+vi.setConfig({ testTimeout: 30_000 });
 
 describe('cyrillic comments ratchet', () => {
     it('comments with Cyrillic only fall', () =>

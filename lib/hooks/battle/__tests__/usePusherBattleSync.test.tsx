@@ -6,7 +6,10 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RESYNC_AFTER_HIDDEN_MS } from '../useBattleResync';
-import { usePusherBattleSync } from '../usePusherBattleSync';
+import {
+    PROJECTED_REFETCH_DEBOUNCE_MS,
+    usePusherBattleSync,
+} from '../usePusherBattleSync';
 
 import { getBattleVersion } from '@/lib/api/battles';
 import { audioState } from '@/lib/utils/audio/__tests__/fixtures';
@@ -209,6 +212,7 @@ describe('usePusherBattleSync — two players receive same battle state', () => 
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         cleanup();
         delete process.env.NEXT_PUBLIC_PUSHER_KEY;
     });
@@ -764,6 +768,7 @@ describe('usePusherBattleSync: dm-канал', () => {
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         cleanup();
         delete process.env.NEXT_PUBLIC_PUSHER_KEY;
     });
@@ -923,6 +928,8 @@ describe('usePusherBattleSync: dm-канал', () => {
         );
         invalidate.mockClear();
 
+        vi.useFakeTimers();
+
         act(() => {
             for (let i = 0; i < 3; i++)
                 simulateTrigger(
@@ -932,9 +939,62 @@ describe('usePusherBattleSync: dm-канал', () => {
                 );
         });
 
-        await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(1));
-        await new Promise((r) => setTimeout(r, 600));
+        act(() => {
+            vi.advanceTimersByTime(PROJECTED_REFETCH_DEBOUNCE_MS - 1);
+        });
+        expect(invalidate).not.toHaveBeenCalled();
+
+        act(() => {
+            vi.advanceTimersByTime(1);
+        });
         expect(invalidate).toHaveBeenCalledTimes(1);
+
+        act(() => {
+            vi.advanceTimersByTime(5 * PROJECTED_REFETCH_DEBOUNCE_MS);
+        });
+        expect(invalidate).toHaveBeenCalledTimes(1);
+    });
+
+    it('після спрацювання дебаунсу нова redacted дельта запускає наступну інвалідацію', async () => {
+        const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        invalidate.mockClear();
+
+        vi.useFakeTimers();
+
+        const fire = () =>
+            act(() => {
+                simulateTrigger(
+                    'private-battle-battle-1',
+                    'battle-delta',
+                    delta([entry('прихований')], true)
+                );
+                vi.advanceTimersByTime(PROJECTED_REFETCH_DEBOUNCE_MS);
+            });
+
+        fire();
+        fire();
+
+        expect(invalidate).toHaveBeenCalledTimes(2);
     });
 
     it('гравець із власним героєм на ворожому боці (charm) на redacted дельту інвалідує сцену', async () => {
