@@ -14,10 +14,15 @@ import { publicSetup, reserveOf } from '@/lib/utils/battle/participant/reserve';
 import type { BattleSceneState, LoadedBattle } from '@/lib/utils/battle/store';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import {
+    redactParticipantsForViewer,
+    redactPatchesForViewer,
+    redactPendingForViewer,
+} from '@/lib/utils/battle/view/redact-participants';
+import {
+    alwaysSeesEnemyStats,
+    PLAYER_VIEWER,
     redactLogForPlayers,
-    redactParticipantsForPlayers,
-    redactPatchesForPlayers,
-    redactPendingForPlayers,
+    type Viewer,
 } from '@/lib/utils/battle/view/visibility';
 import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -31,6 +36,22 @@ import type { BattleAction } from '@/types/battle-actions';
 
 export interface BattleResponseView {
     isDM?: boolean;
+    userId?: string;
+}
+
+export function viewerOf(
+    view: BattleResponseView,
+    participants: BattleParticipant[]
+): Viewer {
+    const { userId = null } = view;
+
+    return {
+        userId,
+        isDM: Boolean(view.isDM),
+        readOnly: true,
+        canSeeEnemyHp:
+            userId !== null && alwaysSeesEnemyStats(participants, userId),
+    };
 }
 
 export interface PusherMessage {
@@ -65,6 +86,8 @@ export function toBattleResponse(
 
     const hide = view && !view.isDM;
 
+    const viewer = view && viewerOf(view, participants);
+
     return {
         id: scene.id,
         campaignId: scene.campaignId,
@@ -79,10 +102,10 @@ export function toBattleResponse(
                 : [],
         currentRound: scene.round,
         currentTurnIndex: scene.turnIndex,
-        initiativeOrder: hide
-            ? redactParticipantsForPlayers(participants)
+        initiativeOrder: viewer
+            ? redactParticipantsForViewer(viewer, participants)
             : participants,
-        pendingSummons: hide ? redactPendingForPlayers(pending) : pending,
+        pendingSummons: viewer ? redactPendingForViewer(viewer, pending) : pending,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
         ...mapFields(meta),
@@ -110,19 +133,22 @@ export function toBattleResponse(
 export function redactDeltaForPlayers(
     delta: ClientBattleDelta,
     participants: BattleParticipant[],
-    rules: Ruleset
+    rules: Ruleset,
+    viewer: Viewer = PLAYER_VIEWER
 ): { delta: ClientBattleDelta; changed: boolean } {
     const { entries, changed: logChanged } = redactLogForPlayers(delta.log, {
         participants,
         rules,
     });
 
-    const upserted = redactParticipantsForPlayers(delta.upserted);
+    const upserted = redactParticipantsForViewer(viewer, delta.upserted);
 
     const patched =
-        delta.patched && redactPatchesForPlayers(delta.patched, participants);
+        delta.patched &&
+        redactPatchesForViewer(viewer, delta.patched, participants);
 
-    const pending = delta.pending && redactPendingForPlayers(delta.pending);
+    const pending =
+        delta.pending && redactPendingForViewer(viewer, delta.pending);
 
     const setup = delta.setup && publicSetup(delta.setup);
 

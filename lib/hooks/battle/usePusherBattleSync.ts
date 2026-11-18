@@ -15,6 +15,7 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
+import { alwaysSeesEnemyStats } from '@/lib/utils/battle/view';
 import type {
     BattleRefetchSignal,
     BattleScene,
@@ -88,8 +89,22 @@ export function usePusherBattleSync(
         // ДМ бере повну дельту з dm-каналу тієї ж версії, але лише поки той канал підписаний
         if (dmReady && 'redacted' in signal && signal.redacted) return;
 
-        const cachedVersion =
-            queryClient.getQueryData<BattleScene>(key)?.version;
+        const cached = queryClient.getQueryData<BattleScene>(key);
+
+        const cachedVersion = cached?.version;
+
+        // the shared channel carries projected enemy stats; a viewer who sees exact stats reads them from the scene
+        if (
+            'redacted' in signal &&
+            signal.redacted &&
+            currentUserId &&
+            cached &&
+            alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId)
+        ) {
+            void queryClient.invalidateQueries({ queryKey: key });
+
+            return;
+        }
 
         if (cachedVersion !== undefined && signal.version <= cachedVersion)
             return;

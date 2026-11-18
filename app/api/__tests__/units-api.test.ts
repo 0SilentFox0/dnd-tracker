@@ -84,6 +84,27 @@ describe('units API', () => {
         expect(res.headers.get('Cache-Control')).toBe('private, no-store');
     });
 
+    it('не учасник кампанії не читає юніти (список і окремий) — 403, БД не чіпається', async () => {
+        const { requireCampaignAccess } = await import(
+            '@/lib/utils/api/api-auth'
+        );
+
+        const deny = () =>
+            NextResponse.json({ error: 'forbidden' }, { status: 403 });
+
+        vi.mocked(requireCampaignAccess)
+            .mockResolvedValueOnce(deny())
+            .mockResolvedValueOnce(deny());
+
+        const listRes = (await list.GET(req('GET'), ctx)) as NextResponse;
+
+        const oneRes = (await one.GET(req('GET'), ctxOne)) as NextResponse;
+
+        expect(listRes.status).toBe(403);
+        expect(oneRes.status).toBe(403);
+        expect(db.unit.findFirst).not.toHaveBeenCalled();
+    });
+
     it('POST з raceId цієї кампанії — 201, пише raceId, інвалідує units з expire: 0', async () => {
         const res = (await list.POST(
             req('POST', { name: 'Шаман', raceId: 'r1', armorClass: 0 }),

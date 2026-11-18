@@ -4,11 +4,9 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { lineKey } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
-import { stubReserve } from '@/lib/utils/battle/participant/reserve';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf, systemKeyOf } from '@/lib/utils/rules/systems';
-import type { BattleParticipantPatch } from '@/types/api';
-import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction, DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
@@ -189,68 +187,4 @@ export function hiddenTargetSteps(
 
     // after відомого кроку вже містить прихований опір, тож або всі кроки цілі, або жодного
     return allKnown ? steps : steps.filter((s) => s.side === 'attacker');
-}
-
-const hidesEffects = (p: BattleParticipant) =>
-    !canSeeExactStats(p, PLAYER_VIEWER);
-
-const withoutConcealed = (effects: ActiveEffect[]) =>
-    effects.filter((e) => !e.concealed);
-
-function redactParticipant(p: BattleParticipant): BattleParticipant {
-    const effects = p.battleData.activeEffects;
-
-    if (!hidesEffects(p) || !effects.some((e) => e.concealed)) return p;
-
-    return {
-        ...p,
-        battleData: {
-            ...p.battleData,
-            activeEffects: withoutConcealed(effects),
-        },
-    };
-}
-
-export function redactParticipantsForPlayers(
-    participants: BattleParticipant[]
-): BattleParticipant[] {
-    const redacted = participants.map(redactParticipant);
-
-    return redacted.some((p, i) => p !== participants[i])
-        ? redacted
-        : participants;
-}
-
-export const redactPendingForPlayers = (
-    pending: BattleParticipant[]
-): BattleParticipant[] => stubReserve(redactParticipantsForPlayers(pending));
-
-export function redactPatchesForPlayers(
-    patches: BattleParticipantPatch[],
-    participants: BattleParticipant[]
-): BattleParticipantPatch[] {
-    const byId = new Map(participants.map((p) => [p.basicInfo.id, p]));
-
-    const redacted = patches.map((patch) => {
-        const owner = byId.get(patch.id);
-
-        const effects = patch.battleData?.activeEffects;
-
-        if (
-            !owner ||
-            !hidesEffects(owner) ||
-            !effects?.some((e) => e.concealed)
-        )
-            return patch;
-
-        return {
-            ...patch,
-            battleData: {
-                ...patch.battleData,
-                activeEffects: withoutConcealed(effects),
-            },
-        };
-    });
-
-    return redacted.some((p, i) => p !== patches[i]) ? redacted : patches;
 }

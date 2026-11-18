@@ -12,6 +12,7 @@ export * from './log-entry';
 export * from './my-turn-key';
 export * from './personal-effects';
 export * from './queue';
+export * from './redact-participants';
 export * from './result-fx';
 export * from './retaliation';
 export * from './rollback';

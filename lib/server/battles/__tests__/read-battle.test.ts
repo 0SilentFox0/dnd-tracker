@@ -114,6 +114,55 @@ describe('readBattleScene', () => {
         expect(d.rateLimit).not.toHaveBeenCalled();
     });
 
+    it('a player gets enemies as a health bucket, the DM gets exact stats', async () => {
+        const goblin = createMockParticipant({
+            basicInfo: {
+                ...createMockParticipant().basicInfo,
+                id: 'gob',
+                side: 'enemy',
+                controlledBy: 'dm',
+            },
+            combatStats: {
+                ...createMockParticipant().combatStats,
+                maxHp: 40,
+                currentHp: 30,
+                armorClass: 17,
+            },
+        });
+
+        const order = [hero, goblin];
+
+        const read = async (isDM: boolean) =>
+            (
+                await readBattleScene(
+                    params,
+                    deps({
+                        loadBattle: async () =>
+                            loaded({ participants: order, isDM }),
+                    })
+                )
+            ).json();
+
+        const player = await read(false);
+
+        expect(player.initiativeOrder[1].combatStats).toMatchObject({
+            maxHp: 100,
+            currentHp: 75,
+            armorClass: 0,
+        });
+        expect(player.initiativeOrder[0].combatStats.armorClass).toBe(
+            hero.combatStats.armorClass
+        );
+
+        const dm = await read(true);
+
+        expect(dm.initiativeOrder[1].combatStats).toMatchObject({
+            maxHp: 40,
+            currentHp: 30,
+            armorClass: 17,
+        });
+    });
+
     it('runs the read inside the campaign write lock and passes its errors through', async () => {
         const withWrite = vi.fn(
             async (_id: string, cb: () => Promise<unknown>) => cb()

@@ -530,7 +530,11 @@ describe('резерв для гравця', () => {
     };
 
     const summon = createMockParticipant({
-        basicInfo: { ...goblin.basicInfo, id: 'summon' },
+        basicInfo: {
+            ...goblin.basicInfo,
+            id: 'summon',
+            side: ParticipantSide.ALLY,
+        },
     });
 
     const log = { mode: 'append' as const, entries: [] };
@@ -698,5 +702,77 @@ describe('резерв для гравця', () => {
             battleData: { reserved: true },
         });
         expect(dm.pending?.[0]).toBe(reserved);
+    });
+});
+
+describe('редакція учасників за глядачем', () => {
+    const wounded = createMockParticipant({
+        basicInfo: { ...goblin.basicInfo, id: 'wounded' },
+        combatStats: {
+            ...goblin.combatStats,
+            maxHp: 40,
+            currentHp: 25,
+            tempHp: 5,
+            armorClass: 17,
+        },
+    });
+
+    const log = { mode: 'append' as const, entries: [] };
+
+    const scene2 = (view: { isDM: boolean; userId?: string }) =>
+        toBattleResponse({ meta }, scene, [hero, wounded], [], log, view);
+
+    it('GET/SSR: гравець бачить для ворога лише грубий стан', () => {
+        const foe = scene2({ isDM: false, userId: 'u-player' })
+            .initiativeOrder[1];
+
+        expect(foe.combatStats).toMatchObject({
+            maxHp: 100,
+            currentHp: 75,
+            tempHp: 0,
+            armorClass: 0,
+        });
+    });
+
+    it('GET/SSR: власний герой і ДМ бачать повні дані', () => {
+        const player = scene2({ isDM: false, userId: 'u-player' });
+
+        expect(player.initiativeOrder[0]).toBe(hero);
+        expect(scene2({ isDM: true }).initiativeOrder[1]).toBe(wounded);
+    });
+
+    it('мутація й Pusher: upserted/patched ворога без точних HP/AC', () => {
+        const delta = {
+            battleId: 'b1',
+            version: 4,
+            upserted: [wounded],
+            patched: [
+                {
+                    id: 'wounded',
+                    combatStats: { currentHp: 5, armorClass: 20, tempHp: 3 },
+                },
+            ],
+            log: [],
+        } as unknown as ClientBattleDelta;
+
+        const out = redactDeltaForPlayers(delta, [hero, wounded], DEFAULT_RULES);
+
+        expect(out.changed).toBe(true);
+        expect(out.delta.upserted[0].combatStats.maxHp).toBe(100);
+        expect(out.delta.patched?.[0].combatStats).toEqual({
+            currentHp: 10,
+            maxHp: 100,
+        });
+
+        const msgs = buildPusherMessages({
+            before: scene,
+            after: scene,
+            participants: [hero, wounded],
+            rules: DEFAULT_RULES,
+            delta,
+        });
+
+        expect(JSON.stringify(msgs[0].payload)).not.toContain('"armorClass":17');
+        expect(JSON.stringify(msgs[1].payload)).toContain('"armorClass":17');
     });
 });
