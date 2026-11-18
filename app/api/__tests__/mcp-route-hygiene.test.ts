@@ -102,23 +102,13 @@ describe('MCP route hygiene', () => {
         expect(h.handler).not.toHaveBeenCalled();
     });
 
-    it('429 on the IP limit comes before token verification', async () => {
-        h.deny.add('mcp-ip');
-
-        const res = await GET(request('GET', 'Bearer dndt_guess'));
-
-        expect(res.status).toBe(429);
-        expect(h.order).toEqual(['mcp-ip']);
-        expect(h.handler).not.toHaveBeenCalled();
-    });
-
     it('429 on the campaign aggregate after the per-token limit passes', async () => {
         h.deny.add('mcp-campaign');
 
         const res = await POST(request('POST', 'Bearer dndt_ok'));
 
         expect(res.status).toBe(429);
-        expect(h.order).toEqual(['mcp-ip', 'auth', 'mcp', 'mcp-campaign']);
+        expect(h.order).toEqual(['auth', 'mcp', 'mcp-campaign']);
         expect(h.handler).not.toHaveBeenCalled();
     });
 

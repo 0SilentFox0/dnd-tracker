@@ -256,6 +256,6 @@ export const JOIN_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
 
 /** Per-IP, перед auth: /api/mcp і публічні маршрути. */
 export const IP_RATE_LIMITS = {
-    mcp: { limit: 120, windowSeconds: 60 },
+    mcp: { limit: 300, windowSeconds: 60 },
     public: { limit: 60, windowSeconds: 60 },
 } as const;

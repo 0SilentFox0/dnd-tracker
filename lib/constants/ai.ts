@@ -105,7 +105,6 @@ export const AI_RATE_LIMITS = {
     chat: { limit: 20, windowSeconds: 60 },
     credentials: { limit: 10, windowSeconds: 60 },
     mcp: { limit: 120, windowSeconds: 60 },
-    mcpIp: { limit: 300, windowSeconds: 60 },
     mcpCampaign: { limit: 600, windowSeconds: 60 },
     summary: { limit: 10, windowSeconds: 600 },
 } as const;
