@@ -1,18 +1,18 @@
 # Приватність учасників бою: оцінка обсягу
 
-Нотатка-дослідження (5c-3, без реалізації). Питання: чи редагувати на сервері `initiativeOrder` (учасників) за глядачем, і скільки це коштує. Журнал уже редагується (див. «Межі 5c-2» у [rule-systems.md](rule-systems.md)); учасники йдуть клієнту сирими.
+Нотатка-дослідження (5c-3, без реалізації). Питання: чи редагувати на сервері `initiativeOrder` (учасників) за глядачем, і скільки це коштує. Журнал і учасники редагуються (див. «Межі 5c-2» у [rule-systems.md](rule-systems.md) і розділ «Реалізація (L8b-1)» нижче).
 
 ## Шляхи доставки учасників клієнту
 
 | Шлях | Де | Що несе | Редакція зараз |
 |---|---|---|---|
-| GET сцени | `readBattleScene` (`lib/server/battles/read-battle.ts`) -> `toBattleResponse` (`lib/utils/battle/pipeline/battle-response.ts`) | повний `initiativeOrder`, `pendingSummons`, `setup` | лише журнал (`battleLog`) |
-| SSR першого HTML | `app/campaigns/[id]/battles/[battleId]/page.tsx` через `PrefetchedQuery` (та сама відповідь `readBattleScene`) | те саме, потрапляє в HTML | лише журнал |
-| Відповідь мутації | `runBattleMutation` (`run-battle-mutation.ts`): `ClientBattleDelta` | `upserted`/`patched`/`pending`/`setup` | `log` для не-DM; учасники повні |
-| Pusher `private-battle-<id>` | `buildPusherMessages` | та сама дельта, що й гравцю; `redacted: true`, якщо журнал змінено | лише `log` |
+| GET сцени | `readBattleScene` (`lib/server/battles/read-battle.ts`) -> `toBattleResponse` (`lib/utils/battle/pipeline/battle-response.ts`) | `initiativeOrder`, `pendingSummons`, `setup`, `battleLog` | усе для не-DM (L8b): учасники, журнал, `redacted: true` на сцені |
+| SSR першого HTML | `app/campaigns/[id]/battles/[battleId]/page.tsx` через `PrefetchedQuery` (та сама відповідь `readBattleScene`) | те саме, потрапляє в HTML | як GET |
+| Відповідь мутації | `runBattleMutation` (`run-battle-mutation.ts`): `ClientBattleDelta` | `upserted`/`patched`/`pending`/`setup` | `log` і учасники для не-DM; preview заклинання проходить `sanitizeLogEntry` |
+| Pusher `private-battle-<id>` | `buildPusherMessages` | та сама дельта, що й гравцю; `redacted: true`, якщо щось змінено | `log` і учасники |
 | Pusher `private-battle-dm-<id>` | `buildPusherMessages` (лише коли `changed`) | повна дельта для ДМ | не потрібна |
 | Refetch-сигнал при переповненні | `fitOrRefetch` | без даних, далі GET сцени | див. GET |
-| Сторінка журналу / summary | `readBattleEvents`, `readBattleSummary` | події, не учасники | журнал редагується; summary бере учасників на сервері |
+| Сторінка журналу / summary | `readBattleEvents`, `readBattleSummary` | події, не учасники | журнал редагується (`redactLogForPlayers`); summary бере учасників на сервері |
 | Клієнтський злив | `applyBattleDelta` (`lib/utils/battle/client/apply-delta.ts`) | `upserted`/`patched`/`order` у кеш TanStack | не стосується |
 
 Канали `userChannelName` (turn-started) несуть лише id/ім'я учасника.
@@ -83,3 +83,11 @@
 - патчі (`patched`) проєктуються за `maxHp`/`status` власника, секретні ключі відкидаються.
 
 Публічна Pusher-дельта використовує найсуворішого глядача. Гравець, у якого кожен герой має `seeEnemyHp` (`alwaysSeesEnemyStats`), точні дані бере з GET/відповіді мутації; на `redacted` дельту `usePusherBattleSync` лише інвалідує сцену. `snapshot`/`snapshotHash` у клієнтські типи не потрапляють (лишаються на сервері).
+
+### Виправлення за рев'ю L8b
+
+- **Журнал**: для цілі, чиї стати глядач не бачить, `change` лишається, а `oldHp`/`newHp` стають відрами `healthState` (`hp-bucket.ts`), `spellAttacks[].ac` знімається. `damageSteps` лишаються свідомо: з них будується «спостережене» (`observedTraits`), а опір і так виводиться з `change`.
+- **Слоти систем**: ядро завжди знімає `slot.ext` (стан модулів), а решту ховає сама система через `RuleSystemParticipant.redactSlot` (список `SlotRedactor(slot, scope)`, `scope` = `abilities` | `battle`). wfrp (`systems/wfrp/rules/redact.ts`) лишає розмір, `flexible` і швидкість ходу; характеристики, `ap`, `ward`, `fortune`, `sin`, `channelledSl` прибирає. d20 свого не має: його приховане лежить лише в `ext`. Редактори отримують `rules` ( `redactParticipantsForViewer(viewer, participants, rules)`).
+- **Клієнт**: сцена несе `redacted: true`, коли сервер проєктував ворогів; `deriveScene` тоді не вважає дані точними, навіть якщо в героя є `seeEnemyHp`. ДМ без підписаного dm-каналу на `redacted` дельту лише інвалідує сцену, версія перевіряється до інвалідації. Зміна `side`/`controlledBy` шле повного учасника, не патч.
+- **FX**: для ворога-відра число удару береться з `FxImpact.delta` (з `hpChanges[].change`), а удар без зміни відра теж дає зміну.
+- **Лишається**: друге повідомлення на dm-канал при кожній дії з ворогом (egress; потребує порівняння з попередньою проєкцією), `attacks`/`resolvedAbilities` числа опорів.
