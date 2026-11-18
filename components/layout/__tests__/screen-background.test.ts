@@ -39,7 +39,7 @@ describe('screenBackgroundFor', () => {
         ['/campaigns/1/character', 'character'],
         ['/campaigns/1/battles/2', 'battle'],
         ['/campaigns/1/dm/battles', 'battle'],
-        ['/campaigns/1/dm/skill-trees/3', 'skill-tree'],
+        ['/campaigns/1/dm/system/skill-trees', 'skill-tree'],
         ['/campaigns/1/dm/compendium', 'races'],
         ['/campaigns/1/dm/main-skills', 'skills'],
         ['/campaigns/1/dm/print/spells', 'spells'],
@@ -52,7 +52,7 @@ describe('screenBackgroundFor', () => {
         '/',
         '/campaigns',
         '/campaigns/1',
-        '/campaigns/1/dm/artifact-sets',
+        '/campaigns/1/dm/system/artifact-sets',
         '/campaigns/1/dm/print/other',
         '/sign-in',
     ])('%s -> tavern', (path) => {

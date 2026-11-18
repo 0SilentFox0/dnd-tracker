@@ -16,5 +16,5 @@ export {
     useSkills,
     useUpdateSkill,
 } from './useSkills';
-export { useSaveSkillTree, useSkillTrees } from './useSkillTrees';
+export { useSkillTrees } from './useSkillTrees';
 export { useUpdateSkillAppearance } from './useUpdateSkillAppearance';

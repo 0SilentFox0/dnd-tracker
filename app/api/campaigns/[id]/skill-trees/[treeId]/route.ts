@@ -1,21 +1,23 @@
 import { NextResponse } from 'next/server';
 
-import { saveSkillTreeSchema } from '@/lib/schemas/skills';
+import type { saveSkillTreeSchema } from '@/lib/schemas/skills';
 import { operationRoute } from '@/lib/server/content/content-routes';
-import { moduleContentOperation } from '@/lib/server/content/module-operations';
+import {
+    moduleContentOperation,
+    runModuleContentOperation,
+} from '@/lib/server/content/module-operations';
 import type { ContentOperation } from '@/lib/server/content/operations';
-import { saveSkillTree } from '@/lib/server/skills/skill-tree-service';
 
 export const PATCH = operationRoute(
     moduleContentOperation('skill-trees.save') as ContentOperation & {
         body: typeof saveSkillTreeSchema;
     },
     async ({ actor, params, body }) => {
-        const saved = await saveSkillTree(actor, {
-            treeId: params.treeId,
-            race: body.race,
-            skills: body.skills,
-        });
+        const saved = (await runModuleContentOperation(
+            'skill-trees.save',
+            actor,
+            { treeId: params.treeId, body }
+        )) as { id: string; race: string; skills: unknown };
 
         return NextResponse.json({
             id: saved.id,

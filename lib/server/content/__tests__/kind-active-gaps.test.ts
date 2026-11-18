@@ -13,10 +13,13 @@ vi.mock('@/lib/server/campaigns/rules', async (orig) => ({
     ...(await orig<object>()),
     loadRules: mocks.loadRules,
 }));
-vi.mock('@/lib/server/skills/skill-tree-service', async (orig) => ({
-    ...(await orig<object>()),
-    listSkillTrees: mocks.listSkillTrees,
-}));
+vi.mock(
+    '@/systems/skilltrees/server/service/skill-tree-service',
+    async (orig) => ({
+        ...(await orig<object>()),
+        listSkillTrees: mocks.listSkillTrees,
+    })
+);
 vi.mock('@/lib/server/content/import/example', () => ({
     exampleCsv: mocks.exampleCsv,
 }));

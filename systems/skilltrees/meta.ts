@@ -7,7 +7,7 @@ export const SKILLTREES_META = {
     aliases: ['skillTree'],
     requires: ['d20'],
     toggle: 'setup',
-    i18n: {},
+    i18n: { campaign: ['skillTree'] },
     dmSections: ['skills', 'skill-trees'],
     contentKinds: ['main-skills', 'skills'],
     contentTables: [

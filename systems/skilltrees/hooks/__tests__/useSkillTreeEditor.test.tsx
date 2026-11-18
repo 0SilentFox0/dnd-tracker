@@ -5,11 +5,13 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createMainSkill } from '@/lib/api/main-skills';
-import * as treesApi from '@/lib/api/skill-trees';
+import * as getApi from '@/lib/api/skill-trees';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
+import * as updateApi from '@/systems/skilltrees/api/skill-trees';
 import { useSkillTreeEditor } from '@/systems/skilltrees/hooks';
 
 vi.mock('@/lib/api/skill-trees');
+vi.mock('@/systems/skilltrees/api/skill-trees');
 
 let races: Array<{ id: string; name: string; availableSkills: string[] }> = [
     { id: 'r1', name: 'Ельф', availableSkills: ['attack'] },
@@ -81,7 +83,7 @@ describe('useSkillTreeEditor', () => {
     beforeEach(() => vi.clearAllMocks());
 
     it('рефетч зі зміненим деревом не перезаписує незбережені правки', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith(['o1']),
         ] as never);
 
@@ -100,14 +102,14 @@ describe('useSkillTreeEditor', () => {
             )
         );
 
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith(['o1', 'o1-changed-on-server']),
         ] as never);
         await act(() =>
             qc.invalidateQueries({ queryKey: ['skill-trees', 'c'] })
         );
         await waitFor(() =>
-            expect(vi.mocked(treesApi.getSkillTrees)).toHaveBeenCalledTimes(2)
+            expect(vi.mocked(getApi.getSkillTrees)).toHaveBeenCalledTimes(2)
         );
 
         expect(result.current.view.tree?.grid.get('attack')?.outer).toEqual([
@@ -119,8 +121,8 @@ describe('useSkillTreeEditor', () => {
     });
 
     it('без дерева — стартові гілки з race.availableSkills, збереження з id "new"', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([] as never);
-        vi.mocked(treesApi.updateSkillTree).mockResolvedValue({
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([] as never);
+        vi.mocked(updateApi.updateSkillTree).mockResolvedValue({
             id: 'row',
             race: 'Ельф',
             skills: buildTreeJson({ id: 'row', race: 'Ельф', branches: [] }),
@@ -137,12 +139,12 @@ describe('useSkillTreeEditor', () => {
         await act(() => result.current.actions.save());
 
         expect(
-            vi.mocked(treesApi.updateSkillTree).mock.calls[0][0]
+            vi.mocked(updateApi.updateSkillTree).mock.calls[0][0]
         ).toMatchObject({ campaignId: 'c', treeId: 'new', race: 'Ельф' });
     });
 
     it('дубль скіла дає помилку й блокує save', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith(['o1']),
         ] as never);
 
@@ -163,11 +165,11 @@ describe('useSkillTreeEditor', () => {
         });
 
         await act(() => result.current.actions.save());
-        expect(treesApi.updateSkillTree).not.toHaveBeenCalled();
+        expect(updateApi.updateSkillTree).not.toHaveBeenCalled();
     });
 
     it('add / move / remove гілки', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith([]),
         ] as never);
 
@@ -193,7 +195,7 @@ describe('useSkillTreeEditor', () => {
     });
 
     it('нове дерево без гілок не позначене як незбережене; зі стартовими гілками — позначене', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([] as never);
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([] as never);
         races = [{ id: 'r1', name: 'Орк', availableSkills: [] }];
 
         const empty = setup();
@@ -214,7 +216,7 @@ describe('useSkillTreeEditor', () => {
     });
 
     it('гілка й іконка скіла з відповіді API', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith([]),
         ] as never);
 
@@ -234,7 +236,7 @@ describe('useSkillTreeEditor', () => {
     });
 
     it('помилка створення гілки — повідомлення, без необробленого відхилення', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith([]),
         ] as never);
 
@@ -256,7 +258,7 @@ describe('useSkillTreeEditor', () => {
     });
 
     it('вдале створення гілки повертає true і додає її', async () => {
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith([]),
         ] as never);
         vi.mocked(createMainSkill).mockResolvedValueOnce({
@@ -290,7 +292,7 @@ describe('useSkillTreeEditor', () => {
             { id: 'r1', name: 'Ельф', availableSkills: ['attack'] },
             { id: 'r2', name: 'Орк', availableSkills: [] },
         ];
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith(['o1']),
         ] as never);
 
@@ -323,7 +325,7 @@ describe('useSkillTreeEditor', () => {
             { id: 'r1', name: 'Ельф', availableSkills: ['attack'] },
             { id: 'r2', name: 'Орк', availableSkills: [] },
         ];
-        vi.mocked(treesApi.getSkillTrees).mockResolvedValue([
+        vi.mocked(getApi.getSkillTrees).mockResolvedValue([
             rowWith(['o1']),
         ] as never);
 

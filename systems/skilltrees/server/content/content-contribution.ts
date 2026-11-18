@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+import { moveSkillTreeProgress } from '../service/progress-move';
+import {
+    listSkillTrees,
+    readSkillTree,
+    saveSkillTree,
+} from '../service/skill-tree-service';
+
 import 'server-only';
 import { invalidateReference, ReferenceKind } from '@/lib/cache/tags';
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -9,12 +16,6 @@ import { saveSkillTreeSchema } from '@/lib/schemas/skills';
 import { jsonContent } from '@/lib/server/assistant/actions/content-snapshot';
 import { ContentError } from '@/lib/server/content/errors';
 import { afterContentCommit } from '@/lib/server/content/write-context';
-import { moveSkillTreeProgress } from '@/lib/server/skills/progress-move';
-import {
-    listSkillTrees,
-    readSkillTree,
-    saveSkillTree,
-} from '@/lib/server/skills/skill-tree-service';
 import type { SystemContentServer } from '@/lib/server/systems/content-types';
 import {
     abilitiesJson,

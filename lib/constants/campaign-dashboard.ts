@@ -57,7 +57,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
     { key: 'skills', href: dm('skills'), icon: BookOpen, group: 'libraries' },
     {
         key: 'skill-trees',
-        href: dm('skill-trees'),
+        href: dm('system/skill-trees'),
         icon: GitBranch,
         group: 'libraries',
     },
@@ -159,7 +159,9 @@ const pick = (list: DashboardSection[], keys: string[]) =>
     list.filter((s) => keys.includes(s.key));
 
 export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
-    ...DM_DASHBOARD_SECTIONS.filter((section) => section.key !== 'rules' && section.key !== 'maps'),
+    ...DM_DASHBOARD_SECTIONS.filter(
+        (section) => section.key !== 'rules' && section.key !== 'maps'
+    ),
     ...pick(PLAYER_DASHBOARD_SECTIONS, ['player-world']).map((section) => ({
         ...section,
         group: 'game' as const,

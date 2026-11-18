@@ -52,6 +52,9 @@ export function screenBackgroundFor(
             ? DM_SECTIONS[printed]
             : null;
 
+    if (sub === 'system')
+        return printed ? (DM_SECTIONS[printed] ?? null) : null;
+
     return sub ? (DM_SECTIONS[sub] ?? null) : null;
 }
 

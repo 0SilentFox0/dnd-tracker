@@ -1,4 +1,6 @@
 import 'server-only';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { ContentError } from '@/lib/server/content/errors';
 import {
     CONTENT_OPERATIONS,
     type ContentOperation,
@@ -6,6 +8,7 @@ import {
 } from '@/lib/server/content/operations';
 import type { ContentOperationContribution } from '@/lib/server/systems/content-types';
 import { systemContent } from '@/lib/server/systems/registry';
+import type { Actor } from '@/lib/utils/api/actor';
 
 export const moduleContentOperations = (): Record<
     string,
@@ -39,4 +42,22 @@ export const moduleContentOperation = (id: string): ContentOperation => {
     if (!operation) throw new Error(`Unknown content operation: ${id}`);
 
     return operation;
+};
+
+/** Runs a module operation's handler directly, without the kind gate or the write lock of `runContentOperation` */
+export const runModuleContentOperation = (
+    id: string,
+    actor: Actor,
+    input: Record<string, unknown>
+): Promise<unknown> => {
+    const contribution = moduleContentOperations()[id];
+
+    if (!contribution) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+    return contribution.run({
+        actor,
+        input,
+        body: input.body,
+        param: (key) => String(input[key]),
+    });
 };
