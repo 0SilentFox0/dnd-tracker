@@ -41,6 +41,11 @@
     "teleport": "🌀 {mover}: teleports",
     "teleportBlocked": "🌀 {mover}: the destination cell is blocked or out of reach"
   },
+  "regen": {
+    "down": "💤 {name} falls unconscious, regeneration may bring it back",
+    "wakes": "💚 {name} regenerates and wakes up",
+    "dies": "💀 {name} cannot regenerate and dies"
+  },
   "abilityLog": {
     "regenSuppressed": "🚫 {label}: {target} does not regenerate this turn",
     "hotTemp": "🛡 {ability}: +{amount} temp. HP/round → {target} ({rounds})",

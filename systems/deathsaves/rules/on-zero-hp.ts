@@ -6,13 +6,14 @@ import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { replaceParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import type { DamageConsequencesResult } from '@/lib/utils/battle/damage/consequences';
+import { regenKeepsAlive } from '@/lib/utils/battle/damage/regen-guard';
 import type { ZeroHpCtx } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 function unitDiesAtZero(
     after: BattleParticipant,
-    ctx: Pick<ZeroHpCtx, 'rules'>
+    ctx: Pick<ZeroHpCtx, 'rules' | 'damageType'>
 ): BattleParticipant {
     const { rules } = ctx;
 
@@ -30,6 +31,8 @@ function unitDiesAtZero(
         after.combatStats.status === CombatStatus.DEAD
     )
         return after;
+
+    if (regenKeepsAlive(after, ctx.damageType)) return after;
 
     return {
         ...after,
@@ -146,7 +149,9 @@ function settleManual(ctx: ZeroHpCtx): DamageConsequencesResult {
     return {
         participant: next,
         participants:
-            next === after ? participants : replaceParticipant(participants, next),
+            next === after
+                ? participants
+                : replaceParticipant(participants, next),
         messages: [],
     };
 }

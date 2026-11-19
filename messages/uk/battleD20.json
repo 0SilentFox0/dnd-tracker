@@ -41,6 +41,11 @@
     "teleport": "🌀 {mover}: телепортується",
     "teleportBlocked": "🌀 {mover}: клітинка призначення зайнята або недосяжна"
   },
+  "regen": {
+    "down": "💤 {name} непритомніє, регенерація може повернути його",
+    "wakes": "💚 {name} регенерує й приходить до тями",
+    "dies": "💀 {name} не може регенерувати й помирає"
+  },
   "abilityLog": {
     "regenSuppressed": "🚫 {label}: {target} не регенерує цього ходу",
     "hotTemp": "🛡 {ability}: +{amount} тимч. HP/раунд → {target} ({rounds})",

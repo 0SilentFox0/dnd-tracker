@@ -1,4 +1,5 @@
 import { dropBrokenConcentration } from './concentration/damaged';
+import { regenGoesDown } from './regen-down';
 
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import type { DamageConsequencesResult } from '@/lib/utils/battle/damage/consequences';
@@ -7,7 +8,14 @@ import type { ZeroHpCtx } from '@/lib/utils/rules/systems/types';
 export function d20OnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
     const { after, participants, rules } = ctx;
 
-    if (!ctx.manual) return { participant: after, participants, messages: [] };
+    if (!ctx.manual)
+        return (
+            regenGoesDown(ctx) ?? {
+                participant: after,
+                participants,
+                messages: [],
+            }
+        );
 
     if (!rules.concentration.enabled)
         return {
