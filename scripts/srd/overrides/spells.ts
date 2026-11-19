@@ -760,6 +760,17 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
         spellEffects: [smite('2d6', 'radiant', { upcastDice: 1 })],
     },
     // the CON save only guards the held item: the opening damage is automatic, the bonus-action repeat stays manual
+    // 2d4 + 4 temp HP; the +5 per slot level above 1 stays manual
+    'srd-2024_false-life': {
+        dice: 2,
+        dieSides: 4,
+        damageBonus: 4,
+        targeting: { kind: 'self' },
+        resolution: { kind: 'auto' },
+        spellEffects: [
+            { kind: 'tempHp', amount: { spellRoll: 100 }, target: 'self' },
+        ],
+    },
     'srd-2024_heat-metal': { resolution: { kind: 'auto' } },
     'srd-2024_disintegrate': { damageBonus: 40 },
     'srd-2024_finger-of-death': { damageBonus: 30 },

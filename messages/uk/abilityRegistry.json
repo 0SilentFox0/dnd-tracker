@@ -18,6 +18,9 @@
     "heal": {
       "label": "Лікування"
     },
+    "tempHp": {
+      "label": "Тимчасові HP"
+    },
     "dot": {
       "label": "Шкода щораунду (DOT)"
     },
@@ -1041,6 +1044,7 @@
       "heal": "{revive, select, yes {воскресіння} other {лікування}} {amount}",
       "dot": "{type} {amount}/раунд × {rounds} р.{linked, select, yes {, поки діє стан} other {}}",
       "hot": "лікування {amount}/раунд × {rounds} р.",
+      "tempHp": "тимчасові HP {amount}",
       "berserk": "шал: автоатака випадкової істоти, +{percent}% шкоди × {rounds} р.",
       "charm": "перехід на бік заклинателя × {rounds} р.",
       "maneuver": "{name}: {percent} % шкоди атаки",

@@ -358,6 +358,12 @@ const HealSchema = z.object({
     ...target,
 });
 
+const TempHpSchema = z.object({
+    kind: z.literal('tempHp'),
+    amount: AmountSchema,
+    ...target,
+});
+
 const DotSchema = z.object({
     kind: z.literal('dot'),
     damagePerRound: AmountSchema,
@@ -488,6 +494,7 @@ export const BASE_EFFECTS = [
     GrantActionSchema,
     DealDamageSchema,
     HealSchema,
+    TempHpSchema,
     DotSchema,
     HotSchema,
     BerserkSchema,

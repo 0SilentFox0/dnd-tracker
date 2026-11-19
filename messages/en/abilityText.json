@@ -7,6 +7,7 @@
     "immuneTo": "⛔ {ability}: {target} — immune to {type}",
     "dot": "🔥 {ability}: {type} {amount}/round → {target} ({rounds} rd.)",
     "hot": "💚 {ability}: +{amount} HP/round → {target} ({rounds} rd.)",
+    "tempHp": "🛡 {ability}: {target} gains {amount} temporary HP",
     "immune": "⛔ {ability}: {target} — immune",
     "notOnHeroes": "⛔ {ability}: {target} — does not affect heroes",
     "berserk": "🤬 {ability}: {target} is enraged ({rounds} rd.)",

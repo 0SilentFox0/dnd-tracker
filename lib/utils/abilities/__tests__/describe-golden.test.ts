@@ -19,6 +19,7 @@ import { renderSegments } from '@/lib/utils/abilities/segments';
 const CONVERTED_KINDS = new Set([
     'dealDamage',
     'heal',
+    'tempHp',
     'dot',
     'hot',
     'berserk',

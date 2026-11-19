@@ -141,6 +141,8 @@ describe('SRD spell effect coverage', () => {
                 kind: 'hitRider',
                 attackKind: 'melee',
                 extraDice: '2d8',
+                upcastDice: 1,
+                maxDice: 5,
                 damageType: 'radiant',
                 charges: 1,
                 duration: { rounds: 1 },
@@ -150,6 +152,30 @@ describe('SRD spell effect coverage', () => {
         expect(spell('shining-smite').spellEffects).toMatchObject([
             { kind: 'hitRider', extraDice: '2d6' },
         ]);
+    });
+
+    it('Heat Metal is automatic; Disintegrate and Finger of Death add their flat damage', () => {
+        expect(spell('heat-metal').resolution).toEqual({ kind: 'auto' });
+        expect(spell('disintegrate').damageBonus).toBe(40);
+        expect(spell('finger-of-death').damageBonus).toBe(30);
+    });
+
+    it('Hypnotic Pattern charms, incapacitates and stops movement; Power Word Kill executes at 100 HP', () => {
+        expect(
+            spell('hypnotic-pattern').spellEffects.map((e) => e.kind)
+        ).toEqual(['applyCondition', 'applyCondition', 'modifyStat']);
+        expect(spell('power-word-kill').spellEffects).toMatchObject([
+            { kind: 'dealDamage', killIfHpAtMost: 100 },
+        ]);
+    });
+
+    it('False Life grants 2d4+4 temporary HP', () => {
+        expect(spell('false-life')).toMatchObject({
+            dice: 2,
+            dieSides: 4,
+            damageBonus: 4,
+            spellEffects: [{ kind: 'tempHp' }],
+        });
     });
 
     it('Power Word Heal restores full HP and Regenerate heals 4d8+15 then 1 per round', () => {

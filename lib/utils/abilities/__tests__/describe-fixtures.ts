@@ -36,6 +36,7 @@ const BASE_EFFECTS: Record<
     note: { kind: 'note', text: 'Просто нотатка' },
     dealDamage: { kind: 'dealDamage', amount: '2d6', damageType: 'fire' },
     heal: { kind: 'heal', amount: 5 },
+    tempHp: { kind: 'tempHp', amount: 8 },
     dot: { kind: 'dot', damagePerRound: 3, damageType: 'poison', duration },
     hot: { kind: 'hot', healPerRound: 4, duration },
     berserk: { kind: 'berserk', damageBonusPercent: 25, duration },

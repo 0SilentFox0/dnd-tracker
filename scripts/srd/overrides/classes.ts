@@ -651,9 +651,8 @@ export const CLASS_FEATURE_OVERRIDES: Record<
             },
         },
         effects: [
-            // no temp-HP effect: the Beast form's Temporary Hit Points (= Druid level) are approximated by a heal
             {
-                kind: 'heal',
+                kind: 'tempHp',
                 amount: { formula: 'class_level' },
                 target: 'self',
             },

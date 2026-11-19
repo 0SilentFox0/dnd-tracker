@@ -328,6 +328,52 @@ export function applyDot(
     return { participants: ps, messages };
 }
 
+export function applyTempHp(
+    input: EffectApplyInput<Of<'tempHp'>>
+): EffectApplyResult {
+    const { ability, effect, ctx } = input;
+
+    let ps = input.participants;
+
+    const owner = findParticipant(ps, input.ownerId);
+
+    if (!owner) return { participants: ps, messages: [] };
+
+    const messages: LogLine[] = [];
+
+    for (const id of input.targetIds) {
+        const t = findParticipant(ps, id);
+
+        if (!t || !isActive(t)) continue;
+
+        const amount = resolveAmount(effect.amount, {
+            owner,
+            target: t,
+            eventDamage: eventDamage(input.event),
+            spellRoll: eventSpellRoll(input.event),
+            rng: ctx.rng,
+            participants: input.participants,
+            rules: ctx.rules,
+        });
+
+        if (amount <= t.combatStats.tempHp) continue;
+
+        ps = replaceParticipant(ps, {
+            ...t,
+            combatStats: { ...t.combatStats, tempHp: amount },
+        });
+        messages.push(
+            textRef('abilityText.log.tempHp', {
+                ability: ability.name,
+                target: t.basicInfo.name,
+                amount,
+            })
+        );
+    }
+
+    return { participants: ps, messages };
+}
+
 export function applyHot(
     input: EffectApplyInput<Of<'hot'>>
 ): EffectApplyResult {
@@ -406,6 +452,10 @@ export const describeHeal = (e: Of<'heal'>): Segment[] => [
         revive: e.revive ? 'yes' : 'no',
         amount: amountSegment(e.amount),
     }),
+];
+
+export const describeTempHp = (e: Of<'tempHp'>): Segment[] => [
+    seg('summary.effects.tempHp', { amount: amountSegment(e.amount) }),
 ];
 
 export const describeDot = (e: Of<'dot'>): Segment[] => [

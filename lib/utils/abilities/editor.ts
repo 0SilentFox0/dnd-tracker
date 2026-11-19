@@ -67,6 +67,7 @@ const BASE_DEFAULTS: {
     grantAction: { refreshAction: true },
     dealDamage: { amount: '1d6', target: 'eventTarget' },
     heal: { amount: '1d8' },
+    tempHp: { amount: '1d8' },
     dot: {
         damagePerRound: '1d4',
         damageType: 'bleed',

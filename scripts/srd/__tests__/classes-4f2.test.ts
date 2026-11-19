@@ -91,7 +91,7 @@ describe('class columns', () => {
         expect(
             cls('Cleric').columns.find((c) => c.key === 'channel-divinity-uses')
                 ?.pool
-        ).toEqual({ rest: 'short' });
+        ).toEqual({ rest: 'long', regain: 1 });
         expect(
             cls('Cleric')
                 .columns.find((c) => c.key === 'divine-spark')
@@ -131,6 +131,26 @@ describe('class columns', () => {
 });
 
 describe('scaled class abilities', () => {
+    it('short-rest regain: Rage and Wild Shape return 1, Bardic Inspiration from level 5, Wild Shape grants temp HP', () => {
+        expect(ability('Barbarian', 'Rage').limits?.perRest?.shortRegain).toBe(
+            1
+        );
+
+        const wild = scaled('Druid', 'Wild Shape', 5);
+
+        expect(wild.limits?.perRest).toMatchObject({
+            rest: 'long',
+            shortRegain: 1,
+        });
+        expect(wild.effects.map((e) => e.kind)).toContain('tempHp');
+
+        expect(
+            scaled('Bard', 'Bardic Inspiration', 5).limits?.perRest?.shortRegain
+        ).toEqual({
+            formula: 'min(1, floor(5 / 5)) * max(1, cha_mod)',
+        });
+    });
+
     it('Barbarian Rage at 1/9/17: 2/4/6 uses, +2/+3/+4', () => {
         expect(
             [1, 9, 17].map(

@@ -66,7 +66,6 @@ export const RACE_OVERRIDES: Record<string, AbilityCore> = {
             },
         ],
     },
-    // the Temporary Hit Points (= proficiency bonus) have no effect kind yet: the DM grants them
     'srd-2024_orc_adrenaline-rush': {
         trigger: { event: 'bonusAction' },
         limits: { perRest: { rest: 'short', uses: { formula: 'prof' } } },
@@ -79,7 +78,7 @@ export const RACE_OVERRIDES: Record<string, AbilityCore> = {
                 duration: { rounds: 1 },
                 target: 'self',
             },
-            { kind: 'note', text: 'Temporary Hit Points = Proficiency Bonus' },
+            { kind: 'tempHp', amount: { formula: 'prof' }, target: 'self' },
         ],
     },
 };

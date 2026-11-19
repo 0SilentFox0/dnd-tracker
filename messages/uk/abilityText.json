@@ -7,6 +7,7 @@
     "immuneTo": "⛔ {ability}: {target} — імунітет до {type}",
     "dot": "🔥 {ability}: {type} {amount}/раунд → {target} ({rounds} р.)",
     "hot": "💚 {ability}: +{amount} HP/раунд → {target} ({rounds} р.)",
+    "tempHp": "🛡 {ability}: {target} отримує {amount} тимчасових HP",
     "immune": "⛔ {ability}: {target} — імунітет",
     "notOnHeroes": "⛔ {ability}: {target} — не діє на героїв",
     "berserk": "🤬 {ability}: {target} у люті ({rounds} р.)",

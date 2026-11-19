@@ -78,6 +78,9 @@ describe('convertRaces', () => {
         expect(ability('Orc', 'adrenaline-rush')).toMatchObject({
             trigger: { event: 'bonusAction' },
             limits: { perRest: { rest: 'short', uses: { formula: 'prof' } } },
+            effects: expect.arrayContaining([
+                { kind: 'tempHp', amount: { formula: 'prof' }, target: 'self' },
+            ]),
         });
     });
 

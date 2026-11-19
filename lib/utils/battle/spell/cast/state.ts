@@ -74,6 +74,7 @@ function amountOf(e: Effect): Amount | undefined {
     switch (e.kind) {
         case 'dealDamage':
         case 'heal':
+        case 'tempHp':
             return e.amount;
         case 'dot':
             return e.damagePerRound;

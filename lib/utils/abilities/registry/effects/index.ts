@@ -19,10 +19,12 @@ import {
     applyDot,
     applyHeal,
     applyHot,
+    applyTempHp,
     describeDealDamage,
     describeDot,
     describeHeal,
     describeHot,
+    describeTempHp,
 } from './hp';
 import { applyManeuver, describeManeuver } from './maneuver';
 import { MODULE_EFFECT_ROWS } from './module-effect-rows';
@@ -177,6 +179,13 @@ const BASE_EFFECT_REGISTRY: {
         ],
         describe: describeHeal,
         apply: applyHeal,
+    },
+    tempHp: {
+        kind: 'tempHp',
+        static: false,
+        fields: [AMOUNT, TARGET_FIELD],
+        describe: describeTempHp,
+        apply: applyTempHp,
     },
     dot: {
         kind: 'dot',
