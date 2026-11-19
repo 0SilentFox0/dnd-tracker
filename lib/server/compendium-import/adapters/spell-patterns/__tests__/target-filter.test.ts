@@ -127,7 +127,7 @@ describe('speedAtLeast', () => {
                             kind: 'modifyStat',
                             stat: 'speed',
                             atLeast: 60,
-                            duration: { rounds: 99 },
+                            duration: { rounds: 600 },
                         },
                     ],
                 },

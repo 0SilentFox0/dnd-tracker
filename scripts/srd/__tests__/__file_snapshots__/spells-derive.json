@@ -157,14 +157,14 @@
         "flag": "checkDisadvantage",
         "skills": "all",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "mark",
         "markId": "hex",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ]

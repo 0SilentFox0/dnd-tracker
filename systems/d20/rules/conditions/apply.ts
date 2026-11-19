@@ -29,6 +29,7 @@ import type {
     ConditionKey,
 } from '@/lib/utils/battle/conditions/set';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
+import { durationRef } from '@/lib/utils/duration/format';
 import {
     concentrationBroken,
     dropConcentration,
@@ -143,7 +144,7 @@ export function applyCondition5e(
                     : dynamicTextRef(
                           `battleActions.condition.lower.${opts.key}`
                       ),
-                rounds: opts.rounds,
+                rounds: durationRef(opts.rounds),
             }
         ),
     ];

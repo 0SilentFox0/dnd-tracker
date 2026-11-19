@@ -391,7 +391,7 @@
     "pacified": "🕊 {caster}: deals no damage ({spell})",
     "noMapRange": "📏 {spell}: no map — the nearest range",
     "distanceDice": "📏 {target}: distance {feet} ft → {dice}",
-    "grantCast": "✨ {holder}: “{label}” — recast for {rounds} rd.",
+    "grantCast": "✨ {holder}: “{label}” — recast for {rounds}",
     "moveSelfNoMap": "🌀 {mover}: moves to {target} (no map)",
     "moveSelfNoCell": "🌀 {mover}: no free cell next to {target}",
     "moveSelf": "🌀 {mover}: moves to {target}",

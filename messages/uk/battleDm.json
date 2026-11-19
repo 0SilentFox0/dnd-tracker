@@ -57,7 +57,7 @@
     "remove": "Зняти",
     "state": "Стан",
     "rounds": "Раунди (порожньо — доки не знімуть)",
-    "roundsLeft": " · {duration} р.",
+    "roundsLeft": " · {duration}",
     "levels": "Рівні",
     "saveEnds": "Рятівний кидок наприкінці ходу",
     "ability": "Характеристика",

@@ -75,6 +75,8 @@ import {
 import type { ModuleEffectKind } from '@/lib/utils/abilities/schema/module-effects';
 import type { SystemEffect } from '@/lib/utils/abilities/schema/system-effects';
 import {
+    durationOf,
+    durationSeg,
     joinSegments,
     seg,
     type Segment,
@@ -300,7 +302,7 @@ const BASE_EFFECT_REGISTRY: {
                     e.percent && { percent: e.percent }),
                 hasLevels: e.levels ? 'yes' : 'no',
                 ...(e.levels && { levels: e.levels }),
-                rounds: e.duration?.rounds ?? '?',
+                rounds: durationOf(e.duration),
                 breakOnDamage: e.breakOnDamage ? 'yes' : 'no',
                 hasSave: e.saveEnds ? 'yes' : 'no',
                 hasEscape: e.escapeDc ? 'yes' : 'no',
@@ -368,7 +370,9 @@ const BASE_EFFECT_REGISTRY: {
             REQUIRED_DURATION,
         ],
         describe: (e) => [
-            seg('summary.effects.mark', { rounds: e.duration.rounds }),
+            seg('summary.effects.mark', {
+                rounds: durationSeg(e.duration.rounds),
+            }),
         ],
         apply: applyMark,
     },
@@ -390,7 +394,7 @@ const BASE_EFFECT_REGISTRY: {
         describe: (e) => [
             seg('summary.effects.guard', {
                 percent: e.percent,
-                rounds: e.duration.rounds,
+                rounds: durationSeg(e.duration.rounds),
             }),
         ],
         apply: applyGuard,

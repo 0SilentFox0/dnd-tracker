@@ -1,4 +1,5 @@
 import type { AbilityCore } from '../lib/abilities';
+import { HOUR } from './durations';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
@@ -379,7 +380,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<
                 kind: 'mark',
                 markId: 'bardic-inspiration',
                 amount: { scale: 'bardic-die' },
-                duration: { rounds: 99 },
+                duration: { rounds: HOUR },
                 target: 'eventTarget',
             },
         ],
@@ -692,7 +693,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<
             {
                 kind: 'mark',
                 markId: 'wild-shape',
-                duration: { rounds: 99 },
+                duration: { rounds: HOUR },
                 target: 'self',
             },
         ],

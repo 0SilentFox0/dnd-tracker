@@ -109,7 +109,7 @@
   "map": {
     "hazardDefault": "Hazardous zone",
     "hazardUntilEnd": "{label} · until the end of round {round}",
-    "hazardRoundsLeft": "{label} · {rounds} more rd.",
+    "hazardRoundsLeft": "{label} · {rounds} left",
     "barrier": "Barrier",
     "barrierUntil": "Barrier until the end of round {round}",
     "returnToToken": "Return",
@@ -373,7 +373,7 @@
       "zone": "in the aura zone until {name}'s next turn",
       "owner": "the owner",
       "permanent": "lasts permanently",
-      "roundsLeft": "{count, plural, one {# more round} other {# more rounds}}",
+      "durationLeft": "{duration} left",
       "from": "from: {source}"
     }
   },

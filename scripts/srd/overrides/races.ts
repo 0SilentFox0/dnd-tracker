@@ -1,4 +1,5 @@
 import type { AbilityCore } from '../lib/abilities';
+import { TEN_MINUTES } from './durations';
 
 const darkvision = (range: number): AbilityCore => ({
     trigger: { event: 'passive' },
@@ -61,7 +62,7 @@ export const RACE_OVERRIDES: Record<string, AbilityCore> = {
                 flag: 'sense',
                 sense: 'tremorsense',
                 range: 60,
-                duration: { rounds: 99 },
+                duration: { rounds: TEN_MINUTES },
                 target: 'self',
             },
         ],

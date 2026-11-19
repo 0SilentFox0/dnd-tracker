@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { resolveSpellDuration } from '../overrides/durations';
 import { SPELL_OVERRIDES } from '../overrides/spells';
 import { UTILITY_SPELL_OVERRIDES } from '../overrides/spells-utility';
 import implemented from './fixtures/implemented-empty-spells.json';
@@ -19,7 +20,7 @@ describe('utility spell overrides', () => {
     });
 
     it.each(slugs)('%s has valid effects and targeting', (slug) => {
-        const o = SPELL_OVERRIDES[slug];
+        const o = resolveSpellDuration(SPELL_OVERRIDES[slug], 600);
 
         const zone =
             o.targeting?.kind === 'template' && o.targeting.zone !== undefined;

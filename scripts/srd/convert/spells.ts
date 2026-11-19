@@ -6,15 +6,18 @@ import {
 } from '../lib/open5e';
 import { bySlug, parseDiceExpr, titleCase } from '../lib/text';
 import type { SpellRow } from '../lib/types';
+import { resolveSpellDuration } from '../overrides/durations';
 import { FRIENDLY_FIRE_SPELLS, SPELL_OVERRIDES } from '../overrides/spells';
 import { schoolName } from './spell-groups';
 
+import { MAX_DURATION_ROUNDS } from '@/lib/constants/duration';
 import { parseMaterial } from '@/lib/server/compendium-import/adapters/spell-patterns/ingredients';
 import { groupBy } from '@/lib/utils/common/collections';
 import { capitalize } from '@/lib/utils/common/text';
 import {
     ADDS_MOD,
     castingFields,
+    durationRounds,
     spellEffects,
     spellHead,
     spellKind,
@@ -126,7 +129,12 @@ export function convertSpell(
         lists: f.classes.map((c) => titleCase(c.replace(/^srd-2024_/, ''))),
     };
 
-    const merged = { ...base, ...SPELL_OVERRIDES[row.pk] };
+    const merged = resolveSpellDuration(
+        { ...base, ...SPELL_OVERRIDES[row.pk] },
+        /^instantaneous$/i.test(f.duration)
+            ? MAX_DURATION_ROUNDS
+            : durationRounds(f.duration)
+    );
 
     const aim = merged.targeting;
 

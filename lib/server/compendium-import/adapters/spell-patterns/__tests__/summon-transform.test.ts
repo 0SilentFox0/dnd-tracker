@@ -57,7 +57,7 @@ describe('summonObject', () => {
                             hp: null,
                             count: 1,
                             upcastEvery: 2,
-                            duration: { rounds: 99 },
+                            duration: { rounds: 100 },
                             aura: {
                                 radiusFeet: 10,
                                 side: 'enemies',
@@ -143,9 +143,6 @@ describe('transformSpell', () => {
 
         expect(d).toMatchObject({
             native: {
-                riders: expect.arrayContaining([
-                    'тривалість обрізана до 99 раундів',
-                ]),
                 refs: [
                     {
                         path: ['spellEffects', 0, 'unitId'],
@@ -170,7 +167,7 @@ describe('transformSpell', () => {
                             kind: 'transform',
                             unitId: 'commoner',
                             revertAtZero: true,
-                            duration: { rounds: 99 },
+                            duration: { rounds: 600 },
                         },
                     ],
                 },

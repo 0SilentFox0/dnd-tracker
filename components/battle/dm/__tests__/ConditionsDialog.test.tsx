@@ -82,7 +82,7 @@ describe('ConditionsDialog', () => {
         expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it('100 раундів блокують «Накласти» (межа з CONDITION_LIMITS)', () => {
+    it('понад 24 години (14400 раундів) блокують «Накласти» (межа з CONDITION_LIMITS)', () => {
         const onSubmit = vi.fn();
 
         render(
@@ -95,7 +95,7 @@ describe('ConditionsDialog', () => {
         );
 
         fireEvent.change(screen.getByLabelText(/Раунди/), {
-            target: { value: '100' },
+            target: { value: '14401' },
         });
 
         expect(
@@ -107,7 +107,7 @@ describe('ConditionsDialog', () => {
         ).toBe(true);
 
         fireEvent.change(screen.getByLabelText(/Раунди/), {
-            target: { value: '99' },
+            target: { value: '14400' },
         });
 
         expect(

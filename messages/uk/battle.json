@@ -109,7 +109,7 @@
   "map": {
     "hazardDefault": "Небезпечна зона",
     "hazardUntilEnd": "{label} · до кінця раунду {round}",
-    "hazardRoundsLeft": "{label} · ще {rounds} р.",
+    "hazardRoundsLeft": "{label} · ще {rounds}",
     "barrier": "Барʼєр",
     "barrierUntil": "Барʼєр до кінця раунду {round}",
     "returnToToken": "Повернутися",
@@ -373,7 +373,7 @@
       "zone": "у зоні аури до наступного ходу {name}",
       "owner": "власника",
       "permanent": "діє постійно",
-      "roundsLeft": "ще {count, plural, one {# раунд} few {# раунди} many {# раундів} other {# раундів}}",
+      "durationLeft": "ще {duration}",
       "from": "від: {source}"
     }
   },

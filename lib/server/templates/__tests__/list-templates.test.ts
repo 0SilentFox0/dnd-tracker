@@ -5,9 +5,15 @@ import { listTemplates } from '@/lib/server/templates/list-templates';
 const findMany = vi.fn();
 
 vi.mock('@/lib/db', () => ({
-    prisma: {
-        campaign: { findMany: (...args: unknown[]) => findMany(...args) },
-    },
+    prisma: new Proxy(
+        { campaign: { findMany: (...args: unknown[]) => findMany(...args) } },
+        {
+            get: (target, key: string) =>
+                (target as Record<string, unknown>)[key] ?? {
+                    groupBy: async () => [],
+                },
+        }
+    ),
 }));
 
 describe('listTemplates', () => {
@@ -68,7 +74,7 @@ describe('listTemplates', () => {
             expect.objectContaining({
                 id: 'english',
                 availableLocales: ['en', 'uk'],
-                counts: { classes: 12 },
+                counts: expect.objectContaining({ classes: 12 }),
             }),
         ]);
         expect(result.mine).toEqual([
@@ -121,5 +127,67 @@ describe('listTemplates', () => {
             .mockResolvedValueOnce([srd('srd', 'en'), grim('grim', 'en')])
             .mockResolvedValueOnce([]);
         expect((await listTemplates('owner')).official).toHaveLength(2);
+    });
+});
+
+describe('template card counts', () => {
+    it('selects _count only for relations that exist on Campaign', async () => {
+        const { Prisma } = await import('@prisma/client');
+
+        const { RELATION_TABLES } = await import('../list-templates');
+
+        const relations = new Set(
+            Prisma.dmmf.datamodel.models
+                .find((m) => m.name === 'Campaign')
+                ?.fields.filter((f) => f.kind === 'object' && f.isList)
+                .map((f) => f.name)
+        );
+
+        expect(RELATION_TABLES.length).toBeGreaterThan(0);
+
+        for (const t of RELATION_TABLES)
+            expect(relations.has(t.key)).toBe(true);
+    });
+
+    it('every detached bundle table has a model with campaignId to count by', async () => {
+        const { Prisma } = await import('@prisma/client');
+
+        const { DETACHED_TABLES } = await import('../list-templates');
+
+        for (const t of DETACHED_TABLES) {
+            const model = Prisma.dmmf.datamodel.models.find(
+                (m) => m.name === t.model
+            );
+
+            expect(
+                model?.fields.some((f) => f.name === 'campaignId'),
+                t.key
+            ).toBe(true);
+        }
+
+        expect(DETACHED_TABLES.map((t) => t.key)).toContain('skillTrees');
+    });
+
+    it('merges groupBy counts of detached tables into the card', async () => {
+        findMany.mockReset();
+
+        findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([
+            {
+                id: 'c1',
+                name: 'T',
+                description: null,
+                visibility: 'private',
+                kind: 'template',
+                credits: null,
+                locale: null,
+                templateKey: null,
+                rules: { system: { key: 'dnd5e' } },
+                _count: { units: 1 },
+            },
+        ]);
+
+        const { mine } = await listTemplates('u1');
+
+        expect(mine[0].counts).toMatchObject({ units: 1, skillTrees: 0 });
     });
 });

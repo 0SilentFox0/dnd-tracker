@@ -1,4 +1,5 @@
 {
+  "duration": "{unit, select, rounds {{n, plural, one {# раунд} few {# раунди} many {# раундів} other {# раунду}}} minutes {{n} хв} hours {{n} год} roundsMinutes {{n, plural, one {# раунд} few {# раунди} many {# раундів} other {# раунду}} ({approx, number} хв)} roundsHours {{n, plural, one {# раунд} few {# раунди} many {# раундів} other {# раунду}} ({approx, number} год)} other {{n}}}",
   "effects": {
     "modifyStat": {
       "label": "Змінити стат"
@@ -1069,13 +1070,13 @@
     "effects": {
       "dealDamage": "шкода {amount}{hasType, select, yes { {type}} other {}}{hasFalloff, select, yes { ({falloff}%)} other {}}",
       "heal": "{revive, select, yes {воскресіння} other {лікування}} {amount}",
-      "dot": "{type} {amount}/раунд × {rounds} р.{linked, select, yes {, поки діє стан} other {}}",
-      "hot": "лікування {amount}/раунд × {rounds} р.",
-      "hotTemp": "тимчасові HP {amount}/раунд × {rounds} р.",
+      "dot": "{type} {amount}/раунд × {rounds}{linked, select, yes {, поки діє стан} other {}}",
+      "hot": "лікування {amount}/раунд × {rounds}",
+      "hotTemp": "тимчасові HP {amount}/раунд × {rounds}",
       "maxHpBoost": "максимум HP +{amount}",
       "tempHp": "тимчасові HP {amount}",
-      "berserk": "шал: автоатака випадкової істоти, +{percent}% шкоди × {rounds} р.",
-      "charm": "перехід на бік заклинателя × {rounds} р.",
+      "berserk": "шал: автоатака випадкової істоти, +{percent}% шкоди × {rounds}",
+      "charm": "перехід на бік заклинателя × {rounds}",
       "maneuver": "{name}: {percent} % шкоди атаки",
       "summonUnit": "прикликати {count}× обраного юніта",
       "summonGroup": "прикликати {count}× юніта «{group}», Tier {tier}",
@@ -1090,14 +1091,14 @@
       "grantRefreshReaction": "оновлює реакцію",
       "note": "{text}",
       "noteDm": "✋ {text}",
-      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds} р.{breakOnDamage, select, yes {, до шкоди} other {}}{hasSave, select, yes {, рятівний кидок {ability}} other {}}{hasEscape, select, yes {, вирватися проти СК} other {}}",
+      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds}{breakOnDamage, select, yes {, до шкоди} other {}}{hasSave, select, yes {, рятівний кидок {ability}} other {}}{hasEscape, select, yes {, вирватися проти СК} other {}}",
       "restoreSpellSlotLevels": "відновлює слоти до {level}-го кола за бюджетом кіл на короткому відпочинку",
       "restoreSpellSlot": "+{count} слот",
       "drainSpellSlot": "−{count} слот заклинань",
       "changeMorale": "мораль {delta}",
-      "mark": "мітка × {rounds} р.",
+      "mark": "мітка × {rounds}",
       "copySpellBuffs": "копіює бафи закляття, накладені на союзника",
-      "guard": "захист: {percent}% шкоди від атак × {rounds} р.",
+      "guard": "захист: {percent}% шкоди від атак × {rounds}",
       "cleanse": "{includeConditions, select, yes {зняття дебафів і станів} other {зняття дебафів}}",
       "randomOf": "одне з: {options}",
       "help": "перевага союзнику на наступну атаку",
@@ -1221,7 +1222,7 @@
         "bonusAction": "бонусна дія",
         "reaction": "реакція"
       },
-      "grantCast": "підкаст «{label}» ({cost}{hasUses, select, yes {, ×{uses}} other {}}) на {rounds} р.",
+      "grantCast": "підкаст «{label}» ({cost}{hasUses, select, yes {, ×{uses}} other {}}) на {rounds}",
       "attack": {
         "any": "будь-яку",
         "melee": "ближню",
@@ -1233,12 +1234,12 @@
         "allies": "союзники",
         "all": "усі"
       },
-      "anchoredZone": "аура {radius} фт на цілі ({side}{excludeBearer, select, yes {, крім носія} other {}}) на {rounds} р.{hasEnter, select, yes {; вхід: {enter}} other {}}{hasTurnStart, select, yes {; початок ходу: {turnStart}} other {}}{endsOutside, select, yes {; закінчується, якщо хід починається поза аурою} other {}}",
+      "anchoredZone": "аура {radius} фт на цілі ({side}{excludeBearer, select, yes {, крім носія} other {}}) на {rounds}{hasEnter, select, yes {; вхід: {enter}} other {}}{hasTurnStart, select, yes {; початок ходу: {turnStart}} other {}}{endsOutside, select, yes {; закінчується, якщо хід починається поза аурою} other {}}",
       "item": "предмет",
       "hp": "{hp} HP",
       "acSpellDc": "= СК",
-      "summonInline": "викликає {count}× «{name}» ({hp}, КЗ {ac}) на {rounds} р.{hasUpcast, select, yes {; +1 за кожні {upcastEvery} кола слота} other {}}{hasAura, select, yes {; аура {auraRadius} фт{auraAttack, select, yes { (атака заклинанням)} other {}}} other {}}",
-      "transform": "перетворює ціль на форму юніта на {rounds} р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму",
+      "summonInline": "викликає {count}× «{name}» ({hp}, КЗ {ac}) на {rounds}{hasUpcast, select, yes {; +1 за кожні {upcastEvery} кола слота} other {}}{hasAura, select, yes {; аура {auraRadius} фт{auraAttack, select, yes { (атака заклинанням)} other {}}} other {}}",
+      "transform": "перетворює ціль на форму юніта на {rounds}; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму",
       "phantom": "створює двійника цілі на боці кастера (ті ж характеристики й вміння, 1 HP); гине від першої шкоди",
       "moveSelf": "кастер переміщується до цілі",
       "teleportSelf": "заклиначка телепортується в обрану клітинку",
@@ -1250,7 +1251,7 @@
         "line": "лінія до цілі",
         "cell": "клітинки області"
       },
-      "createTerrain": "{terrain}: {shape} (до {cells}) на {rounds} р.",
+      "createTerrain": "{terrain}: {shape} (до {cells}) на {rounds}",
       "chooseOne": "на вибір: {options}"
     }
   },

@@ -32,10 +32,11 @@ import {
 import { helpEffect } from '@/lib/utils/battle/actions/effects';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import type { ConditionKey } from '@/lib/utils/battle/conditions/set';
-import { dieSizeOf,HELD_DIE_EFFECT } from '@/lib/utils/battle/d20-rider/held';
+import { dieSizeOf, HELD_DIE_EFFECT } from '@/lib/utils/battle/d20-rider/held';
 import { grantExtraActions } from '@/lib/utils/battle/participant/helpers';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
 import { resetSystemState } from '@/lib/utils/battle/turn/turn-state';
+import { durationRef } from '@/lib/utils/duration/format';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { slotLevel, slotRestoreOrder } from '@/lib/utils/spells/slot-keys';
 import type { BattleParticipant } from '@/types/battle';
@@ -161,7 +162,7 @@ export function applyCondition(
                 condition: dynamicTextRef(
                     `abilityRegistry.options.condition.${condition}`
                 ),
-                rounds: effect.duration.rounds,
+                rounds: durationRef(effect.duration.rounds),
             }),
         (p) => immuneTo(input.participants, p.basicInfo.id, condition)
     );
@@ -468,7 +469,7 @@ export function applyGuard(
                 ability: ability.name,
                 target: names,
                 percent: effect.percent,
-                rounds: effect.duration.rounds,
+                rounds: durationRef(effect.duration.rounds),
             }),
         (p) =>
             p.basicInfo.id === input.ownerId ||

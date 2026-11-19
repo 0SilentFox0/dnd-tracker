@@ -140,8 +140,6 @@ const STATS_REPLACED =
 
 const REVERT_AT_ZERO = /\bdrops to 0 hit points\b/i;
 
-const MAX_DURATION_ROUNDS = 99;
-
 export const transformSpell: SpellRecognizer = ({
     t,
     raw,
@@ -168,13 +166,6 @@ export const transformSpell: SpellRecognizer = ({
     const rounds = durationRounds(cast.facts.duration);
 
     const riders = [
-        ...(/\b(?:hour|day)s?\b/i.test(cast.facts.duration)
-            ? [
-                  t('derived.spell.rider.durationCapped', {
-                      rounds: MAX_DURATION_ROUNDS,
-                  }),
-              ]
-            : []),
         ...(/\bduration increases\b/i.test(higher)
             ? [t('derived.spell.rider.durationUpcast')]
             : []),

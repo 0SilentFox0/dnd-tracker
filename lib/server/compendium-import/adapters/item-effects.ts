@@ -1,6 +1,12 @@
 import { resistFlags } from './race-traits';
 import { num } from './shared';
 
+import {
+    MAX_DURATION_ROUNDS,
+    ROUNDS_PER_DAY,
+    ROUNDS_PER_HOUR,
+    ROUNDS_PER_MINUTE,
+} from '@/lib/constants/duration';
 import type { Translator } from '@/lib/i18n/translator';
 import type { Ability, Effect } from '@/lib/utils/abilities/schema';
 
@@ -8,15 +14,13 @@ const SIGNED = /^([+-]\d+)$/;
 
 const ROUNDS: Record<string, number> = {
     round: 1,
-    minute: 10,
-    hour: 600,
-    day: 14400,
+    minute: ROUNDS_PER_MINUTE,
+    hour: ROUNDS_PER_HOUR,
+    day: ROUNDS_PER_DAY,
 };
 
 const DURATION =
     /\b(?:for|lasts?(?: for)?)\s+(?:the\s+)?(?:next\s+)?(\d+|an?|one)?\s*(round|minute|hour|day)s?\b/i;
-
-const MAX_ROUNDS = 99;
 
 export const EFFECT_FIELDS = [
     'bonusWeapon',
@@ -44,7 +48,7 @@ export function durationRounds(text: string): number | undefined {
     const count = m[1] && /^\d+$/.test(m[1]) ? Number(m[1]) : 1;
 
     return Math.min(
-        MAX_ROUNDS,
+        MAX_DURATION_ROUNDS,
         Math.max(1, count * ROUNDS[m[2].toLowerCase()])
     );
 }

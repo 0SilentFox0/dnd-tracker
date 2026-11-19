@@ -73,7 +73,7 @@
   "condition": {
     "immune": "⛔ {source}: {target} — імунітет",
     "applied": "⛓ {source}: {target} — {condition}",
-    "appliedTimed": "⛓ {source}: {target} — {condition} ({rounds} р.)",
+    "appliedTimed": "⛓ {source}: {target} — {condition} ({rounds})",
     "exhaustionDeath": "💀 {name} помирає від виснаження",
     "exhaustionHalved": "🩸 {name}: максимум HP зменшено вдвічі",
     "incapacitatedReason": "недієздатний",

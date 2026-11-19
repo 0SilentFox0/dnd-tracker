@@ -1,5 +1,9 @@
 import { dynamicTextRef, joinLines } from '@/lib/i18n/text-ref';
 import type { Translator } from '@/lib/i18n/translator';
+import {
+    DURATION_SEGMENT_KEY,
+    durationArgs,
+} from '@/lib/utils/duration/format';
 import type { LogLine, TextArg } from '@/types/text';
 
 type SegmentTranslator = (
@@ -36,6 +40,12 @@ export const seg = (
     key: string,
     params?: Record<string, SegmentParam>
 ): Segment => (params ? { key, params } : { key });
+
+export const durationSeg = (rounds: number): Segment =>
+    seg(DURATION_SEGMENT_KEY, durationArgs(rounds));
+
+export const durationOf = (d?: { rounds: number }): SegmentParam =>
+    d ? durationSeg(d.rounds) : '?';
 
 const isSegment = (p: SegmentParam): p is Segment =>
     typeof p === 'object' && !Array.isArray(p) && 'key' in p;

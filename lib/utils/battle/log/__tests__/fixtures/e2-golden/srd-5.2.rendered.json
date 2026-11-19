@@ -12,12 +12,12 @@
  {
   "seq": 3,
   "type": "spell",
-  "text": "TEST sweep hero 1 Dragonborn застосовує Bane | 🎲 Gold Dragon Wyrmling #1: рятівний кидок 1+3=4 проти СК 12 — провал | 🎲 Succubus #1: рятівний кидок 1+5=6 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1-2=-1 проти СК 12 — провал | ✨ Bane: бонус атаки -2 → Gold Dragon Wyrmling #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Gold Dragon Wyrmling #1 (10 р.) | ✨ Bane: бонус атаки -2 → Succubus #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Succubus #1 (10 р.) | ✨ Bane: бонус атаки -2 → Hydra #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Hydra #1 (10 р.)"
+  "text": "TEST sweep hero 1 Dragonborn застосовує Bane | 🎲 Gold Dragon Wyrmling #1: рятівний кидок 1+3=4 проти СК 12 — провал | 🎲 Succubus #1: рятівний кидок 1+5=6 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1-2=-1 проти СК 12 — провал | ✨ Bane: бонус атаки -2 → Gold Dragon Wyrmling #1 (10) | ✨ Bane: рятівні кидки -2 → Gold Dragon Wyrmling #1 (10) | ✨ Bane: бонус атаки -2 → Succubus #1 (10) | ✨ Bane: рятівні кидки -2 → Succubus #1 (10) | ✨ Bane: бонус атаки -2 → Hydra #1 (10) | ✨ Bane: рятівні кидки -2 → Hydra #1 (10)"
  },
  {
   "seq": 4,
   "type": "spell",
-  "text": "Succubus #1 застосовує Dominate Person | 🎲 Young Green Dragon #1: рятівний кидок 1+1+3=5 проти СК 15 — провал | ⛓ Dominate Person: Young Green Dragon #1 — зачарований (10 р.)"
+  "text": "Succubus #1 застосовує Dominate Person | 🎲 Young Green Dragon #1: рятівний кидок 1+1+3=5 проти СК 15 — провал | ⛓ Dominate Person: Young Green Dragon #1 — зачарований (10)"
  },
  {
   "seq": 5,
@@ -42,7 +42,7 @@
  {
   "seq": 9,
   "type": "ability",
-  "text": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99 р.)"
+  "text": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99)"
  },
  {
   "seq": 10,
@@ -112,7 +112,7 @@
  {
   "seq": 23,
   "type": "ability",
-  "text": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99 р.)"
+  "text": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99)"
  },
  {
   "seq": 24,
@@ -152,7 +152,7 @@
  {
   "seq": 31,
   "type": "spell",
-  "text": "Succubus #1 застосовує Dominate Person | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+1=2 проти СК 15 — провал | ⛓ Dominate Person: TEST sweep hero 1 Dragonborn — зачарований (10 р.)"
+  "text": "Succubus #1 застосовує Dominate Person | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+1=2 проти СК 15 — провал | ⛓ Dominate Person: TEST sweep hero 1 Dragonborn — зачарований (10)"
  },
  {
   "seq": 32,
@@ -187,7 +187,7 @@
  {
   "seq": 38,
   "type": "spell",
-  "text": "TEST sweep hero 3 Elf застосовує Entangle | 🔮 TEST sweep hero 3 Elf втрачає концентрацію на «Detect Poison and Disease» (нове заклинання) | 🎲 Succubus #1: рятівний кидок 1-1=0 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 12 — провал | ⛓ Entangle: Succubus #1 — скутий (10 р.) | ⛓ Entangle: Hydra #1 — скутий (10 р.)"
+  "text": "TEST sweep hero 3 Elf застосовує Entangle | 🔮 TEST sweep hero 3 Elf втрачає концентрацію на «Detect Poison and Disease» (нове заклинання) | 🎲 Succubus #1: рятівний кидок 1-1=0 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 12 — провал | ⛓ Entangle: Succubus #1 — скутий (10) | ⛓ Entangle: Hydra #1 — скутий (10)"
  },
  {
   "seq": 39,
@@ -197,7 +197,7 @@
  {
   "seq": 40,
   "type": "spell",
-  "text": "TEST sweep hero 1 Dragonborn застосовує Expeditious Retreat | 🔮 TEST sweep hero 1 Dragonborn втрачає концентрацію на «Ensnaring Strike» (нове заклинання) | ✨ Expeditious Retreat: швидкість +30 → TEST sweep hero 1 Dragonborn (99 р.)"
+  "text": "TEST sweep hero 1 Dragonborn застосовує Expeditious Retreat | 🔮 TEST sweep hero 1 Dragonborn втрачає концентрацію на «Ensnaring Strike» (нове заклинання) | ✨ Expeditious Retreat: швидкість +30 → TEST sweep hero 1 Dragonborn (99)"
  },
  {
   "seq": 41,

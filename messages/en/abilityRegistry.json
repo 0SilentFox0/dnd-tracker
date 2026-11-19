@@ -1,4 +1,5 @@
 {
+  "duration": "{unit, select, rounds {{n, plural, one {# round} other {# rounds}}} minutes {{n} min} hours {{n} h} roundsMinutes {{n, plural, one {# round} other {# rounds}} ({approx, number} min)} roundsHours {{n, plural, one {# round} other {# rounds}} ({approx, number} h)} other {{n}}}",
   "effects": {
     "modifyStat": {
       "label": "Modify stat"
@@ -1069,13 +1070,13 @@
     "effects": {
       "dealDamage": "damage {amount}{hasType, select, yes { {type}} other {}}{hasFalloff, select, yes { ({falloff}%)} other {}}",
       "heal": "{revive, select, yes {revival} other {healing}} {amount}",
-      "dot": "{type} {amount}/round × {rounds} rd.{linked, select, yes {, while the condition lasts} other {}}",
-      "hot": "healing {amount}/round × {rounds} rd.",
-      "hotTemp": "temp HP {amount}/round × {rounds} rd.",
+      "dot": "{type} {amount}/round × {rounds}{linked, select, yes {, while the condition lasts} other {}}",
+      "hot": "healing {amount}/round × {rounds}",
+      "hotTemp": "temp HP {amount}/round × {rounds}",
       "maxHpBoost": "max HP +{amount}",
       "tempHp": "temporary HP {amount}",
-      "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds} rd.",
-      "charm": "switches to the caster's side × {rounds} rd.",
+      "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds}",
+      "charm": "switches to the caster's side × {rounds}",
       "maneuver": "{name}: {percent}% of attack damage",
       "summonUnit": "summon {count}× of the chosen unit",
       "summonGroup": "summon {count}× unit of «{group}», Tier {tier}",
@@ -1090,14 +1091,14 @@
       "grantRefreshReaction": "refreshes the reaction",
       "note": "{text}",
       "noteDm": "✋ {text}",
-      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds} rd.{breakOnDamage, select, yes {, until damaged} other {}}{hasSave, select, yes {, {ability} saving throw} other {}}{hasEscape, select, yes {, escape vs spell DC} other {}}",
+      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds}{breakOnDamage, select, yes {, until damaged} other {}}{hasSave, select, yes {, {ability} saving throw} other {}}{hasEscape, select, yes {, escape vs spell DC} other {}}",
       "restoreSpellSlotLevels": "restores spell slots up to level {level} by level budget on a short rest",
       "restoreSpellSlot": "+{count} slot",
       "drainSpellSlot": "−{count} spell slot",
       "changeMorale": "morale {delta}",
-      "mark": "mark × {rounds} rd.",
+      "mark": "mark × {rounds}",
       "copySpellBuffs": "copies spell buffs cast on an ally",
-      "guard": "guard: {percent}% of attack damage × {rounds} rd.",
+      "guard": "guard: {percent}% of attack damage × {rounds}",
       "cleanse": "{includeConditions, select, yes {removes debuffs and conditions} other {removes debuffs}}",
       "randomOf": "one of: {options}",
       "help": "advantage for an ally on their next attack",
@@ -1221,7 +1222,7 @@
         "bonusAction": "bonus action",
         "reaction": "reaction"
       },
-      "grantCast": "sub-cast “{label}” ({cost}{hasUses, select, yes {, ×{uses}} other {}}) for {rounds} rd.",
+      "grantCast": "sub-cast “{label}” ({cost}{hasUses, select, yes {, ×{uses}} other {}}) for {rounds}",
       "attack": {
         "any": "any",
         "melee": "melee",
@@ -1233,12 +1234,12 @@
         "allies": "allies",
         "all": "everyone"
       },
-      "anchoredZone": "aura {radius} ft on the target ({side}{excludeBearer, select, yes {, except the bearer} other {}}) for {rounds} rd.{hasEnter, select, yes {; on enter: {enter}} other {}}{hasTurnStart, select, yes {; turn start: {turnStart}} other {}}{endsOutside, select, yes {; ends if the turn starts outside the aura} other {}}",
+      "anchoredZone": "aura {radius} ft on the target ({side}{excludeBearer, select, yes {, except the bearer} other {}}) for {rounds}{hasEnter, select, yes {; on enter: {enter}} other {}}{hasTurnStart, select, yes {; turn start: {turnStart}} other {}}{endsOutside, select, yes {; ends if the turn starts outside the aura} other {}}",
       "item": "object",
       "hp": "{hp} HP",
       "acSpellDc": "= spell DC",
-      "summonInline": "summons {count}× “{name}” ({hp}, AC {ac}) for {rounds} rd.{hasUpcast, select, yes {; +1 per {upcastEvery} slot levels} other {}}{hasAura, select, yes {; aura {auraRadius} ft{auraAttack, select, yes { (spell attack)} other {}}} other {}}",
-      "transform": "transforms the target into a unit form for {rounds} rd.; at 0 HP of the form it reverts and excess damage carries over to the normal form",
+      "summonInline": "summons {count}× “{name}” ({hp}, AC {ac}) for {rounds}{hasUpcast, select, yes {; +1 per {upcastEvery} slot levels} other {}}{hasAura, select, yes {; aura {auraRadius} ft{auraAttack, select, yes { (spell attack)} other {}}} other {}}",
+      "transform": "transforms the target into a unit form for {rounds}; at 0 HP of the form it reverts and excess damage carries over to the normal form",
       "phantom": "creates a double of the target on the caster's side (same stats and abilities, 1 HP); dies on the first damage",
       "moveSelf": "the caster moves next to the target",
       "teleportSelf": "the caster teleports to the aimed cell",
@@ -1250,7 +1251,7 @@
         "line": "line to the target",
         "cell": "area cells"
       },
-      "createTerrain": "{terrain}: {shape} (up to {cells}) for {rounds} rd.",
+      "createTerrain": "{terrain}: {shape} (up to {cells}) for {rounds}",
       "chooseOne": "choose one: {options}"
     }
   },

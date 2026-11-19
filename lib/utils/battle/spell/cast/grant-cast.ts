@@ -5,6 +5,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
 import { grantCastsOf } from '@/lib/utils/battle/spell/cast/state';
+import { durationRef } from '@/lib/utils/duration/format';
 import { castPoolKey } from '@/lib/utils/items/pools';
 import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
@@ -99,7 +100,7 @@ export function applyGrantCasts({
                 textRef('battleLog.spellFx.grantCast', {
                     holder: holder.basicInfo.name,
                     label: effect.label,
-                    rounds: effect.duration.rounds,
+                    rounds: durationRef(effect.duration.rounds),
                 })
             );
         }

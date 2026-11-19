@@ -197,7 +197,7 @@ describe('effects', () => {
                 damageType: 'bleed',
                 duration: { rounds: 3 },
             })
-        ).toBe('Кровотеча 1d4/раунд × 3 р.');
+        ).toBe('Кровотеча 1d4/раунд × 3 раунди');
     });
 });
 

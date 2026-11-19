@@ -57,7 +57,7 @@
     "remove": "Remove",
     "state": "Condition",
     "rounds": "Rounds (empty — until removed)",
-    "roundsLeft": " · {duration} rd.",
+    "roundsLeft": " · {duration}",
     "levels": "Levels",
     "saveEnds": "Saving throw at the end of the turn",
     "ability": "Ability",

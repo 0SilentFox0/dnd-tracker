@@ -1,5 +1,5 @@
 import type { SpellRow } from '../lib/types';
-import { HOUR, MINUTE, rounds, TEN_MINUTES } from './durations';
+import { HOUR, MINUTE, rounds, SPELL_DURATION, TEN_MINUTES } from './durations';
 import { UTILITY_SPELL_OVERRIDES } from './spells-utility';
 
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
@@ -63,7 +63,11 @@ const NO_DAMAGE: SpellOverride = {
     spellEffects: [],
 };
 
-const resist = (damageType: string, percent = 50, n = 99): NonRandomEffect => ({
+const resist = (
+    damageType: string,
+    percent = 50,
+    n = SPELL_DURATION
+): NonRandomEffect => ({
     kind: 'flag',
     flag: 'resistance',
     damageType,
@@ -224,7 +228,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'armor',
                 flat: 2,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -235,7 +239,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'armor',
                 flat: 3,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -377,7 +381,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'speed',
                 flat: 10,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
         upcastTargets: 1,
@@ -418,7 +422,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
             {
                 kind: 'applyCondition',
                 condition: 'invisible',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
         upcastTargets: 1,
@@ -495,7 +499,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'conditionImmunity',
                 conditions: ['restrained', 'grappled'],
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -522,9 +526,9 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'checkDisadvantage',
                 skills: 'all',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
-            { kind: 'mark', markId: 'hex', duration: rounds(99) },
+            { kind: 'mark', markId: 'hex', duration: rounds(SPELL_DURATION) },
         ],
     },
     'srd-2024_hunters-mark': {
@@ -532,7 +536,11 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
         targeting: { kind: 'enemy', range: 90 },
         resolution: { kind: 'auto' },
         spellEffects: [
-            { kind: 'mark', markId: 'hunters-mark', duration: rounds(99) },
+            {
+                kind: 'mark',
+                markId: 'hunters-mark',
+                duration: rounds(SPELL_DURATION),
+            },
         ],
     },
     'srd-2024_barkskin': {
@@ -541,7 +549,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'armor',
                 flat: 3,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -559,7 +567,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'checkAdvantage',
                 skills: 'all',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -569,7 +577,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'attackBonus',
                 flat: 1,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -579,7 +587,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'speed',
                 flat: 30,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
         upcastTargets: 1,
@@ -591,7 +599,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'speed',
                 flat: 30,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -620,7 +628,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
             {
                 kind: 'flag',
                 flag: 'disadvantageForAttackers',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -630,13 +638,13 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'modifyStat',
                 stat: 'armor',
                 flat: 1,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
             {
                 kind: 'modifyStat',
                 stat: 'savingThrow',
                 flat: 1,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
         ingredients: [
@@ -655,7 +663,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'conditionImmunity',
                 conditions: ['charmed'],
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -665,18 +673,18 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'advantage',
                 attackKind: 'all',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
             {
                 kind: 'flag',
                 flag: 'saveAdvantage',
                 abilities: 'all',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
             {
                 kind: 'flag',
                 flag: 'disadvantageForAttackers',
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -781,7 +789,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'skillProficiency',
                 skills: ['stealth'],
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -888,7 +896,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 attackKinds: ['melee'],
                 whileTempHp: true,
                 upcastDamage: 5,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },
@@ -949,7 +957,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
         spellEffects: [
             { kind: 'heal', amount: '4d8' },
             { kind: 'heal', amount: 15 },
-            { kind: 'hot', healPerRound: 1, duration: rounds(99) },
+            { kind: 'hot', healPerRound: 1, duration: rounds(SPELL_DURATION) },
         ],
     },
     // the retaliation 2d8 is not expressible; only the chosen resistance is mechanized
@@ -1039,7 +1047,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 terrain: 'wall',
                 shape: 'cell',
                 cells: 20,
-                rounds: 99,
+                rounds: SPELL_DURATION,
             },
         ],
     },
@@ -1248,7 +1256,7 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 onEnter: noCasting,
                 onTurnStart: noCasting,
                 endsWhenStartOutside: true,
-                duration: rounds(99),
+                duration: rounds(SPELL_DURATION),
             },
         ],
     },

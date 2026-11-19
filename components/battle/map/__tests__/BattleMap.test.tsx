@@ -777,7 +777,7 @@ describe('BattleMap', () => {
         ).toContain('M100 100');
     });
 
-    it("тимчасова небезпека: вогняна заливка, жар, полум'я й «ще N р.»; червона зона руху — ні", () => {
+    it("тимчасова небезпека: вогняна заливка, жар, полум'я й «ще N раундів»; червона зона руху — ні", () => {
         const map: BattleMapConfig = {
             ...square,
             terrain: {
@@ -817,7 +817,7 @@ describe('BattleMap', () => {
                 ?.textContent;
         };
 
-        expect(titleAt(1, 1)).toBe('Вогняна стіна · ще 2 р.');
+        expect(titleAt(1, 1)).toBe('Вогняна стіна · ще 2 раунди');
         expect(titleAt(3, 2)).toBe('Лава');
         expect(
             container
@@ -971,7 +971,7 @@ describe('BattleMap — поворот у портреті', () => {
         expect(
             phone.container.querySelector('[data-grid-hover] title')
                 ?.textContent
-        ).toBe('Небезпечна зона · ще 1 р.');
+        ).toBe('Небезпечна зона · ще 1 раунд');
         expect(
             phone.container
                 .querySelector('[data-hazard-flame="1:1"]')

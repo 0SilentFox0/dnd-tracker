@@ -7,9 +7,15 @@ import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 const findMany = vi.fn();
 
 vi.mock('@/lib/db', () => ({
-    prisma: {
-        campaign: { findMany: (...args: unknown[]) => findMany(...args) },
-    },
+    prisma: new Proxy(
+        { campaign: { findMany: (...args: unknown[]) => findMany(...args) } },
+        {
+            get: (target, key: string) =>
+                (target as Record<string, unknown>)[key] ?? {
+                    groupBy: async () => [],
+                },
+        }
+    ),
 }));
 
 const row = (id: string, rules: unknown) => ({

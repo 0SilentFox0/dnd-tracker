@@ -755,7 +755,7 @@
             "sense": "tremorsense",
             "range": 60,
             "duration": {
-              "rounds": 99
+              "rounds": 100
             },
             "target": "self"
           }

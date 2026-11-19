@@ -27,6 +27,7 @@ import {
 } from '@/lib/utils/abilities/schema/kinds';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
 import { effectName } from '@/lib/utils/battle/common/terms';
+import { durationRef } from '@/lib/utils/duration/format';
 import type { LogLine } from '@/types/text';
 
 function stripTiming(effect: StaticEffect): StaticEffect {
@@ -151,7 +152,7 @@ export function applyStatic(
                       ability: ability.name,
                       effect: describe(effect),
                       target: participantNames(ps, applied),
-                      rounds,
+                      rounds: durationRef(rounds),
                   }),
               ]
             : []),

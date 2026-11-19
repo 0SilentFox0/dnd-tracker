@@ -59,7 +59,7 @@ describe('SRD 5.2 abilities: completeness (parts 3 and 4)', () => {
                 flag: 'sense',
                 sense: 'tremorsense',
                 range: 60,
-                duration: { rounds: 99 },
+                duration: { rounds: 100 },
                 target: 'self',
             },
         ]);

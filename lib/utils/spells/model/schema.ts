@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
+import { MAX_DURATION_ROUNDS } from '@/lib/constants/duration';
 import { DurationSchema } from '@/lib/utils/abilities/schema/common';
 import {
     BASE_EFFECTS,
@@ -64,7 +65,7 @@ export const TEMPLATE_SHAPES = [
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
-export const ZONE_MAX_ROUNDS = 600;
+export const ZONE_MAX_ROUNDS = MAX_DURATION_ROUNDS;
 
 export const ZoneTriggerSchema = z.object({
     save: z.object({ ability: z.enum(ABILITY_KEYS) }).optional(),

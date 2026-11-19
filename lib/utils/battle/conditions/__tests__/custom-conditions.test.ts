@@ -120,7 +120,7 @@ describe('накладання custom-стану', () => {
 
     it('у лозі назва custom-стану лишається як у правилах', () => {
         expect(textOf(apply(target, 'custom:pacified').messages[0])).toContain(
-            '— Умиротворений (3 р.)'
+            '— Умиротворений (3 раунди)'
         );
     });
 

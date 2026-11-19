@@ -175,14 +175,14 @@ describe('item magic effects', () => {
         expect(createArtifactSchema.safeParse(entry.body).success).toBe(true);
     });
 
-    it('a long potion duration is capped and a potion without a parsable duration stays manual', () => {
+    it('a long potion duration converts to rounds and a potion without a parsable duration stays manual', () => {
         expect(
             adapt({
                 type: 'P',
                 resist: ['fire'],
                 entries: ['For the next 8 hours you resist fire.'],
             }).body.abilities
-        ).toMatchObject([{ effects: [{ duration: { rounds: 99 } }] }]);
+        ).toMatchObject([{ effects: [{ duration: { rounds: 4800 } }] }]);
 
         const entry = adapt({
             type: 'P',

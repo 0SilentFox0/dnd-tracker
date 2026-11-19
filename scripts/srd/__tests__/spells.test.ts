@@ -272,8 +272,12 @@ describe('convertSpells', () => {
         expect(durationRounds('1 round')).toBe(1);
         expect(durationRounds('6 rounds')).toBe(6);
         expect(durationRounds('instantaneous')).toBe(1);
-        expect(durationRounds('8 hours')).toBe(99);
-        expect(durationRounds('until dispelled')).toBe(99);
+        expect(durationRounds('10 minutes')).toBe(100);
+        expect(durationRounds('1 hour')).toBe(600);
+        expect(durationRounds('8 hours')).toBe(4800);
+        expect(durationRounds('1 day')).toBe(14400);
+        expect(durationRounds('7 days')).toBe(14400);
+        expect(durationRounds('until dispelled')).toBe(14400);
     });
 
     it('slugs are unique and sorted', () => {

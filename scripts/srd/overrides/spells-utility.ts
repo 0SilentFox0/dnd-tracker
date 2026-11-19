@@ -1,5 +1,5 @@
 import type { SpellRow } from '../lib/types';
-import { MINUTE, rounds } from './durations';
+import { MINUTE, rounds, SPELL_DURATION } from './durations';
 
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
 import type {
@@ -13,8 +13,8 @@ type Override = Partial<
     Omit<SpellRow, 'slug' | 'name' | 'level' | 'groupId' | 'description'>
 >;
 
-// longer durations are capped at the 99-round effect maximum
-const LONG = 99;
+// the spell's own duration, resolved by the converter
+const LONG = SPELL_DURATION;
 
 const SELF: SpellTargeting = { kind: 'self' };
 

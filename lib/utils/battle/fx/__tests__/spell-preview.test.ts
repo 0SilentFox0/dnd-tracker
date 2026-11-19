@@ -74,7 +74,7 @@ describe('previewSpellFx', () => {
         });
         expect(p.auras).toEqual(['roots']);
         expect(linesText(await ukT(), p.effects)).toContain(
-            'без ближніх атак × 1 р.'
+            'без ближніх атак × 1 раунд'
         );
     });
 

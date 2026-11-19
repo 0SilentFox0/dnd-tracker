@@ -1,6 +1,10 @@
+import { MAX_DURATION_ROUNDS } from '@/lib/constants/duration';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
-export const CONDITION_LIMITS = { rounds: 99, dc: 40 } as const;
+export const CONDITION_LIMITS = {
+    rounds: MAX_DURATION_ROUNDS,
+    dc: 40,
+} as const;
 
 export const TURN_TIMER_RANGE = [10, 600] as const;
 

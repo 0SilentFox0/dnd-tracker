@@ -15,6 +15,7 @@ import { CONDITION_LIMITS } from '@/lib/constants/battle';
 import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import type { BattleConditionsBody } from '@/lib/hooks/battles';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
+import { useFormatDuration } from '@/lib/i18n/use-duration';
 import { useText } from '@/lib/i18n/use-text';
 import { effectName } from '@/lib/utils/battle/common/terms';
 import {
@@ -78,6 +79,8 @@ function ConditionsDialogBody({
 
     const tAbility = useTranslations('gameTerms.abilities');
 
+    const formatDuration = useFormatDuration();
+
     const text = useText();
 
     const [selected, setSelected] = useState<ConditionKey | ''>(
@@ -117,7 +120,8 @@ function ConditionsDialogBody({
         (selected !== 'exhaustion' || inRange(levelsCount, MAX_EXHAUSTION)) &&
         (!saveOn || inRange(dc, CONDITION_LIMITS.dc));
 
-    const showSource = SOURCE_CONDITIONS.includes(selected) && sources.length > 0;
+    const showSource =
+        SOURCE_CONDITIONS.includes(selected) && sources.length > 0;
 
     const sourceOptions = [
         { value: AUTO_SOURCE, label: t('sourceAll') },
@@ -135,8 +139,7 @@ function ConditionsDialogBody({
             condition: selected,
             rounds: roundsCount,
             ...(selected === 'exhaustion' && { levels: levelsCount }),
-            ...(showSource &&
-                sourceId !== AUTO_SOURCE && { sourceId }),
+            ...(showSource && sourceId !== AUTO_SOURCE && { sourceId }),
             ...(saveOn &&
                 dc !== undefined && { saveEnds: { ability: saveAbility, dc } }),
         });
@@ -180,7 +183,9 @@ function ConditionsDialogBody({
                                 {effect.permanent
                                     ? ''
                                     : t('roundsLeft', {
-                                          duration: effect.duration,
+                                          duration: formatDuration(
+                                              effect.duration
+                                          ),
                                       })}
                             </span>
                             <Button

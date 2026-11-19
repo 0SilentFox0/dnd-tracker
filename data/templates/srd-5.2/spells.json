@@ -49,7 +49,7 @@
         "whileTempHp": true,
         "upcastDamage": 5,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -1033,7 +1033,7 @@
         "markId": "alarm",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -1077,7 +1077,7 @@
         "markId": "alter-self",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -1820,7 +1820,7 @@
         "kind": "applyCondition",
         "condition": "charmed",
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -1908,7 +1908,7 @@
         "markId": "animal-shapes",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -1962,7 +1962,7 @@
         "hp": 13,
         "count": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         },
         "upcastEvery": 1,
         "attacks": [
@@ -2098,7 +2098,7 @@
         "markId": "antilife-shell",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -2171,7 +2171,7 @@
         },
         "endsWhenStartOutside": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -2221,7 +2221,7 @@
         "kind": "applyCondition",
         "condition": "frightened",
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -2525,7 +2525,7 @@
         "markId": "astral-projection",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -2621,7 +2621,7 @@
         "damageType": "necrotic",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       }
     ],
@@ -2829,7 +2829,7 @@
         "stat": "armor",
         "flat": 3,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -4030,7 +4030,7 @@
         "kind": "applyCondition",
         "condition": "charmed",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -4076,7 +4076,7 @@
         "kind": "applyCondition",
         "condition": "charmed",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -4785,7 +4785,7 @@
         "markId": "comprehend-languages",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -5078,7 +5078,7 @@
         "kind": "applyCondition",
         "condition": "restrained",
         "duration": {
-          "rounds": 99
+          "rounds": 100
         },
         "saveEnds": {
           "ability": "dexterity"
@@ -5534,7 +5534,7 @@
         "markId": "control-weather",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -5791,7 +5791,7 @@
         "hp": 22,
         "count": 3,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         },
         "attacks": [
           {
@@ -6042,7 +6042,7 @@
         "sense": "darkvision",
         "range": 150,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       }
     ],
@@ -6080,7 +6080,7 @@
       "maxTargets": 20,
       "range": 60,
       "zone": {
-        "rounds": 99,
+        "rounds": 600,
         "label": "Daylight",
         "side": "all"
       },
@@ -6130,7 +6130,7 @@
         "markId": "death-ward",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -6230,7 +6230,7 @@
         "markId": "demiplane",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -6518,7 +6518,7 @@
         "markId": "disguise-self",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -7023,7 +7023,7 @@
         "kind": "applyCondition",
         "condition": "charmed",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         },
         "saveEnds": {
           "ability": "wisdom"
@@ -7938,7 +7938,7 @@
         "flag": "checkAdvantage",
         "skills": "all",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -8220,7 +8220,7 @@
         "kind": "flag",
         "flag": "passesWalls",
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -8228,7 +8228,7 @@
         "markId": "etherealness",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -8305,7 +8305,7 @@
         "stat": "speed",
         "flat": 30,
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       }
     ],
@@ -8691,7 +8691,7 @@
         "hp": 1,
         "count": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -8733,7 +8733,7 @@
         "hp": 25,
         "count": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         },
         "attacks": [
           {
@@ -8789,7 +8789,7 @@
         "markId": "find-the-path",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -8968,7 +8968,7 @@
             "damageType": "cold",
             "percent": 50,
             "duration": {
-              "rounds": 99
+              "rounds": 100
             }
           },
           {
@@ -8977,7 +8977,7 @@
             "damageType": "fire",
             "percent": 50,
             "duration": {
-              "rounds": 99
+              "rounds": 100
             }
           }
         ]
@@ -9429,7 +9429,7 @@
         "stat": "speed",
         "flat": 30,
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       }
     ],
@@ -9525,7 +9525,7 @@
         "markId": "forbiddance",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -9580,21 +9580,21 @@
         "kind": "applyCondition",
         "condition": "immobilized",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "applyCondition",
         "condition": "disable_melee_attacks",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "applyCondition",
         "condition": "disable_ranged_attacks",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -9644,7 +9644,7 @@
         "flag": "advantage",
         "attackKind": "all",
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -9652,14 +9652,14 @@
         "flag": "saveAdvantage",
         "abilities": "all",
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
         "kind": "flag",
         "flag": "disadvantageForAttackers",
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       }
     ],
@@ -9713,7 +9713,7 @@
           "grappled"
         ],
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -9821,7 +9821,7 @@
         "damageType": "slashing",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -9830,7 +9830,7 @@
         "damageType": "piercing",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -9839,14 +9839,14 @@
         "damageType": "bludgeoning",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "flag",
         "flag": "passesWalls",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -9854,7 +9854,7 @@
         "markId": "gaseous-form",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -10045,7 +10045,7 @@
         "markId": "gentle-repose",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -10438,7 +10438,7 @@
         "markId": "glibness",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -10545,7 +10545,7 @@
         "markId": "glyph-of-warding",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -10915,7 +10915,7 @@
         "hp": null,
         "count": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         },
         "aura": {
           "radiusFeet": 10,
@@ -10993,7 +10993,7 @@
         "markId": "guards-and-wards",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -11187,7 +11187,7 @@
         "markId": "hallow",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -11238,7 +11238,7 @@
         "markId": "hallucinatory-terrain",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -11682,7 +11682,7 @@
           "frightened"
         ],
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -11691,7 +11691,7 @@
         "damageType": "poison",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -11794,14 +11794,14 @@
         "flag": "checkDisadvantage",
         "skills": "all",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "mark",
         "markId": "hex",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -12105,7 +12105,7 @@
         "kind": "mark",
         "markId": "hunters-mark",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -12410,7 +12410,7 @@
         "markId": "illusory-script",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -12466,7 +12466,7 @@
         "kind": "applyCondition",
         "condition": "restrained",
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -12811,7 +12811,7 @@
         "kind": "applyCondition",
         "condition": "invisible",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -13438,7 +13438,7 @@
         "markId": "light",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -13731,7 +13731,7 @@
         "stat": "speed",
         "flat": 10,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -13781,7 +13781,7 @@
         "stat": "armor",
         "flat": 3,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       }
     ],
@@ -13875,7 +13875,7 @@
         "markId": "magic-circle",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -13930,7 +13930,7 @@
         "markId": "magic-jar",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -14066,7 +14066,7 @@
         "stat": "attackBonus",
         "flat": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -14151,7 +14151,7 @@
         "markId": "magnificent-mansion",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -14457,7 +14457,7 @@
         "kind": "applyCondition",
         "condition": "charmed",
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -14537,7 +14537,7 @@
         "markId": "meld-into-stone",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -14725,7 +14725,7 @@
           "charmed"
         ],
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -14864,7 +14864,7 @@
         "markId": "mirage-arcane",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -15153,7 +15153,7 @@
         "terrain": "difficult",
         "shape": "cell",
         "cells": 12,
-        "rounds": 99
+        "rounds": 1200
       }
     ],
     "lists": [
@@ -15312,7 +15312,7 @@
         "markId": "nondetection",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -15410,7 +15410,7 @@
           "stealth"
         ],
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -15457,7 +15457,7 @@
         "markId": "passwall",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -15706,7 +15706,7 @@
         "hp": 90,
         "count": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         },
         "attacks": [
           {
@@ -15766,7 +15766,7 @@
         "markId": "planar-binding",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -15893,7 +15893,7 @@
       "maxTargets": 20,
       "range": 150,
       "zone": {
-        "rounds": 99,
+        "rounds": 14400,
         "label": "Overgrowth",
         "terrain": [
           "difficult"
@@ -15995,14 +15995,14 @@
         "kind": "applyCondition",
         "condition": "disable_spell_casting",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "applyCondition",
         "condition": "disable_ranged_attacks",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -16361,7 +16361,7 @@
         "markId": "private-sanctum",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -16452,7 +16452,7 @@
         "markId": "programmed-illusion",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -16504,7 +16504,7 @@
         "markId": "project-image",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -16550,7 +16550,7 @@
         "damageType": "fire",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -16601,7 +16601,7 @@
         "kind": "flag",
         "flag": "disadvantageForAttackers",
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       }
     ],
@@ -16646,7 +16646,7 @@
         "damageType": "poison",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -16848,7 +16848,7 @@
         "stat": "attackBonus",
         "flat": -4,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -16856,7 +16856,7 @@
         "stat": "savingThrow",
         "flat": -4,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -17128,7 +17128,7 @@
         "kind": "hot",
         "healPerRound": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -17412,7 +17412,7 @@
         "stat": "attackBonus",
         "flat": -4,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -17420,7 +17420,7 @@
         "stat": "savingThrow",
         "flat": -4,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       }
     ],
@@ -17575,7 +17575,7 @@
         "markId": "rope-trick",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -17945,7 +17945,7 @@
         "markId": "secret-chest",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -17995,7 +17995,7 @@
         "markId": "see-invisibility",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -18043,7 +18043,7 @@
         "markId": "seeming",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -18141,7 +18141,7 @@
         "markId": "sequester",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -18222,7 +18222,7 @@
         "markId": "shapechange",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -18372,7 +18372,7 @@
         "stat": "armor",
         "flat": 2,
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       }
     ],
@@ -18540,7 +18540,7 @@
       "maxTargets": 20,
       "range": 120,
       "zone": {
-        "rounds": 99,
+        "rounds": 100,
         "label": "Silence",
         "side": "all",
         "onEnter": {
@@ -18707,7 +18707,7 @@
         "hp": 40,
         "count": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -19114,7 +19114,7 @@
         "markId": "speak-with-animals",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       },
       {
@@ -19808,7 +19808,7 @@
         "damageType": "bludgeoning",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -19817,7 +19817,7 @@
         "damageType": "piercing",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -19826,7 +19826,7 @@
         "damageType": "slashing",
         "percent": 50,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -19986,7 +19986,7 @@
         "kind": "applyCondition",
         "condition": "charmed",
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       }
     ],
@@ -20237,7 +20237,7 @@
         "markId": "symbol",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -20370,7 +20370,7 @@
         "kind": "applyCondition",
         "condition": "restrained",
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       }
     ],
@@ -20420,7 +20420,7 @@
         "markId": "telepathic-bond",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -20700,7 +20700,7 @@
         "markId": "tiny-hut",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -20752,7 +20752,7 @@
         "markId": "tongues",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -20901,14 +20901,14 @@
         "kind": "applyCondition",
         "condition": "disable_spell_casting",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
         "kind": "applyCondition",
         "condition": "disable_ranged_attacks",
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -21013,7 +21013,7 @@
         "sense": "truesight",
         "range": 120,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -21614,7 +21614,7 @@
         "terrain": "wall",
         "shape": "cell",
         "cells": 20,
-        "rounds": 99
+        "rounds": 100
       }
     ],
     "lists": [
@@ -21714,7 +21714,7 @@
         "terrain": "wall",
         "shape": "cell",
         "cells": 20,
-        "rounds": 99
+        "rounds": 100
       }
     ],
     "lists": [
@@ -21813,7 +21813,7 @@
         "stat": "armor",
         "flat": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -21821,7 +21821,7 @@
         "stat": "savingThrow",
         "flat": 1,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       }
     ],
@@ -21871,7 +21871,7 @@
         "markId": "water-breathing",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 14400
         }
       },
       {
@@ -21968,7 +21968,7 @@
         "markId": "water-walk",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 600
         }
       },
       {
@@ -22195,7 +22195,7 @@
         "markId": "wind-walk",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 4800
         }
       },
       {
@@ -22826,7 +22826,7 @@
         "markId": "zone-of-truth",
         "positive": true,
         "duration": {
-          "rounds": 99
+          "rounds": 100
         }
       },
       {

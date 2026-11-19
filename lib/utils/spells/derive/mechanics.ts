@@ -1,6 +1,12 @@
 import { numberWord, parseDiceExpr } from './text';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
+import {
+    MAX_DURATION_ROUNDS,
+    ROUNDS_PER_DAY,
+    ROUNDS_PER_HOUR,
+    ROUNDS_PER_MINUTE,
+} from '@/lib/constants/duration';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { clamp } from '@/lib/utils/common/clamp';
 import type {
@@ -77,18 +83,28 @@ const SHAPES: Record<string, 'circle' | 'cube' | 'cone' | 'line'> = {
     line: 'line',
 };
 
+const DURATION_UNIT_ROUNDS: Record<string, number> = {
+    round: 1,
+    minute: ROUNDS_PER_MINUTE,
+    hour: ROUNDS_PER_HOUR,
+    day: ROUNDS_PER_DAY,
+};
+
 export function durationRounds(duration: string): number {
     const d = duration.trim().toLowerCase();
 
-    const rounds = /^(\d+) rounds?$/.exec(d);
+    const m = /^(\d+) (round|minute|hour|day)s?$/.exec(d);
 
-    if (rounds) return clamp(Number(rounds[1]), 1, 99);
-
-    if (d === '1 minute') return 10;
+    if (m)
+        return clamp(
+            Number(m[1]) * DURATION_UNIT_ROUNDS[m[2]],
+            1,
+            MAX_DURATION_ROUNDS
+        );
 
     if (d === 'instantaneous') return 1;
 
-    return 99;
+    return MAX_DURATION_ROUNDS;
 }
 
 export function spellRange(

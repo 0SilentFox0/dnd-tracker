@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 
 import { terrainTitle } from './grid-style';
 
+import { useFormatDuration } from '@/lib/i18n/use-duration';
 import {
     cellAtScreenPoint,
     cellKey,
@@ -46,6 +47,8 @@ export const GridHit = memo(function GridHit({
     scene,
 }: GridHitProps) {
     const t = useTranslations('battle.map');
+
+    const formatDuration = useFormatDuration();
 
     const { onCellClick, onCellHover, wasDragged, svgRef } = cellActions;
 
@@ -90,7 +93,7 @@ export const GridHit = memo(function GridHit({
 
     const cell = hoverKey && !hoverBlocked ? terrain?.[hoverKey] : undefined;
 
-    const title = cell && terrainTitle(t, cell, scene.round);
+    const title = cell && terrainTitle(t, cell, scene.round, formatDuration);
 
     return (
         <g

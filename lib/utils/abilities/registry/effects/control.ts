@@ -13,7 +13,8 @@ import {
     upsertTimedEffect,
 } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
-import { seg, type Segment } from '@/lib/utils/abilities/segments';
+import { durationOf, seg, type Segment } from '@/lib/utils/abilities/segments';
+import { durationRef } from '@/lib/utils/duration/format';
 import type { LogLine } from '@/types/text';
 
 type Of<K extends Effect['kind']> = Extract<Effect, { kind: K }>;
@@ -79,7 +80,7 @@ export function applyBerserk(
             textRef('abilityText.log.berserk', {
                 ability: ability.name,
                 target: t.basicInfo.name,
-                rounds: effect.duration.rounds,
+                rounds: durationRef(effect.duration.rounds),
             })
         );
     }
@@ -165,7 +166,7 @@ export function applyCharm(
                 ability: ability.name,
                 target: t.basicInfo.name,
                 owner: owner.basicInfo.name,
-                rounds: effect.duration.rounds,
+                rounds: durationRef(effect.duration.rounds),
             })
         );
     }
@@ -176,10 +177,10 @@ export function applyCharm(
 export const describeBerserk = (e: Of<'berserk'>): Segment[] => [
     seg('summary.effects.berserk', {
         percent: e.damageBonusPercent,
-        rounds: e.duration?.rounds ?? '?',
+        rounds: durationOf(e.duration),
     }),
 ];
 
 export const describeCharm = (e: Of<'charm'>): Segment[] => [
-    seg('summary.effects.charm', { rounds: e.duration?.rounds ?? '?' }),
+    seg('summary.effects.charm', { rounds: durationOf(e.duration) }),
 ];

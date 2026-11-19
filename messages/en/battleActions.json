@@ -73,7 +73,7 @@
   "condition": {
     "immune": "⛔ {source}: {target} — immune",
     "applied": "⛓ {source}: {target} — {condition}",
-    "appliedTimed": "⛓ {source}: {target} — {condition} ({rounds} rd.)",
+    "appliedTimed": "⛓ {source}: {target} — {condition} ({rounds})",
     "exhaustionDeath": "💀 {name} dies of exhaustion",
     "exhaustionHalved": "🩸 {name}: maximum HP is halved",
     "incapacitatedReason": "incapacitated",

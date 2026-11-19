@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 import { BUNDLE_TABLES } from './bundle';
 
 import '@/lib/server/systems/registry';
@@ -20,6 +22,22 @@ import {
 } from '@/lib/utils/templates/registry';
 import type { TemplateCard, TemplateList } from '@/types/campaigns';
 
+const campaignRelationKeys = new Set(
+    Prisma.dmmf.datamodel.models
+        .find((m) => m.name === 'Campaign')
+        ?.fields.filter((f) => f.kind === 'object' && f.isList)
+        .map((f) => f.name)
+);
+
+/** Tables that are `_count`-able relations of Campaign; the rest (module content without a relation) are counted by a groupBy. */
+export const RELATION_TABLES = BUNDLE_TABLES.filter((t) =>
+    campaignRelationKeys.has(t.key)
+);
+
+export const DETACHED_TABLES = BUNDLE_TABLES.filter(
+    (t) => !campaignRelationKeys.has(t.key)
+);
+
 const select = {
     id: true,
     name: true,
@@ -31,7 +49,7 @@ const select = {
     templateKey: true,
     rules: true,
     _count: {
-        select: Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, true])),
+        select: Object.fromEntries(RELATION_TABLES.map((t) => [t.key, true])),
     },
 } as const;
 
@@ -87,6 +105,53 @@ export function visibleTemplates<T extends TemplateIdentity>(
     return templates.filter((template) => !isLegacyLocalizedTemplate(template));
 }
 
+type CountedRow = { id: string; _count: Record<string, number> };
+
+async function withDetachedCounts<T extends CountedRow>(
+    rows: T[]
+): Promise<T[]> {
+    if (!rows.length || !DETACHED_TABLES.length) return rows;
+
+    const ids = rows.map((r) => r.id);
+
+    const extra = await Promise.all(
+        DETACHED_TABLES.map(async (t) => {
+            const groups = await (
+                prisma as unknown as Record<
+                    string,
+                    {
+                        groupBy(args: unknown): Promise<
+                            Array<{
+                                campaignId: string;
+                                _count: { _all: number };
+                            }>
+                        >;
+                    }
+                >
+            )[t.delegate].groupBy({
+                by: ['campaignId'],
+                where: { campaignId: { in: ids } },
+                _count: { _all: true },
+            });
+
+            return [
+                t.key,
+                new Map(groups.map((g) => [g.campaignId, g._count._all])),
+            ] as const;
+        })
+    );
+
+    return rows.map((row) => ({
+        ...row,
+        _count: {
+            ...row._count,
+            ...Object.fromEntries(
+                extra.map(([key, counts]) => [key, counts.get(row.id) ?? 0])
+            ),
+        },
+    }));
+}
+
 export async function listTemplates(userId: string): Promise<TemplateList> {
     const [official, mine] = await Promise.all([
         prisma.campaign.findMany({
@@ -108,8 +173,13 @@ export async function listTemplates(userId: string): Promise<TemplateList> {
         }),
     ]);
 
+    const [officialCounted, mineCounted] = await Promise.all([
+        withDetachedCounts(visibleTemplates(official)),
+        withDetachedCounts(mine),
+    ]);
+
     return {
-        official: toCards(visibleTemplates(official), toCard),
-        mine: toCards(mine, toCard),
+        official: toCards(officialCounted, toCard),
+        mine: toCards(mineCounted, toCard),
     };
 }

@@ -182,7 +182,6 @@
       "rider": {
         "swarmAttackable": "a swarm in flight can be attacked (see description)",
         "variant": "option {n}: see description",
-        "durationCapped": "duration capped at {rounds} rounds",
         "durationUpcast": "duration extends at higher levels",
         "newFormLook": "appearance of the new form: see description",
         "targetCommand": "command to the target: see description",

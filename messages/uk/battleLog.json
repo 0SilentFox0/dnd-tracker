@@ -391,7 +391,7 @@
     "pacified": "🕊 {caster}: не завдає шкоди ({spell})",
     "noMapRange": "📏 {spell}: без мапи — найближчий діапазон",
     "distanceDice": "📏 {target}: дистанція {feet} фт → {dice}",
-    "grantCast": "✨ {holder}: «{label}» — підкаст на {rounds} р.",
+    "grantCast": "✨ {holder}: «{label}» — підкаст на {rounds}",
     "moveSelfNoMap": "🌀 {mover}: переміщується до {target} (без мапи)",
     "moveSelfNoCell": "🌀 {mover}: немає вільної клітинки біля {target}",
     "moveSelf": "🌀 {mover}: переміщується до {target}",

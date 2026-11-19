@@ -4,6 +4,7 @@ import { legacyActiveEffectModifiers } from '@/lib/utils/abilities/engine/effect
 import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { joinSegments } from '@/lib/utils/abilities/segments';
+import { durationRef } from '@/lib/utils/duration/format';
 import type { ActiveEffect } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -63,8 +64,8 @@ export function effectSummary(e: ActiveEffect, t: Translator): LogLine[] {
               })
             : e.permanent
               ? textRef('battle.view.effects.permanent')
-              : textRef('battle.view.effects.roundsLeft', {
-                    count: e.duration,
+              : textRef('battle.view.effects.durationLeft', {
+                    duration: durationRef(e.duration),
                 }),
         ...(e.source
             ? [

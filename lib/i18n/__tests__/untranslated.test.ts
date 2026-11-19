@@ -26,6 +26,9 @@ const IDENTICAL_ALLOWLIST = new Set<string>([
     'abilityText.log.damage', // symbols and placeholders only
     'abilityText.log.heal', // symbols and placeholders only
     'battleLog.maneuver.damage', // symbols and placeholders only
+    'abilityText.log.condition', // symbols and placeholders only
+    'abilityText.log.applied', // symbols and placeholders only
+    'battleActions.condition.appliedTimed', // symbols and placeholders only
 ]);
 
 function flatten(tree: Tree, prefix = ''): Record<string, string> {

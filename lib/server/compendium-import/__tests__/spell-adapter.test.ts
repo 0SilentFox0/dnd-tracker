@@ -400,7 +400,7 @@ describe('native spell mechanics', () => {
                     {
                         kind: 'applyCondition',
                         condition: 'immobilized',
-                        duration: { rounds: 99 },
+                        duration: { rounds: 100 },
                     },
                 ],
             });
@@ -423,7 +423,7 @@ describe('native spell mechanics', () => {
                     {
                         kind: 'applyCondition',
                         condition: 'immobilized',
-                        duration: { rounds: 99 },
+                        duration: { rounds: 14400 },
                     },
                 ],
             });
@@ -457,7 +457,7 @@ describe('native spell mechanics', () => {
                         kind: 'modifyStat',
                         stat: 'speed',
                         flat: 5,
-                        duration: { rounds: 99 },
+                        duration: { rounds: 600 },
                     },
                 ],
             });

@@ -19,7 +19,7 @@ import {
     upsertTimedEffect,
 } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
-import { seg, type Segment } from '@/lib/utils/abilities/segments';
+import { durationOf, seg, type Segment } from '@/lib/utils/abilities/segments';
 import {
     critDoublesDice,
     doubledDice,
@@ -30,6 +30,7 @@ import { regenSuppressed } from '@/lib/utils/battle/damage/regen-guard';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { forgoDice } from '@/lib/utils/common/dice';
+import { durationRef } from '@/lib/utils/duration/format';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
@@ -332,7 +333,7 @@ export function applyDot(
                 type: effect.damageType,
                 amount: dmg,
                 target: t.basicInfo.name,
-                rounds: effect.duration.rounds,
+                rounds: durationRef(effect.duration.rounds),
             })
         );
     }
@@ -493,7 +494,7 @@ export function applyHot(
                     ability: ability.name,
                     amount: heal,
                     target: t.basicInfo.name,
-                    rounds: effect.duration.rounds,
+                    rounds: durationRef(effect.duration.rounds),
                 }
             )
         );
@@ -502,8 +503,7 @@ export function applyHot(
     return { participants: ps, messages };
 }
 
-const rounds = (e: { duration?: { rounds: number } }) =>
-    e.duration?.rounds ?? '?';
+const rounds = (e: { duration?: { rounds: number } }) => durationOf(e.duration);
 
 export const describeDealDamage = (e: Of<'dealDamage'>): Segment[] => [
     seg('summary.effects.dealDamage', {

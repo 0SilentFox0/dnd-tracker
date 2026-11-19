@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ABILITY_TARGETS, DICE_RE } from './kinds';
 
 import { CLASS_COLUMN_KEY_RE } from '@/lib/constants/classes';
+import { MAX_DURATION_ROUNDS } from '@/lib/constants/duration';
 
 export {
     ABILITY_TARGETS,
@@ -19,7 +20,7 @@ export {
 export const AbilityTargetSchema = z.enum(ABILITY_TARGETS);
 
 export const DurationSchema = z.object({
-    rounds: z.number().int().min(1).max(99),
+    rounds: z.number().int().min(1).max(MAX_DURATION_ROUNDS),
 });
 
 export const FormulaSchema = z.object({ formula: z.string().min(1) });

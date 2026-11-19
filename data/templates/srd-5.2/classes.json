@@ -1676,7 +1676,7 @@
                   "scale": "bardic-die"
                 },
                 "duration": {
-                  "rounds": 99
+                  "rounds": 600
                 },
                 "target": "eventTarget"
               }
@@ -3012,7 +3012,7 @@
                 "kind": "mark",
                 "markId": "wild-shape",
                 "duration": {
-                  "rounds": 99
+                  "rounds": 600
                 },
                 "target": "self"
               }

@@ -57,7 +57,8 @@ type MapT = ReturnType<typeof useTranslations<'battle.map'>>;
 function hazardTitle(
     t: MapT,
     cell: TerrainCell,
-    round: number | undefined
+    round: number | undefined,
+    formatDuration: (rounds: number) => string
 ): string {
     const label = cell.label ?? t('hazardDefault');
 
@@ -67,14 +68,15 @@ function hazardTitle(
         ? t('hazardUntilEnd', { label, round: cell.untilRound })
         : t('hazardRoundsLeft', {
               label,
-              rounds: Math.max(1, cell.untilRound - round + 1),
+              rounds: formatDuration(Math.max(1, cell.untilRound - round + 1)),
           });
 }
 
 export function terrainTitle(
     t: MapT,
     cell: TerrainCell,
-    round: number | undefined
+    round: number | undefined,
+    formatDuration: (rounds: number) => string
 ): string | null {
     if (cell.kind === 'barrier')
         return cell.untilRound !== undefined
@@ -83,7 +85,9 @@ export function terrainTitle(
 
     if (cell.kind === 'difficult') return cell.label ?? t('difficultDefault');
 
-    return cell.kind === 'hazard' ? hazardTitle(t, cell, round) : null;
+    return cell.kind === 'hazard'
+        ? hazardTitle(t, cell, round, formatDuration)
+        : null;
 }
 
 export const GRID_COLORS = {

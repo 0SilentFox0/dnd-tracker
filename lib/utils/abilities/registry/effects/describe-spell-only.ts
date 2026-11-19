@@ -1,4 +1,4 @@
-import { seg, type Segment } from '@/lib/utils/abilities/segments';
+import { durationSeg, seg, type Segment } from '@/lib/utils/abilities/segments';
 import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 
 type SpellOnly = Extract<
@@ -64,7 +64,7 @@ export function describeSpellOnly(
                     cost: seg(`summary.spellOnly.cost.${effect.cost}`),
                     hasUses: yn(effect.uses),
                     uses: effect.uses ?? 0,
-                    rounds: effect.duration.rounds,
+                    rounds: durationSeg(effect.duration.rounds),
                 }),
             ];
 
@@ -92,7 +92,7 @@ export function describeSpellOnly(
                     radius: effect.radiusFeet,
                     side: seg(`summary.spellOnly.side.${effect.side}`),
                     excludeBearer: yn(effect.excludeBearer),
-                    rounds: effect.duration.rounds,
+                    rounds: durationSeg(effect.duration.rounds),
                     hasEnter: yn(effect.onEnter),
                     enter: effect.onEnter
                         ? list(effect.onEnter.effects, describe)
@@ -118,7 +118,7 @@ export function describeSpellOnly(
                         effect.ac === 'spellDc'
                             ? seg('summary.spellOnly.acSpellDc')
                             : seg('summary.text', { value: effect.ac }),
-                    rounds: effect.duration.rounds,
+                    rounds: durationSeg(effect.duration.rounds),
                     hasUpcast: yn(effect.upcastEvery),
                     upcastEvery: effect.upcastEvery ?? 0,
                     hasAura: yn(effect.aura),
@@ -133,7 +133,7 @@ export function describeSpellOnly(
         case 'transform':
             return [
                 seg('summary.spellOnly.transform', {
-                    rounds: effect.duration.rounds,
+                    rounds: durationSeg(effect.duration.rounds),
                 }),
             ];
 
@@ -152,7 +152,7 @@ export function describeSpellOnly(
                     terrain: seg(`summary.spellOnly.terrain.${effect.terrain}`),
                     shape: seg(`summary.spellOnly.shape.${effect.shape}`),
                     cells: effect.cells,
-                    rounds: effect.rounds,
+                    rounds: durationSeg(effect.rounds),
                 }),
             ];
 
