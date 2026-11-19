@@ -1,5 +1,6 @@
 import { type CopyRow, refsOf, selectClosure } from './closure';
 import { dropRefs } from './drop-refs';
+import { kindOfTable as contentKindOfTable, nameOf } from './row-names';
 
 import { CONTENT_KINDS } from '@/lib/constants/content-kinds';
 import { isKindActive } from '@/lib/server/content/kind-active';
@@ -21,7 +22,8 @@ export type CopyPlan = {
         name: string;
         reason:
             | 'exists'
-            | 'file-not-copyable'
+            | 'limit'
+            | 'file-failed'
             | 'kind-unsupported'
             | 'unknown-kind'
             | 'not-found'
@@ -37,11 +39,8 @@ const nameKey = (row: Record<string, unknown>): string | undefined => {
     return typeof n === 'string' ? n.trim().toLowerCase() : undefined;
 };
 
-const nameOf = (row: Record<string, unknown>) =>
-    String(row.name ?? row.title ?? row.id);
-
 const kindOfTable = (table: BundleTable) =>
-    CONTENT_KINDS.find((k) => tableOfKind(k)?.key === table) ?? table;
+    contentKindOfTable(table) ?? table;
 
 export async function buildCopyPlan(args: {
     source: Bundle;
@@ -110,13 +109,7 @@ export async function buildCopyPlan(args: {
                 continue;
             }
 
-            if (table === 'tracks' && row.kind === 'file')
-                plan.skipped.push({
-                    kind,
-                    name: nameOf(row),
-                    reason: 'file-not-copyable',
-                });
-            else if (active.get(table) === false)
+            if (active.get(table) === false)
                 plan.skipped.push({
                     kind,
                     name: nameOf(row),

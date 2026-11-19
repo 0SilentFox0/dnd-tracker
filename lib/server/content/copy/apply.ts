@@ -1,20 +1,23 @@
-import type { CopyPlan } from './plan';
+import { buildCopyPlan,type CopyPlan } from './plan';
+import { kindOfTable, nameOf } from './row-names';
+import { copyTrackFiles, removeCopiedTrackFiles } from './tracks-files';
 
 import 'server-only';
 import { invalidateReference } from '@/lib/cache/tags';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { CONTENT_KINDS } from '@/lib/constants/content-kinds';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
 import { afterContentCommit } from '@/lib/server/content/write-context';
-import { tableOfKind } from '@/lib/server/templates/bundle';
+import type { Bundle } from '@/lib/server/templates/bundle';
+import { exportNames } from '@/lib/server/templates/export-campaign';
 import { importBundle } from '@/lib/server/templates/import-bundle';
+import { type Actor } from '@/lib/utils/api/actor';
 import { ContentError } from '@/lib/utils/api/content-error';
 import type { CopyRowRef } from '@/types/content-copy';
 
-const kindOfTable = (table: string) => {
-    const kind = CONTENT_KINDS.find((k) => tableOfKind(k)?.key === table);
+const requireKind = (table: string) => {
+    const kind = kindOfTable(table);
 
     if (!kind) throw new ContentError(API_ERRORS.INTERNAL, 500);
 
@@ -26,50 +29,76 @@ export const copyRowRef = (
     row: Record<string, unknown>,
     id?: string
 ): CopyRowRef => ({
-    kind: kindOfTable(table),
+    kind: requireKind(table),
     ...(id === undefined ? {} : { id }),
-    name: String(row.name ?? row.title ?? row.id),
+    name: nameOf(row),
 });
 
-export async function applyCopyPlan(
-    campaignId: string,
-    plan: CopyPlan
-): Promise<CopyRowRef[]> {
-    if (plan.toCreate.length === 0) return [];
+/** The plan is built under the target's write lock, so concurrent copies cannot duplicate names. */
+export async function applyCopy(args: {
+    campaignId: string;
+    source: Bundle;
+    targetActor: Actor;
+    selected: Array<{ kind: string; ids: string[] }>;
+}): Promise<{ plan: CopyPlan; created: CopyRowRef[] }> {
+    const { campaignId } = args;
 
     return withCampaignContentWrite(campaignId, async (tx) => {
-        const { idMap } = await importBundle(
-            tx,
-            plan.bundle,
-            campaignId,
-            undefined,
-            { reuse: plan.reuse, detached: true }
-        );
-
-        const created = plan.toCreate.map(({ table, row }) => {
-            const id = idMap.get(row.id);
-
-            if (!id) throw new ContentError(API_ERRORS.INTERNAL, 500);
-
-            return copyRowRef(table, row, id);
+        const plan = await buildCopyPlan({
+            source: args.source,
+            target: await exportNames(tx, campaignId),
+            targetActor: args.targetActor,
+            selected: args.selected,
         });
 
-        const refKinds = new Set(
-            created.flatMap(
-                (c) =>
-                    (
-                        CONTENT_RESOURCES as Partial<
-                            Record<string, AnyContentResource>
-                        >
-                    )[c.kind]?.invalidates ?? []
-            )
-        );
+        if (plan.toCreate.length === 0) return { plan, created: [] };
 
-        if (refKinds.size > 0)
-            afterContentCommit(() =>
-                invalidateReference([...refKinds], campaignId)
+        const copiedFiles = await copyTrackFiles(tx, plan, campaignId);
+
+        try {
+            if (plan.toCreate.length === 0) {
+                await removeCopiedTrackFiles(copiedFiles);
+
+                return { plan, created: [] };
+            }
+
+            const { idMap } = await importBundle(
+                tx,
+                plan.bundle,
+                campaignId,
+                undefined,
+                { reuse: plan.reuse, detached: true }
             );
 
-        return created;
+            const created = plan.toCreate.map(({ table, row }) => {
+                const id = idMap.get(row.id);
+
+                if (!id) throw new ContentError(API_ERRORS.INTERNAL, 500);
+
+                return copyRowRef(table, row, id);
+            });
+
+            const refKinds = new Set(
+                created.flatMap(
+                    (c) =>
+                        (
+                            CONTENT_RESOURCES as Partial<
+                                Record<string, AnyContentResource>
+                            >
+                        )[c.kind]?.invalidates ?? []
+                )
+            );
+
+            if (refKinds.size > 0)
+                afterContentCommit(() =>
+                    invalidateReference([...refKinds], campaignId)
+                );
+
+            return { plan, created };
+        } catch (error) {
+            await removeCopiedTrackFiles(copiedFiles);
+
+            throw error;
+        }
     });
 }

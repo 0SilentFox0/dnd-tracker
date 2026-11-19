@@ -153,7 +153,7 @@ describe('buildCopyPlan', () => {
         expect(warnings).toEqual([]);
     });
 
-    it('skips uploaded file tracks and copies youtube tracks', async () => {
+    it('plans both uploaded file and youtube tracks', async () => {
         const [F, Y] = [id('7'), id('8')];
 
         const src = emptyBundle();
@@ -170,10 +170,8 @@ describe('buildCopyPlan', () => {
             selected: [{ kind: 'tracks', ids: [F, Y] }],
         });
 
-        expect(plan.skipped).toEqual([
-            { kind: 'tracks', name: 'Upload', reason: 'file-not-copyable' },
-        ]);
-        expect(plan.toCreate.map((r) => r.row.id)).toEqual([Y]);
+        expect(plan.skipped).toEqual([]);
+        expect(plan.toCreate.map((r) => r.row.id)).toEqual([F, Y]);
     });
 
     it('handles reuse and an unsupported kind together', async () => {

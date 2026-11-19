@@ -6,7 +6,6 @@ import type { CopyResult, CopyTargetReport } from '@/types/content-copy';
 
 const REASON_KEYS = [
     'exists',
-    'file-not-copyable',
     'kind-unsupported',
     'duplicate-name',
     'not-found',

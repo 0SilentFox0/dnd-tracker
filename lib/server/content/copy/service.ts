@@ -1,4 +1,4 @@
-import { applyCopyPlan, copyRowRef } from './apply';
+import { applyCopy, copyRowRef } from './apply';
 import { copyMaps } from './maps';
 import { buildCopyPlan } from './plan';
 import { resolveTargets } from './targets';
@@ -66,12 +66,32 @@ export async function copyContent(args: {
 
         try {
             if (source) {
-                const plan = await buildCopyPlan({
-                    source,
-                    target: await exportNames(prisma, target.id),
-                    targetActor: sessionDmActor(target.id, actor.userId),
-                    selected: contentItems,
-                });
+                const targetActor = sessionDmActor(target.id, actor.userId);
+
+                const preview = async () => {
+                    const plan = await buildCopyPlan({
+                        source,
+                        target: await exportNames(prisma, target.id),
+                        targetActor,
+                        selected: contentItems,
+                    });
+
+                    return {
+                        plan,
+                        created: plan.toCreate.map(({ table, row }) =>
+                            copyRowRef(table, row)
+                        ),
+                    };
+                };
+
+                const { plan, created } = dryRun
+                    ? await preview()
+                    : await applyCopy({
+                          campaignId: target.id,
+                          source,
+                          targetActor,
+                          selected: contentItems,
+                      });
 
                 report.reused = plan.reused.map(({ kind, name }) => ({
                     kind,
@@ -79,12 +99,7 @@ export async function copyContent(args: {
                 }));
                 report.skipped = plan.skipped;
                 report.warnings = plan.warnings;
-
-                report.created = dryRun
-                    ? plan.toCreate.map(({ table, row }) =>
-                          copyRowRef(table, row)
-                      )
-                    : await applyCopyPlan(target.id, plan);
+                report.created = created;
             }
 
             if (mapIds.length > 0)

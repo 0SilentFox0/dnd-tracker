@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
-    applyCopyPlan,
+    applyCopy,
     buildCopyPlan,
     resolveTargets,
     exportCampaign,
     copyMaps,
 } = vi.hoisted(() => ({
     copyMaps: vi.fn(),
-    applyCopyPlan: vi.fn(),
+    applyCopy: vi.fn(),
     buildCopyPlan: vi.fn(),
     resolveTargets: vi.fn(),
     exportCampaign: vi.fn(),
@@ -17,7 +17,7 @@ const {
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 vi.mock('@/lib/server/content/copy/apply', () => ({
-    applyCopyPlan,
+    applyCopy,
     copyRowRef: (table: string, row: { id: string }, id?: string) => ({
         kind: table,
         ...(id === undefined ? {} : { id }),
@@ -51,6 +51,11 @@ const plan = (skipped: unknown[] = []) => ({
     warnings: [],
 });
 
+const applied = (skipped: unknown[] = []) => ({
+    plan: plan(skipped),
+    created: [{ kind: 'units', id: 'n', name: 'X' }],
+});
+
 const run = (dryRun?: boolean) =>
     copyContent({
         actor,
@@ -67,14 +72,14 @@ beforeEach(() => {
     ]);
     exportCampaign.mockResolvedValue({});
     buildCopyPlan.mockResolvedValue(plan());
-    applyCopyPlan.mockResolvedValue([{ kind: 'units', id: 'n', name: 'X' }]);
+    applyCopy.mockResolvedValue(applied());
 });
 
 describe('copyContent', () => {
     it('a failing target does not affect the others', async () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
-        applyCopyPlan
-            .mockResolvedValueOnce([{ kind: 'units', id: 'n', name: 'X' }])
+        applyCopy
+            .mockResolvedValueOnce(applied())
             .mockRejectedValueOnce(new Error('boom'));
 
         const { targets } = await run();
@@ -92,29 +97,29 @@ describe('copyContent', () => {
     it('dryRun applies nothing', async () => {
         const { targets } = await run(true);
 
-        expect(applyCopyPlan).not.toHaveBeenCalled();
+        expect(applyCopy).not.toHaveBeenCalled();
         expect(targets[0].created).toHaveLength(1);
         expect(targets[0].created[0]).not.toHaveProperty('id');
     });
 
     it('is partial when something was skipped for a reason other than exists', async () => {
-        buildCopyPlan.mockResolvedValue(
-            plan([{ kind: 'units', name: 'X', reason: 'kind-unsupported' }])
+        applyCopy.mockResolvedValue(
+            applied([{ kind: 'units', name: 'X', reason: 'kind-unsupported' }])
         );
 
         expect((await run()).targets[0].status).toBe('partial');
     });
 
     it('stays ok when everything skipped already exists', async () => {
-        buildCopyPlan.mockResolvedValue(
-            plan([{ kind: 'units', name: 'X', reason: 'exists' }])
+        applyCopy.mockResolvedValue(
+            applied([{ kind: 'units', name: 'X', reason: 'exists' }])
         );
 
         expect((await run()).targets[0].status).toBe('ok');
     });
 
     it('reports the message key of a bundle error', async () => {
-        applyCopyPlan.mockRejectedValueOnce(
+        applyCopy.mockRejectedValueOnce(
             new BundleInvalidError('errors.bundleForeignContent')
         );
 

@@ -35,12 +35,11 @@
       "exists": "already exists",
       "kind-unsupported": "this kind cannot be copied",
       "duplicate-name": "duplicate name",
-      "file-not-copyable": "this uploaded file is not copied",
       "not-found": "not found",
       "unknown-kind": "unknown kind",
-      "limit": "map limit reached or map too large for this campaign",
-      "file-failed": "map image could not be copied",
-      "error": "map could not be copied",
+      "limit": "limit reached or item too large for this campaign",
+      "file-failed": "file could not be copied",
+      "error": "could not be copied",
       "unknown": "skipped"
     }
   }
