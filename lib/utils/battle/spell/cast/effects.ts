@@ -257,6 +257,7 @@ function dealSpellDamage(
             fromSpell: true,
             school: spell.groupId,
             extra: state.actionModifiers[id],
+            rules: flow.ctx.rules,
         }
     );
 

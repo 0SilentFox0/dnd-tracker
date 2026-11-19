@@ -2,6 +2,7 @@ import { BATTLE_CONSTANTS, CombatStatus } from '@/lib/constants/battle';
 import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import type { AttackKind } from '@/lib/utils/abilities/schema';
 import { applyResistance } from '@/lib/utils/battle/resistance';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -46,7 +47,8 @@ export function applyResistanceForAdditional(
     additionalDamageList: Array<{ type: string; value: number }>,
     dmgMult: number,
     participants: BattleParticipant[] = [target],
-    attackKind?: AttackKind
+    attackKind?: AttackKind,
+    rules?: Ruleset
 ): ApplyResistanceForAdditionalResult {
     let totalAdditionalDamage = 0;
 
@@ -59,7 +61,7 @@ export function applyResistanceForAdditional(
             target,
             additionalValue,
             additionalDamage.type,
-            { participants, attackKind }
+            { participants, attackKind, rules }
         );
 
         totalAdditionalDamage += additionalResistance.finalDamage;

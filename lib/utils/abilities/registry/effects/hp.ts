@@ -20,9 +20,10 @@ import {
 } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
+import { critDoublesDice, doubledDice } from '@/lib/utils/battle/attack/crit-dice';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { isDying } from '@/lib/utils/battle/death-saves';
-import { hasImmunity } from '@/lib/utils/battle/resistance';
+import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { forgoDice } from '@/lib/utils/common/dice';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
@@ -55,7 +56,16 @@ export function applyDealDamage(
                 ? (input.event.cunningDice ?? 0)
                 : 0;
 
-        const rolled = resolveAmount(forgoDice(effect.amount, forgone), {
+        const hitEvent = input.event.type === 'hit' ? input.event : null;
+
+        const planned = forgoDice(effect.amount, forgone);
+
+        const doubleDice =
+            !!hitEvent?.crit &&
+            typeof planned === 'string' &&
+            critDoublesDice(ctx.rules, true);
+
+        const rolled = resolveAmount(doubleDice ? doubledDice(planned) : planned, {
             owner,
             target: t,
             eventDamage: eventDamage(input.event),
@@ -77,10 +87,35 @@ export function applyDealDamage(
 
         if (amount <= 0) continue;
 
+        const damageType = effect.damageType ?? hitEvent?.damageType;
+
+        const resisted =
+            hitEvent && damageType
+                ? applyResistance(t, amount, damageType, {
+                      participants: ps,
+                      attackKind: hitEvent.attackKind,
+                      rules: ctx.rules,
+                  })
+                : null;
+
+        const dealt = resisted ? resisted.finalDamage : amount;
+
+        if (dealt <= 0) {
+            messages.push(
+                textRef('abilityText.log.immuneTo', {
+                    ability: ability.name,
+                    target: t.basicInfo.name,
+                    type: damageType ?? '',
+                })
+            );
+            continue;
+        }
+
         const c = applyDamageConsequences({
             before: t,
-            after: applyRawDamage(t, amount),
-            amount,
+            after: applyRawDamage(t, dealt),
+            amount: dealt,
+            crit: hitEvent?.crit,
             rules: ctx.rules,
             rng: ctx.rng,
             participants: ps,
@@ -93,7 +128,7 @@ export function applyDealDamage(
             textRef('abilityText.log.damage', {
                 ability: ability.name,
                 target: t.basicInfo.name,
-                amount,
+                amount: dealt,
             }),
             ...c.messages
         );

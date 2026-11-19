@@ -195,7 +195,11 @@ export function computeHitDamage(
         updatedTarget,
         physicalDamageForTarget,
         attack.damageType ?? 'physical',
-        { participants: allParticipants, attackKind: attackKindOf(attack.type) }
+        {
+            participants: allParticipants,
+            attackKind: attackKindOf(attack.type),
+            rules: params.rules,
+        }
     );
 
     const { totalAdditionalDamage, additionalDamageBreakdown } =
@@ -207,7 +211,8 @@ export function computeHitDamage(
             ),
             dmgMult,
             allParticipants,
-            attackKindOf(attack.type)
+            attackKindOf(attack.type),
+            params.rules
         );
 
     const immune =

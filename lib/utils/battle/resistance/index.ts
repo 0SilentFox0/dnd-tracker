@@ -4,6 +4,8 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import type { AttackKind, StaticEffect } from '@/lib/utils/abilities/schema';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 import type { DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
@@ -14,6 +16,7 @@ export interface ResistanceOptions {
     attackKind?: AttackKind;
     extra?: StaticEffect[];
     school?: string | null;
+    rules?: Ruleset;
 }
 
 export interface ResistanceResult {
@@ -40,6 +43,22 @@ const clampPercent = (n: number) =>
         -BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP,
         Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, n)
     );
+
+function netPercent(
+    matches: { percent: number }[],
+    opts: ResistanceOptions = {}
+): number {
+    const percents = matches.map((m) => m.percent);
+
+    const combine =
+        opts.rules && ruleSystemOf(opts.rules).combat.combineResistance;
+
+    return clampPercent(
+        combine
+            ? combine(percents)
+            : percents.reduce((sum, percent) => sum + percent, 0)
+    );
+}
 
 function matchesDamageType(
     flagType: string,
@@ -100,12 +119,7 @@ export function getCombinedResistancePercent(
     damageType: string,
     opts?: ResistanceOptions
 ): number {
-    const total = matchingResistances(target, damageType, opts).reduce(
-        (sum, f) => sum + f.percent,
-        0
-    );
-
-    return clampPercent(total);
+    return netPercent(matchingResistances(target, damageType, opts), opts);
 }
 
 export function applyResistance(
@@ -206,9 +220,7 @@ function applyPercentResistance(
         };
     }
 
-    const resistancePercent = clampPercent(
-        matches.reduce((sum, m) => sum + m.percent, 0)
-    );
+    const resistancePercent = netPercent(matches, opts);
 
     if (resistancePercent !== 0) {
         finalDamage = Math.floor(

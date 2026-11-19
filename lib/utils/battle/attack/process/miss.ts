@@ -58,7 +58,11 @@ export function handleMiss(
             target,
             guaranteedDamage,
             attack.damageType ?? 'physical',
-            { participants: flow.ps, attackKind: attackKindOf(attack.type) }
+            {
+                participants: flow.ps,
+                attackKind: attackKindOf(attack.type),
+                rules: flow.ctx.rules,
+            }
         ).finalDamage;
 
         put(flow, applyDamageToTarget(target, actualGuaranteedDamage));

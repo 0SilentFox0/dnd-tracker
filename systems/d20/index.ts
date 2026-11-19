@@ -11,6 +11,7 @@ import { D20_CHARACTERISTICS_COLUMNS } from './rules/characteristics/columns';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
 import { d20Damage } from './rules/damage';
+import { d20CombineResistance } from './rules/damage/resistance';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
 import { D20_MAGIC } from './rules/magic';
 import { d20UnitSpellDc } from './rules/participant/unit-spell-dc';
@@ -75,6 +76,7 @@ export const D20_MODULE: RuleSystemDefinition = {
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,
         damage: d20Damage,
+        combineResistance: d20CombineResistance,
         abortedRoll: d20AbortedRoll,
         onZeroHp: d20OnZeroHp,
         onDamaged: [concentrationFallout],

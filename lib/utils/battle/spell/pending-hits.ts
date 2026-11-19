@@ -63,7 +63,12 @@ export function resolvePendingHits(
             target,
             hit.amount,
             hit.damageType,
-            { participants: next, fromSpell: true, school: hit.school }
+            {
+                participants: next,
+                fromSpell: true,
+                school: hit.school,
+                rules: ctx.rules,
+            }
         );
 
         next = replaceParticipant(next, applyRawDamage(target, finalDamage));

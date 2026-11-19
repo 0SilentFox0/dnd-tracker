@@ -175,6 +175,7 @@ export function hazardHit(
     const damage = applyResistance(p, raw, hazard.type, {
         participants,
         fromSpell: !!hazard.spellId,
+        rules,
     }).finalDamage;
 
     const hurt = applyRawDamage(p, damage);

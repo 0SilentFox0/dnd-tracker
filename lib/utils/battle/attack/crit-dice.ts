@@ -2,6 +2,9 @@ import { parseDiceLenient, rollGroups } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
+export const doubledDice = (dice: string) =>
+    dice.replace(/^(\d+)d/, (_, n) => `${Number(n) * 2}d`);
+
 export function critDoublesDice(
     rules: Ruleset | undefined,
     isCritical: boolean

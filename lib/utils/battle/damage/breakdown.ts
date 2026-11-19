@@ -167,7 +167,8 @@ export function computeDamageBreakdown(
             damageType,
             totalDamage,
             undefined,
-            attackKindOf(attack.type)
+            attackKindOf(attack.type),
+            rules
         );
 
     steps.push(...targetSteps);

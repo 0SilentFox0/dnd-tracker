@@ -5,6 +5,7 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import type { AttackKind } from '@/lib/utils/abilities/schema';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
@@ -52,7 +53,8 @@ export function getDefenderResistanceBreakdown(
     damageType: string,
     incomingDamage: number,
     participants: BattleParticipant[] = [target],
-    attackKind?: AttackKind
+    attackKind?: AttackKind,
+    rules?: Ruleset
 ): {
     targetBreakdown: LogLine[];
     finalDamage: number;
@@ -89,7 +91,7 @@ export function getDefenderResistanceBreakdown(
         target,
         incomingDamage,
         damageType,
-        { participants, attackKind }
+        { participants, attackKind, rules }
     );
 
     const finalDamage = resistanceResult.finalDamage;
@@ -97,6 +99,7 @@ export function getDefenderResistanceBreakdown(
     const resistPercent = getCombinedResistancePercent(target, damageType, {
         participants,
         attackKind,
+        rules,
     });
 
     if (resistPercent !== 0) {

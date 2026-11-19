@@ -79,6 +79,8 @@ export type AbilityEvent =
           damage: number;
           rollMode?: 'advantage' | 'disadvantage';
           cunningDice?: number;
+          crit?: boolean;
+          damageType?: string;
       }
     | { type: 'kill'; actorId: string | null; targetId: string }
     | { type: 'lethalDamage'; actorId: string | null; targetId: string }

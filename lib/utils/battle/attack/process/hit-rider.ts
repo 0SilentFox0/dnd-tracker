@@ -5,7 +5,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { applyEffect } from '@/lib/utils/abilities/registry/effects';
-import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
+import { critDoublesDice, doubledDice } from '@/lib/utils/battle/attack/crit-dice';
 import {
     type ActionFlow,
     applyFlowDamage,
@@ -26,11 +26,6 @@ import type {
     BattleAttack,
     BattleParticipant,
 } from '@/types/battle';
-
-const DICE_COUNT = /^(\d+)d/;
-
-const doubled = (dice: string) =>
-    dice.replace(DICE_COUNT, (_, n) => `${Number(n) * 2}d`);
 
 const matches = (e: ActiveEffect, attack: BattleAttack) =>
     !!e.hitRider &&
@@ -162,7 +157,7 @@ function riderDamage(
     if (dealsNoDamage(attacker)) return;
 
     const dice = critDoublesDice(flow.ctx.rules, crit)
-        ? doubled(state.extraDice)
+        ? doubledDice(state.extraDice)
         : state.extraDice;
 
     const rolled = rollDice(dice, flow.ctx.rng);
@@ -174,6 +169,7 @@ function riderDamage(
     const resisted = applyResistance(target, planned, state.damageType, {
         participants: flow.ps,
         fromSpell: true,
+        rules: flow.ctx.rules,
     });
 
     flow.messages.push(

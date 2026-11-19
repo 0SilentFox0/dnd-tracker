@@ -45,7 +45,9 @@ export function dealResistedDamage(
 
     if (!target) return null;
 
-    const { finalDamage } = applyResistance(target, amount, damageType);
+    const { finalDamage } = applyResistance(target, amount, damageType, {
+        rules: opts.rules,
+    });
 
     const hurt = finalDamage > 0 ? applyRawDamage(target, finalDamage) : target;
 
