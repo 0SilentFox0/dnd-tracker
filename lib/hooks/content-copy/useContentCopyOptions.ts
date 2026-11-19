@@ -14,4 +14,7 @@ export const useContentCopyOptions = (
         queryKey: contentCopyKeys.options(campaignId, kind),
         queryFn: () => contentCopyApi.options(campaignId, kind),
         enabled,
+        staleTime: 0,
+        gcTime: 0,
+        refetchOnMount: 'always',
     });

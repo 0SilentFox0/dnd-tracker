@@ -9,6 +9,11 @@ export const contentCopyApi = {
             campaignId,
             `/content-copy?kind=${encodeURIComponent(kind)}`
         ),
+    campaigns: (campaignId: string) =>
+        campaignGet<{ campaigns: IdName[] }>(
+            campaignId,
+            '/content-copy?campaignsOnly=1'
+        ),
     copy: (campaignId: string, body: CopyRequest) =>
         campaignPost<CopyResult>(campaignId, '/content-copy', body),
 };

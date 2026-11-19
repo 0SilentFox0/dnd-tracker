@@ -30,12 +30,13 @@ const storedRows = (
     db: TemplateDb,
     t: BundleTableDef,
     campaignId: string,
-    extra: readonly string[] = []
+    extra: readonly string[] = [],
+    columns: readonly string[] = t.columns
 ) =>
     delegateOf(db, t).findMany({
         where: { campaignId },
         select: Object.fromEntries(
-            [...t.columns, ...extra].map((c) => [c, true])
+            [...columns, ...extra].map((c) => [c, true])
         ),
         orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     }) as Promise<Rows>;
@@ -43,7 +44,8 @@ const storedRows = (
 async function build(
     db: TemplateDb,
     campaignId: string,
-    rowsOf: (t: BundleTableDef) => Promise<Rows>
+    rowsOf: (t: BundleTableDef) => Promise<Rows>,
+    withCompendium = true
 ): Promise<Bundle> {
     const campaign = await db.campaign.findUnique({
         where: { id: campaignId },
@@ -61,7 +63,7 @@ async function build(
 
     for (const t of BUNDLE_TABLES) bundle[t.key] = await rowsOf(t);
 
-    if (db.compendiumEntry && db.compendiumSource && db.scenarioPage) {
+    if (withCompendium && db.compendiumEntry && db.compendiumSource && db.scenarioPage) {
         const section = await exportCompendiumSection(
             db as CompendiumBundleDb,
             campaignId
@@ -73,15 +75,38 @@ async function build(
     return bundle as Bundle;
 }
 
-/** Rows as the campaign sees them (base layer included for a layered campaign). */
+/** Rows as the campaign sees them (base layer included for a layered campaign). `compendium: false` skips the provenance section. */
 export const exportCampaign = (
+    db: TemplateDb,
+    campaignId: string,
+    options: { compendium?: boolean } = {}
+): Promise<Bundle> =>
+    build(
+        db,
+        campaignId,
+        async (t) =>
+            (await storedRows(db, t, campaignId)).map(
+                (row) => pick(row, t.columns) as Rows[number]
+            ),
+        options.compendium !== false
+    );
+
+/** Only id/name/title per row, as the campaign sees them: enough to match content by name. */
+export const exportNames = (
     db: TemplateDb,
     campaignId: string
 ): Promise<Bundle> =>
-    build(db, campaignId, async (t) =>
-        (await storedRows(db, t, campaignId)).map(
-            (row) => pick(row, t.columns) as Rows[number]
-        )
+    build(
+        db,
+        campaignId,
+        async (t) => {
+            const columns = t.columns.filter((c) =>
+                ['id', 'name', 'title'].includes(c)
+            );
+
+            return (await storedRows(db, t, campaignId, ['id'], columns)) as Rows;
+        },
+        false
     );
 
 /** Settings, rules, credits and compendium only: the content tables of a published template are read through the layer. */

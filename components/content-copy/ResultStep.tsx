@@ -6,6 +6,7 @@ import type { CopyResult, CopyTargetReport } from '@/types/content-copy';
 
 const REASON_KEYS = [
     'exists',
+    'file-not-copyable',
     'kind-unsupported',
     'duplicate-name',
     'not-found',
@@ -27,6 +28,12 @@ function TargetReport({
 }) {
     const t = useTranslations('contentCopy.report');
 
+    const nothingToCopy =
+        report.status === 'ok' &&
+        !report.error &&
+        report.created.length === 0 &&
+        report.skipped.length > 0;
+
     const reasonLabel = (reason: string) =>
         (REASON_KEYS as readonly string[]).includes(reason)
             ? t(`reasons.${reason}`)
@@ -37,8 +44,14 @@ function TargetReport({
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-medium">{report.name}</span>
                 {!dryRun && (
-                    <span className={STATUS_TONE[report.status]}>
-                        {t(`status.${report.status}`)}
+                    <span
+                        className={
+                            nothingToCopy
+                                ? 'text-hud-muted'
+                                : STATUS_TONE[report.status]
+                        }
+                    >
+                        {t(`status.${nothingToCopy ? 'nothing' : report.status}`)}
                     </span>
                 )}
             </div>

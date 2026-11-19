@@ -6,7 +6,8 @@ import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { assertCan } from '@/lib/server/content/access';
-import { exportCampaign } from '@/lib/server/templates/export-campaign';
+import { BundleInvalidError } from '@/lib/server/templates/bundle';
+import { exportCampaign, exportNames } from '@/lib/server/templates/export-campaign';
 import { type Actor, sessionDmActor } from '@/lib/utils/api/actor';
 import { ContentError } from '@/lib/utils/api/content-error';
 import { NEED } from '@/lib/utils/api/need';
@@ -27,7 +28,9 @@ export async function copyContent(args: {
 
     assertCan(actor, NEED.write);
 
-    const source = await exportCampaign(prisma, actor.campaignId);
+    const source = await exportCampaign(prisma, actor.campaignId, {
+        compendium: false,
+    });
 
     const targets = await resolveTargets({
         userId: actor.userId,
@@ -51,7 +54,7 @@ export async function copyContent(args: {
         try {
             const plan = await buildCopyPlan({
                 source,
-                target: await exportCampaign(prisma, target.id),
+                target: await exportNames(prisma, target.id),
                 targetActor: sessionDmActor(target.id, actor.userId),
                 selected: items,
             });
@@ -67,12 +70,17 @@ export async function copyContent(args: {
                 ? plan.toCreate.map(({ table, row }) => copyRowRef(table, row))
                 : await applyCopyPlan(target.id, plan);
 
-            if (plan.skipped.length > 0) report.status = 'partial';
+            if (plan.skipped.some((s) => s.reason !== 'exists'))
+                report.status = 'partial';
         } catch (error) {
             report.status = 'failed';
             report.created = [];
 
-            if (error instanceof ContentError) report.error = error.message;
+            if (
+                error instanceof ContentError ||
+                error instanceof BundleInvalidError
+            )
+                report.error = error.message || API_ERRORS.BUNDLE_INVALID;
             else {
                 console.error('copyContent failed', target.id, error);
                 report.error = API_ERRORS.INTERNAL;

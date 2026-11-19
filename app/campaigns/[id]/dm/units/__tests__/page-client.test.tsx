@@ -23,7 +23,7 @@ import {
 import type { Unit } from '@/types/units';
 
 vi.mock('@/lib/hooks/content-copy', () => ({
-    useContentCopyOptions: () => ({ data: { items: [], campaigns: [] } }),
+    useContentCopyCampaigns: () => ({ data: { campaigns: [] } }),
 }));
 
 vi.mock('next/navigation', () => ({

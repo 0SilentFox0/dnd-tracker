@@ -23,6 +23,15 @@ vi.mock('next/dynamic', () => ({
 
 vi.mock('@/lib/hooks/content-copy', () => ({
     useContentCopyOptions: () => mocks.options,
+    useContentCopyCampaigns: () => ({
+        data: mocks.options.data
+            ? {
+                  campaigns: (
+                      mocks.options.data as { campaigns: unknown[] }
+                  ).campaigns,
+              }
+            : undefined,
+    }),
     useContentCopy: () => ({
         preview: {
             mutate: mocks.preview,

@@ -12,7 +12,7 @@ vi.mock('next/dynamic', () => ({
 }));
 
 vi.mock('@/lib/hooks/content-copy', () => ({
-    useContentCopyOptions: () => ({ data: { items: [], campaigns: [] } }),
+    useContentCopyCampaigns: () => ({ data: { campaigns: [] } }),
 }));
 
 vi.unmock('next-intl');

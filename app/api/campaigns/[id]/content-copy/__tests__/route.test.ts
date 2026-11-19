@@ -122,6 +122,27 @@ describe('content-copy route', () => {
         expect(listCopyTargets).toHaveBeenCalledWith('u1', 'c1');
     });
 
+    it('GET campaignsOnly skips item names', async () => {
+        listCopyTargets.mockResolvedValue([{ id: 'c2', name: 'Two' }]);
+
+        const res = await get('?campaignsOnly=1');
+
+        expect(await res.json()).toEqual({
+            campaigns: [{ id: 'c2', name: 'Two' }],
+        });
+        expect(loadCopyNames).not.toHaveBeenCalled();
+    });
+
+    it('GET requires a session actor', async () => {
+        loadCopyNames.mockResolvedValue([]);
+        listCopyTargets.mockResolvedValue([]);
+        await get();
+
+        expect(JSON.stringify(resolveActor.mock.calls[0])).toContain(
+            '"sessionOnly":true'
+        );
+    });
+
     it('GET 400 on unknown kind', async () => {
         expect((await get('?kind=nope')).status).toBe(400);
     });

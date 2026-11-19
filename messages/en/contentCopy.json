@@ -25,6 +25,7 @@
     "status": {
       "ok": "Copied",
       "partial": "Partly copied",
+      "nothing": "Nothing new to copy",
       "failed": "Failed"
     },
     "summaryPreview": "Will create {created}; {reused} already exist and will be reused; {skipped} skipped.",

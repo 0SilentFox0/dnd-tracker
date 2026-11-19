@@ -7,7 +7,7 @@ import { Copy } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { ContentKind } from '@/lib/constants/content-kinds';
-import { useContentCopyOptions } from '@/lib/hooks/content-copy';
+import { useContentCopyCampaigns } from '@/lib/hooks/content-copy';
 
 const ContentCopyDialog = dynamic(
     () => import('./ContentCopyDialog').then((m) => m.ContentCopyDialog),
@@ -25,9 +25,9 @@ export function ContentCopyButton({
 
     const [open, setOpen] = useState(false);
 
-    const options = useContentCopyOptions(campaignId, kind, true);
+    const campaigns = useContentCopyCampaigns(campaignId);
 
-    if (!options.data || options.data.campaigns.length === 0) return null;
+    if (!campaigns.data || campaigns.data.campaigns.length === 0) return null;
 
     return (
         <>

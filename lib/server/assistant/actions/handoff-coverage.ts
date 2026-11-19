@@ -31,6 +31,11 @@ export const HANDOFF_ACTION_COVERAGE = [
         `${c}/content-import/[kind]/ai-map`,
         'handoff.ai-map',
     ]),
+    ...['GET', 'POST'].map((m) => [
+        m,
+        `${c}/content-copy`,
+        'handoff.content-copy',
+    ]),
     ['POST', `${c}/decks/upload-url`, 'handoff.slide-upload'],
     ['POST', `${c}/tracks/upload-url`, 'handoff.track-upload'],
     ['POST', 'campaigns/import', 'handoff.campaign-import'],

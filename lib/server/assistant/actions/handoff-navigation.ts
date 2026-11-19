@@ -23,6 +23,7 @@ export const HANDOFF_INPUTS = {
     'campaign-import': empty,
     'campaign-join': empty,
     'content-import': z.strictObject({ kind: handoffContentKind }),
+    'content-copy': z.strictObject({ kind: handoffContentKind }),
     'ai-map': z.strictObject({ kind: handoffContentKind }),
     'slide-upload': z.strictObject({ deckId: handoffId.optional() }),
     'track-upload': empty,
@@ -72,7 +73,9 @@ export async function buildAssistantHandoff(
                   ? '/campaigns/new'
                   : key === 'campaign-join'
                     ? '/campaigns'
-                    : key === 'content-import' || key === 'ai-map'
+                    : key === 'content-import' ||
+                      key === 'content-copy' ||
+                      key === 'ai-map'
                       ? `${base}/dm/${content}`
                       : key === 'slide-upload'
                         ? `${base}/dm/show${input.deckId ? `/${input.deckId}` : ''}`

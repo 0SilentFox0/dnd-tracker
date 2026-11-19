@@ -1,7 +1,7 @@
 {
   "2026-11-copy-content": {
     "title": "Copy content to other campaigns",
-    "body": "Units, spells, races, feats and artifacts can now be copied to your other campaigns, or all of them at once. Use the \"Copy to campaigns\" button next to Import; a preview shows what will be created and what already exists."
+    "body": "Content can now be copied to your other campaigns, or all of them at once, from any content library page (units, spells, races, classes, feats, backgrounds, artifacts, music and more). Use the \"Copy to campaigns\" button; a preview shows what will be created and what already exists."
   },
   "2026-11-map-large": {
     "title": "Large battle maps",

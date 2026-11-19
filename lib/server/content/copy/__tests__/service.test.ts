@@ -8,6 +8,7 @@ const { applyCopyPlan, buildCopyPlan, resolveTargets, exportCampaign } =
         exportCampaign: vi.fn(),
     }));
 
+
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 vi.mock('@/lib/server/content/copy/apply', () => ({
@@ -20,10 +21,14 @@ vi.mock('@/lib/server/content/copy/apply', () => ({
 }));
 vi.mock('@/lib/server/content/copy/plan', () => ({ buildCopyPlan }));
 vi.mock('@/lib/server/content/copy/targets', () => ({ resolveTargets }));
-vi.mock('@/lib/server/templates/export-campaign', () => ({ exportCampaign }));
+vi.mock('@/lib/server/templates/export-campaign', () => ({
+    exportCampaign,
+    exportNames: exportCampaign,
+}));
 
 import { copyRequestSchema } from '@/lib/server/content/copy/schema';
 import { copyContent } from '@/lib/server/content/copy/service';
+import { BundleInvalidError } from '@/lib/server/templates/bundle';
 
 const actor = {
     campaignId: 'src',
@@ -86,12 +91,31 @@ describe('copyContent', () => {
         expect(targets[0].created[0]).not.toHaveProperty('id');
     });
 
-    it('is partial when something was skipped', async () => {
+    it('is partial when something was skipped for a reason other than exists', async () => {
+        buildCopyPlan.mockResolvedValue(
+            plan([{ kind: 'units', name: 'X', reason: 'kind-unsupported' }])
+        );
+
+        expect((await run()).targets[0].status).toBe('partial');
+    });
+
+    it('stays ok when everything skipped already exists', async () => {
         buildCopyPlan.mockResolvedValue(
             plan([{ kind: 'units', name: 'X', reason: 'exists' }])
         );
 
-        expect((await run()).targets[0].status).toBe('partial');
+        expect((await run()).targets[0].status).toBe('ok');
+    });
+
+    it('reports the message key of a bundle error', async () => {
+        applyCopyPlan.mockRejectedValueOnce(
+            new BundleInvalidError('errors.bundleForeignContent')
+        );
+
+        expect((await run()).targets[0]).toMatchObject({
+            status: 'failed',
+            error: 'errors.bundleForeignContent',
+        });
     });
 
     it('rejects a non-DM actor', async () => {

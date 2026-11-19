@@ -25,11 +25,24 @@ export const GET = (req: Request, ctx: Ctx) =>
         {
             req,
             ctx,
-            need: NEED.read('dm'),
+            need: NEED.readSession,
             action: 'content copy options',
         },
         async (actor) => {
-            const kind = new URL(req.url).searchParams.get('kind');
+            const params = new URL(req.url).searchParams;
+
+            if (params.get('campaignsOnly') === '1')
+                return NextResponse.json(
+                    {
+                        campaigns: await listCopyTargets(
+                            actor.userId,
+                            actor.campaignId
+                        ),
+                    },
+                    { headers: PRIVATE_NO_STORE_HEADERS }
+                );
+
+            const kind = params.get('kind');
 
             if (!kind || !(CONTENT_KINDS as readonly string[]).includes(kind))
                 throw new ContentError(API_ERRORS.INVALID_QUERY, 400);
