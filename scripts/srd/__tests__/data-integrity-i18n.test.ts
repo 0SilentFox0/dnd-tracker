@@ -188,7 +188,7 @@ describe('shared overlay compatibility', () => {
             fs.readFileSync(path.join(SRD_DATA_DIR, 'i18n', 'uk.json'), 'utf8')
         ) as TranslationsV2;
 
-        expect(Object.keys(translations)).toHaveLength(8677);
+        expect(Object.keys(translations)).toHaveLength(9281);
         expect(
             Object.keys(translations).filter((key) => !entries.has(key))
         ).toEqual([]);
