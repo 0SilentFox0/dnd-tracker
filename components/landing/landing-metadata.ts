@@ -5,8 +5,6 @@ import { BRAND, LANDING_PATH, SITE_URL } from '@/lib/constants/site';
 import { type Locale, LOCALES } from '@/lib/i18n/config';
 import { getTranslator, type Translator } from '@/lib/i18n/translator';
 
-const OG_IMAGE = '/landing/screen-battle.webp';
-
 const OG_LOCALE: Record<Locale, string> = { en: 'en_US', uk: 'uk_UA' };
 
 export async function buildLandingMetadata(locale: Locale): Promise<Metadata> {
@@ -34,15 +32,11 @@ export async function buildLandingMetadata(locale: Locale): Promise<Metadata> {
             ),
             title,
             description,
-            images: [
-                { url: OG_IMAGE, width: 1500, height: 763, alt: t('hero.alt') },
-            ],
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
-            images: [OG_IMAGE],
         },
     };
 }

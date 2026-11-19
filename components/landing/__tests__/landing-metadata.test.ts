@@ -45,4 +45,12 @@ describe.each(['en', 'uk'] as const)('landing metadata (%s)', (locale) => {
             'x-default': '/',
         });
     });
+
+    it('leaves images to the root opengraph-image so the brand card applies', async () => {
+        const meta = await buildLandingMetadata(locale);
+
+        expect(meta.openGraph).not.toHaveProperty('images');
+        expect(meta.twitter).not.toHaveProperty('images');
+        expect(JSON.stringify(meta)).not.toMatch(/https?:\/\/|\.webp/);
+    });
 });
