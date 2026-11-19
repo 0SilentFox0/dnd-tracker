@@ -6,7 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { showKeys } from './keys';
 import { writeShowSnapshot } from './show-snapshot';
 
+import { SOUNDBOARD_PLAY_EVENT } from '@/lib/constants/soundboard';
 import { usePusherChannel } from '@/lib/hooks/common';
+import { armUnlock, handleSoundPlayEvent } from '@/lib/hooks/soundboard';
 import { worldKeys } from '@/lib/hooks/world/keys';
 import {
     SHOW_STATE_EVENT,
@@ -24,6 +26,8 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const lastWorldSeq = useRef<number | null>(null);
+
+    useEffect(armUnlock, []);
 
     useEffect(
         () => () => {
@@ -69,6 +73,8 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
                         queryKey: showKeys.state(campaignId),
                     });
             },
+            [SOUNDBOARD_PLAY_EVENT]: (data) =>
+                handleSoundPlayEvent(queryClient, campaignId, data),
             [WORLD_CHANGED_EVENT]: (data) => {
                 const seq = (data as Partial<WorldChangedEvent> | null)?.seq;
 

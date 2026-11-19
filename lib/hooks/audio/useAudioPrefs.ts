@@ -36,6 +36,11 @@ const videoFlag = createStorageFlag(AUDIO_VIDEO_KEY, true);
 
 const playlistFlag = createStorageFlag(AUDIO_PLAYLIST_KEY, true);
 
+export const readAudioPrefs = (): { volume: number; muted: boolean } => ({
+    volume: volumeStore.get(),
+    muted: mutedFlag.get(),
+});
+
 export function useAudioPrefs(): AudioPrefs {
     const volume = useStorageValue(volumeStore, DEFAULT_AUDIO_VOLUME);
 

@@ -168,3 +168,11 @@ describe('usePusherShowSync show-state', () => {
         expect(invalidate).not.toHaveBeenCalled();
     });
 });
+
+describe('usePusherShowSync soundboard', () => {
+    it('binds the soundboard-play handler', () => {
+        setup();
+
+        expect(captured.handlers['soundboard-play']).toBeTypeOf('function');
+    });
+});
