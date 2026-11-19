@@ -1,4 +1,5 @@
 import type {
+    Prisma,
     SoundLibraryItem,
     SoundPreset as PresetRow,
 } from '@prisma/client';
@@ -13,6 +14,7 @@ import {
     STARTER_PRESETS,
 } from '@/lib/constants/soundboard';
 import { prisma } from '@/lib/db';
+import { lockUserSounds } from '@/lib/server/soundboard/user-lock';
 import {
     removeSoundObject,
     soundObjectPath,
@@ -81,8 +83,7 @@ async function seedStarterPresets(userId: string): Promise<void> {
     if (await seeded()) return;
 
     await prisma.$transaction(async (tx) => {
-        // serializes concurrent first reads of the same account
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sound-presets:${userId}`}))`;
+        await lockUserSounds(tx, userId);
 
         if (
             await tx.userOnboardingFlag.findUnique({
@@ -145,8 +146,11 @@ async function ownedSound(
     return row;
 }
 
-export async function assertLibraryRoom(userId: string): Promise<void> {
-    const count = await prisma.soundLibraryItem.count({ where: { userId } });
+export async function assertLibraryRoom(
+    userId: string,
+    db: Pick<Prisma.TransactionClient, 'soundLibraryItem'> = prisma
+): Promise<void> {
+    const count = await db.soundLibraryItem.count({ where: { userId } });
 
     if (count >= MAX_LIBRARY_SOUNDS)
         throw new ContentError(API_ERRORS.SOUND_LIMIT, 400, undefined, {
@@ -167,18 +171,30 @@ export async function createLibrarySound(
 
     if (!verified.ok) throw new ContentError(verified.message, 400);
 
-    const row = await prisma.soundLibraryItem.create({
-        data: {
-            userId,
-            name: input.name ?? null,
-            icon: input.icon,
-            color: input.color ?? null,
-            volume: input.volume,
-            url: verified.value,
-            durationMs: input.durationMs,
-            source: input.source,
-            sourceUrl: input.sourceUrl ?? null,
-        },
+    const row = await prisma.$transaction(async (tx) => {
+        await lockUserSounds(tx, userId);
+        await assertLibraryRoom(userId, tx);
+
+        const duplicate = await tx.soundLibraryItem.findFirst({
+            where: { userId, url: verified.value },
+            select: { id: true },
+        });
+
+        if (duplicate) throw new ContentError(API_ERRORS.TRACK_DUPLICATE, 409);
+
+        return tx.soundLibraryItem.create({
+            data: {
+                userId,
+                name: input.name ?? null,
+                icon: input.icon,
+                color: input.color ?? null,
+                volume: input.volume,
+                url: verified.value,
+                durationMs: input.durationMs,
+                source: input.source,
+                sourceUrl: input.sourceUrl ?? null,
+            },
+        });
     });
 
     return toRow(row);
@@ -206,6 +222,8 @@ export async function deleteLibrarySound(
     const row = await ownedSound(userId, id);
 
     await prisma.$transaction(async (tx) => {
+        await lockUserSounds(tx, userId);
+
         const presets = await tx.soundPreset.findMany({ where: { userId } });
 
         for (const preset of presets) {

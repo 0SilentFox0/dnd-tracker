@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+
 import { toPreset, toSlots } from './library-store';
 
 import 'server-only';
@@ -8,6 +10,7 @@ import {
     PRESET_SLOTS,
 } from '@/lib/constants/soundboard';
 import { prisma } from '@/lib/db';
+import { lockUserSounds } from '@/lib/server/soundboard/user-lock';
 import { ContentError } from '@/lib/utils/api/content-error';
 import type { SoundPreset } from '@/types/soundboard';
 
@@ -23,6 +26,7 @@ async function ownedPreset(userId: string, id: string) {
 }
 
 async function assertSlotsPlayable(
+    db: Prisma.TransactionClient,
     userId: string,
     slots: (string | null)[]
 ): Promise<void> {
@@ -37,7 +41,7 @@ async function assertSlotsPlayable(
 
     if (custom.length === 0) return;
 
-    const owned = await prisma.soundLibraryItem.findMany({
+    const owned = await db.soundLibraryItem.findMany({
         where: { userId, id: { in: custom } },
         select: { id: true },
     });
@@ -49,23 +53,27 @@ export async function createPreset(
     userId: string,
     name: string
 ): Promise<SoundPreset> {
-    const count = await prisma.soundPreset.count({ where: { userId } });
+    const row = await prisma.$transaction(async (tx) => {
+        await lockUserSounds(tx, userId);
 
-    if (count >= MAX_PRESETS)
-        throw new ContentError(API_ERRORS.PRESET_LIMIT, 400);
+        const count = await tx.soundPreset.count({ where: { userId } });
 
-    const last = await prisma.soundPreset.aggregate({
-        where: { userId },
-        _max: { sortOrder: true },
-    });
+        if (count >= MAX_PRESETS)
+            throw new ContentError(API_ERRORS.PRESET_LIMIT, 400);
 
-    const row = await prisma.soundPreset.create({
-        data: {
-            userId,
-            name,
-            slots: Array.from({ length: PRESET_SLOTS }, () => null),
-            sortOrder: (last._max.sortOrder ?? -1) + 1,
-        },
+        const last = await tx.soundPreset.aggregate({
+            where: { userId },
+            _max: { sortOrder: true },
+        });
+
+        return tx.soundPreset.create({
+            data: {
+                userId,
+                name,
+                slots: Array.from({ length: PRESET_SLOTS }, () => null),
+                sortOrder: (last._max.sortOrder ?? -1) + 1,
+            },
+        });
     });
 
     return toPreset(row);
@@ -78,11 +86,16 @@ export async function updatePreset(
 ): Promise<SoundPreset> {
     await ownedPreset(userId, id);
 
-    if (patch.slots) await assertSlotsPlayable(userId, toSlots(patch.slots));
+    await prisma.$transaction(async (tx) => {
+        await lockUserSounds(tx, userId);
 
-    await prisma.soundPreset.updateMany({
-        where: { id, userId },
-        data: { name: patch.name, slots: patch.slots },
+        if (patch.slots)
+            await assertSlotsPlayable(tx, userId, toSlots(patch.slots));
+
+        await tx.soundPreset.updateMany({
+            where: { id, userId },
+            data: { name: patch.name, slots: patch.slots },
+        });
     });
 
     return toPreset(await ownedPreset(userId, id));
