@@ -24,24 +24,25 @@ describe('magic items with combat effects', () => {
             expect(AbilitySchema.safeParse(a).success, a.id).toBe(true);
     });
 
-    it('Mace of Smiting: crit rider, construct rider, construct crit destroys at 25 HP', () => {
+    it('Mace of Smiting: crit rider, construct damage and to-hit riders, construct crit destroys at 25 HP', () => {
         expect(ids('srd-2024_mace-of-smiting')).toEqual([
             'smite-crit',
             'smite-construct',
+            'smite-construct-hit',
             'smite-construct-crit',
         ]);
         expect(
-            row('srd-2024_mace-of-smiting').abilities?.[2].effects[0]
+            row('srd-2024_mace-of-smiting').abilities?.[3].effects[0]
         ).toMatchObject({ kind: 'dealDamage', amount: 7, killIfHpAtMost: 32 });
     });
 
-    it('Scimitar of Speed keeps +2 and grants an extra action as a bonus action', () => {
+    it('Scimitar of Speed keeps +2 and grants a bound item attack as a bonus action', () => {
         const r = row('srd-2024_scimitar-of-speed');
 
         expect(r.weapon).toMatchObject({ attackBonus: 2, damageBonus: 2 });
         expect(r.abilities?.[0]).toMatchObject({
             trigger: { event: 'bonusAction' },
-            effects: [{ kind: 'grantAction', extraActions: 1 }],
+            effects: [{ kind: 'grantAction', itemAttacks: 1 }],
         });
     });
 
