@@ -20,9 +20,9 @@ export function resolveSchoolRefs<T>(
     ) as T;
 }
 
-type FeatureGroup = {
-    abilities?: Array<Record<string, unknown> & { id?: string }>;
-};
+type IconedEntry = Record<string, unknown> & { id?: string };
+
+type FeatureGroup = { abilities?: IconedEntry[]; choices?: IconedEntry[] };
 
 const iconAbilities = (
     groups: unknown,
@@ -30,14 +30,27 @@ const iconAbilities = (
     urls: Record<string, string>
 ) =>
     Array.isArray(groups)
-        ? groups.map((g: FeatureGroup) => ({
-              ...g,
-              abilities: g.abilities?.map((a) =>
+        ? groups.map((g: FeatureGroup) => {
+              const withIcon = (a: IconedEntry) =>
                   a.id && urls[`${scope}/${a.id}`]
                       ? { ...a, icon: urls[`${scope}/${a.id}`] }
-                      : a
-              ),
-          }))
+                      : a;
+
+              const abilityIds = new Set(g.abilities?.map((a) => a.id));
+
+              // a choice sharing an ability id is a variant of it, not a feature of its own
+              return {
+                  ...g,
+                  abilities: g.abilities?.map(withIcon),
+                  ...(g.choices
+                      ? {
+                            choices: g.choices.map((c) =>
+                                abilityIds.has(c.id) ? c : withIcon(c)
+                            ),
+                        }
+                      : {}),
+              };
+          })
         : groups;
 
 /** Icons of class features and subclasses live under the `features`/`subclasses` keys of icons.json, scoped by `<class slug>[/<subclass id>]`. */

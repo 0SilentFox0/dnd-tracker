@@ -13,7 +13,7 @@ const pack = grimPack();
 
 const data = grimData();
 
-const SRD_CATALOG_SIZE = 9246;
+const SRD_CATALOG_SIZE = 9257;
 
 describe('wfrp catalog', () => {
     const catalog = catalogOfPack(pack);

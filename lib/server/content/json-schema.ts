@@ -19,7 +19,9 @@ import {
     LimitsSchema,
 } from '@/lib/utils/abilities/schema/ability';
 import {
+    AbilityTargetSchema,
     AmountSchema,
+    DurationSchema,
     FlatSchema,
     FormulaSchema,
     ScaleSchema,
@@ -83,6 +85,8 @@ const CORE_SHARED_SCHEMAS: ReadonlyArray<Entry> = [
     [ScaleSchema, 'Scale'],
     [FlatSchema, 'Flat'],
     [AmountSchema, 'Amount'],
+    [AbilityTargetSchema, 'AbilityTarget'],
+    [DurationSchema, 'Duration'],
     [AbilityKeySchema, 'AbilityKey'],
     [AnyConditionSchema, 'AnyCondition'],
     [SpellFxSchema, 'SpellFx'],
