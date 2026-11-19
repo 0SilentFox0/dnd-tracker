@@ -12,10 +12,10 @@ import {
     MAX_SLIDES_PER_DECK,
 } from './show';
 import {
+    MAX_LIBRARY_SOUNDS,
     MAX_PRESETS,
     MAX_SOUND_BYTES,
     MAX_SOUND_SECONDS,
-    MAX_SOUNDS_PER_CAMPAIGN,
 } from './soundboard';
 
 export const API_ERRORS = {
@@ -600,7 +600,7 @@ export type ErrorIssue = {
 export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
     [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },
     [API_ERRORS.TRACK_LIMIT]: { max: MAX_TRACKS_PER_CAMPAIGN },
-    [API_ERRORS.SOUND_LIMIT]: { max: MAX_SOUNDS_PER_CAMPAIGN },
+    [API_ERRORS.SOUND_LIMIT]: { max: MAX_LIBRARY_SOUNDS },
     [API_ERRORS.PRESET_LIMIT]: { max: MAX_PRESETS },
     [API_ERRORS.SOUND_LINK_TOO_LARGE]: { maxKb: MAX_SOUND_BYTES / 1024 },
     [API_ERRORS.SOUND_FILE_INVALID]: {

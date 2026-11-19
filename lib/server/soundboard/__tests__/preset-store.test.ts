@@ -10,7 +10,7 @@ const h = vi.hoisted(() => ({
             findFirst: vi.fn(),
             create: vi.fn(),
             aggregate: vi.fn(),
-            updateMany: vi.fn(async () => ({ count: 1 })),
+            updateMany: vi.fn(async (_args?: unknown) => ({ count: 1 })),
             deleteMany: vi.fn(async () => ({ count: 1 })),
         },
         $transaction: vi.fn(async (ops: unknown[]) => ops),

@@ -2,7 +2,6 @@ import type { BuiltinSound } from '@/types/soundboard';
 
 export const SOUNDBOARD_BUCKET = 'soundboard';
 export const SOUNDBOARD_PLAY_EVENT = 'soundboard-play';
-export const MAX_SOUNDS_PER_CAMPAIGN = 60;
 export const PRESET_SLOTS = 9;
 export const MAX_LIBRARY_SOUNDS = 100;
 export const MAX_PRESETS = 30;
