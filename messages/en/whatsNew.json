@@ -305,6 +305,10 @@
     "title": "Camera for large maps",
     "body": "Pan and zoom around large battle maps. Use the minimap to jump elsewhere on the field; the camera follows your hero automatically."
   },
+  "2026-11-19-sound-library": {
+    "title": "Sound library and presets",
+    "body": "Your sounds now live in an account-wide library: upload a file, record from the microphone or paste a link. Group up to nine sounds into presets and switch them mid-game from the Sounds panel."
+  },
   "2026-11-soundboard": {
     "title": "Soundboard",
     "body": "The DM now has a soundboard: one tap plays a door, thunder or a sword hit for the whole table. Built-in sounds are included, and you can upload your own."
