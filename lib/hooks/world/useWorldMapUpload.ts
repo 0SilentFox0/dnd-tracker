@@ -8,6 +8,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
     WORLD_MAP_MAX_EDGE_PX,
     WORLD_MAP_MAX_PIXELS,
+    WORLD_MAP_UPLOAD_QUALITY,
 } from '@/lib/constants/world';
 import { imageSizeOf } from '@/lib/utils/common/image-decode';
 import {
@@ -45,7 +46,7 @@ export function useWorldMapUpload(campaignId: string) {
                     await resizeImageToBlob(
                         file,
                         WORLD_MAP_MAX_EDGE_PX,
-                        undefined,
+                        WORLD_MAP_UPLOAD_QUALITY,
                         WORLD_MAP_MAX_PIXELS
                     ).catch((e: unknown) => {
                         throw e instanceof ImageResizeError

@@ -5,7 +5,10 @@ import { useTranslations } from 'next-intl';
 
 import { uploadSlideImage } from '@/lib/api/decks';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { SLIDE_MAX_EDGE_PX } from '@/lib/constants/show';
+import {
+    SLIDE_MAX_EDGE_PX,
+    SLIDE_UPLOAD_QUALITY,
+} from '@/lib/constants/show';
 import {
     ImageResizeError,
     resizeImageToBlob,
@@ -47,7 +50,8 @@ export function useSlideUpload(
                                 campaignId,
                                 await resizeImageToBlob(
                                     files[i],
-                                    SLIDE_MAX_EDGE_PX
+                                    SLIDE_MAX_EDGE_PX,
+                                    SLIDE_UPLOAD_QUALITY
                                 ),
                                 (message) =>
                                     t(API_ERRORS.IMAGE_UPLOAD_FAILED, {
