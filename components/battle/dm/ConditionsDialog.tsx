@@ -27,6 +27,10 @@ import type { BattleParticipant } from '@/types/battle';
 
 const FORM_ID = 'conditions-form';
 
+const AUTO_SOURCE = 'auto';
+
+const SOURCE_CONDITIONS: string[] = ['frightened', 'charmed'];
+
 const toInt = (v: string): number | undefined => {
     const n = parseInt(v, 10);
 
@@ -43,6 +47,7 @@ interface ConditionsDialogProps {
     isPending?: boolean;
     standard: Pick<RuleSystemConditionSet, 'keys' | 'labelKey'>;
     custom?: Ruleset['conditions']['custom'];
+    sources?: { id: string; name: string }[];
 }
 
 export function ConditionsDialog({
@@ -67,6 +72,7 @@ function ConditionsDialogBody({
     isPending,
     standard,
     custom = [],
+    sources = [],
 }: ConditionsDialogProps & { participant: BattleParticipant }) {
     const t = useTranslations('battleDm.conditions');
 
@@ -87,6 +93,8 @@ function ConditionsDialogBody({
     const [saveAbility, setSaveAbility] = useState<AbilityKey>('constitution');
 
     const [saveDc, setSaveDc] = useState('12');
+
+    const [sourceId, setSourceId] = useState(AUTO_SOURCE);
 
     const abilityOptions = ABILITY_KEYS.map((value) => ({
         value,
@@ -109,6 +117,13 @@ function ConditionsDialogBody({
         (selected !== 'exhaustion' || inRange(levelsCount, MAX_EXHAUSTION)) &&
         (!saveOn || inRange(dc, CONDITION_LIMITS.dc));
 
+    const showSource = SOURCE_CONDITIONS.includes(selected) && sources.length > 0;
+
+    const sourceOptions = [
+        { value: AUTO_SOURCE, label: t('sourceAll') },
+        ...sources.map((s) => ({ value: s.id, label: s.name })),
+    ];
+
     const apply = (e: FormEvent) => {
         e.preventDefault();
 
@@ -120,6 +135,8 @@ function ConditionsDialogBody({
             condition: selected,
             rounds: roundsCount,
             ...(selected === 'exhaustion' && { levels: levelsCount }),
+            ...(showSource &&
+                sourceId !== AUTO_SOURCE && { sourceId }),
             ...(saveOn &&
                 dc !== undefined && { saveEnds: { ability: saveAbility, dc } }),
         });
@@ -256,6 +273,18 @@ function ConditionsDialogBody({
                         </div>
                     )}
                 </div>
+
+                {showSource && (
+                    <div className="space-y-1">
+                        <Label>{t('source')}</Label>
+                        <SelectField
+                            aria-label={t('source')}
+                            value={sourceId}
+                            options={sourceOptions}
+                            onValueChange={setSourceId}
+                        />
+                    </div>
+                )}
 
                 <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm">

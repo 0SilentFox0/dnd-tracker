@@ -125,3 +125,18 @@ describe('CONDITION_5E_REGISTRY', () => {
         );
     });
 });
+
+describe('check disadvantage conditions', () => {
+    it.each(['poisoned', 'frightened'] as const)(
+        '%s imposes disadvantage on ability checks',
+        (key) => {
+            const { flags } = expandCondition5e(key, { exhaustion: '2024' });
+
+            expect(flags).toContainEqual({
+                kind: 'flag',
+                flag: 'checkDisadvantage',
+                skills: 'all',
+            });
+        }
+    );
+});

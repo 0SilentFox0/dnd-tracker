@@ -40,8 +40,8 @@ describe('class slots', () => {
             '3': { max: 2 },
         }));
 
-    it('single half caster rounds up from level 2', () => {
-        expect(casterLevel([e(cls({ caster: 'half' }), 1)])).toBe(0);
+    it('single half caster rounds up from level 1', () => {
+        expect(casterLevel([e(cls({ caster: 'half' }), 1)])).toBe(1);
         expect(casterLevel([e(cls({ caster: 'half' }), 5)])).toBe(3);
     });
 
@@ -50,14 +50,14 @@ describe('class slots', () => {
         expect(casterLevel([e(cls({ caster: 'third' }), 4)])).toBe(2);
     });
 
-    it('multiclass sums with floor', () =>
+    it('multiclass sums half casters rounded up, third casters down', () =>
         expect(
             casterLevel([
                 e(cls({ caster: 'full' }), 3),
                 e(cls({ caster: 'half' }), 3),
                 e(cls({ caster: 'third' }), 3),
             ])
-        ).toBe(5));
+        ).toBe(6));
 
     it('non-caster + one half caster uses single-class rounding', () =>
         expect(

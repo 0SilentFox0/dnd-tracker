@@ -249,3 +249,43 @@ describe('battleConditionsSchema', () => {
         ).toBe(true);
     });
 });
+
+describe('battleConditionsMutation sources', () => {
+    const apply = (extra: { sourceId?: string } = {}) =>
+        battleConditionsMutation(dmCtx(), {
+            action: 'apply',
+            participantId: 'gob',
+            condition: 'frightened',
+            ...extra,
+        });
+
+    it('frightened without a picked source falls back to every hostile', () => {
+        const effects = byId(apply().participants, 'gob').battleData
+            .activeEffects;
+
+        expect(effects.map((e) => e.source?.participantId)).toEqual([
+            hero.basicInfo.id,
+        ]);
+    });
+
+    it('a picked source is used as is', () => {
+        const effects = byId(
+            apply({ sourceId: hero.basicInfo.id }).participants,
+            'gob'
+        ).battleData.activeEffects;
+
+        expect(effects[0].source?.participantId).toBe(hero.basicInfo.id);
+    });
+
+    it('unrelated conditions keep no source', () => {
+        const out = battleConditionsMutation(dmCtx(), {
+            action: 'apply',
+            participantId: 'gob',
+            condition: 'prone',
+        });
+
+        expect(
+            byId(out.participants, 'gob').battleData.activeEffects[0].source
+        ).toBeUndefined();
+    });
+});

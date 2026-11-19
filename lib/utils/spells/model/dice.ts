@@ -45,6 +45,12 @@ export function schoolMasteryFromLearned(
     return (groupId) => (groupId ? (byGroup.get(groupId) ?? null) : null);
 }
 
+export const cantripTier = (characterLevel: number) =>
+    1 +
+    (characterLevel >= 5 ? 1 : 0) +
+    (characterLevel >= 11 ? 1 : 0) +
+    (characterLevel >= 17 ? 1 : 0);
+
 export function spellDice5e(
     spell: {
         dice: number;
@@ -60,13 +66,7 @@ export function spellDice5e(
     if (spell.dice <= 0) return { count: 0, sides };
 
     if (spell.level === 0) {
-        const tier =
-            1 +
-            (characterLevel >= 5 ? 1 : 0) +
-            (characterLevel >= 11 ? 1 : 0) +
-            (characterLevel >= 17 ? 1 : 0);
-
-        return { count: spell.dice * tier, sides };
+        return { count: spell.dice * cantripTier(characterLevel), sides };
     }
 
     return {

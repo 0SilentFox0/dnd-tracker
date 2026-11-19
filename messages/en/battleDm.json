@@ -61,7 +61,9 @@
     "levels": "Levels",
     "saveEnds": "Saving throw at the end of the turn",
     "ability": "Ability",
-    "dc": "DC"
+    "dc": "DC",
+    "source": "Source",
+    "sourceAll": "All hostile (no specific source)"
   },
   "changeHp": {
     "title": "Change HP",

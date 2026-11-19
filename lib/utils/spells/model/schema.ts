@@ -113,6 +113,7 @@ export const SpellTargetingSchema = z.discriminatedUnion('kind', [
         kind: z.literal('enemy'),
         range: rangeField,
         filter: filterField,
+        projectiles: z.boolean().optional(),
     }),
     z.object({ kind: z.literal('allyDead'), range: rangeField }),
     z.object({ kind: z.literal('allAlliesDead') }),
@@ -123,6 +124,7 @@ export const SpellTargetingSchema = z.discriminatedUnion('kind', [
         range: rangeField,
         chain: z.boolean().optional(),
         filter: filterField,
+        projectiles: z.boolean().optional(),
     }),
     z
         .object({

@@ -9,6 +9,7 @@ import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import { INSPIRATION_LABEL } from '@/lib/utils/battle/attack/inspiration';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { effectName } from '@/lib/utils/battle/common/terms';
+import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isAdjacentAttack } from '@/lib/utils/battle/grid/adjacent-attack';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
@@ -140,6 +141,16 @@ export function rollModeReasonsOf(
         );
     };
 
+    const onlyGrappledBy = (other: BattleParticipant | undefined) => {
+        const grapplers = conditionSourceIds(attacker, 'grappled');
+
+        return (
+            !!other &&
+            grapplers.length > 0 &&
+            grapplers.every((gid) => gid === other.basicInfo.id)
+        );
+    };
+
     const attackerSees = senses(attacker, target);
 
     const attackerBlindSees = senses(attacker, target, true);
@@ -203,7 +214,9 @@ export function rollModeReasonsOf(
     const disadvantage = [
         ...labels(
             flagEntries(id, 'disadvantage', opts.extra).filter(
-                (e) => !(attackerBlindSees && e.condition === 'blinded')
+                (e) =>
+                    !(attackerBlindSees && e.condition === 'blinded') &&
+                    !(e.condition === 'grappled' && onlyGrappledBy(target))
             )
         ),
         ...(opts.targetId

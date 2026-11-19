@@ -7,13 +7,29 @@ export function attacksPerAction(
     p: BattleParticipant,
     participants: BattleParticipant[]
 ): number {
+    const { entries } = collectModifiers(
+        withSelf(participants, p),
+        p.basicInfo.id,
+        { stat: 'attacksPerAction' }
+    );
+
+    // Extra Attack does not stack across classes: sum within a class, take the best class.
+    const perClass = new Map<string, number>();
+
+    let other = 0;
+
+    for (const e of entries) {
+        if (e.sourceType !== 'class') other += e.flat;
+        else {
+            const key = JSON.stringify(e.source);
+
+            perClass.set(key, (perClass.get(key) ?? 0) + e.flat);
+        }
+    }
+
     return Math.max(
         0,
-        Math.floor(
-            collectModifiers(withSelf(participants, p), p.basicInfo.id, {
-                stat: 'attacksPerAction',
-            }).flat
-        )
+        Math.floor(other + Math.max(0, ...perClass.values()))
     );
 }
 

@@ -45,7 +45,7 @@ export const CONDITION_5E_REGISTRY = {
     deafened: { markers: [], flags: () => [] },
     frightened: {
         markers: [],
-        flags: () => [],
+        flags: () => [flag({ flag: 'checkDisadvantage', skills: 'all' })],
     },
     grappled: {
         markers: [EffectMarker.IMMOBILIZED],
@@ -78,7 +78,13 @@ export const CONDITION_5E_REGISTRY = {
             flag({ flag: 'conditionImmunity', conditions: ['poisoned'] }),
         ],
     },
-    poisoned: { markers: [], flags: () => [flag({ flag: 'disadvantage' })] },
+    poisoned: {
+        markers: [],
+        flags: () => [
+            flag({ flag: 'disadvantage' }),
+            flag({ flag: 'checkDisadvantage', skills: 'all' }),
+        ],
+    },
     prone: {
         markers: [],
         flags: () => [

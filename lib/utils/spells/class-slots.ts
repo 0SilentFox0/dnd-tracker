@@ -30,7 +30,7 @@ export function casterLevel(entries: ResolvedClassEntry[]): number {
         if (cls?.caster === 'full') return clampLevel(level);
 
         if (cls?.caster === 'half')
-            return level >= 2 ? clampLevel(Math.ceil(level / 2)) : 0;
+            return level >= 1 ? clampLevel(Math.ceil(level / 2)) : 0;
 
         return level >= 3 ? clampLevel(Math.ceil(level / 3)) : 0;
     }
@@ -38,7 +38,7 @@ export function casterLevel(entries: ResolvedClassEntry[]): number {
     const sum = casters.reduce((acc, { class: cls, level }) => {
         if (cls?.caster === 'full') return acc + level;
 
-        if (cls?.caster === 'half') return acc + Math.floor(level / 2);
+        if (cls?.caster === 'half') return acc + Math.ceil(level / 2);
 
         return acc + Math.floor(level / 3);
     }, 0);

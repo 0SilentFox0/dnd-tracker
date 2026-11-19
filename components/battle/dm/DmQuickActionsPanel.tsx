@@ -139,6 +139,10 @@ export function DmQuickActionsPanel({
 
     const participants = (battle.initiativeOrder ?? []) as BattleParticipant[];
 
+    const conditionSources = participants
+        .filter((p) => p.basicInfo.id !== conditions.target?.basicInfo.id)
+        .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name }));
+
     const isActive = battle.status === BattleStatus.ACTIVE;
 
     const canScale = isActive && participants.some(isLiveScalable);
@@ -349,6 +353,7 @@ export function DmQuickActionsPanel({
                     participant={conditions.target}
                     standard={conditions.standard}
                     custom={conditions.custom}
+                    sources={conditionSources}
                     onClose={conditions.close}
                     onSubmit={conditions.submit}
                     isPending={conditions.isPending}

@@ -315,7 +315,10 @@ export function collectModifiers(
             subject;
 
         const condition = ae.effects.find(
-            (m) => m.type === 'blinded' || m.type === 'invisible'
+            (m) =>
+                m.type === 'blinded' ||
+                m.type === 'invisible' ||
+                m.type === 'grappled'
         )?.type;
 
         for (const effect of ae.abilityEffects ??
