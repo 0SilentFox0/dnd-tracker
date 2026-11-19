@@ -9,13 +9,13 @@ const copyContent = vi.hoisted(() => vi.fn());
 
 const listCopyTargets = vi.hoisted(() => vi.fn());
 
-const loadNames = vi.hoisted(() => vi.fn());
+const loadCopyNames = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/utils/api/actor', () => ({ resolveActor }));
 vi.mock('@/lib/server/systems/registry', () => ({}));
 vi.mock('@/lib/server/content/copy/service', () => ({ copyContent }));
 vi.mock('@/lib/server/content/copy/targets', () => ({ listCopyTargets }));
-vi.mock('@/lib/server/content/import/names', () => ({ loadNames }));
+vi.mock('@/lib/server/content/copy/names', () => ({ loadCopyNames }));
 
 import { GET, POST } from '../route';
 
@@ -83,7 +83,7 @@ describe('content-copy route', () => {
     });
 
     it('GET returns source items and DM campaigns', async () => {
-        loadNames.mockResolvedValue([{ id: 'a', name: 'A', slug: 's' }]);
+        loadCopyNames.mockResolvedValue([{ id: 'a', name: 'A' }]);
         listCopyTargets.mockResolvedValue([{ id: 'c2', name: 'Two' }]);
 
         const res = await get();
