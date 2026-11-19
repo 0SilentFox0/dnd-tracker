@@ -1,8 +1,22 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
 
 import { BRAND, LANDING_PATH } from '@/lib/constants/site';
 import type { Locale } from '@/lib/i18n/config';
+import { cn } from '@/lib/utils';
+
+export function BrandMark({ className }: { className?: string }) {
+    return (
+        <Image
+            src="/brand/email-logo.png"
+            alt=""
+            width={32}
+            height={32}
+            className={cn('size-8 rounded-md', className)}
+        />
+    );
+}
 
 export function Brand({ locale }: { locale: Locale }) {
     return (
@@ -11,12 +25,7 @@ export function Brand({ locale }: { locale: Locale }) {
             href={LANDING_PATH[locale]}
             className="hud-sc flex items-center gap-2 text-lg text-hud-ink"
         >
-            <span
-                aria-hidden
-                className="metal-gold metal-fill grid size-8 place-items-center rounded-md text-sm font-bold"
-            >
-                {BRAND.mark}
-            </span>
+            <BrandMark />
             {BRAND.name}
         </Link>
     );

@@ -2,6 +2,7 @@ import { ArrowRight, X } from 'lucide-react';
 
 import { PROBLEM_ICONS } from '@/components/landing/media';
 import { keysOf, listOf } from '@/components/landing/messages';
+import { BrandMark } from '@/components/landing/parts';
 import { BRAND } from '@/lib/constants/site';
 import type { Translator } from '@/lib/i18n/translator';
 
@@ -69,9 +70,7 @@ export function Problem({ t }: { t: Translator }) {
                         })}
                     </div>
                     <div className="mt-4 flex items-center gap-3 rounded-xl border border-hud-gold bg-gradient-to-r from-[#2a1d05] via-[#3a2a0c] to-[#2a1d05] px-4 py-3 shadow-[0_0_40px_-8px_rgba(230,194,90,.55)]">
-                        <span className="hud-sc metal-gold metal-fill grid size-8 place-items-center rounded-md text-xs font-bold">
-                            {BRAND.mark}
-                        </span>
+                        <BrandMark />
                         <span className="hud-sc text-hud-ink">
                             {BRAND.name}
                         </span>
