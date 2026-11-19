@@ -235,3 +235,11 @@ Grapple розмір (C-10), фільтр «ворог поруч» (C-12), до
 9. **Порядок робіт**: стартувати з першого проходу (P1, P2+P3, P4, P5, P7, P8, P11) після закриття хвилі 4 епіка якості?
 
 Виправлення не починаються до «так» власника.
+
+## Статус 2026-11-19 (прохід 2, `fix/canon-audit-2`)
+
+**Виправлено:** X-1/A-5 (hit: крит, тип, finesse), X-5/A-15 (temp HP, `hot`, thorns), S-1/S-2, S-3–S-7, S-11, S-13–S-20, S-24, S-28 (дружній вогонь за allowlist), S-12/S-25 (усі 160 порожніх заклинань, призови до 4), C-3, C-4, C-6, C-7, C-10 (розмір grapple/shove), C-11, C-12, C-14 (Help 2024), A-3, A-6/A-7/A-10, A-8 (Rage), A-9 (Bardic Inspiration), A-11 (Weapon Mastery), A-12/A-13 (вразливості, регенерація), A-14, A-16, A-18, X-2/X-3 (слоти).
+**Змінено:** C-8 Action Surge — вільна додаткова дія; S-22 — канонічні тривалості зон, стеля 600 раундів; A-23 — Gargantuan 4x4 (збережений `gridSize`, наявні бої 3x3).
+**Знято:** C-15 — SRD 5.2 exhaustion не змінює СК заклинань.
+**Пропущено:** C-13 (OA, до закриття L4b-2); Troll на 0 HP; A-19/A-20 для предметів, що потребують нових концепцій (Mace of Smiting, Scimitar of Speed, Dagger of Venom, Cloak of Displacement, Ring of Free Action, Armor of Invulnerability), варіанти Dragon Scale Mail; Ice Knife (вибух) і рухома Flaming Sphere.
+**Рішення власника (h):** 1 — 2024 для слотів і мультикласу; 2 — заповнити всі порожні заклинання; 3 — Bardic Inspiration механічно; 4 — Weapon Mastery у бою; 5 — дружній вогонь за каноном (`side: all`, allowlist, кастер включно); 6 — кап зон піднято до 600 раундів; 8 — Gargantuan 4x4.

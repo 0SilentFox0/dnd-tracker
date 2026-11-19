@@ -355,3 +355,9 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 ## Міграція legacy-клонів (історія)
 
 Інструмент переводу клонів без бази на шари (`lib/server/templates/legacy-migration/`, CLI `constructor:legacy-layers`) використано на проді 2026-11-04: придатних кампаній не лишилось (0 eligible), HOMM5 не чіпали. Код видалено в Part 6; відновити можна з git (останній коміт з ним — `692852992`, спека й план — у `docs/archive/superpowers/`).
+
+## Канон-аудит 2: екстри й порожні заклинання
+
+- **Екстри:** `scripts/srd/overrides/extras.ts` додає не-SRD рядки з slug `extra_*` (Armor of Agathys, Inspiring Leader); `identity catalog` їх ігнорує, тест каталогу SRD пінить лише справжні slug.
+- **Утилітарні заклинання:** `scripts/srd/overrides/spells-utility.ts` (поруч із `spells.ts`) — перекриття для раніше порожніх заклинань.
+- **Політика SRD для колишніх порожніх заклинань:** реалізовано всі 160 (залишок `dm-resolved-spells.json` — ціль 0). Суто наративні (identify, detect-*, scrying, commune…) — маркер тривалості + рядок у лозі. Counterspell каститься **до** касту ворога (вимикає йому касти на раунд, паузи не робить). Wish і Polymorph-родина змодельовані обмеженнями (діапазон/касти + нотатка DM). Призови обмежені 4 істотами. Деталі й таблиця груп — [empty-spells plan](../superpowers/plans/2026-11-19-empty-spells.md). Ефекти — [abilities.md](abilities.md#srd-52-повнота-механік), бій — [battle.md](battle.md#5e-канон-аудит-2-fixcanon-audit-2).

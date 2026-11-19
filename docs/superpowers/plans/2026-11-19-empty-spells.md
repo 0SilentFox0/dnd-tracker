@@ -21,5 +21,5 @@ is the explicit list of still-bare spells (target: empty).
 
 Notes: Counterspell cannot pause a cast (disables the target's spellcasting for the round); Dispel Magic strips
 buffs and debuffs from one enemy; Aid has no upcast; summon counts are capped at 4; polymorph family is modelled by
-casting/ranged limits plus a DM note; Armor of Agathys and Inspiring Leader are not in the SRD data (skipped).
+casting/ranged limits plus a DM note; Armor of Agathys and Inspiring Leader are not in the SRD data and ship as non-SRD `extra_` rows (`overrides/extras.ts`).
 Open: uk translations of the new note texts and inline summon names in the template i18n dictionary.
