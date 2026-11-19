@@ -16,6 +16,7 @@ export * from './onboarding';
 export * from './prisma-json';
 export * from './races';
 export * from './skills';
+export * from './soundboard';
 export * from './source-sync';
 export * from './spells';
 export * from './units';
