@@ -15,7 +15,8 @@
     "enabled": true
   },
   "concentration": {
-    "enabled": true
+    "enabled": true,
+    "dcCap": 30
   },
   "conditions": {
     "enabled": true,
