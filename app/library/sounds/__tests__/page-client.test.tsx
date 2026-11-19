@@ -96,8 +96,8 @@ describe('SoundLibraryPageClient', () => {
     it('renders library tiles and presets', async () => {
         await mount();
 
-        expect(screen.getByText('Roar')).toBeTruthy();
-        expect(screen.getByText('Bell')).toBeTruthy();
+        expect(screen.getAllByText('Roar').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Bell').length).toBeGreaterThan(0);
         expect(screen.getByRole('button', { name: 'Camp' })).toBeTruthy();
     });
 

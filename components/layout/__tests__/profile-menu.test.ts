@@ -8,6 +8,7 @@ describe('PROFILE_MENU', () => {
             'help',
             'password',
             'preferences',
+            'soundLibrary',
             'aiKeys',
             'switchAccount',
             'signOut',
