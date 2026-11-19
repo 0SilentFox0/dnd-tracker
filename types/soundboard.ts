@@ -73,3 +73,21 @@ export type SoundLibrary = {
     sounds: LibrarySoundRow[];
     presets: SoundPreset[];
 };
+
+export type CreateLibrarySoundData = {
+    path: string;
+    durationMs: number;
+    source: 'upload' | 'record' | 'link';
+    name?: string | null;
+    icon?: string;
+    color?: string | null;
+    volume?: number;
+    sourceUrl?: string;
+};
+
+export type UpdateLibrarySoundData = {
+    name?: string | null;
+    icon?: string;
+    color?: string | null;
+    volume?: number;
+};

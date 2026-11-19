@@ -4,19 +4,19 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useSoundboardKeys } from '../useSoundboardKeys';
 
-import type { Sound } from '@/types/soundboard';
+import type { LibrarySound } from '@/types/soundboard';
 
 const pads = ['a', 'b', 'c'].map(
     (id, i) =>
-        ({ id, source: 'custom', name: id, sortOrder: i }) as unknown as Sound
+        ({ id, source: 'custom', name: id, sortOrder: i }) as unknown as LibrarySound
 );
 
 function Host({
     list,
     play,
 }: {
-    list: Sound[] | null;
-    play: (s: Sound) => void;
+    list: (LibrarySound | null)[] | null;
+    play: (s: LibrarySound) => void;
 }) {
     useSoundboardKeys(list, play);
 

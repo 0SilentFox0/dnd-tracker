@@ -1,32 +1,48 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { markLocalPlay } from './handle-play-event';
 import { playBuffer, previewSound } from './player';
-import { useSoundLibrary } from './useSounds';
+import { useActivePreset } from './useActivePreset';
+import { useSoundLibrary } from './useSoundLibrary';
 
 import { ApiError } from '@/lib/api/client';
 import { playSound } from '@/lib/api/soundboard';
-import { PAD_GUARD_MS } from '@/lib/constants/soundboard';
+import { PAD_GUARD_MS, PRESET_SLOTS } from '@/lib/constants/soundboard';
 import { readAudioPrefs } from '@/lib/hooks/audio';
 import { useNotify } from '@/lib/hooks/common';
 import { effectiveVolume } from '@/lib/utils/soundboard/volume';
-import type { Sound } from '@/types/soundboard';
+import type { LibrarySound, SoundPreset } from '@/types/soundboard';
 
 export function useSoundboardPads(campaignId: string): {
-    sounds: Sound[];
-    play(sound: Sound): void;
-    preview(sound: Sound): void;
+    preset: SoundPreset | null;
+    presets: SoundPreset[];
+    setPresetId(id: string): void;
+    pads: (LibrarySound | null)[];
+    play(sound: LibrarySound): void;
+    preview(sound: LibrarySound): void;
 } {
-    const { all } = useSoundLibrary(campaignId);
+    const { byId, presets } = useSoundLibrary();
+
+    const { preset, setPresetId } = useActivePreset(campaignId, presets);
 
     const notify = useNotify();
 
     const lastPlayed = useRef(new Map<string, number>());
 
+    const pads = useMemo(
+        () =>
+            Array.from({ length: PRESET_SLOTS }, (_, i) => {
+                const id = preset?.slots[i];
+
+                return (id && byId.get(id)) || null;
+            }),
+        [preset, byId]
+    );
+
     const play = useCallback(
-        (sound: Sound) => {
+        (sound: LibrarySound) => {
             const now = Date.now();
 
             const last = lastPlayed.current.get(sound.id);
@@ -55,10 +71,10 @@ export function useSoundboardPads(campaignId: string): {
     );
 
     const preview = useCallback(
-        (sound: Sound) =>
+        (sound: LibrarySound) =>
             void previewSound(sound, effectiveVolume(sound, readAudioPrefs())),
         []
     );
 
-    return { sounds: all, play, preview };
+    return { preset, presets, setPresetId, pads, play, preview };
 }

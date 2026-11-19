@@ -1,5 +1,7 @@
 import { createVoicePool } from '@/lib/utils/soundboard/voices';
-import type { Sound } from '@/types/soundboard';
+import type { LibrarySound } from '@/types/soundboard';
+
+type Playable = Pick<LibrarySound, 'id' | 'url'>;
 
 let ctx: AudioContext | null = null;
 
@@ -81,7 +83,7 @@ async function load(c: AudioContext, url: string): Promise<AudioBuffer> {
 }
 
 export async function playBuffer(
-    sound: Sound,
+    sound: Playable,
     volume: number,
     opts: { remote?: boolean } = {}
 ): Promise<void> {
@@ -132,7 +134,7 @@ export async function playBuffer(
     }
 }
 
-export const previewSound = (sound: Sound, volume = 1): Promise<void> =>
+export const previewSound = (sound: Playable, volume = 1): Promise<void> =>
     playBuffer(sound, volume);
 
 export function __resetForTests(): void {

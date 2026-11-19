@@ -3,57 +3,24 @@ import { describe, expect, it, vi } from 'vitest';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { BUILTIN_SOUNDS } from '@/lib/constants/soundboard';
 import { createNonceGuard } from '@/lib/utils/soundboard/dedupe';
-import { resolveSound } from '@/lib/utils/soundboard/resolve-sound';
+import { resolveBuiltinSound } from '@/lib/utils/soundboard/resolve-sound';
 import { validateSoundFile } from '@/lib/utils/soundboard/validate-file';
 import { createVoicePool } from '@/lib/utils/soundboard/voices';
 import { effectiveVolume } from '@/lib/utils/soundboard/volume';
-import type { Sound } from '@/types/soundboard';
 
-const custom: Sound = {
-    id: 'c1',
-    source: 'custom',
-    name: 'Boom',
-    url: 'https://x/boom.mp3',
-    volume: 0.5,
-    color: null,
-    icon: null,
-    sortOrder: 0,
-    durationMs: 900,
-};
-
-describe('resolveSound', () => {
+describe('resolveBuiltinSound', () => {
     it('resolves a builtin sound', () => {
-        const s = resolveSound('builtin:thunder', {
-            custom: [],
-            hiddenBuiltin: [],
-        });
-
-        expect(s).toMatchObject({
+        expect(resolveBuiltinSound('builtin:thunder')).toMatchObject({
             source: 'builtin',
             url: '/sfx/thunder.mp3',
-            name: 'soundboard.builtin.thunder',
+            nameKey: 'soundboard.builtin.thunder',
+            name: null,
         });
     });
 
-    it('returns null for hidden or unknown builtin', () => {
-        expect(
-            resolveSound('builtin:thunder', {
-                custom: [],
-                hiddenBuiltin: ['builtin:thunder'],
-            })
-        ).toBeNull();
-        expect(
-            resolveSound('builtin:nope', { custom: [], hiddenBuiltin: [] })
-        ).toBeNull();
-    });
-
-    it('resolves a custom sound', () => {
-        expect(
-            resolveSound('c1', { custom: [custom], hiddenBuiltin: [] })
-        ).toBe(custom);
-        expect(
-            resolveSound('c2', { custom: [custom], hiddenBuiltin: [] })
-        ).toBeNull();
+    it('returns null for unknown or custom ids', () => {
+        expect(resolveBuiltinSound('builtin:nope')).toBeNull();
+        expect(resolveBuiltinSound('c1')).toBeNull();
     });
 
     it('registry has unique builtin sounds', () => {

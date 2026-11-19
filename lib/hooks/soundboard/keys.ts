@@ -1,3 +1,3 @@
 export const soundKeys = {
-    list: (campaignId: string) => ['sounds', campaignId] as const,
+    library: () => ['sound-library'] as const,
 };
