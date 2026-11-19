@@ -250,11 +250,18 @@ export type SafeFetchResult = {
 /** Fetch with https-only, public-host check on every hop, 10 s timeout and a streamed size cap. */
 export async function safeFetchBuffer(
     rawUrl: string,
-    opts: { maxBytes: number; headers?: Record<string, string> }
+    opts: {
+        maxBytes: number;
+        headers?: Record<string, string>;
+        timeoutMs?: number;
+    }
 ): Promise<SafeFetchResult> {
     const controller = new AbortController();
 
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const timer = setTimeout(
+        () => controller.abort(),
+        opts.timeoutMs ?? TIMEOUT_MS
+    );
 
     try {
         let current = rawUrl.trim();

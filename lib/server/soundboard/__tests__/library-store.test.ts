@@ -18,6 +18,10 @@ const h = vi.hoisted(() => {
             createMany: vi.fn(async () => ({ count: 2 })),
             update: vi.fn(async () => ({})),
         },
+        userOnboardingFlag: {
+            findUnique: vi.fn(async () => null),
+            upsert: vi.fn(async () => ({})),
+        },
         $executeRaw: vi.fn(async () => 0),
     };
 
@@ -46,6 +50,11 @@ import { MAX_LIBRARY_SOUNDS, PRESET_SLOTS } from '@/lib/constants/soundboard';
 
 const items = h.db.soundLibraryItem as Record<string, ReturnType<typeof vi.fn>>;
 
+const flags = h.db.userOnboardingFlag as Record<
+    string,
+    ReturnType<typeof vi.fn>
+>;
+
 const presets = h.db.soundPreset as Record<string, ReturnType<typeof vi.fn>>;
 
 describe('library store', () => {
@@ -55,6 +64,7 @@ describe('library store', () => {
         h.verify.mockResolvedValue({ ok: true, value: 'https://x/a.mp3' });
         items.count.mockResolvedValue(0);
         items.findMany.mockResolvedValue([]);
+        flags.findUnique.mockResolvedValue(null);
         presets.findMany.mockResolvedValue([]);
     });
 
@@ -71,6 +81,32 @@ describe('library store', () => {
         expect(data[1].slots).toHaveLength(PRESET_SLOTS);
         expect(data[1].slots.at(-1)).toBeNull();
         expect(h.db.$executeRaw).toHaveBeenCalled();
+        expect(flags.upsert).toHaveBeenCalledTimes(1);
+        expect(
+            JSON.stringify(
+                (h.db.$executeRaw as ReturnType<typeof vi.fn>).mock.calls[0]
+            )
+        ).toContain('sound-presets:u1');
+    });
+
+    it('skips the lock and the seed once the marker exists', async () => {
+        flags.findUnique.mockResolvedValue({ id: 'f1' });
+        presets.count.mockResolvedValue(0);
+
+        await getLibrary('u1');
+
+        expect(h.db.$transaction).not.toHaveBeenCalled();
+        expect(h.db.$executeRaw).not.toHaveBeenCalled();
+        expect(presets.createMany).not.toHaveBeenCalled();
+    });
+
+    it('marks an account that already has presets without reseeding', async () => {
+        presets.count.mockResolvedValue(3);
+
+        await getLibrary('u1');
+
+        expect(presets.createMany).not.toHaveBeenCalled();
+        expect(flags.upsert).toHaveBeenCalledTimes(1);
     });
 
     it('does not seed twice', async () => {

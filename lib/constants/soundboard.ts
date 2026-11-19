@@ -20,6 +20,7 @@ export const MAX_VOICES = 8;
 export const NONCE_LRU = 50;
 export const PAD_GUARD_MS = 250;
 export const PLAY_RATE_LIMIT = { limit: 20, windowSeconds: 10 };
+export const SOUND_INTAKE_RATE_LIMIT = { limit: 10, windowSeconds: 60 };
 
 const builtin = (slug: string, icon: string): BuiltinSound => ({
     id: `builtin:${slug}`,

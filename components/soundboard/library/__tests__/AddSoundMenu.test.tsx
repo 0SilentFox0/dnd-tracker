@@ -21,10 +21,8 @@ vi.mock('@/lib/hooks/soundboard', () => ({
     }),
     useLibraryMutations: () => ({
         upload: { mutateAsync: vi.fn() },
-        importLink: { mutateAsync: vi.fn() },
-        create: { mutateAsync: vi.fn() },
-        discard: { mutateAsync: vi.fn() },
     }),
+    useImportSoundLink: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/lib/hooks/common', async (orig) => ({

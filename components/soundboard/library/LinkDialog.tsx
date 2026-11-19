@@ -7,60 +7,42 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { MAX_SOUND_SECONDS } from '@/lib/constants/soundboard';
-import { useLibraryMutations } from '@/lib/hooks/soundboard';
+import { useImportSoundLink } from '@/lib/hooks/soundboard';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import { decodeDurationMs } from '@/lib/utils/soundboard/decode-duration';
 
 function LinkForm({ onClose }: { onClose: () => void }) {
     const t = useTranslations('soundboard');
 
     const tr = useTranslator();
 
-    const { importLink, create, discard } = useLibraryMutations();
+    const importLink = useImportSoundLink();
 
     const [url, setUrl] = useState('');
 
     const [error, setError] = useState<string | null>(null);
 
-    const [busy, setBusy] = useState(false);
+    const busy = importLink.isPending;
 
     const submit = async () => {
         const sourceUrl = url.trim();
 
         if (!sourceUrl) return;
 
-        setBusy(true);
         setError(null);
 
         try {
-            const imported = await importLink.mutateAsync(sourceUrl);
+            const { rejected } = await importLink.mutateAsync(sourceUrl);
 
-            let durationMs: number | null = null;
-
-            try {
-                durationMs = await decodeDurationMs(imported.url);
-            } catch {
-                durationMs = null;
-            }
-
-            if (durationMs === null || durationMs > MAX_SOUND_SECONDS * 1000) {
-                await discard.mutateAsync(imported.path).catch(() => {});
+            if (rejected) {
                 setError(
-                    durationMs === null
+                    rejected === 'invalid'
                         ? t('link.invalid')
                         : t('link.tooLong', { seconds: MAX_SOUND_SECONDS })
                 );
 
                 return;
             }
-
-            await create.mutateAsync({
-                path: imported.path,
-                durationMs,
-                source: 'link',
-                sourceUrl,
-            });
 
             onClose();
         } catch (e) {
@@ -69,8 +51,6 @@ function LinkForm({ onClose }: { onClose: () => void }) {
                     message: e instanceof Error ? e.message : 'link.invalid',
                 })
             );
-        } finally {
-            setBusy(false);
         }
     };
 

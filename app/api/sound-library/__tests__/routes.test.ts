@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import * as importLink from '@/lib/server/soundboard/import-link';
 import * as library from '@/lib/server/soundboard/library-store';
+import * as storage from '@/lib/supabase/soundboard-storage';
 import * as apiAuth from '@/lib/utils/api/api-auth';
 import { ContentError } from '@/lib/utils/api/content-error';
+import { checkRateLimit } from '@/lib/utils/api/rate-limit';
 
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireAuth: vi.fn() }));
 vi.mock('@/lib/server/soundboard/library-store', () => ({
@@ -14,6 +17,10 @@ vi.mock('@/lib/server/soundboard/library-store', () => ({
     updateLibrarySound: vi.fn(),
     deleteLibrarySound: vi.fn(),
     discardUploadedSound: vi.fn(),
+}));
+vi.mock('@/lib/utils/api/rate-limit', async (orig) => ({
+    ...(await orig<typeof import('@/lib/utils/api/rate-limit')>()),
+    checkRateLimit: vi.fn(),
 }));
 vi.mock('@/lib/server/soundboard/import-link', () => ({
     importSoundFromLink: vi.fn(),
@@ -37,6 +44,12 @@ beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(apiAuth.requireAuth).mockResolvedValue({ userId: 'u1' });
     vi.mocked(library.getLibrary).mockResolvedValue(LIBRARY);
+    vi.mocked(checkRateLimit).mockResolvedValue({
+        allowed: true,
+        count: 1,
+        limit: 10,
+        retryAfterSeconds: 0,
+    });
 });
 
 describe('unauthenticated', () => {
@@ -144,5 +157,44 @@ describe('discard', () => {
         expect((await POST(req('POST', { path: 'other/a.mp3' }))).status).toBe(
             403
         );
+    });
+});
+
+describe('intake rate limit', () => {
+    beforeEach(() => {
+        vi.mocked(checkRateLimit).mockResolvedValue({
+            allowed: false,
+            count: 11,
+            limit: 10,
+            retryAfterSeconds: 30,
+        });
+    });
+
+    it('import -> 429 without fetching', async () => {
+        const { POST } = await import('@/app/api/sound-library/import/route');
+
+        const res = await POST(req('POST', { url: 'https://a.b/c.mp3' }));
+
+        expect(res.status).toBe(429);
+        expect(checkRateLimit).toHaveBeenCalledWith(
+            expect.objectContaining({ userId: 'u1', scope: 'sound-import' })
+        );
+        expect(importLink.importSoundFromLink).not.toHaveBeenCalled();
+    });
+
+    it('upload-url -> 429 without issuing a ticket', async () => {
+        const { POST } = await import(
+            '@/app/api/sound-library/upload-url/route'
+        );
+
+        const res = await POST(
+            req('POST', { name: 'a.mp3', contentType: 'audio/mpeg', size: 10 })
+        );
+
+        expect(res.status).toBe(429);
+        expect(checkRateLimit).toHaveBeenCalledWith(
+            expect.objectContaining({ scope: 'sound-upload' })
+        );
+        expect(storage.createSoundUploadTicket).not.toHaveBeenCalled();
     });
 });

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { z } from 'zod';
 
+import { SOUND_INTAKE_RATE_LIMIT } from '@/lib/constants/soundboard';
 import {
     createLibrarySoundSchema,
     discardSoundSchema,
@@ -23,6 +24,7 @@ import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { ifNoneMatch, weakEtag } from '@/lib/utils/api/etag';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
 import { validateSoundFile } from '@/lib/utils/soundboard/validate-file';
 
 const REVALIDATE = 'private, max-age=0, must-revalidate';
@@ -40,6 +42,16 @@ async function withUser(
     } catch (error) {
         return handleApiError(error, { action });
     }
+}
+
+async function limited(userId: string, scope: string) {
+    const limit = await checkRateLimit({
+        userId,
+        scope,
+        ...SOUND_INTAKE_RATE_LIMIT,
+    });
+
+    return limit.allowed ? null : rateLimitResponse(limit);
 }
 
 async function withBody<T>(
@@ -107,6 +119,10 @@ export const issueUploadTicketHandler = (req: Request) =>
         req,
         soundUploadRequestSchema,
         async (userId, body) => {
+            const blocked = await limited(userId, 'sound-upload');
+
+            if (blocked) return blocked;
+
             const file = validateSoundFile({
                 name: body.name,
                 type: body.contentType,
@@ -124,8 +140,19 @@ export const issueUploadTicketHandler = (req: Request) =>
     );
 
 export const importLinkHandler = (req: Request) =>
-    withBody('import sound link', req, importLinkSchema, async (userId, body) =>
-        privateJson(await importSoundFromLink(userId, { url: body.url }))
+    withBody(
+        'import sound link',
+        req,
+        importLinkSchema,
+        async (userId, body) => {
+            const blocked = await limited(userId, 'sound-import');
+
+            if (blocked) return blocked;
+
+            return privateJson(
+                await importSoundFromLink(userId, { url: body.url })
+            );
+        }
     );
 
 export const discardSoundHandler = (req: Request) =>

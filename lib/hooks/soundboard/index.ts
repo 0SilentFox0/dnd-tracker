@@ -2,6 +2,7 @@ export { handleSoundPlayEvent, markLocalPlay } from './handle-play-event';
 export { soundKeys } from './keys';
 export { armUnlock, unlockSoundboard } from './player';
 export { useActivePreset } from './useActivePreset';
+export { useImportSoundLink } from './useImportSoundLink';
 export { useLibraryMutations } from './useLibraryMutations';
 export { usePresetMutations } from './usePresetMutations';
 export { useSoundboardKeys } from './useSoundboardKeys';

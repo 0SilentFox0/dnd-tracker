@@ -1,4 +1,7 @@
-import type { SoundLibraryItem, SoundPreset as PresetRow } from '@prisma/client';
+import type {
+    SoundLibraryItem,
+    SoundPreset as PresetRow,
+} from '@prisma/client';
 import { createHash } from 'node:crypto';
 
 import 'server-only';
@@ -68,22 +71,44 @@ const toRow = (row: SoundLibraryItem): LibrarySoundRow => ({
 const padSlots = (ids: readonly string[]): (string | null)[] =>
     Array.from({ length: PRESET_SLOTS }, (_, i) => ids[i] ?? null);
 
+const SEEDED_FLAG = 'sound-presets-seeded';
+
 async function seedStarterPresets(userId: string): Promise<void> {
+    const where = { userId_key: { userId, key: SEEDED_FLAG } };
+
+    const seeded = () =>
+        prisma.userOnboardingFlag.findUnique({ where, select: { id: true } });
+
+    if (await seeded()) return;
+
     await prisma.$transaction(async (tx) => {
         // serializes concurrent first reads of the same account
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sound-presets:${userId}`}))`;
+
+        if (
+            await tx.userOnboardingFlag.findUnique({
+                where,
+                select: { id: true },
+            })
+        )
+            return;
 
         const count = await tx.soundPreset.count({ where: { userId } });
 
-        if (count > 0) return;
+        if (count === 0)
+            await tx.soundPreset.createMany({
+                data: STARTER_PRESETS.map((preset, index) => ({
+                    userId,
+                    name: preset.nameKey,
+                    slots: padSlots(preset.ids),
+                    sortOrder: index,
+                })),
+            });
 
-        await tx.soundPreset.createMany({
-            data: STARTER_PRESETS.map((preset, index) => ({
-                userId,
-                name: preset.nameKey,
-                slots: padSlots(preset.ids),
-                sortOrder: index,
-            })),
+        await tx.userOnboardingFlag.upsert({
+            where,
+            create: { userId, key: SEEDED_FLAG, value: '1' },
+            update: { value: '1' },
         });
     });
 }

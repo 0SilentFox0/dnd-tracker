@@ -65,13 +65,19 @@ export async function uploadLibrarySoundFile(
         'soundboard.uploadFailed'
     );
 
-    return createLibrarySound({
-        path: ticket.path,
-        name: meta.name,
-        icon: meta.icon,
-        durationMs: Math.max(1, Math.round(meta.durationMs)),
-        source: meta.source ?? 'upload',
-    });
+    try {
+        return await createLibrarySound({
+            path: ticket.path,
+            name: meta.name,
+            icon: meta.icon,
+            durationMs: Math.max(1, Math.round(meta.durationMs)),
+            source: meta.source ?? 'upload',
+        });
+    } catch (e) {
+        await discardSoundObject(ticket.path).catch(() => {});
+
+        throw e;
+    }
 }
 
 export const createPreset = (name: string) =>

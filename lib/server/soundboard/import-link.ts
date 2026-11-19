@@ -1,17 +1,40 @@
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { MAX_LIBRARY_SOUNDS, MAX_SOUND_BYTES } from '@/lib/constants/soundboard';
+import {
+    MAX_LIBRARY_SOUNDS,
+    MAX_SOUND_BYTES,
+} from '@/lib/constants/soundboard';
 import { prisma } from '@/lib/db';
 import { uploadSoundBytes } from '@/lib/supabase/soundboard-storage';
 import { ContentError } from '@/lib/utils/api/content-error';
-import { safeFetchBytes } from '@/lib/utils/net/safe-fetch';
+import { safeFetchBuffer, SafeFetchError } from '@/lib/utils/api/safe-fetch';
 import { sniffAudioFormat } from '@/lib/utils/soundboard/sniff-audio';
 
-const FETCH_LIMITS = {
-    maxBytes: MAX_SOUND_BYTES,
-    timeoutMs: 8000,
-    maxRedirects: 3,
-};
+const FETCH_LIMITS = { maxBytes: MAX_SOUND_BYTES, timeoutMs: 8000 };
+
+async function fetchBytes(url: string): Promise<Uint8Array> {
+    try {
+        const res = await safeFetchBuffer(url, FETCH_LIMITS);
+
+        if (res.status < 200 || res.status >= 300)
+            throw new ContentError(API_ERRORS.SOUND_LINK_INVALID, 400);
+
+        return res.body;
+    } catch (e) {
+        if (e instanceof ContentError) throw e;
+
+        const tooLarge =
+            e instanceof SafeFetchError &&
+            e.message === API_ERRORS.SAFE_FETCH_TOO_LARGE;
+
+        throw new ContentError(
+            tooLarge
+                ? API_ERRORS.SOUND_LINK_TOO_LARGE
+                : API_ERRORS.SOUND_LINK_INVALID,
+            400
+        );
+    }
+}
 
 export async function importSoundFromLink(
     userId: string,
@@ -24,15 +47,13 @@ export async function importSoundFromLink(
             max: MAX_LIBRARY_SOUNDS,
         });
 
-    const fetched = await safeFetchBytes(input.url, FETCH_LIMITS);
+    const bytes = await fetchBytes(input.url);
 
-    if (!fetched.ok) throw new ContentError(fetched.message, 400);
-
-    const format = sniffAudioFormat(fetched.value.bytes);
+    const format = sniffAudioFormat(bytes);
 
     if (!format) throw new ContentError(API_ERRORS.SOUND_FILE_INVALID, 400);
 
-    const stored = await uploadSoundBytes(userId, format, fetched.value.bytes);
+    const stored = await uploadSoundBytes(userId, format, bytes);
 
     if (!stored.ok) throw new ContentError(API_ERRORS.INTERNAL, 500);
 

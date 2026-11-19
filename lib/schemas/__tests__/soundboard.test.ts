@@ -51,10 +51,14 @@ describe('soundboard schemas', () => {
         expect(updatePresetSchema.safeParse({ name: 'x' }).success).toBe(true);
     });
 
-    it('importLinkSchema accepts http(s) only and caps length', () => {
+    it('importLinkSchema accepts https only and caps length', () => {
         expect(importLinkSchema.safeParse({ url: 'ftp://x' }).success).toBe(
             false
         );
+        expect(
+            importLinkSchema.safeParse({ url: 'http://example.com/a.mp3' })
+                .success
+        ).toBe(false);
         expect(
             importLinkSchema.safeParse({
                 url: `https://example.com/${'a'.repeat(3000)}`,

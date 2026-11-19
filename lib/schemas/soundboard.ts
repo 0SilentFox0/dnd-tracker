@@ -41,7 +41,9 @@ export const createLibrarySoundSchema = z.object({
     sourceUrl: z.string().url().max(2048).optional(),
 });
 
-export const discardSoundSchema = z.object({ path: z.string().min(1).max(200) });
+export const discardSoundSchema = z.object({
+    path: z.string().min(1).max(200),
+});
 
 export const updateLibrarySoundSchema = z
     .object({
@@ -58,9 +60,7 @@ export const importLinkSchema = z.object({
         .string()
         .url()
         .max(2048)
-        .refine((u) => /^https?:\/\//i.test(u)),
-    name: soundNameSchema.optional(),
-    icon: styleSchema.optional(),
+        .refine((u) => /^https:\/\//i.test(u)),
 });
 
 export const presetNameSchema = z.string().trim().min(1).max(PRESET_NAME_MAX);

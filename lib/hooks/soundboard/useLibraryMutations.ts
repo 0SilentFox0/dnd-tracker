@@ -5,8 +5,6 @@ import { soundKeys } from './keys';
 import {
     createLibrarySound,
     deleteLibrarySound,
-    discardSoundObject,
-    importSoundLink,
     updateLibrarySound,
     uploadLibrarySoundFile,
 } from '@/lib/api/sound-library';
@@ -54,13 +52,5 @@ export function useLibraryMutations() {
         invalidateKeys,
     });
 
-    const importLink = useCrudMutation({
-        mutationFn: (url: string) => importSoundLink(url),
-    });
-
-    const discard = useCrudMutation({
-        mutationFn: (path: string) => discardSoundObject(path),
-    });
-
-    return { upload, create, update, remove, importLink, discard };
+    return { upload, create, update, remove };
 }
