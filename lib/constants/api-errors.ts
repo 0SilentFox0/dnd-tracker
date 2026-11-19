@@ -134,6 +134,7 @@ export const API_ERRORS = {
     ACTION_USED: 'errors.actionUsed',
     BONUS_ACTION_USED: 'errors.bonusActionUsed',
     OFF_HAND_NOT_ALLOWED: 'errors.offHandNotAllowed',
+    BOUND_ATTACK_WEAPON: 'errors.boundAttackWeapon',
     OFF_HAND_NEEDS_ATTACK: 'errors.offHandNeedsAttack',
     OFF_HAND_NOT_LIGHT: 'errors.offHandNotLight',
     OFF_HAND_NOT_MELEE: 'errors.offHandNotMelee',

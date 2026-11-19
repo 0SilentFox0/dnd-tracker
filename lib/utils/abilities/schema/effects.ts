@@ -16,6 +16,7 @@ import {
     DAMAGE_FILTER_KINDS,
     DICE_RE,
     MANEUVERS,
+    SAVE_SOURCE_TAGS,
     STAT_KEYS,
     type StatKey,
 } from './kinds';
@@ -255,6 +256,12 @@ const FlagSchema = z.discriminatedUnion('flag', [
         flag: z.literal('saveAdvantage'),
         abilities: AbilitiesOrAll,
         vsSpells: z.boolean().optional(),
+        vsTags: z.array(z.enum(SAVE_SOURCE_TAGS)).min(1).optional(),
+        vsCreatureTypes: z
+            .array(z.string().trim().min(1).max(60))
+            .min(1)
+            .max(20)
+            .optional(),
     }),
     z.object({
         ...flagBase,
@@ -312,6 +319,7 @@ const GrantActionSchema = z
     .object({
         kind: z.literal('grantAction'),
         extraActions: z.number().int().min(1).optional(),
+        itemAttacks: z.number().int().min(1).max(4).optional(),
         free: z.literal(true).optional(),
         refreshAction: z.boolean().optional(),
         refreshBonusAction: z.boolean().optional(),
@@ -321,6 +329,7 @@ const GrantActionSchema = z
     .refine(
         (e) =>
             e.extraActions ||
+            e.itemAttacks ||
             e.refreshAction ||
             e.refreshBonusAction ||
             e.refreshReaction,
@@ -450,6 +459,12 @@ const CleanseSchema = z.object({
     ...target,
 });
 
+const RemoveMarkSchema = z.object({
+    kind: z.literal('removeMark'),
+    markId: z.string().min(1),
+    ...target,
+});
+
 const GuardSchema = z.object({
     kind: z.literal('guard'),
     percent: z.number().int().min(1).max(100),
@@ -532,6 +547,7 @@ export const BASE_EFFECTS = [
     DrainSpellSlotSchema,
     CleanseSchema,
     MarkSchema,
+    RemoveMarkSchema,
     CopySpellBuffsSchema,
     GuardSchema,
     SummonSchema,

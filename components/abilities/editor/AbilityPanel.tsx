@@ -10,6 +10,7 @@ import { ConditionSection } from '../sections/ConditionSection';
 import { EffectsSection } from '../sections/EffectsSection';
 import { LimitsSection } from '../sections/LimitsSection';
 import { PerformSection } from '../sections/PerformSection';
+import { SaveSection } from '../sections/SaveSection';
 import { sectionId } from '../sections/SectionShell';
 import { TriggerSection } from '../sections/TriggerSection';
 import { useErrorsUnder } from './editor-context';
@@ -230,6 +231,7 @@ export function AbilityPanel({
             <TriggerSection {...section} state={stateOf('when')} />
             <ConditionSection {...section} state={stateOf('if')} />
             <LimitsSection {...section} state={stateOf('limits')} />
+            <SaveSection {...section} />
             <PerformSection {...section} />
             <EffectsSection {...section} state={stateOf('then')} />
         </div>

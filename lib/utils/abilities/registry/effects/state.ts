@@ -30,6 +30,7 @@ import {
     segmentsLine,
 } from '@/lib/utils/abilities/segments';
 import { helpEffect } from '@/lib/utils/battle/actions/effects';
+import { grantBoundAttacks } from '@/lib/utils/battle/attack/attacks-left';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import type { ConditionKey } from '@/lib/utils/battle/conditions/set';
 import { dieSizeOf, HELD_DIE_EFFECT } from '@/lib/utils/battle/d20-rider/held';
@@ -176,7 +177,26 @@ export function applyGrantAction(
     return each(
         input,
         (p) => {
-            const extra = grantExtraActions(p, effect.extraActions ?? 0);
+            if (
+                effect.itemAttacks &&
+                !ability.source.id &&
+                !effect.extraActions &&
+                !effect.refreshAction &&
+                !effect.refreshBonusAction &&
+                !effect.refreshReaction
+            )
+                return null;
+
+            const bound =
+                effect.itemAttacks && ability.source.id
+                    ? grantBoundAttacks(
+                          p,
+                          ability.source.id,
+                          effect.itemAttacks
+                      )
+                    : p;
+
+            const extra = grantExtraActions(bound, effect.extraActions ?? 0);
 
             const granted = effect.refreshReaction
                 ? resetSystemState(extra, 'reaction', ctx.rules)
@@ -369,6 +389,9 @@ export function describeGrantAction(e: Of<'grantAction'>): Segment[] {
         e.extraActions
             ? seg('summary.effects.grantExtra', { n: e.extraActions })
             : null,
+        e.itemAttacks
+            ? seg('summary.effects.grantItemAttacks', { n: e.itemAttacks })
+            : null,
         e.refreshAction ? seg('summary.effects.grantRefreshAction') : null,
         e.refreshBonusAction
             ? seg('summary.effects.grantRefreshBonusAction')
@@ -437,6 +460,29 @@ export function applyMark(
                 target: names,
                 hasCount: flag(counts.length === 1),
                 count: counts[0] ?? '',
+            })
+    );
+}
+
+export function applyRemoveMark(
+    input: EffectApplyInput<Of<'removeMark'>>
+): EffectApplyResult {
+    const { ability, effect } = input;
+
+    return each(
+        input,
+        (p) => {
+            const { participant, removed } = removeEffects(
+                p,
+                (e) => e.abilityKey === markKey(effect.markId)
+            );
+
+            return removed.length ? participant : null;
+        },
+        (names) =>
+            textRef('abilityText.log.removeMark', {
+                ability: ability.name,
+                target: names,
             })
     );
 }

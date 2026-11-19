@@ -1,5 +1,6 @@
 import type { AbilityKey } from '@/lib/constants/abilities';
 import type { DndSkill } from '@/lib/constants/skills';
+import type { SaveSourceTag } from '@/lib/utils/abilities/schema/kinds';
 import type { RiderPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -10,6 +11,11 @@ export type D20Mode = 'advantage' | 'disadvantage' | 'normal';
 
 export type SaveRollMode = D20Mode;
 
+export interface SaveSource {
+    tags?: readonly SaveSourceTag[];
+    creatureType?: string | null;
+}
+
 export interface SaveRollInput {
     target: BattleParticipant;
     ability: AbilityKey;
@@ -19,6 +25,7 @@ export interface SaveRollInput {
     rng: () => number;
     presetRoll?: number;
     vsSpell?: boolean;
+    source?: SaveSource;
     advantage?: boolean;
     rider?: RiderPicker;
 }

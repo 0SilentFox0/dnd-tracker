@@ -66,6 +66,7 @@ const BASE_EFFECTS: Record<
             { kind: 'dealDamage', amount: 4 },
         ],
     },
+    removeMark: { kind: 'removeMark', markId: 'prey' },
 };
 
 const FLAG_OVERRIDES: Partial<Record<FlagKey, Record<string, unknown>>> = {

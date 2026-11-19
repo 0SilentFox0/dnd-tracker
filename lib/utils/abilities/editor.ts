@@ -98,6 +98,7 @@ const BASE_DEFAULTS: {
     },
     drainSpellSlot: { count: 1, target: 'eventTarget' },
     cleanse: {},
+    removeMark: { markId: 'mark', target: 'self' },
     copySpellBuffs: {},
     summon: { tier: 1 },
     raiseDead: { hpPercent: 50, target: 'eventTarget' },

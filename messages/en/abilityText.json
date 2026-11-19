@@ -18,6 +18,8 @@
     "drainSlot": "🔮 {target} loses a slot{hasLevel, select, true { of level {level}} other {}}",
     "morale": "📊 {ability}: {target} morale {delta}",
     "cleanse": "✨ {ability}: {conditions, select, true {debuffs and conditions} other {debuffs}} removed from {target}",
+    "initialSave": "⚔️ {name}: {target} — {ability} save {total} vs DC {dc} — {success, select, true {success} other {failed}}",
+    "removeMark": "🎯 {ability}: mark removed from {target}",
     "mark": "🎯 {ability}: {target} — mark{hasCount, select, true { ({count})} other {}}",
     "guard": "🛡 {ability}: {target} — guard {percent}% ({rounds})",
     "cancelsEffect": "⚖️ {ability} removes «{effect}» → {target}",

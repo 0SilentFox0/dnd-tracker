@@ -13,7 +13,7 @@ import type {
     CoreActionAvailability,
     CoreActionDef,
 } from '@/lib/utils/battle/actions/types';
-import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
+import { hasPoolAttack } from '@/lib/utils/battle/attack/attacks-left';
 import { hasCondition } from '@/lib/utils/battle/conditions/query';
 import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
 import { bothOnMap } from '@/lib/utils/battle/grid/occupancy';
@@ -144,7 +144,7 @@ export function coreActionAvailability(
     if (
         cost === 'action' &&
         actor.actionFlags.hasUsedAction &&
-        !(isAttackAction(key) && canAttackFromPool(actor))
+        !(isAttackAction(key) && hasPoolAttack(actor))
     )
         return { ok: false, reason: actionReason('actionUsed') };
 

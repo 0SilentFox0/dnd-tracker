@@ -37,6 +37,7 @@ const CONVERTED_KINDS = new Set([
     'drainSpellSlot',
     'changeMorale',
     'mark',
+    'removeMark',
     'copySpellBuffs',
     'guard',
     'cleanse',

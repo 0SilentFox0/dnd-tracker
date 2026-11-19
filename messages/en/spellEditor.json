@@ -56,6 +56,7 @@
     "zoneLabel": "Label",
     "check": "Check",
     "saveAbility": "Ability (DC = 8 + mastery + caster modifier)",
+    "breathWeapon": "Breath weapon",
     "onSuccess": "On success",
     "fixedDice": "Fixed dice",
     "damageBonus": "Damage / healing bonus",

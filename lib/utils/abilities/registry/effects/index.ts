@@ -40,6 +40,7 @@ import {
     applyGuard,
     applyHelp,
     applyMark,
+    applyRemoveMark,
     applyRestoreSpellSlot,
     describeGrantAction,
 } from './state';
@@ -322,6 +323,7 @@ const BASE_EFFECT_REGISTRY: {
         static: false,
         fields: [
             { name: 'extraActions', input: 'number', optional: true },
+            { name: 'itemAttacks', input: 'number', optional: true },
             { name: 'free', input: 'toggle', optional: true },
             { name: 'refreshAction', input: 'toggle', optional: true },
             { name: 'refreshBonusAction', input: 'toggle', optional: true },
@@ -379,6 +381,13 @@ const BASE_EFFECT_REGISTRY: {
             }),
         ],
         apply: applyMark,
+    },
+    removeMark: {
+        kind: 'removeMark',
+        static: false,
+        fields: [{ name: 'markId', input: 'text' }, TARGET_FIELD],
+        describe: () => [seg('summary.effects.removeMark')],
+        apply: applyRemoveMark,
     },
     copySpellBuffs: {
         kind: 'copySpellBuffs',

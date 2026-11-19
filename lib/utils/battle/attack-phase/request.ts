@@ -7,7 +7,11 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import { assertAttackAllowed } from '@/lib/utils/battle/attack/assert-allowed';
-import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
+import {
+    canAttackWithBound,
+    hasBoundAttack,
+    hasPoolAttack,
+} from '@/lib/utils/battle/attack/attacks-left';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import {
     type ActorScope,
@@ -193,14 +197,20 @@ export function validateAttackRequest(
             API_ERRORS.OFF_HAND_NOT_ALLOWED
         );
 
+    const attack = findAttack(attacker, data.attackId, data.offHand);
+
     if (
         !data.offHand &&
         attacker.actionFlags.hasUsedAction &&
-        !canAttackFromPool(attacker)
+        !hasPoolAttack(attacker) &&
+        !(attack && canAttackWithBound(attacker, attack))
     )
-        throw new BattleRuleError('action_used', API_ERRORS.ACTION_USED);
-
-    const attack = findAttack(attacker, data.attackId, data.offHand);
+        throw hasBoundAttack(attacker)
+            ? new BattleRuleError(
+                  'action_rejected',
+                  API_ERRORS.BOUND_ATTACK_WEAPON
+              )
+            : new BattleRuleError('action_used', API_ERRORS.ACTION_USED);
 
     if (!attack)
         throw new BattleRuleError(

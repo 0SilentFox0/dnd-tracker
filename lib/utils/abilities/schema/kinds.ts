@@ -12,6 +12,10 @@ import {
 
 export const DICE_RE = DICE_PATTERN;
 
+export const SAVE_SOURCE_TAGS = ['breath'] as const;
+
+export type SaveSourceTag = (typeof SAVE_SOURCE_TAGS)[number];
+
 export const MANEUVERS = ['dive', 'squall', 'fireBurst'] as const;
 
 export const ABILITY_TARGETS = [

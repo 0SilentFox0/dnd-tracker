@@ -1,4 +1,8 @@
-import { spendFromPool } from './attacks-left';
+import {
+    canAttackWithBound,
+    spendBoundAttack,
+    spendFromPool,
+} from './attacks-left';
 
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -15,7 +19,9 @@ export function spendAttack(
     attack: BattleAttack,
     rules: Ruleset
 ): BattleParticipant {
-    const next = spendFromPool(p, participants);
+    const next = canAttackWithBound(p, attack)
+        ? spendBoundAttack(p, attack)
+        : spendFromPool(p, participants);
 
     return (
         ruleSystemOf(rules).combat.secondaryAttack?.arm(next, attack) ?? next

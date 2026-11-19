@@ -440,6 +440,10 @@ export function resolveOutcome(
             presetRoll: state.saveRolls.find((s) => s.participantId === id)
                 ?.roll,
             vsSpell: true,
+            source: {
+                tags: def.resolution.tags,
+                creatureType: state.caster.abilities.creatureType,
+            },
             rider: flow.ctx.crit?.rider,
         });
 

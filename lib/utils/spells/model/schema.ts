@@ -8,7 +8,10 @@ import {
     NonRandomEffectSchema,
     RandomOfSchema,
 } from '@/lib/utils/abilities/schema/effects';
-import { DICE_RE } from '@/lib/utils/abilities/schema/kinds';
+import {
+    DICE_RE,
+    SAVE_SOURCE_TAGS,
+} from '@/lib/utils/abilities/schema/kinds';
 
 export const SPELL_COSTS = [
     'action',
@@ -159,6 +162,7 @@ export const SpellResolutionSchema = z.discriminatedUnion('kind', [
         ability: z.enum(ABILITY_KEYS),
         orAbility: z.enum(ABILITY_KEYS).optional(),
         onSuccess: z.enum(['half', 'none']),
+        tags: z.array(z.enum(SAVE_SOURCE_TAGS)).min(1).optional(),
     }),
     z.object({ kind: z.literal('attack') }),
 ]);

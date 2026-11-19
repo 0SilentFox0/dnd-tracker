@@ -1,3 +1,4 @@
+import { rollInitialSaves } from './initial-save';
 import {
     findParticipant,
     inPlay,
@@ -52,6 +53,24 @@ function canAct(owner: BattleParticipant, event: AbilityEvent): boolean {
         inPlay(owner) ||
         (event.type === 'lethalDamage' && event.targetId === owner.basicInfo.id)
     );
+}
+
+// A self-targeted effect must test the creature type of the event's target, not the owner's own
+function perTargetEvent(
+    event: AbilityEvent,
+    id: string,
+    ownerId: string
+): AbilityEvent {
+    const targeted =
+        'targetIds' in event
+            ? event.targetIds
+            : 'targetId' in event
+              ? [event.targetId]
+              : null;
+
+    return id === ownerId && targeted?.length && !targeted.includes(ownerId)
+        ? event
+        : conditionEventForTarget(event, id);
 }
 
 export function runAbilities(
@@ -128,7 +147,7 @@ export function runAbilities(
                             !ability.condition ||
                             evaluateCondition(ability.condition, {
                                 owner,
-                                event: conditionEventForTarget(event, id),
+                                event: perTargetEvent(event, id, ownerId),
                                 participants: ps,
                                 sourceId: ability.source.id,
                                 adjacent: adjacencyOf(ctx.map),
@@ -166,12 +185,28 @@ export function runAbilities(
             );
             fired.push(ability.key);
 
+            let failed: Set<string> | null = null;
+
+            if (ability.save) {
+                const saved = rollInitialSaves(
+                    ability,
+                    ownerId,
+                    effects.flatMap(({ targetIds }) => targetIds),
+                    ps,
+                    ctx
+                );
+
+                failed = saved.failed;
+                ps = saved.participants;
+                messages.push(...saved.messages);
+            }
+
             for (const {
                 effectIndex,
                 effect,
                 targetIds: filteredIds,
             } of effects) {
-                const targetIds = perTarget
+                const resolvedIds = perTarget
                     ? filteredIds
                     : resolveTargetIds(
                           'target' in effect ? effect.target : undefined,
@@ -180,6 +215,10 @@ export function runAbilities(
                           ps,
                           ctx
                       );
+
+                const targetIds = failed
+                    ? resolvedIds.filter((id) => id === ownerId || failed.has(id))
+                    : resolvedIds;
 
                 const r = applyEffect({
                     participants: ps,

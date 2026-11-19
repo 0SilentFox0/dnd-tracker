@@ -352,6 +352,8 @@ export interface BattleParticipantBattleData {
     artifactSets?: SetProgress[];
     pendingExtraActions?: number;
     attacksLeft?: number;
+    /** Attacks usable only with the item `sourceId`; cleared at turn reset */
+    boundAttacks?: { sourceId: string; left: number }[];
     /** The participant lies at 0 HP rolling death saves; set by the system together with its slot */
     dying?: true;
     summonedBy?: string;

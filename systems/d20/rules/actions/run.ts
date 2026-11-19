@@ -27,7 +27,7 @@ import type {
     RunCoreActionResult,
 } from '@/lib/utils/battle/actions/types';
 import {
-    canAttackFromPool,
+    hasPoolAttack,
     spendFromPool,
 } from '@/lib/utils/battle/attack/attacks-left';
 import { removeEffects } from '@/lib/utils/battle/conditions';
@@ -53,7 +53,7 @@ function spendAction(
     const attack = isAttackAction(key);
 
     if (
-        !(attack && canAttackFromPool(actor)) &&
+        !(attack && hasPoolAttack(actor)) &&
         actor.actionFlags.hasUsedAction
     )
         throw ruleErrorOf('action_used', actionReason('actionUsed'));

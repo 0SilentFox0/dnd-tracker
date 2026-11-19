@@ -1,7 +1,8 @@
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
+import { attackSourceOf } from '@/lib/utils/battle/attack/source';
 import { applyMainActionUsed } from '@/lib/utils/battle/participant/helpers';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 export function attacksPerAction(
     p: BattleParticipant,
@@ -33,8 +34,74 @@ export function attacksPerAction(
     );
 }
 
-export const canAttackFromPool = (p: BattleParticipant): boolean =>
+export const hasPoolAttack = (p: BattleParticipant): boolean =>
     (p.battleData.attacksLeft ?? 0) > 0;
+
+export const hasBoundAttack = (p: BattleParticipant): boolean =>
+    (p.battleData.boundAttacks ?? []).some((b) => b.left > 0);
+
+export const canAttackFromPool = (p: BattleParticipant): boolean =>
+    hasPoolAttack(p) || hasBoundAttack(p);
+
+/** Index of the bound entry this attack may spend, or -1 */
+export function boundAttackFor(
+    p: BattleParticipant,
+    attack: BattleAttack
+): number {
+    const { attackSourceId } = attackSourceOf(attack);
+
+    return attackSourceId
+        ? (p.battleData.boundAttacks ?? []).findIndex(
+              (b) => b.sourceId === attackSourceId && b.left > 0
+          )
+        : -1;
+}
+
+export const canAttackWithBound = (
+    p: BattleParticipant,
+    attack: BattleAttack
+): boolean => boundAttackFor(p, attack) >= 0;
+
+export function grantBoundAttacks(
+    p: BattleParticipant,
+    sourceId: string,
+    n: number
+): BattleParticipant {
+    const list = p.battleData.boundAttacks ?? [];
+
+    const found = list.find((b) => b.sourceId === sourceId);
+
+    return {
+        ...p,
+        battleData: {
+            ...p.battleData,
+            boundAttacks: found
+                ? list.map((b) =>
+                      b === found ? { ...b, left: b.left + n } : b
+                  )
+                : [...list, { sourceId, left: n }],
+        },
+    };
+}
+
+export function spendBoundAttack(
+    p: BattleParticipant,
+    attack: BattleAttack
+): BattleParticipant {
+    const index = boundAttackFor(p, attack);
+
+    const left = (p.battleData.boundAttacks ?? [])
+        .map((b, i) => (i === index ? { ...b, left: b.left - 1 } : b))
+        .filter((b) => b.left > 0);
+
+    return {
+        ...p,
+        battleData: {
+            ...p.battleData,
+            boundAttacks: left.length ? left : undefined,
+        },
+    };
+}
 
 export function attackCounter(
     p: BattleParticipant,
@@ -61,7 +128,7 @@ export function spendFromPool(
     p: BattleParticipant,
     participants: BattleParticipant[]
 ): BattleParticipant {
-    return canAttackFromPool(p)
+    return hasPoolAttack(p)
         ? {
               ...p,
               battleData: {

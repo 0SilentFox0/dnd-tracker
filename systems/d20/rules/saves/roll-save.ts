@@ -4,6 +4,7 @@ import {
     type ModifierResult,
 } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
+import type { SaveSourceTag } from '@/lib/utils/abilities/schema/kinds';
 import { uniqueLines } from '@/lib/utils/battle/log/lines';
 import {
     ARMOR_PENALTY_LABEL,
@@ -14,6 +15,7 @@ import type {
     SaveRollInput,
     SaveRollMode,
     SaveRollResult,
+    SaveSource,
 } from '@/lib/utils/battle/saves/types';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { rollD20WithMode } from '@/systems/d20/rules/dice/roll-d20';
@@ -39,11 +41,28 @@ const saveFlagEntries = (
     id: string
 ): SaveFlagEntries => collectModifiers(ps, id, { flags: SAVE_FLAGS }).entries;
 
+function matchesSource(
+    flag: { vsTags?: readonly SaveSourceTag[]; vsCreatureTypes?: string[] },
+    source?: SaveSource
+): boolean {
+    if (flag.vsTags && !flag.vsTags.some((t) => source?.tags?.includes(t)))
+        return false;
+
+    if (!flag.vsCreatureTypes) return true;
+
+    const type = source?.creatureType?.trim().toLowerCase();
+
+    return (
+        !!type && flag.vsCreatureTypes.some((t) => t.trim().toLowerCase() === type)
+    );
+}
+
 function modeFrom(
     entries: SaveFlagEntries,
     ability: AbilityKey,
     vsSpell?: boolean,
-    armorBlocked = false
+    armorBlocked = false,
+    source?: SaveSource
 ): {
     mode: SaveRollMode;
     autoFail: boolean;
@@ -54,7 +73,8 @@ function modeFrom(
             (e) =>
                 e.flag?.flag === 'saveAdvantage' &&
                 covers(e.flag.abilities, ability) &&
-                (!e.flag.vsSpells || vsSpell)
+                (!e.flag.vsSpells || vsSpell) &&
+                matchesSource(e.flag, source)
         )
         .map((e) => e.label);
 
@@ -98,7 +118,7 @@ export function saveRollMode(
     target: BattleParticipant,
     ability: AbilityKey,
     participants: BattleParticipant[],
-    opts: { vsSpell?: boolean } = {}
+    opts: { vsSpell?: boolean; source?: SaveSource } = {}
 ): {
     mode: SaveRollMode;
     autoFail: boolean;
@@ -108,7 +128,8 @@ export function saveRollMode(
         saveFlagEntries(withSelf(participants, target), target.basicInfo.id),
         ability,
         opts.vsSpell,
-        armorPenalty(target)
+        armorPenalty(target),
+        opts.source
     );
 }
 
@@ -159,6 +180,7 @@ export function rollSave(input: SaveRollInput): SaveRollResult {
         rng,
         presetRoll,
         vsSpell,
+        source,
         rider: pickRider,
     } = input;
 
@@ -168,7 +190,13 @@ export function rollSave(input: SaveRollInput): SaveRollResult {
 
     const entries = saveFlagEntries(ps, target.basicInfo.id);
 
-    const sm = modeFrom(entries, ability, vsSpell, armorPenalty(target));
+    const sm = modeFrom(
+        entries,
+        ability,
+        vsSpell,
+        armorPenalty(target),
+        source
+    );
 
     const mode: SaveRollMode = input.advantage
         ? sm.reasons.disadvantage.length > 0

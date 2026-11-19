@@ -114,6 +114,7 @@
   "grantNoSlot": "This spell needs no slot",
   "actionUsed": "This turn's action has already been used",
   "bonusActionUsed": "This turn's bonus action has already been used",
+  "boundAttackWeapon": "The extra attack can only be made with the weapon that grants it",
   "offHandNotAllowed": "Off-hand attack is only available to 5e heroes",
   "offHandNeedsAttack": "First attack with the Attack action using a light melee weapon",
   "offHandNotLight": "The off-hand weapon must be light",

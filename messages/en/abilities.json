@@ -78,6 +78,13 @@
     "title": "When",
     "event": "Event"
   },
+  "save": {
+    "title": "Initial saving throw",
+    "abilityAria": "Saving throw ability",
+    "dcAria": "Saving throw DC",
+    "none": "No saving throw",
+    "hint": "Each target other than the owner rolls once; on a success none of the effects apply to it."
+  },
   "perform": {
     "title": "Performs",
     "kindAria": "Performs",
@@ -151,6 +158,7 @@
     "durationRequired": "A duration is required (without it — only in the before phase)",
     "passiveNoLimits": "A passive has no limits",
     "maxStacksNeedsStackable": "maxStacks only makes sense with stackable",
+    "savePassive": "An initial saving throw is not available for a passive ability",
     "maxTargetsTrigger": "maxTargets is available only for a bonus action and an action",
     "legendaryAction": "A legendary action is only for an action ability without a cell aim",
     "lairAction": "A lair action is only for an action ability without a legendary cost and aim",

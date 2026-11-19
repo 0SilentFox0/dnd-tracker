@@ -65,6 +65,9 @@
     "mark": {
       "label": "Мітка на ціль"
     },
+    "removeMark": {
+      "label": "Зняти мітку"
+    },
     "copySpellBuffs": {
       "label": "Копіювати бафи закляття союзника"
     },
@@ -578,6 +581,7 @@
     "saveEnds": "Рятівний кидок наприкінці ходу",
     "breakOnDamage": "Знімається при отриманні шкоди",
     "extraActions": "Додаткові дії",
+    "itemAttacks": "Додаткові атаки лише цим предметом",
     "refreshAction": "Оновити дію",
     "refreshBonusAction": "Оновити бонусну дію",
     "refreshReaction": "Оновити реакцію",
@@ -612,6 +616,8 @@
     "value": "Мінімум (−3…3)",
     "size": "Конус, фт",
     "abilities": "Характеристики",
+    "vsTags": "Лише проти цих джерел",
+    "vsCreatureTypes": "Лише проти типів істот",
     "vsSpells": "Лише проти заклинань",
     "whileTempHp": "Лише поки лишаються тимчасові HP",
     "upcastDamage": "Шкода за кожен рівень комірки понад базовий",
@@ -727,6 +733,9 @@
       "advantage": "перевага",
       "disadvantage": "недолік",
       "normal": "звичайний"
+    },
+    "vsTags": {
+      "breath": "подих"
     },
     "attackKinds": {
       "melee": "ближня",
@@ -1092,6 +1101,7 @@
       "damageBonus": "шкода ({filter}{hasSchool, select, yes {, школа} other {}}) {value}{hasMark, select, yes { за мітку «{mark}»} other {}}",
       "grantAction": "{parts}",
       "grantExtra": "+{n} дія",
+      "grantItemAttacks": "+{n} атака цією зброєю",
       "grantRefreshAction": "оновлює дію",
       "grantRefreshBonusAction": "оновлює бонусну дію",
       "grantRefreshReaction": "оновлює реакцію",
@@ -1103,6 +1113,7 @@
       "drainSpellSlot": "−{count} слот заклинань",
       "changeMorale": "мораль {delta}",
       "mark": "мітка × {rounds}",
+      "removeMark": "знімає мітку",
       "copySpellBuffs": "копіює бафи закляття, накладені на союзника",
       "guard": "захист: {percent}% шкоди від атак × {rounds}",
       "cleanse": "{includeConditions, select, yes {зняття дебафів і станів} other {зняття дебафів}}",
@@ -1146,7 +1157,7 @@
       "piercingShot": "дальня атака влучає в усіх ворогів на лінії за ціллю",
       "fireWave": "влучання обпікає ворогів позаду цілі (конус {size} фт): {percent}% шкоди вогнем",
       "banishSummons": "прикликані ворогом істоти втрачають {percent}% HP",
-      "saveAdvantage": "перевага на рятівні кидки{hasList, select, yes { ({list})} other {}}{vsSpells, select, yes { проти заклинань} other {}}",
+      "saveAdvantage": "перевага на рятівні кидки{hasList, select, yes { ({list})} other {}}{vsSpells, select, yes { проти заклинань} other {}}{hasTags, select, yes { проти: {tags}} other {}}{hasTypes, select, yes { від істот: {types}} other {}}",
       "saveDisadvantage": "недолік на рятівні кидки{hasList, select, yes { ({list})} other {}}",
       "autoFailSave": "автопровал рятівних кидків{hasList, select, yes { ({list})} other {}}",
       "saveProficiency": "майстерність в рятівних кидках{hasList, select, yes { ({list})} other {}}",
@@ -1194,6 +1205,7 @@
       "weaponTrait": "властивість зброї: {traits}",
       "targetDead": "ціль мертва",
       "actorIsEnemy": "виконавець події — ворог",
+      "initialSave": "цілі кидають рятівний кидок {ability} проти СК {dc}",
       "hasMark": "мітка «{markId}»{bySelf, select, yes { (лише моя)} other {}}: {who}",
       "armorWorn": "броня на мені: {categories}{shield, select, with { (зі щитом)} without { (без щита)} other {}}",
       "armorKinds": {

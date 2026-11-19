@@ -298,12 +298,28 @@ const BASE_FLAG_REGISTRY: {
                 options: SAVE_ABILITY_OPTIONS,
             },
             { name: 'vsSpells', input: 'toggle', optional: true },
+            {
+                name: 'vsTags',
+                input: 'multiselect',
+                optional: true,
+                options: [{ value: 'breath' }],
+            },
+            { name: 'vsCreatureTypes', input: 'strings', optional: true },
         ],
         defaults: { abilities: 'all' },
         describe: (e) => [
             flagSeg('saveAdvantage', {
                 ...listParams('abilities', e.abilities),
                 vsSpells: e.vsSpells ? 'yes' : 'no',
+                hasTags: e.vsTags ? 'yes' : 'no',
+                ...(e.vsTags && {
+                    tags: {
+                        join: ', ',
+                        items: e.vsTags.map((k) => seg(`options.vsTags.${k}`)),
+                    },
+                }),
+                hasTypes: e.vsCreatureTypes ? 'yes' : 'no',
+                ...(e.vsCreatureTypes && { types: e.vsCreatureTypes.join(', ') }),
             }),
         ],
     },

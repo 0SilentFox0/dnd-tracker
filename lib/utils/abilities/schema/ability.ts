@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { FormulaSchema, ScaleSchema } from './common';
 import { ConditionSchema } from './conditions';
 import {
+    AbilityKeySchema,
     type Effect,
     EffectSchema,
     isBakedStat,
@@ -233,6 +234,13 @@ export const AbilitySchema = z
         maxStacks: z.number().int().min(1).optional(),
         maxTargets: z.number().int().min(1).optional(),
         params: AbilityParamsSchema.optional(),
+        save: z
+            .object({
+                ability: AbilityKeySchema,
+                dc: z.number().int().min(1).max(30),
+            })
+            .strict()
+            .optional(),
         aim: z
             .object({
                 kind: z.enum(['cell', 'direction']),
@@ -326,6 +334,14 @@ export const AbilitySchema = z
                 code: 'custom',
                 path: ['params', 'cunningStrike'],
                 message: 'abilities.validation.cunningStrike',
+            });
+        }
+
+        if (a.save && a.trigger.event === 'passive') {
+            ctx.addIssue({
+                code: 'custom',
+                path: ['save'],
+                message: 'abilities.validation.savePassive',
             });
         }
 

@@ -4,14 +4,24 @@ import { limitsSegments } from './registry/labels';
 import { describeTrigger } from './registry/triggers';
 import { type OwnerKind, readAbilities } from './read';
 import { type Ability, AbilitySchema } from './schema';
-import type { AbilityFlowSummary } from './segments';
+import { type AbilityFlowSummary,seg } from './segments';
 
 export type { AbilityFlowSummary };
 
 export function summarizeAbility(a: Ability): AbilityFlowSummary {
     return {
         when: describeTrigger(a.trigger),
-        if: a.condition ? describeCondition(a.condition) : [],
+        if: [
+            ...(a.condition ? describeCondition(a.condition) : []),
+            ...(a.save
+                ? [
+                      seg('summary.conditions.initialSave', {
+                          ability: seg(`options.abilities.${a.save.ability}`),
+                          dc: a.save.dc,
+                      }),
+                  ]
+                : []),
+        ],
         then: a.effects.map(describeEffect),
         limits: limitsSegments(a.limits),
     };

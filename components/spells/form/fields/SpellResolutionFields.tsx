@@ -8,6 +8,7 @@ import type { TargetingValue } from './SpellTargetingFields';
 
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
+import { SwitchField } from '@/components/ui/switch-field';
 import type { AbilityKey } from '@/lib/constants/abilities';
 import { useTranslator } from '@/lib/i18n/use-translator';
 
@@ -105,6 +106,22 @@ export function SpellResolutionFields({
                             )}
                         />
                     </div>
+                    <SwitchField
+                        id={id('save-breath')}
+                        className="col-span-2"
+                        label={tp('breathWeapon')}
+                        checked={!!resolution.tags?.includes('breath')}
+                        onCheckedChange={(on) => {
+                            const { tags: _t, ...rest } = resolution;
+
+                            onChange({
+                                ...value,
+                                resolution: on
+                                    ? { ...rest, tags: ['breath'] }
+                                    : rest,
+                            });
+                        }}
+                    />
                 </>
             )}
         </>

@@ -65,6 +65,9 @@
     "mark": {
       "label": "Mark on target"
     },
+    "removeMark": {
+      "label": "Remove mark"
+    },
     "copySpellBuffs": {
       "label": "Copy ally's spell buffs"
     },
@@ -578,6 +581,7 @@
     "saveEnds": "Saving throw at end of turn",
     "breakOnDamage": "Ends when taking damage",
     "extraActions": "Extra actions",
+    "itemAttacks": "Extra attacks with this item only",
     "refreshAction": "Refresh action",
     "refreshBonusAction": "Refresh bonus action",
     "refreshReaction": "Refresh reaction",
@@ -612,6 +616,8 @@
     "value": "Minimum (−3…3)",
     "size": "Cone, ft",
     "abilities": "Abilities",
+    "vsTags": "Only against these sources",
+    "vsCreatureTypes": "Only against creature types",
     "vsSpells": "Only against spells",
     "whileTempHp": "Only while temp HP remain",
     "upcastDamage": "Damage per slot level above base",
@@ -727,6 +733,9 @@
       "advantage": "advantage",
       "disadvantage": "disadvantage",
       "normal": "normal"
+    },
+    "vsTags": {
+      "breath": "breath weapon"
     },
     "attackKinds": {
       "melee": "melee",
@@ -1092,6 +1101,7 @@
       "damageBonus": "damage ({filter}{hasSchool, select, yes {, school} other {}}) {value}{hasMark, select, yes { per mark «{mark}»} other {}}",
       "grantAction": "{parts}",
       "grantExtra": "+{n} action",
+      "grantItemAttacks": "+{n} attack with this weapon",
       "grantRefreshAction": "refreshes the action",
       "grantRefreshBonusAction": "refreshes the bonus action",
       "grantRefreshReaction": "refreshes the reaction",
@@ -1103,6 +1113,7 @@
       "drainSpellSlot": "−{count} spell slot",
       "changeMorale": "morale {delta}",
       "mark": "mark × {rounds}",
+      "removeMark": "removes the mark",
       "copySpellBuffs": "copies spell buffs cast on an ally",
       "guard": "guard: {percent}% of attack damage × {rounds}",
       "cleanse": "{includeConditions, select, yes {removes debuffs and conditions} other {removes debuffs}}",
@@ -1146,7 +1157,7 @@
       "piercingShot": "a ranged attack hits all enemies in line behind the target",
       "fireWave": "a hit scorches enemies behind the target (cone {size} ft): {percent}% fire damage",
       "banishSummons": "creatures summoned by the enemy lose {percent}% HP",
-      "saveAdvantage": "advantage on saving throws{hasList, select, yes { ({list})} other {}}{vsSpells, select, yes { against spells} other {}}",
+      "saveAdvantage": "advantage on saving throws{hasList, select, yes { ({list})} other {}}{vsSpells, select, yes { against spells} other {}}{hasTags, select, yes { against: {tags}} other {}}{hasTypes, select, yes { from creatures: {types}} other {}}",
       "saveDisadvantage": "disadvantage on saving throws{hasList, select, yes { ({list})} other {}}",
       "autoFailSave": "automatically fails saving throws{hasList, select, yes { ({list})} other {}}",
       "saveProficiency": "proficiency in saving throws{hasList, select, yes { ({list})} other {}}",
@@ -1194,6 +1205,7 @@
       "weaponTrait": "weapon trait: {traits}",
       "targetDead": "target is dead",
       "actorIsEnemy": "event actor is an enemy",
+      "initialSave": "targets roll a {ability} save, DC {dc}",
       "hasMark": "mark \"{markId}\"{bySelf, select, yes { (mine only)} other {}}: {who}",
       "armorWorn": "armor worn: {categories}{shield, select, with { (with shield)} without { (no shield)} other {}}",
       "armorKinds": {
