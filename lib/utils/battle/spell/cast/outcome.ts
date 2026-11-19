@@ -9,11 +9,13 @@ import {
     replaceParticipant,
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
+import { autoCritsAdjacent } from '@/lib/utils/battle/attack/adjacent-crit';
 import {
     forcedRollMode,
     rollModeReasons,
 } from '@/lib/utils/battle/attack/bonus';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
+import { cancelCritIfImmune } from '@/lib/utils/battle/attack/crit-immunity';
 import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { critThresholdOf } from '@/lib/utils/battle/attack/crit-threshold';
 import {
@@ -28,11 +30,10 @@ import {
     type CritKind,
     randomCritEffect,
 } from '@/lib/utils/battle/crit-choice/catalog';
-import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
-import { isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import { savesOf } from '@/lib/utils/battle/saves/access';
+import { spellAttackType } from '@/lib/utils/battle/spell/attack-type';
 import type {
     Outcome,
     SpellCastState,
@@ -94,18 +95,13 @@ function resolveSpellAttack(
         return { skip: false, factor: 1, raceMultiplier };
     }
 
-    const adjacent =
-        isOnMap(caster) &&
-        isOnMap(target) &&
-        isAdjacentOnMap(flow.ctx.map, caster, target);
-
     const targeting = spell.definition.targeting;
 
     const range = 'range' in targeting ? targeting.range : undefined;
 
     const pseudoAttack: BattleAttack = {
         name: spell.name,
-        type: adjacent ? 'melee' : 'ranged',
+        type: spellAttackType(targeting),
         attackBonus: 0,
         damageDice: '',
         damageType: 'magic',
@@ -136,7 +132,13 @@ function resolveSpellAttack(
 
     const ac = getEffectiveArmorClass(target, flow.ps);
 
-    const { roll, rolls, crit, fumble, hit } = attackRoll({
+    const {
+        roll,
+        rolls,
+        crit: natural,
+        fumble,
+        hit,
+    } = attackRoll({
         mode,
         rng: state.rng,
         presetRoll: state.attackRolls.find((a) => a.participantId === id)?.roll,
@@ -147,6 +149,30 @@ function resolveSpellAttack(
     });
 
     const total = roll + bonus;
+
+    const adjacentCrit =
+        hit &&
+        !natural &&
+        autoCritsAdjacent({
+            participants: flow.ps,
+            attacker: caster,
+            target,
+            attack: pseudoAttack,
+            map: flow.ctx.map,
+            targetExtra: state.actionModifiers[id],
+        });
+
+    const immune =
+        hit &&
+        (natural || adjacentCrit) &&
+        cancelCritIfImmune(
+            { isCritical: true },
+            flow.ps,
+            id,
+            state.actionModifiers[id]
+        ).cancelled;
+
+    const crit = !immune && (natural || adjacentCrit);
 
     state.attacks.push({
         participantId: id,
@@ -216,6 +242,11 @@ function resolveSpellAttack(
         !maxed &&
         critDoublesDice(flow.ctx.rules, crit) &&
         state.diceCount > 0;
+
+    if (adjacentCrit && !immune)
+        flow.messages.push(textRef('battleLog.crit.adjacent'));
+
+    if (immune) flow.messages.push(textRef('battleLog.crit.cancelled'));
 
     flow.messages.push(
         textRef(

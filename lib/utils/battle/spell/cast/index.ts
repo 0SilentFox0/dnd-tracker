@@ -32,6 +32,10 @@ import { moveAdjacent } from '@/lib/utils/battle/spell/cast/move-self';
 import { resolveOutcome } from '@/lib/utils/battle/spell/cast/outcome';
 import { phantomRequests } from '@/lib/utils/battle/spell/cast/phantom';
 import {
+    projectileShots,
+    runProjectiles,
+} from '@/lib/utils/battle/spell/cast/projectiles';
+import {
     abilityOf,
     actionOf,
     type ChosenSpell,
@@ -61,7 +65,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     const {
         caster,
         spell: source,
-        targetIds,
+        targetIds: requestedIds,
         allParticipants,
         currentRound,
         battleId,
@@ -70,6 +74,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         attackRolls = [],
         isDMCast = false,
     } = params;
+
+    const targetIds = [...new Set(requestedIds)];
 
     const spell: ChosenSpell = {
         ...source,
@@ -371,14 +377,20 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     const psBeforeEffects = flow.ps;
 
-    for (const id of targetIds)
-        state.outcomes.set(id, resolveOutcome(state, id, true));
+    const shots = projectileShots(def.targeting, requestedIds, allRolls);
 
-    for (const [index, id] of targetIds.entries()) {
-        def.effects.forEach((effect, effectIndex) => {
-            if (isPerTarget(effect) && !readsEventDamage(effect))
-                applyTo(state, effect, effectIndex, id, index);
-        });
+    const shotOutcomes = shots ? runProjectiles(state, shots) : undefined;
+
+    if (!shots) {
+        for (const id of targetIds)
+            state.outcomes.set(id, resolveOutcome(state, id, true));
+
+        for (const [index, id] of targetIds.entries()) {
+            def.effects.forEach((effect, effectIndex) => {
+                if (isPerTarget(effect) && !readsEventDamage(effect))
+                    applyTo(state, effect, effectIndex, id, index);
+            });
+        }
     }
 
     def.effects.forEach((effect, effectIndex) => {
@@ -387,7 +399,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         if (
             'onlyIfAffected' in effect &&
             effect.onlyIfAffected &&
-            targetIds.every((id) => state.outcomes.get(id)?.skip !== false)
+            (
+                shotOutcomes ?? targetIds.map((id) => state.outcomes.get(id))
+            ).every((o) => o?.skip !== false)
         )
             return;
 

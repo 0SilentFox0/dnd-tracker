@@ -1,12 +1,9 @@
 import { calculateAttackRoll } from './roll';
 
 import { textRef } from '@/lib/i18n/text-ref';
-import {
-    collectModifiers,
-    findFlags,
-} from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import { autoCritsAdjacent } from '@/lib/utils/battle/attack/adjacent-crit';
 import { cancelCritIfImmune } from '@/lib/utils/battle/attack/crit-immunity';
-import { isAdjacentAttack } from '@/lib/utils/battle/grid/adjacent-attack';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { rollDie } from '@/lib/utils/common/dice';
@@ -134,13 +131,14 @@ export function resolveD20Attack(ctx: ResolveAttackCtx): ResolvedAttack {
     const adjacentCrit =
         isHit &&
         !rolled.isCritical &&
-        collectModifiers(
+        autoCritsAdjacent({
             participants,
-            targetId,
-            { flag: 'autoCritAdjacent' },
-            modifiers[targetId]
-        ).entries.length > 0 &&
-        isAdjacentAttack(attacker, target, attack, ctx.map);
+            attacker,
+            target,
+            attack,
+            map: ctx.map,
+            targetExtra: modifiers[targetId],
+        });
 
     const critRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
 

@@ -38,6 +38,7 @@ import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type {
@@ -205,6 +206,28 @@ export function validateSpellTargetCount(
     count: number
 ): boolean {
     return targeting.mode === 'all' || count <= targeting.maxTargets;
+}
+
+const projectileCap = (
+    caster: BattleParticipant,
+    spell: SpellRef,
+    base: number
+): number => (spell.level === 0 ? cantripTier(caster.abilities.level) : base);
+
+export function spreadProjectiles(
+    distinct: string[],
+    requested: string[],
+    cap: number
+): SpellTargetResolution {
+    if (distinct.length > cap || requested.length > cap)
+        return fail(textRef('battleActions.spell.target.tooMany'));
+
+    const shots = requested.filter((id) => distinct.includes(id));
+
+    for (let i = 0; shots.length < cap; i++)
+        shots.push(distinct[i % distinct.length]);
+
+    return { ok: true, targetIds: shots };
 }
 
 export type SpellTargetResolution =
@@ -557,6 +580,18 @@ function resolveRaw(
                       maxTargets:
                           base.maxTargets + upcastExtra(caster, spell, mapCtx),
                   };
+
+            if ('projectiles' in targeting && targeting.projectiles) {
+                const cap = multi
+                    ? skill.maxTargets
+                    : projectileCap(caster, spell, skill.maxTargets);
+
+                return spreadProjectiles(
+                    picked.map((p) => p.basicInfo.id),
+                    chosenIds,
+                    cap
+                );
+            }
 
             if (!validateSpellTargetCount(skill, picked.length))
                 return fail(textRef('battleActions.spell.target.tooMany'));

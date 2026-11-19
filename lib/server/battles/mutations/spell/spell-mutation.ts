@@ -134,7 +134,8 @@ export function createSpellMutation(
             caster,
             spell,
             castLevel,
-            !!options.serverRolls
+            !!options.serverRolls,
+            resolution.targetIds.length
         );
 
         const plan: CastPlan = {

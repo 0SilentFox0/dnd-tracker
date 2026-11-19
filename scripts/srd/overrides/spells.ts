@@ -208,7 +208,13 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
     'srd-2024_magic-missile': {
         dice: 1,
         dieSides: 4,
-        targeting: { kind: 'area', side: 'enemy', maxTargets: 3, range: 120 },
+        targeting: {
+            kind: 'area',
+            side: 'enemy',
+            maxTargets: 3,
+            range: 120,
+            projectiles: true,
+        },
         resolution: { kind: 'auto' },
         spellEffects: [
             {
@@ -218,6 +224,8 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
             },
         ],
         upcastTargets: 1,
+        fixedDice: true,
+        damageBonus: 1,
     },
     'srd-2024_heal': {
         targeting: { kind: 'ally', range: 60 },
@@ -356,7 +364,21 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
         ],
     },
     'srd-2024_spiritual-weapon': { addAbilityMod: true },
-    'srd-2024_scorching-ray': { upcastTargets: 1 },
+    'srd-2024_scorching-ray': {
+        targeting: {
+            kind: 'area',
+            side: 'enemy',
+            maxTargets: 3,
+            range: 120,
+            projectiles: true,
+        },
+        upcastTargets: 1,
+        fixedDice: true,
+    },
+    'srd-2024_eldritch-blast': {
+        targeting: { kind: 'enemy', range: 120, projectiles: true },
+        fixedDice: true,
+    },
     'srd-2024_chain-lightning': { upcastTargets: 1 },
 
     // Open5e rows of these spells carry another spell's numbers (Freedom of Movement has Freezing Sphere's 10d6 cold)

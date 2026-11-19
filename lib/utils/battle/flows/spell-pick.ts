@@ -35,6 +35,7 @@ import {
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { BookSpell } from '@/types/spells';
@@ -130,8 +131,20 @@ export function buildSpellPick(
               }
             : skillRadius && SKILL_AREA_TEMPLATE;
 
+    const shotCap =
+        'projectiles' in targeting && targeting.projectiles
+            ? targeting.kind === 'area'
+                ? targeting.maxTargets + extra
+                : s.level === 0 && caster
+                  ? cantripTier(caster.abilities.level)
+                  : 1
+            : 0;
+
     const isMulti =
-        !chain && (targeting.kind === 'area' || targeting.kind === 'template');
+        !chain &&
+        (targeting.kind === 'area' ||
+            targeting.kind === 'template' ||
+            shotCap > 1);
 
     const auto = AUTO_TARGETING.includes(targeting.kind);
 
@@ -149,11 +162,13 @@ export function buildSpellPick(
 
     const maxTargets = template
         ? undefined
-        : isMulti
-          ? targeting.maxTargets + extra
-          : skill.mode === 'area'
-            ? skill.maxTargets
-            : undefined;
+        : shotCap > 1
+          ? shotCap
+          : isMulti && 'maxTargets' in targeting
+            ? targeting.maxTargets + extra
+            : skill.mode === 'area'
+              ? skill.maxTargets
+              : undefined;
 
     const range = 'range' in targeting ? targeting.range : undefined;
 
@@ -208,7 +223,7 @@ export function buildSpellPick(
                 inline: { spellId: s.hostSpellId, grantKey: s.grantKey },
             }),
         diceSlots: Array.from(
-            { length: input ? 1 : dice.count },
+            { length: input ? 1 : dice.count * Math.max(1, shotCap) },
             () => dice.sides
         ),
     };

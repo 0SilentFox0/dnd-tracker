@@ -36,6 +36,11 @@ const spell: CastableSpell = {
     },
 };
 
+const touch: CastableSpell = {
+    ...spell,
+    definition: { ...spell.definition, targeting: { kind: 'enemy', range: 5 } },
+};
+
 const map: BattleMapConfig = {
     cols: 20,
     rows: 20,
@@ -82,6 +87,7 @@ function cast(
         caster?: BattleParticipant;
         rng?: () => number;
         map?: BattleMapConfig;
+        spell?: CastableSpell;
     } = {}
 ) {
     const c = over.caster ?? caster();
@@ -90,7 +96,7 @@ function cast(
 
     return castSpell({
         caster: c,
-        spell,
+        spell: over.spell ?? spell,
         targetIds: targets,
         allParticipants: [c, ...(over.others ?? [enemy('e1')])],
         currentRound: 1,
@@ -219,13 +225,14 @@ describe('атака заклинанням', () => {
         expect(hp(r, 'e1')).toBe(200);
     });
 
-    it('an adjacent target is a melee attack with no second d20', () => {
+    it('a touch spell at an adjacent target is a melee attack with no second d20', () => {
         const c = at(caster(true), { x: 2, y: 2 });
 
         const r = cast({
             caster: c,
             map,
             roll: 15,
+            spell: touch,
             rng: () => {
                 throw new Error('rng used');
             },
@@ -233,6 +240,86 @@ describe('атака заклинанням', () => {
         });
 
         expect(hp(r, 'e1')).toBe(194);
+    });
+
+    it('a ranged spell at an adjacent target is still ranged: the nearby enemy gives disadvantage', () => {
+        const c = at(caster(true), { x: 2, y: 2 });
+
+        const r = cast({
+            caster: c,
+            map,
+            roll: 15,
+            rng: seq(0),
+            others: [at(enemy('e1'), { x: 3, y: 2 })],
+        });
+
+        expect(r.battleAction.actionDetails.spellAttacks?.[0].roll).toBe(1);
+        expect(hp(r, 'e1')).toBe(200);
+    });
+
+    describe('auto-crit next to a paralyzed target', () => {
+        const sleeper = (position: GridPoint, immune = false) =>
+            at(
+                makeParticipant({
+                    id: 'e1',
+                    side: ParticipantSide.ENEMY,
+                    hp: 200,
+                    maxHp: 200,
+                    abilities: [
+                        resolved({
+                            trigger: { event: 'passive' },
+                            effects: [
+                                { kind: 'flag', flag: 'autoCritAdjacent' },
+                                ...(immune
+                                    ? [
+                                          {
+                                              kind: 'flag',
+                                              flag: 'critImmunity',
+                                          } as const,
+                                      ]
+                                    : []),
+                            ],
+                        }),
+                    ],
+                }),
+                position
+            );
+
+        const run = (touchSpell: CastableSpell, ex: number, immune = false) =>
+            cast({
+                caster: at(caster(true), { x: 2, y: 2 }),
+                map,
+                roll: 12,
+                rules: doubled,
+                spell: touchSpell,
+                others: [sleeper({ x: 2 + ex, y: 2 }, immune)],
+            });
+
+        it('a touch spell hit from 5 ft is a crit', () => {
+            const r = run(touch, 1);
+
+            expect(
+                r.battleAction.actionDetails.spellAttacks?.[0]
+            ).toMatchObject({ hit: true, crit: true });
+            expect(hp(r, 'e1')).toBe(200 - 6 - 8);
+        });
+
+        it('critImmunity cancels the auto-crit but the spell still hits', () => {
+            const r = run(touch, 1, true);
+
+            expect(
+                r.battleAction.actionDetails.spellAttacks?.[0]
+            ).toMatchObject({ hit: true, crit: false });
+            expect(hp(r, 'e1')).toBe(194);
+        });
+
+        it('a ranged spell hit from afar is a plain hit', () => {
+            const r = run(spell, 4);
+
+            expect(
+                r.battleAction.actionDetails.spellAttacks?.[0]
+            ).toMatchObject({ hit: true, crit: false });
+        });
     });
 
     it('non-enemy targets resolve as auto without a roll', () => {

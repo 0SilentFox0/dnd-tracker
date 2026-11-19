@@ -161,7 +161,8 @@ export function prepareCastDice(
     caster: BattleParticipant,
     spell: Spellcast,
     castLevel: number | undefined,
-    serverRolls: boolean
+    serverRolls: boolean,
+    shots = 1
 ) {
     const { definition } = spell;
 
@@ -189,7 +190,11 @@ export function prepareCastDice(
 
     const expected = inputDice
         ? { ...sized, count: Math.min(data.inputCount ?? 1, inputDice.max) }
-        : sized;
+        : sized.count > 0 &&
+            'projectiles' in definition.targeting &&
+            definition.targeting.projectiles
+          ? { ...sized, count: sized.count * shots }
+          : sized;
 
     // preview without rolls: the server rolls itself to show an estimate
     const diceRolls =
