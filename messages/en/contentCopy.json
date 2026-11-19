@@ -1,0 +1,44 @@
+{
+  "button": "Copy to campaigns…",
+  "title": "Copy to other campaigns",
+  "steps": {
+    "pick": "Choose what to copy and where",
+    "preview": "Check what will happen",
+    "result": "Copy result"
+  },
+  "pick": {
+    "itemsTitle": "What to copy",
+    "search": "Search",
+    "selectAll": "Select all",
+    "campaignsTitle": "Where to copy",
+    "allCampaigns": "All my campaigns"
+  },
+  "preview": {
+    "intro": "Nothing is copied yet. Review the plan for each campaign."
+  },
+  "actions": {
+    "next": "Next",
+    "copy": "Copy",
+    "done": "Done"
+  },
+  "report": {
+    "status": {
+      "ok": "Copied",
+      "partial": "Partly copied",
+      "nothing": "Nothing new to copy",
+      "failed": "Failed"
+    },
+    "summaryPreview": "Will create {created}; {reused} already exist and will be reused; {skipped} skipped.",
+    "summaryResult": "Created {created}; {reused} already existed and were reused; skipped {skipped}.",
+    "warnings": "{count, plural, one {# link to unsupported content was skipped} other {# links to unsupported content were skipped}}",
+    "reasons": {
+      "exists": "already exists",
+      "kind-unsupported": "this kind cannot be copied",
+      "duplicate-name": "duplicate name",
+      "file-not-copyable": "this uploaded file is not copied",
+      "not-found": "not found",
+      "unknown-kind": "unknown kind",
+      "unknown": "skipped"
+    }
+  }
+}

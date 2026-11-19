@@ -11,6 +11,10 @@ vi.mock('next/dynamic', () => ({
         props.open ? <p>{`WIZARD ${props.kind}`}</p> : null,
 }));
 
+vi.mock('@/lib/hooks/content-copy', () => ({
+    useContentCopyCampaigns: () => ({ data: { campaigns: [] } }),
+}));
+
 vi.unmock('next-intl');
 afterEach(cleanup);
 

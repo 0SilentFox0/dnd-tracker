@@ -38,6 +38,9 @@ vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useDeleteCareer: () => ({ mutateAsync: mocks.remove }),
     useCareerForm: () => ({}),
 }));
+vi.mock('@/components/content-copy/ContentCopyButton', () => ({
+    ContentCopyButton: () => null,
+}));
 vi.mock('@/systems/wfrp/ui/careers/CareerForm', () => ({
     CareerForm: () => null,
 }));

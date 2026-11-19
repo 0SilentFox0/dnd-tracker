@@ -975,6 +975,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'handoff',
     },
     {
+        route: 'campaigns/[id]/content-copy',
+        methods: ['GET', 'POST'],
+        task: 13,
+        adapter: 'handoffs',
+        state: 'handoff',
+    },
+    {
         route: 'campaigns/[id]/content-export/[kind]',
         methods: ['GET'],
         task: 5,

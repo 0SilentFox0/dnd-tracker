@@ -3,6 +3,10 @@
     "title": "Counterspell reaction window",
     "body": "When an enemy can counter a spell, the cast now pauses for 10 seconds. The owner of the reacting creature picks a slot and counters, or lets it through. A countered spell has no effect and costs the caster the action but not the slot."
   },
+  "2026-11-copy-content": {
+    "title": "Copy content to other campaigns",
+    "body": "Content can now be copied to your other campaigns, or all of them at once, from any content library page (units, spells, races, classes, feats, backgrounds, artifacts, music and more). Use the \"Copy to campaigns\" button; a preview shows what will be created and what already exists."
+  },
   "2026-11-map-large": {
     "title": "Large battle maps",
     "body": "With the map library turned on, battles can use maps up to 200×200 cells. Photo maps stay up to 60×60."

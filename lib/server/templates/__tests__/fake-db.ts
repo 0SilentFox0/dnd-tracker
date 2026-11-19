@@ -44,7 +44,7 @@ export function createFakeDb(
                 if (where.id)
                     return rows
                         .filter((r) => where.id!.in.includes(r.id as string))
-                        .map((r) => ({ id: r.id }));
+                        .map((r) => ({ ...r }));
 
                 return rows
                     .filter((r) => r.campaignId === where.campaignId)

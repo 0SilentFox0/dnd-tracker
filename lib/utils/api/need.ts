@@ -7,6 +7,11 @@ export const NEED = {
         access,
         scope: 'content:read',
     }),
+    readSession: {
+        access: 'dm',
+        scope: 'content:read',
+        sessionOnly: true,
+    } as ActorNeed,
     write: { access: 'dm', scope: 'content:write' } as ActorNeed,
     writeAll: {
         access: 'dm',

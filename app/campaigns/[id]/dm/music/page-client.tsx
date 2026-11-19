@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Music, Plus } from 'lucide-react';
 
 import { EmptyState, LoadingState } from '@/components/common/states';
+import { ContentCopyButton } from '@/components/content-copy/ContentCopyButton';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { AddYoutubeTrackDialog } from '@/components/music/AddYoutubeTrackDialog';
 import { EditTrackDialog } from '@/components/music/EditTrackDialog';
@@ -49,6 +50,10 @@ export function DMMusicPageClient({
                 })}
                 actions={
                     <>
+                        <ContentCopyButton
+                            campaignId={campaignId}
+                            kind="tracks"
+                        />
                         <UploadTrackButton
                             onFile={(file) => void library.upload(file)}
                             pending={library.isBusy || full}

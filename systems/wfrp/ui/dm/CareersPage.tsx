@@ -6,6 +6,7 @@ import { Briefcase, Edit, Plus, Trash2 } from 'lucide-react';
 
 import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { EmptyState } from '@/components/common/states';
+import { ContentCopyButton } from '@/components/content-copy/ContentCopyButton';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
@@ -67,13 +68,19 @@ export function CareersPage({
                 subtitle={t('page.subtitle', { count: careers.length })}
                 actions={
                     canEdit && (
-                        <Button
-                            onClick={() => setEditing('new')}
-                            className="flex min-h-11 items-center gap-2"
-                        >
-                            <Plus className="h-4 w-4" />
-                            {t('page.create')}
-                        </Button>
+                        <>
+                            <ContentCopyButton
+                                campaignId={campaignId}
+                                kind="careers"
+                            />
+                            <Button
+                                onClick={() => setEditing('new')}
+                                className="flex min-h-11 items-center gap-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                {t('page.create')}
+                            </Button>
+                        </>
                     )
                 }
             />

@@ -28,6 +28,7 @@ const handoffs: AssistantActionDef[] = Object.entries(HANDOFF_INPUTS).map(
                     ? 'campaign:read'
                     : [
                             'content-import',
+                            'content-copy',
                             'ai-map',
                             'compendium-preview',
                             'compendium-confirm',

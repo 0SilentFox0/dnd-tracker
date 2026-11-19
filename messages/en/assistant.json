@@ -46,6 +46,7 @@
     "campaign-import": "Choose a local file in the campaign creation form.",
     "campaign-join": "Enter the invitation code in the campaign join dialog.",
     "content-import": "Choose a file, check the mapping and confirm the import in the existing editor.",
+    "content-copy": "Pick the items and campaigns, review the preview and confirm the copy in the content library.",
     "ai-map": "Pick the data and run AI mapping in the import dialog.",
     "slide-upload": "Choose an image in the slide deck editor.",
     "track-upload": "Choose an audio file in the music library.",

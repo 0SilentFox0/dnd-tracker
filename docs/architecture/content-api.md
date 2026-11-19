@@ -331,6 +331,22 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - Шаблон без опублікованої версії, SRD-оверлей з непорожнім перекладом (`uk`: шар ще не локалізує) і кампанії без бази (HOMM5, клони неопублікованих джерел) йдуть шляхом бандла.
 - `exportCampaign` шарової кампанії віддає злитий вигляд (override під базовим id, без дублікатів, «осиротілий» override присутній). Публікація такої кампанії-шаблону заборонена: `publishTemplate` повертає 409 `TEMPLATE_PUBLISH_LAYERED` (ланцюжки шарів поза обсягом; PK `*_base` `(id, validFrom)` глобальний, тож базові id інакше конфліктували б), кнопка «Опублікувати версію» на сторінці шаблону з базою прихована.
 
+## Копіювання між кампаніями
+
+Етап 1: 13 `ContentKind` (UI — точки входу в бібліотеках контенту, `components/content-copy/`). Спека — [copy content design](../superpowers/specs/2026-11-19-copy-content-to-campaigns-design.md), план — [copy content plan](../superpowers/plans/2026-11-19-copy-content-to-campaigns.md). Код: `lib/server/content/copy/`, клієнт `lib/api/content-copy.ts`, хуки `lib/hooks/content-copy/`.
+
+- **Потік:** `exportCampaign` джерела → `selectClosure` (вибрані рядки + залежності за FK і content-id у JSON, `closure.ts`) → `buildCopyPlan` проти експорту цілі (порівняння за нормалізованим `name`/`title`: trim + lowercase, `plan.ts`) → `importBundle` з `{ reuse, detached: true }` для кожної цілі в **окремій** `withCampaignContentWrite`-транзакції (`apply.ts`). `detached` пише рядки без `sourceId`/`sourceHash`/`slug`, тож це самостійні копії, не шарові. Збій однієї цілі не відкочує інші (`status: failed`, `created: []`).
+- **Ендпоїнт** `/api/campaigns/[id]/content-copy` (id = джерело), лише сесія: `GET ?kind=` — імена записів джерела + кампанії-цілі (`campaigns`); `POST { items: [{kind, ids}], targets: {campaignIds} | {all: true}, dryRun? }` → `{ targets: CopyTargetReport[] }` (`created`, `reused`, `skipped`, `warnings`, `status` `ok|partial|failed`, `error`).
+- **Цілі:** кампанії, де користувач DM, лише `kind = campaign` (не шаблони/світи), без самого джерела (`targets.ts`); чужа ціль → 403. DM-права на джерело — `NEED.writeAll` на POST, `NEED.read('dm')` на GET.
+- **Причини в `skipped`:** `exists` (запис із таким іменем уже є в цілі), `kind-unsupported` (вид вимкнений у цілі або залежність такого виду), `duplicate-name` (два вибрані/залежні рядки з однаковим іменем — лишається перший, посилання перемаплюються), `not-found` (id немає в джерелі), `unknown-kind`. Залежність, що вже є в цілі за іменем, не копіюється, а потрапляє в `reused` (`reuse`-мапа). Залежність, яку пропущено, дає рядок у `warnings`.
+- **Не в етапі 1:** звуки (етап 2), карти (етап 3), меню на окремих картках.
+- **Підводні камені:**
+  - `importBundle` перевіряє `reuse`-цілі: рядок має існувати й належати кампанії-цілі (`loadReuseTargets`), інакше помилка.
+  - `dryRun` повертає `created` без `id` (рядків ще немає).
+  - `loadNames` для треків не годиться (поле `title`) — `names.ts` бере `name` або `title` за колонками таблиці бандла.
+  - `errors` — server-only namespace, тому ключі помилок цілей перекладаються в самому роуті (`translateErrorBody`) для тіла 200-відповіді; клієнт отримує вже текст.
+  - Інвалідація довідкових кешів — через `afterContentCommit` після коміту транзакції цілі.
+
 ## Sync поверх шарів
 
 Кампанія з `baseSourceId/baseVersion` синхронізується окремим шляхом (`sync/layered*.ts`); кампанії без бази (HOMM5, клони неопублікованих джерел) лишаються на копійному sync (`context/classify/apply`). Розгалуження — у `applySourceChanges`/`applySafeSourceChanges`/`previewSourceSelection`/`getSourceDiff`/`sourceUpdateState` через `layerOf`.

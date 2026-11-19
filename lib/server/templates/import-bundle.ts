@@ -37,24 +37,104 @@ export interface ImportLayer {
 const isOverrideId = (layer: ImportLayer | undefined, id: string) =>
     !!layer && Object.hasOwn(layer.overrides, id);
 
+export interface ImportOptions {
+    /** source id → id of an existing row in the target; mapped, not written */
+    reuse?: ReadonlyMap<string, string>;
+    /** copy between campaigns: no sourceId/sourceHash/slug */
+    detached?: true;
+}
+
 type ParsedBundle = z.infer<typeof BundleSchema>;
 
-function assertBackgroundRefs(bundle: ParsedBundle, layer?: ImportLayer) {
+interface ReuseTarget {
+    table: string;
+    campaignId: unknown;
+    type?: unknown;
+}
+
+async function loadReuseTargets(
+    tx: TemplateDb,
+    reuse: ReadonlyMap<string, string>,
+    targetCampaignId: string
+) {
+    const ids = [...new Set(reuse.values())];
+
+    const found = new Map<string, ReuseTarget>();
+
+    if (ids.length === 0) return found;
+
+    for (const t of BUNDLE_TABLES) {
+        const rows = await delegateOf(tx, t).findMany({
+            where: { campaignId: targetCampaignId, id: { in: ids } },
+            select: {
+                id: true,
+                campaignId: true,
+                ...(t.key === 'feats' && { type: true }),
+            },
+        });
+
+        for (const r of rows)
+            found.set(r.id as string, {
+                table: t.key,
+                campaignId: r.campaignId,
+                type: r.type,
+            });
+    }
+
+    for (const id of ids)
+        if (found.get(id)?.campaignId !== targetCampaignId)
+            throw new BundleInvalidError(
+                API_ERRORS.BUNDLE_FOREIGN_CONTENT,
+                undefined,
+                { ids: id }
+            );
+
+    return found;
+}
+
+function assertBackgroundRefs(
+    bundle: ParsedBundle,
+    layer?: ImportLayer,
+    reuse?: ReadonlyMap<string, string>,
+    reuseTargets?: ReadonlyMap<string, ReuseTarget>
+) {
+    const reused = [...(reuse ?? [])].map(([from, to]) => ({
+        from,
+        target: reuseTargets?.get(to),
+    }));
+
+    const feats = [
+        ...bundle.feats,
+        ...reused
+            .filter((r) => r.target?.table === 'feats')
+            .map((r) => ({ id: r.from, type: r.target!.type })),
+    ];
+
+    const spellIds = new Set([
+        ...bundle.spells.map((s) => s.id),
+        ...reused.filter((r) => r.target?.table === 'spells').map((r) => r.from),
+    ]);
+
     for (const background of layer ? [] : bundle.backgrounds) {
         const error = backgroundReferenceError(
             {
                 originFeatId: background.originFeatId,
                 choices: background.choices,
             },
-            bundle.feats,
-            new Set(bundle.spells.map((s) => s.id))
+            feats,
+            spellIds
         );
 
         if (error) throw new BundleInvalidError(error);
     }
 }
 
-function buildIdMap(tx: TemplateDb, bundle: ParsedBundle, layer?: ImportLayer) {
+function buildIdMap(
+    tx: TemplateDb,
+    bundle: ParsedBundle,
+    layer?: ImportLayer,
+    reuse?: ReadonlyMap<string, string>
+) {
     const idMap = new Map<string, string>();
 
     for (const t of BUNDLE_TABLES) {
@@ -114,13 +194,51 @@ function buildIdMap(tx: TemplateDb, bundle: ParsedBundle, layer?: ImportLayer) {
         }
     }
 
+    for (const [from, to] of reuse ?? []) idMap.set(from, to);
+
     return idMap;
+}
+
+function storedFor({
+    t,
+    rowId,
+    newId,
+    sourceHash,
+    layer,
+    detached,
+}: {
+    t: { columns: readonly string[] };
+    rowId: string;
+    newId: string;
+    sourceHash: string;
+    layer?: ImportLayer;
+    detached?: true;
+}) {
+    if (detached)
+        return {
+            id: newId,
+            sourceId: null,
+            sourceHash: null,
+            ...(t.columns.includes('slug') && { slug: null }),
+        };
+
+    if (!layer) return { id: newId, sourceId: rowId, sourceHash };
+
+    if (isOverrideId(layer, rowId))
+        return {
+            id: newContentId(),
+            sourceId: rowId,
+            sourceHash: layer.overrides[rowId],
+        };
+
+    return { id: newId, sourceId: null, sourceHash: null };
 }
 
 function buildWrites({
     bundle,
     idMap,
     layer,
+    options,
     targetCampaignId,
     warnings,
     hashes,
@@ -129,6 +247,7 @@ function buildWrites({
     bundle: ParsedBundle;
     idMap: Map<string, string>;
     layer?: ImportLayer;
+    options?: ImportOptions;
     targetCampaignId: string;
     warnings: string[];
     hashes: TableHashes;
@@ -152,6 +271,7 @@ function buildWrites({
                     if (
                         typeof ref === 'string' &&
                         !layer &&
+                        !options?.reuse?.has(ref) &&
                         !idsByTable.get(target!)!.has(ref)
                     ) {
                         warnings.push(`${t.key} ${row.id}: ${col} → null`);
@@ -167,19 +287,14 @@ function buildWrites({
 
                 (hashes[t.key] ??= {})[row.id] = sourceHash;
 
-                const stored = !layer
-                    ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash }
-                    : isOverrideId(layer, row.id)
-                      ? {
-                            id: newContentId(),
-                            sourceId: row.id,
-                            sourceHash: layer.overrides[row.id],
-                        }
-                      : {
-                            id: idMap.get(row.id)!,
-                            sourceId: null,
-                            sourceHash: null,
-                        };
+                const stored = storedFor({
+                    t,
+                    rowId: row.id,
+                    newId: idMap.get(row.id)!,
+                    sourceHash,
+                    layer,
+                    detached: options?.detached,
+                });
 
                 return {
                     ...remapped,
@@ -203,7 +318,8 @@ export async function importBundle(
     tx: TemplateDb,
     raw: Bundle,
     targetCampaignId: string,
-    layer?: ImportLayer
+    layer?: ImportLayer,
+    options?: ImportOptions
 ) {
     const parsed = BundleSchema.safeParse(raw);
 
@@ -215,11 +331,15 @@ export async function importBundle(
 
     const bundle = parsed.data;
 
-    assertBackgroundRefs(bundle, layer);
+    const reuseTargets = options?.reuse
+        ? await loadReuseTargets(tx, options.reuse, targetCampaignId)
+        : undefined;
+
+    assertBackgroundRefs(bundle, layer, options?.reuse, reuseTargets);
 
     const warnings: string[] = [];
 
-    const idMap = buildIdMap(tx, bundle, layer);
+    const idMap = buildIdMap(tx, bundle, layer, options?.reuse);
 
     const foreign = layer
         ? []
@@ -244,6 +364,7 @@ export async function importBundle(
         bundle,
         idMap,
         layer,
+        options,
         targetCampaignId,
         warnings,
         hashes,
