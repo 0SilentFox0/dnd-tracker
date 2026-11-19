@@ -9,7 +9,11 @@ const isFormula = (v: unknown): v is { formula: string } =>
 export function resolveLimitFormulas(p: BattleParticipant): BattleParticipant {
     const list = p.battleData.resolvedAbilities;
 
-    if (!list.some((a) => isFormula(a.limits?.perRest?.uses))) return p;
+    const hasFormula = (a: (typeof list)[number]) =>
+        isFormula(a.limits?.perRest?.uses) ||
+        isFormula(a.limits?.perRest?.shortRegain);
+
+    if (!list.some(hasFormula)) return p;
 
     return {
         ...p,
@@ -18,21 +22,27 @@ export function resolveLimitFormulas(p: BattleParticipant): BattleParticipant {
             resolvedAbilities: list.map((a) => {
                 const perRest = a.limits?.perRest;
 
-                return a.limits && perRest && isFormula(perRest.uses)
-                    ? {
-                          ...a,
-                          limits: {
-                              ...a.limits,
-                              perRest: {
-                                  ...perRest,
-                                  uses: Math.max(
-                                      1,
-                                      resolveFlat(perRest.uses, p)
-                                  ),
-                              },
-                          },
-                      }
-                    : a;
+                if (!a.limits || !perRest || !hasFormula(a)) return a;
+
+                const { shortRegain, ...rest } = perRest;
+
+                const regain = isFormula(shortRegain)
+                    ? Math.max(0, resolveFlat(shortRegain, p))
+                    : shortRegain;
+
+                return {
+                    ...a,
+                    limits: {
+                        ...a.limits,
+                        perRest: {
+                            ...rest,
+                            uses: isFormula(perRest.uses)
+                                ? Math.max(1, resolveFlat(perRest.uses, p))
+                                : perRest.uses,
+                            ...(regain ? { shortRegain: regain } : {}),
+                        },
+                    },
+                };
             }),
         },
     };

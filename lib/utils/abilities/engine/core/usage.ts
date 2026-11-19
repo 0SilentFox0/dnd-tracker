@@ -30,6 +30,12 @@ export function restUses(l: Limits): number | undefined {
     return typeof uses === 'number' ? uses : 0;
 }
 
+export function shortRegainOf(l: Limits): number | undefined {
+    const n = l.perRest?.shortRegain;
+
+    return typeof n === 'number' && n > 0 ? n : undefined;
+}
+
 export const battleLimit = (l: Limits): number | undefined =>
     l.perBattle ?? restUses(l);
 

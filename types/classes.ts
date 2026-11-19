@@ -24,7 +24,7 @@ export interface ClassColumn {
     key: string;
     label: string;
     values: string[];
-    pool?: { rest: 'short' | 'long' };
+    pool?: { rest: 'short' | 'long'; regain?: number };
 }
 
 export interface GameClassData {

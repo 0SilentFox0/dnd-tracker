@@ -10,7 +10,7 @@ import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { ContentError } from '@/lib/server/content/errors';
-import { restUses } from '@/lib/utils/abilities/engine/core/usage';
+import { restUses, shortRegainOf } from '@/lib/utils/abilities/engine/core/usage';
 import { editResources } from '@/lib/utils/characters/resources/edit';
 import { readResources } from '@/lib/utils/characters/resources/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -33,7 +33,7 @@ function chargeLimits(
                       {
                           max: restUses(a.limits) ?? 0,
                           rest: a.limits.perRest.rest,
-                          regain: a.limits.perRest.shortRegain,
+                          regain: shortRegainOf(a.limits),
                       },
                   ] as const,
               ]

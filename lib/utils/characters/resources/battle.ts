@@ -3,6 +3,7 @@ import { readResources } from './schema';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
+import { shortRegainOf } from '@/lib/utils/abilities/engine/core/usage';
 import {
     exhaustionLevel,
     PERMANENT_ROUNDS,
@@ -206,7 +207,7 @@ function battleCharges(
                       {
                           key: a.key,
                           rest: a.limits.perRest.rest,
-                          regain: a.limits.perRest.shortRegain,
+                          regain: shortRegainOf(a.limits),
                       },
                   ]
                 : []
@@ -216,7 +217,7 @@ function battleCharges(
             .map(([key, pool]) => ({
                 key,
                 rest: pool.rest,
-                regain: undefined,
+                regain: pool.regain,
             })),
     ];
 

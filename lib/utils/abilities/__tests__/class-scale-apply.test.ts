@@ -323,7 +323,11 @@ describe('multiclass and subclass', () => {
 });
 
 describe('resolveLimitFormulas', () => {
-    const withAbility = (uses: number | { formula: string }, cha: number) => {
+    const withAbility = (
+        uses: number | { formula: string },
+        cha: number,
+        shortRegain?: { formula: string }
+    ) => {
         const p = createMockParticipant();
 
         return {
@@ -339,7 +343,13 @@ describe('resolveLimitFormulas', () => {
                         id: 'bi',
                         name: 'Bardic Inspiration',
                         trigger: { event: 'bonusAction' as const },
-                        limits: { perRest: { rest: 'long' as const, uses } },
+                        limits: {
+                            perRest: {
+                                rest: 'long' as const,
+                                uses,
+                                ...(shortRegain && { shortRegain }),
+                            },
+                        },
                         effects: [{ kind: 'note' as const, text: 'n' }],
                         source: {
                             type: 'class' as const,
@@ -366,5 +376,16 @@ describe('resolveLimitFormulas', () => {
         const plain = withAbility(2, 3);
 
         expect(resolveLimitFormulas(plain)).toBe(plain);
+    });
+
+    it('a shortRegain formula resolves to a number; zero drops it', () => {
+        const regain = (formula: string, cha: number) =>
+            resolveLimitFormulas(withAbility(2, cha, { formula })).battleData
+                .resolvedAbilities[0].limits?.perRest?.shortRegain;
+
+        expect(regain('min(1, floor(5 / 5)) * max(1, cha_mod)', 3)).toBe(3);
+        expect(regain('min(1, floor(3 / 5)) * max(1, cha_mod)', 3)).toBe(
+            undefined
+        );
     });
 });

@@ -110,6 +110,40 @@ describe('pools between battles', () => {
         ).toBeUndefined();
     });
 
+    it('a long pool with regain keeps its regain in the battle result and gives it back on a short rest', () => {
+        const CD = 'pool:cleric:channel-divinity-uses';
+
+        const p = hero({ [CD]: 3 });
+
+        const withCd = {
+            ...p,
+            battleData: {
+                ...p.battleData,
+                pools: {
+                    ...p.battleData.pools,
+                    [CD]: {
+                        label: 'Channel Divinity',
+                        max: 3,
+                        rest: 'long' as const,
+                        regain: 1,
+                    },
+                },
+            },
+        };
+
+        const stored = applyBattleResult({}, withCd, rules).charges;
+
+        expect(stored?.[CD]).toEqual({ used: 3, rest: 'long', regain: 1 });
+
+        expect(
+            applyRest(
+                'short',
+                { charges: stored },
+                { pool: [], longRestHitDice: 'half' }
+            ).charges?.[CD]
+        ).toEqual({ used: 2, rest: 'long', regain: 1 });
+    });
+
     it('sheet rest block lists pools as charges', () => {
         const block = buildRestBlock({
             participant: hero({ [FOCUS]: 1 }),

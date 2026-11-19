@@ -220,6 +220,7 @@ export function classPools(
                     label: column.label,
                     max,
                     rest: column.pool.rest,
+                    ...(column.pool.regain && { regain: column.pool.regain }),
                 };
         }
     }

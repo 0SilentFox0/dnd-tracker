@@ -256,7 +256,13 @@ export const CLASS_FEATURE_OVERRIDES: Record<
     'srd-2024_barbarian_rage': {
         trigger: { event: 'bonusAction' },
         condition: NOT_HEAVY,
-        limits: { perRest: { rest: 'long', uses: { scale: 'rages' } } },
+        limits: {
+            perRest: {
+                rest: 'long',
+                uses: { scale: 'rages' },
+                shortRegain: 1,
+            },
+        },
         effects: [
             resist('bludgeoning'),
             resist('piercing'),
@@ -327,7 +333,14 @@ export const CLASS_FEATURE_OVERRIDES: Record<
     'srd-2024_bard_bardic-inspiration': {
         trigger: { event: 'bonusAction' },
         limits: {
-            perRest: { rest: 'long', uses: { formula: 'max(1, cha_mod)' } },
+            perRest: {
+                rest: 'long',
+                uses: { formula: 'max(1, cha_mod)' },
+                // Font of Inspiration: from Bard level 5 the uses return on a short rest
+                shortRegain: {
+                    formula: 'min(1, floor(class_level / 5)) * max(1, cha_mod)',
+                },
+            },
         },
         effects: [
             {
@@ -631,7 +644,11 @@ export const CLASS_FEATURE_OVERRIDES: Record<
     'srd-2024_druid_wild-shape': {
         trigger: { event: 'bonusAction' },
         limits: {
-            perRest: { rest: 'short', uses: { scale: 'wild-shape-uses' } },
+            perRest: {
+                rest: 'long',
+                uses: { scale: 'wild-shape-uses' },
+                shortRegain: 1,
+            },
         },
         effects: [
             // no temp-HP effect: the Beast form's Temporary Hit Points (= Druid level) are approximated by a heal
@@ -749,11 +766,14 @@ export const COLUMN_LABELS: Record<string, string> = {
     'srd-2024_druid_wild-shape-uses': 'Wild Shape',
 };
 
-export const POOL_COLUMNS: Record<string, { rest: 'short' | 'long' }> = {
+export const POOL_COLUMNS: Record<
+    string,
+    { rest: 'short' | 'long'; regain?: number }
+> = {
     'srd-2024_monk_focus-points': { rest: 'short' },
     'srd-2024_sorcerer_sorcery-points': { rest: 'long' },
-    'srd-2024_cleric_channel-divinity-uses': { rest: 'short' },
-    'srd-2024_paladin_channel-divinity-uses': { rest: 'short' },
+    'srd-2024_cleric_channel-divinity-uses': { rest: 'long', regain: 1 },
+    'srd-2024_paladin_channel-divinity-uses': { rest: 'long', regain: 1 },
 };
 
 const levels = (f: (level: number) => string) =>

@@ -46,7 +46,9 @@ export const LimitsSchema = z.object({
                 FormulaSchema,
                 ScaleSchema,
             ]),
-            shortRegain: z.number().int().min(1).optional(),
+            shortRegain: z
+                .union([z.number().int().min(1), FormulaSchema])
+                .optional(),
         })
         .optional(),
     cooldownRounds: z.number().int().min(1).optional(),

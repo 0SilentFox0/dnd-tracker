@@ -279,6 +279,7 @@ export interface AbilityPool {
     label: string;
     max: number;
     rest: 'short' | 'long' | null;
+    regain?: number;
     recharge?: 4 | 5 | 6;
 }
 

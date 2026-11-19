@@ -55,7 +55,12 @@ export const ClassColumnSchema = z.object({
         .max(40),
     label: z.string().trim().min(1).max(60),
     values: z.array(z.string().trim().max(20)).length(MAX_CLASS_LEVEL),
-    pool: z.object({ rest: z.enum(['short', 'long']) }).optional(),
+    pool: z
+        .object({
+            rest: z.enum(['short', 'long']),
+            regain: z.number().int().min(1).max(10).optional(),
+        })
+        .optional(),
 });
 
 const columnsSchema = z.array(ClassColumnSchema).max(MAX_CLASS_COLUMNS);

@@ -13,9 +13,9 @@ import {
     put,
 } from '@/lib/utils/battle/common/action-flow';
 import { applyBalanceDamageMultiplier } from '@/lib/utils/battle/damage/balance-multiplier';
+import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
 import { bothOnMap, cellsOf, footprintDistance } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
-import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
 import { dealsNoDamage } from '@/lib/utils/battle/participant/state';
 import { applyResistance, immunityNote } from '@/lib/utils/battle/resistance';
 import { outcomeFor } from '@/lib/utils/battle/spell/cast/outcome';
