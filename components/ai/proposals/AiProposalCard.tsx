@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ScenarioOpList } from './ScenarioOpList';
 
 import { Button } from '@/components/ui/button';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { AiProposal, ScenarioAiOp } from '@/types/ai';
 
 interface AiProposalCardProps {
@@ -25,7 +26,7 @@ function SlideView({
     return (
         <div className="space-y-1 rounded border border-primary/40 p-2">
             <Image
-                src={op.slide.imageUrl}
+                src={toMediaUrl(op.slide.imageUrl)}
                 alt={op.slide.title ?? t('proposal.slideAlt')}
                 width={0}
                 height={0}

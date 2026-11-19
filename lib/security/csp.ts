@@ -22,7 +22,7 @@ const RESOURCES = [
     "img-src 'self' data: blob: https:",
     "media-src 'self' blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.pusher.com wss://*.pusher.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.workers.dev https://*.pusher.com wss://*.pusher.com",
     "frame-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

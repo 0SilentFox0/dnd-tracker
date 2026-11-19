@@ -1,3 +1,5 @@
+import { toMediaUrl } from '@/lib/utils/common/image-url';
+
 export interface ImageDimensions {
     width: number;
     height: number;
@@ -24,6 +26,6 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
 
         image.onload = () => resolve(image);
         image.onerror = () => reject(new Error(src));
-        image.src = src;
+        image.src = toMediaUrl(src);
     });
 }

@@ -24,6 +24,7 @@
 |--------|----------|------|
 | `DATABASE_URL` | Production, Preview | PostgreSQL (для serverless краще **Supabase pooler**, порт **6543**, у рядку `?pgbouncer=true&sslmode=require`). Див. коментар у `lib/db.ts`. |
 | `NEXT_PUBLIC_SUPABASE_URL` | Усі | URL проєкту Supabase. |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` | Усі (опційно) | Хост Cloudflare-кешу перед Supabase Storage (`infra/media-worker`). Не задано — прямі URL Supabase; відкат = прибрати змінну. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Усі | Anon (public) key. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Service role — лише на сервері, не в клієнтському бандлі. |
 | `DIRECT_URL` | Production | Session pooler / Direct, порт 5432 — для `prisma migrate deploy` у збірці. |

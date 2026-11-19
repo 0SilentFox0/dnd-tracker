@@ -2,12 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
     isBundledStaticAsset,
+    isHostedOnProjectStorage,
     isHttpUrl,
     isSharedAssetUrl,
     isSupabaseStorageUrl,
     normalizeImageUrl,
     sharedAssetPath,
     templateAssetPath,
+    toMediaUrl,
 } from '../image-url';
 
 describe('normalizeImageUrl', () => {
@@ -175,5 +177,75 @@ describe('isSharedAssetUrl', () => {
         expect(isSharedAssetUrl(`${base}/scene-slides/sets/x/y.webp`)).toBe(
             false
         );
+    });
+});
+
+describe('toMediaUrl', () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    const SB = 'https://proj.supabase.co';
+
+    const MEDIA = 'https://media.example.workers.dev';
+
+    const useMedia = () => {
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', SB);
+        vi.stubEnv('NEXT_PUBLIC_MEDIA_BASE_URL', MEDIA);
+    };
+
+    it('swaps the project storage host for the media host keeping path and query', () => {
+        useMedia();
+        expect(
+            toMediaUrl(`${SB}/storage/v1/object/public/unit-icons/a.webp?t=1`)
+        ).toBe(`${MEDIA}/storage/v1/object/public/unit-icons/a.webp?t=1`);
+    });
+
+    it('keeps encoded and non-ASCII paths intact', () => {
+        useMedia();
+        expect(
+            toMediaUrl(
+                `${SB}/storage/v1/object/public/world-maps/c1/%D0%BA%D0%B0%D1%80%D1%82%D0%B0%20a.webp`
+            )
+        ).toBe(
+            `${MEDIA}/storage/v1/object/public/world-maps/c1/%D0%BA%D0%B0%D1%80%D1%82%D0%B0%20a.webp`
+        );
+    });
+
+    it('is a no-op when NEXT_PUBLIC_MEDIA_BASE_URL is unset', () => {
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', SB);
+
+        const url = `${SB}/storage/v1/object/public/unit-icons/a.webp`;
+
+        expect(toMediaUrl(url)).toBe(url);
+    });
+
+    it.each([
+        'https://static.wikia.nocookie.net/x/images/a.png/revision/latest',
+        'data:image/png;base64,AAAA',
+        'blob:https://app.example/1234',
+        '/battle-maps/nicolas-tomb.webp',
+        'not-a-url',
+        'https://other.supabase.co/storage/v1/object/public/unit-icons/a.webp',
+    ])('leaves %s untouched', (src) => {
+        useMedia();
+        expect(toMediaUrl(src)).toBe(src);
+    });
+
+    it('is idempotent and the media host still counts as project storage', () => {
+        useMedia();
+
+        const media = `${MEDIA}/storage/v1/object/public/unit-icons/a.webp`;
+
+        expect(toMediaUrl(media)).toBe(media);
+        expect(isSupabaseStorageUrl(media)).toBe(true);
+        expect(isHostedOnProjectStorage(media)).toBe(true);
+    });
+
+    it('a media-host URL on another host is not project storage', () => {
+        useMedia();
+        expect(
+            isHostedOnProjectStorage(
+                'https://evil.workers.dev/storage/v1/object/public/unit-icons/a.webp'
+            )
+        ).toBe(false);
     });
 });

@@ -9,6 +9,7 @@ import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { useLoadedAspect } from '@/lib/hooks/battle';
 import { useReducedMotion } from '@/lib/hooks/common';
 import { backgroundBox } from '@/lib/utils/battle/grid';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const BACKGROUND_FADE_MS = 800;
@@ -22,7 +23,7 @@ interface LayerProps {
 }
 
 function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
-    const src = map.background ?? DEFAULT_MAP_BACKGROUND;
+    const src = toMediaUrl(map.background ?? DEFAULT_MAP_BACKGROUND);
 
     const { aspect, imgProps } = useLoadedAspect(src, onReady);
 

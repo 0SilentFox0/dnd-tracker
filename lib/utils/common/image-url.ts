@@ -28,7 +28,7 @@ export function normalizeImageUrl(src: string): string {
             }
         }
 
-        return url.toString();
+        return toMediaUrl(url.toString());
     } catch {
         return src;
     }
@@ -64,20 +64,46 @@ export function bucketObjectPath(src: string, bucket: string): string | null {
     }
 }
 
-/** Already on our project Storage (host of NEXT_PUBLIC_SUPABASE_URL). */
+function hostOf(raw: string | undefined): string | null {
+    try {
+        return raw ? new URL(raw).host : null;
+    } catch {
+        return null;
+    }
+}
+
+const mediaHost = () => hostOf(process.env.NEXT_PUBLIC_MEDIA_BASE_URL);
+
+/** Already on our project Storage (host of NEXT_PUBLIC_SUPABASE_URL or the media cache host). */
 export function isHostedOnProjectStorage(url: string): boolean {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const parsed = parsePublicStorageUrl(url)?.url;
 
-    const parsed = base ? parsePublicStorageUrl(url)?.url : undefined;
+    if (!parsed || parsed.protocol !== 'https:') return false;
 
-    if (!base || !parsed) return false;
+    return [hostOf(process.env.NEXT_PUBLIC_SUPABASE_URL), mediaHost()].includes(
+        parsed.host
+    );
+}
+
+/** Render-time only: stored URLs stay canonical Supabase URLs. No-op when the media base is unset. */
+export function toMediaUrl(src: string): string {
+    const base = process.env.NEXT_PUBLIC_MEDIA_BASE_URL;
+
+    const parsed = base ? parsePublicStorageUrl(src)?.url : undefined;
+
+    if (!base || !parsed) return src;
+
+    if (parsed.host !== hostOf(process.env.NEXT_PUBLIC_SUPABASE_URL)) return src;
 
     try {
-        return (
-            parsed.protocol === 'https:' && parsed.host === new URL(base).host
-        );
+        const media = new URL(base);
+
+        parsed.protocol = media.protocol;
+        parsed.host = media.host;
+
+        return parsed.toString();
     } catch {
-        return false;
+        return src;
     }
 }
 
@@ -127,7 +153,10 @@ export function isBundledStaticAsset(src: string): boolean {
 export function isSupabaseStorageUrl(src: string): boolean {
     const url = parsePublicStorageUrl(src)?.url;
 
-    return url?.protocol === 'https:' && url.hostname.endsWith('.supabase.co');
+    return (
+        url?.protocol === 'https:' &&
+        (url.hostname.endsWith('.supabase.co') || url.host === mediaHost())
+    );
 }
 
 export function isHttpUrl(src: string): boolean {

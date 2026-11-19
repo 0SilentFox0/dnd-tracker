@@ -51,7 +51,7 @@ describe('media worker handle', () => {
     });
 
     it('forwards Range and passes a 206 through', async () => {
-        const origin = vi.fn(async () => new Response('x', { status: 206 }));
+        const origin = vi.fn(async (_url: string, _init: RequestInit) => new Response('x', { status: 206 }));
 
         const res = await handle(
             req(PATH, { headers: { range: 'bytes=0-99' } }),
@@ -66,7 +66,7 @@ describe('media worker handle', () => {
     });
 
     it('asks Cloudflare to cache 2xx for a year, 404 briefly, 5xx never', async () => {
-        const origin = vi.fn(async () => new Response('x'));
+        const origin = vi.fn(async (_url: string, _init: RequestInit) => new Response('x'));
 
         await handle(req(PATH), ENV, origin);
 
