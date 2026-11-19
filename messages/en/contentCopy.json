@@ -34,6 +34,7 @@
       "exists": "already exists",
       "kind-unsupported": "this kind cannot be copied",
       "duplicate-name": "duplicate name",
+      "file-not-copyable": "this uploaded file is not copied",
       "not-found": "not found",
       "unknown-kind": "unknown kind",
       "unknown": "skipped"

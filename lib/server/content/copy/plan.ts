@@ -21,6 +21,7 @@ export type CopyPlan = {
         name: string;
         reason:
             | 'exists'
+            | 'file-not-copyable'
             | 'kind-unsupported'
             | 'unknown-kind'
             | 'not-found'
@@ -109,7 +110,13 @@ export async function buildCopyPlan(args: {
                 continue;
             }
 
-            if (active.get(table) === false)
+            if (table === 'tracks' && row.kind === 'file')
+                plan.skipped.push({
+                    kind,
+                    name: nameOf(row),
+                    reason: 'file-not-copyable',
+                });
+            else if (active.get(table) === false)
                 plan.skipped.push({
                     kind,
                     name: nameOf(row),

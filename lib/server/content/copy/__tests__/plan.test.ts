@@ -153,6 +153,29 @@ describe('buildCopyPlan', () => {
         expect(warnings).toEqual([]);
     });
 
+    it('skips uploaded file tracks and copies youtube tracks', async () => {
+        const [F, Y] = [id('7'), id('8')];
+
+        const src = emptyBundle();
+
+        src.tracks.push(
+            { id: F, title: 'Upload', kind: 'file', url: 'p/x.mp3' },
+            { id: Y, title: 'Yt', kind: 'youtube', url: 'https://youtu.be/a' }
+        );
+
+        const plan = await buildCopyPlan({
+            source: src,
+            target: emptyBundle(),
+            targetActor: actor,
+            selected: [{ kind: 'tracks', ids: [F, Y] }],
+        });
+
+        expect(plan.skipped).toEqual([
+            { kind: 'tracks', name: 'Upload', reason: 'file-not-copyable' },
+        ]);
+        expect(plan.toCreate.map((r) => r.row.id)).toEqual([Y]);
+    });
+
     it('handles reuse and an unsupported kind together', async () => {
         inactive.add('spells');
 

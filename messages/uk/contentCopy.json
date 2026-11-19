@@ -34,6 +34,7 @@
       "exists": "уже існує",
       "kind-unsupported": "цей вид не копіюється",
       "duplicate-name": "дубль назви",
+      "file-not-copyable": "завантажений файл не копіюється",
       "not-found": "не знайдено",
       "unknown-kind": "невідомий вид",
       "unknown": "пропущено"
