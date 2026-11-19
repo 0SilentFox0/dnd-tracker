@@ -235,7 +235,6 @@
   "profile": {
     "title": "Profile",
     "subtitle": "Your account and avatar",
-    "account": "Account",
     "avatar": {
       "change": "Change photo",
       "remove": "Remove photo",

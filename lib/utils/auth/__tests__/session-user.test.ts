@@ -1,10 +1,33 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { toSessionUser } from '@/lib/utils/auth/session-user';
 
 const base = { id: 'u1', email: 'a@b.c' };
 
+const own = (path: string) =>
+    `https://x.supabase.co/storage/v1/object/public/user-avatars/${path}`;
+
 describe('toSessionUser', () => {
+    beforeEach(() =>
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://x.supabase.co')
+    );
+
+    it('ignores a custom_avatar_url from a foreign host or bucket', () => {
+        for (const custom of [
+            'https://tracker.example/pixel',
+            'https://x.supabase.co/storage/v1/object/public/other/u/a.webp',
+        ])
+            expect(
+                toSessionUser({
+                    ...base,
+                    user_metadata: {
+                        custom_avatar_url: custom,
+                        avatar_url: 'https://g/1',
+                    },
+                })?.avatarUrl
+            ).toBe('https://g/1');
+    });
+
     it('returns null without a user', () =>
         expect(toSessionUser(null)).toBeNull());
 
@@ -12,12 +35,12 @@ describe('toSessionUser', () => {
         const u = toSessionUser({
             ...base,
             user_metadata: {
-                custom_avatar_url: 'https://x.supabase.co/own.webp',
+                custom_avatar_url: own('u/own.webp'),
                 avatar_url: 'https://lh3.googleusercontent.com/g',
             },
         });
 
-        expect(u?.avatarUrl).toBe('https://x.supabase.co/own.webp');
+        expect(u?.avatarUrl).toBe(own('u/own.webp'));
     });
 
     it('falls back to avatar_url, then picture, then null', () => {

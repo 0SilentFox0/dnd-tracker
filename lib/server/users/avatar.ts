@@ -1,14 +1,18 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { USER_AVATARS_BUCKET } from '@/lib/constants/profile';
+import {
+    USER_AVATARS_BUCKET,
+    type UserAvatarContentType,
+} from '@/lib/constants/profile';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { userAvatars } from '@/lib/supabase/user-avatar-storage';
 import type { Result } from '@/types/common';
 import type { SlideUploadTicket } from '@/types/show';
 
 export const createUserAvatarTicket = (
-    userId: string
+    userId: string,
+    contentType: UserAvatarContentType
 ): Promise<Result<SlideUploadTicket>> =>
-    userAvatars.createTicket(userId, 'image/webp');
+    userAvatars.createTicket(userId, contentType);
 
 async function listObjectUrls(userId: string, except?: string) {
     const storage = createAdminClient().storage.from(USER_AVATARS_BUCKET);

@@ -53,6 +53,25 @@ describe('commitUserAvatar', () => {
         expect(updateUserById).not.toHaveBeenCalled();
     });
 
+    it.each([
+        ['a foreign host', `https://evil.example/storage/v1/object/public/user-avatars/u1/${id('a')}.webp`],
+        ['another bucket', `https://p.supabase.co/storage/v1/object/public/other/u1/${id('a')}.webp`],
+        ['a traversal path', `${base}/u1/../u2/${id('a')}.webp`],
+        ['a bad object name', `${base}/u1/avatar.webp`],
+        ['a non-allowed extension', `${base}/u1/${id('a')}.png`],
+    ])('rejects %s', async (_n, url) => {
+        const r = await commitUserAvatar('u1', url);
+
+        expect(r).toEqual({ ok: false, message: API_ERRORS.INVALID_BODY });
+        expect(updateUserById).not.toHaveBeenCalled();
+    });
+
+    it('accepts a jpeg object', async () => {
+        const r = await commitUserAvatar('u1', `${base}/u1/${id('a')}.jpg`);
+
+        expect(r.ok).toBe(true);
+    });
+
     it('stores the url and removes the older objects', async () => {
         const url = `${base}/u1/${id('a')}.webp`;
 

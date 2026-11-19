@@ -1,3 +1,9 @@
+import { USER_AVATARS_BUCKET } from '@/lib/constants/profile';
+import {
+    bucketObjectPath,
+    isHostedOnProjectStorage,
+} from '@/lib/utils/common/image-url';
+
 export type SessionUser = {
     id: string;
     email: string | null;
@@ -14,6 +20,12 @@ type AuthUserLike = {
 const httpsUrl = (v: unknown): v is string =>
     typeof v === 'string' && v.startsWith('https://');
 
+// user_metadata is client-writable, so a custom photo counts only when it lives in our avatar bucket
+const ownAvatarUrl = (v: unknown): v is string =>
+    httpsUrl(v) &&
+    isHostedOnProjectStorage(v) &&
+    bucketObjectPath(v, USER_AVATARS_BUCKET) !== null;
+
 const text = (v: unknown): v is string =>
     typeof v === 'string' && v.trim() !== '';
 
@@ -29,7 +41,8 @@ export function toSessionUser(
         email: u.email ?? null,
         name: [m.full_name, m.name].find(text) ?? null,
         avatarUrl:
-            [m.custom_avatar_url, m.avatar_url, m.picture].find(httpsUrl) ??
-            null,
+            (ownAvatarUrl(m.custom_avatar_url)
+                ? m.custom_avatar_url
+                : [m.avatar_url, m.picture].find(httpsUrl)) ?? null,
     };
 }

@@ -132,11 +132,15 @@ export async function cropSquareToBlob(
     ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, size, size);
     bitmap.close();
 
-    const blob = await toBlob(canvas, 'image/webp', quality);
+    const webp = await toBlob(canvas, 'image/webp', quality);
 
-    // the bucket accepts webp only; Safari may hand back PNG
-    if (blob?.type !== 'image/webp')
+    // Safari hands back PNG for webp; the bucket accepts webp and jpeg only
+    if (webp?.type === 'image/webp') return webp;
+
+    const jpeg = await toBlob(canvas, 'image/jpeg', quality);
+
+    if (jpeg?.type !== 'image/jpeg')
         throw new ImageResizeError('validation.image.compressFailed');
 
-    return blob;
+    return jpeg;
 }

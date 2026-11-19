@@ -12,13 +12,18 @@ import { YEAR_CACHE_SECONDS } from '@/lib/constants/storage';
 import { useNotify } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { createClient } from '@/lib/supabase/client';
-import { cropSquareToBlob } from '@/lib/utils/common/image-resize';
+import {
+    cropSquareToBlob,
+    ImageResizeError,
+} from '@/lib/utils/common/image-resize';
 
 const isSourceType = (type: string) =>
     (AVATAR_SOURCE_TYPES as readonly string[]).includes(type);
 
 export function useAvatar() {
     const t = useTranslator('common');
+
+    const tRoot = useTranslator();
 
     const notify = useNotify();
 
@@ -34,11 +39,24 @@ export function useAvatar() {
 
         try {
             await task();
+        } catch (err) {
+            console.error('avatar', err);
+            void notify(
+                err instanceof ImageResizeError
+                    ? tRoot(err.key)
+                    : t('profile.avatar.failed')
+            );
+            lock.current = false;
+            setPending(false);
+
+            return;
+        }
+
+        try {
             // refreshing the session fires onAuthStateChange, which updates the header
             await createClient().auth.refreshSession();
         } catch (err) {
-            console.error('avatar', err);
-            void notify(t('profile.avatar.failed'));
+            console.error('avatar session refresh', err);
         } finally {
             lock.current = false;
             setPending(false);
@@ -55,12 +73,12 @@ export function useAvatar() {
         await run(async () => {
             const blob = await cropSquareToBlob(file, USER_AVATAR_SIZE);
 
-            const ticket = await profileApi.avatarTicket();
+            const ticket = await profileApi.avatarTicket(blob.type);
 
             const { error } = await createClient()
                 .storage.from(ticket.bucket)
                 .uploadToSignedUrl(ticket.path, ticket.token, blob, {
-                    contentType: 'image/webp',
+                    contentType: blob.type,
                     cacheControl: YEAR_CACHE_SECONDS,
                 });
 
