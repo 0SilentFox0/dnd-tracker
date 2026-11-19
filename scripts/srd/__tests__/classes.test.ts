@@ -98,7 +98,7 @@ describe('convertClasses', () => {
             at('Fighter', 2).find((a) => a.id === 'action-surge-2')
         ).toMatchObject({
             trigger: { event: 'action' },
-            effects: [{ kind: 'grantAction', extraActions: 2 }],
+            effects: [{ kind: 'grantAction', extraActions: 1, free: true }],
         });
         expect(at('Fighter', 17).some((a) => a.id === 'action-surge-17')).toBe(
             false
