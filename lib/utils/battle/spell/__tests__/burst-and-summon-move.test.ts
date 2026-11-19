@@ -24,7 +24,20 @@ const at = (p: BattleParticipant, position: GridPoint): BattleParticipant => ({
 const foe = (id: string, position: GridPoint) =>
     at(makeParticipant({ id, side: ParticipantSide.ENEMY }), position);
 
-const caster = () => at(makeParticipant({ id: 'c' }), { x: 0, y: 5 });
+const caster = () => {
+    const c = at(makeParticipant({ id: 'c' }), { x: 0, y: 5 });
+
+    return {
+        ...c,
+        spellcasting: {
+            ...c.spellcasting,
+            spellSlots: {
+                '1': { max: 2, current: 2 },
+                '3': { max: 2, current: 2 },
+            },
+        },
+    };
+};
 
 const knife: CastableSpell = {
     id: 'ice-knife',
@@ -82,8 +95,8 @@ const hpAfter = (id: string, castLevel?: number) => {
         ...(castLevel && { castLevel }),
     });
 
-    return r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats
-        .currentHp;
+    return r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)
+        ?.combatStats.currentHp;
 };
 
 describe('burst', () => {

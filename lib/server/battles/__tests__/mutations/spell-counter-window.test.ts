@@ -65,7 +65,9 @@ const body = (over: Record<string, unknown> = {}) =>
     }) as never;
 
 const make = (
-    loadInterruptSpells?: (...a: [string, string[]]) => Promise<InterruptSpell[]>,
+    loadInterruptSpells?: (
+        ...a: [string, string[]]
+    ) => Promise<InterruptSpell[]>,
     options: Parameters<typeof createSpellMutation>[1] = {}
 ) =>
     createSpellMutation(
@@ -89,7 +91,7 @@ describe('counter window in the spell mutation', () => {
 
         const pending = counterPendingOf(out.scene?.pendingChoice);
 
-        expect(load).toHaveBeenCalledWith('c1', ['s1', 'cs']);
+        expect(load).toHaveBeenCalledWith('c1', ['cs']);
         expect(pending?.shown.offers).toEqual([
             { reactorId: 'mage', spellId: 'cs', slotLevels: [3], dm: true },
         ]);

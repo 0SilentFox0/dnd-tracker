@@ -318,6 +318,7 @@ exports[`детермінований контракт turn loop > зберіг�
           ],
           "attacks": [],
           "attacksLeft": undefined,
+          "boundAttacks": undefined,
           "equippedArtifacts": [],
           "extraMovement": undefined,
           "hazardHitRound": 2,

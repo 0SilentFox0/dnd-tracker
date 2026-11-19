@@ -74,6 +74,7 @@ describe('useCounterNudge', () => {
         expect(mutate).toHaveBeenCalledTimes(1);
 
         mutate.mockReset();
+        vi.setSystemTime(NOW);
         scene = makeScene({ isDM: false, userId: 'u2' });
         renderHook(() => useCounterNudge());
 

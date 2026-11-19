@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { bareD20Rules, dnd5eRules } from '@/lib/__tests__/helpers/dnd5e-modules';
+import {
+    bareD20Rules,
+    dnd5eRules,
+} from '@/lib/__tests__/helpers/dnd5e-modules';
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
@@ -47,7 +50,12 @@ describe('deathsaves module composition', () => {
 
         expect(combat.holdsOn).toBeDefined();
         expect(combat.onRevived).toBeDefined();
-        expect(combat.turn?.onSkippedTurn).toHaveLength(1);
+
+        const bare = ruleSystemOf(bareD20Rules()).combat.turn?.onSkippedTurn;
+
+        expect(combat.turn?.onSkippedTurn).toHaveLength(
+            (bare?.length ?? 0) + 1
+        );
     });
 
     it('bare d20 has none of them', () => {
@@ -55,7 +63,9 @@ describe('deathsaves module composition', () => {
 
         expect(combat.holdsOn).toBeUndefined();
         expect(combat.onRevived).toBeUndefined();
-        expect(combat.turn?.onSkippedTurn ?? []).toHaveLength(0);
+        expect(
+            (combat.turn?.onSkippedTurn ?? []).map((hook) => hook.name)
+        ).toEqual(['d20RegenWake']);
     });
 
     it('victory waits for a dying hero with the module and not without it', () => {

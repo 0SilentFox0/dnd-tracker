@@ -202,6 +202,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         start: mutation(),
         reset: mutation(),
         complete: mutation(),
+        counterWindow: mutation(),
         rollback: mutation(),
         addParticipant: mutation(),
         updateParticipant: mutation(),

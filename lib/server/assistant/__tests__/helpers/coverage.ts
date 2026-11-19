@@ -366,6 +366,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/battles/[battleId]/counter-window',
+        methods: ['POST'],
+        task: 10,
+        adapter: 'battle-counter-window',
+        state: 'handoff',
+    },
+    {
         route: 'campaigns/[id]/battles/[battleId]/complete',
         methods: ['POST'],
         task: 10,

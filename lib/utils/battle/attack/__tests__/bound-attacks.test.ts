@@ -77,7 +77,13 @@ const validate = (p: BattleParticipant, attackId: string): string => {
                 participants: [p, target],
                 scene: { turnIndex: 0 },
             },
-            { attackerId: 'h', targetId: 't', attackId, d20Roll: 10, damageRolls: [1] },
+            {
+                attackerId: 'h',
+                targetId: 't',
+                attackId,
+                d20Roll: 10,
+                damageRolls: [1],
+            },
             DEFAULT_RULES
         );
 
@@ -100,10 +106,15 @@ describe('bound attacks', () => {
     });
 
     it('is a no-op without an item source', () => {
-        const generic = resolved({
-            trigger: { event: 'bonusAction' },
-            effects: [{ kind: 'grantAction', itemAttacks: 1, target: 'self' }],
-        });
+        const generic = resolved(
+            {
+                trigger: { event: 'bonusAction' },
+                effects: [
+                    { kind: 'grantAction', itemAttacks: 1, target: 'self' },
+                ],
+            },
+            { id: '' }
+        );
 
         const p = makeParticipant({ id: 'h', abilities: [generic] });
 
@@ -162,7 +173,11 @@ describe('bound attacks', () => {
     });
 
     it('stacks on an existing entry', () => {
-        const p = grantBoundAttacks(grantBoundAttacks(hero(), 'item-1', 1), 'item-1', 1);
+        const p = grantBoundAttacks(
+            grantBoundAttacks(hero(), 'item-1', 1),
+            'item-1',
+            1
+        );
 
         expect(p.battleData.boundAttacks).toEqual([
             { sourceId: 'item-1', left: 2 },

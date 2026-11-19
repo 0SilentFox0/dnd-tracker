@@ -78,9 +78,10 @@ describe('allowWhileAwaitingDm', () => {
         ]);
     });
 
-    it('allowWhileCritPending: лише вибір крита, завершення, скидання й відкат', async () => {
+    it('allowWhileCritPending: лише вибір крита, вікно контрзаклинання, завершення, скидання й відкат', async () => {
         expect(await allowing('allowWhileCritPending')).toEqual([
             'complete',
+            'counter-window',
             'crit-choice',
             'reset',
             'rollback',

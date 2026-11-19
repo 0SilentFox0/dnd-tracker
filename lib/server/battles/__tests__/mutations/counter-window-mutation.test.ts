@@ -64,7 +64,11 @@ const ROWS: Record<string, Spell> = {
         name: 'Counterspell',
         level: 3,
         cost: 'reaction',
-        resolution: { kind: 'save', ability: 'constitution' },
+        resolution: {
+            kind: 'save',
+            ability: 'constitution',
+            onSuccess: 'none',
+        },
         spellEffects: [{ kind: 'interruptCast' }],
     }),
 };
@@ -101,6 +105,7 @@ const mageOf = (id: string, controlledBy: string) =>
             spellcasting: {
                 spellSlots: { '3': { max: 1, current: 1 } },
                 knownSpells: ['cs'],
+                spellcastingAbility: 'intelligence',
             },
         }
     );
@@ -119,7 +124,11 @@ const FIRE = (over: Record<string, unknown> = {}) =>
     }) as never;
 
 const dmCtx = (over: Partial<BattleMutationContext> = {}) =>
-    ({ userId: 'dm-user', isDM: true, ...over }) as Partial<BattleMutationContext>;
+    ({
+        userId: 'dm-user',
+        isDM: true,
+        ...over,
+    }) as Partial<BattleMutationContext>;
 
 const FAIL = 0;
 
@@ -129,7 +138,8 @@ function machine(opts: { rng?: number; now?: () => number } = {}) {
     const spell = (o: Parameters<typeof createSpellMutation>[1]) =>
         createSpellMutation(deps, {
             ...o,
-            ...(o?.rng && opts.rng !== undefined && { rng: () => opts.rng as number }),
+            ...(o?.rng &&
+                opts.rng !== undefined && { rng: () => opts.rng as number }),
         });
 
     return createCounterWindowMutation({ spell, now: opts.now });
@@ -270,11 +280,15 @@ describe('counter-window mutation', () => {
         const after = counterPendingOf(first.scene?.pendingChoice);
 
         expect(first.response).toMatchObject({ countered: false });
-        expect(after?.shown.offers.find((o) => o.reactorId === 'mage')).toMatchObject({
+        expect(
+            after?.shown.offers.find((o) => o.reactorId === 'mage')
+        ).toMatchObject({
             answer: 'failed',
         });
         expect(after?.hidden.attempts).toBe(1);
-        expect(new Date(after?.shown.deadline ?? 0).getTime()).toBe(later + 10_000);
+        expect(new Date(after?.shown.deadline ?? 0).getTime()).toBe(
+            later + 10_000
+        );
         expect(find(first, 'hero').actionFlags.hasUsedAction).toBe(false);
 
         const second = await machine({ rng: FAIL })(
@@ -290,10 +304,7 @@ describe('counter-window mutation', () => {
     it('pass by every reactor resolves the cast with the stored dice', async () => {
         const { ctx, pending } = await openWindow([hero, goblin, dmMage]);
 
-        const out = await machine()(
-            as(ctx, dmCtx()),
-            passBy(pending, 'mage')
-        );
+        const out = await machine()(as(ctx, dmCtx()), passBy(pending, 'mage'));
 
         const direct = await createSpellMutation(deps, { skipCounter: true })(
             context({ participants: [hero, goblin, dmMage] }),
@@ -351,9 +362,9 @@ describe('counter-window mutation', () => {
 
         const run = machine();
 
-        await expect(
-            run(ctx, passBy(pending, 'mage'))
-        ).rejects.toMatchObject({ status: 403 });
+        await expect(run(ctx, passBy(pending, 'mage'))).rejects.toMatchObject({
+            status: 403,
+        });
 
         await expect(
             run(ctx, {
@@ -423,10 +434,12 @@ describe('counter-window mutation', () => {
         const { ctx, pending } = await openWindow([hero, goblin, dmMage]);
 
         const spell = vi.fn(
-            (o: Parameters<typeof createSpellMutation>[1]) =>
-                async () => {
-                    throw new BattleRuleError('action_rejected', `x${o?.skipCounter}`);
-                }
+            (o: Parameters<typeof createSpellMutation>[1]) => async () => {
+                throw new BattleRuleError(
+                    'action_rejected',
+                    `x${o?.skipCounter}`
+                );
+            }
         );
 
         const dm = as(ctx, dmCtx());

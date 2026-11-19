@@ -89,10 +89,10 @@ describe('concentration save and the held die', () => {
 
         concentrationCheck({
             caster: holder,
-            damage: 40,
+            damage: 20,
             participants: [holder],
             rules: rules(),
-            rng: seq(0.1),
+            rng: seq(0.4),
             rider: gate.pick.rider,
         });
 
