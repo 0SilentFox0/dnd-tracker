@@ -1,4 +1,5 @@
 import type { SoundLibraryItem, SoundPreset as PresetRow } from '@prisma/client';
+import { createHash } from 'node:crypto';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -103,6 +104,9 @@ export async function getLibrary(userId: string): Promise<SoundLibrary> {
 
     return { sounds: sounds.map(toRow), presets: presets.map(toPreset) };
 }
+
+export const libraryEtag = (library: SoundLibrary): string =>
+    createHash('sha1').update(JSON.stringify(library)).digest('hex');
 
 async function ownedSound(
     userId: string,
@@ -213,4 +217,14 @@ export async function findPlayableFor(
     });
 
     return row ?? null;
+}
+
+export async function discardUploadedSound(
+    userId: string,
+    path: string
+): Promise<void> {
+    if (!soundPathOwnedBy(path, userId))
+        throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+
+    await removeSoundObject(path);
 }

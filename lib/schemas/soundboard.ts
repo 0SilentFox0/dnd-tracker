@@ -75,8 +75,11 @@ export const createLibrarySoundSchema = z.object({
         .int()
         .min(1)
         .max(MAX_SOUND_SECONDS * 1000),
-    source: z.enum(['upload', 'record']),
+    source: z.enum(['upload', 'record', 'link']),
+    sourceUrl: z.string().url().max(2048).optional(),
 });
+
+export const discardSoundSchema = z.object({ path: z.string().min(1).max(200) });
 
 export const updateLibrarySoundSchema = z
     .object({

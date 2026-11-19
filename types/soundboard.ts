@@ -21,7 +21,7 @@ export type SoundPlayEvent = {
     soundId: string;
     nonce: string;
     volume: number;
-    url: string;
+    url?: string;
 };
 
 export type BuiltinSound = {
