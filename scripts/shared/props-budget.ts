@@ -6,7 +6,7 @@ import {
     overBudget,
 } from '@/lib/__tests__/helpers/props-budget';
 
-export const PROPS_BUDGET_FILE = 'props-budget-exempt.json';
+export const PROPS_BUDGET_FILE = 'ratchets/props-budget-exempt.json';
 
 if (process.argv.includes('--write')) {
     const sorted = Object.fromEntries(

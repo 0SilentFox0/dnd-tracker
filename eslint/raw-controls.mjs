@@ -25,7 +25,7 @@ const rule = {
         type: 'problem',
         schema: [],
         messages: {
-            raw: 'Сирий <{{tag}}>: використайте kit (components/ui, components/hud: Textarea, Disclosure; Slider для type=range, next/image для img). Baseline raw-controls-exempt.json лише скорочується.',
+            raw: 'Сирий <{{tag}}>: використайте kit (components/ui, components/hud: Textarea, Disclosure; Slider для type=range, next/image для img). Baseline ratchets/raw-controls-exempt.json лише скорочується.',
         },
     },
     create(context) {

@@ -109,7 +109,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 ## Правила зони
 
-- **Зона.** Поза коренями й `system-imports-exempt.json` нічого не імпортує `@/systems/*` (ESLint `systems/zone`).
+- **Зона.** Поза коренями й `ratchets/system-imports-exempt.json` нічого не імпортує `@/systems/*` (ESLint `systems/zone`).
 - **Шари всередині системи** наслідують правила core: `rules/**` = `lib/utils`, `ui/**` = `components`, `hooks/**` = `lib/hooks`, `api/**` = `lib/api`, `server/**` без обмежень шару. Система не імпортує іншу систему (лише теки з `requires`), `@/app/*`, `@/scripts/*`; `meta.ts` — лише `import type`.
 - **Контракт** (`lib/__tests__/system-contract.test.ts`): ключі meta = логіка = UI = сервер = `PACK_HOOKS`; кожен namespace meta має файл у `messages/{uk,en}`; `assertSystemContract` проходять і реальні системи, і фікстура `d6pool` (`lib/__tests__/fixtures/d6pool`, `d6pool-plus` — модуль, `d6pool-alt` — той самий `claims`). Матриця композицій — `system-composition-matrix.test.ts`; бій без d20 — `lib/__tests__/d6pool-battle.test.ts` (граф імпортів зупиняється на коренях і не досягає жодного `systems/*`).
 - **Гард колонок статблока** `lib/__tests__/statblock-guard.test.ts`: правила core не читають `abilities.<d20-колонка>` (дозволені будівники/мапери `battle/participant`, `battle/store`, `battle/transform`, `abilities/build`); максимум лише падає.
@@ -127,11 +127,11 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`; числа лише падають.
 
-- `props-budget-exempt.json` (Ч23): компоненти з > 7 пропсів, числа лише падають; `pnpm exec tsx scripts/shared/props-budget.ts --write`.
-- `system-imports-exempt.json` = `[]` (було 18 в E1, 1 до Ч17).
-- Межі UI системних тек (`systems/*/{ui,hooks}` беруть з core лише `ui`/`hud`/`common`, `components/systems/types` і кіт) — ESLint `ui-layers/zone`, `ui-layers-exempt.json` = `[]`; див. [ui-layers.md](ui-layers.md).
-- `system-literals-exempt.json`: 5 файлів / 5 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
-- `system-surface-exempt.json` (`lib/__tests__/system-surface.test.ts`): `case`-мітки, ключі об'єктів і kebab-назви операцій із id аддона в core (файли), колонки/моделі `prisma/schema/core.prisma` (allowlist до contract-кроку; файли `prisma/schema/systems/<module>.prisma` називають лише свій модуль) і ключі core-namespaces у `messages/en`; числа й списки лише падають, регенерація — `pnpm exec tsx scripts/shared/system-ratchet.ts --write`.
+- `ratchets/props-budget-exempt.json` (Ч23): компоненти з > 7 пропсів, числа лише падають; `pnpm exec tsx scripts/shared/props-budget.ts --write`.
+- `ratchets/system-imports-exempt.json` = `[]` (було 18 в E1, 1 до Ч17).
+- Межі UI системних тек (`systems/*/{ui,hooks}` беруть з core лише `ui`/`hud`/`common`, `components/systems/types` і кіт) — ESLint `ui-layers/zone`, `ratchets/ui-layers-exempt.json` = `[]`; див. [ui-layers.md](ui-layers.md).
+- `ratchets/system-literals-exempt.json`: 5 файлів / 5 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
+- `ratchets/system-surface-exempt.json` (`lib/__tests__/system-surface.test.ts`): `case`-мітки, ключі об'єктів і kebab-назви операцій із id аддона в core (файли), колонки/моделі `prisma/schema/core.prisma` (allowlist до contract-кроку; файли `prisma/schema/systems/<module>.prisma` називають лише свій модуль) і ключі core-namespaces у `messages/en`; числа й списки лише падають, регенерація — `pnpm exec tsx scripts/shared/system-ratchet.ts --write`.
 - Лічильник module-queries (запити до модуля в обхід `ruleSystemOf`) = 0, жорстка заборона.
 - `lib/__tests__/registry-cycles.test.ts`: `KNOWN_CYCLES = []` (Ч21: lookup/install split); будь-який новий цикл реєстр↔шар систем = червоний тест.
 - `lib/__tests__/server-entry-imports.test.ts`: граф імпортів серверних входів (напр. `lib/db.ts`) не тягне реєстрів систем і `systems/*/index.ts`, `systems/*/server/index.ts`, `systems/*/ui/index.ts`.

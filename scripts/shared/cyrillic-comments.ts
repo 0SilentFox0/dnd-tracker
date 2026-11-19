@@ -1,11 +1,11 @@
-// pnpm ratchet:cyrillic-comments [--write]: cyrillic-comments-exempt.json = { file: count } of comments with Cyrillic (only shrinks)
+// pnpm ratchet:cyrillic-comments [--write]: ratchets/cyrillic-comments-exempt.json = { file: count } of comments with Cyrillic (only shrinks)
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
 export const ROOT = path.resolve(__dirname, '../..');
 
-export const COMMENTS_FILE = 'cyrillic-comments-exempt.json';
+export const COMMENTS_FILE = 'ratchets/cyrillic-comments-exempt.json';
 
 const SCAN_DIRS = [
     'app',

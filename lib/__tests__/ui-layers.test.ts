@@ -51,7 +51,7 @@ const importsOf = (file: string) =>
 const ignored = UI_LAYER_IGNORES.map(globToRe);
 
 const exempt: Entry[] = JSON.parse(
-    fs.readFileSync(path.join(ROOT, 'ui-layers-exempt.json'), 'utf8')
+    fs.readFileSync(path.join(ROOT, 'ratchets/ui-layers-exempt.json'), 'utf8')
 );
 
 const violations = (zone: (typeof UI_LAYER_ZONES)[number], file: string) => {

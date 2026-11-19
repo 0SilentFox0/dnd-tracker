@@ -12,11 +12,11 @@ import { TEMPLATE_REGISTRY } from '@/lib/utils/templates/registry';
 
 export const ROOT = path.resolve(__dirname, '../..');
 
-export const SURFACE_FILE = 'system-surface-exempt.json';
+export const SURFACE_FILE = 'ratchets/system-surface-exempt.json';
 
-export const IMPORTS_FILE = 'system-imports-exempt.json';
+export const IMPORTS_FILE = 'ratchets/system-imports-exempt.json';
 
-export const LITERALS_FILE = 'system-literals-exempt.json';
+export const LITERALS_FILE = 'ratchets/system-literals-exempt.json';
 
 export const SCAN_DIRS = [
     'lib',
