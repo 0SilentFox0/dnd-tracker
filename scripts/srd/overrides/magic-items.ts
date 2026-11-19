@@ -164,3 +164,36 @@ export const WONDROUS_SLOTS: Array<[RegExp, ArtifactRow['slot']]> = [
     [/\b(Cloak|Cape|Mantle|Robe)\b/, 'cloak'],
     [/\b(Helm|Hat|Circlet|Headband)\b/, 'helmet'],
 ];
+
+// wholly passive SRD properties the description parser leaves as text
+export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
+    'srd-2024_periapt-of-proof-against-poison': [
+        {
+            id: 'poison-immunity',
+            name: 'Proof against Poison',
+            trigger: { event: 'passive' },
+            effects: [
+                {
+                    kind: 'flag',
+                    flag: 'resistance',
+                    damageType: 'poison',
+                    percent: 100,
+                },
+                {
+                    kind: 'flag',
+                    flag: 'conditionImmunity',
+                    conditions: ['poisoned'],
+                },
+            ],
+        },
+    ],
+    'srd-2024_stone-of-good-luck-luckstone': [
+        {
+            id: 'luck',
+            name: 'Good Luck',
+            description: 'Applies to saving throws; ability checks stay manual.',
+            trigger: { event: 'passive' },
+            effects: [{ kind: 'modifyStat', stat: 'savingThrow', flat: 1 }],
+        },
+    ],
+};
