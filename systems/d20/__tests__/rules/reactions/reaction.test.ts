@@ -65,7 +65,7 @@ describe('reactionBlocker / canReact', () => {
 });
 
 describe('pickMeleeAttack', () => {
-    it('picks the first main-hand melee attack, skipping ranged and off-hand', () => {
+    it('picks the first main-hand melee attack of equal reach, skipping ranged and off-hand', () => {
         const p = withAttacks(
             atk('bow', { type: 'ranged' }),
             atk('dagger', { hand: 'off' }),
@@ -74,6 +74,12 @@ describe('pickMeleeAttack', () => {
         );
 
         expect(pickMeleeAttack(p)?.name).toBe('sword');
+    });
+
+    it('prefers the attack with the longest reach even when it is not first', () => {
+        const p = withAttacks(atk('sword'), atk('glaive', { reachCells: 2 }));
+
+        expect(pickMeleeAttack(p)?.name).toBe('glaive');
     });
 
     it('returns null with only ranged attacks or none', () => {

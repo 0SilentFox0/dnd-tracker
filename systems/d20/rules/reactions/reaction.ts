@@ -1,3 +1,5 @@
+import { D20_REACH } from '../attack/ability';
+
 import { AttackType, EffectMarker } from '@/lib/constants/battle';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
@@ -23,9 +25,21 @@ export const canReact = (p: BattleParticipant) => reactionBlocker(p) === null;
 export function pickMeleeAttack(p: BattleParticipant): BattleAttack | null {
     if (getDisabledAttackKinds(p).melee) return null;
 
-    return (
-        p.battleData.attacks.find(
-            (a) => a.hand !== 'off' && attackKindOf(a.type) === AttackType.MELEE
-        ) ?? null
-    );
+    let best: BattleAttack | null = null;
+
+    let bestReach = 0;
+
+    for (const a of p.battleData.attacks) {
+        if (a.hand === 'off' || attackKindOf(a.type) !== AttackType.MELEE)
+            continue;
+
+        const reach = a.reachCells || D20_REACH.meleeCells(p, a);
+
+        if (reach > bestReach) {
+            best = a;
+            bestReach = reach;
+        }
+    }
+
+    return best;
 }
