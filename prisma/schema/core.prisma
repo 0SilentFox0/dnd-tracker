@@ -26,6 +26,8 @@ model User {
   worldTravelLog      WorldTravelLog[]
   playerNotifications PlayerNotification[]
   acquaintanceNotes   AcquaintanceNote[]
+  soundLibraryItems   SoundLibraryItem[]
+  soundPresets        SoundPreset[]
 
   @@map("users")
 }
@@ -480,6 +482,37 @@ model CampaignSound {
 
   @@index([campaignId, sortOrder])
   @@map("campaign_sounds")
+}
+
+model SoundLibraryItem {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  name       String?
+  icon       String   @default("volume-2")
+  color      String?
+  volume     Float    @default(1)
+  url        String
+  durationMs Int      @map("duration_ms")
+  source     String
+  sourceUrl  String?  @map("source_url")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("sound_library_items")
+}
+
+model SoundPreset {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  slots     Json
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sortOrder])
+  @@map("sound_presets")
 }
 
 model SlideDeck {
