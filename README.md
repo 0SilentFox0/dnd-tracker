@@ -66,7 +66,11 @@ pnpm dev                     # запускає Docker Postgres, застосо�
 ```bash
 pnpm dev                 # next dev
 pnpm build               # prisma generate && next build
-pnpm lint                # eslint
+pnpm build:local         # те саме локально; при нестачі пам'яті NODE_OPTIONS=--max-old-space-size=10240
+pnpm lint                # eslint (повний прогін важкий; зазвичай pnpm lint:dirs --changed main)
+pnpm lint:dirs           # eslint по теках, з кешем
+pnpm cycles              # цикли імпортів (ratchet ratchets/import-cycles-baseline.json)
+pnpm systems:index       # перегенерувати корені реєстру систем після нової теки в systems/
 pnpm knip                # невикористаний код і залежності
 
 pnpm test:run            # vitest, один прогін (CI)
@@ -91,12 +95,18 @@ app/                  # App Router: сторінки, API routes
   campaigns/[id]/     # сторінки кампанії: dm/…, battles, character, show, world, info
   help/  settings/  uk/   # довідка, налаштування, українська версія лендінгу
 components/           # UI за доменами (battle, hud, show, world, ai, …) + ui/ (shadcn)
+                      #   у папці до ~10 файлів; далі підпапки за відповідальністю
+                      #   (battle/map/{layers,tokens,edges,panels}, common/{fields,entity,dialogs,shell,states})
 lib/
   api/                # клієнтські обгортки запитів
   hooks/<domain>/     # TanStack Query і форм-хуки
   server/             # серверна логіка (battles, content, templates, …)
   utils/<domain>/     # чиста доменна логіка (battle, abilities, spells, …)
   ai/  pusher/  supabase/  schemas/  constants/  onboarding/
+systems/              # рулсистеми: база (d20, wfrp), модулі (morale, skilltrees, …) і пресети (dnd5e, homm); ядро бачить їх лише через реєстри
+messages/             # переклади uk/en (next-intl), по неймспейсах
+eslint/               # власні ESLint-правила (raw-controls, ui-layers, кирилиця)
+ratchets/             # baseline-файли ratchet-перевірок (лише скорочуються): винятки, цикли, бюджети пропсів
 types/                # типи за доменами
 prisma/               # schema/ (core.prisma + systems/*.prisma), міграції
 scripts/              # CLI-скрипти (assets, constructor, db, import, seed, sim, srd)
@@ -104,7 +114,7 @@ data/                 # бібліотеки й шаблони (templates/srd-5.
 docs/                 # architecture/, guides/, product/, superpowers/ (специфікації й плани)
 ```
 
-Потік запиту: сторінка (server component) → `*-client.tsx` → хук `lib/hooks/<domain>` → `lib/api/<domain>` → route handler (Zod + сесія) → `lib/server/…` / `lib/utils/…` → Prisma. Компоненти не імпортують `@/lib/api/*` напряму (ESLint). Деталі шарів і правила — у [CLAUDE.md](CLAUDE.md).
+Потік запиту: сторінка (server component) → `*-client.tsx` → хук `lib/hooks/<domain>` → `lib/api/<domain>` → route handler (Zod + сесія) → `lib/server/…` / `lib/utils/…` → Prisma. Компоненти не імпортують `@/lib/api/*` напряму (ESLint). Деталі шарів і правила — у [CLAUDE.md](CLAUDE.md); межі шарів UI — [ui-layers.md](docs/architecture/ui-layers.md), системи й модулі — [rule-systems.md](docs/architecture/rule-systems.md).
 
 ## Деплой
 
