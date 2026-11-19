@@ -13,6 +13,7 @@
   "lairUsed": "Дію лігва вже використано в цьому раунді",
   "lairRepeat": "Не можна повторити цю дію лігва в сусідніх раундах",
   "trackFileInvalid": "Потрібен файл {formats} до {maxMb} МБ",
+  "soundFileInvalid": "Потрібен файл {formats} до {maxKb} КБ і {maxSeconds} с",
   "trackTitleTooLong": "Група й назва разом — до {max} символів",
   "trackDurationInvalid": "Ціле число секунд від 1 до 86400",
   "hexColor": "Колір — у форматі #RRGGBB",

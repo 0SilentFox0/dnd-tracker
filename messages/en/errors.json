@@ -167,6 +167,8 @@
   "systemStatsInvalid": "The item system stats are invalid",
   "trackNotFound": "Track not found",
   "trackLimit": "The library already has {max} tracks — delete some",
+  "soundNotFound": "Sound not found",
+  "soundLimit": "The soundboard already has {max} sounds — delete some",
   "trackUploadMissing": "File not uploaded — try again",
   "trackDuplicate": "This file is already in the library",
   "trackOrderMismatch": "The order must include all campaign tracks",

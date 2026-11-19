@@ -13,6 +13,7 @@
   "lairUsed": "The lair action has already been used this round",
   "lairRepeat": "This lair action cannot be repeated in consecutive rounds",
   "trackFileInvalid": "A {formats} file up to {maxMb} MB is required",
+  "soundFileInvalid": "A {formats} file up to {maxKb} KB and {maxSeconds} s is required",
   "trackTitleTooLong": "Group and title together — up to {max} characters",
   "trackDurationInvalid": "A whole number of seconds from 1 to 86400",
   "hexColor": "The color must be in #RRGGBB format",
