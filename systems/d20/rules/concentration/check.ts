@@ -4,6 +4,7 @@ import {
     findParticipant,
     replaceParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
+import type { RiderPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { Ruleset } from '@/lib/utils/rules';
 import {
     concentrationOn,
@@ -21,8 +22,9 @@ export function concentrationCheck(input: {
     participants: BattleParticipant[];
     rules: Ruleset;
     rng: () => number;
+    rider?: RiderPicker;
 }): { participants: BattleParticipant[]; messages: LogLine[] } {
-    const { caster, damage, participants, rules, rng } = input;
+    const { caster, damage, participants, rules, rng, rider } = input;
 
     const id = caster.basicInfo.id;
 
@@ -53,6 +55,7 @@ export function concentrationCheck(input: {
         participants: ps,
         rules,
         rng,
+        rider,
     });
 
     const {

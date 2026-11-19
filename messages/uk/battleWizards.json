@@ -161,7 +161,7 @@
     "ability": "Вміння",
     "target": "{name} · ціль",
     "offHand": "Атака другою рукою",
-    "cooldown": "ще {rounds} р.",
+    "cooldown": "ще {duration}",
     "confirm": "Підтвердити · {picked}/{max}"
   },
   "aura": {

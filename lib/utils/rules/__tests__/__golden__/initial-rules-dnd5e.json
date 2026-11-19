@@ -16,7 +16,8 @@
   },
   "concentration": {
     "enabled": true,
-    "dcCap": 30
+    "dcCap": 30,
+    "rageBreaks": true
   },
   "conditions": {
     "enabled": true,

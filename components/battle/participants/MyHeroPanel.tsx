@@ -25,6 +25,7 @@ import {
     useFxImpacts,
     useHitFx,
 } from '@/lib/hooks/battle';
+import { useFormatDuration } from '@/lib/i18n/use-duration';
 import {
     abilityCharges,
     NO_EFFECTS,
@@ -41,6 +42,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({
     compact?: boolean;
 }) {
     const t = useTranslations('battle.hero');
+
+    const formatDuration = useFormatDuration();
 
     const {
         battle,
@@ -153,7 +156,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                             {c.name}
                             {c.limit !== null && ` ${c.left}/${c.limit}`}
                             {c.cooldownLeft > 0 &&
-                                ` · ${t('cooldown', { count: c.cooldownLeft })}`}
+                                ` · ${t('cooldown', { duration: formatDuration(c.cooldownLeft) })}`}
                         </span>
                     ))}
                     {pools.map((p) => (

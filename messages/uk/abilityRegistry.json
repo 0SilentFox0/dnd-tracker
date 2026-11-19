@@ -1055,7 +1055,7 @@
       "restLong": "довгий відпочинок",
       "perRound": "{n}/раунд",
       "perTurn": "{n}/хід",
-      "cooldown": "перезарядка {n} р.",
+      "cooldown": "перезарядка {duration}",
       "chance": "{n}%",
       "lair": "дія лігва",
       "legendary": "легендарна дія ({n})",

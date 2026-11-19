@@ -35,6 +35,18 @@ export function ConcentrationSection({ form }: { form: RulesFormState }) {
                         })
                     }
                 />
+                <SwitchField
+                    id="rules-concentration-rage-breaks"
+                    label={t('sections.concentration.rageBreaks')}
+                    checked={concentration.rageBreaks === true}
+                    disabled={!concentration.enabled}
+                    onCheckedChange={(v) =>
+                        form.set('concentration', {
+                            ...concentration,
+                            rageBreaks: v,
+                        })
+                    }
+                />
             </div>
         </RulesSection>
     );

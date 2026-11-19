@@ -151,6 +151,8 @@ export interface RuleSystemSustain {
         ps: BattleParticipant[],
         tag: NonNullable<ActiveEffect['concentrationOf']> | undefined
     ): boolean;
+    /** Ends a hold the caster can no longer keep because an effect bars spellcasting */
+    dropBarred?(ps: BattleParticipant[], rules: Ruleset): SustainResult;
     /** Ends a hold whose effects, zones, objects and grants are all gone */
     dropOrphaned(
         ps: BattleParticipant[],

@@ -258,7 +258,7 @@
     "yourTurn": "your turn",
     "acting": "acting",
     "turnIn": "turn in {count}",
-    "cooldown": "recharge: {count} rd.",
+    "cooldown": "recharge: {duration}",
     "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration"
   },
   "participant": {

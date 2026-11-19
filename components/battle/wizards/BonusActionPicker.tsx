@@ -12,6 +12,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useAbilityPicker, useBattleSceneData } from '@/lib/hooks/battle';
+import { useFormatDuration } from '@/lib/i18n/use-duration';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { abilityLabel } from '@/lib/utils/abilities/build/resolve';
@@ -34,6 +35,8 @@ export function BonusActionPicker({
     onOffHand?: () => void;
 }) {
     const t = useTranslations('battleWizards');
+
+    const formatDuration = useFormatDuration();
 
     const { battle } = useBattleSceneData();
 
@@ -123,7 +126,7 @@ export function BonusActionPicker({
                                             {cooldownLeft > 0 && (
                                                 <span className="ml-2 text-xs font-normal text-hud-soft">
                                                     {t('bonus.cooldown', {
-                                                        rounds: cooldownLeft,
+                                                        duration: formatDuration(cooldownLeft),
                                                     })}
                                                 </span>
                                             )}

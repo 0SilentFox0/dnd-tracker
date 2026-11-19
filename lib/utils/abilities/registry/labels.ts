@@ -14,7 +14,7 @@ import {
     CONDITION_KEYS,
     isCustomConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
-import { seg, type Segment } from '@/lib/utils/abilities/segments';
+import { durationSeg, seg, type Segment } from '@/lib/utils/abilities/segments';
 import { signed } from '@/lib/utils/common/format';
 import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 
@@ -123,7 +123,9 @@ export function limitsSegments(l: Limits | undefined): Segment[] {
         l.perRound ? seg('summary.limits.perRound', { n: l.perRound }) : null,
         l.perTurn ? seg('summary.limits.perTurn', { n: l.perTurn }) : null,
         l.cooldownRounds
-            ? seg('summary.limits.cooldown', { n: l.cooldownRounds })
+            ? seg('summary.limits.cooldown', {
+                  duration: durationSeg(l.cooldownRounds),
+              })
             : null,
         l.chance ? seg('summary.limits.chance', { n: l.chance }) : null,
         l.lair ? seg('summary.limits.lair') : null,

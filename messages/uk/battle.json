@@ -258,7 +258,7 @@
     "yourTurn": "твій хід",
     "acting": "ходить",
     "turnIn": "хід через {count}",
-    "cooldown": "перезарядка: {count} р.",
+    "cooldown": "перезарядка: {duration}",
     "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація"
   },
   "participant": {

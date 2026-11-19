@@ -161,7 +161,7 @@
     "ability": "Ability",
     "target": "{name} · target",
     "offHand": "Off-hand attack",
-    "cooldown": "{rounds} more rd.",
+    "cooldown": "{duration} more",
     "confirm": "Confirm · {picked}/{max}"
   },
   "aura": {

@@ -1,5 +1,6 @@
 import { CombatStatus } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
+import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
     findParticipant,
     replaceParticipant,
@@ -11,6 +12,7 @@ import {
     hasCondition,
     removeEffects,
 } from '@/lib/utils/battle/conditions/query';
+import type { Ruleset } from '@/lib/utils/rules';
 import type {
     RuleSystemSustain,
     SustainResult,
@@ -286,6 +288,37 @@ export function isZoneConcentrationLive(
     );
 }
 
+export function dropBarredConcentration(
+    ps: BattleParticipant[],
+    rules: Ruleset
+): SustainResult {
+    if (!rules.concentration.enabled || !rules.concentration.rageBreaks)
+        return { participants: ps, messages: [] };
+
+    let next = ps;
+
+    const messages: LogLine[] = [];
+
+    for (const p of ps) {
+        if (
+            !hasConcentration(p) ||
+            findFlags(next, p.basicInfo.id, 'noSpellcasting').length === 0
+        )
+            continue;
+
+        const dropped = dropConcentration(
+            next,
+            p.basicInfo.id,
+            textRef('battleLog.concentration.reasons.barred')
+        );
+
+        next = dropped.participants;
+        messages.push(...dropped.messages);
+    }
+
+    return { participants: next, messages };
+}
+
 export const D20_SUSTAIN: RuleSystemSustain = {
     anchorLive: isZoneConcentrationLive,
     holds: (rules, spell) =>
@@ -296,4 +329,5 @@ export const D20_SUSTAIN: RuleSystemSustain = {
     drop: dropConcentration,
     tag: tagConcentration,
     dropOrphaned: dropOrphanedConcentration,
+    dropBarred: dropBarredConcentration,
 };

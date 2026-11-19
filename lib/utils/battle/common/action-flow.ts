@@ -70,6 +70,7 @@ export function applyFlowDamage(
         participants: flow.ps,
         location,
         round: flow.ctx.round,
+        rider: flow.ctx.crit?.rider,
     });
 
     flow.ps = r.participants;

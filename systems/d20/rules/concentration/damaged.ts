@@ -28,6 +28,7 @@ export const concentrationFallout: DamagedHook = (ctx, result) => {
         participants: result.participants,
         rules,
         rng: ctx.rng,
+        rider: ctx.rider,
     });
 
     return {

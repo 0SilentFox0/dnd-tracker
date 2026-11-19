@@ -207,7 +207,8 @@
       "newSpell": "a new spell",
       "castCancelled": "casting cancelled",
       "castSkipped": "the casting action was skipped",
-      "effectsEnded": "the spell effects ended"
+      "effectsEnded": "the spell effects ended",
+      "barred": "spellcasting is barred"
     },
     "effect": "Concentration: {spell}",
     "check": "🎲 {name}: concentration — CON saving throw {total} vs DC {dc}",

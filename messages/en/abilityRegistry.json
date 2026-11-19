@@ -1055,7 +1055,7 @@
       "restLong": "long rest",
       "perRound": "{n}/round",
       "perTurn": "{n}/turn",
-      "cooldown": "cooldown {n} r.",
+      "cooldown": "cooldown {duration}",
       "chance": "{n}%",
       "lair": "lair action",
       "legendary": "legendary action ({n})",

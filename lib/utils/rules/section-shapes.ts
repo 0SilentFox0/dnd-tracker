@@ -51,6 +51,7 @@ export const sectionSchemas = {
     concentration: z.strictObject({
         enabled: z.boolean(),
         dcCap: z.number().int().min(10).max(99).nullable(),
+        rageBreaks: z.boolean().optional(),
     }),
     conditions: z.strictObject({
         enabled: z.boolean(),

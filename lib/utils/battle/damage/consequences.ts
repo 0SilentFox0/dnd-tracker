@@ -1,5 +1,6 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import { replaceParticipant } from '@/lib/utils/abilities/engine/core/participants';
+import type { RiderPicker } from '@/lib/utils/battle/crit-choice/types';
 import { markGuardedDamage } from '@/lib/utils/battle/damage/regen-guard';
 import { revertOnZero } from '@/lib/utils/battle/transform/revert';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -18,6 +19,7 @@ export interface DamageConsequencesInput {
     participants: BattleParticipant[];
     location?: string;
     round?: number;
+    rider?: RiderPicker;
 }
 
 export interface DamageConsequencesResult {

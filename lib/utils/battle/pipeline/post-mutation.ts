@@ -164,6 +164,24 @@ export function withPlacement(
     if (swept !== result.participants)
         result = { ...result, participants: swept };
 
+    const barred = ruleSystemOf(rules).magic.sustain.dropBarred?.(
+        result.participants,
+        rules
+    );
+
+    if (barred && barred.participants !== result.participants)
+        result = {
+            ...result,
+            participants: barred.participants,
+            events: [
+                ...result.events,
+                systemEvent(
+                    result.scene?.round ?? scene.round,
+                    lineText(barred.messages, '; ')
+                ),
+            ],
+        };
+
     const orphaned = ruleSystemOf(rules).magic.sustain.dropOrphaned(
         result.participants,
         map,
