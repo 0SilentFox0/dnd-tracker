@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ColorField } from '@/components/common/ColorField';
-import { IconUrlField } from '@/components/common/IconUrlField';
+import { ColorField } from '@/components/common/fields/ColorField';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import { HudSection } from '@/components/hud/form';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';

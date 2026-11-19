@@ -60,7 +60,7 @@ vi.mock('@/components/battle/wizards/BonusActionPicker', () => ({
 vi.mock('@/components/battle/wizards/AuraZonePicker', () => ({
     AuraZonePicker: () => null,
 }));
-vi.mock('@/components/battle/scene/MapStrip', () => ({
+vi.mock('@/components/battle/scene/layout/MapStrip', () => ({
     MapStripRow: () => null,
 }));
 vi.mock('@/components/battle/modes', () => ({ modeUiOf: () => undefined }));

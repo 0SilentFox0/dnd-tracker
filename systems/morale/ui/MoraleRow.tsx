@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { CombatRow } from '@/components/character-profile/CombatRow';
+import { CombatRow } from '@/components/character-profile/combat/CombatRow';
 import type { CombatRowProps } from '@/components/systems/types';
 import { signed } from '@/lib/utils/common/format';
 

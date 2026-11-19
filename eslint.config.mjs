@@ -140,7 +140,7 @@ const SYSTEM_ROOTS = [
 
 const SYSTEM_IMPORT_EXEMPT = JSON.parse(
     readFileSync(
-        new URL('./system-imports-exempt.json', import.meta.url),
+        new URL('./ratchets/system-imports-exempt.json', import.meta.url),
         'utf8'
     )
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
@@ -150,17 +150,23 @@ const uiLayersPlugin = {
 };
 
 const UI_LAYERS_EXEMPT = JSON.parse(
-    readFileSync(new URL('./ui-layers-exempt.json', import.meta.url), 'utf8')
+    readFileSync(
+        new URL('./ratchets/ui-layers-exempt.json', import.meta.url),
+        'utf8'
+    )
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
 
 const RAW_CONTROLS_EXEMPT = JSON.parse(
-    readFileSync(new URL('./raw-controls-exempt.json', import.meta.url), 'utf8')
+    readFileSync(
+        new URL('./ratchets/raw-controls-exempt.json', import.meta.url),
+        'utf8'
+    )
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
 
 const SYSTEM_ZONE_PATTERN = {
     group: ['@/systems/*', '@/systems/**'],
     message:
-        'Система — лише через реєстри (D38): корені SYSTEM_ROOTS або system-imports-exempt.json',
+        'Система — лише через реєстри (D38): корені SYSTEM_ROOTS або ratchets/system-imports-exempt.json',
 };
 
 const SYSTEM_OWNED_FILES = [
@@ -279,7 +285,10 @@ const DB_IMPORT_PATH = {
 const DB_IN_UTILS_EXEMPT = ['lib/utils/api/api-auth.ts'];
 
 const I18N_EXEMPT = JSON.parse(
-    readFileSync(new URL('./i18n-exempt.json', import.meta.url), 'utf8')
+    readFileSync(
+        new URL('./ratchets/i18n-exempt.json', import.meta.url),
+        'utf8'
+    )
 ).map((e) => e.glob);
 
 const CYRILLIC_MESSAGE = 'Текст — у messages/*.json через t()';

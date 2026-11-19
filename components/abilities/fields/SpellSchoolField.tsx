@@ -3,7 +3,7 @@
 import type { FieldProps } from './FieldRenderer';
 import { SelectInput } from './SelectInput';
 
-import { useAbilityEditor } from '@/components/abilities/editor-context';
+import { useAbilityEditor } from '@/components/abilities/editor/editor-context';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import type { LocalizedFieldMeta } from '@/lib/utils/abilities/registry/fields';
 

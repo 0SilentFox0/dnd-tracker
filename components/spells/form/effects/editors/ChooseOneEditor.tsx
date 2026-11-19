@@ -2,8 +2,8 @@
 
 import type { SpellOnlyEditorProps } from '../spell-only-types';
 
-import { useFieldErrors } from '@/components/abilities/editor-context';
-import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { useFieldErrors } from '@/components/abilities/editor/editor-context';
+import { FieldErrors } from '@/components/abilities/editor/FieldErrors';
 import { EffectListEditor } from '@/components/spells/form/effects/EffectListEditor';
 import { useTranslator } from '@/lib/i18n/use-translator';
 

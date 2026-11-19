@@ -3,10 +3,10 @@
 import type { SpellOnlyEditorProps } from '../spell-only-types';
 import { SpellOnlyField } from '../SpellOnlyField';
 
-import { useFieldErrors } from '@/components/abilities/editor-context';
-import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { useFieldErrors } from '@/components/abilities/editor/editor-context';
+import { FieldErrors } from '@/components/abilities/editor/FieldErrors';
 import { EffectListEditor } from '@/components/spells/form/effects/EffectListEditor';
-import { SpellTargetingFields } from '@/components/spells/form/SpellTargetingFields';
+import { SpellTargetingFields } from '@/components/spells/form/fields/SpellTargetingFields';
 import { Disclosure } from '@/components/ui/disclosure';
 import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';

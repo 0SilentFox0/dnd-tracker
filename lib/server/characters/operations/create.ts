@@ -34,10 +34,12 @@ import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { toInputJson } from '@/lib/utils/common/json';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 import {
     columnViewDto,
     splitColumnView,
 } from '@/lib/utils/rules/systems/column-view';
+import { storedColumnsCreate } from '@/lib/utils/rules/systems/stored-columns';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
 async function assertClassSkills({
@@ -132,6 +134,7 @@ async function createChoices(
 function characterCreateData({
     campaignId,
     system,
+    rules,
     data,
     initiative,
     fromClasses,
@@ -142,6 +145,7 @@ function characterCreateData({
     split,
 }: {
     campaignId: string;
+    rules: { system: SystemSelection };
     system: ReturnType<typeof ruleSystemOf>;
     data: NormalizedInput;
     initiative: number;
@@ -152,6 +156,12 @@ function characterCreateData({
     spellSlots: Prisma.InputJsonValue;
     split: ReturnType<typeof splitColumnView>;
 }): Prisma.CharacterUncheckedCreateInput {
+    const characteristics = (split.characteristics ??
+        data.characteristics ??
+        system.characteristics.defaults()) as Prisma.InputJsonObject;
+
+    const stored = storedColumnsCreate(rules, { characteristics }, data);
+
     return {
         campaignId,
         type: data.type,
@@ -195,11 +205,8 @@ function characterCreateData({
         personalSkillId: data.personalSkillId ?? null,
         primaryAbility: data.primaryAbility ?? null,
 
-        characteristics: (split.characteristics ??
-            data.characteristics ??
-            system.characteristics.defaults()) as
-            | Prisma.InputJsonObject
-            | undefined,
+        characteristics: (stored?.characteristics ??
+            characteristics) as Prisma.InputJsonObject,
         ...(system.resources?.seed &&
             data.characteristics && {
                 resources: system.resources.seed(
@@ -295,6 +302,7 @@ async function createCharacterCore(
         const character = await prisma.character.create({
             data: characterCreateData({
                 campaignId,
+                rules: campaign.rules,
                 system,
                 data,
                 initiative,

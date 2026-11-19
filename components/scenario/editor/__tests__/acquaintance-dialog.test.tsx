@@ -23,7 +23,7 @@ vi.mock('@/lib/hooks/acquaintances', () => ({
 vi.mock('@/lib/hooks/characters', () => ({
     useCharacters: () => ({ data: [{ id: 'ch1', name: 'Король' }] }),
 }));
-vi.mock('@/components/scenario/CharacterSelect', () => ({
+vi.mock('@/components/scenario/chips/CharacterSelect', () => ({
     CharacterSelect: ({
         value,
         onValueChange,
@@ -45,8 +45,8 @@ vi.mock('@/components/scenario/CharacterSelect', () => ({
 import {
     acquaintanceTargetFor,
     acquaintanceToolEnabled,
-} from '@/components/scenario/editor/acquaintance-target';
-import { AcquaintanceDialog } from '@/components/scenario/editor/AcquaintanceDialog';
+} from '@/components/scenario/editor/acquaintance/acquaintance-target';
+import { AcquaintanceDialog } from '@/components/scenario/editor/acquaintance/AcquaintanceDialog';
 import { renderWithConfirm } from '@/components/ui/__tests__/uk-intl';
 import type { AcquaintanceView } from '@/types/acquaintances';
 

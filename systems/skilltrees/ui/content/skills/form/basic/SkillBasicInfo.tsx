@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { IconUrlField } from '@/components/common/IconUrlField';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import { Label } from '@/components/ui/label';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { Textarea } from '@/components/ui/textarea';

@@ -10,7 +10,7 @@ import { SpeciesStep } from './SpeciesStep';
 import { StatsStep } from './StatsStep';
 import { TalentsStep } from './TalentsStep';
 
-import { StepIndicator } from '@/components/common/StepIndicator';
+import { StepIndicator } from '@/components/common/shell/StepIndicator';
 import { HudButton } from '@/components/hud';
 import { HudFormPage } from '@/components/hud/form';
 import { ActionBar } from '@/components/ui/action-bar';

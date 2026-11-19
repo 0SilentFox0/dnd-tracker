@@ -1,8 +1,8 @@
 import { useTranslations } from 'next-intl';
 import { Gem } from 'lucide-react';
 
-import { AbilityFlowList } from '@/components/abilities/AbilityFlow';
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     AccordionContent,
     AccordionItem,

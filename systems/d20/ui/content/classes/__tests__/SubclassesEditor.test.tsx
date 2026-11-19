@@ -19,7 +19,7 @@ vi.mock('@/systems/d20/ui/content/classes/ClassFeaturesEditor', () => ({
         </button>
     ),
 }));
-vi.mock('@/components/common/ImageUpload', () => ({
+vi.mock('@/components/common/fields/ImageUpload', () => ({
     ImageUpload: () => null,
 }));
 

@@ -1,0 +1,73 @@
+'use client';
+
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+
+import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
+import { HudButton } from '@/components/hud';
+import { cn } from '@/lib/utils';
+
+interface HeroPortraitProps {
+    src: string | null | undefined;
+    name: string;
+    className?: string;
+    canEdit?: boolean;
+}
+
+export function HeroPortrait({
+    src,
+    name,
+    className,
+    canEdit,
+}: HeroPortraitProps) {
+    const t = useTranslations('characterProfile.portrait');
+
+    const [open, setOpen] = useState(false);
+
+    const frame = cn(
+        'relative aspect-[3/4] w-full overflow-hidden rounded-xl border-2 border-hud-gold bg-hud-raised',
+        className
+    );
+
+    if (!src) {
+        return (
+            <div
+                className={cn(
+                    frame,
+                    'hud-sc flex h-48 flex-col items-center justify-center gap-1 text-6xl text-hud-gold lg:aspect-[3/4] lg:h-auto'
+                )}
+            >
+                {name.trim().charAt(0).toUpperCase() || '?'}
+                {canEdit && (
+                    <span className="text-xs text-hud-muted">{t('add')}</span>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <HudButton
+                type="button"
+                aria-label={t('open')}
+                onClick={() => setOpen(true)}
+                className={frame}
+            >
+                <OptimizedImage
+                    src={src}
+                    alt={name}
+                    width={640}
+                    height={853}
+                    className="size-full object-cover"
+                />
+            </HudButton>
+            <ImageZoomDialog
+                src={src}
+                name={name}
+                open={open}
+                onOpenChange={setOpen}
+            />
+        </>
+    );
+}

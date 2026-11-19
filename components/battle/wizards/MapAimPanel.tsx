@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Crosshair } from 'lucide-react';
 
-import { useMapStripSlot } from '@/components/battle/scene/MapStrip';
+import { useMapStripSlot } from '@/components/battle/scene/layout/MapStrip';
 import { HUD_SURFACE } from '@/components/hud';
 import { cn } from '@/lib/utils';
 

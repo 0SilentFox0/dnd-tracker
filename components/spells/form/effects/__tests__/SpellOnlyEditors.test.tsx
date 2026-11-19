@@ -41,7 +41,7 @@ vi.mock('@/components/ui/select-field', () => ({
 
 import { ZoneTriggerEditor } from '../ZoneTriggerEditor';
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { SpellEffectCard } from '@/components/spells/form/effects/SpellEffectCard';
 import { newSpellOnlyEffect } from '@/lib/utils/spells/editor/spell-only';
 import {

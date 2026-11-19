@@ -16,7 +16,7 @@ import {
     ErrorState,
     LoadingState,
 } from '@/components/common/states';
-import { ScenarioSummaryPanel } from '@/components/scenario/ScenarioSummaryPanel';
+import { ScenarioSummaryPanel } from '@/components/scenario/page/ScenarioSummaryPanel';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';

@@ -5,9 +5,9 @@ import { useTranslations } from 'next-intl';
 import { Swords } from 'lucide-react';
 
 import { BattleListCard } from '@/components/battle/list/BattleListCard';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState } from '@/components/common/states';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { HudSection } from '@/components/hud/form';
 import { HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

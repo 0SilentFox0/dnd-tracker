@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Images } from 'lucide-react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudCard } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/lib/hooks/common';

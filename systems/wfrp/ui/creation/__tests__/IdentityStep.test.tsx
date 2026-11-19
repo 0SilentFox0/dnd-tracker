@@ -4,7 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { IdentityStep } from '../IdentityStep';
 
-vi.mock('@/components/common/ImageUpload', () => ({ ImageUpload: () => null }));
+vi.mock('@/components/common/fields/ImageUpload', () => ({
+    ImageUpload: () => null,
+}));
 
 afterEach(cleanup);
 

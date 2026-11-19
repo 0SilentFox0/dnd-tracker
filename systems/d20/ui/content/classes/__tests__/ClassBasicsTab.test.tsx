@@ -14,7 +14,7 @@ import type { ClassFormData } from '@/types/classes';
 vi.mock('@/systems/d20/ui/content/classes/SpellListHint', () => ({
     SpellListHint: ({ tag }: { tag: string }) => <p>{`hint:${tag}`}</p>,
 }));
-vi.mock('@/components/common/ImageUpload', () => ({
+vi.mock('@/components/common/fields/ImageUpload', () => ({
     ImageUpload: ({ label }: { label: string }) => <span>{label}</span>,
 }));
 

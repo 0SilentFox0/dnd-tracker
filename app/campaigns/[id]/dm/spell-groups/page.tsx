@@ -1,4 +1,4 @@
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { SpellGroupList } from '@/components/spells/groups/SpellGroupList';
 import { getRequestLocale } from '@/lib/i18n/request-locale';

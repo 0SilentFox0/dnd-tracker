@@ -9,7 +9,7 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: undefined }),
 }));
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { AmountField } from '@/components/abilities/fields/AmountField';
 import { FlatField } from '@/components/abilities/fields/FlatField';
 import type { LocalizedFieldMeta } from '@/lib/utils/abilities/registry/fields';

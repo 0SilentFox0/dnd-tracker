@@ -2,13 +2,13 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ColorField } from '@/components/common/ColorField';
-import { ColorSwatch } from '@/components/common/ColorSwatch';
-import { ImportDialog } from '@/components/common/ImportDialog';
-import { RenameGroupDialog } from '@/components/common/RenameGroupDialog';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
-import { WeaponTraitsField } from '@/components/common/WeaponTraitsField';
+import { ImportDialog } from '@/components/common/dialogs/ImportDialog';
+import { RenameGroupDialog } from '@/components/common/dialogs/RenameGroupDialog';
+import { ColorField } from '@/components/common/fields/ColorField';
+import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
+import { SearchInput } from '@/components/common/fields/SearchInput';
+import { WeaponTraitsField } from '@/components/common/fields/WeaponTraitsField';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 
 afterEach(cleanup);
 

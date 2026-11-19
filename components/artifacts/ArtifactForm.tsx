@@ -13,7 +13,7 @@ import { ArtifactItemFields } from './ArtifactItemFields';
 import { ArtifactWeaponFields } from './ArtifactWeaponFields';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
-import { IconUrlField } from '@/components/common/IconUrlField';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';

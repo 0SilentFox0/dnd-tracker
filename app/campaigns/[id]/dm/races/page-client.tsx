@@ -3,11 +3,11 @@
 import { useTranslations } from 'next-intl';
 import { Dna, Plus } from 'lucide-react';
 
-import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { CreateRaceDialog } from '@/components/races/CreateRaceDialog';

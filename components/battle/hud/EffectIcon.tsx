@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Sparkles } from 'lucide-react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { useParticipantFace } from '@/lib/hooks/battle';
 import type { ActiveEffect } from '@/types/battle';
 

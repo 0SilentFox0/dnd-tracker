@@ -8,7 +8,7 @@ import { GrantArtifactDialog } from '../stash/GrantArtifactDialog';
 import { InventoryLogPanel } from '../stash/InventoryLogPanel';
 import { ItemDialog } from '../stash/ItemDialog';
 import { MoneyDialog, type MoneyMode } from '../stash/MoneyDialog';
-import { TransferArtifactDialog } from '../TransferArtifactDialog';
+import { TransferArtifactDialog } from '../tokens/TransferArtifactDialog';
 import { AddMenu } from './AddMenu';
 import { BackpackGrid } from './BackpackGrid';
 import { EquipmentGrid } from './EquipmentGrid';

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

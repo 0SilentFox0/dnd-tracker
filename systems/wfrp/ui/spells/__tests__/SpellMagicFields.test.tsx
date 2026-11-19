@@ -5,14 +5,14 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { SpellMagicFields } from '../SpellMagicFields';
 
+import { SpellFormBasicFields } from '@/components/spells/form/fields/SpellFormBasicFields';
+import { SpellFormPowerFields } from '@/components/spells/form/fields/SpellFormPowerFields';
 import {
     getDefaultSpellFormData,
     resolutionKeysOf,
     spellCostKeysOf,
     type SpellFormData,
 } from '@/components/spells/form/spell-form-defaults';
-import { SpellFormBasicFields } from '@/components/spells/form/SpellFormBasicFields';
-import { SpellFormPowerFields } from '@/components/spells/form/SpellFormPowerFields';
 
 Object.assign(Element.prototype, {
     hasPointerCapture: () => false,

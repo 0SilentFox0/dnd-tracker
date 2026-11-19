@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { RowBindings } from '@/components/scenario/editor/RowBindings';
+import { RowBindings } from '@/components/scenario/editor/rows/RowBindings';
 import { render } from '@/components/ui/__tests__/uk-intl';
 
 vi.unmock('next-intl');
@@ -42,7 +42,7 @@ vi.mock('@/lib/hooks/world', () => ({
     useWorldMap: () => world.map,
     useWorldMaps: () => ({ data: [], isLoading: false }),
 }));
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: (p: { alt: string }) => <img alt={p.alt} />,
 }));
 

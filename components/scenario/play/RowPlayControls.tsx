@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { MapPin, Play, Swords } from 'lucide-react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
-import { MarkerChip } from '@/components/scenario/MarkerChip';
+import { MarkerChip } from '@/components/scenario/chips/MarkerChip';
 import { BattleStatus } from '@/lib/constants/battle';
 import type { ScenarioPlay } from '@/lib/hooks/scenario';
 import { useTranslator } from '@/lib/i18n/use-translator';

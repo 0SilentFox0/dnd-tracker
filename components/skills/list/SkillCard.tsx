@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 
 import { SkillCardActionsMenu } from './SkillCardActionsMenu';
 
-import { AbilityFlowList } from '@/components/abilities/AbilityFlow';
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudCard } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/lib/hooks/common';

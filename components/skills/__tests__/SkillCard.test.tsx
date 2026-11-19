@@ -29,7 +29,7 @@ vi.mock('next/link', () => ({
     ),
 }));
 
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: ({
         alt,
         fallback,

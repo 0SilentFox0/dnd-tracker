@@ -11,7 +11,7 @@ import {
 
 const exempt: Record<string, number> = JSON.parse(
     fs.readFileSync(
-        path.resolve(__dirname, '../../props-budget-exempt.json'),
+        path.resolve(__dirname, '../../ratchets/props-budget-exempt.json'),
         'utf8'
     )
 );

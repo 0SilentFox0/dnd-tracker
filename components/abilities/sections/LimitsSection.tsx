@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import type { AbilitySectionProps } from '../AbilityPanel';
-import { useAbilityEditor } from '../editor-context';
+import type { AbilitySectionProps } from '../editor/AbilityPanel';
+import { useAbilityEditor } from '../editor/editor-context';
 import { FieldRenderer } from '../fields/FieldRenderer';
 import { FlatField } from '../fields/FlatField';
 import { ScaleColumnSelect } from '../fields/ScaleColumnSelect';
@@ -286,7 +286,9 @@ export function LimitsSection({
                     >
                         <Checkbox
                             aria-label={t(flag.id as Parameters<typeof t>[0])}
-                            checked={!!ability.limits?.[flag.id as keyof Limits]}
+                            checked={
+                                !!ability.limits?.[flag.id as keyof Limits]
+                            }
                             onCheckedChange={(on) =>
                                 set(
                                     flag.id as keyof Limits,

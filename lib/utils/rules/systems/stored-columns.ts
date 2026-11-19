@@ -119,6 +119,17 @@ export function writeStoredColumn(
     return entry && setAtPath(row.characteristics, entry.path, value);
 }
 
+export function isStoredColumnActive(
+    rules: { system: SystemSelection },
+    column: string
+): boolean {
+    const entry = STORED_COLUMN_ENTRIES.find((e) => e.column === column);
+
+    const { base, modules } = composition(rules.system);
+
+    return !!entry && (entry.module === base || modules.includes(entry.module));
+}
+
 /** The module's stored ext value when the module is in the composition, else undefined (callers apply the default) */
 export function readStoredColumn<
     K extends 'number' | 'boolean',
@@ -131,12 +142,10 @@ export function readStoredColumn<
 ): (K extends 'number' ? number : boolean) | undefined {
     const entry = STORED_COLUMN_ENTRIES.find((e) => e.column === column);
 
-    const { base, modules } = composition(rules.system);
-
-    const active =
-        !!entry && (entry.module === base || modules.includes(entry.module));
-
-    const stored = active ? getAtPath(row.characteristics, entry.path) : null;
+    const stored =
+        isStoredColumnActive(rules, column) && entry
+            ? getAtPath(row.characteristics, entry.path)
+            : null;
 
     return typeof stored === kind
         ? (stored as K extends 'number' ? number : boolean)
@@ -152,4 +161,30 @@ export function storedColumnUpdate(
     const characteristics = writeStoredColumn(row, column, value);
 
     return characteristics ? { characteristics } : {};
+}
+
+/** Stored ext values for the non-zero module columns in `input`, only for modules in the composition */
+export function storedColumnsCreate(
+    rules: { system: SystemSelection },
+    row: { characteristics?: unknown },
+    input: Record<string, unknown>
+): { characteristics?: Record<string, unknown> } {
+    return STORED_COLUMN_ENTRIES.reduce<{
+        characteristics?: Record<string, unknown>;
+    }>((acc, { column }) => {
+        const value = input[column];
+
+        if (
+            (typeof value !== 'number' && typeof value !== 'boolean') ||
+            value === 0 ||
+            !isStoredColumnActive(rules, column)
+        )
+            return acc;
+
+        return storedColumnUpdate(
+            { characteristics: acc.characteristics ?? row.characteristics },
+            column,
+            value
+        );
+    }, {});
 }

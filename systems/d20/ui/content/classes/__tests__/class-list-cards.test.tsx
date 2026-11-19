@@ -17,7 +17,7 @@ vi.unmock('next-intl');
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 vi.mock('@/lib/hooks/classes', () => ({ useClassesList: vi.fn() }));
 vi.mock('@/lib/hooks/backgrounds', () => ({ useBackgroundsList: vi.fn() }));
-vi.mock('@/components/content-import/ContentTransferButtons', () => ({
+vi.mock('@/components/content-import/shared/ContentTransferButtons', () => ({
     ContentTransferButtons: ({ kind }: { kind: string }) => (
         <p>transfer:{kind}</p>
     ),

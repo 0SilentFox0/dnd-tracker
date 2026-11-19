@@ -47,7 +47,7 @@ Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they
 
 ## Калібрування сітки (setup)
 
-`BattleMapConfig.backgroundRows?` — окрема висота фону в клітинках (неквадратні клітинки зображення; без неї береться з пропорцій). `backgroundBox` враховує її. Чисті `fromCellRect`/`nudge` у `lib/utils/battle/grid/calibration.ts`; стан у `useGridCalibration`, застосування через `applyCalibration` у `useBattleMapEditor`; UI — `components/battle/setup/GridCalibration.tsx`. При заміні фону калібрування пропонується зберегти лише за того самого розміру зображення. Автодетект сітки відкладено: [спайк](../superpowers/research/2026-11-14-grid-autodetect-spike.md).
+`BattleMapConfig.backgroundRows?` — окрема висота фону в клітинках (неквадратні клітинки зображення; без неї береться з пропорцій). `backgroundBox` враховує її. Чисті `fromCellRect`/`nudge` у `lib/utils/battle/grid/calibration.ts`; стан у `useGridCalibration`, застосування через `applyCalibration` у `useBattleMapEditor`; UI — `components/battle/setup/map/GridCalibration.tsx`. При заміні фону калібрування пропонується зберегти лише за того самого розміру зображення. Автодетект сітки відкладено: [спайк](../superpowers/research/2026-11-14-grid-autodetect-spike.md).
 
 ## Зберігання карти (етап 0)
 

@@ -18,10 +18,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/hooks/campaigns', () => ({ useCampaignRules: mocks.rules }));
 vi.mock('@/lib/hooks/systems', () => ({ useRuleSystem: mocks.system }));
 vi.mock('@/lib/hooks/classes', () => ({ useClassMode: mocks.classMode }));
-vi.mock('@/components/character-profile/HeroPortrait', () => ({
+vi.mock('@/components/character-profile/hero/HeroPortrait', () => ({
     HeroPortrait: () => null,
 }));
-vi.mock('@/components/common/ActionsMenu', () => ({
+vi.mock('@/components/common/entity/ActionsMenu', () => ({
     ActionsMenu: ({ actions }: { actions: { label: string }[] }) => (
         <ul>
             {actions.map((a) => (

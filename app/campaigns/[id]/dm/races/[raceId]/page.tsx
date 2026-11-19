@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { RaceEditForm } from '@/components/races/RaceEditForm';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';

@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-import type { AbilitySectionProps } from '../AbilityPanel';
-import { useAbilityEditor, useErrorsUnder } from '../editor-context';
-import { FieldErrors } from '../FieldErrors';
+import type { AbilitySectionProps } from '../editor/AbilityPanel';
+import { useAbilityEditor, useErrorsUnder } from '../editor/editor-context';
+import { FieldErrors } from '../editor/FieldErrors';
 import { SectionTitle } from './SectionTitle';
 
 import { SelectField } from '@/components/ui/select-field';

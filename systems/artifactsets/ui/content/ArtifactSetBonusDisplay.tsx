@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { AbilityFlowList } from '@/components/abilities/AbilityFlow';
+import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
 import { cn } from '@/lib/utils';
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
 

@@ -14,22 +14,22 @@ import {
     type AcquaintanceDialogTarget,
     acquaintanceTargetFor,
     acquaintanceToolEnabled,
-} from './acquaintance-target';
-import { AcquaintanceDialog } from './AcquaintanceDialog';
-import { PagePropertiesDialog } from './PagePropertiesDialog';
-import { SaveStatus } from './SaveStatus';
-import { type CellColumn, ScenarioCell } from './ScenarioCell';
-import { ScenarioEditorSection } from './ScenarioEditorSection';
-import { ScenarioToolbar } from './ScenarioToolbar';
+} from './acquaintance/acquaintance-target';
+import { AcquaintanceDialog } from './acquaintance/AcquaintanceDialog';
+import { SaveStatus } from './chrome/SaveStatus';
+import { ScenarioToolbar } from './chrome/ScenarioToolbar';
+import { PagePropertiesDialog } from './dialogs/PagePropertiesDialog';
+import { type CellColumn, ScenarioCell } from './rows/ScenarioCell';
+import { ScenarioEditorSection } from './rows/ScenarioEditorSection';
 
 import { HudButton } from '@/components/hud';
-import { ScenarioLayout } from '@/components/scenario/ScenarioLayout';
-import { ScenarioLegend } from '@/components/scenario/ScenarioLegend';
+import { ScenarioLayout } from '@/components/scenario/book/ScenarioLayout';
+import { ScenarioLegend } from '@/components/scenario/book/ScenarioLegend';
 import {
     ScenarioToc,
     type TocControl,
     tocItems,
-} from '@/components/scenario/ScenarioToc';
+} from '@/components/scenario/book/ScenarioToc';
 import { useConfirm, useCssVarHeight } from '@/lib/hooks/common';
 import {
     useMentionSearch,

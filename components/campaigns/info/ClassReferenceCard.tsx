@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { GraduationCap } from 'lucide-react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     AccordionContent,
     AccordionItem,

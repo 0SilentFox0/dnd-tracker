@@ -2,7 +2,7 @@
 
 import type { FieldProps } from './FieldRenderer';
 
-import { useAbilityEditor } from '@/components/abilities/editor-context';
+import { useAbilityEditor } from '@/components/abilities/editor/editor-context';
 import { SpellMultiSelect } from '@/components/characters/spells/SpellMultiSelect';
 
 export function SpellPickerField({

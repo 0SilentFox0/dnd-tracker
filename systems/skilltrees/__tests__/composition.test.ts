@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { systemLevelResetWriters } from '@/lib/server/systems/registry';
 import { type Ruleset } from '@/lib/utils/rules';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -40,6 +41,12 @@ describe('skilltrees module composition', () => {
         );
         expect(JSON.stringify(bare().stats?.columns ?? [])).not.toContain(
             'personalSkillId'
+        );
+    });
+
+    it('resets the progress table on level-down only with the module', () => {
+        expect(len(systemLevelResetWriters(withModule([MODULE])))).toBe(
+            len(systemLevelResetWriters(withModule([]))) + 1
         );
     });
 });

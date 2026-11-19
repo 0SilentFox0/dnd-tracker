@@ -2,7 +2,7 @@
 import { getSchema } from '@tiptap/core';
 import { describe, expect, it } from 'vitest';
 
-import { buildExtensions } from '@/components/scenario/editor/extensions';
+import { buildExtensions } from '@/components/scenario/editor/rich-text/extensions';
 import { scenarioContentSchema } from '@/lib/schemas/scenario';
 import { parseArtifactHtml } from '@/scripts/import/scenario/parse-artifact';
 

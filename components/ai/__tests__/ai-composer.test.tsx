@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AiComposer } from '@/components/ai/AiComposer';
+import { AiComposer } from '@/components/ai/chat/AiComposer';
 
 afterEach(cleanup);
 

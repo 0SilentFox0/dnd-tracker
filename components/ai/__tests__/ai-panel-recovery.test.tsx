@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AiPanel } from '@/components/ai/AiPanel';
+import { AiPanel } from '@/components/ai/chat/AiPanel';
 
 const chat = vi.hoisted(() => ({
     send: vi.fn(),
@@ -21,11 +21,11 @@ vi.mock('@/lib/hooks/common', () => ({
     useMediaQuery: () => true,
     useIsMobile: () => false,
 }));
-vi.mock('@/components/ai/AssistantContextDisclosure', () => ({
+vi.mock('@/components/ai/assistant/AssistantContextDisclosure', () => ({
     AssistantContextDisclosure: () => null,
 }));
-vi.mock('@/components/ai/AiComposer', () => ({ AiComposer: () => null }));
-vi.mock('@/components/ai/AiThreadHeader', () => ({
+vi.mock('@/components/ai/chat/AiComposer', () => ({ AiComposer: () => null }));
+vi.mock('@/components/ai/chat/AiThreadHeader', () => ({
     AiThreadHeader: () => null,
 }));
 vi.mock('@/lib/hooks/ai', () => ({

@@ -1,7 +1,7 @@
 import type { DragEvent, ReactNode } from 'react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
-import { NewPill } from '@/components/common/NewPill';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
+import { NewPill } from '@/components/common/entity/NewPill';
 import { HudButton } from '@/components/hud';
 import { ARTIFACT_RARITY_COLOR } from '@/lib/constants/artifacts';
 import { useTranslator } from '@/lib/i18n/use-translator';

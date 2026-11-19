@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import type { AbilitySectionProps } from '../AbilityPanel';
-import { ConditionEditor, DEFAULT_CONDITION } from '../ConditionEditor';
+import type { AbilitySectionProps } from '../editor/AbilityPanel';
+import { ConditionEditor, DEFAULT_CONDITION } from '../editor/ConditionEditor';
 import { SectionShell } from './SectionShell';
 
 import { Button } from '@/components/ui/button';

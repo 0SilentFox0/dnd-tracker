@@ -59,7 +59,7 @@ describe('entry-чанки гравця', () => {
 
     it('десктоп, DM-UI, майстри й оверлеї бою вантажаться окремо', () => {
         const lazy = [
-            'components/battle/scene/DesktopBattleLayout.tsx',
+            'components/battle/scene/layout/DesktopBattleLayout.tsx',
             'components/battle/dm/DmPanel.tsx',
             'components/battle/dm/CompleteBattleDialog.tsx',
             'components/battle/dm/dialogs/AddParticipantDialog.tsx',
@@ -74,7 +74,7 @@ describe('entry-чанки гравця', () => {
 
         expect(lazy.filter((f) => battle.files.has(f))).toEqual([]);
         expect(battle.files).toContain(
-            'components/battle/scene/MobileBattleLayout.tsx'
+            'components/battle/scene/layout/MobileBattleLayout.tsx'
         );
         expect(importers(battle, 'framer-motion')).toEqual([]);
     });

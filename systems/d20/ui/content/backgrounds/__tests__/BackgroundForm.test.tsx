@@ -47,7 +47,7 @@ vi.mock('@/lib/hooks/feats', () => ({
 }));
 vi.mock('@/lib/api/backgrounds', () => ({ updateBackground: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push, refresh }) }));
-vi.mock('@/components/choices/ChoiceListEditor', () => ({
+vi.mock('@/components/choices/editor/ChoiceListEditor', () => ({
     ChoiceListEditor: ({
         onValidityChange,
         onChange,

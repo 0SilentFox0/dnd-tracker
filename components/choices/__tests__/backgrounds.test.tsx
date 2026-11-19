@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 
-import { ChoicesEditor } from '@/components/choices/ChoicesEditor';
+import { ChoicesEditor } from '@/components/choices/editor/ChoicesEditor';
 import { pickOption } from '@/components/ui/__tests__/radix-select';
 import {
     empty,

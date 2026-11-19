@@ -20,10 +20,10 @@ vi.mock('@/components/character-profile/ProfileContext', () => ({
     }),
 }));
 vi.mock('next/dynamic', () => ({ default: () => () => null }));
-vi.mock('@/components/character-profile/RacePassive', () => ({
+vi.mock('@/components/character-profile/hero/RacePassive', () => ({
     RacePassive: () => null,
 }));
-vi.mock('@/components/character-profile/FeatsBlock', () => ({
+vi.mock('@/components/character-profile/hero/FeatsBlock', () => ({
     FeatsBlock: () => null,
 }));
 vi.mock('@/components/character-profile/rest/ChargesList', () => ({
@@ -37,11 +37,13 @@ vi.mock('@/lib/hooks/campaigns', async (orig) => ({
     useCampaignRules: () => ({ data: current.rules }),
 }));
 
-let SkillsTab: typeof import('@/components/character-profile/SkillsTab').SkillsTab;
+let SkillsTab: typeof import('@/components/character-profile/tabs/SkillsTab').SkillsTab;
 
 beforeAll(async () => {
     await import('@/components/systems');
-    ({ SkillsTab } = await import('@/components/character-profile/SkillsTab'));
+    ({ SkillsTab } = await import(
+        '@/components/character-profile/tabs/SkillsTab'
+    ));
 }, 30_000);
 
 describe('SkillsTab path panels wait for the campaign rules (M8)', () => {

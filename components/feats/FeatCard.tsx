@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { DmEntityCard } from '@/components/common/DmEntityCard';
+import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
 import { Badge } from '@/components/ui/badge';
 import type { FeatData } from '@/types/choices';
 

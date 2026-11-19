@@ -13,6 +13,7 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { buildCharacterUpdateData } from '@/lib/server/characters/core/build-character-update-data';
 import { normalizeCharacterInput } from '@/lib/server/characters/core/system-fields';
+import { systemLevelResetWriters } from '@/lib/server/systems/registry';
 import { buildCharacterSheet } from '@/lib/utils/characters/sheet';
 import { mergeRules, parseRules, type Ruleset } from '@/lib/utils/rules/schema';
 import { PRESETS } from '@/lib/utils/rules/systems/catalog';
@@ -119,7 +120,9 @@ const context = (rules: Ruleset) =>
             skilltrees: {
                 treeByRace: { Ельф: tree },
                 progress: {
-                    ch1: { 'row-tree': { unlockedSkills: ['light_basic_level'] } },
+                    ch1: {
+                        'row-tree': { unlockedSkills: ['light_basic_level'] },
+                    },
                 },
                 mainSkills: [
                     { id: 'light', spellGroupId: 'sg', name: 'Світло' },
@@ -305,5 +308,15 @@ describe.each(MODULES)('D16 module toggle: $id', (mod) => {
             expect(model.delete).not.toHaveBeenCalled();
             expect(model.deleteMany).not.toHaveBeenCalled();
         }
+    });
+});
+
+describe('level-down resets of module tables (D16)', () => {
+    it('the skilltrees progress reset runs only with the module in the composition', () => {
+        const on = systemLevelResetWriters(rulesWith(FULL));
+
+        const off = systemLevelResetWriters(rulesWith(without('skilltrees')));
+
+        expect(on.length).toBe(off.length + 1);
     });
 });

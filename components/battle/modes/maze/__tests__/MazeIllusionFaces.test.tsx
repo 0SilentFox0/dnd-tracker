@@ -3,7 +3,7 @@ import { type ReactNode } from 'react';
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MazeViewProvider } from '../MazeViewProvider';
+import { MazeViewProvider } from '../view/MazeViewProvider';
 
 import { EffectIcon } from '@/components/battle/hud';
 import {

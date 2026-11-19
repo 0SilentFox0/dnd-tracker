@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { SlotButton } from './SlotButton';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import type { TreeNodes } from '@/lib/utils/skills/progression';
 import {
     BRANCH_LEVELS,

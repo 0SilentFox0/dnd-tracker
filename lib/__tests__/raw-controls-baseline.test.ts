@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { RAW_CONTROL_TAGS } from '@/eslint/raw-controls.mjs';
 
 const exempt: { file: string }[] = JSON.parse(
-    readFileSync('raw-controls-exempt.json', 'utf8')
+    readFileSync('ratchets/raw-controls-exempt.json', 'utf8')
 );
 
 const rawTag = new RegExp(`<(${RAW_CONTROL_TAGS.join('|')})[\\s>]`);

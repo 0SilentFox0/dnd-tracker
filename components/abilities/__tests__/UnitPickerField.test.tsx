@@ -37,7 +37,7 @@ vi.mock('@/components/ui/select-field', () => ({
     ),
 }));
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { UnitPickerField } from '@/components/abilities/fields/UnitPickerField';
 import { useUnits } from '@/lib/hooks/units';
 import { EFFECT_REGISTRY } from '@/lib/utils/abilities/registry/effects';

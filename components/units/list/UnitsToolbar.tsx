@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { HudChipTabs } from '@/components/hud/page';
 import type { UnitRaceChip } from '@/lib/utils/units/group-units';
 

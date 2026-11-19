@@ -9,13 +9,14 @@ import {
 } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
-import { AssistantWorkspace } from '../AssistantWorkspace';
+import { AssistantWorkspace } from '../assistant/AssistantWorkspace';
 
 import * as ai from '@/lib/api/ai';
 import * as api from '@/lib/api/assistant';
 
-vi.mock('@/components/ui/select-field', () =>
-    import('@/components/ui/__tests__/select-field-mock')
+vi.mock(
+    '@/components/ui/select-field',
+    () => import('@/components/ui/__tests__/select-field-mock')
 );
 
 vi.mock('@/lib/api/assistant', () => ({

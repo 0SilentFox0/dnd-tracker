@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useAbilityEditor } from '@/components/abilities/editor-context';
+import { useAbilityEditor } from '@/components/abilities/editor/editor-context';
 import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { SelectField } from '@/components/ui/select-field';
 

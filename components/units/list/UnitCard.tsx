@@ -7,8 +7,8 @@ import { GripVertical, X } from 'lucide-react';
 
 import { UnitQuickStatsEditor } from './UnitQuickStatsEditor';
 
-import { AbilityFlowList } from '@/components/abilities/AbilityFlow';
-import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
+import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
+import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

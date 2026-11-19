@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl';
 import { GraduationCap, Plus } from 'lucide-react';
 
-import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
+import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { EmptyState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { useClassesList } from '@/lib/hooks/classes';

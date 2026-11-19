@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BattleMapPanel } from '../BattleMapPanel';
+import { BattleMapPanel } from '../panels/BattleMapPanel';
 
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';

@@ -1,4 +1,4 @@
-// node scripts/shared/raw-controls-baseline.mjs [--write]: raw-controls-exempt.json = files that still hold raw controls (only shrinks)
+// node scripts/shared/raw-controls-baseline.mjs [--write]: ratchets/raw-controls-exempt.json = files that still hold raw controls (only shrinks)
 import { readFileSync, writeFileSync } from 'node:fs';
 import { ESLint } from 'eslint';
 import typescriptParser from '@typescript-eslint/parser';
@@ -8,7 +8,7 @@ import {
     rawControlsPlugin,
 } from '../../eslint/raw-controls.mjs';
 
-const FILE = 'raw-controls-exempt.json';
+const FILE = 'ratchets/raw-controls-exempt.json';
 const root = new URL('../../', import.meta.url).pathname;
 
 const eslint = new ESLint({

@@ -13,7 +13,7 @@ import {
 } from '@/components/characters/character-form-tabs';
 import { CharacterSkillsSection } from '@/components/characters/skills/CharacterSkillsSection';
 import { SystemFormFields } from '@/components/characters/stats/SystemFormFields';
-import { CharacterChoicesTab } from '@/components/choices/CharacterChoicesTab';
+import { CharacterChoicesTab } from '@/components/choices/character/CharacterChoicesTab';
 import {
     HudForm,
     HudFormPage,

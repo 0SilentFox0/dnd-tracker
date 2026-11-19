@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { LocaleSwitcher } from '@/components/common/LocaleSwitcher';
+import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { Input } from '@/components/ui/input';
 import {

@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Pencil } from 'lucide-react';
 
-import { AbilityFlowList } from '@/components/abilities/AbilityFlow';
+import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
 import { ArtifactDeleteButton } from '@/components/artifacts/ArtifactDeleteButton';
-import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
+import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

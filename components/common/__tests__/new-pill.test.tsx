@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { NewPill } from '@/components/common/NewPill';
+import { NewPill } from '@/components/common/entity/NewPill';
 import { HudTile } from '@/components/hud/page';
 
 afterEach(cleanup);

@@ -1,7 +1,7 @@
 'use client';
 
-import { EffectCard } from '@/components/abilities/EffectCard';
-import { NestedEffectsEditor } from '@/components/abilities/NestedEffectsEditor';
+import { NestedEffectsEditor } from '@/components/abilities/editor/NestedEffectsEditor';
+import { EffectCard } from '@/components/abilities/flow/EffectCard';
 import { allowedEffectKinds, newEffect } from '@/lib/utils/abilities/editor';
 import type { Effect, NonRandomEffect } from '@/lib/utils/abilities/schema';
 import { SPELL_EFFECT_TRIGGER } from '@/lib/utils/spells/editor/spell-only';

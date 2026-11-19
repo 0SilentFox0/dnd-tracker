@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { ImportDialog } from '@/components/common/ImportDialog';
+import { ImportDialog } from '@/components/common/dialogs/ImportDialog';
 import { HudButton } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
 import { HudPill } from '@/components/hud/page';

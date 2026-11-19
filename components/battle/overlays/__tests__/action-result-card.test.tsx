@@ -12,11 +12,11 @@ vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 import '@/components/systems/registry';
 import { ActionResultCard } from '@/components/battle/overlays/ActionResultCard';
-import { CornerStack } from '@/components/battle/scene/CornerStack';
+import { CornerStack } from '@/components/battle/scene/layout/CornerStack';
 import {
     MapStripSlotContext,
     NoticeStackContext,
-} from '@/components/battle/scene/MapStrip';
+} from '@/components/battle/scene/layout/MapStrip';
 import { ACTION_RESULT_MS } from '@/lib/hooks/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import type {

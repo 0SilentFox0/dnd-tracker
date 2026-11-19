@@ -13,8 +13,8 @@ import {
 import { CreateMapDialog } from './CreateMapDialog';
 import { MapCatalogDialog } from './MapCatalogDialog';
 
-import { ActionsMenu } from '@/components/common/ActionsMenu';
-import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
+import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
+import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { EmptyState, ErrorState } from '@/components/common/states';
 import { HudCard, HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';

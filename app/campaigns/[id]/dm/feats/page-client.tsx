@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl';
 import { Award, Plus } from 'lucide-react';
 
-import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
+import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { EmptyState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { CreateFeatDialog } from '@/components/feats/CreateFeatDialog';
 import { FeatCard } from '@/components/feats/FeatCard';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';

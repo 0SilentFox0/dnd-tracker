@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import '@/components/hud/hud.css';
 import '@/components/landing/landing.css';
-import { LocaleSwitcher } from '@/components/common/LocaleSwitcher';
+import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HUD_SURFACE } from '@/components/hud';
 import { buildLandingJsonLd } from '@/components/landing/landing-metadata';
 import { keysOf } from '@/components/landing/messages';

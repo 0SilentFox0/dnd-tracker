@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { NameOnlyCreateDialog } from '@/components/common/NameOnlyCreateDialog';
+import { NameOnlyCreateDialog } from '@/components/common/dialogs/NameOnlyCreateDialog';
 import type { BackgroundFormData } from '@/types/backgrounds';
 
 const emptyBackground = (name: string): BackgroundFormData => ({

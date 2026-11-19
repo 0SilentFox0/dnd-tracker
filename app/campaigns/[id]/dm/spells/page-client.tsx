@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Printer, Wand2 } from 'lucide-react';
 
-import { DeleteAllButton } from '@/components/common/DeleteAllButton';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState, LoadingState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { CreateSpellGroupDialog } from '@/components/spells/dialogs/CreateSpellGroupDialog';

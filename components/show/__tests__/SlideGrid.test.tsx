@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SlideGrid } from '../editor/SlideGrid';
 
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: ({ alt }: { alt: string }) => <img alt={alt} />,
 }));
 

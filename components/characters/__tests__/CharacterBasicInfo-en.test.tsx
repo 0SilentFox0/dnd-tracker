@@ -8,7 +8,7 @@ import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { defaultCharacterFormData } from '@/lib/utils/characters/form/defaults';
 
 vi.unmock('next-intl');
-vi.mock('@/components/common/ImageUpload', () => ({
+vi.mock('@/components/common/fields/ImageUpload', () => ({
     ImageUpload: ({ label }: { label: string }) => <span>{label}</span>,
 }));
 

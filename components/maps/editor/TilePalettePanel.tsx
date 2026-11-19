@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { LAYER_ICONS, TILE_TOOLS } from './editor-icons';
 import { TileAssetImage } from './TileAssetImage';
 
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
@@ -26,11 +26,9 @@ const GROUND_LAYERS = ['ground', 'wallfill', 'objects', 'edge-art'] as const;
 
 const EFFECT_LAYERS = ['effects'] as const;
 
-const SECTION =
-    'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
+const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
-const HEADING =
-    'text-xs font-semibold tracking-wide text-hud-muted uppercase';
+const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
 
 function tileImageClass(layer: string) {
     return layer === 'edge-art'
@@ -58,7 +56,10 @@ export function TilePalettePanel({
     );
 
     const layerTiles = useMemo(
-        () => TILE_CATALOG.filter((tile) => tile.layer === tileEditor.activeLayer),
+        () =>
+            TILE_CATALOG.filter(
+                (tile) => tile.layer === tileEditor.activeLayer
+            ),
         [tileEditor.activeLayer]
     );
 
@@ -146,7 +147,9 @@ export function TilePalettePanel({
                         <label className="space-y-1 text-xs text-hud-muted">
                             <span className="flex justify-between gap-2">
                                 <span>{t('effectIntensity')}</span>
-                                <span>{Math.round(effect.intensity * 100)}%</span>
+                                <span>
+                                    {Math.round(effect.intensity * 100)}%
+                                </span>
                             </span>
                             <Slider
                                 aria-label={t('effectIntensity')}

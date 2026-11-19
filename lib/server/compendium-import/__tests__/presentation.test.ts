@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 
-import { CompendiumReport } from '@/components/content-import/CompendiumReport';
+import { CompendiumReport } from '@/components/content-import/compendium/report/CompendiumReport';
 import type { CompendiumReport as Report } from '@/lib/server/compendium-import/service';
 import { publicToolData } from '@/lib/utils/common/public-tool-data';
 vi.mock('../repository', () => ({ kindTable: {}, prismaImportRepository: {} }));

@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { SpellListHint } from './SpellListHint';
 
-import { ColorField } from '@/components/common/ColorField';
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ColorField } from '@/components/common/fields/ColorField';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CommaListInput } from '@/components/ui/comma-list-input';
 import { Input } from '@/components/ui/input';

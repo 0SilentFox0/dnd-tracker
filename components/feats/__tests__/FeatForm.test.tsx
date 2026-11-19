@@ -7,8 +7,9 @@ import type { FeatData } from '@/types/choices';
 
 const mutate = vi.fn();
 
-vi.mock('@/components/ui/select-field', () =>
-    import('@/components/ui/__tests__/select-field-mock')
+vi.mock(
+    '@/components/ui/select-field',
+    () => import('@/components/ui/__tests__/select-field-mock')
 );
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
@@ -33,7 +34,7 @@ vi.mock('@/components/abilities', () => ({
     AbilityListEditor: () => <div data-testid="ability-editor" />,
     withAbilityErrors: (label: string) => label,
 }));
-vi.mock('@/components/choices/ChoiceListEditor', () => ({
+vi.mock('@/components/choices/editor/ChoiceListEditor', () => ({
     ChoiceListEditor: ({ owner }: { owner: string }) => (
         <div data-testid="choice-editor">{owner}</div>
     ),

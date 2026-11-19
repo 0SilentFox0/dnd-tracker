@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { DmEntityCard } from '@/components/common/DmEntityCard';
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { DmEntityCard } from '@/components/common/entity/DmEntityCard';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { Badge } from '@/components/ui/badge';
 import type { GameClassData } from '@/types/classes';
 

@@ -1,4 +1,4 @@
-import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { UnitEditForm } from '@/components/units/form/UnitEditForm';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 

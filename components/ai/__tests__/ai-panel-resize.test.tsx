@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AiPanel } from '@/components/ai/AiPanel';
+import { AiPanel } from '@/components/ai/chat/AiPanel';
 
 vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),

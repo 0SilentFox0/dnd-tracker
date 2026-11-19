@@ -8,13 +8,13 @@ import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { HeroEyesSelect } from '@/components/world/editor/HeroEyesSelect';
-import { NewWorldMapDialog } from '@/components/world/editor/NewWorldMapDialog';
+import { NewWorldMapDialog } from '@/components/world/editor/maps/NewWorldMapDialog';
+import { WorldMapSettings } from '@/components/world/editor/maps/WorldMapSettings';
+import { HeroEyesSelect } from '@/components/world/editor/panels/HeroEyesSelect';
+import { WorldInspectorBar } from '@/components/world/editor/panels/WorldInspectorBar';
+import { WorldMarkerPanel } from '@/components/world/editor/panels/WorldMarkerPanel';
 import { WorldBreadcrumbs } from '@/components/world/editor/WorldBreadcrumbs';
 import { WorldEditorContext } from '@/components/world/editor/WorldEditorContext';
-import { WorldInspectorBar } from '@/components/world/editor/WorldInspectorBar';
-import { WorldMapSettings } from '@/components/world/editor/WorldMapSettings';
-import { WorldMarkerPanel } from '@/components/world/editor/WorldMarkerPanel';
 import {
     WorldToolbar,
     WorldToolHint,

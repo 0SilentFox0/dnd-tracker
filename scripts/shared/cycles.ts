@@ -7,7 +7,7 @@ import {
     ROOT,
 } from '../../lib/__tests__/helpers/static-graph';
 
-export const BASELINE_FILE = 'import-cycles-baseline.json';
+export const BASELINE_FILE = 'ratchets/import-cycles-baseline.json';
 
 const SCAN_DIRS = ['app', 'components', 'lib', 'systems', 'scripts', 'types'];
 

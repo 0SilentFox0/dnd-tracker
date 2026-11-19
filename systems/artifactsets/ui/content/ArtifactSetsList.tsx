@@ -6,10 +6,10 @@ import { Layers } from 'lucide-react';
 
 import { ArtifactSetCard } from './ArtifactSetCard';
 
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { useArtifactSetsPage } from '@/systems/artifactsets/hooks';

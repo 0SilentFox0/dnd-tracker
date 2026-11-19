@@ -14,6 +14,8 @@
 | **`types/`** | Глобальні TypeScript-типи та інтерфейси |
 | **`prisma/`** | Схема БД та міграції |
 | **`scripts/`** | CLI/одноразові скрипти (імпорт, міграції, seed) |
+| **`systems/`** | Рулсистеми: бази, модулі, пресети (`docs/architecture/rule-systems.md`) |
+| **`ratchets/`** | Baseline-файли ratchet-перевірок (лише скорочуються) |
 | **`docs/`** | Документація (ТЗ, опис юнітів тощо) |
 | **`public/`** | Статичні файли (зображення, фони) |
 
@@ -75,35 +77,55 @@
 
 ## 2. `components/` — React-компоненти
 
-Компоненти згруповані за доменами. Загальні UI-примітиви — в `ui/`.
+Компоненти згруповані за доменами. Загальні UI-примітиви — в `ui/`. Правило розміру: у папці до ~10 файлів компонентів; більше — підпапки за відповідальністю (а не за алфавітом). Barrel `index.ts` лежить у корені папки лише там, де він уже є; імпорт завжди через `@/components/...`. Шари й межі — [ui-layers.md](docs/architecture/ui-layers.md).
 
-### 2.1 Доменні папки
+### 2.1 Примітиви та спільне
 
 | Папка | Що містить |
 |-------|------------|
-| **`ui/`** | Базові компоненти (Button, Card, Select, Tabs, Accordion тощо) — shadcn/ui стиль. Діалоги — лише `ResponsiveDialog` (модалка на десктопі, шторка `vaul` на телефоні); підтвердження й повідомлення — `ConfirmProvider` + `useConfirm` / `useNotify`. |
-| **`hud/form/`** | HUD-форми: `HudFormPage` + `HudForm` (таби `HudTab`, заголовки секцій `HudSection`); діалоги-форми — `ResponsiveDialog hud`. Усередині `.hud-surface` shadcn-токени HUD-кольорові, текстова змінна HUD — `--hud-muted`. Акордеони — лише у списках. |
-| **`hud/page/`** | HUD-сторінки: `HudPage` + `HudPageHeader`, елементи — `HudCard` / `HudTile`, фільтри — `HudChipTabs`, панелі — `HudPanel`. Арт розділу (`body::before`; `layout.tsx` сегмента ставить маркер `screenBackgroundLayout(SCREEN_BACKGROUND.x)`, CSS у `app/globals.css`, без маркера — таверна) видно під напівпрозорими панелями; сторінки друку лишаються світлими. |
-| **`common/`** | Спільні блоки без доменних типів: FormCard, FormField, LabeledInput, `ImageUpload`, `states/` (`EmptyState`, `LoadingState`, `ErrorState`, `QueryState`). `ActionBar` (кнопки форми, на телефоні прилипають донизу) — `ui/action-bar`. Шари й межі — [ui-layers.md](docs/architecture/ui-layers.md). |
-| **`layout/`** | Макети, хедери, навігація, `ThemeProvider`, `PaletteSwitcher`, `AbbreviationsInfoDialog`. |
-| **`dice/`** | 3D-кубики: `DiceStage` (сцена, рушій), `DiceRoller` (кубик ведучого в показі). |
-| **`show/world/`** | Карта світу в показі: `ShowWorldControls`, `ShowWorldStage`, `WorldTravelDialog`. |
-| **`scenario/page/`** | Сторінка сценарію ДМ: `ScenarioPageActions`, `ScenarioPageContent`, `ScenarioAiPanel`. |
-| **`ai/settings/`** | Блоки сторінки AI-налаштувань ДМ. |
-| **`battle/`** | Бій: `scene/` (провайдер, `BattleScreen`, мобільна й десктопна розкладки, трек ініціативи, рядки учасників, мій герой, журнал), `wizards/` (майстер атаки, книга заклинань, бонусна дія, введення кубиків), `fx/` (оверлеї результатів), `hud/` (тема, шрифти, примітиви), `dialogs/` і `panels/` (DM), `views/BattlePreparationView`. |
-| **`characters/`** | Персонаж: basic info, ability scores, combat params, skills, spells, artifacts, stats (damage calculator, HP preview). |
-| **`campaigns/`** | Кампанія: join, members, info, settings. |
-| **`abilities/`** | Редактор умінь для всіх власників: акордеон (`AbilityListEditor`), секції «Коли / Умова / Ліміти / Що робить», поля з реєстру (`fields/`), шаблони й «Скопіювати з…», `AbilitySummary` для карток. |
-| **`skills/`** | Скіли: форми створення/редагування (`form/`), списки, картки, діалоги (діалоги). |
-| **`skill-tree/`** | Прокачка: `progression/` (панель гравця — рядки гілок, пропозиції, шторка вузла, анімація нового рівня), `editor/` (таблиця-редактор дерева для DM). |
-| **`spells/`** | Заклинання: списки, групи, діалоги, форми. |
-| **`races/`** | Раси: форми редагування, стати, слоти заклинань. |
-| **`main-skills/`** | Основні навички (MainSkill): картки, діалог створення. |
-| **`artifacts/`** | Артефакти: картки, форми, кнопки видалення. |
-| **`inventory/`** | Інвентар: валюта, екіпіровка, рюкзак. |
-| **`units/`** | Юніти: списки, форми, діалоги. |
+| **`ui/`** | Базові компоненти (Button, Card, Select, Tabs, Accordion тощо) — shadcn/ui стиль. Діалоги — лише `ResponsiveDialog` (модалка на десктопі, шторка `vaul` на телефоні); підтвердження й повідомлення — `ConfirmProvider` + `useConfirm` / `useNotify`. `ActionBar` — `ui/action-bar`. |
+| **`hud/form/`**, **`hud/page/`** | HUD-форми (`HudFormPage` + `HudForm`, `HudTab`, `HudSection`) і HUD-сторінки (`HudPage`, `HudPageHeader`, `HudCard` / `HudTile`, `HudChipTabs`, `HudPanel`). Усередині `.hud-surface` shadcn-токени HUD-кольорові, текст — `--hud-muted`. Арт розділу ставить `screenBackgroundLayout(SCREEN_BACKGROUND.x)` у `layout.tsx` сегмента (CSS у `app/globals.css`); сторінки друку лишаються світлими. |
+| **`common/`** | Спільні блоки без доменних типів: `fields/` (ColorField, IconUrlField, ImageUpload, SearchInput…), `entity/` (EntityIcon, OptimizedImage, DmEntityCard, GroupAccordionItem, MarkdownLite…), `dialogs/` (ImportDialog, NameOnlyCreateDialog, RenameGroupDialog, UndoableResultDialog), `shell/` (PrintPageShell, PagerNav, PlayerViewGuard/Toggle, LocaleSwitcher, ToastHost, StepIndicator), `states/` (`EmptyState`, `LoadingState`, `ErrorState`, `QueryState`, `SearchEmptyState`, `SectionLoading`). |
+| **`layout/`** | Макети, хедери, навігація, `ThemeProvider`, `PaletteSwitcher`. |
+| **`systems/`** | Реєстр UI рулсистем і типи слотів (`registry.ts`, `types`); сам UI систем — у `systems/<id>/ui`. |
+| **`fx/`** | 2D-ефекти: `animations/`, `auras/`, `frames/`, `runtime/`, `preview/` (один файл на анімацію). |
+| **`dice/`**, **`audio/`**, **`music/`**, **`soundboard/`**, **`notifications/`** | 3D-кубики (`DiceStage`, `DiceRoller`), аудіо, музична бібліотека/плеєр, швидкі звуки ДМ, сповіщення. |
+| **`auth/`**, **`landing/`**, **`onboarding/`** | Вхід/реєстрація, статичний лендінг (`sections/`), чеклісти, підказки, «Що нового». |
 
-Іменування: доменні компоненти з великої літери; підкомпоненти часто в тій самій папці або в підпапках (`battle/scene/`, `battle/wizards/`).
+### 2.2 Бій
+
+| Папка | Що містить |
+|-------|------------|
+| **`battle/scene/`** | `BattleScreen`, `BattleSceneProvider`, `BattlePlayerViewToggle`; `layout/` (Desktop/Mobile розкладки, `CornerStack`, `BattleTopBar`, `MapStrip`), `banners/` (AwaitingDm, BattleOver, Connection, `BattleToast`, `LastActionTicker`). |
+| **`battle/map/`** | Мапа бою: `BattleMap`, `MapStage` у корені; `layers/` (шари фону, токенів, стін, дверей), `tokens/` (токен, HUD токена, курсори атаки, геометрія), `edges/` (редактор ребер, двері), `panels/` (панелі мапи, погода, рух, інструменти), `camera/`, `fog/`, `grid/`, `motion/`, `tiles/`, `weather/`. |
+| **`battle/setup/`** | Створення бою: `form/` (`BattleSetupForm`, вкладки), `map/` (бібліотека карт, калібрування сітки), `participants/` (списки героїв/юнітів, рядки учасників), `balance/` (баланс і XP). |
+| **`battle/modes/maze/`** | Режим лабіринту: `layers/` (туман, стіни, фічі), `view/` (провайдер вигляду, перемикач, огляд партії), `tools/` (тулбар, редактор ребер, мітки), `dialogs/` (генерація, ілюзії, перетасовка). |
+| **`battle/`** (решта) | `wizards/` (атака, книга заклинань, бонусна дія, кидки), `participants/`, `turn/`, `log/`, `dm/` (діалоги й панелі ДМ), `hud/`, `overlays/`, `list/`, `audio/`, `demo/`, `dev/`. |
+
+### 2.3 Персонаж і контент
+
+| Папка | Що містить |
+|-------|------------|
+| **`character-profile/`** | Лист героя: `tabs/` (Combat, Magic, Skills, Story, BasicEdit), `hero/` (портрет, шапка, раса, риси, книга заклинань), `level-up/` (діалоги підвищення, вибори, бейджі), `story/` (біографія, цілі, нотатки), `combat/` (рядки бою, кидки, розбивка), `tokens/`, `inventory/`, `path/`, `rest/`, `stash/`; `CharacterProfile`, `ProfileContext`, `ProfileEditor` у корені. |
+| **`characters/`** | Створення/списки персонажів: `basic/`, `abilities/`, `skills/`, `spells/`, `artifacts/`, `stats/`, `rest/`, `review/`, `player-draft/`, `list/`. |
+| **`choices/`** | Вибори персонажа: `editor/` (редактор виборів для ДМ), `picker/` (вибір гравцем, майстер, передісторії), `character/` (панелі виборів героя). |
+| **`abilities/`** | Редактор умінь: `editor/` (список, панель, умови, контекст), `recipes/` (шаблони й «Скопіювати з…»), `flow/` (схема потоку, чипи, `EffectCard`), `fields/` (поля з реєстру), `sections/`, `effect-renderers/`. |
+| **`spells/`** | Заклинання: `list/`, `groups/`, `dialogs/`, `book/`, `preview/`; `form/` — `fields/` (поля форми), `forms/` (create/edit/body/effects), `effects/`. |
+| **`skills/`**, **`races/`**, **`feats/`**, **`artifacts/`**, **`units/`** | Картки, списки й форми відповідного контенту (`units/form`, `units/list`). |
+| **`content-import/`** | Імпорт: `ContentImportWizard`; `compendium/` (кроки компендіуму), `compendium/report/` (звіти, медіа, покриття), `steps/`, `shared/` (чипи, лічильники, кнопки передачі). |
+| **`rules/`**, **`campaigns/`**, **`acquaintances/`** | Секції правил кампанії (`sections/`, `system/`); кампанія (`dashboard/`, `info/`, `join/`, `members/`, `settings/`, `templates/`); знайомі. |
+
+### 2.4 Сценарій, показ, світ, AI
+
+| Папка | Що містить |
+|-------|------------|
+| **`scenario/`** | `book/` (книга, зміст, індекс, пошук, шрифти, CSS), `page/` (сторінка, rich text, підсумок), `chips/` (маркери, іконки секцій, вибір героя), `editor/` (див. нижче), `graph/`, `play/`. |
+| **`scenario/editor/`** | `acquaintance/` (діалог і форми знайомих, журнал), `dialogs/` (вибір бою/маркера/слайда, властивості, версії, треки), `rich-text/` (TipTap-редактор, згадки), `chrome/` (тулбар, статус збереження, порядок), `rows/` (клітинки, прив'язки, розкриття). |
+| **`show/`** | «Показ»: `editor/`, `puzzle/`, `stage/`, `world/` (карта світу в показі). |
+| **`world/`**, **`maps/`** | Карта світу (`editor/`, `notes/`, `play/`, `travel/`); бібліотека карт бою (`maps/editor`). `world/editor/`: `panels/` (маркер, інспектор), `maps/` (смуги, дропзона, налаштування, нова карта). |
+| **`ai/`** | `chat/` (панель, композер, повідомлення, тред), `proposals/` (пропозиції, операції сценарію), `assistant/` (воркспейс, черга, ревю, політика, handoff), `settings/` (провайдери, інструкції, токени). |
+
+Іменування: доменні компоненти з великої літери; хуки `useX.ts`, чисті хелпери й типи — kebab-case поруч у відповідній підпапці.
 
 ---
 

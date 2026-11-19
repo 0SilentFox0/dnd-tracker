@@ -15,8 +15,8 @@ import { TextField } from './TextField';
 import { ToggleField } from './ToggleField';
 import { UnitPickerField } from './UnitPickerField';
 
-import { useErrorsUnder } from '@/components/abilities/editor-context';
-import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { useErrorsUnder } from '@/components/abilities/editor/editor-context';
+import { FieldErrors } from '@/components/abilities/editor/FieldErrors';
 import { localizeField } from '@/components/abilities/fields/registry-labels';
 import { Label } from '@/components/ui/label';
 import { useTranslator } from '@/lib/i18n/use-translator';

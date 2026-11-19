@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { FieldProps } from './FieldRenderer';
 import { ScaleColumnSelect } from './ScaleColumnSelect';
 
-import { useAbilityEditor } from '@/components/abilities/editor-context';
+import { useAbilityEditor } from '@/components/abilities/editor/editor-context';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';

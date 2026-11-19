@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useAbilityEditor } from '@/components/abilities/editor-context';
+import { useAbilityEditor } from '@/components/abilities/editor/editor-context';
 import { FieldRenderer } from '@/components/abilities/fields/FieldRenderer';
 import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -58,7 +58,11 @@ export function FlagEditor({
         } as Effect);
     };
 
-    const fields = [...(FLAG_FIELDS[effect.flag] ?? []), TARGET_FIELD, DURATION_FIELD];
+    const fields = [
+        ...(FLAG_FIELDS[effect.flag] ?? []),
+        TARGET_FIELD,
+        DURATION_FIELD,
+    ];
 
     return (
         <>

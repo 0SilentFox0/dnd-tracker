@@ -91,22 +91,22 @@ vi.mock('@/components/world/travel/TravelPanel', () => ({
 vi.mock('@/components/world/WorldMapView', () => ({
     WorldMapView: () => <div>map</div>,
 }));
-vi.mock('@/components/world/editor/HeroEyesSelect', () => ({
+vi.mock('@/components/world/editor/panels/HeroEyesSelect', () => ({
     HeroEyesSelect: () => null,
 }));
-vi.mock('@/components/world/editor/NewWorldMapDialog', () => ({
+vi.mock('@/components/world/editor/maps/NewWorldMapDialog', () => ({
     NewWorldMapDialog: () => null,
 }));
 vi.mock('@/components/world/editor/WorldBreadcrumbs', () => ({
     WorldBreadcrumbs: () => null,
 }));
-vi.mock('@/components/world/editor/WorldInspectorBar', () => ({
+vi.mock('@/components/world/editor/panels/WorldInspectorBar', () => ({
     WorldInspectorBar: () => null,
 }));
-vi.mock('@/components/world/editor/WorldMapSettings', () => ({
+vi.mock('@/components/world/editor/maps/WorldMapSettings', () => ({
     WorldMapSettings: () => null,
 }));
-vi.mock('@/components/world/editor/WorldMarkerPanel', () => ({
+vi.mock('@/components/world/editor/panels/WorldMarkerPanel', () => ({
     WorldMarkerPanel: () => <span>marker-panel</span>,
 }));
 vi.mock('@/components/ui/responsive-dialog', () => ({

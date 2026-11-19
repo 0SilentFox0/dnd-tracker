@@ -3,8 +3,8 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { RollableCell } from '@/components/character-profile/combat/RollableCell';
 import { useProfile } from '@/components/character-profile/ProfileContext';
-import { RollableCell } from '@/components/character-profile/RollableCell';
 import { HudSection } from '@/components/hud/form';
 import type {
     SheetRollRequest,

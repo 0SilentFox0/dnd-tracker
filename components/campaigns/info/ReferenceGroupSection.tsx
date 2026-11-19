@@ -1,4 +1,4 @@
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     AccordionContent,
     AccordionItem,

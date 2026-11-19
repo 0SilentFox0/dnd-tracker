@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { LevelUpBadge } from '@/components/character-profile/LevelUpBadge';
+import { LevelUpBadge } from '@/components/character-profile/level-up/LevelUpBadge';
 
 vi.mock('@/components/hud/fonts', () => ({
     hudFontClassName: '',

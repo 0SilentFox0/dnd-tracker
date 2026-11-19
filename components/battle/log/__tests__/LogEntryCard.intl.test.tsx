@@ -3,7 +3,7 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { LogEntryCard } from '@/components/battle/log/LogEntryCard';
-import { BattleTopBar } from '@/components/battle/scene/BattleTopBar';
+import { BattleTopBar } from '@/components/battle/scene/layout/BattleTopBar';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES } from '@/lib/i18n/scopes';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';

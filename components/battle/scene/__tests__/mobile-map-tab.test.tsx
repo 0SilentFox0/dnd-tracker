@@ -33,8 +33,8 @@ vi.mock('@/components/audio/AudioDock', () => ({
 }));
 
 import '@/components/systems/registry';
-import { MapStripSlotContext } from '@/components/battle/scene/MapStrip';
-import { MobileBattleLayout } from '@/components/battle/scene/MobileBattleLayout';
+import { MapStripSlotContext } from '@/components/battle/scene/layout/MapStrip';
+import { MobileBattleLayout } from '@/components/battle/scene/layout/MobileBattleLayout';
 import { SpellAimPanel } from '@/components/battle/wizards/spellbook/SpellAimPanel';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';

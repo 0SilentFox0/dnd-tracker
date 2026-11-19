@@ -1,7 +1,7 @@
 'use client';
 
 import { AiPanel, AiProposalCard } from '@/components/ai';
-import { AssistantReview } from '@/components/ai/AssistantReview';
+import { AssistantReview } from '@/components/ai/assistant/AssistantReview';
 import type { AiThreadMode } from '@/lib/constants/ai';
 import type { useAiProposals } from '@/lib/hooks/ai';
 import type { AiFocus } from '@/types/ai';

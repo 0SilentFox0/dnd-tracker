@@ -3,11 +3,11 @@
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
-import type { AbilitySectionProps } from '../AbilityPanel';
-import { useAbilityEditor } from '../editor-context';
-import { EffectCard } from '../EffectCard';
-import { FieldErrors } from '../FieldErrors';
-import { NestedEffectsEditor } from '../NestedEffectsEditor';
+import type { AbilitySectionProps } from '../editor/AbilityPanel';
+import { useAbilityEditor } from '../editor/editor-context';
+import { FieldErrors } from '../editor/FieldErrors';
+import { NestedEffectsEditor } from '../editor/NestedEffectsEditor';
+import { EffectCard } from '../flow/EffectCard';
 import { sectionId, SectionShell } from './SectionShell';
 
 import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';

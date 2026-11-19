@@ -1,5 +1,5 @@
 import { ScenarioEditor } from './ScenarioEditor';
 
-export { PagePropertiesDialog } from './PagePropertiesDialog';
-export { VersionsDialog } from './VersionsDialog';
+export { PagePropertiesDialog } from './dialogs/PagePropertiesDialog';
+export { VersionsDialog } from './dialogs/VersionsDialog';
 export default ScenarioEditor;

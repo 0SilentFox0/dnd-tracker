@@ -1,4 +1,4 @@
-import { AssistantWorkspace } from '@/components/ai/AssistantWorkspace';
+import { AssistantWorkspace } from '@/components/ai/assistant/AssistantWorkspace';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 export default async function AssistantPage({
     params,

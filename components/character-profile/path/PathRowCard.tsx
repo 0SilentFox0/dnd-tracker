@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Info } from 'lucide-react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
 import { HudPill } from '@/components/hud/page';
 import { Disclosure } from '@/components/ui/disclosure';

@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SpellFormPowerFields } from '@/components/spells/form/SpellFormPowerFields';
+import { SpellFormPowerFields } from '@/components/spells/form/fields/SpellFormPowerFields';
 import { formToPayload } from '@/lib/utils/spells/model/form';
 import type { SpellFormData } from '@/types/spells';
 

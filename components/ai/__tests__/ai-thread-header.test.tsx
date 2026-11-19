@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AiThreadHeader } from '@/components/ai/AiThreadHeader';
+import { AiThreadHeader } from '@/components/ai/chat/AiThreadHeader';
 import { LEGACY_THREAD_TITLE } from '@/lib/constants/ai';
 import type { AiThread } from '@/types/ai';
 

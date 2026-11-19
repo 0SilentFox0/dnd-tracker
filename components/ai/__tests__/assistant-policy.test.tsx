@@ -9,8 +9,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
-import { AssistantIntentCard } from '../AssistantIntentCard';
-import { AssistantPolicyControl } from '../AssistantPolicyControl';
+import { AssistantIntentCard } from '../assistant/AssistantIntentCard';
+import { AssistantPolicyControl } from '../assistant/AssistantPolicyControl';
 
 import * as api from '@/lib/api/assistant';
 vi.mock('@/lib/api/assistant', () => ({

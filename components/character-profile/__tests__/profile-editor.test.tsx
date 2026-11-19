@@ -2,8 +2,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BiographyEditor } from '@/components/character-profile/BiographyEditor';
-import { LevelUpAction } from '@/components/character-profile/LevelUpAction';
+import { LevelUpAction } from '@/components/character-profile/level-up/LevelUpAction';
+import { BiographyEditor } from '@/components/character-profile/story/BiographyEditor';
 
 describe('редактор ДМа', () => {
     afterEach(cleanup);

@@ -14,7 +14,7 @@ const world = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/hooks/world', () => ({ useWorldMap: () => world.map }));
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => null,
 }));
 

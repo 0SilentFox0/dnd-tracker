@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Loader2, Sparkles } from 'lucide-react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { SpellBattlePreview } from '@/components/spells/preview/SpellBattlePreview';
 import {
     AccordionContent,

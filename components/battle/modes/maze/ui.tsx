@@ -3,18 +3,21 @@
 import { useTranslations } from 'next-intl';
 
 import type { MapModeUi } from '../types';
-import { MazeDarkScreen } from './MazeDarkScreen';
-import { MazeEdgeEditor } from './MazeEdgeEditor';
-import { MazeFeaturesLayer } from './MazeFeaturesLayer';
-import { MazeFogOfWar } from './MazeFogOfWar';
-import { MazeMarkPicker } from './MazeMarkPicker';
-import { MazePartyVision } from './MazePartyVision';
-import { MazeEditPalette, MazeToolbar } from './MazeToolbar';
-import { MazeViewerSwitch } from './MazeViewerSwitch';
-import { MazeToolStateProvider, MazeViewProvider } from './MazeViewProvider';
-import { MazeWallsLayer } from './MazeWallsLayer';
+import { MazeDarkScreen } from './layers/MazeDarkScreen';
+import { MazeFeaturesLayer } from './layers/MazeFeaturesLayer';
+import { MazeFogOfWar } from './layers/MazeFogOfWar';
+import { MazeWallsLayer } from './layers/MazeWallsLayer';
+import { MazeEdgeEditor } from './tools/MazeEdgeEditor';
+import { MazeMarkPicker } from './tools/MazeMarkPicker';
+import { MazeEditPalette, MazeToolbar } from './tools/MazeToolbar';
+import { MazePartyVision } from './view/MazePartyVision';
+import { MazeViewerSwitch } from './view/MazeViewerSwitch';
+import {
+    MazeToolStateProvider,
+    MazeViewProvider,
+} from './view/MazeViewProvider';
 
-import { ToggleRow } from '@/components/battle/setup/ToggleRow';
+import { ToggleRow } from '@/components/battle/setup/form/ToggleRow';
 import type { MazeTools } from '@/lib/hooks/battle/modes/maze';
 import type { MazeView } from '@/lib/utils/battle/modes/maze';
 

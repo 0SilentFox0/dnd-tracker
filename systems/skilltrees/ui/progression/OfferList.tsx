@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { Button } from '@/components/ui/button';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useText } from '@/lib/i18n/use-text';

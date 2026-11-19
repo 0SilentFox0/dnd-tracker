@@ -7,7 +7,7 @@ import { AudiencePicker } from './AudiencePicker';
 import { PuzzlePreview } from './PuzzlePreview';
 import { TrackPicker } from './TrackPicker';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';

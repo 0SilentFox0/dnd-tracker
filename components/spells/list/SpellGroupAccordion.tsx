@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { Edit, X } from 'lucide-react';
 
-import { GroupAccordionItem } from '@/components/common/GroupAccordionItem';
-import { RenameGroupDialog } from '@/components/common/RenameGroupDialog';
+import { RenameGroupDialog } from '@/components/common/dialogs/RenameGroupDialog';
+import { GroupAccordionItem } from '@/components/common/entity/GroupAccordionItem';
 import {
     type SpellGroupItemActions,
     SpellLevelAccordion,

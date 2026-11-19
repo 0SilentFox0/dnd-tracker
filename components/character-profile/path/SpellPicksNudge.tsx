@@ -12,7 +12,9 @@ import {
     openSpellPicks,
 } from '@/lib/utils/characters/classes';
 
-const ChoicesDialog = dynamic(() => import('../ChoicesDialog'), { ssr: false });
+const ChoicesDialog = dynamic(() => import('../level-up/ChoicesDialog'), {
+    ssr: false,
+});
 
 export function SpellPicksNudge({ onPick }: { onPick?: () => void }) {
     const { campaignId, characterId, sheet } = useProfile();

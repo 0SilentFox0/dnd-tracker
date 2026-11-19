@@ -1,0 +1,168 @@
+'use client';
+
+import { type ReactNode, type Ref, useState } from 'react';
+import { useTranslations } from 'next-intl';
+
+import { Breakdown } from '../combat/Breakdown';
+import { useProfile } from '../ProfileContext';
+import { ArcaneRecoveryPanel } from '../rest/ArcaneRecoveryPanel';
+import { HitDicePanel } from '../rest/HitDicePanel';
+import { RestBadges } from '../rest/RestBadges';
+import { HeroPortrait } from './HeroPortrait';
+
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
+import { HudButton } from '@/components/hud';
+import { systemUiOf } from '@/components/systems';
+import { useCampaignSystem } from '@/lib/hooks/systems';
+import { signed } from '@/lib/utils/common/format';
+import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
+
+export function ProfileHero({
+    actions,
+    badge,
+    ref,
+}: {
+    actions?: ReactNode;
+    badge?: ReactNode;
+    ref?: Ref<HTMLElement>;
+}) {
+    const { campaignId, sheet, canEdit } = useProfile();
+
+    const t = useTranslations('characterProfile.hero');
+
+    const [hpOpen, setHpOpen] = useState(false);
+
+    const id = sheet.identity;
+
+    const { def: system, system: current } = useCampaignSystem(
+        campaignId,
+        sheet.system
+    );
+
+    const Ui = systemUiOf(current.key, current.modules);
+
+    const hpKey = Ui.hideProgression
+        ? ({ current: 'woundsCurrent', total: 'woundsTotal' } as const)
+        : ({ current: 'hpCurrent', total: 'hpTotal' } as const);
+
+    return (
+        <header ref={ref} className="px-4 pt-4 pb-3">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                <HeroPortrait
+                    src={id.avatar}
+                    name={id.name}
+                    canEdit={canEdit}
+                    className="lg:w-80 lg:shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="hud-sc truncate text-xl leading-7 text-hud-ink">
+                                {id.name}
+                            </h1>
+                            <p className="flex min-w-0 items-center gap-1.5 text-xs text-hud-muted">
+                                <span className="truncate">
+                                    {!Ui.hideProgression &&
+                                        `${t('level', { level: id.level })} · `}
+                                    {sheet.hitDice === null &&
+                                        !Ui.hideProgression &&
+                                        `${id.archetype} · `}
+                                    {statColumnsOf(system).has('classes') &&
+                                        `${id.className}${id.subclass ? ` (${id.subclass})` : ''} · `}
+                                </span>
+                                {badge}
+                                {id.raceIcon && (
+                                    <OptimizedImage
+                                        src={id.raceIcon}
+                                        alt=""
+                                        width={14}
+                                        height={14}
+                                        className="size-3.5 shrink-0 rounded-sm"
+                                    />
+                                )}
+                                <span className="truncate">
+                                    {id.race}
+                                    {id.subrace ? ` (${id.subrace})` : ''}
+                                    {system.identity.alignments && id.alignment
+                                        ? ` · ${id.alignment}`
+                                        : ''}
+                                </span>
+                            </p>
+                            <HudButton
+                                type="button"
+                                aria-expanded={hpOpen}
+                                onClick={() => setHpOpen((v) => !v)}
+                                className="mt-1 text-sm text-hud-bone underline-offset-2 hover:underline"
+                            >
+                                {sheet.rest?.hp
+                                    ? `${t(hpKey.current, { current: sheet.rest.hp.current, max: sheet.rest.hp.max })}${sheet.rest.hp.temp ? ` (+${sheet.rest.hp.temp})` : ''}`
+                                    : t(hpKey.total, { total: sheet.hp.total })}
+                                {sheet.hitDice && ` · ${sheet.hitDice}`}
+                            </HudButton>
+                            {sheet.classTable?.map((line) => (
+                                <p
+                                    key={line}
+                                    className="text-xs text-hud-muted"
+                                >
+                                    {line}
+                                </p>
+                            ))}
+                            {sheet.rest && <RestBadges />}
+                            {sheet.rest && system.rest.kinds && (
+                                <HitDicePanel />
+                            )}
+                            {sheet.rest && system.rest.kinds && (
+                                <ArcaneRecoveryPanel />
+                            )}
+                        </div>
+                        {actions && (
+                            <div className="flex shrink-0 flex-col gap-1.5">
+                                {actions}
+                            </div>
+                        )}
+                    </div>
+                    {hpOpen && <Breakdown lines={sheet.hp.lines} />}
+                    <div className="mt-3 flex gap-1.5">
+                        <Ui.HeroStats />
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+}
+
+export function CompactHero() {
+    const { campaignId, sheet } = useProfile();
+
+    const t = useTranslations('characterProfile.hero');
+
+    const { system } = useCampaignSystem(campaignId, sheet.system);
+
+    const hideProgression = systemUiOf(
+        system.key,
+        system.modules
+    ).hideProgression;
+
+    const hp = sheet.rest?.hp
+        ? t(hideProgression ? 'woundsCurrent' : 'hpCurrent', {
+              current: sheet.rest.hp.current,
+              max: sheet.rest.hp.max,
+          })
+        : t(hideProgression ? 'woundsTotal' : 'hpTotal', {
+              total: sheet.hp.total,
+          });
+
+    return (
+        <div className="flex items-center justify-between gap-2 px-4 pt-2 text-xs text-hud-muted">
+            <span className="hud-sc truncate text-sm text-hud-ink">
+                {sheet.identity.name}
+                {!hideProgression && ` · ${sheet.identity.level}`}
+            </span>
+            <span className="shrink-0 tabular-nums">
+                {hp}
+                {!hideProgression &&
+                    ` · AC ${sheet.armorClass.total} · ${t('short.toHit')} ${sheet.bestToHit === null ? '—' : signed(sheet.bestToHit)}`}
+            </span>
+        </div>
+    );
+}

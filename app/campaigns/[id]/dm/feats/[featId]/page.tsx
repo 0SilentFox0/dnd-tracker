@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { FeatForm } from '@/components/feats/FeatForm';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';

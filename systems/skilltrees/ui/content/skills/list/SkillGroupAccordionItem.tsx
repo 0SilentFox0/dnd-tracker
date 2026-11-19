@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Edit, X } from 'lucide-react';
 
-import { GroupAccordionItem } from '@/components/common/GroupAccordionItem';
+import { GroupAccordionItem } from '@/components/common/entity/GroupAccordionItem';
 import {
     SkillCard,
     type SkillCardActions,
