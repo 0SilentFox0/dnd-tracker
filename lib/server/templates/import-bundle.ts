@@ -46,28 +46,83 @@ export interface ImportOptions {
 
 type ParsedBundle = z.infer<typeof BundleSchema>;
 
+interface ReuseTarget {
+    table: string;
+    campaignId: unknown;
+    type?: unknown;
+}
+
+async function loadReuseTargets(
+    tx: TemplateDb,
+    reuse: ReadonlyMap<string, string>,
+    targetCampaignId: string
+) {
+    const ids = [...new Set(reuse.values())];
+
+    const found = new Map<string, ReuseTarget>();
+
+    if (ids.length === 0) return found;
+
+    for (const t of BUNDLE_TABLES) {
+        const rows = await delegateOf(tx, t).findMany({
+            where: { id: { in: ids } },
+            select: {
+                id: true,
+                campaignId: true,
+                ...(t.key === 'feats' && { type: true }),
+            },
+        });
+
+        for (const r of rows)
+            found.set(r.id as string, {
+                table: t.key,
+                campaignId: r.campaignId,
+                type: r.type,
+            });
+    }
+
+    for (const id of ids)
+        if (found.get(id)?.campaignId !== targetCampaignId)
+            throw new BundleInvalidError(
+                API_ERRORS.BUNDLE_FOREIGN_CONTENT,
+                undefined,
+                { ids: id }
+            );
+
+    return found;
+}
+
 function assertBackgroundRefs(
     bundle: ParsedBundle,
     layer?: ImportLayer,
-    reuse?: ReadonlyMap<string, string>
+    reuse?: ReadonlyMap<string, string>,
+    reuseTargets?: ReadonlyMap<string, ReuseTarget>
 ) {
+    const reused = [...(reuse ?? [])].map(([from, to]) => ({
+        from,
+        target: reuseTargets?.get(to),
+    }));
+
+    const feats = [
+        ...bundle.feats,
+        ...reused
+            .filter((r) => r.target?.table === 'feats')
+            .map((r) => ({ id: r.from, type: r.target!.type })),
+    ];
+
+    const spellIds = new Set([
+        ...bundle.spells.map((s) => s.id),
+        ...reused.filter((r) => r.target?.table === 'spells').map((r) => r.from),
+    ]);
+
     for (const background of layer ? [] : bundle.backgrounds) {
         const error = backgroundReferenceError(
             {
                 originFeatId: background.originFeatId,
                 choices: background.choices,
             },
-            [
-                ...bundle.feats,
-                ...[...(reuse?.keys() ?? [])].map((id) => ({
-                    id,
-                    type: 'origin',
-                })),
-            ],
-            new Set([
-                ...bundle.spells.map((s) => s.id),
-                ...(reuse?.keys() ?? []),
-            ])
+            feats,
+            spellIds
         );
 
         if (error) throw new BundleInvalidError(error);
@@ -144,6 +199,41 @@ function buildIdMap(
     return idMap;
 }
 
+function storedFor({
+    t,
+    rowId,
+    newId,
+    sourceHash,
+    layer,
+    detached,
+}: {
+    t: { columns: readonly string[] };
+    rowId: string;
+    newId: string;
+    sourceHash: string;
+    layer?: ImportLayer;
+    detached?: true;
+}) {
+    if (detached)
+        return {
+            id: newId,
+            sourceId: null,
+            sourceHash: null,
+            ...(t.columns.includes('slug') && { slug: null }),
+        };
+
+    if (!layer) return { id: newId, sourceId: rowId, sourceHash };
+
+    if (isOverrideId(layer, rowId))
+        return {
+            id: newContentId(),
+            sourceId: rowId,
+            sourceHash: layer.overrides[rowId],
+        };
+
+    return { id: newId, sourceId: null, sourceHash: null };
+}
+
 function buildWrites({
     bundle,
     idMap,
@@ -197,26 +287,14 @@ function buildWrites({
 
                 (hashes[t.key] ??= {})[row.id] = sourceHash;
 
-                const stored = options?.detached
-                    ? {
-                          id: idMap.get(row.id)!,
-                          sourceId: null,
-                          sourceHash: null,
-                          ...(t.columns.includes('slug') && { slug: null }),
-                      }
-                    : !layer
-                    ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash }
-                    : isOverrideId(layer, row.id)
-                      ? {
-                            id: newContentId(),
-                            sourceId: row.id,
-                            sourceHash: layer.overrides[row.id],
-                        }
-                      : {
-                            id: idMap.get(row.id)!,
-                            sourceId: null,
-                            sourceHash: null,
-                        };
+                const stored = storedFor({
+                    t,
+                    rowId: row.id,
+                    newId: idMap.get(row.id)!,
+                    sourceHash,
+                    layer,
+                    detached: options?.detached,
+                });
 
                 return {
                     ...remapped,
@@ -253,7 +331,11 @@ export async function importBundle(
 
     const bundle = parsed.data;
 
-    assertBackgroundRefs(bundle, layer, options?.reuse);
+    const reuseTargets = options?.reuse
+        ? await loadReuseTargets(tx, options.reuse, targetCampaignId)
+        : undefined;
+
+    assertBackgroundRefs(bundle, layer, options?.reuse, reuseTargets);
 
     const warnings: string[] = [];
 

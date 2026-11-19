@@ -27,6 +27,19 @@ const bundleOf = (rows: Record<string, unknown[]>): Bundle =>
         ...rows,
     }) as unknown as Bundle;
 
+const seed = (
+    store: Map<string, Record<string, unknown>[]>,
+    table: string,
+    row: Record<string, unknown>
+) => store.get(table)!.push({ campaignId: 'target', ...row });
+
+const bgBundle = () =>
+    bundleOf({
+        backgrounds: [
+            { id: BG, name: 'Sage', originFeatId: SRC_FEAT, choices: [] },
+        ],
+    });
+
 const unitBundle = () =>
     bundleOf({
         units: [{ id: UNIT, name: 'u', raceId: SRC_RACE, slug: 'u-slug' }],
@@ -35,6 +48,8 @@ const unitBundle = () =>
 describe('importBundle options', () => {
     it('reuse maps the reference to the existing target row without writing it', async () => {
         const { db, store } = createFakeDb();
+
+        seed(store, 'race', { id: TGT_RACE });
 
         const reuse = new Map([[SRC_RACE, TGT_RACE]]);
 
@@ -47,7 +62,7 @@ describe('importBundle options', () => {
         );
 
         expect(warnings).toEqual([]);
-        expect(store.get('race')).toEqual([]);
+        expect(store.get('race')).toHaveLength(1);
         expect(store.get('unit')![0].raceId).toBe(TGT_RACE);
     });
 
@@ -55,6 +70,7 @@ describe('importBundle options', () => {
         const { db, store } = createFakeDb();
 
         store.get('race')!.push({ id: SRC_RACE, campaignId: 'other' });
+        seed(store, 'race', { id: TGT_RACE });
 
         await expect(
             importBundle(db, unitBundle(), 'target', undefined, {
@@ -69,6 +85,8 @@ describe('importBundle options', () => {
     it('detached rows carry no sourceId, sourceHash or slug', async () => {
         const { db, store } = createFakeDb();
 
+        seed(store, 'race', { id: TGT_RACE });
+
         await importBundle(db, unitBundle(), 'target', undefined, {
             detached: true,
             reuse: new Map([[SRC_RACE, TGT_RACE]]),
@@ -82,13 +100,11 @@ describe('importBundle options', () => {
     });
 
     it('background originFeatId in reuse passes the reference check', async () => {
-        const bundle = bundleOf({
-            backgrounds: [
-                { id: BG, name: 'Sage', originFeatId: SRC_FEAT, choices: [] },
-            ],
-        });
+        const bundle = bgBundle();
 
         const { db, store } = createFakeDb();
+
+        seed(store, 'feat', { id: TGT_FEAT, type: 'origin' });
 
         await importBundle(db, bundle, 'target', undefined, {
             reuse: new Map([[SRC_FEAT, TGT_FEAT]]),
@@ -98,6 +114,62 @@ describe('importBundle options', () => {
         await expect(
             importBundle(createFakeDb().db, bundle, 'target')
         ).rejects.toBeInstanceOf(BundleInvalidError);
+    });
+
+    it('a reused non-origin feat is rejected as originFeatId', async () => {
+        const { db, store } = createFakeDb();
+
+        seed(store, 'feat', { id: TGT_FEAT, type: 'general' });
+
+        await expect(
+            importBundle(db, bgBundle(), 'target', undefined, {
+                reuse: new Map([[SRC_FEAT, TGT_FEAT]]),
+            })
+        ).rejects.toBeInstanceOf(BundleInvalidError);
+    });
+
+    it('a reused race id is rejected as originFeatId', async () => {
+        const { db, store } = createFakeDb();
+
+        seed(store, 'race', { id: TGT_RACE });
+
+        await expect(
+            importBundle(db, bgBundle(), 'target', undefined, {
+                reuse: new Map([[SRC_FEAT, TGT_RACE]]),
+            })
+        ).rejects.toBeInstanceOf(BundleInvalidError);
+    });
+
+    it('a reuse target in another campaign or missing is rejected', async () => {
+        const { db, store } = createFakeDb();
+
+        store.get('race')!.push({ id: TGT_RACE, campaignId: 'other' });
+
+        const opts = (to: string) => ({ reuse: new Map([[SRC_RACE, to]]) });
+
+        await expect(
+            importBundle(db, unitBundle(), 'target', undefined, opts(TGT_RACE))
+        ).rejects.toBeInstanceOf(BundleInvalidError);
+        await expect(
+            importBundle(db, unitBundle(), 'target', undefined, opts(id('9')))
+        ).rejects.toBeInstanceOf(BundleInvalidError);
+    });
+
+    it('detached nulls slug on other tables too', async () => {
+        const { db, store } = createFakeDb();
+
+        await importBundle(
+            db,
+            bundleOf({ races: [{ id: SRC_RACE, name: 'r', slug: 'r-slug' }] }),
+            'target',
+            undefined,
+            { detached: true }
+        );
+
+        expect(store.get('race')![0]).toMatchObject({
+            slug: null,
+            sourceId: null,
+        });
     });
 
     it('without options rows keep sourceId and the unknown reference is nulled', async () => {
