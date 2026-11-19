@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import { BattlePageClient } from './page-client';
 
 import { PlayerViewGuard } from '@/components/common/shell/PlayerViewGuard';
@@ -7,6 +9,7 @@ import { battleQueryKey } from '@/lib/hooks/battles';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { getMap } from '@/lib/server/battle-maps/library-service';
 import { getTileChunks } from '@/lib/server/battle-maps/tiles-service';
+import { resolveDemoBattleId } from '@/lib/server/battles/demo-copy';
 import { readBattleScene } from '@/lib/server/battles/read-battle';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';
 import { readOkJson } from '@/lib/utils/api/read-json';
@@ -19,13 +22,25 @@ export default async function BattlePage({
 }) {
     const { id, battleId } = await params;
 
-    const [userId, , battle] = await Promise.all([
+    const [userId, access] = await Promise.all([
         getSessionUserId(),
         requireCampaignMember(id),
-        readBattleScene({ id, battleId }).then((res) =>
-            readOkJson<BattleScene>(res)
-        ),
     ]);
+
+    if (access.isDemo) {
+        const ownId = await resolveDemoBattleId({
+            campaignId: id,
+            battleId,
+            userId: access.userId,
+        });
+
+        if (ownId && ownId !== battleId)
+            redirect(`/campaigns/${id}/battles/${ownId}`);
+    }
+
+    const battle = await readBattleScene({ id, battleId }).then((res) =>
+        readOkJson<BattleScene>(res)
+    );
 
     const ref = battle?.mapRef;
 

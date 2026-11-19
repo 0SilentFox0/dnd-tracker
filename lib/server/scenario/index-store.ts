@@ -147,7 +147,10 @@ async function resolveEntities(
                         }))
                     );
             case 'battle':
-                return prisma.battleScene.findMany({ where, select });
+                return prisma.battleScene.findMany({
+                    where: { ...where, ownerUserId: null },
+                    select,
+                });
             case 'acquaintance':
                 return prisma.acquaintance
                     .findMany({ where, select: { ...select, avatarUrl: true } })

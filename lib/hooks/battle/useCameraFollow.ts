@@ -9,6 +9,7 @@ import {
     centerOn,
     clampCamera,
     fitAllCamera,
+    focusZoomOf,
     type Frame,
     inComfort,
 } from '@/lib/utils/battle/camera';
@@ -73,11 +74,7 @@ export function useCameraFollow({
             const target = follow.self ?? follow.target;
 
             const initial = target
-                ? centerOn(
-                      target.point,
-                      Math.max(1, frame.bounds.max / 3),
-                      frame
-                  )
+                ? centerOn(target.point, focusZoomOf(frame), frame)
                 : fitAllCamera(frame);
 
             initialized.current = true;
@@ -142,7 +139,7 @@ export function useCameraFollow({
             fly(
                 centerOn(
                     follow.target.point,
-                    Math.max(cameraRef.current.zoom, frame.bounds.max / 3),
+                    Math.max(cameraRef.current.zoom, focusZoomOf(frame)),
                     frame
                 )
             );

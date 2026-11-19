@@ -70,6 +70,7 @@ export async function readDmDashboard(
         prisma.battleScene.findMany({
             where: {
                 campaignId,
+                ownerUserId: null,
                 status: { in: [BattleStatus.PREPARED, BattleStatus.ACTIVE] },
             },
             orderBy: { createdAt: 'desc' },

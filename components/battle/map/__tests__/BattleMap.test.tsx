@@ -272,7 +272,7 @@ describe('BattleMap', () => {
         expect(container.querySelectorAll('[data-fx-clip]')).toHaveLength(1);
     });
 
-    it('fits a tall map into the container height', () => {
+    it('fits the whole tall map into the container height', () => {
         avail = { width: 1000, height: 1000 };
 
         const { container } = render(
@@ -284,8 +284,8 @@ describe('BattleMap', () => {
 
         const clip = container.querySelector('[data-fx-clip]') as HTMLElement;
 
-        expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1400);
-        expect(parseFloat(clip.style.width)).toBeCloseTo(1400 * (2 / 3));
+        expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1000);
+        expect(parseFloat(clip.style.width)).toBeCloseTo(1000 * (2 / 3));
     });
 
     it('дрібні клітинки — вмикається камера без нативного прокручування', () => {

@@ -229,6 +229,7 @@ export async function loadBattle(
         select: {
             id: true,
             campaignId: true,
+            ownerUserId: true,
             name: true,
             description: true,
             status: true,
@@ -292,6 +293,9 @@ export async function loadBattle(
 
     const membership = row.campaign.members[0];
 
+    const ownsDemoCopy =
+        isDemoKind(row.campaign.kind) && row.ownerUserId === args.userId;
+
     const mapRef =
         row.mapId && row.mapVersion !== null
             ? { mapId: row.mapId, version: row.mapVersion }
@@ -329,7 +333,9 @@ export async function loadBattle(
         meta: {
             name: row.name,
             description: row.description,
-            setup: storedRecordList<BattlePreparationParticipant>().parse(row.participants),
+            setup: storedRecordList<BattlePreparationParticipant>().parse(
+                row.participants
+            ),
             friendlyFire: row.campaign.friendlyFire ?? false,
             rules,
             critChoiceByDm: row.campaign.critChoiceByDm,
@@ -346,10 +352,8 @@ export async function loadBattle(
         pending: all.filter((p) => p.isPending).map((p) => p.participant),
         // A demo visitor gets the standard battle controls, while campaign content
         // writes remain protected by their separate DM/member authorization.
-        isDM:
-            membership?.role === CampaignRole.DM ||
-            isDemoKind(row.campaign.kind),
-        isMember: Boolean(membership) || isDemoKind(row.campaign.kind),
+        isDM: membership?.role === CampaignRole.DM || ownsDemoCopy,
+        isMember: Boolean(membership) || ownsDemoCopy,
         isDemo: isDemoKind(row.campaign.kind),
     };
 }
@@ -367,6 +371,7 @@ export async function loadBattleAccess(
         where: { id: args.battleId, campaignId: args.campaignId },
         select: {
             version: true,
+            ownerUserId: true,
             campaign: {
                 select: {
                     kind: true,
@@ -385,10 +390,12 @@ export async function loadBattleAccess(
 
     const isDemo = isDemoKind(row.campaign.kind);
 
+    const ownsDemoCopy = isDemo && row.ownerUserId === args.userId;
+
     return {
         version: row.version,
-        isMember: Boolean(membership) || isDemo,
-        isDM: membership?.role === CampaignRole.DM || isDemo,
+        isMember: Boolean(membership) || ownsDemoCopy,
+        isDM: membership?.role === CampaignRole.DM || ownsDemoCopy,
         isDemo,
     };
 }

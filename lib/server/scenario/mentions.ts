@@ -26,7 +26,10 @@ export async function searchScenarioMentions(
                 where: { ...args.where, ...ACTIVE_CHARACTER },
             }),
             prisma.spell.findMany(args),
-            prisma.battleScene.findMany(args),
+            prisma.battleScene.findMany({
+                ...args,
+                where: { ...args.where, ownerUserId: null },
+            }),
             prisma.worldMarker.findMany({
                 ...args,
                 where: { map: { campaignId }, name: args.where.name },

@@ -1,4 +1,4 @@
-import { type MapView,MIN_TAP_CELL_PX } from '@/lib/utils/battle/grid/layout';
+import { type MapView, MIN_TAP_CELL_PX } from '@/lib/utils/battle/grid/layout';
 import { clamp } from '@/lib/utils/common/clamp';
 
 export interface Size {
@@ -16,15 +16,36 @@ export interface Frame {
     avail: Size;
     content: Size;
     bounds: { min: number; max: number };
+    focusZoom?: number;
 }
 
 export const CAMERA_MAX_CELL_PX = 3 * MIN_TAP_CELL_PX;
 
-export function cameraBounds(fitCellPx: number): { min: 1; max: number } {
+const FOCUS_VISIBLE_CELLS = 20;
+
+export function focusCellPx(avail: Size): number {
+    return Math.max(
+        MIN_TAP_CELL_PX,
+        Math.max(avail.width, avail.height) / FOCUS_VISIBLE_CELLS
+    );
+}
+
+export function cameraBounds(
+    fitCellPx: number,
+    focusPx = 0
+): { min: 1; max: number } {
     return {
         min: 1,
-        max: Math.max(1, CAMERA_MAX_CELL_PX / Math.max(fitCellPx, 1e-6)),
+        max: Math.max(
+            1,
+            Math.max(CAMERA_MAX_CELL_PX, focusPx * 2) /
+                Math.max(fitCellPx, 1e-6)
+        ),
     };
+}
+
+export function focusZoomOf(frame: Frame): number {
+    return Math.max(1, frame.focusZoom ?? frame.bounds.max / 3);
 }
 
 export function tapZoom(fitCellPx: number): number {
@@ -36,9 +57,7 @@ export function needsCamera(view: MapView): boolean {
 }
 
 function clampAxis(offset: number, avail: number, span: number): number {
-    return span <= avail
-        ? (avail - span) / 2
-        : clamp(offset, avail - span, 0);
+    return span <= avail ? (avail - span) / 2 : clamp(offset, avail - span, 0);
 }
 
 export function clampCamera(cam: Camera, frame: Frame): Camera {

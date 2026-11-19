@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { cleanupAssistantData } from '@/lib/server/assistant/cleanup';
 import { cleanupBattleSnapshots } from '@/lib/server/battles/cleanup';
+import { cleanupDemoBattleCopies } from '@/lib/server/battles/demo-copy';
 import { cleanupReadNotifications } from '@/lib/server/notifications/cleanup';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { bearerToken } from '@/lib/utils/api/bearer';
@@ -27,11 +28,14 @@ export async function GET(request: Request) {
 
         const battleSnapshots = await cleanupBattleSnapshots();
 
+        const demoCopies = await cleanupDemoBattleCopies();
+
         return NextResponse.json({
             ok: true,
             ...result,
             ...notifications,
             battleSnapshotsDeleted: battleSnapshots.snapshots,
+            demoBattleCopiesDeleted: demoCopies.copies,
         });
     } catch (error) {
         return handleApiError(error, { action: 'assistant cleanup' });

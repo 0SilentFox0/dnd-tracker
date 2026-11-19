@@ -9,6 +9,7 @@ import { usePanPinch } from '@/lib/hooks/common';
 import {
     centerOn,
     fitAllCamera,
+    focusZoomOf,
     type Frame,
     minimapPointToContent,
     panBy,
@@ -199,7 +200,7 @@ export function useMapCamera({
                       target.point,
                       Math.max(
                           cameraRef.current.zoom,
-                          activeFrame.bounds.max / 3
+                          focusZoomOf(activeFrame)
                       ),
                       activeFrame
                   )

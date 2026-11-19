@@ -15,6 +15,9 @@ vi.mock('@/lib/server/notifications/cleanup', () => ({
     cleanupReadNotifications,
 }));
 vi.mock('@/lib/server/battles/cleanup', () => ({ cleanupBattleSnapshots }));
+vi.mock('@/lib/server/battles/demo-copy', () => ({
+    cleanupDemoBattleCopies: vi.fn().mockResolvedValue({ copies: 5 }),
+}));
 
 import { GET } from '../route';
 
@@ -60,6 +63,7 @@ describe('GET /api/cron/assistant-cleanup', () => {
             assistant: 1,
             notifications: 2,
             battleSnapshotsDeleted: 4,
+            demoBattleCopiesDeleted: 5,
         });
     });
 

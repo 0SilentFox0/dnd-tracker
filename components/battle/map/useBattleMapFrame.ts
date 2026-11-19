@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import {
     cameraBounds,
+    focusCellPx,
     type Frame,
     needsCamera,
 } from '@/lib/utils/battle/camera';
@@ -14,8 +15,6 @@ import {
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
-
-const DESKTOP_MAX_TALLER = 1.4;
 
 export function useBattleMapFrame(
     map: BattleMapConfig,
@@ -35,7 +34,7 @@ export function useBattleMapFrame(
                 rotatable: phone,
                 bothWays: !phone,
                 fillWidth: phone,
-                taller: phone ? 1 : DESKTOP_MAX_TALLER,
+                taller: 1,
                 minCell: MIN_TAP_CELL_PX,
             }),
         [avail, win, phone]
@@ -76,10 +75,15 @@ export function useBattleMapFrame(
                 bounds: FIT_ZOOM_BOUNDS,
             };
 
+        const fitCell = fitAll.width / win.cols;
+
+        const focusPx = focusCellPx(avail);
+
         return {
             avail,
             content: { width: fitAll.width, height: fitAll.height },
-            bounds: cameraBounds(fitAll.width / win.cols),
+            bounds: cameraBounds(fitCell, focusPx),
+            focusZoom: Math.max(1, focusPx / fitCell),
         };
     }, [
         cameraMode,

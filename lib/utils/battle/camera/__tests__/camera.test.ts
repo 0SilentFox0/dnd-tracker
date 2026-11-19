@@ -6,6 +6,8 @@ import {
     clampCamera,
     easeCamera,
     fitAllCamera,
+    focusCellPx,
+    focusZoomOf,
     type Frame,
     inComfort,
     needsCamera,
@@ -26,6 +28,18 @@ describe('межі й zoom', () => {
         expect(cameraBounds(100).max).toBe(1);
         expect(tapZoom(15)).toBe(2);
         expect(tapZoom(100)).toBe(1);
+    });
+
+    it('focusCellPx scales with the screen, never below the tap size', () => {
+        expect(focusCellPx({ width: 2000, height: 1000 })).toBe(100);
+        expect(focusCellPx({ width: 1200, height: 800 })).toBe(60);
+        expect(focusCellPx({ width: 390, height: 500 })).toBe(30);
+    });
+
+    it('focusZoomOf prefers the explicit focus zoom', () => {
+        expect(focusZoomOf({ ...frame, focusZoom: 2.5 })).toBe(2.5);
+        expect(focusZoomOf(frame)).toBeCloseTo(4 / 3);
+        expect(cameraBounds(15, 100).max).toBeCloseTo(200 / 15);
     });
 
     it('needsCamera за grow', () => {

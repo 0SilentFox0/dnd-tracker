@@ -6,7 +6,7 @@ import type { BattlePreparationParticipant } from '@/types/battle';
 
 export function listBattleBriefs(campaignId: string) {
     return prisma.battleScene.findMany({
-        where: { campaignId },
+        where: { campaignId, ownerUserId: null },
         orderBy: { createdAt: 'desc' },
         select: { id: true, name: true, status: true },
     });
@@ -14,7 +14,7 @@ export function listBattleBriefs(campaignId: string) {
 
 export async function listCampaignBattles(campaignId: string, isDM: boolean) {
     const battles = await prisma.battleScene.findMany({
-        where: { campaignId },
+        where: { campaignId, ownerUserId: null },
         orderBy: { createdAt: 'desc' },
         select: battleSceneListSelect,
     });
