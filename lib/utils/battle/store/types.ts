@@ -120,6 +120,7 @@ export interface BattleMeta {
     friendlyFire: boolean;
     rules: Ruleset;
     critChoiceByDm: boolean;
+    dmUserId?: string | null;
     /** effective map: library edges of the pinned version minus removed edges */
     map: BattleMapConfig | null;
     mapRef?: BattleMapRef | null;

@@ -4,7 +4,9 @@ import type { Prisma } from '@prisma/client';
 import { cacheTags } from '@/lib/cache/tags';
 import { prisma } from '@/lib/db';
 import { currentContentWrite } from '@/lib/server/content/write-context';
+import type { InterruptSpell } from '@/lib/utils/battle/counter/types';
 import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
+import { readSpellDefinition } from '@/lib/utils/spells/model/read';
 import { toUnit } from '@/lib/utils/units/to-unit';
 
 // A guarded write must use the transaction snapshot, never a previously cached reference.
@@ -136,6 +138,39 @@ export async function getCachedSummonPool(campaignId: string) {
         [cacheTags.units(campaignId), 'summon-pool'],
         {
             tags: [cacheTags.units(campaignId), cacheTags.races(campaignId)],
+            revalidate: REFERENCE_REVALIDATE_SECONDS,
+        }
+    )();
+}
+
+export async function getCachedInterruptSpells(
+    campaignId: string
+): Promise<InterruptSpell[]> {
+    return referenceCache(
+        async () => {
+            const rows = await prisma.spell.findMany({
+                where: {
+                    campaignId,
+                    spellEffects: {
+                        array_contains: [{ kind: 'interruptCast' }],
+                    },
+                },
+            });
+
+            return rows.map((row) => {
+                const { targeting } = readSpellDefinition(row);
+
+                return {
+                    id: row.id,
+                    name: row.name,
+                    level: row.level,
+                    range: ('range' in targeting && targeting.range) || 60,
+                };
+            });
+        },
+        [cacheTags.spells(campaignId), 'interrupt-spells'],
+        {
+            tags: [cacheTags.spells(campaignId)],
             revalidate: REFERENCE_REVALIDATE_SECONDS,
         }
     )();

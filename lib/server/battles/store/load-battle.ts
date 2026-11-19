@@ -261,6 +261,7 @@ export async function loadBattle(
                     kind: true,
                     friendlyFire: true,
                     critChoiceByDm: true,
+                    dmUserId: true,
                     members: {
                         where: { userId: args.userId },
                         select: { role: true },
@@ -332,6 +333,7 @@ export async function loadBattle(
             friendlyFire: row.campaign.friendlyFire ?? false,
             rules,
             critChoiceByDm: row.campaign.critChoiceByDm,
+            dmUserId: row.campaign.dmUserId,
             map,
             mapRef,
             mapState,

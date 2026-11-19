@@ -29,6 +29,15 @@ describe('counter pending', () => {
         expect(out.dmDeciding).toBe(true);
     });
 
+    it('stops flagging dmDeciding once the DM offer is answered', () => {
+        const out = redactCounterForPlayers({
+            ...shown,
+            offers: [shown.offers[0], { ...shown.offers[1], answer: 'pass' }],
+        });
+
+        expect(out.dmDeciding).toBeUndefined();
+    });
+
     it('does not flag dmDeciding when every offer is public', () => {
         const out = redactCounterForPlayers({
             ...shown,
@@ -49,7 +58,9 @@ describe('counter pending', () => {
         expect(counterPendingOf({ shown, hidden: {} })?.shown.windowId).toBe(
             'w1'
         );
-        expect(counterPendingOf({ shown: { triggers: [] }, hidden: {} })).toBeNull();
+        expect(
+            counterPendingOf({ shown: { triggers: [] }, hidden: {} })
+        ).toBeNull();
         expect(allAnswered(shown)).toBe(false);
         expect(
             allAnswered({

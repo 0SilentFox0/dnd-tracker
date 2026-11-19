@@ -12,11 +12,14 @@ import type { BattleMapConfig } from '@/types/battle-grid';
 const mocks = vi.hoisted(() => ({ off: false }));
 
 vi.mock('@/lib/utils/battle/actions/access', async (importOriginal) => {
-    const original = await importOriginal<
-        typeof import('@/lib/utils/battle/actions/access')
-    >();
+    const original =
+        await importOriginal<
+            typeof import('@/lib/utils/battle/actions/access')
+        >();
 
-    const { noReactions: none } = await import('@/lib/utils/battle/actions/none');
+    const { noReactions: none } = await import(
+        '@/lib/utils/battle/actions/none'
+    );
 
     return {
         ...original,
@@ -94,6 +97,15 @@ describe('counterReactors', () => {
         ]);
     });
 
+    it('marks an NPC controlled by the DM user id as a DM offer', () => {
+        const npc = wizard();
+
+        npc.basicInfo.controlledBy = 'dm-user';
+
+        expect(run(npc)[0].dm).toBe(false);
+        expect(run(npc, { dmUserId: 'dm-user' })[0].dm).toBe(true);
+    });
+
     it('skips reactors that cannot answer', () => {
         const used = wizard();
 
@@ -119,9 +131,9 @@ describe('counterReactors', () => {
     it('needs the cast spell to have components', () => {
         const none = { v: false, s: false, m: false };
 
-        expect(run(wizard(), { castSpell: { level: 3, components: none } })).toEqual(
-            []
-        );
+        expect(
+            run(wizard(), { castSpell: { level: 3, components: none } })
+        ).toEqual([]);
         expect(run(wizard(), { castSpell: { level: 3 } })).toHaveLength(1);
     });
 
@@ -130,7 +142,10 @@ describe('counterReactors', () => {
 
         expect(
             run(wizard(), {
-                castSpell: { level: 0, components: { v: true, s: false, m: false } },
+                castSpell: {
+                    level: 0,
+                    components: { v: true, s: false, m: false },
+                },
             })
         ).toHaveLength(1);
     });

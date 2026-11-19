@@ -74,6 +74,7 @@ export async function openCounterIfAny(args: {
         rules: ctx.meta.rules,
         map: ctx.meta.map,
         round: ctx.scene.round,
+        dmUserId: ctx.meta.dmUserId ?? (ctx.isDM ? ctx.userId : null),
     });
 
     if (offers.length === 0) return null;

@@ -17,7 +17,7 @@ import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { BattleRuleError } from '@/lib/utils/battle/store';
+import { BattleAccessError, BattleRuleError } from '@/lib/utils/battle/store';
 import type { BattleParticipant } from '@/types/battle';
 
 const row = (over: Record<string, unknown>) =>
@@ -428,6 +428,21 @@ describe('counter-window mutation', () => {
         await expect(
             machine()(next(dm, out), passBy(pending, 'mage'))
         ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('a replay hitting an access error also falls back to castFailed', async () => {
+        const { ctx, pending } = await openWindow([hero, goblin, dmMage]);
+
+        const dm = as(ctx, dmCtx());
+
+        const out = await createCounterWindowMutation({
+            spell: (() => async () => {
+                throw new BattleAccessError(404, 'gone');
+            }) as never,
+        })(dm, passBy(pending, 'mage'));
+
+        expect(out.scene?.pendingChoice).toBeNull();
+        expect(logged(out)).toContain('battleLog.counter.castFailed');
     });
 
     it('a replay that now fails closes the window with a log and no state change', async () => {

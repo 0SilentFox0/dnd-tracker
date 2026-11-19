@@ -1,12 +1,12 @@
 import type { CounterOffer, InterruptSpell } from './types';
 
-import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { poolLeft } from '@/lib/utils/abilities/engine/core/usage';
 import { reactionsOf } from '@/lib/utils/battle/actions/access';
 import { cellsOf, footprintDistance, isOnMap } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
+import { controlledByDm } from '@/lib/utils/battle/participant/unit-control';
 import { isGrantLive } from '@/lib/utils/battle/spell/inline-grant';
 import { resolveChosenSlot } from '@/lib/utils/battle/spell/slot';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -25,6 +25,7 @@ export interface CounterReactorsArgs {
     rules: Ruleset;
     map: BattleMapConfig | null | undefined;
     round: number;
+    dmUserId?: string | null;
 }
 
 const hasComponents = (c: CounterReactorsArgs['castSpell']['components']) =>
@@ -66,7 +67,7 @@ function offerFor(
     const base = {
         reactorId: p.basicInfo.id,
         spellId: spell.id,
-        dm: p.basicInfo.controlledBy === CONTROLLED_BY_DM,
+        dm: controlledByDm(p, args.dmUserId ?? null),
     };
 
     const hasGrant = (p.spellcasting.grants ?? []).some(

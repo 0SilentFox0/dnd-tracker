@@ -1,4 +1,7 @@
-import { getCachedSummonPool } from '@/lib/cache/reference-data';
+import {
+    getCachedInterruptSpells,
+    getCachedSummonPool,
+} from '@/lib/cache/reference-data';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type { SpellRequestData } from '@/lib/schemas/battles';
@@ -39,31 +42,14 @@ import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Rng } from '@/lib/utils/common/rng';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { readSpellDefinition } from '@/lib/utils/spells/model/read';
 
 const defaultDeps: SpellMutationDeps = {
     loadSpell: (id, campaignId) =>
         prisma.spell.findFirst({ where: { id, campaignId } }),
-    loadInterruptSpells: async (campaignId, ids) => {
-        const rows = await prisma.spell.findMany({
-            where: {
-                campaignId,
-                id: { in: ids },
-                spellEffects: { array_contains: [{ kind: 'interruptCast' }] },
-            },
-        });
-
-        return rows.map((row) => {
-            const { targeting } = readSpellDefinition(row);
-
-            return {
-                id: row.id,
-                name: row.name,
-                level: row.level,
-                range: ('range' in targeting && targeting.range) || 60,
-            };
-        });
-    },
+    loadInterruptSpells: async (campaignId, ids) =>
+        (await getCachedInterruptSpells(campaignId)).filter((s) =>
+            ids.includes(s.id)
+        ),
     loadPool: getCachedSummonPool,
 };
 
@@ -205,10 +191,12 @@ export function createSpellMutation(
         if (replay?.counteredBy !== undefined)
             return counteredResult(plan, replay.counteredBy);
 
-        if (!data.preview &&
+        if (
+            !data.preview &&
             !resume &&
             replay?.seed === undefined &&
-            !options.skipCounter) {
+            !options.skipCounter
+        ) {
             const paused = await openCounterIfAny({
                 innate: !!grant?.inline,
                 ctx,
@@ -224,18 +212,21 @@ export function createSpellMutation(
             if (paused) return paused;
         }
 
-        return runWithCritChoice(options.rng ? { ...ctx, rng: options.rng } : ctx, {
-            action: 'spell',
-            actorId: data.casterId,
-            request: { ...data, diceRolls },
-            enabled:
-                ctx.meta.critChoiceByDm &&
-                !data.preview &&
-                options.critPause !== false,
-            resume,
-            seed: replay?.seed,
-            run: (rolls) => executeCast(plan, rolls),
-        });
+        return runWithCritChoice(
+            options.rng ? { ...ctx, rng: options.rng } : ctx,
+            {
+                action: 'spell',
+                actorId: data.casterId,
+                request: { ...data, diceRolls },
+                enabled:
+                    ctx.meta.critChoiceByDm &&
+                    !data.preview &&
+                    options.critPause !== false,
+                resume,
+                seed: replay?.seed,
+                run: (rolls) => executeCast(plan, rolls),
+            }
+        );
     };
 }
 

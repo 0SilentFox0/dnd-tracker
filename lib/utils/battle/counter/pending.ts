@@ -84,7 +84,9 @@ export function redactCounterForPlayers(shown: ShownCounter): ShownCounter {
     return {
         ...rest,
         offers,
-        ...(offers.length < shown.offers.length && { dmDeciding: true }),
+        ...(shown.offers.some((o) => o.dm && o.answer === undefined) && {
+            dmDeciding: true,
+        }),
     };
 }
 

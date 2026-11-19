@@ -146,7 +146,13 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
                 },
             };
         } catch (err) {
-            if (!(err instanceof BattleRuleError)) throw err;
+            if (
+                !(
+                    err instanceof BattleRuleError ||
+                    err instanceof BattleAccessError
+                )
+            )
+                throw err;
 
             return {
                 participants: base.participants,
