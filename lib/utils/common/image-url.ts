@@ -74,15 +74,13 @@ function hostOf(raw: string | undefined): string | null {
 
 const mediaHost = () => hostOf(process.env.NEXT_PUBLIC_MEDIA_BASE_URL);
 
-/** Already on our project Storage (host of NEXT_PUBLIC_SUPABASE_URL or the media cache host). */
+/** Canonical project Storage URL (host of NEXT_PUBLIC_SUPABASE_URL); the media host is render-only and never persisted. */
 export function isHostedOnProjectStorage(url: string): boolean {
     const parsed = parsePublicStorageUrl(url)?.url;
 
-    if (!parsed || parsed.protocol !== 'https:') return false;
+    const host = hostOf(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
-    return [hostOf(process.env.NEXT_PUBLIC_SUPABASE_URL), mediaHost()].includes(
-        parsed.host
-    );
+    return parsed?.protocol === 'https:' && !!host && parsed.host === host;
 }
 
 /** Render-time only: stored URLs stay canonical Supabase URLs. No-op when the media base is unset. */

@@ -110,4 +110,24 @@ describe('useTrackPreview', () => {
         act(() => result.current.toggle({ ...file('a'), url: null }));
         expect(result.current.playingId).toBeNull();
     });
+
+    it('plays a Supabase track through the media host when configured', () => {
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://proj.supabase.co');
+        vi.stubEnv('NEXT_PUBLIC_MEDIA_BASE_URL', 'https://media.example.dev');
+
+        const { result } = renderHook(() => useTrackPreview());
+
+        act(() =>
+            result.current.toggle({
+                ...file('a'),
+                url: 'https://proj.supabase.co/storage/v1/object/public/battle-music/a.mp3',
+            })
+        );
+
+        expect(audios[0].src).toBe(
+            'https://media.example.dev/storage/v1/object/public/battle-music/a.mp3'
+        );
+
+        vi.unstubAllEnvs();
+    });
 });

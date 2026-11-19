@@ -20,6 +20,24 @@ describe('media worker handle', () => {
         expect(origin).not.toHaveBeenCalled();
     });
 
+    it('answers CORS preflight with 204 and never hits the origin', async () => {
+        const origin = vi.fn();
+
+        const res = await handle(
+            req(PATH, { method: 'OPTIONS' }),
+            ENV,
+            origin
+        );
+
+        expect(res.status).toBe(204);
+        expect(res.headers.get('access-control-allow-origin')).toBe('*');
+        expect(res.headers.get('access-control-allow-methods')).toBe(
+            'GET, HEAD, OPTIONS'
+        );
+        expect(res.headers.get('access-control-allow-headers')).toBe('range');
+        expect(origin).not.toHaveBeenCalled();
+    });
+
     it('returns 404 for paths outside the public object prefix', async () => {
         const origin = vi.fn();
 

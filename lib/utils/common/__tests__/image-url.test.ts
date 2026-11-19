@@ -230,14 +230,14 @@ describe('toMediaUrl', () => {
         expect(toMediaUrl(src)).toBe(src);
     });
 
-    it('is idempotent and the media host still counts as project storage', () => {
+    it('is idempotent; the media host is a render host, never persistable project storage', () => {
         useMedia();
 
         const media = `${MEDIA}/storage/v1/object/public/unit-icons/a.webp`;
 
         expect(toMediaUrl(media)).toBe(media);
         expect(isSupabaseStorageUrl(media)).toBe(true);
-        expect(isHostedOnProjectStorage(media)).toBe(true);
+        expect(isHostedOnProjectStorage(media)).toBe(false);
     });
 
     it('a media-host URL on another host is not project storage', () => {

@@ -1,4 +1,5 @@
 import { MAX_SOUND_SECONDS } from '@/lib/constants/soundboard';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import { createVoicePool } from '@/lib/utils/soundboard/voices';
 import type { LibrarySound } from '@/types/soundboard';
 
@@ -72,7 +73,7 @@ async function load(c: AudioContext, url: string): Promise<AudioBuffer> {
 
     if (cached) return cached;
 
-    const response = await fetch(url);
+    const response = await fetch(toMediaUrl(url));
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 

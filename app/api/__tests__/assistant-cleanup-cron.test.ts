@@ -15,6 +15,9 @@ vi.mock('@/lib/server/notifications/cleanup', () => ({
 vi.mock('@/lib/server/battles/cleanup', () => ({
     cleanupBattleSnapshots: cleanupSnapshots,
 }));
+vi.mock('@/lib/server/battles/demo-copy', () => ({
+    cleanupDemoBattleCopies: vi.fn().mockResolvedValue({ copies: 3 }),
+}));
 
 import { GET } from '@/app/api/cron/assistant-cleanup/route';
 
@@ -45,6 +48,7 @@ describe('assistant cleanup cron route', () => {
             receiptsDeleted: 1,
             notificationsDeleted: 5,
             battleSnapshotsDeleted: 4,
+            demoBattleCopiesDeleted: 3,
         });
         expect(cleanup).toHaveBeenCalledOnce();
     });

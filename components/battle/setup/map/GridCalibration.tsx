@@ -17,6 +17,7 @@ import {
     backgroundRowsOf,
     type NudgeUnit,
 } from '@/lib/utils/battle/grid';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 
 const MAX_N = 20;
 
@@ -141,7 +142,7 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                 onPointerMove={onMove}
                             >
                                 <Image
-                                    src={imageSrc}
+                                    src={toMediaUrl(imageSrc)}
                                     alt=""
                                     fill
                                     sizes="(min-width: 1024px) 64rem, 100vw"

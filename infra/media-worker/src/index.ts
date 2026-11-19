@@ -14,6 +14,18 @@ export async function handle(
     env: Env,
     fetchOrigin: FetchOrigin = fetch
 ): Promise<Response> {
+    if (request.method === 'OPTIONS') {
+        return new Response(null, {
+            status: 204,
+            headers: {
+                'access-control-allow-origin': '*',
+                'access-control-allow-methods': 'GET, HEAD, OPTIONS',
+                'access-control-allow-headers': 'range',
+                'access-control-max-age': '86400',
+            },
+        });
+    }
+
     if (request.method !== 'GET' && request.method !== 'HEAD') {
         return new Response('Method Not Allowed', {
             status: 405,
