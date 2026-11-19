@@ -163,14 +163,28 @@ export function storedColumnUpdate(
     return characteristics ? { characteristics } : {};
 }
 
-/** Like `storedColumnUpdate`, but a no-op unless the column's module is in the composition */
-export function storedColumnCreate(
+/** Stored ext values for the non-zero module columns in `input`, only for modules in the composition */
+export function storedColumnsCreate(
     rules: { system: SystemSelection },
     row: { characteristics?: unknown },
-    column: string,
-    value: number | boolean
+    input: Record<string, unknown>
 ): { characteristics?: Record<string, unknown> } {
-    return isStoredColumnActive(rules, column)
-        ? storedColumnUpdate(row, column, value)
-        : {};
+    return STORED_COLUMN_ENTRIES.reduce<{
+        characteristics?: Record<string, unknown>;
+    }>((acc, { column }) => {
+        const value = input[column];
+
+        if (
+            (typeof value !== 'number' && typeof value !== 'boolean') ||
+            value === 0 ||
+            !isStoredColumnActive(rules, column)
+        )
+            return acc;
+
+        return storedColumnUpdate(
+            { characteristics: acc.characteristics ?? row.characteristics },
+            column,
+            value
+        );
+    }, {});
 }

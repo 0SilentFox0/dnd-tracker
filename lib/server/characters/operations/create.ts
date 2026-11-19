@@ -39,10 +39,7 @@ import {
     columnViewDto,
     splitColumnView,
 } from '@/lib/utils/rules/systems/column-view';
-import {
-    STORED_COLUMN,
-    storedColumnCreate,
-} from '@/lib/utils/rules/systems/stored-columns';
+import { storedColumnsCreate } from '@/lib/utils/rules/systems/stored-columns';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
 async function assertClassSkills({
@@ -163,15 +160,7 @@ function characterCreateData({
         data.characteristics ??
         system.characteristics.defaults()) as Prisma.InputJsonObject;
 
-    const stored =
-        typeof data.morale === 'number' && data.morale !== 0
-            ? storedColumnCreate(
-                  rules,
-                  { characteristics },
-                  STORED_COLUMN.morale,
-                  data.morale
-              )
-            : undefined;
+    const stored = storedColumnsCreate(rules, { characteristics }, data);
 
     return {
         campaignId,
