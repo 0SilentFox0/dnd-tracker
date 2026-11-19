@@ -47,6 +47,8 @@ describe('useSoundboardKeys', () => {
 
         fireEvent.keyDown(getByTestId('field'), { key: '1' });
         fireEvent.keyDown(document.body, { key: '1', ctrlKey: true });
+        fireEvent.keyDown(document.body, { key: '1', shiftKey: true });
+        fireEvent.keyDown(document.body, { key: '1', altKey: true });
         fireEvent.keyDown(document.body, { key: '9' });
 
         const dialog = document.createElement('div');

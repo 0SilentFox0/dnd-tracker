@@ -2,10 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
+import { shortcutBlocked } from '@/lib/hooks/common';
 import type { Sound } from '@/types/soundboard';
-
-const TYPING =
-    'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
 
 export function useSoundboardKeys(
     pads: Sound[] | null,
@@ -23,15 +21,9 @@ export function useSoundboardKeys(
         if (!enabled) return;
 
         const onKey = (e: KeyboardEvent) => {
-            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+            if (shortcutBlocked(e)) return;
 
             if (!/^[1-9]$/.test(e.key)) return;
-
-            const target = e.target instanceof Element ? e.target : null;
-
-            if (target?.closest(TYPING)) return;
-
-            if (document.querySelector('[role=dialog]')) return;
 
             const sound = latest.current.pads?.[Number(e.key) - 1];
 
