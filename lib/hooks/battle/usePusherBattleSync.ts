@@ -198,7 +198,7 @@ export function usePusherBattleSync(
         {
             'battle-delta': applyDelta,
             [SOUNDBOARD_PLAY_EVENT]: (data) =>
-                handleSoundPlayEvent(queryClient, campaignId, data),
+                handleSoundPlayEvent(campaignId, data),
             [BATTLE_AUDIO_EVENT]: (data) => {
                 const audio = (data as Partial<BattleAudioEvent> | null)?.audio;
 

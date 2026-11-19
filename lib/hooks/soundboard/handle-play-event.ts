@@ -1,14 +1,9 @@
-import type { QueryClient } from '@tanstack/react-query';
-
-import { soundKeys } from './keys';
 import { playBuffer } from './player';
 
-import { getSounds } from '@/lib/api/soundboard';
 import { readAudioPrefs } from '@/lib/hooks/audio';
 import { createNonceGuard } from '@/lib/utils/soundboard/dedupe';
-import { resolveSound } from '@/lib/utils/soundboard/resolve-sound';
+import { resolveBuiltinSound } from '@/lib/utils/soundboard/resolve-sound';
 import { effectiveVolume } from '@/lib/utils/soundboard/volume';
-import type { Sound, SoundList } from '@/types/soundboard';
 
 let firstSeen = createNonceGuard();
 
@@ -20,55 +15,51 @@ export function __resetNonces(): void {
     firstSeen = createNonceGuard();
 }
 
-const find = (list: SoundList, soundId: string): Sound | null =>
-    resolveSound(soundId, {
-        custom: list.sounds.map((s) => ({ ...s, source: 'custom' as const })),
-        hiddenBuiltin: list.hiddenBuiltin,
-    });
+type PlayEvent = {
+    soundId?: unknown;
+    nonce?: unknown;
+    volume?: unknown;
+    url?: unknown;
+};
 
-async function play(
-    queryClient: QueryClient,
-    campaignId: string,
-    soundId: string
-): Promise<void> {
-    const key = soundKeys.list(campaignId);
+function resolvePlayable(
+    event: PlayEvent & { soundId: string }
+): { id: string; url: string; volume: number } | null {
+    const builtin = resolveBuiltinSound(event.soundId);
 
-    const cached = queryClient.getQueryData<SoundList>(key);
+    if (builtin)
+        return {
+            id: builtin.id,
+            url: new URL(builtin.url, window.location.origin).toString(),
+            volume: 1,
+        };
 
-    let sound = cached && find(cached, soundId);
+    if (event.soundId.startsWith('builtin:') || typeof event.url !== 'string')
+        return null;
 
-    if (!sound) {
-        const fresh = await queryClient
-            .fetchQuery({
-                queryKey: key,
-                queryFn: () => getSounds(campaignId),
-                staleTime: cached ? 0 : 60_000,
-            })
-            .catch(() => undefined);
-
-        sound = fresh && find(fresh, soundId);
-    }
-
-    if (!sound) return;
-
-    const volume = effectiveVolume(sound, readAudioPrefs());
-
-    if (volume > 0) await playBuffer(sound, volume, { remote: true });
+    return {
+        id: event.soundId,
+        url: event.url,
+        volume: typeof event.volume === 'number' ? event.volume : 1,
+    };
 }
 
-export function handleSoundPlayEvent(
-    queryClient: QueryClient,
-    campaignId: string,
-    data: unknown
-): void {
-    const event = data as { soundId?: unknown; nonce?: unknown } | null;
+export function handleSoundPlayEvent(_campaignId: string, data: unknown): void {
+    const event = data as PlayEvent | null;
 
     if (typeof event?.soundId !== 'string' || typeof event.nonce !== 'string')
         return;
 
     if (!firstSeen(event.nonce)) return;
 
-    play(queryClient, campaignId, event.soundId).catch((error) =>
-        console.warn('[soundboard] play event failed', {}, error)
-    );
+    const sound = resolvePlayable({ ...event, soundId: event.soundId });
+
+    if (!sound) return;
+
+    const volume = effectiveVolume(sound, readAudioPrefs());
+
+    if (volume > 0)
+        void playBuffer(sound, volume, { remote: true }).catch((error) =>
+            console.warn('[soundboard] play event failed', {}, error)
+        );
 }

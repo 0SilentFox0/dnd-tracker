@@ -74,7 +74,7 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
                     });
             },
             [SOUNDBOARD_PLAY_EVENT]: (data) =>
-                handleSoundPlayEvent(queryClient, campaignId, data),
+                handleSoundPlayEvent(campaignId, data),
             [WORLD_CHANGED_EVENT]: (data) => {
                 const seq = (data as Partial<WorldChangedEvent> | null)?.seq;
 

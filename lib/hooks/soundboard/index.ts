@@ -1,7 +1,12 @@
 export { handleSoundPlayEvent, markLocalPlay } from './handle-play-event';
 export { soundKeys } from './keys';
 export { armUnlock, unlockSoundboard } from './player';
+export { useActivePreset } from './useActivePreset';
+export { useImportSoundLink } from './useImportSoundLink';
+export { useLibraryMutations } from './useLibraryMutations';
+export { usePresetMutations } from './usePresetMutations';
 export { useSoundboardKeys } from './useSoundboardKeys';
 export { useSoundboardPads } from './useSoundboardPads';
-export { useSoundMutations } from './useSoundMutations';
-export { useSoundLibrary, useSounds } from './useSounds';
+export { useSoundLibrary } from './useSoundLibrary';
+export { useSoundPreview } from './useSoundPreview';
+export { isRecorderSupported, useSoundRecorder } from './useSoundRecorder';

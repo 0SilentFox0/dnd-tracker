@@ -1228,12 +1228,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
     },
     ...(
         [
-            ['', ['GET', 'POST']],
-            ['/[soundId]', ['DELETE', 'PATCH']],
-            ['/hidden', ['PUT']],
-            ['/order', ['PUT']],
             ['/play', ['POST']],
-            ['/upload-url', ['POST']],
         ] as const
     ).map(([suffix, methods]) => ({
         route: `campaigns/[id]/sounds${suffix}`,

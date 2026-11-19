@@ -1,29 +1,22 @@
 import { BUILTIN_SOUNDS } from '@/lib/constants/soundboard';
-import type { Sound } from '@/types/soundboard';
+import type { BuiltinSound, LibrarySound } from '@/types/soundboard';
 
-const BUILTIN_BY_ID = new Map(BUILTIN_SOUNDS.map((s) => [s.id, s]));
+export const builtinToSound = (b: BuiltinSound): LibrarySound => ({
+    id: b.id,
+    source: 'builtin',
+    name: null,
+    nameKey: b.nameKey,
+    icon: b.icon,
+    color: null,
+    volume: 1,
+    url: b.url,
+    durationMs: null,
+});
 
-export function resolveSound(
-    id: string,
-    lib: { custom: Sound[]; hiddenBuiltin: string[] }
-): Sound | null {
-    if (id.startsWith('builtin:')) {
-        const b = BUILTIN_BY_ID.get(id);
+export const BUILTIN_LIBRARY_SOUNDS: readonly LibrarySound[] =
+    BUILTIN_SOUNDS.map(builtinToSound);
 
-        if (!b || lib.hiddenBuiltin.includes(id)) return null;
+const BUILTIN_BY_ID = new Map(BUILTIN_LIBRARY_SOUNDS.map((s) => [s.id, s]));
 
-        return {
-            id: b.id,
-            source: 'builtin',
-            name: b.nameKey,
-            url: b.url,
-            volume: 1,
-            color: null,
-            icon: b.icon,
-            sortOrder: 0,
-            durationMs: null,
-        };
-    }
-
-    return lib.custom.find((s) => s.id === id) ?? null;
-}
+export const resolveBuiltinSound = (id: string): LibrarySound | null =>
+    BUILTIN_BY_ID.get(id) ?? null;

@@ -26,6 +26,8 @@ model User {
   worldTravelLog      WorldTravelLog[]
   playerNotifications PlayerNotification[]
   acquaintanceNotes   AcquaintanceNote[]
+  soundLibraryItems   SoundLibraryItem[]
+  soundPresets        SoundPreset[]
 
   @@map("users")
 }
@@ -44,7 +46,6 @@ model Campaign {
   critChoiceByDm       Boolean               @default(false)
   acquaintancesEnabled Boolean               @default(false)
   mapLibraryEnabled    Boolean               @default(true)
-  hiddenBuiltinSounds  String[]              @default([]) @map("hidden_builtin_sounds")
   status               String                @default("active")
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -74,7 +75,6 @@ model Campaign {
   spellGroups          SpellGroup[]
   spells               Spell[]
   tracks               CampaignTrack[]
-  sounds               CampaignSound[]
   slideDecks           SlideDeck[]
   show                 CampaignShow?
   units                Unit[]
@@ -465,21 +465,35 @@ model CampaignTrack {
   @@map("campaign_tracks")
 }
 
-model CampaignSound {
+model SoundLibraryItem {
   id         String   @id @default(cuid())
-  campaignId String   @map("campaign_id")
-  name       String
-  url        String
-  durationMs Int?     @map("duration_ms")
-  volume     Float    @default(1)
+  userId     String   @map("user_id")
+  name       String?
+  icon       String   @default("volume-2")
   color      String?
-  icon       String?
-  sortOrder  Int      @default(0) @map("sort_order")
+  volume     Float    @default(1)
+  url        String
+  durationMs Int      @map("duration_ms")
+  source     String
+  sourceUrl  String?  @map("source_url")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([campaignId, sortOrder])
-  @@map("campaign_sounds")
+  @@index([userId, createdAt])
+  @@map("sound_library_items")
+}
+
+model SoundPreset {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  slots     Json
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sortOrder])
+  @@map("sound_presets")
 }
 
 model SlideDeck {

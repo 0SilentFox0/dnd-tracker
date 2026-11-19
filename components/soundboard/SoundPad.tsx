@@ -1,36 +1,32 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Headphones, Pencil } from 'lucide-react';
+import { Headphones } from 'lucide-react';
 
+import { useSoundLabel } from './labels';
 import { soundIcon } from './sound-icon';
 
 import { HudButton, HudIconButton } from '@/components/hud';
-import { useTranslator } from '@/lib/i18n/use-translator';
-import type { Sound } from '@/types/soundboard';
+import type { LibrarySound } from '@/types/soundboard';
 
-export function useSoundLabel(sound: Sound): string {
-    const t = useTranslator();
+type PadActions = {
+    onPlay: (sound: LibrarySound) => void;
+    onPreview: (sound: LibrarySound) => void;
+    onReplace: (index: number) => void;
+};
 
-    return sound.source === 'builtin' ? t(sound.name) : sound.name;
-}
-
-export function SoundPad({
+function FilledPad({
     sound,
     index,
     actions,
-    editing,
+    replacing,
 }: {
-    sound: Sound;
+    sound: LibrarySound;
     index: number;
-    actions: {
-        onPlay: (sound: Sound) => void;
-        onPreview: (sound: Sound) => void;
-        onEdit: (sound: Sound) => void;
-    };
-    editing: boolean;
+    actions: PadActions;
+    replacing: boolean;
 }) {
-    const t = useTranslations();
+    const t = useTranslations('soundboard');
 
     const Icon = soundIcon(sound.icon);
 
@@ -44,37 +40,80 @@ export function SoundPad({
             <HudButton
                 className="flex min-w-0 flex-1 flex-col items-center gap-1 p-2 text-hud-ink"
                 aria-label={
-                    editing
-                        ? t('soundboard.edit.open', { name: label })
-                        : t('soundboard.play', { name: label })
+                    replacing
+                        ? t('slot.replace', { n: index + 1 })
+                        : t('play', { name: label })
                 }
                 onClick={() =>
-                    editing ? actions.onEdit(sound) : actions.onPlay(sound)
+                    replacing ? actions.onReplace(index) : actions.onPlay(sound)
                 }
             >
-                {editing ? (
-                    <Pencil className="size-5" />
-                ) : (
-                    <Icon className="size-5" />
-                )}
+                <Icon className="size-5" />
                 <span className="line-clamp-2 text-center text-xs break-words">
                     {label}
                 </span>
             </HudButton>
-            {index < 9 && (
-                <span className="pointer-events-none absolute top-1 left-1.5 text-[10px] text-hud-muted">
-                    {index + 1}
-                </span>
-            )}
+            <span className="pointer-events-none absolute top-1 left-1.5 text-[10px] text-hud-muted">
+                {index + 1}
+            </span>
             <HudIconButton
                 className="absolute top-0 right-0"
                 tone="muted"
-                aria-label={t('soundboard.preview', { name: label })}
-                title={t('soundboard.previewHint')}
+                aria-label={t('preview', { name: label })}
+                title={t('previewHint')}
                 onClick={() => actions.onPreview(sound)}
             >
                 <Headphones className="size-4" />
             </HudIconButton>
+        </div>
+    );
+}
+
+export function SoundPad({
+    sound,
+    index,
+    actions,
+    replacing,
+}: {
+    sound: LibrarySound | null;
+    index: number;
+    actions: PadActions;
+    replacing: boolean;
+}) {
+    const t = useTranslations('soundboard');
+
+    if (sound)
+        return (
+            <FilledPad
+                sound={sound}
+                index={index}
+                actions={actions}
+                replacing={replacing}
+            />
+        );
+
+    const placeholder =
+        'relative flex min-h-16 min-w-0 items-center justify-center rounded-lg border border-dashed border-hud-rule text-xs text-hud-muted';
+
+    const number = (
+        <span className="absolute top-1 left-1.5 text-[10px]">{index + 1}</span>
+    );
+
+    return replacing ? (
+        <HudButton
+            className={placeholder}
+            aria-label={t('slot.replace', { n: index + 1 })}
+            onClick={() => actions.onReplace(index)}
+        >
+            {number}+
+        </HudButton>
+    ) : (
+        <div
+            className={placeholder}
+            role="img"
+            aria-label={t('slot.empty', { n: index + 1 })}
+        >
+            {number}
         </div>
     );
 }

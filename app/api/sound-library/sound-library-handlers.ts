@@ -1,0 +1,135 @@
+import { NextResponse } from 'next/server';
+
+import { SOUND_INTAKE_RATE_LIMIT } from '@/lib/constants/soundboard';
+import {
+    createLibrarySoundSchema,
+    discardSoundSchema,
+    importLinkSchema,
+    soundUploadRequestSchema,
+    updateLibrarySoundSchema,
+} from '@/lib/schemas/soundboard';
+import { importSoundFromLink } from '@/lib/server/soundboard/import-link';
+import {
+    createLibrarySound,
+    deleteLibrarySound,
+    discardUploadedSound,
+    getLibrary,
+    libraryEtag,
+    updateLibrarySound,
+} from '@/lib/server/soundboard/library-store';
+import { createSoundUploadTicket } from '@/lib/supabase/soundboard-storage';
+import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
+import { ifNoneMatch, weakEtag } from '@/lib/utils/api/etag';
+import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
+import { withBody, withUser } from '@/lib/utils/api/with-user';
+import { validateSoundFile } from '@/lib/utils/soundboard/validate-file';
+
+const REVALIDATE = 'private, max-age=0, must-revalidate';
+
+async function limited(userId: string, scope: string) {
+    const limit = await checkRateLimit({
+        userId,
+        scope,
+        ...SOUND_INTAKE_RATE_LIMIT,
+    });
+
+    return limit.allowed ? null : rateLimitResponse(limit);
+}
+
+export const getLibraryHandler = (req: Request) =>
+    withUser('get sound library', async (userId) => {
+        const library = await getLibrary(userId);
+
+        const etag = weakEtag(userId, libraryEtag(library));
+
+        const notModified = ifNoneMatch(req, etag);
+
+        if (notModified) {
+            notModified.headers.set('Cache-Control', REVALIDATE);
+
+            return notModified;
+        }
+
+        return NextResponse.json(library, {
+            headers: { ETag: etag, 'Cache-Control': REVALIDATE },
+        });
+    });
+
+export const createLibrarySoundHandler = (req: Request) =>
+    withBody(
+        'create library sound',
+        req,
+        createLibrarySoundSchema,
+        async (userId, body) =>
+            privateJson(await createLibrarySound(userId, body), 201)
+    );
+
+export const updateLibrarySoundHandler = (req: Request, id: string) =>
+    withBody(
+        'update library sound',
+        req,
+        updateLibrarySoundSchema,
+        async (userId, body) =>
+            privateJson(await updateLibrarySound(userId, id, body))
+    );
+
+export const deleteLibrarySoundHandler = (id: string) =>
+    withUser('delete library sound', async (userId) => {
+        await deleteLibrarySound(userId, id);
+
+        return privateJson({ ok: true });
+    });
+
+export const issueUploadTicketHandler = (req: Request) =>
+    withBody(
+        'issue sound upload',
+        req,
+        soundUploadRequestSchema,
+        async (userId, body) => {
+            const blocked = await limited(userId, 'sound-upload');
+
+            if (blocked) return blocked;
+
+            const file = validateSoundFile({
+                name: body.name,
+                type: body.contentType,
+                size: body.size,
+            });
+
+            if (!file.ok) return errorResponse(file.message, 400);
+
+            const ticket = await createSoundUploadTicket(userId, file.value);
+
+            return ticket.ok
+                ? NextResponse.json(ticket.value)
+                : errorResponse(ticket.message, 500);
+        }
+    );
+
+export const importLinkHandler = (req: Request) =>
+    withBody(
+        'import sound link',
+        req,
+        importLinkSchema,
+        async (userId, body) => {
+            const blocked = await limited(userId, 'sound-import');
+
+            if (blocked) return blocked;
+
+            return privateJson(
+                await importSoundFromLink(userId, { url: body.url })
+            );
+        }
+    );
+
+export const discardSoundHandler = (req: Request) =>
+    withBody(
+        'discard sound upload',
+        req,
+        discardSoundSchema,
+        async (userId, body) => {
+            await discardUploadedSound(userId, body.path);
+
+            return privateJson({ ok: true });
+        }
+    );

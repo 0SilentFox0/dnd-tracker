@@ -3,11 +3,11 @@
 import { useEffect, useRef } from 'react';
 
 import { shortcutBlocked } from '@/lib/hooks/common';
-import type { Sound } from '@/types/soundboard';
+import type { LibrarySound } from '@/types/soundboard';
 
 export function useSoundboardKeys(
-    pads: Sound[] | null,
-    play: (sound: Sound) => void
+    pads: (LibrarySound | null)[] | null,
+    play: (sound: LibrarySound) => void
 ) {
     const latest = useRef({ pads, play });
 

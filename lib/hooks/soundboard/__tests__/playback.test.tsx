@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -9,19 +9,18 @@ import {
     handleSoundPlayEvent,
     markLocalPlay,
 } from '../handle-play-event';
-import { soundKeys } from '../keys';
 import { __resetForTests, armUnlock, playBuffer } from '../player';
 import { useSoundboardPads } from '../useSoundboardPads';
 
-import { getSounds, playSound } from '@/lib/api/soundboard';
+import { getSoundLibrary } from '@/lib/api/sound-library';
+import { playSound } from '@/lib/api/soundboard';
 import { PAD_GUARD_MS } from '@/lib/constants/soundboard';
-import type { Sound } from '@/types/soundboard';
+import type { LibrarySound } from '@/types/soundboard';
 
-vi.mock('@/lib/api/soundboard', async (orig) => ({
-    ...(await orig<typeof import('@/lib/api/soundboard')>()),
+vi.mock('@/lib/api/soundboard', () => ({
     playSound: vi.fn(() => Promise.resolve({ ok: true })),
-    getSounds: vi.fn(),
 }));
+vi.mock('@/lib/api/sound-library', () => ({ getSoundLibrary: vi.fn() }));
 
 const prefs = vi.hoisted(() => ({ muted: false }));
 
@@ -73,30 +72,18 @@ class FakeAudioContext {
     };
 }
 
-const sound = (id: string): Sound => ({
+const sound = (id: string): LibrarySound => ({
     id,
-    source: 'custom',
+    source: 'library',
     name: id,
-    url: `/${id}.mp3`,
-    volume: 1,
+    icon: 'bell',
     color: null,
-    icon: null,
-    sortOrder: 0,
+    volume: 1,
+    url: `/${id}.mp3`,
     durationMs: null,
 });
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
-
-const client = () => {
-    const qc = new QueryClient();
-
-    qc.setQueryData(soundKeys.list('c1'), {
-        sounds: [{ ...sound('s1'), source: undefined }],
-        hiddenBuiltin: [],
-    });
-
-    return qc;
-};
 
 beforeEach(() => {
     state.ctxState = 'running';
@@ -116,50 +103,54 @@ beforeEach(() => {
     __resetForTests();
     __resetNonces();
     vi.mocked(playSound).mockClear();
+    vi.mocked(getSoundLibrary).mockClear();
 });
 
 describe('handleSoundPlayEvent', () => {
-    it('plays a duplicate nonce once', async () => {
-        const qc = client();
-
-        handleSoundPlayEvent(qc, 'c1', { soundId: 's1', nonce: 'n1' });
-        handleSoundPlayEvent(qc, 'c1', { soundId: 's1', nonce: 'n1' });
+    it('plays a custom sound from event.url without any library fetch', async () => {
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n1', url: '/s1.mp3' });
         await flush();
 
         expect(state.sources).toHaveLength(1);
         expect(state.sources[0].start).toHaveBeenCalled();
+        expect(getSoundLibrary).not.toHaveBeenCalled();
     });
 
-    it('ignores an unknown sound id and malformed data', async () => {
-        const qc = client();
+    it('plays a builtin by id without a url', async () => {
+        handleSoundPlayEvent('c1', { soundId: 'builtin:bell', nonce: 'n2' });
+        await flush();
 
+        expect(state.sources).toHaveLength(1);
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/sfx/bell.mp3')
+        );
+    });
+
+    it('plays a duplicate nonce once', async () => {
+        const event = { soundId: 's1', nonce: 'n3', url: '/s1.mp3' };
+
+        handleSoundPlayEvent('c1', event);
+        handleSoundPlayEvent('c1', event);
+        await flush();
+
+        expect(state.sources).toHaveLength(1);
+    });
+
+    it('ignores an unknown id without url and malformed data', async () => {
         expect(() => {
-            handleSoundPlayEvent(qc, 'c1', { soundId: 'nope', nonce: 'n2' });
-            handleSoundPlayEvent(qc, 'c1', null);
-            handleSoundPlayEvent(qc, 'c1', { soundId: 1, nonce: 'n3' });
+            handleSoundPlayEvent('c1', { soundId: 'nope', nonce: 'n4' });
+            handleSoundPlayEvent('c1', { soundId: 'builtin:nope', nonce: 'n5', url: '/x.mp3' });
+            handleSoundPlayEvent('c1', null);
+            handleSoundPlayEvent('c1', { soundId: 1, nonce: 'n6' });
         }).not.toThrow();
         await flush();
 
         expect(state.sources).toHaveLength(0);
     });
 
-    it('refetches the list once when the sound is missing from the cache', async () => {
-        vi.mocked(getSounds).mockResolvedValue({
-            sounds: [{ ...sound('s9'), source: undefined }],
-            hiddenBuiltin: [],
-        } as never);
-        vi.mocked(getSounds).mockClear();
-
-        handleSoundPlayEvent(client(), 'c1', { soundId: 's9', nonce: 'n9' });
-        await flush();
-
-        expect(getSounds).toHaveBeenCalledTimes(1);
-        expect(state.sources).toHaveLength(1);
-    });
-
     it('markLocalPlay suppresses the echo', async () => {
-        markLocalPlay('n4');
-        handleSoundPlayEvent(client(), 'c1', { soundId: 's1', nonce: 'n4' });
+        markLocalPlay('n7');
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n7', url: '/s1.mp3' });
         await flush();
 
         expect(state.sources).toHaveLength(0);
@@ -167,7 +158,7 @@ describe('handleSoundPlayEvent', () => {
 
     it('does not play when muted', async () => {
         prefs.muted = true;
-        handleSoundPlayEvent(client(), 'c1', { soundId: 's1', nonce: 'n5' });
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n8', url: '/s1.mp3' });
         await flush();
 
         expect(state.sources).toHaveLength(0);
@@ -273,32 +264,76 @@ describe('player', () => {
 });
 
 describe('useSoundboardPads', () => {
-    it('posts once for two plays within the guard window', () => {
-        vi.useFakeTimers();
+    const setup = () => {
+        const qc = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
 
-        const qc = client();
+        vi.mocked(getSoundLibrary).mockResolvedValue({
+            sounds: [
+                {
+                    id: 's1',
+                    name: 's1',
+                    icon: 'bell',
+                    color: null,
+                    volume: 1,
+                    url: '/s1.mp3',
+                    durationMs: 100,
+                    sourceUrl: null,
+                },
+            ],
+            presets: [
+                {
+                    id: 'p1',
+                    name: 'P',
+                    sortOrder: 0,
+                    slots: ['s1', 'gone', null, 'builtin:bell'],
+                },
+            ],
+        });
 
-        const { result } = renderHook(() => useSoundboardPads('c1'), {
+        return renderHook(() => useSoundboardPads('c1'), {
             wrapper: ({ children }: { children: ReactNode }) => (
                 <QueryClientProvider client={qc}>
                     {children}
                 </QueryClientProvider>
             ),
         });
+    };
 
-        const s = result.current.sounds.find((x) => x.id === 's1') as Sound;
+    it('returns 9 pads with null for empty or missing slots', async () => {
+        const { result } = setup();
+
+        await waitFor(() => expect(result.current.pads[0]).not.toBeNull());
+
+        expect(result.current.pads).toHaveLength(9);
+        expect(result.current.pads[0]?.id).toBe('s1');
+        expect(result.current.pads[1]).toBeNull();
+        expect(result.current.pads[2]).toBeNull();
+        expect(result.current.pads[3]?.id).toBe('builtin:bell');
+    });
+
+    it('play posts { soundId, nonce } once within the guard window and plays locally', async () => {
+        const { result } = setup();
+
+        await waitFor(() => expect(result.current.pads[0]).not.toBeNull());
+
+        const s = result.current.pads[0] as LibrarySound;
 
         result.current.play(s);
-        vi.advanceTimersByTime(PAD_GUARD_MS - 50);
         result.current.play(s);
+        await flush();
 
         expect(playSound).toHaveBeenCalledTimes(1);
+        expect(playSound).toHaveBeenCalledWith('c1', {
+            soundId: 's1',
+            nonce: expect.any(String),
+        });
+        expect(state.sources).toHaveLength(1);
 
-        vi.advanceTimersByTime(100);
+        await new Promise((r) => setTimeout(r, PAD_GUARD_MS + 20));
         result.current.play(s);
 
         expect(playSound).toHaveBeenCalledTimes(2);
-
-        vi.useRealTimers();
     });
 });

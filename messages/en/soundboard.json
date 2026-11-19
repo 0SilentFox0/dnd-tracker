@@ -12,11 +12,10 @@
     "volume": "Volume",
     "color": "Colour",
     "delete": "Delete",
-    "hide": "Hide",
     "deleteTitle": "Delete \"{name}\"?",
-    "hideTitle": "Hide \"{name}\" from the soundboard?",
-    "show": "Show",
-    "hiddenTitle": "Hidden sounds"
+    "icon": "Icon",
+    "usedIn": "Used in presets: {presets}",
+    "deleteUsed": "Delete \"{name}\"? It is used in: {presets}. Those slots will be cleared."
   },
   "upload": {
     "fileLabel": "Sound file",
@@ -43,5 +42,66 @@
     "chest-open": "Chest opens",
     "glass-break": "Glass breaks",
     "dragon-roar": "Dragon roar"
-  }
+  },
+  "add": {
+    "button": "Add sound",
+    "file": "From file",
+    "record": "Record",
+    "link": "From link"
+  },
+  "record": {
+    "title": "Record a sound",
+    "hint": "Up to {seconds} s",
+    "start": "Record",
+    "stop": "Stop",
+    "again": "Record again",
+    "denied": "Microphone access was denied",
+    "error": "Recording failed",
+    "save": "Save",
+    "name": "Name",
+    "defaultName": "Recording",
+    "preview": "Recording preview"
+  },
+  "link": {
+    "title": "Add from link",
+    "url": "Audio URL",
+    "import": "Import",
+    "tooLong": "The sound is longer than {seconds} s",
+    "invalid": "Could not read audio from this link"
+  },
+  "slot": {
+    "empty": "Empty slot {n}",
+    "replace": "Replace slot {n}",
+    "title": "Slot {n}",
+    "search": "Search sounds",
+    "clear": "Clear slot",
+    "openLibrary": "Open library",
+    "none": "No sounds found",
+    "pick": "Put {name} in the slot"
+  },
+  "library": {
+    "title": "Sound library",
+    "subtitle": "Your sounds and presets for every campaign",
+    "sounds": "Sounds",
+    "presets": "Presets",
+    "builtin": "Built-in",
+    "empty": "No sounds yet"
+  },
+  "preset": {
+    "create": "New preset",
+    "placeholder": "Preset name",
+    "add": "Add",
+    "rename": "Preset name",
+    "delete": "Delete preset",
+    "deleteTitle": "Delete preset \"{name}\"?",
+    "up": "Move {name} up",
+    "down": "Move {name} down",
+    "clearSlot": "Clear slot {n}",
+    "none": "No presets yet"
+  },
+  "starter": {
+    "battle": "Battle",
+    "ambience": "Ambience"
+  },
+  "noPresets": "No presets yet"
 }
