@@ -1,6 +1,11 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { MAX_TRACK_BYTES, type TrackFormat } from '@/lib/constants/music';
-import { MAX_SOUND_BYTES, SOUNDBOARD_BUCKET } from '@/lib/constants/soundboard';
+import { MAX_TRACK_BYTES } from '@/lib/constants/music';
+import {
+    MAX_SOUND_BYTES,
+    SOUND_FORMATS,
+    SOUNDBOARD_BUCKET,
+    type SoundFormat,
+} from '@/lib/constants/soundboard';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
     type AudioBucket,
@@ -15,15 +20,17 @@ import type { Result } from '@/types/common';
 const BUCKET: AudioBucket = {
     name: SOUNDBOARD_BUCKET,
     maxBytes: Math.min(MAX_SOUND_BYTES, MAX_TRACK_BYTES),
+    formats: SOUND_FORMATS,
 };
 
-export const soundPathOwnedBy = audioPathOwnedBy;
+export const soundPathOwnedBy = (path: string, userId: string): boolean =>
+    audioPathOwnedBy(path, userId, SOUND_FORMATS);
 
 export const createSoundUploadTicket = (
-    campaignId: string,
-    format: TrackFormat
+    userId: string,
+    format: SoundFormat
 ): Promise<Result<TrackUploadTicket>> =>
-    createAudioUploadTicket(BUCKET, campaignId, format);
+    createAudioUploadTicket(BUCKET, userId, format);
 
 export const verifyUploadedSound = (path: string): Promise<Result<string>> =>
     verifyUploadedAudio(BUCKET, path, API_ERRORS.SOUND_FILE_INVALID);

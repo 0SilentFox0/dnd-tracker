@@ -15,6 +15,7 @@ export const SOUND_FORMATS = {
     m4a: { ext: 'm4a', contentType: 'audio/mp4' },
     webm: { ext: 'webm', contentType: 'audio/webm' },
 } as const;
+export type SoundFormat = keyof typeof SOUND_FORMATS;
 
 export const MAX_VOICES = 8;
 export const NONCE_LRU = 50;

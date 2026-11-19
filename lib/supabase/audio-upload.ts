@@ -1,10 +1,5 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import {
-    TRACK_CONTENT_TYPES,
-    TRACK_EXTENSIONS,
-    TRACK_FORMATS,
-    type TrackFormat,
-} from '@/lib/constants/music';
+import { TRACK_FORMATS } from '@/lib/constants/music';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { ensureBucket } from '@/lib/supabase/buckets';
 import type { TrackUploadTicket } from '@/types/audio';
@@ -13,24 +8,43 @@ import type { Result } from '@/types/common';
 type Admin = ReturnType<typeof createAdminClient>;
 type Bucket = ReturnType<Admin['storage']['from']>;
 
-export type AudioBucket = { name: string; maxBytes: number };
+type AudioFormats = Record<string, { ext: string; contentType: string }>;
 
-const AUDIO_OBJECT = new RegExp(
-    `^([^/]+)/[a-f0-9]{32}\\.(${TRACK_EXTENSIONS.join('|')})$`
-);
+export type AudioBucket = {
+    name: string;
+    maxBytes: number;
+    formats?: AudioFormats;
+};
 
-export const audioPathOwnedBy = (path: string, campaignId: string): boolean =>
-    AUDIO_OBJECT.exec(path)?.[1] === campaignId;
+const formatsOf = (formats?: AudioFormats): AudioFormats =>
+    formats ?? TRACK_FORMATS;
+
+const contentTypesOf = (formats?: AudioFormats): string[] =>
+    Object.values(formatsOf(formats)).map((f) => f.contentType);
+
+export const audioPathOwnedBy = (
+    path: string,
+    ownerId: string,
+    formats?: AudioFormats
+): boolean => {
+    const exts = Object.values(formatsOf(formats)).map((f) => f.ext);
+
+    return (
+        new RegExp(`^([^/]+)/[a-f0-9]{32}\\.(${exts.join('|')})$`).exec(
+            path
+        )?.[1] === ownerId
+    );
+};
 
 async function audioBucket(
     supabase: Admin,
-    { name, maxBytes }: AudioBucket
+    { name, maxBytes, formats }: AudioBucket
 ): Promise<Result<Bucket>> {
     // limit and types at bucket level: Storage rejects a foreign file sent through a signed URL
     const ensured = await ensureBucket(supabase, name, {
         public: true,
         fileSizeLimit: maxBytes,
-        allowedMimeTypes: TRACK_CONTENT_TYPES,
+        allowedMimeTypes: contentTypesOf(formats),
     });
 
     return ensured.ok
@@ -40,16 +54,20 @@ async function audioBucket(
 
 export async function createAudioUploadTicket(
     bucketConfig: AudioBucket,
-    campaignId: string,
-    format: TrackFormat
+    ownerId: string,
+    format: string
 ): Promise<Result<TrackUploadTicket>> {
     const bucket = await audioBucket(createAdminClient(), bucketConfig);
 
     if (!bucket.ok) return bucket;
 
-    const { ext, contentType } = TRACK_FORMATS[format];
+    const spec = formatsOf(bucketConfig.formats)[format];
 
-    const path = `${campaignId}/${crypto.randomUUID().replace(/-/g, '')}.${ext}`;
+    if (!spec) return { ok: false, message: API_ERRORS.INTERNAL };
+
+    const { ext, contentType } = spec;
+
+    const path = `${ownerId}/${crypto.randomUUID().replace(/-/g, '')}.${ext}`;
 
     const { data, error } = await bucket.value.createSignedUploadUrl(path);
 
@@ -68,7 +86,7 @@ export async function createAudioUploadTicket(
 }
 
 export async function verifyUploadedAudio(
-    { name, maxBytes }: AudioBucket,
+    { name, maxBytes, formats }: AudioBucket,
     path: string,
     invalidMessage: string
 ): Promise<Result<string>> {
@@ -82,7 +100,7 @@ export async function verifyUploadedAudio(
     const type = (data.contentType ?? '').toLowerCase();
 
     if (
-        !TRACK_CONTENT_TYPES.includes(type) ||
+        !contentTypesOf(formats).includes(type) ||
         !data.size ||
         data.size > maxBytes
     ) {

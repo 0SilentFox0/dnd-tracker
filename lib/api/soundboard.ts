@@ -8,6 +8,7 @@ import {
 import { uploadAudioViaTicket } from './upload-audio-file';
 
 import { validateSoundFile } from '@/lib/utils/soundboard/validate-file';
+import type { TrackUploadTicket } from '@/types/audio';
 import type {
     CreateSoundData,
     Sound,
@@ -51,10 +52,14 @@ export async function uploadSoundFile(
     if (!checked.ok) throw new Error(checked.message);
 
     const ticket = await uploadAudioViaTicket(
-        campaignId,
+        (req) =>
+            campaignPost<TrackUploadTicket>(
+                campaignId,
+                '/sounds/upload-url',
+                req
+            ),
         file,
         checked.value,
-        '/sounds/upload-url',
         'soundboard.uploadFailed'
     );
 

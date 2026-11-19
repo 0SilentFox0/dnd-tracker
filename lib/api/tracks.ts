@@ -1,10 +1,11 @@
-import { campaignPut, createCampaignCrudApi } from './client';
+import { campaignPost, campaignPut, createCampaignCrudApi } from './client';
 import { uploadAudioViaTicket } from './upload-audio-file';
 
 import { validateTrackFile } from '@/lib/utils/audio/track-file';
 import type {
     CampaignTrack,
     CreateTrackData,
+    TrackUploadTicket,
     UpdateTrackData,
 } from '@/types/audio';
 
@@ -37,10 +38,14 @@ export async function uploadTrackFile(
     if (!checked.ok) throw new Error(checked.message);
 
     const ticket = await uploadAudioViaTicket(
-        campaignId,
+        (req) =>
+            campaignPost<TrackUploadTicket>(
+                campaignId,
+                '/tracks/upload-url',
+                req
+            ),
         file,
         checked.value,
-        '/tracks/upload-url',
         'music.library.uploadFailed'
     );
 

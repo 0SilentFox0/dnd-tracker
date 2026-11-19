@@ -131,6 +131,19 @@ describe('validateSoundFile', () => {
         ).toEqual({ ok: true, value: 'mp3' });
     });
 
+    it('accepts webm', () => {
+        expect(
+            validateSoundFile({ name: 'a.webm', type: 'audio/webm', size: 100 })
+        ).toEqual({ ok: true, value: 'webm' });
+        expect(
+            validateSoundFile({
+                name: 'rec',
+                type: 'audio/webm;codecs=opus',
+                size: 100,
+            })
+        ).toEqual({ ok: true, value: 'webm' });
+    });
+
     it('rejects files over 1 MB', () => {
         expect(
             validateSoundFile({
