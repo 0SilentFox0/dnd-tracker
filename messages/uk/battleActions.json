@@ -11,6 +11,7 @@
     "noSuchAttack": "У учасника немає такої атаки",
     "attackUnavailable": "Ця атака зараз недоступна",
     "alreadyGrappled": "Ціль уже схоплена",
+    "targetTooBig": "Ціль більша більш ніж на один розмір",
     "pushNeedsMap": "Для відштовхування потрібна карта",
     "notProne": "Ви не лежите",
     "standSpeedZero": "Не можна встати: швидкість 0",
@@ -36,7 +37,7 @@
   "core": {
     "done": "{icon} {name}: {action}{tail}",
     "dashTail": " (+{gained} кл. руху)",
-    "help": "🤝 {name}: {action} — {target} має перевагу на наступну атаку",
+    "help": "🤝 {name}: {action} — наступна атака по {target} має перевагу до наступного ходу {name}",
     "hideSpotted": " — 🎲 Скритність {total} проти пасивного Сприйняття {dc}, помічено",
     "hideHidden": " — 🎲 Скритність {total} проти пасивного Сприйняття {dc}, схований"
   },

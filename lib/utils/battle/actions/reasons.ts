@@ -13,6 +13,7 @@ export const ACTION_REASONS = [
     'noSuchAttack',
     'attackUnavailable',
     'alreadyGrappled',
+    'targetTooBig',
     'pushNeedsMap',
     'notProne',
     'standSpeedZero',

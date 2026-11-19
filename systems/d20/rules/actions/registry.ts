@@ -6,7 +6,7 @@ export const CORE_ACTION_REGISTRY: Record<CoreActionKey, CoreActionDef> = {
     dash: { cost: 'action', target: 'none' },
     disengage: { cost: 'action', target: 'none' },
     dodge: { cost: 'action', target: 'none' },
-    help: { cost: 'action', target: 'allyAdjacent' },
+    help: { cost: 'action', target: 'enemyAdjacent' },
     hide: { cost: 'action', target: 'none' },
     ready: { cost: 'action', target: 'none' },
     standUp: { cost: 'movement', target: 'none' },

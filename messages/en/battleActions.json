@@ -11,6 +11,7 @@
     "noSuchAttack": "The participant has no such attack",
     "attackUnavailable": "This attack is unavailable right now",
     "alreadyGrappled": "The target is already grappled",
+    "targetTooBig": "The target is more than one size larger",
     "pushNeedsMap": "Pushing needs a map",
     "notProne": "You are not prone",
     "standSpeedZero": "Cannot stand up: speed is 0",
@@ -36,7 +37,7 @@
   "core": {
     "done": "{icon} {name}: {action}{tail}",
     "dashTail": " (+{gained} cells of movement)",
-    "help": "🤝 {name}: {action} — {target} has advantage on the next attack",
+    "help": "🤝 {name}: {action} — the next attack against {target} has advantage until {name}'s next turn",
     "hideSpotted": " — 🎲 Stealth {total} vs passive Perception {dc}, spotted",
     "hideHidden": " — 🎲 Stealth {total} vs passive Perception {dc}, hidden"
   },

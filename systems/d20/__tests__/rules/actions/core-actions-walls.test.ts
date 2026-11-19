@@ -15,28 +15,13 @@ describe('coreActionTargets: стіни', () => {
         at: { x: 2, y: 1 },
     });
 
-    const ids = (map: ReturnType<typeof testMap>) =>
-        coreActionTargets('help', actor, [actor, foe], map).map(
-            (p) => p.basicInfo.id
-        );
-
-    it('help ally: сусід через стіну не ціль', () => {
-        const ally = {
-            ...foe,
-            basicInfo: {
-                ...foe.basicInfo,
-                side: ParticipantSide.ALLY,
-                id: 'f',
-            },
-        };
-
+    it('help: ворог через стіну не ціль, союзник не ціль', () => {
         const near = (map: ReturnType<typeof testMap>) =>
-            coreActionTargets('help', actor, [actor, ally], map).map(
+            coreActionTargets('help', actor, [actor, foe], map).map(
                 (p) => p.basicInfo.id
             );
 
         expect(near(testMap(5, 5))).toEqual(['f']);
         expect(near(testMap(5, 5, { walls: ['1:1:e'] }))).toEqual([]);
-        expect(ids(testMap(5, 5))).toEqual([]);
     });
 });

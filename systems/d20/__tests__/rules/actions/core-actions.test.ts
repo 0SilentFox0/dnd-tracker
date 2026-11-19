@@ -6,6 +6,7 @@ import {
     grantPassive,
 } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { runCoreAction } from '@/lib/utils/battle/actions/dispatch';
+import { dropHelpFrom } from '@/lib/utils/battle/actions/effects';
 import {
     activeEffectIds,
     consumeAttackEffects,
@@ -204,57 +205,65 @@ describe('core actions', () => {
         ).toBe(false);
     });
 
-    it('help: ефект на союзнику споживається його атакою; не союзник і несуміжний — відмова', () => {
+    it('help: ворог поруч дає перевагу наступній атаці по ньому; союзник і несуміжний — відмова', () => {
         const a = mk('a', 'ally', 0);
 
-        const ally = mk('ally2', 'ally', 1);
+        const foe = mk('foe', 'enemy', 1);
 
         const out = run(
-            [a, ally],
-            { action: 'help', participantId: 'a', targetId: 'ally2' },
+            [a, foe],
+            { action: 'help', participantId: 'a', targetId: 'foe' },
             map
         );
 
-        const helped = get(out, 'ally2');
+        const helped = get(out, 'foe');
 
         expect(helped.battleData.activeEffects[0]).toMatchObject({
-            consumeOn: 'ownAttack',
-            duration: 1,
+            consumeOn: 'attackAgainst',
+            permanent: true,
         });
         expect(get(out, 'a').actionFlags.hasUsedAction).toBe(true);
 
         const used = consumeAttackEffects(out.participants, {
             attackerId: 'ally2',
-            targetId: 'a',
+            targetId: 'foe',
             hit: true,
             existedBefore: activeEffectIds(out.participants),
         });
 
         expect(
-            get({ participants: used }, 'ally2').battleData.activeEffects
+            get({ participants: used }, 'foe').battleData.activeEffects
         ).toHaveLength(0);
 
         expect(() =>
             run(
-                [a, mk('foe', 'enemy', 1)],
-                { action: 'help', participantId: 'a', targetId: 'foe' },
+                [a, mk('ally2', 'ally', 1)],
+                { action: 'help', participantId: 'a', targetId: 'ally2' },
                 map
             )
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
         expect(() =>
             run(
-                [a, mk('far', 'ally', 6)],
+                [a, mk('far', 'enemy', 6)],
                 { action: 'help', participantId: 'a', targetId: 'far' },
                 map
             )
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
-        expect(
-            run([a, mk('far', 'ally', 6)], {
-                action: 'help',
-                participantId: 'a',
-                targetId: 'far',
-            }).participants
-        ).toHaveLength(2);
+    });
+
+    it('help: ефект знімається на початку наступного ходу помічника', () => {
+        const a = mk('a', 'ally', 0);
+
+        const out = run(
+            [a, mk('foe', 'enemy', 1)],
+            { action: 'help', participantId: 'a', targetId: 'foe' },
+            map
+        );
+
+        const after = dropHelpFrom(out.participants, 'a');
+
+        expect(get({ participants: after }, 'foe').battleData.activeEffects).toHaveLength(0);
+        expect(dropHelpFrom(out.participants, 'other')).toBe(out.participants);
     });
 
     it('standUp: знімає prone і витрачає половину руху; відмови', () => {

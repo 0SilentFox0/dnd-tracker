@@ -1,4 +1,5 @@
 import { D20_CONDITION_SET } from '../conditions';
+import { tooBigToHold } from './size-limit';
 
 import { joinLines, textRef } from '@/lib/i18n/text-ref';
 import {
@@ -251,6 +252,8 @@ export function runGrapple(input: GrappleActionInput): GrappleActionResult {
 
     const name = actor.basicInfo.name;
 
+    if (tooBigToHold(actor, target)) return reject(actionReason('targetTooBig'));
+
     if (
         hasCondition(target, 'grappled') &&
         conditionSourceIds(target, 'grappled').includes(actor.basicInfo.id)
@@ -305,6 +308,8 @@ export function runShove(
     const target = targetOf(input);
 
     if (mode === 'push' && !map) return reject(actionReason('pushNeedsMap'));
+
+    if (tooBigToHold(actor, target)) return reject(actionReason('targetTooBig'));
 
     const name = actor.basicInfo.name;
 

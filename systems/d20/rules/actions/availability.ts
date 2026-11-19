@@ -1,5 +1,6 @@
 import type { CoreActionKey } from './keys';
 import { CORE_ACTION_REGISTRY } from './registry';
+import { tooBigToHold } from './size-limit';
 
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
@@ -117,6 +118,13 @@ export function validateCoreAction(
         return actionReason(
             target === 'allyAdjacent' ? 'noAdjacentAlly' : 'noAdjacentEnemy'
         );
+
+    if (isAttackAction(key) && targetId !== undefined) {
+        const held = targets.find((t) => t.basicInfo.id === targetId);
+
+        if (held && tooBigToHold(actor, held))
+            return actionReason('targetTooBig');
+    }
 
     return null;
 }

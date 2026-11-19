@@ -21,6 +21,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/run-abilities';
 import type { Rng } from '@/lib/utils/abilities/engine/core/types';
 import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
+import { dropHelpFrom } from '@/lib/utils/battle/actions/effects';
 import { effectName } from '@/lib/utils/battle/common/terms';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { clearGuardedDamage } from '@/lib/utils/battle/damage/regen-guard';
@@ -502,6 +503,8 @@ export function processStartOfTurn(
         participants = r.participants;
         abilityMessages.push(...r.messages);
     }
+
+    participants = dropHelpFrom(participants, id);
 
     const finalParticipant = clearGuardedDamage(
         findParticipant(participants, id) ?? updatedParticipant
