@@ -11,6 +11,7 @@ import {
     type AudioBucket,
     audioPathOwnedBy,
     createAudioUploadTicket,
+    uploadAudioObject,
     verifyUploadedAudio,
 } from '@/lib/supabase/audio-upload';
 import { bucketObjectPath } from '@/lib/utils/common/image-url';
@@ -50,3 +51,10 @@ export async function removeSoundObject(path: string): Promise<void> {
         console.warn('[soundboard] remove failed', path, e);
     }
 }
+
+export const uploadSoundBytes = (
+    userId: string,
+    format: SoundFormat,
+    bytes: Uint8Array
+): Promise<Result<{ path: string; url: string }>> =>
+    uploadAudioObject(BUCKET, userId, format, bytes);

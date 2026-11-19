@@ -1,5 +1,5 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { TRACK_FORMATS } from '@/lib/constants/music';
+import { TRACK_CACHE_SECONDS, TRACK_FORMATS } from '@/lib/constants/music';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { ensureBucket } from '@/lib/supabase/buckets';
 import type { TrackUploadTicket } from '@/types/audio';
@@ -52,6 +52,38 @@ async function audioBucket(
         : ensured;
 }
 
+const newAudioPath = (ownerId: string, ext: string): string =>
+    `${ownerId}/${crypto.randomUUID().replace(/-/g, '')}.${ext}`;
+
+export async function uploadAudioObject(
+    bucketConfig: AudioBucket,
+    ownerId: string,
+    format: string,
+    bytes: Uint8Array
+): Promise<Result<{ path: string; url: string }>> {
+    const spec = formatsOf(bucketConfig.formats)[format];
+
+    if (!spec) return { ok: false, message: API_ERRORS.INTERNAL };
+
+    const bucket = await audioBucket(createAdminClient(), bucketConfig);
+
+    if (!bucket.ok) return bucket;
+
+    const path = newAudioPath(ownerId, spec.ext);
+
+    const { error } = await bucket.value.upload(path, bytes, {
+        contentType: spec.contentType,
+        cacheControl: TRACK_CACHE_SECONDS,
+    });
+
+    if (error) return { ok: false, message: API_ERRORS.INTERNAL };
+
+    return {
+        ok: true,
+        value: { path, url: bucket.value.getPublicUrl(path).data.publicUrl },
+    };
+}
+
 export async function createAudioUploadTicket(
     bucketConfig: AudioBucket,
     ownerId: string,
@@ -67,7 +99,7 @@ export async function createAudioUploadTicket(
 
     const { ext, contentType } = spec;
 
-    const path = `${ownerId}/${crypto.randomUUID().replace(/-/g, '')}.${ext}`;
+    const path = newAudioPath(ownerId, ext);
 
     const { data, error } = await bucket.value.createSignedUploadUrl(path);
 
