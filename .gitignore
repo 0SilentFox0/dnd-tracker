@@ -48,3 +48,4 @@ next-env.d.ts
 data/templates/srd-5.2/i18n/todo/
 data/templates/grim-d100/i18n/todo/
 .eslintcache
+.landing-auth/

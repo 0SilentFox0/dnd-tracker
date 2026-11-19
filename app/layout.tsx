@@ -9,7 +9,7 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { ScreenBackground } from '@/components/layout/screen-background';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
-import { SITE_INDEXING, SITE_URL } from '@/lib/constants/site';
+import { BRAND, SITE_INDEXING, SITE_URL } from '@/lib/constants/site';
 import { ClientLocaleProvider } from '@/lib/i18n/client-locale-provider';
 import { loadStaticMessages } from '@/lib/i18n/messages';
 import { ROOT_NAMESPACES } from '@/lib/i18n/scopes';
@@ -19,7 +19,7 @@ import { PALETTES_ENABLED } from '@/lib/theme/palettes';
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
-    title: 'D&D Combat Tracker',
+    title: BRAND.name,
     description: 'Dungeon Master companion for D&D 5e campaigns',
     robots: SITE_INDEXING ? undefined : { index: false, follow: false },
 };
