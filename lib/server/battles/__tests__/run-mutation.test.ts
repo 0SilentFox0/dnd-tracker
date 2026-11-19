@@ -1229,6 +1229,27 @@ describe('runBattleMutation: pending крита', () => {
         expect((await res.json()).code).toBe('crit_pending');
     });
 
+    it('pending вікно контрзаклинання — повідомлення про контрзаклинання', async () => {
+        const counter = {
+            ...stored,
+            shown: { kind: 'counter', offers: [] },
+        };
+
+        const res = await runBattleMutation(
+            req(),
+            { params, access: 'member', mutate: noop },
+            dmDeps({
+                loadBattle: vi.fn(async () => ({
+                    ...pendingLoaded(),
+                    scene: { ...pendingLoaded().scene, pendingChoice: counter },
+                })),
+            })
+        );
+
+        expect(res.status).toBe(422);
+        expect((await res.json()).error).toBe('errors.counterWindowOpen');
+    });
+
     it('dryRun і allowWhileCritPending проходять', async () => {
         expect(
             (

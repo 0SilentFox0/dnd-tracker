@@ -210,6 +210,7 @@ export function createSpellMutation(
             replay?.seed === undefined &&
             !options.skipCounter) {
             const paused = await openCounterIfAny({
+                innate: !!grant?.inline,
                 ctx,
                 deps,
                 data,

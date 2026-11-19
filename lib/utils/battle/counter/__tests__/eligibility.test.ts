@@ -125,6 +125,16 @@ describe('counterReactors', () => {
         expect(run(wizard(), { castSpell: { level: 3 } })).toHaveLength(1);
     });
 
+    it('ignores level-0 pseudo casts without components but keeps real cantrips', () => {
+        expect(run(wizard(), { castSpell: { level: 0 } })).toEqual([]);
+
+        expect(
+            run(wizard(), {
+                castSpell: { level: 0, components: { v: true, s: false, m: false } },
+            })
+        ).toHaveLength(1);
+    });
+
     it('offers a live grant with a charge and none for an exhausted one', () => {
         const grant: SpellGrant = {
             spellId: 'cs',

@@ -96,7 +96,14 @@ export function counterReactors(args: CounterReactorsArgs): CounterOffer[] {
     const { caster, castSpell, participants, interruptSpells, rules, map } =
         args;
 
-    if (!hasComponents(castSpell.components) || interruptSpells.length === 0)
+    // Monster actions are level-0 rows without component flags; real cantrips always carry them
+    const pseudoCast = castSpell.level === 0 && !castSpell.components;
+
+    if (
+        pseudoCast ||
+        !hasComponents(castSpell.components) ||
+        interruptSpells.length === 0
+    )
         return [];
 
     const blocker = reactionsOf(rules).blocker;

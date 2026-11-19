@@ -14,6 +14,8 @@ import {
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { uniqueCastId } from '@/lib/utils/battle/concentration';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
+import { createCritGate } from '@/lib/utils/battle/crit-choice/gate';
+import { HELD_DIE_EFFECT } from '@/lib/utils/battle/d20-rider/held';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { hazardHit, hazardUnder } from '@/lib/utils/battle/grid';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
@@ -435,6 +437,43 @@ describe('перевірка концентрації', () => {
         expect(textsOf(r.messages)[0]).toContain('утримує');
         expect(effectsOf(r.participants, 'e1')).toHaveLength(1);
         expect(effectsOf(r.participants, 'c')).toHaveLength(1);
+    });
+
+    it('a held die flips a failed save and is marked spent', () => {
+        const ps = concentrating();
+
+        const c = ps[0];
+
+        const holder: BattleParticipant = {
+            ...c,
+            combatStats: { ...c.combatStats, currentHp: 15 },
+            battleData: {
+                ...c.battleData,
+                activeEffects: [
+                    ...c.battleData.activeEffects,
+                    makeEffect('insp', {
+                        effects: [{ type: HELD_DIE_EFFECT, value: 20 }],
+                    }),
+                ],
+            },
+        };
+
+        const gate = createCritGate({
+            rng: seq(0.99),
+            riderChoices: { 'rider:c:save:0': true },
+        });
+
+        const r = concentrationCheck({
+            caster: holder,
+            damage: 30,
+            participants: ps.map((p) => (p === c ? holder : p)),
+            rules: rulesOn(),
+            rng: seq(0.05),
+            rider: gate.pick.rider,
+        });
+
+        expect(textsOf(r.messages)[0]).toContain('утримує');
+        expect(gate.spent).toEqual([{ holderId: 'c', effectId: 'insp' }]);
     });
 
     it('хук шкоди: провал і 0 HP без кидка', () => {

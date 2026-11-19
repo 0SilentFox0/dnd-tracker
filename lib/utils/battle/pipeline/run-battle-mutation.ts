@@ -21,6 +21,7 @@ import type {
     RateLimitResult,
 } from '@/lib/utils/api/rate-limit';
 import { controls, currentOf } from '@/lib/utils/battle/common/control';
+import { counterPendingOf } from '@/lib/utils/battle/counter/pending';
 import {
     modeBlockedText,
     withModeAfterMutation,
@@ -539,7 +540,12 @@ export function guardBattleContext<TBody>(
         !options.allowWhileCritPending &&
         !isDryRun
     ) {
-        throw new BattleRuleError('crit_pending', API_ERRORS.CRIT_PENDING);
+        throw new BattleRuleError(
+            'crit_pending',
+            counterPendingOf(loaded.scene.pendingChoice)
+                ? API_ERRORS.COUNTER_WINDOW_OPEN
+                : API_ERRORS.CRIT_PENDING
+        );
     }
 
     return { ctx, awaiting, isDryRun };

@@ -33,10 +33,11 @@ export async function openCounterIfAny(args: {
     order: BattleParticipant[];
     diceRolls: number[];
     serverRolls: boolean;
+    innate: boolean;
 }): Promise<MutationResult | null> {
     const { ctx, deps, data, spell, caster, order } = args;
 
-    if (!deps.loadInterruptSpells) return null;
+    if (!deps.loadInterruptSpells || args.innate) return null;
 
     const blocker = reactionsOf(ctx.meta.rules).blocker;
 
