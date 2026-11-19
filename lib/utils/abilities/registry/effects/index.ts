@@ -187,7 +187,11 @@ const BASE_EFFECT_REGISTRY: {
     tempHp: {
         kind: 'tempHp',
         static: false,
-        fields: [AMOUNT, TARGET_FIELD],
+        fields: [
+            AMOUNT,
+            { name: 'upcastAmount', input: 'number', optional: true },
+            TARGET_FIELD,
+        ],
         describe: describeTempHp,
         apply: applyTempHp,
     },

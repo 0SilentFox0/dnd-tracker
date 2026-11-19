@@ -54,10 +54,10 @@ const SCHEMAS: Record<SrdKind, { create: ZodType; update: ZodType }> = {
 
 const EXPECTED: Record<SrdKind, number> = {
     'spell-groups': 9,
-    spells: 498,
+    spells: 499,
     races: 9,
     classes: 12,
-    feats: 20,
+    feats: 21,
     backgrounds: 4,
     units: 331,
     artifacts: 333,
@@ -88,12 +88,16 @@ describe('SRD 5.2 data files', () => {
         expect(manifest.credits).toContain('System Reference Document 5.2');
     });
 
-    it('every row has a srd-2024 slug, unique within its kind', () => {
+    it('every row has a srd-2024 or extra slug, unique within its kind', () => {
         for (const kind of SRD_KINDS) {
             const slugs = rowsOf(kind).map((r) => r.slug);
 
             expect(
-                slugs.every((s) => s.startsWith('srd-2024_') && isSlug(s))
+                slugs.every(
+                    (s) =>
+                        (s.startsWith('srd-2024_') || s.startsWith('extra_')) &&
+                        isSlug(s)
+                )
             ).toBe(true);
             expect(new Set(slugs).size).toBe(slugs.length);
         }

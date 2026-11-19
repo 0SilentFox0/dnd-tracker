@@ -26,6 +26,7 @@ import {
     SINGLE_LEVEL_FEATURES,
     SPELLCASTING_ABILITY,
 } from '../overrides/classes';
+import { withExtras } from '../overrides/extras';
 import { FEAT_MECHANICS } from '../overrides/feats';
 import {
     BELT_STRENGTH,
@@ -70,7 +71,9 @@ export function assertKnown(
         throw new Error(`${label}: unknown ${unknown.join(', ')}`);
 }
 
-export function buildSrdData(data: Open5eData): SrdData {
+export function buildSrdData(source: Open5eData): SrdData {
+    const data = withExtras(source);
+
     const pks = (rows: ReadonlyArray<{ pk: string }>) =>
         new Set(rows.map((r) => r.pk));
 

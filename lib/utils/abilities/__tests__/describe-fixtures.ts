@@ -149,6 +149,14 @@ const VARIANT_EFFECTS: Effect[] = [
         attackKinds: ['melee', 'ranged'],
         bonusPercent: 20,
     },
+    {
+        kind: 'flag',
+        flag: 'thorns',
+        damage: 5,
+        damageType: 'cold',
+        attackKinds: ['melee'],
+        whileTempHp: true,
+    },
     { kind: 'flag', flag: 'extraSummons', count: 2, spellIds: ['s1'] },
     {
         kind: 'flag',

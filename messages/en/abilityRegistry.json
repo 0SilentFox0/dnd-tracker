@@ -247,6 +247,13 @@
     "counterAttack": {
       "label": "Counterattack"
     },
+    "thorns": {
+      "label": "Thorns",
+      "fields": {
+        "damage": "Damage",
+        "damageType": "Damage type"
+      }
+    },
     "attackHitsAllEnemies": {
       "label": "Attack hits all enemies"
     },
@@ -598,6 +605,9 @@
     "size": "Cone, ft",
     "abilities": "Abilities",
     "vsSpells": "Only against spells",
+    "whileTempHp": "Only while temp HP remain",
+    "upcastDamage": "Damage per slot level above base",
+    "upcastAmount": "Temp HP per slot level above base",
     "skills": "Skills",
     "kinds": "Proficiency",
     "conditions": "Conditions",
@@ -1110,6 +1120,7 @@
       "spellImmunity": "{hasIds, select, yes {immunity to spells ({count})} other {immunity to all spells}}",
       "spellTargeting": "{scope, select, school {spells of school {school}} ids {spells ({count})} other {spells}} — {mode, select, all {on everyone} other {area (up to {max} targets)}}",
       "counterAttack": "retaliation{ranged, select, yes { (also vs ranged)} other {}} +{percent}%",
+      "thorns": "{damage} {type} damage to a creature that hits this target{ranged, select, yes { (melee or ranged)} other { in melee}}{tempHp, select, yes { while temp HP remain} other {}}",
       "attackHitsAllEnemies": "every attack hits all enemies",
       "seeEnemyHp": "sees enemy HP",
       "multiTargetFalloff": "extra targets of a ranged attack take {percent}% damage",

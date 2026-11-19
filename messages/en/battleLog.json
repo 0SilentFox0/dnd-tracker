@@ -100,6 +100,7 @@
     "aborted": "{attacker} → {target}: the target died before the attack",
     "serverDamageDice": "🎲 damage dice rolled by the server: {rolls}",
     "guard": "🛡 {guardian} takes {damage} damage — protecting {target}",
+    "thorns": "🧊 {target} retaliates: {attacker} takes {damage} {type} damage",
     "fireWave": "🔥 Fire wave: {parts}",
     "obstacle": "🧱 obstacle: damage ×0.5 → {damage}"
   },

@@ -57,7 +57,7 @@ describe('SRD spell effect coverage', () => {
                 .filter((s) => s.lists.length > 0)
                 .every((s) => s.componentFlags)
         ).toBe(true);
-        expect(withIngredients).toHaveLength(187);
+        expect(withIngredients).toHaveLength(188);
         expect(unparsed.sort()).toEqual(['jump', 'true-strike']);
         expect(spell('revivify').ingredients).toEqual([
             {

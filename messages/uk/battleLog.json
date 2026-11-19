@@ -100,6 +100,7 @@
     "aborted": "{attacker} → {target}: ціль загинула до атаки",
     "serverDamageDice": "🎲 кубики шкоди кинув сервер: {rolls}",
     "guard": "🛡 {guardian} приймає {damage} шкоди — захищає: {target}",
+    "thorns": "🧊 {target} відповідає: {attacker} отримує {damage} шкоди ({type})",
     "fireWave": "🔥 Вогняна хвиля: {parts}",
     "obstacle": "🧱 перешкода: шкода ×0.5 → {damage}"
   },

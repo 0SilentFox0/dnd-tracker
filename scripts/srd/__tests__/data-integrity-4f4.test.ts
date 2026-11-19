@@ -22,13 +22,13 @@ const SPELL_LIST_COUNTS: Record<string, number> = {
     Bard: 130,
     Druid: 124,
     Cleric: 109,
-    Warlock: 72,
+    Warlock: 73,
     Ranger: 48,
     Paladin: 38,
 };
 
 describe('SRD 5.2 data: 4f-4', () => {
-    it('20 feats: 7 origin, 2 general, 4 fighting styles, 7 epic boons; ASI, Skilled, Magic Initiate repeatable', () => {
+    it('21 feats: 7 origin, 3 general, 4 fighting styles, 7 epic boons; ASI, Skilled, Magic Initiate repeatable', () => {
         const count = (type: string) =>
             data.feats.filter((f) => f.type === type).length;
 
@@ -37,7 +37,7 @@ describe('SRD 5.2 data: 4f-4', () => {
             count('general'),
             count('fightingStyle'),
             count('epicBoon'),
-        ]).toEqual([7, 2, 4, 7]);
+        ]).toEqual([7, 3, 4, 7]);
         expect(
             data.feats
                 .filter((f) => f.repeatable)

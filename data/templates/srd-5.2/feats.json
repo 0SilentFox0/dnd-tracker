@@ -1,5 +1,77 @@
 [
   {
+    "slug": "extra_inspiring-leader",
+    "name": "Inspiring Leader",
+    "type": "general",
+    "prerequisite": {
+      "level": 4,
+      "scores": {
+        "abilities": [
+          "wisdom",
+          "charisma"
+        ],
+        "min": 13
+      }
+    },
+    "repeatable": false,
+    "description": "You can spend 10 minutes inspiring your companions, shoring up their resolve to fight.\n\n**Ability Score Increase.** Increase your Wisdom or Charisma score by 1, to a maximum of 20.\n\n**Bolstering Performance.** When you finish a Short or Long Rest, you can give a performance of up to 10 minutes. Choose up to six allies (which can include yourself) who witness it. Each gains Temporary Hit Points equal to your character level plus the modifier of the ability score you increased with this feat.",
+    "abilities": [
+      {
+        "id": "bolstering-performance",
+        "name": "Bolstering Performance",
+        "description": "You can spend 10 minutes inspiring your companions, shoring up their resolve to fight.\n\n**Ability Score Increase.** Increase your Wisdom or Charisma score by 1, to a maximum of 20.\n\n**Bolstering Performance.** When you finish a Short or Long Rest, you can give a performance of up to 10 minutes. Choose up to six allies (which can include yourself) who witness it. Each gains Temporary Hit Points equal to your character level plus the modifier of the ability score you increased with this feat.",
+        "trigger": {
+          "event": "action"
+        },
+        "limits": {
+          "perRest": {
+            "rest": "short",
+            "uses": 1
+          }
+        },
+        "maxTargets": 6,
+        "effects": [
+          {
+            "kind": "tempHp",
+            "amount": {
+              "formula": "hero_level + max(wis_mod, cha_mod)"
+            },
+            "target": "eventTarget"
+          }
+        ]
+      },
+      {
+        "id": "inspiring-leader",
+        "name": "Inspiring Leader",
+        "description": "You can spend 10 minutes inspiring your companions, shoring up their resolve to fight.\n\n**Ability Score Increase.** Increase your Wisdom or Charisma score by 1, to a maximum of 20.\n\n**Bolstering Performance.** When you finish a Short or Long Rest, you can give a performance of up to 10 minutes. Choose up to six allies (which can include yourself) who witness it. Each gains Temporary Hit Points equal to your character level plus the modifier of the ability score you increased with this feat.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Inspiring Leader"
+          }
+        ]
+      }
+    ],
+    "choices": [
+      {
+        "id": "ability-score-increase",
+        "label": "Ability Score Increase",
+        "level": 1,
+        "count": 1,
+        "kind": "abilityScore",
+        "points": 1,
+        "max": 20,
+        "abilities": [
+          "wisdom",
+          "charisma"
+        ]
+      }
+    ]
+  },
+  {
     "slug": "srd-2024_ability-score-improvement",
     "name": "Ability Score Improvement",
     "type": "general",

@@ -1,7 +1,7 @@
 import type { Ability } from '@/lib/utils/abilities/schema';
 
 export type AbilityCore = Pick<Ability, 'trigger' | 'effects'> &
-    Partial<Pick<Ability, 'limits' | 'condition' | 'perform' | 'params'>>;
+    Partial<Pick<Ability, 'limits' | 'condition' | 'perform' | 'params' | 'maxTargets'>>;
 
 export const noteAbility = (
     id: string,

@@ -5,6 +5,7 @@ import { splitGuardedDamage } from './guard';
 import { applyVampirism } from './hit-effects';
 import { applyHitRiders } from './hit-rider';
 import { castHitSpell } from './hit-spell';
+import { applyThorns } from './thorns';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
@@ -142,6 +143,13 @@ export function resolveHit(p: ResolveHitParams): {
     }
 
     settleDowned(flow, targetId, attackerId);
+
+    applyThorns(flow, {
+        attackerId,
+        targetId,
+        attack,
+        tempHpBefore: targetBefore.combatStats.tempHp,
+    });
 
     const hpBeforeHit = getP(flow, targetId).combatStats.currentHp;
 

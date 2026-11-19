@@ -144,6 +144,30 @@ export const FEAT_MECHANICS: Record<string, FeatMechanics> = {
             },
         ],
     },
+    'extra_inspiring-leader': {
+        abilities: [
+            {
+                id: 'bolstering-performance',
+                name: 'Bolstering Performance',
+                core: {
+                    trigger: { event: 'action' },
+                    limits: { perRest: { rest: 'short', uses: 1 } },
+                    maxTargets: 6,
+                    effects: [
+                        {
+                            kind: 'tempHp',
+                            amount: {
+                                formula: 'hero_level + max(wis_mod, cha_mod)',
+                            },
+                            target: 'eventTarget',
+                        },
+                    ],
+                },
+            },
+            'note',
+        ],
+        choices: [asi(1, 20, ['wisdom', 'charisma'])],
+    },
     'srd-2024_boon-of-combat-prowess': boon,
     'srd-2024_boon-of-dimensional-travel': boon,
     'srd-2024_boon-of-fate': boon,

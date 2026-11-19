@@ -201,6 +201,34 @@ const BASE_FLAG_REGISTRY: {
             }),
         ],
     },
+    thorns: {
+        fields: [
+            { name: 'damage', input: 'number' },
+            { name: 'damageType', input: 'text' },
+            {
+                name: 'attackKinds',
+                input: 'multiselect',
+                options: MELEE_RANGED,
+            },
+            { name: 'whileTempHp', input: 'toggle', optional: true },
+            { name: 'upcastDamage', input: 'number', optional: true },
+        ],
+        defaults: {
+            damage: 5,
+            damageType: 'cold',
+            attackKinds: [AttackType.MELEE],
+        },
+        describe: (e) => [
+            flagSeg('thorns', {
+                damage: e.damage,
+                type: damageTypeSegment(e.damageType),
+                ranged: e.attackKinds.includes(AttackType.RANGED)
+                    ? 'yes'
+                    : 'no',
+                tempHp: e.whileTempHp ? 'yes' : 'no',
+            }),
+        ],
+    },
     attackHitsAllEnemies: plain('attackHitsAllEnemies'),
     seeEnemyHp: plain('seeEnemyHp'),
     multiTargetFalloff: {

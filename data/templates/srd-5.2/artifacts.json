@@ -7293,6 +7293,13 @@
           "castLevel": 1,
           "dc": 13,
           "attackBonus": 5
+        },
+        {
+          "spellId": "Armor of Agathys",
+          "cost": 1,
+          "castLevel": 1,
+          "dc": 13,
+          "attackBonus": 5
         }
       ]
     }

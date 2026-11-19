@@ -878,6 +878,28 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
             { kind: 'tempHp', amount: { spellRoll: 100 }, target: 'self' },
         ],
     },
+    'extra_armor-of-agathys': {
+        targeting: { kind: 'self' },
+        resolution: { kind: 'auto' },
+        spellEffects: [
+            {
+                kind: 'tempHp',
+                amount: 5,
+                upcastAmount: 5,
+                target: 'self',
+            },
+            {
+                kind: 'flag',
+                flag: 'thorns',
+                damage: 5,
+                damageType: 'cold',
+                attackKinds: ['melee'],
+                whileTempHp: true,
+                upcastDamage: 5,
+                duration: rounds(99),
+            },
+        ],
+    },
     'srd-2024_heat-metal': {
         resolution: { kind: 'auto' },
         spellEffects: [

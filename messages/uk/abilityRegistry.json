@@ -247,6 +247,13 @@
     "counterAttack": {
       "label": "Контратака"
     },
+    "thorns": {
+      "label": "Шипи",
+      "fields": {
+        "damage": "Шкода",
+        "damageType": "Тип шкоди"
+      }
+    },
     "attackHitsAllEnemies": {
       "label": "Атака б'є всіх ворогів"
     },
@@ -598,6 +605,9 @@
     "size": "Конус, фт",
     "abilities": "Характеристики",
     "vsSpells": "Лише проти заклинань",
+    "whileTempHp": "Лише поки лишаються тимчасові HP",
+    "upcastDamage": "Шкода за кожен рівень комірки понад базовий",
+    "upcastAmount": "Тимчасові HP за кожен рівень комірки понад базовий",
     "skills": "Навички",
     "kinds": "Володіння",
     "conditions": "Умови",
@@ -1110,6 +1120,7 @@
       "spellImmunity": "{hasIds, select, yes {імунітет до заклинань ({count})} other {імунітет до всіх заклинань}}",
       "spellTargeting": "{scope, select, school {закляття школи {school}} ids {закляття ({count})} other {закляття}} — {mode, select, all {на всіх} other {по області (до {max} цілей)}}",
       "counterAttack": "відсіч{ranged, select, yes { (і на дальні)} other {}} +{percent}%",
+      "thorns": "{damage} шкоди ({type}) тому, хто влучив по цілі{ranged, select, yes { (ближній або дальній бій)} other { у ближньому бою}}{tempHp, select, yes {, поки лишаються тимчасові HP} other {}}",
       "attackHitsAllEnemies": "кожна атака б'є всіх ворогів",
       "seeEnemyHp": "бачить HP ворогів",
       "multiTargetFalloff": "додаткові цілі дальньої атаки отримують {percent}% шкоди",

@@ -191,6 +191,15 @@ const FlagSchema = z.discriminatedUnion('flag', [
     }),
     z.object({
         ...flagBase,
+        flag: z.literal('thorns'),
+        damage: z.number().int().min(1).max(500),
+        damageType: z.string().min(1),
+        attackKinds: z.array(z.enum(ATTACK_KINDS)).min(1),
+        whileTempHp: z.boolean().optional(),
+        upcastDamage: z.number().int().min(1).max(100).optional(),
+    }),
+    z.object({
+        ...flagBase,
         flag: z.literal('spellTargeting'),
         mode: z.enum(['area', 'all']),
         spellIds: z.array(z.string().min(1)).min(1).optional(),
@@ -365,6 +374,7 @@ const HealSchema = z.object({
 const TempHpSchema = z.object({
     kind: z.literal('tempHp'),
     amount: AmountSchema,
+    upcastAmount: z.number().int().min(1).max(100).optional(),
     ...target,
 });
 

@@ -47,6 +47,32 @@ function freezeSpellRoll(effect: Effect, roll: number): Effect {
     };
 }
 
+function scaleUpcast(effect: Effect, steps: number): Effect {
+    if (steps <= 0) return effect;
+
+    if (
+        effect.kind === 'tempHp' &&
+        effect.upcastAmount &&
+        typeof effect.amount === 'number'
+    )
+        return {
+            ...effect,
+            amount: effect.amount + effect.upcastAmount * steps,
+        };
+
+    if (
+        effect.kind === 'flag' &&
+        effect.flag === 'thorns' &&
+        effect.upcastDamage
+    )
+        return {
+            ...effect,
+            damage: effect.damage + effect.upcastDamage * steps,
+        };
+
+    return effect;
+}
+
 function runEffect(
     state: SpellCastState,
     source: Effect,
@@ -56,7 +82,13 @@ function runEffect(
 ): void {
     const { flow } = state;
 
-    const effect = freezeSpellRoll(source, roll);
+    const effect = scaleUpcast(
+        freezeSpellRoll(source, roll),
+        ruleSystemOf(flow.ctx.rules).magic.upcast.steps(
+            state.spell.level,
+            state.castLevel
+        )
+    );
 
     const event: AbilityEvent = {
         type: 'spellCast',

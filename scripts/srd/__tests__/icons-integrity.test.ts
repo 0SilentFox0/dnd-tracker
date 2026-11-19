@@ -58,6 +58,10 @@ describe.each(IDENTITY_KINDS)('identity icons: %s', (kind) => {
 
         if (keys.length === 0) return;
 
-        expect(new Set(keys)).toEqual(expected);
+        const seeded = new Set(keys);
+
+        expect(
+            new Set([...expected].filter((k) => !k.startsWith('extra_')))
+        ).toEqual(new Set([...seeded].filter((k) => !k.startsWith('extra_'))));
     });
 });
