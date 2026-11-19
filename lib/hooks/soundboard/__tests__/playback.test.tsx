@@ -13,7 +13,7 @@ import { soundKeys } from '../keys';
 import { __resetForTests, armUnlock, playBuffer } from '../player';
 import { useSoundboardPads } from '../useSoundboardPads';
 
-import { playSound } from '@/lib/api/soundboard';
+import { getSounds, playSound } from '@/lib/api/soundboard';
 import { PAD_GUARD_MS } from '@/lib/constants/soundboard';
 import type { Sound } from '@/types/soundboard';
 
@@ -143,6 +143,20 @@ describe('handleSoundPlayEvent', () => {
         expect(state.sources).toHaveLength(0);
     });
 
+    it('refetches the list once when the sound is missing from the cache', async () => {
+        vi.mocked(getSounds).mockResolvedValue({
+            sounds: [{ ...sound('s9'), source: undefined }],
+            hiddenBuiltin: [],
+        } as never);
+        vi.mocked(getSounds).mockClear();
+
+        handleSoundPlayEvent(client(), 'c1', { soundId: 's9', nonce: 'n9' });
+        await flush();
+
+        expect(getSounds).toHaveBeenCalledTimes(1);
+        expect(state.sources).toHaveLength(1);
+    });
+
     it('markLocalPlay suppresses the echo', async () => {
         markLocalPlay('n4');
         handleSoundPlayEvent(client(), 'c1', { soundId: 's1', nonce: 'n4' });
@@ -161,8 +175,19 @@ describe('handleSoundPlayEvent', () => {
 });
 
 describe('player', () => {
-    it('does nothing and does not throw while the context is suspended', async () => {
+    it('resumes a suspended context before playing', async () => {
         state.ctxState = 'suspended';
+
+        await playBuffer(sound('s1'), 1);
+
+        expect(state.sources).toHaveLength(1);
+    });
+
+    it('stays silent without throwing when resume leaves it suspended', async () => {
+        state.ctxState = 'suspended';
+        window.AudioContext = class extends FakeAudioContext {
+            resume = vi.fn(() => Promise.resolve());
+        } as never;
 
         await expect(playBuffer(sound('s1'), 1)).resolves.toBeUndefined();
 

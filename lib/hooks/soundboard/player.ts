@@ -75,7 +75,11 @@ export async function playBuffer(sound: Sound, volume: number): Promise<void> {
     try {
         const c = getContext();
 
-        if (!c || c.state !== 'running' || volume <= 0) return;
+        if (!c || volume <= 0) return;
+
+        if (c.state !== 'running') await c.resume().catch(() => {});
+
+        if (c.state !== 'running') return;
 
         const buffer = await load(c, sound.url);
 
@@ -91,7 +95,13 @@ export async function playBuffer(sound: Sound, volume: number): Promise<void> {
         const release = voices.add(() => source.stop());
 
         source.onended = release;
-        source.start();
+
+        try {
+            source.start();
+        } catch (error) {
+            release();
+            throw error;
+        }
     } catch (error) {
         logger.warn(
             '[soundboard] playback failed',

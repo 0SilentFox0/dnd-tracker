@@ -21,6 +21,12 @@ export function __resetNonces(): void {
     firstSeen = createNonceGuard();
 }
 
+const find = (list: SoundList, soundId: string): Sound | null =>
+    resolveSound(soundId, {
+        custom: list.sounds.map((s) => ({ ...s, source: 'custom' as const })),
+        hiddenBuiltin: list.hiddenBuiltin,
+    });
+
 async function play(
     queryClient: QueryClient,
     campaignId: string,
@@ -28,23 +34,21 @@ async function play(
 ): Promise<void> {
     const key = soundKeys.list(campaignId);
 
-    const list =
-        queryClient.getQueryData<SoundList>(key) ??
-        (await queryClient.fetchQuery({
-            queryKey: key,
-            queryFn: () => getSounds(campaignId),
-            staleTime: 60_000,
-        }));
+    const cached = queryClient.getQueryData<SoundList>(key);
 
-    const custom: Sound[] = list.sounds.map((s) => ({
-        ...s,
-        source: 'custom',
-    }));
+    let sound = cached && find(cached, soundId);
 
-    const sound = resolveSound(soundId, {
-        custom,
-        hiddenBuiltin: list.hiddenBuiltin,
-    });
+    if (!sound) {
+        const fresh = await queryClient
+            .fetchQuery({
+                queryKey: key,
+                queryFn: () => getSounds(campaignId),
+                staleTime: cached ? 0 : 60_000,
+            })
+            .catch(() => undefined);
+
+        sound = fresh && find(fresh, soundId);
+    }
 
     if (!sound) return;
 
