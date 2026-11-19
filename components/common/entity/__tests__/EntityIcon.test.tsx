@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 
 describe('EntityIcon', () => {
     afterEach(cleanup);

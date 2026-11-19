@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { RecipeForm } from '@/components/abilities/RecipeForm';
+import { RecipeForm } from '@/components/abilities/recipes/RecipeForm';
 import { RECIPES } from '@/lib/utils/abilities/templates';
 
 const recipe = RECIPES.filter((r) =>

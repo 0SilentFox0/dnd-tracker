@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ImageZoomDialog } from '@/components/common/ImageZoomDialog';
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 

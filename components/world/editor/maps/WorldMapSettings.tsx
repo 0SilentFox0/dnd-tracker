@@ -4,10 +4,13 @@ import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Crosshair, ImageUp, Map as MapIcon } from 'lucide-react';
 
+import {
+    QuietDeleteButton,
+    WorldPanelHeader,
+} from '../panels/WorldPanelHeader';
+import { useEditorMapFields } from '../use-editor-fields';
+import { useWorldEditorContext } from '../WorldEditorContext';
 import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
-import { useEditorMapFields } from './use-editor-fields';
-import { useWorldEditorContext } from './WorldEditorContext';
-import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';

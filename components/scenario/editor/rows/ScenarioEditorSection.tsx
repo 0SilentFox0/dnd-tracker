@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 
-import { OrderButtons } from './OrderButtons';
+import { OrderButtons } from '../chrome/OrderButtons';
+import { SectionHeaderEditor } from '../chrome/SectionHeaderEditor';
 import { RevealSettings } from './RevealSettings';
 import { RowBindings } from './RowBindings';
 import type { CellColumn } from './ScenarioCell';
-import { SectionHeaderEditor } from './SectionHeaderEditor';
 
 import { HudButton } from '@/components/hud';
 import {

@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SectionHeaderEditor } from '@/components/scenario/editor/SectionHeaderEditor';
+import { SectionHeaderEditor } from '@/components/scenario/editor/chrome/SectionHeaderEditor';
 import { render } from '@/components/ui/__tests__/uk-intl';
 import type { ScenarioSection } from '@/types/scenario';
 

@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 
-import { PULSE_STEP_MS, STROKE_COLORS, TEMPLATE_COLORS } from './constants';
+import { PULSE_STEP_MS, STROKE_COLORS, TEMPLATE_COLORS } from '../constants';
 
 import {
     cellDistance,

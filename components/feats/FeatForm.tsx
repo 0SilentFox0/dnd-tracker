@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { FeatBasicsTab } from './FeatBasicsTab';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
-import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
+import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useErrorTotals } from '@/lib/hooks/common';

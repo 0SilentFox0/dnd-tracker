@@ -1,7 +1,7 @@
 'use client';
 
-import { ErrorReportButton } from '../ErrorReportButton';
-import { ImportCounts } from '../ImportCounts';
+import { ErrorReportButton } from '../shared/ErrorReportButton';
+import { ImportCounts } from '../shared/ImportCounts';
 
 import type { ContentImportState } from '@/lib/hooks/content-import';
 

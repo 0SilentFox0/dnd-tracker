@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { sheetFixture } from './sheet-fixture';
 
-import { SkillsTab } from '@/components/character-profile/SkillsTab';
+import { SkillsTab } from '@/components/character-profile/tabs/SkillsTab';
 import { buildClassProgression } from '@/lib/utils/characters/classes';
 import { makeClass } from '@/lib/utils/characters/classes/__tests__/class-fixtures';
 import { parseRules } from '@/lib/utils/rules/schema';
@@ -26,16 +26,16 @@ vi.mock('next/dynamic', () => ({
     default: () => (props: { open: boolean }) =>
         props.open ? <div data-testid="choices-dialog" /> : null,
 }));
-vi.mock('@/components/character-profile/RacePassive', () => ({
+vi.mock('@/components/character-profile/hero/RacePassive', () => ({
     RacePassive: () => null,
 }));
-vi.mock('@/components/character-profile/FeatsBlock', () => ({
+vi.mock('@/components/character-profile/hero/FeatsBlock', () => ({
     FeatsBlock: () => null,
 }));
 vi.mock('@/components/character-profile/rest/ChargesList', () => ({
     ChargesList: () => null,
 }));
-vi.mock('@/components/character-profile/ClassLevelUpDialog', () => ({
+vi.mock('@/components/character-profile/level-up/ClassLevelUpDialog', () => ({
     ClassLevelUpDialog: (p: { startNew?: boolean }) => (
         <div
             data-testid="class-level-up-dialog"

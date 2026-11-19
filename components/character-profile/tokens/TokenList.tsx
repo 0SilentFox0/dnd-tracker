@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Trash2 } from 'lucide-react';
 
+import { useProfile } from '../ProfileContext';
 import { AddTokenDialog, TOKEN_DOT } from './AddTokenDialog';
-import { useProfile } from './ProfileContext';
 
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';

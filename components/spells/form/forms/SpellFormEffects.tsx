@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
-import type { SpellFormFieldsProps } from './SpellFormBasicFields';
+import type { SpellFormFieldsProps } from '../fields/SpellFormBasicFields';
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
-import { NestedEffectsEditor } from '@/components/abilities/NestedEffectsEditor';
-import { RecipeGallery } from '@/components/abilities/RecipeGallery';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
+import { NestedEffectsEditor } from '@/components/abilities/editor/NestedEffectsEditor';
+import { RecipeGallery } from '@/components/abilities/recipes/RecipeGallery';
 import { CollapsibleHeader } from '@/components/abilities/sections/CollapsibleHeader';
 import { HudSection } from '@/components/hud/form';
 import { SpellEffectCard } from '@/components/spells/form/effects/SpellEffectCard';

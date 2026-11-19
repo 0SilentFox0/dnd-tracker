@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { sheetFixture } from './sheet-fixture';
 
-import { FeatsBlock } from '@/components/character-profile/FeatsBlock';
-import { PendingChoicesBadge } from '@/components/character-profile/PendingChoicesBadge';
+import { FeatsBlock } from '@/components/character-profile/hero/FeatsBlock';
+import { PendingChoicesBadge } from '@/components/character-profile/level-up/PendingChoicesBadge';
 import type { CharacterSheet } from '@/types/characters';
 
 const current = vi.hoisted(() => ({

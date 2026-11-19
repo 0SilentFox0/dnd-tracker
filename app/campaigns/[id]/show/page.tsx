@@ -1,6 +1,6 @@
 import { ShowPageClient } from './page-client';
 
-import { PlayerViewGuard } from '@/components/common/PlayerViewGuard';
+import { PlayerViewGuard } from '@/components/common/shell/PlayerViewGuard';
 import { showKeys } from '@/lib/hooks/show';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';

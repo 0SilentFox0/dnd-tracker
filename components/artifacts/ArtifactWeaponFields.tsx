@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { WeaponTraitsField } from '@/components/common/WeaponTraitsField';
+import { WeaponTraitsField } from '@/components/common/fields/WeaponTraitsField';
 import { HudSection } from '@/components/hud/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

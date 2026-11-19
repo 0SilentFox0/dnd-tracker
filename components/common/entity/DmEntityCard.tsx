@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Edit, Trash2 } from 'lucide-react';
 
-import { ActionsMenu } from '@/components/common/ActionsMenu';
-import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
+import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
+import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
 
 interface DmEntityCardProps {

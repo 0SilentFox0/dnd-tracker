@@ -3,11 +3,11 @@
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
-import { FlagEditor } from './effect-renderers/FlagEditor';
-import { FieldRenderer } from './fields/FieldRenderer';
-import { useAbilityEditor, useErrorsUnder } from './editor-context';
-import { FieldErrors } from './FieldErrors';
-import { NestedEffectsEditor } from './NestedEffectsEditor';
+import { useAbilityEditor, useErrorsUnder } from '../editor/editor-context';
+import { FieldErrors } from '../editor/FieldErrors';
+import { NestedEffectsEditor } from '../editor/NestedEffectsEditor';
+import { FlagEditor } from '../effect-renderers/FlagEditor';
+import { FieldRenderer } from '../fields/FieldRenderer';
 
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
@@ -63,7 +63,8 @@ export function EffectCard({
 
     const pickable = useAbilityComposition(campaignId).kinds(trigger);
 
-    const schoolFlag = effect.kind === 'flag' && effect.flag === 'spellTargeting';
+    const schoolFlag =
+        effect.kind === 'flag' && effect.flag === 'spellTargeting';
 
     const { data: spellGroups = [] } = useSpellGroups(campaignId, {
         enabled: schoolFlag,

@@ -3,25 +3,27 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 
-import { ChargesList } from './rest/ChargesList';
-import { ClassLevelUpDialog } from './ClassLevelUpDialog';
-import { FeatsBlock } from './FeatsBlock';
-import type { ClassLevelUpProps } from './LevelUpAction';
+import { FeatsBlock } from '../hero/FeatsBlock';
+import { RacePassive } from '../hero/RacePassive';
+import { ClassLevelUpDialog } from '../level-up/ClassLevelUpDialog';
+import type { ClassLevelUpProps } from '../level-up/LevelUpAction';
 import {
     BackgroundSection,
     CharacterPath,
     ClassesHeader,
     ClassSection,
     SpellPicksNudge,
-} from './path';
-import { useProfile } from './ProfileContext';
-import { RacePassive } from './RacePassive';
+} from '../path';
+import { useProfile } from '../ProfileContext';
+import { ChargesList } from '../rest/ChargesList';
 
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { classSectionOpen } from '@/lib/utils/characters/classes/path';
 
-const ChoicesDialog = dynamic(() => import('./ChoicesDialog'), { ssr: false });
+const ChoicesDialog = dynamic(() => import('../level-up/ChoicesDialog'), {
+    ssr: false,
+});
 
 export function SkillsTab({
     manage = false,

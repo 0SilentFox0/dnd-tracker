@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useProfile } from './ProfileContext';
+import { useProfile } from '../ProfileContext';
 
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import { CharacterHpPreview } from '@/components/characters/stats/CharacterHpPreview';

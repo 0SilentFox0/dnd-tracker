@@ -3,9 +3,9 @@
 import { type ReactNode, useCallback } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 
+import { AssistantContextDisclosure } from '../assistant/AssistantContextDisclosure';
 import { AiComposer } from './AiComposer';
 import { AiMessageList } from './AiMessageList';
-import { AssistantContextDisclosure } from './AssistantContextDisclosure';
 
 import { LoadingState } from '@/components/common/states';
 import {

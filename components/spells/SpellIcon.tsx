@@ -2,7 +2,7 @@
 
 import { Sparkles } from 'lucide-react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { spellSchoolColor } from '@/lib/constants/spells';
 import {
     getSpellGroupIcon,

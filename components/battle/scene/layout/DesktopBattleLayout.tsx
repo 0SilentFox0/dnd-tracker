@@ -4,16 +4,16 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
-import { AwaitingDmBanner } from './AwaitingDmBanner';
-import { BattleOverBanner } from './BattleOverBanner';
+import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
+import { BattleOverBanner } from '../banners/BattleOverBanner';
+import { ConnectionBanner } from '../banners/ConnectionBanner';
+import { LastActionTicker } from '../banners/LastActionTicker';
 import { BattleTopBar } from './BattleTopBar';
-import { ConnectionBanner } from './ConnectionBanner';
-import { LastActionTicker } from './LastActionTicker';
 
 import { SideDot } from '@/components/battle/hud';
 import { BattleLog } from '@/components/battle/log/BattleLog';
-import { BattleMapPanel } from '@/components/battle/map/BattleMapPanel';
-import { MapToolsSlotContext } from '@/components/battle/map/MapToolsSlot';
+import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
+import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { MyHeroPanel } from '@/components/battle/participants/MyHeroPanel';
 import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';

@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 
-import { MarkerPlay, RowPlayControls } from './play/RowPlayControls';
-import { ScenarioLegend } from './ScenarioLegend';
+import { ScenarioLegend } from '../book/ScenarioLegend';
+import { SectionIcon } from '../chips/SectionIcon';
+import { SectionTrackChip } from '../chips/SectionTrackChip';
+import { MarkerPlay, RowPlayControls } from '../play/RowPlayControls';
 import { ScenarioRichText } from './ScenarioRichText';
-import { SectionIcon } from './SectionIcon';
-import { SectionTrackChip } from './SectionTrackChip';
 
 import { HudButton } from '@/components/hud';
 import type { ScenarioPlay, SectionCollapse } from '@/lib/hooks/scenario';

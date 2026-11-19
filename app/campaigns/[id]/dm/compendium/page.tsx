@@ -1,4 +1,4 @@
-import { CompendiumImport } from '@/components/content-import/CompendiumImport';
+import { CompendiumImport } from '@/components/content-import/compendium/CompendiumImport';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 export default async function CompendiumPage({
     params,

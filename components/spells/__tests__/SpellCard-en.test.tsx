@@ -7,7 +7,7 @@ import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import type { Spell } from '@/types/spells';
 
 vi.unmock('next-intl');
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => null,
 }));
 

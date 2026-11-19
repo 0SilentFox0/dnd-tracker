@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { Button } from '@/components/ui/button';
 import type { MapBackgroundTool } from '@/lib/hooks/battle';
 

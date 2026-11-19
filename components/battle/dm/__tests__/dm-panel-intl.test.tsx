@@ -9,7 +9,7 @@ vi.mock('@/components/hud/fonts', () => ({
 
 import { ConditionsDialog } from '@/components/battle/dm/ConditionsDialog';
 import { mazeMap } from '@/components/battle/modes/maze/__tests__/maze-fixtures';
-import { MazeToolbar } from '@/components/battle/modes/maze/MazeToolbar';
+import { MazeToolbar } from '@/components/battle/modes/maze/tools/MazeToolbar';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import type { MazeTools } from '@/lib/hooks/battle/modes/maze';
 import { CAMPAIGN_NAMESPACES } from '@/lib/i18n/scopes';

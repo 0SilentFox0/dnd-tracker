@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 
-import { PORTRAIT_SHARE } from './constants';
+import { PORTRAIT_SHARE } from '../constants';
 import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
 import { hitFlashClass, Portrait } from '@/components/battle/hud';

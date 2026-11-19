@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MazeIllusionDialog } from '@/components/battle/modes/maze/MazeIllusionDialog';
+import { MazeIllusionDialog } from '@/components/battle/modes/maze/dialogs/MazeIllusionDialog';
 import { render } from '@/lib/i18n/test/render-uk';
 import type { IllusionGroup } from '@/types/battle-grid';
 

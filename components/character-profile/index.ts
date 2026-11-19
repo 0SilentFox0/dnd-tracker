@@ -1,6 +1,6 @@
-export { BiographyText } from './BiographyText';
 export { CharacterProfile } from './CharacterProfile';
 export { InventoryTab } from './inventory/InventoryTab';
-export { MagicTab } from './MagicTab';
-export { SkillsTab } from './SkillsTab';
-export { StoryTab } from './StoryTab';
+export { BiographyText } from './story/BiographyText';
+export { MagicTab } from './tabs/MagicTab';
+export { SkillsTab } from './tabs/SkillsTab';
+export { StoryTab } from './tabs/StoryTab';

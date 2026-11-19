@@ -4,8 +4,8 @@ import { cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BattleListCard } from '@/components/battle/list/BattleListCard';
-import { BalanceSummary } from '@/components/battle/setup/BalanceSummary';
-import { XpBalanceSummary } from '@/components/battle/setup/XpBalanceSummary';
+import { BalanceSummary } from '@/components/battle/setup/balance/BalanceSummary';
+import { XpBalanceSummary } from '@/components/battle/setup/balance/XpBalanceSummary';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { textOf } from '@/lib/i18n/test/text';

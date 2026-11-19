@@ -3,8 +3,8 @@
 import { type FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { useWorldEditorContext } from '../WorldEditorContext';
 import { MapFileDropzone } from './MapFileDropzone';
-import { useWorldEditorContext } from './WorldEditorContext';
 
 import { Button } from '@/components/ui/button';
 import { FormField, LabeledInput } from '@/components/ui/labeled-input';

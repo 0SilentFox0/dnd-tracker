@@ -6,10 +6,10 @@ import { Gem } from 'lucide-react';
 
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { DeleteAllArtifactsButton } from '@/components/artifacts/DeleteAllArtifactsButton';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState, LoadingState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudSection } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';

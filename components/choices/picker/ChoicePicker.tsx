@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ChoiceCard } from '@/components/choices/ChoiceCard';
+import { ChoiceCard } from '@/components/choices/editor/ChoiceCard';
 import {
     AbilityPoints,
     Card,
@@ -12,7 +12,7 @@ import {
     OptionCards,
     type PickerContext,
     SpellList,
-} from '@/components/choices/ChoicePickerParts';
+} from '@/components/choices/picker/ChoicePickerParts';
 import { DND_SKILLS } from '@/lib/constants/skills';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { MULTICLASS_SKILLS_ID } from '@/lib/utils/characters/choices/class-choices';

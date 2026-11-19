@@ -3,9 +3,9 @@
 import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { MazeGenerateDialog } from './MazeGenerateDialog';
-import { MazeIllusionDialog } from './MazeIllusionDialog';
-import { MazeReshuffleDialog } from './MazeReshuffleDialog';
+import { MazeGenerateDialog } from '../dialogs/MazeGenerateDialog';
+import { MazeIllusionDialog } from '../dialogs/MazeIllusionDialog';
+import { MazeReshuffleDialog } from '../dialogs/MazeReshuffleDialog';
 
 import { HudButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';

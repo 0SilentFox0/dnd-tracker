@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { HeroPortrait } from '@/components/character-profile/HeroPortrait';
+import { HeroPortrait } from '@/components/character-profile/hero/HeroPortrait';
 import { HudSection } from '@/components/hud/form';
 import { HudCard, HudPanel, HudPill } from '@/components/hud/page';
 import { useCharacters } from '@/lib/hooks/characters';

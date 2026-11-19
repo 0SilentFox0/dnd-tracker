@@ -2,7 +2,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AiComposer } from '@/components/ai/AiComposer';
+import { AiComposer } from '@/components/ai/chat/AiComposer';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 
 vi.unmock('next-intl');

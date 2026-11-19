@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { GrantSummaryView } from './GrantSummaryView';
 
-import { UndoableResultDialog } from '@/components/common/UndoableResultDialog';
+import { UndoableResultDialog } from '@/components/common/dialogs/UndoableResultDialog';
 import { Input } from '@/components/ui/input';
 import { useGrantCorruption, useUndoCorruption } from '@/systems/wfrp/hooks';
 import {
@@ -81,15 +81,16 @@ export function GrantCorruptionDialog({
                 undone: t('undone'),
                 undoConfirm: t('undoConfirm'),
             }}
-            result={
-                result && <GrantSummaryView summary={result.summary} />
-            }
+            result={result && <GrantSummaryView summary={result.summary} />}
             submit={{ onClick: submit, disabled: grant.isPending }}
             undo={{
                 pending: undo.isPending,
                 done: undone,
                 onConfirm: async () => {
-                    if (result && (await undo.mutateOk({ grantId: result.grantId })))
+                    if (
+                        result &&
+                        (await undo.mutateOk({ grantId: result.grantId }))
+                    )
                         setUndone(true);
                 },
             }}

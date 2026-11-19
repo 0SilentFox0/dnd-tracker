@@ -2,12 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 
-import { BiographyText } from './BiographyText';
-import { GoalList } from './GoalList';
-import { PlayerNotes } from './PlayerNotes';
-import { useProfile } from './ProfileContext';
-import { StoryChapters } from './StoryChapters';
-import { TokenList } from './TokenList';
+import { useProfile } from '../ProfileContext';
+import { BiographyText } from '../story/BiographyText';
+import { GoalList } from '../story/GoalList';
+import { PlayerNotes } from '../story/PlayerNotes';
+import { StoryChapters } from '../story/StoryChapters';
+import { TokenList } from '../tokens/TokenList';
 
 import { HudSection } from '@/components/hud/form';
 

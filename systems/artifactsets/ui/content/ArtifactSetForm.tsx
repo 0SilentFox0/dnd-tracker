@@ -10,7 +10,7 @@ import {
 import { ArtifactSetMembersPicker } from './ArtifactSetMembersPicker';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { HudForm, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

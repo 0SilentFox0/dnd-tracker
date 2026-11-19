@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
-import { FieldRenderer } from './fields/FieldRenderer';
+import { FieldRenderer } from '../fields/FieldRenderer';
 
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';

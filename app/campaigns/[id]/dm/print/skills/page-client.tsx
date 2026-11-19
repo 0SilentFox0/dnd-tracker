@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { PrintPageShell } from '@/components/common/PrintPageShell';
+import { PrintPageShell } from '@/components/common/shell/PrintPageShell';
 import { SkillCard } from '@/components/skills/list/SkillCard';
 import { groupDisplayName } from '@/lib/constants/ungrouped';
 import { useTranslator } from '@/lib/i18n/use-translator';

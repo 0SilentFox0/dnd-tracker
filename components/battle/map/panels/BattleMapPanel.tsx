@@ -4,10 +4,10 @@ import { Fragment, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 
-import { MapFogToolbar } from './fog/MapFogToolbar';
-import { BattleMap } from './BattleMap';
+import { BattleMap } from '../BattleMap';
+import { MapFogControls } from '../fog/MapFogControls';
+import { MapFogToolbar } from '../fog/MapFogToolbar';
 import { MapBackgroundPanel } from './MapBackgroundPanel';
-import { MapFogControls } from './MapFogControls';
 import { MapMotionPanel } from './MapMotionPanel';
 import { MapTerrainToolbar } from './MapTerrainToolbar';
 import { useMapToolsSlot } from './MapToolsSlot';
@@ -72,8 +72,14 @@ function BattleMapPanelContent({
 
     const slot = useMapToolsSlot();
 
-    const { fogTool, placement, terrainTool, weatherTool, motionTool, backgroundTool } =
-        scene;
+    const {
+        fogTool,
+        placement,
+        terrainTool,
+        weatherTool,
+        motionTool,
+        backgroundTool,
+    } = scene;
 
     const modeTools = phone ? null : scene.modeTools;
 
@@ -111,7 +117,9 @@ function BattleMapPanelContent({
         <div
             className={cn(
                 'z-20 flex flex-col items-start gap-1.5',
-                phone ? 'w-full shrink-0 px-1 pb-1' : !inRow && 'absolute top-2 left-2'
+                phone
+                    ? 'w-full shrink-0 px-1 pb-1'
+                    : !inRow && 'absolute top-2 left-2'
             )}
         >
             <div className={cn('flex flex-wrap gap-1.5', phone && 'w-full')}>
@@ -166,7 +174,9 @@ function BattleMapPanelContent({
                     <UpdateMapButton tool={scene.mapUpdate} tall={inRow} />
                 )}
             </div>
-            {(terrainTool.active || palettes.some((p) => p.tool.active) || fogTool?.active) && (
+            {(terrainTool.active ||
+                palettes.some((p) => p.tool.active) ||
+                fogTool?.active) && (
                 <div
                     className={cn(
                         'flex flex-col items-start gap-1.5',

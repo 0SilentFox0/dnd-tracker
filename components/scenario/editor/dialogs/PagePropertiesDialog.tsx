@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { CharacterSelect } from '@/components/scenario/CharacterSelect';
-import { LegendColorPicker } from '@/components/scenario/editor/LegendColorPicker';
+import { CharacterSelect } from '@/components/scenario/chips/CharacterSelect';
+import { LegendColorPicker } from '@/components/scenario/editor/chrome/LegendColorPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

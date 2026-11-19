@@ -12,9 +12,9 @@ import {
     IssueGroupCard,
     RowCard,
 } from './CompendiumReportCards';
-import { SourceNotes } from './SourceNotes';
 
-import { PagerNav } from '@/components/common/PagerNav';
+import { PagerNav } from '@/components/common/shell/PagerNav';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { Disclosure } from '@/components/ui/disclosure';

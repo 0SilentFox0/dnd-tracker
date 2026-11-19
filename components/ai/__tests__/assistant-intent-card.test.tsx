@@ -8,8 +8,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
-import { AiToolChip } from '../AiToolChip';
-import { AssistantIntentCard } from '../AssistantIntentCard';
+import { AssistantIntentCard } from '../assistant/AssistantIntentCard';
+import { AiToolChip } from '../chat/AiToolChip';
 
 import type { IntentDetail } from '@/types/assistant';
 

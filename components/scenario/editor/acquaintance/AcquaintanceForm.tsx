@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 
 import { type Fields, FORM_ID } from './acquaintance-fields';
 
-import { IconUrlField } from '@/components/common/IconUrlField';
-import { CharacterSelect } from '@/components/scenario/CharacterSelect';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
+import { CharacterSelect } from '@/components/scenario/chips/CharacterSelect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

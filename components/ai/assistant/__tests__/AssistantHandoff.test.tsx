@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AssistantHandoff } from '@/components/ai/AssistantHandoff';
+import { AssistantHandoff } from '@/components/ai/assistant/AssistantHandoff';
 
 afterEach(cleanup);
 

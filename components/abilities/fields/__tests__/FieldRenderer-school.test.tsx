@@ -2,7 +2,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { FieldRenderer } from '@/components/abilities/fields/FieldRenderer';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 

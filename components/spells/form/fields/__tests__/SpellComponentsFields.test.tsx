@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { SpellComponentsFields } from '@/components/spells/form/fields/SpellComponentsFields';
 import {
     getDefaultSpellFormData,
     type SpellFormData,
 } from '@/components/spells/form/spell-form-defaults';
-import { SpellComponentsFields } from '@/components/spells/form/SpellComponentsFields';
 import { formToPayload, spellFormIssue } from '@/lib/utils/spells/model/form';
 
 Object.assign(Element.prototype, {

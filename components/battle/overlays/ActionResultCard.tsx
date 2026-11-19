@@ -4,11 +4,11 @@ import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
-import { useInCornerStack } from '@/components/battle/scene/CornerStack';
+import { useInCornerStack } from '@/components/battle/scene/layout/CornerStack';
 import {
     useMapStripSlot,
     useNoticeStack,
-} from '@/components/battle/scene/MapStrip';
+} from '@/components/battle/scene/layout/MapStrip';
 import { HUD_SURFACE, HudButton } from '@/components/hud';
 import { systemUiByKey } from '@/components/systems';
 import { useActionResult, useBattleRules } from '@/lib/hooks/battle';

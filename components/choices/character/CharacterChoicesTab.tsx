@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ChoicesEditor } from './ChoicesEditor';
+import { ChoicesEditor } from '../editor/ChoicesEditor';
 
 import { LoadingState } from '@/components/common/states';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';

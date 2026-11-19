@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Plus, X } from 'lucide-react';
 
-import { AssistantPolicyControl } from './AssistantPolicyControl';
+import { AssistantPolicyControl } from '../assistant/AssistantPolicyControl';
 
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';

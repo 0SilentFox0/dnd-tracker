@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-import type { AbilitySectionProps } from '../AbilityPanel';
-import { useFieldErrors } from '../editor-context';
-import { FieldErrors } from '../FieldErrors';
+import type { AbilitySectionProps } from '../editor/AbilityPanel';
+import { useFieldErrors } from '../editor/editor-context';
+import { FieldErrors } from '../editor/FieldErrors';
 import { FieldRenderer } from '../fields/FieldRenderer';
 import { SectionShell } from './SectionShell';
 

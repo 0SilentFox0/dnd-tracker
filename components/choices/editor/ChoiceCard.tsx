@@ -4,9 +4,9 @@ import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Info } from 'lucide-react';
 
-import { RequirementList } from '@/components/choices/RequirementList';
-import { EntityIcon } from '@/components/common/EntityIcon';
-import { MarkdownLite } from '@/components/common/MarkdownLite';
+import { RequirementList } from '@/components/choices/editor/RequirementList';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
+import { MarkdownLite } from '@/components/common/entity/MarkdownLite';
 import { HudButton } from '@/components/hud';
 import { OptionButton } from '@/components/hud/OptionButton';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';

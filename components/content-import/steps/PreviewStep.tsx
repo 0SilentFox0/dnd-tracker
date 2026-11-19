@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ErrorReportButton } from '../ErrorReportButton';
-import { ImportCounts } from '../ImportCounts';
+import { ErrorReportButton } from '../shared/ErrorReportButton';
+import { ImportCounts } from '../shared/ImportCounts';
 
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';

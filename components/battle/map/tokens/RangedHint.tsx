@@ -2,7 +2,7 @@ import {
     RANGED_HINT_DOT_RATIO,
     RANGED_HINT_LABEL_OFFSET_RATIO,
     RANGED_HINT_LABEL_SIZE_RATIO,
-} from './constants';
+} from '../constants';
 
 import { cellCenter, parseCellKey, UNIT } from '@/lib/utils/battle/grid';
 import type { BattleMapView } from '@/types/battle-grid';

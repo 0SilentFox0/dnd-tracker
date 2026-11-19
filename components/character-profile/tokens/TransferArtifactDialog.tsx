@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useProfile } from './ProfileContext';
+import { useProfile } from '../ProfileContext';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';

@@ -4,11 +4,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { SpellFormEffects } from '@/components/spells/form/forms/SpellFormEffects';
 import {
     getDefaultSpellFormData,
     type SpellFormData,
 } from '@/components/spells/form/spell-form-defaults';
-import { SpellFormEffects } from '@/components/spells/form/SpellFormEffects';
 import { newEffect } from '@/lib/utils/abilities/editor';
 import { SPELL_EFFECT_TRIGGER } from '@/lib/utils/spells/editor/spell-only';
 

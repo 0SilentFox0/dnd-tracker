@@ -2,9 +2,13 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { hero, mazeMap, RO, viewOf } from './maze-fixtures';
-
 import { BattleMap } from '@/components/battle/map';
+import {
+    hero,
+    mazeMap,
+    RO,
+    viewOf,
+} from '@/components/battle/modes/maze/__tests__/maze-fixtures';
 
 afterEach(cleanup);
 

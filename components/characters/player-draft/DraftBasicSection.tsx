@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { RollingField } from './RollingField';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

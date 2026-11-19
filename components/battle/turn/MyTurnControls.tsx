@@ -8,7 +8,7 @@ import { ActionGrid } from './ActionGrid';
 import { TurnCountdown } from './TurnCountdown';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { MapStripRow } from '@/components/battle/scene/MapStrip';
+import { MapStripRow } from '@/components/battle/scene/layout/MapStrip';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
 import { ParticipantSourceType } from '@/lib/constants/battle';

@@ -85,7 +85,7 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
         };
     },
 }));
-vi.mock('@/components/character-profile/BasicEditTab', () => ({
+vi.mock('@/components/character-profile/tabs/BasicEditTab', () => ({
     BasicEditTab: () => <div>основне</div>,
 }));
 

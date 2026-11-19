@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BattleFormMap } from '@/components/battle/setup/BattleFormMap';
+import { BattleFormMap } from '@/components/battle/setup/form/BattleFormMap';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { useBattleMapEditor } from '@/lib/hooks/battles/setup/useBattleMapEditor';
 import { MAX_SIDE, UNIT } from '@/lib/utils/battle/grid';

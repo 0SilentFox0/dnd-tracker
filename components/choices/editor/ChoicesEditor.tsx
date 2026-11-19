@@ -2,8 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ChoicePicker, type PickerContext } from './ChoicePicker';
-import { classPickerContext, issueFor, pickerBase } from './picker-context';
+import { ChoicePicker, type PickerContext } from '../picker/ChoicePicker';
+import {
+    classPickerContext,
+    issueFor,
+    pickerBase,
+} from '../picker/picker-context';
 
 import { HudButton } from '@/components/hud';
 import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';

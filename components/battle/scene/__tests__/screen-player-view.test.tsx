@@ -32,7 +32,7 @@ vi.mock('@/components/fx/preload', () => ({
 }));
 
 import '@/components/systems/registry';
-import { MazeViewProvider } from '@/components/battle/modes/maze/MazeViewProvider';
+import { MazeViewProvider } from '@/components/battle/modes/maze/view/MazeViewProvider';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import {
     fakeScene,

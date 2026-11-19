@@ -2,7 +2,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SpellFormBasicFields } from '@/components/spells/form/SpellFormBasicFields';
+import { SpellFormBasicFields } from '@/components/spells/form/fields/SpellFormBasicFields';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { defaultSpellForm } from '@/lib/utils/spells/model/form';
 

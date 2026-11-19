@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { Button } from '@/components/ui/button';
 import { useSearch } from '@/lib/hooks/common';
 import type { AcquaintanceView } from '@/types/acquaintances';

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { PeriodSummaryView } from './PeriodSummaryView';
 
 import { CharacterPickList } from '@/components/characters/rest/CharacterPickList';
-import { UndoableResultDialog } from '@/components/common/UndoableResultDialog';
+import { UndoableResultDialog } from '@/components/common/dialogs/UndoableResultDialog';
 import type { DowntimePeriodPanelProps } from '@/components/systems/types';
 import { Input } from '@/components/ui/input';
 import { useCheckedIds } from '@/lib/hooks/common';

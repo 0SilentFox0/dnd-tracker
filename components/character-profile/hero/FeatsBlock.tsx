@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useProfile } from './ProfileContext';
+import { useProfile } from '../ProfileContext';
 
 import { HudSection } from '@/components/hud/form';
 import { HudPill } from '@/components/hud/page';

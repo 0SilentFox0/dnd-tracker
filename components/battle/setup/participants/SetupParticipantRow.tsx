@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Eye, EyeOff, Minus, Plus } from 'lucide-react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { Button } from '@/components/ui/button';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { cn } from '@/lib/utils';

@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Skull } from 'lucide-react';
 
-import { DeleteAllButton } from '@/components/common/DeleteAllButton';
+import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
 import { EmptyState, LoadingState } from '@/components/common/states';
-import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
+import { ContentTransferButtons } from '@/components/content-import/shared/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Accordion } from '@/components/ui/accordion';

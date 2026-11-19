@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Briefcase, Edit, Plus, Trash2 } from 'lucide-react';
 
-import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
+import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { EmptyState } from '@/components/common/states';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

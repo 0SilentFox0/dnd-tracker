@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
     ChoicePicker,
     type PickerContext,
-} from '@/components/choices/ChoicePicker';
+} from '@/components/choices/picker/ChoicePicker';
 import {
     alert,
     asi,

@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
-import { RecipeGallery } from '@/components/abilities/RecipeGallery';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
+import { RecipeGallery } from '@/components/abilities/recipes/RecipeGallery';
 import { RECIPES } from '@/lib/utils/abilities/templates';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 

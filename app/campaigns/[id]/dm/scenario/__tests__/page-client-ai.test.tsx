@@ -59,7 +59,7 @@ vi.mock('@/components/scenario', () => ({
     ScenarioToc: () => null,
     tocItems: () => [],
 }));
-vi.mock('@/components/scenario/editor/VersionsDialog', () => ({
+vi.mock('@/components/scenario/editor/dialogs/VersionsDialog', () => ({
     VersionsDialog: () => null,
 }));
 vi.mock('@/components/scenario/play/ScenarioShowDock', () => ({

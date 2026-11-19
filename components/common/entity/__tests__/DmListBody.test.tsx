@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { DmListBody } from '@/components/common/DmListBody';
+import { DmListBody } from '@/components/common/entity/DmListBody';
 
 afterEach(cleanup);
 

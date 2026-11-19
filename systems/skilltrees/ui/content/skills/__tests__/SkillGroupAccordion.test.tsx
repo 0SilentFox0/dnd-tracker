@@ -27,7 +27,7 @@ vi.mock(
     })
 );
 
-vi.mock('@/components/common/RenameGroupDialog', () => ({
+vi.mock('@/components/common/dialogs/RenameGroupDialog', () => ({
     RenameGroupDialog: (props: {
         groupName: string;
         dialog: { open: boolean };

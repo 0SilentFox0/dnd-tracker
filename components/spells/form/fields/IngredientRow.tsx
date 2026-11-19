@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { FieldErrors } from '@/components/abilities/editor/FieldErrors';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LabeledInput } from '@/components/ui/labeled-input';

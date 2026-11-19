@@ -4,13 +4,13 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, MapPin } from 'lucide-react';
 
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import {
     EmptyState,
     ErrorState,
     LoadingState,
 } from '@/components/common/states';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { WorldMapLink } from '@/components/world/WorldMapLink';

@@ -10,7 +10,7 @@ vi.unmock('next-intl');
 vi.mock('@/systems/d20/ui/content/classes/SpellListHint', () => ({
     SpellListHint: () => null,
 }));
-vi.mock('@/components/common/ImageUpload', () => ({
+vi.mock('@/components/common/fields/ImageUpload', () => ({
     ImageUpload: ({ label }: { label: string }) => <span>{label}</span>,
 }));
 

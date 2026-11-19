@@ -11,7 +11,7 @@ import {
     Trash2,
 } from 'lucide-react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import type { DeckDraftAction } from '@/lib/utils/show/deck-draft';
 import type { Slide } from '@/types/show';

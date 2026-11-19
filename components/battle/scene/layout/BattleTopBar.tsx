@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Loader2, Sparkles } from 'lucide-react';
 
-import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
+import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
 
 import { HudButton, HudIconButton } from '@/components/hud';
 import { BattleStatus } from '@/lib/constants/battle';

@@ -10,7 +10,7 @@ import {
 
 import { TrackList, type TrackListActions } from './TrackList';
 
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { usePlaylistView } from '@/lib/hooks/audio';

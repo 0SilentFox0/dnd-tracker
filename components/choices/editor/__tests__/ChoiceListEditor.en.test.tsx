@@ -2,7 +2,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
+import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import type { Choice } from '@/types/choices';
 

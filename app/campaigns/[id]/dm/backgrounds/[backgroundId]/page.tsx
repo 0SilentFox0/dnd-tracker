@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';

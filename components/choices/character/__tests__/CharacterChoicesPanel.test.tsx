@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CharacterChoicesPanel } from '@/components/choices/CharacterChoicesPanel';
+import { CharacterChoicesPanel } from '@/components/choices/character/CharacterChoicesPanel';
 import {
     featsById,
     refs,

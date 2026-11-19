@@ -2,8 +2,8 @@
 
 import { EffectListEditor } from './EffectListEditor';
 
-import { useFieldErrors } from '@/components/abilities/editor-context';
-import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { useFieldErrors } from '@/components/abilities/editor/editor-context';
+import { FieldErrors } from '@/components/abilities/editor/FieldErrors';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import { Switch } from '@/components/ui/switch';

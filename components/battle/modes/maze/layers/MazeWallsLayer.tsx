@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 
-import { edgeRect } from '@/components/battle/map/edge-geometry';
+import { edgeRect } from '@/components/battle/map/edges/edge-geometry';
 import { EDGE_WALL_WIDTH } from '@/lib/constants/battle';
 import { UNIT } from '@/lib/utils/battle/grid';
 import type { MazeView } from '@/lib/utils/battle/modes/maze';

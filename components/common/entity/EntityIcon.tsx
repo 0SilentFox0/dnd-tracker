@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { cn } from '@/lib/utils';
 
 export interface EntityIconProps {

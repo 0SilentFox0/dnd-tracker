@@ -22,7 +22,7 @@ vi.mock('@/lib/hooks/scenario/useScenarioIndex', () => ({
         refetch,
     }),
 }));
-vi.mock('@/components/scenario/ScenarioSummaryPanel', () => ({
+vi.mock('@/components/scenario/page/ScenarioSummaryPanel', () => ({
     ScenarioSummaryPanel: () => null,
 }));
 

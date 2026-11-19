@@ -12,11 +12,11 @@ vi.mock('@tiptap/react', () => ({
         destroy = vi.fn();
     },
 }));
-vi.mock('@/components/scenario/editor/MentionList', () => ({
+vi.mock('@/components/scenario/editor/rich-text/MentionList', () => ({
     MentionList: () => null,
 }));
 
-import { mentionSuggestion } from '@/components/scenario/editor/mention-suggestion';
+import { mentionSuggestion } from '@/components/scenario/editor/rich-text/mention-suggestion';
 
 const lifecycle = () => {
     const render = mentionSuggestion(async () => [])?.render?.();

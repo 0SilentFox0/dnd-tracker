@@ -4,20 +4,20 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { AutopickCard } from './AutopickCard';
-import { BalanceSummary } from './BalanceSummary';
+import { BalanceSummary } from '../balance/BalanceSummary';
+import { XpBalanceSummary } from '../balance/XpBalanceSummary';
+import { BattleMapLibraryPicker } from '../map/BattleMapLibraryPicker';
+import { AutopickCard } from '../participants/AutopickCard';
+import { CharactersListCard } from '../participants/CharactersListCard';
+import { SidePanelCard } from '../participants/SidePanelCard';
+import { UnitsListCard } from '../participants/UnitsListCard';
 import { BattleFormBasicInfo } from './BattleFormBasicInfo';
 import { BattleFormMap } from './BattleFormMap';
-import { BattleMapLibraryPicker } from './BattleMapLibraryPicker';
-import { CharactersListCard } from './CharactersListCard';
-import { SidePanelCard } from './SidePanelCard';
-import { UnitsListCard } from './UnitsListCard';
-import { XpBalanceSummary } from './XpBalanceSummary';
 
 import {
     BATTLE_FORM_TAB,
     type BattleFormTabId,
-} from '@/components/battle/setup/battle-form-tabs';
+} from '@/components/battle/setup/form/battle-form-tabs';
 import { LoadingState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';

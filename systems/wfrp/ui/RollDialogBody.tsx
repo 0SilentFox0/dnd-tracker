@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { RollResultView } from '@/components/character-profile/RollResultView';
+import { RollResultView } from '@/components/character-profile/combat/RollResultView';
 import type { RollDialogBodyProps } from '@/components/systems/types';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';

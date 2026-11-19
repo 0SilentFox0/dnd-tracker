@@ -4,10 +4,10 @@ import {
     SPELL_LEVELS,
     spellCostKeysOf,
     type SpellFormData,
-} from './spell-form-defaults';
+} from '../spell-form-defaults';
 import { SpellFxFields } from './SpellFxFields';
 
-import { IconUrlField } from '@/components/common/IconUrlField';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import { Label } from '@/components/ui/label';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';

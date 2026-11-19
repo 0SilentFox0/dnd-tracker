@@ -3,11 +3,11 @@
 import { type ComponentType, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
+import { BattleToast } from './banners/BattleToast';
+import { CornerStack } from './layout/CornerStack';
+import { NoticeStackContext } from './layout/MapStrip';
+import { MobileBattleLayout } from './layout/MobileBattleLayout';
 import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
-import { BattleToast } from './BattleToast';
-import { CornerStack } from './CornerStack';
-import { NoticeStackContext } from './MapStrip';
-import { MobileBattleLayout } from './MobileBattleLayout';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleAudioProvider } from '@/components/battle/audio/BattleAudioProvider';
@@ -42,7 +42,7 @@ let desktopLoad: Promise<void> | null = null;
 
 // phones always use the mobile layout (in the entry chunk); the desktop one loads only on wide screens
 function loadDesktopLayout() {
-    desktopLoad ??= import('./DesktopBattleLayout').then((m) => {
+    desktopLoad ??= import('./layout/DesktopBattleLayout').then((m) => {
         desktopLayout = m.DesktopBattleLayout;
     });
 

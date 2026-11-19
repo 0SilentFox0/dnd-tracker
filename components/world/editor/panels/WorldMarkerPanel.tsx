@@ -4,15 +4,15 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPinned, PenLine } from 'lucide-react';
 
+import { MarkerIconGrid } from '../maps/MapFieldParts';
+import { NewWorldMapDialog } from '../maps/NewWorldMapDialog';
+import { markerIcon } from '../marker-icon-options';
+import { useEditorMarkerFields } from '../use-editor-fields';
+import { useWorldEditorContext } from '../WorldEditorContext';
 import { DmMarkerNotes } from './DmMarkerNotes';
-import { MarkerIconGrid } from './MapFieldParts';
-import { markerIcon } from './marker-icon-options';
-import { NewWorldMapDialog } from './NewWorldMapDialog';
-import { useEditorMarkerFields } from './use-editor-fields';
-import { useWorldEditorContext } from './WorldEditorContext';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
-import { ColorSwatch } from '@/components/common/ColorSwatch';
+import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';

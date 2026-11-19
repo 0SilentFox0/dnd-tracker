@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl';
 
 import { HudSection } from '@/components/hud/form';
-import { ScenarioBook } from '@/components/scenario/ScenarioBook';
-import { ScenarioRichText } from '@/components/scenario/ScenarioRichText';
+import { ScenarioBook } from '@/components/scenario/book/ScenarioBook';
+import { ScenarioRichText } from '@/components/scenario/page/ScenarioRichText';
 import type { StoryChapter } from '@/types/scenario';
 
 export function StoryChapters({

@@ -51,7 +51,7 @@ vi.mock('@/components/ui/select-field', () => ({
     ),
 }));
 
-import { RevealSettings } from '@/components/scenario/editor/RevealSettings';
+import { RevealSettings } from '@/components/scenario/editor/rows/RevealSettings';
 import { render } from '@/components/ui/__tests__/uk-intl';
 
 afterEach(cleanup);

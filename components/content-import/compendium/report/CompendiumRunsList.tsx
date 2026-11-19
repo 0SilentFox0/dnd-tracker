@@ -1,7 +1,7 @@
 'use client';
 import { useTranslations } from 'next-intl';
 
-import { PagerNav } from '@/components/common/PagerNav';
+import { PagerNav } from '@/components/common/shell/PagerNav';
 import { FormAlert } from '@/components/common/states';
 import { HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 
-import { SpellPicksNudge } from './path';
-import { useProfile } from './ProfileContext';
-import { ProfileSpellBook } from './ProfileSpellBook';
+import { ProfileSpellBook } from '../hero/ProfileSpellBook';
+import { SpellPicksNudge } from '../path';
+import { useProfile } from '../ProfileContext';
 
-import { NewPill } from '@/components/common/NewPill';
+import { NewPill } from '@/components/common/entity/NewPill';
 import { spellLevelMetal } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
 import { EmptySpellBook } from '@/components/spells/book/SpellBookPages';

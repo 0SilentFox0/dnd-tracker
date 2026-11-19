@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 
-import { edgeRect } from './edge-geometry';
+import { edgeRect } from '../edges/edge-geometry';
 
 import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';

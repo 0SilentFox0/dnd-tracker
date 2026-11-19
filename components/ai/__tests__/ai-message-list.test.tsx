@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { AiMessageList } from '@/components/ai/AiMessageList';
+import { AiMessageList } from '@/components/ai/chat/AiMessageList';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 
 describe('AiMessageList', () => {

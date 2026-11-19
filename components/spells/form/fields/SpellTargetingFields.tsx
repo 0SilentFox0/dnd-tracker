@@ -7,10 +7,10 @@ import {
     SPELL_SIDE_KEYS,
     TARGETING_KINDS,
     TEMPLATE_SHAPE_KEYS,
-} from './spell-form-defaults';
+} from '../spell-form-defaults';
+import { RANGED_KINDS, targetingOf } from '../targeting-of';
 import { SpellRangeInput } from './SpellRangeInput';
 import { SpellResolutionFields } from './SpellResolutionFields';
-import { RANGED_KINDS, targetingOf } from './targeting-of';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Label } from '@/components/ui/label';

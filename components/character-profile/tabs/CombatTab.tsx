@@ -4,10 +4,13 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Crosshair, Swords } from 'lucide-react';
 
-import { SheetRollDialog, type SheetRollRequest } from './rest/SheetRollDialog';
-import { Breakdown } from './Breakdown';
-import { CombatRow } from './CombatRow';
-import { useProfile } from './ProfileContext';
+import { Breakdown } from '../combat/Breakdown';
+import { CombatRow } from '../combat/CombatRow';
+import { useProfile } from '../ProfileContext';
+import {
+    SheetRollDialog,
+    type SheetRollRequest,
+} from '../rest/SheetRollDialog';
 
 import { EmptyState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';

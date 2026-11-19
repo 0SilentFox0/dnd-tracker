@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ImportDialog } from '@/components/common/ImportDialog';
+import { ImportDialog } from '@/components/common/dialogs/ImportDialog';
 import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 
 const importHook = {

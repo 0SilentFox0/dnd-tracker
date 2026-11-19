@@ -3,8 +3,8 @@
 import type { MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { SectionIcon } from '../chips/SectionIcon';
 import { scenarioFontClassName } from './fonts';
-import { SectionIcon } from './SectionIcon';
 
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useActiveSection } from '@/lib/hooks/scenario';

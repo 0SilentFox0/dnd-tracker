@@ -48,7 +48,7 @@ vi.mock('@/components/ui/select-field', () => ({
 import { SpellEffectCard } from '../SpellEffectCard';
 import { SPELL_ONLY_FIXTURES as FIXTURES } from './spell-only-fixtures';
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { SPELL_ONLY_EDITORS } from '@/components/spells/form/effects/spell-only-editors';
 import {
     SPELL_ONLY_EFFECT_KINDS,

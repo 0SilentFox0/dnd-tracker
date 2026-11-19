@@ -25,7 +25,7 @@ vi.mock('@/components/fx/frames/ImpactFrame', () => ({
     ),
 }));
 
-import { MapToken } from '@/components/battle/map/MapToken';
+import { MapToken } from '@/components/battle/map/tokens/MapToken';
 import { fireFxImpact } from '@/lib/hooks/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { FxImpact } from '@/lib/utils/battle/fx';

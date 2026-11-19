@@ -12,7 +12,7 @@ vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
     }),
 }));
 
-import { MapTokenHud } from '@/components/battle/map/MapTokenHud';
+import { MapTokenHud } from '@/components/battle/map/tokens/MapTokenHud';
 import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { ActiveEffect } from '@/types/battle';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
-import { useProfile } from './ProfileContext';
+import { useProfile } from '../ProfileContext';
 
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

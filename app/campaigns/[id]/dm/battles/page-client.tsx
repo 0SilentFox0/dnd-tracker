@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { DeleteAllButton } from '@/components/common/DeleteAllButton';
+import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
 import { useDeleteAllBattles } from '@/lib/hooks/battles';
 
 export function DeleteAllBattlesButton({

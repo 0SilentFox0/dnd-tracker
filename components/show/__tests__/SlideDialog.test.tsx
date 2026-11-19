@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SlideDialog } from '../editor/SlideDialog';
 
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => null,
 }));
 vi.mock('../editor/TrackPicker', () => ({ TrackPicker: () => null }));

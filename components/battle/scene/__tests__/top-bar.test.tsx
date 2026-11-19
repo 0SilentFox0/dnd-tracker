@@ -16,7 +16,7 @@ vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
     }),
 }));
 
-import { BattleTopBar } from '@/components/battle/scene/BattleTopBar';
+import { BattleTopBar } from '@/components/battle/scene/layout/BattleTopBar';
 import { BattleSceneContext } from '@/lib/hooks/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { usePlayerView } from '@/lib/hooks/common';

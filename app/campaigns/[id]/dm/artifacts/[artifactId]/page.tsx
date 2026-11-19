@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { ArtifactEditForm } from '@/components/artifacts/ArtifactEditForm';
-import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 import { readAbilities } from '@/lib/utils/abilities/read';

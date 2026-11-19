@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { PlayerViewToggle } from '@/components/common/PlayerViewToggle';
+import { PlayerViewToggle } from '@/components/common/shell/PlayerViewToggle';
 
 afterEach(cleanup);
 

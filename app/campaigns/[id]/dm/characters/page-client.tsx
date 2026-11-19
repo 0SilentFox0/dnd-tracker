@@ -7,14 +7,14 @@ import { Trash2, Users } from 'lucide-react';
 import { DmCharacterCard } from '@/components/characters/list/DmCharacterCard';
 import { PartyRestActions } from '@/components/characters/rest/PartyRestActions';
 import { PendingDraftsPanel } from '@/components/characters/review/PendingDraftsPanel';
-import { DeleteAllButton } from '@/components/common/DeleteAllButton';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import {
     EmptyState,
     LoadingState,
     QueryState,
 } from '@/components/common/states';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import {

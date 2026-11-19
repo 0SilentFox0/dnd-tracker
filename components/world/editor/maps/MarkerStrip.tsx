@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPinned, MessagesSquare, NotebookPen, PenLine } from 'lucide-react';
 
-import { DmMarkerNotes } from './DmMarkerNotes';
+import { markerIcon } from '../marker-icon-options';
+import { DmMarkerNotes } from '../panels/DmMarkerNotes';
 import {
     CHIP,
     CloseButton,
@@ -13,13 +14,12 @@ import {
     POPOVER,
     StripLead,
     SwitchField,
-} from './InspectorParts';
+} from '../panels/InspectorParts';
+import { useEditorMarkerFields } from '../use-editor-fields';
 import { MarkerIconGrid } from './MapFieldParts';
-import { markerIcon } from './marker-icon-options';
 import { NewWorldMapDialog } from './NewWorldMapDialog';
-import { useEditorMarkerFields } from './use-editor-fields';
 
-import { ColorSwatch } from '@/components/common/ColorSwatch';
+import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import {

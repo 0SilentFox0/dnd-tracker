@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPin, Music } from 'lucide-react';
 
-import { MarkerPickerDialog } from './MarkerPickerDialog';
+import { MarkerPickerDialog } from '../dialogs/MarkerPickerDialog';
+import { SectionTrackDialog } from '../dialogs/SectionTrackDialog';
 import { OrderButtons } from './OrderButtons';
-import { SectionTrackDialog } from './SectionTrackDialog';
 
 import { HudButton } from '@/components/hud';
-import { MarkerChip } from '@/components/scenario/MarkerChip';
-import { SectionIcon } from '@/components/scenario/SectionIcon';
-import { SectionTrackChip } from '@/components/scenario/SectionTrackChip';
+import { MarkerChip } from '@/components/scenario/chips/MarkerChip';
+import { SectionIcon } from '@/components/scenario/chips/SectionIcon';
+import { SectionTrackChip } from '@/components/scenario/chips/SectionTrackChip';
 import {
     DropdownMenu,
     DropdownMenuContent,

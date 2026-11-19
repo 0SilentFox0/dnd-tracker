@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { XpBalanceSummary } from '@/components/battle/setup/XpBalanceSummary';
+import { XpBalanceSummary } from '@/components/battle/setup/balance/XpBalanceSummary';
 import { computeXpBudget } from '@/lib/utils/battle/balance/xp-budget';
 
 afterEach(cleanup);

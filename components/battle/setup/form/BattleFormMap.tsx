@@ -2,13 +2,17 @@
 
 import { useTranslations } from 'next-intl';
 
-import { MapBackgroundSection } from './MapBackgroundSection';
-import { MapCellToolsSection } from './MapCellToolsSection';
-import { DoorToolOptions, EDGE_TOOLS, ToolButtons } from './MapToolButtons';
+import { MapBackgroundSection } from '../map/MapBackgroundSection';
+import { MapCellToolsSection } from '../map/MapCellToolsSection';
+import {
+    DoorToolOptions,
+    EDGE_TOOLS,
+    ToolButtons,
+} from '../map/MapToolButtons';
 import { ToggleRow } from './ToggleRow';
 
 import { BattleMap } from '@/components/battle/map';
-import { MapMotionPanel } from '@/components/battle/map/MapMotionPanel';
+import { MapMotionPanel } from '@/components/battle/map/panels/MapMotionPanel';
 import { MAP_MODE_UI, type MapModeUi } from '@/components/battle/modes';
 import { HudSection } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';

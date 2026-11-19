@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { FLOW_BORDER, type FlowPart } from '../flow-part';
+import { FLOW_BORDER, type FlowPart } from '../flow/flow-part';
 import { CollapsibleHeader } from './CollapsibleHeader';
 
 import { cn } from '@/lib/utils';

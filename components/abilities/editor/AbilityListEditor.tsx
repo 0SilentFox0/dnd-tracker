@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { AbilityChips, pickAfterRemove } from './AbilityChips';
+import { AbilityChips, pickAfterRemove } from '../flow/AbilityChips';
+import { RecipeGallery } from '../recipes/RecipeGallery';
 import { AbilityPanel } from './AbilityPanel';
 import { AbilityEditorProvider } from './editor-context';
-import { RecipeGallery } from './RecipeGallery';
 
 import { HudSection } from '@/components/hud/form';
 import { useText } from '@/lib/i18n/use-text';

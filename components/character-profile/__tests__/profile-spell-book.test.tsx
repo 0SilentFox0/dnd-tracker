@@ -10,7 +10,7 @@ vi.mock('@/components/hud/fonts', () => ({
     HUD_SURFACE: 'hud-surface',
 }));
 
-import { ProfileSpellBook } from '@/components/character-profile/ProfileSpellBook';
+import { ProfileSpellBook } from '@/components/character-profile/hero/ProfileSpellBook';
 import type { BookSpell } from '@/types/spells';
 
 const spells: BookSpell[] = [

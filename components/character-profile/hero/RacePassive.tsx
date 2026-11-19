@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useProfile } from './ProfileContext';
+import { useProfile } from '../ProfileContext';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { RacePassiveBlock } from '@/components/races/RaceInnateSections';
 import { useRaces } from '@/lib/hooks/races';
 import { normalizePassiveAbility } from '@/lib/utils/races/race-summary';

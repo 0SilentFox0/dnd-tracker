@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp, EyeOff, SkipForward } from 'lucide-react';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { AudioPlayerProvider } from '@/components/audio/AudioPlayerProvider';
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { ShowButton } from '@/components/show/stage/show-ui';
 import { ShowDeckStrip } from '@/components/show/stage/ShowDeckStrip';

@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { HeroPortrait } from '@/components/character-profile/HeroPortrait';
+import { HeroPortrait } from '@/components/character-profile/hero/HeroPortrait';
 
 describe('HeroPortrait', () => {
     afterEach(cleanup);

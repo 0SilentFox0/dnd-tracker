@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { RollableCell } from '@/components/character-profile/RollableCell';
+import { RollableCell } from '@/components/character-profile/combat/RollableCell';
 import type { SheetRollRequest } from '@/components/systems/types';
 import { signed } from '@/lib/utils/common/format';
 import type { SheetWfrpBlock } from '@/systems/wfrp/rules/characteristics/sheet-block';

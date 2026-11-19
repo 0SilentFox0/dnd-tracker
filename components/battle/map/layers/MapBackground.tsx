@@ -3,7 +3,7 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 
-import { MotionBackground } from './motion/MotionBackground';
+import { MotionBackground } from '../motion/MotionBackground';
 
 import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { useLoadedAspect } from '@/lib/hooks/battle';

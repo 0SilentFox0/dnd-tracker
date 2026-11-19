@@ -2,15 +2,18 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import { RulesPatchOffer } from '../shared/RulesPatchOffer';
+import { CompendiumMediaReport } from './report/CompendiumMediaReport';
+import {
+    CompendiumReport,
+    DEPENDENCIES_ANCHOR,
+} from './report/CompendiumReport';
+import { CompendiumRunsList } from './report/CompendiumRunsList';
 import { CompendiumCategories } from './CompendiumCategories';
 import { CompendiumDependencies } from './CompendiumDependencies';
 import { CompendiumFileStep } from './CompendiumFileStep';
-import { CompendiumMediaReport } from './CompendiumMediaReport';
 import { CompendiumProgress } from './CompendiumProgress';
-import { CompendiumReport, DEPENDENCIES_ANCHOR } from './CompendiumReport';
-import { CompendiumRunsList } from './CompendiumRunsList';
 import { CompendiumSteps } from './CompendiumSteps';
-import { RulesPatchOffer } from './RulesPatchOffer';
 
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';

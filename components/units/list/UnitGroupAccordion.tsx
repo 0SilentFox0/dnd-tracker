@@ -6,7 +6,7 @@ import { Pencil } from 'lucide-react';
 
 import { UnitGroupDialog } from './UnitGroupDialog';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     Accordion,
     AccordionContent,

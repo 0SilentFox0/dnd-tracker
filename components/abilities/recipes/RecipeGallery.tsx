@@ -3,9 +3,9 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { useAbilityEditor } from '../editor/editor-context';
+import { AbilityFlow } from '../flow/AbilityFlow';
 import { AbilityCopySourcePicker } from './AbilityCopySourcePicker';
-import { AbilityFlow } from './AbilityFlow';
-import { useAbilityEditor } from './editor-context';
 import { RecipeForm } from './RecipeForm';
 
 import { HudChipTabs } from '@/components/hud/page';

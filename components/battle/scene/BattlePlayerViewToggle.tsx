@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { PlayerViewToggle } from '@/components/common/PlayerViewToggle';
+import { PlayerViewToggle } from '@/components/common/shell/PlayerViewToggle';
 import { useBattleScene } from '@/lib/hooks/battle';
 
 export function BattlePlayerViewToggle({ className }: { className?: string }) {

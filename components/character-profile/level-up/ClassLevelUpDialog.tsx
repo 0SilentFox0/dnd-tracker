@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { LevelUpChoicesStep } from './LevelUpChoicesStep';
 import { MulticlassReasons } from './MulticlassReasons';
 
-import { SubclassCard } from '@/components/choices/SubclassCard';
+import { SubclassCard } from '@/components/choices/picker/SubclassCard';
 import { FormAlert } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 import { Radio } from '@/components/ui/radio';

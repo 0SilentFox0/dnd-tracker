@@ -5,17 +5,17 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Settings2 } from 'lucide-react';
 
-import { AwaitingDmBanner } from './AwaitingDmBanner';
-import { BattleOverBanner } from './BattleOverBanner';
-import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
+import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
+import { BattleOverBanner } from '../banners/BattleOverBanner';
+import { ConnectionBanner } from '../banners/ConnectionBanner';
+import { LastActionTicker } from '../banners/LastActionTicker';
+import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
 import { BattleTopBar } from './BattleTopBar';
-import { ConnectionBanner } from './ConnectionBanner';
-import { LastActionTicker } from './LastActionTicker';
 import { MapStripRow, MapStripSlotContext } from './MapStrip';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleLog } from '@/components/battle/log/BattleLog';
-import { BattleMapPanel } from '@/components/battle/map/BattleMapPanel';
+import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { MyHeroPanel } from '@/components/battle/participants/MyHeroPanel';
 import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';

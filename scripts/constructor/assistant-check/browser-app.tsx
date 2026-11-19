@@ -6,8 +6,8 @@ import { ConstructorUiCheck } from './constructor-ui';
 
 import '@/components/systems/registry';
 import '@/lib/utils/rules/systems/registry';
-import { AssistantHandoff } from '@/components/ai/AssistantHandoff';
-import { AssistantWorkspace } from '@/components/ai/AssistantWorkspace';
+import { AssistantHandoff } from '@/components/ai/assistant/AssistantHandoff';
+import { AssistantWorkspace } from '@/components/ai/assistant/AssistantWorkspace';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AiThread } from '@/types/ai';
 

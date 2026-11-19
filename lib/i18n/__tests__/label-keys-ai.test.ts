@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { expectLabelKeys } from '../test/label-keys';
 
-import { TOOL_LABEL_KEYS } from '@/components/ai/AiToolChip';
+import { TOOL_LABEL_KEYS } from '@/components/ai/chat/AiToolChip';
 import {
     AI_THREAD_MODES,
     API_TOKEN_SCOPES,

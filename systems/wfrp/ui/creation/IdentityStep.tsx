@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import type { WfrpDraftFormState } from './types';
 
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';

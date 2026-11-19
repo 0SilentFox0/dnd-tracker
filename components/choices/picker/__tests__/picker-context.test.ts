@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { issueFor } from '@/components/choices/picker-context';
+import { issueFor } from '@/components/choices/picker/picker-context';
 import type { ChoiceIssue } from '@/types/choices';
 
 describe('issueFor', () => {

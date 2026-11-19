@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ClassLevelUpDialog } from '@/components/character-profile/ClassLevelUpDialog';
+import { ClassLevelUpDialog } from '@/components/character-profile/level-up/ClassLevelUpDialog';
 import {
     featsById,
     refs,

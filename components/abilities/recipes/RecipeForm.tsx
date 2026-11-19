@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { optionSetKey } from './fields/registry-labels';
-import { FieldErrors } from './FieldErrors';
+import { FieldErrors } from '../editor/FieldErrors';
+import { optionSetKey } from '../fields/registry-labels';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

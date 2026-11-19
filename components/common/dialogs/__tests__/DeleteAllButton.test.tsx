@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { DeleteAllButton } from '@/components/common/DeleteAllButton';
+import { DeleteAllButton } from '@/components/common/dialogs/DeleteAllButton';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 
 const noun = 'юніти';

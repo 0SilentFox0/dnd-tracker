@@ -61,7 +61,7 @@ vi.mock('next/link', () => ({
         </a>
     ),
 }));
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => null,
 }));
 vi.mock('@/lib/hooks/systems', () => ({

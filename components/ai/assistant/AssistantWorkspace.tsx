@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { AiPanel } from './AiPanel';
+import { AiPanel } from '../chat/AiPanel';
 import { AssistantReview } from './AssistantReview';
 
 import { Button } from '@/components/ui/button';
@@ -62,7 +62,12 @@ export function AssistantWorkspace({
                         value={kind}
                         onValueChange={setKind}
                         options={(
-                            ['campaign', 'scenario', 'character', 'battle'] as const
+                            [
+                                'campaign',
+                                'scenario',
+                                'character',
+                                'battle',
+                            ] as const
                         ).map((k) => ({
                             value: k,
                             label: t(`workspace.kinds.${k}`),

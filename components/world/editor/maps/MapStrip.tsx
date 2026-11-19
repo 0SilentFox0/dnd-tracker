@@ -12,9 +12,9 @@ import {
     POPOVER,
     StripLead,
     SwitchField,
-} from './InspectorParts';
+} from '../panels/InspectorParts';
+import { useEditorMapFields } from '../use-editor-fields';
 import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
-import { useEditorMapFields } from './use-editor-fields';
 
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';

@@ -59,13 +59,15 @@ vi.mock('@/lib/api/characters', () => ({
 vi.mock('@/lib/api/units', () => ({ getUnits: vi.fn(async () => []) }));
 vi.mock('@/lib/api/rules', async () => ({
     getCampaignRules: vi.fn(
-        async () => (await import('@/lib/utils/rules/__tests__/fixtures/default-rules')).DEFAULT_RULES
+        async () =>
+            (await import('@/lib/utils/rules/__tests__/fixtures/default-rules'))
+                .DEFAULT_RULES
     ),
     updateCampaignRules: vi.fn(),
 }));
 vi.mock('@/lib/api/races', () => ({ getRaces: vi.fn(async () => []) }));
 
-import { BattleSetupForm } from '@/components/battle/setup/BattleSetupForm';
+import { BattleSetupForm } from '@/components/battle/setup/form/BattleSetupForm';
 
 let client: QueryClient;
 

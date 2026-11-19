@@ -118,7 +118,9 @@ describe('ui layers ratchet', () => {
         expect(allowed('ui', '@/components/hud/hud.css')).toBe(true);
         expect(allowed('ui', '@/components/hud')).toBe(false);
         expect(allowed('ui', '@/components/hud/metal')).toBe(false);
-        expect(allowed('ui', '@/components/common/IconUrlField')).toBe(false);
+        expect(allowed('ui', '@/components/common/fields/IconUrlField')).toBe(
+            false
+        );
         expect(allowed('ui', '@/components/ui/dialog')).toBe(true);
         expect(allowed('ui', '@/types/battle')).toBe(false);
         expect(allowed('ui', '@/lib/utils')).toBe(true);

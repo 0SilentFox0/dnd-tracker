@@ -7,7 +7,7 @@ import { Items } from '@/systems/d20/ui/content/classes/progression/ProgressionR
 import { SubclassesEditor } from '@/systems/d20/ui/content/classes/SubclassesEditor';
 import type { ClassFormData, GameClassData } from '@/types/classes';
 
-vi.mock('@/components/common/ImageUpload', () => ({
+vi.mock('@/components/common/fields/ImageUpload', () => ({
     ImageUpload: ({
         value,
         onChange,

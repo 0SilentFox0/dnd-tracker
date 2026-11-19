@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { Pencil, Trash2, TrendingUp } from 'lucide-react';
 
-import { HeroPortrait } from '@/components/character-profile/HeroPortrait';
-import { ActionsMenu } from '@/components/common/ActionsMenu';
+import { HeroPortrait } from '@/components/character-profile/hero/HeroPortrait';
+import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
 import { HudCard, HudPill, HudStatChip } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
 import { CharacterType } from '@/lib/constants/characters';

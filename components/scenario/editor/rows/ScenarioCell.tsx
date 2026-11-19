@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl';
 import type { Editor } from '@tiptap/core';
 
-import { RichTextEditor } from './RichTextEditor';
+import { RichTextEditor } from '../rich-text/RichTextEditor';
 
-import { ScenarioRichText } from '@/components/scenario/ScenarioRichText';
+import { ScenarioRichText } from '@/components/scenario/page/ScenarioRichText';
 import { isDocEmpty } from '@/lib/utils/scenario/doc';
 import type { MentionOption, RichDoc } from '@/types/scenario';
 

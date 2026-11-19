@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import type { FieldProps } from './FieldRenderer';
 
-import { useAbilityEditor } from '@/components/abilities/editor-context';
+import { useAbilityEditor } from '@/components/abilities/editor/editor-context';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useUnits } from '@/lib/hooks/units';

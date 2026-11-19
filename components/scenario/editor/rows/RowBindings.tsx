@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Image as ImageIcon, MapPin, Swords, X } from 'lucide-react';
 
-import { BattlePickerDialog } from './BattlePickerDialog';
-import { MarkerPickerDialog } from './MarkerPickerDialog';
-import { SlidePickerDialog } from './SlidePickerDialog';
+import { BattlePickerDialog } from '../dialogs/BattlePickerDialog';
+import { MarkerPickerDialog } from '../dialogs/MarkerPickerDialog';
+import { SlidePickerDialog } from '../dialogs/SlidePickerDialog';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
-import { MarkerChip } from '@/components/scenario/MarkerChip';
+import { MarkerChip } from '@/components/scenario/chips/MarkerChip';
 import { useBattleBriefs } from '@/lib/hooks/battles';
 import { useDeck } from '@/lib/hooks/show';
 import type {

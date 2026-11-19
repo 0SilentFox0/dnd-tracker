@@ -6,7 +6,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { OptionSpellsEditor } from './OptionSpellsEditor';
 
 import { AbilityListEditor } from '@/components/abilities';
-import { MarkdownLite } from '@/components/common/MarkdownLite';
+import { MarkdownLite } from '@/components/common/entity/MarkdownLite';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Disclosure } from '@/components/ui/disclosure';

@@ -12,7 +12,7 @@ import type { ImportKind } from '@/types/content-import';
 
 // csv-parse and the wizard load only when the dialog opens
 const ContentImportWizard = dynamic(
-    () => import('./ContentImportWizard').then((m) => m.ContentImportWizard),
+    () => import('../ContentImportWizard').then((m) => m.ContentImportWizard),
     { ssr: false }
 );
 

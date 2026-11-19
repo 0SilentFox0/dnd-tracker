@@ -1,5 +1,5 @@
 'use client';
-import { CategoryChip } from './CategoryChip';
+import { CategoryChip } from '../shared/CategoryChip';
 import { CompendiumAdvanced } from './CompendiumAdvanced';
 import { CompendiumMaterials } from './CompendiumMaterials';
 

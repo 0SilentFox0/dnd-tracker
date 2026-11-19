@@ -2,9 +2,13 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
-import { ImageUpload } from '@/components/common/ImageUpload';
-import { HUD_SELECT_TRIGGER_CLASS, HudForm, HudFormPage } from '@/components/hud/form';
+import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
+import {
+    HUD_SELECT_TRIGGER_CLASS,
+    HudForm,
+    HudFormPage,
+} from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

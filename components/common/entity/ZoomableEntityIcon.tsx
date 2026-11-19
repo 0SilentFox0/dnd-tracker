@@ -7,8 +7,8 @@ import {
     EntityIcon,
     type EntityIconProps,
     isImageSrc,
-} from '@/components/common/EntityIcon';
-import { ImageZoomDialog } from '@/components/common/ImageZoomDialog';
+} from '@/components/common/entity/EntityIcon';
+import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
 import { HudButton } from '@/components/hud';
 
 export function ZoomableEntityIcon(props: EntityIconProps) {

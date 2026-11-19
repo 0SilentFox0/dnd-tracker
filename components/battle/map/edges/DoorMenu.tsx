@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { doorCentre } from './DoorsLayer';
+import { doorCentre } from '../layers/DoorsLayer';
 
 import { Button } from '@/components/ui/button';
 import type { MapDoorsTool } from '@/lib/hooks/battle';

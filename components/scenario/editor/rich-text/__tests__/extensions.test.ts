@@ -2,7 +2,7 @@
 import { Editor, getSchema } from '@tiptap/core';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { buildExtensions } from '@/components/scenario/editor/extensions';
+import { buildExtensions } from '@/components/scenario/editor/rich-text/extensions';
 import { MARK_TYPES, NODE_TYPES } from '@/lib/constants/scenario';
 import { scenarioContentSchema } from '@/lib/schemas/scenario';
 import type { RichDoc } from '@/types/scenario';

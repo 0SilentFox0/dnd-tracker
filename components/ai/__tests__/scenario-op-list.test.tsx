@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 
-import { ScenarioOpList } from '../ScenarioOpList';
+import { ScenarioOpList } from '../proposals/ScenarioOpList';
 
 import type { ScenarioAiOp } from '@/types/ai';
 

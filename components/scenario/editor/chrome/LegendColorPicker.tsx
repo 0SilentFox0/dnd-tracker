@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ColorSwatch } from '@/components/common/ColorSwatch';
+import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import type { LegendEntry, LegendKind } from '@/types/scenario';
 
 // hex twins of the dark book palette, the starting colour for entries saved before free colours

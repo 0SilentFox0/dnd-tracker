@@ -4,7 +4,7 @@ import type { CSSProperties, Ref } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronRight } from 'lucide-react';
 
-import { ICON_OPTIONS } from './marker-icon-options';
+import { ICON_OPTIONS } from '../marker-icon-options';
 
 import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';

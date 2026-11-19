@@ -2,7 +2,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { sheetFixture } from './sheet-fixture';
+import { sheetFixture } from '@/components/character-profile/__tests__/sheet-fixture';
 
 vi.mock('@/components/hud/fonts', () => ({
     hudFontClassName: '',
@@ -18,7 +18,7 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
 }));
 
 import { ProfileContext } from '@/components/character-profile/ProfileContext';
-import { TokenList } from '@/components/character-profile/TokenList';
+import { TokenList } from '@/components/character-profile/tokens/TokenList';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import type { CharacterSheet, CharacterToken } from '@/types/characters';
 

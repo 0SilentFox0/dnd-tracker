@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { Portrait, type PortraitProps } from './Portrait';
 
-import { ImageZoomDialog } from '@/components/common/ImageZoomDialog';
+import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
 import { HudButton } from '@/components/hud';
 
 interface ZoomablePortraitProps

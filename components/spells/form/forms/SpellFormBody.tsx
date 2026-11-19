@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import type { SpellFormData } from './spell-form-defaults';
-import { SPELL_FORM_TAB, type SpellFormTabId } from './spell-form-tabs';
-import { SpellComponentsFields } from './SpellComponentsFields';
-import { SpellFormBasicFields } from './SpellFormBasicFields';
+import { SpellComponentsFields } from '../fields/SpellComponentsFields';
+import { SpellFormBasicFields } from '../fields/SpellFormBasicFields';
+import { SpellFormPowerFields } from '../fields/SpellFormPowerFields';
+import type { SpellFormData } from '../spell-form-defaults';
+import { SPELL_FORM_TAB, type SpellFormTabId } from '../spell-form-tabs';
 import { SpellFormEffects } from './SpellFormEffects';
-import { SpellFormPowerFields } from './SpellFormPowerFields';
 
 import { HudForm, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';

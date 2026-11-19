@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ChoiceCard } from '@/components/choices/ChoiceCard';
+import { ChoiceCard } from '@/components/choices/editor/ChoiceCard';
 import { summarize } from '@/lib/utils/characters/classes';
 import type { GameClassData, Subclass } from '@/types/classes';
 

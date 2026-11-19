@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 
 interface ImageZoomDialogProps {

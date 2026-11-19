@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { AiProposalCard } from './AiProposalCard';
+import { AiProposalCard } from '../proposals/AiProposalCard';
 import { AssistantIntentCard } from './AssistantIntentCard';
 import { AssistantQueue } from './AssistantQueue';
 

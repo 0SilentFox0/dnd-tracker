@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AutopickCard } from '@/components/battle/setup/AutopickCard';
+import { AutopickCard } from '@/components/battle/setup/participants/AutopickCard';
 import type { BalanceSuggestions } from '@/lib/hooks/battles';
 
 afterEach(cleanup);

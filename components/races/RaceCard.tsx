@@ -6,8 +6,8 @@ import { Circle, Edit, Plus, Shield, Trash2 } from 'lucide-react';
 
 import { RacePassiveBlock } from './RaceInnateSections';
 
-import { ActionsMenu } from '@/components/common/ActionsMenu';
-import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
+import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
+import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
 import { useNoSkillSummary } from '@/components/systems/compose';
 import { Badge } from '@/components/ui/badge';

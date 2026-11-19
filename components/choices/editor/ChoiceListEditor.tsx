@@ -12,7 +12,7 @@ import {
     SpellChoiceFields,
 } from './ChoiceKindFields';
 
-import { MarkdownLite } from '@/components/common/MarkdownLite';
+import { MarkdownLite } from '@/components/common/entity/MarkdownLite';
 import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';

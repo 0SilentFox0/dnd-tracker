@@ -10,7 +10,7 @@ import {
     STATE_CLASS,
 } from './ProgressionRowView';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { cn } from '@/lib/utils';
 import type { ClassProgression } from '@/types/classes';

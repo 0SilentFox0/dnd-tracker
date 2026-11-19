@@ -1,4 +1,4 @@
-import { BattleSetupForm } from '@/components/battle/setup/BattleSetupForm';
+import { BattleSetupForm } from '@/components/battle/setup/form/BattleSetupForm';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
 export default async function EditBattlePage({

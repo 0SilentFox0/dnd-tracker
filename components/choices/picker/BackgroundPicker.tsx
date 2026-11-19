@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { ChoiceCard } from '@/components/choices/ChoiceCard';
-import { useBackgroundFacts } from '@/components/choices/useBackgroundFacts';
+import { ChoiceCard } from '@/components/choices/editor/ChoiceCard';
+import { useBackgroundFacts } from '@/components/choices/picker/useBackgroundFacts';
 import { summarize } from '@/lib/utils/characters/classes/summary';
 import type { BackgroundData } from '@/types/backgrounds';
 import type { FeatData } from '@/types/choices';

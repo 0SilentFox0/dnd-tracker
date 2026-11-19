@@ -8,9 +8,9 @@ import { RaceEditFormSpellSlots } from './RaceEditFormSpellSlots';
 import { RaceEditFormStatModifiers } from './RaceEditFormStatModifiers';
 
 import { AbilityListEditor } from '@/components/abilities';
-import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
-import { ColorField } from '@/components/common/ColorField';
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
+import { ColorField } from '@/components/common/fields/ColorField';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { HudSection, type HudTab, HudTabs } from '@/components/hud/form';
 import { useRevealInvalidTab } from '@/components/hud/form/reveal-invalid-tab';
 import { Input } from '@/components/ui/input';

@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ScenarioToc, tocItems } from '@/components/scenario/ScenarioToc';
+import { ScenarioToc, tocItems } from '@/components/scenario/book/ScenarioToc';
 import type { ScenarioSection } from '@/types/scenario';
 
 afterEach(cleanup);

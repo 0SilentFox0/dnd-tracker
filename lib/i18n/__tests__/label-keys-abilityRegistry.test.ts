@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { expectLabelKeys } from '../test/label-keys';
 
 import { optionSetKey } from '@/components/abilities/fields/registry-labels';
-import { recipeOptionKey } from '@/components/abilities/RecipeForm';
+import { recipeOptionKey } from '@/components/abilities/recipes/RecipeForm';
 import { LOCALES } from '@/lib/i18n/config';
 import { localSource } from '@/lib/i18n/local-source';
 import { CONDITION_REGISTRY } from '@/lib/utils/abilities/registry/conditions';

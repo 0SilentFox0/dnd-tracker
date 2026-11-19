@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { SetupEntityCard } from './SetupEntityCard';
 
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { HudSection } from '@/components/hud/form';
 import { HudChipTabs } from '@/components/hud/page';
 import {

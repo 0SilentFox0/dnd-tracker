@@ -4,9 +4,14 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { enemy, hero, mazeMap, RO, viewOf } from './maze-fixtures';
-
 import { BattleMap } from '@/components/battle/map';
+import {
+    enemy,
+    hero,
+    mazeMap,
+    RO,
+    viewOf,
+} from '@/components/battle/modes/maze/__tests__/maze-fixtures';
 import {
     mazeVision,
     unionVision,

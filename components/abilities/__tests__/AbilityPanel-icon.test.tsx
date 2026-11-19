@@ -12,8 +12,8 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: undefined }),
 }));
 
-import { AbilityPanel } from '../AbilityPanel';
-import { AbilityEditorProvider } from '../editor-context';
+import { AbilityPanel } from '../editor/AbilityPanel';
+import { AbilityEditorProvider } from '../editor/editor-context';
 
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import type { Ability } from '@/lib/utils/abilities/schema';

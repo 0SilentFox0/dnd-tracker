@@ -1,6 +1,6 @@
 'use client';
 
-import { RenameGroupDialog } from '@/components/common/RenameGroupDialog';
+import { RenameGroupDialog } from '@/components/common/dialogs/RenameGroupDialog';
 import type { SkillCardActions } from '@/components/skills/list/SkillCard';
 import { isUngroupedKey } from '@/lib/constants/ungrouped';
 import { useSpellGroupActions } from '@/lib/hooks/spells';

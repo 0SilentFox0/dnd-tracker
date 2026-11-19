@@ -3,9 +3,9 @@ import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NewWorldMapDialog } from '../NewWorldMapDialog';
-import { WorldEditorContext } from '../WorldEditorContext';
 
 import { renderWithConfirm } from '@/components/ui/__tests__/uk-intl';
+import { WorldEditorContext } from '@/components/world/editor/WorldEditorContext';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { WorldEditorCtx } from '@/lib/hooks/world';
 

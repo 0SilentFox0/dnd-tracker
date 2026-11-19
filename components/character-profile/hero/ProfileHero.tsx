@@ -3,14 +3,14 @@
 import { type ReactNode, type Ref, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ArcaneRecoveryPanel } from './rest/ArcaneRecoveryPanel';
-import { HitDicePanel } from './rest/HitDicePanel';
-import { RestBadges } from './rest/RestBadges';
-import { Breakdown } from './Breakdown';
+import { Breakdown } from '../combat/Breakdown';
+import { useProfile } from '../ProfileContext';
+import { ArcaneRecoveryPanel } from '../rest/ArcaneRecoveryPanel';
+import { HitDicePanel } from '../rest/HitDicePanel';
+import { RestBadges } from '../rest/RestBadges';
 import { HeroPortrait } from './HeroPortrait';
-import { useProfile } from './ProfileContext';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';

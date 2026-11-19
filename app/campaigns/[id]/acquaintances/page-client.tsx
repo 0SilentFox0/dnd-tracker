@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl';
 
 import { AcquaintanceCard } from '@/components/acquaintances/AcquaintanceCard';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState, QueryState } from '@/components/common/states';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { useAcquaintances } from '@/lib/hooks/acquaintances';
 import { useSearch } from '@/lib/hooks/common';

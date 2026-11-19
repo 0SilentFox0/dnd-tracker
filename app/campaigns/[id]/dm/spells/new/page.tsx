@@ -1,4 +1,4 @@
-import { SpellCreateForm } from '@/components/spells/form/SpellCreateForm';
+import { SpellCreateForm } from '@/components/spells/form/forms/SpellCreateForm';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
 export default async function NewSpellPage({

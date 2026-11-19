@@ -6,7 +6,7 @@ import { Swords, Zap } from 'lucide-react';
 import { HealthLabel } from '@/components/battle/hud';
 import { AbilityAimPanel } from '@/components/battle/wizards/AbilityAimPanel';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HUD_SURFACE, HudButton } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';

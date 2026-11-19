@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CharacterChoicesTab } from '@/components/choices/CharacterChoicesTab';
+import { CharacterChoicesTab } from '@/components/choices/character/CharacterChoicesTab';
 import {
     featsById,
     refs,

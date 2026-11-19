@@ -35,7 +35,7 @@ vi.mock('@/lib/hooks/show', () => ({
 vi.mock('@/lib/hooks/battles', () => ({
     useBattleBriefs: () => ({ data: [] }),
 }));
-vi.mock('@/components/scenario/editor/RichTextEditor', () => ({
+vi.mock('@/components/scenario/editor/rich-text/RichTextEditor', () => ({
     RichTextEditor: ({ label }: { label: string }) => (
         <div data-testid="tiptap">{label}</div>
     ),

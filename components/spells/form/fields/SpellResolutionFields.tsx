@@ -1,6 +1,9 @@
 'use client';
 
-import { SAVE_ABILITY_KEYS, SAVE_ON_SUCCESS_KEYS } from './spell-form-defaults';
+import {
+    SAVE_ABILITY_KEYS,
+    SAVE_ON_SUCCESS_KEYS,
+} from '../spell-form-defaults';
 import type { TargetingValue } from './SpellTargetingFields';
 
 import { Label } from '@/components/ui/label';

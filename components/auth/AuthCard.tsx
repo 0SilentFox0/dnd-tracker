@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { LocaleSwitcher } from '@/components/common/LocaleSwitcher';
+import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HudPage, HudPanel } from '@/components/hud/page';
 
 interface AuthCardProps {

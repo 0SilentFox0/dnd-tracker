@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MazeReshuffleDialog } from '@/components/battle/modes/maze/MazeReshuffleDialog';
+import { MazeReshuffleDialog } from '@/components/battle/modes/maze/dialogs/MazeReshuffleDialog';
 import { render } from '@/lib/i18n/test/render-uk';
 
 vi.unmock('next-intl');

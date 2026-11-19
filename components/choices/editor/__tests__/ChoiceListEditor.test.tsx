@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
+import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
 import {
     listOptions,
     pickOption,

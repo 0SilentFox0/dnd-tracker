@@ -6,7 +6,7 @@ import { Lock, Music, Star, X } from 'lucide-react';
 
 import { SHOW_TONE, ShowButton } from './show-ui';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';
 import { type ShowControl, useDeck, useDecks } from '@/lib/hooks/show';

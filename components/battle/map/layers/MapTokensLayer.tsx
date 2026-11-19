@@ -1,7 +1,7 @@
-import { MapHitFloat } from './MapHitFloat';
-import { MapToken } from './MapToken';
-import { MapTokenHud } from './MapTokenHud';
-import type { PlacedToken } from './useMapStageTokens';
+import { MapHitFloat } from '../tokens/MapHitFloat';
+import { MapToken } from '../tokens/MapToken';
+import { MapTokenHud } from '../tokens/MapTokenHud';
+import type { PlacedToken } from '../tokens/useMapStageTokens';
 
 import { cn } from '@/lib/utils';
 import { isDormant } from '@/lib/utils/abilities/engine/core/participants';

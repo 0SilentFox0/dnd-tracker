@@ -2,7 +2,7 @@
 
 import type { ComponentType } from 'react';
 
-import { DIE_SIDES } from './spell-form-defaults';
+import { DIE_SIDES } from '../spell-form-defaults';
 import type { SpellFormFieldsProps } from './SpellFormBasicFields';
 import { SpellTargetingFields } from './SpellTargetingFields';
 

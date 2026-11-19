@@ -1,16 +1,16 @@
-export { CreateScenarioPageDialog } from './CreateScenarioPageDialog';
-export { ScenarioBar } from './ScenarioBar';
-export { ScenarioBook } from './ScenarioBook';
-export { ScenarioIndex } from './ScenarioIndex';
-export { ScenarioLayout } from './ScenarioLayout';
-export { ScenarioLegend } from './ScenarioLegend';
-export { ScenarioPageView } from './ScenarioPageView';
-export { ScenarioRichText } from './ScenarioRichText';
-export { ScenarioSearch } from './ScenarioSearch';
-export { ScenarioSummaryPanel } from './ScenarioSummaryPanel';
+export { ScenarioBar } from './book/ScenarioBar';
+export { ScenarioBook } from './book/ScenarioBook';
+export { ScenarioIndex } from './book/ScenarioIndex';
+export { ScenarioLayout } from './book/ScenarioLayout';
+export { ScenarioLegend } from './book/ScenarioLegend';
+export { ScenarioSearch } from './book/ScenarioSearch';
 export {
     ScenarioToc,
     type TocControl,
     type TocItem,
     tocItems,
-} from './ScenarioToc';
+} from './book/ScenarioToc';
+export { CreateScenarioPageDialog } from './CreateScenarioPageDialog';
+export { ScenarioPageView } from './page/ScenarioPageView';
+export { ScenarioRichText } from './page/ScenarioRichText';
+export { ScenarioSummaryPanel } from './page/ScenarioSummaryPanel';

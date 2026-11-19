@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { HudFormPage } from '@/components/hud/form';
+import { SpellFormBody } from '@/components/spells/form/forms/SpellFormBody';
 import type { SpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { getDefaultSpellFormData } from '@/components/spells/form/spell-form-defaults';
-import { SpellFormBody } from '@/components/spells/form/SpellFormBody';
 import { useNotify } from '@/lib/hooks/common';
 import {
     useCreateSpell,

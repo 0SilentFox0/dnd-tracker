@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { CharacterSelect } from './CharacterSelect';
+import { CharacterSelect } from './chips/CharacterSelect';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

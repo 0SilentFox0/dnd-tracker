@@ -5,14 +5,14 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { BookOpen, ChevronsUpDown, History, Moon, Sun } from 'lucide-react';
 
-import type { ActionsMenuItem } from '@/components/common/ActionsMenu';
+import type { ActionsMenuItem } from '@/components/common/entity/ActionsMenu';
 import { LoadingState, QueryState } from '@/components/common/states';
 import {
     ScenarioBar,
     ScenarioBook,
     type TocControl,
 } from '@/components/scenario';
-import { VersionsDialog } from '@/components/scenario/editor/VersionsDialog';
+import { VersionsDialog } from '@/components/scenario/editor/dialogs/VersionsDialog';
 import { ScenarioAiPanel } from '@/components/scenario/page/ScenarioAiPanel';
 import { ScenarioPageActions } from '@/components/scenario/page/ScenarioPageActions';
 import { ScenarioPageContent } from '@/components/scenario/page/ScenarioPageContent';

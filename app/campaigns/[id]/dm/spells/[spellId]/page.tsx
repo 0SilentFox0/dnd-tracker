@@ -1,5 +1,5 @@
-import { SourceNotes } from '@/components/content-import/SourceNotes';
-import { SpellEditForm } from '@/components/spells/form/SpellEditForm';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { SpellEditForm } from '@/components/spells/form/forms/SpellEditForm';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
 export default async function EditSpellPage({

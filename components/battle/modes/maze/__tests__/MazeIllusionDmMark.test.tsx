@@ -8,7 +8,7 @@ vi.mock('@/components/hud/fonts', () => ({
     HUD_SURFACE: 'hud-surface',
 }));
 
-import { MazeViewProvider } from '../MazeViewProvider';
+import { MazeViewProvider } from '../view/MazeViewProvider';
 
 import '@/components/systems/registry';
 import { DmQuickActionsPanel } from '@/components/battle/dm/DmQuickActionsPanel';

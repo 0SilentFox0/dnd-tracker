@@ -1,5 +1,5 @@
 'use client';
-import { PagerNav } from '@/components/common/PagerNav';
+import { PagerNav } from '@/components/common/shell/PagerNav';
 import { FormAlert } from '@/components/common/states';
 import { Disclosure } from '@/components/ui/disclosure';
 import { useSourceNotes } from '@/lib/hooks/compendium-import';

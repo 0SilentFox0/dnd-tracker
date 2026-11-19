@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { BattlePlayerViewToggle } from '@/components/battle/scene/BattlePlayerViewToggle';
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { QueryState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
 import { FullscreenOverlay } from '@/components/ui/fullscreen-overlay';

@@ -4,11 +4,14 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MazeToolbar } from '../MazeToolbar';
-import { mazeMap, RO } from './maze-fixtures';
 
 import { clickCell } from '@/components/battle/map/__tests__/grid-pointer';
-import { BattleMapPanel } from '@/components/battle/map/BattleMapPanel';
-import { MazeViewProvider } from '@/components/battle/modes/maze/MazeViewProvider';
+import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
+import {
+    mazeMap,
+    RO,
+} from '@/components/battle/modes/maze/__tests__/maze-fixtures';
+import { MazeViewProvider } from '@/components/battle/modes/maze/view/MazeViewProvider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { type MazeTools, useMazeView } from '@/lib/hooks/battle/modes/maze';

@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 
 const SUPABASE_ICON =
     'https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/spell-icons/fireball.png';

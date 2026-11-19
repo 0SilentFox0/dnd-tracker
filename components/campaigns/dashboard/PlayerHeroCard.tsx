@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { HeroHp } from '@/components/campaigns/dashboard/HeroHp';
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudPanel, HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { CharacterStatus } from '@/lib/constants/characters';

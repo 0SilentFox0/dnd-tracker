@@ -1,7 +1,7 @@
 'use client';
 import { useTranslations } from 'next-intl';
 
-import { StepIndicator } from '@/components/common/StepIndicator';
+import { StepIndicator } from '@/components/common/shell/StepIndicator';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 
 const KEYS = ['file', 'categories', 'check', 'confirm'] as const;

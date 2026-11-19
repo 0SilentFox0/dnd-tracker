@@ -4,18 +4,18 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
-import { ConditionSection } from './sections/ConditionSection';
-import { EffectsSection } from './sections/EffectsSection';
-import { LimitsSection } from './sections/LimitsSection';
-import { PerformSection } from './sections/PerformSection';
-import { sectionId } from './sections/SectionShell';
-import { TriggerSection } from './sections/TriggerSection';
-import { AbilityFlow } from './AbilityFlow';
+import { AbilityFlow } from '../flow/AbilityFlow';
+import type { FlowPart } from '../flow/flow-part';
+import { ConditionSection } from '../sections/ConditionSection';
+import { EffectsSection } from '../sections/EffectsSection';
+import { LimitsSection } from '../sections/LimitsSection';
+import { PerformSection } from '../sections/PerformSection';
+import { sectionId } from '../sections/SectionShell';
+import { TriggerSection } from '../sections/TriggerSection';
 import { useErrorsUnder } from './editor-context';
 import { FieldErrors } from './FieldErrors';
-import type { FlowPart } from './flow-part';
 
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

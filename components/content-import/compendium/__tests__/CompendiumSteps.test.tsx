@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { compendiumStep, CompendiumSteps } from '../CompendiumSteps';
 
-import { StepIndicator } from '@/components/common/StepIndicator';
+import { StepIndicator } from '@/components/common/shell/StepIndicator';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 
 type State = CompendiumImportController['state'];

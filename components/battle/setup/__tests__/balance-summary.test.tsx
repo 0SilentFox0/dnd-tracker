@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { BalanceSummary } from '@/components/battle/setup/BalanceSummary';
+import { BalanceSummary } from '@/components/battle/setup/balance/BalanceSummary';
 import { useFairBalance } from '@/lib/hooks/battles/setup/useFairBalance';
 import { D20_MODEL } from '@/lib/utils/battle/balance/__tests__/d20-model';
 import type {

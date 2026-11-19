@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { GridCalibration } from './GridCalibration';
 
-import { ImageUpload } from '@/components/common/ImageUpload';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';

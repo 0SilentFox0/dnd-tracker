@@ -5,7 +5,7 @@ import type { ComponentType, ReactNode } from 'react';
 import {
     ActionsMenu,
     type ActionsMenuItem,
-} from '@/components/common/ActionsMenu';
+} from '@/components/common/entity/ActionsMenu';
 import {
     AccordionContent,
     AccordionItem,

@@ -9,7 +9,7 @@ import { UnitSpellcastingFields } from './UnitSpellcastingFields';
 import { UnitStatblockFields } from './UnitStatblockFields';
 
 import { AbilityListEditor } from '@/components/abilities';
-import { IconUrlField } from '@/components/common/IconUrlField';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import { type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import type { UnitFormFieldsState } from '@/lib/hooks/units';

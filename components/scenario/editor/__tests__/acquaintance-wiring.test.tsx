@@ -34,10 +34,10 @@ vi.mock('@/lib/hooks/show', () => ({
 vi.mock('@/lib/hooks/battles', () => ({
     useBattleBriefs: () => ({ data: [] }),
 }));
-vi.mock('@/components/scenario/editor/RichTextEditor', () => ({
+vi.mock('@/components/scenario/editor/rich-text/RichTextEditor', () => ({
     RichTextEditor: () => <div />,
 }));
-vi.mock('@/components/scenario/editor/ScenarioToolbar', () => ({
+vi.mock('@/components/scenario/editor/chrome/ScenarioToolbar', () => ({
     ScenarioToolbar: (props: { onAcquaintance?: () => void }) => {
         toolbar.props.push(props);
 

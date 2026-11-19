@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AbilityCopySourcePicker } from '@/components/abilities/AbilityCopySourcePicker';
+import { AbilityCopySourcePicker } from '@/components/abilities/recipes/AbilityCopySourcePicker';
 import { getAbilitySources, getOwnerAbilities } from '@/lib/api/abilities';
 
 vi.mock('@/lib/api/abilities', () => ({

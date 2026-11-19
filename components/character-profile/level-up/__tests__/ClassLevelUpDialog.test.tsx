@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ClassLevelUpDialog } from '@/components/character-profile/ClassLevelUpDialog';
+import { ClassLevelUpDialog } from '@/components/character-profile/level-up/ClassLevelUpDialog';
 import {
     makeAbility,
     makeClass,
@@ -42,7 +42,7 @@ vi.mock('@/components/ui/select-field', () => ({
     ),
 }));
 
-vi.mock('@/components/character-profile/LevelUpChoicesStep', () => ({
+vi.mock('@/components/character-profile/level-up/LevelUpChoicesStep', () => ({
     LevelUpChoicesStep: () => null,
 }));
 

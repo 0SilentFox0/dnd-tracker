@@ -1,6 +1,6 @@
 import { BattlePageClient } from './page-client';
 
-import { PlayerViewGuard } from '@/components/common/PlayerViewGuard';
+import { PlayerViewGuard } from '@/components/common/shell/PlayerViewGuard';
 import { getSessionUserId } from '@/lib/auth';
 import { battleMapKeys } from '@/lib/hooks/battle-maps';
 import { battleQueryKey } from '@/lib/hooks/battles';
@@ -33,9 +33,10 @@ export default async function BattlePage({
         ? await getMap(ref.mapId, ref.version).catch(() => null)
         : null;
 
-    const tileChunks = ref && pinned?.campaignId === id
-        ? await getTileChunks(ref.mapId, ref.version).catch(() => null)
-        : null;
+    const tileChunks =
+        ref && pinned?.campaignId === id
+            ? await getTileChunks(ref.mapId, ref.version).catch(() => null)
+            : null;
 
     const edges =
         ref && pinned?.campaignId === id
@@ -61,12 +62,18 @@ export default async function BattlePage({
                 >
                     {tileChunks ? (
                         <PrefetchedQuery
-                            queryKey={battleMapKeys.tiles(id, ref.mapId, ref.version)}
+                            queryKey={battleMapKeys.tiles(
+                                id,
+                                ref.mapId,
+                                ref.version
+                            )}
                             data={{ version: ref.version, chunks: tileChunks }}
                         >
                             {client}
                         </PrefetchedQuery>
-                    ) : client}
+                    ) : (
+                        client
+                    )}
                 </PrefetchedQuery>
             ) : (
                 client

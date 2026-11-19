@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { LegendColorPicker } from '@/components/scenario/editor/LegendColorPicker';
+import { LegendColorPicker } from '@/components/scenario/editor/chrome/LegendColorPicker';
 import { render } from '@/components/ui/__tests__/uk-intl';
 
 afterEach(cleanup);

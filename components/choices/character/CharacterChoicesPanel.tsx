@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ChoicesEditor } from './ChoicesEditor';
+import { ChoicesEditor } from '../editor/ChoicesEditor';
 
 import { LoadingState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';

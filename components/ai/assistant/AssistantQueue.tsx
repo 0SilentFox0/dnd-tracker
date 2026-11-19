@@ -1,7 +1,7 @@
 'use client';
 import { useTranslations } from 'next-intl';
 
-import { PagerNav } from '@/components/common/PagerNav';
+import { PagerNav } from '@/components/common/shell/PagerNav';
 import { Button } from '@/components/ui/button';
 import { ASSISTANT_PAGE_SIZES } from '@/lib/constants/ai';
 import type { IntentSummary } from '@/types/assistant';

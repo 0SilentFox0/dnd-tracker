@@ -1,6 +1,6 @@
 'use client';
 
-import { useWorldEditorContext } from './WorldEditorContext';
+import { useWorldEditorContext } from '../WorldEditorContext';
 
 import { WorldNotesPanel } from '@/components/world/notes/WorldNotesPanel';
 import type { RosterHero } from '@/lib/hooks/world';

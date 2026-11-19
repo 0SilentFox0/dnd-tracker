@@ -3,7 +3,7 @@ import { Play } from 'lucide-react';
 
 import type { SpellCardData } from './types';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import {
     ARCHETYPE_LABEL,
     AURA_LABEL,

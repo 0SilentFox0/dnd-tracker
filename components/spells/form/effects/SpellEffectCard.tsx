@@ -6,9 +6,9 @@ import { X } from 'lucide-react';
 import { SPELL_ONLY_EDITORS } from './spell-only-editors';
 import type { SpellOnlyEditorProps } from './spell-only-types';
 
-import { useFieldErrors } from '@/components/abilities/editor-context';
-import { EffectCard } from '@/components/abilities/EffectCard';
-import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { useFieldErrors } from '@/components/abilities/editor/editor-context';
+import { FieldErrors } from '@/components/abilities/editor/FieldErrors';
+import { EffectCard } from '@/components/abilities/flow/EffectCard';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useAbilityText } from '@/lib/hooks/abilities';

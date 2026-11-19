@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 
 import { AcquaintanceNoteEditor } from './AcquaintanceNoteEditor';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
-import { NewPill } from '@/components/common/NewPill';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
+import { NewPill } from '@/components/common/entity/NewPill';
 import { HudCard, HudPill } from '@/components/hud/page';
 import type { AcquaintanceView } from '@/types/acquaintances';
 

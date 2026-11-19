@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 import { round1 } from '@/lib/utils/common/format';

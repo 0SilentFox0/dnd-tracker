@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { Button } from '@/components/ui/button';
 import type { NodeState } from '@/systems/skilltrees/rules/progression';
 

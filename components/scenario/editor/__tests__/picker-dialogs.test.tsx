@@ -2,8 +2,8 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BattlePickerDialog } from '../BattlePickerDialog';
-import { SlidePickerDialog } from '../SlidePickerDialog';
+import { BattlePickerDialog } from '../dialogs/BattlePickerDialog';
+import { SlidePickerDialog } from '../dialogs/SlidePickerDialog';
 
 import { render } from '@/components/ui/__tests__/uk-intl';
 
@@ -24,7 +24,7 @@ vi.mock('@/components/ui/responsive-dialog', () => ({
         <div>{children}</div>
     ),
 }));
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => null,
 }));
 vi.mock('@/lib/hooks/show', () => ({

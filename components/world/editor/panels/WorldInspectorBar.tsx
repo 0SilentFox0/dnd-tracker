@@ -3,10 +3,10 @@
 import { type ReactNode, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { MapStrip } from '../maps/MapStrip';
+import { MarkerStrip } from '../maps/MarkerStrip';
+import { useWorldEditorContext } from '../WorldEditorContext';
 import { ROW } from './InspectorParts';
-import { MapStrip } from './MapStrip';
-import { MarkerStrip } from './MarkerStrip';
-import { useWorldEditorContext } from './WorldEditorContext';
 
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { cn } from '@/lib/utils';

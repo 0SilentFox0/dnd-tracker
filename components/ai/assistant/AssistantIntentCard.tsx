@@ -1,9 +1,9 @@
 'use client';
 import { useFormatter, useTranslations } from 'next-intl';
 
-import { ScenarioOpList } from './ScenarioOpList';
+import { ScenarioOpList } from '../proposals/ScenarioOpList';
 
-import { PagerNav } from '@/components/common/PagerNav';
+import { PagerNav } from '@/components/common/shell/PagerNav';
 import { Button } from '@/components/ui/button';
 import { ASSISTANT_PAGE_SIZES } from '@/lib/constants/ai';
 import { useExpiry, usePager } from '@/lib/hooks/common';

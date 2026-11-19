@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import ChoicesDialog from '@/components/character-profile/ChoicesDialog';
+import ChoicesDialog from '@/components/character-profile/level-up/ChoicesDialog';
 import {
     featsById,
     refs,
@@ -49,7 +49,7 @@ vi.mock('@/lib/hooks/characters', () => ({
 vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: { classes: { enabled: true } } }),
 }));
-vi.mock('@/components/choices/ChoiceWizard', () => ({
+vi.mock('@/components/choices/picker/ChoiceWizard', () => ({
     ChoiceWizard: (p: { startAt?: string }) => (
         <div data-testid="wizard">{p.startAt ?? 'none'}</div>
     ),

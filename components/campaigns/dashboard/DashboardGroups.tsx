@@ -3,9 +3,9 @@
 import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { NewPill } from '@/components/common/NewPill';
-import { SearchEmptyState } from '@/components/common/SearchEmptyState';
-import { SearchInput } from '@/components/common/SearchInput';
+import { NewPill } from '@/components/common/entity/NewPill';
+import { SearchInput } from '@/components/common/fields/SearchInput';
+import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
 import { HudTile } from '@/components/hud/page';
 import {
     COMPACT_GROUPS,

@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 
+import { CompendiumImport } from './compendium/CompendiumImport';
 import { ColumnsStep } from './steps/ColumnsStep';
 import { FileStep } from './steps/FileStep';
 import { PreviewStep } from './steps/PreviewStep';
 import { ResultStep } from './steps/ResultStep';
-import { CompendiumImport } from './CompendiumImport';
 
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';

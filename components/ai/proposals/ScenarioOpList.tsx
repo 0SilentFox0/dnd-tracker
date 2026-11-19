@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { PagerNav } from '@/components/common/PagerNav';
-import { ScenarioRichText } from '@/components/scenario/ScenarioRichText';
+import { PagerNav } from '@/components/common/shell/PagerNav';
+import { ScenarioRichText } from '@/components/scenario/page/ScenarioRichText';
 import { ASSISTANT_PAGE_SIZES } from '@/lib/constants/ai';
 import { usePager } from '@/lib/hooks/common';
 import { addedMentionCount } from '@/lib/utils/scenario/ai-refs';

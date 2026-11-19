@@ -47,7 +47,7 @@ vi.mock('@/components/ui/select-field', () => ({
 
 import { SpellEffectCard } from '../SpellEffectCard';
 
-import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { newSpellOnlyEffect } from '@/lib/utils/spells/editor/spell-only';
 import {
     type SpellEffect,

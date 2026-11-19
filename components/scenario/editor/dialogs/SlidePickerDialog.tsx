@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Images } from 'lucide-react';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';

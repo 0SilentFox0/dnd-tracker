@@ -10,18 +10,22 @@ import {
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
+import { CompactHero, ProfileHero } from './hero/ProfileHero';
 import { InventoryTab } from './inventory/InventoryTab';
+import { LevelUpBadge } from './level-up/LevelUpBadge';
+import { PendingChoicesBadge } from './level-up/PendingChoicesBadge';
 import { CharacterLogTab } from './rest/CharacterLogTab';
 import { DmRestActions } from './rest/DmRestActions';
-import { CombatTab } from './CombatTab';
-import { LevelUpBadge } from './LevelUpBadge';
-import { MagicTab } from './MagicTab';
-import { PendingChoicesBadge } from './PendingChoicesBadge';
+import { CombatTab } from './tabs/CombatTab';
+import { MagicTab } from './tabs/MagicTab';
+import {
+    type ProfileTab,
+    type ProfileTabId,
+    ProfileTabs,
+} from './tabs/ProfileTabs';
+import { SkillsTab } from './tabs/SkillsTab';
+import { StoryTab } from './tabs/StoryTab';
 import { ProfileProvider, useProfile } from './ProfileContext';
-import { CompactHero, ProfileHero } from './ProfileHero';
-import { type ProfileTab, type ProfileTabId, ProfileTabs } from './ProfileTabs';
-import { SkillsTab } from './SkillsTab';
-import { StoryTab } from './StoryTab';
 
 import '@/components/hud/hud.css';
 import { DraftBanner } from '@/components/characters/player-draft/DraftBanner';

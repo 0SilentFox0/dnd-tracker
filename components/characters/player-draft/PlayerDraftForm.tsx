@@ -9,7 +9,7 @@ import { DraftBasicSection } from './DraftBasicSection';
 import { DraftRegenerateBar } from './DraftRegenerateBar';
 import { DraftStorySection } from './DraftStorySection';
 
-import { ChoicesEditor } from '@/components/choices/ChoicesEditor';
+import { ChoicesEditor } from '@/components/choices/editor/ChoicesEditor';
 import { HudForm, HudFormPage, HudSection } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';

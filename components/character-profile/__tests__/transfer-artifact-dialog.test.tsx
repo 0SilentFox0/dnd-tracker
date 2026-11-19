@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { sheetFixture } from './sheet-fixture';
 
 import { ProfileContext } from '@/components/character-profile/ProfileContext';
-import { TransferArtifactDialog } from '@/components/character-profile/TransferArtifactDialog';
+import { TransferArtifactDialog } from '@/components/character-profile/tokens/TransferArtifactDialog';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import type { RosterHero, SheetArtifact } from '@/types/characters';
 

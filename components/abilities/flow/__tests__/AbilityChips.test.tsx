@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     AbilityChips,
     pickAfterRemove,
-} from '@/components/abilities/AbilityChips';
+} from '@/components/abilities/flow/AbilityChips';
 import type { Ability } from '@/lib/utils/abilities/schema';
 
 const ab = (id: string, name: string): Ability => ({

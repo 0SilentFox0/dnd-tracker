@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Plus, Trash2 } from 'lucide-react';
 
 import { AbilityListEditor } from '@/components/abilities';
-import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
+import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
 import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

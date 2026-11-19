@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight, List } from 'lucide-react';
 import {
     ActionsMenu,
     type ActionsMenuItem,
-} from '@/components/common/ActionsMenu';
+} from '@/components/common/entity/ActionsMenu';
 import { HudButton } from '@/components/hud';
 import { useCssVarHeight } from '@/lib/hooks/common';
 

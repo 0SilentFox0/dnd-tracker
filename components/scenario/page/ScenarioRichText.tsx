@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { CALLOUT_KINDS, MENTION_TYPES } from '@/lib/constants/scenario';
 import { mentionHref } from '@/lib/utils/scenario/mention-href';
 import type {

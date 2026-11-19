@@ -4,21 +4,24 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { BasicEditTab } from './BasicEditTab';
-import { BiographyEditor } from './BiographyEditor';
-import { GoalList } from './GoalList';
-import { type ClassLevelUpProps, LevelUpAction } from './LevelUpAction';
-import { MagicTab } from './MagicTab';
+import { ProfileHero } from './hero/ProfileHero';
+import {
+    type ClassLevelUpProps,
+    LevelUpAction,
+} from './level-up/LevelUpAction';
+import { BiographyEditor } from './story/BiographyEditor';
+import { GoalList } from './story/GoalList';
+import { BasicEditTab } from './tabs/BasicEditTab';
+import { MagicTab } from './tabs/MagicTab';
+import { type ProfileTabId, ProfileTabs } from './tabs/ProfileTabs';
+import { SkillsTab } from './tabs/SkillsTab';
 import { useProfile } from './ProfileContext';
-import { ProfileHero } from './ProfileHero';
-import { type ProfileTabId, ProfileTabs } from './ProfileTabs';
-import { SkillsTab } from './SkillsTab';
 
 import { CharacterAbilitiesSection } from '@/components/characters/abilities/CharacterAbilitiesSection';
 import { CharacterArtifactsSection } from '@/components/characters/artifacts/CharacterArtifactsSection';
 import { CharacterSkillsSection } from '@/components/characters/skills/CharacterSkillsSection';
 import { SystemFormFields } from '@/components/characters/stats/SystemFormFields';
-import { CharacterChoicesPanel } from '@/components/choices/CharacterChoicesPanel';
+import { CharacterChoicesPanel } from '@/components/choices/character/CharacterChoicesPanel';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
 import { systemUiOf } from '@/components/systems';

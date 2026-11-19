@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SkillBasicInfo } from '@/systems/skilltrees/ui/content/skills/form/basic/SkillBasicInfo';
 
-vi.mock('@/components/common/OptimizedImage', () => ({
+vi.mock('@/components/common/entity/OptimizedImage', () => ({
     OptimizedImage: () => <span data-testid="optimized-image" />,
 }));
 

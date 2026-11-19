@@ -7,7 +7,7 @@ import { Copy, Move, Pencil, Sparkles, X } from 'lucide-react';
 
 import { SpellPrintCard } from './SpellPrintCard';
 
-import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
+import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { HudCard, HudPill } from '@/components/hud/page';
 import { SpellComponentsLine } from '@/components/spells/SpellComponentsLine';
 import { SpellIcon } from '@/components/spells/SpellIcon';

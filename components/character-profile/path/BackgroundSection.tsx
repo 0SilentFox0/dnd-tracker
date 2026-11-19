@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useBackgroundFacts } from '@/components/choices/useBackgroundFacts';
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { useBackgroundFacts } from '@/components/choices/picker/useBackgroundFacts';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { Disclosure } from '@/components/ui/disclosure';

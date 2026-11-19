@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 
 import '@/lib/server/systems/registry';
-import { SectionLoading } from '@/components/common/SectionLoading';
+import { SectionLoading } from '@/components/common/states/SectionLoading';
 import { CampaignSystemGate } from '@/components/systems/CampaignSystemGate';
 import { systemSelectionOfCampaign } from '@/lib/server/systems/campaign-system';
 

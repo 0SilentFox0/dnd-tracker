@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { ScrollText, TriangleAlert } from 'lucide-react';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { GRAPH_TYPE_STYLE } from '@/lib/constants/scenario-graph';

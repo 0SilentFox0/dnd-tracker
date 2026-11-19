@@ -2,20 +2,20 @@
 
 import { memo, useMemo } from 'react';
 
+import { DoorMenu } from './edges/DoorMenu';
+import { EdgeEditor } from './edges/EdgeEditor';
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
+import { DoorsLayer } from './layers/DoorsLayer';
+import { MapBackground } from './layers/MapBackground';
+import { StrokeLayer, TemplateLayer } from './layers/MapLayers';
+import { MapTokensLayer } from './layers/MapTokensLayer';
+import { WallsLayer } from './layers/WallsLayer';
 import { MapEffectsLayer } from './tiles/MapEffectsLayer';
 import { TileCanvas } from './tiles/TileCanvas';
-import { DoorMenu } from './DoorMenu';
-import { DoorsLayer } from './DoorsLayer';
-import { EdgeEditor } from './EdgeEditor';
+import { RangedHint } from './tokens/RangedHint';
+import { useMapStageTokens } from './tokens/useMapStageTokens';
 import type { MapStageProps } from './map-stage-types';
-import { MapBackground } from './MapBackground';
-import { StrokeLayer, TemplateLayer } from './MapLayers';
-import { MapTokensLayer } from './MapTokensLayer';
-import { RangedHint } from './RangedHint';
-import { useMapStageTokens } from './useMapStageTokens';
-import { WallsLayer } from './WallsLayer';
 
 import { modeUiOf } from '@/components/battle/modes';
 import { UNIT } from '@/lib/utils/battle/grid';

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MarkerPickerDialog } from '../MarkerPickerDialog';
 
-import { MarkerChip } from '@/components/scenario/MarkerChip';
+import { MarkerChip } from '@/components/scenario/chips/MarkerChip';
 import { render } from '@/components/ui/__tests__/uk-intl';
 
 vi.unmock('next-intl');

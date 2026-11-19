@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
 
-import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
+import { ZoomableEntityIcon } from '@/components/common/entity/ZoomableEntityIcon';
 import { cn } from '@/lib/utils';
 
 export interface ArtifactSetCardIconProps {

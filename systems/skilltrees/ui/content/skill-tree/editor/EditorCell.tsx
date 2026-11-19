@@ -1,4 +1,4 @@
-import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { Button } from '@/components/ui/button';
 
 export function EditorCell({

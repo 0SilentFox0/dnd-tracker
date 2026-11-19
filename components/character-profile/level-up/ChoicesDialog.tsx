@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ChoiceWizard } from '@/components/choices/ChoiceWizard';
+import { ChoiceWizard } from '@/components/choices/picker/ChoiceWizard';
 import { LoadingState } from '@/components/common/states';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useCampaignRules } from '@/lib/hooks/campaigns';

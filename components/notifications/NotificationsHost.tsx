@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Gem, Sparkles, TrendingUp, UserRound } from 'lucide-react';
 
-import { ToastHost } from '@/components/common/ToastHost';
+import { ToastHost } from '@/components/common/shell/ToastHost';
 import type { NotificationType } from '@/lib/constants/notifications';
 import { useToasts } from '@/lib/hooks/common';
 import {

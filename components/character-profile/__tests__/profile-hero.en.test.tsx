@@ -19,9 +19,9 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),
 }));
 
-import { GoalList } from '@/components/character-profile/GoalList';
+import { ProfileHero } from '@/components/character-profile/hero/ProfileHero';
 import { ProfileContext } from '@/components/character-profile/ProfileContext';
-import { ProfileHero } from '@/components/character-profile/ProfileHero';
+import { GoalList } from '@/components/character-profile/story/GoalList';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import type { CharacterSheet } from '@/types/characters';

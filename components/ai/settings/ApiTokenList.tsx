@@ -3,7 +3,7 @@
 import { type FormEvent, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 
-import { AssistantPolicyControl } from './AssistantPolicyControl';
+import { AssistantPolicyControl } from '../assistant/AssistantPolicyControl';
 
 import { HudCard } from '@/components/hud/page';
 import { Badge } from '@/components/ui/badge';

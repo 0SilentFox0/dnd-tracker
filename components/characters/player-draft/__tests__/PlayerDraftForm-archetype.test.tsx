@@ -39,12 +39,16 @@ vi.mock('@/lib/hooks/characters', () => ({
 vi.mock('@/components/onboarding/OnboardingHint', () => ({
     OnboardingHint: () => null,
 }));
-vi.mock('@/components/choices/ChoicesEditor', () => ({
+vi.mock('@/components/choices/editor/ChoicesEditor', () => ({
     ChoicesEditor: () => null,
 }));
-vi.mock('@/components/common/ImageUpload', () => ({ ImageUpload: () => null }));
+vi.mock('@/components/common/fields/ImageUpload', () => ({
+    ImageUpload: () => null,
+}));
 vi.mock('../AbilityScoresPicker', () => ({ AbilityScoresPicker: () => null }));
-vi.mock('@/components/common/EntityIcon', () => ({ EntityIcon: () => null }));
+vi.mock('@/components/common/entity/EntityIcon', () => ({
+    EntityIcon: () => null,
+}));
 
 const show = (key: string, modules?: string[]) => {
     system.def = ruleSystemOf(parseRules({ system: { key, modules } }));

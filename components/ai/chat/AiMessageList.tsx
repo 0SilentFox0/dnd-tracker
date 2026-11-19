@@ -4,7 +4,7 @@ import type { UIMessage } from 'ai';
 
 import { AiToolChip, toolName } from './AiToolChip';
 
-import { ScenarioRichText } from '@/components/scenario/ScenarioRichText';
+import { ScenarioRichText } from '@/components/scenario/page/ScenarioRichText';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { markdownToDoc } from '@/lib/utils/scenario/markdown';

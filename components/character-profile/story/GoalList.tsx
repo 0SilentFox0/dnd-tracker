@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 
-import { useProfile } from './ProfileContext';
+import { useProfile } from '../ProfileContext';
 
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';

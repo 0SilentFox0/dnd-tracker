@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { IconUrlField } from '@/components/common/IconUrlField';
+import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNotify } from '@/lib/hooks/common';

@@ -20,7 +20,7 @@ vi.mock('next/link', () => ({
     ),
 }));
 
-vi.mock('@/components/common/ActionsMenu', () => ({
+vi.mock('@/components/common/entity/ActionsMenu', () => ({
     ActionsMenu: ({
         actions,
     }: {
@@ -41,7 +41,7 @@ vi.mock('@/components/common/ActionsMenu', () => ({
     ),
 }));
 
-vi.mock('@/components/common/ZoomableEntityIcon', () => ({
+vi.mock('@/components/common/entity/ZoomableEntityIcon', () => ({
     ZoomableEntityIcon: ({ src, name }: { src: string; name: string }) => (
         <span data-testid="icon" data-src={src}>
             {name}
@@ -111,9 +111,9 @@ describe('MainSkillCard', () => {
             />
         );
 
-        expect(
-            screen.getByText('common.actions.edit').dataset.href
-        ).toBe('/campaigns/c9/dm/main-skills/ms1');
+        expect(screen.getByText('common.actions.edit').dataset.href).toBe(
+            '/campaigns/c9/dm/main-skills/ms1'
+        );
 
         fireEvent.click(screen.getByText('common.actions.delete'));
 

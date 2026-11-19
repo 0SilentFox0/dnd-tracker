@@ -3,7 +3,10 @@
 import { Fragment, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ChoiceCard, DetailsButton } from '@/components/choices/ChoiceCard';
+import {
+    ChoiceCard,
+    DetailsButton,
+} from '@/components/choices/editor/ChoiceCard';
 import { HudButton } from '@/components/hud';
 import { OptionButton } from '@/components/hud/OptionButton';
 import {

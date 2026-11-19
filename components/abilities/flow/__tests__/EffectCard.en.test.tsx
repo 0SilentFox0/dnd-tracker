@@ -11,9 +11,9 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: undefined }),
 }));
 
-import { AbilityEditorProvider } from '../editor-context';
 import { EffectCard } from '../EffectCard';
 
+import { AbilityEditorProvider } from '@/components/abilities/editor/editor-context';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import type { Effect } from '@/lib/utils/abilities/schema';
 

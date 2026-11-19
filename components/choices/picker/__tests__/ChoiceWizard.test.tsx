@@ -9,8 +9,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ChoiceWizard } from '@/components/choices/ChoiceWizard';
-import { SubclassCard } from '@/components/choices/SubclassCard';
+import { ChoiceWizard } from '@/components/choices/picker/ChoiceWizard';
+import { SubclassCard } from '@/components/choices/picker/SubclassCard';
 import type { ChoiceRefsView } from '@/lib/hooks/characters';
 import {
     featsById,
