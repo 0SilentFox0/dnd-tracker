@@ -30,6 +30,14 @@ Template icons shared between campaigns are immutable. New seeder uploads go to 
 
 `withSafePoolLimits` (`lib/db.ts`) adds `connection_limit` and `pool_timeout` to pooled URLs (Vercel, `pooler.` host or `pgbouncer=true`) without overwriting values already in the URL. Default is 5 connections per instance on Vercel (Fluid Compute serves several requests per instance; Supavisor transaction mode holds many clients) and 10 in dev. Override with `PRISMA_CONNECTION_LIMIT`. After a deploy, check the client count in Supabase → Database → Pooler.
 
+## Profile and avatar
+
+`useSessionUser` returns `SessionUser { id, email, name, avatarUrl }` (`lib/utils/auth/session-user.ts`) and re-derives on `onAuthStateChange`. Avatar resolution order: `user_metadata.custom_avatar_url` (own upload) > OAuth `avatar_url`/`picture` > initials on a hue derived from the user id (`lib/utils/auth/avatar.ts`; `UserAvatar` in `components/auth`). Removing the custom photo falls back to the Google photo, not straight to initials.
+
+Upload goes through the signed-ticket flow into the public bucket `user-avatars` (not `avatars`, which holds campaign character images): `POST` ticket route (`ensureBucket` creates the bucket lazily on the first upload, so no prod setup) -> the browser crops to a 256x256 WebP (`cropSquareToBlob`) and `uploadToSignedUrl` -> commit route accepts only a URL under `user-avatars/<own userId>/` (400 otherwise) and writes `custom_avatar_url` with the admin client; a second upload deletes the previous object, remove clears the metadata and the object. `useAvatar` (`lib/hooks/auth`) guards against double clicks and refreshes the session so the header updates at once.
+
+`/profile` (`app/profile`) is the account hub: `AvatarEditor` plus the list from the `PROFILE_MENU` registry (`components/layout/profile-menu.ts`), the same registry feeds the header dropdown, so a new entry is one row. Unauthenticated requests redirect to `/sign-in?next=/profile`.
+
 ## User palettes
 
 `User.palette` stores one of six validated IDs (`tavern`, `midnight`, `forest`, `parchment`, `amethyst`, `frost`). Authenticated `GET`/`PUT /api/theme` return private no-store responses and scope writes to `getSessionUserId()`. `lib/theme/palettes.ts` owns the allowed IDs and labels are in `messages/{uk,en}/common.json`. `ThemeProvider` uses an account-keyed local cache for first paint and cross-tab changes; the authenticated profile remains authoritative. The root layout stays static: a validated, path-aware bootstrap script applies the active cached preference before paint. Landing, authentication and print routes use their original colors. `app/palettes.css` defines the shared HUD and shadcn tokens, with `--book-*` tokens inherited by the shared spellbook used in profiles and battle. `User.palette` is nullable: null/unknown values use `tavern` during migration/backfill windows.
