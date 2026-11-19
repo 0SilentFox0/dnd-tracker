@@ -347,7 +347,8 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
   - `dryRun` повертає `created` без `id` (рядків ще немає).
   - `loadNames` для треків не годиться (поле `title`) — `names.ts` бере `name` або `title` за колонками таблиці бандла.
   - `errors` — server-only namespace, тому ключі помилок цілей перекладаються в самому роуті (`translateErrorBody`) для тіла 200-відповіді; клієнт отримує вже текст.
-  - Інвалідація довідкових кешів — через `afterContentCommit` після коміту транзакції цілі.
+  - Інвалідація довідкових кешів — через `afterContentCommit` після коміту транзакції цілі. На клієнті `useContentCopy.run` інвалідує всі react-query кеші, ключ яких містить id цілі, що отримала записи (`touchesCampaign`).
+  - Handoff-вид `careers` веде на `dm/system/careers` (`handoff-navigation.ts`, `assistant-handoff.ts`).
 
 ## Sync поверх шарів
 

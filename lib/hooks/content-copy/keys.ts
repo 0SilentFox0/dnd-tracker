@@ -4,3 +4,9 @@ export const contentCopyKeys = {
     campaigns: (campaignId: string) =>
         ['content-copy-campaigns', campaignId] as const,
 };
+
+export const touchesCampaign = (campaignIds: readonly string[]) => ({
+    queryKey,
+}: {
+    queryKey: readonly unknown[];
+}) => queryKey.some((part) => campaignIds.includes(part as string));
