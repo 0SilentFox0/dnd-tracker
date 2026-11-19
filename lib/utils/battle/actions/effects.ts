@@ -50,3 +50,39 @@ export function helpEffect(helperId: string): LabeledEffectInput {
         consumeOn: 'ownAttack',
     };
 }
+
+/** 2024 Help: the next attack against the distracted enemy has advantage until the helper's next turn. */
+export function helpAttackEffect(helperId: string): LabeledEffectInput {
+    return {
+        timedKey: coreTimedKey('help', helperId),
+        name: 'Help',
+        label: textRef('battleCommon.coreActions.help'),
+        type: 'debuff',
+        rounds: 1,
+        permanent: true,
+        stackable: false,
+        abilityEffects: [flag({ flag: 'advantageForAttackers' })],
+        consumeOn: 'attackAgainst',
+    };
+}
+
+export function dropHelpFrom(
+    participants: BattleParticipant[],
+    helperId: string
+): BattleParticipant[] {
+    const key = coreTimedKey('help', helperId);
+
+    return participants.map((p) =>
+        p.battleData.activeEffects.some((e) => e.abilityKey === key)
+            ? {
+                  ...p,
+                  battleData: {
+                      ...p.battleData,
+                      activeEffects: p.battleData.activeEffects.filter(
+                          (e) => e.abilityKey !== key
+                      ),
+                  },
+              }
+            : p
+    );
+}

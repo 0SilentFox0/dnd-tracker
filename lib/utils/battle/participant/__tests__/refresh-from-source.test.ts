@@ -106,6 +106,29 @@ describe('refreshFromSource', () => {
         });
     });
 
+    it('keeps the placed footprint when the library size grows (Gargantuan 3 -> 4)', () => {
+        const base = makeParticipant({ id: 'p' });
+
+        const live = {
+            ...base,
+            combatStats: { ...base.combatStats, gridSize: 3 },
+            battleData: { ...base.battleData, position: { x: 1, y: 1 } },
+        };
+
+        const fresh = {
+            ...base,
+            combatStats: { ...base.combatStats, gridSize: 4 },
+        };
+
+        expect(refreshFromSource(live, fresh).combatStats.gridSize).toBe(3);
+        expect(
+            refreshFromSource(
+                { ...live, battleData: { ...live.battleData, position: undefined } },
+                fresh
+            ).combatStats.gridSize
+        ).toBe(4);
+    });
+
     describe('spell slots', () => {
         const run = (
             live: Record<string, { max: number; current: number }>,

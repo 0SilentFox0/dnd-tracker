@@ -382,6 +382,7 @@ export interface BattleParticipantBattleData {
     returnedThisTurn?: boolean;
     airborne?: AirborneState;
     hazardHitRound?: number;
+    damagedByTypes?: string[];
     pendingHits?: PendingHit[];
     zoneHits?: Record<string, number>;
     damageMultiplier?: number;

@@ -150,6 +150,44 @@ describe('досяжність і дальність 5e', () => {
         ).toEqual([]);
     });
 
+    it('an incapacitated or fallen adjacent enemy does not impose ranged disadvantage', () => {
+        const base = enemyAt(1);
+
+        const stunned = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                activeEffects: [
+                    {
+                        id: 'st',
+                        name: 'Stunned',
+                        type: 'debuff' as const,
+                        duration: 2,
+                        appliedAt: { round: 1, timestamp: new Date(0) },
+                        effects: [{ type: 'skip_action', value: 1 }],
+                    },
+                ],
+            },
+        } as BattleParticipant;
+
+        const reasons = (e: BattleParticipant) =>
+            rangeDisadvantageReasons(
+                map,
+                [fiveE, e, target(5)],
+                fiveE,
+                bow,
+                target(5),
+                DEFAULT_RULES
+            );
+
+        expect(reasons(base)).toContainEqual(
+            textRef('battleLog.rollMode.enemyNear')
+        );
+        expect(reasons(stunned)).not.toContainEqual(
+            textRef('battleLog.rollMode.enemyNear')
+        );
+    });
+
     it('80/320: beyond normal is disadvantage, beyond long is rejected', () => {
         expect(rangeBands('80/320', DEFAULT_RULES)).toEqual({
             normal: 16,

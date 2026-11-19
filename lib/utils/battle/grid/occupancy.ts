@@ -16,7 +16,7 @@ import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export function sizeOf(p: BattleParticipant): number {
-    return Math.min(3, Math.max(1, p.combatStats.gridSize ?? 1));
+    return Math.min(4, Math.max(1, p.combatStats.gridSize ?? 1));
 }
 
 export function isFallen(p: BattleParticipant): boolean {

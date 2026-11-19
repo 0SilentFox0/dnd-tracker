@@ -4,6 +4,7 @@
     "damage": "💥 {ability}: {target} −{amount} HP",
     "heal": "💚 {label}: {target} +{amount} HP",
     "revive": "✝️ {label}: {target} returns with {hp} HP",
+    "regenSuppressed": "🚫 {label}: {target} does not regenerate this turn",
     "immuneTo": "⛔ {ability}: {target} — immune to {type}",
     "dot": "🔥 {ability}: {type} {amount}/round → {target} ({rounds} rd.)",
     "hot": "💚 {ability}: +{amount} HP/round → {target} ({rounds} rd.)",

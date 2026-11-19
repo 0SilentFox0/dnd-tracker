@@ -55,6 +55,18 @@ function mergeIngredientStock(
     };
 }
 
+/** A footprint that grew while the token stands on the map would overlap neighbours or the edge, so it keeps the placed size. */
+function refreshedGridSize(
+    live: BattleParticipant,
+    fresh: BattleParticipant
+): number | undefined {
+    const grew = (fresh.combatStats.gridSize ?? 1) > (live.combatStats.gridSize ?? 1);
+
+    return live.battleData.position && grew
+        ? live.combatStats.gridSize
+        : fresh.combatStats.gridSize;
+}
+
 /** Takes only what the library edits (abilities, attacks, spells, slot maxima, grid size, speed); HP, morale, effects, usage and flags stay live. */
 export function refreshFromSource(
     live: BattleParticipant,
@@ -85,7 +97,7 @@ export function refreshFromSource(
         },
         combatStats: {
             ...live.combatStats,
-            gridSize: fresh.combatStats.gridSize,
+            gridSize: refreshedGridSize(live, fresh),
             speed: fresh.combatStats.speed,
         },
         battleData: {

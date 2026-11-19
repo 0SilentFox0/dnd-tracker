@@ -355,6 +355,7 @@ const HealSchema = z.object({
     kind: z.literal('heal'),
     amount: AmountSchema,
     revive: z.boolean().optional(),
+    unlessDamagedBy: z.array(z.string().min(1)).min(1).optional(),
     ...target,
 });
 

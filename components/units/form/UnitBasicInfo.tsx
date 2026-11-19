@@ -34,7 +34,7 @@ const NUMBER_FIELDS: Array<{
     { key: 'maxTargets', min: 1 },
 ];
 
-const GRID_SIZES = ['1', '2', '3'] as const;
+const GRID_SIZES = ['1', '2', '3', '4'] as const;
 
 interface UnitBasicInfoProps {
     formData: Partial<Unit>;

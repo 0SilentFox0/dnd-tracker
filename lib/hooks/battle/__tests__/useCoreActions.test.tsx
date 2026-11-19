@@ -30,7 +30,7 @@ describe('useCoreActions', () => {
         });
     });
 
-    it('targetsFor без мапи: вороги для схоплення, союзники для допомоги', () => {
+    it('targetsFor без мапи: вороги для схоплення і допомоги', () => {
         const { me, wrapper } = fakeScene();
 
         const { result } = renderHook(() => useCoreActions(me), { wrapper });
@@ -40,7 +40,7 @@ describe('useCoreActions', () => {
         ).toEqual(['gob']);
         expect(
             result.current.targetsFor('help').map((p) => p.basicInfo.id)
-        ).toEqual(['ally']);
+        ).toEqual(['gob']);
         expect(result.current.targetsFor('dash')).toEqual([]);
     });
 

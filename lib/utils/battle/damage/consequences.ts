@@ -1,5 +1,6 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import { replaceParticipant } from '@/lib/utils/abilities/engine/core/participants';
+import { markGuardedDamage } from '@/lib/utils/battle/damage/regen-guard';
 import { revertOnZero } from '@/lib/utils/battle/transform/revert';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -10,6 +11,7 @@ export interface DamageConsequencesInput {
     before: BattleParticipant;
     after: BattleParticipant;
     amount: number;
+    damageType?: string;
     crit?: boolean;
     rules: Ruleset;
     rng: () => number;
@@ -52,10 +54,22 @@ export function applyDamageConsequences(
 
     const { combat } = ruleSystemOf(input.rules);
 
-    return (combat.onDamaged ?? []).reduce(
-        (result, hook) => hook(input, result),
+    const result = (combat.onDamaged ?? []).reduce(
+        (acc, hook) => hook(input, acc),
         combat.onZeroHp(input)
     );
+
+    if (input.amount <= 0 || !input.damageType) return result;
+
+    const marked = markGuardedDamage(result.participant, input.damageType);
+
+    return marked === result.participant
+        ? result
+        : {
+              ...result,
+              participant: marked,
+              participants: replaceParticipant(result.participants, marked),
+          };
 }
 
 export function settleStatusChange(

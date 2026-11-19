@@ -184,6 +184,7 @@ export function hazardHit(
         before: p,
         after: hurt,
         amount: damage,
+        damageType: hazard.type,
         rules,
         rng,
         participants,

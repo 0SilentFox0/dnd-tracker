@@ -5,7 +5,7 @@ import { lineOfFire } from './line-of-fire';
 import { cellsOf, isOnMap } from './occupancy';
 import { wallsAllowSight } from './sight';
 
-import { AttackType } from '@/lib/constants/battle';
+import { AttackType, EffectMarker } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { hasTrait } from '@/lib/utils/battle/common/weapon-trait';
@@ -15,6 +15,7 @@ import {
     modeMeleeBlockedText,
     modeTargetHiddenText,
 } from '@/lib/utils/battle/modes/engine';
+import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { ReachRules } from '@/lib/utils/rules/systems/types';
@@ -100,6 +101,7 @@ export function rangeDisadvantageReasons(
         (p) =>
             isHostile(map, attacker, p) &&
             isOnMap(p) &&
+            !hasEffectMarker(p, EffectMarker.SKIP_ACTION) &&
             isAdjacentOnMap(map, attacker, p) &&
             modeEngages(map, attacker, p)
     );

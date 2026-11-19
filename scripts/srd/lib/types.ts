@@ -136,7 +136,7 @@ export interface UnitRow {
     intelligence: number;
     wisdom: number;
     charisma: number;
-    gridSize: 1 | 2 | 3;
+    gridSize: 1 | 2 | 3 | 4;
     multiattack: number;
     legendaryActions: number;
     legendaryResistances: number;

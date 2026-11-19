@@ -11,6 +11,7 @@ import {
     POTIONS_OF_HEALING_PK,
     PROPERTY_OVERRIDES,
     QUARTERSTAFF_PK,
+    UNIQUE_ABILITIES,
     UNIQUE_BASES,
     WONDROUS_SLOTS,
 } from '../overrides/magic-items';
@@ -576,6 +577,7 @@ function uniqueRow(
                   ]),
               ]
             : []),
+        ...(UNIQUE_ABILITIES[pk] ?? []),
         ...(charges ? [EXPEND_CHARGE] : []),
         ...(consumable ? [f.category === 'potion' ? DRINK : USE] : []),
     ];

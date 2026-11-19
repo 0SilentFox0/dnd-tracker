@@ -69,7 +69,8 @@
     "gridSizes": {
       "1": "1×1 — normal",
       "2": "2×2 — large",
-      "3": "3×3 — huge"
+      "3": "3×3 — huge",
+      "4": "4×4 — gargantuan"
     },
     "fields": {
       "level": "Level",

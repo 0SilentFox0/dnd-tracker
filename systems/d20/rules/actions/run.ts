@@ -19,7 +19,7 @@ import {
     replaceParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { type TimedEffectInput } from '@/lib/utils/abilities/engine/effects/timed-effects';
-import { helpEffect, upsertLabeled } from '@/lib/utils/battle/actions/effects';
+import { helpAttackEffect, upsertLabeled } from '@/lib/utils/battle/actions/effects';
 import { reject } from '@/lib/utils/battle/actions/errors';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import type {
@@ -181,7 +181,7 @@ export function runCoreAction(
             const helped = upsertLabeled(
                 findParticipant(withSpent, target.basicInfo.id) ?? target,
                 {
-                    ...helpEffect(actor.basicInfo.id),
+                    ...helpAttackEffect(actor.basicInfo.id),
                     source: { participantId: actor.basicInfo.id, name },
                 },
                 round

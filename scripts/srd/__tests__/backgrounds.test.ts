@@ -25,6 +25,23 @@ const data = {
     backgroundBenefits: read('BackgroundBenefit'),
 };
 
+describe('Soldier gaming set', () => {
+    it('offers a Gaming Set proficiency choice, other backgrounds do not', () => {
+        const rows = convertBackgrounds(data);
+
+        const soldier = rows.find((r) => r.name === 'Soldier');
+
+        expect(soldier?.choices.map((c) => c.id)).toEqual([
+            'ability-scores',
+            'gaming-set',
+        ]);
+        expect(soldier?.choices[1].options).toHaveLength(4);
+        expect(
+            rows.filter((r) => r.choices.some((c) => c.id === 'gaming-set'))
+        ).toHaveLength(1);
+    });
+});
+
 describe('pinned SRD backgrounds', () => {
     it('converts four records with exact abilities, skills and manual equipment', () => {
         const rows = convertBackgrounds(data);

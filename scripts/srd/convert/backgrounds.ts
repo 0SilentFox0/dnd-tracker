@@ -10,6 +10,33 @@ const skillByName = new Map(DND_SKILLS.map((key) => [key.toLowerCase(), key]));
 
 const normalized = (s: string) => s.replace(/\s/g, '').toLowerCase();
 
+const GAMING_SETS = [
+    'Dice Set',
+    'Dragonchess Set',
+    'Playing Card Set',
+    'Three-Dragon Ante Set',
+];
+
+const gamingSetChoice = (): BackgroundRow['choices'][number] => ({
+    id: 'gaming-set',
+    label: 'Gaming Set proficiency',
+    level: 1,
+    count: 1,
+    kind: 'option',
+    options: GAMING_SETS.map((name) => ({
+        id: name.toLowerCase().replace(/\s+/g, '-'),
+        name,
+        abilities: [
+            {
+                id: 'tool-proficiency',
+                name: `Proficiency: ${name}`,
+                trigger: { event: 'passive' as const },
+                effects: [{ kind: 'note' as const, text: `Proficiency: ${name}` }],
+            },
+        ],
+    })),
+});
+
 export function convertBackgrounds(data: Open5eData): BackgroundRow[] {
     return data.backgrounds
         .map((background): BackgroundRow => {
@@ -67,6 +94,9 @@ export function convertBackgrounds(data: Open5eData): BackgroundRow[] {
                         maxPerAbility: 2,
                         max: 20,
                     },
+                    ...(unresolvedTool && /Gaming Set/i.test(tool)
+                        ? [gamingSetChoice()]
+                        : []),
                 ],
                 skillProficiencies: skills as DndSkill[],
                 toolProficiencies: unresolvedTool ? [] : [tool],

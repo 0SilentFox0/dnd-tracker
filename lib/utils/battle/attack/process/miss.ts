@@ -66,7 +66,14 @@ export function handleMiss(
         ).finalDamage;
 
         put(flow, applyDamageToTarget(target, actualGuaranteedDamage));
-        applyFlowDamage(flow, target, actualGuaranteedDamage);
+        applyFlowDamage(
+            flow,
+            target,
+            actualGuaranteedDamage,
+            undefined,
+            undefined,
+            attack.damageType
+        );
         settleDowned(flow, targetId, attackerId);
     }
 
