@@ -105,6 +105,7 @@ const DamageBonusSchema = z
         filter: z.object({
             kind: z.enum(DAMAGE_FILTER_KINDS),
             school: z.string().min(1).optional(),
+            ability: z.enum(ABILITY_KEYS).optional(),
         }),
         flat: z.union([FlatSchema, SpellRollFlatSchema]).optional(),
         percent: FlatSchema.optional(),
@@ -272,6 +273,7 @@ const FlagSchema = z.discriminatedUnion('flag', [
     z.object({ ...flagBase, flag: z.literal('cunningAction') }),
     z.object({ ...flagBase, flag: z.literal('critImmunity') }),
     z.object({ ...flagBase, flag: z.literal('passesWalls') }),
+    z.object({ ...flagBase, flag: z.literal('noSpellcasting') }),
     z.object({
         ...flagBase,
         flag: z.literal('conditionImmunity'),
@@ -299,6 +301,7 @@ const GrantActionSchema = z
     .object({
         kind: z.literal('grantAction'),
         extraActions: z.number().int().min(1).optional(),
+        free: z.literal(true).optional(),
         refreshAction: z.boolean().optional(),
         refreshBonusAction: z.boolean().optional(),
         refreshReaction: z.boolean().optional(),

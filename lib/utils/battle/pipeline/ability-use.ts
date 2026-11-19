@@ -124,7 +124,11 @@ export async function runAbilityUse(
 
     const usage = USAGE[trigger];
 
-    if (usage.used(participant))
+    const free = ability.effects.some(
+        (e) => e.kind === 'grantAction' && e.free
+    );
+
+    if (!free && usage.used(participant))
         throw new BattleRuleError(usage.error.code, usage.error.message);
 
     if (!poolAffordable(participant, ability))
@@ -179,7 +183,7 @@ export async function runAbilityUse(
 
     const id = participant.basicInfo.id;
 
-    const order = usage.spendFirst
+    const order = usage.spendFirst && !free
         ? updateParticipant(ctx.participants, id, spend[trigger])
         : ctx.participants;
 

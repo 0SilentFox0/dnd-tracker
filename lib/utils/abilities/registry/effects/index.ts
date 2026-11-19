@@ -301,6 +301,7 @@ const BASE_EFFECT_REGISTRY: {
         static: false,
         fields: [
             { name: 'extraActions', input: 'number', optional: true },
+            { name: 'free', input: 'toggle', optional: true },
             { name: 'refreshAction', input: 'toggle', optional: true },
             { name: 'refreshBonusAction', input: 'toggle', optional: true },
             { name: 'refreshReaction', input: 'toggle', optional: true },

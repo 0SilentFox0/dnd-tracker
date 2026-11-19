@@ -356,6 +356,9 @@
     "critImmunity": {
       "label": "Crit immunity"
     },
+    "noSpellcasting": {
+      "label": "Cannot cast spells"
+    },
     "passesWalls": {
       "label": "Passes through walls"
     },
@@ -1125,6 +1128,7 @@
       "autoCritAdjacent": "melee attacks from 5 ft against the target are critical",
       "twoWeaponFighting": "off-hand damage modifier",
       "critImmunity": "a critical hit against the owner becomes a normal hit",
+      "noSpellcasting": "cannot cast spells",
       "passesWalls": "passes through map walls and bars",
       "cunningAction": "Dash, Disengage and Hide as a bonus action",
       "evasion": "Dexterity saving throw with half damage: success — 0, failure — half",

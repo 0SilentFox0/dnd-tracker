@@ -153,11 +153,11 @@ export const CLASS_FEATURE_OVERRIDES: Record<
     'srd-2024_monk_extra-attack': EXTRA_ATTACK,
     'srd-2024_fighter_two-extra-attacks': EXTRA_ATTACK,
     'srd-2024_fighter_three-extra-attacks': EXTRA_ATTACK,
-    // the action is spent first: the first granted action returns it, the second goes to the pool
+    // free use at any point of the own turn (the ability gate skips the action cost), one extra action
     'srd-2024_fighter_action-surge': {
         trigger: { event: 'action' },
         limits: { perRest: { rest: 'short', uses: { scale: 'action-surge' } } },
-        effects: [{ kind: 'grantAction', extraActions: 2 }],
+        effects: [{ kind: 'grantAction', extraActions: 1, free: true }],
     },
     'srd-2024_fighter_second-wind': {
         trigger: { event: 'bonusAction' },
@@ -284,8 +284,25 @@ export const CLASS_FEATURE_OVERRIDES: Record<
             resist('slashing'),
             {
                 kind: 'damageBonus',
-                filter: { kind: 'melee' },
+                filter: { kind: 'melee', ability: 'strength' },
                 flat: { scale: 'rage-damage' },
+                duration: { rounds: 10 },
+            },
+            {
+                kind: 'flag',
+                flag: 'saveAdvantage',
+                abilities: ['strength'],
+                duration: { rounds: 10 },
+            },
+            {
+                kind: 'flag',
+                flag: 'checkAdvantage',
+                skills: ['athletics'],
+                duration: { rounds: 10 },
+            },
+            {
+                kind: 'flag',
+                flag: 'noSpellcasting',
                 duration: { rounds: 10 },
             },
             {

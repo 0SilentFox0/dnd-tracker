@@ -338,6 +338,7 @@
     "cunningDice": "Підступний удар: недостатньо кубиків Прихованої атаки",
     "cannotAttackRanged": "Атакуючий не може атакувати здалеку",
     "cannotAttackMelee": "Атакуючий не може атакувати в ближньому бою",
+    "cannotCast": "{name} зараз не може творити закляття (Лють)",
     "charmedTarget": "{name} не може атакувати того, хто його зачарував",
     "rollRequired": "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)",
     "attackerMissing": "Атакуючого немає в бою",

@@ -334,6 +334,7 @@ const BASE_FLAG_REGISTRY: {
     twoWeaponFighting: plain('twoWeaponFighting'),
     critImmunity: plain('critImmunity'),
     passesWalls: plain('passesWalls'),
+    noSpellcasting: plain('noSpellcasting'),
     cunningAction: plain('cunningAction'),
     evasion: plain('evasion'),
     proneDefense: plain('proneDefense'),

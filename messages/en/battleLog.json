@@ -338,6 +338,7 @@
     "cunningDice": "Cunning Strike: not enough Sneak Attack dice",
     "cannotAttackRanged": "The attacker cannot attack at range",
     "cannotAttackMelee": "The attacker cannot attack in melee",
+    "cannotCast": "{name} cannot cast spells right now (Rage)",
     "charmedTarget": "{name} cannot attack the one who charmed them",
     "rollRequired": "A d20 roll is required (d20Roll, attackRoll or attackRolls)",
     "attackerMissing": "The attacker is not in the battle",
