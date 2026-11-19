@@ -8,8 +8,7 @@ export const MAX_LIBRARY_SOUNDS = 100;
 export const MAX_PRESETS = 30;
 export const PRESET_NAME_MAX = 40;
 export const MAX_SOUND_SECONDS = 10;
-// size cap doubles as a duration bound: 10 s at 512 kbps plus 15% for tags
-export const MAX_SOUND_BYTES = Math.round(MAX_SOUND_SECONDS * 64_000 * 1.15);
+export const MAX_SOUND_BYTES = 720 * 1024;
 export const SOUND_NAME_MAX = 60;
 export const SOUND_FORMATS = AUDIO_FORMATS;
 export type SoundFormat = keyof typeof SOUND_FORMATS;

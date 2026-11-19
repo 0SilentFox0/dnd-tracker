@@ -1,3 +1,4 @@
+import { MAX_SOUND_SECONDS } from '@/lib/constants/soundboard';
 import { createVoicePool } from '@/lib/utils/soundboard/voices';
 import type { LibrarySound } from '@/types/soundboard';
 
@@ -120,7 +121,7 @@ export async function playBuffer(
         source.onended = release;
 
         try {
-            source.start();
+            source.start(0, 0, MAX_SOUND_SECONDS);
         } catch (error) {
             release();
             throw error;

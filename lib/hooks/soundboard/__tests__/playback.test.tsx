@@ -14,7 +14,7 @@ import { useSoundboardPads } from '../useSoundboardPads';
 
 import { getSoundLibrary } from '@/lib/api/sound-library';
 import { playSound } from '@/lib/api/soundboard';
-import { PAD_GUARD_MS } from '@/lib/constants/soundboard';
+import { MAX_SOUND_SECONDS, PAD_GUARD_MS } from '@/lib/constants/soundboard';
 import type { LibrarySound } from '@/types/soundboard';
 
 vi.mock('@/lib/api/soundboard', () => ({
@@ -116,7 +116,11 @@ describe('handleSoundPlayEvent', () => {
         await flush();
 
         expect(state.sources).toHaveLength(1);
-        expect(state.sources[0].start).toHaveBeenCalled();
+        expect(state.sources[0].start).toHaveBeenCalledWith(
+            0,
+            0,
+            MAX_SOUND_SECONDS
+        );
         expect(getSoundLibrary).not.toHaveBeenCalled();
     });
 

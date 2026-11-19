@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 const h = vi.hoisted(() => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { AsyncLocalStorage } = require('node:async_hooks');
+
     const models = () => ({
         soundLibraryItem: {
             count: vi.fn(),
@@ -29,14 +32,37 @@ const h = vi.hoisted(() => {
 
     const tx = models();
 
-    let chain: Promise<unknown> = Promise.resolve();
+    // the advisory lock: a transaction holds the mutex from $executeRaw until it ends
+    const als = new AsyncLocalStorage();
 
-    db.$transaction = vi.fn((fn: (t: unknown) => Promise<unknown>) => {
-        const run = chain.then(() => fn(tx));
+    let chain: Promise<void> = Promise.resolve();
 
-        chain = run.catch(() => undefined);
+    tx.$executeRaw = vi.fn(async () => {
+        const store = als.getStore() as { release: (() => void) | null } | undefined;
 
-        return run;
+        if (!store || store.release) return 0;
+
+        const prev = chain;
+
+        let release!: () => void;
+
+        chain = new Promise<void>((r) => {
+            release = r;
+        });
+        await prev;
+        store.release = release;
+
+        return 0;
+    });
+
+    db.$transaction = vi.fn(async (fn: (t: unknown) => Promise<unknown>) => {
+        const store: { release: (() => void) | null } = { release: null };
+
+        try {
+            return await als.run(store, () => fn(tx));
+        } finally {
+            store.release?.();
+        }
     });
 
     return { db, tx, remove: vi.fn(), owned: vi.fn(), verify: vi.fn() };
@@ -75,6 +101,14 @@ const txFlags = h.tx.userOnboardingFlag as unknown as Mocks;
 const txPresets = h.tx.soundPreset as unknown as Mocks;
 
 const txLock = () => h.tx.$executeRaw as ReturnType<typeof vi.fn>;
+
+const expectLockFirst = (...reads: ReturnType<typeof vi.fn>[]) => {
+    const lockAt = txLock().mock.invocationCallOrder[0];
+
+    for (const read of reads)
+        for (const at of read.mock.invocationCallOrder)
+            expect(lockAt).toBeLessThan(at);
+};
 
 describe('library store', () => {
     beforeEach(() => {
@@ -137,9 +171,11 @@ describe('library store', () => {
         flags.findUnique.mockImplementation(async () =>
             marker ? { id: 'f' } : null
         );
-        txFlags.findUnique.mockImplementation(async () =>
-            marker ? { id: 'f' } : null
-        );
+        txFlags.findUnique.mockImplementation(async () => {
+            await new Promise((r) => setTimeout(r, 1));
+
+            return marker ? { id: 'f' } : null;
+        });
         txPresets.count.mockImplementation(async () => stored);
         txPresets.createMany.mockImplementation(async () => {
             await new Promise((r) => setTimeout(r, 5));
@@ -170,6 +206,7 @@ describe('library store', () => {
         await deleteLibrarySound('u1', 's1');
 
         expect(txLock()).toHaveBeenCalledTimes(1);
+        expectLockFirst(txPresets.findMany);
         expect(presets.update).not.toHaveBeenCalled();
         expect(items.deleteMany).not.toHaveBeenCalled();
         expect(txPresets.update).toHaveBeenCalledTimes(2);
@@ -214,6 +251,7 @@ describe('library store', () => {
             })
         ).rejects.toMatchObject({ message: API_ERRORS.SOUND_LIMIT });
         expect(txLock()).toHaveBeenCalledTimes(1);
+        expectLockFirst(txItems.count, txItems.findFirst);
         expect(txItems.create).not.toHaveBeenCalled();
     });
 
@@ -251,6 +289,7 @@ describe('library store', () => {
             url: 'https://x/a.mp3',
         });
         expect(txItems.create).not.toHaveBeenCalled();
+        expectLockFirst(txItems.findFirst);
     });
 
     it('findPlayableFor hides other users sounds and resolves builtin', async () => {

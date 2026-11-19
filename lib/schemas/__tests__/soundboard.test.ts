@@ -15,7 +15,7 @@ import {
 } from '@/lib/schemas/soundboard';
 
 describe('soundboard schemas', () => {
-    it('upload request caps size at 1 MB', () => {
+    it('upload request caps size at MAX_SOUND_BYTES', () => {
         const base = { name: 'a.mp3', contentType: 'audio/mpeg' };
 
         expect(
@@ -23,7 +23,7 @@ describe('soundboard schemas', () => {
                 .success
         ).toBe(true);
         expect(
-            soundUploadRequestSchema.safeParse({ ...base, size: 1_048_577 })
+            soundUploadRequestSchema.safeParse({ ...base, size: MAX_SOUND_BYTES + 1 })
                 .success
         ).toBe(false);
     });

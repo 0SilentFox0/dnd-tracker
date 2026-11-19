@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -11,6 +11,10 @@ import { audioPathOwnedBy, createAudioUploadTicket } from '../audio-upload';
 import { soundPathOwnedBy } from '../soundboard-storage';
 
 const HEX = 'a'.repeat(32);
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 describe('audio object ownership', () => {
     it('owns a webm path in the sound bucket', () => {
