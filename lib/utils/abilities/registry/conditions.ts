@@ -117,6 +117,7 @@ export const CONDITION_REGISTRY: Record<
     allyAdjacent: { fields: [] },
     notMoved: { fields: [] },
     withThisItem: { fields: [] },
+    critical: { fields: [] },
     not: { fields: [{ name: 'condition', input: 'effects' }] },
     all: { fields: [{ name: 'conditions', input: 'effects' }] },
     any: { fields: [{ name: 'conditions', input: 'effects' }] },
@@ -354,6 +355,8 @@ export function evaluateCondition(
                 e.attackSourceId === ctx.sourceId
             );
         }
+        case 'critical':
+            return ctx.event?.type === 'hit' && !!ctx.event.crit;
         case 'not':
             return !evaluateCondition(c.condition, ctx);
         case 'all':

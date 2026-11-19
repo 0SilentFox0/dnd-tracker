@@ -4,6 +4,7 @@ import { isPlayable } from '../geometry';
 import { pathTo, reachable } from '../path';
 import { diffTerrain } from '../terrain';
 
+import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { TerrainCell } from '@/types/battle-grid';
 
@@ -83,5 +84,23 @@ describe('складна місцевість', () => {
         );
 
         expect(diff?.set?.[0].keys).toEqual(['1:0']);
+    });
+});
+
+describe('ignoreDifficultTerrain', () => {
+    it('носій прапорця платить за складну клітинку як за звичайну', () => {
+        const map = withTerrain({ '1:0': { kind: 'difficult' } });
+
+        const free = placed('f', {
+            at: { x: 0, y: 0 },
+            abilities: [
+                resolved({
+                    trigger: { event: 'passive' },
+                    effects: [{ kind: 'flag', flag: 'ignoreDifficultTerrain' }],
+                }),
+            ],
+        });
+
+        expect(reachable(map, [free], free, 5).get('2:0')).toBe(2);
     });
 });

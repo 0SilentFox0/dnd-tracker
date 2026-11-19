@@ -39,6 +39,7 @@ function defaultFor(type: Condition['type']): Condition {
         case 'allyAdjacent':
         case 'notMoved':
         case 'withThisItem':
+        case 'critical':
             return { type };
         case 'attackRollMode':
             return { type, mode: 'advantage' };

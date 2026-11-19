@@ -8,6 +8,7 @@ import {
     DROPPED_GENERIC,
     FAMILY_NAMES,
     HEALING_POTIONS,
+    ITEM_CHARGES,
     POTIONS_OF_HEALING_PK,
     PROPERTY_OVERRIDES,
     QUARTERSTAFF_PK,
@@ -549,7 +550,7 @@ function uniqueRow(
 
     const belt = BELT_STRENGTH[pk];
 
-    const charges = consumable ? null : chargesOf(f.desc);
+    const charges = consumable ? null : (chargesOf(f.desc) ?? ITEM_CHARGES[pk]);
 
     const weapon = base?.weapon && {
         ...base.weapon,
@@ -578,7 +579,7 @@ function uniqueRow(
               ]
             : []),
         ...(UNIQUE_ABILITIES[pk] ?? []),
-        ...(charges ? [EXPEND_CHARGE] : []),
+        ...(charges && !ITEM_CHARGES[pk] ? [EXPEND_CHARGE] : []),
         ...(consumable ? [f.category === 'potion' ? DRINK : USE] : []),
     ];
 

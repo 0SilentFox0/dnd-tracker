@@ -369,6 +369,7 @@ const CONDITION_BASES: Record<Condition['type'], Condition> = {
     allyAdjacent: { type: 'allyAdjacent' },
     notMoved: { type: 'notMoved' },
     withThisItem: { type: 'withThisItem' },
+    critical: { type: 'critical' },
     not: { type: 'not', condition: { type: 'targetDead' } },
     all: {
         type: 'all',

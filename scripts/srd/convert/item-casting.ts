@@ -17,6 +17,15 @@ const RESISTANCE_TYPES = [
     'thunder',
 ];
 
+// one row per dragon colour would need per-colour icons; the colour is picked as its resistance type
+const DRAGON_SCALE_TYPES = [
+    ['acid', 'black, copper'],
+    ['cold', 'silver, white'],
+    ['fire', 'brass, gold, red'],
+    ['lightning', 'blue, bronze'],
+    ['poison', 'green'],
+] as const;
+
 const RIDERS: Record<
     string,
     { types: string[]; amount: string; damageType?: string }
@@ -102,7 +111,15 @@ export function applyItemCasting(
                   kind: 'damageType' as const,
                   options: RESISTANCE_TYPES.map((key) => ({ key, label: key })),
               }
-            : undefined;
+            : row.name === 'Dragon Scale Mail'
+              ? {
+                    kind: 'damageType' as const,
+                    options: DRAGON_SCALE_TYPES.map(([key, dragons]) => ({
+                        key,
+                        label: `${key} (${dragons})`,
+                    })),
+                }
+              : undefined;
 
         const rider = RIDERS[row.name];
 

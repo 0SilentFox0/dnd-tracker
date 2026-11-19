@@ -727,8 +727,84 @@
     },
     "item": {
       "unique": false,
-      "attunement": true
-    }
+      "attunement": true,
+      "charges": {
+        "max": 1,
+        "rest": "long"
+      }
+    },
+    "abilities": [
+      {
+        "id": "invulnerable-resistance",
+        "name": "Resistance to weapon damage",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
+          }
+        ]
+      },
+      {
+        "id": "metal-shell",
+        "name": "Metal Shell",
+        "description": "Magic action, once until dawn: Immunity to Bludgeoning, Piercing and Slashing damage for 10 minutes.",
+        "trigger": {
+          "event": "action"
+        },
+        "limits": {
+          "pool": {
+            "key": "charges",
+            "cost": 1
+          }
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 100,
+            "duration": {
+              "rounds": 100
+            }
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 100,
+            "duration": {
+              "rounds": 100
+            }
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 100,
+            "duration": {
+              "rounds": 100
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_armor-of-resistance",
@@ -1639,7 +1715,50 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "displacement",
+        "name": "Displacement",
+        "description": "Attackers have Disadvantage against you until you take damage; it works again from the start of your next turn.",
+        "trigger": {
+          "event": "passive"
+        },
+        "condition": {
+          "type": "not",
+          "condition": {
+            "type": "hasMark",
+            "who": "self",
+            "markId": "displacement-off"
+          }
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "disadvantageForAttackers"
+          }
+        ]
+      },
+      {
+        "id": "displacement-broken",
+        "name": "Displacement disrupted",
+        "trigger": {
+          "event": "hit",
+          "role": "target"
+        },
+        "effects": [
+          {
+            "kind": "mark",
+            "markId": "displacement-off",
+            "positive": false,
+            "duration": {
+              "rounds": 1
+            },
+            "target": "self"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_cloak-of-elvenkind",
@@ -1971,8 +2090,43 @@
       "damageBonus": 1
     },
     "item": {
-      "unique": false
-    }
+      "unique": false,
+      "charges": {
+        "max": 1,
+        "rest": "long"
+      }
+    },
+    "abilities": [
+      {
+        "id": "coat-blade",
+        "name": "Coat the blade",
+        "description": "Bonus Action, once until dawn: the poison lasts 1 minute or until a hit; the creature hit makes a DC 15 Constitution save or takes 2d10 Poison damage and is Poisoned for 1 minute.",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "pool": {
+            "key": "charges",
+            "cost": 1
+          }
+        },
+        "effects": [
+          {
+            "kind": "mark",
+            "markId": "venom-coat",
+            "positive": true,
+            "duration": {
+              "rounds": 10
+            },
+            "target": "self"
+          },
+          {
+            "kind": "note",
+            "text": "On a hit: DC 15 Constitution save or 2d10 Poison damage and Poisoned for 1 minute"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_dancing",
@@ -2179,7 +2333,32 @@
     },
     "item": {
       "unique": false,
-      "attunement": true
+      "attunement": true,
+      "parameter": {
+        "kind": "damageType",
+        "options": [
+          {
+            "key": "acid",
+            "label": "acid (black, copper)"
+          },
+          {
+            "key": "cold",
+            "label": "cold (silver, white)"
+          },
+          {
+            "key": "fire",
+            "label": "fire (brass, gold, red)"
+          },
+          {
+            "key": "lightning",
+            "label": "lightning (blue, bronze)"
+          },
+          {
+            "key": "poison",
+            "label": "poison (green)"
+          }
+        ]
+      }
     },
     "abilities": [
       {
@@ -2193,6 +2372,21 @@
             "kind": "modifyStat",
             "stat": "armor",
             "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "parameter-resistance",
+        "name": "Resistance ({param})",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "{param}",
+            "percent": 50
           }
         ]
       }
@@ -4164,7 +4358,103 @@
     },
     "item": {
       "unique": false
-    }
+    },
+    "abilities": [
+      {
+        "id": "smite-crit",
+        "name": "Smiting",
+        "description": "A Critical Hit deals an extra 7 Bludgeoning damage.",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "critical"
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": 7,
+            "damageType": "bludgeoning",
+            "target": "eventTarget"
+          }
+        ]
+      },
+      {
+        "id": "smite-construct",
+        "name": "Smiting (Construct)",
+        "description": "The bonus is +3 against a Construct: +2 damage here.",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "construct"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": 2,
+            "damageType": "bludgeoning",
+            "target": "eventTarget"
+          }
+        ]
+      },
+      {
+        "id": "smite-construct-crit",
+        "name": "Smiting (Construct crit)",
+        "description": "A Critical Hit on a Construct deals 7 more Bludgeoning damage; it is destroyed at 25 HP or fewer after the damage.",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "critical"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "construct"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": 7,
+            "damageType": "bludgeoning",
+            "killIfHpAtMost": 32,
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_mace-of-terror",
@@ -5710,7 +6000,30 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "free-action",
+        "name": "Free Action",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "ignoreDifficultTerrain"
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "paralyzed",
+              "restrained"
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_ring-of-invisibility",
@@ -6450,7 +6763,26 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "speed",
+        "name": "Speed",
+        "description": "Bonus Action: one extra attack with this weapon (granted as an extra action).",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perTurn": 1
+        },
+        "effects": [
+          {
+            "kind": "grantAction",
+            "extraActions": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_sharpness",

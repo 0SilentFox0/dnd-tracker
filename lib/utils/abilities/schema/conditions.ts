@@ -38,6 +38,7 @@ export type Condition =
     | { type: 'allyAdjacent' }
     | { type: 'notMoved' }
     | { type: 'withThisItem' }
+    | { type: 'critical' }
     | { type: 'not'; condition: Condition }
     | { type: 'all'; conditions: Condition[] }
     | { type: 'any'; conditions: Condition[] };
@@ -87,6 +88,7 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
         z.object({ type: z.literal('allyAdjacent') }),
         z.object({ type: z.literal('notMoved') }),
         z.object({ type: z.literal('withThisItem') }),
+        z.object({ type: z.literal('critical') }),
         z.object({ type: z.literal('not'), condition: ConditionSchema }),
         z.object({
             type: z.literal('all'),

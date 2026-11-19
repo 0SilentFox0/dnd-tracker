@@ -403,6 +403,7 @@ const BASE_FLAG_REGISTRY: {
             }),
         ],
     },
+    ignoreDifficultTerrain: plain('ignoreDifficultTerrain'),
 };
 
 export const FLAG_REGISTRY = { ...BASE_FLAG_REGISTRY } as {

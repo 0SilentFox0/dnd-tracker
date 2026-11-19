@@ -125,6 +125,14 @@ export function passesWalls(mover?: BattleParticipant): boolean {
     );
 }
 
+export function ignoresDifficultTerrain(mover: BattleParticipant): boolean {
+    return (
+        collectModifiers([mover], mover.basicInfo.id, {
+            flag: 'ignoreDifficultTerrain',
+        }).entries.length > 0
+    );
+}
+
 export function edgeBlocks(
     map: EdgeMap,
     a: GridPoint,

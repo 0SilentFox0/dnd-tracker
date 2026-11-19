@@ -1,7 +1,8 @@
 import type { ArtifactRow } from '../lib/types';
 
+import { ROUNDS_PER_MINUTE } from '@/lib/constants/duration';
 import type { WeaponTrait } from '@/lib/constants/weapon-traits';
-import type { Ability } from '@/lib/utils/abilities/schema';
+import type { Ability, Condition, Effect } from '@/lib/utils/abilities/schema';
 import type { ItemStats } from '@/lib/utils/items/item-stats';
 
 type PropertyOverride = {
@@ -165,6 +166,32 @@ export const WONDROUS_SLOTS: Array<[RegExp, ArtifactRow['slot']]> = [
     [/\b(Helm|Hat|Circlet|Headband)\b/, 'helmet'],
 ];
 
+// items whose single charge is the SRD "once until the next dawn" use
+export const ITEM_CHARGES: Record<string, NonNullable<ItemStats['charges']>> = {
+    'srd-2024_dagger-of-venom': { max: 1, rest: 'long' },
+    'srd-2024_armor-of-invulnerability': { max: 1, rest: 'long' },
+};
+
+const withThisItem = { type: 'withThisItem' } as const;
+
+const critical = { type: 'critical' } as const;
+
+const vsConstruct: Condition = {
+    type: 'targetCreatureType',
+    types: ['construct'],
+};
+
+const PHYSICAL_TYPES = ['bludgeoning', 'piercing', 'slashing'] as const;
+
+const physicalResistance = (percent: number, rounds?: number): Effect[] =>
+    PHYSICAL_TYPES.map((damageType) => ({
+        kind: 'flag',
+        flag: 'resistance',
+        damageType,
+        percent,
+        ...(rounds && { duration: { rounds } }),
+    }));
+
 // wholly passive SRD properties the description parser leaves as text
 export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
     'srd-2024_periapt-of-proof-against-poison': [
@@ -191,9 +218,163 @@ export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
         {
             id: 'luck',
             name: 'Good Luck',
-            description: 'Applies to saving throws; ability checks stay manual.',
+            description:
+                'Applies to saving throws; ability checks stay manual.',
             trigger: { event: 'passive' },
             effects: [{ kind: 'modifyStat', stat: 'savingThrow', flat: 1 }],
+        },
+    ],
+    'srd-2024_mace-of-smiting': [
+        {
+            id: 'smite-crit',
+            name: 'Smiting',
+            description: 'A Critical Hit deals an extra 7 Bludgeoning damage.',
+            trigger: { event: 'hit', role: 'attacker' },
+            condition: { type: 'all', conditions: [withThisItem, critical] },
+            effects: [
+                {
+                    kind: 'dealDamage',
+                    amount: 7,
+                    damageType: 'bludgeoning',
+                    target: 'eventTarget',
+                },
+            ],
+        },
+        {
+            id: 'smite-construct',
+            name: 'Smiting (Construct)',
+            description: 'The bonus is +3 against a Construct: +2 damage here.',
+            trigger: { event: 'hit', role: 'attacker' },
+            condition: {
+                type: 'all',
+                conditions: [withThisItem, vsConstruct],
+            },
+            effects: [
+                {
+                    kind: 'dealDamage',
+                    amount: 2,
+                    damageType: 'bludgeoning',
+                    target: 'eventTarget',
+                },
+            ],
+        },
+        {
+            id: 'smite-construct-crit',
+            name: 'Smiting (Construct crit)',
+            description:
+                'A Critical Hit on a Construct deals 7 more Bludgeoning damage; it is destroyed at 25 HP or fewer after the damage.',
+            trigger: { event: 'hit', role: 'attacker' },
+            condition: {
+                type: 'all',
+                conditions: [withThisItem, critical, vsConstruct],
+            },
+            effects: [
+                {
+                    kind: 'dealDamage',
+                    amount: 7,
+                    damageType: 'bludgeoning',
+                    killIfHpAtMost: 32,
+                    target: 'eventTarget',
+                },
+            ],
+        },
+    ],
+    'srd-2024_scimitar-of-speed': [
+        {
+            id: 'speed',
+            name: 'Speed',
+            description:
+                'Bonus Action: one extra attack with this weapon (granted as an extra action).',
+            trigger: { event: 'bonusAction' },
+            limits: { perTurn: 1 },
+            effects: [{ kind: 'grantAction', extraActions: 1 }],
+        },
+    ],
+    'srd-2024_dagger-of-venom': [
+        {
+            id: 'coat-blade',
+            name: 'Coat the blade',
+            description:
+                'Bonus Action, once until dawn: the poison lasts 1 minute or until a hit; the creature hit makes a DC 15 Constitution save or takes 2d10 Poison damage and is Poisoned for 1 minute.',
+            trigger: { event: 'bonusAction' },
+            limits: { pool: { key: 'charges', cost: 1 } },
+            effects: [
+                {
+                    kind: 'mark',
+                    markId: 'venom-coat',
+                    positive: true,
+                    duration: { rounds: ROUNDS_PER_MINUTE },
+                    target: 'self',
+                },
+                {
+                    kind: 'note',
+                    text: 'On a hit: DC 15 Constitution save or 2d10 Poison damage and Poisoned for 1 minute',
+                },
+            ],
+        },
+    ],
+    'srd-2024_cloak-of-displacement': [
+        {
+            id: 'displacement',
+            name: 'Displacement',
+            description:
+                'Attackers have Disadvantage against you until you take damage; it works again from the start of your next turn.',
+            trigger: { event: 'passive' },
+            condition: {
+                type: 'not',
+                condition: {
+                    type: 'hasMark',
+                    who: 'self',
+                    markId: 'displacement-off',
+                },
+            },
+            effects: [{ kind: 'flag', flag: 'disadvantageForAttackers' }],
+        },
+        {
+            id: 'displacement-broken',
+            name: 'Displacement disrupted',
+            trigger: { event: 'hit', role: 'target' },
+            effects: [
+                {
+                    kind: 'mark',
+                    markId: 'displacement-off',
+                    positive: false,
+                    duration: { rounds: 1 },
+                    target: 'self',
+                },
+            ],
+        },
+    ],
+    'srd-2024_ring-of-free-action': [
+        {
+            id: 'free-action',
+            name: 'Free Action',
+            trigger: { event: 'passive' },
+            effects: [
+                { kind: 'flag', flag: 'ignoreDifficultTerrain' },
+                {
+                    kind: 'flag',
+                    flag: 'conditionImmunity',
+                    conditions: ['paralyzed', 'restrained'],
+                },
+            ],
+        },
+    ],
+    'srd-2024_armor-of-invulnerability': [
+        {
+            id: 'invulnerable-resistance',
+            name: 'Resistance to weapon damage',
+            trigger: { event: 'passive' },
+            effects: physicalResistance(50),
+        },
+        {
+            id: 'metal-shell',
+            name: 'Metal Shell',
+            description:
+                'Magic action, once until dawn: Immunity to Bludgeoning, Piercing and Slashing damage for 10 minutes.',
+            trigger: { event: 'action' },
+            limits: { pool: { key: 'charges', cost: 1 } },
+            effects: physicalResistance(100, 10 * ROUNDS_PER_MINUTE),
         },
     ],
 };

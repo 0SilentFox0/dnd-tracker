@@ -1,5 +1,10 @@
 import { cellFeetOf } from './cell-feet';
-import { edgeBlocks, passesWalls, wallsOf } from './edges';
+import {
+    edgeBlocks,
+    ignoresDifficultTerrain,
+    passesWalls,
+    wallsOf,
+} from './edges';
 import {
     cellKey,
     difficultSet,
@@ -140,7 +145,9 @@ export function searchPaths(
         );
     };
 
-    const difficult = difficultSet(map);
+    const difficult = ignoresDifficultTerrain(mover)
+        ? new Set<string>()
+        : difficultSet(map);
 
     const stepCost = (anchor: GridPoint) =>
         difficult.size > 0 &&
