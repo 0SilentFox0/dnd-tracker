@@ -1,3 +1,4 @@
+import { fortuneMax } from './characteristics/keys';
 import { PARTICIPANT_SLOT } from './slots';
 import { wfrpState, withWfrpState } from './state';
 
@@ -7,18 +8,23 @@ import type {
     TurnStateReset,
 } from '@/lib/utils/rules/systems/types';
 
-/** Fortune: the saved value, else the Fate characteristic */
+/** Fortune: the saved value, else its maximum; Fate: only once spent (absent = the characteristic) */
 export const wfrpFromStored: StoredPart = (p, { stored }) => {
+    const chars = PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics;
+
     const fortune =
-        stored.resources?.fortune ??
-        PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics.fate;
+        stored.resources?.fortune ?? (chars && fortuneMax(chars));
+
+    const fate = stored.resources?.fate;
 
     const sin = stored.resources?.sin;
 
-    if (fortune === undefined && sin === undefined) return p;
+    if (fortune === undefined && sin === undefined && fate === undefined)
+        return p;
 
     return withWfrpState(p, {
         ...(fortune !== undefined && { fortune }),
+        ...(fate !== undefined && { fate }),
         ...(sin !== undefined && { sin }),
     });
 };
@@ -27,6 +33,7 @@ export const wfrpPersist: PersistPart = ({ participant }, acc) => ({
     resources: {
         ...acc.resources,
         fortune: wfrpState(participant).fortune ?? acc.resources.fortune,
+        fate: wfrpState(participant).fate ?? acc.resources.fate,
     },
 });
 

@@ -169,5 +169,8 @@
   "tables": {},
   "system": {
     "key": "dnd5e"
+  },
+  "edition": {
+    "preset": "legacy"
   }
 }

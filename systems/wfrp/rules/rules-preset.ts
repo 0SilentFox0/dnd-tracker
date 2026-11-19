@@ -4,6 +4,7 @@ import type { RulesPreset } from '@/lib/utils/rules/systems/rules-presets';
 export const WFRP_RULES_PRESET = {
     outOfCombat: { persistResources: true, xp: true },
     spellIngredients: { enabled: true },
+    edition: { preset: 'canon5e' },
 } as const satisfies RulesPreset;
 
 export const WFRP_RULES = RulesetSchema.parse({

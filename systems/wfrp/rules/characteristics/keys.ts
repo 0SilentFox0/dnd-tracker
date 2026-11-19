@@ -47,6 +47,8 @@ export type Characteristics = {
     move: number;
     skillAdvances: Record<string, number>;
     fate: number;
+    /** Fortune maximum where it differs from Fate (canon5e); absent = `fate` */
+    fortune?: number;
     extraWounds: number;
     talents: Record<string, number>;
     ledger: LedgerEntry[];
@@ -61,6 +63,9 @@ const fill = (value: number) =>
         CharacteristicKey,
         number
     >;
+
+export const fortuneMax = (c: Pick<Characteristics, 'fate' | 'fortune'>) =>
+    c.fortune ?? c.fate;
 
 export const DEFAULT_CHARACTERISTICS: Characteristics = {
     base: fill(30),
@@ -230,6 +235,7 @@ export function readCharacteristics(row: {
         move: num('move', 1, 12),
         skillAdvances: readSkillAdvances(raw.skillAdvances),
         fate: num('fate', 0, 9),
+        ...(isInt(raw.fortune, 0, 9) && { fortune: raw.fortune as number }),
         extraWounds: num('extraWounds', 0, 3),
         talents: readTalents(raw.talents),
         ledger: readLedger(raw.ledger),

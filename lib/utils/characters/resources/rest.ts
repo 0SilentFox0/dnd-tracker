@@ -60,6 +60,7 @@ export function applyRest(
         exhaustion: Math.max(0, (r.exhaustion ?? 0) - 1),
         charges: withoutKey(r.charges, (_k, c) => c.rest !== null),
         fortune: r.fortune,
+        fate: r.fate,
         sin: r.sin,
     });
 }

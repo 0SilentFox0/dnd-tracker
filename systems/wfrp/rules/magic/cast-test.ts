@@ -1,10 +1,12 @@
 import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
 import { selfTestMod } from '../conditions/test-mod';
+import { editionOf } from '../edition';
 import {
     type PercentileTestResult,
     resolvePercentileTest,
 } from '../percentile';
+import { resolveModeSources } from '../percentile/advantage';
 import {
     applyFortune,
     FORTUNE_INPUT,
@@ -67,8 +69,14 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const fortuneInput = FORTUNE_INPUT.read(ctx.system);
 
+    const reverse = editionOf(ctx.rules).advantageModel === 'reverse';
+
+    const edge = fortuneInput?.kind === 'sl';
+
+    const modeOf = resolveModeSources({ advantage: edge && reverse ? 1 : 0 });
+
     const slModifier =
-        channelled - armour + (fortuneInput?.kind === 'sl' ? 1 : 0);
+        channelled - armour + (edge && !reverse ? 1 : 0) + modeOf.slMod;
 
     const passes = (t: PercentileTestResult) =>
         (t.outcome === 'success' || t.outcome === 'critical') && t.sl >= cn;
@@ -78,7 +86,9 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             resolvePercentileTest({
                 target,
                 slModifier,
+                mode: modeOf.mode,
                 doubles: true,
+                slModel: editionOf(ctx.rules).slModel,
                 rng,
                 presetRoll: preset,
             }),
@@ -146,7 +156,9 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             textRef(
                 fortune.kind === 'reroll'
                     ? 'battleWfrp.log.fortuneReroll'
-                    : 'battleWfrp.log.fortuneSl',
+                    : reverse
+                      ? 'battleWfrp.log.fortuneAdvantage'
+                      : 'battleWfrp.log.fortuneSl',
                 { name: caster.basicInfo.name, first: fortune.firstRoll ?? 0 }
             )
         );

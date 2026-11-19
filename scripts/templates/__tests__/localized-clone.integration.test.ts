@@ -84,7 +84,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())('grim-d100 localized clones', () => {
     beforeAll(async () => {
         if (
             await raw.campaign.count({
-                where: { kind: 'template', name: 'Grim d100' },
+                where: { kind: 'template', name: 'Grim d100 (5e)' },
             })
         )
             throw new Error(

@@ -21,6 +21,7 @@ const UK_LATIN_ALLOWLIST = new Set<string>([
 /** Keys (`ns.path`) whose uk and en values are identical on purpose (names, formulas, shared terms). */
 const IDENTICAL_ALLOWLIST = new Set<string>([
     'common.app.name', // product name
+    'gameTerms.ruleSystem.wfrp', // product name of the template
     'rest.arcane.aria', // D&D feature name kept in English across the uk UI
     'characterProfile.sheet.heroHp.total', // formula
     'abilityText.log.damage', // symbols and placeholders only

@@ -24,6 +24,7 @@ const shape = {
     exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
     shortRestOpen: z.boolean().optional(),
     fortune: z.number().int().min(0).max(9).optional(),
+    fate: z.number().int().min(0).max(9).optional(),
     sin: z.number().int().min(0).max(10).optional(),
 };
 

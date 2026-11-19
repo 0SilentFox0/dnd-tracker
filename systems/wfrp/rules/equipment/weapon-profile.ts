@@ -4,6 +4,7 @@ import type { WfrpWeaponStats } from './stats';
 
 export type WeaponProfile = {
     range: 'melee' | 'ranged';
+    group?: WfrpWeaponStats['group'];
     cells?: number;
     rangeFt?: number;
     damageFlat: number;
@@ -36,6 +37,7 @@ export function weaponProfile(stats: unknown): WeaponProfile | null {
     if (s?.type !== 'weapon') return null;
 
     const common = {
+        group: s.group,
         damageFlat: s.damage.flat,
         addSb: s.damage.addSb,
         qualities: s.qualities,

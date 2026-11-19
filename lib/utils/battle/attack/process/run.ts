@@ -337,6 +337,8 @@ function judge(run: AttackRun, actionModifiers: Modifiers): Judged {
 
     if (r.attackerUpdate) put(flow, r.attackerUpdate(getP(flow, attackerId)));
 
+    if (r.targetUpdate) put(flow, r.targetUpdate(getP(flow, run.targetId)));
+
     return {
         second: r.attackRoll.secondRoll,
         targetAC: r.defenseValue ?? 0,

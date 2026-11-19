@@ -21,6 +21,7 @@ import {
 import {
     CHARACTERISTIC_KEYS,
     type CharacteristicKey,
+    fortuneMax,
     readCharacteristics,
 } from './keys';
 
@@ -50,6 +51,9 @@ export interface SheetWfrpBlock {
     }[];
     fate: number;
     fortune: number;
+    fortuneMax: number;
+    /** Fate left in the pool */
+    fateLeft: number;
     sin: number;
     corruption: { points: number; threshold: number; mutations: Mutation[] };
 }
@@ -121,7 +125,9 @@ function buildBlock({
         move: { value: moveOf(c), walkYd: walkYards(c), runYd: runYards(c) },
         skills,
         fate: c.fate,
-        fortune: resources.fortune ?? c.fate,
+        fortune: resources.fortune ?? fortuneMax(c),
+        fortuneMax: fortuneMax(c),
+        fateLeft: resources.fate ?? c.fate,
         sin: resources.sin ?? 0,
         corruption: {
             points: c.corruption?.points ?? 0,

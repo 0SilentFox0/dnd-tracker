@@ -1,4 +1,5 @@
 import { skillTarget, value } from '../characteristics/derive';
+import { EDITION_PROFILES, editionOf } from '../edition';
 import { ATTACK_SLOT } from '../slots';
 import {
     AVERAGE_SIZE,
@@ -16,10 +17,11 @@ import {
 } from './constants';
 import { LOCATION_WEIGHTS } from './location';
 import { participantChars, participantStats } from './participant';
-import { winChance } from './win-chance';
+import { winChance, winChanceFor } from './win-chance';
 
 import { diceAverage } from '@/lib/utils/common/dice';
-import type { RuleSystemCombat } from '@/lib/utils/rules/systems/types';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { RuleSystemHitModel } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 
 const MAX_WARD_CHANCE = 0.9;
@@ -46,7 +48,9 @@ function bestHitAverage(p: BattleParticipant): number {
     );
 }
 
-export const wfrpHitModel: NonNullable<RuleSystemCombat['hitModel']> = {
+const hitModelOf = (
+    chance: RuleSystemHitModel['winChance']
+): RuleSystemHitModel => ({
     offense: (p) => value(participantChars(p), 'ws'),
     saves: (p) => p.abilities.modifiers,
     defense: (p) => {
@@ -60,7 +64,7 @@ export const wfrpHitModel: NonNullable<RuleSystemCombat['hitModel']> = {
             SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p))
         );
     },
-    winChance,
+    winChance: chance,
     damage: (p) =>
         Math.max(
             MIN_DAMAGE,
@@ -96,5 +100,14 @@ export const wfrpHitModel: NonNullable<RuleSystemCombat['hitModel']> = {
             )
         );
     },
-    refHit: winChance(BALANCE_REF_TARGET, BALANCE_REF_TARGET),
-};
+    refHit: chance(BALANCE_REF_TARGET, BALANCE_REF_TARGET),
+});
+
+export const wfrpHitModel = hitModelOf(winChance);
+
+const canonModel = hitModelOf(winChanceFor(EDITION_PROFILES.canon5e));
+
+export const wfrpHitModelFor = (
+    rules: Pick<Ruleset, 'system'>
+): RuleSystemHitModel =>
+    editionOf(rules).opposedModel === 'higherSl' ? canonModel : wfrpHitModel;

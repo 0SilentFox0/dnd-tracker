@@ -8,9 +8,10 @@ const fullDefaults: Record<string, unknown> = {
 
 delete fullDefaults.advancement;
 
-const { opportunityAttacks, retaliation, ...actions } = (
-    fullDefaults.actions as Record<string, unknown>
-);
+delete fullDefaults.edition;
+
+const { opportunityAttacks, retaliation, ...actions } =
+    fullDefaults.actions as Record<string, unknown>;
 
 void opportunityAttacks;
 void retaliation;

@@ -31,7 +31,10 @@ describe('rules.json of the packs', () => {
     });
 
     it('grim-d100-empty carries the code default WFRP_RULES', () => {
-        expect(rulesOf('grim-d100-empty')).toEqual(roundTrip(WFRP_RULES));
+        expect(rulesOf('grim-d100-empty')).toEqual({
+            ...roundTrip(WFRP_RULES),
+            edition: { preset: 'canon5e' },
+        });
     });
 
     it('grim-d100 equals the old patch merged over WFRP_RULES', () => {
@@ -46,7 +49,10 @@ describe('rules.json of the packs', () => {
 
         if (!merged.ok) throw new Error('old patch invalid');
 
-        expect(rulesOf('grim-d100')).toEqual(roundTrip(merged.rules));
+        expect(rulesOf('grim-d100')).toEqual({
+            ...roundTrip(merged.rules),
+            edition: { preset: 'canon5e' },
+        });
     });
 
     it('the shells have no kinds, only the English locale and no errors', () => {

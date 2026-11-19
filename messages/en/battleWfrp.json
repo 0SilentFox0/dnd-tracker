@@ -67,6 +67,7 @@
     "stand": "{name} gets up",
     "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
     "fortuneSl": "{name} spends Fortune: +1 SL",
+    "fortuneAdvantage": "{name} spends Fortune: Advantage",
     "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
     "critWound": "🩸 Critical wound for {target}: {text}",
     "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious",
@@ -107,7 +108,8 @@
       "firstRoll": "First roll",
       "secondRoll": "Second roll (reroll)",
       "used": "Fortune: reroll (first roll {first})",
-      "usedSl": "Fortune: +1 SL"
+      "usedSl": "Fortune: +1 SL",
+      "usedAdvantage": "Fortune: Advantage"
     }
   },
   "crit": {

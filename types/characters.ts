@@ -408,6 +408,8 @@ export interface CharacterResources {
     exhaustion?: number;
     shortRestOpen?: boolean;
     fortune?: number;
+    /** Current Fate where the system keeps it apart from Fortune; absent = the characteristic */
+    fate?: number;
     /** Sin 0-10; only the DM changes it, battle never writes it */
     sin?: number;
 }

@@ -381,6 +381,8 @@
       ],
       "fate": 0,
       "fortune": 0,
+      "fortuneMax": 0,
+      "fateLeft": 0,
       "sin": 0,
       "corruption": {
         "points": 0,

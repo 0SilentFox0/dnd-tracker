@@ -88,6 +88,7 @@ describe('sectionsOf', () => {
                 'criticals',
                 'deathSaves',
                 'defaultAttacks',
+                'edition',
                 'encounters',
                 'formulas',
                 'heroScaling',
@@ -285,6 +286,7 @@ describe('defaultRulesFor', () => {
                 retaliation: true,
             },
             advancement: DEFAULT_ADVANCEMENT_RULES,
+            edition: { preset: 'legacy' },
             system: { key: 'dnd5e' },
         });
     });

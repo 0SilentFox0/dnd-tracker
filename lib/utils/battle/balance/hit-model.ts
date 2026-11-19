@@ -17,8 +17,11 @@ export const noHitModel: HitModel = {
     refHit: 0.5,
 };
 
-export const hitModelOf = (rules: Pick<Ruleset, 'system'>): HitModel =>
-    ruleSystemOf(rules).combat.hitModel ?? noHitModel;
+export const hitModelOf = (rules: Pick<Ruleset, 'system'>): HitModel => {
+    const { combat } = ruleSystemOf(rules);
+
+    return combat.hitModelFor?.(rules) ?? combat.hitModel ?? noHitModel;
+};
 
 const MELEE_KEY = 'melee:physical';
 

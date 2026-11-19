@@ -53,6 +53,12 @@ const AdvancementSection = dynamic(() =>
     )
 );
 
+const EditionSection = dynamic(() =>
+    import('@/systems/wfrp/ui/rules/EditionSection').then(
+        (m) => m.EditionSection
+    )
+);
+
 const TablesSection = dynamic(() =>
     import('@/systems/wfrp/ui/rules/TablesSection').then((m) => m.TablesSection)
 );
@@ -82,7 +88,11 @@ const battle: SystemBattleUi = {
 export const WFRP_MODULE_UI: SystemUi = {
     battle,
     SpellMagicFields,
-    rulesSections: { advancement: AdvancementSection, tables: TablesSection },
+    rulesSections: {
+        advancement: AdvancementSection,
+        tables: TablesSection,
+        edition: EditionSection,
+    },
     HeroStats,
     StatsTab,
     RollDialogBody,

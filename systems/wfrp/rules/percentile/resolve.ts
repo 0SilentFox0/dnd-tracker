@@ -4,6 +4,8 @@ import type { Rng } from '@/lib/utils/common/rng';
 
 export type TestMode = 'normal' | 'advantage' | 'disadvantage';
 
+export type SlModel = 'clamped' | 'final';
+
 export type PercentileOutcome = 'critical' | 'success' | 'failure' | 'fumble';
 
 export interface PercentileTestInput {
@@ -11,6 +13,7 @@ export interface PercentileTestInput {
     slModifier?: number;
     mode?: TestMode;
     doubles?: boolean;
+    slModel?: SlModel;
     rng: Rng;
     presetRoll?: number;
 }
@@ -48,13 +51,18 @@ function resolveSingle(
     roll: number,
     target: number,
     slModifier: number,
-    withDoubles: boolean
+    withDoubles: boolean,
+    slModel: SlModel
 ): Single {
     const auto = roll <= 5 ? 'success' : roll >= 96 ? 'failure' : null;
 
-    const success = auto ? auto === 'success' : roll <= target;
+    const rawSl = tens(target) - tens(roll) + slModifier;
 
-    const sl = tens(target) - tens(roll) + slModifier;
+    const success = auto
+        ? auto === 'success'
+        : slModel === 'final'
+          ? rawSl > 0 || (rawSl === 0 && roll <= target)
+          : roll <= target;
 
     const doubles = isDouble(roll);
 
@@ -70,7 +78,7 @@ function resolveSingle(
     return {
         roll,
         outcome,
-        sl: success ? Math.max(0, sl) : Math.min(0, sl),
+        sl: success ? Math.max(0, rawSl) : Math.min(0, rawSl),
         auto,
         doubles,
     };
@@ -83,12 +91,19 @@ export function resolvePercentileTest({
     slModifier = 0,
     mode = 'normal',
     doubles = false,
+    slModel = 'clamped',
     rng,
     presetRoll,
 }: PercentileTestInput): PercentileTestResult {
     const rawRoll = rollPercentile(rng, presetRoll);
 
-    const straight = resolveSingle(rawRoll, target, slModifier, doubles);
+    const straight = resolveSingle(
+        rawRoll,
+        target,
+        slModifier,
+        doubles,
+        slModel
+    );
 
     if (mode === 'normal')
         return { ...straight, rawRoll, reversed: false, target, mode };
@@ -97,7 +112,8 @@ export function resolvePercentileTest({
         reverseRoll(rawRoll),
         target,
         slModifier,
-        doubles
+        doubles,
+        slModel
     );
 
     const flippedWins =

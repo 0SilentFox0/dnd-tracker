@@ -41,7 +41,7 @@ export const redactWfrpSlot: SlotRedactor = (slot, scope) => {
 
     if (!state) return slot;
 
-    const { fortune: _f, sin: _s, channelledSl: _c, ...open } = state;
+    const { fortune: _f, fate: _fa, sin: _s, channelledSl: _c, ...open } = state;
 
     return PARTICIPANT_STATE.write(open);
 };

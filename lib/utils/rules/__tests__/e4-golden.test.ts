@@ -10,10 +10,7 @@ import { initialRules } from '@/lib/utils/rules/initial-rules';
 const golden = (name: string) => `./__golden__/${name}.json`;
 
 const storedGolden = (name: string) =>
-    JSON.parse(
-        readFileSync(join(__dirname, golden(name)), 'utf8')
-    ) as unknown;
-
+    JSON.parse(readFileSync(join(__dirname, golden(name)), 'utf8')) as unknown;
 
 describe('E4 golden: stable before and after the d20 module split', () => {
     it('initialRules dnd5e without modules: sections stay, modules come from the preset', async () => {

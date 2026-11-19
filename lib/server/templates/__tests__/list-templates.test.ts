@@ -101,7 +101,7 @@ describe('listTemplates', () => {
 
     const grim = (id: string, locale: string | null) => ({
         ...srd(id, locale),
-        name: 'Grim d100',
+        name: 'Grim d100 (5e)',
         templateKey: 'grim-d100',
         _count: { careers: 3 },
     });

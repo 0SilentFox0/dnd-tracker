@@ -1,6 +1,7 @@
 import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
 import { selfTestMod } from '../conditions/test-mod';
+import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
 import { wfrpState, withWfrpState } from '../state';
 import { CHANNEL_MAX_SL, WORST_ROLL } from './constants';
@@ -32,6 +33,7 @@ export function wfrpChannel(
 
     const test = resolvePercentileTest({
         target,
+        slModel: editionOf(ctx.rules).slModel,
         rng: ctx.rng,
         presetRoll: ctx.presetRoll,
     });

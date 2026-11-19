@@ -81,8 +81,8 @@ describe('templateKeyOf', () => {
         expect(templateKeyOf({ name: 'constructor' })).toBeNull();
     });
 
-    it('legacy map covers the five official names', () => {
-        expect(Object.keys(LEGACY_KEY_BY_NAME)).toHaveLength(5);
+    it('legacy map covers the five official names and the renamed Grim', () => {
+        expect(Object.keys(LEGACY_KEY_BY_NAME)).toHaveLength(6);
     });
 });
 

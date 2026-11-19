@@ -38,7 +38,7 @@ const marker = `grimload-${randomUUID()}`;
 
 const fixtures = path.join(__dirname, 'fixtures/grim-fixture');
 
-const GRIM_NAME = 'Grim d100';
+const GRIM_NAME = 'Grim d100 (5e)';
 
 const manifest = {
     key: 'grim-d100',

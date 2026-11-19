@@ -37,6 +37,7 @@ describe('weaponProfile', () => {
     it('melee: average reach is 1 cell', () => {
         expect(weaponProfile(sword)).toEqual({
             range: 'melee',
+            group: 'basic',
             cells: 1,
             damageFlat: 4,
             addSb: true,

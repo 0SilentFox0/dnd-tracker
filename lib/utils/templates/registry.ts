@@ -13,6 +13,7 @@ export const DEFAULT_TEMPLATE_KEY = 'srd-5.2-empty';
 export const LEGACY_KEY_BY_NAME: Readonly<Record<string, string>> = {
     '5e SRD 5.2': 'srd-5.2',
     'Grim d100': 'grim-d100',
+    'Grim d100 (5e)': 'grim-d100',
     Heroes: 'heroes-homm',
     '5e (empty)': 'srd-5.2-empty',
     'Grim d100 (empty)': 'grim-d100-empty',

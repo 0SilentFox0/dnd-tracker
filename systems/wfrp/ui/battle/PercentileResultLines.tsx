@@ -31,7 +31,9 @@ export function PercentileResultLines({
                 <div className="text-hud-gold">
                     {p.fortune.kind === 'sl'
                         ? tf('usedSl')
-                        : p.fortune.firstRoll !== undefined
+                        : p.fortune.kind === 'advantage'
+                          ? tf('usedAdvantage')
+                          : p.fortune.firstRoll !== undefined
                           ? tf('used', { first: p.fortune.firstRoll })
                           : `${tf('label')}: ${tf('reroll')}`}
                 </div>

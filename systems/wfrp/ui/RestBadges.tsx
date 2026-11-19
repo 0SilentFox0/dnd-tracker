@@ -13,7 +13,7 @@ export function RestBadges({ sheet }: RestBadgesProps) {
 
     return block ? (
         <HudPill tone="gold">
-            {t('fortune', { current: block.fortune, max: block.fate })}
+            {t('fortune', { current: block.fortune, max: block.fortuneMax })}
         </HudPill>
     ) : null;
 }

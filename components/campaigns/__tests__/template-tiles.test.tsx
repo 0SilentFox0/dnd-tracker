@@ -50,7 +50,7 @@ describe('TemplateTiles Grim source', () => {
     it('shows the canonical English Grim and hides the legacy uk one', () => {
         const grim = (id: string, locale: string | null): TemplateTile => ({
             id,
-            name: 'Grim d100',
+            name: 'Grim d100 (5e)',
             description: 'd',
             locale,
             templateKey: 'grim-d100',

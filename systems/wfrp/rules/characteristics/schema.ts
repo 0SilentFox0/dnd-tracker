@@ -74,6 +74,7 @@ export const CharacteristicsSchema = z.object({
         )
         .default({}),
     fate: z.number().int().min(0).max(9).default(0),
+    fortune: z.number().int().min(0).max(9).optional(),
     extraWounds: z.number().int().min(0).max(3).default(0),
     talents: z
         .record(z.string().min(1), z.number().int().min(1).max(20))

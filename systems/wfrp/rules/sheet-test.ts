@@ -14,6 +14,7 @@ import {
 } from './percentile/difficulty';
 import { resolvePercentileTest } from './percentile/resolve';
 import { skillDef } from './skills/catalog';
+import { editionOf } from './edition';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/utils/api/content-error';
@@ -55,6 +56,7 @@ export function rollWfrpSheetTest({
     body,
     character,
     rng,
+    rules,
     t,
     presetRoll,
 }: SheetTestInput): SheetPercentileRollResult {
@@ -94,6 +96,7 @@ export function rollWfrpSheetTest({
         target: target + selfTestMod(participant, 'test'),
         slModifier: DIFFICULTY_SL[difficulty],
         doubles: false,
+        slModel: editionOf(rules).slModel,
         mode: 'normal',
         rng,
         presetRoll,

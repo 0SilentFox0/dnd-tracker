@@ -10,7 +10,6 @@ export const DIFFICULTY_KEYS = [
 
 export type DifficultyKey = (typeof DIFFICULTY_KEYS)[number];
 
-// 4e modifiers / 10; verify against 5e book
 export const DIFFICULTY_SL: Record<DifficultyKey, number> = {
     veryEasy: 6,
     easy: 4,

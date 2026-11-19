@@ -2,6 +2,7 @@ import { WFRP_ADVANCEMENT } from './rules/advancement';
 import { woundsBreakdown, woundsMax } from './rules/characteristics/derive';
 import {
     DEFAULT_CHARACTERISTICS,
+    fortuneMax,
     readCharacteristics,
 } from './rules/characteristics/keys';
 import {
@@ -13,7 +14,7 @@ import {
 import { wfrpSheetBlock } from './rules/characteristics/sheet-block';
 import { wfrpActionDetails } from './rules/combat/details';
 import { extractWfrpAttacks } from './rules/combat/extract-attacks';
-import { wfrpHitModel } from './rules/combat/hit-model';
+import { wfrpHitModel, wfrpHitModelFor } from './rules/combat/hit-model';
 import { wfrpInitiative } from './rules/combat/initiative';
 import { assertWfrpInput } from './rules/combat/input';
 import { wfrpLoseChannelled } from './rules/combat/lose-channelled';
@@ -93,9 +94,9 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         initial: initialCharacteristics,
     },
     resources: {
-        limits: (row) => ({ fateMax: readCharacteristics(row).fate }),
+        limits: (row) => ({ fateMax: fortuneMax(readCharacteristics(row)) }),
         seed: (characteristics) => ({
-            fortune: readCharacteristics({ characteristics }).fate,
+            fortune: fortuneMax(readCharacteristics({ characteristics })),
         }),
     },
     sheetTest: {
@@ -140,6 +141,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         onDamaged: [wfrpLoseChannelled],
         turn: WFRP_TURN,
         hitModel: wfrpHitModel,
+        hitModelFor: wfrpHitModelFor,
     },
     lineage: false,
     attacks: false,

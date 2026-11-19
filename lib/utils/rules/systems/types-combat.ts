@@ -34,6 +34,21 @@ import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine, TextRef } from '@/types/text';
 
+export interface RuleSystemHitModel {
+    offense(p: BattleParticipant): number;
+    defense(p: BattleParticipant): number;
+    winChance(off: number, def: number): number;
+    damage(p: BattleParticipant): number;
+    /** Multiplier on effective HP for protection that offense/defense do not capture (armour, ward) */
+    durability?(p: BattleParticipant): number;
+    /** Save modifiers the balance of a party member reports; absent means none */
+    saves?(p: BattleParticipant): Partial<Record<string, number>>;
+    /** Hit chance of an average matchup; party/unit factors are relative to it */
+    refHit: number;
+    /** Reference for library units when it differs from the hero one */
+    refHitUnit?: number;
+}
+
 export interface ResolveAttackCtx {
     attacker: BattleParticipant;
     target: BattleParticipant;
@@ -73,6 +88,8 @@ export interface ResolvedAttack {
     scene?: SystemSlot;
     /** Applied by the pipeline to the up-to-date attacker (a spent resource) */
     attackerUpdate?: (p: BattleParticipant) => BattleParticipant;
+    /** Applied to the up-to-date target before damage (a state the exchange itself changes) */
+    targetUpdate?: (p: BattleParticipant) => BattleParticipant;
 }
 
 export interface MitigateStep {
@@ -384,18 +401,7 @@ export interface RuleSystemCombat {
         speed: number;
     };
     /** Balance: hit chance from offense/defense numbers (instead of d20 to-hit vs AC) and expected damage per hit against a reference target; absent means `noHitModel` */
-    hitModel?: {
-        offense(p: BattleParticipant): number;
-        defense(p: BattleParticipant): number;
-        winChance(off: number, def: number): number;
-        damage(p: BattleParticipant): number;
-        /** Multiplier on effective HP for protection that offense/defense do not capture (armour, ward) */
-        durability?(p: BattleParticipant): number;
-        /** Save modifiers the balance of a party member reports; absent means none */
-        saves?(p: BattleParticipant): Partial<Record<string, number>>;
-        /** Hit chance of an average matchup; party/unit factors are relative to it */
-        refHit: number;
-        /** Reference for library units when it differs from the hero one */
-        refHitUnit?: number;
-    };
+    hitModel?: RuleSystemHitModel;
+    /** Edition-dependent variant of `hitModel` for a campaign's rules */
+    hitModelFor?(rules: Pick<Ruleset, 'system'>): RuleSystemHitModel;
 }

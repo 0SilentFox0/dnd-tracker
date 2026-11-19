@@ -1,5 +1,6 @@
 import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
+import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
 import { reduceWfrpCondition } from './apply';
 import { isWfrpConditionKey, WFRP_CONDITION_REGISTRY } from './catalog';
@@ -57,6 +58,7 @@ export function attemptWfrpConditionEnd(
 
     const t = resolvePercentileTest({
         target,
+        slModel: editionOf(ctx.rules).slModel,
         rng: ctx.rng,
         presetRoll: ctx.presetRoll,
     });

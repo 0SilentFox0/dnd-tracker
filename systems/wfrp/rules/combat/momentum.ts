@@ -1,6 +1,7 @@
 import type { SceneMomentum } from '../slots';
+import { wfrpState, withWfrpState } from '../state';
 
-import type { ParticipantSide } from '@/types/battle';
+import type { BattleParticipant, ParticipantSide } from '@/types/battle';
 
 export const heldBy = (m: SceneMomentum, side: ParticipantSide): boolean =>
     m[side] === true;
@@ -32,4 +33,24 @@ export function settle(
         next,
         gained: !(winner === attacker ? heldAttacker : heldDefender),
     };
+}
+
+export const hasMomentum = (p: BattleParticipant): boolean =>
+    wfrpState(p).momentum === true;
+
+export const withMomentum = (
+    p: BattleParticipant,
+    on: boolean
+): BattleParticipant =>
+    hasMomentum(p) === on
+        ? p
+        : withWfrpState(p, { momentum: on ? true : undefined });
+
+/** Damage, an inflicted Condition or a failed melee test (p168) */
+export const loseMomentum = (p: BattleParticipant): BattleParticipant =>
+    withMomentum(p, false);
+
+/** Momentum is spent on a second attack or Disengage; false when there is none to spend (p168) */
+export function spendMomentum(p: BattleParticipant): BattleParticipant | null {
+    return hasMomentum(p) ? loseMomentum(p) : null;
 }

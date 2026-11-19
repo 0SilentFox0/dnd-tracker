@@ -168,5 +168,8 @@
   "tables": {},
   "system": {
     "key": "homm"
+  },
+  "edition": {
+    "preset": "legacy"
   }
 }

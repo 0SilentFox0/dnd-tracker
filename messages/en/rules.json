@@ -101,6 +101,13 @@
     "spellIngredients": {
       "enabled": "Spell ingredients: check and spend material components when casting",
       "autoPay": "Cover missing ingredients from the wallet"
+    },
+    "edition": {
+      "preset": "Edition preset",
+      "options": {
+        "legacy": "Legacy (pre-5e values)",
+        "canon5e": "5e canon"
+      }
     }
   },
   "mechanics": {
@@ -163,6 +170,10 @@
     "tables": {
       "label": "Tables",
       "description": "Critical, miscast and Wrath of the Gods tables; untouched tables keep the built-in rows."
+    },
+    "edition": {
+      "label": "Edition",
+      "description": "Which Grim d100 edition the campaign plays by: the legacy values or the 5e canon (test success levels, opposed tests, initiative). Existing campaigns stay on legacy until switched."
     }
   },
   "customConditions": {

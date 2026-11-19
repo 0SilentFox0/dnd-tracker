@@ -1,3 +1,4 @@
+import { loseMomentum } from '../combat/momentum';
 import {
     isWfrpConditionKey,
     WFRP_CONDITION_REGISTRY,
@@ -118,7 +119,7 @@ export function applyWfrpConditionTo(
             },
         };
 
-    return { participant: next, messages: [message] };
+    return { participant: loseMomentum(next), messages: [message] };
 }
 
 export function reduceWfrpCondition(

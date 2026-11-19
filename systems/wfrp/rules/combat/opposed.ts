@@ -1,7 +1,9 @@
+import type { EditionProfile } from '../edition';
 import {
     type PercentileTestResult,
     resolvePercentileTest,
 } from '../percentile';
+import { type ModeSources, resolveModeSources } from '../percentile/advantage';
 import type { DefenseKind } from './constants';
 
 import type { Rng } from '@/lib/utils/common/rng';
@@ -11,6 +13,10 @@ export interface OpposedInput {
     defenderTargets: { kind: DefenseKind; target: number }[];
     attackerSlMod?: number;
     defenderSlMod?: number;
+    attackerModes?: ModeSources;
+    /** Advantage sources of the defence that is chosen (a parry is a melee test, a dodge is not) */
+    defenderModes?: Partial<Record<DefenseKind, ModeSources>>;
+    edition?: Pick<EditionProfile, 'slModel' | 'opposedModel'>;
     rng: Rng;
     presetRolls?: { attacker?: number; defender?: number };
 }
@@ -28,6 +34,9 @@ export function resolveOpposed({
     defenderTargets,
     attackerSlMod = 0,
     defenderSlMod = 0,
+    attackerModes,
+    defenderModes,
+    edition,
     rng,
     presetRolls,
 }: OpposedInput): OpposedResult {
@@ -36,10 +45,16 @@ export function resolveOpposed({
         { kind: 'dodge', target: 0 }
     );
 
+    const aMode = resolveModeSources(attackerModes ?? {});
+
+    const dMode = resolveModeSources(defenderModes?.[best.kind] ?? {});
+
     const attacker = resolvePercentileTest({
         target: attackerTarget,
-        slModifier: attackerSlMod,
+        slModifier: attackerSlMod + aMode.slMod,
+        mode: aMode.mode,
         doubles: true,
+        slModel: edition?.slModel,
         rng,
         presetRoll: presetRolls?.attacker,
     });
@@ -47,7 +62,9 @@ export function resolveOpposed({
     const defender = {
         ...resolvePercentileTest({
             target: best.target,
-            slModifier: defenderSlMod,
+            slModifier: defenderSlMod + dMode.slMod,
+            mode: dMode.mode,
+            slModel: edition?.slModel,
             rng,
             presetRoll: presetRolls?.defender,
         }),
@@ -59,7 +76,10 @@ export function resolveOpposed({
     const attackerSucceeded =
         attacker.outcome === 'success' || attacker.outcome === 'critical';
 
-    const isHit = attackerSucceeded && netSl >= 0;
+    const isHit =
+        edition?.opposedModel === 'higherSl'
+            ? netSl >= 0
+            : attackerSucceeded && netSl >= 0;
 
     return { attacker, defender, isHit, netSl, attackerWon: isHit };
 }

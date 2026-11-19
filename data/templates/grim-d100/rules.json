@@ -512,5 +512,8 @@
   },
   "system": {
     "key": "wfrp"
+  },
+  "edition": {
+    "preset": "canon5e"
   }
 }

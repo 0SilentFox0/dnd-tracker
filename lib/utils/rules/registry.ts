@@ -32,4 +32,5 @@ export const MECHANIC_REGISTRY = {
     spellIngredients: true,
     advancement: true,
     tables: true,
+    edition: true,
 } satisfies Record<MechanicKey, true>;

@@ -67,6 +67,7 @@ export function wfrpAttackFromProfile(
         system: ATTACK_SLOT.write({
             qualities: profile.qualities,
             flaws: profile.flaws,
+            ...(profile.group && { group: profile.group }),
             ...(!profile.addSb && { noSb: true }),
             ...(extra?.magical && { magical: true as const }),
         }),

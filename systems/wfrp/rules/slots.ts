@@ -17,6 +17,8 @@ export interface WfrpAttackSlot {
     flaws: QualityRef[];
     noSb?: boolean;
     magical?: true;
+    /** Weapon group, picks the Melee/Ranged skill speciality */
+    group?: string;
 }
 
 export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
@@ -31,6 +33,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
     return {
         qualities,
         flaws,
+        ...(typeof raw.group === 'string' && { group: raw.group }),
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.magical === true && { magical: true as const }),
     };
@@ -86,6 +89,10 @@ export const SCENE_SLOT = defineSlot<SceneMomentum>('wfrp', (raw) => {
 
 export interface WfrpParticipantState {
     fortune?: number;
+    /** Current Fate where Fate is its own pool (canon5e) */
+    fate?: number;
+    /** Personal Momentum, canon5e only (p168) */
+    momentum?: true;
     channelledSl?: number;
     sin?: number;
     conditionTests?: string[];
@@ -110,6 +117,8 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
 
         return {
             ...(finite(raw.fortune) && { fortune: raw.fortune }),
+            ...(finite(raw.fate) && { fate: raw.fate }),
+            ...(raw.momentum === true && { momentum: true as const }),
             ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
             ...(finite(raw.sin) && { sin: raw.sin }),
             ...(Array.isArray(raw.conditionTests) && {

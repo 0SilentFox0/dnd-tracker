@@ -6,9 +6,15 @@ import type { DamagedHook } from '@/lib/utils/rules/systems/types';
 export const wfrpLoseChannelled: DamagedHook = (ctx, result) => {
     const { participant } = result;
 
-    if (ctx.amount <= 0 || !wfrpState(participant).channelledSl) return result;
+    const state = wfrpState(participant);
 
-    const dropped = withWfrpState(participant, { channelledSl: undefined });
+    if (ctx.amount <= 0 || !(state.channelledSl || state.momentum))
+        return result;
+
+    const dropped = withWfrpState(participant, {
+        channelledSl: undefined,
+        momentum: undefined,
+    });
 
     return {
         ...result,
