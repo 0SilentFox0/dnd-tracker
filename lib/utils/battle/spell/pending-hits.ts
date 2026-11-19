@@ -84,6 +84,7 @@ export function resolvePendingHits(
             before: target,
             after: findParticipant(next, hit.targetId) ?? target,
             amount: finalDamage,
+            damageType: hit.damageType,
             rules: ctx.rules,
             rng: ctx.rng,
             participants: next,

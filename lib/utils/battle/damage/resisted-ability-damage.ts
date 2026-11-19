@@ -57,6 +57,7 @@ export function dealResistedDamage(
         before: target,
         after: hurt,
         amount: finalDamage,
+        damageType,
         rules: opts.rules,
         rng: rngOf(opts),
         participants: after,

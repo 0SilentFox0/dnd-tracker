@@ -26,6 +26,7 @@ import {
 } from '@/lib/utils/battle/attack/crit-dice';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
+import { regenSuppressed } from '@/lib/utils/battle/damage/regen-guard';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { forgoDice } from '@/lib/utils/common/dice';
@@ -126,6 +127,7 @@ export function applyDealDamage(
             before: t,
             after: applyRawDamage(t, dealt),
             amount: dealt,
+            damageType,
             crit: hitEvent?.crit,
             rules: ctx.rules,
             rng: ctx.rng,
@@ -173,6 +175,16 @@ export function applyHeal(
         const t = findParticipant(ps, id);
 
         if (!t || (!isActive(t) && !effect.revive && !isDying(t))) continue;
+
+        if (regenSuppressed(t, effect.unlessDamagedBy)) {
+            messages.push(
+                textRef('abilityText.log.regenSuppressed', {
+                    label,
+                    target: t.basicInfo.name,
+                })
+            );
+            continue;
+        }
 
         const amount = resolveAmount(effect.amount, {
             owner,

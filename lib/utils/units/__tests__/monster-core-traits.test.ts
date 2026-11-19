@@ -39,3 +39,26 @@ describe('coreTrait', () => {
         expect(coreTrait('Regeneration', 'heals a lot')).toBeUndefined();
     });
 });
+
+describe('coreTrait regeneration guard', () => {
+    const troll =
+        "The troll regains 15 Hit Points at the start of each of its turns. If the troll takes Acid or Fire damage, this trait doesn't function on the troll's next turn. The troll dies only if it starts its turn with 0 Hit Points and doesn't regenerate.";
+
+    it('reads the damage types that switch regeneration off', () => {
+        expect(coreTrait('Regeneration', troll)?.effects[0]).toEqual({
+            kind: 'heal',
+            amount: 15,
+            target: 'self',
+            unlessDamagedBy: ['acid', 'fire'],
+        });
+    });
+
+    it('leaves plain regeneration unguarded', () => {
+        const core = coreTrait(
+            'Regeneration',
+            'The oni regains 10 Hit Points at the start of each of its turns if it has at least 1 Hit Point.'
+        );
+
+        expect(core?.effects[0]).not.toHaveProperty('unlessDamagedBy');
+    });
+});

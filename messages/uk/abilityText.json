@@ -4,6 +4,7 @@
     "damage": "💥 {ability}: {target} −{amount} HP",
     "heal": "💚 {label}: {target} +{amount} HP",
     "revive": "✝️ {label}: {target} повертається з {hp} HP",
+    "regenSuppressed": "🚫 {label}: {target} не регенерує цього ходу",
     "immuneTo": "⛔ {ability}: {target} — імунітет до {type}",
     "dot": "🔥 {ability}: {type} {amount}/раунд → {target} ({rounds} р.)",
     "hot": "💚 {ability}: +{amount} HP/раунд → {target} ({rounds} р.)",

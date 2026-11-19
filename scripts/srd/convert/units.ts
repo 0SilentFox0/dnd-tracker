@@ -9,7 +9,7 @@ import {
 } from '../lib/open5e';
 import { bySlug, clamp, titleCase } from '../lib/text';
 import type { UnitAttackRow, UnitRow } from '../lib/types';
-import { UNIT_OVERRIDES } from '../overrides/units';
+import { UNIT_DAMAGE_OVERRIDES, UNIT_OVERRIDES } from '../overrides/units';
 import {
     actionGrant,
     saveAction,
@@ -374,11 +374,17 @@ export function convertUnits(data: Open5eData): UnitRow[] {
                 );
             }
 
+            const damageOverride = UNIT_DAMAGE_OVERRIDES[row.pk] ?? {};
+
+            const merged = (feed: string[], extra: string[] = []) => [
+                ...new Set([...feed, ...extra]),
+            ];
+
             const immunities = [
                 flagsAbility(
                     uniqueId(seen, 'damage-immunities'),
                     'Damage Immunities',
-                    c.damage_immunities,
+                    merged(c.damage_immunities, damageOverride.immunities),
                     (t) => ({
                         kind: 'flag',
                         flag: 'resistance',
@@ -389,7 +395,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
                 flagsAbility(
                     uniqueId(seen, 'damage-resistances'),
                     'Damage Resistances',
-                    c.damage_resistances,
+                    merged(c.damage_resistances, damageOverride.resistances),
                     (t) => ({
                         kind: 'flag',
                         flag: 'resistance',
@@ -400,7 +406,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
                 flagsAbility(
                     uniqueId(seen, 'damage-vulnerabilities'),
                     'Damage Vulnerabilities',
-                    c.damage_vulnerabilities,
+                    merged(c.damage_vulnerabilities, damageOverride.vulnerabilities),
                     (t) => ({
                         kind: 'flag',
                         flag: 'resistance',

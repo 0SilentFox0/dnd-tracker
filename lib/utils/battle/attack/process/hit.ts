@@ -102,7 +102,8 @@ export function resolveHit(p: ResolveHitParams): {
         targetBefore,
         guarded.targetDamage,
         p.attackRoll.isCritical,
-        p.attackRoll.location
+        p.attackRoll.location,
+        attack.damageType
     );
 
     if (guarded.guardianId) {
@@ -114,7 +115,8 @@ export function resolveHit(p: ResolveHitParams): {
             guardian,
             guarded.guardianDamage,
             p.attackRoll.isCritical,
-            p.attackRoll.location
+            p.attackRoll.location,
+            attack.damageType
         );
 
         if (hitDamage.afterHit && guarded.guardianDamage > 0) {

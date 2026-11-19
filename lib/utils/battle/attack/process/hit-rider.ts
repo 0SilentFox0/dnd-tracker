@@ -179,7 +179,14 @@ function riderDamage(
     if (resisted.finalDamage <= 0) return;
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
-    applyFlowDamage(flow, target, resisted.finalDamage, crit);
+    applyFlowDamage(
+        flow,
+        target,
+        resisted.finalDamage,
+        crit,
+        undefined,
+        state.damageType
+    );
     flow.messages.push(
         `💥 ${rider.name}: ${target.basicInfo.name} −${resisted.finalDamage} HP`
     );

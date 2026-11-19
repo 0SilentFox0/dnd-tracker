@@ -265,7 +265,14 @@ function dealSpellDamage(
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
     state.dealt += resisted.finalDamage;
-    applyFlowDamage(flow, target, resisted.finalDamage);
+    applyFlowDamage(
+        flow,
+        target,
+        resisted.finalDamage,
+        undefined,
+        undefined,
+        effect.damageType ?? 'magic'
+    );
     absorbSpellDamage(state, id, resisted.finalDamage);
     state.damageSteps[id] = [
         ...(state.damageSteps[id] ?? []),

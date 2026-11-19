@@ -54,7 +54,8 @@ export function applyFlowDamage(
     before: BattleParticipant,
     amount: number,
     crit?: boolean,
-    location?: string
+    location?: string,
+    damageType?: string
 ): void {
     if (amount <= 0) return;
 
@@ -62,6 +63,7 @@ export function applyFlowDamage(
         before,
         after: getP(flow, before.basicInfo.id),
         amount,
+        damageType,
         crit,
         rules: flow.ctx.rules,
         rng: flow.ctx.rng,

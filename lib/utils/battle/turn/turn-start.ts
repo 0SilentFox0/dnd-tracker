@@ -23,6 +23,7 @@ import type { Rng } from '@/lib/utils/abilities/engine/core/types';
 import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { effectName } from '@/lib/utils/battle/common/terms';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
+import { clearGuardedDamage } from '@/lib/utils/battle/damage/regen-guard';
 import {
     hazardHit,
     hazardLabel,
@@ -502,8 +503,9 @@ export function processStartOfTurn(
         abilityMessages.push(...r.messages);
     }
 
-    const finalParticipant =
-        findParticipant(participants, id) ?? updatedParticipant;
+    const finalParticipant = clearGuardedDamage(
+        findParticipant(participants, id) ?? updatedParticipant
+    );
 
     const unableToUseAnyAttackOrSpell =
         isActive(finalParticipant) &&
