@@ -86,3 +86,24 @@ Minor (скорочено)
 | Тести систем UI | skilltrees без тестів EditorTable/SkillGroupAccordion/MainSkillCard | +15 тестів |
 
 Не досягнуто / свідомо відкрито: `moraleStore`/`morale-store.ts` у ядрі називає модуль (потрібен узагальнений seam на `STORED_COLUMN_ENTRIES`; зараз це зростання ratchet на 1 файл); `BattleParticipant.morale` і `isEnableInSkillTree` лишаються в схемі ядра (D5/D6); поріг покриття `app/api` не додано (потрібен виміряний `--coverage`); CI немає. Читачі колонок лишаються до D2: `usageSelect.skillTreeProgress`. Прод не чіпали: міграція M1, бекфіли і деплой чекають «так» власника.
+
+## 6. Завершення хвилі 4 (2026-11-19: смуга E, seam, D1–D3 на проді)
+
+Виміряно гейтами й сканерами: tsc 0, cycles 0 SCC, повний `test:run` 2611 файлів / 18758 тестів зелені (після D3: 2610 + виправлений ратчет), `lint:dirs --changed` чистий.
+
+| Критерій | Було (реаудит) | Після слайсів 1–3 | Стало (після D3) |
+|---|---|---|---|
+| `system-literals-exempt` | 45 файлів / 67 хітів | 5 / 9 | **3 файли / 7 хітів** |
+| surface code (файлів / сума хітів) | 1477 (честний reset) | 210 / 1060 | **201 / 971** |
+| surface schema | 18 | 9 | **3** |
+| surface messages | 192 | 164 | 164 |
+| Колонки модулів у ядрі (`pendingMoraleCheck`, `characters.inspiration/morale/skillTreeProgress`, `units(.base).morale`) | 6 | 6 (dual-write) | **0, видалені на проді** |
+| Читання/запис модульних даних | колонки ядра | dual-write + fallback | **лише нове сховище** (`ext.*`, таблиця `skill_tree_progress`, слот сцени) |
+| Поріг покриття `app/api` | немає | немає | 80/80/80/70 (виміряний `--coverage`) |
+| Файли > 150 рядків у `lib/server`, `world-service`/`import-content` та ін. | кілька | — | розбиті (смуга E) |
+
+Прод (2026-11-19): активний бій завершено власником; `RATE_LIMIT_ALLOW_MEMORY=1` у Vercel production; токен лише з `ai` розширено read-scope'ами; бекапи перед D1 і D3; M1 застосовано вручну до push (D2-prep читає таблицю), бекфіли: skill_tree_progress 8 (6 порожніх), morale units 612 / units_base 153, characters 0, inspiration 0, pending-morale 0; усі `--report --expect-zero` = 0 перед DROP; D1 → D2 → D3 задеплоєні, `migrate status` 82 міграції, health 200, помилок у логах немає.
+
+Знайдено й виправлено під час виконання: sweep писав навички героїв лише в колонку (таблиця має пріоритет, 17 хибних збоїв `heroes-homm`); Opus-рев'ю D2: I1 (хеш контенту без `morale` після дропу змінював би baseline template sync — дефолт `morale: 0` у `contentRowHash`), I2 (`active-battles-report` читав видалену колонку).
+
+Свідомо відкрито: `BattleParticipant.morale` і `isEnableInSkillTree` у схемі ядра (D5/D6); CI немає; M3 (скидання прогресу дерева при пониженні рівня незалежно від композиції — поведінка з D1); M4 (створення персонажа не зберігає `morale`, давній дефект); `heroes-homm` «темрява в лабіринті» — одна відома помилка sweep, ідентична базовому main; розвчення навички не перевірено в UI (кнопки в DM-екрані немає); браузерну перевірку виконано на prodcopy_w4c (learn, inspiration, morale-check), а не на проді.

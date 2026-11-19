@@ -17,10 +17,10 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 | C | MCP: idempotency w/o session id, `propose_scenario_edit` requestId, L11-11, e2e IDOR/retry, AiToolError codes, ai.md | done (full tests green after ratchet entry move) |
 | B | modularity + migrations (Opus design first) | slice 1 done; slice 2 done (P5, P9, P10, tails a/b/c; local main, gate green, Opus review 0 Critical, Important fixed); slice 3 (W13-W18, design: `2026-11-18-quality-wave4-slices-2-3.md`) code done, pending gate/review |
 | D | tests (route-contract, app/api coverage, d20 rules, systems UI, downtime-handler) | done + tails (wfrp/d20 UI tests, downtime casts); open: app/api coverage threshold (needs measured `--coverage` run), skilltrees EditorTable/SkillGroupAccordion/MainSkillCard tests, hit-dice clamp bug |
-| E | file/function size hygiene, snapshot Zod | todo |
+| E | file/function size hygiene, snapshot Zod | done |
 | F | maps perf + BattleMap/MapStage split + chunk constants | done (feat/wave4-lane-f, merged local main; not pushed) |
 | G | clones, keys.ts, raw-controls rule, overlays/tabs | done (see journal) |
-| Mini re-audit | changed criteria only, update before/after report | todo |
+| Mini re-audit | changed criteria only, update before/after report | done (reaudit §5-§6) |
 
 ## Lane A design notes
 
@@ -64,3 +64,5 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 
 - 2026-11-19 (session 8): prod battle «Лабіринт» (HOMM5) ended by owner's yes via `end-active-battles.ts --apply` (snapshot in `.migration-backup/end-battles/`), prod now idle (0 active/paused). Sweep on prodcopy_w4c: `srd-5.2+morale` 0 errors (36 morale checks, 35 d10Roll events); `heroes-homm` 1 error (known maze-darkness, identical on origin/main d871500da baseline). First run had 18 errors: sweep script wrote only `characters.skillTreeProgress` while readers prefer table `skill_tree_progress` (table wins) — fixed in b0db5c404 (sweep writes both). Row counts unchanged after runs. Browser check of HOMM5 hero NOT done: Chrome extension cannot open localhost and there is no local login (Supabase cloud auth). Part 4 (push, D1, prod backfills, D2, D3/M2) not started.
 - 2026-11-19 (owner request, AFTER D2+D3): pure technical task — regroup files into logical subfolders; priority `components/battle/map` and `components/battle/setup`; any folder with >10 component files counts as under-split. Then update README. No behavior change; one commit per folder group; imports via `@/` only; run tsc + cycles + full test:run once at the end. Separate small UI task done: playlist upload/YouTube buttons unified (3b8b7f76a).
+
+- 2026-11-19 (session 8, closing): PART 3+4 DONE. Prod battle ended by owner; env RATE_LIMIT_ALLOW_MEMORY=1; ai token expanded; backup; M1 manual; prod backfills (counters in reaudit §6); push D1 3b8b7f76a; D2 1705c76d2 (Opus review: 0 Critical, I1 hash morale default + I2 active-battles-report fixed); M2 rehearsed on prodcopy_w4c (diff = 14 known FK drift lines only, sweep morale 0 errors); D3 cdbe0789e deployed, `migrate status` 82 / up to date, health 200, no error logs. Open: folder regrouping + README (owner request), M3/M4 minors, UI unlearn button absent for DM, Upstash for rate limit.
