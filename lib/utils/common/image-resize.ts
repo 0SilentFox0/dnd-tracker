@@ -97,3 +97,46 @@ export async function resizeImageToBlob(
 
     return jpeg;
 }
+
+export function squareCrop(w: number, h: number) {
+    const side = Math.min(w, h);
+
+    return {
+        sx: Math.floor((w - side) / 2),
+        sy: Math.floor((h - side) / 2),
+        side,
+    };
+}
+
+export async function cropSquareToBlob(
+    file: File,
+    size: number,
+    quality = 0.85
+): Promise<Blob> {
+    const bitmap = await decodeBitmap(file);
+
+    const { sx, sy, side } = squareCrop(bitmap.width, bitmap.height);
+
+    const canvas = document.createElement('canvas');
+
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+        bitmap.close();
+        throw new ImageResizeError('validation.image.tooLarge');
+    }
+
+    ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, size, size);
+    bitmap.close();
+
+    const blob = await toBlob(canvas, 'image/webp', quality);
+
+    // the bucket accepts webp only; Safari may hand back PNG
+    if (blob?.type !== 'image/webp')
+        throw new ImageResizeError('validation.image.compressFailed');
+
+    return blob;
+}

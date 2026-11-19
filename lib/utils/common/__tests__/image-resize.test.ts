@@ -5,6 +5,7 @@ import {
     fitWithin,
     resizeImageToBlob,
     resizeImageToDataUrl,
+    squareCrop,
 } from '@/lib/utils/common/image-resize';
 
 describe('fitWithin', () => {
@@ -113,4 +114,12 @@ describe('resizeImageToBlob', () => {
             resizeImageToBlob(new File([''], 'a.png'), 50)
         ).rejects.toThrow('validation.image.tooLarge');
     });
+});
+
+describe('squareCrop', () => {
+    it.each([
+        [400, 200, { sx: 100, sy: 0, side: 200 }],
+        [100, 300, { sx: 0, sy: 100, side: 100 }],
+        [50, 50, { sx: 0, sy: 0, side: 50 }],
+    ])('%i x %i', (w, h, out) => expect(squareCrop(w, h)).toEqual(out));
 });

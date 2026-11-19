@@ -1,3 +1,4 @@
+export { useAvatar } from './useAvatar';
 export {
     type PasswordSession,
     useAuthUrlError,
