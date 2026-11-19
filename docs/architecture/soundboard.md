@@ -6,7 +6,7 @@ DM-панель швидких звуків: один дотик відтвор�
 
 - Таблиця `campaign_sounds` (`campaignId` cascade, `name`, `url`, `durationMs`, `volume`, `color`, `icon`, `sortOrder`; індекс `(campaignId, sortOrder)`), RLS увімкнено. Звуки належать кампанії, шарів контенту немає.
 - `Campaign.hiddenBuiltinSounds String[]` — приховані вбудовані звуки; видалити вбудований не можна.
-- Файли власних звуків — bucket `soundboard` (`SOUNDBOARD_BUCKET`), створюється ліниво через `ensureBucket`; завантаження через signed upload.
+- Файли власних звуків — bucket `soundboard` (`SOUNDBOARD_BUCKET`), створюється ліниво через `ensureBucket`; завантаження через signed upload (спільні `lib/supabase/audio-upload.ts` і `lib/api/upload-audio-file.ts` з battle-music).
 
 ## Вбудований реєстр
 

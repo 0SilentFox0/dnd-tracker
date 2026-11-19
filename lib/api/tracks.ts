@@ -1,13 +1,10 @@
-import { campaignPost, campaignPut, createCampaignCrudApi } from './client';
+import { campaignPut, createCampaignCrudApi } from './client';
+import { uploadAudioViaTicket } from './upload-audio-file';
 
-import { TRACK_CACHE_SECONDS, TRACK_FORMATS } from '@/lib/constants/music';
-import { createClient } from '@/lib/supabase/client';
 import { validateTrackFile } from '@/lib/utils/audio/track-file';
 import type {
     CampaignTrack,
     CreateTrackData,
-    TrackUploadRequest,
-    TrackUploadTicket,
     UpdateTrackData,
 } from '@/types/audio';
 
@@ -30,7 +27,6 @@ export function reorderTracks(
     return campaignPut<CampaignTrack[]>(campaignId, '/tracks/order', { ids });
 }
 
-/** The file goes from the browser straight to Storage: the request body to Vercel is capped at 4.5 MB. */
 export async function uploadTrackFile(
     campaignId: string,
     file: File,
@@ -40,33 +36,13 @@ export async function uploadTrackFile(
 
     if (!checked.ok) throw new Error(checked.message);
 
-    const request: TrackUploadRequest = {
-        name: file.name,
-        size: file.size,
-        contentType: TRACK_FORMATS[checked.value].contentType,
-    };
-
-    const ticket = await campaignPost<TrackUploadTicket>(
+    const ticket = await uploadAudioViaTicket(
         campaignId,
+        file,
+        checked.value,
         '/tracks/upload-url',
-        request
+        'music.library.uploadFailed'
     );
-
-    // Storage takes the MIME from the FormData part, and browsers send "audio/x-m4a" or "" for .m4a: retype from the ticket
-    const body = new Blob([file], { type: ticket.contentType });
-
-    const { error } = await createClient()
-        .storage.from(ticket.bucket)
-        .uploadToSignedUrl(ticket.path, ticket.token, body, {
-            contentType: ticket.contentType,
-            cacheControl: TRACK_CACHE_SECONDS,
-        });
-
-    if (error) {
-        console.warn('[tracks] upload failed', error.message);
-
-        throw new Error('music.library.uploadFailed');
-    }
 
     return createTrack(campaignId, {
         kind: 'file',
