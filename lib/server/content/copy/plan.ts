@@ -1,4 +1,4 @@
-import { type CopyRow,selectClosure } from './closure';
+import { type CopyRow, selectClosure } from './closure';
 
 import { CONTENT_KINDS } from '@/lib/constants/content-kinds';
 import { isKindActive } from '@/lib/server/content/kind-active';
@@ -106,7 +106,11 @@ export async function buildCopyPlan(args: {
                     reason: 'kind-unsupported',
                 });
             else if (targetIdOf(table, row))
-                plan.skipped.push({ kind, name: nameOf(row), reason: 'exists' });
+                plan.skipped.push({
+                    kind,
+                    name: nameOf(row),
+                    reason: 'exists',
+                });
             else roots.push({ table, id });
         }
     }

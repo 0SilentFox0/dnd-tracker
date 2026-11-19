@@ -61,7 +61,9 @@ describe('buildCopyPlan', () => {
 
         expect(plan.reuse.get(R)).toBe(TR);
         expect(plan.reused).toEqual([{ kind: 'races', id: R, name: 'Giant' }]);
-        expect(plan.toCreate.map((r) => r.row.id).sort()).toEqual([U, S].sort());
+        expect(plan.toCreate.map((r) => r.row.id).sort()).toEqual(
+            [U, S].sort()
+        );
         expect(plan.bundle.races).toEqual([]);
     });
 
@@ -80,7 +82,9 @@ describe('buildCopyPlan', () => {
         expect(plan.skipped).toEqual([
             { kind: 'spells', name: 'Bolt', reason: 'kind-unsupported' },
         ]);
-        expect(plan.toCreate.map((r) => r.row.id).sort()).toEqual([U, R].sort());
+        expect(plan.toCreate.map((r) => r.row.id).sort()).toEqual(
+            [U, R].sort()
+        );
     });
 
     it('yields an empty plan when re-planned against a copied target', async () => {

@@ -1,6 +1,6 @@
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
+import { CampaignKind, CampaignRole } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
 import type { IdName } from '@/types/common';
@@ -17,7 +17,10 @@ export async function listCopyTargets(
 
     return members
         .map((m) => m.campaign)
-        .filter((c) => c.id !== excludeCampaignId && !isDemoKind(c.kind))
+        .filter(
+            (c) =>
+                c.id !== excludeCampaignId && c.kind === CampaignKind.CAMPAIGN
+        )
         .map(({ id, name }) => ({ id, name }));
 }
 

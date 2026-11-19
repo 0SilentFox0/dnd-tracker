@@ -5,7 +5,16 @@ import { emptyBundle } from '@/lib/server/templates/bundle';
 
 const id = (c: string) => 'c' + c.repeat(24);
 
-const [U, R, S, U2, A, SET, X, OTHER] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map(id);
+const [U, R, S, U2, A, SET, X, OTHER] = [
+    'a',
+    'b',
+    'c',
+    'd',
+    'e',
+    'f',
+    'g',
+    'h',
+].map(id);
 
 describe('selectClosure', () => {
     it('follows ids inside JSON abilities', () => {
@@ -75,6 +84,8 @@ describe('selectClosure', () => {
 
         b.units.push({ id: U, abilities: { race: X } });
 
-        expect(selectClosure(b, [{ table: 'units', id: U }]).missing).toEqual([X]);
+        expect(selectClosure(b, [{ table: 'units', id: U }]).missing).toEqual([
+            X,
+        ]);
     });
 });

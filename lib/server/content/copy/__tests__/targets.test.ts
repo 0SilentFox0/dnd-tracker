@@ -7,7 +7,10 @@ vi.mock('@/lib/db', () => ({
     prisma: { campaignMember: { findMany: (a: unknown) => findMany(a) } },
 }));
 
-import { listCopyTargets, resolveTargets } from '@/lib/server/content/copy/targets';
+import {
+    listCopyTargets,
+    resolveTargets,
+} from '@/lib/server/content/copy/targets';
 
 const m = (id: string, kind = 'campaign') => ({
     campaign: { id, name: `N${id}`, kind },
@@ -15,7 +18,13 @@ const m = (id: string, kind = 'campaign') => ({
 
 beforeEach(() => {
     findMany.mockReset();
-    findMany.mockResolvedValue([m('a'), m('src'), m('demo', 'demo'), m('b')]);
+    findMany.mockResolvedValue([
+        m('a'),
+        m('src'),
+        m('demo', 'demo'),
+        m('tpl', 'template'),
+        m('b'),
+    ]);
 });
 
 describe('copy targets', () => {
@@ -28,7 +37,7 @@ describe('copy targets', () => {
         });
     });
 
-    it('all excludes source and demo campaigns', async () => {
+    it('all excludes source, demo and template campaigns', async () => {
         const r = await resolveTargets({
             userId: 'u1',
             sourceCampaignId: 'src',
@@ -36,6 +45,16 @@ describe('copy targets', () => {
         });
 
         expect(r.map((c) => c.id)).toEqual(['a', 'b']);
+    });
+
+    it('rejects an explicit template target', async () => {
+        await expect(
+            resolveTargets({
+                userId: 'u1',
+                sourceCampaignId: 'src',
+                targets: { campaignIds: ['tpl'] },
+            })
+        ).rejects.toMatchObject({ status: 403 });
     });
 
     it('rejects an id the user does not manage', async () => {
