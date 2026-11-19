@@ -1219,6 +1219,22 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         adapter: 'show/puzzle, player route without assistant adapter',
         state: 'planned',
     },
+    ...(
+        [
+            ['', ['GET', 'POST']],
+            ['/[soundId]', ['DELETE', 'PATCH']],
+            ['/hidden', ['PUT']],
+            ['/order', ['PUT']],
+            ['/play', ['POST']],
+            ['/upload-url', ['POST']],
+        ] as const
+    ).map(([suffix, methods]) => ({
+        route: `campaigns/[id]/sounds${suffix}`,
+        methods,
+        task: 0,
+        adapter: 'soundboard, DM-only live audio without assistant adapter',
+        state: 'planned' as const,
+    })),
     {
         route: 'campaigns/[id]/show',
         methods: ['GET', 'POST'],

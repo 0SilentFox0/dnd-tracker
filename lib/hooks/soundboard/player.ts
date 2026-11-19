@@ -1,4 +1,3 @@
-import { logger } from '@/lib/utils/common/logger';
 import { createVoicePool } from '@/lib/utils/soundboard/voices';
 import type { Sound } from '@/types/soundboard';
 
@@ -40,7 +39,7 @@ const unlock = async (): Promise<void> => {
 
         if (c && c.state !== 'running') await c.resume().catch(() => {});
     } catch (error) {
-        logger.warn('[soundboard] unlock failed', {}, error);
+        console.warn('[soundboard] unlock failed', {}, error);
     }
 };
 
@@ -125,7 +124,7 @@ export async function playBuffer(
             throw error;
         }
     } catch (error) {
-        logger.warn(
+        console.warn(
             '[soundboard] playback failed',
             { soundId: sound.id },
             error

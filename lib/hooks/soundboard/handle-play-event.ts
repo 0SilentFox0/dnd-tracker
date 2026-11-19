@@ -5,7 +5,6 @@ import { playBuffer } from './player';
 
 import { getSounds } from '@/lib/api/soundboard';
 import { readAudioPrefs } from '@/lib/hooks/audio';
-import { logger } from '@/lib/utils/common/logger';
 import { createNonceGuard } from '@/lib/utils/soundboard/dedupe';
 import { resolveSound } from '@/lib/utils/soundboard/resolve-sound';
 import { effectiveVolume } from '@/lib/utils/soundboard/volume';
@@ -70,6 +69,6 @@ export function handleSoundPlayEvent(
     if (!firstSeen(event.nonce)) return;
 
     play(queryClient, campaignId, event.soundId).catch((error) =>
-        logger.warn('[soundboard] play event failed', {}, error)
+        console.warn('[soundboard] play event failed', {}, error)
     );
 }

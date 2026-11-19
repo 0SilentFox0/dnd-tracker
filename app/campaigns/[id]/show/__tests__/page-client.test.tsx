@@ -59,6 +59,10 @@ vi.mock('@/components/show/stage/ShowControlPanel', () => ({
     ShowControlPanel: () => <div data-testid="control-panel" />,
 }));
 
+vi.mock('@/components/soundboard/SoundboardPanel', () => ({
+    SoundboardPanel: () => <div data-testid="soundboard" />,
+}));
+
 vi.mock('@/components/show/stage/ShowBattleCall', () => ({
     ShowBattleCall: () => <a href="/b">battle</a>,
 }));
