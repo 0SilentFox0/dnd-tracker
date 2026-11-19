@@ -22,6 +22,10 @@ import {
 } from '@/lib/utils/rules/schema';
 import type { Unit } from '@/types/units';
 
+vi.mock('@/lib/hooks/content-copy', () => ({
+    useContentCopyOptions: () => ({ data: { items: [], campaigns: [] } }),
+}));
+
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));

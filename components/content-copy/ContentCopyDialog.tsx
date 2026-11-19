@@ -122,7 +122,7 @@ export function ContentCopyDialog({
             size="lg"
             open={open}
             onOpenChange={close}
-            title={t('title', { kind: t(`kinds.${kind}`) })}
+            title={t('title')}
             description={t(`steps.${step}`)}
             footer={footer}
         >

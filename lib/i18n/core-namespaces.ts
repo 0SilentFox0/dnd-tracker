@@ -33,7 +33,6 @@ export const CAMPAIGN_NAMESPACES = [
     'tileLabels',
     'compendium',
     'contentImport',
-    'contentCopy',
     'gameTerms',
     'abilityText',
     'battleTerms',

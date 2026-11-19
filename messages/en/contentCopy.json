@@ -1,21 +1,6 @@
 {
   "button": "Copy to campaigns…",
-  "title": "Copy {kind} to other campaigns",
-  "kinds": {
-    "units": "units",
-    "spells": "spells",
-    "spell-groups": "spell schools",
-    "races": "races",
-    "feats": "feats",
-    "artifacts": "artifacts",
-    "classes": "classes",
-    "backgrounds": "backgrounds",
-    "careers": "careers",
-    "main-skills": "main skills",
-    "skills": "skills",
-    "artifact-sets": "artifact sets",
-    "tracks": "tracks"
-  },
+  "title": "Copy to other campaigns",
   "steps": {
     "pick": "Choose what to copy and where",
     "preview": "Check what will happen",

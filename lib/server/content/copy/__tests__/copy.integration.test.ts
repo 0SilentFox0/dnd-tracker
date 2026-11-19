@@ -191,8 +191,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copyContent (local DB)', () => {
 
         expect(targets[0].created).toEqual([]);
         expect(targets[0].skipped.length).toBeGreaterThan(0);
-        expect(targets[0].reused.length).toBeGreaterThan(0);
-        expect(targets[0].reused.every((r) => r.id === undefined)).toBe(true);
+        expect(targets[0].reused).toEqual([]);
         expect(await raw.unit.count({ where: { campaignId: tgt } })).toBe(1);
         expect(await raw.race.count({ where: { campaignId: tgt } })).toBe(1);
         expect(
