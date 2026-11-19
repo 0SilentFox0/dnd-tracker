@@ -277,7 +277,7 @@ export const UTILITY_SPELL_OVERRIDES: Record<string, Override> =
 
             // vitality
             aid: effects(area('ally', 3, 30), [
-                { kind: 'maxHpBoost', amount: 5 },
+                { kind: 'maxHpBoost', amount: 5, upcastAmount: 5 },
             ]),
             'raise-dead': raise(1, true),
             resurrection: raise({ percentOf: 'maxHp', value: 100 }, true),

@@ -51,7 +51,7 @@ function scaleUpcast(effect: Effect, steps: number): Effect {
     if (steps <= 0) return effect;
 
     if (
-        effect.kind === 'tempHp' &&
+        (effect.kind === 'tempHp' || effect.kind === 'maxHpBoost') &&
         effect.upcastAmount &&
         typeof effect.amount === 'number'
     )

@@ -477,6 +477,7 @@ const RaiseDeadSchema = z.object({
 const MaxHpBoostSchema = z.object({
     kind: z.literal('maxHpBoost'),
     amount: AmountSchema,
+    upcastAmount: z.number().int().min(1).max(100).optional(),
     ...target,
 });
 

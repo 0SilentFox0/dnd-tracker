@@ -944,7 +944,8 @@
     "spellEffects": [
       {
         "kind": "maxHpBoost",
-        "amount": 5
+        "amount": 5,
+        "upcastAmount": 5
       }
     ],
     "lists": [

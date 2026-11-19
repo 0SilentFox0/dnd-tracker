@@ -200,7 +200,11 @@ const BASE_EFFECT_REGISTRY: {
     maxHpBoost: {
         kind: 'maxHpBoost',
         static: false,
-        fields: [AMOUNT, TARGET_FIELD],
+        fields: [
+            AMOUNT,
+            { name: 'upcastAmount', input: 'number', optional: true },
+            TARGET_FIELD,
+        ],
         describe: describeMaxHpBoost,
         apply: applyMaxHpBoost,
     },
