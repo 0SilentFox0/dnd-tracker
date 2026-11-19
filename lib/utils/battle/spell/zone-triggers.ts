@@ -84,7 +84,7 @@ function fire(
     targetId: string,
     ctx: ZoneCtx
 ): Fired {
-    const zone = ctx.map.spellZones?.[zoneId];
+    const zone = ctx.map?.spellZones?.[zoneId];
 
     if (!zone) return { participants: ps, messages: [], failed: false };
 

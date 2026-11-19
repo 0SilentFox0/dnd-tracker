@@ -9,6 +9,8 @@ type SpellOnly = Extract<
             | 'grantCast'
             | 'hitRider'
             | 'anchoredZone'
+            | 'burst'
+            | 'moveSummon'
             | 'summonInline'
             | 'transform'
             | 'phantom'
@@ -24,6 +26,8 @@ const SPELL_ONLY_KINDS = new Set([
     'grantCast',
     'hitRider',
     'anchoredZone',
+    'burst',
+    'moveSummon',
     'summonInline',
     'transform',
     'phantom',
@@ -104,6 +108,20 @@ export function describeSpellOnly(
                     endsOutside: yn(effect.endsWhenStartOutside),
                 }),
             ];
+
+        case 'burst':
+            return [
+                seg('summary.spellOnly.burst', {
+                    radius: effect.radiusFeet,
+                    dice: effect.dice,
+                    hasSave: yn(effect.trigger.save),
+                    ability: effect.trigger.save?.ability ?? '',
+                    effects: list(effect.trigger.effects, describe),
+                }),
+            ];
+
+        case 'moveSummon':
+            return [seg('summary.spellOnly.moveSummon', { feet: effect.feet })];
 
         case 'summonInline':
             return [

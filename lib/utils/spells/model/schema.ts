@@ -203,6 +203,11 @@ const ATTACK_TARGET_ISSUE = {
     path: ['resolution'],
 };
 
+const MoveSummonSchema = z.object({
+    kind: z.literal('moveSummon'),
+    feet: z.number().int().min(5).max(120).multipleOf(5),
+});
+
 export const InlineCastSchema = z
     .object({
         targeting: SpellTargetingSchema,
@@ -212,6 +217,7 @@ export const InlineCastSchema = z
         addAbilityMod: z.boolean().optional(),
         damageBonus: z.number().int().min(-20).max(40).optional(),
         effects: z.array(NonRandomEffectSchema).min(1).max(6),
+        moveSummonFeet: MoveSummonSchema.shape.feet.optional(),
         anchorMarkId: z.string().min(1).max(40).optional(),
         perObjectFeet: z.number().int().min(5).max(60).optional(),
         auto: z
@@ -280,6 +286,14 @@ export const AnchoredZoneSchema = z.object({
     }),
 });
 
+const BurstSchema = z.object({
+    kind: z.literal('burst'),
+    radiusFeet: z.number().int().min(5).max(60),
+    dice: z.string().regex(DICE_RE),
+    upcastDice: z.number().int().min(1).max(10).optional(),
+    trigger: ZoneTriggerSchema,
+});
+
 export const SUMMON_INLINE_SIZES = [
     'tiny',
     'small',
@@ -333,6 +347,8 @@ const SPELL_ONLY_EFFECTS = [
     TeleportSelfSchema,
     CreateTerrainSchema,
     AnchoredZoneSchema,
+    BurstSchema,
+    MoveSummonSchema,
     SummonInlineSchema,
     TransformSchema,
     PhantomSchema,
@@ -351,6 +367,10 @@ export const SpellEffectSchema = z.discriminatedUnion('kind', [
 export type SpellEffect = z.infer<typeof SpellEffectSchema>;
 
 export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
+
+export type MoveSummonEffect = z.infer<typeof MoveSummonSchema>;
+
+export type BurstEffect = z.infer<typeof BurstSchema>;
 
 export type AnchoredZoneEffect = z.infer<typeof AnchoredZoneSchema>;
 

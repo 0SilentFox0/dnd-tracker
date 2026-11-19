@@ -1251,6 +1251,8 @@
       "phantom": "creates a double of the target on the caster's side (same stats and abilities, 1 HP); dies on the first damage",
       "moveSelf": "the caster moves next to the target",
       "teleportSelf": "the caster teleports to the aimed cell",
+      "burst": "explodes around the target ({radius} ft, {dice}){hasSave, select, yes { — {ability} save} other {}}: {effects}",
+      "moveSummon": "the caster moves their summon of this spell up to {feet} ft toward the aimed cell",
       "terrain": {
         "wall": "wall",
         "difficult": "difficult terrain"

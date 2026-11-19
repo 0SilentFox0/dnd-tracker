@@ -1098,6 +1098,24 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 },
                 duration: rounds(MINUTE),
             },
+            // the caster (its controller) rolls the sphere as a bonus action; contact saves come from the aura's onEnter
+            repeatDamage('Move Flaming Sphere', 'bonusAction', {
+                targeting: {
+                    kind: 'template',
+                    shape: 'circle',
+                    size: 5,
+                    side: 'all',
+                    maxTargets: 1,
+                    exact: true,
+                    range: 120,
+                },
+                resolution: { kind: 'auto' },
+                dice: 0,
+                moveSummonFeet: 30,
+                effects: [
+                    { kind: 'note', text: 'The sphere rolls across the ground.' },
+                ],
+            }),
         ],
     },
     'srd-2024_call-lightning': {
@@ -1192,6 +1210,28 @@ const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
         ],
     },
     // secondary effects of attack/save spells; a miss or a passed save skips them
+    // the shard explodes hit or miss: the Dex burst is independent of the attack roll
+    'srd-2024_ice-knife': {
+        spellEffects: [
+            strike('piercing'),
+            {
+                kind: 'burst',
+                radiusFeet: 5,
+                dice: '2d6',
+                upcastDice: 1,
+                trigger: {
+                    save: { ability: 'dexterity' },
+                    effects: [
+                        {
+                            kind: 'dealDamage',
+                            amount: { spellRoll: 100 },
+                            damageType: 'cold',
+                        },
+                    ],
+                },
+            },
+        ],
+    },
     'srd-2024_guiding-bolt': {
         spellEffects: [
             strike('radiant'),

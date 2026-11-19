@@ -16,6 +16,7 @@ import { uniqueCastId } from '@/lib/utils/battle/concentration';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import { runAutoReactions } from '@/lib/utils/battle/spell/auto-reaction';
 import { applyAnchoredZones } from '@/lib/utils/battle/spell/cast/anchored-zone';
+import { applyBursts } from '@/lib/utils/battle/spell/cast/burst';
 import {
     applyCastAttribute,
     rollCastTest,
@@ -32,6 +33,7 @@ import {
     moveAdjacent,
     teleportTo,
 } from '@/lib/utils/battle/spell/cast/move-self';
+import { moveSummon } from '@/lib/utils/battle/spell/cast/move-summon';
 import { resolveOutcome } from '@/lib/utils/battle/spell/cast/outcome';
 import { phantomRequests } from '@/lib/utils/battle/spell/cast/phantom';
 import {
@@ -46,6 +48,7 @@ import {
     hasMoveSelf,
     hasTeleportSelf,
     isPerTarget,
+    moveSummonOf,
     readsEventDamage,
     type SpellCastState,
     spellDiceOf,
@@ -463,6 +466,30 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         dice: spellDiceOf(state),
         round: currentRound,
     });
+
+    applyBursts({
+        flow,
+        effects: source.definition.effects,
+        casterId,
+        centreId: targetIds[0],
+        spell,
+        saveDc: state.saveDc,
+        upcastSteps: ruleSystemOf(params.rules).magic.upcast.steps(
+            spell.level,
+            castLevel
+        ),
+    });
+
+    const summonMove = moveSummonOf(source.definition.effects);
+
+    if (summonMove?.kind === 'moveSummon' && !params.dryRun)
+        moveSummon({
+            flow,
+            casterId,
+            spell,
+            feet: summonMove.feet,
+            aim: params.aim,
+        });
 
     if (hasMoveSelf(source.definition.effects) && targetIds[0]) {
         const moved = moveAdjacent(

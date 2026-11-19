@@ -7,6 +7,8 @@
       "hitRider": "Extra damage charges",
       "moveSelf": "Caster moves to the target",
       "teleportSelf": "Caster teleports to the aimed cell",
+      "burst": "Burst around the target",
+      "moveSummon": "Move own summon",
       "phantom": "Double of the target (phantom)",
       "createTerrain": "Wall / difficult terrain",
       "anchoredZone": "Aura on the target",
@@ -154,6 +156,8 @@
       "phantom": "The spell target gets a double on the caster's side: same stats and abilities, 1 HP, controlled by the caster.",
       "moveSelf": "The caster moves to the nearest free cell next to the first target without provoking attacks.",
       "teleportSelf": "The caster teleports to the aimed free cell within the spell range.",
+      "burst": "Hit or miss, everyone within the radius of the first target makes the save (the trigger below) against one shared dice roll.",
+      "moveSummon": "Moves the object this caster summoned with the spell toward the aimed cell, stopping at the first blocked cell.",
       "revertAtZero": "At 0 HP of the form it reverts; excess damage carries over to the normal form."
     },
     "delete": "Remove effect",

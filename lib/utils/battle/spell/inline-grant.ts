@@ -46,6 +46,7 @@ export function withInlineDefinition(
         addAbilityMod,
         damageBonus,
         perObjectFeet,
+        moveSummonFeet,
         effects,
     } = inline;
 
@@ -59,7 +60,9 @@ export function withInlineDefinition(
             cost: grant.castCost ?? 'action',
             targeting,
             resolution,
-            effects,
+            effects: moveSummonFeet
+                ? [...effects, { kind: 'moveSummon', feet: moveSummonFeet }]
+                : effects,
             raceModifiers: [],
             fixedDice: true,
             ...(dieSides && { dieSides }),

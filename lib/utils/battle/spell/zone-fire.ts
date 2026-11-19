@@ -22,7 +22,7 @@ import type { LogLine } from '@/types/text';
 export type TriggerKind = 'onEnter' | 'onTurnStart' | 'onExit';
 
 export interface ZoneCtx {
-    map: BattleMapConfig;
+    map?: BattleMapConfig | null;
     round: number;
     rng: Rng;
     rules: Ruleset;

@@ -9283,6 +9283,36 @@
         "duration": {
           "rounds": 10
         }
+      },
+      {
+        "kind": "grantCast",
+        "label": "Move Flaming Sphere",
+        "cost": "bonusAction",
+        "duration": {
+          "rounds": 10
+        },
+        "cast": {
+          "targeting": {
+            "kind": "template",
+            "shape": "circle",
+            "size": 5,
+            "side": "all",
+            "maxTargets": 1,
+            "exact": true,
+            "range": 120
+          },
+          "resolution": {
+            "kind": "auto"
+          },
+          "dice": 0,
+          "moveSummonFeet": 30,
+          "effects": [
+            {
+              "kind": "note",
+              "text": "The sphere rolls across the ground."
+            }
+          ]
+        }
       }
     ],
     "lists": [
@@ -12227,6 +12257,26 @@
           "spellRoll": 100
         },
         "damageType": "piercing"
+      },
+      {
+        "kind": "burst",
+        "radiusFeet": 5,
+        "dice": "2d6",
+        "upcastDice": 1,
+        "trigger": {
+          "save": {
+            "ability": "dexterity"
+          },
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "cold"
+            }
+          ]
+        }
       }
     ],
     "lists": [

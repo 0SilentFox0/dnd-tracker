@@ -12,6 +12,7 @@ import type { TransformRequest } from '@/lib/utils/battle/transform/types';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import type {
     AnchoredZoneEffect,
+    BurstEffect,
     GrantCastEffect,
     HitRiderEffect,
     SpellDefinition,
@@ -120,6 +121,8 @@ export const SPELL_ONLY_KINDS = new Set<string>([
     'teleportSelf',
     'createTerrain',
     'anchoredZone',
+    'burst',
+    'moveSummon',
     'summonInline',
     'transform',
     'phantom',
@@ -154,6 +157,16 @@ export const anchoredZonesOf = (
     effects.flatMap((effect, index) =>
         effect.kind === 'anchoredZone' ? [{ effect, index }] : []
     );
+
+export const burstsOf = (
+    effects: SpellEffect[]
+): Array<{ effect: BurstEffect; index: number }> =>
+    effects.flatMap((effect, index) =>
+        effect.kind === 'burst' ? [{ effect, index }] : []
+    );
+
+export const moveSummonOf = (effects: SpellEffect[]) =>
+    effects.find((e) => e.kind === 'moveSummon');
 
 export const hasMoveSelf = (effects: SpellEffect[]) =>
     effects.some((e) => e.kind === 'moveSelf');

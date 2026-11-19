@@ -67,6 +67,17 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, 'kind'> } = {
             effects: [{ kind: 'dealDamage', amount: { spellRoll: 100 } }],
         },
     },
+    moveSummon: { feet: 30 },
+    burst: {
+        radiusFeet: 5,
+        dice: '2d6',
+        trigger: {
+            save: { ability: 'dexterity' },
+            effects: [
+                { kind: 'dealDamage', amount: { spellRoll: 100 } },
+            ],
+        },
+    },
     summonInline: {
         name: DEFAULT_TEXT,
         size: 'small',

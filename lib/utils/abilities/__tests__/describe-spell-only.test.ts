@@ -136,6 +136,10 @@ const CASES: [SpellEffect, string][] = [
     ],
     [{ kind: 'teleportSelf' }, 'заклиначка телепортується в обрану клітинку'],
     [
+        { kind: 'moveSummon', feet: 30 },
+        'заклиначка переміщує свій призов цього закляття до 30 фт у бік обраної клітинки',
+    ],
+    [
         {
             kind: 'createTerrain',
             terrain: 'wall',
