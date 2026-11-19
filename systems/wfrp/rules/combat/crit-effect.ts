@@ -1,5 +1,6 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { CritResult } from './crit-table';
+import { recordCritWound } from './critical';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
@@ -10,19 +11,26 @@ import type { LogLine } from '@/types/text';
 export function applyWfrpCrit(
     target: BattleParticipant,
     crit: CritResult,
-    round: number
+    round: number,
+    /** Canon5e counts Critical Wounds and can die from them (p172) */
+    counted = false
 ): { participant: BattleParticipant; message: LogLine } {
     const message =
-        crit.bonusDamage > 0
-            ? textRef('battleWfrp.log.critHit', {
+        counted && crit.death
+            ? textRef('battleWfrp.log.critDeath', {
                   target: target.basicInfo.name,
                   text: crit.text,
-                  bonus: crit.bonusDamage,
               })
-            : textRef('battleWfrp.log.critWound', {
-                  target: target.basicInfo.name,
-                  text: crit.text,
-              });
+            : crit.bonusDamage > 0
+              ? textRef('battleWfrp.log.critHit', {
+                    target: target.basicInfo.name,
+                    text: crit.text,
+                    bonus: crit.bonusDamage,
+                })
+              : textRef('battleWfrp.log.critWound', {
+                    target: target.basicInfo.name,
+                    text: crit.text,
+                });
 
     let participant = target;
 
@@ -51,5 +59,10 @@ export function applyWfrpCrit(
         );
     }
 
-    return { participant, message };
+    return {
+        participant: counted
+            ? recordCritWound(participant, crit.death)
+            : participant,
+        message,
+    };
 }

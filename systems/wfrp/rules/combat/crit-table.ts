@@ -1,7 +1,9 @@
 import type { WfrpConditionKey } from '../conditions/catalog';
-import { rollSlot, rowText } from '../tables/resolve';
+import { resolveTable, rollSlot, rowText } from '../tables/resolve';
 import type { HitLocation } from './constants';
 
+import { dynamicTextRef } from '@/lib/i18n/text-ref';
+import { rollDie } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { TableSlot } from '@/systems/wfrp/rules/tables/schema';
@@ -13,6 +15,8 @@ export interface CritResult {
     bonusDamage: number;
     conditions: { key: WfrpConditionKey; levels: number }[];
     markers: string[];
+    /** The roll ran past the table (or hit a `death` row), p171-176 */
+    death: boolean;
 }
 
 const SLOT: Record<HitLocation, TableSlot> = {
@@ -26,9 +30,27 @@ export function rollCrit(
     location: HitLocation,
     rules: Pick<Ruleset, 'tables'>,
     rng: Rng,
-    presetRoll?: number
+    presetRoll?: number,
+    /** +10 per Wound beyond what dropped the target to 0 (p171) */
+    bonus = 0
 ): CritResult {
-    const { index, row } = rollSlot(rules, SLOT[location], rng, presetRoll);
+    const slot = SLOT[location];
+
+    const roll = (presetRoll ?? rollDie(100, rng)) + bonus;
+
+    const { index, row } = rollSlot(rules, slot, rng, roll);
+
+    const rows = resolveTable(rules, slot);
+
+    if (roll > rows[rows.length - 1].max)
+        return {
+            id: `${location}.death`,
+            text: dynamicTextRef(`battleWfrp.crit.${location}.death`),
+            bonusDamage: 0,
+            conditions: [],
+            markers: [],
+            death: true,
+        };
 
     const result: CritResult = {
         id: `${location}.${index + 1}`,
@@ -36,6 +58,7 @@ export function rollCrit(
         bonusDamage: 0,
         conditions: [],
         markers: [],
+        death: false,
     };
 
     for (const e of row.effects) {
@@ -43,6 +66,7 @@ export function rollCrit(
         else if (e.type === 'condition')
             result.conditions.push({ key: e.key, levels: e.levels });
         else if (e.type === 'marker') result.markers.push(e.key);
+        else if (e.type === 'death') result.death = true;
     }
 
     return result;

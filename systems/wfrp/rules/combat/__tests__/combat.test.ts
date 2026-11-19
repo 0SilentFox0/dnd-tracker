@@ -265,6 +265,7 @@ describe('rollCrit', () => {
             bonusDamage: 5,
             conditions: [{ key: 'unconscious', levels: 1 }],
             markers: [],
+            death: false,
         });
         expect(rollCrit('leg', WFRP_RULES, rng, 1)).toEqual({
             id: 'leg.1',
@@ -272,6 +273,7 @@ describe('rollCrit', () => {
             bonusDamage: 1,
             conditions: [],
             markers: [],
+            death: false,
         });
     });
 
@@ -385,6 +387,7 @@ describe('resolveWfrpAttack conditions', () => {
                     ? []
                     : [{ key: key as WfrpConditionKey, levels: 1 }],
             markers: key === 'disarmed' ? ['disarmed'] : [],
+            death: false,
         });
 
         const crits = (p: BattleParticipant) =>

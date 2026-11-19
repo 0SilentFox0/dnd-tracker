@@ -23,7 +23,8 @@
     "marker": "Marker",
     "characteristic": "Characteristic",
     "move": "Move",
-    "maxWounds": "Max Wounds"
+    "maxWounds": "Max Wounds",
+    "death": "Death"
   },
   "amount": "Amount",
   "condition": "Condition",

@@ -1,3 +1,4 @@
+import { editionOf } from '../edition';
 import { QUALITY_REGISTRY } from '../equipment/qualities';
 import { qualityEffects } from '../equipment/quality-effects';
 import { ATTACK_SLOT } from '../slots';
@@ -101,8 +102,10 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (base.total !== raw) steps.push(step('minimum', base.total - raw));
 
+    const counted = editionOf(ctx.rules).woundModel === 'critical';
+
     const crit =
-        ctx.crit && target.combatStats.currentHp > 0
+        ctx.crit && (counted || target.combatStats.currentHp > 0)
             ? rollCrit(location, ctx.rules, ctx.rng)
             : undefined;
 
@@ -114,7 +117,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         amount: base.total + crit.bonusDamage,
         steps,
         totalLabel,
-        afterHit: (p, round) => applyWfrpCrit(p, crit, round),
+        afterHit: (p, round) => applyWfrpCrit(p, crit, round, counted),
     };
 }
 

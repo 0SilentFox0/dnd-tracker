@@ -41,6 +41,7 @@ export type TableEffect =
     | { type: 'wounds'; amount: number }
     | { type: 'condition'; key: WfrpConditionKey; levels: number }
     | { type: 'marker'; key: (typeof MARKER_KEYS)[number] }
+    | { type: 'death' }
     | { type: 'characteristic'; key: CharacteristicKey; amount: number }
     | { type: 'move'; amount: number }
     | { type: 'maxWounds'; amount: number };
@@ -50,6 +51,9 @@ export type TableRow = {
     text?: string;
     effects: TableEffect[];
 };
+
+/** Critical Wound rolls climb past 100 with +10 per excess Wound (p171) */
+export const CRIT_ROLL_CAP = 200;
 
 const amount = z.number().int().min(1).max(20);
 
@@ -62,10 +66,11 @@ const EffectSchema = z.discriminatedUnion('type', [
         levels: z.number().int().min(1).max(WFRP_CONDITION_MAX_LEVEL),
     }),
     z.strictObject({ type: z.literal('marker'), key: z.enum(MARKER_KEYS) }),
+    z.strictObject({ type: z.literal('death') }),
 ]);
 
 const RowSchema = z.strictObject({
-    max: z.number().int().min(1).max(100),
+    max: z.number().int().min(1).max(CRIT_ROLL_CAP),
     text: z.string().max(200).optional(),
     effects: z.array(EffectSchema).max(4),
 });
@@ -106,10 +111,10 @@ const rowSchemaOf = (slot: TableSlot) =>
         : RowSchema) as z.ZodType<TableRow>;
 
 export const SLOT_EFFECTS: Record<TableSlot, readonly TableEffect['type'][]> = {
-    critHead: ['damage', 'condition', 'marker'],
-    critArm: ['damage', 'condition', 'marker'],
-    critBody: ['damage', 'condition', 'marker'],
-    critLeg: ['damage', 'condition', 'marker'],
+    critHead: ['damage', 'condition', 'marker', 'death'],
+    critArm: ['damage', 'condition', 'marker', 'death'],
+    critBody: ['damage', 'condition', 'marker', 'death'],
+    critLeg: ['damage', 'condition', 'marker', 'death'],
     miscastMinor: ['wounds', 'condition'],
     miscastMajor: ['wounds', 'condition'],
     wrath: ['wounds', 'condition'],
@@ -130,7 +135,11 @@ const slotRows = (slot: TableSlot) =>
                     message: 'rules.validation.tablesOrder',
                 });
 
-            if (rows[rows.length - 1].max !== 100)
+            const critSlot = SLOT_EFFECTS[slot].includes('death');
+
+            const last = rows[rows.length - 1].max;
+
+            if (critSlot ? last < 100 : last !== 100)
                 ctx.addIssue({
                     code: 'custom',
                     message: 'rules.validation.tablesLast',

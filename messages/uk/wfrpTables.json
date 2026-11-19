@@ -23,7 +23,8 @@
     "marker": "Маркер",
     "characteristic": "Характеристика",
     "move": "Рух",
-    "maxWounds": "Макс. Wounds"
+    "maxWounds": "Макс. Wounds",
+    "death": "Смерть"
   },
   "amount": "Кількість",
   "condition": "Стан",

@@ -121,6 +121,7 @@ describe('TablesSection', () => {
             'wfrpTables.effect.damage',
             'wfrpTables.effect.condition',
             'wfrpTables.effect.marker',
+            'wfrpTables.effect.death',
         ]);
     });
 

@@ -75,7 +75,10 @@
     "psychologyPass": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: resisted",
     "psychologyFail": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: failed",
     "psychologyPassHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: resisted",
-    "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed"
+    "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed",
+    "critDeath": "☠️ {target} is killed outright: {text}",
+    "dying": "⏳ {name} is dying: {rounds} round(s) left unless healed",
+    "diedOfWounds": "☠️ {name} succumbs to their critical wounds"
   },
   "psychology": {
     "fear": "Fear",
@@ -122,28 +125,32 @@
       "2": "A split brow floods the eyes with blood.",
       "3": "Skull ringing, the world swims.",
       "4": "The helm cracks and the foe sways like a drunkard.",
-      "5": "The skull caves in, and consciousness gutters like a candle."
+      "5": "The skull caves in, and consciousness gutters like a candle.",
+      "death": "The skull is crushed; death is instant."
     },
     "arm": {
       "1": "The arm bones ache from the strike.",
       "2": "A deep cut, blood seeping through the sleeve.",
       "3": "Fingers spasm open and the weapon drops.",
       "4": "An artery is opened, blood spurts forth.",
-      "5": "The arm hangs limp, the weapon slips away."
+      "5": "The arm hangs limp, the weapon slips away.",
+      "death": "The limb is torn away and the victim bleeds out within moments."
     },
     "body": {
       "1": "Ribs creak but hold.",
       "2": "Breath is knocked out, wheezing and coughing.",
       "3": "A ragged wound in the flank, the blood will not stop.",
       "4": "The blade bites deep, guts afire.",
-      "5": "A chest blow topples the foe, darkness closing in."
+      "5": "A chest blow topples the foe, darkness closing in.",
+      "death": "A mortal wound to the vitals; death is instant."
     },
     "leg": {
       "1": "The knee buckles for a moment.",
       "2": "A shin wound leaves a trail of blood.",
       "3": "Legs swept, the foe sprawls in the mud.",
       "4": "Tendon severed, the foe falls screaming.",
-      "5": "The knee is shattered, no more walking."
+      "5": "The knee is shattered, no more walking.",
+      "death": "The limb is severed and the victim bleeds out within moments."
     }
   },
   "damage": {

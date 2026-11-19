@@ -45,6 +45,7 @@ describe('rollCrit with rules.tables', () => {
             bonusDamage: 4,
             conditions: [{ key: 'stunned', levels: 2 }],
             markers: ['crippled'],
+            death: false,
         });
 
         const r = applyWfrpCrit(
@@ -69,6 +70,7 @@ describe('rollCrit with rules.tables', () => {
             bonusDamage: 4,
             conditions: [],
             markers: ['crippled'],
+            death: false,
         });
     });
 

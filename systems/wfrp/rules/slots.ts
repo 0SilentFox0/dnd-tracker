@@ -94,6 +94,10 @@ export interface WfrpParticipantState {
     /** Personal Momentum, canon5e only (p168) */
     momentum?: true;
     channelledSl?: number;
+    /** Critical Wounds taken this battle, canon5e (p172) */
+    critWounds?: number;
+    /** Rounds left before a critically wounded, unconscious fighter dies (p172) */
+    dyingRounds?: number;
     sin?: number;
     conditionTests?: string[];
     psychologyTested?: Partial<Record<string, number>>;
@@ -120,6 +124,8 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...(finite(raw.fate) && { fate: raw.fate }),
             ...(raw.momentum === true && { momentum: true as const }),
             ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
+            ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
+            ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),
             ...(finite(raw.sin) && { sin: raw.sin }),
             ...(Array.isArray(raw.conditionTests) && {
                 conditionTests: raw.conditionTests.filter(

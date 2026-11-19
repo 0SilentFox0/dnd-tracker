@@ -60,3 +60,19 @@
 - Зачіпає: `combat/on-zero-hp.ts`, `crit-table.ts`, `crit-effect.ts`, `conditions/*`, `combat/location.ts`, `data/templates/grim-d100*/crit tables`, `battle.md` (спільний бойовий пайплайн: sweep homm/dnd5e обов'язковий після W3–W4).
 - Acceptance: канон-тести на прикладах книги (сторінка в назві); регрес `battleWfrp`; нічого в d20/homm.
 - Порядок: спершу визначити `editionOf` поля (`woundModel`, `conditionModel`) у профілі, потім хвиля даних, потім пайплайн.
+
+## Стан після сесії 3 (2026-11-20): W3 частина 1 «рани й крити» (НЕ закомічено)
+
+Зроблено (профіль `woundModel: 'knockdown' | 'critical'`, `canon5e` = `critical`):
+- `combat/on-zero-hp.ts` `criticalOnZeroHp`: Critical Wound лише при шкоді понад 0 (`amount − hp − tempHp`), +10 до кидка за кожну зайву Wound, удар по цілі на 0 HP знову дає крит; крит-удар + надлишок = два крити (другий у випадкову локацію, с. 171). Легасі без змін.
+- `combat/critical.ts`: лічильник `critWounds`, таймер смерті `dyingRounds` (критів > TB і Unconscious → смерть за TB раундів, с. 172), `tickDeathTimer` у `wfrpSkippedTurn`, скидання таймера при відновленні (`wfrpConditionsTurnStart`).
+- `rollCrit(…, presetRoll, bonus)`: кидок понад останній рядок таблиці = смерть (`CritResult.death`, ключі `battleWfrp.crit.<loc>.death`); схема таблиць: `max` до 200 (`CRIT_ROLL_CAP`), ефект `death`, крит-слоти приймають останній `max ≥ 100`; UI таблиць показує/додає `death`.
+- `mitigate.ts` під `critical`: крит-удар дає Critical Wound і при 0 HP (`applyWfrpCrit(…, counted)`).
+- Канон-тест `canon/wounds.test.ts`; `canon + combat + conditions + tables` зелені; `test:changed` зелений, крім `assistant-cleanup-cron` (не наш).
+
+Відкрито в W3 (наступна сесія):
+1. **0 HP без авто-Unconscious (M03 а)** потребує core-хука: `lib/utils/battle/attack/process/damage.ts:31`, `turn/turn-start.ts:419`, `turn/effects.ts:69` самі ставлять UNCONSCIOUS при HP ≤ 0 до `onZeroHp`; поки статус лишається UNCONSCIOUS (канон: свідомий).
+2. Bleeding на 0 HP (M21: Endurance-тест, d10 ≤ кількості, 10 знімає), крит-кидок захисника за дублем (M20), тривалі травми, рядки смерті/каліцтв у даних Grim (`data/templates/grim-d100*` crit tables), row-max редактор (`TableRowFields` `max={100}`).
+3. Стани (M04, M22, M23): SL-штраф `−max(level)`, Stunned ½ Move без SKIP_ACTION, Prone/Blinded/Surprised, Poisoned-тік, Ablaze `min(ap)`; L/R локації (M35). Профіль-поле `conditionModel`.
+4. W2-хвости: `howDidThatMiss` (pending-вікно), `notToday` (тепер можна: смерть є), витрата Momentum, Fortune «зняти стан», UI Critical+локації для notFail.
+5. Наприкінці: `rule-systems.md`/`STATUS.md` (W2+W3), `pnpm cycles`, sweep homm/dnd5e (після W3–W4), `/simplify`, Opus-рев'ю.

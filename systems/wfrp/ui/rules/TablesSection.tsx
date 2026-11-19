@@ -23,7 +23,9 @@ const MAX_ROWS = 20;
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
 const withLastHundred = (rows: TableRow[]) =>
-    rows.map((r, i) => (i === rows.length - 1 ? { ...r, max: 100 } : r));
+    rows.map((r, i) =>
+        i === rows.length - 1 && r.max < 100 ? { ...r, max: 100 } : r
+    );
 
 function DefaultRows({ slot }: { slot: TableSlot }) {
     const t = useTranslator('wfrpTables');
@@ -35,6 +37,8 @@ function DefaultRows({ slot }: { slot: TableSlot }) {
             return `${tt(`battleWfrp.conditions.${e.key}.label`)} ${e.levels}`;
 
         if (e.type === 'marker') return t(`markers.${e.key}`);
+
+        if (e.type === 'death') return t('effect.death');
 
         if (e.type === 'characteristic')
             return `${tt(`gameTerms.characteristics.${e.key}.short`)} ${signed(e.amount)}`;

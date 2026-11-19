@@ -23,6 +23,8 @@ export interface EditionProfile {
     opposedModel: 'attackerMustSucceed' | 'higherSl';
     /** Attack and parry targets: the bare characteristic or the weapon-group skill */
     attackTarget: 'characteristic' | 'skill';
+    /** `knockdown`: any hit to 0 Wounds drops and crits; `critical`: only damage beyond 0 gives a Critical Wound (+10 per excess Wound), crits beyond TB threaten death (p171-172) */
+    woundModel: 'knockdown' | 'critical';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -38,6 +40,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         slModel: 'clamped',
         opposedModel: 'attackerMustSucceed',
         attackTarget: 'characteristic',
+        woundModel: 'knockdown',
     },
     canon5e: {
         advanceStep: 5,
@@ -51,5 +54,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         slModel: 'final',
         opposedModel: 'higherSl',
         attackTarget: 'skill',
+        woundModel: 'critical',
     },
 };

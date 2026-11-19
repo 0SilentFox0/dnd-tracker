@@ -1,4 +1,5 @@
 import { MIN_DAMAGE } from '../combat/constants';
+import { clearDeathTimer, tickDeathTimer } from '../combat/critical';
 import { participantStats } from '../combat/participant';
 import { applyWfrpConditionTo } from './apply';
 import { BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL } from './catalog';
@@ -36,6 +37,10 @@ export function wfrpConditionsTurnStart(
 
     if (!start || !isActive(start))
         return { participants: ps, messages: [], downed: false };
+
+    const revived = clearDeathTimer(start);
+
+    if (revived !== start) ps = replaceParticipant(ps, revived);
 
     let participants = ps;
 
@@ -143,6 +148,21 @@ export function wfrpSkippedTurn(
 
     if (!p || p.combatStats.status !== CombatStatus.UNCONSCIOUS)
         return { participants: ps, messages: [] };
+
+    const timer = tickDeathTimer(p);
+
+    if (timer)
+        return {
+            participants: replaceParticipant(ps, timer.participant),
+            messages: [
+                textRef(
+                    timer.died
+                        ? 'battleWfrp.log.diedOfWounds'
+                        : 'battleWfrp.log.dying',
+                    { name: p.basicInfo.name, rounds: timer.left }
+                ),
+            ],
+        };
 
     const bleeding = conditionLevel(p, 'bleeding');
 

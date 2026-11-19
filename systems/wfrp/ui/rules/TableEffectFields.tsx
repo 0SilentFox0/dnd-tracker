@@ -36,6 +36,8 @@ export const newEffect = (type: TableEffect['type']): TableEffect => {
 
     if (type === 'marker') return { type, key: MARKER_KEYS[0] };
 
+    if (type === 'death') return { type };
+
     if (type === 'characteristic')
         return { type, key: CHARACTERISTIC_KEYS[0], amount: -5 };
 

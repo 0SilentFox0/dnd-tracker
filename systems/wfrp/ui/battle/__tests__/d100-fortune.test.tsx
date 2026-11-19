@@ -57,7 +57,7 @@ describe('D100RollBody Fortune', () => {
 
         render(<D100RollBody wizard={wizard} />);
         expect(screen.getByRole('group', { name: 'Удача' })).toBeTruthy();
-        expect(screen.getByText('Залишилось Удачі: 2')).toBeTruthy();
+        expect(screen.getByText(/Залишилось Удачі: 2/)).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'Перекинути' }));
         expect(actions.setSystemInput).toHaveBeenCalledWith(
