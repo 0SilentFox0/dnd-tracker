@@ -410,6 +410,7 @@ describe('moveSelf', () => {
                 rng: () => 0.5,
                 map,
                 castLevel,
+                slotKey: String(castLevel),
             });
 
             return r.allParticipantsUpdated

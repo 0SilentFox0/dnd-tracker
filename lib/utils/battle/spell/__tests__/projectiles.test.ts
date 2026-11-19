@@ -60,7 +60,11 @@ const caster = (): BattleParticipant => {
 
     return {
         ...p,
-        spellcasting: { ...p.spellcasting, spellAttackBonus: 5 },
+        spellcasting: {
+            ...p.spellcasting,
+            spellAttackBonus: 5,
+            spellSlots: { '1': { max: 2, current: 2 } },
+        },
     };
 };
 

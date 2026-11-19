@@ -131,11 +131,11 @@ describe('pendingCount: spell picks without an available slot level', () => {
             palRefs
         );
 
-    it('level 1 half caster: prepared picks are not required, cantrips still are', () => {
-        expect(count(1)).toBe(4);
+    it('level 1 half caster already has a slot (2024), so prepared picks count', () => {
+        expect(count(1)).toBe(6);
     });
 
-    it('level 2 half caster has a slot, so prepared picks count again', () => {
+    it('level 2 half caster has more prepared picks', () => {
         expect(count(2)).toBe(8);
     });
 });

@@ -545,6 +545,7 @@
     "amount": "Amount (number, dice, formula, %)",
     "damageType": "Type",
     "falloff": "% damage per target in order (100, 50, 25…)",
+    "killIfHpAtMost": "Kills the target if its HP is at most",
     "revive": "Revives",
     "damagePerRound": "Damage/round (number, dice, formula)",
     "healPerRound": "Healing/round (number, dice, formula)",

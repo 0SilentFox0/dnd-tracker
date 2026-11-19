@@ -38,7 +38,15 @@ const spell: CastableSpell = {
 };
 
 const cast = (hp: number) => {
-    const caster = makeParticipant({ id: 'c' });
+    const base = makeParticipant({ id: 'c' });
+
+    const caster = {
+        ...base,
+        spellcasting: {
+            ...base.spellcasting,
+            spellSlots: { '9': { max: 1, current: 1 } },
+        },
+    };
 
     const foe = makeParticipant({
         id: 'e1',

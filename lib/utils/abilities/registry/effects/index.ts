@@ -156,6 +156,7 @@ const BASE_EFFECT_REGISTRY: {
         fields: [
             AMOUNT,
             { name: 'damageType', input: 'text', optional: true },
+            { name: 'killIfHpAtMost', input: 'number', optional: true },
             { name: 'falloff', input: 'numberList', optional: true },
             { name: 'byDistance', input: 'distanceDice', optional: true },
             { name: 'delayIfBeyond.feet', input: 'number', optional: true },
