@@ -43,6 +43,7 @@ export async function copyContent(args: {
             created: [],
             reused: [],
             skipped: [],
+            warnings: [],
         };
 
         try {
@@ -55,6 +56,7 @@ export async function copyContent(args: {
 
             report.reused = plan.reused;
             report.skipped = plan.skipped;
+            report.warnings = plan.warnings;
 
             report.created = dryRun
                 ? plan.toCreate.map(({ table, row }) =>

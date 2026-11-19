@@ -19,6 +19,7 @@ export type CopyTargetReport = {
     created: CopyRowRef[];
     reused: CopyRowRef[];
     skipped: Array<{ kind: string; name: string; reason: string }>;
+    warnings: string[];
     error?: string;
 };
 

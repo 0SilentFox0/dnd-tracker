@@ -37,6 +37,7 @@ const plan = (skipped: unknown[] = []) => ({
     toCreate: [{ table: 'units', row: { id: 'x' } }],
     reused: [],
     skipped,
+    warnings: [],
 });
 
 const run = (dryRun?: boolean) =>

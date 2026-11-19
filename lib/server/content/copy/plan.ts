@@ -1,4 +1,4 @@
-import { type CopyRow, selectClosure } from './closure';
+import { type CopyRow, refsOf, selectClosure } from './closure';
 
 import { CONTENT_KINDS } from '@/lib/constants/content-kinds';
 import { isKindActive } from '@/lib/server/content/kind-active';
@@ -8,6 +8,7 @@ import {
     emptyBundle,
     tableOfKind,
 } from '@/lib/server/templates/bundle';
+import { remapIds } from '@/lib/server/templates/remap-ids';
 import type { Actor } from '@/lib/utils/api/actor';
 
 export type CopyPlan = {
@@ -17,13 +18,19 @@ export type CopyPlan = {
     skipped: Array<{
         kind: string;
         name: string;
-        reason: 'exists' | 'kind-unsupported';
+        reason:
+            | 'exists'
+            | 'kind-unsupported'
+            | 'unknown-kind'
+            | 'not-found'
+            | 'duplicate-name';
     }>;
+    warnings: string[];
     bundle: Bundle;
 };
 
 const nameKey = (row: Record<string, unknown>): string | undefined => {
-    const n = row.name ?? row.title;
+    const n = typeof row.name === 'string' ? row.name : row.title;
 
     return typeof n === 'string' ? n.trim().toLowerCase() : undefined;
 };
@@ -47,6 +54,7 @@ export async function buildCopyPlan(args: {
         reuse: new Map(),
         reused: [],
         skipped: [],
+        warnings: [],
         bundle: emptyBundle(),
     };
 
@@ -88,13 +96,14 @@ export async function buildCopyPlan(args: {
                 ? source[table].find((r) => r.id === id)
                 : undefined;
 
-            if (!table || !row) {
-                if (!table)
-                    plan.skipped.push({
-                        kind,
-                        name: id,
-                        reason: 'kind-unsupported',
-                    });
+            if (!table) {
+                plan.skipped.push({ kind, name: kind, reason: 'unknown-kind' });
+
+                continue;
+            }
+
+            if (!row) {
+                plan.skipped.push({ kind, name: id, reason: 'not-found' });
 
                 continue;
             }
@@ -121,6 +130,8 @@ export async function buildCopyPlan(args: {
         return targetIdOf(entry.table, entry.row) !== undefined;
     });
 
+    const unsupported = new Map<string, { kind: string; name: string }>();
+
     for (const { table, row } of boundary) {
         const kind = kindOfTable(table);
 
@@ -129,17 +140,65 @@ export async function buildCopyPlan(args: {
         if (existing) {
             plan.reuse.set(row.id, existing);
             plan.reused.push({ kind, id: row.id, name: nameOf(row) });
-        } else
+        } else {
+            unsupported.set(row.id, { kind, name: nameOf(row) });
             plan.skipped.push({
                 kind,
                 name: nameOf(row),
                 reason: 'kind-unsupported',
             });
+        }
     }
 
-    plan.toCreate = rows;
+    const winners = new Map<string, string>();
 
-    for (const { table, row } of rows) plan.bundle[table].push(row);
+    const dropped = new Map<string, string>();
+
+    const kept: CopyRow[] = [];
+
+    for (const entry of rows) {
+        const n = nameKey(entry.row);
+
+        const key = `${entry.table}:${n}`;
+
+        const winner = n === undefined ? undefined : winners.get(key);
+
+        if (winner) {
+            dropped.set(entry.row.id, winner);
+            plan.skipped.push({
+                kind: kindOfTable(entry.table),
+                name: nameOf(entry.row),
+                reason: 'duplicate-name',
+            });
+        } else {
+            if (n !== undefined) winners.set(key, entry.row.id);
+
+            kept.push(entry);
+        }
+    }
+
+    plan.toCreate =
+        dropped.size === 0
+            ? kept
+            : kept.map(({ table, row }) => ({
+                  table,
+                  row: remapIds(row, dropped),
+              }));
+
+    for (const { table, row } of plan.toCreate) {
+        plan.bundle[table].push(row);
+
+        if (unsupported.size === 0) continue;
+
+        for (const ref of refsOf({ table, row })) {
+            const dep = unsupported.get(ref);
+
+            if (dep)
+                plan.warnings.push(
+                    `${kindOfTable(table)} ${nameOf(row)}: ${dep.kind} dependency skipped`
+                );
+        }
+    }
 
     return plan;
 }

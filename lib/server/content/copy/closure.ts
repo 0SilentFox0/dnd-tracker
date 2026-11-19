@@ -11,6 +11,23 @@ export type CopyRow = {
     row: Record<string, unknown> & { id: string };
 };
 
+const FKS_OF = new Map(BUNDLE_TABLES.map((t) => [t.key, t.fks]));
+
+export function refsOf(entry: CopyRow): Set<string> {
+    const refs = new Set<string>();
+
+    for (const col of Object.keys(FKS_OF.get(entry.table) ?? {})) {
+        const v = entry.row[col];
+
+        if (typeof v === 'string') refs.add(v);
+    }
+
+    for (const s of collectKeysAndStrings(entry.row))
+        if (CONTENT_ID_RE.test(s)) refs.add(s);
+
+    return refs;
+}
+
 export function selectClosure(
     bundle: Bundle,
     selected: ReadonlyArray<{ table: BundleTable; id: string }>,
@@ -21,8 +38,6 @@ export function selectClosure(
     for (const def of BUNDLE_TABLES)
         for (const row of bundle[def.key] ?? [])
             index.set(row.id, { table: def.key, row });
-
-    const fksOf = new Map(BUNDLE_TABLES.map((t) => [t.key, t.fks]));
 
     const seen = new Set<string>();
 
@@ -36,8 +51,8 @@ export function selectClosure(
 
     const queue = selected.map((s) => s.id);
 
-    while (queue.length) {
-        const id = queue.shift() as string;
+    for (let head = 0; head < queue.length; head++) {
+        const id = queue[head];
 
         if (seen.has(id)) continue;
 
@@ -54,16 +69,7 @@ export function selectClosure(
 
         rows.push(entry);
 
-        const refs = new Set<string>();
-
-        for (const col of Object.keys(fksOf.get(entry.table) ?? {})) {
-            const v = entry.row[col];
-
-            if (typeof v === 'string') refs.add(v);
-        }
-
-        for (const s of collectKeysAndStrings(entry.row))
-            if (CONTENT_ID_RE.test(s)) refs.add(s);
+        const refs = refsOf(entry);
 
         refs.delete(id);
 

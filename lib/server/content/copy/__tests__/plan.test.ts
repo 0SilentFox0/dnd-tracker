@@ -103,4 +103,132 @@ describe('buildCopyPlan', () => {
 
         expect(plan.toCreate).toEqual([]);
     });
+    it('warns when a created row references a skipped unsupported dependency', async () => {
+        inactive.add('spells');
+
+        const plan = await buildCopyPlan({
+            source: source(),
+            target: emptyBundle(),
+            targetActor: actor,
+            selected,
+        });
+
+        inactive.clear();
+
+        expect(plan.warnings).toEqual(['units Orc: spells dependency skipped']);
+    });
+
+    it('handles reuse and an unsupported kind together', async () => {
+        inactive.add('spells');
+
+        const target = emptyBundle();
+
+        target.races.push({ id: TR, name: 'Giant' });
+
+        const plan = await buildCopyPlan({
+            source: source(),
+            target,
+            targetActor: actor,
+            selected,
+        });
+
+        inactive.clear();
+
+        expect(plan.reuse.get(R)).toBe(TR);
+        expect(plan.skipped).toEqual([
+            { kind: 'spells', name: 'Bolt', reason: 'kind-unsupported' },
+        ]);
+        expect(plan.toCreate.map((r) => r.row.id)).toEqual([U]);
+        expect(plan.warnings).toHaveLength(1);
+    });
+
+    it('terminates on a cycle through a reused row', async () => {
+        const b = emptyBundle();
+
+        b.spells.push({ id: S, name: 'Bolt', summon: U });
+        b.units.push({ id: U, name: 'Orc', abilities: { spell: S } });
+
+        const target = emptyBundle();
+
+        target.units.push({ id: TU, name: 'orc' });
+
+        const plan = await buildCopyPlan({
+            source: b,
+            target,
+            targetActor: actor,
+            selected: [{ kind: 'spells', ids: [S] }],
+        });
+
+        expect(plan.toCreate.map((r) => r.row.id)).toEqual([S]);
+        expect(plan.reuse.get(U)).toBe(TU);
+    });
+
+    it('drops same-name duplicates and remaps references to the winner', async () => {
+        const [S2, U3] = ['g', 'h'].map(id);
+
+        const b = emptyBundle();
+
+        b.spells.push({ id: S, name: 'Bolt' }, { id: S2, name: ' bolt ' });
+        b.units.push(
+            { id: U, name: 'Orc', abilities: { spell: S } },
+            { id: U3, name: 'Ogre', abilities: { spell: S2 } }
+        );
+
+        const plan = await buildCopyPlan({
+            source: b,
+            target: emptyBundle(),
+            targetActor: actor,
+            selected: [{ kind: 'units', ids: [U, U3] }],
+        });
+
+        const ids = new Set(plan.toCreate.map((r) => r.row.id));
+
+        expect(ids).toEqual(new Set([U, U3, S]));
+        expect(plan.skipped).toEqual([
+            { kind: 'spells', name: ' bolt ', reason: 'duplicate-name' },
+        ]);
+        expect(JSON.stringify(plan.toCreate)).not.toContain(S2);
+        expect(plan.bundle.spells).toHaveLength(1);
+        expect(plan.bundle.units.find((r) => r.id === U3)?.abilities).toEqual({
+            spell: S,
+        });
+    });
+
+    it('reports a missing id and an unknown kind', async () => {
+        const plan = await buildCopyPlan({
+            source: source(),
+            target: emptyBundle(),
+            targetActor: actor,
+            selected: [
+                { kind: 'units', ids: [TS] },
+                { kind: 'bogus', ids: [U] },
+            ],
+        });
+
+        expect(plan.skipped).toEqual([
+            { kind: 'units', name: TS, reason: 'not-found' },
+            { kind: 'bogus', name: 'bogus', reason: 'unknown-kind' },
+        ]);
+    });
+
+    it('falls back to title when name is not a string', async () => {
+        const b = emptyBundle();
+
+        b.units.push({ id: U, name: null, title: 'Orc' });
+
+        const target = emptyBundle();
+
+        target.units.push({ id: TU, title: 'ORC' });
+
+        const plan = await buildCopyPlan({
+            source: b,
+            target,
+            targetActor: actor,
+            selected,
+        });
+
+        expect(plan.skipped).toEqual([
+            { kind: 'units', name: 'Orc', reason: 'exists' },
+        ]);
+    });
 });
