@@ -1,4 +1,5 @@
 import { disengageEffect } from '../actions/effects';
+import { D20_MASTERIES } from './mastery';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -271,6 +272,7 @@ function hitRiders({ attacker, round, effects }: HitRidersCtx): HitRidersPlan {
 }
 
 export const D20_ATTACK_HOOKS: RuleSystemAttackHooks = {
+    masteries: D20_MASTERIES,
     riderOptions: riderOffer,
     hitRiders,
 };

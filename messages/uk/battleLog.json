@@ -127,6 +127,20 @@
     "manualTag": " (вибір гравця)",
     "serverTag": " (сервер)"
   },
+  "mastery": {
+    "cleave": "Розтин",
+    "graze": "Подряпина",
+    "nick": "Порізати",
+    "push": "Відштовхування",
+    "sap": "Виснаження",
+    "slow": "Сповільнення",
+    "topple": "Збивання з ніг",
+    "vex": "Дратування",
+    "applied": "{mastery}: {target}",
+    "vexNext": "Дратування: перевага на наступний кидок атаки по {target}",
+    "grazeHit": "Подряпина: {target} отримує {damage} шкоди",
+    "toppleSave": "Збивання з ніг: {target}, рятівний кидок Статури {total} проти СК {dc}: {success, select, true {успіх} other {провал, цілю збито з ніг}}"
+  },
   "rider": {
     "spent": "🎲 кубик натхнення d{die}: +{bonus}, разом {total}"
   },

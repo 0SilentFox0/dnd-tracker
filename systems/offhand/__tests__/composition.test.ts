@@ -4,6 +4,8 @@ import {
     bareD20Rules,
     dnd5eRules,
 } from '@/lib/__tests__/helpers/dnd5e-modules';
+import { AttackType } from '@/lib/constants/battle';
+import { makeParticipant, resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { resetSystemState } from '@/lib/utils/battle/turn/turn-state';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -37,5 +39,58 @@ describe('offhand module composition', () => {
             d20State(resetSystemState(armed, 'turn', bareD20Rules()))
                 .attackedWithLight
         ).toBe(true);
+    });
+});
+
+describe('Nick mastery frees the off-hand attack', () => {
+    const dagger = {
+        id: 'd',
+        name: 'Dagger',
+        type: AttackType.MELEE,
+        attackBonus: 0,
+        damageDice: '1d4',
+        damageType: 'piercing',
+        properties: 'Mastery: Nick',
+        traits: ['light' as const],
+        hand: 'off' as const,
+    };
+
+    const nicker = () => {
+        const p = makeParticipant({
+            id: 'n',
+            abilities: [
+                resolved({
+                    trigger: { event: 'passive' },
+                    params: { weaponMastery: ['dagger'] },
+                    effects: [{ kind: 'note', text: 'Mastery' }],
+                }),
+            ],
+        });
+
+        return withD20State(
+            {
+                ...p,
+                abilities: { ...p.abilities, damageModel: '5e' },
+                actionFlags: { ...p.actionFlags, hasUsedBonusAction: true },
+                battleData: { ...p.battleData, attacks: [dagger] },
+            },
+            { attackedWithLight: true }
+        );
+    };
+
+    it('the off-hand stays ready after the bonus action was spent', () => {
+        const { secondaryAttack } = ruleSystemOf(dnd5eRules()).combat;
+
+        expect(secondaryAttack?.ready(nicker())).toBe(true);
+    });
+
+    it('free() spends the once-per-turn use', () => {
+        const { secondaryAttack } = ruleSystemOf(dnd5eRules()).combat;
+
+        const spent = secondaryAttack?.free?.(nicker(), dagger, 1);
+
+        expect(spent).toBeTruthy();
+        expect(secondaryAttack?.free?.(spent!, dagger, 1)).toBeNull();
+        expect(secondaryAttack?.ready(spent!)).toBe(false);
     });
 });

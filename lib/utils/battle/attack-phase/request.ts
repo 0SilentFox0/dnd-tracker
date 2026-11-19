@@ -85,7 +85,13 @@ function assertOffHand(
     attack: BattleAttack,
     rules: Ruleset
 ): void {
-    if (attacker.actionFlags.hasUsedBonusAction)
+    const free = ruleSystemOf(rules).combat.secondaryAttack?.free?.(
+        attacker,
+        attack,
+        0
+    );
+
+    if (attacker.actionFlags.hasUsedBonusAction && !free)
         throw new BattleRuleError('action_used', API_ERRORS.BONUS_ACTION_USED);
 
     if (!ruleSystemOf(rules).combat.secondaryAttack?.ready(attacker))

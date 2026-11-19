@@ -46,6 +46,7 @@ export interface ResolveHitParams {
     bonusLabel?: LogLine;
     offTurn?: boolean;
     obstacle?: boolean;
+    noAbilityMod?: boolean;
     hitSpells?: ReadonlyMap<string, CastableSpell>;
     battleId: string;
     cunningStrike?: StrikeRiderEffect[];
@@ -71,6 +72,7 @@ export function resolveHit(p: ResolveHitParams): {
         bonusLabel: p.bonusLabel,
         offTurn: p.offTurn,
         obstacle: p.obstacle,
+        noAbilityMod: p.noAbilityMod,
         rng: flow.ctx.rng,
         rules: flow.ctx.rules,
     });
@@ -179,6 +181,14 @@ export function resolveHit(p: ResolveHitParams): {
 
     if (riders?.apply(flow, targetId, fired))
         settleDowned(flow, targetId, attackerId);
+
+    ruleSystemOf(flow.ctx.rules).combat.attack?.masteries?.onStrike({
+        flow,
+        attackerId,
+        targetId,
+        attack,
+        hit: true,
+    });
 
     const abilityDamage = Math.max(
         0,

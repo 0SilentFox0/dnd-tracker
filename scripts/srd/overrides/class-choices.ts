@@ -58,6 +58,68 @@ export const SPELL_FEATURES: Record<
     },
 };
 
+export interface MasteryWeapon {
+    name: string;
+    mastery: string;
+    ranged?: true;
+}
+
+export const MASTERY_WEAPONS: readonly MasteryWeapon[] = [
+    { name: 'Battleaxe', mastery: 'Topple' },
+    { name: 'Blowgun', mastery: 'Vex', ranged: true },
+    { name: 'Club', mastery: 'Slow' },
+    { name: 'Dagger', mastery: 'Nick' },
+    { name: 'Dart', mastery: 'Vex', ranged: true },
+    { name: 'Flail', mastery: 'Sap' },
+    { name: 'Glaive', mastery: 'Graze' },
+    { name: 'Greataxe', mastery: 'Cleave' },
+    { name: 'Greatclub', mastery: 'Push' },
+    { name: 'Greatsword', mastery: 'Graze' },
+    { name: 'Halberd', mastery: 'Cleave' },
+    { name: 'Hand Crossbow', mastery: 'Vex', ranged: true },
+    { name: 'Handaxe', mastery: 'Vex' },
+    { name: 'Heavy Crossbow', mastery: 'Push', ranged: true },
+    { name: 'Javelin', mastery: 'Slow' },
+    { name: 'Lance', mastery: 'Topple' },
+    { name: 'Light Crossbow', mastery: 'Slow', ranged: true },
+    { name: 'Light Hammer', mastery: 'Nick' },
+    { name: 'Longbow', mastery: 'Slow', ranged: true },
+    { name: 'Longsword', mastery: 'Sap' },
+    { name: 'Mace', mastery: 'Sap' },
+    { name: 'Maul', mastery: 'Topple' },
+    { name: 'Morningstar', mastery: 'Sap' },
+    { name: 'Musket', mastery: 'Slow', ranged: true },
+    { name: 'Pike', mastery: 'Push' },
+    { name: 'Pistol', mastery: 'Vex', ranged: true },
+    { name: 'Quarterstaff', mastery: 'Topple' },
+    { name: 'Rapier', mastery: 'Vex' },
+    { name: 'Scimitar', mastery: 'Nick' },
+    { name: 'Shortbow', mastery: 'Vex', ranged: true },
+    { name: 'Shortsword', mastery: 'Vex' },
+    { name: 'Sickle', mastery: 'Nick' },
+    { name: 'Sling', mastery: 'Slow', ranged: true },
+    { name: 'Spear', mastery: 'Sap' },
+    { name: 'Trident', mastery: 'Topple' },
+    { name: 'War Pick', mastery: 'Sap' },
+    { name: 'Warhammer', mastery: 'Push' },
+    { name: 'Whip', mastery: 'Slow' },
+];
+
+/** Classes that grow their count with a class column; the rest train a fixed number of kinds */
+export const MASTERY_FEATURES: Record<
+    string,
+    { count: number | { scale: string }; meleeOnly?: true }
+> = {
+    'barbarian:weapon-mastery': {
+        count: { scale: 'weapon-mastery-count' },
+        meleeOnly: true,
+    },
+    'fighter:weapon-mastery': { count: { scale: 'weapon-mastery-count' } },
+    'paladin:weapon-mastery': { count: 2 },
+    'ranger:weapon-mastery': { count: 2 },
+    'rogue:weapon-mastery': { count: 2 },
+};
+
 const strike = (damageType: string): AbilityCore => ({
     trigger: { event: 'hit', role: 'attacker' },
     limits: { perTurn: 1 },

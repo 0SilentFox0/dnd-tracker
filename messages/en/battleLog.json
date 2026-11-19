@@ -127,6 +127,20 @@
     "manualTag": " (player's choice)",
     "serverTag": " (server)"
   },
+  "mastery": {
+    "cleave": "Cleave",
+    "graze": "Graze",
+    "nick": "Nick",
+    "push": "Push",
+    "sap": "Sap",
+    "slow": "Slow",
+    "topple": "Topple",
+    "vex": "Vex",
+    "applied": "{mastery}: {target}",
+    "vexNext": "Vex: advantage on the next attack roll against {target}",
+    "grazeHit": "Graze: {target} takes {damage} damage",
+    "toppleSave": "Topple: {target} CON save {total} vs DC {dc}: {success, select, true {success} other {fail, knocked prone}}"
+  },
   "rider": {
     "spent": "🎲 inspiration die d{die}: +{bonus}, total {total}"
   },
