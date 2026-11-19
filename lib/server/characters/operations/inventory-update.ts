@@ -85,6 +85,24 @@ function planEquipSlot(
     };
 }
 
+async function requireArtifactsInCampaign(
+    tx: Tx,
+    campaignId: string,
+    ref: string
+) {
+    const ids = [...new Set(refArtifactIds(ref))];
+
+    const found = ids.length
+        ? await tx.artifact.findMany({
+              where: { id: { in: ids }, campaignId },
+              select: { id: true },
+          })
+        : [];
+
+    if (!ids.length || found.length !== ids.length)
+        throw new ContentError(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
+}
+
 async function checkOffHand(
     tx: Tx,
     scope: { campaignId: string; rules: ReturnType<typeof parseRules> },
@@ -289,6 +307,13 @@ async function updateInventoryCore({ access, character }: Gate, data: Input) {
             | undefined;
 
         let displaced: string | undefined;
+
+        if (data.equipSlot?.artifactId)
+            await requireArtifactsInCampaign(
+                tx,
+                campaignId,
+                data.equipSlot.artifactId
+            );
 
         if (data.equipSlot)
             ({ nextEquipped, displaced } = planEquipSlot(

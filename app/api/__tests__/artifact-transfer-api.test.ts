@@ -17,6 +17,7 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
 const tx = vi.hoisted(() => ({
     $executeRaw: vi.fn(),
     inventoryLog: { createMany: vi.fn() },
+    artifact: { findMany: vi.fn() },
     characterInventory: {
         upsert: vi.fn(),
         update: vi.fn(),
@@ -305,6 +306,10 @@ describe('PATCH inventory — унікальність артефакта', () =
 
     beforeEach(() => {
         vi.clearAllMocks();
+        tx.artifact.findMany.mockImplementation(
+            async ({ where }: { where: { id: { in: string[] } } }) =>
+                where.id.in.map((id) => ({ id }))
+        );
         vi.mocked(apiAuth.requireDM).mockResolvedValue(access('dm', 'dm'));
         vi.mocked(prisma.character.findUnique).mockResolvedValue({
             id: 'a',

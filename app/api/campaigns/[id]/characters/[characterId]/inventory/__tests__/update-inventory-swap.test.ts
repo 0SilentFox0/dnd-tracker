@@ -41,6 +41,7 @@ import { updateInventory } from '../update-inventory';
 
 describe('DM grid swap', () => {
     it('displacing an item already in the stash → 409, nothing written', async () => {
+        tx.artifact.findMany.mockResolvedValue([{ id: 'ls' }]);
         tx.characterInventory.findUnique.mockResolvedValue({
             equipped: { weapon: 'dg' },
             stash: ['dg', 'ls'],

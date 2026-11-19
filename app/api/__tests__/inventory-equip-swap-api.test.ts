@@ -42,6 +42,10 @@ const patch = async (body: unknown) => {
 describe('DM equip via inventory PATCH', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        tx.artifact.findMany.mockImplementation(
+            async ({ where }: { where: { id: { in: string[] } } }) =>
+                where.id.in.map((id) => ({ id }))
+        );
         vi.mocked(apiAuth.requireDM).mockResolvedValue({
             userId: 'dm',
             isDM: true,
@@ -94,6 +98,18 @@ describe('DM equip via inventory PATCH', () => {
         });
 
         expect(response.status).toBe(422);
+        expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
+    });
+
+    it('unknown artifact in the campaign answers 404 without writing', async () => {
+        tx.artifact.findMany.mockResolvedValue([]);
+
+        const res = await patch({
+            equipSlot: { slot: 'helmet', artifactId: 'ghost' },
+        });
+
+        expect(res.status).toBe(404);
+        expect((await res.json()).error).toBe('errors.artifactNotFound');
         expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
     });
 

@@ -8,7 +8,7 @@ vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
 const tx = vi.hoisted(() => ({
     $executeRaw: vi.fn(),
     inventoryLog: { createMany: vi.fn() },
-    artifact: { findFirst: vi.fn() },
+    artifact: { findFirst: vi.fn(), findMany: vi.fn() },
     campaign: { findUnique: vi.fn() },
     characterInventory: {
         upsert: vi.fn(),
@@ -43,6 +43,10 @@ const patch = async (body: unknown) => {
 describe('shield cell validation in inventory PATCH', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        tx.artifact.findMany.mockImplementation(
+            async ({ where }: { where: { id: { in: string[] } } }) =>
+                where.id.in.map((id) => ({ id }))
+        );
         vi.mocked(apiAuth.requireDM).mockResolvedValue({
             userId: 'dm',
             isDM: true,
