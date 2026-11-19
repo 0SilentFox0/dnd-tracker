@@ -25,6 +25,7 @@ const m = vi.hoisted(() => ({
         $transaction: vi.fn(),
         $queryRaw: vi.fn(async () => [{ id: 'c1' }]),
     },
+    groupBy: vi.fn(async () => [] as unknown[]),
     kvDel: vi.fn(),
     requireDM: vi.fn(),
     userId: { current: 'u1' },
@@ -33,7 +34,11 @@ const m = vi.hoisted(() => ({
     admin: vi.fn(),
 }));
 
-vi.mock('@/lib/db', () => ({ prisma: m.db }));
+vi.mock('@/lib/db', () => ({
+    prisma: new Proxy(m.db as Record<string, unknown>, {
+        get: (target, key: string) => target[key] ?? { groupBy: m.groupBy },
+    }),
+}));
 vi.mock('@/lib/cache/kv', () => ({
     kvDel: m.kvDel,
     kvGet: vi.fn(),
@@ -427,6 +432,9 @@ describe('campaign templates API', () => {
     });
 
     it('GET /api/templates — офіційні й мої, без чужих приватних', async () => {
+        m.groupBy.mockImplementation(async () => [
+            { campaignId: 'o1', _count: { _all: 3 } },
+        ]);
         m.db.campaign.findMany.mockImplementation(
             async ({ where }: { where: { visibility: unknown } }) =>
                 where.visibility === 'official'
@@ -457,6 +465,8 @@ describe('campaign templates API', () => {
         expect(body.official.map((t: { id: string }) => t.id)).toEqual(['o1']);
         expect(body.mine.map((t: { id: string }) => t.id)).toEqual(['m1']);
         expect(body.official[0].counts.spellGroups).toBe(2);
+        expect(body.official[0].counts.skillTrees).toBe(3);
+        expect(body.mine[0].counts.skillTrees).toBe(0);
 
         const mineWhere = m.db.campaign.findMany.mock.calls
             .map((c) => c[0].where)

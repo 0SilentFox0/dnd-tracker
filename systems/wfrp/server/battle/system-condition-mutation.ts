@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { CONDITION_LIMITS } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import { lineText } from '@/lib/utils/battle/log/lines';
@@ -12,13 +11,20 @@ import type {
 import { BattleRuleError, dmEvent } from '@/lib/utils/battle/store';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
+const WFRP_CONDITION_MAX_ROUNDS = 99;
+
 export const systemConditionSchema = z.discriminatedUnion('action', [
     z.object({
         action: z.literal('apply'),
         participantId: z.string().min(1),
         condition: z.string().min(1).max(40),
         levels: z.number().int().min(1).max(10).optional(),
-        rounds: z.number().int().min(1).max(CONDITION_LIMITS.rounds).optional(),
+        rounds: z
+            .number()
+            .int()
+            .min(1)
+            .max(WFRP_CONDITION_MAX_ROUNDS)
+            .optional(),
     }),
     z.object({
         action: z.literal('remove'),
