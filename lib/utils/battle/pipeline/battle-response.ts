@@ -1,5 +1,5 @@
 import { PUSHER_DELTA_LIMIT_BYTES } from './limits';
-import { publicPending } from './public-pending';
+import { publicPending, redactPendingForPlayers } from './public-pending';
 
 import { BattleStatus } from '@/lib/constants/battle';
 import { CampaignRole } from '@/lib/constants/campaigns';
@@ -182,7 +182,9 @@ export function toBattleResponse(
             !viewer.isDM &&
             !viewer.canSeeEnemyHp && { redacted: true as const }),
         pendingSummons: viewer ? redactPendingForViewer(viewer, pending, meta.rules) : pending,
-        pendingChoice: publicPending(scene.pendingChoice),
+        pendingChoice: hide
+            ? redactPendingForPlayers(publicPending(scene.pendingChoice))
+            : publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
         ...mapFields(meta),
         audio: meta.audio ?? null,
@@ -238,8 +240,18 @@ export function redactDeltaForPlayers(
 
     const setup = delta.setup && publicSetup(delta.setup);
 
+    const sceneIn = delta.scene as ClientBattleDelta['scene'] | undefined;
+
+    const pendingChoice = viewer.isDM
+        ? sceneIn?.pendingChoice
+        : redactPendingForPlayers(sceneIn?.pendingChoice);
+
+    const sceneChanged =
+        !!sceneIn && pendingChoice !== sceneIn.pendingChoice;
+
     const touched =
         logChanged ||
+        sceneChanged ||
         upserted !== delta.upserted ||
         patched !== delta.patched ||
         pending !== delta.pending ||
@@ -253,6 +265,9 @@ export function redactDeltaForPlayers(
               ...(patched && { patched }),
               ...(pending && { pending }),
               ...(setup && { setup }),
+              ...(sceneChanged && {
+                  scene: { ...delta.scene, pendingChoice },
+              }),
           }
         : delta;
 
@@ -263,8 +278,22 @@ export function redactDeltaForPlayers(
 }
 
 function sameDeltaPayload(a: ClientBattleDelta, b: ClientBattleDelta): boolean {
-    const pick = ({ log, upserted, patched, pending, setup }: ClientBattleDelta) =>
-        JSON.stringify([log, upserted, patched, pending, setup]);
+    const pick = ({
+        log,
+        upserted,
+        patched,
+        pending,
+        setup,
+        scene,
+    }: ClientBattleDelta) =>
+        JSON.stringify([
+            log,
+            upserted,
+            patched,
+            pending,
+            setup,
+            scene?.pendingChoice,
+        ]);
 
     return pick(a) === pick(b);
 }

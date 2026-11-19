@@ -1,6 +1,7 @@
 import type { Spell } from '@prisma/client';
 
 import type { SpellRequestData } from '@/lib/schemas/battles';
+import type { InterruptSpell } from '@/lib/utils/battle/counter/types';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { resolveSpellSource } from '@/lib/utils/battle/spell/resolve-source';
@@ -15,6 +16,10 @@ import type { BattleParticipant } from '@/types/battle';
 
 export interface SpellMutationDeps extends SummonDeps {
     loadSpell(spellId: string, campaignId: string): Promise<Spell | null>;
+    loadInterruptSpells?(
+        campaignId: string,
+        ids: string[]
+    ): Promise<InterruptSpell[]>;
 }
 
 export type Spellcast = ReturnType<typeof toCastableSpell>;

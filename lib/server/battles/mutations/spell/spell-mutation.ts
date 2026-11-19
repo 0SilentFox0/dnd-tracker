@@ -2,6 +2,7 @@ import { getCachedSummonPool } from '@/lib/cache/reference-data';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type { SpellRequestData } from '@/lib/schemas/battles';
+import { openCounterIfAny } from '@/lib/server/battles/mutations/spell/cast-counter';
 import { executeCast } from '@/lib/server/battles/mutations/spell/cast-execute';
 import { resolvePicks } from '@/lib/server/battles/mutations/spell/cast-pick';
 import {
@@ -33,22 +34,50 @@ import { resolveSpellSource } from '@/lib/utils/battle/spell/resolve-source';
 import { splitSaveRolls } from '@/lib/utils/battle/spell/save-rolls';
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import type { Rng } from '@/lib/utils/common/rng';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { readSpellDefinition } from '@/lib/utils/spells/model/read';
 
 const defaultDeps: SpellMutationDeps = {
     loadSpell: (id, campaignId) =>
         prisma.spell.findFirst({ where: { id, campaignId } }),
+    loadInterruptSpells: async (campaignId, ids) => {
+        const rows = await prisma.spell.findMany({
+            where: {
+                campaignId,
+                id: { in: ids },
+                spellEffects: { array_contains: [{ kind: 'interruptCast' }] },
+            },
+        });
+
+        return rows.map((row) => {
+            const { targeting } = readSpellDefinition(row);
+
+            return {
+                id: row.id,
+                name: row.name,
+                level: row.level,
+                range: ('range' in targeting && targeting.range) || 60,
+            };
+        });
+    },
     loadPool: getCachedSummonPool,
 };
 
 export function createSpellMutation(
     deps: SpellMutationDeps = defaultDeps,
-    options: { serverRolls?: boolean } = {}
+    options: {
+        serverRolls?: boolean;
+        critPause?: boolean;
+        skipCounter?: boolean;
+        rng?: Rng;
+    } = {}
 ) {
     return async (
         ctx: BattleMutationContext,
         data: SpellRequestData,
-        resume?: CritResume
+        resume?: CritResume,
+        replay?: { serverRolls?: boolean; seed?: number }
     ): Promise<MutationResult> => {
         let order = ctx.participants;
 
@@ -170,12 +199,34 @@ export function createSpellMutation(
             ...picks,
         };
 
-        return runWithCritChoice(ctx, {
+        if (!data.preview &&
+            !resume &&
+            replay?.seed === undefined &&
+            !options.skipCounter) {
+            const paused = await openCounterIfAny({
+                ctx,
+                deps,
+                data,
+                spell,
+                caster,
+                order,
+                diceRolls,
+                serverRolls: !!options.serverRolls,
+            });
+
+            if (paused) return paused;
+        }
+
+        return runWithCritChoice(options.rng ? { ...ctx, rng: options.rng } : ctx, {
             action: 'spell',
             actorId: data.casterId,
             request: { ...data, diceRolls },
-            enabled: ctx.meta.critChoiceByDm && !data.preview,
+            enabled:
+                ctx.meta.critChoiceByDm &&
+                !data.preview &&
+                options.critPause !== false,
             resume,
+            seed: replay?.seed,
             run: (rolls) => executeCast(plan, rolls),
         });
     };

@@ -4,7 +4,10 @@ import type { SpellFx } from '@/lib/utils/battle/fx/spells';
 import type { TransformRequest } from '@/lib/utils/battle/transform/types';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { SpellIngredient } from '@/lib/utils/spells/ingredients/types';
+import type {
+    ComponentFlags,
+    SpellIngredient,
+} from '@/lib/utils/spells/ingredients/types';
 import type { SpellDice } from '@/lib/utils/spells/model/dice';
 import type { SpellDefinition } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
@@ -21,6 +24,7 @@ export interface CastableSpell {
     fx?: SpellFx | null;
     definition: SpellDefinition;
     ingredients?: SpellIngredient[];
+    components?: ComponentFlags;
 }
 
 export interface CastSpellParams {

@@ -1002,3 +1002,65 @@ describe('server-side fog', () => {
         expect(out.delta.upserted[0].battleData.position).toEqual({ x: 15, y: 2 });
     });
 });
+
+describe('counter window projection', () => {
+    const counter = {
+        kind: 'counter',
+        windowId: 'w1',
+        actorId: 'hero',
+        spell: { name: 'Fireball', level: 3 },
+        deadline: '2026-01-01T00:00:10.000Z',
+        offers: [{ reactorId: 'gob', spellId: 'cs', slotLevels: [3], dm: true }],
+    };
+
+    const pausedScene = {
+        ...scene,
+        pendingChoice: { shown: counter, hidden: { seed: 1 } },
+    };
+
+    it('GET: a player sees no DM offer and no spell, the DM sees everything', () => {
+        const log = { mode: 'full' as const, entries: [] };
+
+        const player = toBattleResponse({ meta }, pausedScene, [hero], [], log, {
+            isDM: false,
+        });
+
+        const dm = toBattleResponse({ meta }, pausedScene, [hero], [], log, {
+            isDM: true,
+        });
+
+        expect(player.pendingChoice).toMatchObject({
+            offers: [],
+            dmDeciding: true,
+        });
+        expect(player.pendingChoice).not.toHaveProperty('spell');
+        expect(dm.pendingChoice).toEqual(counter);
+    });
+
+    it('delta: the player projection is redacted and flagged changed, the DM one is not', () => {
+        const delta = {
+            battleId: 'b1',
+            version: 4,
+            scene: { pendingChoice: counter },
+            upserted: [],
+            log: [],
+        } as unknown as ClientBattleDelta;
+
+        const player = redactDeltaForPlayers(delta, [hero], DEFAULT_RULES);
+
+        expect(player.changed).toBe(true);
+        expect(player.delta.scene.pendingChoice).toMatchObject({
+            offers: [],
+            dmDeciding: true,
+        });
+
+        const dm = redactDeltaForPlayers(delta, [hero], DEFAULT_RULES, {
+            userId: null,
+            isDM: true,
+            readOnly: false,
+            canSeeEnemyHp: true,
+        });
+
+        expect(dm.delta.scene.pendingChoice).toEqual(counter);
+    });
+});

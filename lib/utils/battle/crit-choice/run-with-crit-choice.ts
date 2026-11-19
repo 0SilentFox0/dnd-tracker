@@ -16,6 +16,8 @@ interface RunWithCritChoiceOptions {
     enabled: boolean;
     serverRolls?: boolean;
     resume?: CritResume;
+    /** replays a stored request with its original seed (no crit resume) */
+    seed?: number;
     run(env: {
         rng: Rng;
         crit: CritPicker;
@@ -26,9 +28,13 @@ export async function runWithCritChoice(
     ctx: BattleMutationContext,
     opts: RunWithCritChoiceOptions
 ): Promise<MutationResult> {
-    const seed = opts.resume?.seed ?? Math.floor(Math.random() * 2 ** 32);
+    const seed =
+        opts.resume?.seed ?? opts.seed ?? Math.floor(Math.random() * 2 ** 32);
 
-    const rng = !opts.resume && ctx.rng ? ctx.rng : mulberry32(seed);
+    const rng =
+        !opts.resume && opts.seed === undefined && ctx.rng
+            ? ctx.rng
+            : mulberry32(seed);
 
     const { criticals } = ctx.meta.rules;
 
