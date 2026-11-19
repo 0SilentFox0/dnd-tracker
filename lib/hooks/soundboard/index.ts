@@ -7,3 +7,5 @@ export { usePresetMutations } from './usePresetMutations';
 export { useSoundboardKeys } from './useSoundboardKeys';
 export { useSoundboardPads } from './useSoundboardPads';
 export { useSoundLibrary } from './useSoundLibrary';
+export { useSoundPreview } from './useSoundPreview';
+export { isRecorderSupported, useSoundRecorder } from './useSoundRecorder';

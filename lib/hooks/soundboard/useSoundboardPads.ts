@@ -3,9 +3,10 @@
 import { useCallback, useMemo, useRef } from 'react';
 
 import { markLocalPlay } from './handle-play-event';
-import { playBuffer, previewSound } from './player';
+import { playBuffer } from './player';
 import { useActivePreset } from './useActivePreset';
 import { useSoundLibrary } from './useSoundLibrary';
+import { useSoundPreview } from './useSoundPreview';
 
 import { ApiError } from '@/lib/api/client';
 import { playSound } from '@/lib/api/soundboard';
@@ -70,11 +71,7 @@ export function useSoundboardPads(campaignId: string): {
         [campaignId, notify]
     );
 
-    const preview = useCallback(
-        (sound: LibrarySound) =>
-            void previewSound(sound, effectiveVolume(sound, readAudioPrefs())),
-        []
-    );
+    const preview = useSoundPreview();
 
     return { preset, presets, setPresetId, pads, play, preview };
 }

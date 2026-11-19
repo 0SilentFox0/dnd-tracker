@@ -26,6 +26,7 @@ export function useLibraryMutations() {
         }: {
             file: File | Blob;
             name?: string;
+            icon?: string;
             durationMs: number;
             source?: 'upload' | 'record';
         }) => uploadLibrarySoundFile(file, meta),

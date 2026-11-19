@@ -41,6 +41,7 @@ export async function uploadLibrarySoundFile(
     file: File | Blob,
     meta: {
         name?: string;
+        icon?: string;
         durationMs: number;
         source?: 'upload' | 'record';
     }
@@ -67,6 +68,7 @@ export async function uploadLibrarySoundFile(
     return createLibrarySound({
         path: ticket.path,
         name: meta.name,
+        icon: meta.icon,
         durationMs: Math.max(1, Math.round(meta.durationMs)),
         source: meta.source ?? 'upload',
     });
