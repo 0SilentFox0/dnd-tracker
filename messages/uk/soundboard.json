@@ -14,12 +14,15 @@
     "delete": "Видалити",
     "hide": "Сховати",
     "deleteTitle": "Видалити «{name}»?",
-    "hideTitle": "Сховати «{name}» зі звукової панелі?"
+    "hideTitle": "Сховати «{name}» зі звукової панелі?",
+    "show": "Показати",
+    "hiddenTitle": "Приховані звуки"
   },
   "upload": {
     "fileLabel": "Файл звуку",
     "button": "Завантажити звук",
-    "pending": "Завантаження…"
+    "pending": "Завантаження…",
+    "defaultName": "Звук"
   },
   "uploadFailed": "Не вдалося завантажити звук",
   "builtin": {

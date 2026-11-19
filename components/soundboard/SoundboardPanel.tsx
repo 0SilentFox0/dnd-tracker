@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 
+import { HiddenBuiltinSounds } from './HiddenBuiltinSounds';
 import { SoundEditDialog } from './SoundEditDialog';
 import { SoundPad } from './SoundPad';
 import { SoundUploader } from './SoundUploader';
@@ -72,6 +73,12 @@ export function SoundboardPanel({ campaignId }: { campaignId: string }) {
                             />
                         ))}
                     </div>
+                    {editing && (
+                        <HiddenBuiltinSounds
+                            campaignId={campaignId}
+                            hiddenBuiltin={hiddenBuiltin}
+                        />
+                    )}
                 </div>
             )}
             <SoundEditDialog

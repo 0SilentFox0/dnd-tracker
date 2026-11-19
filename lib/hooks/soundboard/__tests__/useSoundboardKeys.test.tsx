@@ -38,6 +38,15 @@ describe('useSoundboardKeys', () => {
         expect(play).toHaveBeenCalledWith(pads[2]);
     });
 
+    it('ignores auto-repeated keydown', () => {
+        const play = vi.fn();
+
+        render(<Host list={pads} play={play} />);
+        fireEvent.keyDown(document.body, { key: '1', repeat: true });
+
+        expect(play).not.toHaveBeenCalled();
+    });
+
     it('ignores typing, dialogs, modifiers, missing pads and null', () => {
         const play = vi.fn();
 

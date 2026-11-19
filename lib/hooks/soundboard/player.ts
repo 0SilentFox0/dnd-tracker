@@ -30,15 +30,23 @@ const getContext = (): AudioContext | null => {
     return ctx;
 };
 
-const unlock = () => {
+const UNLOCK_EVENTS = ['pointerup', 'touchend', 'click', 'keydown'] as const;
+
+const REMOTE_RESUME_MAX_MS = 1000;
+
+const unlock = async (): Promise<void> => {
     try {
         const c = getContext();
 
-        if (c && c.state !== 'running') void c.resume().catch(() => {});
+        if (c && c.state !== 'running') await c.resume().catch(() => {});
     } catch (error) {
         logger.warn('[soundboard] unlock failed', {}, error);
     }
 };
+
+export function unlockSoundboard(): Promise<void> {
+    return unlock();
+}
 
 export function armUnlock(): void {
     if (armed || typeof document === 'undefined') return;
@@ -46,13 +54,15 @@ export function armUnlock(): void {
     armed = true;
 
     const handler = () => {
-        document.removeEventListener('pointerdown', handler);
-        document.removeEventListener('keydown', handler);
-        unlock();
+        void unlock().then(() => {
+            if (ctx?.state !== 'running') return;
+
+            for (const type of UNLOCK_EVENTS)
+                document.removeEventListener(type, handler);
+        });
     };
 
-    document.addEventListener('pointerdown', handler);
-    document.addEventListener('keydown', handler);
+    for (const type of UNLOCK_EVENTS) document.addEventListener(type, handler);
 }
 
 async function load(c: AudioContext, url: string): Promise<AudioBuffer> {
@@ -71,13 +81,25 @@ async function load(c: AudioContext, url: string): Promise<AudioBuffer> {
     return buffer;
 }
 
-export async function playBuffer(sound: Sound, volume: number): Promise<void> {
+export async function playBuffer(
+    sound: Sound,
+    volume: number,
+    opts: { remote?: boolean } = {}
+): Promise<void> {
     try {
         const c = getContext();
 
         if (!c || volume <= 0) return;
 
-        if (c.state !== 'running') await c.resume().catch(() => {});
+        if (c.state !== 'running') {
+            const started = Date.now();
+
+            await c.resume().catch(() => {});
+
+            // a remote event held behind a pending resume would play late
+            if (opts.remote && Date.now() - started > REMOTE_RESUME_MAX_MS)
+                return;
+        }
 
         if (c.state !== 'running') return;
 

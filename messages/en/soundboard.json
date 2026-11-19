@@ -14,12 +14,15 @@
     "delete": "Delete",
     "hide": "Hide",
     "deleteTitle": "Delete \"{name}\"?",
-    "hideTitle": "Hide \"{name}\" from the soundboard?"
+    "hideTitle": "Hide \"{name}\" from the soundboard?",
+    "show": "Show",
+    "hiddenTitle": "Hidden sounds"
   },
   "upload": {
     "fileLabel": "Sound file",
     "button": "Upload sound",
-    "pending": "Uploading…"
+    "pending": "Uploading…",
+    "defaultName": "Sound"
   },
   "uploadFailed": "Could not upload the sound",
   "builtin": {

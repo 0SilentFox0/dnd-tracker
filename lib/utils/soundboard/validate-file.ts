@@ -12,7 +12,10 @@ export function validateSoundFile(file: {
     const format = detectTrackFormat(file);
 
     if (!format || file.size <= 0 || file.size > MAX_SOUND_BYTES)
-        return { ok: false, message: API_ERRORS.TRACK_FILE_INVALID };
+        return {
+            ok: false,
+            message: API_ERRORS.SOUND_FILE_INVALID,
+        };
 
     return { ok: true, value: format };
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { BUILTIN_SOUNDS } from '@/lib/constants/soundboard';
 import { createNonceGuard } from '@/lib/utils/soundboard/dedupe';
 import { resolveSound } from '@/lib/utils/soundboard/resolve-sound';
@@ -138,6 +139,12 @@ describe('validateSoundFile', () => {
                 size: 2 * 1024 * 1024,
             }).ok
         ).toBe(false);
+    });
+
+    it('reports the sound-specific error key', () => {
+        expect(
+            validateSoundFile({ name: 'a.wav', type: 'audio/wav', size: 1000 })
+        ).toEqual({ ok: false, message: API_ERRORS.SOUND_FILE_INVALID });
     });
 
     it('rejects wav', () => {

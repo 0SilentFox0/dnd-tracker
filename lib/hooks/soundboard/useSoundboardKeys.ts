@@ -21,7 +21,7 @@ export function useSoundboardKeys(
         if (!enabled) return;
 
         const onKey = (e: KeyboardEvent) => {
-            if (shortcutBlocked(e)) return;
+            if (e.repeat || shortcutBlocked(e)) return;
 
             if (!/^[1-9]$/.test(e.key)) return;
 

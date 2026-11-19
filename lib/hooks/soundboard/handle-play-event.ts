@@ -54,7 +54,7 @@ async function play(
 
     const volume = effectiveVolume(sound, readAudioPrefs());
 
-    if (volume > 0) await playBuffer(sound, volume);
+    if (volume > 0) await playBuffer(sound, volume, { remote: true });
 }
 
 export function handleSoundPlayEvent(

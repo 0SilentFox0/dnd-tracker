@@ -67,7 +67,7 @@ function EditForm({
             confirmLabel: t(
                 builtin ? 'soundboard.edit.hide' : 'soundboard.edit.delete'
             ),
-            destructive: !builtin,
+            destructive: true,
         });
 
         if (!confirmed) return;

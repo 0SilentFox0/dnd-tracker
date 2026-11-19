@@ -201,13 +201,72 @@ describe('player', () => {
         expect(state.sources[1].stop).not.toHaveBeenCalled();
     });
 
-    it('armUnlock resumes the context once on first gesture', async () => {
+    it('armUnlock resumes the context on a gesture', async () => {
         state.ctxState = 'suspended';
         armUnlock();
         armUnlock();
-        document.dispatchEvent(new Event('pointerdown'));
+        document.dispatchEvent(new Event('pointerup'));
 
         await playBuffer(sound('s1'), 1);
+
+        expect(state.sources).toHaveLength(1);
+    });
+
+    it('armUnlock keeps listening until the context runs', async () => {
+        state.ctxState = 'suspended';
+
+        let calls = 0;
+
+        window.AudioContext = class extends FakeAudioContext {
+            resume = vi.fn(() => {
+                if (++calls > 1) state.ctxState = 'running';
+
+                return Promise.resolve();
+            });
+        } as never;
+
+        armUnlock();
+        document.dispatchEvent(new Event('click'));
+        await flush();
+        document.dispatchEvent(new Event('touchend'));
+        await flush();
+
+        expect(calls).toBe(2);
+
+        document.dispatchEvent(new Event('keydown'));
+        await flush();
+
+        expect(calls).toBe(2);
+    });
+
+    it('drops a remote play that waited too long for resume', async () => {
+        vi.useFakeTimers();
+        state.ctxState = 'suspended';
+        window.AudioContext = class extends FakeAudioContext {
+            resume = vi.fn(async () => {
+                vi.advanceTimersByTime(1500);
+                state.ctxState = 'running';
+            });
+        } as never;
+
+        await playBuffer(sound('s1'), 1, { remote: true });
+        vi.useRealTimers();
+
+        expect(state.sources).toHaveLength(0);
+    });
+
+    it('still plays a local press after a slow resume', async () => {
+        vi.useFakeTimers();
+        state.ctxState = 'suspended';
+        window.AudioContext = class extends FakeAudioContext {
+            resume = vi.fn(async () => {
+                vi.advanceTimersByTime(1500);
+                state.ctxState = 'running';
+            });
+        } as never;
+
+        await playBuffer(sound('s1'), 1);
+        vi.useRealTimers();
 
         expect(state.sources).toHaveLength(1);
     });
