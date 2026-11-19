@@ -17,6 +17,7 @@ import {
 } from '@/components/battle/use-system-battle-ui';
 import { hudFontClassName } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
+import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
@@ -235,6 +236,11 @@ export function BattleScreen() {
                                 placement="corner"
                                 collapseOn={turnKey}
                             />
+                            {isDM && !readOnly && (
+                                <SoundboardPanel
+                                    campaignId={battle.campaignId}
+                                />
+                            )}
                         </CornerStack>
                     )}
                     {isDM && <DmRevivePrompt />}

@@ -1,0 +1,47 @@
+{
+  "title": "Звуки",
+  "play": "Відтворити {name}",
+  "preview": "Прослухати {name} (тільки я)",
+  "previewHint": "Тільки я",
+  "done": "Готово",
+  "edit": {
+    "toggle": "Редагувати",
+    "open": "Редагувати {name}",
+    "title": "Редагування звуку",
+    "name": "Назва",
+    "volume": "Гучність",
+    "color": "Колір",
+    "delete": "Видалити",
+    "hide": "Сховати",
+    "deleteTitle": "Видалити «{name}»?",
+    "hideTitle": "Сховати «{name}» зі звукової панелі?"
+  },
+  "upload": {
+    "fileLabel": "Файл звуку",
+    "button": "Завантажити звук",
+    "pending": "Завантаження…"
+  },
+  "uploadFailed": "Не вдалося завантажити звук",
+  "builtin": {
+    "door-open": "Двері відчиняються",
+    "door-slam": "Двері грюкають",
+    "sword-hit": "Удар мечем",
+    "sword-draw": "Меч з піхов",
+    "bow-shot": "Постріл з лука",
+    "thunder": "Грім",
+    "explosion": "Вибух",
+    "fire": "Вогонь",
+    "magic-cast": "Закляття",
+    "heal": "Зцілення",
+    "wolf-howl": "Виття вовка",
+    "tavern": "Таверна",
+    "footsteps": "Кроки",
+    "scream": "Крик",
+    "coins": "Монети",
+    "bell": "Дзвін",
+    "chest-open": "Скриня відчиняється",
+    "glass-break": "Розбите скло",
+    "dragon-roar": "Рев дракона",
+    "crowd-cheer": "Овації натовпу"
+  }
+}

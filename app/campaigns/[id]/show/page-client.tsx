@@ -10,6 +10,7 @@ import { FullscreenButton } from '@/components/show/stage/FullscreenButton';
 import { ShowBattleCall } from '@/components/show/stage/ShowBattleCall';
 import { ShowControlPanel } from '@/components/show/stage/ShowControlPanel';
 import { ShowStage } from '@/components/show/stage/ShowStage';
+import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { useNotify, usePlayerView, usePlayerViewKey } from '@/lib/hooks/common';
 import {
     usePusherShowSync,
@@ -94,6 +95,11 @@ export function ShowPageClient({
                         <AudioDock placement="corner" />
                     </div>
                 </div>
+                {effectiveDM && (
+                    <div className="px-4 pt-2">
+                        <SoundboardPanel campaignId={campaignId} />
+                    </div>
+                )}
                 {effectiveDM && (
                     <ShowControlPanel
                         campaignId={campaignId}

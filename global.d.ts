@@ -35,6 +35,7 @@ import type inventory from './messages/uk/inventory.json';
 import type landing from './messages/uk/landing.json';
 import type maps from './messages/uk/maps.json';
 import type music from './messages/uk/music.json';
+import type soundboard from './messages/uk/soundboard.json';
 import type onboarding from './messages/uk/onboarding.json';
 import type races from './messages/uk/races.json';
 import type rest from './messages/uk/rest.json';
@@ -72,6 +73,7 @@ declare module 'next-intl' {
             backgrounds: typeof backgrounds;
             artifacts: typeof artifacts;
             music: typeof music;
+            soundboard: typeof soundboard;
             choices: typeof choices;
             campaigns: typeof campaigns;
             dashboard: typeof dashboard;

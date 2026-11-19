@@ -12,6 +12,7 @@ import { ShowButton } from '@/components/show/stage/show-ui';
 import { ShowDeckStrip } from '@/components/show/stage/ShowDeckStrip';
 import { ShowTransport } from '@/components/show/stage/ShowTransport';
 import { ShowWorldControls } from '@/components/show/world/ShowWorldControls';
+import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { useCssVarHeight, useNotify } from '@/lib/hooks/common';
 import { type ScenarioPlay, useShowDockExpanded } from '@/lib/hooks/scenario';
 import { useShowAudioHost, useShowKeys } from '@/lib/hooks/show';
@@ -211,6 +212,7 @@ function DockBody({
                 </div>
                 {expanded && !play.readOnly && (
                     <div className="sb-show-body sans">
+                        <SoundboardPanel campaignId={campaignId} />
                         <ShowDeckStrip
                             campaignId={campaignId}
                             show={show}
