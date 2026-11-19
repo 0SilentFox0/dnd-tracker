@@ -20,7 +20,7 @@ Server pages call the GET handler's own function (`readBattleScene`, `readCharac
 
 ## Egress
 
-- Public Storage images and audio can be served through a Cloudflare cache Worker (`infra/media-worker`, host in `NEXT_PUBLIC_MEDIA_BASE_URL`). `toMediaUrl` rewrites the host at render time only; stored URLs stay canonical Supabase URLs, uploads still go to Supabase, unsetting the variable rolls back. Free Workers plan: 100k requests/day.
+- Public Storage images and audio can be served through a Cloudflare cache Worker (`infra/media-worker`, host in `NEXT_PUBLIC_MEDIA_BASE_URL`). `toMediaUrl` rewrites the host at render time only; stored URLs stay canonical Supabase URLs, uploads still go to Supabase, unsetting the variable and redeploying rolls back (`NEXT_PUBLIC_*` is inlined at build). Free Workers plan: 100k requests/day.
 
 Supabase free tier egress is a hard constraint: avoid re-reading large rows, prefer deltas over refetches, keep polling slow, serve Storage images through `next/image` (cached by Vercel) with long `cacheControl` on immutable uploads.
 

@@ -151,6 +151,8 @@ export function useAudioElementSync(input: MediaSyncInput): {
     return {
         ref,
         prime,
-        failed: failedSrc !== null && failedSrc === (unlocked ? src : null),
+        failed:
+            failedSrc !== null &&
+            failedSrc === (unlocked && src ? toMediaUrl(src) : null),
     };
 }

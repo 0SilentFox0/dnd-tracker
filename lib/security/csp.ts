@@ -16,13 +16,23 @@ const REPORTING = [
     `report-to ${CSP_REPORT_GROUP}`,
 ];
 
+function mediaOrigin(): string {
+    try {
+        const raw = process.env.NEXT_PUBLIC_MEDIA_BASE_URL;
+
+        return raw ? ` ${new URL(raw).origin}` : '';
+    } catch {
+        return '';
+    }
+}
+
 const RESOURCES = [
     "default-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "media-src 'self' blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.workers.dev https://*.pusher.com wss://*.pusher.com",
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co${mediaOrigin()} https://*.pusher.com wss://*.pusher.com`,
     "frame-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
