@@ -80,7 +80,7 @@ export function expectedTargets(data: SrdData): IdentityTarget[] {
             recordId: `background:${bare(b.slug)}`,
         });
 
-    for (const f of data.feats)
+    for (const f of data.feats.filter((x) => x.slug.startsWith(SRD_PREFIX)))
         targets.push({
             kind: 'feats',
             key: f.slug,
@@ -91,9 +91,7 @@ export function expectedTargets(data: SrdData): IdentityTarget[] {
         groups.flatMap((g) =>
             [
                 ...g.abilities,
-                ...(g.choices ?? []).filter((c) =>
-                    ICONED_CHOICE_IDS.has(c.id)
-                ),
+                ...(g.choices ?? []).filter((c) => ICONED_CHOICE_IDS.has(c.id)),
             ]
                 .filter((a) => !PLACEHOLDER_RE.test(a.id))
                 .map((a) => ({
