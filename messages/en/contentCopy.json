@@ -1,0 +1,57 @@
+{
+  "button": "Copy to campaigns…",
+  "title": "Copy {kind} to other campaigns",
+  "kinds": {
+    "units": "units",
+    "spells": "spells",
+    "spell-groups": "spell schools",
+    "races": "races",
+    "feats": "feats",
+    "artifacts": "artifacts",
+    "classes": "classes",
+    "backgrounds": "backgrounds",
+    "careers": "careers",
+    "main-skills": "main skills",
+    "skills": "skills",
+    "artifact-sets": "artifact sets",
+    "tracks": "tracks"
+  },
+  "steps": {
+    "pick": "Choose what to copy and where",
+    "preview": "Check what will happen",
+    "result": "Copy result"
+  },
+  "pick": {
+    "itemsTitle": "What to copy",
+    "search": "Search",
+    "selectAll": "Select all",
+    "campaignsTitle": "Where to copy",
+    "allCampaigns": "All my campaigns"
+  },
+  "preview": {
+    "intro": "Nothing is copied yet. Review the plan for each campaign."
+  },
+  "actions": {
+    "next": "Next",
+    "copy": "Copy",
+    "done": "Done"
+  },
+  "report": {
+    "status": {
+      "ok": "Copied",
+      "partial": "Partly copied",
+      "failed": "Failed"
+    },
+    "summaryPreview": "Will create {created}; {reused} already exist and will be reused; {skipped} skipped.",
+    "summaryResult": "Created {created}; {reused} already existed and were reused; skipped {skipped}.",
+    "warnings": "{count, plural, one {# link to unsupported content was skipped} other {# links to unsupported content were skipped}}",
+    "reasons": {
+      "exists": "already exists",
+      "kind-unsupported": "this kind cannot be copied",
+      "duplicate-name": "duplicate name",
+      "not-found": "not found",
+      "unknown-kind": "unknown kind",
+      "unknown": "skipped"
+    }
+  }
+}

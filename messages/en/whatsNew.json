@@ -1,4 +1,8 @@
 {
+  "2026-11-copy-content": {
+    "title": "Copy content to other campaigns",
+    "body": "Units, spells, races, feats and artifacts can now be copied to your other campaigns, or all of them at once. Use the \"Copy to campaigns\" button next to Import; a preview shows what will be created and what already exists."
+  },
   "2026-11-map-large": {
     "title": "Large battle maps",
     "body": "With the map library turned on, battles can use maps up to 200×200 cells. Photo maps stay up to 60×60."

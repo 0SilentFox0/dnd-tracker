@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Download, FileJson, Upload } from 'lucide-react';
 
+import { ContentCopyButton } from '@/components/content-copy/ContentCopyButton';
 import { Button } from '@/components/ui/button';
 import { useContentTransferUrls } from '@/lib/hooks/content-import';
 import type { ImportKind } from '@/types/content-import';
@@ -59,6 +60,7 @@ export function ContentTransferButtons({
                     {t('compendium')}
                 </Link>
             </Button>
+            <ContentCopyButton campaignId={campaignId} kind={kind} />
             {open && (
                 <ContentImportWizard
                     campaignId={campaignId}
