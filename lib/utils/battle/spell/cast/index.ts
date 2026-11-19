@@ -28,6 +28,7 @@ import {
     spendCastCost,
 } from '@/lib/utils/battle/spell/cast/finish';
 import { applyGrantCasts } from '@/lib/utils/battle/spell/cast/grant-cast';
+import { applyGrantSpells } from '@/lib/utils/battle/spell/cast/grant-spell';
 import { applyHitRiders } from '@/lib/utils/battle/spell/cast/hit-rider';
 import {
     moveAdjacent,
@@ -545,6 +546,17 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         concentrationOf: tag,
     });
 
+    applyGrantSpells({
+        flow,
+        effects: source.definition.effects,
+        casterId,
+        spell,
+        picked: params.pickedSpell,
+        optionIndex: params.optionIndex,
+        castId,
+        round: currentRound,
+    });
+
     state.summons.push(
         ...inlineSummonRequests({
             effects: source.definition.effects,
@@ -570,7 +582,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             source.definition.effects,
             currentRound,
             castId,
-            tag
+            tag,
+            params.pickedId
         )
     );
 

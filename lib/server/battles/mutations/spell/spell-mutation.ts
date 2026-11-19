@@ -3,6 +3,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import { executeCast } from '@/lib/server/battles/mutations/spell/cast-execute';
+import { resolvePicks } from '@/lib/server/battles/mutations/spell/cast-pick';
 import {
     assertCasterMayCast,
     assertSpellRequestAllowed,
@@ -131,6 +132,14 @@ export function createSpellMutation(
             castLevel
         );
 
+        const picks = await resolvePicks(
+            ctx,
+            deps,
+            data,
+            definition,
+            resolution
+        );
+
         const { expected, diceRolls } = prepareCastDice(
             ctx,
             data,
@@ -158,6 +167,7 @@ export function createSpellMutation(
             saves: splitSaveRolls(ctx, order, data.saveRolls),
             serverRolls: !!options.serverRolls,
             system,
+            ...picks,
         };
 
         return runWithCritChoice(ctx, {

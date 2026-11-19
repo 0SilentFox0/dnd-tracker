@@ -39,6 +39,7 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, 'kind'> } = {
         cells: 4,
         rounds: 10,
     },
+    grantSpell: { maxLevel: 3, duration: { rounds: 1 } },
     transform: { unitId: '', revertAtZero: true, duration: { rounds: 10 } },
     grantCast: {
         label: DEFAULT_TEXT,

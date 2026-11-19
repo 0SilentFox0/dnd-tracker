@@ -595,6 +595,7 @@ const castSpellShape = {
     cancelCasting: z.boolean().optional(),
     free: z.boolean().optional(),
     optionIndex: z.number().int().min(0).max(6).optional(),
+    pickedId: z.string().min(1).max(64).optional(),
     inputCount: z.number().int().min(0).max(40).optional(),
     slotKey: z
         .string()

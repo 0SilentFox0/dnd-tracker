@@ -230,6 +230,8 @@ export interface SpellGrant {
     expiresRound?: number;
     concentrationOf?: { casterId: string; castId: string };
     castCost?: SpellCost;
+    /** casting it does not spend the turn action (cast as part of another spell) */
+    noAction?: true;
 }
 
 export interface BattleParticipantCombatStats {

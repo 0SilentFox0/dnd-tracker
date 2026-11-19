@@ -21,7 +21,7 @@ interface GrantCastInput {
     concentrationOf?: SpellGrant['concentrationOf'];
 }
 
-function withGrant(
+export function withGrant(
     p: BattleParticipant,
     grant: SpellGrant,
     pool?: { key: string; label: string; max: number }

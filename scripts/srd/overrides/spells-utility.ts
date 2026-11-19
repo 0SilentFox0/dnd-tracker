@@ -559,12 +559,14 @@ export const UTILITY_SPELL_OVERRIDES: Record<string, Override> =
             ),
 
             // transformations: the target keeps its own token, so the beast form is modelled by its limits
+            // the caster picks a beast (CR up to the target's CR or level); its stats, HP and attacks replace the target's
             polymorph: hostileSave({ kind: 'enemy', range: 60 }, 'wisdom', [
-                cond('disable_spell_casting', LONG),
-                cond('disable_ranged_attacks', LONG),
-                note(
-                    'The target takes a beast form; the DM sets the form stats if needed.'
-                ),
+                {
+                    kind: 'transform',
+                    pick: { creatureType: 'beast' },
+                    revertAtZero: true,
+                    duration: rounds(LONG),
+                },
             ]),
             'true-polymorph': hostileSave(
                 { kind: 'enemy', range: 30 },
@@ -1227,6 +1229,7 @@ export const UTILITY_SPELL_OVERRIDES: Record<string, Override> =
                 {
                     kind: 'chooseOne',
                     options: [
+                        { kind: 'note', text: 'Spell Duplication: cast any spell of level 8 or lower without a slot or components (pick it below).' },
                         {
                             kind: 'heal',
                             amount: { percentOf: 'maxHp', value: 100 },
@@ -1240,6 +1243,7 @@ export const UTILITY_SPELL_OVERRIDES: Record<string, Override> =
                         },
                     ],
                 },
+                { kind: 'grantSpell', maxLevel: 8, onOption: 0, duration: rounds(1) },
                 note(
                     'Beyond these stock wishes the DM adjudicates what the wish does.'
                 ),

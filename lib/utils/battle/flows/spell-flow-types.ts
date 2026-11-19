@@ -24,6 +24,10 @@ export interface SpellPick {
     filter?: SpellTargetFilter;
     castLevel?: number;
     options?: Segment[][];
+    /** the caster also picks a unit form or a spell from the library */
+    choice?:
+        | { kind: 'unit'; creatureType: string }
+        | { kind: 'spell'; maxLevel: number; onOption?: number };
     inputDice?: { label: string; max: number; sides: number };
     inline?: { spellId: string; grantKey: string };
     needsSaves: boolean;
@@ -62,6 +66,7 @@ export interface SpellFlowState {
     grantKey?: string;
     castLevel?: number;
     optionIndex?: number;
+    pickedId?: string;
     inputCount?: number;
     damage: (number | undefined)[];
     /** casting test: manual roll (and the second one some systems ask for) or the server roll */
@@ -95,6 +100,7 @@ export type SpellFlowAction =
       }
     | { type: 'SET_CAST_LEVEL'; castLevel: number; pick: SpellPick }
     | { type: 'SET_OPTION'; index: number }
+    | { type: 'SET_PICKED'; id: string | undefined }
     | { type: 'SET_INPUT'; count: number }
     | { type: 'SET_ATTACK'; id: string; value: number | undefined }
     | { type: 'TO_TARGETS' }

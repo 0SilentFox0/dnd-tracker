@@ -7,6 +7,7 @@ import { spellBookActions } from './spellBookActions';
 import { useBattleRules } from './useBattleRules';
 import { useBattleScene } from './useBattleScene';
 import { useBattleSpellLibrary } from './useBattleSpellLibrary';
+import { useCastChoices } from './useCastChoices';
 import { useIngredientPlan } from './useIngredientPlan';
 import { useSpellBookTargets } from './useSpellBookTargets';
 import { useSpellCastSubmit } from './useSpellCastSubmit';
@@ -188,7 +189,10 @@ export function useSpellBook(
               )
             : null;
 
+    const castChoices = useCastChoices(state, targets);
+
     const view = {
+        castChoices,
         cast: castPreview && {
             ...castPreview,
             cn: selected?.casting?.magic?.cn ?? 0,

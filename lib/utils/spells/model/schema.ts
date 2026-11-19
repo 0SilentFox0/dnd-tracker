@@ -331,8 +331,18 @@ const SummonInlineSchema = z.object({
 
 const TransformSchema = z.object({
     kind: z.literal('transform'),
-    unitId: z.string().trim().min(1).max(64),
+    unitId: z.string().trim().min(1).max(64).optional(),
+    pick: z
+        .object({ creatureType: z.string().trim().min(1).max(40) })
+        .optional(),
     revertAtZero: z.literal(true),
+    duration: DurationSchema,
+});
+
+const GrantSpellSchema = z.object({
+    kind: z.literal('grantSpell'),
+    maxLevel: z.number().int().min(0).max(9),
+    onOption: z.number().int().min(0).max(6).optional(),
     duration: DurationSchema,
 });
 
@@ -351,6 +361,7 @@ const SPELL_ONLY_EFFECTS = [
     MoveSummonSchema,
     SummonInlineSchema,
     TransformSchema,
+    GrantSpellSchema,
     PhantomSchema,
 ] as const;
 
@@ -375,6 +386,8 @@ export type BurstEffect = z.infer<typeof BurstSchema>;
 export type AnchoredZoneEffect = z.infer<typeof AnchoredZoneSchema>;
 
 export type SummonInlineEffect = z.infer<typeof SummonInlineSchema>;
+
+export type GrantSpellEffect = z.infer<typeof GrantSpellSchema>;
 
 export type TransformEffect = z.infer<typeof TransformSchema>;
 

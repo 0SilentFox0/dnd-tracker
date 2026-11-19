@@ -14,6 +14,7 @@ import type {
     AnchoredZoneEffect,
     BurstEffect,
     GrantCastEffect,
+    GrantSpellEffect,
     HitRiderEffect,
     SpellDefinition,
     SpellEffect,
@@ -125,6 +126,7 @@ export const SPELL_ONLY_KINDS = new Set<string>([
     'moveSummon',
     'summonInline',
     'transform',
+    'grantSpell',
     'phantom',
 ]);
 
@@ -167,6 +169,13 @@ export const burstsOf = (
 
 export const moveSummonOf = (effects: SpellEffect[]) =>
     effects.find((e) => e.kind === 'moveSummon');
+
+export const grantSpellsOf = (
+    effects: SpellEffect[]
+): Array<{ effect: GrantSpellEffect; index: number }> =>
+    effects.flatMap((effect, index) =>
+        effect.kind === 'grantSpell' ? [{ effect, index }] : []
+    );
 
 export const hasMoveSelf = (effects: SpellEffect[]) =>
     effects.some((e) => e.kind === 'moveSelf');

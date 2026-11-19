@@ -83,6 +83,8 @@ export async function executeCast(
         grant,
         castLevel: plan.castLevel,
         optionIndex: data.optionIndex,
+        ...(data.pickedId && { pickedId: data.pickedId }),
+        ...(plan.pickedSpell && { pickedSpell: plan.pickedSpell }),
         ...(chosen?.ok && { slotKey: data.slotKey }),
         rng,
         crit,

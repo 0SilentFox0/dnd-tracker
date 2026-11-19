@@ -32,6 +32,20 @@ const needsRolls = (p: SpellPick) =>
 export const optionMissing = (s: SpellFlowState): boolean =>
     !!s.pick?.options && s.optionIndex === undefined;
 
+export const choiceNeeded = (s: SpellFlowState): boolean => {
+    const c = s.pick?.choice;
+
+    return (
+        !!c &&
+        (c.kind === 'unit' ||
+            c.onOption === undefined ||
+            c.onOption === s.optionIndex)
+    );
+};
+
+export const choiceMissing = (s: SpellFlowState): boolean =>
+    choiceNeeded(s) && !s.pickedId;
+
 export function rollsComplete(s: SpellFlowState): boolean {
     if (!s.pick) return false;
 
@@ -156,6 +170,7 @@ export function spellFlow(
                 grantKey: a.grantKey,
                 castLevel: a.castLevel,
                 optionIndex: undefined,
+                pickedId: undefined,
                 inputCount: a.pick.inputDice ? 1 : undefined,
                 targetIds: [],
                 aim: undefined,
@@ -187,8 +202,10 @@ export function spellFlow(
             return s.pick?.options &&
                 a.index >= 0 &&
                 a.index < s.pick.options.length
-                ? { ...s, optionIndex: a.index }
+                ? { ...s, optionIndex: a.index, pickedId: undefined }
                 : s;
+        case 'SET_PICKED':
+            return { ...s, pickedId: a.id };
         case 'SET_INPUT':
             return s.pick?.inputDice
                 ? reconcileSpellPick(s, s.pick, {
@@ -401,6 +418,7 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
             s.inputCount !== undefined && { inputCount: s.inputCount }),
         ...(s.pick?.options &&
             s.optionIndex !== undefined && { optionIndex: s.optionIndex }),
+        ...(choiceNeeded(s) && s.pickedId && { pickedId: s.pickedId }),
         ...(s.pick?.castTest && castTestPayload(s)),
         ...(s.useIngredient && { useIngredient: true as const }),
     };

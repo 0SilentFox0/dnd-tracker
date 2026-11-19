@@ -13,6 +13,7 @@ type SpellOnly = Extract<
             | 'moveSummon'
             | 'summonInline'
             | 'transform'
+            | 'grantSpell'
             | 'phantom'
             | 'moveSelf'
             | 'teleportSelf'
@@ -30,6 +31,7 @@ const SPELL_ONLY_KINDS = new Set([
     'moveSummon',
     'summonInline',
     'transform',
+    'grantSpell',
     'phantom',
     'moveSelf',
     'teleportSelf',
@@ -151,6 +153,16 @@ export function describeSpellOnly(
         case 'transform':
             return [
                 seg('summary.spellOnly.transform', {
+                    rounds: durationSeg(effect.duration.rounds),
+                    picks: yn(effect.pick),
+                    type: effect.pick?.creatureType ?? '',
+                }),
+            ];
+
+        case 'grantSpell':
+            return [
+                seg('summary.spellOnly.grantSpell', {
+                    maxLevel: effect.maxLevel,
                     rounds: durationSeg(effect.duration.rounds),
                 }),
             ];

@@ -76,6 +76,22 @@ const AUTO_TARGETING = [
     'everyone',
 ];
 
+function choiceOf(effects: NonNullable<BookSpell['spellEffects']>): SpellPick['choice'] {
+    for (const e of effects) {
+        if (e.kind === 'transform' && e.pick && !e.unitId)
+            return { kind: 'unit', creatureType: e.pick.creatureType };
+
+        if (e.kind === 'grantSpell')
+            return {
+                kind: 'spell',
+                maxLevel: e.maxLevel,
+                ...(e.onOption !== undefined && { onOption: e.onOption }),
+            };
+    }
+
+    return undefined;
+}
+
 export function buildSpellPick(
     order: BattleParticipant[],
     caster: BattleParticipant | null,
@@ -194,6 +210,8 @@ export function buildSpellPick(
 
     const input = inputDiceOf(s.spellEffects ?? []);
 
+    const choice = choiceOf(s.spellEffects ?? []);
+
     return {
         spellId: s.id,
         level: s.level,
@@ -215,6 +233,7 @@ export function buildSpellPick(
                 }),
             }),
         ...(choose && { options: choose.options.map(describeEffect) }),
+        ...(choice && { choice }),
         needsSaves: def.resolution.kind === 'save' && !auto,
         ...(def.resolution.kind === 'attack' &&
             !auto && { needsAttackRolls: true }),

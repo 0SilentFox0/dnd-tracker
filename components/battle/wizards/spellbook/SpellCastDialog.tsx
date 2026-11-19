@@ -14,11 +14,14 @@ import { HUD_SURFACE, HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Radio } from '@/components/ui/radio';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { SelectField } from '@/components/ui/select-field';
+import { BATTLE_SELECT_TRIGGER_CLASS } from '@/lib/constants/battle';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import {
     canGoBack,
+    choiceMissing,
     optionMissing,
     rollsComplete,
 } from '@/lib/utils/battle/flows';
@@ -219,6 +222,32 @@ function OptionPicker({ book }: { book: Book }) {
     );
 }
 
+function ChoicePicker({ book }: { book: Book }) {
+    const tw = useTranslations('battleWizards.spell.cast');
+
+    const { castChoices } = book.view;
+
+    if (!castChoices) return null;
+
+    return (
+        <label className="mt-3 flex items-center justify-between gap-3 text-sm">
+            {tw(castChoices.kind === 'unit' ? 'pickForm' : 'pickSpell')}
+            <SelectField
+                aria-label={tw(
+                    castChoices.kind === 'unit' ? 'pickForm' : 'pickSpell'
+                )}
+                value={book.state.pickedId ?? ''}
+                onValueChange={book.actions.setPicked}
+                triggerClassName={`${BATTLE_SELECT_TRIGGER_CLASS} w-auto`}
+                options={castChoices.options.map((o) => ({
+                    value: o.id,
+                    label: o.label,
+                }))}
+            />
+        </label>
+    );
+}
+
 function SummaryStep({ book }: { book: Book }) {
     const tw = useTranslations('battleWizards.spell.cast');
 
@@ -245,11 +274,13 @@ function SummaryStep({ book }: { book: Book }) {
                 onUse={actions.setUseIngredient}
             />
             <OptionPicker book={book} />
+            <ChoicePicker book={book} />
             <HudButton
                 type="button"
                 disabled={
                     submitting ||
                     optionMissing(state) ||
+                    choiceMissing(state) ||
                     !!view.ingredients?.blocked
                 }
                 onClick={actions.submit}

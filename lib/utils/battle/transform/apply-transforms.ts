@@ -113,6 +113,19 @@ function intoForm(
     );
 }
 
+export function formAllowed(
+    form: BattleParticipant,
+    target: BattleParticipant,
+    pick: NonNullable<TransformRequest['pick']>
+): boolean {
+    const limit = target.abilities.cr ?? target.abilities.level;
+
+    return (
+        form.abilities.creatureType?.toLowerCase() ===
+            pick.creatureType.toLowerCase() && (form.abilities.cr ?? 0) <= limit
+    );
+}
+
 export async function applyTransforms(
     order: BattleParticipant[],
     requests: TransformRequest[],
@@ -156,6 +169,16 @@ export async function applyTransforms(
             {},
             opts.rules
         );
+
+        if (req.pick && !formAllowed(form, target, req.pick)) {
+            messages.push(
+                textRef('battleLog.transform.formInvalid', {
+                    name: target.basicInfo.name,
+                    unit: unit.name,
+                })
+            );
+            continue;
+        }
 
         next = replaceParticipant(
             next,

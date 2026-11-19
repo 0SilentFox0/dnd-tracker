@@ -534,6 +534,8 @@ export const API_ERRORS = {
     CHARACTER_NOTES_INVALID: 'errors.characterNotesInvalid',
     CHARACTER_CONTROLLER_INVALID: 'errors.characterControllerInvalid',
     BATTLE_SPELL_OPTION_REQUIRED: 'errors.battleSpellOptionRequired',
+    BATTLE_SPELL_PICK_REQUIRED: 'errors.battleSpellPickRequired',
+    BATTLE_SPELL_PICK_INVALID: 'errors.battleSpellPickInvalid',
     BATTLE_SPELL_INPUT_REQUIRED: 'errors.battleSpellInputRequired',
     BATTLE_SPELL_TARGET_FILTER: 'errors.battleSpellTargetFilter',
     BATTLE_SPELL_NO_OBJECT_NEAR: 'errors.battleSpellNoObjectNear',

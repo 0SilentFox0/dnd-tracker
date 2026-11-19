@@ -148,6 +148,8 @@ export function spellBookActions({
                 });
         },
         setOption: (index: number) => dispatch({ type: 'SET_OPTION', index }),
+        setPicked: (id: string | undefined) =>
+            dispatch({ type: 'SET_PICKED', id }),
         setInputCount: (count: number) =>
             dispatch({ type: 'SET_INPUT', count }),
         setAttack: (id: string, v: number | undefined) =>

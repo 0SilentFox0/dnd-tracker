@@ -2,6 +2,7 @@ export interface TransformRequest {
     targetId: string;
     casterId: string;
     unitId: string;
+    pick?: { creatureType: string };
     spellId: string;
     spellName: string;
     castId: string;

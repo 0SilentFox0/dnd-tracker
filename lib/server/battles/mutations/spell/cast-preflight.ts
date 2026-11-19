@@ -148,7 +148,7 @@ export async function assertCasterMayCast(
         });
 
     if (!data.preview && !legendaryAbility)
-        assertActionAvailable(ctx, caster, spell, free);
+        assertActionAvailable(ctx, caster, spell, free, !!grant?.noAction);
 
     if (hasEffectMarker(caster, 'disable_spell_casting')) {
         throw new BattleRuleError(
@@ -218,7 +218,8 @@ function assertActionAvailable(
     ctx: BattleMutationContext,
     caster: BattleParticipant,
     spell: Spellcast,
-    free: boolean
+    free: boolean,
+    noAction = false
 ): void {
     const { definition } = spell;
 
@@ -234,6 +235,7 @@ function assertActionAvailable(
 
     if (
         !free &&
+        !noAction &&
         definition.cost !== 'reaction' &&
         (isBonus
             ? caster.actionFlags.hasUsedBonusAction

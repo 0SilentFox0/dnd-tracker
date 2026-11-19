@@ -45,6 +45,7 @@ export interface CastPlan {
     saves: ReturnType<typeof splitSaveRolls>;
     serverRolls: boolean;
     system: SystemSlot | undefined;
+    pickedSpell?: { id: string; name: string; level: number };
 }
 
 export type SpellDefinition = Spellcast['definition'];

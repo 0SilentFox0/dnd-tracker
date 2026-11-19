@@ -16043,22 +16043,14 @@
     },
     "spellEffects": [
       {
-        "kind": "applyCondition",
-        "condition": "disable_spell_casting",
+        "kind": "transform",
+        "pick": {
+          "creatureType": "beast"
+        },
+        "revertAtZero": true,
         "duration": {
           "rounds": 600
         }
-      },
-      {
-        "kind": "applyCondition",
-        "condition": "disable_ranged_attacks",
-        "duration": {
-          "rounds": 600
-        }
-      },
-      {
-        "kind": "note",
-        "text": "The target takes a beast form; the DM sets the form stats if needed."
       }
     ],
     "lists": [
@@ -22373,6 +22365,10 @@
         "kind": "chooseOne",
         "options": [
           {
+            "kind": "note",
+            "text": "Spell Duplication: cast any spell of level 8 or lower without a slot or components (pick it below)."
+          },
+          {
             "kind": "heal",
             "amount": {
               "percentOf": "maxHp",
@@ -22391,6 +22387,14 @@
             "target": "self"
           }
         ]
+      },
+      {
+        "kind": "grantSpell",
+        "maxLevel": 8,
+        "onOption": 0,
+        "duration": {
+          "rounds": 1
+        }
       },
       {
         "kind": "note",

@@ -39,6 +39,8 @@ export interface CastSpellParams {
     slotKey?: string;
     castLevel?: number;
     optionIndex?: number;
+    pickedId?: string;
+    pickedSpell?: { id: string; name: string; level: number };
     grant?: SpellGrant;
     rng?: () => number;
     crit?: CritPicker;

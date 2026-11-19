@@ -75,7 +75,7 @@ export function spendCastCost(
         };
     }
 
-    if (!cost.isDMCast && !cost.isLegendaryCast) {
+    if (!cost.isDMCast && !cost.isLegendaryCast && !cost.grant?.noAction) {
         caster =
             state.spell.definition.cost === 'reaction'
                 ? {
