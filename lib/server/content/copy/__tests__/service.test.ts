@@ -161,6 +161,26 @@ describe('copyContent', () => {
         expect(copyMaps).toHaveBeenCalledTimes(2);
     });
 
+    it('a copyMaps crash keeps content created and fails only that target', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        copyMaps
+            .mockRejectedValueOnce(new Error('boom'))
+            .mockResolvedValueOnce({ created: [], skipped: [] });
+
+        const { targets } = await copyContent({
+            actor,
+            items: [
+                { kind: 'units', ids: ['x'] },
+                { kind: 'maps', ids: ['m'] },
+            ],
+            targets: { all: true },
+        });
+
+        expect(targets[0]).toMatchObject({ status: 'failed' });
+        expect(targets[0].created).toHaveLength(1);
+        expect(targets[1]).toMatchObject({ status: 'ok' });
+    });
+
     it('rejects a non-DM actor', async () => {
         await expect(
             copyContent({

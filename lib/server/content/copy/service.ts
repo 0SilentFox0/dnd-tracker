@@ -9,10 +9,7 @@ import type { ContentKind } from '@/lib/constants/content-kinds';
 import { prisma } from '@/lib/db';
 import { assertCan } from '@/lib/server/content/access';
 import { BundleInvalidError } from '@/lib/server/templates/bundle';
-import {
-    exportCampaign,
-    exportNames,
-} from '@/lib/server/templates/export-campaign';
+import { exportCampaign, exportNames } from '@/lib/server/templates/export-campaign';
 import { type Actor, sessionDmActor } from '@/lib/utils/api/actor';
 import { ContentError } from '@/lib/utils/api/content-error';
 import { NEED } from '@/lib/utils/api/need';
@@ -90,25 +87,33 @@ export async function copyContent(args: {
                     : await applyCopyPlan(target.id, plan);
             }
 
-            if (mapIds.length > 0) {
-                const maps = await copyMaps({
-                    sourceCampaignId: actor.campaignId,
-                    targetCampaignId: target.id,
-                    ids: mapIds,
-                    dryRun,
-                });
+            if (mapIds.length > 0)
+                try {
+                    const maps = await copyMaps({
+                        sourceCampaignId: actor.campaignId,
+                        targetCampaignId: target.id,
+                        ids: mapIds,
+                        dryRun,
+                    });
 
-                report.created.push(
-                    ...maps.created.map(({ id, name }) => ({
-                        kind: 'maps',
-                        ...(dryRun ? {} : { id }),
-                        name,
-                    }))
-                );
-                report.skipped.push(
-                    ...maps.skipped.map((s) => ({ kind: 'maps', ...s }))
-                );
-            }
+                    report.created.push(
+                        ...maps.created.map(({ id, name }) => ({
+                            kind: 'maps',
+                            ...(dryRun ? {} : { id }),
+                            name,
+                        }))
+                    );
+                    report.skipped.push(
+                        ...maps.skipped.map((s) => ({ kind: 'maps', ...s }))
+                    );
+                } catch (error) {
+                    console.error('copyMaps failed', target.id, error);
+                    report.status = 'failed';
+                    report.error = API_ERRORS.INTERNAL;
+                    reports.push(report);
+
+                    continue;
+                }
 
             if (report.skipped.some((s) => s.reason !== 'exists'))
                 report.status = 'partial';

@@ -13,6 +13,7 @@ const REASON_KEYS = [
     'unknown-kind',
     'limit',
     'file-failed',
+    'error',
 ] as const;
 
 const STATUS_TONE = {

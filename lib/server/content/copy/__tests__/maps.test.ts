@@ -165,17 +165,61 @@ describe('copyMaps', () => {
         expect(h.create).not.toHaveBeenCalled();
     });
 
-    it('a row failure removes the copied file and rethrows', async () => {
-        h.create.mockRejectedValue(new Error('db'));
-        setup([source()]);
+    it('a row failure removes the file, skips that map and continues', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        h.removeFiles.mockRejectedValue(new Error('cleanup'));
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        h.create
+            .mockRejectedValueOnce(new Error('db'))
+            .mockResolvedValueOnce({ id: 'new2' });
+        setup([
+            source(),
+            source({ id: 'm2', name: 'Keep', header: { cols: 10, rows: 8 } }),
+        ]);
 
-        await expect(run()).rejects.toThrow('db');
+        const result = await copyMaps({
+            sourceCampaignId: 'src',
+            targetCampaignId: 'tgt',
+            ids: ['m1', 'm2'],
+        });
 
         const to = h.copyObject.mock.calls[0][2];
 
         expect(h.removeFiles).toHaveBeenCalledWith('tgt', [
             `https://x.test/storage/battle-maps/${to}`,
         ]);
+        expect(result).toEqual({
+            created: [{ id: 'new2', name: 'Keep' }],
+            skipped: [{ name: 'Cave', reason: 'error' }],
+        });
+    });
+
+    it('reports requested ids missing from the source campaign as not-found', async () => {
+        setup([]);
+
+        const result = await copyMaps({
+            sourceCampaignId: 'src',
+            targetCampaignId: 'tgt',
+            ids: ['foreign-id'],
+        });
+
+        expect(h.findMany.mock.calls[0][0].where).toMatchObject({
+            campaignId: 'src',
+        });
+        expect(result.skipped).toEqual([
+            { name: 'foreign-id', reason: 'not-found' },
+        ]);
+    });
+
+    it('rejects a background with an unknown extension as file-failed', async () => {
+        setup([
+            source({
+                header: { cols: 10, rows: 8, background: `${BG}.exe` },
+            }),
+        ]);
+
+        expect((await run()).skipped[0].reason).toBe('file-failed');
+        expect(h.copyObject).not.toHaveBeenCalled();
     });
 
     it('a limit hit inside the transaction removes the file', async () => {

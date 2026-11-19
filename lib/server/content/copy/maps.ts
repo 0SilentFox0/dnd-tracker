@@ -1,7 +1,10 @@
 import { type Prisma } from '@prisma/client';
 
 import 'server-only';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import {
+    BATTLE_MAP_BACKGROUND_FORMATS,
+    MAP_LIMITS,
+} from '@/lib/constants/map-limits';
 import { prisma } from '@/lib/db';
 import {
     ownedBattleMapBackgroundPath,
@@ -11,7 +14,12 @@ import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import { BATTLE_MAPS_BUCKET } from '@/lib/supabase/battle-map-storage';
 import { copyStorageObject } from '@/lib/supabase/copy-object';
 
-export type MapCopySkipReason = 'exists' | 'limit' | 'file-failed';
+export type MapCopySkipReason =
+    | 'exists'
+    | 'limit'
+    | 'file-failed'
+    | 'not-found'
+    | 'error';
 
 export interface CopyMapsResult {
     created: Array<{ id: string; name: string }>;
@@ -31,6 +39,14 @@ const backgroundOf = (header: unknown) => {
     return typeof value === 'string' ? value : null;
 };
 
+async function removeQuietly(campaignId: string, url: string) {
+    try {
+        await removeBattleMapBackgroundFiles(campaignId, [url]);
+    } catch (error) {
+        console.warn('[content-copy] map background cleanup failed', error);
+    }
+}
+
 async function copyBackground(
     sourceCampaignId: string,
     targetCampaignId: string,
@@ -40,7 +56,11 @@ async function copyBackground(
 
     if (!url || !from) return { ok: true, url };
 
-    const ext = from.slice(from.lastIndexOf('.') + 1);
+    const ext = (Object.values(BATTLE_MAP_BACKGROUND_FORMATS) as string[]).find(
+        (e) => from.endsWith(`.${e}`)
+    );
+
+    if (!ext) return { ok: false };
 
     const to = `${targetCampaignId}/${crypto.randomUUID().replace(/-/g, '')}.${ext}`;
 
@@ -73,6 +93,12 @@ export async function copyMaps(args: {
         include: { chunks: true },
         orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
+
+    const found = new Set(sources.map((m) => m.id));
+
+    for (const id of new Set(args.ids))
+        if (!found.has(id))
+            result.skipped.push({ name: id, reason: 'not-found' });
 
     if (sources.length === 0) return result;
 
@@ -174,9 +200,7 @@ export async function copyMaps(args: {
 
             if (!created) {
                 if (copiedFile)
-                    await removeBattleMapBackgroundFiles(targetCampaignId, [
-                        copiedFile,
-                    ]);
+                    await removeQuietly(targetCampaignId, copiedFile);
 
                 skip('limit');
 
@@ -189,12 +213,11 @@ export async function copyMaps(args: {
 
             result.created.push({ id: created.id, name: map.name });
         } catch (error) {
-            if (copiedFile)
-                await removeBattleMapBackgroundFiles(targetCampaignId, [
-                    copiedFile,
-                ]);
+            if (copiedFile) await removeQuietly(targetCampaignId, copiedFile);
 
-            throw error;
+            console.error('copyMaps row failed', map.id, error);
+
+            skip('error');
         }
     }
 

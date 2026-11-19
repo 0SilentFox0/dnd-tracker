@@ -40,6 +40,7 @@
       "unknown-kind": "unknown kind",
       "limit": "map limit reached or map too large for this campaign",
       "file-failed": "map image could not be copied",
+      "error": "map could not be copied",
       "unknown": "skipped"
     }
   }
