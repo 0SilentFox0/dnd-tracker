@@ -164,7 +164,11 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: 'spell' }> }) {
                 {fx.spellName}
             </div>
             <SystemLines system={fx.system} hit exact />
-            {fx.changes.length > 0 ? (
+            {fx.countered ? (
+                <div className="mt-1 text-sm text-[var(--hud-muted)]">
+                    {t('countered')}
+                </div>
+            ) : fx.changes.length > 0 ? (
                 <ul className="mt-1 space-y-0.5 text-sm">
                     {fx.changes.map((c) => (
                         <li key={c.name} className="flex justify-between gap-3">

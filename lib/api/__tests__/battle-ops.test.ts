@@ -36,6 +36,7 @@ const EXPECTED_PATHS: Record<
     bonusAction: 'bonus-action',
     swapGear: 'swap-gear',
     castSpell: 'spell',
+    counterWindow: 'counter-window',
     start: 'start',
     reset: 'reset',
     complete: 'complete',

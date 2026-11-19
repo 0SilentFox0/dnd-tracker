@@ -115,7 +115,8 @@ export function counteredResult(plan: CastPlan, by: string): MutationResult {
                     caster: caster.basicInfo.name,
                     spell: spell.name,
                     reactor: by,
-                })
+                }),
+                { actionDetails: { countered: true } }
             ),
         ],
     };

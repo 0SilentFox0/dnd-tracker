@@ -40,6 +40,7 @@ export type ResultFx =
     | {
           kind: 'spell';
           spellName: string;
+          countered?: true;
           changes: { name: string; change: number }[];
           targetCount: number;
           system?: SystemSlot;

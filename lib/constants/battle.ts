@@ -112,6 +112,10 @@ export type ParticipantSourceTypeValue =
 
 export const COUNTER_WINDOW_MS = 10_000;
 
+export const COUNTER_NUDGE_DM_MS = 2_000;
+
+export const COUNTER_NUDGE_MEMBER_MS = 5_000;
+
 export const BATTLE_VERSION_ONLY_PARAM = 'versionOnly';
 
 export const BATTLE_LOG_RECENT_EVENTS = 30;

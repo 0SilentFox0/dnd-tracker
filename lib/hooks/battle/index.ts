@@ -4,6 +4,11 @@ export * from './modes';
 export { isSystemActionPending } from './system-action';
 export type { TurnGateControls } from './types';
 export type { BattleSceneValue } from './types';
+export {
+    type CounterOfferView,
+    useCounterNudge,
+    useCounterWindow,
+} from './use-counter-window';
 export { useAbilityMapAim } from './useAbilityMapAim';
 export { useAbilityPicker } from './useAbilityPicker';
 export { ACTION_RESULT_MS, useActionResult } from './useActionResult';

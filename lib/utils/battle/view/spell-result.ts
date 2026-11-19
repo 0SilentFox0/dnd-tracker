@@ -29,11 +29,13 @@ export function buildSpellResultFx(
     spellName: string,
     changes: HpChange[],
     targetCount: number,
-    system?: SystemSlot
+    system?: SystemSlot,
+    countered?: boolean
 ): ResultFx {
     return {
         kind: 'spell',
         spellName,
+        ...(countered && { countered: true as const }),
         changes: hpTotals(changes),
         targetCount,
         ...(system && { system }),
@@ -54,3 +56,15 @@ export function castDetailsOf(
             e.actionDetails?.system
     )?.actionDetails?.system;
 }
+
+export const wasCountered = (
+    log: BattleAction[],
+    seen: Set<number>,
+    actorId: string
+): boolean =>
+    log.some(
+        (e) =>
+            !seen.has(e.actionIndex) &&
+            e.actorId === actorId &&
+            e.actionDetails?.countered === true
+    );

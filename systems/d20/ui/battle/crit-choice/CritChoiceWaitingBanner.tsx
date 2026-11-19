@@ -1,8 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Hourglass } from 'lucide-react';
 
+import { WaitingNotice } from '@/components/hud';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 
@@ -33,14 +33,8 @@ export function CritChoiceWaitingBanner() {
     if (holdsAll) return null;
 
     return (
-        <div
-            role="status"
-            className="flex min-h-10 items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center"
-        >
-            <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
-            <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
-                {ridersWait ? tRider('waitingBanner') : t('waitingBanner')}
-            </span>
-        </div>
+        <WaitingNotice>
+            {ridersWait ? tRider('waitingBanner') : t('waitingBanner')}
+        </WaitingNotice>
     );
 }

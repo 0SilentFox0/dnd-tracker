@@ -2,6 +2,7 @@ import { campaignPatch, campaignPost } from './client';
 import { systemPath } from './system';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
+import type { CounterWindowBody } from '@/lib/schemas/battles';
 import type {
     CustomConditionKey,
     StandardConditionKey,
@@ -191,6 +192,9 @@ export const battleOps = {
     castSpell: op<SpellCastData, AttackResponse>({
         path: '/spell',
         mapResponse: withHpChanges,
+    }),
+    counterWindow: op<CounterWindowBody, { countered?: boolean }>({
+        path: '/counter-window',
     }),
     start: op<object>({ path: '/start', invalidate: BATTLES_AND_ACTIVE }),
     reset: op<object>({ path: '/reset', invalidate: BATTLES }),

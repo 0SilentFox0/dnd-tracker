@@ -12,7 +12,11 @@ import {
     type SpellFlowState,
     spellPayload,
 } from '@/lib/utils/battle/flows';
-import { buildSpellResultFx, castDetailsOf } from '@/lib/utils/battle/view';
+import {
+    buildSpellResultFx,
+    castDetailsOf,
+    wasCountered,
+} from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 
@@ -50,7 +54,13 @@ export function useSpellCastSubmit({
                           seen,
                           caster.basicInfo.id
                       )
-                    : undefined
+                    : undefined,
+                !!caster &&
+                    wasCountered(
+                        scene.readBattle()?.battleLog ?? [],
+                        seen,
+                        caster.basicInfo.id
+                    )
             )
         );
         onDone?.();

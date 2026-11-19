@@ -101,6 +101,7 @@ export interface BattleAction {
         damageRows?: DamageRow[];
         damageSteps?: Record<string, DamageStep[]>;
         spellId?: string;
+        countered?: true;
         spellName?: string;
         spellFx?: SpellFx;
         spellLevel?: number;

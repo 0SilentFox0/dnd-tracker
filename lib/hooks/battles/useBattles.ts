@@ -142,6 +142,8 @@ export const useMapBackground = makeBattleHook(battleOps.mapBackground);
 export const useMapWeather = makeBattleHook(battleOps.mapWeather);
 export const useBonusAction = makeBattleHook(battleOps.bonusAction);
 export const useCastSpell = makeBattleHook(battleOps.castSpell);
+
+export const useCounterWindowOp = makeBattleHook(battleOps.counterWindow);
 export const useStartBattle = makeBattleHook(battleOps.start);
 export const useResetBattle = makeBattleHook(battleOps.reset);
 export const useCompleteBattle = makeBattleHook(battleOps.complete);

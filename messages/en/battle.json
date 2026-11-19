@@ -15,6 +15,20 @@
     "waitingBanner": "The DM is choosing an effect…",
     "waitingNote": "The DM is choosing the critical roll effect…"
   },
+  "counterWindow": {
+    "title": "Counterspell?",
+    "description": "{caster} is casting a spell. You can answer with your reaction.",
+    "descriptionSpell": "{caster} is casting {spell}. You can answer with your reaction.",
+    "slot": "Spell slot",
+    "slotLevel": "Level {level}",
+    "grant": "Granted use",
+    "counter": "Counterspell",
+    "pass": "Let it through",
+    "passForPlayer": "Pass for the player",
+    "closeAll": "Close the window",
+    "banner": "Someone may answer with a reaction… {seconds} s",
+    "bannerDm": "The DM is deciding on a reaction… {seconds} s"
+  },
   "hud": {
     "wounds": "Wounds",
     "d100": {
@@ -210,7 +224,8 @@
     "splash": "splashed",
     "applied": "Applied",
     "appliedTargets": "Applied · targets: {count}",
-    "aria": "Action result"
+    "aria": "Action result",
+    "countered": "Countered"
   },
   "prep": {
     "badge": "Battle preparation",

@@ -11,6 +11,8 @@ import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleAudioProvider } from '@/components/battle/audio/BattleAudioProvider';
+import { CounterWindowBanner } from '@/components/battle/counter/CounterWindowBanner';
+import { CounterWindowDialog } from '@/components/battle/counter/CounterWindowDialog';
 import {
     useSystemBattleUi,
     useSystemFx,
@@ -222,6 +224,7 @@ export function BattleScreen() {
                         className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto"
                     >
                         <BattleToast />
+                        <CounterWindowBanner />
                         {systemNotices?.map((Notice, i) => (
                             <Notice key={i} />
                         ))}
@@ -244,6 +247,7 @@ export function BattleScreen() {
                         </CornerStack>
                     )}
                     {isDM && <DmRevivePrompt />}
+                    <CounterWindowDialog />
                     {systemDialogs?.map((Dialog, i) => (
                         <Dialog key={i} />
                     ))}
