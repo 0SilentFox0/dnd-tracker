@@ -67,4 +67,5 @@ export interface CastSpellResult {
     spellDamage?: TerrainDamage;
     spellDice?: string;
     concentration?: { casterId: string; castId: string };
+    interruptedIds?: string[];
 }

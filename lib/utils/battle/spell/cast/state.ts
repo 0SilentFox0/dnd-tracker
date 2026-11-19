@@ -128,6 +128,7 @@ export const SPELL_ONLY_KINDS = new Set<string>([
     'transform',
     'grantSpell',
     'phantom',
+    'interruptCast',
 ]);
 
 export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] =>

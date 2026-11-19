@@ -321,12 +321,7 @@ export const UTILITY_SPELL_OVERRIDES: Record<string, Override> =
             // reactions and dispelling
             counterspell: effects(
                 { kind: 'enemy', range: 60 },
-                [
-                    cond('disable_spell_casting', 1),
-                    note(
-                        'Cast it before the enemy casts: the pipeline cannot pause a cast, so the target loses its spellcasting for the round.'
-                    ),
-                ],
+                [{ kind: 'interruptCast' }],
                 save('constitution')
             ),
             'dispel-magic': effects(area('enemy', 1, 120), [

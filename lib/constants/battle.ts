@@ -110,6 +110,8 @@ export const ParticipantSourceType = {
 export type ParticipantSourceTypeValue =
     (typeof ParticipantSourceType)[keyof typeof ParticipantSourceType];
 
+export const COUNTER_WINDOW_MS = 10_000;
+
 export const BATTLE_VERSION_ONLY_PARAM = 'versionOnly';
 
 export const BATTLE_LOG_RECENT_EVENTS = 30;

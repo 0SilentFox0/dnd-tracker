@@ -22,6 +22,7 @@ describe('spell-only kinds', () => {
             'grantCast',
             'hitRider',
             'inputDice',
+            'interruptCast',
             'moveSelf',
             'phantom',
             'summonInline',

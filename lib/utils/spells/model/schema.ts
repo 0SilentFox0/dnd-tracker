@@ -348,6 +348,8 @@ const GrantSpellSchema = z.object({
 
 const PhantomSchema = z.object({ kind: z.literal('phantom') });
 
+const InterruptCastSchema = z.object({ kind: z.literal('interruptCast') });
+
 const SPELL_ONLY_EFFECTS = [
     ChooseOneSchema,
     InputDiceSchema,
@@ -363,6 +365,7 @@ const SPELL_ONLY_EFFECTS = [
     TransformSchema,
     GrantSpellSchema,
     PhantomSchema,
+    InterruptCastSchema,
 ] as const;
 
 export const SPELL_ONLY_EFFECT_KINDS = SPELL_ONLY_EFFECTS.map(

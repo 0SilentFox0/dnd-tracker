@@ -33,6 +33,7 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, 'kind'> } = {
     moveSelf: { to: 'adjacentToTarget' },
     teleportSelf: {},
     phantom: {},
+    interruptCast: {},
     createTerrain: {
         terrain: 'difficult',
         shape: 'cell',

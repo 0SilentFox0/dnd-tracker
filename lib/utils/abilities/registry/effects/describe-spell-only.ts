@@ -15,6 +15,7 @@ type SpellOnly = Extract<
             | 'transform'
             | 'grantSpell'
             | 'phantom'
+            | 'interruptCast'
             | 'moveSelf'
             | 'teleportSelf'
             | 'createTerrain'
@@ -33,6 +34,7 @@ const SPELL_ONLY_KINDS = new Set([
     'transform',
     'grantSpell',
     'phantom',
+    'interruptCast',
     'moveSelf',
     'teleportSelf',
     'createTerrain',
@@ -169,6 +171,9 @@ export function describeSpellOnly(
 
         case 'phantom':
             return [seg('summary.spellOnly.phantom')];
+
+        case 'interruptCast':
+            return [seg('summary.spellOnly.interruptCast')];
 
         case 'moveSelf':
             return [seg('summary.spellOnly.moveSelf')];

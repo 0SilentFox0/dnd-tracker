@@ -56,4 +56,15 @@ describe('utility spell overrides', () => {
                 SPELL_OVERRIDES[`srd-2024_${slug}`].spellEffects?.[0].kind
             ).toBe('summonInline');
     });
+
+    it('counterspell is a CON save that interrupts the cast', () => {
+        const o = SPELL_OVERRIDES['srd-2024_counterspell'];
+
+        expect(o.resolution).toMatchObject({
+            kind: 'save',
+            ability: 'constitution',
+        });
+        expect(o.spellEffects).toEqual([{ kind: 'interruptCast' }]);
+        expect(JSON.stringify(o)).not.toContain('disable_spell_casting');
+    });
 });

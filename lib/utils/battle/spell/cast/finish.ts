@@ -26,8 +26,26 @@ import {
 import type { CastSpellResult } from '@/lib/utils/battle/types/spell-process';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemMagicResource } from '@/lib/utils/rules/systems/types';
+import type { SpellCost } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
+
+export function spendCastEconomy(
+    p: BattleParticipant,
+    spellCost: SpellCost,
+    src: { isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }
+): BattleParticipant {
+    if (src.isDMCast || src.isLegendaryCast || src.grant?.noAction) return p;
+
+    return spellCost === 'reaction'
+        ? { ...p, actionFlags: { ...p.actionFlags, hasUsedReaction: true } }
+        : spellCost === 'bonusAction'
+          ? {
+                ...p,
+                actionFlags: { ...p.actionFlags, hasUsedBonusAction: true },
+            }
+          : applyMainActionUsed(p);
+}
 
 export function spendCastCost(
     state: SpellCastState,
@@ -75,26 +93,11 @@ export function spendCastCost(
         };
     }
 
-    if (!cost.isDMCast && !cost.isLegendaryCast && !cost.grant?.noAction) {
-        caster =
-            state.spell.definition.cost === 'reaction'
-                ? {
-                      ...caster,
-                      actionFlags: {
-                          ...caster.actionFlags,
-                          hasUsedReaction: true,
-                      },
-                  }
-                : state.spell.definition.cost === 'bonusAction'
-                  ? {
-                        ...caster,
-                        actionFlags: {
-                            ...caster.actionFlags,
-                            hasUsedBonusAction: true,
-                        },
-                    }
-                  : applyMainActionUsed(caster);
-    }
+    caster = spendCastEconomy(
+        caster,
+        state.spell.definition.cost,
+        cost
+    );
 
     put(state.flow, caster);
 }

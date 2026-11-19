@@ -30,6 +30,7 @@ import {
 import { applyGrantCasts } from '@/lib/utils/battle/spell/cast/grant-cast';
 import { applyGrantSpells } from '@/lib/utils/battle/spell/cast/grant-spell';
 import { applyHitRiders } from '@/lib/utils/battle/spell/cast/hit-rider';
+import { interruptedTargets } from '@/lib/utils/battle/spell/cast/interrupt';
 import {
     moveAdjacent,
     teleportTo,
@@ -603,5 +604,11 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         ...(test && { details: test.details }),
     });
 
-    return tag ? { ...result, concentration: tag } : result;
+    const interruptedIds = interruptedTargets(state, source.definition.effects);
+
+    return {
+        ...result,
+        ...(tag && { concentration: tag }),
+        ...(interruptedIds.length > 0 && { interruptedIds }),
+    };
 }

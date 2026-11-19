@@ -139,6 +139,7 @@ export const SPELL_ONLY_FIXTURES: Record<string, Fixture> = {
         edit: { id: 'cells', value: '6', patch: { cells: 6 } },
     },
     phantom: { effect: { kind: 'phantom' } },
+    interruptCast: { effect: { kind: 'interruptCast' } },
     moveSelf: { effect: { kind: 'moveSelf', to: 'adjacentToTarget' } },
     teleportSelf: { effect: { kind: 'teleportSelf' } },
     chooseOne: {

@@ -5653,15 +5653,7 @@
     },
     "spellEffects": [
       {
-        "kind": "applyCondition",
-        "condition": "disable_spell_casting",
-        "duration": {
-          "rounds": 1
-        }
-      },
-      {
-        "kind": "note",
-        "text": "Cast it before the enemy casts: the pipeline cannot pause a cast, so the target loses its spellcasting for the round."
+        "kind": "interruptCast"
       }
     ],
     "lists": [

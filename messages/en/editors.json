@@ -11,6 +11,7 @@
       "grantSpell": "Free cast of a chosen spell",
       "moveSummon": "Move own summon",
       "phantom": "Double of the target (phantom)",
+      "interruptCast": "Interrupt a spell being cast",
       "createTerrain": "Wall / difficult terrain",
       "anchoredZone": "Aura on the target",
       "summonInline": "Summon from the spell map",
@@ -155,6 +156,7 @@
     "hints": {
       "chooseOne": "The caster picks one of the options when casting.",
       "phantom": "The spell target gets a double on the caster's side: same stats and abilities, 1 HP, controlled by the caster.",
+      "interruptCast": "On a failed save the target's spell being cast dissipates with no effect; its action is wasted but the slot is kept.",
       "moveSelf": "The caster moves to the nearest free cell next to the first target without provoking attacks.",
       "teleportSelf": "The caster teleports to the aimed free cell within the spell range.",
       "burst": "Hit or miss, everyone within the radius of the first target makes the save (the trigger below) against one shared dice roll.",

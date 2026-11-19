@@ -6,6 +6,7 @@ import { CreateTerrainEditor } from './editors/CreateTerrainEditor';
 import { GrantCastEditor } from './editors/GrantCastEditor';
 import { HitRiderEditor } from './editors/HitRiderEditor';
 import { InputDiceEditor } from './editors/InputDiceEditor';
+import { InterruptCastEditor } from './editors/InterruptCastEditor';
 import { MoveSelfEditor } from './editors/MoveSelfEditor';
 import { PhantomEditor } from './editors/PhantomEditor';
 import { SummonInlineEditor } from './editors/SummonInlineEditor';
@@ -25,6 +26,7 @@ export const SPELL_ONLY_EDITORS: EditorMap = {
     moveSelf: MoveSelfEditor,
     teleportSelf: TeleportSelfEditor,
     phantom: PhantomEditor,
+    interruptCast: InterruptCastEditor,
     createTerrain: CreateTerrainEditor,
     transform: TransformEditor,
     hitRider: HitRiderEditor,
