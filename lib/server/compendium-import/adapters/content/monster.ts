@@ -421,9 +421,11 @@ export const monster: Adapter = (row, ctx) => {
             gridSize:
                 str(array(row.size)[0]) === 'L'
                     ? 2
-                    : ['H', 'G'].includes(str(array(row.size)[0]))
+                    : str(array(row.size)[0]) === 'H'
                       ? 3
-                      : 1,
+                      : str(array(row.size)[0]) === 'G'
+                        ? 4
+                        : 1,
             cr,
             statblock,
             attacks,

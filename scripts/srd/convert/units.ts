@@ -39,7 +39,7 @@ const SIZE_CELLS: Record<string, UnitRow['gridSize']> = {
     medium: 1,
     large: 2,
     huge: 3,
-    gargantuan: 3,
+    gargantuan: 4,
 };
 
 const TEXT_ATTACK =

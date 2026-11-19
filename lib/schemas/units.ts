@@ -186,7 +186,7 @@ const unitStatFields = {
     armorClass: z.number().min(0).default(10),
     initiative: z.number().default(0),
     speed: z.number().min(0).default(30),
-    gridSize: z.number().int().min(1).max(3).default(1),
+    gridSize: z.number().int().min(1).max(4).default(1),
     maxHp: z.number().min(1).default(10),
     proficiencyBonus: z.number().min(0).optional(),
     attacks: z
@@ -228,7 +228,7 @@ export const updateUnitSchema = z.object({
     armorClass: z.number().min(0).optional(),
     initiative: z.number().optional(),
     speed: z.number().min(0).optional(),
-    gridSize: z.number().int().min(1).max(3).optional(),
+    gridSize: z.number().int().min(1).max(4).optional(),
     maxHp: z.number().min(1).optional(),
     proficiencyBonus: z.number().min(0).optional(),
     attacks: z
