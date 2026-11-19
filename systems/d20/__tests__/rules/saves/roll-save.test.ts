@@ -200,3 +200,39 @@ describe('rollSave', () => {
         expect(run(t)).toMatchObject({ bonus: 2, total: 15 });
     });
 });
+
+describe('rollSave held d20 die', () => {
+    const rider = (spend: boolean) => {
+        const offered: number[] = [];
+
+        return {
+            offered,
+            pick: ((i: { total: number }) => {
+                offered.push(i.total);
+
+                return spend ? { bonus: 3, die: 6 } : undefined;
+            }) as NonNullable<Parameters<typeof rollSave>[0]['rider']>,
+        };
+    };
+
+    it('adds the die to a failed save it could flip', () => {
+        const r = rider(true);
+
+        // roll 11 (0.5) + DEX 2 = 13 vs DC 15
+        const out = run(base(), { dc: 15, rider: r.pick });
+
+        expect(r.offered).toEqual([13]);
+        expect(out.total).toBe(16);
+        expect(out.riderBonus).toBe(3);
+        expect(out.success).toBe(true);
+    });
+
+    it('does not offer on a natural 1, a passed save or a missing DC', () => {
+        const r = rider(true);
+
+        run(base(), { dc: 10, rider: r.pick });
+        run(base(), { dc: undefined, rider: r.pick });
+        run(base(), { dc: 15, rng: seq(0), rider: r.pick });
+        expect(r.offered).toEqual([]);
+    });
+});

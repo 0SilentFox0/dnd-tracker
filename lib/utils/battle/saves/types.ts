@@ -1,5 +1,6 @@
 import type { AbilityKey } from '@/lib/constants/abilities';
 import type { DndSkill } from '@/lib/constants/skills';
+import type { RiderPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { GameClassData } from '@/types/classes';
@@ -19,6 +20,7 @@ export interface SaveRollInput {
     presetRoll?: number;
     vsSpell?: boolean;
     advantage?: boolean;
+    rider?: RiderPicker;
 }
 
 export interface SaveRollResult {
@@ -30,6 +32,7 @@ export interface SaveRollResult {
     success: boolean;
     mode: SaveRollMode;
     autoFail: boolean;
+    riderBonus?: number;
 }
 
 export interface SaveResolution<T> {

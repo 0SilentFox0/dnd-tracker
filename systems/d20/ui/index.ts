@@ -3,6 +3,7 @@ import { CritChoiceWaitingBanner } from './battle/crit-choice/CritChoiceWaitingB
 import { d20Defense } from './battle/defense';
 import { HeroStats as BattleHeroStats } from './battle/HeroStats';
 import { ParticipantStats } from './battle/ParticipantStats';
+import { RiderChoiceDialog } from './battle/rider-choice/RiderChoiceDialog';
 import { SpellSlotsPanel } from './battle/SpellSlotsPanel';
 import { BackgroundsPage } from './content/BackgroundsPage';
 import { ClassesPage } from './content/ClassesPage';
@@ -30,7 +31,7 @@ export const D20_MODULE_UI: SystemUi = {
         defense: d20Defense,
         ParticipantStats,
         heroPanels: [SpellSlotsPanel],
-        dialogs: [CritChoiceDialog],
+        dialogs: [CritChoiceDialog, RiderChoiceDialog],
         notices: [CritChoiceWaitingBanner],
     },
     rulesSections: {

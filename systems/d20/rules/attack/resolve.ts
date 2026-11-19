@@ -122,6 +122,34 @@ export function resolveD20Attack(ctx: ResolveAttackCtx): ResolvedAttack {
             modifiers[attackerId]
         ).length > 0;
 
+    const missed =
+        !rolled.isCriticalFail &&
+        !rolled.isCritical &&
+        !guaranteedHit &&
+        rolled.totalAttackValue < targetAC;
+
+    const rider = missed
+        ? ctx.crit?.rider?.({
+              holder: attacker,
+              kind: 'attack',
+              total: rolled.totalAttackValue,
+              needed: targetAC,
+              targetId,
+          })
+        : undefined;
+
+    if (rider) {
+        rolled.totalAttackValue += rider.bonus;
+        rolled.riderBonus = rider.bonus;
+        lines.push(
+            textRef('battleLog.rider.spent', {
+                die: rider.die,
+                bonus: rider.bonus,
+                total: rolled.totalAttackValue,
+            })
+        );
+    }
+
     const isHit =
         !rolled.isCriticalFail &&
         (rolled.isCritical ||

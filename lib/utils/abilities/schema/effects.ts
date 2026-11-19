@@ -475,6 +475,7 @@ const MarkSchema = z.object({
     kind: z.literal('mark'),
     markId: z.string().min(1),
     duration: DurationSchema,
+    amount: AmountSchema.optional(),
     ...target,
 });
 

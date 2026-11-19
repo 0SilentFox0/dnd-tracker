@@ -10,7 +10,11 @@ import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { BattleRuleError, dmEvent } from '@/lib/utils/battle/store';
+import {
+    BattleAccessError,
+    BattleRuleError,
+    dmEvent,
+} from '@/lib/utils/battle/store';
 
 export type CritChoiceDeps = Pick<BattleOperationDeps, 'attack' | 'spell'>;
 
@@ -27,7 +31,24 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
                 API_ERRORS.CRIT_CHOICE_NONE
             );
 
+        const riders = pending.shown.riders ?? [];
+
+        const holdersControlled = riders.every(
+            (r) =>
+                ctx.participants.find((p) => p.basicInfo.id === r.holderId)
+                    ?.basicInfo.controlledBy === ctx.userId
+        );
+
+        if (
+            !ctx.isDM &&
+            !(pending.shown.triggers.length === 0 && holdersControlled)
+        )
+            throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+
         if ('cancel' in body) {
+            if (!ctx.isDM)
+                throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+
             return {
                 participants: ctx.participants,
                 pending: ctx.pending,
@@ -46,6 +67,17 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
             keys.length !== triggers.size ||
             keys.some((k) => !triggers.has(k))
         ) {
+            throw new BattleRuleError(
+                'action_rejected',
+                API_ERRORS.CRIT_CHOICE_INCOMPLETE
+            );
+        }
+
+        const offered = new Set(riders.map((r) => r.key));
+
+        const riderKeys = Object.keys(body.riders ?? {});
+
+        if (riderKeys.some((k) => !offered.has(k))) {
             throw new BattleRuleError(
                 'action_rejected',
                 API_ERRORS.CRIT_CHOICE_INCOMPLETE
@@ -75,7 +107,11 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
 
         const { hidden } = pending;
 
-        const resume = { seed: hidden.seed, choices };
+        const resume = {
+            seed: hidden.seed,
+            choices,
+            riderChoices: body.riders ?? {},
+        };
 
         const requester = { ...ctx, userId: hidden.userId, isDM: hidden.isDM };
 

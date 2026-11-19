@@ -84,7 +84,9 @@ function scene(opts: { allyAt?: GridPoint; targetAt?: GridPoint } = {}) {
     return [rogue, ally, target];
 }
 
-const hit = (rollMode?: 'advantage' | 'disadvantage'): AbilityEvent => ({
+const hit = (
+    rollMode?: 'advantage' | 'disadvantage'
+): Extract<AbilityEvent, { type: 'hit' }> => ({
     type: 'hit',
     actorId: 'r',
     targetId: 't',
@@ -108,7 +110,7 @@ describe('Sneak Attack conditions', () => {
     });
 
     it('requires a finesse or ranged weapon', () => {
-        const heavy: AbilityEvent = { ...hit('advantage'), attackTraits: [] };
+        const heavy = { ...hit('advantage'), attackTraits: [] };
 
         expect(hpAfter(scene(), heavy)).toBe(50);
         expect(

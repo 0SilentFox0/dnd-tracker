@@ -60,10 +60,18 @@ const deps = {
 
 const attack = createAttackMutation(deps);
 
-const critChoice = createCritChoiceMutation({
-    attack,
-    spell: createSpellMutation(deps),
-});
+const dmOnly = (
+    mutation: ReturnType<typeof createCritChoiceMutation>
+): ReturnType<typeof createCritChoiceMutation> =>
+    (c, b) =>
+        mutation({ ...c, isDM: true }, b);
+
+const critChoice = dmOnly(
+    createCritChoiceMutation({
+        attack,
+        spell: createSpellMutation(deps),
+    })
+);
 
 const body = (over: Record<string, unknown> = {}) =>
     attackBodySchema.parse({
@@ -211,10 +219,12 @@ describe('crit-choice mutation', () => {
 
         const replayAttack = vi.fn(async () => out);
 
-        const mutation = createCritChoiceMutation({
-            attack: replayAttack,
-            spell: createSpellMutation(deps),
-        });
+        const mutation = dmOnly(
+            createCritChoiceMutation({
+                attack: replayAttack,
+                spell: createSpellMutation(deps),
+            })
+        );
 
         await mutation(
             { ...c, scene: { ...c.scene, pendingChoice: pending } },
@@ -377,5 +387,106 @@ describe('очищення pending', () => {
         )(c, { actionIndex: 4 });
 
         expect(out.scene?.pendingChoice).toBeNull();
+    });
+});
+
+describe('crit-choice access and rider offers', () => {
+    const KEY2 = 'rider:hero:attack:0';
+
+    const pendingOf = (shown: Record<string, unknown>): PendingChoice => ({
+        shown: { action: 'attack', actorId: 'hero', ...shown },
+        hidden: {
+            request: body(),
+            seed: 1,
+            userId: 'user-1',
+            isDM: false,
+        },
+    });
+
+    const mutation = (
+        spy = vi.fn(async (c: BattleMutationContext) => ({
+            participants: c.participants,
+            pending: c.pending,
+            events: [],
+        }))
+    ) => ({
+        spy,
+        run: createCritChoiceMutation({
+            attack: spy as never,
+            spell: vi.fn() as never,
+        }),
+    });
+
+    const ctxWith = (
+        pending: PendingChoice,
+        over: Partial<BattleMutationContext>
+    ): BattleMutationContext => {
+        const c = context();
+
+        return { ...c, ...over, scene: { ...c.scene, pendingChoice: pending } };
+    };
+
+    const offer = { key: KEY2, holderId: 'hero', kind: 'attack', die: 6, total: 12 };
+
+    it('a player cannot resolve crit triggers', async () => {
+        const { run } = mutation();
+
+        await expect(
+            run(
+                ctxWith(pendingOf({ triggers: [{ key: KEY, source: 'attack', kind: 'success', actorId: 'hero', targetId: 'gob' }] }), {
+                    isDM: false,
+                }),
+                { choices: { [KEY]: 'random' } }
+            )
+        ).rejects.toMatchObject({ status: 403 });
+    });
+
+    it('the controller of the holder answers a rider-only pause and the answer reaches the replay', async () => {
+        const { run, spy } = mutation();
+
+        const base = context();
+
+        const owned = base.participants.map((p) =>
+            p.basicInfo.id === 'hero'
+                ? { ...p, basicInfo: { ...p.basicInfo, controlledBy: 'user-1' } }
+                : p
+        );
+
+        await run(
+            ctxWith(pendingOf({ triggers: [], riders: [offer] }), {
+                isDM: false,
+                userId: 'user-1',
+                participants: owned,
+            }),
+            { choices: {}, riders: { [KEY2]: true } }
+        );
+
+        expect(spy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            { seed: 1, choices: {}, riderChoices: { [KEY2]: true } },
+            expect.anything()
+        );
+    });
+
+    it('someone else cannot answer a rider offer, and unknown offers are rejected', async () => {
+        const { run } = mutation();
+
+        await expect(
+            run(
+                ctxWith(pendingOf({ triggers: [], riders: [offer] }), {
+                    isDM: false,
+                    userId: 'stranger',
+                }),
+                { choices: {}, riders: { [KEY2]: true } }
+            )
+        ).rejects.toMatchObject({ status: 403 });
+
+        await expect(
+            run(
+                ctxWith(pendingOf({ triggers: [], riders: [offer] }), { isDM: true }),
+                { choices: {}, riders: { bogus: true } }
+            )
+        ).rejects.toThrow();
     });
 });

@@ -127,6 +127,9 @@
     "manualTag": " (player's choice)",
     "serverTag": " (server)"
   },
+  "rider": {
+    "spent": "🎲 inspiration die d{die}: +{bonus}, total {total}"
+  },
   "crit": {
     "adjacent": "💥 point-blank hit — critical",
     "cancelled": "🛡 critical cancelled — normal hit",

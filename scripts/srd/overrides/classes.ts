@@ -361,6 +361,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<
             {
                 kind: 'mark',
                 markId: 'bardic-inspiration',
+                amount: { scale: 'bardic-die' },
                 duration: { rounds: 99 },
                 target: 'eventTarget',
             },

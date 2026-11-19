@@ -346,6 +346,7 @@ const BASE_EFFECT_REGISTRY: {
         static: false,
         fields: [
             { name: 'markId', input: 'text' },
+            { ...AMOUNT, optional: true },
             TARGET_FIELD,
             REQUIRED_DURATION,
         ],

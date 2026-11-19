@@ -6,6 +6,7 @@ import {
     createMockParticipant,
     grantPassive,
 } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { createCritGate } from '@/lib/utils/battle/crit-choice/gate';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
 import {
@@ -195,5 +196,73 @@ describe('d20AbortedRoll', () => {
 
         expect(r.chosenD20).toBe(1);
         expect(r.isCriticalFail).toBe(true);
+    });
+});
+
+describe('resolveD20Attack held d20 die', () => {
+    const holding = (): BattleParticipant => {
+        const a = A();
+
+        return {
+            ...a,
+            battleData: {
+                ...a.battleData,
+                activeEffects: [
+                    {
+                        id: 'insp',
+                        name: 'Bardic Inspiration',
+                        type: 'buff',
+                        duration: 99,
+                        appliedAt: { round: 1, timestamp: new Date(0) },
+                        effects: [{ type: 'd20Rider', value: 6 }],
+                    },
+                ],
+            },
+        };
+    };
+
+    const gate = (spend: boolean) =>
+        createCritGate({
+            rng: () => 0.5,
+            riderChoices: spend ? { 'rider:a:attack:0': true } : {},
+        });
+
+    it('turns a near miss into a hit when the holder spends the die', () => {
+        const g = gate(true);
+
+        const r = resolveD20Attack(
+            ctx(holding(), T(), { manualRoll: 3, crit: g.pick })
+        );
+
+        // 3 + 9 = 12 vs AC 14, die d6 at 0.5 = +4
+        expect(r.isHit).toBe(true);
+        expect(r.attackRoll.totalAttackValue).toBe(16);
+        expect(r.attackRoll.riderBonus).toBe(4);
+        expect(g.spent).toEqual([{ holderId: 'a', effectId: 'insp' }]);
+    });
+
+    it('stays a miss and offers the die when the holder keeps it', () => {
+        const g = gate(false);
+
+        const r = resolveD20Attack(
+            ctx(holding(), T(), { manualRoll: 3, crit: g.pick })
+        );
+
+        expect(r.isHit).toBe(false);
+        expect(g.offers).toHaveLength(1);
+    });
+
+    it('offers nothing on a natural 1 or when the die cannot reach the AC', () => {
+        const g = gate(true);
+
+        resolveD20Attack(ctx(holding(), T(), { manualRoll: 1, crit: g.pick }));
+        resolveD20Attack(ctx(holding(), T(30), { manualRoll: 3, crit: g.pick }));
+        expect(g.offers).toEqual([]);
+    });
+
+    it('does nothing without a gate (previews, off-turn flows)', () => {
+        const r = resolveD20Attack(ctx(holding(), T(), { manualRoll: 3 }));
+
+        expect(r.isHit).toBe(false);
     });
 });
