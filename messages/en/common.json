@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "D&D Combat Tracker"
+    "name": "CritNest"
   },
   "confirm": {
     "confirm": "Confirm",
@@ -231,5 +231,21 @@
   },
   "errors": {
     "imageUploadFailed": "Failed to upload the image: {message}"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Your account and avatar",
+    "avatar": {
+      "change": "Change photo",
+      "remove": "Remove photo",
+      "removeConfirm": "Remove your photo?",
+      "hint": "JPEG, PNG, WebP or GIF up to 15 MB, cropped to a square",
+      "badType": "Use a JPEG, PNG, WebP or GIF image",
+      "tooLarge": "The image is larger than 15 MB",
+      "failed": "Couldn't update the photo"
+    },
+    "sections": {
+      "account": "Account"
+    }
   }
 }

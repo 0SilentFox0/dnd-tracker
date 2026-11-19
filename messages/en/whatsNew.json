@@ -313,6 +313,10 @@
     "title": "Soundboard",
     "body": "The DM now has a soundboard: one tap plays a door, thunder or a sword hit for the whole table. Built-in sounds are included, and you can upload your own."
   },
+  "2026-11-19-profile-avatar": {
+    "title": "Profile and avatar",
+    "body": "You can now upload your own photo as an avatar. Open the new Profile page from the header menu to change or remove it; without a photo your initials are shown."
+  },
   "2026-11-19-weapon-mastery": {
     "title": "Weapon Mastery",
     "body": "Fighters, Barbarians, Paladins, Rangers and Rogues now choose the weapon kinds they have mastered. Their mastery properties (Graze, Push, Sap, Slow, Topple, Vex, Cleave and Nick) trigger in battle."

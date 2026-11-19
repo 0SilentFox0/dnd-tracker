@@ -2,9 +2,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+    cropSquareToBlob,
     fitWithin,
     resizeImageToBlob,
     resizeImageToDataUrl,
+    squareCrop,
 } from '@/lib/utils/common/image-resize';
 
 describe('fitWithin', () => {
@@ -112,5 +114,60 @@ describe('resizeImageToBlob', () => {
         await expect(
             resizeImageToBlob(new File([''], 'a.png'), 50)
         ).rejects.toThrow('validation.image.tooLarge');
+    });
+});
+
+describe('squareCrop', () => {
+    it.each([
+        [400, 200, { sx: 100, sy: 0, side: 200 }],
+        [100, 300, { sx: 0, sy: 100, side: 100 }],
+        [50, 50, { sx: 0, sy: 0, side: 50 }],
+    ])('%i x %i', (w, h, out) => expect(squareCrop(w, h)).toEqual(out));
+});
+
+describe('cropSquareToBlob', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    const stub = (encode: (type: string) => Blob | null) => {
+        vi.stubGlobal('createImageBitmap', async () => ({
+            width: 100,
+            height: 80,
+            close: () => {},
+        }));
+        vi.spyOn(document, 'createElement').mockReturnValue({
+            width: 0,
+            height: 0,
+            getContext: () => ({ drawImage: () => {} }),
+            toBlob: (cb: (b: Blob | null) => void, type: string) =>
+                cb(encode(type)),
+        } as never);
+    };
+
+    it('returns webp when the browser encodes it', async () => {
+        stub((type) => new Blob(['w'], { type }));
+
+        const blob = await cropSquareToBlob(new File([''], 'a.png'), 256);
+
+        expect(blob.type).toBe('image/webp');
+    });
+
+    it('falls back to jpeg when the browser returns png for webp (Safari)', async () => {
+        stub((type) =>
+            new Blob(['x'], {
+                type: type === 'image/webp' ? 'image/png' : type,
+            })
+        );
+
+        const blob = await cropSquareToBlob(new File([''], 'a.png'), 256);
+
+        expect(blob.type).toBe('image/jpeg');
+    });
+
+    it('fails when neither format is encoded', async () => {
+        stub(() => new Blob(['x'], { type: 'image/png' }));
+
+        await expect(
+            cropSquareToBlob(new File([''], 'a.png'), 256)
+        ).rejects.toThrow('validation.image.compressFailed');
     });
 });

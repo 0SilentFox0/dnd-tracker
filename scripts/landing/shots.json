@@ -1,0 +1,9 @@
+[
+  { "name": "battle", "path": "/battles/demo-battle-grove" },
+  { "name": "scenario", "path": "/dm/scenario/demo-bell-scene" },
+  { "name": "show", "path": "/dm/show/demo-deck-listening-grove", "steps": [{ "role": "Start show" }, { "wait": 2500 }, { "goto": "/show" }, { "wait": 2000 }] },
+  { "name": "world", "path": "/world" },
+  { "name": "hero", "path": "/dm/characters/demo-character-scout" },
+  { "name": "constructor", "path": "/dm/classes", "steps": [{ "link": "Ranger" }, { "wait": 1500 }] },
+  { "name": "player-mobile", "path": "/battles/demo-battle-grove", "mobile": true }
+]

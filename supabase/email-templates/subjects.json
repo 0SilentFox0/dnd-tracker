@@ -1,0 +1,8 @@
+{
+  "confirmation": "Confirm your email · Підтвердіть пошту",
+  "magic_link": "Your sign-in link · Посилання для входу",
+  "recovery": "Reset your password · Скидання пароля",
+  "invite": "You are invited · Вас запрошено",
+  "email_change": "Confirm your new email · Підтвердіть нову пошту",
+  "reauthentication": "Your confirmation code · Код підтвердження"
+}

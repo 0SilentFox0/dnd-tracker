@@ -42,9 +42,13 @@ export function NewPasswordForm({
                 name="password"
                 autoComplete="new-password"
                 error={errors.password}
-                description={tRoot('validation.minLength', {
-                    minimum: PASSWORD_MIN_LENGTH,
-                })}
+                description={
+                    errors.password
+                        ? undefined
+                        : tRoot('validation.minLength', {
+                              minimum: PASSWORD_MIN_LENGTH,
+                          })
+                }
             />
             <PasswordInput
                 label={t('common.confirmPassword')}

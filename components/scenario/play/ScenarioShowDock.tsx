@@ -172,6 +172,11 @@ function DockBody({
                             />
                         </div>
                         {!play.readOnly && (
+                            <div className="sb-show-sounds">
+                                <SoundboardPanel campaignId={campaignId} />
+                            </div>
+                        )}
+                        {!play.readOnly && (
                             <>
                                 <ShowTransport
                                     campaignId={campaignId}
@@ -212,7 +217,6 @@ function DockBody({
                 </div>
                 {expanded && !play.readOnly && (
                     <div className="sb-show-body sans">
-                        <SoundboardPanel campaignId={campaignId} />
                         <ShowDeckStrip
                             campaignId={campaignId}
                             show={show}

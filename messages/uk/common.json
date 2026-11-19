@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "D&D Combat Tracker"
+    "name": "CritNest"
   },
   "confirm": {
     "confirm": "Підтвердити",
@@ -231,5 +231,21 @@
   },
   "errors": {
     "imageUploadFailed": "Не вдалося завантажити картинку: {message}"
+  },
+  "profile": {
+    "title": "Профіль",
+    "subtitle": "Ваш обліковий запис і аватар",
+    "avatar": {
+      "change": "Змінити фото",
+      "remove": "Видалити фото",
+      "removeConfirm": "Видалити ваше фото?",
+      "hint": "JPEG, PNG, WebP або GIF до 15 МБ, обрізається до квадрата",
+      "badType": "Оберіть зображення JPEG, PNG, WebP або GIF",
+      "tooLarge": "Зображення більше за 15 МБ",
+      "failed": "Не вдалося оновити фото"
+    },
+    "sections": {
+      "account": "Обліковий запис"
+    }
   }
 }

@@ -21,6 +21,7 @@ const STATIC_SAFE = [
     'app/dev/fx-spells/page.tsx',
     'app/help/page.tsx',
     'app/page.tsx',
+    'app/profile/page.tsx',
     'app/settings/ai/page.tsx',
     'app/settings/password/page.tsx',
     'app/settings/preferences/page.tsx',

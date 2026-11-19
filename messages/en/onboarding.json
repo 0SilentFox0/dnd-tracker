@@ -160,6 +160,12 @@
         "body": "When your turn comes, choose an action: move, attack, spell. The server calculates rolls and damage; you end your turn with the end turn button."
       }
     },
+    "profile": {
+      "avatar": {
+        "title": "Your profile",
+        "body": "Upload a photo (it is cropped to a square) or keep the initials badge. The same avatar shows in the header, on the battle map and in the character lists."
+      }
+    },
     "battle": {
       "map-doors": {
         "title": "Doors on the map",

@@ -70,6 +70,7 @@
     "test:related": "vitest related --run",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "migrate:deploy": "bash scripts/db/prisma-migrate-deploy.sh",
+    "landing:screens": "node scripts/landing/capture-screens.mjs",
     "db:local": "docker compose up -d --wait db && pnpm migrate:deploy"
   },
   "dependencies": {
@@ -151,6 +152,7 @@
     "jsdom": "^28.0.0",
     "knip": "^5.88.1",
     "node-html-parser": "^9.0.5",
+    "playwright": "^1.65.1",
     "postcss": "^8.5.6",
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "0.6.14",

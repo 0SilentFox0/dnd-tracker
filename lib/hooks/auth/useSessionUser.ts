@@ -3,41 +3,32 @@
 import { useEffect, useState } from 'react';
 
 import { createClient } from '@/lib/supabase/client';
+import { type SessionUser, toSessionUser } from '@/lib/utils/auth/session-user';
 
-export type SessionUser = { email: string | null; avatarUrl: string | null };
+export type { SessionUser };
 
 // display only: getSession reads the cookie without a network round trip, the server still verifies every request
 export function useSessionUser(): SessionUser | null {
     const [user, setUser] = useState<SessionUser | null>(null);
 
     useEffect(() => {
+        const supabase = createClient();
+
         let alive = true;
 
-        createClient()
-            .auth.getSession()
-            .then(({ data }) => {
-                if (!alive) return;
+        supabase.auth.getSession().then(({ data }) => {
+            if (alive) setUser(toSessionUser(data.session?.user));
+        });
 
-                const u = data.session?.user;
-
-                const meta = u?.user_metadata as
-                    | { avatar_url?: unknown; picture?: unknown }
-                    | undefined;
-
-                const photo = [meta?.avatar_url, meta?.picture].find(
-                    (v): v is string =>
-                        typeof v === 'string' && v.startsWith('https://')
-                );
-
-                setUser(
-                    u
-                        ? { email: u.email ?? null, avatarUrl: photo ?? null }
-                        : null
-                );
-            });
+        const { data: sub } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                if (alive) setUser(toSessionUser(session?.user));
+            }
+        );
 
         return () => {
             alive = false;
+            sub.subscription.unsubscribe();
         };
     }, []);
 

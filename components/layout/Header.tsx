@@ -1,26 +1,18 @@
 'use client';
 
-import { Fragment, useRef } from 'react';
-import Image from 'next/image';
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import {
-    CircleHelp,
-    Globe,
-    KeyRound,
-    LogOut,
-    Menu,
-    Sparkles,
-    User,
-    UserRoundCog,
-} from 'lucide-react';
+import { Menu, UserRound } from 'lucide-react';
 
+import { UserAvatar } from '@/components/auth/UserAvatar';
 import { JoinBattleButton } from '@/components/campaigns/JoinBattleButton';
 import { WatchShowButton } from '@/components/campaigns/WatchShowButton';
 import { HUD_SURFACE } from '@/components/hud';
 import { AbbreviationsInfoDialog } from '@/components/layout/AbbreviationsInfoDialog';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
+import { PROFILE_MENU } from '@/components/layout/profile-menu';
 import { WhatsNewButton } from '@/components/onboarding/WhatsNewButton';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
-import { useSessionUser, useSwitchGoogleAccount } from '@/lib/hooks/auth';
+import { useProfileActions, useSessionUser } from '@/lib/hooks/auth';
 import {
     useCampaignRules,
     useCampaignSystemSelection,
@@ -42,37 +34,6 @@ import {
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
-
-function UserAvatar({
-    url,
-    className,
-}: {
-    url: string | null;
-    className: string;
-}) {
-    return (
-        <span
-            className={cn(
-                'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-hud-gold/60 bg-hud-panel text-hud-gold',
-                className
-            )}
-        >
-            {url ? (
-                <Image
-                    src={url}
-                    alt=""
-                    fill
-                    sizes="40px"
-                    unoptimized
-                    referrerPolicy="no-referrer"
-                    className="object-cover"
-                />
-            ) : (
-                <User className="size-4" aria-hidden />
-            )}
-        </span>
-    );
-}
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
@@ -93,9 +54,7 @@ export function Header() {
             : undefined
     );
 
-    const switchAccount = useSwitchGoogleAccount();
-
-    const signOutForm = useRef<HTMLFormElement>(null);
+    const actions = useProfileActions();
 
     const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
 
@@ -221,7 +180,7 @@ export function Header() {
                                     className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
                                 >
                                     <UserAvatar
-                                        url={sessionUser?.avatarUrl ?? null}
+                                        user={sessionUser}
                                         className="size-7"
                                     />
                                     <span className="sr-only">
@@ -234,57 +193,53 @@ export function Header() {
                                     <>
                                         <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
                                             <UserAvatar
-                                                url={
-                                                    sessionUser?.avatarUrl ??
-                                                    null
-                                                }
+                                                user={sessionUser}
                                                 className="size-8"
                                             />
-                                            <span className="min-w-0 truncate">
-                                                {email}
+                                            <span className="min-w-0">
+                                                {sessionUser?.name && (
+                                                    <span className="block truncate font-medium text-foreground">
+                                                        {sessionUser.name}
+                                                    </span>
+                                                )}
+                                                <span className="block truncate">
+                                                    {email}
+                                                </span>
                                             </span>
                                         </div>
                                         <DropdownMenuSeparator />
                                     </>
                                 )}
                                 <DropdownMenuItem asChild>
-                                    <Link href="/help">
-                                        <CircleHelp className="mr-2 h-4 w-4" />
-                                        {t('help')}
+                                    <Link href="/profile">
+                                        <UserRound className="mr-2 h-4 w-4" />
+                                        {t('profile')}
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/settings/password">
-                                        <KeyRound className="mr-2 h-4 w-4" />
-                                        {t('password')}
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/settings/preferences">
-                                        <Globe className="mr-2 h-4 w-4" />
-                                        {t('preferences')}
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/settings/ai">
-                                        <Sparkles className="mr-2 h-4 w-4" />
-                                        {t('aiKeys')}
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onSelect={() => void switchAccount.start()}
-                                >
-                                    <UserRoundCog className="mr-2 h-4 w-4" />
-                                    {t('switchAccount')}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onSelect={() =>
-                                        signOutForm.current?.requestSubmit()
-                                    }
-                                >
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    {t('signOut')}
-                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {PROFILE_MENU.map((entry) => (
+                                    <DropdownMenuItem
+                                        key={entry.id}
+                                        asChild={'href' in entry}
+                                        onSelect={
+                                            'action' in entry
+                                                ? () => actions[entry.action]()
+                                                : undefined
+                                        }
+                                    >
+                                        {'href' in entry ? (
+                                            <Link href={entry.href}>
+                                                <entry.icon className="mr-2 h-4 w-4" />
+                                                {t(entry.labelKey)}
+                                            </Link>
+                                        ) : (
+                                            <>
+                                                <entry.icon className="mr-2 h-4 w-4" />
+                                                {t(entry.labelKey)}
+                                            </>
+                                        )}
+                                    </DropdownMenuItem>
+                                ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -292,12 +247,6 @@ export function Header() {
                 <div className={`${width} pb-2`}>
                     <Breadcrumbs />
                 </div>
-                <form
-                    ref={signOutForm}
-                    action="/auth/signout"
-                    method="post"
-                    hidden
-                />
             </HudPortalClassProvider>
         </header>
     );

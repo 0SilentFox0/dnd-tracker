@@ -6,6 +6,12 @@ export const WHATS_NEW_BUNDLED = 15;
 
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
     { id: '2026-11-19-counterspell-window', date: '2026-11-19', audience: 'all' },
+    {
+        id: '2026-11-19-profile-avatar',
+        date: '2026-11-19',
+        audience: 'all',
+        href: '/profile',
+    },
     { id: '2026-11-19-weapon-mastery', date: '2026-11-19', audience: 'all' },
     { id: '2026-11-19-bard-die', date: '2026-11-19', audience: 'all' },
     { id: '2026-11-soundboard', date: '2026-11-19', audience: 'all' },
