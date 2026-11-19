@@ -6,6 +6,7 @@ import {
     auraZoneSchema,
     bonusActionSchema,
     castSpellSchema,
+    counterWindowSchema,
     mapBackgroundBodySchema,
     mapDoorToggleSchema,
     mapEdgeRemoveSchema,
@@ -134,6 +135,21 @@ const OPERATIONS: Record<string, Loader> = {
             return {
                 schema: abilityActionSchema,
                 mutate: abilityActionMutation,
+            };
+        },
+    }),
+    'counter-window': operation({
+        access: MEMBER,
+        allowWhileCritPending: true,
+        rateLimitScope: 'spell',
+        load: async () => {
+            const { createCounterWindowMutation } = await import(
+                '@/lib/server/battles/mutations/counter-window/counter-window-mutation'
+            );
+
+            return {
+                schema: counterWindowSchema,
+                mutate: createCounterWindowMutation(),
             };
         },
     }),

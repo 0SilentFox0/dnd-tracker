@@ -290,6 +290,8 @@ export const API_ERRORS = {
     HP_FULL: 'errors.hpFull',
     CHARACTER_IN_BATTLE: 'errors.characterInBattle',
     CRIT_PENDING: 'errors.critPending',
+    COUNTER_WINDOW_OPEN: 'errors.counterWindowOpen',
+    COUNTER_WINDOW_STALE: 'errors.counterWindowStale',
     CRIT_CHOICE_NONE: 'errors.critChoiceNone',
     CRIT_CHOICE_INCOMPLETE: 'errors.critChoiceIncomplete',
     CRIT_EFFECT_UNKNOWN: 'errors.critEffectUnknown',

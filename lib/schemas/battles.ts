@@ -614,6 +614,32 @@ export const castSpellSchema = z.object(castSpellShape);
 
 export type SpellRequestData = z.infer<typeof castSpellInputSchema>;
 
+const counterWindowIdSchema = z.string().min(1).max(64);
+
+export const counterWindowSchema = z.discriminatedUnion('action', [
+    z.object({
+        action: z.literal('counter'),
+        windowId: counterWindowIdSchema,
+        reactorId: z.string().min(1),
+        slotLevel: z.number().int().min(1).max(9).optional(),
+    }),
+    z.object({
+        action: z.literal('pass'),
+        windowId: counterWindowIdSchema,
+        reactorId: z.string().min(1),
+    }),
+    z.object({
+        action: z.literal('expire'),
+        windowId: counterWindowIdSchema,
+    }),
+    z.object({
+        action: z.literal('closeAll'),
+        windowId: counterWindowIdSchema,
+    }),
+]);
+
+export type CounterWindowBody = z.infer<typeof counterWindowSchema>;
+
 export const abilityActionSchema = z.object({
     participantId: z.string(),
     abilityKey: z.string(),

@@ -277,6 +277,13 @@
     "use": "👑 {name}: легендарна дія — {ability} → {attack}",
     "run": "👑 {name}: легендарна дія «{ability}» ({counter}) — {text}"
   },
+  "counter": {
+    "countered": "✋ {reactor} контрить закляття «{spell}» ({caster}) — воно розсіюється",
+    "saved": "🛡 {caster} опирається контрзаклинанню {reactor}",
+    "passed": "{name} пропускає закляття",
+    "expired": "Ніхто не відповів вчасно — закляття спрацьовує",
+    "castFailed": "Закляття не вдалося завершити після паузи"
+  },
   "spell": {
     "castCancelled": "{name}: накладання скасовано",
     "ingredientsSpent": "🧪 {name}: витрачено інгредієнти — {list}",

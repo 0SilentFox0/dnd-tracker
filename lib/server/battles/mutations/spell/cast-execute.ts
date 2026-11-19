@@ -36,6 +36,7 @@ import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { applyTransforms } from '@/lib/utils/battle/transform/apply-transforms';
 import { sanitizeLogEntry } from '@/lib/utils/battle/view';
 import { currencyValueOf } from '@/lib/utils/rules/systems';
+import type { BattleParticipant } from '@/types/battle';
 
 const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
     const flat = flatEffects(effects);
@@ -206,6 +207,29 @@ function fizzleResult(
     };
 }
 
+export function spendLegendaryCast(
+    order: BattleParticipant[],
+    { ctx, caster }: Pick<CastPlan, 'ctx' | 'caster'>,
+    ability: NonNullable<CastPlan['source']['legendaryAbility']>
+): BattleParticipant[] {
+    return updateParticipant(order, caster.basicInfo.id, (p) => {
+        const used = recordUse(
+            p,
+            ability.key,
+            ctx.scene.round,
+            ability.limits?.pool
+        );
+
+        return ability.limits?.lair
+            ? lairOf(ctx.meta.rules).spend(
+                  used,
+                  ctx.scene.round,
+                  ability.key
+              )
+            : spendLegendary(used, legendaryCostOf(ability));
+    });
+}
+
 async function finalizeCast(
     plan: CastPlan,
     result: ReturnType<typeof castSpell>,
@@ -251,25 +275,10 @@ async function finalizeCast(
     summoned.messages.push(...transformed.messages);
 
     if (legendaryAbility)
-        summoned.order = updateParticipant(
+        summoned.order = spendLegendaryCast(
             summoned.order,
-            caster.basicInfo.id,
-            (p) => {
-                const used = recordUse(
-                    p,
-                    legendaryAbility.key,
-                    ctx.scene.round,
-                    legendaryAbility.limits?.pool
-                );
-
-                return legendaryAbility.limits?.lair
-                    ? lairOf(ctx.meta.rules).spend(
-                          used,
-                          ctx.scene.round,
-                          legendaryAbility.key
-                      )
-                    : spendLegendary(used, legendaryCostOf(legendaryAbility));
-            }
+            plan,
+            legendaryAbility
         );
 
     if (legendaryAbility)
@@ -341,5 +350,8 @@ async function finalizeCast(
         pending: ctx.pending,
         events: [battleActionToEvent(action)],
         ...(map && { scene: { map } }),
+        ...(result.interruptedIds && {
+            response: { interruptedIds: result.interruptedIds },
+        }),
     };
 }

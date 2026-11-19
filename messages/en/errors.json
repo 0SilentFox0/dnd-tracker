@@ -251,6 +251,8 @@
   "hpFull": "Health is already full",
   "characterInBattle": "The hero is in a battle now — wait for it to end",
   "critPending": "The DM is choosing a crit effect — wait",
+  "counterWindowOpen": "There is a spell counter window open — wait for it to close",
+  "counterWindowStale": "The counter window is already closed or changed",
   "critChoiceNone": "No crit choice",
   "critChoiceIncomplete": "Choose an effect for every crit",
   "critEffectUnknown": "Unknown crit effect",

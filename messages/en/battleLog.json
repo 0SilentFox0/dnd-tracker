@@ -277,6 +277,13 @@
     "use": "👑 {name}: legendary action — {ability} → {attack}",
     "run": "👑 {name}: legendary action “{ability}” ({counter}) — {text}"
   },
+  "counter": {
+    "countered": "✋ {reactor} counters {caster}'s spell “{spell}” — it dissipates",
+    "saved": "🛡 {caster} resists the counterspell of {reactor}",
+    "passed": "{name} lets the spell through",
+    "expired": "No one answered in time — the spell goes off",
+    "castFailed": "The spell could not be completed after the pause"
+  },
   "spell": {
     "castCancelled": "{name}: casting cancelled",
     "ingredientsSpent": "🧪 {name}: ingredients spent — {list}",

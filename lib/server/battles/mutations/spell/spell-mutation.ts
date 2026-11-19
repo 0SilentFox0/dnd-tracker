@@ -2,7 +2,10 @@ import { getCachedSummonPool } from '@/lib/cache/reference-data';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type { SpellRequestData } from '@/lib/schemas/battles';
-import { openCounterIfAny } from '@/lib/server/battles/mutations/spell/cast-counter';
+import {
+    counteredResult,
+    openCounterIfAny,
+} from '@/lib/server/battles/mutations/spell/cast-counter';
 import { executeCast } from '@/lib/server/battles/mutations/spell/cast-execute';
 import { resolvePicks } from '@/lib/server/battles/mutations/spell/cast-pick';
 import {
@@ -77,7 +80,7 @@ export function createSpellMutation(
         ctx: BattleMutationContext,
         data: SpellRequestData,
         resume?: CritResume,
-        replay?: { serverRolls?: boolean; seed?: number }
+        replay?: { serverRolls?: boolean; seed?: number; counteredBy?: string }
     ): Promise<MutationResult> => {
         let order = ctx.participants;
 
@@ -198,6 +201,9 @@ export function createSpellMutation(
             system,
             ...picks,
         };
+
+        if (replay?.counteredBy !== undefined)
+            return counteredResult(plan, replay.counteredBy);
 
         if (!data.preview &&
             !resume &&
