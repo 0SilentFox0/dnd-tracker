@@ -287,4 +287,30 @@ describe('buildCopyPlan', () => {
             { kind: 'units', name: 'Orc', reason: 'exists' },
         ]);
     });
+
+    it('enforces the track limit for every kind, in the same way for a dry run', async () => {
+        const src = emptyBundle();
+
+        const ids = Array.from({ length: 30 }, (_, i) => `c${String(i).padStart(24, '0')}`);
+
+        for (const [i, tid] of ids.entries())
+            src.tracks.push({
+                id: tid,
+                title: `T${i}`,
+                kind: 'youtube',
+                url: `https://youtu.be/${i}`,
+            });
+
+        const plan = await buildCopyPlan({
+            source: src,
+            target: emptyBundle(),
+            targetActor: actor,
+            selected: [{ kind: 'tracks', ids }],
+            trackRoom: 10,
+        });
+
+        expect(plan.toCreate).toHaveLength(10);
+        expect(plan.bundle.tracks).toHaveLength(10);
+        expect(plan.skipped.filter((s) => s.reason === 'limit')).toHaveLength(20);
+    });
 });

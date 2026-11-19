@@ -14,6 +14,8 @@ vi.mock('@/lib/supabase/copy-object', () => ({
 }));
 vi.mock('@/lib/supabase/battle-music-storage', () => ({
     removeTrackFile: files.remove,
+    trackPathOwnedBy: (path: string, owner: string) =>
+        path.startsWith(`${owner}/`),
     trackObjectPath: (url: string) =>
         url.includes('/battle-music/')
             ? url.slice(url.indexOf('/battle-music/') + 14)
@@ -125,7 +127,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copy tracks (local DB)', () => {
     });
 
     it('copies the file into the target prefix and creates both rows', async () => {
-        files.copy.mockResolvedValue({ ok: true });
+        files.copy.mockImplementation(async (b: string, _f: string, to: string) => ({
+            ok: true,
+            url: `https://x.test/storage/${b}/${to}`,
+        }));
 
         const { targets } = await copy(tgt);
 
@@ -158,7 +163,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copy tracks (local DB)', () => {
 
     it('concurrent copies do not duplicate names', async () => {
         await raw.campaignTrack.deleteMany({ where: { campaignId: tgt } });
-        files.copy.mockResolvedValue({ ok: true });
+        files.copy.mockImplementation(async (b: string, _f: string, to: string) => ({
+            ok: true,
+            url: `https://x.test/storage/${b}/${to}`,
+        }));
 
         await Promise.all([copy(tgt), copy(tgt)]);
 
@@ -168,7 +176,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copy tracks (local DB)', () => {
     });
 
     it('removes the copied file when the target transaction fails', async () => {
-        files.copy.mockResolvedValue({ ok: true });
+        files.copy.mockImplementation(async (b: string, _f: string, to: string) => ({
+            ok: true,
+            url: `https://x.test/storage/${b}/${to}`,
+        }));
         files.remove.mockClear();
         vi.spyOn(console, 'error').mockImplementation(() => {});
 

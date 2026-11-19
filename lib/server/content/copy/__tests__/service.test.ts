@@ -15,7 +15,9 @@ const {
 }));
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/db', () => ({ prisma: {} }));
+vi.mock('@/lib/db', () => ({
+    prisma: { campaignTrack: { count: async () => 0 } },
+}));
 vi.mock('@/lib/server/content/copy/apply', () => ({
     applyCopy,
     copyRowRef: (table: string, row: { id: string }, id?: string) => ({
@@ -166,7 +168,7 @@ describe('copyContent', () => {
         expect(copyMaps).toHaveBeenCalledTimes(2);
     });
 
-    it('a copyMaps crash keeps content created and fails only that target', async () => {
+    it('a copyMaps crash keeps content created and marks only that target partial', async () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
         copyMaps
             .mockRejectedValueOnce(new Error('boom'))
@@ -181,7 +183,8 @@ describe('copyContent', () => {
             targets: { all: true },
         });
 
-        expect(targets[0]).toMatchObject({ status: 'failed' });
+        expect(targets[0]).toMatchObject({ status: 'partial' });
+        expect(targets[0].error).toBeTruthy();
         expect(targets[0].created).toHaveLength(1);
         expect(targets[1]).toMatchObject({ status: 'ok' });
     });

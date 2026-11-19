@@ -71,11 +71,35 @@ beforeEach(() => {
     vi.resetAllMocks();
     h.maxSide.mockResolvedValue(60);
     h.count.mockResolvedValue(0);
-    h.copyObject.mockResolvedValue({ ok: true });
+    h.copyObject.mockImplementation(async (_b: string, _f: string, to: string) => ({
+        ok: true,
+        url: `https://x.test/storage/battle-maps/${to}`,
+    }));
     h.create.mockResolvedValue({ id: 'new1' });
 });
 
 describe('copyMaps', () => {
+    it('builds the new url from the public-url helper, not by replacing a percent-encoded legacy path', async () => {
+        setup([
+            source({
+                header: {
+                    cols: 10,
+                    rows: 8,
+                    background:
+                        'https://x.test/storage/battle-maps/src/a%20b.png',
+                },
+            }),
+        ]);
+
+        await run();
+
+        const to = h.copyObject.mock.calls[0][2];
+
+        expect(h.create.mock.calls[0][0].data.header.background).toBe(
+            `https://x.test/storage/battle-maps/${to}`
+        );
+    });
+
     it('copies chunks 1:1 with version 1 and a new background path in the target', async () => {
         setup([source()]);
 

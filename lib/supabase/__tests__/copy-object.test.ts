@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { copy, from } = vi.hoisted(() => ({
+const { copy, from, getPublicUrl } = vi.hoisted(() => ({
     copy: vi.fn(),
+    getPublicUrl: vi.fn(),
     from: vi.fn(),
 }));
 
@@ -13,7 +14,10 @@ import { copyStorageObject } from '@/lib/supabase/copy-object';
 
 beforeEach(() => {
     vi.resetAllMocks();
-    from.mockReturnValue({ copy });
+    from.mockReturnValue({ copy, getPublicUrl });
+    getPublicUrl.mockImplementation((p: string) => ({
+        data: { publicUrl: `https://s/bk/${encodeURIComponent(p)}` },
+    }));
 });
 
 describe('copyStorageObject', () => {
@@ -22,6 +26,7 @@ describe('copyStorageObject', () => {
 
         await expect(copyStorageObject('bk', 'a', 'b')).resolves.toEqual({
             ok: true,
+            url: 'https://s/bk/b',
         });
         expect(from).toHaveBeenCalledWith('bk');
         expect(copy).toHaveBeenCalledWith('a', 'b');

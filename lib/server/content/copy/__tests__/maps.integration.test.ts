@@ -115,7 +115,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copyMaps (local DB)', () => {
     });
 
     it('copies the map with chunks, version 1 and a target background path', async () => {
-        files.copy.mockResolvedValue({ ok: true });
+        files.copy.mockImplementation(async (b: string, _f: string, to: string) => ({
+            ok: true,
+            url: `https://x.test/storage/${b}/${to}`,
+        }));
 
         const result = await run();
 

@@ -1,10 +1,19 @@
-import { buildCopyPlan,type CopyPlan } from './plan';
+import type { Prisma } from '@prisma/client';
+
+import { buildCopyPlan, type CopyPlan, loadActiveTables } from './plan';
 import { kindOfTable, nameOf } from './row-names';
-import { copyTrackFiles, removeCopiedTrackFiles } from './tracks-files';
+import {
+    attachCopiedFiles,
+    fileTracksOf,
+    precopyTrackFiles,
+    removeCopiedTrackFiles,
+} from './tracks-files';
 
 import 'server-only';
 import { invalidateReference } from '@/lib/cache/tags';
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { MAX_TRACKS_PER_CAMPAIGN } from '@/lib/constants/music';
+import { prisma } from '@/lib/db';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
@@ -34,33 +43,53 @@ export const copyRowRef = (
     name: nameOf(row),
 });
 
-/** The plan is built under the target's write lock, so concurrent copies cannot duplicate names. */
+/** Track files are copied before the lock (storage I/O must not hold it); the plan is rebuilt under the lock, so concurrent copies cannot duplicate names. */
 export async function applyCopy(args: {
     campaignId: string;
+    sourceCampaignId: string;
     source: Bundle;
     targetActor: Actor;
     selected: Array<{ kind: string; ids: string[] }>;
 }): Promise<{ plan: CopyPlan; created: CopyRowRef[] }> {
     const { campaignId } = args;
 
-    return withCampaignContentWrite(campaignId, async (tx) => {
-        const plan = await buildCopyPlan({
-            source: args.source,
-            target: await exportNames(tx, campaignId),
-            targetActor: args.targetActor,
-            selected: args.selected,
-        });
+    const active = await loadActiveTables(args.targetActor);
 
-        if (plan.toCreate.length === 0) return { plan, created: [] };
+    const trackRoom = async (db: Prisma.TransactionClient | typeof prisma) =>
+        MAX_TRACKS_PER_CAMPAIGN -
+        (await db.campaignTrack.count({ where: { campaignId } }));
 
-        const copiedFiles = await copyTrackFiles(tx, plan, campaignId);
+    const draft = await buildCopyPlan({
+        source: args.source,
+        target: await exportNames(prisma, campaignId),
+        targetActor: args.targetActor,
+        selected: args.selected,
+        active,
+        trackRoom: await trackRoom(prisma),
+    });
 
-        try {
-            if (plan.toCreate.length === 0) {
-                await removeCopiedTrackFiles(copiedFiles);
+    const precopied = await precopyTrackFiles(
+        fileTracksOf(draft),
+        args.sourceCampaignId,
+        campaignId
+    );
 
-                return { plan, created: [] };
-            }
+    let unused = [...precopied.values()];
+
+    try {
+        const result = await withCampaignContentWrite(campaignId, async (tx) => {
+            const plan = await buildCopyPlan({
+                source: args.source,
+                target: await exportNames(tx, campaignId),
+                targetActor: args.targetActor,
+                selected: args.selected,
+                active,
+                trackRoom: await trackRoom(tx),
+            });
+
+            unused = attachCopiedFiles(plan, precopied);
+
+            if (plan.toCreate.length === 0) return { plan, created: [] };
 
             const { idMap } = await importBundle(
                 tx,
@@ -95,10 +124,14 @@ export async function applyCopy(args: {
                 );
 
             return { plan, created };
-        } catch (error) {
-            await removeCopiedTrackFiles(copiedFiles);
+        });
 
-            throw error;
-        }
-    });
+        await removeCopiedTrackFiles(unused);
+
+        return result;
+    } catch (error) {
+        await removeCopiedTrackFiles([...precopied.values()]);
+
+        throw error;
+    }
 }

@@ -42,11 +42,36 @@ const nameKey = (row: Record<string, unknown>): string | undefined => {
 const kindOfTable = (table: BundleTable) =>
     contentKindOfTable(table) ?? table;
 
+export async function loadActiveTables(targetActor: Actor) {
+    const active = new Map<BundleTable, boolean>();
+
+    for (const kind of CONTENT_KINDS) {
+        const t = tableOfKind(kind)?.key;
+
+        if (t) active.set(t, await isKindActive(kind, targetActor));
+    }
+
+    return active;
+}
+
+export function removeFromPlan(plan: CopyPlan, ids: Set<string>) {
+    plan.toCreate = plan.toCreate
+        .filter(({ row }) => !ids.has(row.id))
+        .map(({ table, row }) => ({ table, row: dropRefs(row, ids) }));
+    plan.bundle = emptyBundle();
+
+    for (const { table, row } of plan.toCreate) plan.bundle[table].push(row);
+}
+
 export async function buildCopyPlan(args: {
     source: Bundle;
     target: Bundle;
     targetActor: Actor;
     selected: Array<{ kind: string; ids: string[] }>;
+    /** Preloaded so no pool read happens while the target write lock holds a connection. */
+    active?: Map<BundleTable, boolean>;
+    /** Free track slots in the target (MAX_TRACKS_PER_CAMPAIGN minus its current count). */
+    trackRoom?: number;
 }): Promise<CopyPlan> {
     const { source, target, targetActor } = args;
 
@@ -79,13 +104,7 @@ export async function buildCopyPlan(args: {
         return n === undefined ? undefined : targetIds.get(`${table}:${n}`);
     };
 
-    const active = new Map<BundleTable, boolean>();
-
-    for (const kind of CONTENT_KINDS) {
-        const t = tableOfKind(kind)?.key;
-
-        if (t) active.set(t, await isKindActive(kind, targetActor));
-    }
+    const active = args.active ?? (await loadActiveTables(targetActor));
 
     const roots: Array<{ table: BundleTable; id: string }> = [];
 
@@ -202,6 +221,23 @@ export async function buildCopyPlan(args: {
                     `${kindOfTable(table)} ${nameOf(row)}: ${dep.kind} dependency skipped`
                 );
         }
+    }
+
+    if (args.trackRoom !== undefined) {
+        const over = plan.toCreate
+            .filter((e) => e.table === 'tracks')
+            .slice(Math.max(args.trackRoom, 0))
+            .map((e) => e.row);
+
+        for (const row of over)
+            plan.skipped.push({
+                kind: 'tracks',
+                name: nameOf(row),
+                reason: 'limit',
+            });
+
+        if (over.length > 0)
+            removeFromPlan(plan, new Set(over.map((r) => r.id)));
     }
 
     return plan;

@@ -6,6 +6,7 @@ import { resolveTargets } from './targets';
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { ContentKind } from '@/lib/constants/content-kinds';
+import { MAX_TRACKS_PER_CAMPAIGN } from '@/lib/constants/music';
 import { prisma } from '@/lib/db';
 import { assertCan } from '@/lib/server/content/access';
 import { BundleInvalidError } from '@/lib/server/templates/bundle';
@@ -74,6 +75,11 @@ export async function copyContent(args: {
                         target: await exportNames(prisma, target.id),
                         targetActor,
                         selected: contentItems,
+                        trackRoom:
+                            MAX_TRACKS_PER_CAMPAIGN -
+                            (await prisma.campaignTrack.count({
+                                where: { campaignId: target.id },
+                            })),
                     });
 
                     return {
@@ -88,6 +94,7 @@ export async function copyContent(args: {
                     ? await preview()
                     : await applyCopy({
                           campaignId: target.id,
+                          sourceCampaignId: actor.campaignId,
                           source,
                           targetActor,
                           selected: contentItems,
@@ -123,7 +130,7 @@ export async function copyContent(args: {
                     );
                 } catch (error) {
                     console.error('copyMaps failed', target.id, error);
-                    report.status = 'failed';
+                    report.status = 'partial';
                     report.error = API_ERRORS.INTERNAL;
                     reports.push(report);
 

@@ -4,13 +4,15 @@ export async function copyStorageObject(
     bucket: string,
     fromPath: string,
     toPath: string
-): Promise<{ ok: true } | { ok: false; message: string }> {
+): Promise<{ ok: true; url: string } | { ok: false; message: string }> {
     try {
-        const { error } = await createAdminClient()
-            .storage.from(bucket)
-            .copy(fromPath, toPath);
+        const storage = createAdminClient().storage.from(bucket);
 
-        return error ? { ok: false, message: error.message } : { ok: true };
+        const { error } = await storage.copy(fromPath, toPath);
+
+        return error
+            ? { ok: false, message: error.message }
+            : { ok: true, url: storage.getPublicUrl(toPath).data.publicUrl };
     } catch (e) {
         return {
             ok: false,

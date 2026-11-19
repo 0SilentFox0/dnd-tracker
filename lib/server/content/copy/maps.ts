@@ -75,7 +75,7 @@ async function copyBackground(
         return { ok: false };
     }
 
-    return { ok: true, url: url.replace(from, to) };
+    return { ok: true, url: copied.url };
 }
 
 export async function copyMaps(args: {
