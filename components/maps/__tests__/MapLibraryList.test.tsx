@@ -9,6 +9,14 @@ import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 
 vi.mock('@/lib/hooks/battle-maps', () => ({ useMapLibrary: vi.fn() }));
 vi.mock('../MapCatalogDialog', () => ({ MapCatalogDialog: () => null }));
+vi.mock('@/lib/hooks/campaigns', () => ({
+    useMapLibraryEnabled: vi.fn(() => true),
+}));
+vi.mock('@/components/content-copy/ContentCopyButton', () => ({
+    ContentCopyButton: ({ kind }: { kind: string }) => (
+        <button>copy-{kind}</button>
+    ),
+}));
 
 afterEach(cleanup);
 
@@ -37,5 +45,6 @@ describe('MapLibraryList', () => {
         expect(
             screen.getByRole('button', { name: 'maps.list.create' })
         ).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'copy-maps' })).toBeTruthy();
     });
 });

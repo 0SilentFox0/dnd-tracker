@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Copy } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import type { ContentKind } from '@/lib/constants/content-kinds';
 import { useContentCopyCampaigns } from '@/lib/hooks/content-copy';
+import type { ContentCopyKind } from '@/types/content-copy';
 
 const ContentCopyDialog = dynamic(
     () => import('./ContentCopyDialog').then((m) => m.ContentCopyDialog),
@@ -19,7 +19,7 @@ export function ContentCopyButton({
     kind,
 }: {
     campaignId: string;
-    kind: ContentKind;
+    kind: ContentCopyKind;
 }) {
     const t = useTranslations('contentCopy');
 

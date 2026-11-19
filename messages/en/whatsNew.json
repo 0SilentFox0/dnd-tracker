@@ -1,4 +1,8 @@
 {
+  "2026-11-19-copy-maps": {
+    "title": "Copy maps to other campaigns",
+    "body": "Battle maps can now be copied to your other campaigns from the Maps page. The background image is copied too; maps with an existing name or over the target's limits are skipped."
+  },
   "2026-11-19-counterspell-window": {
     "title": "Counterspell reaction window",
     "body": "When an enemy can counter a spell, the cast now pauses for 10 seconds. The owner of the reacting creature picks a slot and counters, or lets it through. A countered spell has no effect and costs the caster the action but not the slot."

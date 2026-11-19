@@ -11,6 +11,13 @@ export async function loadCopyNames(
     campaignId: string,
     kind: string
 ): Promise<IdName[]> {
+    if (kind === 'maps')
+        return prisma.battleMap.findMany({
+            where: { campaignId },
+            select: { id: true, name: true },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        });
+
     const table = tableOfKind(kind);
 
     if (!table) return [];

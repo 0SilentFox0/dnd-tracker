@@ -1,13 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { applyCopyPlan, buildCopyPlan, resolveTargets, exportCampaign } =
-    vi.hoisted(() => ({
-        applyCopyPlan: vi.fn(),
-        buildCopyPlan: vi.fn(),
-        resolveTargets: vi.fn(),
-        exportCampaign: vi.fn(),
-    }));
-
+const {
+    applyCopyPlan,
+    buildCopyPlan,
+    resolveTargets,
+    exportCampaign,
+    copyMaps,
+} = vi.hoisted(() => ({
+    copyMaps: vi.fn(),
+    applyCopyPlan: vi.fn(),
+    buildCopyPlan: vi.fn(),
+    resolveTargets: vi.fn(),
+    exportCampaign: vi.fn(),
+}));
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: {} }));
@@ -19,6 +24,7 @@ vi.mock('@/lib/server/content/copy/apply', () => ({
         name: row.id,
     }),
 }));
+vi.mock('@/lib/server/content/copy/maps', () => ({ copyMaps }));
 vi.mock('@/lib/server/content/copy/plan', () => ({ buildCopyPlan }));
 vi.mock('@/lib/server/content/copy/targets', () => ({ resolveTargets }));
 vi.mock('@/lib/server/templates/export-campaign', () => ({
@@ -116,6 +122,43 @@ describe('copyContent', () => {
             status: 'failed',
             error: 'errors.bundleForeignContent',
         });
+    });
+
+    it('copies maps without building a content plan', async () => {
+        copyMaps.mockResolvedValue({
+            created: [{ id: 'm', name: 'Cave' }],
+            skipped: [{ name: 'Keep', reason: 'limit' }],
+        });
+
+        const { targets } = await copyContent({
+            actor,
+            items: [{ kind: 'maps', ids: ['x'] }],
+            targets: { all: true },
+        });
+
+        expect(exportCampaign).not.toHaveBeenCalled();
+        expect(buildCopyPlan).not.toHaveBeenCalled();
+        expect(targets[0]).toMatchObject({
+            status: 'partial',
+            created: [{ kind: 'maps', id: 'm', name: 'Cave' }],
+            skipped: [{ kind: 'maps', name: 'Keep', reason: 'limit' }],
+        });
+    });
+
+    it('merges map results into the content report', async () => {
+        copyMaps.mockResolvedValue({ created: [], skipped: [] });
+
+        const { targets } = await copyContent({
+            actor,
+            items: [
+                { kind: 'units', ids: ['x'] },
+                { kind: 'maps', ids: ['m'] },
+            ],
+            targets: { all: true },
+        });
+
+        expect(targets[0].created).toHaveLength(1);
+        expect(copyMaps).toHaveBeenCalledTimes(2);
     });
 
     it('rejects a non-DM actor', async () => {

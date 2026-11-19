@@ -11,6 +11,8 @@ const REASON_KEYS = [
     'duplicate-name',
     'not-found',
     'unknown-kind',
+    'limit',
+    'file-failed',
 ] as const;
 
 const STATUS_TONE = {
@@ -51,7 +53,9 @@ function TargetReport({
                                 : STATUS_TONE[report.status]
                         }
                     >
-                        {t(`status.${nothingToCopy ? 'nothing' : report.status}`)}
+                        {t(
+                            `status.${nothingToCopy ? 'nothing' : report.status}`
+                        )}
                     </span>
                 )}
             </div>
