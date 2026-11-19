@@ -45,7 +45,7 @@ function CritChoiceForm({
 
     const [spend, setSpend] = useState<Record<string, boolean>>({});
 
-    const tRider = useTranslations('battle.riderChoice');
+    const tRider = useTranslations('battleD20.riderChoice');
 
     const complete = rows.every((r) => choices[r.trigger.key] !== undefined);
 

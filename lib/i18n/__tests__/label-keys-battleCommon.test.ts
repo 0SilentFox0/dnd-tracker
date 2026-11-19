@@ -15,7 +15,11 @@ describe('battleCommon has translations', () => {
         'conditions',
         CONDITION_5E_KEYS.flatMap((k) => [`${k}.label`, `${k}.description`])
     );
-    expectLabelKeys('battleCommon', 'coreActions', Object.keys(actionsOf(DEFAULT_RULES).catalog));
+    expectLabelKeys(
+        'battleCommon',
+        'coreActions',
+        Object.keys(actionsOf(DEFAULT_RULES).catalog)
+    );
     expectLabelKeys('battleCommon', 'cunningStrike', STRIKE_RIDER_EFFECTS);
     expectLabelKeys('battleCommon', 'attackKinds', Object.values(AttackType));
     expectLabelKeys('battleCommon', 'actionKinds', [

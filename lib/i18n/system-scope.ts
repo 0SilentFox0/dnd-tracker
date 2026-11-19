@@ -81,11 +81,32 @@ export const rulesFormScope = (): readonly Namespace[] => [
     ),
 ];
 
-/** Stored battle-log texts of every installed module (`meta.i18n.log`): old logs render with the module off */
-export const logScope = (): readonly Namespace[] => [
-    ...new Set(
-        (SYSTEM_META as readonly SystemMeta[]).flatMap(
-            (meta) => (meta.i18n.log ?? []) as readonly Namespace[]
-        )
-    ),
-];
+/** Stored battle-log texts of the modules that can run on the system's base (`meta.i18n.log`): old logs render with the module off */
+export const logScope = (
+    system: SystemScopeInput | null
+): readonly Namespace[] => {
+    if (!system?.key) return [];
+
+    const selection = { key: system.key, modules: system.modules };
+
+    if (unknownIds(selection).some((issue) => issue.code === 'unknownKey'))
+        return [];
+
+    const { base } = composition(selection);
+
+    return [
+        ...new Set(
+            (SYSTEM_META as readonly SystemMeta[])
+                .filter(
+                    (meta) =>
+                        meta.module === base ||
+                        (
+                            meta.requires as readonly string[] | undefined
+                        )?.includes(base)
+                )
+                .flatMap(
+                    (meta) => (meta.i18n.log ?? []) as readonly Namespace[]
+                )
+        ),
+    ];
+};

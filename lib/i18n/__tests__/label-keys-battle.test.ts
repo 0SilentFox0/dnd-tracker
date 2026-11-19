@@ -9,11 +9,14 @@ import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { HEALTH_LABEL } from '@/lib/utils/battle/view';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
-
 describe('battle has translations', () => {
     expectLabelKeys('battle', 'view.health', Object.keys(HEALTH_LABEL));
     expectLabelKeys('battle', 'view.heroStatus', Object.values(CombatStatus));
-    expectLabelKeys('battle', 'coreActions.descriptions', Object.keys(actionsOf(DEFAULT_RULES).catalog));
+    expectLabelKeys(
+        'battle',
+        'coreActions.descriptions',
+        Object.keys(actionsOf(DEFAULT_RULES).catalog)
+    );
     expectLabelKeys('battle', 'coreActions.shove', ['prone', 'push']);
     expectLabelKeys('battle', 'map.terrain.brushes', [
         'wall',

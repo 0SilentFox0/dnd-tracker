@@ -100,7 +100,6 @@
     "aborted": "{attacker} → {target}: ціль загинула до атаки",
     "serverDamageDice": "🎲 кубики шкоди кинув сервер: {rolls}",
     "guard": "🛡 {guardian} приймає {damage} шкоди — захищає: {target}",
-    "thorns": "🧊 {target} відповідає: {attacker} отримує {damage} шкоди ({type})",
     "fireWave": "🔥 Вогняна хвиля: {parts}",
     "obstacle": "🧱 перешкода: шкода ×0.5 → {damage}"
   },
@@ -127,23 +126,6 @@
     "disadvantage": "недолік",
     "manualTag": " (вибір гравця)",
     "serverTag": " (сервер)"
-  },
-  "mastery": {
-    "cleave": "Розтин",
-    "graze": "Подряпина",
-    "nick": "Порізати",
-    "push": "Відштовхування",
-    "sap": "Виснаження",
-    "slow": "Сповільнення",
-    "topple": "Збивання з ніг",
-    "vex": "Дратування",
-    "applied": "{mastery}: {target}",
-    "vexNext": "Дратування: перевага на наступний кидок атаки по {target}",
-    "grazeHit": "Подряпина: {target} отримує {damage} шкоди",
-    "toppleSave": "Збивання з ніг: {target}, рятівний кидок Статури {total} проти СК {dc}: {success, select, true {успіх} other {провал, цілю збито з ніг}}"
-  },
-  "rider": {
-    "spent": "🎲 кубик натхнення d{die}: +{bonus}, разом {total}"
   },
   "crit": {
     "adjacent": "💥 влучання впритул — критичне",
@@ -179,7 +161,6 @@
     "dot": "{name}: {damage} {type} шкоди від {effect}",
     "dotReduced": "{name}: {damage} (з {base}) {type} шкоди від {effect}",
     "hot": "{name}: +{heal} HP від {effect}",
-    "hotTemp": "{name}: тимчасові HP до {heal} від {effect}",
     "effectsEnded": "ефекти завершилися: {names}",
     "effectsEndedCap": "Ефекти завершилися: {names}",
     "extraTurn": "{name} отримує додатковий хід"
@@ -340,7 +321,6 @@
     "cunningDice": "Підступний удар: недостатньо кубиків Прихованої атаки",
     "cannotAttackRanged": "Атакуючий не може атакувати здалеку",
     "cannotAttackMelee": "Атакуючий не може атакувати в ближньому бою",
-    "cannotCast": "{name} зараз не може творити закляття (Лють)",
     "charmedTarget": "{name} не може атакувати того, хто його зачарував",
     "rollRequired": "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)",
     "attackerMissing": "Атакуючого немає в бою",
@@ -395,8 +375,6 @@
     "moveSelfNoMap": "🌀 {mover}: переміщується до {target} (без мапи)",
     "moveSelfNoCell": "🌀 {mover}: немає вільної клітинки біля {target}",
     "moveSelf": "🌀 {mover}: переміщується до {target}",
-    "teleport": "🌀 {mover}: телепортується",
-    "teleportBlocked": "🌀 {mover}: клітинка призначення зайнята або недосяжна",
     "pendingMiss": "💨 «{spell}»: ціль недоступна, удар розсіявся",
     "pendingHit": "💥 «{spell}» влучає: {target} −{damage} HP",
     "zoneSave": "🎲 {target}: «{spell}» — рятівний {ability} {total} проти СК {dc}: {success, select, true {успіх} other {провал}}",

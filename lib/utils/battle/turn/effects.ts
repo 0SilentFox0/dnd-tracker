@@ -76,7 +76,7 @@ export function applyHOTEffects(participant: BattleParticipant): {
             if (effect.hotHeal.healPerRound > tempHp) {
                 tempHp = effect.hotHeal.healPerRound;
                 healMessages.push(
-                    textRef('battleLog.turn.hotTemp', {
+                    textRef('battleD20.turn.hotTemp', {
                         name: participant.basicInfo.name,
                         heal: tempHp,
                         effect: effectName(effect),

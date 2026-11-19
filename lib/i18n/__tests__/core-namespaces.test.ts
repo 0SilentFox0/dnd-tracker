@@ -7,10 +7,19 @@ import { CORE_NAMESPACES } from '@/lib/i18n/core-namespaces';
 describe('CORE_NAMESPACES', () => {
     it('every namespace has a message file in each locale (a typo is not a new namespace)', () => {
         const missing = CORE_NAMESPACES.flatMap((ns) =>
-            ['en', 'uk'].filter(
-                (locale) =>
-                    !existsSync(join(process.cwd(), 'messages', locale, `${ns}.json`))
-            ).map((locale) => `${locale}/${ns}`)
+            ['en', 'uk']
+                .filter(
+                    (locale) =>
+                        !existsSync(
+                            join(
+                                process.cwd(),
+                                'messages',
+                                locale,
+                                `${ns}.json`
+                            )
+                        )
+                )
+                .map((locale) => `${locale}/${ns}`)
         );
 
         expect(missing).toEqual([]);

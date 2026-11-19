@@ -37,7 +37,7 @@ export const REJECT = {
     cannotAttackRanged: 'battleLog.reject.cannotAttackRanged',
     cannotAttackMelee: 'battleLog.reject.cannotAttackMelee',
     charmedTarget: 'battleLog.reject.charmedTarget',
-    cannotCast: 'battleLog.reject.cannotCast',
+    cannotCast: 'battleD20.reject.cannotCast',
     rollRequired: 'battleLog.reject.rollRequired',
     attackerMissing: 'battleLog.reject.attackerMissing',
     attackForbidden: 'battleLog.reject.attackForbidden',

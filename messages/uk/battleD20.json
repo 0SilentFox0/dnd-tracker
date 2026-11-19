@@ -1,0 +1,49 @@
+{
+  "riderChoice": {
+    "title": "Витратити кубик натхнення?",
+    "description": "Кидок невдалий, але кубик у руках може змінити результат. Дія призупинена, доки ви не оберете.",
+    "confirm": "Підтвердити",
+    "spend": "Витратити d{die}",
+    "keep": "Залишити",
+    "row": {
+      "attack": "{name}: результат кидка атаки {total}",
+      "save": "{name}: результат рятівного кидка {total}"
+    },
+    "waitingBanner": "Очікуємо вибір кубика натхнення…"
+  },
+  "mastery": {
+    "cleave": "Розтин",
+    "graze": "Подряпина",
+    "nick": "Порізати",
+    "push": "Відштовхування",
+    "sap": "Виснаження",
+    "slow": "Сповільнення",
+    "topple": "Збивання з ніг",
+    "vex": "Дратування",
+    "applied": "{mastery}: {target}",
+    "vexNext": "Дратування: перевага на наступний кидок атаки по {target}",
+    "grazeHit": "Подряпина: {target} отримує {damage} шкоди",
+    "toppleSave": "Збивання з ніг: {target}, рятівний кидок Статури {total} проти СК {dc}: {success, select, true {успіх} other {провал, цілю збито з ніг}}"
+  },
+  "rider": {
+    "spent": "🎲 кубик натхнення d{die}: +{bonus}, разом {total}"
+  },
+  "attack": {
+    "thorns": "🧊 {target} відповідає: {attacker} отримує {damage} шкоди ({type})"
+  },
+  "turn": {
+    "hotTemp": "{name}: тимчасові HP до {heal} від {effect}"
+  },
+  "reject": {
+    "cannotCast": "{name} зараз не може творити закляття (Лють)"
+  },
+  "spellFx": {
+    "teleport": "🌀 {mover}: телепортується",
+    "teleportBlocked": "🌀 {mover}: клітинка призначення зайнята або недосяжна"
+  },
+  "abilityLog": {
+    "regenSuppressed": "🚫 {label}: {target} не регенерує цього ходу",
+    "hotTemp": "🛡 {ability}: +{amount} тимч. HP/раунд → {target} ({rounds})",
+    "maxHpBoost": "✚ {ability}: {target} отримує +{amount} до максимуму й поточних HP"
+  }
+}

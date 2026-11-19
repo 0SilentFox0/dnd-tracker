@@ -15,18 +15,6 @@
     "waitingBanner": "The DM is choosing an effect…",
     "waitingNote": "The DM is choosing the critical roll effect…"
   },
-  "riderChoice": {
-    "title": "Spend an inspiration die?",
-    "description": "The roll failed, but the held die could change the result. The action is paused until you choose.",
-    "confirm": "Confirm",
-    "spend": "Spend d{die}",
-    "keep": "Keep",
-    "row": {
-      "attack": "{name}: attack roll total {total}",
-      "save": "{name}: saving throw total {total}"
-    },
-    "waitingBanner": "Waiting for an inspiration die choice…"
-  },
   "hud": {
     "wounds": "Wounds",
     "d100": {

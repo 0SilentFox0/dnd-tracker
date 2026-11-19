@@ -38,14 +38,14 @@ import type { TextRef } from '@/types/text';
 const LARGE = 2;
 
 const LABELS = {
-    cleave: textRef('battleLog.mastery.cleave'),
-    graze: textRef('battleLog.mastery.graze'),
-    nick: textRef('battleLog.mastery.nick'),
-    push: textRef('battleLog.mastery.push'),
-    sap: textRef('battleLog.mastery.sap'),
-    slow: textRef('battleLog.mastery.slow'),
-    topple: textRef('battleLog.mastery.topple'),
-    vex: textRef('battleLog.mastery.vex'),
+    cleave: textRef('battleD20.mastery.cleave'),
+    graze: textRef('battleD20.mastery.graze'),
+    nick: textRef('battleD20.mastery.nick'),
+    push: textRef('battleD20.mastery.push'),
+    sap: textRef('battleD20.mastery.sap'),
+    slow: textRef('battleD20.mastery.slow'),
+    topple: textRef('battleD20.mastery.topple'),
+    vex: textRef('battleD20.mastery.vex'),
 } satisfies Record<WeaponMastery, TextRef>;
 
 const label = (mastery: WeaponMastery) => LABELS[mastery];
@@ -99,7 +99,7 @@ function graze({ flow, attackerId, targetId, attack }: MasteryStrikeCtx) {
         attack.damageType
     );
     flow.messages.push(
-        textRef('battleLog.mastery.grazeHit', {
+        textRef('battleD20.mastery.grazeHit', {
             target: target.basicInfo.name,
             damage: resisted.finalDamage,
         })
@@ -170,7 +170,7 @@ function timedOnTarget(
         )
     );
     ctx.flow.messages.push(
-        textRef('battleLog.mastery.applied', {
+        textRef('battleD20.mastery.applied', {
             mastery: label(mastery),
             target: target.basicInfo.name,
         })
@@ -206,7 +206,7 @@ function vex({ flow, attackerId, targetId }: MasteryStrikeCtx) {
         )
     );
     flow.messages.push(
-        textRef('battleLog.mastery.vexNext', { target: target.basicInfo.name })
+        textRef('battleD20.mastery.vexNext', { target: target.basicInfo.name })
     );
 }
 
@@ -234,7 +234,7 @@ function topple(ctx: MasteryStrikeCtx) {
     });
 
     flow.messages.push(
-        textRef('battleLog.mastery.toppleSave', {
+        textRef('battleD20.mastery.toppleSave', {
             target: target.basicInfo.name,
             dc,
             total: save.total,

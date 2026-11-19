@@ -54,7 +54,7 @@ export function applyThorns(
             f.damageType
         );
         flow.messages.push(
-            textRef('battleLog.attack.thorns', {
+            textRef('battleD20.attack.thorns', {
                 target: getP(flow, a.targetId).basicInfo.name,
                 attacker: attacker.basicInfo.name,
                 damage: resisted.finalDamage,

@@ -14,7 +14,7 @@ export function RiderRows({
     spend: Record<string, boolean>;
     onChange: (spend: Record<string, boolean>) => void;
 }) {
-    const t = useTranslations('battle.riderChoice');
+    const t = useTranslations('battleD20.riderChoice');
 
     return (
         <ul className="space-y-3 py-2">

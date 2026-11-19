@@ -33,7 +33,7 @@ const systemScopes = SYSTEM_META.filter(
         };
     };
 
-    const battle = [...systemScope({ key }, 'battle'), ...logScope()];
+    const battle = [...systemScope({ key }, 'battle'), ...logScope({ key })];
 
     const member = [
         ...BASE,
@@ -64,7 +64,7 @@ const systemScopes = SYSTEM_META.filter(
                 ...CAMPAIGN_NAMESPACES,
                 ...BATTLE_NAMESPACES,
                 ...systemScope({ key, modules: addons }, 'battle'),
-                ...logScope(),
+                ...logScope({ key }),
             ],
             ...(budgetKb?.battle && { limit: budgetKb.battle }),
         },
@@ -151,9 +151,15 @@ describe('message scope size', () => {
             'dmRules',
             'draft',
         ] as const) {
-            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual([]);
+            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual(
+                slot === 'battle' ? ['battleD20'] : []
+            );
             expect(systemScope({ key: 'dnd5e' }, slot)).toEqual(
-                slot === 'campaign' ? ['inspiration'] : []
+                slot === 'campaign'
+                    ? ['inspiration']
+                    : slot === 'battle'
+                      ? ['battleD20']
+                      : []
             );
             expect(systemScope(null, slot)).toEqual([]);
         }

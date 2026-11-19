@@ -16,10 +16,12 @@ export default async function Layout({
 }) {
     const { id } = await params;
 
+    const system = await systemOfCampaign(id);
+
     const namespaces = [
         ...BATTLE_NAMESPACES,
-        ...systemScope(await systemOfCampaign(id), 'battle'),
-        ...logScope(),
+        ...systemScope(system, 'battle'),
+        ...logScope(system),
     ];
 
     return (

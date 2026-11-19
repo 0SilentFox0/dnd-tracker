@@ -9,7 +9,7 @@ import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 export function CritChoiceWaitingBanner() {
     const t = useTranslations('battle.critChoice');
 
-    const tRider = useTranslations('battle.riderChoice');
+    const tRider = useTranslations('battleD20.riderChoice');
 
     const { battle, viewer } = useBattleScene();
 

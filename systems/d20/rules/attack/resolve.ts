@@ -142,7 +142,7 @@ export function resolveD20Attack(ctx: ResolveAttackCtx): ResolvedAttack {
         rolled.totalAttackValue += rider.bonus;
         rolled.riderBonus = rider.bonus;
         lines.push(
-            textRef('battleLog.rider.spent', {
+            textRef('battleD20.rider.spent', {
                 die: rider.die,
                 bonus: rider.bonus,
                 total: rolled.totalAttackValue,

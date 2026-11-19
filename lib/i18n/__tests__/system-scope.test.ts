@@ -9,15 +9,15 @@ describe('systemScope', () => {
 
     it('follows the composition for the object form', () => {
         expect(systemScope({ key: 'wfrp' }, 'battle')).toContain('battleWfrp');
-        expect(systemScope({ key: 'dnd5e', modules: [] }, 'battle')).toEqual(
-            []
-        );
+        expect(systemScope({ key: 'dnd5e', modules: [] }, 'battle')).toEqual([
+            'battleD20',
+        ]);
     });
 
     it('adds the battle namespace of every composed module', () => {
         expect(
             systemScope({ key: 'dnd5e', modules: ['morale'] }, 'battle')
-        ).toEqual(['battleMorale']);
+        ).toEqual(['battleD20', 'battleMorale']);
         expect(systemScope({ key: 'homm' }, 'battle')).toContain(
             'battleMorale'
         );
@@ -31,7 +31,7 @@ describe('systemScope', () => {
         expect(systemScope({ key: null }, 'battle')).toEqual([]);
         expect(
             systemScope({ key: 'dnd5e', modules: ['bogus'] }, 'battle')
-        ).toEqual([]);
+        ).toEqual(['battleD20']);
     });
 
     it('has no duplicates', () => {

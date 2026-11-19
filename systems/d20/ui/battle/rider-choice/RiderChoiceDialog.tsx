@@ -22,7 +22,7 @@ function RiderChoiceForm({
 }: {
     dialog: Dialog;
 }) {
-    const t = useTranslations('battle.riderChoice');
+    const t = useTranslations('battleD20.riderChoice');
 
     const [spend, setSpend] = useState<Record<string, boolean>>({});
 

@@ -132,7 +132,7 @@ export function teleportTo(
     if (!map || !cell || !isOnMap(mover) || !fits(map, cell, sizeOf(mover), blocked))
         return {
             participants,
-            message: textRef('battleLog.spellFx.teleportBlocked', {
+            message: textRef('battleD20.spellFx.teleportBlocked', {
                 mover: mover.basicInfo.name,
             }),
         };
@@ -143,7 +143,7 @@ export function teleportTo(
                 ? { ...p, battleData: { ...p.battleData, position: cell } }
                 : p
         ),
-        message: textRef('battleLog.spellFx.teleport', {
+        message: textRef('battleD20.spellFx.teleport', {
             mover: mover.basicInfo.name,
         }),
     };

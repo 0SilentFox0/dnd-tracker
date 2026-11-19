@@ -179,7 +179,7 @@ export function applyHeal(
 
         if (regenSuppressed(t, effect.unlessDamagedBy)) {
             messages.push(
-                textRef('abilityText.log.regenSuppressed', {
+                textRef('battleD20.abilityLog.regenSuppressed', {
                     label,
                     target: t.basicInfo.name,
                 })
@@ -426,7 +426,7 @@ export function applyMaxHpBoost(
             },
         });
         messages.push(
-            textRef('abilityText.log.maxHpBoost', {
+            textRef('battleD20.abilityLog.maxHpBoost', {
                 ability: ability.name,
                 target: t.basicInfo.name,
                 amount,
@@ -489,7 +489,9 @@ export function applyHot(
         );
         messages.push(
             textRef(
-                effect.temp ? 'abilityText.log.hotTemp' : 'abilityText.log.hot',
+                effect.temp
+                    ? 'battleD20.abilityLog.hotTemp'
+                    : 'abilityText.log.hot',
                 {
                     ability: ability.name,
                     amount: heal,

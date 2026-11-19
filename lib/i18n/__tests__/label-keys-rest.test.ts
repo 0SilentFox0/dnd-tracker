@@ -12,7 +12,9 @@ import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 describe('rest log lines have translations', () => {
     const kinds: CharacterLogKindValue[] = [
         ...Object.values(CharacterLogKind),
-        ...moduleVocab('characterLogTypes').map((t) => t.id as CharacterLogKindValue),
+        ...moduleVocab('characterLogTypes').map(
+            (t) => t.id as CharacterLogKindValue
+        ),
     ];
 
     const keys = kinds.flatMap((kind) => [

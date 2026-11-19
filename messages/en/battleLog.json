@@ -100,7 +100,6 @@
     "aborted": "{attacker} → {target}: the target died before the attack",
     "serverDamageDice": "🎲 damage dice rolled by the server: {rolls}",
     "guard": "🛡 {guardian} takes {damage} damage — protecting {target}",
-    "thorns": "🧊 {target} retaliates: {attacker} takes {damage} {type} damage",
     "fireWave": "🔥 Fire wave: {parts}",
     "obstacle": "🧱 obstacle: damage ×0.5 → {damage}"
   },
@@ -127,23 +126,6 @@
     "disadvantage": "disadvantage",
     "manualTag": " (player's choice)",
     "serverTag": " (server)"
-  },
-  "mastery": {
-    "cleave": "Cleave",
-    "graze": "Graze",
-    "nick": "Nick",
-    "push": "Push",
-    "sap": "Sap",
-    "slow": "Slow",
-    "topple": "Topple",
-    "vex": "Vex",
-    "applied": "{mastery}: {target}",
-    "vexNext": "Vex: advantage on the next attack roll against {target}",
-    "grazeHit": "Graze: {target} takes {damage} damage",
-    "toppleSave": "Topple: {target} CON save {total} vs DC {dc}: {success, select, true {success} other {fail, knocked prone}}"
-  },
-  "rider": {
-    "spent": "🎲 inspiration die d{die}: +{bonus}, total {total}"
   },
   "crit": {
     "adjacent": "💥 point-blank hit — critical",
@@ -179,7 +161,6 @@
     "dot": "{name}: {damage} {type} damage from {effect}",
     "dotReduced": "{name}: {damage} (of {base}) {type} damage from {effect}",
     "hot": "{name}: +{heal} HP from {effect}",
-    "hotTemp": "{name}: temp HP raised to {heal} by {effect}",
     "effectsEnded": "effects ended: {names}",
     "effectsEndedCap": "Effects ended: {names}",
     "extraTurn": "{name} gets an extra turn"
@@ -340,7 +321,6 @@
     "cunningDice": "Cunning Strike: not enough Sneak Attack dice",
     "cannotAttackRanged": "The attacker cannot attack at range",
     "cannotAttackMelee": "The attacker cannot attack in melee",
-    "cannotCast": "{name} cannot cast spells right now (Rage)",
     "charmedTarget": "{name} cannot attack the one who charmed them",
     "rollRequired": "A d20 roll is required (d20Roll, attackRoll or attackRolls)",
     "attackerMissing": "The attacker is not in the battle",
@@ -395,8 +375,6 @@
     "moveSelfNoMap": "🌀 {mover}: moves to {target} (no map)",
     "moveSelfNoCell": "🌀 {mover}: no free cell next to {target}",
     "moveSelf": "🌀 {mover}: moves to {target}",
-    "teleport": "🌀 {mover}: teleports",
-    "teleportBlocked": "🌀 {mover}: the destination cell is blocked or out of reach",
     "pendingMiss": "💨 “{spell}”: the target is unavailable, the strike dissipates",
     "pendingHit": "💥 “{spell}” hits: {target} −{damage} HP",
     "zoneSave": "🎲 {target}: “{spell}” — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",

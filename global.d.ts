@@ -97,6 +97,7 @@ declare module 'next-intl' {
             maps: typeof maps;
             tileLabels: typeof tileLabels;
             // <systems:generated>
+            battleD20: typeof import('./messages/uk/battleD20.json');
             battleMorale: typeof import('./messages/uk/battleMorale.json');
             battleWfrp: typeof import('./messages/uk/battleWfrp.json');
             inspiration: typeof import('./messages/uk/inspiration.json');

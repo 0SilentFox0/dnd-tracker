@@ -1,0 +1,49 @@
+{
+  "riderChoice": {
+    "title": "Spend an inspiration die?",
+    "description": "The roll failed, but the held die could change the result. The action is paused until you choose.",
+    "confirm": "Confirm",
+    "spend": "Spend d{die}",
+    "keep": "Keep",
+    "row": {
+      "attack": "{name}: attack roll total {total}",
+      "save": "{name}: saving throw total {total}"
+    },
+    "waitingBanner": "Waiting for an inspiration die choice…"
+  },
+  "mastery": {
+    "cleave": "Cleave",
+    "graze": "Graze",
+    "nick": "Nick",
+    "push": "Push",
+    "sap": "Sap",
+    "slow": "Slow",
+    "topple": "Topple",
+    "vex": "Vex",
+    "applied": "{mastery}: {target}",
+    "vexNext": "Vex: advantage on the next attack roll against {target}",
+    "grazeHit": "Graze: {target} takes {damage} damage",
+    "toppleSave": "Topple: {target} CON save {total} vs DC {dc}: {success, select, true {success} other {fail, knocked prone}}"
+  },
+  "rider": {
+    "spent": "🎲 inspiration die d{die}: +{bonus}, total {total}"
+  },
+  "attack": {
+    "thorns": "🧊 {target} retaliates: {attacker} takes {damage} {type} damage"
+  },
+  "turn": {
+    "hotTemp": "{name}: temp HP raised to {heal} by {effect}"
+  },
+  "reject": {
+    "cannotCast": "{name} cannot cast spells right now (Rage)"
+  },
+  "spellFx": {
+    "teleport": "🌀 {mover}: teleports",
+    "teleportBlocked": "🌀 {mover}: the destination cell is blocked or out of reach"
+  },
+  "abilityLog": {
+    "regenSuppressed": "🚫 {label}: {target} does not regenerate this turn",
+    "hotTemp": "🛡 {ability}: +{amount} temp. HP/round → {target} ({rounds})",
+    "maxHpBoost": "✚ {ability}: {target} gains +{amount} maximum and current HP"
+  }
+}
