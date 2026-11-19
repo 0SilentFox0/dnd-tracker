@@ -121,8 +121,9 @@ export const systemTemplateHooks = <
         ...unionServers().map((s) => s.content?.template?.[key] ?? {})
     ) as NonNullable<NonNullable<SystemContentServer['template']>[K]>;
 
-export const systemLevelResetWriters = (): LevelResetWriter[] =>
-    unionServers().flatMap((s) => s.levelResets ?? []);
+export const systemLevelResetWriters = (
+    rules: Pick<Ruleset, 'system'>
+): readonly LevelResetWriter[] => systemServerOf(rules).levelResets ?? [];
 
 export const systemContentRefs = (): ContentRefSource[] =>
     unionServers().flatMap((s) => s.contentRefs ?? []);

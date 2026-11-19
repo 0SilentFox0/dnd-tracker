@@ -245,6 +245,7 @@ interface UpdateWriterInput {
     resolved: ClassesResult;
     computedState: Awaited<ReturnType<typeof computeUpdate>>;
     system: RuleSystemDefinition;
+    rules: Campaign['rules'];
 }
 
 function updateWriter({
@@ -254,6 +255,7 @@ function updateWriter({
     resolved,
     computedState,
     system,
+    rules,
 }: UpdateWriterInput) {
     const { fromClasses, finalLevel } = resolved;
 
@@ -343,7 +345,7 @@ function updateWriter({
         });
 
         if (computed.finalLevel < character.level)
-            for (const reset of systemLevelResetWriters())
+            for (const reset of systemLevelResetWriters(rules))
                 await reset(db, character.id);
 
         return updated;
@@ -513,6 +515,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         resolved,
         computedState,
         system,
+        rules: campaign.rules,
     });
 
     const guardsLedger = Boolean(
