@@ -58,6 +58,7 @@ const BASE_EFFECTS: Record<
     raiseDead: { kind: 'raiseDead', hpPercent: 30 },
     cleanse: { kind: 'cleanse' },
     maneuver: { kind: 'maneuver', maneuver: 'dive', percentOfAttack: 150 },
+    maxHpBoost: { kind: 'maxHpBoost', amount: 5 },
     randomOf: {
         kind: 'randomOf',
         options: [
@@ -272,7 +273,7 @@ const MERGED_EFFECTS: Effect[] = [
 ];
 
 export const EFFECT_FIXTURES: Effect[] = [
-    ...Object.values(BASE_EFFECTS),
+    ...Object.values(BASE_EFFECTS).filter((e) => e.kind !== 'maxHpBoost'),
     ...FLAG_FIXTURES,
     ...VARIANT_EFFECTS,
     ...MERGED_EFFECTS,

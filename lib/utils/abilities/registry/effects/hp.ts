@@ -386,6 +386,56 @@ export function applyTempHp(
     return { participants: ps, messages };
 }
 
+export function applyMaxHpBoost(
+    input: EffectApplyInput<Of<'maxHpBoost'>>
+): EffectApplyResult {
+    const { ability, effect, ctx } = input;
+
+    let ps = input.participants;
+
+    const owner = findParticipant(ps, input.ownerId);
+
+    if (!owner) return { participants: ps, messages: [] };
+
+    const messages: LogLine[] = [];
+
+    for (const id of input.targetIds) {
+        const t = findParticipant(ps, id);
+
+        if (!t || !isActive(t)) continue;
+
+        const amount = resolveAmount(effect.amount, {
+            owner,
+            target: t,
+            eventDamage: eventDamage(input.event),
+            spellRoll: eventSpellRoll(input.event),
+            rng: ctx.rng,
+            participants: input.participants,
+            rules: ctx.rules,
+        });
+
+        if (amount <= 0) continue;
+
+        ps = replaceParticipant(ps, {
+            ...t,
+            combatStats: {
+                ...t.combatStats,
+                maxHp: t.combatStats.maxHp + amount,
+                currentHp: t.combatStats.currentHp + amount,
+            },
+        });
+        messages.push(
+            textRef('abilityText.log.maxHpBoost', {
+                ability: ability.name,
+                target: t.basicInfo.name,
+                amount,
+            })
+        );
+    }
+
+    return { participants: ps, messages };
+}
+
 export function applyHot(
     input: EffectApplyInput<Of<'hot'>>
 ): EffectApplyResult {
@@ -470,6 +520,10 @@ export const describeHeal = (e: Of<'heal'>): Segment[] => [
         revive: e.revive ? 'yes' : 'no',
         amount: amountSegment(e.amount),
     }),
+];
+
+export const describeMaxHpBoost = (e: Of<'maxHpBoost'>): Segment[] => [
+    seg('summary.effects.maxHpBoost', { amount: amountSegment(e.amount) }),
 ];
 
 export const describeTempHp = (e: Of<'tempHp'>): Segment[] => [

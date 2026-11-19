@@ -28,7 +28,7 @@ import {
 } from '@/lib/utils/battle/spell/cast/finish';
 import { applyGrantCasts } from '@/lib/utils/battle/spell/cast/grant-cast';
 import { applyHitRiders } from '@/lib/utils/battle/spell/cast/hit-rider';
-import { moveAdjacent } from '@/lib/utils/battle/spell/cast/move-self';
+import { moveAdjacent, teleportTo } from '@/lib/utils/battle/spell/cast/move-self';
 import { resolveOutcome } from '@/lib/utils/battle/spell/cast/outcome';
 import { phantomRequests } from '@/lib/utils/battle/spell/cast/phantom';
 import {
@@ -41,6 +41,7 @@ import {
     type ChosenSpell,
     expandChosen,
     hasMoveSelf,
+    hasTeleportSelf,
     isPerTarget,
     readsEventDamage,
     type SpellCastState,
@@ -469,6 +470,19 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         flow.ps = moved.participants;
 
         if (moved.message) flow.messages.push(moved.message);
+    }
+
+    if (hasTeleportSelf(source.definition.effects) && !params.dryRun) {
+        const teleported = teleportTo(
+            flow.ctx.map,
+            flow.ps,
+            casterId,
+            params.aim
+        );
+
+        flow.ps = teleported.participants;
+
+        if (teleported.message) flow.messages.push(teleported.message);
     }
 
     if (def.resolution.kind === 'attack' && !params.grant?.inline?.auto) {

@@ -87,6 +87,7 @@ export async function executeCast(
         rng,
         crit,
         map: ctx.meta.map,
+        ...(resolution.centre && { aim: resolution.centre }),
         rules: ctx.meta.rules,
         ...(data.preview && { dryRun: true }),
         ...(plan.ingredients && { ingredientUsed: true }),

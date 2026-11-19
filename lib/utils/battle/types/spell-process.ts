@@ -9,7 +9,7 @@ import type { SpellDice } from '@/lib/utils/spells/model/dice';
 import type { SpellDefinition } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
-import type { BattleMapConfig, TerrainDamage } from '@/types/battle-grid';
+import type { BattleMapConfig, GridPoint, TerrainDamage } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface CastableSpell {
@@ -43,6 +43,7 @@ export interface CastSpellParams {
     rng?: () => number;
     crit?: CritPicker;
     map?: BattleMapConfig | null;
+    aim?: GridPoint;
     rules: Ruleset;
     /** an ingredient was spent on this cast (optional-ingredient systems) */
     ingredientUsed?: boolean;

@@ -18,6 +18,9 @@
     "heal": {
       "label": "Healing"
     },
+    "maxHpBoost": {
+      "label": "Max HP boost"
+    },
     "tempHp": {
       "label": "Temporary HP"
     },
@@ -568,6 +571,8 @@
     "tier": "Tier (unit level 1–7)",
     "hpPercent": "HP, %",
     "includeConditions": "Remove conditions too",
+    "includeBuffs": "Remove beneficial effects too",
+    "positive": "Beneficial marker",
     "maneuver": "Maneuver",
     "percentOfAttack": "% of attack damage",
     "options": "Options",
@@ -1046,6 +1051,7 @@
       "dot": "{type} {amount}/round × {rounds} rd.{linked, select, yes {, while the condition lasts} other {}}",
       "hot": "healing {amount}/round × {rounds} rd.",
       "hotTemp": "temp HP {amount}/round × {rounds} rd.",
+      "maxHpBoost": "max HP +{amount}",
       "tempHp": "temporary HP {amount}",
       "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds} rd.",
       "charm": "switches to the caster's side × {rounds} rd.",
@@ -1211,6 +1217,7 @@
       "transform": "transforms the target into a unit form for {rounds} rd.; at 0 HP of the form it reverts and excess damage carries over to the normal form",
       "phantom": "creates a double of the target on the caster's side (same stats and abilities, 1 HP); dies on the first damage",
       "moveSelf": "the caster moves next to the target",
+      "teleportSelf": "the caster teleports to the aimed cell",
       "terrain": {
         "wall": "wall",
         "difficult": "difficult terrain"

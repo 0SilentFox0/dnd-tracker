@@ -140,6 +140,7 @@ export const SPELL_ONLY_FIXTURES: Record<string, Fixture> = {
     },
     phantom: { effect: { kind: 'phantom' } },
     moveSelf: { effect: { kind: 'moveSelf', to: 'adjacentToTarget' } },
+    teleportSelf: { effect: { kind: 'teleportSelf' } },
     chooseOne: {
         effect: {
             kind: 'chooseOne',

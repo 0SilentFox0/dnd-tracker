@@ -31,6 +31,7 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, 'kind'> } = {
     },
     inputDice: { label: DEFAULT_TEXT, max: 20 },
     moveSelf: { to: 'adjacentToTarget' },
+    teleportSelf: {},
     phantom: {},
     createTerrain: {
         terrain: 'difficult',

@@ -33,6 +33,7 @@ describe('spell effect editor nested labels', () => {
         'nested.chooseOneHeading',
         'nested.chooseOneAdd',
         'hints.moveSelf',
+        'hints.teleportSelf',
         'hints.revertAtZero',
     ]);
 });

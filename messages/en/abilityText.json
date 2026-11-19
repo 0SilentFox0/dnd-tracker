@@ -10,6 +10,7 @@
     "hot": "💚 {ability}: +{amount} HP/round → {target} ({rounds} rd.)",
     "hotTemp": "🛡 {ability}: +{amount} temp. HP/round → {target} ({rounds} rd.)",
     "tempHp": "🛡 {ability}: {target} gains {amount} temporary HP",
+    "maxHpBoost": "✚ {ability}: {target} gains +{amount} maximum and current HP",
     "immune": "⛔ {ability}: {target} — immune",
     "notOnHeroes": "⛔ {ability}: {target} — does not affect heroes",
     "berserk": "🤬 {ability}: {target} is enraged ({rounds} rd.)",

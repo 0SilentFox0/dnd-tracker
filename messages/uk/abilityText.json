@@ -10,6 +10,7 @@
     "hot": "💚 {ability}: +{amount} HP/раунд → {target} ({rounds} р.)",
     "hotTemp": "🛡 {ability}: +{amount} тимч. HP/раунд → {target} ({rounds} р.)",
     "tempHp": "🛡 {ability}: {target} отримує {amount} тимчасових HP",
+    "maxHpBoost": "✚ {ability}: {target} отримує +{amount} до максимуму й поточних HP",
     "immune": "⛔ {ability}: {target} — імунітет",
     "notOnHeroes": "⛔ {ability}: {target} — не діє на героїв",
     "berserk": "🤬 {ability}: {target} у люті ({rounds} р.)",

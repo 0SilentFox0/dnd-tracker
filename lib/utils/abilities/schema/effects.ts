@@ -431,6 +431,7 @@ const DrainSpellSlotSchema = z.object({
 const CleanseSchema = z.object({
     kind: z.literal('cleanse'),
     includeConditions: z.boolean().optional(),
+    includeBuffs: z.boolean().optional(),
     ...target,
 });
 
@@ -459,6 +460,12 @@ const RaiseDeadSchema = z.object({
     ...target,
 });
 
+const MaxHpBoostSchema = z.object({
+    kind: z.literal('maxHpBoost'),
+    amount: AmountSchema,
+    ...target,
+});
+
 const HelpSchema = z.object({ kind: z.literal('help'), ...target });
 
 const PushSchema = z.object({
@@ -476,6 +483,7 @@ const CopySpellBuffsSchema = z.object({
 const MarkSchema = z.object({
     kind: z.literal('mark'),
     markId: z.string().min(1),
+    positive: z.boolean().optional(),
     duration: DurationSchema,
     ...target,
 });
@@ -511,6 +519,7 @@ export const BASE_EFFECTS = [
     GuardSchema,
     SummonSchema,
     RaiseDeadSchema,
+    MaxHpBoostSchema,
     ManeuverSchema,
     HelpSchema,
     PushSchema,
