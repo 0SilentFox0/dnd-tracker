@@ -9,6 +9,7 @@ paths:
 - Aim for ≤ ~7 props. Pass domain objects (`participant`, `character`, `form`) instead of exploding their fields into separate props.
 - Group related callbacks into one object prop (`actions={{ onRename, onDelete }}`) rather than many `onX` props.
 - Deep trees (battle scene, character view, skill tree) use a context provider instead of drilling `battle`/`handlers`/`mutations` bags through 3+ levels.
+- Folders hold at most ~10 component files: group by responsibility into subfolders (`battle/map/{layers,tokens,edges,panels}`, `common/{fields,entity,dialogs,shell,states}`); a barrel `index.ts` stays at the folder root only where it already exists.
 - Shared UI goes in `components/common` or `components/ui`; check there before writing a new card, dialog, avatar or empty state.
 - Search on list pages: `useSearch(items, fieldsOf)` (`@/lib/hooks/common`, built on `matchesQuery` from `lib/utils/common/text-search`) + `SearchInput` / `SearchEmptyState` (`components/common`); don't write per-page filtering.
 - Dialogs: `ResponsiveDialog` (`components/ui/responsive-dialog`) — modal on desktop, `vaul` bottom sheet on phones. Never Radix `Dialog`/`AlertDialog` or `vaul` directly (ESLint enforces outside `components/ui`). Buttons go in its `footer`; a footer submit button needs `form="<form id>"`.
