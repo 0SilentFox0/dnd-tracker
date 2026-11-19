@@ -11,6 +11,11 @@ import {
     MAX_SLIDE_MB,
     MAX_SLIDES_PER_DECK,
 } from './show';
+import {
+    MAX_SOUND_BYTES,
+    MAX_SOUND_SECONDS,
+    MAX_SOUNDS_PER_CAMPAIGN,
+} from './soundboard';
 
 export const API_ERRORS = {
     UNAUTHORIZED: 'errors.unauthorized',
@@ -183,6 +188,9 @@ export const API_ERRORS = {
     TRACK_NOT_FOUND: 'errors.trackNotFound',
     TRACK_LIMIT: 'errors.trackLimit',
     TRACK_FILE_INVALID: 'validation.trackFileInvalid',
+    SOUND_LIMIT: 'errors.soundLimit',
+    SOUND_NOT_FOUND: 'errors.soundNotFound',
+    SOUND_FILE_INVALID: 'validation.soundFileInvalid',
     TRACK_UPLOAD_MISSING: 'errors.trackUploadMissing',
     TRACK_DUPLICATE: 'errors.trackDuplicate',
     TRACK_ORDER_MISMATCH: 'errors.trackOrderMismatch',
@@ -586,6 +594,12 @@ export type ErrorIssue = {
 export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
     [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },
     [API_ERRORS.TRACK_LIMIT]: { max: MAX_TRACKS_PER_CAMPAIGN },
+    [API_ERRORS.SOUND_LIMIT]: { max: MAX_SOUNDS_PER_CAMPAIGN },
+    [API_ERRORS.SOUND_FILE_INVALID]: {
+        formats: TRACK_FORMATS_LABEL,
+        maxKb: MAX_SOUND_BYTES / 1024,
+        maxSeconds: MAX_SOUND_SECONDS,
+    },
     [API_ERRORS.TRACK_FILE_INVALID]: {
         formats: TRACK_FORMATS_LABEL,
         maxMb: MAX_TRACK_MB,

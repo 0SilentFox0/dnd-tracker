@@ -23,6 +23,7 @@ import { ParticipantList } from '@/components/battle/participants/ParticipantLis
 import { ReserveSheetButton } from '@/components/battle/participants/ReservePanel';
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
 import { HUD_SURFACE, HudButton } from '@/components/hud';
+import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
@@ -56,7 +57,7 @@ export function MobileBattleLayout() {
     const {
         battle,
         awaiting,
-        viewer: { isDM },
+        viewer: { isDM, readOnly },
         turn: { current, isMyTurn },
         roster: { hero, allies, enemies },
         select,
@@ -193,6 +194,9 @@ export function MobileBattleLayout() {
                         collapseOn={turnKey}
                         collapseTick={expandTick}
                     />
+                    {isDM && !readOnly && (
+                        <SoundboardPanel campaignId={battle.campaignId} />
+                    )}
                 </div>
                 {/* wrapper and MyTurnControls stay in place on every tab: remounting would kill an open wizard and aiming */}
                 {(hero || mapTab) && (

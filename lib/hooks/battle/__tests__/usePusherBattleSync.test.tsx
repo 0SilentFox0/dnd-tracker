@@ -465,6 +465,23 @@ describe('usePusherBattleSync — two players receive same battle state', () => 
         warn.mockRestore();
     });
 
+    it('binds soundboard-play on the battle channel', async () => {
+        render(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="u1"
+                client={new QueryClient()}
+            />
+        );
+
+        await waitFor(() =>
+            expect(
+                channelBindings.get(channelName)?.has('soundboard-play')
+            ).toBe(true)
+        );
+    });
+
     const audioKey = ['battle-audio', campaignId, battleId];
 
     const audioAt = (seq: number) => audioState({ startedAt: 1_000, seq });

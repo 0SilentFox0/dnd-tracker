@@ -304,5 +304,9 @@
   "2026-11-map-camera": {
     "title": "Camera for large maps",
     "body": "Pan and zoom around large battle maps. Use the minimap to jump elsewhere on the field; the camera follows your hero automatically."
+  },
+  "2026-11-soundboard": {
+    "title": "Soundboard",
+    "body": "The DM now has a soundboard: one tap plays a door, thunder or a sword hit for the whole table. Built-in sounds are included, and you can upload your own."
   }
 }

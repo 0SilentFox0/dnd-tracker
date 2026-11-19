@@ -1,0 +1,47 @@
+{
+  "title": "Sounds",
+  "play": "Play {name}",
+  "preview": "Preview {name} (only me)",
+  "previewHint": "Only me",
+  "done": "Done",
+  "edit": {
+    "toggle": "Edit",
+    "open": "Edit {name}",
+    "title": "Edit sound",
+    "name": "Name",
+    "volume": "Volume",
+    "color": "Colour",
+    "delete": "Delete",
+    "hide": "Hide",
+    "deleteTitle": "Delete \"{name}\"?",
+    "hideTitle": "Hide \"{name}\" from the soundboard?",
+    "show": "Show",
+    "hiddenTitle": "Hidden sounds"
+  },
+  "upload": {
+    "fileLabel": "Sound file",
+    "button": "Upload sound",
+    "pending": "Uploading…",
+    "defaultName": "Sound"
+  },
+  "uploadFailed": "Could not upload the sound",
+  "builtin": {
+    "door-open": "Door opens",
+    "door-slam": "Door slams",
+    "sword-hit": "Sword hit",
+    "sword-draw": "Sword drawn",
+    "thunder": "Thunder",
+    "explosion": "Explosion",
+    "fire": "Fire",
+    "magic-cast": "Spell cast",
+    "heal": "Healing",
+    "wolf-howl": "Wolf howl",
+    "footsteps": "Footsteps",
+    "scream": "Scream",
+    "coins": "Coins",
+    "bell": "Bell",
+    "chest-open": "Chest opens",
+    "glass-break": "Glass breaks",
+    "dragon-roar": "Dragon roar"
+  }
+}

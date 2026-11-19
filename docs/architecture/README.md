@@ -22,5 +22,6 @@ Details that used to live in `CLAUDE.md`. Read the file of the subsystem you are
 | [participant-privacy-scope.md](participant-privacy-scope.md) | Оцінка серверної приватності учасників бою (шляхи, поля, рекомендація; без реалізації) |
 | [platform.md](platform.md) | Auth session (`getClaims`), self-hosted fonts, Pusher, prefetched first HTML, egress, account color palettes, prodcopy battle-sweep |
 | [i18n.md](i18n.md) | Мультимовність uk/en: next-intl, потік мови, лендинг `/` і `/en`, ESLint-храповик, перенесення доменів |
+| [soundboard.md](soundboard.md) | Саундборд DM: `campaign_sounds`, вбудований реєстр `/sfx`, подія `soundboard-play` у sync-хуках, ліміти |
 
 The folder-by-folder overview (in Ukrainian) is `ARCHITECTURE.md` in the repo root. When a subsystem changes, update its file here in the same branch.

@@ -9,6 +9,7 @@ export const CAMPAIGN_NAMESPACES = [
     'backgrounds',
     'artifacts',
     'music',
+    'soundboard',
     'choices',
     'campaigns',
     'dashboard',

@@ -126,4 +126,12 @@ export const DM_ARTICLES: HelpArticleDef[] = [
             { blocks: [{ kind: 'p' }, { kind: 'p' }] },
         ],
     },
+    {
+        slug: 'dm-soundboard',
+        audience: 'dm',
+        sections: [
+            { blocks: [{ kind: 'p' }] },
+            { blocks: [{ kind: 'p' }] },
+        ],
+    },
 ];

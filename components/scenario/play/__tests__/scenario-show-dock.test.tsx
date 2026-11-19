@@ -20,6 +20,9 @@ vi.mock('@/components/audio/AudioPlayerProvider', () => ({
         <>{children}</>
     ),
 }));
+vi.mock('@/components/soundboard/SoundboardPanel', () => ({
+    SoundboardPanel: () => <div>soundboard</div>,
+}));
 vi.mock('@/components/show/stage/ShowDeckStrip', () => ({
     ShowDeckStrip: () => <div>control-panel</div>,
 }));

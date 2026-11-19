@@ -44,6 +44,7 @@ import type scenarioGraph from './messages/uk/scenarioGraph.json';
 import type show from './messages/uk/show.json';
 import type skills from './messages/uk/skills.json';
 import type skillTree from './messages/uk/skillTree.json';
+import type soundboard from './messages/uk/soundboard.json';
 import type spellEditor from './messages/uk/spellEditor.json';
 import type spells from './messages/uk/spells.json';
 import type tileLabels from './messages/uk/tileLabels.json';
@@ -72,6 +73,7 @@ declare module 'next-intl' {
             backgrounds: typeof backgrounds;
             artifacts: typeof artifacts;
             music: typeof music;
+            soundboard: typeof soundboard;
             choices: typeof choices;
             campaigns: typeof campaigns;
             dashboard: typeof dashboard;

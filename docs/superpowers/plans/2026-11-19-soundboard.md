@@ -78,7 +78,7 @@
 
 ### Task 2: Prisma model and migration
 
-**Files:** Modify `prisma/schema/core.prisma` (model next to `CampaignTrack`, relation on `Campaign`); Create `prisma/migrations/20261208000000_campaign_sounds/migration.sql`.
+**Files:** Modify `prisma/schema/core.prisma` (model next to `CampaignTrack`, relation on `Campaign`); Create `prisma/migrations/20261209000000_campaign_sounds/migration.sql`.
 
 **Interfaces:** Produces model `CampaignSound { id cuid, campaignId, name, url, durationMs Int?, volume Float @default(1), color String?, icon String?, sortOrder Int @default(0), createdAt }` `@@index([campaignId, sortOrder])` `@@map("campaign_sounds")`; `Campaign.hiddenBuiltinSounds String[] @default([])`, `Campaign.sounds CampaignSound[]`.
 

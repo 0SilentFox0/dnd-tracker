@@ -5,10 +5,12 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useBattleResync } from './useBattleResync';
 
+import { SOUNDBOARD_PLAY_EVENT } from '@/lib/constants/soundboard';
 import { writeAudioSnapshot } from '@/lib/hooks/audio';
 import { battleKeys } from '@/lib/hooks/battles/keys';
 import { writeBattleDelta } from '@/lib/hooks/battles/write-battle-delta';
 import { usePusherChannel, usePusherConnection } from '@/lib/hooks/common';
+import { armUnlock, handleSoundPlayEvent } from '@/lib/hooks/soundboard';
 import {
     BATTLE_AUDIO_EVENT,
     battleChannelName,
@@ -76,6 +78,8 @@ export function usePusherBattleSync(
         },
         () => void resync()
     );
+
+    useEffect(armUnlock, []);
 
     const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -193,6 +197,8 @@ export function usePusherBattleSync(
         channel,
         {
             'battle-delta': applyDelta,
+            [SOUNDBOARD_PLAY_EVENT]: (data) =>
+                handleSoundPlayEvent(queryClient, campaignId, data),
             [BATTLE_AUDIO_EVENT]: (data) => {
                 const audio = (data as Partial<BattleAudioEvent> | null)?.audio;
 
