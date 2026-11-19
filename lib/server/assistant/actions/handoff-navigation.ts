@@ -60,7 +60,12 @@ export async function buildAssistantHandoff(
 
     const base = `/campaigns/${campaignId}`;
 
-    const content = input.kind === 'tracks' ? 'music' : input.kind;
+    const content =
+        input.kind === 'tracks'
+            ? 'music'
+            : input.kind === 'careers'
+              ? 'system/careers'
+              : input.kind;
 
     const href =
         key === 'credentials'

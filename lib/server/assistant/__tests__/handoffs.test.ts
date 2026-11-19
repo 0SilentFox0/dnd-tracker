@@ -118,6 +118,12 @@ describe('T13 protected handoffs', () => {
             'assistant.handoffs.content-import',
         ],
         [
+            'content-copy',
+            { kind: 'careers' },
+            '/campaigns/campaign/dm/system/careers',
+            'assistant.handoffs.content-copy',
+        ],
+        [
             'ai-map',
             { kind: 'tracks' },
             '/campaigns/campaign/dm/music',

@@ -1,10 +1,13 @@
 import { campaignGet, campaignPost } from '@/lib/api/client';
-import type { ContentKind } from '@/lib/constants/content-kinds';
 import type { IdName } from '@/types/common';
-import type { CopyRequest, CopyResult } from '@/types/content-copy';
+import type {
+    ContentCopyKind,
+    CopyRequest,
+    CopyResult,
+} from '@/types/content-copy';
 
 export const contentCopyApi = {
-    options: (campaignId: string, kind: ContentKind) =>
+    options: (campaignId: string, kind: ContentCopyKind) =>
         campaignGet<{ items: IdName[]; campaigns: IdName[] }>(
             campaignId,
             `/content-copy?kind=${encodeURIComponent(kind)}`

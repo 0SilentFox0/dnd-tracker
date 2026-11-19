@@ -10,18 +10,17 @@ import { ResultStep } from './ResultStep';
 import { LoadingState } from '@/components/common/states/LoadingState';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import type { ContentKind } from '@/lib/constants/content-kinds';
 import {
     useContentCopy,
     useContentCopyOptions,
 } from '@/lib/hooks/content-copy';
-import type { CopyRequest } from '@/types/content-copy';
+import type { ContentCopyKind, CopyRequest } from '@/types/content-copy';
 
 type Step = 'pick' | 'preview' | 'result';
 
 interface ContentCopyDialogProps {
     campaignId: string;
-    kind: ContentKind;
+    kind: ContentCopyKind;
     initialIds?: string[];
     open: boolean;
     onOpenChange: (open: boolean) => void;

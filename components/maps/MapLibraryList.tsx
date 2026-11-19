@@ -16,10 +16,12 @@ import { MapCatalogDialog } from './MapCatalogDialog';
 import { ActionsMenu } from '@/components/common/entity/ActionsMenu';
 import { DmCardGrid, DmListBody } from '@/components/common/entity/DmListBody';
 import { EmptyState, ErrorState } from '@/components/common/states';
+import { ContentCopyButton } from '@/components/content-copy/ContentCopyButton';
 import { HudCard, HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { useMapLibrary } from '@/lib/hooks/battle-maps';
+import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 
 const DATE_FORMAT = { dateStyle: 'medium' } as const;
 
@@ -32,6 +34,8 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
 
     const library = useMapLibrary(campaignId);
 
+    const libraryEnabled = useMapLibraryEnabled(campaignId);
+
     const { maps, actions, createDialog, catalog } = library;
 
     const editorHref = (id: string) => `/campaigns/${campaignId}/dm/maps/${id}`;
@@ -43,6 +47,12 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
                 subtitle={t('subtitle')}
                 actions={
                     <div className="flex gap-2">
+                        {libraryEnabled && (
+                            <ContentCopyButton
+                                campaignId={campaignId}
+                                kind="maps"
+                            />
+                        )}
                         <Button
                             variant="outline"
                             onClick={() => catalog.setOpen(true)}

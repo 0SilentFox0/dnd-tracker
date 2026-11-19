@@ -1,6 +1,8 @@
 import type { ContentKind } from '@/lib/constants/content-kinds';
 
-export type CopyItem = { kind: ContentKind; ids: string[] };
+export type ContentCopyKind = ContentKind | 'maps';
+
+export type CopyItem = { kind: ContentCopyKind; ids: string[] };
 
 export type CopyTargets = { campaignIds: string[] } | { all: true };
 

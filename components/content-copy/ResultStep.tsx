@@ -6,12 +6,17 @@ import type { CopyResult, CopyTargetReport } from '@/types/content-copy';
 
 const REASON_KEYS = [
     'exists',
-    'file-not-copyable',
     'kind-unsupported',
     'duplicate-name',
     'not-found',
     'unknown-kind',
+    'limit',
+    'file-failed',
+    'error',
 ] as const;
+
+const isReasonKey = (value: string): value is (typeof REASON_KEYS)[number] =>
+    (REASON_KEYS as readonly string[]).includes(value);
 
 const STATUS_TONE = {
     ok: 'text-emerald-400',
@@ -35,9 +40,7 @@ function TargetReport({
         report.skipped.length > 0;
 
     const reasonLabel = (reason: string) =>
-        (REASON_KEYS as readonly string[]).includes(reason)
-            ? t(`reasons.${reason}`)
-            : t('reasons.unknown');
+        isReasonKey(reason) ? t(`reasons.${reason}`) : t('reasons.unknown');
 
     return (
         <li className="space-y-1 rounded border border-hud-line/40 p-2 text-sm">
@@ -51,7 +54,9 @@ function TargetReport({
                                 : STATUS_TONE[report.status]
                         }
                     >
-                        {t(`status.${nothingToCopy ? 'nothing' : report.status}`)}
+                        {t(
+                            `status.${nothingToCopy ? 'nothing' : report.status}`
+                        )}
                     </span>
                 )}
             </div>

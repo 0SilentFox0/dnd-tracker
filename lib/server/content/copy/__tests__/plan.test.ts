@@ -153,7 +153,7 @@ describe('buildCopyPlan', () => {
         expect(warnings).toEqual([]);
     });
 
-    it('skips uploaded file tracks and copies youtube tracks', async () => {
+    it('plans both uploaded file and youtube tracks', async () => {
         const [F, Y] = [id('7'), id('8')];
 
         const src = emptyBundle();
@@ -170,10 +170,8 @@ describe('buildCopyPlan', () => {
             selected: [{ kind: 'tracks', ids: [F, Y] }],
         });
 
-        expect(plan.skipped).toEqual([
-            { kind: 'tracks', name: 'Upload', reason: 'file-not-copyable' },
-        ]);
-        expect(plan.toCreate.map((r) => r.row.id)).toEqual([Y]);
+        expect(plan.skipped).toEqual([]);
+        expect(plan.toCreate.map((r) => r.row.id)).toEqual([F, Y]);
     });
 
     it('handles reuse and an unsupported kind together', async () => {
@@ -288,5 +286,31 @@ describe('buildCopyPlan', () => {
         expect(plan.skipped).toEqual([
             { kind: 'units', name: 'Orc', reason: 'exists' },
         ]);
+    });
+
+    it('enforces the track limit for every kind, in the same way for a dry run', async () => {
+        const src = emptyBundle();
+
+        const ids = Array.from({ length: 30 }, (_, i) => `c${String(i).padStart(24, '0')}`);
+
+        for (const [i, tid] of ids.entries())
+            src.tracks.push({
+                id: tid,
+                title: `T${i}`,
+                kind: 'youtube',
+                url: `https://youtu.be/${i}`,
+            });
+
+        const plan = await buildCopyPlan({
+            source: src,
+            target: emptyBundle(),
+            targetActor: actor,
+            selected: [{ kind: 'tracks', ids }],
+            trackRoom: 10,
+        });
+
+        expect(plan.toCreate).toHaveLength(10);
+        expect(plan.bundle.tracks).toHaveLength(10);
+        expect(plan.skipped.filter((s) => s.reason === 'limit')).toHaveLength(20);
     });
 });

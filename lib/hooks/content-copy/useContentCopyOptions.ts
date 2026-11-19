@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { contentCopyKeys } from './keys';
 
 import { contentCopyApi } from '@/lib/api/content-copy';
-import type { ContentKind } from '@/lib/constants/content-kinds';
+import type { ContentCopyKind } from '@/types/content-copy';
 
 export const useContentCopyOptions = (
     campaignId: string,
-    kind: ContentKind,
+    kind: ContentCopyKind,
     enabled: boolean
 ) =>
     useQuery({

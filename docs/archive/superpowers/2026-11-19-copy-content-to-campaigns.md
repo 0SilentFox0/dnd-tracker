@@ -284,61 +284,63 @@ useContentCopy(campaignId): { preview: Mutation<CopyRequest, CopyResult>; run: M
 
 ---
 
-# Етап 2: звуки
+# Етап 2: звуки — знято
 
-### Task 12: Серверний `copy` об'єкта в Storage
+### Task 12: Серверний `copy` об'єкта в Storage — перенесено в Task 14
 
-**Files:**
-- Create: `lib/supabase/copy-object.ts`
-- Test: `lib/supabase/__tests__/copy-object.test.ts`
+Знято як окрема задача (2026-11-19): `copyStorageObject` робиться всередині Task 14 (потрібен картам і файловим трекам).
 
-**Interfaces:** Produces `copyStorageObject(bucket: string, fromPath: string, toPath: string): Promise<Result<true>>` через `createAdminClient().storage.from(bucket).copy(fromPath, toPath)`. Повертає `{ ok:false, message }` на помилку.
+### Task 13: Копіювання звуків — знято: звуки акаунтні
 
-- [ ] Failing test (моковий admin-клієнт): успіх і помилка Storage. Реалізація, PASS, eslint, commit `feat(storage): server-side object copy helper`.
-
-### Task 13: Копіювання звуків
-
-**Files:**
-- Create: `lib/server/content/copy/sounds.ts`
-- Modify: `lib/server/content/copy/service.ts` (гілка для `kind: 'sounds'`), `types/content-copy.ts` (`ContentCopyKind = ContentKind | 'sounds'`), `schema.ts`, GET-опції (`loadSoundNames`)
-- Test: `lib/server/content/copy/__tests__/sounds.test.ts`
-
-**Interfaces:**
-```ts
-export async function copySounds(args: {
-    sourceCampaignId: string; targetCampaignId: string; ids: string[]; dryRun?: boolean;
-}): Promise<{ created: Array<{id:string;name:string}>; skipped: Array<{name:string;reason:'exists'|'limit'|'file-failed'}> }>;
-```
-Логіка: рядки `campaignSound` джерела; пропуск за назвою (`exists`); ліміт `MAX_SOUNDS_PER_CAMPAIGN` цілі (`limit`); для кожного: `soundObjectPath(url)` → новий шлях цілі (за схемою `soundObjectPath`/`createSoundUploadTicket` для campaignId цілі — вивести розширення з поточного шляху) → `copyStorageObject(SOUNDBOARD_BUCKET, from, to)` → створити рядок із новим `url` (публічний URL бакета для `to`). Порядок: спочатку файл, потім рядок; помилка рядка → `removeSoundObject(to)`. `sortOrder` = кінець списку цілі.
-
-- [ ] Failing tests: ліміт; помилка копіювання файла (`file-failed`, рядка немає); помилка вставки рядка прибирає файл; дубль за назвою; успіх змінює `url` на шлях цілі.
-- [ ] Реалізація, PASS, eslint.
-- [ ] UI: `ContentCopyButton` на сторінці звуків DM (знайти в `app/campaigns/[id]/dm/` або компоненті саундборду), `ContentCopyDialog` приймає `kind: 'sounds'`.
-- [ ] Docs (`docs/architecture/soundboard.md` одним абзацом) + `whats-new`. Один повний прогін тестів і живий прогін (скопіювати звук, відтворити в цілі). Commit `feat(content-copy): copy sounds between campaigns`.
+Бібліотека звуків і пресети акаунтні (`SoundLibraryItem`, `SoundPreset` на користувача), per-campaign `campaign_sounds` замінено, тож звуки доступні в усіх кампаніях користувача й копіювати їх не потрібно. Видалення `campaign_sounds` не чіпаємо (окремий деплой із сесії sound-library).
 
 ---
 
 # Етап 3: карти
 
-### Task 14: Копіювання карти
+### Task 14: Копіювання карти (+ `copyStorageObject`)
 
 **Files:**
-- Create: `lib/server/content/copy/maps.ts`
-- Modify: `service.ts`, `types/content-copy.ts` (`ContentCopyKind = ContentKind | 'sounds' | 'maps'`), `schema.ts`, GET-опції
-- Test: `lib/server/content/copy/__tests__/maps.test.ts` + інтеграційний
+- Create: `lib/supabase/copy-object.ts`, `lib/supabase/__tests__/copy-object.test.ts`
+- Create: `lib/server/content/copy/maps.ts`, `lib/server/content/copy/__tests__/maps.test.ts` (+ інтеграційний на скретч-БД `copytest_cc`)
+- Modify: `service.ts`, `types/content-copy.ts` (`ContentCopyKind = ContentKind | 'maps'`), `schema.ts`, GET-опції, UI-вхід на `dm/maps`, `lib/onboarding/whats-new.ts` + `whatsNew.<id>` у `messages/{uk,en}/whatsNew.json`, `messages/{uk,en}/contentCopy.json`, абзац у `docs/architecture/content-api.md`
 
 **Interfaces:**
 ```ts
+// lib/supabase/copy-object.ts
+export async function copyStorageObject(bucket: string, fromPath: string, toPath: string):
+    Promise<{ ok: true } | { ok: false; message: string }>; // createAdminClient().storage.from(bucket).copy(from, to)
+
+// lib/server/content/copy/maps.ts
 export async function copyMaps(args: {
     sourceCampaignId: string; targetCampaignId: string; ids: string[]; dryRun?: boolean;
 }): Promise<{ created: Array<{id:string;name:string}>; skipped: Array<{name:string;reason:'exists'|'limit'|'file-failed'}> }>;
 ```
-Логіка: `BattleMap` (+ `chunks`; без `BattleMapVersion`; `mapVersion: 1`) → нові рядки в цілі (`newContentId` / cuid за схемою моделі); `header.background`/поле фону (перевірити в `lib/server/battle-maps/background-cleanup.ts` → `backgroundOf`) перепризначити на новий об'єкт у бакеті `battle-maps` цілі (`copyStorageObject`, шлях через `ownedBattleMapBackgroundPath`-сумісну схему `<campaignId>/...`); ліміти цілі з `lib/server/battle-maps/campaign-limits.ts`; пропуск за назвою; помилка файла/запису прибирає вже створене (файл і рядок + чанки в транзакції Prisma).
+Логіка: `BattleMap` + `chunks`; без `BattleMapVersion`; `mapVersion: 1`; нові id. Фон копіюється як НОВИЙ об'єкт у бакеті `battle-maps` цілі (`BATTLE_MAPS_BUCKET`, шлях за схемою `<campaignId>/...`, див. `battle-map-storage.ts`, `background-cleanup.ts`, `background-upload.ts`). Ліміти цілі з `lib/server/battle-maps/campaign-limits.ts` та сервісу бібліотеки карт; пропуск за назвою (`exists`); спочатку файл, потім рядок; помилка рядка/чанків відкочує транзакцію й прибирає створений файл; помилка файла дає `file-failed` без рядка. Кнопка на `dm/maps` за гейтом `useMapLibraryEnabled`.
 
-- [ ] Failing tests: чанки скопійовані 1:1, `mapVersion=1`, версій немає; фон скопійований, `url` вказує на цільовий шлях; ліміт цілі; дубль за назвою; відкат при помилці запису прибирає файл.
-- [ ] Реалізація, PASS, eslint; UI: кнопка на сторінці `dm/maps` (бібліотека карт; гейт `useMapLibraryEnabled`).
-- [ ] Docs (`docs/architecture/map-modes.md` або окремий абзац у `content-api.md`) + `whats-new`; повний прогін тестів; живий прогін (скопіювати карту з фоном, відкрити в цілі); `/simplify`; фінальний рев'ю.
-- [ ] Commit `feat(content-copy): copy battle maps between campaigns`.
+- [ ] Failing tests: чанки 1:1, `mapVersion=1`, версій немає; фон скопійований і `url` указує на шлях цілі; ліміт; дубль за назвою; відкат прибирає файл; `copyStorageObject` успіх/помилка.
+- [ ] Реалізація, `pnpm test:run <files>`, eslint по змінених файлах, commit `feat(content-copy): copy battle maps between campaigns`.
+
+---
+
+# Етап 4: файлові треки та беклог
+
+### Task 15: Копіювання файлових треків (`CampaignTrack` kind file)
+
+**Files:** `lib/server/content/copy/plan.ts` (зняти пропуск `file-not-copyable`), `apply.ts`/новий `tracks-files.ts`, `lib/supabase/battle-music-storage.ts` (шлях за схемою), `components/content-copy/ResultStep.tsx`, `messages/*/contentCopy.json`, тести.
+
+Копія файлового треку = новий рядок + новий об'єкт у бакеті `battle-music` цілі (`copyStorageObject`), без ділення файлу. Файл спочатку, потім рядок; відкат файлу при збої транзакції цілі. Причину `file-not-copyable` прибрати, якщо більше не використовується (типи, ResultStep, переклади). Якщо інтеграція з `importBundle` складніша за карти — зупинитись і повідомити (запропонувати відкласти).
+
+### Task 16: Беклог етапу 1
+
+- **M5** дублі `nameOf`/`kindOfTable` між `plan.ts` і `apply.ts` → один спільний модуль (`names.ts`).
+- **M6** план будується до write lock → перебудовувати/перевіряти дублі назв усередині `withCampaignContentWrite` цілі (одночасні копіювання не мають дублювати назви).
+- **M8** кеші списків цільових кампаній (GET-опції/хуки) не оновлюються після копіювання → інвалідувати.
+- **N3** `careers` відсутні у видах handoff → додати.
+
+### Task 17: Живий прогін у браузері (контролер, не імплементер)
+
+Через субагента, `next start`. Дві кампанії, копія юніта із залежностями, «Усі кампанії», повторне копіювання (нуль створених), копія карти з фоном, копія в кампанію на основі шаблону.
 
 ---
 

@@ -53,6 +53,33 @@ describe('useContentCopy', () => {
         });
     });
 
+    it('invalidates cached queries of targets that received content', async () => {
+        const client = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
+
+        client.setQueryData(['spells', 'c2'], [1]);
+        client.setQueryData(['spells', 'c3'], [1]);
+        client.setQueryData(['spells', 'c1'], [1]);
+        vi.mocked(contentCopyApi.copy).mockResolvedValue({
+            targets: [
+                { campaignId: 'c2', created: [{ kind: 'spells', name: 'a' }] },
+                { campaignId: 'c3', created: [] },
+            ],
+        } as never);
+
+        const { result } = renderHook(() => useContentCopy('c1'), {
+            wrapper: ({ children }: { children: ReactNode }) =>
+                createElement(QueryClientProvider, { client }, children),
+        });
+
+        await act(() => result.current.run.mutateAsync(body));
+
+        expect(client.getQueryState(['spells', 'c2'])?.isInvalidated).toBe(true);
+        expect(client.getQueryState(['spells', 'c3'])?.isInvalidated).toBe(false);
+        expect(client.getQueryState(['spells', 'c1'])?.isInvalidated).toBe(false);
+    });
+
     it('propagates API errors', async () => {
         vi.mocked(contentCopyApi.copy).mockRejectedValue(new Error('boom'));
 
