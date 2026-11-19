@@ -228,12 +228,12 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
             </HudButton>
             {open && (
                 <>
-                    <div className="mt-2 flex items-center gap-1">
+                    <div className="mt-2 flex flex-col gap-1">
                         <UploadTrackButton
                             pending={library.isBusy}
                             onFile={(file) => void library.upload(file)}
                             size="sm"
-                            className="min-w-0 flex-1"
+                            className="w-full"
                         />
                         <Button
                             type="button"
@@ -241,7 +241,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                             size="sm"
                             disabled={library.isBusy}
                             onClick={() => setYoutubeOpen(true)}
-                            className="min-w-0 flex-1"
+                            className="w-full"
                         >
                             <Plus />
                             {t('music.youtube.add')}

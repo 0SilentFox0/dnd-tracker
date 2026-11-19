@@ -203,6 +203,8 @@ html.dark .scenario-book:not([data-theme]) {
 .scenario-book .sb-show-thumb-empty { display: inline-flex; align-items: center; justify-content: center; border: 1px dashed var(--rule); color: var(--ink-soft); }
 .scenario-book .sb-show-body { max-width: 1180px; margin: 0 auto; padding: 4px 16px 10px; max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; }
 .scenario-book .sb-show-audio { margin-right: 8px; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 13px; line-height: 1.4; }
+.scenario-book .sb-show-sounds { margin-right: 8px; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 13px; }
+.scenario-book .sb-show-sounds:has([aria-expanded="true"]) > * { position: absolute; right: 16px; bottom: calc(100% + 8px); z-index: 2; max-width: calc(100vw - 32px); }
 .scenario-book .sb-show-audio [data-audio-panel="open"] { position: absolute; right: 16px; bottom: calc(100% + 8px); z-index: 1; max-width: calc(100vw - 32px); }
 @media (max-width: 640px) {
   .scenario-book .sb-show-bar { flex-wrap: wrap; gap: 6px; padding: 6px 12px; overflow: visible; }
