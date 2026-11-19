@@ -223,7 +223,8 @@
       "kind": "area",
       "side": "enemy",
       "maxTargets": 3,
-      "range": 120
+      "range": 120,
+      "projectiles": true
     },
     "resolution": {
       "kind": "auto"
