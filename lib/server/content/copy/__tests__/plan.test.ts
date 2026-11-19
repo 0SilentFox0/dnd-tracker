@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { buildCopyPlan } from '@/lib/server/content/copy/plan';
+import { createFakeDb } from '@/lib/server/templates/__tests__/fake-db';
 import { emptyBundle } from '@/lib/server/templates/bundle';
+import { importBundle } from '@/lib/server/templates/import-bundle';
 import type { Actor } from '@/lib/utils/api/actor';
 
 const inactive = new Set<string>();
@@ -116,6 +118,39 @@ describe('buildCopyPlan', () => {
         inactive.clear();
 
         expect(plan.warnings).toEqual(['units Orc: spells dependency skipped']);
+    });
+
+    it('drops references to unsupported dependencies so the import succeeds', async () => {
+        inactive.add('spells');
+
+        const src = source();
+
+        src.units[0] = { ...src.units[0], abilities: [S, R] };
+
+        const plan = await buildCopyPlan({
+            source: src,
+            target: emptyBundle(),
+            targetActor: actor,
+            selected,
+        });
+
+        inactive.clear();
+
+        expect(JSON.stringify(plan.toCreate)).not.toContain(S);
+        expect(plan.toCreate.find((r) => r.table === 'units')?.row.abilities)
+            .toHaveLength(1);
+
+        const { db } = createFakeDb();
+
+        const { warnings } = await importBundle(
+            db,
+            plan.bundle,
+            'target',
+            undefined,
+            { reuse: plan.reuse, detached: true }
+        );
+
+        expect(warnings).toEqual([]);
     });
 
     it('handles reuse and an unsupported kind together', async () => {

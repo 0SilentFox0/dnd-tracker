@@ -1,4 +1,5 @@
 import { type CopyRow, refsOf, selectClosure } from './closure';
+import { dropRefs } from './drop-refs';
 
 import { CONTENT_KINDS } from '@/lib/constants/content-kinds';
 import { isKindActive } from '@/lib/server/content/kind-active';
@@ -177,20 +178,23 @@ export async function buildCopyPlan(args: {
         }
     }
 
-    plan.toCreate =
-        dropped.size === 0
-            ? kept
-            : kept.map(({ table, row }) => ({
-                  table,
-                  row: remapIds(row, dropped),
-              }));
+    const dropIds = new Set(unsupported.keys());
 
-    for (const { table, row } of plan.toCreate) {
+    plan.toCreate = kept.map(({ table, row }) => {
+        const remapped = dropped.size === 0 ? row : remapIds(row, dropped);
+
+        return {
+            table,
+            row: dropIds.size === 0 ? remapped : dropRefs(remapped, dropIds),
+        };
+    });
+
+    for (const [i, { table, row }] of plan.toCreate.entries()) {
         plan.bundle[table].push(row);
 
         if (unsupported.size === 0) continue;
 
-        for (const ref of refsOf({ table, row })) {
+        for (const ref of refsOf(kept[i])) {
             const dep = unsupported.get(ref);
 
             if (dep)
