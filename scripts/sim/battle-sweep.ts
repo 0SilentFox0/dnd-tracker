@@ -136,6 +136,7 @@ import {
     MAZE_SCATTER_MIN_GAP,
     MAZE_STEPS_PER_TURN,
 } from '@/lib/utils/battle/modes/maze/constants';
+import { mazePlacementError } from '@/lib/utils/battle/modes/maze/placement';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { spellTargetingFor } from '@/lib/utils/battle/spell/spell-targeting';
@@ -5122,7 +5123,15 @@ async function mazeClearBlocker(mover: any) {
         .find(Boolean);
 
     const spot = [...exitDist.entries()]
-        .filter(([k]) => freeMazeCell(k))
+        .filter(
+            ([k]) =>
+                freeMazeCell(k) &&
+                !mazePlacementError(grid, {
+                    participants: P(),
+                    mover: blocker as any,
+                    to: parseCellKey(k),
+                })
+        )
         .sort((a, b) => b[1] - a[1])[0];
 
     if (!blocker || !spot) return false;
@@ -5504,11 +5513,11 @@ async function mazeCheck() {
     const darkNext = await call('next-turn', NEXT);
 
     tcheck(
-        'Лабіринт: темрява блокує атаку (422), next-turn пропускає хід',
+        'Лабіринт: темрява блокує атаку (422), next-turn не позначає хід пропущеним',
         darkAtk.status === 422 &&
             JSON.stringify(darkAtk.body).includes(API_ERRORS.MAZE_DARK) &&
             darkNext.status === 200 &&
-            logText(darkNext.log).includes('Темрява — хід пропущено'),
+            !logText(darkNext.log).includes('Темрява — хід пропущено'),
         `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`
     );
 
