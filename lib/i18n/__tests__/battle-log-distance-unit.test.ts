@@ -8,6 +8,8 @@ const SPELL_ONLY = [
     'spellFx.anchoredAura',
     'spellFx.delayed',
     'spellFx.distanceDice',
+    'spellFx.moveSummon',
+    'spellFx.moveSummonFar',
 ];
 
 const LITERAL_UNIT = /\b(ft|feet)\b|фт/;

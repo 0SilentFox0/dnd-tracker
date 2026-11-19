@@ -6,7 +6,8 @@ export const HOMM_RULES_PRESET = {
     initiative: { heroMin: 10, heroMax: 16, mode: 'static' },
     saves: { proficiency: false },
     deathSaves: { enabled: false },
-    concentration: { enabled: false, dcCap: null },
+    // undefined overrides the d20 base flag: the heroes-homm pack leaves it unset
+    concentration: { enabled: false, dcCap: null, rageBreaks: undefined },
     conditions: { enabled: false, exhaustion: '2014' },
     actions: { enabled: false, variant: '2014' },
     classes: { enabled: false },
