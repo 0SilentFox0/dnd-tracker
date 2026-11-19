@@ -12,6 +12,11 @@ describe('avatarInitials', () => {
         [null, null, '?'],
         ['', '', '?'],
         ['😀 Bob', null, '😀B'],
+        ['e\u0301lise', null, 'E\u0301'],
+        ['🇺🇦 Bob', null, '🇺🇦B'],
+        ['👨‍👩‍👧 Bob', null, '👨‍👩‍👧B'],
+        ['👍🏽 Bob', null, '👍🏽B'],
+        ['Anna', null, 'A'],
     ])('%s / %s → %s', (name, email, out) => {
         expect(avatarInitials(name, email)).toBe(out);
     });

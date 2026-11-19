@@ -1,4 +1,10 @@
-const letter = (s: string) => Array.from(s.trim()).slice(0, 1).join('').toUpperCase();
+const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+const letter = (s: string) => {
+    const first = segmenter.segment(s.trim())[Symbol.iterator]().next();
+
+    return first.done ? '' : first.value.segment.toLocaleUpperCase();
+};
 
 export function avatarInitials(
     name?: string | null,
