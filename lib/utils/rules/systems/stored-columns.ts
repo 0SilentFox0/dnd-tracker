@@ -119,6 +119,17 @@ export function writeStoredColumn(
     return entry && setAtPath(row.characteristics, entry.path, value);
 }
 
+export function isStoredColumnActive(
+    rules: { system: SystemSelection },
+    column: string
+): boolean {
+    const entry = STORED_COLUMN_ENTRIES.find((e) => e.column === column);
+
+    const { base, modules } = composition(rules.system);
+
+    return !!entry && (entry.module === base || modules.includes(entry.module));
+}
+
 /** The module's stored ext value when the module is in the composition, else undefined (callers apply the default) */
 export function readStoredColumn<
     K extends 'number' | 'boolean',
@@ -131,12 +142,10 @@ export function readStoredColumn<
 ): (K extends 'number' ? number : boolean) | undefined {
     const entry = STORED_COLUMN_ENTRIES.find((e) => e.column === column);
 
-    const { base, modules } = composition(rules.system);
-
-    const active =
-        !!entry && (entry.module === base || modules.includes(entry.module));
-
-    const stored = active ? getAtPath(row.characteristics, entry.path) : null;
+    const stored =
+        isStoredColumnActive(rules, column) && entry
+            ? getAtPath(row.characteristics, entry.path)
+            : null;
 
     return typeof stored === kind
         ? (stored as K extends 'number' ? number : boolean)
@@ -152,4 +161,16 @@ export function storedColumnUpdate(
     const characteristics = writeStoredColumn(row, column, value);
 
     return characteristics ? { characteristics } : {};
+}
+
+/** Like `storedColumnUpdate`, but a no-op unless the column's module is in the composition */
+export function storedColumnCreate(
+    rules: { system: SystemSelection },
+    row: { characteristics?: unknown },
+    column: string,
+    value: number | boolean
+): { characteristics?: Record<string, unknown> } {
+    return isStoredColumnActive(rules, column)
+        ? storedColumnUpdate(row, column, value)
+        : {};
 }
