@@ -21,6 +21,7 @@ export type SoundPlayEvent = {
     soundId: string;
     nonce: string;
     volume: number;
+    url: string;
 };
 
 export type BuiltinSound = {
@@ -43,4 +44,32 @@ export type UpdateSoundData = {
     volume?: number;
     color?: string | null;
     icon?: string | null;
+};
+
+export type LibrarySound = {
+    id: string;
+    source: 'builtin' | 'library';
+    name: string | null;
+    nameKey?: string;
+    icon: string;
+    color: string | null;
+    volume: number;
+    url: string;
+    durationMs: number | null;
+};
+
+export type LibrarySoundRow = Omit<LibrarySound, 'source' | 'nameKey'> & {
+    sourceUrl: string | null;
+};
+
+export type SoundPreset = {
+    id: string;
+    name: string;
+    slots: (string | null)[];
+    sortOrder: number;
+};
+
+export type SoundLibrary = {
+    sounds: LibrarySoundRow[];
+    presets: SoundPreset[];
 };
