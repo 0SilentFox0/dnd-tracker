@@ -12,6 +12,7 @@ import {
     MAX_SLIDES_PER_DECK,
 } from './show';
 import {
+    MAX_PRESETS,
     MAX_SOUND_BYTES,
     MAX_SOUND_SECONDS,
     MAX_SOUNDS_PER_CAMPAIGN,
@@ -191,6 +192,11 @@ export const API_ERRORS = {
     SOUND_LIMIT: 'errors.soundLimit',
     SOUND_NOT_FOUND: 'errors.soundNotFound',
     SOUND_FILE_INVALID: 'validation.soundFileInvalid',
+    PRESET_NOT_FOUND: 'errors.presetNotFound',
+    PRESET_LIMIT: 'errors.presetLimit',
+    PRESET_SLOT_INVALID: 'errors.presetSlotInvalid',
+    SOUND_LINK_INVALID: 'errors.soundLinkInvalid',
+    SOUND_LINK_TOO_LARGE: 'errors.soundLinkTooLarge',
     TRACK_UPLOAD_MISSING: 'errors.trackUploadMissing',
     TRACK_DUPLICATE: 'errors.trackDuplicate',
     TRACK_ORDER_MISMATCH: 'errors.trackOrderMismatch',
@@ -595,6 +601,8 @@ export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
     [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },
     [API_ERRORS.TRACK_LIMIT]: { max: MAX_TRACKS_PER_CAMPAIGN },
     [API_ERRORS.SOUND_LIMIT]: { max: MAX_SOUNDS_PER_CAMPAIGN },
+    [API_ERRORS.PRESET_LIMIT]: { max: MAX_PRESETS },
+    [API_ERRORS.SOUND_LINK_TOO_LARGE]: { maxKb: MAX_SOUND_BYTES / 1024 },
     [API_ERRORS.SOUND_FILE_INVALID]: {
         formats: TRACK_FORMATS_LABEL,
         maxKb: MAX_SOUND_BYTES / 1024,
