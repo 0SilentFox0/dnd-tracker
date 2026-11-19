@@ -96,12 +96,6 @@ export type SceneStateReset = (
     slot: SystemSlot | undefined
 ) => SystemSlot | undefined;
 
-/** Upgrade-on-read: folds values still stored in legacy scene columns into the scene slot; `legacy` is keyed by column name */
-export type SceneStateUpgrade = (
-    slot: SystemSlot | undefined,
-    legacy: Record<string, unknown>
-) => SystemSlot | undefined;
-
 /** Clears the per-turn part of a participant's system state; 'reaction' = only what a regained reaction restores */
 export type TurnStateReset = (
     p: BattleParticipant,
@@ -115,7 +109,6 @@ export interface RuleSystemTurn {
     /** The scene slot loses its per-turn state when the turn moves on */
     resetScene?: readonly SceneStateReset[];
     /** Reads legacy scene columns into the scene slot (load and rollback) */
-    upgradeScene?: readonly SceneStateUpgrade[];
     /** Client turn gate (a check before the first action) */
     startCheck?: TurnStartCheck;
     /** Before the turn passes on */

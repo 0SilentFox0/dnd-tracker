@@ -7,7 +7,7 @@ import {
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { systemServerOf } from '@/lib/server/systems/registry';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
-import { resetSceneState, upgradeSceneState } from '@/lib/utils/battle/scene-state';
+import { resetSceneState } from '@/lib/utils/battle/scene-state';
 import { assertCanAct, assertCanEndTurn } from '@/lib/utils/battle/turn';
 import { beforeAdvanceHooks } from '@/lib/utils/battle/turn/hooks';
 import { type Ruleset } from '@/lib/utils/rules';
@@ -159,45 +159,7 @@ describe('morale module on d20', () => {
         expect(rolled).toBeLessThanOrEqual(10);
     });
 
-    it('upgrade-on-read folds the legacy column into the scene slot, round-trips, and leaves a migrated slot alone', () => {
-        const payload = {
-            participantId: 'hero',
-            d10Roll: 4,
-            moraleResult: {
-                shouldSkipTurn: true,
-                hasExtraTurn: false,
-                moralePositive: false,
-                message: '',
-            },
-        };
-
-        const upgraded = upgradeSceneState(withMorale, undefined, {
-            pendingMoraleCheck: payload,
-        });
-
-        expect(pendingMoraleOf(upgraded)).toEqual(payload);
-        expect(JSON.parse(JSON.stringify(upgraded))).toEqual(upgraded);
-
-        const cleared = resetSceneState(withMorale, upgraded);
-
-        expect(pendingMoraleOf(cleared)).toBeNull();
-        expect(
-            upgradeSceneState(withMorale, cleared, {
-                pendingMoraleCheck: payload,
-            })
-        ).toEqual(cleared);
-        expect(
-            upgradeSceneState(withMorale, undefined, {
-                pendingMoraleCheck: null,
-            })
-        ).toBeUndefined();
-    });
-
-    it('without the module the scene slot is neither upgraded nor reset', () => {
-        const legacy = { pendingMoraleCheck: { participantId: 'hero' } };
-
-        expect(upgradeSceneState(bare, undefined, legacy)).toBeUndefined();
-
+    it('without the module the scene slot is not reset', () => {
         const slot = { key: 'd20', data: { ext: { other: 1 } } };
 
         expect(resetSceneState(bare, slot)).toBe(slot);

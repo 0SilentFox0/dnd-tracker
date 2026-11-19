@@ -171,9 +171,6 @@ async function main() {
 
     for (const {
         id: sourceHeroId,
-        morale: _morale,
-        inspiration: _inspiration,
-        skillTreeProgress: _legacyProgress,
         inventory,
         characterSkills,
         campaignId: _campaignId,

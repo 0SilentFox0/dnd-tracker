@@ -16,16 +16,6 @@ export const resetSceneState = (
         slot
     );
 
-export const upgradeSceneState = (
-    rules: Ruleset,
-    slot: SystemSlot | undefined,
-    legacy: Record<string, unknown>
-): SystemSlot | undefined =>
-    (ruleSystemOf(rules).combat.turn?.upgradeScene ?? []).reduce(
-        (acc, upgrade) => upgrade(acc, legacy),
-        slot
-    );
-
 /** Patch for a turn change: only the slot that actually changed */
 export const sceneResetPatch = (
     rules: Ruleset,

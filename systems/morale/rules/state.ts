@@ -2,10 +2,7 @@ import type { PendingMoraleCheckPayload } from './threshold';
 
 import { isRecord } from '@/lib/utils/common/is-record';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type {
-    SceneStateReset,
-    SceneStateUpgrade,
-} from '@/lib/utils/rules/systems/types';
+import type { SceneStateReset } from '@/lib/utils/rules/systems/types';
 import { D20_SCENE } from '@/systems/d20/rules/scene-state';
 
 interface MoraleSceneState {
@@ -19,7 +16,6 @@ const parsePayload = (raw: unknown): PendingMoraleCheckPayload | null =>
         ? (raw as unknown as PendingMoraleCheckPayload)
         : null;
 
-/** `pending: null` marks a scene already moved off the legacy column */
 export const MORALE_SCENE = D20_SCENE.extend<MoraleSceneState>(
     'morale',
     (raw) =>
@@ -44,12 +40,3 @@ export function withPendingMorale(
 
 export const resetPendingMorale: SceneStateReset = (slot) =>
     withPendingMorale(slot, null);
-
-/** Legacy: only the pending-morale backfill script uses this; drop with the column */
-export const upgradePendingMorale: SceneStateUpgrade = (slot, legacy) => {
-    if (MORALE_SCENE.read(slot)) return slot;
-
-    const pending = parsePayload(legacy.pendingMoraleCheck);
-
-    return pending ? withPendingMorale(slot, pending) : slot;
-};

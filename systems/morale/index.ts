@@ -1,5 +1,5 @@
 import { moraleCapPart } from './rules/cap';
-import { resetPendingMorale, upgradePendingMorale } from './rules/state';
+import { resetPendingMorale } from './rules/state';
 import { applyPendingMorale } from './rules/turn/apply-pending';
 import { moraleGate } from './rules/turn/gate';
 import { moraleOutcomeOf } from './rules/turn/outcome';
@@ -14,7 +14,6 @@ export const MORALE_MODULE = defineAddon<RuleSystemDefinition>(() => ({
         turn: {
             beforeAdvance: [applyPendingMorale],
             resetScene: [resetPendingMorale],
-            upgradeScene: [upgradePendingMorale],
             actGates: [moraleGate],
             startCheck: {
                 due: awaitsMoraleCheck,
