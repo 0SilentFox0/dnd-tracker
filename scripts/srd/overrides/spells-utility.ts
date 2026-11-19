@@ -1,4 +1,5 @@
 import type { SpellRow } from '../lib/types';
+import { MINUTE, rounds } from './durations';
 
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
 import type {
@@ -12,11 +13,7 @@ type Override = Partial<
     Omit<SpellRow, 'slug' | 'name' | 'level' | 'groupId' | 'description'>
 >;
 
-const rounds = (n: number) => ({ rounds: n });
-
-// canon durations: 1 minute = 10 rounds; longer durations are capped at the 99-round effect maximum
-const MINUTE = 10;
-
+// longer durations are capped at the 99-round effect maximum
 const LONG = 99;
 
 const SELF: SpellTargeting = { kind: 'self' };

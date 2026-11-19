@@ -28,7 +28,10 @@ import {
 } from '@/lib/utils/battle/spell/cast/finish';
 import { applyGrantCasts } from '@/lib/utils/battle/spell/cast/grant-cast';
 import { applyHitRiders } from '@/lib/utils/battle/spell/cast/hit-rider';
-import { moveAdjacent, teleportTo } from '@/lib/utils/battle/spell/cast/move-self';
+import {
+    moveAdjacent,
+    teleportTo,
+} from '@/lib/utils/battle/spell/cast/move-self';
 import { resolveOutcome } from '@/lib/utils/battle/spell/cast/outcome';
 import { phantomRequests } from '@/lib/utils/battle/spell/cast/phantom';
 import {
@@ -62,6 +65,13 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { AbilityEvent } from '@/types/abilities';
 
 const DEFAULT_CONCENTRATION_ROUNDS = 10;
+
+export const effectRounds = (e: object): number =>
+    'duration' in e
+        ? ((e.duration as { rounds?: number } | undefined)?.rounds ?? 0)
+        : 'rounds' in e
+          ? (e.rounds as number)
+          : 0;
 
 export function castSpell(params: CastSpellParams): CastSpellResult {
     const {
@@ -358,12 +368,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
                 ? (def.targeting.zone?.rounds ?? 0)
                 : 0;
 
-        const rounds = Math.max(
-            zoneRounds,
-            ...def.effects.map((e) =>
-                'duration' in e ? (e.duration?.rounds ?? 0) : 0
-            )
-        );
+        const rounds = Math.max(zoneRounds, ...def.effects.map(effectRounds));
 
         const begun = sustain.begin(flow.ps, {
             casterId,

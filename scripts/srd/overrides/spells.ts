@@ -1,4 +1,5 @@
 import type { SpellRow } from '../lib/types';
+import { HOUR, MINUTE, rounds, TEN_MINUTES } from './durations';
 import { UTILITY_SPELL_OVERRIDES } from './spells-utility';
 
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
@@ -13,15 +14,6 @@ import type {
 export type SpellOverride = Partial<
     Omit<SpellRow, 'slug' | 'name' | 'level' | 'groupId' | 'description'>
 >;
-
-const rounds = (n: number) => ({ rounds: n });
-
-// canon durations: 1 minute = 10 rounds, 10 minutes = 100, 1 hour = 600
-const MINUTE = 10;
-
-const TEN_MINUTES = 100;
-
-const HOUR = 600;
 
 export const FRIENDLY_FIRE_SPELLS: ReadonlySet<string> = new Set(
     [
