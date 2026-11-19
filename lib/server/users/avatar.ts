@@ -14,12 +14,24 @@ export const createUserAvatarTicket = (
 ): Promise<Result<SlideUploadTicket>> =>
     userAvatars.createTicket(userId, contentType);
 
-async function listObjectUrls(userId: string, except?: string) {
+const STALE_AFTER_MS = 10 * 60 * 1000;
+
+const isStale = (o: { created_at?: string; updated_at?: string }) => {
+    const at = Date.parse(o.updated_at ?? o.created_at ?? '');
+
+    return Number.isFinite(at) && Date.now() - at > STALE_AFTER_MS;
+};
+
+async function listObjectUrls(
+    userId: string,
+    { except, staleOnly }: { except?: string; staleOnly?: boolean } = {}
+) {
     const storage = createAdminClient().storage.from(USER_AVATARS_BUCKET);
 
     const { data } = await storage.list(userId);
 
     return (data ?? [])
+        .filter((o) => !staleOnly || isStale(o))
         .map((o) => storage.getPublicUrl(`${userId}/${o.name}`).data.publicUrl)
         .filter((u) => u !== except);
 }
@@ -44,7 +56,7 @@ export async function commitUserAvatar(
     if (!(await setAvatarMetadata(userId, url)))
         return { ok: false, message: API_ERRORS.INTERNAL };
 
-    await userAvatars.remove(userId, await listObjectUrls(userId, url));
+    await userAvatars.remove(userId, await listObjectUrls(userId, { except: url, staleOnly: true }));
 
     return { ok: true, value: { avatarUrl: url } };
 }

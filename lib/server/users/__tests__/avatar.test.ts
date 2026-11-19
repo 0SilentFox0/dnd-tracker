@@ -75,8 +75,13 @@ describe('commitUserAvatar', () => {
     it('stores the url and removes the older objects', async () => {
         const url = `${base}/u1/${id('a')}.webp`;
 
+        const old = new Date(Date.now() - 3_600_000).toISOString();
+
         list.mockResolvedValue({
-            data: [{ name: `${id('a')}.webp` }, { name: `${id('b')}.webp` }],
+            data: [
+                { name: `${id('a')}.webp`, created_at: old },
+                { name: `${id('b')}.webp`, created_at: old },
+            ],
             error: null,
         });
 
@@ -88,6 +93,27 @@ describe('commitUserAvatar', () => {
             user_metadata: { custom_avatar_url: url },
         });
         expect(remove).toHaveBeenCalledWith([`u1/${id('b')}.webp`]);
+    });
+
+    it('keeps recent, unstamped and the committed objects (cross-tab race)', async () => {
+        const now = Date.now();
+
+        const at = (ms: number) => new Date(now - ms).toISOString();
+
+        list.mockResolvedValue({
+            data: [
+                { name: `${id('a')}.webp`, created_at: at(3_600_000) },
+                { name: `${id('b')}.webp`, created_at: at(60_000) },
+                { name: `${id('c')}.webp`, created_at: at(3_600_000), updated_at: at(1_000) },
+                { name: `${id('d')}.webp` },
+                { name: `${id('e')}.webp`, created_at: at(3_600_000) },
+            ],
+            error: null,
+        });
+
+        await commitUserAvatar('u1', `${base}/u1/${id('a')}.webp`);
+
+        expect(remove).toHaveBeenCalledWith([`u1/${id('e')}.webp`]);
     });
 
     it('keeps the new object when the metadata write fails', async () => {
