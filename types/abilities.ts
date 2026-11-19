@@ -81,6 +81,7 @@ export type AbilityEvent =
           cunningDice?: number;
           crit?: boolean;
           damageType?: string;
+          attackTraits?: string[];
       }
     | { type: 'kill'; actorId: string | null; targetId: string }
     | { type: 'lethalDamage'; actorId: string | null; targetId: string }

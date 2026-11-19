@@ -30,6 +30,8 @@ function defaultFor(type: Condition['type']): Condition {
             return { type, condition: 'no_reaction' };
         case 'targetCreatureType':
             return { type, types: ['humanoid'] };
+        case 'weaponTrait':
+            return { type, traits: ['finesse'] };
         case 'targetRace':
             return { type, races: [''] };
         case 'targetDead':

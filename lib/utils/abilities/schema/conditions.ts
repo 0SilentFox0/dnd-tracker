@@ -20,6 +20,7 @@ export type Condition =
     | { type: 'targetHasCondition'; condition: string }
     | { type: 'targetCreatureType'; types: string[] }
     | { type: 'targetRace'; races: string[] }
+    | { type: 'weaponTrait'; traits: string[] }
     | { type: 'targetDead' }
     | { type: 'actorIsEnemy' }
     | {
@@ -61,6 +62,10 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
         z.object({
             type: z.literal('targetRace'),
             races: z.array(z.string().min(1)).min(1),
+        }),
+        z.object({
+            type: z.literal('weaponTrait'),
+            traits: z.array(z.string().trim().min(1).max(40)).min(1).max(10),
         }),
         z.object({ type: z.literal('targetDead') }),
         z.object({ type: z.literal('actorIsEnemy') }),

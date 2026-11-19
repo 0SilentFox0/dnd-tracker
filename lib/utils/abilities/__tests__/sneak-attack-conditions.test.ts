@@ -15,7 +15,7 @@ import type { AbilityEvent } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 import type { GridPoint } from '@/types/battle-grid';
 
-const SNEAK: Condition = {
+const POSITIONING: Condition = {
     type: 'any',
     conditions: [
         { type: 'attackRollMode', mode: 'advantage' },
@@ -29,6 +29,20 @@ const SNEAK: Condition = {
                 },
             ],
         },
+    ],
+};
+
+const SNEAK: Condition = {
+    type: 'all',
+    conditions: [
+        {
+            type: 'any',
+            conditions: [
+                { type: 'weaponTrait', traits: ['finesse'] },
+                { type: 'attackKind', kind: 'ranged' },
+            ],
+        },
+        POSITIONING,
     ],
 };
 
@@ -75,6 +89,7 @@ const hit = (rollMode?: 'advantage' | 'disadvantage'): AbilityEvent => ({
     actorId: 'r',
     targetId: 't',
     attackKind: 'melee',
+    attackTraits: ['finesse'],
     damage: 5,
     ...(rollMode && { rollMode }),
 });
@@ -90,6 +105,18 @@ describe('Sneak Attack conditions', () => {
     it('advantage alone is enough, even without a map', () => {
         expect(hpAfter(scene(), hit('advantage'))).toBe(43);
         expect(hpAfter(scene(), hit())).toBe(50);
+    });
+
+    it('requires a finesse or ranged weapon', () => {
+        const heavy: AbilityEvent = { ...hit('advantage'), attackTraits: [] };
+
+        expect(hpAfter(scene(), heavy)).toBe(50);
+        expect(
+            hpAfter(scene(), { ...heavy, attackTraits: ['twoHanded'] })
+        ).toBe(50);
+        expect(
+            hpAfter(scene(), { ...heavy, attackKind: 'ranged' })
+        ).toBe(43);
     });
 
     it('an ally next to the target without disadvantage', () => {

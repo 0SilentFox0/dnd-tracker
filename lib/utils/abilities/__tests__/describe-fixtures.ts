@@ -347,6 +347,7 @@ const CONDITION_BASES: Record<Condition['type'], Condition> = {
         types: ['undead', 'fiend'],
     },
     targetRace: { type: 'targetRace', races: ['Orc'] },
+    weaponTrait: { type: 'weaponTrait', traits: ['finesse', 'light'] },
     targetDead: { type: 'targetDead' },
     actorIsEnemy: { type: 'actorIsEnemy' },
     hasMark: { type: 'hasMark', who: 'anyEnemy', markId: 'prey', bySelf: true },

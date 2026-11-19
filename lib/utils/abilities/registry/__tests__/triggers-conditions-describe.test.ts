@@ -44,6 +44,7 @@ const CONDITIONS: Condition[] = [
     { type: 'targetHasCondition', condition: 'stunned' },
     { type: 'targetCreatureType', types: ['undead', 'fiend'] },
     { type: 'targetRace', races: ['elf'] },
+    { type: 'weaponTrait', traits: ['finesse'] },
     { type: 'targetDead' },
     { type: 'actorIsEnemy' },
     { type: 'hasMark', who: 'eventTarget', markId: 'm', bySelf: true },

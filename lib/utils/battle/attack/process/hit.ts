@@ -167,6 +167,7 @@ export function resolveHit(p: ResolveHitParams): {
         ...(forgo > 0 && { cunningDice: forgo }),
         crit: p.attackRoll.isCritical,
         damageType: attack.damageType,
+        ...(attack.traits?.length && { attackTraits: attack.traits }),
     });
 
     applyHitRiders(flow, {

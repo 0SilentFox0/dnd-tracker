@@ -485,6 +485,9 @@
     "targetRace": {
       "label": "Раса цілі"
     },
+    "weaponTrait": {
+      "label": "Властивість зброї"
+    },
     "targetDead": {
       "label": "Ціль мертва"
     },
@@ -1153,6 +1156,7 @@
       "targetHasCondition": "ціль має стан «{condition}»",
       "targetCreatureType": "тип істоти цілі: {types}",
       "targetRace": "раса цілі: {races}",
+      "weaponTrait": "властивість зброї: {traits}",
       "targetDead": "ціль мертва",
       "actorIsEnemy": "виконавець події — ворог",
       "hasMark": "мітка «{markId}»{bySelf, select, yes { (лише моя)} other {}}: {who}",

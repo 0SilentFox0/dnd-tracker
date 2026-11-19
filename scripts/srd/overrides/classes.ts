@@ -83,16 +83,31 @@ const UNARMORED_NO_SHIELD: Condition = {
 const RAGING: Condition = { type: 'hasMark', who: 'self', markId: 'rage' };
 
 const SNEAK: Condition = {
-    type: 'any',
+    type: 'all',
     conditions: [
-        { type: 'attackRollMode', mode: 'advantage' },
         {
-            type: 'all',
+            type: 'any',
             conditions: [
-                { type: 'allyAdjacent' },
+                { type: 'weaponTrait', traits: ['finesse'] },
+                { type: 'attackKind', kind: 'ranged' },
+            ],
+        },
+        {
+            type: 'any',
+            conditions: [
+                { type: 'attackRollMode', mode: 'advantage' },
                 {
-                    type: 'not',
-                    condition: { type: 'attackRollMode', mode: 'disadvantage' },
+                    type: 'all',
+                    conditions: [
+                        { type: 'allyAdjacent' },
+                        {
+                            type: 'not',
+                            condition: {
+                                type: 'attackRollMode',
+                                mode: 'disadvantage',
+                            },
+                        },
+                    ],
                 },
             ],
         },
