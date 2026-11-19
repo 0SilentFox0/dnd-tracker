@@ -8,7 +8,7 @@ DM-панель швидких звуків: один дотик відтвор�
 - `sound_presets` — `userId`, `name`, `slots Json` (рівно 9 елементів: `soundId | null`), `sortOrder`; індекс `(userId, sortOrder)`, RLS. FK на слоти немає: видалення звуку в транзакції замінює його `null` у всіх пресетах акаунта.
 - `soundId` — id рядка бібліотеки або `builtin:<slug>`. Ліміти: `MAX_LIBRARY_SOUNDS` 100, `MAX_PRESETS` 30, `PRESET_SLOTS` 9.
 - Стартові пресети «Бій» і «Атмосфера» (`STARTER_PRESETS`, назви — ключі `soundboard.starter.*`) створюються один раз на акаунт при першому `GET`: маркер — прапорець `sound-presets-seeded` у `user_onboarding_flags` (видалення останнього пресета їх не повертає); дешева перевірка маркера йде до advisory lock `sound-presets:<userId>`.
-- Файли — bucket `soundboard` (`SOUNDBOARD_BUCKET`), створюється ліниво через `ensureBucket`; signed upload через `lib/supabase/audio-upload.ts` і `lib/api/upload-audio-file.ts` (спільні з battle-music). Стара `campaign_sounds` і `Campaign.hiddenBuiltinSounds` прибрані з Prisma-схеми, але ще є в БД (див. нижче).
+- Файли — bucket `soundboard` (`SOUNDBOARD_BUCKET`), створюється ліниво через `ensureBucket`; signed upload через `lib/supabase/audio-upload.ts` і `lib/api/upload-audio-file.ts` (спільні з battle-music). Стара `campaign_sounds` і `Campaign.hiddenBuiltinSounds` прибрані з Prisma-схеми, і видалені з БД міграцією нижче.
 
 ## Вбудований реєстр
 
@@ -45,14 +45,6 @@ DM-панель швидких звуків: один дотик відтвор�
 
 Пропущену подію не відтворюємо. `MAX_SOUND_BYTES` 1 МБ, `MAX_SOUND_SECONDS` 10; клієнт гасить подвійний клік за `PAD_GUARD_MS`. Прев'ю «Тільки мені» не розсилається.
 
-## Відкладена міграція видалення (contract)
+## Міграція видалення (contract)
 
-Міграцію `20261210000001_drop_campaign_sounds` зняли з гілки: contract-крок має йти окремим деплоєм після того, як жоден читач не лишився (`.claude/rules/db-deploy.md`). Додати окремим комітом після першого деплою бібліотеки:
-
-```sql
-DROP TABLE "campaign_sounds";
-
-ALTER TABLE "campaigns" DROP COLUMN "hidden_builtin_sounds";
-```
-
-Початковий коміт видалення: 99bb03985.
+`20261212000000_drop_campaign_sounds` (окремий деплой після бібліотеки, 2026-11-19): `DROP TABLE campaign_sounds` і `campaigns.hidden_builtin_sounds`. На проді обидва були порожні, читачів у коді немає (коміт, що прибрав читачів: 99bb03985).
