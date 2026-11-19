@@ -13,6 +13,7 @@ type SpellOnly = Extract<
             | 'transform'
             | 'phantom'
             | 'moveSelf'
+            | 'teleportSelf'
             | 'createTerrain'
             | 'chooseOne';
     }
@@ -27,6 +28,7 @@ const SPELL_ONLY_KINDS = new Set([
     'transform',
     'phantom',
     'moveSelf',
+    'teleportSelf',
     'createTerrain',
     'chooseOne',
 ]);
@@ -140,6 +142,9 @@ export function describeSpellOnly(
 
         case 'moveSelf':
             return [seg('summary.spellOnly.moveSelf')];
+
+        case 'teleportSelf':
+            return [seg('summary.spellOnly.teleportSelf')];
 
         case 'createTerrain':
             return [

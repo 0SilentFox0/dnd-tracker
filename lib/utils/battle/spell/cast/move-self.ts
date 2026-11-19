@@ -113,3 +113,38 @@ export function moveAdjacent(
         }),
     };
 }
+
+export function teleportTo(
+    map: BattleMapConfig | null | undefined,
+    participants: BattleParticipant[],
+    moverId: string,
+    cell: GridPoint | undefined
+): { participants: BattleParticipant[]; message: LogLine } {
+    const mover = participants.find((p) => p.basicInfo.id === moverId);
+
+    if (!mover) return { participants, message: '' };
+
+    const blocked = occupiedBy(
+        participants,
+        (p) => p.basicInfo.id !== moverId
+    );
+
+    if (!map || !cell || !isOnMap(mover) || !fits(map, cell, sizeOf(mover), blocked))
+        return {
+            participants,
+            message: textRef('battleLog.spellFx.teleportBlocked', {
+                mover: mover.basicInfo.name,
+            }),
+        };
+
+    return {
+        participants: participants.map((p) =>
+            p === mover
+                ? { ...p, battleData: { ...p.battleData, position: cell } }
+                : p
+        ),
+        message: textRef('battleLog.spellFx.teleport', {
+            mover: mover.basicInfo.name,
+        }),
+    };
+}

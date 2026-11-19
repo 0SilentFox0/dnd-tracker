@@ -135,6 +135,10 @@ const CASES: [SpellEffect, string][] = [
         'кастер переміщується до цілі',
     ],
     [
+        { kind: 'teleportSelf' },
+        'заклиначка телепортується в обрану клітинку',
+    ],
+    [
         {
             kind: 'createTerrain',
             terrain: 'wall',

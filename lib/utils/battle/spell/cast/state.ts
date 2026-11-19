@@ -117,6 +117,7 @@ export const SPELL_ONLY_KINDS = new Set<string>([
     'grantCast',
     'hitRider',
     'moveSelf',
+    'teleportSelf',
     'createTerrain',
     'anchoredZone',
     'summonInline',
@@ -156,6 +157,9 @@ export const anchoredZonesOf = (
 
 export const hasMoveSelf = (effects: SpellEffect[]) =>
     effects.some((e) => e.kind === 'moveSelf');
+
+export const hasTeleportSelf = (effects: SpellEffect[]) =>
+    effects.some((e) => e.kind === 'teleportSelf');
 
 export const inputDiceOf = (
     effects: SpellEffect[]

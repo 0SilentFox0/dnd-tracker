@@ -19,11 +19,13 @@ import {
     applyDot,
     applyHeal,
     applyHot,
+    applyMaxHpBoost,
     applyTempHp,
     describeDealDamage,
     describeDot,
     describeHeal,
     describeHot,
+    describeMaxHpBoost,
     describeTempHp,
 } from './hp';
 import { applyManeuver, describeManeuver } from './maneuver';
@@ -188,6 +190,13 @@ const BASE_EFFECT_REGISTRY: {
         describe: describeTempHp,
         apply: applyTempHp,
     },
+    maxHpBoost: {
+        kind: 'maxHpBoost',
+        static: false,
+        fields: [AMOUNT, TARGET_FIELD],
+        describe: describeMaxHpBoost,
+        apply: applyMaxHpBoost,
+    },
     dot: {
         kind: 'dot',
         static: false,
@@ -349,6 +358,7 @@ const BASE_EFFECT_REGISTRY: {
         fields: [
             { name: 'markId', input: 'text' },
             { ...AMOUNT, optional: true },
+            { name: 'positive', input: 'toggle', optional: true },
             TARGET_FIELD,
             REQUIRED_DURATION,
         ],
@@ -404,6 +414,7 @@ const BASE_EFFECT_REGISTRY: {
         static: false,
         fields: [
             { name: 'includeConditions', input: 'toggle', optional: true },
+            { name: 'includeBuffs', input: 'toggle', optional: true },
             TARGET_FIELD,
         ],
         describe: (e) => [

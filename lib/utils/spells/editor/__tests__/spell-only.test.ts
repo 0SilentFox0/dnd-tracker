@@ -25,6 +25,7 @@ describe('spell-only kinds', () => {
             'moveSelf',
             'phantom',
             'summonInline',
+            'teleportSelf',
             'transform',
         ]);
     });

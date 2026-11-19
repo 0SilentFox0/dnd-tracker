@@ -68,6 +68,7 @@ const BASE_DEFAULTS: {
     dealDamage: { amount: '1d6', target: 'eventTarget' },
     heal: { amount: '1d8' },
     tempHp: { amount: '1d8' },
+    maxHpBoost: { amount: 5 },
     dot: {
         damagePerRound: '1d4',
         damageType: 'bleed',

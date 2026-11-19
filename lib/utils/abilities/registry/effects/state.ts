@@ -336,6 +336,7 @@ export function applyCleanse(
                 p,
                 (e) =>
                     e.type === 'debuff' ||
+                    (!!effect.includeBuffs && e.type === 'buff') ||
                     (!!effect.includeConditions && e.type === 'condition')
             );
 
@@ -414,7 +415,7 @@ export function applyMark(
                     timedKey: markKey(effect.markId),
                     source: effectSource(owner, ability),
                     name: ability.name,
-                    type: die > 0 ? 'buff' : 'debuff',
+                    type: die > 0 || effect.positive ? 'buff' : 'debuff',
                     rounds: effect.duration.rounds,
                     stackable: die === 0,
                     countdownAtTurnStart: true,

@@ -9,6 +9,7 @@ import { InputDiceEditor } from './editors/InputDiceEditor';
 import { MoveSelfEditor } from './editors/MoveSelfEditor';
 import { PhantomEditor } from './editors/PhantomEditor';
 import { SummonInlineEditor } from './editors/SummonInlineEditor';
+import { TeleportSelfEditor } from './editors/TeleportSelfEditor';
 import { TransformEditor } from './editors/TransformEditor';
 import type { SpellOnlyEditorProps } from './spell-only-types';
 
@@ -22,6 +23,7 @@ export const SPELL_ONLY_EDITORS: EditorMap = {
     chooseOne: ChooseOneEditor,
     inputDice: InputDiceEditor,
     moveSelf: MoveSelfEditor,
+    teleportSelf: TeleportSelfEditor,
     phantom: PhantomEditor,
     createTerrain: CreateTerrainEditor,
     transform: TransformEditor,

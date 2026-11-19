@@ -394,6 +394,8 @@
     "moveSelfNoMap": "🌀 {mover}: moves to {target} (no map)",
     "moveSelfNoCell": "🌀 {mover}: no free cell next to {target}",
     "moveSelf": "🌀 {mover}: moves to {target}",
+    "teleport": "🌀 {mover}: teleports",
+    "teleportBlocked": "🌀 {mover}: the destination cell is blocked or out of reach",
     "pendingMiss": "💨 “{spell}”: the target is unavailable, the strike dissipates",
     "pendingHit": "💥 “{spell}” hits: {target} −{damage} HP",
     "zoneSave": "🎲 {target}: “{spell}” — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",

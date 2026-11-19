@@ -256,6 +256,8 @@ const MoveSelfSchema = z.object({
     to: z.literal('adjacentToTarget'),
 });
 
+const TeleportSelfSchema = z.object({ kind: z.literal('teleportSelf') });
+
 const CreateTerrainSchema = z.object({
     kind: z.literal('createTerrain'),
     terrain: z.enum(['wall', 'difficult']),
@@ -327,6 +329,7 @@ const SPELL_ONLY_EFFECTS = [
     GrantCastSchema,
     HitRiderSchema,
     MoveSelfSchema,
+    TeleportSelfSchema,
     CreateTerrainSchema,
     AnchoredZoneSchema,
     SummonInlineSchema,
