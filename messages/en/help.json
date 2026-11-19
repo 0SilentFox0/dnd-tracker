@@ -441,5 +441,19 @@
         "b1": "Switching a module off keeps its data: settings and learned skills come back when you turn it on again. Setup modules (the ones that change how heroes are calculated) ask for confirmation first. Nothing is saved until you press Apply in the summary."
       }
     }
+  },
+  "dm-soundboard": {
+    "title": "Soundboard",
+    "summary": "Play sound effects for the whole table, preview them privately and upload your own.",
+    "sections": {
+      "s0": {
+        "heading": "Playing sounds",
+        "b0": "Open the soundboard and tap a pad: the sound plays for every player who has the campaign open. Use the preview button on a pad to hear it only on your device."
+      },
+      "s1": {
+        "heading": "Your own sounds",
+        "b0": "Switch to edit mode to upload a sound, rename it, change its volume or colour, or delete it. Built-in sounds can only be hidden. A sound is limited to 10 seconds and 1 MB."
+      }
+    }
   }
 }
