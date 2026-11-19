@@ -192,7 +192,11 @@ describe('атака: вибір крита ДМ-ом', () => {
         const pending = (await attack(paused, body())).scene?.pendingChoice;
 
         const resumed = await critChoice(
-            { ...paused, scene: { ...paused.scene, pendingChoice: pending! } },
+            {
+                ...paused,
+                isDM: true,
+                scene: { ...paused.scene, pendingChoice: pending! },
+            },
             { choices: { 'attack:hero:gob:0': 'random' } }
         );
 

@@ -1,7 +1,7 @@
 import type { Amount } from '@/lib/utils/abilities/schema';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
-export const D20_RIDER = 'd20Rider';
+export const HELD_DIE_EFFECT = 'd20Rider';
 
 export interface HeldRider {
     effectId: string;
@@ -22,7 +22,7 @@ export function dieSizeOf(amount: Amount, resolved: number): number {
 }
 
 const dieOf = (e: ActiveEffect): number =>
-    e.effects.find((x) => x.type === D20_RIDER)?.value ?? 0;
+    e.effects.find((x) => x.type === HELD_DIE_EFFECT)?.value ?? 0;
 
 export function heldRider(p: BattleParticipant): HeldRider | null {
     const best = p.battleData.activeEffects

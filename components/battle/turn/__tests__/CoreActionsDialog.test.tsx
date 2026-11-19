@@ -92,7 +92,7 @@ describe('CoreActionsDialog', () => {
         expect(onDone).toHaveBeenCalled();
     });
 
-    it("ціль обов'язкова; вороги для схоплення, союзники для допомоги", async () => {
+    it("ціль обов'язкова; вороги для схоплення і допомоги", async () => {
         const { coreAction } = setup();
 
         fireEvent.click(row('Схопити'));
@@ -116,8 +116,8 @@ describe('CoreActionsDialog', () => {
         );
 
         fireEvent.click(row('Допомога'));
-        expect(screen.queryByRole('radio', { name: 'Гоблін' })).toBeNull();
-        expect(screen.getByRole('radio', { name: 'Годрік' })).toBeTruthy();
+        expect(screen.queryByRole('radio', { name: 'Годрік' })).toBeNull();
+        expect(screen.getByRole('radio', { name: 'Гоблін' })).toBeTruthy();
     });
 
     it('штовхання має вибір «Повалити / Відштовхнути»', async () => {

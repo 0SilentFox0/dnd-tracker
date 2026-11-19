@@ -58,8 +58,8 @@ describe('system ui registry', () => {
         expect(dndBattle.badges?.map((b) => b.name)).toEqual([
             'DeathSaveBadge',
         ]);
-        expect(hommBattle.dialogs).toHaveLength(2);
-        expect(dndBattle.dialogs).toHaveLength(1);
+        expect(hommBattle.dialogs).toHaveLength(3);
+        expect(dndBattle.dialogs).toHaveLength(2);
         expect([
             hommForms?.fields?.length,
             hommSheet?.combatRows?.length,

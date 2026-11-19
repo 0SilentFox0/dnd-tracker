@@ -541,7 +541,7 @@ describe('zones with cast dice', () => {
     it('canon durations survive past the old 10-round cap', () => {
         const map = dicey(10);
 
-        expect(pruneExpiredTerrain(map, 11)?.terrain?.['4:4']).toBeDefined();
+        expect(pruneExpiredTerrain(map, 11)).toBeNull();
         expect(map.terrain?.['4:4']?.untilRound).toBe(100);
     });
 });

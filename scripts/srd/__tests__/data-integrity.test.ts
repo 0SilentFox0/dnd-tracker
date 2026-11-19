@@ -136,7 +136,7 @@ describe('SRD 5.2 data files', () => {
         }
     );
 
-    it("no self-targeted spell harms a creature (only Contact Other Plane, the caster's own price)", () => {
+    it("no self-targeted spell harms a creature (only Contact Other Plane, the caster's own price; Mislead makes the caster invisible)", () => {
         const harmful = data.spells
             .filter(
                 (r) =>
@@ -149,7 +149,7 @@ describe('SRD 5.2 data files', () => {
             )
             .map((r) => r.name);
 
-        expect(harmful).toEqual(['Contact Other Plane']);
+        expect(harmful).toEqual(['Contact Other Plane', 'Mislead']);
     });
 
     it("a damage or heal row's dice appear in its own text", () => {
@@ -192,7 +192,7 @@ describe('SRD 5.2 data files', () => {
             kind: 'template',
             shape: 'line',
             size: 60,
-            side: 'enemy',
+            side: 'all',
         });
         expect(byName('Hex').targeting).toEqual({ kind: 'enemy', range: 90 });
         expect(byName("Hunter's Mark").targeting).toEqual({

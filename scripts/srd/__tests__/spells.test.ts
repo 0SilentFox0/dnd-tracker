@@ -138,20 +138,22 @@ describe('convertSpells', () => {
         });
     });
 
-    it('Spirit Guardians is a self-centered emanation; all SRD circles are exact', () => {
+    it('Spirit Guardians is an aura anchored on the caster; all SRD circles are exact', () => {
         expect(spell('spirit-guardians')).toMatchObject({
-            targeting: {
-                kind: 'template',
-                shape: 'emanation',
-                size: 15,
-                side: 'enemy',
-            },
-            resolution: { kind: 'save', ability: 'wisdom', onSuccess: 'half' },
+            targeting: { kind: 'self' },
+            resolution: { kind: 'auto' },
+            spellEffects: [
+                {
+                    kind: 'anchoredZone',
+                    radiusFeet: 15,
+                    side: 'enemies',
+                    excludeBearer: true,
+                },
+            ],
             dice: 3,
             dieSides: 8,
             upcastDice: 1,
         });
-        expect(spell('spirit-guardians').targeting).not.toHaveProperty('range');
         expect(
             spells
                 .filter(
@@ -167,13 +169,16 @@ describe('convertSpells', () => {
         ).toBe(true);
     });
 
-    it('Hex deals no damage on cast; Teleport (d100) has no dice; Sacred Flame cantrip has no upcast', () => {
+    it('Hex deals no damage on cast; Teleport (d100) has no dice and teleports the caster; Sacred Flame cantrip has no upcast', () => {
         expect(spell('hex')).toMatchObject({
             dice: 0,
             cost: 'bonusAction',
             targeting: { kind: 'enemy', range: 90 },
         });
-        expect(spell('teleport')).toMatchObject({ dice: 0, spellEffects: [] });
+        expect(spell('teleport')).toMatchObject({
+            dice: 0,
+            spellEffects: [{ kind: 'teleportSelf' }],
+        });
         expect(spell('teleport').dieSides).toBeUndefined();
         expect(spell('sacred-flame')).toMatchObject({
             resolution: {
@@ -229,9 +234,8 @@ describe('convertSpells', () => {
         ]);
         expect(spell('web').dieSides).toBeUndefined();
         expect(spell('dimension-door')).toMatchObject({
-            dice: 0,
-            targeting: { kind: 'self' },
-            spellEffects: [],
+            targeting: { kind: 'template', exact: true, range: 500 },
+            spellEffects: [{ kind: 'teleportSelf' }],
         });
         expect(spell('shield')).toMatchObject({
             targeting: { kind: 'self' },

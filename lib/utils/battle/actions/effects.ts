@@ -72,8 +72,13 @@ export function dropHelpFrom(
 ): BattleParticipant[] {
     const key = coreTimedKey('help', helperId);
 
+    const holds = (p: BattleParticipant) =>
+        p.battleData.activeEffects.some((e) => e.abilityKey === key);
+
+    if (!participants.some(holds)) return participants;
+
     return participants.map((p) =>
-        p.battleData.activeEffects.some((e) => e.abilityKey === key)
+        holds(p)
             ? {
                   ...p,
                   battleData: {

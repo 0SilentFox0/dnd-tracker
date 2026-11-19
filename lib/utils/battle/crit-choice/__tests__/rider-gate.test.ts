@@ -10,7 +10,7 @@ import {
     makeParticipant,
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
-import { D20_RIDER } from '@/lib/utils/battle/d20-rider/held';
+import { HELD_DIE_EFFECT } from '@/lib/utils/battle/d20-rider/held';
 import type { BattleParticipant } from '@/types/battle';
 
 const holder = (die = 6): BattleParticipant => {
@@ -21,7 +21,7 @@ const holder = (die = 6): BattleParticipant => {
         battleData: {
             ...p.battleData,
             activeEffects: [
-                makeEffect('insp', { effects: [{ type: D20_RIDER, value: die }] }),
+                makeEffect('insp', { effects: [{ type: HELD_DIE_EFFECT, value: die }] }),
             ],
         },
     };

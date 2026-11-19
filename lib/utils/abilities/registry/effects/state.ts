@@ -32,7 +32,7 @@ import {
 import { helpEffect } from '@/lib/utils/battle/actions/effects';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import type { ConditionKey } from '@/lib/utils/battle/conditions/set';
-import { D20_RIDER, dieSizeOf } from '@/lib/utils/battle/d20-rider/held';
+import { dieSizeOf,HELD_DIE_EFFECT } from '@/lib/utils/battle/d20-rider/held';
 import { grantExtraActions } from '@/lib/utils/battle/participant/helpers';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
 import { resetSystemState } from '@/lib/utils/battle/turn/turn-state';
@@ -420,7 +420,7 @@ export function applyMark(
                     stackable: die === 0,
                     countdownAtTurnStart: true,
                     ...(die > 0 && {
-                        effects: [{ type: D20_RIDER, value: die }],
+                        effects: [{ type: HELD_DIE_EFFECT, value: die }],
                     }),
                 },
                 ctx.round

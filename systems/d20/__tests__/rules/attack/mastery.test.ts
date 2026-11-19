@@ -43,6 +43,7 @@ function attacker(kinds: string[] = ['longsword']): BattleParticipant {
             ...p.abilities,
             damageModel: '5e',
             proficiencyBonus: 3,
+            strength: 16,
             modifiers: { ...p.abilities.modifiers, strength: 3 },
         },
     };

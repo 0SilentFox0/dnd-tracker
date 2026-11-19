@@ -170,7 +170,7 @@ describe('scaled class abilities', () => {
         });
     });
 
-    it('Sneak Attack at Rogue 5 → 3d6, once per turn, advantage or ally adjacent', () => {
+    it('Sneak Attack at Rogue 5 → 3d6, once per turn, finesse/ranged with advantage or ally adjacent', () => {
         expect(scaled('Rogue', 'Sneak Attack', 5).effects[0]).toMatchObject({
             kind: 'dealDamage',
             amount: '3d6',
@@ -179,7 +179,7 @@ describe('scaled class abilities', () => {
         expect(ability('Rogue', 'Sneak Attack')).toMatchObject({
             trigger: { event: 'hit', role: 'attacker' },
             limits: { perTurn: 1 },
-            condition: { type: 'any' },
+            condition: { type: 'all' },
         });
     });
 

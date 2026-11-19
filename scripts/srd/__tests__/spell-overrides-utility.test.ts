@@ -36,7 +36,9 @@ describe('utility spell overrides', () => {
         for (const slug of ['raise-dead', 'resurrection', 'true-resurrection'])
             expect(SPELL_OVERRIDES[`srd-2024_${slug}`]).toMatchObject({
                 targeting: { kind: 'allyDead' },
-                spellEffects: [{ kind: 'heal', revive: true }],
+                spellEffects: expect.arrayContaining([
+                    expect.objectContaining({ kind: 'heal', revive: true }),
+                ]),
             });
     });
 

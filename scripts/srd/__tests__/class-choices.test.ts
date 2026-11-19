@@ -86,7 +86,7 @@ describe('class choices', () => {
                     id.startsWith('epic-boon')
             )
         ).toBe(false);
-        expect(abilityIds('Fighter')).toContain('weapon-mastery-1');
+        expect(abilityIds('Fighter')).not.toContain('weapon-mastery-1');
     });
 
     it('Paladin and Ranger Fighting Style embed Blessed / Druidic Warrior', () => {

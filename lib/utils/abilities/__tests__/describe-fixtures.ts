@@ -273,7 +273,7 @@ const MERGED_EFFECTS: Effect[] = [
 ];
 
 export const EFFECT_FIXTURES: Effect[] = [
-    ...Object.values(BASE_EFFECTS).filter((e) => e.kind !== 'maxHpBoost'),
+    ...Object.values(BASE_EFFECTS),
     ...FLAG_FIXTURES,
     ...VARIANT_EFFECTS,
     ...MERGED_EFFECTS,

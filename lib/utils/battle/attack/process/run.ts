@@ -224,27 +224,25 @@ function spendAttackAction(run: AttackRun): void {
 
     const attacker = getP(flow, attackerId);
 
-    const free = params.offHand
-        ? ruleSystemOf(flow.ctx.rules).combat.secondaryAttack?.free?.(
-              attacker,
-              params.attack,
-              params.currentRound
-          )
+    const off = params.offHand
+        ? {
+              free: ruleSystemOf(flow.ctx.rules).combat.secondaryAttack?.free?.(
+                  attacker,
+                  params.attack,
+                  params.currentRound
+              ),
+              bonus: Boolean(actionEconomyOf(flow.ctx.rules).bonusAction),
+          }
         : null;
 
-    put(
-        flow,
-        free ??
-            (params.offHand && actionEconomyOf(flow.ctx.rules).bonusAction
-                ? {
-                      ...attacker,
-                      actionFlags: {
-                          ...attacker.actionFlags,
-                          hasUsedBonusAction: true,
-                      },
-                  }
-                : spendAttack(attacker, flow.ps, params.attack, flow.ctx.rules))
-    );
+    const spent = off?.bonus
+        ? {
+              ...attacker,
+              actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true },
+          }
+        : spendAttack(attacker, flow.ps, params.attack, flow.ctx.rules);
+
+    put(flow, off?.free ?? spent);
 }
 
 function consume(

@@ -178,6 +178,7 @@ const BASE_EFFECT_REGISTRY: {
         fields: [
             AMOUNT,
             { name: 'revive', input: 'toggle', optional: true },
+            { name: 'unlessDamagedBy', input: 'strings', optional: true },
             TARGET_FIELD,
         ],
         describe: describeHeal,

@@ -128,10 +128,18 @@ export function convertSpell(
 
     const merged = { ...base, ...SPELL_OVERRIDES[row.pk] };
 
-    return merged.targeting.kind === 'template' &&
-        FRIENDLY_FIRE_SPELLS.has(row.pk)
-        ? { ...merged, targeting: { ...merged.targeting, side: 'all' } }
-        : merged;
+    const aim = merged.targeting;
+
+    if (aim.kind !== 'template') return merged;
+
+    return {
+        ...merged,
+        targeting: {
+            ...aim,
+            ...(FRIENDLY_FIRE_SPELLS.has(row.pk) && { side: 'all' as const }),
+            ...(aim.shape === 'circle' && { exact: true as const }),
+        },
+    };
 }
 
 export function convertSpells(data: Open5eData): SpellRow[] {

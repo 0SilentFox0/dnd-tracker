@@ -3783,7 +3783,8 @@
       "size": 20,
       "side": "all",
       "maxTargets": 20,
-      "range": 60
+      "range": 60,
+      "exact": true
     },
     "resolution": {
       "kind": "save",
@@ -4872,7 +4873,8 @@
       "size": 10,
       "side": "all",
       "maxTargets": 20,
-      "range": 90
+      "range": 90,
+      "exact": true
     },
     "resolution": {
       "kind": "save",
@@ -6023,7 +6025,8 @@
         "rounds": 99,
         "label": "Daylight",
         "side": "all"
-      }
+      },
+      "exact": true
     },
     "resolution": {
       "kind": "auto"
@@ -15838,7 +15841,8 @@
           "difficult"
         ],
         "side": "all"
-      }
+      },
+      "exact": true
     },
     "resolution": {
       "kind": "auto"
@@ -17399,7 +17403,8 @@
       "size": 50,
       "side": "all",
       "maxTargets": 20,
-      "range": 100
+      "range": 100,
+      "exact": true
     },
     "resolution": {
       "kind": "save",
@@ -18502,7 +18507,8 @@
             }
           ]
         }
-      }
+      },
+      "exact": true
     },
     "resolution": {
       "kind": "auto"

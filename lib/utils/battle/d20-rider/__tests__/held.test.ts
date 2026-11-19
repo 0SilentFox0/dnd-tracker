@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { consumeRider, D20_RIDER, dieSizeOf, heldRider } from '../held';
+import { consumeRider, dieSizeOf, HELD_DIE_EFFECT, heldRider } from '../held';
 
 import {
     makeEffect,
@@ -16,7 +16,7 @@ const holding = (...dice: number[]): BattleParticipant => {
         battleData: {
             ...p.battleData,
             activeEffects: dice.map((value, i) =>
-                makeEffect(`e${i}`, { effects: [{ type: D20_RIDER, value }] })
+                makeEffect(`e${i}`, { effects: [{ type: HELD_DIE_EFFECT, value }] })
             ),
         },
     };

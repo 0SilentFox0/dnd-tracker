@@ -27,6 +27,10 @@ exports[`describeCondition > pins uk text 1`] = `
     "раса цілі: elf",
   ],
   [
+    "weaponTrait",
+    "властивість зброї: finesse",
+  ],
+  [
     "targetDead",
     "ціль мертва",
   ],
