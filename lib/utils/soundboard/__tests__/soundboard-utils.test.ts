@@ -55,8 +55,10 @@ describe('resolveSound', () => {
         ).toBeNull();
     });
 
-    it('registry has 20 unique builtin sounds', () => {
-        expect(new Set(BUILTIN_SOUNDS.map((s) => s.id)).size).toBe(20);
+    it('registry has unique builtin sounds', () => {
+        expect(new Set(BUILTIN_SOUNDS.map((s) => s.id)).size).toBe(
+            BUILTIN_SOUNDS.length
+        );
     });
 });
 

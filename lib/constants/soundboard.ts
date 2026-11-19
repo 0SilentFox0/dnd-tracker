@@ -23,14 +23,12 @@ export const BUILTIN_SOUNDS: readonly BuiltinSound[] = [
     builtin('door-slam', 'door-closed'),
     builtin('sword-hit', 'swords'),
     builtin('sword-draw', 'sword'),
-    builtin('bow-shot', 'target'),
     builtin('thunder', 'cloud-lightning'),
     builtin('explosion', 'bomb'),
     builtin('fire', 'flame'),
     builtin('magic-cast', 'sparkles'),
     builtin('heal', 'heart-pulse'),
     builtin('wolf-howl', 'paw-print'),
-    builtin('tavern', 'beer'),
     builtin('footsteps', 'footprints'),
     builtin('scream', 'megaphone'),
     builtin('coins', 'coins'),
@@ -38,7 +36,6 @@ export const BUILTIN_SOUNDS: readonly BuiltinSound[] = [
     builtin('chest-open', 'package-open'),
     builtin('glass-break', 'glass-water'),
     builtin('dragon-roar', 'skull'),
-    builtin('crowd-cheer', 'party-popper'),
 ];
 
 export const BUILTIN_SOUND_IDS: ReadonlySet<string> = new Set(

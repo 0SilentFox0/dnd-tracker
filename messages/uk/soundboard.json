@@ -27,21 +27,18 @@
     "door-slam": "Двері грюкають",
     "sword-hit": "Удар мечем",
     "sword-draw": "Меч з піхов",
-    "bow-shot": "Постріл з лука",
     "thunder": "Грім",
     "explosion": "Вибух",
     "fire": "Вогонь",
     "magic-cast": "Закляття",
     "heal": "Зцілення",
     "wolf-howl": "Виття вовка",
-    "tavern": "Таверна",
     "footsteps": "Кроки",
     "scream": "Крик",
     "coins": "Монети",
     "bell": "Дзвін",
     "chest-open": "Скриня відчиняється",
     "glass-break": "Розбите скло",
-    "dragon-roar": "Рев дракона",
-    "crowd-cheer": "Овації натовпу"
+    "dragon-roar": "Рев дракона"
   }
 }

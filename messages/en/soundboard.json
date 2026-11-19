@@ -27,21 +27,18 @@
     "door-slam": "Door slams",
     "sword-hit": "Sword hit",
     "sword-draw": "Sword drawn",
-    "bow-shot": "Bow shot",
     "thunder": "Thunder",
     "explosion": "Explosion",
     "fire": "Fire",
     "magic-cast": "Spell cast",
     "heal": "Healing",
     "wolf-howl": "Wolf howl",
-    "tavern": "Tavern",
     "footsteps": "Footsteps",
     "scream": "Scream",
     "coins": "Coins",
     "bell": "Bell",
     "chest-open": "Chest opens",
     "glass-break": "Glass breaks",
-    "dragon-roar": "Dragon roar",
-    "crowd-cheer": "Crowd cheers"
+    "dragon-roar": "Dragon roar"
   }
 }
