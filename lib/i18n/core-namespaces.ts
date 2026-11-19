@@ -60,7 +60,10 @@ const SITE_NAMESPACES = [
     'compendiumReport',
 ] as const;
 
+const DM_NAMESPACES = ['contentCopy'] as const;
+
 type CoreNamespace =
+    | (typeof DM_NAMESPACES)[number]
     | (typeof SITE_NAMESPACES)[number]
     | (typeof CAMPAIGN_NAMESPACES)[number]
     | (typeof BATTLE_NAMESPACES)[number];
@@ -70,5 +73,6 @@ export const CORE_NAMESPACES: readonly CoreNamespace[] = [
         ...SITE_NAMESPACES,
         ...CAMPAIGN_NAMESPACES,
         ...BATTLE_NAMESPACES,
+        ...DM_NAMESPACES,
     ]),
 ];

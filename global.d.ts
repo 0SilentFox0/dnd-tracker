@@ -23,6 +23,7 @@ import type classes from './messages/uk/classes.json';
 import type common from './messages/uk/common.json';
 import type compendium from './messages/uk/compendium.json';
 import type compendiumReport from './messages/uk/compendiumReport.json';
+import type contentCopy from './messages/uk/contentCopy.json';
 import type contentImport from './messages/uk/contentImport.json';
 import type dashboard from './messages/uk/dashboard.json';
 import type demoTours from './messages/uk/demoTours.json';
@@ -76,6 +77,7 @@ declare module 'next-intl' {
             soundboard: typeof soundboard;
             choices: typeof choices;
             campaigns: typeof campaigns;
+            contentCopy: typeof contentCopy;
             dashboard: typeof dashboard;
             characters: typeof characters;
             characterProfile: typeof characterProfile;

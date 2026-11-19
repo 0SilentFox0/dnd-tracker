@@ -15,6 +15,9 @@ const REASON_KEYS = [
     'error',
 ] as const;
 
+const isReasonKey = (value: string): value is (typeof REASON_KEYS)[number] =>
+    (REASON_KEYS as readonly string[]).includes(value);
+
 const STATUS_TONE = {
     ok: 'text-emerald-400',
     partial: 'text-amber-400',
@@ -37,9 +40,7 @@ function TargetReport({
         report.skipped.length > 0;
 
     const reasonLabel = (reason: string) =>
-        (REASON_KEYS as readonly string[]).includes(reason)
-            ? t(`reasons.${reason}`)
-            : t('reasons.unknown');
+        isReasonKey(reason) ? t(`reasons.${reason}`) : t('reasons.unknown');
 
     return (
         <li className="space-y-1 rounded border border-hud-line/40 p-2 text-sm">
