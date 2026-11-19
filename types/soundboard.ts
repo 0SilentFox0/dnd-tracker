@@ -29,3 +29,18 @@ export type BuiltinSound = {
     icon: string;
     url: string;
 };
+
+export type CreateSoundData = {
+    path: string;
+    name: string;
+    durationMs?: number;
+    color?: string;
+    icon?: string;
+};
+
+export type UpdateSoundData = {
+    name?: string;
+    volume?: number;
+    color?: string | null;
+    icon?: string | null;
+};
