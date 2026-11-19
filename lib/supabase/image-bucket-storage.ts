@@ -36,7 +36,7 @@ export function imageBucketStorage<T extends string>({
         });
 
     async function createTicket(
-        campaignId: string,
+        ownerId: string,
         contentType: T
     ): Promise<Result<SlideUploadTicket>> {
         const supabase = createAdminClient();
@@ -51,7 +51,7 @@ export function imageBucketStorage<T extends string>({
 
         const storage = supabase.storage.from(bucket);
 
-        const path = `${campaignId}/${crypto.randomUUID().replace(/-/g, '')}.${formats[contentType]}`;
+        const path = `${ownerId}/${crypto.randomUUID().replace(/-/g, '')}.${formats[contentType]}`;
 
         const { data, error } = await storage.createSignedUploadUrl(path);
 
@@ -73,23 +73,23 @@ export function imageBucketStorage<T extends string>({
         };
     }
 
-    function ownedPath(campaignId: string, url: string): string | null {
+    function ownedPath(ownerId: string, url: string): string | null {
         if (!isHostedOnProjectStorage(url)) return null;
 
         const path = bucketObjectPath(url, bucket);
 
-        return path?.startsWith(`${campaignId}/`) &&
-            objectName.test(path.slice(campaignId.length + 1))
+        return path?.startsWith(`${ownerId}/`) &&
+            objectName.test(path.slice(ownerId.length + 1))
             ? path
             : null;
     }
 
     async function remove(
-        campaignId: string,
+        ownerId: string,
         urls: string[],
         options: { strict?: boolean } = {}
     ): Promise<void> {
-        const paths = urls.flatMap((url) => ownedPath(campaignId, url) ?? []);
+        const paths = urls.flatMap((url) => ownedPath(ownerId, url) ?? []);
 
         if (paths.length === 0) return;
 
