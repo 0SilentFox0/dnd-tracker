@@ -12,9 +12,9 @@ vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 vi.mock('@/lib/server/content/copy/apply', () => ({
     applyCopyPlan,
-    copyRowRef: (table: string, row: { id: string }, id: string) => ({
+    copyRowRef: (table: string, row: { id: string }, id?: string) => ({
         kind: table,
-        id,
+        ...(id === undefined ? {} : { id }),
         name: row.id,
     }),
 }));
@@ -61,6 +61,7 @@ beforeEach(() => {
 
 describe('copyContent', () => {
     it('a failing target does not affect the others', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
         applyCopyPlan
             .mockResolvedValueOnce([{ kind: 'units', id: 'n', name: 'X' }])
             .mockRejectedValueOnce(new Error('boom'));
@@ -71,9 +72,10 @@ describe('copyContent', () => {
         expect(targets[0].created).toHaveLength(1);
         expect(targets[1]).toMatchObject({
             status: 'failed',
-            error: 'boom',
+            error: 'errors.internal',
             created: [],
         });
+        expect(JSON.stringify(targets[1])).not.toContain('boom');
     });
 
     it('dryRun applies nothing', async () => {
@@ -81,6 +83,7 @@ describe('copyContent', () => {
 
         expect(applyCopyPlan).not.toHaveBeenCalled();
         expect(targets[0].created).toHaveLength(1);
+        expect(targets[0].created[0]).not.toHaveProperty('id');
     });
 
     it('is partial when something was skipped', async () => {

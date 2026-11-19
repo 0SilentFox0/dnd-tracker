@@ -10,7 +10,7 @@ export type CopyRequest = {
     dryRun?: boolean;
 };
 
-export type CopyRowRef = { kind: string; id: string; name: string };
+export type CopyRowRef = { kind: string; id?: string; name: string };
 
 export type CopyTargetReport = {
     campaignId: string;

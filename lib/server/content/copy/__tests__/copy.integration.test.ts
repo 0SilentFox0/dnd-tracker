@@ -8,6 +8,22 @@ vi.mock('next/cache', () => ({
     revalidateTag: vi.fn(),
 }));
 
+vi.mock('@/lib/server/templates/import-bundle', async (orig) => {
+    const actual =
+        await orig<typeof import('@/lib/server/templates/import-bundle')>();
+
+    return {
+        ...actual,
+        importBundle: vi.fn(
+            (...args: Parameters<typeof actual.importBundle>) => {
+                if (args[2].endsWith('-bad')) throw new Error('forced failure');
+
+                return actual.importBundle(...args);
+            }
+        ),
+    };
+});
+
 import { copyContent } from '@/lib/server/content/copy/service';
 import {
     isLocalDevDatabaseEnv,
@@ -25,6 +41,10 @@ const marker = `copy-${randomUUID()}`;
 const src = `${marker}-src`;
 
 const tgt = `${marker}-tgt`;
+
+const bad = `${marker}-bad`;
+
+const fresh = `${marker}-fresh`;
 
 const tpl = `${marker}-tpl`;
 
@@ -63,6 +83,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copyContent (local DB)', () => {
             [src, 'campaign'],
             [tgt, 'campaign'],
             [tpl, 'template'],
+            [bad, 'campaign'],
+            [fresh, 'campaign'],
         ] as const) {
             await raw.campaign.create({
                 data: {
@@ -124,11 +146,13 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copyContent (local DB)', () => {
                 raw[m] as unknown as {
                     deleteMany(a: unknown): Promise<unknown>;
                 }
-            ).deleteMany({ where: { campaignId: { in: [src, tgt, tpl] } } });
+            ).deleteMany({
+                where: { campaignId: { in: [src, tgt, tpl, bad, fresh] } },
+            });
 
         await raw.campaignMember.deleteMany({ where: { userId: marker } });
         await raw.campaign.deleteMany({
-            where: { id: { in: [src, tgt, tpl] } },
+            where: { id: { in: [src, tgt, tpl, bad, fresh] } },
         });
         await raw.user.delete({ where: { id: marker } });
         await raw.$disconnect();
@@ -167,7 +191,31 @@ describe.skipIf(!isLocalDevDatabaseEnv())('copyContent (local DB)', () => {
 
         expect(targets[0].created).toEqual([]);
         expect(targets[0].skipped.length).toBeGreaterThan(0);
+        expect(targets[0].reused.length).toBeGreaterThan(0);
+        expect(targets[0].reused.every((r) => r.id === undefined)).toBe(true);
         expect(await raw.unit.count({ where: { campaignId: tgt } })).toBe(1);
+        expect(await raw.race.count({ where: { campaignId: tgt } })).toBe(1);
+        expect(
+            await raw.spell.count({ where: { campaignId: tgt, name: 'Bolt' } })
+        ).toBe(1);
+    });
+
+    it('a failing target rolls back and does not affect the other', async () => {
+        const errorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+
+        const { targets } = await copy([bad, fresh]);
+
+        expect(targets.find((t) => t.campaignId === bad)).toMatchObject({
+            status: 'failed',
+            error: 'errors.internal',
+            created: [],
+        });
+        expect(targets.find((t) => t.campaignId === fresh)?.status).toBe('ok');
+        expect(await raw.unit.count({ where: { campaignId: bad } })).toBe(0);
+        expect(await raw.unit.count({ where: { campaignId: fresh } })).toBe(1);
+        errorSpy.mockRestore();
     });
 
     it('a template campaign is not a valid target', async () => {

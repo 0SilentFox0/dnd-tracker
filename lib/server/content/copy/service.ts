@@ -3,10 +3,12 @@ import { buildCopyPlan } from './plan';
 import { resolveTargets } from './targets';
 
 import 'server-only';
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { assertCan } from '@/lib/server/content/access';
 import { exportCampaign } from '@/lib/server/templates/export-campaign';
 import { type Actor, sessionDmActor } from '@/lib/utils/api/actor';
+import { ContentError } from '@/lib/utils/api/content-error';
 import { NEED } from '@/lib/utils/api/need';
 import type {
     CopyItem,
@@ -54,22 +56,27 @@ export async function copyContent(args: {
                 selected: items,
             });
 
-            report.reused = plan.reused;
+            report.reused = plan.reused.map(({ kind, name }) => ({
+                kind,
+                name,
+            }));
             report.skipped = plan.skipped;
             report.warnings = plan.warnings;
 
             report.created = dryRun
-                ? plan.toCreate.map(({ table, row }) =>
-                      copyRowRef(table, row, row.id)
-                  )
+                ? plan.toCreate.map(({ table, row }) => copyRowRef(table, row))
                 : await applyCopyPlan(target.id, plan);
 
             if (plan.skipped.length > 0) report.status = 'partial';
         } catch (error) {
             report.status = 'failed';
             report.created = [];
-            report.error =
-                error instanceof Error ? error.message : String(error);
+
+            if (error instanceof ContentError) report.error = error.message;
+            else {
+                console.error('copyContent failed', target.id, error);
+                report.error = API_ERRORS.INTERNAL;
+            }
         }
 
         reports.push(report);
