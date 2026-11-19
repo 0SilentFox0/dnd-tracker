@@ -12,12 +12,26 @@ const isDropped = (s: string, drop: ReadonlySet<string>) => {
 };
 
 function strip(value: unknown, drop: ReadonlySet<string>): unknown {
-    if (typeof value === 'string') return isDropped(value, drop) ? DROPPED : value;
+    if (typeof value === 'string')
+        return isDropped(value, drop) ? DROPPED : value;
 
     if (Array.isArray(value))
         return value.map((v) => strip(v, drop)).filter((v) => v !== DROPPED);
 
-    if (isRecord(value) && !(value instanceof Date))
+    if (isRecord(value) && !(value instanceof Date)) {
+        if (value.type === 'itemStats' && typeof value.value === 'string') {
+            try {
+                return {
+                    ...value,
+                    value: JSON.stringify(strip(JSON.parse(value.value), drop)),
+                };
+            } catch {
+                console.warn(
+                    '[content-copy] malformed itemStats left unchanged'
+                );
+            }
+        }
+
         return Object.fromEntries(
             Object.entries(value)
                 .filter(([k]) => !drop.has(k))
@@ -27,6 +41,7 @@ function strip(value: unknown, drop: ReadonlySet<string>): unknown {
                     return [k, s === DROPPED ? null : s];
                 })
         );
+    }
 
     return value;
 }
