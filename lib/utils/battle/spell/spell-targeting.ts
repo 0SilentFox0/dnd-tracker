@@ -665,7 +665,7 @@ export function resolveSpellTargets(
 
     const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
 
-    const charmers = conditionSourceIds(caster, 'charmed');
+    const charmers = conditionSourceIds(caster, 'charmed', ps);
 
     if (!res.ok || !charmers.length || !hostile(targeting)) return res;
 
@@ -673,7 +673,15 @@ export function resolveSpellTargets(
 
     if (targetIds.length === res.targetIds.length) return res;
 
-    return targetIds.length > 0
-        ? { ...res, targetIds }
-        : fail(textRef('battleActions.spell.target.charmerHostile'));
+    if (targetIds.length === 0)
+        return fail(textRef('battleActions.spell.target.charmerHostile'));
+
+    if ('projectiles' in targeting && targeting.projectiles)
+        return spreadProjectiles(
+            [...new Set(targetIds)],
+            targetIds,
+            res.targetIds.length
+        );
+
+    return { ...res, targetIds };
 }

@@ -10,6 +10,11 @@ import {
 } from '@/lib/utils/battle/resistance';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
+const FIVE_E = {
+    ...DEFAULT_RULES,
+    criticals: { ...DEFAULT_RULES.criticals, doubleDice: true },
+};
+
 const flag = (percent: number) => ({
     kind: 'flag' as const,
     flag: 'resistance' as const,
@@ -32,7 +37,7 @@ describe('resistance combination', () => {
         const t = stacked(50, 40);
 
         expect(
-            applyResistance(t, 10, 'fire', { rules: DEFAULT_RULES }).finalDamage
+            applyResistance(t, 10, 'fire', { rules: FIVE_E }).finalDamage
         ).toBe(5);
     });
 
@@ -40,7 +45,16 @@ describe('resistance combination', () => {
         const t = stacked(50, -100);
 
         expect(
-            applyResistance(t, 10, 'fire', { rules: DEFAULT_RULES }).finalDamage
+            applyResistance(t, 10, 'fire', { rules: FIVE_E }).finalDamage
         ).toBe(10);
+    });
+
+    it('sums percentages for the percent damage model', () => {
+        const t = stacked(15, 20);
+
+        expect(
+            applyResistance(t, 100, 'fire', { rules: DEFAULT_RULES })
+                .finalDamage
+        ).toBe(65);
     });
 });

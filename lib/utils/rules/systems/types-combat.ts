@@ -330,7 +330,7 @@ export interface RuleSystemCombat {
     /** Crit-dice rule and, when `ctx.hit` is set, the system's own damage mitigation of that hit */
     damage(ctx: DamageCtx): DamageResult;
     /** Net percent of the non-immune resistance (+) and vulnerability (−) flags matching a hit; absent means they add up */
-    combineResistance?(percents: readonly number[]): number;
+    combineResistance?(percents: readonly number[], rules: Ruleset): number;
     /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
     onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
     onDamaged?: readonly DamagedHook[];

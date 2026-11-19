@@ -22,7 +22,7 @@ export function assertAttackAllowed(
         );
     }
 
-    const charmers = conditionSourceIds(attacker, 'charmed');
+    const charmers = conditionSourceIds(attacker, 'charmed', targets);
 
     if (targets.some((t) => charmers.includes(t.basicInfo.id))) {
         throw new BattleRuleError('invalid_target', REJECT.charmedTarget, {

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from '@/lib/constants/battle';
+import {
+    CombatStatus,
+    ParticipantSide,
+    ParticipantSourceType,
+} from '@/lib/constants/battle';
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
@@ -37,7 +41,7 @@ const spell: CastableSpell = {
     },
 };
 
-const cast = (hp: number) => {
+const cast = (hp: number, hero = false, rules = DEFAULT_RULES) => {
     const base = makeParticipant({ id: 'c' });
 
     const caster = {
@@ -48,12 +52,22 @@ const cast = (hp: number) => {
         },
     };
 
-    const foe = makeParticipant({
+    const plain = makeParticipant({
         id: 'e1',
         side: ParticipantSide.ENEMY,
         hp,
         maxHp: 300,
     });
+
+    const foe = hero
+        ? {
+              ...plain,
+              basicInfo: {
+                  ...plain.basicInfo,
+                  sourceType: ParticipantSourceType.CHARACTER,
+              },
+          }
+        : plain;
 
     const out = castSpell({
         caster,
@@ -65,7 +79,7 @@ const cast = (hp: number) => {
         diceRolls: Array(12).fill(1),
         dice: { count: 12, sides: 12 },
         rng: seq(0.5),
-        rules: DEFAULT_RULES,
+        rules,
         map,
     });
 
@@ -75,6 +89,24 @@ const cast = (hp: number) => {
 describe('killIfHpAtMost', () => {
     it('kills a target at or below the threshold regardless of the roll', () => {
         expect(cast(100)?.combatStats.currentHp).toBe(0);
+    });
+
+    it('drops a monster to 0 HP and out of the fight', () => {
+        const foe = cast(100);
+
+        expect(foe?.combatStats.currentHp).toBe(0);
+        expect(foe?.combatStats.status).not.toBe(CombatStatus.ACTIVE);
+    });
+
+    it('kills a hero outright instead of starting death saves', () => {
+        const rules = {
+            ...DEFAULT_RULES,
+            deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true },
+        };
+
+        expect(cast(100, true, rules)?.combatStats.status).toBe(
+            CombatStatus.DEAD
+        );
     });
 
     it('rolls normal damage above the threshold', () => {

@@ -209,7 +209,7 @@ export function frightenedBlocksMove(
 ): boolean {
     if (!map) return false;
 
-    const sources = conditionSourceIds(mover, 'frightened');
+    const sources = conditionSourceIds(mover, 'frightened', participants);
 
     if (!sources.length) return false;
 

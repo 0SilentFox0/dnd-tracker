@@ -89,4 +89,10 @@ describe('dealDamage on hit', () => {
     it('stops damage fully against immunity', () => {
         expect(hpAfter(hit({ damageType: 'slashing' }), victim(100))).toBe(100);
     });
+
+    it('keeps the old behaviour outside the 5e model (no resistance routing)', () => {
+        expect(
+            hpAfter(hit({ damageType: 'slashing' }), victim(100), false)
+        ).toBe(92);
+    });
 });

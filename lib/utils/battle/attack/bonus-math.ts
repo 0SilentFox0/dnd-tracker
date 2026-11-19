@@ -171,12 +171,13 @@ export function rollModeReasonsOf(
     const frightenedLabels = attacker.battleData.activeEffects
         .filter(
             (e) =>
-                e.source &&
                 e.effects.some((m) => m.type === 'frightened') &&
                 ps.some(
                     (p) =>
-                        p.basicInfo.id === e.source?.participantId &&
-                        isActive(p)
+                        isActive(p) &&
+                        (e.source
+                            ? p.basicInfo.id === e.source.participantId
+                            : p.basicInfo.side !== attacker.basicInfo.side)
                 )
         )
         .map(effectName);

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { ParticipantSide } from '@/lib/constants/battle';
-import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
+import {
+    makeEffect,
+    makeParticipant,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
 import { castSpell } from '@/lib/utils/battle/spell';
 import { projectileShots } from '@/lib/utils/battle/spell/cast/projectiles';
 import {
@@ -156,6 +160,31 @@ describe('resolveSpellTargets with projectiles', () => {
         );
 
         expect(r.ok && r.targetIds).toEqual(['e1', 'e2', 'e1']);
+    });
+
+    it('a charmed caster keeps the full shot count on the remaining targets', () => {
+        const c = caster();
+
+        c.battleData = {
+            ...c.battleData,
+            activeEffects: [
+                makeEffect('ch', {
+                    type: 'condition',
+                    effects: [{ type: 'charmed' }] as never,
+                    source: { participantId: 'e1', name: 'e1' },
+                }),
+            ],
+        };
+
+        const r = resolveSpellTargets(
+            [c, enemy('e1'), enemy('e2')],
+            c,
+            { id: 'mm', groupId: 'evocation', level: 1 },
+            darts.definition.targeting,
+            ['e1', 'e2']
+        );
+
+        expect(r).toEqual({ ok: true, targetIds: ['e2', 'e2', 'e2'] });
     });
 
     it('Eldritch Blast gets one beam per cantrip tier', () => {

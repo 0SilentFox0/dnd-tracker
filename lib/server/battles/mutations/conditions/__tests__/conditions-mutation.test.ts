@@ -12,6 +12,7 @@ import {
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { hasCondition } from '@/lib/utils/battle/conditions';
+import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
@@ -259,13 +260,34 @@ describe('battleConditionsMutation sources', () => {
             ...extra,
         });
 
-    it('frightened without a picked source falls back to every hostile', () => {
+    it('frightened without a picked source is one source-less effect', () => {
         const effects = byId(apply().participants, 'gob').battleData
             .activeEffects;
 
-        expect(effects.map((e) => e.source?.participantId)).toEqual([
-            hero.basicInfo.id,
-        ]);
+        expect(effects).toHaveLength(1);
+        expect(effects[0].source).toBeUndefined();
+    });
+
+    it('a source-less frightened can be removed', () => {
+        const out = battleConditionsMutation(dmCtx(apply().participants), {
+            action: 'remove',
+            participantId: 'gob',
+            condition: 'frightened',
+        });
+
+        expect(byId(out.participants, 'gob').battleData.activeEffects).toEqual(
+            []
+        );
+    });
+
+    it('a source-less effect resolves to every active hostile', () => {
+        const gob = byId(apply().participants, 'gob');
+
+        expect(
+            conditionSourceIds(gob, 'frightened', [hero, gob]),
+            'hostile only'
+        ).toEqual([hero.basicInfo.id]);
+        expect(conditionSourceIds(gob, 'frightened')).toEqual([]);
     });
 
     it('a picked source is used as is', () => {

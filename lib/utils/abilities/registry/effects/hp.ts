@@ -60,14 +60,14 @@ export function applyDealDamage(
                 ? (input.event.cunningDice ?? 0)
                 : 0;
 
-        const hitEvent = input.event.type === 'hit' ? input.event : null;
+        const hitEvent =
+            input.event.type === 'hit' && critDoublesDice(ctx.rules, true)
+                ? input.event
+                : null;
 
         const planned = forgoDice(effect.amount, forgone);
 
-        const doubleDice =
-            !!hitEvent?.crit &&
-            typeof planned === 'string' &&
-            critDoublesDice(ctx.rules, true);
+        const doubleDice = !!hitEvent?.crit && typeof planned === 'string';
 
         const rolled = resolveAmount(
             doubleDice ? doubledDice(planned) : planned,

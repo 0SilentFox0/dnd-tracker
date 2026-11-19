@@ -4,6 +4,7 @@ import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { DEFAULT_RULES_EDITION } from '@/lib/constants/rules';
 import {
     findParticipant,
+    isActive,
     replaceParticipant,
     withActiveEffects,
 } from '@/lib/utils/abilities/engine/core/participants';
@@ -26,13 +27,28 @@ export function hasCondition(
     return hasEffectMarker(p, key);
 }
 
+/** A source-less effect (DM-applied) holds against every active participant of another side when `ps` is given */
 export function conditionSourceIds(
     p: BattleParticipant,
-    key: StandardConditionKey
+    key: StandardConditionKey,
+    ps?: readonly BattleParticipant[]
 ): string[] {
-    return p.battleData.activeEffects.flatMap((e) =>
+    const ids = p.battleData.activeEffects.flatMap((e) =>
         e.source && carries(e, key) ? [e.source.participantId] : []
     );
+
+    const open = p.battleData.activeEffects.some(
+        (e) => !e.source && carries(e, key)
+    );
+
+    if (!open || !ps) return ids;
+
+    return [
+        ...ids,
+        ...ps
+            .filter((o) => isActive(o) && o.basicInfo.side !== p.basicInfo.side)
+            .map((o) => o.basicInfo.id),
+    ];
 }
 
 export function exhaustionLevel(p: BattleParticipant): number {

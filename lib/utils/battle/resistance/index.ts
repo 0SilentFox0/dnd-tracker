@@ -54,8 +54,8 @@ function netPercent(
         opts.rules && ruleSystemOf(opts.rules).combat.combineResistance;
 
     return clampPercent(
-        combine
-            ? combine(percents)
+        opts.rules && combine
+            ? combine(percents, opts.rules)
             : percents.reduce((sum, percent) => sum + percent, 0)
     );
 }

@@ -52,10 +52,14 @@ export interface OpportunityResult {
     sceneState?: SystemSlot;
 }
 
-const canProvoke = (e: BattleParticipant, moverId: string) =>
+const canProvoke = (
+    e: BattleParticipant,
+    moverId: string,
+    ps: BattleParticipant[]
+) =>
     canReact(e) &&
     isOnMap(e) &&
-    !conditionSourceIds(e, 'charmed').includes(moverId);
+    !conditionSourceIds(e, 'charmed', ps).includes(moverId);
 
 export function resolveOpportunityAttacks(
     input: OpportunityInput
@@ -126,7 +130,7 @@ export function resolveOpportunityAttacks(
         for (const { id, reach } of enemies) {
             const e = findParticipant(flow.ps, id);
 
-            if (!e || !canProvoke(e, moverId)) continue;
+            if (!e || !canProvoke(e, moverId, input.participants)) continue;
 
             const { attack, range } = meleeOf(e);
 
