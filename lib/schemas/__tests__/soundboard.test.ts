@@ -89,7 +89,8 @@ describe('sound size cap', () => {
     it('rejects a file too big to be a 10 s clip', () => {
         expect(
             soundUploadRequestSchema.safeParse({
-                ...base,
+                name: 'a.mp3',
+                contentType: 'audio/mpeg',
                 size: MAX_SOUND_BYTES + 1,
             }).success
         ).toBe(false);
