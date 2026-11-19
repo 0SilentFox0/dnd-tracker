@@ -3,12 +3,27 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
 import { resolveCharacterSkillEntries } from '@/systems/skilltrees/server/participant/skill-entries';
 
+const stored = vi.hoisted(() => new Map<string, unknown>());
+
 vi.mock('@/lib/db', () => ({
     prisma: {
         skillTree: { findFirst: vi.fn() },
         skill: { findMany: vi.fn() },
         mainSkill: { findMany: vi.fn() },
-        skillTreeProgress: { findMany: vi.fn(async () => []) },
+        skillTreeProgress: {
+            findMany: vi.fn(
+                async ({
+                    where,
+                }: {
+                    where: { characterId: { in: string[] } };
+                }) =>
+                    where.characterId.in.flatMap((characterId) =>
+                        stored.has(characterId)
+                            ? [{ characterId, progress: stored.get(characterId) }]
+                            : []
+                    )
+            ),
+        },
         character: { findMany: vi.fn(async () => []) },
     },
 }));
@@ -42,14 +57,16 @@ const SKILLS = {
     pers: row('pers', 'Особисте'),
 };
 
-const character = (unlocked: string[], extra: Record<string, unknown> = {}) =>
-    ({
+const character = (unlocked: string[], extra: Record<string, unknown> = {}) => {
+    stored.set('c', { 'row-tree': { unlockedSkills: unlocked } });
+
+    return {
         id: 'c',
         race: 'Ельф',
         campaignId: 'camp',
-        skillTreeProgress: { 'row-tree': { unlockedSkills: unlocked } },
         ...extra,
-    }) as never;
+    } as never;
+};
 
 describe('resolveCharacterSkillEntries', () => {
     beforeEach(() => vi.clearAllMocks());

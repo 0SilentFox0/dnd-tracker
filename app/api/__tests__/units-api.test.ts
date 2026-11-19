@@ -187,10 +187,15 @@ describe('units API', () => {
         expect(db.race.count).not.toHaveBeenCalled();
     });
 
-    it('PATCH записує morale', async () => {
+    it('PATCH записує morale лише в ext, не в колонку', async () => {
         await one.PATCH(req('PATCH', { morale: 2 }), ctxOne);
 
-        expect(db.unit.update.mock.calls[0][0].data.morale).toBe(2);
+        const { data } = db.unit.update.mock.calls[0][0];
+
+        expect(data.characteristics).toMatchObject({
+            ext: { morale: { value: 2 } },
+        });
+        expect(data).not.toHaveProperty('morale');
     });
 
     it('юніт іншої кампанії — 404, нічого не змінено', async () => {

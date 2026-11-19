@@ -80,10 +80,10 @@ describe('GET progression', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(prisma.character.findFirst).mockResolvedValue(CHAR as never);
-        vi.mocked(prisma.character.findUnique).mockResolvedValue({
-            skillTreeProgress: CHAR.skillTreeProgress,
+        vi.mocked(prisma.skillTreeProgress.findUnique).mockResolvedValue({
+            progress: CHAR.skillTreeProgress,
+            version: 1,
         } as never);
-        vi.mocked(prisma.skillTreeProgress.findUnique).mockResolvedValue(null);
         vi.mocked(prisma.skillTree.findFirst).mockResolvedValue(
             TREE_ROW as never
         );

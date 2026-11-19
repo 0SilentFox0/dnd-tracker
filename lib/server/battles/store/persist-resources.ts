@@ -74,7 +74,6 @@ export async function persistCharacterResources(
         select: {
             id: true,
             resources: true,
-            inspiration: true,
             characteristics: true,
         },
     });

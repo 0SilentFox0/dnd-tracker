@@ -96,11 +96,9 @@ describe('skilltrees character operations', () => {
             id: 'ch',
             level: 3,
             race: 'Ельф',
-            skillTreeProgress: {},
             seenLevel: 3,
             controlledBy: 'owner',
         });
-        h.db.character.findUnique.mockResolvedValue({ skillTreeProgress: {} });
         h.db.skillTreeProgress.findUnique.mockResolvedValue(null);
         h.db.skillTree.findFirst.mockResolvedValue(tree);
         h.db.race.findFirst.mockResolvedValue(null);

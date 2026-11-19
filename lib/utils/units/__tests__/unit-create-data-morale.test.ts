@@ -9,13 +9,13 @@ import { unitCreateData } from '@/lib/utils/units/unit-create-data';
 
 const homm = ruleSystemOf(parseRules({ system: { key: 'homm' } }));
 
-describe('morale dual-write', () => {
-    it('unit create writes the column and ext.morale.value', () => {
+describe('morale stored in ext', () => {
+    it('unit create writes ext.morale.value and no column', () => {
         const data = createUnitSchema.parse({ name: 'U', morale: 2 });
 
         const out = unitCreateData('c1', data, homm);
 
-        expect(out.morale).toBe(2);
+        expect(out).not.toHaveProperty('morale');
         expect(out.characteristics).toMatchObject({
             ext: { morale: { value: 2 } },
         });
@@ -29,7 +29,6 @@ describe('morale dual-write', () => {
         );
 
         expect(out).toEqual({
-            morale: -1,
             characteristics: {
                 strength: 9,
                 ext: { other: { a: 1 }, morale: { value: -1 } },
@@ -38,8 +37,9 @@ describe('morale dual-write', () => {
     });
 
     it('a system without the module still writes the ext value (readers prefer it)', () => {
-        expect(storedColumnUpdate({ characteristics: { ws: 3 } }, 'morale', 2)).toEqual({
-            morale: 2,
+        expect(
+            storedColumnUpdate({ characteristics: { ws: 3 } }, 'morale', 2)
+        ).toEqual({
             characteristics: { ws: 3, ext: { morale: { value: 2 } } },
         });
     });

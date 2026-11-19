@@ -119,7 +119,7 @@ export function writeStoredColumn(
     return entry && setAtPath(row.characteristics, entry.path, value);
 }
 
-/** Dual-store reader: the module's ext value (when the module is in the composition), else the legacy column */
+/** The module's stored ext value when the module is in the composition, else undefined (callers apply the default) */
 export function readStoredColumn<
     K extends 'number' | 'boolean',
     R extends { characteristics?: unknown },
@@ -129,8 +129,6 @@ export function readStoredColumn<
     column: string,
     kind: K
 ): (K extends 'number' ? number : boolean) | undefined {
-    type Value = K extends 'number' ? number : boolean;
-
     const entry = STORED_COLUMN_ENTRIES.find((e) => e.column === column);
 
     const { base, modules } = composition(rules.system);
@@ -140,26 +138,18 @@ export function readStoredColumn<
 
     const stored = active ? getAtPath(row.characteristics, entry.path) : null;
 
-    if (typeof stored === kind) return stored as Value;
-
-    const legacy = (row as Record<string, unknown>)[column];
-
-    return typeof legacy === kind ? (legacy as Value) : undefined;
+    return typeof stored === kind
+        ? (stored as K extends 'number' ? number : boolean)
+        : undefined;
 }
 
-/** Update data that sets the column and its stored ext value together, whatever the composition (readers prefer ext) */
-export function storedColumnUpdate<
-    C extends string,
-    V extends number | boolean,
->(
+/** Update data carrying the stored ext value, whatever the composition */
+export function storedColumnUpdate(
     row: { characteristics?: unknown },
-    column: C,
-    value: V
-): { [K in C]: V } & { characteristics?: Record<string, unknown> } {
+    column: string,
+    value: number | boolean
+): { characteristics?: Record<string, unknown> } {
     const characteristics = writeStoredColumn(row, column, value);
 
-    return {
-        [column]: value,
-        ...(characteristics && { characteristics }),
-    } as { [K in C]: V } & { characteristics?: Record<string, unknown> };
+    return characteristics ? { characteristics } : {};
 }

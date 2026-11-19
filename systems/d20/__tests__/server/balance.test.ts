@@ -21,7 +21,7 @@ import { D20_BALANCE } from '@/systems/d20/server/balance';
 const input = (over: Record<string, unknown> = {}) => ({
     built: createMockParticipant(),
     rules: DEFAULT_RULES,
-    character: { race: 'elf', row: { skillTreeProgress: { n: 1 } } },
+    character: { race: 'elf', row: { id: 'h1' } },
     campaignContext: undefined,
     ...over,
 });

@@ -184,7 +184,6 @@ export const unitsResource = defineResource<
                         : undefined,
                 immunities: toJsonInput(data.immunities),
                 knownSpells: toJsonInput(data.knownSpells),
-                morale: moraleData?.morale,
                 minTargets: data.minTargets,
                 maxTargets: data.maxTargets,
                 avatar: data.avatar,

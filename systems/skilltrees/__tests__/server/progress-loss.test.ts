@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-type Row = { level: number; race: string; skillTreeProgress: unknown };
+type Row = { level: number; race: string };
 
 const world = vi.hoisted(() => ({
     characters: new Map<string, Row & { id: string }>(),
@@ -151,13 +151,13 @@ const seed = () => {
             id,
             level: 5,
             race: id === 'c' ? 'Orc' : 'Elf',
-            skillTreeProgress: { old: { unlockedSkills: [id] } },
         });
 
-    world.table.set('a', {
-        progress: { old: { unlockedSkills: ['a'] } },
-        version: 1,
-    });
+    for (const id of ['a', 'b', 'c'])
+        world.table.set(id, {
+            progress: { old: { unlockedSkills: [id] } },
+            version: 1,
+        });
 };
 
 describe('skill tree progress is never lost across heroes', () => {
@@ -169,35 +169,30 @@ describe('skill tree progress is never lost across heroes', () => {
         const map = await readProgress(['a', 'b', 'c'], db as never);
 
         expect(map.get('a')).toEqual({});
-        expect(world.characters.get('a')?.skillTreeProgress).toEqual({});
         expect(map.get('b')).toEqual({ old: { unlockedSkills: ['b'] } });
         expect(map.get('c')).toEqual({ old: { unlockedSkills: ['c'] } });
-        expect(world.table.has('b')).toBe(false);
     });
 
-    it('a reset of a column-only hero creates the table row and clears the column', async () => {
+    it('a reset of a hero without a table row creates the row', async () => {
+        world.table.delete('b');
+
         await resetProgress(db as never, 'b');
 
         expect(world.table.get('b')).toEqual({ progress: {}, version: 1 });
-        expect(world.characters.get('b')?.skillTreeProgress).toEqual({});
     });
 
-    it('moving the tree key rewrites table and column for that race only', async () => {
+    it('moving the tree key rewrites the table for that race only', async () => {
         await moveSkillTreeProgress(db as never, 'camp', 'Elf', 'old', 'new');
 
         for (const id of ['a', 'b']) {
-            const moved = { new: { unlockedSkills: [id] } };
-
-            expect((await readProgress([id], db as never)).get(id)).toEqual(
-                moved
-            );
-            expect(world.characters.get(id)?.skillTreeProgress).toEqual(moved);
+            expect((await readProgress([id], db as never)).get(id)).toEqual({
+                new: { unlockedSkills: [id] },
+            });
         }
 
-        expect(world.characters.get('c')?.skillTreeProgress).toEqual({
+        expect(world.table.get('c')?.progress).toEqual({
             old: { unlockedSkills: ['c'] },
         });
-        expect(world.table.has('c')).toBe(false);
     });
 
     it('moving again is a no-op and does not bump versions', async () => {

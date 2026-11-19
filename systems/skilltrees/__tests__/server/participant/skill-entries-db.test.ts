@@ -36,17 +36,20 @@ const character = (extra: Record<string, unknown> = {}) =>
         id: 'c',
         race: 'Elf',
         campaignId: 'camp',
-        skillTreeProgress: {
-            'row-tree': { unlockedSkills: ['attack_basic_level'] },
-        },
         ...extra,
     }) as never;
 
 describe('resolveCharacterSkillEntries without preloaded data', () => {
     beforeEach(() => {
         vi.resetAllMocks();
-        db.skillTreeProgress.findMany.mockResolvedValue([]);
-        db.character.findMany.mockResolvedValue([]);
+        db.skillTreeProgress.findMany.mockResolvedValue([
+            {
+                characterId: 'c',
+                progress: {
+                    'row-tree': { unlockedSkills: ['attack_basic_level'] },
+                },
+            },
+        ]);
     });
 
     it('loads tree, skills and main skill spell groups from the database', async () => {

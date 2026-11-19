@@ -38,13 +38,11 @@ export function unitCreateData(
         (system && splitColumnView(data, system).characteristics) ??
         data.characteristics;
 
-    const { morale, characteristics } = system
-        ? storedColumnUpdate(
-              { characteristics: base },
-              STORED_COLUMN.morale,
-              data.morale
-          )
-        : { morale: data.morale, characteristics: base };
+    const { characteristics = base } = storedColumnUpdate(
+        { characteristics: base },
+        STORED_COLUMN.morale,
+        data.morale
+    );
 
     return {
         campaignId,
@@ -61,7 +59,6 @@ export function unitCreateData(
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         immunities: data.immunities as Prisma.InputJsonValue,
         knownSpells: data.knownSpells,
-        morale,
         avatar: data.avatar ?? null,
         cr: data.cr ?? null,
         xp: data.xp ?? null,

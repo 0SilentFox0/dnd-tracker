@@ -122,8 +122,6 @@ const post = async (action: string, body?: unknown) => {
 
 let table: { progress: unknown; version: number } | null = null;
 
-let column: unknown = null;
-
 describe('progression actions', () => {
     beforeAll(async () => {
         await import('@/app/api/campaigns/[id]/characters/[characterId]/route');
@@ -147,23 +145,7 @@ describe('progression actions', () => {
         vi.mocked(prisma.character.updateMany).mockResolvedValue({
             count: 1,
         } as never);
-        table = null;
-        column = CHAR.skillTreeProgress;
-        vi.mocked(prisma.character.findUnique).mockImplementation(
-            (async () => ({
-                skillTreeProgress: column,
-            })) as never
-        );
-        vi.mocked(prisma.character.update).mockImplementation((async ({
-            data,
-        }: {
-            data: { skillTreeProgress?: unknown };
-        }) => {
-            if (data.skillTreeProgress !== undefined)
-                column = data.skillTreeProgress;
-
-            return {};
-        }) as never);
+        table = { progress: CHAR.skillTreeProgress, version: 1 };
         vi.mocked(prisma.skillTreeProgress.findUnique).mockImplementation(
             (async () => table) as never
         );
@@ -196,7 +178,7 @@ describe('progression actions', () => {
         );
     });
 
-    it('власник без allowPlayerEdit вчить; запис під id рядка в таблицю й колонку', async () => {
+    it('власник без allowPlayerEdit вчить; запис під id рядка в таблицю', async () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('owner', 'player')
         );
@@ -212,18 +194,18 @@ describe('progression actions', () => {
             'row-id': { unlockedSkills: ['attack_basic_level', 'o1'] },
         };
 
-        expect(table).toEqual({ progress: written, version: 1 });
-        expect(column).toEqual(written);
+        expect(table).toEqual({ progress: written, version: 2 });
+        expect(prisma.character.update).not.toHaveBeenCalled();
         expect(
             vi.mocked(prisma.character.updateMany).mock.calls[0][0].where
         ).toEqual({ id: 'ch', level: 3 });
     });
 
-    it("JSON null у колонці ('null'::jsonb): вивчення працює", async () => {
+    it('без рядка в таблиці: вивчення працює й створює рядок', async () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('owner', 'player')
         );
-        column = null;
+        table = null as typeof table;
 
         const res = await post('learn', { nodeId: 'attack_basic_level' });
 
@@ -232,7 +214,7 @@ describe('progression actions', () => {
             unlocked: ['attack_basic_level'],
         });
 
-        expect(column).toEqual({
+        expect(table?.progress).toEqual({
             'row-id': { unlockedSkills: ['attack_basic_level'] },
         });
     });
@@ -286,10 +268,13 @@ describe('progression actions', () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('dm', 'dm')
         );
-        column = {
-            'json-id': {
-                unlockedSkills: ['attack_basic_level', 'gone-1', 'gone-2'],
+        table = {
+            progress: {
+                'json-id': {
+                    unlockedSkills: ['attack_basic_level', 'gone-1', 'gone-2'],
+                },
             },
+            version: 1,
         };
 
         const res = await post('unlearn', { nodeIds: ['gone-1', 'gone-2'] });
@@ -297,8 +282,8 @@ describe('progression actions', () => {
         expect(await getResponseJson(res)).toEqual({
             unlocked: ['attack_basic_level'],
         });
-        expect(prisma.skillTreeProgress.createMany).toHaveBeenCalledTimes(1);
-        expect(column).toEqual({
+        expect(prisma.skillTreeProgress.updateMany).toHaveBeenCalledTimes(1);
+        expect(table?.progress).toEqual({
             'row-id': { unlockedSkills: ['attack_basic_level'] },
         });
     });
@@ -414,7 +399,7 @@ describe('progression actions', () => {
         expect((await patchCharacter({ level: 4 })).status).toBe(200);
         expect((await learnAsOwner('defense_basic_level')).status).toBe(200);
 
-        expect(row.skillTreeProgress).toEqual({
+        expect(table?.progress).toEqual({
             'row-id': {
                 unlockedSkills: [
                     'attack_basic_level',

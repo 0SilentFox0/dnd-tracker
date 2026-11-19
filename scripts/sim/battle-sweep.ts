@@ -1066,15 +1066,10 @@ async function applyRotation(r: number) {
 
         const progress = writeUnlocked(tree, {}, unlocked) as any;
 
-        // the table wins over the legacy column on read, so both must be written
         await prisma.skillTreeProgress.upsert({
             where: { characterId: h.id },
             create: { characterId: h.id, progress, version: 1 },
             update: { progress, version: { increment: 1 } },
-        });
-        await prisma.character.update({
-            where: { id: h.id },
-            data: { skillTreeProgress: progress },
         });
         lines.push(
             `${h.name} (${h.race}): ${b.branch} ${b.kind === 'F' ? '+ раса просунутий/експерт + ультимат (ПРИМУСОВО, поза правилами рівня)' : b.kind} — ${unlocked.length} вузлів`

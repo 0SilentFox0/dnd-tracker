@@ -301,11 +301,6 @@ async function seed() {
                 constitution: 16,
                 armorClass: 16,
                 initiative: 1,
-                skillTreeProgress: progress(dwarfTree, [
-                    skills.rage,
-                    skills.undying,
-                    skills.ironSkin,
-                ]),
             }),
         }),
         lyra: await prisma.character.create({
@@ -319,11 +314,6 @@ async function seed() {
                 dexterity: 18,
                 armorClass: 14,
                 initiative: 4,
-                skillTreeProgress: progress(elfTree, [
-                    skills.bleed,
-                    skills.secondWind,
-                    racialNodeId('basic'),
-                ]),
             }),
         }),
         myron: await prisma.character.create({
@@ -343,6 +333,26 @@ async function seed() {
             }),
         }),
     };
+
+    for (const [id, tree, nodes] of [
+        [
+            chars.thorin.id,
+            dwarfTree,
+            [skills.rage, skills.undying, skills.ironSkin],
+        ],
+        [
+            chars.lyra.id,
+            elfTree,
+            [skills.bleed, skills.secondWind, racialNodeId('basic')],
+        ],
+    ] as const)
+        await prisma.skillTreeProgress.create({
+            data: {
+                characterId: id,
+                progress: progress(tree, [...nodes]),
+                version: 1,
+            },
+        });
 
     await prisma.characterInventory.create({
         data: {

@@ -21,8 +21,7 @@ const locked = vi.hoisted(() => ({
     id: 'ch',
     resources: {},
     experience: 0,
-    inspiration: true,
-    characteristics: {},
+    characteristics: {} as unknown,
 }));
 
 vi.mock('@/lib/db', () => {
@@ -62,7 +61,7 @@ const gate = (inspirationRule: boolean) =>
                 },
             },
         },
-        character: { id: 'ch', campaignId: 'camp', inspiration: true },
+        character: { id: 'ch', campaignId: 'camp' },
     } as never);
 
 const post = async (body: object) => {
@@ -77,7 +76,7 @@ const post = async (body: object) => {
 describe('POST roll', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        locked.inspiration = true;
+        locked.characteristics = { ext: { inspiration: { available: true } } };
     });
 
     it('skill check without inspiration: result + log, inspiration untouched', async () => {
@@ -114,7 +113,11 @@ describe('POST roll', () => {
         expect(json.rolls).toHaveLength(2);
         expect(prisma.character.update).toHaveBeenCalledWith({
             where: { id: 'ch' },
-            data: expect.objectContaining({ inspiration: false }),
+            data: {
+                characteristics: {
+                    ext: { inspiration: { available: false } },
+                },
+            },
         });
         expect(prisma.characterLog.createMany).toHaveBeenCalledWith({
             data: [expect.objectContaining({ kind: 'save' })],
@@ -123,7 +126,7 @@ describe('POST roll', () => {
 
     it('no inspiration left → 409, nothing logged', async () => {
         gate(true);
-        locked.inspiration = false;
+        locked.characteristics = {};
 
         const res = await post({
             kind: 'check',

@@ -201,8 +201,8 @@ describe('units d20 columnView', () => {
     it('unitCreateData / toUnitCreateData with a system write characteristics and the columns', () => {
         const parsed = createUnitSchema.parse({ name: 'Orc', ...STATS });
 
-        expect(unitCreateData('c1', parsed)).not.toHaveProperty(
-            'characteristics'
+        expect(unitCreateData('c1', parsed).characteristics).toEqual(
+            ZERO_MORALE
         );
 
         const created = unitCreateData('c1', parsed, ruleSystemOf(rules));

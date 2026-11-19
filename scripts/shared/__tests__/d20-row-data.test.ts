@@ -24,6 +24,6 @@ describe('d20RowData', () => {
     it('leaves the data untouched without a statblock column', () => {
         const data = { name: 'x' };
 
-        expect(d20RowData(data)).toBe(data);
+        expect(d20RowData(data)).toEqual(data);
     });
 });

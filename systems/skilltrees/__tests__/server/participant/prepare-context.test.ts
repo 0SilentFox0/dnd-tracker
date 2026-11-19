@@ -30,7 +30,6 @@ const hero = (race: string, extra: object = {}) =>
         id: race,
         race,
         campaignId: 'c1',
-        skillTreeProgress: {},
         ...extra,
     }) as never;
 
@@ -96,7 +95,7 @@ describe('prepareSkillTreeContext', () => {
         });
     });
 
-    it('puts the table progress into the ext slot, falling back to the column', async () => {
+    it('puts the table progress into the ext slot and ignores the legacy column', async () => {
         db.skillTreeProgress.findMany.mockResolvedValue([
             { characterId: 'a', progress: { t: ['table'] } },
         ]);
@@ -105,17 +104,13 @@ describe('prepareSkillTreeContext', () => {
 
         await prepareSkillTreeContext('c1', ctx, {
             characters: [
-                hero('Ельф', { id: 'a', skillTreeProgress: { t: ['column'] } }),
-                hero('Ельф', {
-                    id: 'b',
-                    skillTreeProgress: { t: ['column-b'] },
-                }),
+                hero('Ельф', { id: 'a' }),
+                hero('Ельф', { id: 'b' }),
             ],
         });
 
         expect(skillTreeContext.read(ctx as never)?.progress).toEqual({
             a: { t: ['table'] },
-            b: { t: ['column-b'] },
         });
     });
 });

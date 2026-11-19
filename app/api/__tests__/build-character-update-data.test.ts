@@ -38,7 +38,7 @@ describe('buildCharacterUpdateData', () => {
         ).toBeUndefined();
     });
 
-    it('не пише skillTreeProgress з тіла; зниження рівня скидає прогрес лише з частиною skilltrees', () => {
+    it('не пише skillTreeProgress з тіла; зниження рівня не скидає колонок (прогрес у таблиці)', () => {
         const resets = ruleSystemOf(DEFAULT_RULES).progression.levelResets;
 
         expect(
@@ -56,7 +56,7 @@ describe('buildCharacterUpdateData', () => {
                 character,
                 data: { level: 2 },
             }).columnResets
-        ).toEqual({ skillTreeProgress: {} });
+        ).toEqual({});
     });
 
     it('без частин рівнів (голий dnd5e) пониження рівня дерево не чіпає', () => {

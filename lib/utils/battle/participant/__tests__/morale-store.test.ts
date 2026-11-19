@@ -102,11 +102,10 @@ const heroMorale = async (over: object) =>
         )
     ).combatStats.morale;
 
-describe('morale dual store in participants (the sheet reads combatStats)', () => {
+describe('morale ext store in participants (the sheet reads combatStats)', () => {
     it.each([
-        ['column only', { morale: 2, characteristics: null }],
-        ['ext only', { morale: 0, characteristics: ext(2) }],
-        ['both', { morale: 2, characteristics: ext(2) }],
+        ['ext only', { characteristics: ext(2) }],
+        ['ext with a stale column', { morale: 5, characteristics: ext(2) }],
     ])('unit and hero read the same value: %s', async (_name, over) => {
         expect(await unitMorale(over)).toBe(2);
         expect(await heroMorale(over)).toBe(2);
@@ -119,12 +118,17 @@ describe('morale dual store in participants (the sheet reads combatStats)', () =
         expect(await heroMorale(over)).toBe(-3);
     });
 
+    it('a legacy column with an empty ext reads as 0', async () => {
+        expect(await unitMorale({ morale: 3, characteristics: null })).toBe(0);
+        expect(await heroMorale({ morale: 3, characteristics: null })).toBe(0);
+    });
+
     it('missing values read as 0', async () => {
         expect(await unitMorale({ characteristics: null })).toBe(0);
         expect(await heroMorale({ characteristics: null })).toBe(0);
     });
 
-    it('a ruleset without the module reads the column', () => {
+    it('a ruleset without the module reads nothing', () => {
         expect(
             readStoredColumn(
                 parseRules(WFRP_RULES),
@@ -132,6 +136,6 @@ describe('morale dual store in participants (the sheet reads combatStats)', () =
                 'morale',
                 'number'
             )
-        ).toBe(4);
+        ).toBeUndefined();
     });
 });

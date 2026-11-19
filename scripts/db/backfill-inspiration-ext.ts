@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// legacy: needs the pre-drop schema
 /**
  * Copies `characters.inspiration = true` into `characteristics.ext.inspiration.available` for rows that lack it. The column is never touched.
  * Dry run by default; --apply writes in batches (one transaction each) with a compare-and-swap on `updatedAt` + stored text and a byte-exact snapshot for --revert.

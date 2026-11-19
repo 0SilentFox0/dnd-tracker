@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// legacy: needs the pre-drop schema
 import '@/lib/utils/rules/systems/registry';
 import { hasPendingMorale } from '@/scripts/db/lib/backfill-pending-morale-plan';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';

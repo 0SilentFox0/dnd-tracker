@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// legacy: needs the pre-drop schema
 /**
  * Moves `battle_scenes.pendingMoraleCheck` into the scene slot (`system_state`, the morale entry of `ext`) and nulls the column.
  * Expand-only: the column stays in the schema; reads already fall back to it. Dry run by default; --apply writes with a version guard (no version bump).

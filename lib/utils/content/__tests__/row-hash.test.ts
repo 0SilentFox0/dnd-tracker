@@ -58,11 +58,20 @@ describe('contentRowHash baselines', () => {
 
         for (const empty of [undefined, null, {}, DEFAULT_CHARACTERISTICS])
             expect(unit(empty)).toBe(
-                'ed14b18eb584db1afea63904076806a7cb356210'
+                '2d65306f22ac50080971139e149388e8cae7668c'
             );
 
         expect(unit({ ...DEFAULT_CHARACTERISTICS, fate: 3 })).toBe(
-            'f26682d706a7b3ff7c5357baa930cc4da21905c2'
+            '3b87175c689c8886bc8fe83a57c2dbf1fbb85d43'
+        );
+    });
+
+    it('a unit without a morale column hashes like morale 0', () => {
+        expect(contentRowHash('Unit', { name: 'U', hp: 5 })).toBe(
+            contentRowHash('Unit', { name: 'U', hp: 5, morale: 0 })
+        );
+        expect(contentRowHash('Unit', { name: 'U', hp: 5, morale: 2 })).not.toBe(
+            contentRowHash('Unit', { name: 'U', hp: 5 })
         );
     });
 

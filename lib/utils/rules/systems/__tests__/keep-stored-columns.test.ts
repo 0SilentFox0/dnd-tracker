@@ -55,7 +55,7 @@ describe('readStoredColumn / storedColumnUpdate', () => {
 
     const wfrp = { system: { key: 'wfrp' } };
 
-    it('ext wins over the column, the column is the fallback', () => {
+    it('reads the ext value only; a legacy column with an empty ext yields undefined', () => {
         const ext = { ext: { morale: { value: 2 } } };
 
         expect(
@@ -73,11 +73,11 @@ describe('readStoredColumn / storedColumnUpdate', () => {
                 'morale',
                 'number'
             )
-        ).toBe(1);
+        ).toBeUndefined();
         expect(readStoredColumn(homm, {}, 'morale', 'number')).toBeUndefined();
     });
 
-    it('a composition without the module reads the column', () => {
+    it('a composition without the module reads nothing, whatever the column holds', () => {
         expect(
             readStoredColumn(
                 wfrp,
@@ -88,10 +88,10 @@ describe('readStoredColumn / storedColumnUpdate', () => {
                 'morale',
                 'number'
             )
-        ).toBe(4);
+        ).toBeUndefined();
     });
 
-    it('update writes the column and ext, keeping siblings', () => {
+    it('update writes only the ext value, keeping siblings', () => {
         expect(
             storedColumnUpdate(
                 {
@@ -104,7 +104,6 @@ describe('readStoredColumn / storedColumnUpdate', () => {
                 true
             )
         ).toEqual({
-            inspiration: true,
             characteristics: {
                 a: 1,
                 ext: { inspiration: { spent: true, available: true } },

@@ -133,7 +133,7 @@
   },
   "initiative": 0,
   "speed": 30,
-  "morale": 1,
+  "morale": 0,
   "targets": {
     "min": 1,
     "max": 1

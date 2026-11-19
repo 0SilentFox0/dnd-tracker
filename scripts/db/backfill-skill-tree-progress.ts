@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// legacy: needs the pre-drop schema
 /**
  * Inserts missing `skill_tree_progress` rows from the legacy `characters.skillTreeProgress` column (version 1, ON CONFLICT DO NOTHING). Existing rows are never touched; diverging ones are listed.
  * Dry run by default; --apply saves a snapshot of the inserted ids; --revert deletes exactly those rows while they are still at version 1 with the inserted bytes (--force skips the check).

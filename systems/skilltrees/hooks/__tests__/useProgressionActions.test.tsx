@@ -127,38 +127,6 @@ describe('useProgressionActions', () => {
         vi.useRealTimers();
     });
 
-    it('learn зливає skillTreeProgress[treeId] у кеші персонажа, не стираючи інші дерева й поля', async () => {
-        vi.mocked(api.learnNode).mockResolvedValue({ unlocked: ['a', 'b'] });
-
-        const { qc, result } = setup();
-
-        qc.setQueryData(skillKeys.progression('camp', 'ch'), {
-            treeId: 't1',
-            unlocked: ['a'],
-            level: 3,
-        });
-        qc.setQueryData(['character', 'camp', 'ch'], {
-            id: 'ch',
-            skillTreeProgress: {
-                other: { unlockedSkills: ['x'] },
-                t1: { level: 'basic', unlockedSkills: ['a'] },
-            },
-        });
-
-        await act(() => result.current.learn('b'));
-
-        expect(
-            qc.getQueryData<{ skillTreeProgress: unknown }>([
-                'character',
-                'camp',
-                'ch',
-            ])?.skillTreeProgress
-        ).toEqual({
-            other: { unlockedSkills: ['x'] },
-            t1: { level: 'basic', unlockedSkills: ['a', 'b'] },
-        });
-    });
-
     it('unlearn шле всі вузли одним запитом', async () => {
         vi.mocked(api.unlearnNodes).mockResolvedValue({ unlocked: [] });
 

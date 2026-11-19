@@ -27,7 +27,7 @@ const races = ['Демони', 'Гноми', 'Ельфи', 'Нежить', 'Ак
 // columns createMany left to DB defaults in the old import
 const LEGACY_DEFAULTS = {
     immunities: [],
-    morale: 0,
+    characteristics: { ext: { morale: { value: 0 } } },
     minTargets: 1,
     maxTargets: 1,
 };

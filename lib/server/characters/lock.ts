@@ -7,7 +7,6 @@ export interface LockedCharacter {
     id: string;
     resources: CharacterResources;
     experience: number;
-    inspiration: boolean;
     characteristics: unknown;
 }
 
@@ -23,11 +22,10 @@ export async function lockCharacters(
             id: string;
             resources: unknown;
             experience: number;
-            inspiration: boolean | null;
             characteristics: unknown;
         }[]
     >`
-    SELECT id, resources, experience, inspiration, characteristics FROM characters WHERE id IN (${Prisma.join(ids)}) ORDER BY id FOR UPDATE`;
+    SELECT id, resources, experience, characteristics FROM characters WHERE id IN (${Prisma.join(ids)}) ORDER BY id FOR UPDATE`;
 
     return new Map(
         rows.map((r) => [
@@ -36,7 +34,6 @@ export async function lockCharacters(
                 id: r.id,
                 resources: readResources(r.resources),
                 experience: r.experience,
-                inspiration: !!r.inspiration,
                 characteristics: r.characteristics,
             },
         ])

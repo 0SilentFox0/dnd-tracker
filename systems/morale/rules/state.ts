@@ -45,6 +45,7 @@ export function withPendingMorale(
 export const resetPendingMorale: SceneStateReset = (slot) =>
     withPendingMorale(slot, null);
 
+/** Legacy: only the pending-morale backfill script uses this; drop with the column */
 export const upgradePendingMorale: SceneStateUpgrade = (slot, legacy) => {
     if (MORALE_SCENE.read(slot)) return slot;
 

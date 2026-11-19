@@ -278,7 +278,6 @@ async function copySrdLibraries(campaignId: string, userId: string) {
                     backgroundChoices: json({}),
                     backgroundFeatPicks: json({}),
                     raceChoices: json({}),
-                    skillTreeProgress: json({}),
                 },
             });
             await tx.campaignSourceSync.deleteMany({ where: { campaignId } });

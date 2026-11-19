@@ -339,6 +339,7 @@ export function createFakeSyncDb() {
     return {
         db: db as unknown as SyncDb,
         store,
+        progressRows,
         campaigns,
         syncs,
         updates,

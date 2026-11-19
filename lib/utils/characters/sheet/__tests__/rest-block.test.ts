@@ -209,7 +209,13 @@ describe('buildRestBlock', () => {
         expect(
             buildRestBlock({
                 participant: p,
-                character: { level: 1, experience: 300, inspiration: true },
+                character: {
+                    level: 1,
+                    experience: 300,
+                    characteristics: {
+                        ext: { inspiration: { available: true } },
+                    },
+                },
                 rules: rules({ xp: true, inspiration: true }),
                 maxLevel: 20,
             })

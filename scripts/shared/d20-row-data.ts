@@ -25,7 +25,7 @@ export function d20RowData<T extends object>(
         prev
     ).characteristics;
 
-    const { morale } = data as { morale?: unknown };
+    const { morale, ...rest } = data as { morale?: unknown };
 
     const stored =
         typeof morale === 'number'
@@ -38,10 +38,7 @@ export function d20RowData<T extends object>(
 
     const characteristics = stored?.characteristics ?? view;
 
-    return characteristics
-        ? {
-              ...data,
-              characteristics: characteristics as Prisma.InputJsonObject,
-          }
-        : data;
+    return (
+        characteristics ? { ...rest, characteristics } : rest
+    ) as WithCharacteristics<T>;
 }

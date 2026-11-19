@@ -16,7 +16,7 @@ import type { BattleParticipant } from '@/types/battle';
 export type StartSlot =
     | {
           type: typeof ParticipantSourceType.CHARACTER;
-          character: { race: string; skillTreeProgress?: unknown };
+          character: { race: string };
           side: ParticipantSide;
       }
     | {

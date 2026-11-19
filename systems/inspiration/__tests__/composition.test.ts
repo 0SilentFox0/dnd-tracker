@@ -88,7 +88,7 @@ describe('inspiration module composition', () => {
         expect(rerollTokenOn(raw(['inspiration']))).toBe(true);
     });
 
-    it('the stored reader works through the core seam and is null when off', () => {
+    it('the stored reader uses ext only (a legacy column is ignored) and is null when off', () => {
         const ext = {
             inspiration: false,
             characteristics: { ext: { inspiration: { available: true } } },
@@ -96,7 +96,7 @@ describe('inspiration module composition', () => {
 
         expect(storedInspiration(on(dnd5eRules()), ext)).toBe(true);
         expect(storedInspiration(on(dnd5eRules()), { inspiration: true })).toBe(
-            true
+            false
         );
         expect(storedInspiration(bareD20Rules(), ext)).toBeNull();
     });
@@ -108,6 +108,6 @@ describe('inspiration module composition', () => {
         });
 
         expect(ruleSystemOf(rules).combat.rerollToken).toBeUndefined();
-        expect(storedInspiration(rules, { inspiration: true })).toBeNull();
+        expect(storedInspiration(rules, { characteristics: null })).toBeNull();
     });
 });

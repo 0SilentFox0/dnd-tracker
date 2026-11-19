@@ -86,29 +86,6 @@ export function useProgressionActions(campaignId: string, characterId: string) {
                 queryClient.setQueryData<CharacterProgressionDto>(key, (old) =>
                     old ? { ...old, unlocked } : old
                 );
-                queryClient.setQueryData<{
-                    skillTreeProgress?: Record<string, object> | null;
-                }>(characterKeys.detail(campaignId, characterId), (old) => {
-                    const treeId =
-                        queryClient.getQueryData<CharacterProgressionDto>(
-                            key
-                        )?.treeId;
-
-                    if (!old || !treeId) return old;
-
-                    const progress = old.skillTreeProgress ?? {};
-
-                    return {
-                        ...old,
-                        skillTreeProgress: {
-                            ...progress,
-                            [treeId]: {
-                                ...progress[treeId],
-                                unlockedSkills: unlocked,
-                            },
-                        },
-                    };
-                });
                 patchSheet(unlocked);
                 void queryClient.invalidateQueries({
                     queryKey: battleKeys.balanceAll(),

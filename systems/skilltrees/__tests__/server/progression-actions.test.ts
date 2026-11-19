@@ -47,7 +47,6 @@ const character = (over: object = {}) => ({
     id: 'ch',
     level: 3,
     race: 'Elf',
-    skillTreeProgress: {},
     seenLevel: 3,
     controlledBy: 'owner',
     ...over,
@@ -63,10 +62,11 @@ const run = (
     action: Parameters<typeof runProgressionAction>[3]
 ) => runProgressionAction(access, 'camp', 'ch', action);
 
-const tableWrite = () =>
-    db.skillTreeProgress.createMany.mock.calls[0][0].data[0];
+const tableWrite = () => {
+    const [{ where, data }] = db.skillTreeProgress.updateMany.mock.calls[0];
 
-const columnWrite = () => db.character.update.mock.calls[0][0].data;
+    return { characterId: where.characterId, ...data };
+};
 
 describe('runProgressionAction', () => {
     beforeEach(() => {
@@ -74,14 +74,14 @@ describe('runProgressionAction', () => {
         stored = {};
         db.$transaction.mockImplementation(async (fn) => fn(db));
         db.character.findFirst.mockResolvedValue(character());
-        db.character.findUnique.mockImplementation(async () => ({
-            skillTreeProgress: stored,
+        db.skillTreeProgress.findUnique.mockImplementation(async () => ({
+            progress: stored,
+            version: 1,
         }));
-        db.skillTreeProgress.findUnique.mockResolvedValue(null);
         db.skillTree.findFirst.mockResolvedValue(treeRow);
         db.character.updateMany.mockResolvedValue({ count: 1 });
         db.character.update.mockResolvedValue({});
-        db.skillTreeProgress.createMany.mockResolvedValue({ count: 1 });
+        db.skillTreeProgress.updateMany.mockResolvedValue({ count: 1 });
     });
 
     it('404 for a character of another campaign', async () => {
@@ -120,7 +120,7 @@ describe('runProgressionAction', () => {
         };
 
         expect(tableWrite()).toMatchObject({ characterId: 'ch', progress });
-        expect(columnWrite()).toEqual({ skillTreeProgress: progress });
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('a blocked learn answers 422 with the reason and writes nothing', async () => {
@@ -184,9 +184,7 @@ describe('runProgressionAction', () => {
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ unlocked: [] });
         expect(tableWrite()).toMatchObject({ characterId: 'ch' });
-        expect(columnWrite()).toEqual({
-            skillTreeProgress: { row: { unlockedSkills: [] } },
-        });
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('unlearning a node that was not learned answers 422', async () => {
@@ -207,8 +205,7 @@ describe('runProgressionAction', () => {
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ unlocked: [] });
         expect(tableWrite()).toMatchObject({ characterId: 'ch', progress: {} });
-        expect(columnWrite()).toEqual({ skillTreeProgress: {} });
-        expect(db.character.update).toHaveBeenCalledTimes(1);
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('a concurrent level change answers 409 and writes nothing', async () => {
@@ -225,7 +222,7 @@ describe('runProgressionAction', () => {
         });
     });
 
-    it('a progress version conflict answers 409 and keeps the column untouched', async () => {
+    it('a progress version conflict answers 409 and writes no column', async () => {
         db.skillTreeProgress.findUnique.mockResolvedValue({
             progress: {},
             version: 3,

@@ -381,7 +381,7 @@ describe('skill trees', () => {
         skills: { id: TREE, mainSkills: [], note },
     });
 
-    it('creates with the JSON id remapped, and moves legacy progress on update', async () => {
+    it('creates with the JSON id remapped, and moves stored progress on update', async () => {
         f.addRow('skillTree', tree('v1'));
 
         await applySourceChanges(f.db, TGT, {
@@ -401,7 +401,11 @@ describe('skill trees', () => {
             id: id('h'),
             campaignId: TGT,
             race: 'Haven',
-            skillTreeProgress: { legacy: ['a'], other: ['b'] },
+        });
+        f.progressRows.set(id('h'), {
+            characterId: id('h'),
+            progress: { legacy: ['a'], other: ['b'] },
+            version: 1,
         });
         f.patchRow('skillTree', TREE, {
             skills: { id: TREE, mainSkills: [], note: 'v2' },
@@ -414,7 +418,7 @@ describe('skill trees', () => {
         const updated = rows('skillTree', TGT)[0];
 
         expect((updated.skills as { id: string }).id).toBe(updated.id);
-        expect(f.store.get('character')![0].skillTreeProgress).toEqual({
+        expect(f.progressRows.get(id('h'))!.progress).toEqual({
             [updated.id as string]: ['a'],
             other: ['b'],
         });

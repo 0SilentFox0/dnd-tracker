@@ -8,7 +8,7 @@ import {
 
 function makeDb(
     rows: { characterId: string; progress: unknown }[],
-    columns: { id: string; skillTreeProgress: unknown }[]
+    columns: { id: string; skillTreeProgress: unknown }[] = []
 ) {
     return {
         skillTreeProgress: {
@@ -25,7 +25,7 @@ function makeDb(
 }
 
 describe('readProgress', () => {
-    it('prefers the table and falls back to the column', async () => {
+    it('reads the table only: a legacy column without a row yields no entry', async () => {
         const db = makeDb(
             [{ characterId: 'a', progress: { t: ['x'] } }],
             [
@@ -37,7 +37,8 @@ describe('readProgress', () => {
         const map = await readProgress(['a', 'b'], db as never);
 
         expect(map.get('a')).toEqual({ t: ['x'] });
-        expect(map.get('b')).toEqual({ t: ['col'] });
+        expect(map.has('b')).toBe(false);
+        expect(db.character.findMany).not.toHaveBeenCalled();
     });
 
     it('returns an empty map without querying for no ids', async () => {
@@ -49,16 +50,13 @@ describe('readProgress', () => {
 });
 
 describe('writeProgress', () => {
-    it('upserts the table and writes the legacy column', async () => {
+    it('upserts the table and never writes the legacy column', async () => {
         const db = makeDb([], []);
 
         await writeProgress(db as never, 'a', { t: [] });
 
         expect(db.skillTreeProgress.upsert).toHaveBeenCalledOnce();
-        expect(db.character.update).toHaveBeenCalledWith({
-            where: { id: 'a' },
-            data: { skillTreeProgress: { t: [] } },
-        });
+        expect(db.character.update).not.toHaveBeenCalled();
     });
 
     it('compares and swaps on the expected version', async () => {
@@ -73,7 +71,7 @@ describe('writeProgress', () => {
         );
     });
 
-    it('throws a typed conflict when the version moved and skips the column', async () => {
+    it('throws a typed conflict when the version moved', async () => {
         const db = makeDb([], []);
 
         db.skillTreeProgress.updateMany.mockResolvedValue({ count: 0 });

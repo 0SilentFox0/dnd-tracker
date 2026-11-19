@@ -24,6 +24,9 @@ const context = {
         skilltrees: {
             treeByRace: { Ельф: tree },
             mainSkills: [{ id: 'light', spellGroupId: 'sg', name: 'Світло' }],
+            progress: {
+                c: { 'row-tree': { unlockedSkills: ['light_basic_level'] } },
+            },
         },
     },
     spells: [{ id: 's1', level: 1, spellGroup: { id: 'sg' } }],
@@ -42,9 +45,6 @@ describe('resolveLearnedSpellsAndMastery', () => {
             id: 'c',
             race: 'Ельф',
             campaignId: 'camp',
-            skillTreeProgress: {
-                'row-tree': { unlockedSkills: ['light_basic_level'] },
-            },
         } as never;
 
         expect((await resolve(character, ['k'])).knownSpells).toEqual([
@@ -58,7 +58,6 @@ describe('resolveLearnedSpellsAndMastery', () => {
             id: 'c',
             race: 'Гном',
             campaignId: 'camp',
-            skillTreeProgress: {},
         } as never;
 
         expect(
@@ -76,7 +75,6 @@ describe('resolveLearnedSpellsAndMastery', () => {
             id: 'c',
             race: 'Гном',
             campaignId: 'camp',
-            skillTreeProgress: {},
             personalSkillId: 'ps',
         } as never;
 

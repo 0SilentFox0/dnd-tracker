@@ -313,23 +313,25 @@ describe.skipIf(!isLocal)('battle store (local DB)', () => {
         ).rejects.toBeInstanceOf(BattleConflictError);
     });
 
-    it('запис сценового слота обнуляє застарілу колонку pendingMoraleCheck', async () => {
+    it('сценовий слот зберігається і очищається без колонки pendingMoraleCheck', async () => {
         const before = await mustLoad();
 
+        const slot = pendingSlot({
+            participantId: 'hero',
+            d10Roll: 5,
+            moraleResult: {},
+        });
+
         await saveBattle(prisma, before, {
-            scene: {
-                sceneState: pendingSlot({
-                    participantId: 'hero',
-                    d10Roll: 5,
-                    moraleResult: {},
-                }),
-            },
+            scene: { sceneState: slot },
             participants: before.participants,
             pending: [],
             events: [],
         });
 
         const mid = await mustLoad();
+
+        expect(mid.scene.sceneState).toEqual(slot);
 
         await saveBattle(prisma, mid, {
             scene: { sceneState: null },
@@ -338,11 +340,7 @@ describe.skipIf(!isLocal)('battle store (local DB)', () => {
             events: [],
         });
 
-        const rows = await prisma.$queryRaw<Array<{ isnull: boolean }>>`
-      SELECT "pendingMoraleCheck" IS NULL AS isnull FROM battle_scenes WHERE id = ${ids.battle}
-    `;
-
-        expect(rows[0].isnull).toBe(true);
+        expect((await mustLoad()).scene.sceneState).toBeUndefined();
     });
 
     it('дія без подій: версія росте, eventSeq і кількість знімків — ні', async () => {

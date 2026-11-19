@@ -1,6 +1,5 @@
 {
     "eslint.config.mjs": 2,
     "scripts/postinstall.mjs": 1,
-    "scripts/seed/seed-mock-battle-data.ts": 4,
     "scripts/vercel-build.mjs": 2
 }

@@ -49,7 +49,6 @@ const LIST_SELECT = {
     armorClass: true,
     initiative: true,
     experience: true,
-    inspiration: true,
     resources: true,
     characteristics: true,
     user: { select: { displayName: true } },

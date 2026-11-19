@@ -772,7 +772,6 @@ async function main() {
                     level: 1,
                     avatar,
                     spellSlots: fullSpellSlots(1, progression),
-                    skillTreeProgress: {},
                 },
                 select: { id: true },
             });

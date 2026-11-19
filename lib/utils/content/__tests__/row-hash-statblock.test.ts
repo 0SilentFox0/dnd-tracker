@@ -90,7 +90,7 @@ describe('contentRowHash statblock fold', () => {
                 hp: 5,
                 characteristics: { ...DEFAULT_CHARACTERISTICS, fate: 3 },
             })
-        ).toBe('f26682d706a7b3ff7c5357baa930cc4da21905c2');
+        ).toBe('3b87175c689c8886bc8fe83a57c2dbf1fbb85d43');
     });
 
     it('other characteristics keys survive the fold', () => {

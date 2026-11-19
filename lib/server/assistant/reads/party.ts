@@ -114,7 +114,6 @@ export const READ_CHARACTER_ACTION = readAction({
                       wisdom: true,
                       charisma: true,
                       speed: true,
-                      morale: true,
                   },
         });
 

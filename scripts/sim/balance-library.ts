@@ -934,11 +934,16 @@ async function createParty(
                 initiative: 1,
                 spellcastingAbility: b.caster ? 'intelligence' : null,
                 spellSlots: {},
-                skillTreeProgress: {
-                    [tree.treeId]: { unlockedSkills: unlocked },
-                },
                 ...stats,
             }),
+        });
+
+        await prisma.skillTreeProgress.create({
+            data: {
+                characterId: row.id,
+                progress: { [tree.treeId]: { unlockedSkills: unlocked } },
+                version: 1,
+            },
         });
 
         let equipped: Record<string, string> = { mainHand: weapons[b.weapon] };

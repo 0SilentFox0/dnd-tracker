@@ -48,6 +48,10 @@ export function contentRowHash(
         row.characteristics = rest;
     }
 
+    // the morale column may be dropped; zero morale hashes the same as the old default
+    if ((model === 'Unit' || model === 'UnitBase') && row.morale === undefined)
+        row.morale = 0;
+
     if (
         (model === 'Unit' || model === 'Character') &&
         isEmptyCharacteristics(row.characteristics)

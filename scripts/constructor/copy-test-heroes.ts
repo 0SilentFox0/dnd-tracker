@@ -16,11 +16,9 @@ import { remapIds } from '@/lib/server/templates/remap-ids';
 
 type IdMap = ReadonlyMap<string, string>;
 
-type HeroRefs = Pick<
-    Character,
-    'knownSpells' | 'personalSkillId' | 'skillTreeProgress'
-> &
-    Partial<
+type HeroRefs = Pick<Character, 'knownSpells' | 'personalSkillId'> & {
+    progress?: unknown;
+} & Partial<
         Pick<
             Character,
             'backgroundId' | 'backgroundChoices' | 'backgroundFeatPicks'
@@ -41,9 +39,8 @@ export function mapHeroRefs(
     sourceIdToNew: IdMap
 ) {
     const progress =
-        character.skillTreeProgress &&
-        typeof character.skillTreeProgress === 'object'
-            ? character.skillTreeProgress
+        character.progress && typeof character.progress === 'object'
+            ? character.progress
             : {};
 
     const backgroundId = character.backgroundId
@@ -68,7 +65,7 @@ export function mapHeroRefs(
             ? (sourceIdToNew.get(character.personalSkillId) ??
               character.personalSkillId)
             : null,
-        skillTreeProgress: Object.fromEntries(
+        progress: Object.fromEntries(
             Object.entries(progress).map(([key, value]) => [
                 sourceIdToNew.get(key) ?? key,
                 remapIds(value, sourceIdToNew),
@@ -164,8 +161,19 @@ async function main() {
         });
     }
 
+    const progressById = new Map(
+        (
+            await prisma.skillTreeProgress.findMany({
+                where: { characterId: { in: heroes.map((h) => h.id) } },
+            })
+        ).map((r) => [r.characterId, r.progress])
+    );
+
     for (const {
-        id: _id,
+        id: sourceHeroId,
+        morale: _morale,
+        inspiration: _inspiration,
+        skillTreeProgress: _legacyProgress,
         inventory,
         characterSkills,
         campaignId: _campaignId,
@@ -174,7 +182,10 @@ async function main() {
         ...character
     } of heroes) {
         const mapped = mapHeroRefs(
-            character,
+            {
+                ...character,
+                progress: progressById.get(sourceHeroId),
+            },
             inventory,
             characterSkills,
             sourceIdToNew
@@ -191,8 +202,6 @@ async function main() {
                     mapped.backgroundFeatPicks as Prisma.InputJsonValue,
                 knownSpells: mapped.knownSpells as Prisma.InputJsonValue,
                 personalSkillId: mapped.personalSkillId,
-                skillTreeProgress:
-                    mapped.skillTreeProgress as Prisma.InputJsonValue,
                 savingThrows: character.savingThrows as Prisma.InputJsonValue,
                 skills: character.skills as Prisma.InputJsonValue,
                 spellSlots: character.spellSlots as Prisma.InputJsonValue,
@@ -206,6 +215,14 @@ async function main() {
                 resources: character.resources as Prisma.InputJsonValue,
                 characteristics:
                     character.characteristics as Prisma.InputJsonValue,
+            },
+        });
+
+        await prisma.skillTreeProgress.create({
+            data: {
+                characterId: created.id,
+                progress: mapped.progress as Prisma.InputJsonValue,
+                version: 1,
             },
         });
 

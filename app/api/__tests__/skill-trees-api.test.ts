@@ -175,27 +175,22 @@ describe('PATCH skill tree', () => {
             skills: { id: 'mock-Ельф-camp', mainSkills: [] },
         } as never);
         vi.mocked(prisma.character.findMany).mockResolvedValue([
-            {
-                id: 'a',
-                skillTreeProgress: {
-                    'mock-Ельф-camp': { unlockedSkills: ['o1'] },
-                    other: { unlockedSkills: ['x'] },
-                },
-            },
-            { id: 'b', skillTreeProgress: { row: { unlockedSkills: ['o1'] } } },
+            { id: 'a' },
+            { id: 'b' },
         ] as never);
-        vi.mocked(prisma.character.findUnique).mockImplementation((async ({
+        vi.mocked(prisma.skillTreeProgress.findUnique).mockImplementation((async ({
             where,
         }: {
-            where: { id: string };
+            where: { characterId: string };
         }) => ({
-            skillTreeProgress:
-                where.id === 'a'
+            progress:
+                where.characterId === 'a'
                     ? {
                           'mock-Ельф-camp': { unlockedSkills: ['o1'] },
                           other: { unlockedSkills: ['x'] },
                       }
                     : { row: { unlockedSkills: ['o1'] } },
+            version: 1,
         })) as never);
 
         await patch('row', RAW);
@@ -204,26 +199,21 @@ describe('PATCH skill tree', () => {
             vi.mocked(prisma.character.findMany).mock.calls[0][0]
         ).toMatchObject({ where: { campaignId: 'camp', race: 'Ельф' } });
         expect(prisma.$transaction).toHaveBeenCalledTimes(1);
-        expect(
-            vi.mocked(prisma.skillTreeProgress.createMany).mock.calls
-        ).toEqual([
+        expect(vi.mocked(prisma.skillTreeProgress.updateMany).mock.calls).toEqual([
             [
                 {
-                    data: [
-                        {
-                            characterId: 'a',
-                            progress: {
-                                row: { unlockedSkills: ['o1'] },
-                                other: { unlockedSkills: ['x'] },
-                            },
-                            version: 1,
+                    where: { characterId: 'a', version: 1 },
+                    data: {
+                        progress: {
+                            row: { unlockedSkills: ['o1'] },
+                            other: { unlockedSkills: ['x'] },
                         },
-                    ],
-                    skipDuplicates: true,
+                        version: { increment: 1 },
+                    },
                 },
             ],
         ]);
-        expect(vi.mocked(prisma.character.update).mock.calls).toHaveLength(1);
+        expect(prisma.character.update).not.toHaveBeenCalled();
     });
 
     const OLD = {
@@ -238,7 +228,7 @@ describe('PATCH skill tree', () => {
             OLD as never
         );
         vi.mocked(prisma.character.findMany).mockResolvedValue([
-            { id: 'a', skillTreeProgress: {} },
+            { id: 'a' },
         ] as never);
         vi.mocked(prisma.skillTreeProgress.findMany).mockResolvedValue([
             {
@@ -281,7 +271,7 @@ describe('PATCH skill tree', () => {
             OLD as never
         );
         vi.mocked(prisma.character.findMany).mockResolvedValue([
-            { id: 'a', skillTreeProgress: {} },
+            { id: 'a' },
         ] as never);
 
         const row = {

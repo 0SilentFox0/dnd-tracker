@@ -98,14 +98,11 @@ const hero = {
     armorClass: 12,
     speed: 30,
     initiative: 10,
-    morale: 1,
+    characteristics: { ext: { morale: { value: 1 } } },
     controlledBy: 'u1',
     immunities: [],
     knownSpells: [],
     equipment: {},
-    skillTreeProgress: {
-        'row-tree': { unlockedSkills: ['light_basic_level'] },
-    },
     personalSkillId: 'ps',
     archetype: 'ranger',
     classes: [],
@@ -121,6 +118,9 @@ const context = (rules: Ruleset) =>
         ext: {
             skilltrees: {
                 treeByRace: { Ельф: tree },
+                progress: {
+                    ch1: { 'row-tree': { unlockedSkills: ['light_basic_level'] } },
+                },
                 mainSkills: [
                     { id: 'light', spellGroupId: 'sg', name: 'Світло' },
                 ],
@@ -236,25 +236,6 @@ describe.each(MODULES)('D16 module toggle: $id', (mod) => {
 
             expect(off).not.toHaveProperty(mod.column);
             expect(on).toHaveProperty(mod.column, 'x');
-        });
-
-    if (mod.id === 'skilltrees')
-        it('level-down resets the tree only with the module', () => {
-            const lower = (rules: Ruleset) =>
-                buildCharacterUpdateData({
-                    character: {
-                        ...hero,
-                        spellSlots: {},
-                        seenLevel: null,
-                    } as never,
-                    data: { level: 2 },
-                    campaign: { maxLevel: 20 },
-                    race: null,
-                    resets: ruleSystemOf(rules).progression.levelResets,
-                }).columnResets;
-
-            expect(lower(rulesOff)).not.toHaveProperty('skillTreeProgress');
-            expect(lower(rulesOn)).toEqual({ skillTreeProgress: {} });
         });
 
     it('sheet: module data disappears and comes back identical', async () => {

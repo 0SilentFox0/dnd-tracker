@@ -74,7 +74,7 @@ const loaded = (
 });
 
 function fakeDb(
-    rows: Array<{ id: string; resources: unknown; inspiration?: boolean }>
+    rows: Array<{ id: string; resources: unknown; characteristics?: unknown }>
 ) {
     const tx = {
         battleScene: { updateMany: vi.fn(async () => ({ count: 1 })) },
@@ -210,7 +210,7 @@ describe('saveBattle: resources write-back', () => {
         );
 
         const { db, tx } = fakeDb([
-            { id: 'ch-a', resources: {}, inspiration: true },
+            { id: 'ch-a', resources: {}, characteristics: { ext: { inspiration: { available: true } } } },
         ]);
 
         await saveBattle(db, loaded(RULES, [a]), {
@@ -226,7 +226,11 @@ describe('saveBattle: resources write-back', () => {
         });
         expect(tx.character.update).toHaveBeenCalledWith({
             where: { id: 'ch-a' },
-            data: expect.objectContaining({ inspiration: false }),
+            data: {
+                characteristics: {
+                    ext: { inspiration: { available: false } },
+                },
+            },
         });
     });
 
@@ -241,7 +245,7 @@ describe('saveBattle: resources write-back', () => {
         };
 
         const { db, tx } = fakeDb([
-            { id: 'ch-a', resources: {}, inspiration: true },
+            { id: 'ch-a', resources: {}, characteristics: { ext: { inspiration: { available: true } } } },
         ]);
 
         await saveBattle(db, loaded(rules, [a]), {
@@ -254,7 +258,11 @@ describe('saveBattle: resources write-back', () => {
         expect(tx.character.update).toHaveBeenCalledTimes(1);
         expect(tx.character.update).toHaveBeenCalledWith({
             where: { id: 'ch-a' },
-            data: expect.objectContaining({ inspiration: false }),
+            data: {
+                characteristics: {
+                    ext: { inspiration: { available: false } },
+                },
+            },
         });
     });
 

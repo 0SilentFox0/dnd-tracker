@@ -10,7 +10,7 @@ import { parseRules } from '@/lib/utils/rules/schema';
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
     include: { inventory: true };
-}> & { skillTreeProgress?: unknown; personalSkillId?: string | null };
+}> & { personalSkillId?: string | null };
 type UnitRow = { id: string; raceId: string | null };
 
 export interface BuildContextResult {

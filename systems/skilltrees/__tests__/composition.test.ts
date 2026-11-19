@@ -31,9 +31,9 @@ describe('skilltrees module composition', () => {
             )
         ).not.toEqual([]));
 
-    it('adds the level-down reset and owns the personal skill column', () => {
+    it('owns the personal skill column and adds no pure level reset', () => {
         expect(len(on().progression.levelResets)).toBe(
-            len(bare().progression.levelResets) + 1
+            len(bare().progression.levelResets)
         );
         expect(JSON.stringify(on().stats?.columns)).toContain(
             'personalSkillId'
@@ -41,16 +41,5 @@ describe('skilltrees module composition', () => {
         expect(JSON.stringify(bare().stats?.columns ?? [])).not.toContain(
             'personalSkillId'
         );
-    });
-
-    it('the reset clears the tree progress only when the level drops', () => {
-        const resets = on().progression.levelResets ?? [];
-
-        const reset = resets[resets.length - 1];
-
-        expect(reset?.({ from: 5, to: 4 } as never)).toEqual({
-            skillTreeProgress: {},
-        });
-        expect(reset?.({ from: 4, to: 5 } as never)).toEqual({});
     });
 });

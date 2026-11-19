@@ -2,12 +2,9 @@ import { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
 
-type ReadDb = Pick<Prisma.TransactionClient, 'skillTreeProgress' | 'character'>;
+type ReadDb = Pick<Prisma.TransactionClient, 'skillTreeProgress'>;
 
-type WriteDb = Pick<
-    Prisma.TransactionClient,
-    'skillTreeProgress' | 'character'
->;
+type WriteDb = Pick<Prisma.TransactionClient, 'skillTreeProgress'>;
 
 export class ProgressVersionConflictError extends Error {
     constructor(readonly characterId: string) {
@@ -16,7 +13,6 @@ export class ProgressVersionConflictError extends Error {
     }
 }
 
-// table wins; the legacy characters.skillTreeProgress column is the fallback until backfill
 export async function readProgress(
     characterIds: string[],
     db: ReadDb = prisma
@@ -25,17 +21,9 @@ export async function readProgress(
 
     if (characterIds.length === 0) return result;
 
-    const [rows, columns] = await Promise.all([
-        db.skillTreeProgress.findMany({
-            where: { characterId: { in: characterIds } },
-        }),
-        db.character.findMany({
-            where: { id: { in: characterIds } },
-            select: { id: true, skillTreeProgress: true },
-        }),
-    ]);
-
-    for (const c of columns) result.set(c.id, c.skillTreeProgress);
+    const rows = await db.skillTreeProgress.findMany({
+        where: { characterId: { in: characterIds } },
+    });
 
     for (const r of rows) result.set(r.characterId, r.progress);
 
@@ -43,7 +31,7 @@ export async function readProgress(
 }
 
 export async function overlayProgress(
-    characters: { id: string; skillTreeProgress?: unknown }[],
+    characters: { id: string }[],
     db: Pick<Prisma.TransactionClient, 'skillTreeProgress'> = prisma
 ): Promise<Map<string, unknown>> {
     const result = new Map<string, unknown>();
@@ -53,8 +41,6 @@ export async function overlayProgress(
     const rows = await db.skillTreeProgress.findMany({
         where: { characterId: { in: characters.map((c) => c.id) } },
     });
-
-    for (const c of characters) result.set(c.id, c.skillTreeProgress);
 
     for (const r of rows) result.set(r.characterId, r.progress);
 
@@ -81,14 +67,7 @@ export async function readProgressRow(
         where: { characterId },
     });
 
-    if (row) return { progress: row.progress, version: row.version };
-
-    const column = await db.character.findUnique({
-        where: { id: characterId },
-        select: { skillTreeProgress: true },
-    });
-
-    return column ? { progress: column.skillTreeProgress, version: 0 } : null;
+    return row ? { progress: row.progress, version: row.version } : null;
 }
 
 export const resetProgress = (
@@ -123,9 +102,4 @@ export async function writeProgress(
 
         if (count === 0) throw new ProgressVersionConflictError(characterId);
     }
-
-    await tx.character.update({
-        where: { id: characterId },
-        data: { skillTreeProgress: progress },
-    });
 }

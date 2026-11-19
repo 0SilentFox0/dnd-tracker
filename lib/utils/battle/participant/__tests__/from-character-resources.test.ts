@@ -5,6 +5,7 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { exhaustionLevel } from '@/lib/utils/battle/conditions';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { composition } from '@/lib/utils/rules/systems/catalog';
 import { d20State } from '@/systems/d20/rules/state';
 import type { GameClassData } from '@/types/classes';
 
@@ -77,6 +78,17 @@ const warlock = cls({
 });
 
 const FIGHTER3 = [{ classId: 'fighter', level: 3 }];
+
+const WITH_INSPIRATION = {
+    system: {
+        key: 'dnd5e',
+        modules: [...(composition({ key: 'dnd5e' }).modules ?? []), 'inspiration'],
+    },
+};
+
+const inspired = (available: boolean) => ({
+    characteristics: { ext: { inspiration: { available } } },
+});
 
 const build = (outOfCombat: object, character: object, extra: object = {}) => {
     const context = {
@@ -222,17 +234,17 @@ describe('battle start from stored resources', () => {
         expect(tired.combatStats.currentHp).toBe(tired.combatStats.maxHp);
     });
 
-    it('inspiration comes from the column when the rule is on', async () => {
+    it('inspiration comes from characteristics.ext when the rule is on', async () => {
         expect(
-            d20State(await build({ inspiration: true }, { inspiration: true }))
+            d20State(await build({ inspiration: true }, inspired(true), WITH_INSPIRATION))
                 .inspiration
         ).toBe(true);
         expect(
-            d20State(await build({ inspiration: true }, { inspiration: false }))
+            d20State(await build({ inspiration: true }, inspired(false), WITH_INSPIRATION))
                 .inspiration
         ).toBeUndefined();
         expect(
-            d20State(await build({ inspiration: false }, { inspiration: true }))
+            d20State(await build({ inspiration: false }, inspired(true), WITH_INSPIRATION))
                 .inspiration
         ).toBeUndefined();
     });

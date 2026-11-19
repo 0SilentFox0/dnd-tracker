@@ -14,7 +14,7 @@ describe('mapHeroRefs', () => {
         {
             knownSpells: ['sp1', 'unknown-spell'],
             personalSkillId: 'sk1',
-            skillTreeProgress: {
+            progress: {
                 tree1: { level: 2, unlockedSkills: ['sk1', 'other'] },
                 'tree-json': { unlockedSkills: [] },
             },
@@ -39,8 +39,8 @@ describe('mapHeroRefs', () => {
         ]);
     });
 
-    it('replaces skillTreeProgress keys and values', () => {
-        expect(result.skillTreeProgress).toEqual({
+    it('replaces progress keys and values', () => {
+        expect(result.progress).toEqual({
             'tree1-new': { level: 2, unlockedSkills: ['sk1-new', 'other'] },
             'tree-json': { unlockedSkills: [] },
         });
@@ -56,7 +56,7 @@ describe('mapHeroRefs', () => {
 
     it('handles missing personal skill and inventory', () => {
         const empty = mapHeroRefs(
-            { knownSpells: [], personalSkillId: null, skillTreeProgress: {} },
+            { knownSpells: [], personalSkillId: null, progress: {} },
             null,
             [],
             map
@@ -79,7 +79,7 @@ it('remaps background picks and refuses to carry a source campaign background', 
     const hero = {
         knownSpells: [],
         personalSkillId: null,
-        skillTreeProgress: {},
+        progress: {},
         backgroundId: 'bg',
         backgroundChoices: { gift: [{ id: 'sp1' }] },
         backgroundFeatPicks: { cantrip: [{ id: 'sp1' }] },

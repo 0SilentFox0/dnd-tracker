@@ -86,9 +86,7 @@ export const skillTreeCharacterContext: CharacterContextLoader = {
             where: { campaignId, race: character.race },
         });
 
-        const progress =
-            (await readProgressTable(character.id)) ??
-            character.skillTreeProgress;
+        const progress = await readProgressTable(character.id);
 
         const library = await loadLibrary(
             campaignId,

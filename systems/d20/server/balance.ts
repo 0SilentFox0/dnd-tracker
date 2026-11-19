@@ -27,11 +27,9 @@ export const D20_BALANCE: SystemBalance = {
 
         const treeCtx = skillTreeContext.read(campaignContext);
 
-        const row = character.row as { id?: string; skillTreeProgress?: unknown };
+        const row = character.row as { id?: string };
 
-        const progress =
-            (row.id ? treeCtx?.progress?.[row.id] : undefined) ??
-            row.skillTreeProgress;
+        const progress = row.id ? treeCtx?.progress?.[row.id] : undefined;
 
         const treeRow = treeCtx?.treeByRace[character.race];
 

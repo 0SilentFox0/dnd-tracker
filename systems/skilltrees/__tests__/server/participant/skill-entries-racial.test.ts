@@ -6,9 +6,24 @@ import { composition } from '@/lib/utils/rules/systems/catalog';
 import { buildTreeJson, racialNodeId } from '@/lib/utils/skills/progression';
 import { resolveCharacterSkillEntries } from '@/systems/skilltrees/server/participant/skill-entries';
 
+const stored = vi.hoisted(() => new Map<string, unknown>());
+
 vi.mock('@/lib/db', () => ({
     prisma: {
-        skillTreeProgress: { findMany: vi.fn(async () => []) },
+        skillTreeProgress: {
+            findMany: vi.fn(
+                async ({
+                    where,
+                }: {
+                    where: { characterId: { in: string[] } };
+                }) =>
+                    where.characterId.in.flatMap((characterId) =>
+                        stored.has(characterId)
+                            ? [{ characterId, progress: stored.get(characterId) }]
+                            : []
+                    )
+            ),
+        },
         character: { findMany: vi.fn(async () => []) },
     },
 }));
@@ -46,11 +61,12 @@ async function learnedRacial(
         }),
     };
 
+    stored.set('c', { t1: { unlockedSkills: levels.map(racialNodeId) } });
+
     const character = {
         id: 'c',
         race: race.name,
         personalSkillId: null,
-        skillTreeProgress: { t1: { unlockedSkills: levels.map(racialNodeId) } },
     };
 
     const entries = await resolveCharacterSkillEntries(

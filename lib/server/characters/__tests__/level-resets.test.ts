@@ -25,8 +25,8 @@ const lower = (to: number) =>
     }).columnResets;
 
 describe('allLevelResets', () => {
-    it('a level-down wipes the tree progress whatever the composition', () => {
-        expect(lower(2)).toEqual({ skillTreeProgress: {} });
+    it('a level-down resets no column (tree progress lives in its table)', () => {
+        expect(lower(2)).toEqual({});
     });
 
     it('a level-up resets nothing', () => {

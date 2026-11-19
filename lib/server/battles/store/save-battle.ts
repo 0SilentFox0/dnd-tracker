@@ -306,7 +306,6 @@ async function updateScene(tx: Prisma.TransactionClient, s: SaveScope) {
                 pendingCritChoice: jsonOrNull(patch.pendingChoice),
             }),
             ...(patch.sceneState !== undefined && {
-                pendingMoraleCheck: Prisma.DbNull,
                 systemState: patch.sceneState
                     ? toInputJson(patch.sceneState)
                     : Prisma.DbNull,

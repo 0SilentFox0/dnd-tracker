@@ -38,8 +38,6 @@ export const rowToMapState = (
 export interface SnapshotState {
     scene: Pick<BattleSceneState, 'round' | 'turnIndex' | 'status'> & {
         sceneState?: SystemSlot;
-        /** Legacy snapshots only: read through `upgradeScene`, never written */
-        pendingMoraleCheck?: unknown;
         mapState?: BattleMapState;
         mapStateChanged?: true;
         mapVersion?: number;

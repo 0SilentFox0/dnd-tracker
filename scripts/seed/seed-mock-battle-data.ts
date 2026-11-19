@@ -397,7 +397,6 @@ async function seedMockData() {
                 morale: 1,
                 spellSlots: {},
                 knownSpells: [],
-                skillTreeProgress: {} as Prisma.InputJsonValue, // Буде заповнено після створення дерева
             },
             {
                 name: 'Айра Маг',
@@ -427,7 +426,6 @@ async function seedMockData() {
                     createdSpells[2].id, // Magic Missile
                     createdSpells[3].id, // Cure Wounds
                 ],
-                skillTreeProgress: {} as Prisma.InputJsonValue, // Буде заповнено після створення дерева
             },
         ];
 
@@ -454,7 +452,6 @@ async function seedMockData() {
                     '2': { max: 2, current: 2 },
                 },
                 knownSpells: [createdSpells[1].id, createdSpells[3].id], // Heal, Cure Wounds
-                skillTreeProgress: {} as Prisma.InputJsonValue, // Буде заповнено після створення дерева
             },
             {
                 name: 'Елвін Чарівник',
@@ -484,7 +481,6 @@ async function seedMockData() {
                     createdSpells[2].id, // Magic Missile
                     createdSpells[4].id, // Poison Spray
                 ],
-                skillTreeProgress: {} as Prisma.InputJsonValue, // Буде заповнено після створення дерева
             },
         ];
 
@@ -514,8 +510,6 @@ async function seedMockData() {
                     ...charData,
                     spellSlots: charData.spellSlots as Prisma.InputJsonValue,
                     knownSpells: charData.knownSpells as Prisma.InputJsonValue,
-                    skillTreeProgress:
-                        charData.skillTreeProgress as Prisma.InputJsonValue,
                 }),
             });
 
@@ -547,14 +541,20 @@ async function seedMockData() {
                 }
             }
 
-            await prisma.character.update({
-                where: { id: character.id },
-                data: {
-                    skillTreeProgress: {
-                        [skillTreeId]: {
-                            unlockedSkills,
-                        },
-                    } as Prisma.InputJsonValue,
+            await prisma.skillTreeProgress.upsert({
+                where: { characterId: character.id },
+                create: {
+                    characterId: character.id,
+                    progress: {
+                        [skillTreeId]: { unlockedSkills },
+                    },
+                    version: 1,
+                },
+                update: {
+                    progress: {
+                        [skillTreeId]: { unlockedSkills },
+                    },
+                    version: { increment: 1 },
                 },
             });
 

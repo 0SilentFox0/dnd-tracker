@@ -21,7 +21,6 @@ vi.mock('@/lib/db', () => {
                 id: 'ch',
                 resources: {},
                 experience: 0,
-                inspiration: false,
                 characteristics: { strength: 12, ext: { other: { a: 1 } } },
             },
         ]),
@@ -90,7 +89,6 @@ describe('POST inspiration', () => {
         expect(prisma.character.update).toHaveBeenCalledWith({
             where: { id: 'ch' },
             data: {
-                inspiration: true,
                 characteristics: {
                     strength: 12,
                     ext: {

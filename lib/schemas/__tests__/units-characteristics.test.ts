@@ -29,10 +29,11 @@ describe('unit characteristics', () => {
         expect(units[0].characteristics?.base).toEqual({ ws: 50 });
     });
 
-    it('unitCreateData includes characteristics only when given', () => {
+    it('unitCreateData stores morale in characteristics.ext and keeps given characteristics', () => {
         expect(
             unitCreateData('c', createUnitSchema.parse({ name: 'Orc' }))
-        ).not.toHaveProperty('characteristics');
+                .characteristics
+        ).toEqual({ ext: { morale: { value: 0 } } });
         expect(
             unitCreateData(
                 'c',

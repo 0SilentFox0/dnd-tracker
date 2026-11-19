@@ -62,7 +62,7 @@ function character(raceName: string, morale = 0) {
         armorClass: 12,
         speed: 30,
         initiative: 0,
-        morale,
+        characteristics: { ext: { morale: { value: morale } } },
         controlledBy: 'u1',
         immunities: [],
         knownSpells: [],

@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// legacy: needs the pre-drop schema
 /**
  * Copies the legacy `morale` column into `characteristics.ext.morale.value` for one table (--table characters|units|units_base). The column is never touched.
  * HASH GUARD (--expect-same-hashes, on by default): contentRowHash legacy == migrated for every row, otherwise nothing is written.

@@ -261,6 +261,8 @@ function updateWriter({
 
     const { systemBaseline: _baseline, ...columns } = data;
 
+    const { morale, ...rest } = columns;
+
     const classesData = fromClasses && {
         class: fromClasses.class,
         subclass: fromClasses.subclass,
@@ -291,20 +293,20 @@ function updateWriter({
             view.characteristics ??
             kept(data.characteristics);
 
-        const moraleData =
-            typeof columns.morale === 'number'
+        const stored =
+            typeof morale === 'number'
                 ? storedColumnUpdate(
                       { characteristics: nextCharacteristics ?? prev },
                       STORED_COLUMN.morale,
-                      columns.morale
+                      morale
                   )
                 : undefined;
 
         const updated = await db.character.update({
             where: { id: character.id },
             data: {
-                ...columns,
-                characteristics: (moraleData?.characteristics ??
+                ...rest,
+                characteristics: (stored?.characteristics ??
                     nextCharacteristics) as Prisma.InputJsonValue | undefined,
                 backgroundChoices: undefined,
                 backgroundFeatPicks: undefined,

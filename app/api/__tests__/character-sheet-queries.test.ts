@@ -192,6 +192,9 @@ describe('лист персонажа: запити до БД', () => {
         db.args = {};
         db.results = {
             'character.findUnique': character,
+            'skillTreeProgress.findUnique': {
+                progress: character.skillTreeProgress,
+            },
             'campaign.findUnique': (arg: {
                 select: Record<string, unknown>;
             }) =>
@@ -335,11 +338,9 @@ describe('лист персонажа: запити до БД', () => {
     });
 
     it('без вивчених вузлів і особистого скіла — без скілів, шкіл і заклинань кампанії', async () => {
-        const fresh = {
-            ...character,
-            skillTreeProgress: {},
-            personalSkillId: null,
-        };
+        const fresh = { ...character, personalSkillId: null };
+
+        db.results['skillTreeProgress.findUnique'] = { progress: {} };
 
         await buildSheetFor(
             fresh as never,
@@ -357,7 +358,9 @@ describe('лист персонажа: запити до БД', () => {
     });
 
     it('лише особистий скіл — скіл за id, без шкіл і заклинань', async () => {
-        const personalOnly = { ...character, skillTreeProgress: {} };
+        const personalOnly = { ...character };
+
+        db.results['skillTreeProgress.findUnique'] = { progress: {} };
 
         await buildSheetFor(
             personalOnly as never,
