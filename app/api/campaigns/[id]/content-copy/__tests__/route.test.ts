@@ -17,6 +17,19 @@ vi.mock('@/lib/server/content/copy/service', () => ({ copyContent }));
 vi.mock('@/lib/server/content/copy/targets', () => ({ listCopyTargets }));
 vi.mock('@/lib/server/content/copy/names', () => ({ loadCopyNames }));
 
+vi.mock('@/lib/utils/api/translate-error', async (orig) => ({
+    ...(await orig<object>()),
+    requestTranslator: async () => ({
+        has: (k: string) => k === 'errors.internal',
+        raw: () => '',
+        t: 0,
+    }),
+    translateErrorBody: (
+        t: { has: (k: string) => boolean },
+        b: { error: string }
+    ) => ({ error: t.has(b.error) ? 'Внутрішня помилка сервера' : b.error }),
+}));
+
 import { GET, POST } from '../route';
 
 const ctx = { params: Promise.resolve({ id: 'c1' }) };
@@ -46,6 +59,20 @@ beforeEach(() => {
 });
 
 describe('content-copy route', () => {
+    it('translates per-target error keys', async () => {
+        copyContent.mockResolvedValue({
+            targets: [
+                { campaignId: 'c2', status: 'failed', error: 'errors.internal' },
+                { campaignId: 'c3', status: 'ok' },
+            ],
+        });
+
+        const body = await (await post(valid)).json();
+
+        expect(body.targets[0].error).toBe('Внутрішня помилка сервера');
+        expect(body.targets[1].error).toBeUndefined();
+    });
+
     it('returns the guard response when not allowed (POST)', async () => {
         resolveActor.mockResolvedValue(
             NextResponse.json({ error: 'x' }, { status: 403 })

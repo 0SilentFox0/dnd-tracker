@@ -11,6 +11,10 @@ import { ContentError } from '@/lib/server/content/errors';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';
 import { NEED } from '@/lib/utils/api/need';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import {
+    requestTranslator,
+    translateErrorBody,
+} from '@/lib/utils/api/translate-error';
 
 export const maxDuration = 120;
 
@@ -53,6 +57,25 @@ export const POST = (req: Request, ctx: Ctx) =>
 
             if (body instanceof NextResponse) return body;
 
-            return NextResponse.json(await copyContent({ actor, ...body }));
+            const result = await copyContent({ actor, ...body });
+
+            // `errors` is a server-only namespace, so per-target keys are translated here
+            if (!result.targets.some((target) => target.error))
+                return NextResponse.json(result);
+
+            const t = await requestTranslator();
+
+            return NextResponse.json({
+                targets: result.targets.map((target) =>
+                    target.error
+                        ? {
+                              ...target,
+                              error: translateErrorBody(t, {
+                                  error: target.error,
+                              }).error,
+                          }
+                        : target
+                ),
+            });
         }
     );
