@@ -303,6 +303,7 @@ export function convertBreathSpells(data: Open5eData): SpellRow[] {
                     kind: 'save',
                     ability: 'dexterity',
                     onSuccess: 'half',
+                    tags: ['breath'],
                 },
                 spellEffects: [
                     {

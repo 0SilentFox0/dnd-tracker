@@ -2100,7 +2100,7 @@
       {
         "id": "coat-blade",
         "name": "Coat the blade",
-        "description": "Bonus Action, once until dawn: the poison lasts 1 minute or until a hit; the creature hit makes a DC 15 Constitution save or takes 2d10 Poison damage and is Poisoned for 1 minute.",
+        "description": "Bonus Action, once until dawn: the poison lasts 1 minute or until a hit.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2119,10 +2119,53 @@
               "rounds": 10
             },
             "target": "self"
+          }
+        ]
+      },
+      {
+        "id": "venom-hit",
+        "name": "Venom",
+        "description": "The creature hit makes a DC 15 Constitution save or takes 2d10 Poison damage and is Poisoned for 1 minute.",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "hasMark",
+              "who": "self",
+              "markId": "venom-coat"
+            }
+          ]
+        },
+        "save": {
+          "ability": "constitution",
+          "dc": 15
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": "2d10",
+            "damageType": "poison",
+            "target": "eventTarget"
           },
           {
-            "kind": "note",
-            "text": "On a hit: DC 15 Constitution save or 2d10 Poison damage and Poisoned for 1 minute"
+            "kind": "applyCondition",
+            "condition": "poisoned",
+            "duration": {
+              "rounds": 10
+            },
+            "target": "eventTarget"
+          },
+          {
+            "kind": "removeMark",
+            "markId": "venom-coat",
+            "target": "self"
           }
         ]
       }
@@ -2372,6 +2415,27 @@
             "kind": "modifyStat",
             "stat": "armor",
             "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "breath-ward",
+        "name": "Dragon Breath Ward",
+        "description": "Advantage on saving throws against the breath of a Dragon.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "saveAdvantage",
+            "abilities": "all",
+            "vsTags": [
+              "breath"
+            ],
+            "vsCreatureTypes": [
+              "dragon"
+            ]
           }
         ]
       },
@@ -4416,6 +4480,37 @@
             "amount": 2,
             "damageType": "bludgeoning",
             "target": "eventTarget"
+          }
+        ]
+      },
+      {
+        "id": "smite-construct-hit",
+        "name": "Smiting (Construct to hit)",
+        "description": "The bonus is +3 against a Construct: +2 to hit here.",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "all",
+          "conditions": [
+            {
+              "type": "withThisItem"
+            },
+            {
+              "type": "targetCreatureType",
+              "types": [
+                "construct"
+              ]
+            }
+          ]
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 2
           }
         ]
       },
@@ -6768,7 +6863,7 @@
       {
         "id": "speed",
         "name": "Speed",
-        "description": "Bonus Action: one extra attack with this weapon (granted as an extra action).",
+        "description": "Bonus Action: make one attack with this weapon.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -6778,7 +6873,7 @@
         "effects": [
           {
             "kind": "grantAction",
-            "extraActions": 1
+            "itemAttacks": 1
           }
         ]
       }

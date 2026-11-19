@@ -259,6 +259,17 @@ export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
             ],
         },
         {
+            id: 'smite-construct-hit',
+            name: 'Smiting (Construct to hit)',
+            description: 'The bonus is +3 against a Construct: +2 to hit here.',
+            trigger: { event: 'attack', phase: 'before', role: 'attacker' },
+            condition: {
+                type: 'all',
+                conditions: [withThisItem, vsConstruct],
+            },
+            effects: [{ kind: 'modifyStat', stat: 'attackBonus', flat: 2 }],
+        },
+        {
             id: 'smite-construct-crit',
             name: 'Smiting (Construct crit)',
             description:
@@ -283,11 +294,10 @@ export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
         {
             id: 'speed',
             name: 'Speed',
-            description:
-                'Bonus Action: one extra attack with this weapon (granted as an extra action).',
+            description: 'Bonus Action: make one attack with this weapon.',
             trigger: { event: 'bonusAction' },
             limits: { perTurn: 1 },
-            effects: [{ kind: 'grantAction', extraActions: 1 }],
+            effects: [{ kind: 'grantAction', itemAttacks: 1 }],
         },
     ],
     'srd-2024_dagger-of-venom': [
@@ -295,7 +305,7 @@ export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
             id: 'coat-blade',
             name: 'Coat the blade',
             description:
-                'Bonus Action, once until dawn: the poison lasts 1 minute or until a hit; the creature hit makes a DC 15 Constitution save or takes 2d10 Poison damage and is Poisoned for 1 minute.',
+                'Bonus Action, once until dawn: the poison lasts 1 minute or until a hit.',
             trigger: { event: 'bonusAction' },
             limits: { pool: { key: 'charges', cost: 1 } },
             effects: [
@@ -306,9 +316,53 @@ export const UNIQUE_ABILITIES: Record<string, Ability[]> = {
                     duration: { rounds: ROUNDS_PER_MINUTE },
                     target: 'self',
                 },
+            ],
+        },
+        {
+            id: 'venom-hit',
+            name: 'Venom',
+            description:
+                'The creature hit makes a DC 15 Constitution save or takes 2d10 Poison damage and is Poisoned for 1 minute.',
+            trigger: { event: 'hit', role: 'attacker' },
+            condition: {
+                type: 'all',
+                conditions: [
+                    withThisItem,
+                    { type: 'hasMark', who: 'self', markId: 'venom-coat' },
+                ],
+            },
+            save: { ability: 'constitution', dc: 15 },
+            effects: [
                 {
-                    kind: 'note',
-                    text: 'On a hit: DC 15 Constitution save or 2d10 Poison damage and Poisoned for 1 minute',
+                    kind: 'dealDamage',
+                    amount: '2d10',
+                    damageType: 'poison',
+                    target: 'eventTarget',
+                },
+                {
+                    kind: 'applyCondition',
+                    condition: 'poisoned',
+                    duration: { rounds: ROUNDS_PER_MINUTE },
+                    target: 'eventTarget',
+                },
+                { kind: 'removeMark', markId: 'venom-coat', target: 'self' },
+            ],
+        },
+    ],
+    'srd-2024_dragon-scale-mail': [
+        {
+            id: 'breath-ward',
+            name: 'Dragon Breath Ward',
+            description:
+                'Advantage on saving throws against the breath of a Dragon.',
+            trigger: { event: 'passive' },
+            effects: [
+                {
+                    kind: 'flag',
+                    flag: 'saveAdvantage',
+                    abilities: 'all',
+                    vsTags: ['breath'],
+                    vsCreatureTypes: ['dragon'],
                 },
             ],
         },

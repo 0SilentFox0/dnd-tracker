@@ -206,6 +206,7 @@ export function saveAction(
                 onSuccess: /Success: Half damage|half as much/i.test(text)
                     ? 'half'
                     : 'none',
+                ...(/\bBreath\b/.test(f.name) && { tags: ['breath'] as const }),
             },
             spellEffects: effects,
             lists: [],
