@@ -1,4 +1,5 @@
 import type { SpellRow } from '../lib/types';
+import { UTILITY_SPELL_OVERRIDES } from './spells-utility';
 
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
 import type {
@@ -176,7 +177,7 @@ const vampiricHeal: NonRandomEffect = {
 };
 
 // sides/targets of popular spells and timed buffs (flat approximations of 1d4 bonuses), checked by hand against SRD 5.2
-export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
+const BASE_SPELL_OVERRIDES: Record<string, SpellOverride> = {
     'srd-2024_bless': {
         ...NO_DAMAGE,
         targeting: { kind: 'area', side: 'ally', maxTargets: 3, range: 30 },
@@ -376,16 +377,6 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 saveEnds: { ability: 'strength' },
             },
         ],
-    },
-    'srd-2024_dimension-door': {
-        ...NO_DAMAGE,
-        targeting: { kind: 'self' },
-        resolution: { kind: 'auto' },
-    },
-    'srd-2024_wish': {
-        ...NO_DAMAGE,
-        targeting: { kind: 'self' },
-        resolution: { kind: 'auto' },
     },
     'srd-2024_longstrider': {
         targeting: { kind: 'ally', range: 5 },
@@ -1247,4 +1238,14 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
             },
         ],
     },
+};
+
+export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
+    ...BASE_SPELL_OVERRIDES,
+    ...Object.fromEntries(
+        Object.entries(UTILITY_SPELL_OVERRIDES).map(([slug, override]) => [
+            slug,
+            { ...BASE_SPELL_OVERRIDES[slug], ...override },
+        ])
+    ),
 };

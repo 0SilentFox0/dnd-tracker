@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { ParticipantSide } from '@/lib/constants/battle';
-import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import {
+    makeParticipant,
+    resolved,
+} from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { castSpell } from '@/lib/utils/battle/spell';
@@ -108,17 +111,22 @@ const apply = (effect: Effect, target: BattleParticipant) => {
 
     return applyEffect({
         participants: [owner, target],
-        ability: {
+        ability: resolved({
             id: 'a',
             name: 'Aid',
             trigger: { event: 'spellCast', phase: 'after', role: 'caster' },
             effects: [effect],
-        },
+        }),
         effectIndex: 0,
         ownerId: 'o',
         effect,
         targetIds: [target.basicInfo.id],
-        event: { type: 'spellCast', phase: 'after', actorId: 'o', targetIds: [] },
+        event: {
+            type: 'spellCast',
+            phase: 'after',
+            actorId: 'o',
+            targetIds: [],
+        },
         ctx: { round: 1, rng: () => 0.5, rules: DEFAULT_RULES },
     }).participants.find((p) => p.basicInfo.id === target.basicInfo.id)!;
 };
@@ -148,9 +156,7 @@ describe('mark positive', () => {
             t
         );
 
-        expect(r.battleData.activeEffects.map((e) => e.type)).toEqual([
-            'buff',
-        ]);
+        expect(r.battleData.activeEffects.map((e) => e.type)).toEqual(['buff']);
     });
 });
 

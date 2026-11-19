@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import type { SpellRow } from '../lib/types';
-import dmResolved from './fixtures/dm-resolved-spells.json';
+import zoneOnly from './fixtures/zone-only-spells.json';
 
 import { SpellEffectSchema } from '@/lib/utils/spells/model/schema';
 
@@ -23,12 +23,12 @@ const spell = (slug: string) => {
 };
 
 describe('SRD spell effect coverage', () => {
-    it('spells without effects are exactly the explicit DM-resolved list', () => {
+    it('the only spells without effects are the zone-only ones', () => {
         const bare = spells
             .filter((s) => s.spellEffects.length === 0)
             .map((s) => s.slug.replace('srd-2024_', ''));
 
-        expect(bare.sort()).toEqual([...dmResolved].sort());
+        expect(bare.sort()).toEqual([...zoneOnly].sort());
     });
 
     it('ritual flag is set on the 29 SRD ritual spells only', () => {
