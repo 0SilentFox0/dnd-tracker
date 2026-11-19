@@ -40,10 +40,15 @@ const damageChoice = (types: string[]): SpellEffect => ({
     ),
 });
 
-const smite = (extraDice: string, damageType: string): SpellEffect => ({
+const smite = (
+    extraDice: string,
+    damageType: string,
+    upcast: { upcastDice: number; maxDice?: number }
+): SpellEffect => ({
     kind: 'hitRider',
     attackKind: 'melee',
     extraDice,
+    ...upcast,
     damageType,
     charges: 1,
     duration: rounds(1),
@@ -743,16 +748,52 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
             ]),
         ],
     },
-    // cast right before the hit: the extra dice ride on the next melee hit of the turn (fiend/undead bonus die and upcast stay manual)
+    // cast right before the hit: the extra dice ride on the next melee hit of the turn (the fiend/undead bonus die stays manual)
     'srd-2024_divine-smite': {
         targeting: { kind: 'self' },
         resolution: { kind: 'auto' },
-        spellEffects: [smite('2d8', 'radiant')],
+        spellEffects: [smite('2d8', 'radiant', { upcastDice: 1, maxDice: 5 })],
     },
     'srd-2024_shining-smite': {
         targeting: { kind: 'self' },
         resolution: { kind: 'auto' },
-        spellEffects: [smite('2d6', 'radiant')],
+        spellEffects: [smite('2d6', 'radiant', { upcastDice: 1 })],
+    },
+    // the CON save only guards the held item: the opening damage is automatic, the bonus-action repeat stays manual
+    'srd-2024_heat-metal': { resolution: { kind: 'auto' } },
+    'srd-2024_disintegrate': { damageBonus: 40 },
+    'srd-2024_finger-of-death': { damageBonus: 30 },
+    'srd-2024_hypnotic-pattern': {
+        spellEffects: [
+            {
+                kind: 'applyCondition',
+                condition: 'charmed',
+                duration: rounds(10),
+                breakOnDamage: true,
+            },
+            {
+                kind: 'applyCondition',
+                condition: 'incapacitated',
+                duration: rounds(10),
+                breakOnDamage: true,
+            },
+            {
+                kind: 'modifyStat',
+                stat: 'speed',
+                percent: -100,
+                duration: rounds(10),
+            },
+        ],
+    },
+    'srd-2024_power-word-kill': {
+        spellEffects: [
+            {
+                kind: 'dealDamage',
+                amount: { spellRoll: 100 },
+                damageType: 'psychic',
+                killIfHpAtMost: 100,
+            },
+        ],
     },
     'srd-2024_power-word-heal': {
         spellEffects: [

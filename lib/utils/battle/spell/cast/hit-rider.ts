@@ -20,6 +20,25 @@ interface HitRiderInput {
     ability: ResolvedAbility;
     saveDc: number | undefined;
     round: number;
+    upcastSteps?: number;
+}
+
+const DICE_COUNT = /^(\d+)d(\d+)$/;
+
+function riderDice(
+    effect: Extract<SpellEffect, { kind: 'hitRider' }>,
+    steps: number
+): string {
+    const m = DICE_COUNT.exec(effect.extraDice);
+
+    if (!m || !effect.upcastDice || steps <= 0) return effect.extraDice;
+
+    const count = Math.min(
+        Number(m[1]) + effect.upcastDice * steps,
+        effect.maxDice ?? Infinity
+    );
+
+    return `${count}d${m[2]}`;
 }
 
 export function applyHitRiders({
@@ -30,8 +49,11 @@ export function applyHitRiders({
     ability,
     saveDc,
     round,
+    upcastSteps = 0,
 }: HitRiderInput): void {
     for (const { effect, index } of hitRidersOf(effects)) {
+        const extraDice = riderDice(effect, upcastSteps);
+
         const holders =
             effect.target === 'eventTarget' ? targetIds : [casterId];
 
@@ -56,7 +78,7 @@ export function applyHitRiders({
                     }),
                     hitRider: {
                         attackKind: effect.attackKind,
-                        extraDice: effect.extraDice,
+                        extraDice,
                         damageType: effect.damageType,
                         chargesLeft: effect.charges,
                         casterId,
@@ -79,7 +101,7 @@ export function applyHitRiders({
                     holder: holder.basicInfo.name,
                     ability: ability.name,
                     charges: effect.charges,
-                    dice: effect.extraDice,
+                    dice: extraDice,
                     type: effect.damageType,
                 })
             );

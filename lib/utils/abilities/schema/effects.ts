@@ -329,6 +329,7 @@ const DealDamageSchema = z.object({
     kind: z.literal('dealDamage'),
     amount: AmountSchema,
     damageType: z.string().min(1).optional(),
+    killIfHpAtMost: z.number().int().min(1).max(10000).optional(),
     falloff: z.array(z.number().min(0).max(100)).min(1).optional(),
     byDistance: z
         .array(

@@ -439,6 +439,10 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         ability: state.ability,
         saveDc: state.saveDc,
         round: currentRound,
+        upcastSteps: ruleSystemOf(params.rules).magic.upcast.steps(
+            spell.level,
+            castLevel
+        ),
     });
 
     applyAnchoredZones({

@@ -386,4 +386,39 @@ describe('moveSelf', () => {
             'немає вільної клітинки'
         );
     });
+    it('upcastDice adds dice per slot level above the spell level, capped by maxDice', () => {
+        const dice = (castLevel: number, over = {}) => {
+            const c = caster();
+
+            const r = castSpell({
+                rules: DEFAULT_RULES,
+                caster: {
+                    ...c,
+                    spellcasting: {
+                        ...c.spellcasting,
+                        spellSlots: { '4': { max: 1, current: 1 } },
+                    },
+                },
+                spell: spellOf([
+                    rider({ extraDice: '2d8', upcastDice: 1, ...over }),
+                ]),
+                targetIds: [],
+                allParticipants: [c, foe()],
+                currentRound: 1,
+                battleId: 'b',
+                diceRolls: [],
+                rng: () => 0.5,
+                map,
+                castLevel,
+            });
+
+            return r.allParticipantsUpdated
+                ?.find((p) => p.basicInfo.id === 'c')
+                ?.battleData.activeEffects.find((e) => e.hitRider)?.hitRider
+                ?.extraDice;
+        };
+
+        expect(dice(4)).toBe('5d8');
+        expect(dice(4, { maxDice: 4 })).toBe('4d8');
+    });
 });

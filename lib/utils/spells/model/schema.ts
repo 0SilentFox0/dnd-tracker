@@ -232,6 +232,8 @@ const HitRiderSchema = z.object({
     kind: z.literal('hitRider'),
     attackKind: z.enum(['melee', 'ranged', 'any']),
     extraDice: z.string().regex(DICE_RE),
+    upcastDice: z.number().int().min(1).max(10).optional(),
+    maxDice: z.number().int().min(1).max(30).optional(),
     damageType: z.string().trim().min(1).max(30),
     charges: z.number().int().min(1).max(10),
     consumeOnMiss: z.boolean().optional(),

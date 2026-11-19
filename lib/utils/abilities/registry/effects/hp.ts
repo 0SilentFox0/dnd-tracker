@@ -20,8 +20,12 @@ import {
 } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
-import { critDoublesDice, doubledDice } from '@/lib/utils/battle/attack/crit-dice';
+import {
+    critDoublesDice,
+    doubledDice,
+} from '@/lib/utils/battle/attack/crit-dice';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
+import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { forgoDice } from '@/lib/utils/common/dice';
@@ -65,32 +69,39 @@ export function applyDealDamage(
             typeof planned === 'string' &&
             critDoublesDice(ctx.rules, true);
 
-        const rolled = resolveAmount(doubleDice ? doubledDice(planned) : planned, {
-            owner,
-            target: t,
-            eventDamage: eventDamage(input.event),
-            spellRoll: eventSpellRoll(input.event),
-            rng: ctx.rng,
-            participants: input.participants,
-            rules: ctx.rules,
-        });
+        const rolled = resolveAmount(
+            doubleDice ? doubledDice(planned) : planned,
+            {
+                owner,
+                target: t,
+                eventDamage: eventDamage(input.event),
+                spellRoll: eventSpellRoll(input.event),
+                rng: ctx.rng,
+                participants: input.participants,
+                rules: ctx.rules,
+            }
+        );
 
-        const amount = effect.falloff
-            ? Math.floor(
-                  (rolled *
-                      effect.falloff[
-                          Math.min(index, effect.falloff.length - 1)
-                      ]) /
-                      100
-              )
-            : rolled;
+        const lethal = isLethal(t, effect.killIfHpAtMost);
+
+        const amount = lethal
+            ? lethalAmount(t)
+            : effect.falloff
+              ? Math.floor(
+                    (rolled *
+                        effect.falloff[
+                            Math.min(index, effect.falloff.length - 1)
+                        ]) /
+                        100
+                )
+              : rolled;
 
         if (amount <= 0) continue;
 
         const damageType = effect.damageType ?? hitEvent?.damageType;
 
         const resisted =
-            hitEvent && damageType
+            !lethal && hitEvent && damageType
                 ? applyResistance(t, amount, damageType, {
                       participants: ps,
                       attackKind: hitEvent.attackKind,

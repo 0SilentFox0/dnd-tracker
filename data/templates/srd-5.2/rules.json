@@ -41,7 +41,7 @@
   },
   "concentration": {
     "enabled": true,
-    "dcCap": null
+    "dcCap": 30
   },
   "conditions": {
     "enabled": true,

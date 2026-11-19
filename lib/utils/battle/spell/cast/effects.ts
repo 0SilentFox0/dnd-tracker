@@ -15,6 +15,7 @@ import {
 import { applyBalanceDamageMultiplier } from '@/lib/utils/battle/damage/balance-multiplier';
 import { bothOnMap, cellsOf, footprintDistance } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
 import { dealsNoDamage } from '@/lib/utils/battle/participant/state';
 import { applyResistance, immunityNote } from '@/lib/utils/battle/resistance';
 import { outcomeFor } from '@/lib/utils/battle/spell/cast/outcome';
@@ -218,10 +219,14 @@ function dealSpellDamage(
         ? effect.falloff[Math.min(index, effect.falloff.length - 1)]
         : 100;
 
-    const planned = applyBalanceDamageMultiplier(
-        state.caster,
-        Math.floor((raw * share) / 100)
-    ).damage;
+    const lethal = isLethal(target, effect.killIfHpAtMost);
+
+    const planned = lethal
+        ? lethalAmount(target)
+        : applyBalanceDamageMultiplier(
+              state.caster,
+              Math.floor((raw * share) / 100)
+          ).damage;
 
     if (planned <= 0) return;
 
@@ -248,18 +253,15 @@ function dealSpellDamage(
     )
         return;
 
-    const resisted = applyResistance(
-        target,
-        planned,
-        effect.damageType ?? 'magic',
-        {
-            participants: flow.ps,
-            fromSpell: true,
-            school: spell.groupId,
-            extra: state.actionModifiers[id],
-            rules: flow.ctx.rules,
-        }
-    );
+    const resisted = lethal
+        ? { finalDamage: planned, steps: [], immunityApplied: false }
+        : applyResistance(target, planned, effect.damageType ?? 'magic', {
+              participants: flow.ps,
+              fromSpell: true,
+              school: spell.groupId,
+              extra: state.actionModifiers[id],
+              rules: flow.ctx.rules,
+          });
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
     state.dealt += resisted.finalDamage;
