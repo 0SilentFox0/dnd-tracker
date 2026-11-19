@@ -18,6 +18,9 @@ vi.mock('@/lib/hooks/auth', () => ({
 vi.mock('@/components/profile/AvatarEditor', () => ({
     AvatarEditor: () => <div data-testid="editor" />,
 }));
+vi.mock('@/components/onboarding/OnboardingHint', () => ({
+    OnboardingHint: ({ id }: { id: string }) => <div data-testid={`hint-${id}`} />,
+}));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 
 afterEach(cleanup);
@@ -35,6 +38,8 @@ describe('ProfileClient', () => {
         state.user = { id: 'u1', email: 'a@x.com', name: 'Anna', avatarUrl: null };
 
         render(<ProfileClient />);
+
+        expect(screen.getByTestId('hint-profile.avatar')).toBeTruthy();
 
         for (const entry of PROFILE_MENU)
             expect(screen.getByText(entry.labelKey)).toBeTruthy();

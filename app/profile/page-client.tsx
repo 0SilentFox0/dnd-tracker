@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { LoadingState } from '@/components/common/states';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { PROFILE_MENU } from '@/components/layout/profile-menu';
+import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { AvatarEditor } from '@/components/profile/AvatarEditor';
 import { Button } from '@/components/ui/button';
 import { useProfileActions, useSessionUser } from '@/lib/hooks/auth';
@@ -29,6 +30,7 @@ export function ProfileClient() {
                 <LoadingState />
             ) : (
                 <div className="space-y-4">
+                    <OnboardingHint id="profile.avatar" />
                     <HudPanel>
                         <AvatarEditor user={user} />
                     </HudPanel>
