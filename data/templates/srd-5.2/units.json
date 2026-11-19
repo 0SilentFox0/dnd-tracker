@@ -2379,7 +2379,7 @@
     "intelligence": 16,
     "wisdom": 15,
     "charisma": 22,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -2582,7 +2582,7 @@
     "intelligence": 18,
     "wisdom": 17,
     "charisma": 25,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -2769,7 +2769,7 @@
     "intelligence": 16,
     "wisdom": 15,
     "charisma": 22,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -2963,7 +2963,7 @@
     "intelligence": 18,
     "wisdom": 17,
     "charisma": 25,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -3179,7 +3179,7 @@
     "intelligence": 20,
     "wisdom": 17,
     "charisma": 22,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -3385,7 +3385,7 @@
     "intelligence": 18,
     "wisdom": 17,
     "charisma": 28,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -3602,7 +3602,7 @@
     "intelligence": 20,
     "wisdom": 17,
     "charisma": 22,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -3814,7 +3814,7 @@
     "intelligence": 18,
     "wisdom": 15,
     "charisma": 27,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -3996,7 +3996,7 @@
     "intelligence": 18,
     "wisdom": 15,
     "charisma": 26,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -4205,7 +4205,7 @@
     "intelligence": 10,
     "wisdom": 13,
     "charisma": 18,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -5326,6 +5326,38 @@
             "text": "Statblock"
           }
         ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Piercing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
+          }
+        ]
       }
     ],
     "statblock": {
@@ -5382,6 +5414,44 @@
           {
             "kind": "note",
             "text": "Statblock"
+          }
+        ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
           }
         ]
       }
@@ -10568,7 +10638,7 @@
     "intelligence": 10,
     "wisdom": 12,
     "charisma": 12,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 3,
     "legendaryActions": 0,
     "legendaryResistances": 0,
@@ -11264,6 +11334,22 @@
             "flag": "resistance",
             "damageType": "poison",
             "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
           }
         ]
       },
@@ -19183,6 +19269,28 @@
         ]
       },
       {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Bludgeoning, Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": -100
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
+          }
+        ]
+      },
+      {
         "id": "fog-cloud",
         "name": "Fog Cloud (1/Day)",
         "description": "The mephit casts Fog Cloud, requiring no spell components and using Charisma as the spellcasting ability.\n\n- **At Will:**\n- **1/Day Each:** Fog Cloud",
@@ -20149,7 +20257,7 @@
     "intelligence": 22,
     "wisdom": 18,
     "charisma": 20,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 2,
     "legendaryActions": 3,
     "legendaryResistances": 4,
@@ -21267,6 +21375,22 @@
             "percent": 100
           }
         ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Cold",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "cold",
+            "percent": -100
+          }
+        ]
       }
     ],
     "statblock": {
@@ -22328,6 +22452,22 @@
             "percent": 100
           }
         ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Bludgeoning",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": -100
+          }
+        ]
       }
     ],
     "statblock": {
@@ -22499,6 +22639,22 @@
             "percent": 100
           }
         ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
+          }
+        ]
       }
     ],
     "statblock": {
@@ -22645,6 +22801,22 @@
             "flag": "resistance",
             "damageType": "poison",
             "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
           }
         ]
       },
@@ -25633,7 +25805,7 @@
     "intelligence": 1,
     "wisdom": 8,
     "charisma": 4,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 2,
     "legendaryActions": 0,
     "legendaryResistances": 0,
@@ -26571,7 +26743,7 @@
     "intelligence": 3,
     "wisdom": 10,
     "charisma": 9,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 2,
     "legendaryActions": 0,
     "legendaryResistances": 0,
@@ -27149,6 +27321,22 @@
             "flag": "resistance",
             "damageType": "fire",
             "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Cold",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "cold",
+            "percent": -100
           }
         ]
       }
@@ -27761,6 +27949,22 @@
         ]
       },
       {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Radiant",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "radiant",
+            "percent": -100
+          }
+        ]
+      },
+      {
         "id": "shadow-stealth",
         "name": "Shadow Stealth (Bonus Action)",
         "description": "While in Dim Light or darkness, the shadow takes the Hide action.",
@@ -28329,6 +28533,22 @@
             "flag": "resistance",
             "damageType": "poison",
             "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Bludgeoning",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": -100
           }
         ]
       }
@@ -30603,6 +30823,34 @@
             "text": "Swarm"
           }
         ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing, Slashing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
+          }
+        ]
       }
     ],
     "statblock": {
@@ -30814,6 +31062,34 @@
             "text": "Swarm"
           }
         ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing, Slashing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
+          }
+        ]
       }
     ],
     "statblock": {
@@ -30903,6 +31179,34 @@
             "text": "Water Breathing"
           }
         ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing, Slashing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
+          }
+        ]
       }
     ],
     "statblock": {
@@ -30973,6 +31277,34 @@
           {
             "kind": "note",
             "text": "Swarm"
+          }
+        ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing, Slashing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
           }
         ]
       }
@@ -31048,6 +31380,34 @@
           {
             "kind": "note",
             "text": "Swarm"
+          }
+        ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing, Slashing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
           }
         ]
       }
@@ -31134,6 +31494,34 @@
             "text": "Swarm"
           }
         ]
+      },
+      {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing, Slashing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "slashing",
+            "percent": 50
+          }
+        ]
       }
     ],
     "statblock": {
@@ -31164,7 +31552,7 @@
     "intelligence": 3,
     "wisdom": 11,
     "charisma": 11,
-    "gridSize": 3,
+    "gridSize": 4,
     "multiattack": 4,
     "legendaryActions": 3,
     "legendaryResistances": 6,
@@ -31670,6 +32058,44 @@
         ]
       },
       {
+        "id": "damage-resistances",
+        "name": "Damage Resistances",
+        "description": "Bludgeoning, Piercing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": 50
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "piercing",
+            "percent": 50
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Fire",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": -100
+          }
+        ]
+      },
+      {
         "id": "animate-trees",
         "name": "Animate Trees (1/Day)",
         "description": "The treant magically animates up to two trees it can see within 60 feet of itself. Each tree uses the Treant stat block, except it has Intelligence and Charisma scores of 1, it can't speak, and it lacks this action. The tree takes its turn immediately after the treant on the same Initiative count, and it obeys the treant. A tree remains animate for 1 day or until it dies, the treant dies, or it is more than 120 feet from the treant. The tree then takes root if possible.",
@@ -31820,7 +32246,11 @@
           {
             "kind": "heal",
             "amount": 15,
-            "target": "self"
+            "target": "self",
+            "unlessDamagedBy": [
+              "acid",
+              "fire"
+            ]
           }
         ]
       },
@@ -31905,7 +32335,11 @@
           {
             "kind": "heal",
             "amount": 5,
-            "target": "self"
+            "target": "self",
+            "unlessDamagedBy": [
+              "acid",
+              "fire"
+            ]
           }
         ]
       },
@@ -33152,6 +33586,22 @@
             "flag": "resistance",
             "damageType": "poison",
             "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "damage-vulnerabilities",
+        "name": "Damage Vulnerabilities",
+        "description": "Bludgeoning",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "bludgeoning",
+            "percent": -100
           }
         ]
       }

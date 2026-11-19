@@ -135,7 +135,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 5,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 60
@@ -875,13 +875,20 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 3,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "maxHpBoost",
+        "amount": 5
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -957,17 +964,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 20,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "alarm",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A ward alerts the caster when a creature enters the warded area."
+      }
+    ],
     "lists": [
       "Ranger",
       "Wizard"
@@ -998,7 +1013,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "alter-self",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster reshapes the body: aquatic adaptation, a changed appearance or natural weapons."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -1771,13 +1799,17 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A Tiny beast carries a message to a chosen recipient."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -1804,13 +1836,28 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 10,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "animal-shapes",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Willing creatures transform into beasts of CR 4 or lower."
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -1843,13 +1890,33 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Skeleton",
+        "size": "medium",
+        "ac": 14,
+        "hp": 13,
+        "count": 1,
+        "duration": {
+          "rounds": 99
+        },
+        "upcastEvery": 1,
+        "attacks": [
+          {
+            "name": "Shortsword",
+            "attackBonus": 5,
+            "damageDice": "1d6+3",
+            "damageType": "piercing"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Cleric",
       "Wizard"
@@ -1875,13 +1942,33 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Animated Object",
+        "size": "small",
+        "ac": 15,
+        "hp": 20,
+        "count": 4,
+        "duration": {
+          "rounds": 10
+        },
+        "upcastEvery": 1,
+        "attacks": [
+          {
+            "name": "Slam",
+            "attackBonus": 6,
+            "damageDice": "1d6+3",
+            "damageType": "bludgeoning"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -1942,16 +2029,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "template",
-      "shape": "emanation",
-      "size": 10,
-      "side": "ally",
-      "maxTargets": 20
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "antilife-shell",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Living creatures cannot pass the 10-foot barrier around the caster."
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -2104,13 +2200,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "arcane-eye",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An invisible magical eye floats up to 30 feet per turn and relays what it sees."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -2142,13 +2250,32 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Arcane Hand",
+        "size": "large",
+        "ac": 18,
+        "hp": 40,
+        "count": 1,
+        "duration": {
+          "rounds": 10
+        },
+        "attacks": [
+          {
+            "name": "Clenched Fist",
+            "attackBonus": 8,
+            "damageDice": "4d8",
+            "damageType": "force"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -2188,7 +2315,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A door, window or container is magically locked."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -2275,7 +2407,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The magic aura of an object is masked or altered."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -2299,15 +2436,45 @@
       "s": true,
       "m": true
     },
-    "ingredients": [],
+    "ingredients": [
+      {
+        "name": "Jacinth",
+        "qty": 1,
+        "minGp": 1000,
+        "consumed": true,
+        "focus": false
+      },
+      {
+        "name": "Silver bar",
+        "qty": 1,
+        "minGp": 100,
+        "consumed": true,
+        "focus": false
+      }
+    ],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 8,
+      "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "astral-projection",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Astral bodies of the party travel the Astral Plane; the DM resolves the journey."
+      }
+    ],
     "lists": [
       "Cleric",
       "Warlock",
@@ -2348,7 +2515,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The DM gives an omen (weal, woe, both or nothing) about the next 30 minutes."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -2429,13 +2601,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The beast or plant gains an Intelligence of 10 and a language; the DM resolves it."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid"
@@ -3477,7 +3653,7 @@
       "kind": "template",
       "shape": "cone",
       "size": 15,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -3521,7 +3697,12 @@
     "ingredients": [],
     "upcastDice": 1,
     "targeting": {
-      "kind": "enemy",
+      "kind": "template",
+      "shape": "circle",
+      "size": 5,
+      "side": "all",
+      "maxTargets": 20,
+      "exact": true,
       "range": 120
     },
     "resolution": {
@@ -3536,6 +3717,41 @@
           "spellRoll": 100
         },
         "damageType": "lightning"
+      },
+      {
+        "kind": "grantCast",
+        "label": "Call Lightning",
+        "cost": "action",
+        "duration": {
+          "rounds": 10
+        },
+        "cast": {
+          "targeting": {
+            "kind": "template",
+            "shape": "circle",
+            "size": 5,
+            "side": "all",
+            "maxTargets": 20,
+            "exact": true,
+            "range": 120
+          },
+          "resolution": {
+            "kind": "save",
+            "ability": "dexterity",
+            "onSuccess": "half"
+          },
+          "dice": 3,
+          "dieSides": 10,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "lightning"
+            }
+          ]
+        }
       }
     ],
     "lists": [
@@ -3565,15 +3781,24 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
-      "exact": true,
       "range": 60
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "charisma",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "no_damage_dealt",
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric"
@@ -4036,7 +4261,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150
@@ -4090,13 +4315,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 600
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "clairvoyance",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An invisible sensor lets the caster see or hear a known location."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -4156,15 +4393,34 @@
       "s": true,
       "m": true
     },
-    "ingredients": [],
+    "ingredients": [
+      {
+        "name": "Diamond",
+        "qty": 1,
+        "minGp": 1000,
+        "consumed": true,
+        "focus": false
+      },
+      {
+        "name": "Sealable vessel",
+        "qty": 1,
+        "minGp": 2000,
+        "consumed": false,
+        "focus": false
+      }
+    ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A dormant duplicate body grows; if the caster dies the soul moves into it (the DM resolves)."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -4194,10 +4450,47 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
-      "range": 120
+      "range": 120,
+      "zone": {
+        "rounds": 100,
+        "terrain": [
+          "obscured"
+        ],
+        "side": "all",
+        "onEnter": {
+          "save": {
+            "ability": "constitution"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "poison"
+            }
+          ]
+        },
+        "onTurnStart": {
+          "save": {
+            "ability": "constitution"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "poison"
+            }
+          ]
+        }
+      }
     },
     "resolution": {
       "kind": "save",
@@ -4248,7 +4541,7 @@
       "kind": "template",
       "shape": "cone",
       "size": 15,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -4348,7 +4641,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster asks the deity three yes/no questions; the DM answers."
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -4379,7 +4677,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster gains knowledge of the surrounding terrain; the DM answers."
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger"
@@ -4417,7 +4720,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "comprehend-languages",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster understands any spoken language and read written text."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -4501,7 +4817,7 @@
       "kind": "template",
       "shape": "cone",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -4554,15 +4870,24 @@
       "kind": "template",
       "shape": "circle",
       "size": 10,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
-      "exact": true,
       "range": 90
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "berserk",
+        "damageBonusPercent": 0,
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -4766,16 +5091,33 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "template",
-      "shape": "emanation",
-      "size": 15,
-      "side": "ally",
-      "maxTargets": 20
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Minor Elemental",
+        "size": "small",
+        "ac": 15,
+        "hp": 20,
+        "count": 2,
+        "duration": {
+          "rounds": 60
+        },
+        "upcastEvery": 1,
+        "attacks": [
+          {
+            "name": "Slam",
+            "attackBonus": 5,
+            "damageDice": "1d8+3",
+            "damageType": "fire"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Druid",
       "Wizard"
@@ -4986,7 +5328,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A prepared spell triggers when the chosen condition occurs; the DM resolves it."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -5019,13 +5366,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A magical flame without heat burns permanently on an object."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -5059,13 +5410,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 300
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "control-water",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Flood, part, redirect or whirlpool a body of water; the DM resolves the effect."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -5105,7 +5468,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "control-weather",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The weather around the caster shifts; the DM applies the map weather."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -5210,9 +5586,23 @@
       "range": 60
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "constitution",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "disable_spell_casting",
+        "duration": {
+          "rounds": 1
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Cast it before the enemy casts: the pipeline cannot pause a cast, so the target loses its spellcasting for the round."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Warlock",
@@ -5239,13 +5629,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "Food and water for up to 15 humanoids or 5 steeds appear."
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin"
@@ -5278,17 +5672,17 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 30,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "Up to 10 gallons of water appear or a volume of water or fog is destroyed."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid"
@@ -5315,20 +5709,40 @@
     },
     "ingredients": [
       {
-        "name": "one 150+ GP black onyx stone for each corpse",
+        "name": "Black onyx stone",
         "qty": 1,
+        "minGp": 150,
         "consumed": false,
-        "focus": true
+        "focus": false
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Ghoul",
+        "size": "medium",
+        "ac": 12,
+        "hp": 22,
+        "count": 3,
+        "duration": {
+          "rounds": 99
+        },
+        "attacks": [
+          {
+            "name": "Claws",
+            "attackBonus": 4,
+            "damageDice": "2d4+2",
+            "damageType": "slashing"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Cleric",
       "Warlock",
@@ -5363,17 +5777,17 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 5,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A nonliving object of vegetable matter or mineral up to a 5-foot cube appears."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -5451,13 +5865,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "dancing-lights",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Up to four torch-sized lights float in the air."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -5494,12 +5920,12 @@
       "kind": "template",
       "shape": "circle",
       "size": 15,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 60,
       "zone": {
-        "rounds": 10,
+        "rounds": 100,
         "terrain": [
           "obscured"
         ],
@@ -5549,7 +5975,17 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "sense",
+        "sense": "darkvision",
+        "range": 150,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger",
@@ -5580,10 +6016,14 @@
       "kind": "template",
       "shape": "circle",
       "size": 60,
-      "side": "ally",
+      "side": "all",
       "maxTargets": 20,
-      "exact": true,
-      "range": 60
+      "range": 60,
+      "zone": {
+        "rounds": 99,
+        "label": "Daylight",
+        "side": "all"
+      }
     },
     "resolution": {
       "kind": "auto"
@@ -5623,7 +6063,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "death-ward",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The first time the target would drop to 0 hit points it drops to 1 instead; the DM applies it."
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin"
@@ -5661,7 +6114,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150
@@ -5705,13 +6158,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "demiplane",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A door opens to an extradimensional room."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Warlock",
@@ -5743,7 +6208,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "detect-evil-and-good",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster senses aberrations, celestials, elementals, fey, fiends and undead within 30 feet."
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin"
@@ -5774,7 +6252,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "detect-magic",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster senses magic within 30 feet and can see the aura."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -5818,7 +6309,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "detect-poison-and-disease",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster senses poison, poisonous creatures and disease within 30 feet."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -5858,7 +6362,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "detect-thoughts",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster reads the surface thoughts of creatures within 30 feet."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -5875,7 +6392,8 @@
     "casting": {
       "text": "action"
     },
-    "dice": 0,
+    "dice": 4,
+    "dieSides": 6,
     "concentration": false,
     "ritual": false,
     "componentFlags": {
@@ -5885,12 +6403,22 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "self"
+      "kind": "template",
+      "shape": "circle",
+      "size": 5,
+      "side": "all",
+      "maxTargets": 20,
+      "exact": true,
+      "range": 500
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "teleportSelf"
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -5923,7 +6451,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "disguise-self",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster appearance changes."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -6014,7 +6555,31 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "conditionImmunity",
+        "conditions": [
+          "charmed",
+          "frightened"
+        ],
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "dispel-evil-and-good",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Celestials, fiends and similar creatures have disadvantage to attack the caster; the DM applies it."
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin"
@@ -6040,13 +6605,21 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 1,
       "range": 120
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "cleanse",
+        "includeBuffs": true,
+        "includeConditions": true
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -6134,7 +6707,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The DM gives a truthful reply about the next seven days."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -6891,17 +7469,49 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cone",
-      "size": 15,
-      "side": "enemy",
-      "maxTargets": 20,
+      "kind": "ally",
       "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "grantCast",
+        "label": "Dragon's Breath",
+        "cost": "action",
+        "duration": {
+          "rounds": 10
+        },
+        "target": "eventTarget",
+        "cast": {
+          "targeting": {
+            "kind": "template",
+            "shape": "cone",
+            "size": 15,
+            "side": "all",
+            "maxTargets": 20,
+            "range": 5
+          },
+          "resolution": {
+            "kind": "save",
+            "ability": "dexterity",
+            "onSuccess": "half"
+          },
+          "dice": 3,
+          "dieSides": 6,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "fire"
+            }
+          ]
+        }
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -7012,13 +7622,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A minor nature effect: weather sensor, bloom, harmless sensory effect or a small fire."
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -7087,7 +7701,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 100,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 500
@@ -7174,13 +7788,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A minor elemental effect: gust, flame, water or earth tremor."
+      }
+    ],
     "lists": [
       "Druid",
       "Sorcerer",
@@ -7400,7 +8018,7 @@
       "kind": "template",
       "shape": "cube",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "range": 90
     },
@@ -7446,13 +8064,28 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "enemy",
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 20,
       "range": 60
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "checkDisadvantage",
+        "skills": [
+          "perception"
+        ],
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock"
@@ -7521,7 +8154,27 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "passesWalls",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "etherealness",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster is on the Ethereal Plane and passes through walls and creatures."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -7666,17 +8319,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 10,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "Raw materials are converted into a product of the same material."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -7704,7 +8357,7 @@
       "kind": "template",
       "shape": "cube",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "range": 60
     },
@@ -7854,7 +8507,7 @@
       "kind": "template",
       "shape": "cone",
       "size": 30,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -7906,13 +8559,28 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 5,
       "range": 60
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "feather-fall",
+        "positive": true,
+        "duration": {
+          "rounds": 1
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Falling creatures descend slowly and take no falling damage."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -7948,13 +8616,24 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Familiar",
+        "size": "tiny",
+        "ac": 12,
+        "hp": 1,
+        "count": 1,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -7979,13 +8658,32 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Otherworldly Steed",
+        "size": "large",
+        "ac": 12,
+        "hp": 25,
+        "count": 1,
+        "duration": {
+          "rounds": 99
+        },
+        "attacks": [
+          {
+            "name": "Otherworldly Slam",
+            "attackBonus": 6,
+            "damageDice": "1d8+2",
+            "damageType": "radiant"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Paladin"
     ]
@@ -8024,7 +8722,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "find-the-path",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster knows the shortest path to a chosen location."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -8051,13 +8762,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster senses the presence of traps within 120 feet."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -8237,7 +8952,7 @@
       "kind": "template",
       "shape": "cube",
       "size": 10,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "range": 150
     },
@@ -8293,7 +9008,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150
@@ -8398,7 +9113,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 10,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 60
@@ -8450,21 +9165,62 @@
     ],
     "upcastDice": 1,
     "targeting": {
-      "kind": "enemy",
+      "kind": "template",
+      "shape": "circle",
+      "size": 5,
+      "side": "all",
+      "maxTargets": 20,
+      "exact": true,
       "range": 60
     },
     "resolution": {
-      "kind": "save",
-      "ability": "dexterity",
-      "onSuccess": "half"
+      "kind": "auto"
     },
     "spellEffects": [
       {
-        "kind": "dealDamage",
-        "amount": {
-          "spellRoll": 100
+        "kind": "summonInline",
+        "name": "Flaming Sphere",
+        "size": "medium",
+        "ac": 10,
+        "hp": null,
+        "count": 1,
+        "aura": {
+          "radiusFeet": 5,
+          "side": "all",
+          "onEnter": {
+            "save": {
+              "ability": "dexterity"
+            },
+            "saveHalf": true,
+            "effects": [
+              {
+                "kind": "dealDamage",
+                "amount": {
+                  "spellRoll": 100
+                },
+                "damageType": "fire"
+              }
+            ]
+          },
+          "onTurnStart": {
+            "save": {
+              "ability": "dexterity"
+            },
+            "saveHalf": true,
+            "effects": [
+              {
+                "kind": "dealDamage",
+                "amount": {
+                  "spellRoll": 100
+                },
+                "damageType": "fire"
+              }
+            ]
+          }
         },
-        "damageType": "fire"
+        "duration": {
+          "rounds": 10
+        }
       }
     ],
     "lists": [
@@ -8550,13 +9306,24 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Floating Disk",
+        "size": "medium",
+        "ac": 10,
+        "hp": null,
+        "count": 1,
+        "duration": {
+          "rounds": 60
+        }
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -8634,12 +9401,12 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 120,
       "zone": {
-        "rounds": 10,
+        "rounds": 600,
         "terrain": [
           "obscured"
         ],
@@ -8686,13 +9453,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "forbiddance",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The area bars planar travel and damages chosen creature types; the DM resolves it."
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -8725,13 +9504,39 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
+      "kind": "template",
+      "shape": "cube",
+      "size": 20,
+      "side": "all",
+      "maxTargets": 20,
       "range": 100
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "immobilized",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "disable_melee_attacks",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "disable_ranged_attacks",
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock",
@@ -8890,7 +9695,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 300
@@ -8942,13 +9747,56 @@
     ],
     "upcastTargets": 1,
     "targeting": {
-      "kind": "enemy",
+      "kind": "ally",
       "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "resistance",
+        "damageType": "slashing",
+        "percent": 50,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "flag",
+        "flag": "resistance",
+        "damageType": "piercing",
+        "percent": 50,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "flag",
+        "flag": "resistance",
+        "damageType": "bludgeoning",
+        "percent": 50,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "flag",
+        "flag": "passesWalls",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "gaseous-form",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Warlock",
@@ -8983,13 +9831,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "gate",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A portal to another plane opens; the DM resolves what comes through."
+      }
+    ],
     "lists": [
       "Cleric",
       "Sorcerer",
@@ -9118,7 +9978,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "gentle-repose",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The corpse cannot become undead and does not decay."
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin",
@@ -9299,13 +10172,32 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Giant Spider",
+        "size": "large",
+        "ac": 14,
+        "hp": 26,
+        "count": 1,
+        "duration": {
+          "rounds": 60
+        },
+        "attacks": [
+          {
+            "name": "Bite",
+            "attackBonus": 5,
+            "damageDice": "1d8+3",
+            "damageType": "piercing"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -9479,7 +10371,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "glibness",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster treats Charisma checks as at least 15 and cannot be forced to lie."
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock"
@@ -9517,7 +10422,23 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "spellImmunity",
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "globe-of-invulnerability",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -9552,18 +10473,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "circle",
-      "size": 20,
-      "side": "enemy",
-      "maxTargets": 20,
-      "exact": true,
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "glyph-of-warding",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A glyph triggers a stored spell or explosive runes when disturbed; the DM resolves the trigger."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -9631,12 +10559,20 @@
       }
     ],
     "targeting": {
-      "kind": "self"
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 10,
+      "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": 1
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger"
@@ -9904,13 +10840,54 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "enemy",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Guardian of Faith",
+        "size": "large",
+        "ac": 10,
+        "hp": null,
+        "count": 1,
+        "duration": {
+          "rounds": 99
+        },
+        "aura": {
+          "radiusFeet": 10,
+          "side": "enemies",
+          "onEnter": {
+            "save": {
+              "ability": "dexterity"
+            },
+            "saveHalf": true,
+            "effects": [
+              {
+                "kind": "dealDamage",
+                "amount": 20,
+                "damageType": "radiant"
+              }
+            ]
+          },
+          "onTurnStart": {
+            "save": {
+              "ability": "dexterity"
+            },
+            "saveHalf": true,
+            "effects": [
+              {
+                "kind": "dealDamage",
+                "amount": 20,
+                "damageType": "radiant"
+              }
+            ]
+          }
+        }
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -9944,13 +10921,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "guards-and-wards",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The building is warded with fog, locks and illusions."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -10032,6 +11021,13 @@
           "spellRoll": 100
         },
         "damageType": "radiant"
+      },
+      {
+        "kind": "flag",
+        "flag": "advantageForAttackers",
+        "duration": {
+          "rounds": 1
+        }
       }
     ],
     "lists": [
@@ -10068,7 +11064,7 @@
       "kind": "template",
       "shape": "line",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -10119,13 +11115,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "hallow",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The ground becomes consecrated with a chosen extra effect."
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -10158,17 +11166,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 120,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 300
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "hallucinatory-terrain",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Natural terrain looks like different terrain."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -10442,6 +11458,34 @@
           "spellRoll": 100
         },
         "damageType": "fire"
+      },
+      {
+        "kind": "grantCast",
+        "label": "Heat Metal",
+        "cost": "bonusAction",
+        "duration": {
+          "rounds": 10
+        },
+        "cast": {
+          "targeting": {
+            "kind": "enemy",
+            "range": 60
+          },
+          "resolution": {
+            "kind": "auto"
+          },
+          "dice": 2,
+          "dieSides": 8,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "fire"
+            }
+          ]
+        }
       }
     ],
     "lists": [
@@ -10556,17 +11600,40 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 10,
+      "kind": "area",
       "side": "ally",
-      "maxTargets": 20,
-      "range": 5
+      "maxTargets": 12,
+      "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "maxHpBoost",
+        "amount": "2d10"
+      },
+      {
+        "kind": "flag",
+        "flag": "conditionImmunity",
+        "conditions": [
+          "poisoned",
+          "frightened"
+        ],
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "flag",
+        "flag": "resistance",
+        "damageType": "poison",
+        "percent": 50,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -10607,6 +11674,16 @@
         "conditions": [
           "frightened"
         ],
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "hot",
+        "healPerRound": {
+          "formula": "max(0, cha_mod)"
+        },
+        "temp": true,
         "duration": {
           "rounds": 10
         }
@@ -11005,7 +12082,7 @@
       "kind": "template",
       "shape": "cube",
       "size": 30,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "range": 120
     },
@@ -11162,7 +12239,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 300
@@ -11216,13 +12293,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster learns the properties of a touched magic item or the spells on a creature."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -11257,13 +12338,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "illusory-script",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Writing is readable only by chosen creatures."
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock",
@@ -11345,10 +12438,47 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
-      "range": 150
+      "range": 150,
+      "zone": {
+        "rounds": 10,
+        "terrain": [
+          "obscured"
+        ],
+        "side": "all",
+        "onEnter": {
+          "save": {
+            "ability": "dexterity"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "fire"
+            }
+          ]
+        },
+        "onTurnStart": {
+          "save": {
+            "ability": "dexterity"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "fire"
+            }
+          ]
+        }
+      }
     },
     "resolution": {
       "kind": "save",
@@ -11475,10 +12605,47 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
-      "range": 300
+      "range": 300,
+      "zone": {
+        "rounds": 100,
+        "terrain": [
+          "difficult"
+        ],
+        "side": "all",
+        "onEnter": {
+          "save": {
+            "ability": "constitution"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "piercing"
+            }
+          ]
+        },
+        "onTurnStart": {
+          "save": {
+            "ability": "constitution"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "piercing"
+            }
+          ]
+        }
+      }
     },
     "resolution": {
       "kind": "save",
@@ -11529,13 +12696,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The marked object teleports to the caster hand; the DM moves it."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -11735,7 +12906,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "jump",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Jump distance is tripled."
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger",
@@ -11763,13 +12947,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A lock, bar or stuck mechanism opens."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -11990,14 +13178,34 @@
       "s": true,
       "m": true
     },
-    "ingredients": [],
+    "ingredients": [
+      {
+        "name": "Incense",
+        "qty": 1,
+        "minGp": 250,
+        "consumed": true,
+        "focus": false
+      },
+      {
+        "name": "Ivory strips",
+        "qty": 4,
+        "minGp": 50,
+        "consumed": false,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster learns lore about a chosen person, place or object; the DM answers."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -12071,13 +13279,26 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
+      "kind": "ally",
       "range": 60
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "levitate",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target floats up to 20 feet above the ground."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -12150,7 +13371,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "light",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An object sheds bright light in a 20-foot radius."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -12190,7 +13424,7 @@
       "kind": "template",
       "shape": "line",
       "size": 100,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -12274,7 +13508,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster senses the direction to the nearest chosen creature kind within 5 miles."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -12313,7 +13552,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "locate-creature",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster senses the direction to a known creature within 1000 feet."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -12355,7 +13607,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "locate-object",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster senses the direction to a known object within 1000 feet."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -12484,13 +13749,24 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Spectral Hand",
+        "size": "tiny",
+        "ac": 10,
+        "hp": null,
+        "count": 1,
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -12527,18 +13803,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "circle",
-      "size": 10,
-      "side": "enemy",
-      "maxTargets": 20,
-      "exact": true,
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "magic-circle",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A 10-foot-radius circle bars the chosen creature types from entering or affecting those inside."
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin",
@@ -12580,7 +13863,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "magic-jar",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The soul enters a vessel and can possess creatures; the DM resolves possession."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -12661,13 +13957,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A mouth appears on an object and speaks a message when triggered."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -12779,17 +14079,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 10,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 300
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "magnificent-mansion",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A door opens to an extradimensional mansion."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -12822,17 +14130,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 20,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "major-image",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A convincing illusory image with sound, smell and temperature appears."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -12979,13 +14295,21 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "allAllies"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": 700
+      },
+      {
+        "kind": "cleanse",
+        "includeConditions": true
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -13141,13 +14465,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "meld-into-stone",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster merges into a stone object and can hear the surroundings."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -13182,13 +14518,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A single break or tear in an object is repaired."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -13224,13 +14564,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A whispered message reaches a chosen creature within range."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -13262,7 +14606,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 40,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 600
@@ -13401,13 +14745,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "minor-illusion",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A sound or an image of an object appears."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -13436,13 +14792,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "mirage-arcane",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The terrain looks, sounds and feels like different terrain."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -13515,7 +14883,27 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "invisible",
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "mislead",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An illusory double stands where the caster was; the DM voices it."
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock",
@@ -13542,12 +14930,22 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "self"
+      "kind": "template",
+      "shape": "circle",
+      "size": 5,
+      "side": "all",
+      "maxTargets": 20,
+      "exact": true,
+      "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "teleportSelf"
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Warlock",
@@ -13628,7 +15026,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 5,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 120
@@ -13678,13 +15076,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "template",
+      "shape": "cube",
+      "size": 40,
+      "side": "enemy",
+      "maxTargets": 1,
       "range": 120
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "createTerrain",
+        "terrain": "difficult",
+        "shape": "cell",
+        "cells": 12,
+        "rounds": 99
+      }
+    ],
     "lists": [
       "Druid",
       "Sorcerer",
@@ -13835,7 +15245,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "nondetection",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target cannot be targeted by divination magic or perceived by scrying sensors."
+      }
+    ],
     "lists": [
       "Bard",
       "Ranger",
@@ -13962,13 +15385,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "passwall",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A passage opens through a wooden, plaster or stone surface."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -14093,13 +15528,24 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Phantom Steed",
+        "size": "large",
+        "ac": 11,
+        "hp": 13,
+        "count": 1,
+        "duration": {
+          "rounds": 60
+        }
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -14185,13 +15631,36 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Planar Ally",
+        "size": "large",
+        "ac": 16,
+        "hp": 90,
+        "count": 1,
+        "duration": {
+          "rounds": 99
+        },
+        "attacks": [
+          {
+            "name": "Slam",
+            "attackBonus": 8,
+            "damageDice": "2d8+5",
+            "damageType": "radiant"
+          }
+        ]
+      },
+      {
+        "kind": "note",
+        "text": "The DM negotiates the ally service and payment."
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -14225,13 +15694,25 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "planar-binding",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The bound creature serves according to the DM ruling."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -14268,13 +15749,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The target travels to another plane of existence; the DM resolves the destination."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -14343,10 +15828,17 @@
       "kind": "template",
       "shape": "circle",
       "size": 100,
-      "side": "ally",
+      "side": "all",
       "maxTargets": 20,
-      "exact": true,
-      "range": 150
+      "range": 150,
+      "zone": {
+        "rounds": 99,
+        "label": "Overgrowth",
+        "terrain": [
+          "difficult"
+        ],
+        "side": "all"
+      }
     },
     "resolution": {
       "kind": "auto"
@@ -14432,9 +15924,30 @@
       "range": 60
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "disable_spell_casting",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "disable_ranged_attacks",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target takes a beast form; the DM sets the form stats if needed."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -14639,13 +16152,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A minor magical trick: sensory effect, light a candle, clean or soil, chill or warm."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -14677,7 +16194,7 @@
       "kind": "template",
       "shape": "cone",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -14771,17 +16288,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 100,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "private-sanctum",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The area is shielded from sight, sound, scrying and teleportation."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -14854,17 +16379,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 30,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 120
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "programmed-illusion",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An illusion plays out when a trigger occurs."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -14898,13 +16431,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 600
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "project-image",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An illusory double of the caster appears within 500 feet and can cast spells from its position."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -15108,18 +16653,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "template",
-      "shape": "circle",
-      "size": 5,
-      "side": "ally",
-      "maxTargets": 20,
-      "exact": true,
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "Food and drink in a 5-foot radius are purified of poison and disease."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -15225,13 +16769,35 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "allyDead",
       "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": 1,
+        "revive": true
+      },
+      {
+        "kind": "modifyStat",
+        "stat": "attackBonus",
+        "flat": -4,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "modifyStat",
+        "stat": "savingThrow",
+        "flat": -4,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -15405,6 +16971,13 @@
           "spellRoll": 100
         },
         "damageType": "poison"
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "poisoned",
+        "duration": {
+          "rounds": 2
+        }
       }
     ],
     "lists": [
@@ -15532,13 +17105,19 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "allyDead",
       "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": 1,
+        "revive": true
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -15606,7 +17185,12 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "cleanse",
+        "includeConditions": true
+      }
+    ],
     "lists": [
       "Cleric",
       "Paladin",
@@ -15645,9 +17229,33 @@
       "range": 30
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "immobilized",
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "disable_melee_attacks",
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "disable_ranged_attacks",
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -15722,13 +17330,38 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "allyDead",
       "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "percentOf": "maxHp",
+          "value": 100
+        },
+        "revive": true
+      },
+      {
+        "kind": "modifyStat",
+        "stat": "attackBonus",
+        "flat": -4,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "modifyStat",
+        "stat": "savingThrow",
+        "flat": -4,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric"
@@ -15761,13 +17394,32 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
+      "kind": "template",
+      "shape": "circle",
+      "size": 50,
+      "side": "all",
+      "maxTargets": 20,
       "range": 100
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": "5d6",
+        "damageType": "bludgeoning"
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "restrained",
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Druid",
       "Sorcerer",
@@ -15849,13 +17501,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "rope-trick",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A rope leads to a pocket space that holds up to eight creatures."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -15968,13 +17632,29 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
+      "kind": "ally",
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "disadvantageForAttackers",
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "sanctuary",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -16091,7 +17771,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "scrying",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster sees and hears a chosen creature on the same plane (Wisdom save for unwilling)."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -16161,15 +17854,42 @@
       "s": true,
       "m": true
     },
-    "ingredients": [],
+    "ingredients": [
+      {
+        "name": "Chest of rare materials",
+        "qty": 1,
+        "minGp": 5000,
+        "consumed": false,
+        "focus": false
+      },
+      {
+        "name": "Tiny replica of the chest",
+        "qty": 1,
+        "minGp": 50,
+        "consumed": false,
+        "focus": false
+      }
+    ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "secret-chest",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A chest is hidden on the Ethereal Plane and can be recalled."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -16206,7 +17926,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "see-invisibility",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster sees invisible creatures and objects."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -16233,13 +17966,28 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "enemy",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 10,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "seeming",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The appearance of the targets changes."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -16273,13 +18021,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A message of up to 25 words reaches a known creature, which can reply."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -16320,7 +18072,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "sequester",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target becomes invisible and undetectable by divination."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -16388,7 +18153,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "shapechange",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster takes the form of a creature up to CR equal to the caster level."
+      }
+    ],
     "lists": [
       "Druid",
       "Wizard"
@@ -16426,7 +18204,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 10,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 60
@@ -16572,7 +18350,18 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "damageBonus",
+        "filter": {
+          "kind": "melee"
+        },
+        "flat": 3,
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -16684,10 +18473,36 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "ally",
+      "side": "all",
       "maxTargets": 20,
-      "exact": true,
-      "range": 120
+      "range": 120,
+      "zone": {
+        "rounds": 99,
+        "label": "Silence",
+        "side": "all",
+        "onEnter": {
+          "effects": [
+            {
+              "kind": "applyCondition",
+              "condition": "disable_spell_casting",
+              "duration": {
+                "rounds": 1
+              }
+            }
+          ]
+        },
+        "onTurnStart": {
+          "effects": [
+            {
+              "kind": "applyCondition",
+              "condition": "disable_spell_casting",
+              "duration": {
+                "rounds": 1
+              }
+            }
+          ]
+        }
+      }
     },
     "resolution": {
       "kind": "auto"
@@ -16726,17 +18541,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "cube",
-      "size": 15,
-      "side": "ally",
-      "maxTargets": 20,
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "silent-image",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "An illusory image of an object, creature or effect appears."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -16806,13 +18629,28 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Simulacrum",
+        "size": "medium",
+        "ac": 15,
+        "hp": 40,
+        "count": 1,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A duplicate with half the creature hit points; the DM sets its stats and abilities."
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -16847,7 +18685,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 5,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 60
@@ -16905,7 +18743,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150
@@ -17165,12 +19003,17 @@
     "ingredients": [],
     "targeting": {
       "kind": "ally",
-      "range": 15
+      "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The dying creature is stabilized and stops making death saving throws."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid"
@@ -17201,7 +19044,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "speak-with-animals",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster can talk to beasts."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -17236,13 +19092,25 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "speak-with-dead",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A corpse answers up to five questions."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -17269,16 +19137,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "template",
-      "shape": "emanation",
-      "size": 30,
-      "side": "ally",
-      "maxTargets": 20
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "speak-with-plants",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster can talk to plants and command them within 30 feet."
+      }
+    ],
     "lists": [
       "Bard",
       "Druid",
@@ -17422,7 +19299,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "spider-climb",
+        "positive": true,
+        "duration": {
+          "rounds": 60
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target climbs walls and ceilings with a climbing speed equal to its walking speed."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Warlock",
@@ -17459,12 +19349,12 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150,
       "zone": {
-        "rounds": 10,
+        "rounds": 100,
         "terrain": [
           "difficult"
         ],
@@ -17518,24 +19408,50 @@
     ],
     "upcastDice": 1,
     "targeting": {
-      "kind": "template",
-      "shape": "emanation",
-      "size": 15,
-      "side": "enemy",
-      "maxTargets": 20
+      "kind": "self"
     },
     "resolution": {
-      "kind": "save",
-      "ability": "wisdom",
-      "onSuccess": "half"
+      "kind": "auto"
     },
     "spellEffects": [
       {
-        "kind": "dealDamage",
-        "amount": {
-          "spellRoll": 100
+        "kind": "anchoredZone",
+        "radiusFeet": 15,
+        "side": "enemies",
+        "excludeBearer": true,
+        "onEnter": {
+          "save": {
+            "ability": "wisdom"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "radiant"
+            }
+          ]
         },
-        "damageType": "radiant"
+        "onTurnStart": {
+          "save": {
+            "ability": "wisdom"
+          },
+          "saveHalf": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "radiant"
+            }
+          ]
+        },
+        "duration": {
+          "rounds": 100
+        }
       }
     ],
     "lists": [
@@ -17554,7 +19470,7 @@
     },
     "dice": 1,
     "dieSides": 8,
-    "concentration": true,
+    "concentration": false,
     "ritual": false,
     "componentFlags": {
       "v": true,
@@ -17577,6 +19493,35 @@
           "spellRoll": 100
         },
         "damageType": "force"
+      },
+      {
+        "kind": "grantCast",
+        "label": "Spiritual Weapon",
+        "cost": "bonusAction",
+        "duration": {
+          "rounds": 10
+        },
+        "cast": {
+          "targeting": {
+            "kind": "enemy",
+            "range": 60
+          },
+          "resolution": {
+            "kind": "attack"
+          },
+          "dice": 1,
+          "dieSides": 8,
+          "addAbilityMod": true,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "force"
+            }
+          ]
+        }
       }
     ],
     "lists": [
@@ -17689,7 +19634,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 90
@@ -17741,13 +19686,17 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A stone object is reshaped as desired."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -18012,13 +19961,32 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Draconic Spirit",
+        "size": "large",
+        "ac": 19,
+        "hp": 50,
+        "count": 1,
+        "duration": {
+          "rounds": 60
+        },
+        "attacks": [
+          {
+            "name": "Rend",
+            "attackBonus": 8,
+            "damageDice": "1d6+9",
+            "damageType": "piercing"
+          }
+        ]
+      }
+    ],
     "lists": [
       "Wizard"
     ]
@@ -18054,7 +20022,7 @@
       "kind": "template",
       "shape": "line",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20
     },
     "resolution": {
@@ -18109,7 +20077,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 60,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150
@@ -18194,18 +20162,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "circle",
-      "size": 60,
-      "side": "ally",
-      "maxTargets": 20,
-      "exact": true,
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "symbol",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A glyph triggers a magical effect when disturbed; the DM resolves the trigger."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -18367,13 +20342,28 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 8,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "telepathic-bond",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Willing creatures communicate telepathically at any distance on the same plane."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -18399,13 +20389,22 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "template",
+      "shape": "circle",
+      "size": 5,
+      "side": "all",
+      "maxTargets": 20,
+      "exact": true,
+      "range": 600
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "teleportSelf"
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -18441,18 +20440,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "circle",
-      "size": 5,
-      "side": "ally",
-      "maxTargets": 20,
-      "exact": true,
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "teleportation-circle",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A shimmering portal circle links to a known permanent teleportation circle; the DM moves the party."
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -18480,13 +20486,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 30
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "A minor wonder: altered voice, flickering flames, tremors or a harmless sound."
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -18516,7 +20526,7 @@
       "kind": "template",
       "shape": "cube",
       "size": 15,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "range": 5
     },
@@ -18532,6 +20542,11 @@
           "spellRoll": 100
         },
         "damageType": "thunder"
+      },
+      {
+        "kind": "push",
+        "feet": 10,
+        "from": "caster"
       }
     ],
     "lists": [
@@ -18566,7 +20581,17 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "grantAction",
+        "extraActions": 2,
+        "refreshAction": true
+      },
+      {
+        "kind": "note",
+        "text": "The caster takes extra turns while others are frozen."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -18600,16 +20625,25 @@
       }
     ],
     "targeting": {
-      "kind": "template",
-      "shape": "emanation",
-      "size": 10,
-      "side": "ally",
-      "maxTargets": 20
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "tiny-hut",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "A 10-foot dome blocks weather and unwanted creatures; the DM resolves entries."
+      }
+    ],
     "lists": [
       "Bard",
       "Wizard"
@@ -18648,7 +20682,20 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "tongues",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target understands any spoken language and is understood by all."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -18677,13 +20724,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 10
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "transport-via-plants",
+        "positive": true,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Creatures step into a large plant and emerge from a known plant on the same plane; the DM moves them."
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -18708,12 +20767,31 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "self"
+      "kind": "template",
+      "shape": "circle",
+      "size": 5,
+      "side": "all",
+      "maxTargets": 20,
+      "exact": true,
+      "range": 500
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "teleportSelf"
+      },
+      {
+        "kind": "mark",
+        "markId": "tree-stride",
+        "positive": true,
+        "target": "self",
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger"
@@ -18750,9 +20828,30 @@
       "range": 30
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "disable_spell_casting",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "disable_ranged_attacks",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The target takes a new form; the DM sets the form stats if needed."
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock",
@@ -18788,13 +20887,22 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "allyDead",
       "range": 5
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "percentOf": "maxHp",
+          "value": 100
+        },
+        "revive": true
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid"
@@ -18834,7 +20942,17 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "sense",
+        "sense": "truesight",
+        "range": 120,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",
@@ -18868,7 +20986,18 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "advantage",
+        "attackKind": "all",
+        "consumeOn": "ownAttack",
+        "until": "turnEnd",
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Sorcerer",
@@ -18946,13 +21075,24 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "summonInline",
+        "name": "Unseen Servant",
+        "size": "medium",
+        "ac": 10,
+        "hp": 1,
+        "count": 1,
+        "duration": {
+          "rounds": 60
+        }
+      }
+    ],
     "lists": [
       "Bard",
       "Warlock",
@@ -19058,6 +21198,50 @@
           "spellRoll": 100
         },
         "damageType": "necrotic"
+      },
+      {
+        "kind": "heal",
+        "amount": {
+          "percentOf": "eventDamage",
+          "value": 50
+        },
+        "target": "self"
+      },
+      {
+        "kind": "grantCast",
+        "label": "Vampiric Touch",
+        "cost": "action",
+        "duration": {
+          "rounds": 10
+        },
+        "cast": {
+          "targeting": {
+            "kind": "enemy",
+            "range": 5
+          },
+          "resolution": {
+            "kind": "attack"
+          },
+          "dice": 3,
+          "dieSides": 6,
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "necrotic"
+            },
+            {
+              "kind": "heal",
+              "amount": {
+                "percentOf": "eventDamage",
+                "value": 50
+              },
+              "target": "self"
+            }
+          ]
+        }
       }
     ],
     "lists": [
@@ -19140,7 +21324,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 150
@@ -19270,8 +21454,38 @@
     ],
     "upcastDice": 1,
     "targeting": {
-      "kind": "enemy",
-      "range": 120
+      "kind": "template",
+      "shape": "line",
+      "size": 60,
+      "side": "all",
+      "maxTargets": 20,
+      "range": 120,
+      "zone": {
+        "rounds": 10,
+        "side": "all",
+        "onEnter": {
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "fire"
+            }
+          ]
+        },
+        "onTurnStart": {
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": {
+                "spellRoll": 100
+              },
+              "damageType": "fire"
+            }
+          ]
+        }
+      }
     },
     "resolution": {
       "kind": "save",
@@ -19420,13 +21634,25 @@
       }
     ],
     "targeting": {
-      "kind": "enemy",
+      "kind": "template",
+      "shape": "line",
+      "size": 100,
+      "side": "enemy",
+      "maxTargets": 1,
       "range": 120
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "createTerrain",
+        "terrain": "wall",
+        "shape": "cell",
+        "cells": 20,
+        "rounds": 99
+      }
+    ],
     "lists": [
       "Druid",
       "Sorcerer",
@@ -19567,13 +21793,28 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 10,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "water-breathing",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Creatures can breathe underwater."
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger",
@@ -19649,13 +21890,28 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 10,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "water-walk",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Creatures can walk on liquid surfaces."
+      }
+    ],
     "lists": [
       "Cleric",
       "Druid",
@@ -19693,7 +21949,7 @@
       "kind": "template",
       "shape": "cube",
       "size": 20,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "range": 60
     },
@@ -19743,7 +21999,7 @@
       "kind": "template",
       "shape": "circle",
       "size": 30,
-      "side": "enemy",
+      "side": "all",
       "maxTargets": 20,
       "exact": true,
       "range": 120
@@ -19861,13 +22117,28 @@
       }
     ],
     "targeting": {
-      "kind": "ally",
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 10,
       "range": 30
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "wind-walk",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "The caster and allies become cloud-like with a flying speed of 300 feet."
+      }
+    ],
     "lists": [
       "Druid"
     ]
@@ -19966,7 +22237,8 @@
     "casting": {
       "text": "action"
     },
-    "dice": 0,
+    "dice": 1,
+    "dieSides": 10,
     "concentration": false,
     "ritual": false,
     "componentFlags": {
@@ -19981,7 +22253,35 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "chooseOne",
+        "options": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 100
+            },
+            "target": "self"
+          },
+          {
+            "kind": "restoreSpellSlot",
+            "count": 3,
+            "target": "self"
+          },
+          {
+            "kind": "grantAction",
+            "extraActions": 1,
+            "target": "self"
+          }
+        ]
+      },
+      {
+        "kind": "note",
+        "text": "Beyond these stock wishes the DM adjudicates what the wish does."
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
@@ -20007,13 +22307,17 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "ally",
-      "range": 5
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "The caster and up to five willing creatures teleport to the designated sanctuary; the DM removes them from the scene."
+      }
+    ],
     "lists": [
       "Cleric"
     ]
@@ -20447,18 +22751,25 @@
     },
     "ingredients": [],
     "targeting": {
-      "kind": "template",
-      "shape": "circle",
-      "size": 15,
-      "side": "enemy",
-      "maxTargets": 20,
-      "exact": true,
-      "range": 60
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "mark",
+        "markId": "zone-of-truth",
+        "positive": true,
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "note",
+        "text": "Creatures in the 15-foot sphere that fail a Charisma save cannot speak a deliberate lie."
+      }
+    ],
     "lists": [
       "Bard",
       "Cleric",

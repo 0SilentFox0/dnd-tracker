@@ -96,11 +96,39 @@
               {
                 "kind": "damageBonus",
                 "filter": {
-                  "kind": "melee"
+                  "kind": "melee",
+                  "ability": "strength"
                 },
                 "flat": {
                   "scale": "rage-damage"
                 },
+                "duration": {
+                  "rounds": 10
+                }
+              },
+              {
+                "kind": "flag",
+                "flag": "saveAdvantage",
+                "abilities": [
+                  "strength"
+                ],
+                "duration": {
+                  "rounds": 10
+                }
+              },
+              {
+                "kind": "flag",
+                "flag": "checkAdvantage",
+                "skills": [
+                  "athletics"
+                ],
+                "duration": {
+                  "rounds": 10
+                }
+              },
+              {
+                "kind": "flag",
+                "flag": "noSpellcasting",
                 "duration": {
                   "rounds": 10
                 }
@@ -137,18 +165,746 @@
                 "none"
               ]
             }
-          },
+          }
+        ],
+        "choices": [
           {
             "id": "weapon-mastery-1",
-            "name": "Weapon Mastery",
+            "label": "Weapon Mastery",
             "description": "Your training with weapons allows you to use the mastery properties of two kinds of Simple or Martial Melee weapons of your choice, such as Greataxes and Handaxes. Whenever you finish a Long Rest, you can practice weapon drills and change one of those weapon choices.\n\nWhen you reach certain Barbarian levels, you gain the ability to use the mastery properties of more kinds of weapons, as shown in the Weapon Mastery column of the Barbarian Features table.",
-            "trigger": {
-              "event": "passive"
+            "level": 1,
+            "count": {
+              "scale": "weapon-mastery-count"
             },
-            "effects": [
+            "kind": "option",
+            "options": [
               {
-                "kind": "note",
-                "text": "Weapon Mastery"
+                "id": "battleaxe",
+                "name": "Battleaxe",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "battleaxe",
+                    "name": "Battleaxe",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "battleaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Battleaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "club",
+                "name": "Club",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "club",
+                    "name": "Club",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "club"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Club"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dagger",
+                "name": "Dagger",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "dagger",
+                    "name": "Dagger",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dagger"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dagger"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "flail",
+                "name": "Flail",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "flail",
+                    "name": "Flail",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "flail"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Flail"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "glaive",
+                "name": "Glaive",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "glaive",
+                    "name": "Glaive",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "glaive"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Glaive"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greataxe",
+                "name": "Greataxe",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "greataxe",
+                    "name": "Greataxe",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greataxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greataxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatclub",
+                "name": "Greatclub",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "greatclub",
+                    "name": "Greatclub",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatclub"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatclub"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatsword",
+                "name": "Greatsword",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "greatsword",
+                    "name": "Greatsword",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "halberd",
+                "name": "Halberd",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "halberd",
+                    "name": "Halberd",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "halberd"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Halberd"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "handaxe",
+                "name": "Handaxe",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "handaxe",
+                    "name": "Handaxe",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "handaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Handaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "javelin",
+                "name": "Javelin",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "javelin",
+                    "name": "Javelin",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "javelin"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Javelin"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lance",
+                "name": "Lance",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "lance",
+                    "name": "Lance",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "lance"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-hammer",
+                "name": "Light Hammer",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "light-hammer",
+                    "name": "Light Hammer",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-hammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Hammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longsword",
+                "name": "Longsword",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "longsword",
+                    "name": "Longsword",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "mace",
+                "name": "Mace",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "mace",
+                    "name": "Mace",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "mace"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Mace"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "maul",
+                "name": "Maul",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "maul",
+                    "name": "Maul",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "maul"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Maul"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "morningstar",
+                "name": "Morningstar",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "morningstar",
+                    "name": "Morningstar",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "morningstar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Morningstar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pike",
+                "name": "Pike",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "pike",
+                    "name": "Pike",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pike"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pike"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "quarterstaff",
+                "name": "Quarterstaff",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "quarterstaff",
+                    "name": "Quarterstaff",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "quarterstaff"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Quarterstaff"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "rapier",
+                "name": "Rapier",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "rapier",
+                    "name": "Rapier",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "rapier"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Rapier"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "scimitar",
+                "name": "Scimitar",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "scimitar",
+                    "name": "Scimitar",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "scimitar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Scimitar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortsword",
+                "name": "Shortsword",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortsword",
+                    "name": "Shortsword",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sickle",
+                "name": "Sickle",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "sickle",
+                    "name": "Sickle",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sickle"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sickle"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "spear",
+                "name": "Spear",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "spear",
+                    "name": "Spear",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "spear"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Spear"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "trident",
+                "name": "Trident",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "trident",
+                    "name": "Trident",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "trident"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Trident"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "war-pick",
+                "name": "War Pick",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "war-pick",
+                    "name": "War Pick",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "war-pick"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "War Pick"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "warhammer",
+                "name": "Warhammer",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "warhammer",
+                    "name": "Warhammer",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "warhammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Warhammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "whip",
+                "name": "Whip",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "whip",
+                    "name": "Whip",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "whip"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Whip"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -916,6 +1672,9 @@
               {
                 "kind": "mark",
                 "markId": "bardic-inspiration",
+                "amount": {
+                  "scale": "bardic-die"
+                },
                 "duration": {
                   "rounds": 99
                 },
@@ -2773,20 +3532,6 @@
                 "target": "self"
               }
             ]
-          },
-          {
-            "id": "weapon-mastery-1",
-            "name": "Weapon Mastery",
-            "description": "Your training with weapons allows you to use the mastery properties of three kinds of Simple or Martial weapons of your choice. Whenever you finish a Long Rest, you can practice weapon drills and change one of those weapon choices.\n\nWhen you reach certain Fighter levels, you gain the ability to use the mastery properties of more kinds of weapons, as shown in the Weapon Mastery column of the Fighter Features table.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Weapon Mastery"
-              }
-            ]
           }
         ],
         "choices": [
@@ -2799,6 +3544,1006 @@
             "kind": "feat",
             "featTypes": [
               "fightingStyle"
+            ]
+          },
+          {
+            "id": "weapon-mastery-1",
+            "label": "Weapon Mastery",
+            "description": "Your training with weapons allows you to use the mastery properties of three kinds of Simple or Martial weapons of your choice. Whenever you finish a Long Rest, you can practice weapon drills and change one of those weapon choices.\n\nWhen you reach certain Fighter levels, you gain the ability to use the mastery properties of more kinds of weapons, as shown in the Weapon Mastery column of the Fighter Features table.",
+            "level": 1,
+            "count": {
+              "scale": "weapon-mastery-count"
+            },
+            "kind": "option",
+            "options": [
+              {
+                "id": "battleaxe",
+                "name": "Battleaxe",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "battleaxe",
+                    "name": "Battleaxe",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "battleaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Battleaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "blowgun",
+                "name": "Blowgun",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "blowgun",
+                    "name": "Blowgun",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "blowgun"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Blowgun"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "club",
+                "name": "Club",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "club",
+                    "name": "Club",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "club"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Club"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dagger",
+                "name": "Dagger",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "dagger",
+                    "name": "Dagger",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dagger"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dagger"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dart",
+                "name": "Dart",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "dart",
+                    "name": "Dart",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dart"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dart"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "flail",
+                "name": "Flail",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "flail",
+                    "name": "Flail",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "flail"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Flail"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "glaive",
+                "name": "Glaive",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "glaive",
+                    "name": "Glaive",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "glaive"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Glaive"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greataxe",
+                "name": "Greataxe",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "greataxe",
+                    "name": "Greataxe",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greataxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greataxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatclub",
+                "name": "Greatclub",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "greatclub",
+                    "name": "Greatclub",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatclub"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatclub"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatsword",
+                "name": "Greatsword",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "greatsword",
+                    "name": "Greatsword",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "halberd",
+                "name": "Halberd",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "halberd",
+                    "name": "Halberd",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "halberd"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Halberd"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "hand-crossbow",
+                "name": "Hand Crossbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "hand-crossbow",
+                    "name": "Hand Crossbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "hand-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Hand Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "handaxe",
+                "name": "Handaxe",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "handaxe",
+                    "name": "Handaxe",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "handaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Handaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "heavy-crossbow",
+                "name": "Heavy Crossbow",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "heavy-crossbow",
+                    "name": "Heavy Crossbow",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "heavy-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Heavy Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "javelin",
+                "name": "Javelin",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "javelin",
+                    "name": "Javelin",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "javelin"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Javelin"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lance",
+                "name": "Lance",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "lance",
+                    "name": "Lance",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "lance"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-crossbow",
+                "name": "Light Crossbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "light-crossbow",
+                    "name": "Light Crossbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-hammer",
+                "name": "Light Hammer",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "light-hammer",
+                    "name": "Light Hammer",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-hammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Hammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longbow",
+                "name": "Longbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "longbow",
+                    "name": "Longbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longsword",
+                "name": "Longsword",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "longsword",
+                    "name": "Longsword",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "mace",
+                "name": "Mace",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "mace",
+                    "name": "Mace",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "mace"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Mace"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "maul",
+                "name": "Maul",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "maul",
+                    "name": "Maul",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "maul"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Maul"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "morningstar",
+                "name": "Morningstar",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "morningstar",
+                    "name": "Morningstar",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "morningstar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Morningstar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "musket",
+                "name": "Musket",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "musket",
+                    "name": "Musket",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "musket"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Musket"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pike",
+                "name": "Pike",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "pike",
+                    "name": "Pike",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pike"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pike"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pistol",
+                "name": "Pistol",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "pistol",
+                    "name": "Pistol",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pistol"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pistol"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "quarterstaff",
+                "name": "Quarterstaff",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "quarterstaff",
+                    "name": "Quarterstaff",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "quarterstaff"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Quarterstaff"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "rapier",
+                "name": "Rapier",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "rapier",
+                    "name": "Rapier",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "rapier"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Rapier"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "scimitar",
+                "name": "Scimitar",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "scimitar",
+                    "name": "Scimitar",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "scimitar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Scimitar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortbow",
+                "name": "Shortbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortbow",
+                    "name": "Shortbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortsword",
+                "name": "Shortsword",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortsword",
+                    "name": "Shortsword",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sickle",
+                "name": "Sickle",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "sickle",
+                    "name": "Sickle",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sickle"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sickle"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sling",
+                "name": "Sling",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "sling",
+                    "name": "Sling",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sling"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sling"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "spear",
+                "name": "Spear",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "spear",
+                    "name": "Spear",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "spear"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Spear"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "trident",
+                "name": "Trident",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "trident",
+                    "name": "Trident",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "trident"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Trident"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "war-pick",
+                "name": "War Pick",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "war-pick",
+                    "name": "War Pick",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "war-pick"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "War Pick"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "warhammer",
+                "name": "Warhammer",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "warhammer",
+                    "name": "Warhammer",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "warhammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Warhammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "whip",
+                "name": "Whip",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "whip",
+                    "name": "Whip",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "whip"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Whip"
+                      }
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -2824,7 +4569,8 @@
             "effects": [
               {
                 "kind": "grantAction",
-                "extraActions": 2
+                "extraActions": 1,
+                "free": true
               }
             ]
           },
@@ -4349,23 +6095,1007 @@
                 "text": "Spellcasting"
               }
             ]
-          },
-          {
-            "id": "weapon-mastery-1",
-            "name": "Weapon Mastery",
-            "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longswords and Javelins.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Halberds and Flails.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Weapon Mastery"
-              }
-            ]
           }
         ],
         "choices": [
+          {
+            "id": "weapon-mastery-1",
+            "label": "Weapon Mastery",
+            "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longswords and Javelins.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Halberds and Flails.",
+            "level": 1,
+            "count": 2,
+            "kind": "option",
+            "options": [
+              {
+                "id": "battleaxe",
+                "name": "Battleaxe",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "battleaxe",
+                    "name": "Battleaxe",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "battleaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Battleaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "blowgun",
+                "name": "Blowgun",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "blowgun",
+                    "name": "Blowgun",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "blowgun"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Blowgun"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "club",
+                "name": "Club",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "club",
+                    "name": "Club",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "club"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Club"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dagger",
+                "name": "Dagger",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "dagger",
+                    "name": "Dagger",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dagger"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dagger"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dart",
+                "name": "Dart",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "dart",
+                    "name": "Dart",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dart"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dart"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "flail",
+                "name": "Flail",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "flail",
+                    "name": "Flail",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "flail"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Flail"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "glaive",
+                "name": "Glaive",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "glaive",
+                    "name": "Glaive",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "glaive"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Glaive"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greataxe",
+                "name": "Greataxe",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "greataxe",
+                    "name": "Greataxe",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greataxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greataxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatclub",
+                "name": "Greatclub",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "greatclub",
+                    "name": "Greatclub",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatclub"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatclub"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatsword",
+                "name": "Greatsword",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "greatsword",
+                    "name": "Greatsword",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "halberd",
+                "name": "Halberd",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "halberd",
+                    "name": "Halberd",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "halberd"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Halberd"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "hand-crossbow",
+                "name": "Hand Crossbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "hand-crossbow",
+                    "name": "Hand Crossbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "hand-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Hand Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "handaxe",
+                "name": "Handaxe",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "handaxe",
+                    "name": "Handaxe",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "handaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Handaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "heavy-crossbow",
+                "name": "Heavy Crossbow",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "heavy-crossbow",
+                    "name": "Heavy Crossbow",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "heavy-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Heavy Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "javelin",
+                "name": "Javelin",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "javelin",
+                    "name": "Javelin",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "javelin"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Javelin"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lance",
+                "name": "Lance",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "lance",
+                    "name": "Lance",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "lance"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-crossbow",
+                "name": "Light Crossbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "light-crossbow",
+                    "name": "Light Crossbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-hammer",
+                "name": "Light Hammer",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "light-hammer",
+                    "name": "Light Hammer",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-hammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Hammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longbow",
+                "name": "Longbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "longbow",
+                    "name": "Longbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longsword",
+                "name": "Longsword",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "longsword",
+                    "name": "Longsword",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "mace",
+                "name": "Mace",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "mace",
+                    "name": "Mace",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "mace"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Mace"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "maul",
+                "name": "Maul",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "maul",
+                    "name": "Maul",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "maul"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Maul"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "morningstar",
+                "name": "Morningstar",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "morningstar",
+                    "name": "Morningstar",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "morningstar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Morningstar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "musket",
+                "name": "Musket",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "musket",
+                    "name": "Musket",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "musket"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Musket"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pike",
+                "name": "Pike",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "pike",
+                    "name": "Pike",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pike"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pike"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pistol",
+                "name": "Pistol",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "pistol",
+                    "name": "Pistol",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pistol"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pistol"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "quarterstaff",
+                "name": "Quarterstaff",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "quarterstaff",
+                    "name": "Quarterstaff",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "quarterstaff"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Quarterstaff"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "rapier",
+                "name": "Rapier",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "rapier",
+                    "name": "Rapier",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "rapier"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Rapier"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "scimitar",
+                "name": "Scimitar",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "scimitar",
+                    "name": "Scimitar",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "scimitar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Scimitar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortbow",
+                "name": "Shortbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortbow",
+                    "name": "Shortbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortsword",
+                "name": "Shortsword",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortsword",
+                    "name": "Shortsword",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sickle",
+                "name": "Sickle",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "sickle",
+                    "name": "Sickle",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sickle"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sickle"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sling",
+                "name": "Sling",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "sling",
+                    "name": "Sling",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sling"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sling"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "spear",
+                "name": "Spear",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "spear",
+                    "name": "Spear",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "spear"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Spear"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "trident",
+                "name": "Trident",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "trident",
+                    "name": "Trident",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "trident"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Trident"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "war-pick",
+                "name": "War Pick",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "war-pick",
+                    "name": "War Pick",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "war-pick"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "War Pick"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "warhammer",
+                "name": "Warhammer",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "warhammer",
+                    "name": "Warhammer",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "warhammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Warhammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "whip",
+                "name": "Whip",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "whip",
+                    "name": "Whip",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "whip"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Whip"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
           {
             "id": "prepared-spells",
             "label": "Prepared Spells",
@@ -5021,23 +7751,1007 @@
                 "text": "Spellcasting"
               }
             ]
-          },
-          {
-            "id": "weapon-mastery-1",
-            "name": "Weapon Mastery",
-            "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longbows and Shortswords.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Longswords.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Weapon Mastery"
-              }
-            ]
           }
         ],
         "choices": [
+          {
+            "id": "weapon-mastery-1",
+            "label": "Weapon Mastery",
+            "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longbows and Shortswords.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Longswords.",
+            "level": 1,
+            "count": 2,
+            "kind": "option",
+            "options": [
+              {
+                "id": "battleaxe",
+                "name": "Battleaxe",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "battleaxe",
+                    "name": "Battleaxe",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "battleaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Battleaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "blowgun",
+                "name": "Blowgun",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "blowgun",
+                    "name": "Blowgun",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "blowgun"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Blowgun"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "club",
+                "name": "Club",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "club",
+                    "name": "Club",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "club"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Club"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dagger",
+                "name": "Dagger",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "dagger",
+                    "name": "Dagger",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dagger"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dagger"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dart",
+                "name": "Dart",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "dart",
+                    "name": "Dart",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dart"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dart"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "flail",
+                "name": "Flail",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "flail",
+                    "name": "Flail",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "flail"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Flail"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "glaive",
+                "name": "Glaive",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "glaive",
+                    "name": "Glaive",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "glaive"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Glaive"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greataxe",
+                "name": "Greataxe",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "greataxe",
+                    "name": "Greataxe",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greataxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greataxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatclub",
+                "name": "Greatclub",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "greatclub",
+                    "name": "Greatclub",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatclub"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatclub"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatsword",
+                "name": "Greatsword",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "greatsword",
+                    "name": "Greatsword",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "halberd",
+                "name": "Halberd",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "halberd",
+                    "name": "Halberd",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "halberd"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Halberd"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "hand-crossbow",
+                "name": "Hand Crossbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "hand-crossbow",
+                    "name": "Hand Crossbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "hand-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Hand Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "handaxe",
+                "name": "Handaxe",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "handaxe",
+                    "name": "Handaxe",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "handaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Handaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "heavy-crossbow",
+                "name": "Heavy Crossbow",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "heavy-crossbow",
+                    "name": "Heavy Crossbow",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "heavy-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Heavy Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "javelin",
+                "name": "Javelin",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "javelin",
+                    "name": "Javelin",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "javelin"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Javelin"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lance",
+                "name": "Lance",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "lance",
+                    "name": "Lance",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "lance"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-crossbow",
+                "name": "Light Crossbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "light-crossbow",
+                    "name": "Light Crossbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-hammer",
+                "name": "Light Hammer",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "light-hammer",
+                    "name": "Light Hammer",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-hammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Hammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longbow",
+                "name": "Longbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "longbow",
+                    "name": "Longbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longsword",
+                "name": "Longsword",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "longsword",
+                    "name": "Longsword",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "mace",
+                "name": "Mace",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "mace",
+                    "name": "Mace",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "mace"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Mace"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "maul",
+                "name": "Maul",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "maul",
+                    "name": "Maul",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "maul"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Maul"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "morningstar",
+                "name": "Morningstar",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "morningstar",
+                    "name": "Morningstar",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "morningstar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Morningstar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "musket",
+                "name": "Musket",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "musket",
+                    "name": "Musket",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "musket"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Musket"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pike",
+                "name": "Pike",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "pike",
+                    "name": "Pike",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pike"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pike"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pistol",
+                "name": "Pistol",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "pistol",
+                    "name": "Pistol",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pistol"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pistol"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "quarterstaff",
+                "name": "Quarterstaff",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "quarterstaff",
+                    "name": "Quarterstaff",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "quarterstaff"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Quarterstaff"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "rapier",
+                "name": "Rapier",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "rapier",
+                    "name": "Rapier",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "rapier"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Rapier"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "scimitar",
+                "name": "Scimitar",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "scimitar",
+                    "name": "Scimitar",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "scimitar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Scimitar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortbow",
+                "name": "Shortbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortbow",
+                    "name": "Shortbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortsword",
+                "name": "Shortsword",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortsword",
+                    "name": "Shortsword",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sickle",
+                "name": "Sickle",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "sickle",
+                    "name": "Sickle",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sickle"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sickle"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sling",
+                "name": "Sling",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "sling",
+                    "name": "Sling",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sling"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sling"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "spear",
+                "name": "Spear",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "spear",
+                    "name": "Spear",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "spear"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Spear"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "trident",
+                "name": "Trident",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "trident",
+                    "name": "Trident",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "trident"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Trident"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "war-pick",
+                "name": "War Pick",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "war-pick",
+                    "name": "War Pick",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "war-pick"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "War Pick"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "warhammer",
+                "name": "Warhammer",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "warhammer",
+                    "name": "Warhammer",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "warhammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Warhammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "whip",
+                "name": "Whip",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "whip",
+                    "name": "Whip",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "whip"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Whip"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
           {
             "id": "prepared-spells",
             "label": "Prepared Spells",
@@ -5715,24 +9429,44 @@
               "role": "attacker"
             },
             "condition": {
-              "type": "any",
+              "type": "all",
               "conditions": [
                 {
-                  "type": "attackRollMode",
-                  "mode": "advantage"
-                },
-                {
-                  "type": "all",
+                  "type": "any",
                   "conditions": [
                     {
-                      "type": "allyAdjacent"
+                      "type": "weaponTrait",
+                      "traits": [
+                        "finesse"
+                      ]
                     },
                     {
-                      "type": "not",
-                      "condition": {
-                        "type": "attackRollMode",
-                        "mode": "disadvantage"
-                      }
+                      "type": "attackKind",
+                      "kind": "ranged"
+                    }
+                  ]
+                },
+                {
+                  "type": "any",
+                  "conditions": [
+                    {
+                      "type": "attackRollMode",
+                      "mode": "advantage"
+                    },
+                    {
+                      "type": "all",
+                      "conditions": [
+                        {
+                          "type": "allyAdjacent"
+                        },
+                        {
+                          "type": "not",
+                          "condition": {
+                            "type": "attackRollMode",
+                            "mode": "disadvantage"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -5767,20 +9501,6 @@
                 "text": "Thieves' Cant"
               }
             ]
-          },
-          {
-            "id": "weapon-mastery-1",
-            "name": "Weapon Mastery",
-            "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Daggers and Shortbows.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Shortswords.",
-            "trigger": {
-              "event": "passive"
-            },
-            "effects": [
-              {
-                "kind": "note",
-                "text": "Weapon Mastery"
-              }
-            ]
           }
         ],
         "choices": [
@@ -5791,6 +9511,1004 @@
             "level": 1,
             "count": 2,
             "kind": "expertise"
+          },
+          {
+            "id": "weapon-mastery-1",
+            "label": "Weapon Mastery",
+            "description": "Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Daggers and Shortbows.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Shortswords.",
+            "level": 1,
+            "count": 2,
+            "kind": "option",
+            "options": [
+              {
+                "id": "battleaxe",
+                "name": "Battleaxe",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "battleaxe",
+                    "name": "Battleaxe",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "battleaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Battleaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "blowgun",
+                "name": "Blowgun",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "blowgun",
+                    "name": "Blowgun",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "blowgun"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Blowgun"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "club",
+                "name": "Club",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "club",
+                    "name": "Club",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "club"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Club"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dagger",
+                "name": "Dagger",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "dagger",
+                    "name": "Dagger",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dagger"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dagger"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "dart",
+                "name": "Dart",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "dart",
+                    "name": "Dart",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "dart"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Dart"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "flail",
+                "name": "Flail",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "flail",
+                    "name": "Flail",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "flail"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Flail"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "glaive",
+                "name": "Glaive",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "glaive",
+                    "name": "Glaive",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "glaive"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Glaive"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greataxe",
+                "name": "Greataxe",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "greataxe",
+                    "name": "Greataxe",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greataxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greataxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatclub",
+                "name": "Greatclub",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "greatclub",
+                    "name": "Greatclub",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatclub"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatclub"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "greatsword",
+                "name": "Greatsword",
+                "description": "Mastery: Graze",
+                "abilities": [
+                  {
+                    "id": "greatsword",
+                    "name": "Greatsword",
+                    "description": "Mastery: Graze",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "greatsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Greatsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "halberd",
+                "name": "Halberd",
+                "description": "Mastery: Cleave",
+                "abilities": [
+                  {
+                    "id": "halberd",
+                    "name": "Halberd",
+                    "description": "Mastery: Cleave",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "halberd"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Halberd"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "hand-crossbow",
+                "name": "Hand Crossbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "hand-crossbow",
+                    "name": "Hand Crossbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "hand-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Hand Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "handaxe",
+                "name": "Handaxe",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "handaxe",
+                    "name": "Handaxe",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "handaxe"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Handaxe"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "heavy-crossbow",
+                "name": "Heavy Crossbow",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "heavy-crossbow",
+                    "name": "Heavy Crossbow",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "heavy-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Heavy Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "javelin",
+                "name": "Javelin",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "javelin",
+                    "name": "Javelin",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "javelin"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Javelin"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "lance",
+                "name": "Lance",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "lance",
+                    "name": "Lance",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "lance"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Lance"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-crossbow",
+                "name": "Light Crossbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "light-crossbow",
+                    "name": "Light Crossbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-crossbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Crossbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "light-hammer",
+                "name": "Light Hammer",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "light-hammer",
+                    "name": "Light Hammer",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "light-hammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Light Hammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longbow",
+                "name": "Longbow",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "longbow",
+                    "name": "Longbow",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "longsword",
+                "name": "Longsword",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "longsword",
+                    "name": "Longsword",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "longsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Longsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "mace",
+                "name": "Mace",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "mace",
+                    "name": "Mace",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "mace"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Mace"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "maul",
+                "name": "Maul",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "maul",
+                    "name": "Maul",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "maul"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Maul"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "morningstar",
+                "name": "Morningstar",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "morningstar",
+                    "name": "Morningstar",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "morningstar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Morningstar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "musket",
+                "name": "Musket",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "musket",
+                    "name": "Musket",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "musket"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Musket"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pike",
+                "name": "Pike",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "pike",
+                    "name": "Pike",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pike"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pike"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "pistol",
+                "name": "Pistol",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "pistol",
+                    "name": "Pistol",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "pistol"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Pistol"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "quarterstaff",
+                "name": "Quarterstaff",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "quarterstaff",
+                    "name": "Quarterstaff",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "quarterstaff"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Quarterstaff"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "rapier",
+                "name": "Rapier",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "rapier",
+                    "name": "Rapier",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "rapier"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Rapier"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "scimitar",
+                "name": "Scimitar",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "scimitar",
+                    "name": "Scimitar",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "scimitar"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Scimitar"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortbow",
+                "name": "Shortbow",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortbow",
+                    "name": "Shortbow",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortbow"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortbow"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "shortsword",
+                "name": "Shortsword",
+                "description": "Mastery: Vex",
+                "abilities": [
+                  {
+                    "id": "shortsword",
+                    "name": "Shortsword",
+                    "description": "Mastery: Vex",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "shortsword"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Shortsword"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sickle",
+                "name": "Sickle",
+                "description": "Mastery: Nick",
+                "abilities": [
+                  {
+                    "id": "sickle",
+                    "name": "Sickle",
+                    "description": "Mastery: Nick",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sickle"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sickle"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sling",
+                "name": "Sling",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "sling",
+                    "name": "Sling",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "sling"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Sling"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "spear",
+                "name": "Spear",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "spear",
+                    "name": "Spear",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "spear"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Spear"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "trident",
+                "name": "Trident",
+                "description": "Mastery: Topple",
+                "abilities": [
+                  {
+                    "id": "trident",
+                    "name": "Trident",
+                    "description": "Mastery: Topple",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "trident"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Trident"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "war-pick",
+                "name": "War Pick",
+                "description": "Mastery: Sap",
+                "abilities": [
+                  {
+                    "id": "war-pick",
+                    "name": "War Pick",
+                    "description": "Mastery: Sap",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "war-pick"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "War Pick"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "warhammer",
+                "name": "Warhammer",
+                "description": "Mastery: Push",
+                "abilities": [
+                  {
+                    "id": "warhammer",
+                    "name": "Warhammer",
+                    "description": "Mastery: Push",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "warhammer"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Warhammer"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "whip",
+                "name": "Whip",
+                "description": "Mastery: Slow",
+                "abilities": [
+                  {
+                    "id": "whip",
+                    "name": "Whip",
+                    "description": "Mastery: Slow",
+                    "trigger": {
+                      "event": "passive"
+                    },
+                    "params": {
+                      "weaponMastery": [
+                        "whip"
+                      ]
+                    },
+                    "effects": [
+                      {
+                        "kind": "note",
+                        "text": "Whip"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },

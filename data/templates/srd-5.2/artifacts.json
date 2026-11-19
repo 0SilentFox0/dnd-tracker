@@ -4685,7 +4685,31 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "poison-immunity",
+        "name": "Proof against Poison",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "poison",
+            "percent": 100
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "poisoned"
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_periapt-of-wound-closure",
@@ -8152,7 +8176,24 @@
     "item": {
       "unique": false,
       "attunement": true
-    }
+    },
+    "abilities": [
+      {
+        "id": "luck",
+        "name": "Good Luck",
+        "description": "Applies to saving throws; ability checks stay manual.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "savingThrow",
+            "flat": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "srd-2024_studded-leather-armor",

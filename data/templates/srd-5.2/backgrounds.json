@@ -111,6 +111,91 @@
         ],
         "maxPerAbility": 2,
         "max": 20
+      },
+      {
+        "id": "gaming-set",
+        "label": "Gaming Set proficiency",
+        "level": 1,
+        "count": 1,
+        "kind": "option",
+        "options": [
+          {
+            "id": "dice-set",
+            "name": "Dice Set",
+            "abilities": [
+              {
+                "id": "tool-proficiency",
+                "name": "Proficiency: Dice Set",
+                "trigger": {
+                  "event": "passive"
+                },
+                "effects": [
+                  {
+                    "kind": "note",
+                    "text": "Proficiency: Dice Set"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "dragonchess-set",
+            "name": "Dragonchess Set",
+            "abilities": [
+              {
+                "id": "tool-proficiency",
+                "name": "Proficiency: Dragonchess Set",
+                "trigger": {
+                  "event": "passive"
+                },
+                "effects": [
+                  {
+                    "kind": "note",
+                    "text": "Proficiency: Dragonchess Set"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "playing-card-set",
+            "name": "Playing Card Set",
+            "abilities": [
+              {
+                "id": "tool-proficiency",
+                "name": "Proficiency: Playing Card Set",
+                "trigger": {
+                  "event": "passive"
+                },
+                "effects": [
+                  {
+                    "kind": "note",
+                    "text": "Proficiency: Playing Card Set"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "three-dragon-ante-set",
+            "name": "Three-Dragon Ante Set",
+            "abilities": [
+              {
+                "id": "tool-proficiency",
+                "name": "Proficiency: Three-Dragon Ante Set",
+                "trigger": {
+                  "event": "passive"
+                },
+                "effects": [
+                  {
+                    "kind": "note",
+                    "text": "Proficiency: Three-Dragon Ante Set"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "skillProficiencies": [
