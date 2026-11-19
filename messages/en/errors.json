@@ -507,6 +507,8 @@
   "mediaCleanupFailed": "Could not clean up the media",
   "templateLeak": "The template contains source campaign ids: {ids}",
   "battleSpellOptionRequired": "Choose one of the spell options",
+  "battleSpellPickRequired": "Pick a form or spell for this option",
+  "battleSpellPickInvalid": "That pick is not allowed for this spell",
   "battleSpellInputRequired": "Enter a value for the spell dice",
   "battleSpellTargetFilter": "The target does not fit the spell restriction (creature type, hazard or flight)",
   "battleSpellNoObjectNear": "None of your summoned objects from this spell are near the target",

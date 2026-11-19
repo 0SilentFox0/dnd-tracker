@@ -125,7 +125,9 @@
       "nextSummary": "Далі · підсумок",
       "apply": "Застосувати",
       "notSuitable": "Не підходить",
-      "pickOption": "Оберіть варіант"
+      "pickOption": "Оберіть варіант",
+      "pickForm": "Форма",
+      "pickSpell": "Закляття"
     },
     "saveRoll": "Рятівний кидок",
     "book": {

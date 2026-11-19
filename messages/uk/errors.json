@@ -507,6 +507,8 @@
   "mediaCleanupFailed": "Не вдалося очистити медіа",
   "templateLeak": "Шаблон містить id вихідної кампанії: {ids}",
   "battleSpellOptionRequired": "Оберіть один із варіантів заклинання",
+  "battleSpellPickRequired": "Оберіть форму або заклинання для цього варіанта",
+  "battleSpellPickInvalid": "Цей вибір не дозволений для цього закляття",
   "battleSpellInputRequired": "Вкажіть значення для кубиків заклинання",
   "battleSpellTargetFilter": "Ціль не підходить під обмеження заклинання (тип істоти, небезпека чи політ)",
   "battleSpellNoObjectNear": "Поруч із ціллю немає ваших викликаних предметів цього заклинання",

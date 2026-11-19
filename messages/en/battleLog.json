@@ -373,6 +373,7 @@
     "noMapRange": "📏 {spell}: no map — the nearest range",
     "distanceDice": "📏 {target}: distance {feet} ft → {dice}",
     "grantCast": "✨ {holder}: “{label}” — recast for {rounds}",
+    "grantSpell": "✨ {holder}: “{spell}” — may cast “{granted}” for free this turn",
     "moveSelfNoMap": "🌀 {mover}: moves to {target} (no map)",
     "moveSelfNoCell": "🌀 {mover}: no free cell next to {target}",
     "moveSelf": "🌀 {mover}: moves to {target}",
@@ -390,6 +391,7 @@
   "transform": {
     "targetMissing": "the transformation target was not found",
     "formMissing": "the transformation form was not found",
+    "formInvalid": "🐾 {name}: {unit} is not an allowed form (type or CR)",
     "applied": "🐾 {name} transforms: {unit} ({hp} HP, AC {ac})",
     "reverted": "🐾 {name} returns to the normal form",
     "formLost": "🐾 {name}: the form is lost{hasOverflow, select, true {, {overflow} damage carries over to the normal form} other {}}"

@@ -125,7 +125,9 @@
       "nextSummary": "Next · summary",
       "apply": "Apply",
       "notSuitable": "Not suitable",
-      "pickOption": "Choose an option"
+      "pickOption": "Choose an option",
+      "pickForm": "Form",
+      "pickSpell": "Spell"
     },
     "saveRoll": "Saving throw",
     "book": {

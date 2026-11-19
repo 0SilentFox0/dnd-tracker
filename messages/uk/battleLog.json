@@ -373,6 +373,7 @@
     "noMapRange": "📏 {spell}: без мапи — найближчий діапазон",
     "distanceDice": "📏 {target}: дистанція {feet} фт → {dice}",
     "grantCast": "✨ {holder}: «{label}» — підкаст на {rounds}",
+    "grantSpell": "✨ {holder}: «{spell}» — може безкоштовно сотворити «{granted}» цього ходу",
     "moveSelfNoMap": "🌀 {mover}: переміщується до {target} (без мапи)",
     "moveSelfNoCell": "🌀 {mover}: немає вільної клітинки біля {target}",
     "moveSelf": "🌀 {mover}: переміщується до {target}",
@@ -390,6 +391,7 @@
   "transform": {
     "targetMissing": "ціль перетворення не знайдено",
     "formMissing": "форму перетворення не знайдено",
+    "formInvalid": "🐾 {name}: {unit} — недопустима форма (тип або CR)",
     "applied": "🐾 {name} перетворюється: {unit} ({hp} HP, КЗ {ac})",
     "reverted": "🐾 {name} повертає звичайну форму",
     "formLost": "🐾 {name}: форма втрачена{hasOverflow, select, true {, {overflow} шкоди переходить на звичайну форму} other {}}"

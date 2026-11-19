@@ -1247,10 +1247,11 @@
       "hp": "{hp} HP",
       "acSpellDc": "= spell DC",
       "summonInline": "summons {count}× “{name}” ({hp}, AC {ac}) for {rounds}{hasUpcast, select, yes {; +1 per {upcastEvery} slot levels} other {}}{hasAura, select, yes {; aura {auraRadius} ft{auraAttack, select, yes { (spell attack)} other {}}} other {}}",
-      "transform": "transforms the target into a unit form for {rounds}; at 0 HP of the form it reverts and excess damage carries over to the normal form",
+      "transform": "transforms the target into {picks, select, yes {a {type} picked by the caster (CR up to the target CR or level)} other {a unit form}} for {rounds}; at 0 HP of the form it reverts and excess damage carries over to the normal form",
       "phantom": "creates a double of the target on the caster's side (same stats and abilities, 1 HP); dies on the first damage",
       "moveSelf": "the caster moves next to the target",
       "teleportSelf": "the caster teleports to the aimed cell",
+      "grantSpell": "the caster may cast one chosen spell of level {maxLevel} or lower without a slot or components within {rounds}",
       "burst": "explodes around the target ({radius} ft, {dice}){hasSave, select, yes { — {ability} save} other {}}: {effects}",
       "moveSummon": "the caster moves their summon of this spell up to {feet} ft toward the aimed cell",
       "terrain": {

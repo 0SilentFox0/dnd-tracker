@@ -44,6 +44,7 @@
     "constructor:grim-template": "pnpm template import grim-d100 --publish",
     "constructor:empty-grim-template": "pnpm template import grim-d100-empty --publish",
     "i18n:extract": "tsx scripts/i18n/extract-cyrillic.ts",
+    "i18n:report": "DATABASE_URL=${DATABASE_URL:-postgresql://x@localhost:5432/x} tsx --tsconfig tsconfig.scripts.json scripts/i18n/report.ts",
     "template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/templates/cli.ts",
     "template:index": "pnpm template index",
     "template:i18n": "pnpm template i18n",

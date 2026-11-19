@@ -8,6 +8,7 @@
       "moveSelf": "Caster moves to the target",
       "teleportSelf": "Caster teleports to the aimed cell",
       "burst": "Burst around the target",
+      "grantSpell": "Free cast of a chosen spell",
       "moveSummon": "Move own summon",
       "phantom": "Double of the target (phantom)",
       "createTerrain": "Wall / difficult terrain",
