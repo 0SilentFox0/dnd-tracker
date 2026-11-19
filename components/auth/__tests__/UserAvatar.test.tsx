@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { UserAvatar } from '@/components/auth/UserAvatar';
 
@@ -49,5 +49,22 @@ describe('UserAvatar', () => {
 
         expect(first).toContain('hsl(');
         expect(bg()).toBe(first);
+    });
+
+    it('serves project-storage uploads through the image optimizer', () => {
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://p.supabase.co');
+
+        const url =
+            'https://p.supabase.co/storage/v1/object/public/user-avatars/u1/a.webp';
+
+        const { container } = render(
+            <UserAvatar user={user({ avatarUrl: url })} />
+        );
+
+        expect(container.querySelector('img')?.getAttribute('src')).toContain(
+            '/_next/image'
+        );
+
+        vi.unstubAllEnvs();
     });
 });

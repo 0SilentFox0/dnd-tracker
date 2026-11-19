@@ -4,6 +4,7 @@ import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { avatarHue, avatarInitials } from '@/lib/utils/auth/avatar';
 import type { SessionUser } from '@/lib/utils/auth/session-user';
+import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
 
 export function UserAvatar({
     user,
@@ -36,7 +37,7 @@ export function UserAvatar({
                     alt=""
                     fill
                     sizes={sizes}
-                    unoptimized
+                    unoptimized={!isHostedOnProjectStorage(user.avatarUrl)}
                     referrerPolicy="no-referrer"
                     className="object-cover"
                 />
