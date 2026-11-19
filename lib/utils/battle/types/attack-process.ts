@@ -30,6 +30,8 @@ export interface ProcessAttackParams {
     bonusLabel?: LogLine;
     actionSpent?: boolean;
     offHand?: boolean;
+    /** The ability modifier is left out of the damage unless it is negative (Cleave) */
+    noAbilityMod?: boolean;
     cunningStrike?: StrikeRiderEffect[];
     system?: SystemSlot;
     obstacle?: boolean;

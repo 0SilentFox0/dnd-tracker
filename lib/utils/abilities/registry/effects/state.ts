@@ -3,6 +3,7 @@ import type { EffectApplyInput, EffectApplyResult } from './types';
 
 import { EffectMarker } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
+import { resolveAmount } from '@/lib/utils/abilities/engine/core/amount';
 import {
     findParticipant,
     updateParticipant,
@@ -31,6 +32,7 @@ import {
 import { helpEffect } from '@/lib/utils/battle/actions/effects';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import type { ConditionKey } from '@/lib/utils/battle/conditions/set';
+import { D20_RIDER, dieSizeOf } from '@/lib/utils/battle/d20-rider/held';
 import { grantExtraActions } from '@/lib/utils/battle/participant/helpers';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
 import { resetSystemState } from '@/lib/utils/battle/turn/turn-state';
@@ -388,6 +390,21 @@ export function applyMark(
 
     const counts: number[] = [];
 
+    const die =
+        effect.amount === undefined || !owner
+            ? 0
+            : dieSizeOf(
+                  effect.amount,
+                  typeof effect.amount === 'string'
+                      ? 0
+                      : resolveAmount(effect.amount, {
+                            owner,
+                            rng: ctx.rng,
+                            participants: input.participants,
+                            rules: ctx.rules,
+                        })
+              );
+
     return each(
         input,
         (p) => {
@@ -397,10 +414,13 @@ export function applyMark(
                     timedKey: markKey(effect.markId),
                     source: effectSource(owner, ability),
                     name: ability.name,
-                    type: 'debuff',
+                    type: die > 0 ? 'buff' : 'debuff',
                     rounds: effect.duration.rounds,
-                    stackable: true,
+                    stackable: die === 0,
                     countdownAtTurnStart: true,
+                    ...(die > 0 && {
+                        effects: [{ type: D20_RIDER, value: die }],
+                    }),
                 },
                 ctx.round
             );

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { WEAPON_MASTERY_PARAM_RE } from '@/lib/constants/weapon-mastery';
+
 export const STRIKE_RIDER_EFFECTS = ['poison', 'trip', 'withdraw'] as const;
 
 export type StrikeRiderEffect = (typeof STRIKE_RIDER_EFFECTS)[number];
@@ -25,6 +27,11 @@ export const AbilityParamsSchema = z
     .object({
         cunningStrike: CunningStrikeParamsSchema.optional(),
         sneakAttack: z.literal(true).optional(),
+        weaponMastery: z
+            .array(z.string().regex(WEAPON_MASTERY_PARAM_RE))
+            .min(1)
+            .max(40)
+            .optional(),
     })
     .strict();
 

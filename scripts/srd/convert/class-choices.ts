@@ -7,6 +7,8 @@ import {
     EXTRA_CHOICES,
     FEAT_FEATURES,
     INVOCATION_MECHANICS,
+    MASTERY_FEATURES,
+    MASTERY_WEAPONS,
     RESISTANCE_FEATURES,
     SKILL_FEATURES,
     SPELL_FEATURES,
@@ -165,6 +167,36 @@ function abilityChoice(
                 ...(skill.fromClass && { skills: ctx.skillFrom }),
             },
             keep: !!skill.keepAbility,
+        };
+
+    const mastery = MASTERY_FEATURES[key];
+
+    if (mastery)
+        return {
+            choice: {
+                ...base,
+                kind: 'option',
+                count: mastery.count,
+                options: MASTERY_WEAPONS.filter(
+                    (w) => !(mastery.meleeOnly && w.ranged)
+                ).map((w) => {
+                    const id = choiceSlug(w.name);
+
+                    return {
+                        id,
+                        name: w.name,
+                        description: `Mastery: ${w.mastery}`,
+                        abilities: [
+                            coreAbility(id, w.name, `Mastery: ${w.mastery}`, {
+                                trigger: { event: 'passive' },
+                                params: { weaponMastery: [id] },
+                                effects: [{ kind: 'note', text: w.name }],
+                            }),
+                        ],
+                    };
+                }),
+            },
+            keep: false,
         };
 
     const spell = SPELL_FEATURES[key];

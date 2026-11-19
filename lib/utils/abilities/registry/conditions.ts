@@ -71,6 +71,7 @@ export const CONDITION_REGISTRY: Record<
     targetHasCondition: { fields: [{ name: 'condition', input: 'text' }] },
     targetCreatureType: { fields: [{ name: 'types', input: 'strings' }] },
     targetRace: { fields: [{ name: 'races', input: 'strings' }] },
+    weaponTrait: { fields: [{ name: 'traits', input: 'strings' }] },
     targetDead: { fields: [] },
     actorIsEnemy: { fields: [] },
     hasMark: {
@@ -155,6 +156,12 @@ export function describeCondition(c: Condition): Segment[] {
             return [
                 seg('summary.conditions.targetCreatureType', {
                     types: listParam(c.types),
+                }),
+            ];
+        case 'weaponTrait':
+            return [
+                seg('summary.conditions.weaponTrait', {
+                    traits: listParam(c.traits),
                 }),
             ];
         case 'targetRace':
@@ -252,6 +259,10 @@ function eventRollModeOf(
     return e.rollMode ?? 'normal';
 }
 
+function hitTraitsOf(e: AbilityEvent | null): readonly string[] {
+    return e?.type === 'hit' ? (e.attackTraits ?? []) : [];
+}
+
 function allyNextToTarget({
     owner,
     event,
@@ -308,6 +319,8 @@ export function evaluateCondition(
                         p.abilities.race.trim().toLowerCase()
                 )
             );
+        case 'weaponTrait':
+            return hitTraitsOf(ctx.event).some((t) => c.traits.includes(t));
         case 'targetDead':
             return subjects('eventTarget', ctx).some((p) => !isActive(p));
         case 'actorIsEnemy':

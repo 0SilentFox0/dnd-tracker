@@ -37,7 +37,7 @@ export function useCritChoiceDialog() {
     }));
 
     return {
-        open: viewer.isDM && pending !== null,
+        open: viewer.isDM && (pending?.triggers.length ?? 0) > 0,
         rows,
         submit: (choices: Record<string, number | 'random'>) =>
             actions.system.mutate(critChoiceOp({ choices })),

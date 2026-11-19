@@ -8,6 +8,7 @@ import {
     resolvedAbilitiesOf,
 } from './participants';
 
+import type { AbilityKey } from '@/lib/constants/abilities';
 import { textRef } from '@/lib/i18n/text-ref';
 import { abilityLabel } from '@/lib/utils/abilities/build/resolve';
 import { legacyActiveEffectModifiers } from '@/lib/utils/abilities/engine/effects/legacy-active-effects';
@@ -41,6 +42,7 @@ export type ModifierQuery =
               kind: DamageKind;
               school?: string | null;
               targetId?: string;
+              ability?: AbilityKey;
           };
       }
     | { flag: FlagKey }
@@ -85,7 +87,7 @@ function matchesQuery(effect: StaticEffect, query: ModifierQuery): boolean {
     if ('damage' in query) {
         if (effect.kind !== 'damageBonus') return false;
 
-        const { kind, school } = query.damage;
+        const { kind, school, ability } = query.damage;
 
         const f = effect.filter;
 
@@ -96,7 +98,8 @@ function matchesQuery(effect: StaticEffect, query: ModifierQuery): boolean {
 
         return (
             kindOk &&
-            !(kind === 'magic' && f.school && school && f.school !== school)
+            !(kind === 'magic' && f.school && school && f.school !== school) &&
+            !(f.ability && ability && f.ability !== ability)
         );
     }
 

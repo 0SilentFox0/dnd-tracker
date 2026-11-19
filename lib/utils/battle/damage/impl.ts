@@ -108,7 +108,13 @@ export function calculateDamageWithModifiersImpl(
     const mods = collectModifiers(
         withSelf(context?.allParticipants ?? [], attacker),
         attacker.basicInfo.id,
-        { damage: { kind, targetId: context?.targetId } },
+        {
+            damage: {
+                kind,
+                targetId: context?.targetId,
+                ability: context?.statKey,
+            },
+        },
         context?.actionModifiers
     );
 

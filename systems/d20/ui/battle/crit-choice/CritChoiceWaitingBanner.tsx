@@ -4,16 +4,33 @@ import { useTranslations } from 'next-intl';
 import { Hourglass } from 'lucide-react';
 
 import { useBattleScene } from '@/lib/hooks/battle';
+import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 
 export function CritChoiceWaitingBanner() {
     const t = useTranslations('battle.critChoice');
 
-    const {
-        battle,
-        viewer: { isDM },
-    } = useBattleScene();
+    const tRider = useTranslations('battle.riderChoice');
 
-    if (isDM || !battle.pendingChoice) return null;
+    const { battle, viewer } = useBattleScene();
+
+    if (viewer.isDM || !battle.pendingChoice) return null;
+
+    const pending = asShownCrit(battle.pendingChoice);
+
+    const ridersWait =
+        !!pending?.riders?.length && pending.triggers.length === 0;
+
+    const holdsAll =
+        ridersWait &&
+        pending.riders?.every(
+            (r) =>
+                !!viewer.userId &&
+                battle.initiativeOrder.find(
+                    (p) => p.basicInfo.id === r.holderId
+                )?.basicInfo.controlledBy === viewer.userId
+        );
+
+    if (holdsAll) return null;
 
     return (
         <div
@@ -22,7 +39,7 @@ export function CritChoiceWaitingBanner() {
         >
             <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
             <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
-                {t('waitingBanner')}
+                {ridersWait ? tRider('waitingBanner') : t('waitingBanner')}
             </span>
         </div>
     );

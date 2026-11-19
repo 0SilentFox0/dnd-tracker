@@ -392,6 +392,7 @@ export const critChoiceSchema = z.union([
             z.string(),
             z.union([z.number().int(), z.literal('random')])
         ),
+        riders: z.record(z.string(), z.boolean()).optional(),
     }),
     z.object({ cancel: z.literal(true) }),
 ]);

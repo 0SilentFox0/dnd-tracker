@@ -86,6 +86,12 @@ describe('dealDamage on hit', () => {
         expect(hpAfter(hit({ damageType: 'piercing' }), victim(50))).toBe(92);
     });
 
+    it('doubles on a crit and then halves against resistance (Sneak crit vs resistant)', () => {
+        expect(
+            hpAfter(hit({ crit: true, damageType: 'slashing' }), victim(50))
+        ).toBe(92);
+    });
+
     it('stops damage fully against immunity', () => {
         expect(hpAfter(hit({ damageType: 'slashing' }), victim(100))).toBe(100);
     });

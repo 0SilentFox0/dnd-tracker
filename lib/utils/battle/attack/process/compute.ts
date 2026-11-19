@@ -65,6 +65,7 @@ export interface ComputeHitDamageParams {
     bonusLabel?: LogLine;
     offTurn?: boolean;
     obstacle?: boolean;
+    noAbilityMod?: boolean;
     rng?: () => number;
 }
 
@@ -110,12 +111,16 @@ export function computeHitDamage(
 
     const baseDamage = damageRolls.reduce((sum, roll) => sum + roll, 0);
 
-    const statModifier = attackDamageModifier(
+    const abilityModifier = attackDamageModifier(
         updatedAttacker,
         attack,
         params.rules,
         allParticipants
     );
+
+    const statModifier = params.noAbilityMod
+        ? Math.min(0, abilityModifier)
+        : abilityModifier;
 
     const additionalDamageModifiers: Array<{ type: string; value: number }> =
         [];

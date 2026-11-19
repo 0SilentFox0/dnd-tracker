@@ -159,6 +159,7 @@ export function rollSave(input: SaveRollInput): SaveRollResult {
         rng,
         presetRoll,
         vsSpell,
+        rider: pickRider,
     } = input;
 
     const mod = target.abilities.modifiers[ability];
@@ -195,7 +196,19 @@ export function rollSave(input: SaveRollInput): SaveRollResult {
         proficiencyBonus(target, ability, entries, rules) +
         collectModifiers(ps, target.basicInfo.id, { stat: 'savingThrow' }).flat;
 
-    const total = roll + mod + bonus;
+    const base = roll + mod + bonus;
+
+    const offered =
+        dc !== undefined && roll > 1 && base < dc
+            ? pickRider?.({
+                  holder: target,
+                  kind: 'save',
+                  total: base,
+                  needed: dc,
+              })
+            : undefined;
+
+    const total = base + (offered?.bonus ?? 0);
 
     return {
         roll,
@@ -203,6 +216,7 @@ export function rollSave(input: SaveRollInput): SaveRollResult {
         mod,
         bonus,
         total,
+        ...(offered && { riderBonus: offered.bonus }),
         success: dc !== undefined && total >= dc,
         mode,
         autoFail: false,

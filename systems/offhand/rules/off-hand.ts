@@ -6,6 +6,7 @@ import type {
     OffHandRules,
     TurnStateReset,
 } from '@/lib/utils/rules/systems/types';
+import { nickFree } from '@/systems/d20/rules/attack/mastery';
 import { isFiveE } from '@/systems/d20/rules/damage-model';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 
@@ -14,8 +15,12 @@ export const OFF_HAND_RULES: OffHandRules = {
     ready: (p) =>
         isFiveE(p) &&
         !!d20State(p).attackedWithLight &&
-        !p.actionFlags.hasUsedBonusAction &&
-        p.battleData.attacks.some((a) => a.hand === 'off'),
+        p.battleData.attacks.some(
+            (a) =>
+                a.hand === 'off' &&
+                (!p.actionFlags.hasUsedBonusAction || !!nickFree(p, a, 0))
+        ),
+    free: nickFree,
     arm: (p, attack) =>
         attack.hand !== 'off' &&
         attackKindOf(attack.type) === AttackType.MELEE &&

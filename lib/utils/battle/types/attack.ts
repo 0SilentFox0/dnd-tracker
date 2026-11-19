@@ -22,6 +22,7 @@ export interface AttackRollResult {
     system?: SystemSlot;
     margin?: number;
     location?: string;
+    riderBonus?: number;
 }
 
 export interface AttackResult {

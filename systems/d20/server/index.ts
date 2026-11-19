@@ -58,7 +58,7 @@ export const D20_MODULE_SERVER: SystemServer = {
         },
         'crit-choice': {
             settings: {
-                access: 'dm',
+                access: 'member',
                 allowWhileAwaitingDm: true,
                 allowWhileCritPending: true,
                 respond: 'wrapped',

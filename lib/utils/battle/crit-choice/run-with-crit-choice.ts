@@ -1,6 +1,7 @@
 import { createCritGate } from './gate';
 import type { CritPicker, CritResume } from './types';
 
+import { consumeRider } from '@/lib/utils/battle/d20-rider/held';
 import type {
     BattleMutationContext,
     MutationResult,
@@ -34,18 +35,31 @@ export async function runWithCritChoice(
     const gate = createCritGate({
         rng,
         choices: opts.resume?.choices,
+        riderChoices: opts.resume?.riderChoices,
         disabled: {
             success: criticals.disabledSuccess,
             fail: criticals.disabledFail,
         },
     });
 
-    const result = await opts.run({ rng, crit: gate.pick });
+    const ran = await opts.run({ rng, crit: gate.pick });
+
+    const result = gate.spent.length
+        ? {
+              ...ran,
+              participants: gate.spent.reduce(
+                  (ps, s) => consumeRider(ps, s.holderId, s.effectId),
+                  ran.participants
+              ),
+          }
+        : ran;
 
     if (opts.resume)
         return { ...result, scene: { ...result.scene, pendingChoice: null } };
 
-    if (!opts.enabled || gate.triggers.length === 0) return result;
+    const critPause = opts.enabled && gate.triggers.length > 0;
+
+    if (!critPause && gate.offers.length === 0) return result;
 
     return {
         participants: ctx.participants,
@@ -56,7 +70,8 @@ export async function runWithCritChoice(
                 shown: {
                     action: opts.action,
                     actorId: opts.actorId,
-                    triggers: gate.triggers,
+                    triggers: critPause ? gate.triggers : [],
+                    ...(gate.offers.length > 0 && { riders: gate.offers }),
                 },
                 hidden: {
                     request: opts.request,

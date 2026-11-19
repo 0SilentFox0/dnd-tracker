@@ -127,6 +127,23 @@
     "manualTag": " (player's choice)",
     "serverTag": " (server)"
   },
+  "mastery": {
+    "cleave": "Cleave",
+    "graze": "Graze",
+    "nick": "Nick",
+    "push": "Push",
+    "sap": "Sap",
+    "slow": "Slow",
+    "topple": "Topple",
+    "vex": "Vex",
+    "applied": "{mastery}: {target}",
+    "vexNext": "Vex: advantage on the next attack roll against {target}",
+    "grazeHit": "Graze: {target} takes {damage} damage",
+    "toppleSave": "Topple: {target} CON save {total} vs DC {dc}: {success, select, true {success} other {fail, knocked prone}}"
+  },
+  "rider": {
+    "spent": "🎲 inspiration die d{die}: +{bonus}, total {total}"
+  },
   "crit": {
     "adjacent": "💥 point-blank hit — critical",
     "cancelled": "🛡 critical cancelled — normal hit",
@@ -322,6 +339,7 @@
     "cunningDice": "Cunning Strike: not enough Sneak Attack dice",
     "cannotAttackRanged": "The attacker cannot attack at range",
     "cannotAttackMelee": "The attacker cannot attack in melee",
+    "cannotCast": "{name} cannot cast spells right now (Rage)",
     "charmedTarget": "{name} cannot attack the one who charmed them",
     "rollRequired": "A d20 roll is required (d20Roll, attackRoll or attackRolls)",
     "attackerMissing": "The attacker is not in the battle",

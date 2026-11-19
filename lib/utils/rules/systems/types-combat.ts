@@ -187,6 +187,12 @@ export interface OffHandRules {
     ready(attacker: BattleParticipant): boolean;
     /** Records a main-hand attack so that an off-hand follow-up becomes ready */
     arm(attacker: BattleParticipant, attack: BattleAttack): BattleParticipant;
+    /** This off-hand attack is made as part of the Attack action; returns the attacker with the free use spent, or null when the bonus action is needed */
+    free?(
+        attacker: BattleParticipant,
+        attack: BattleAttack,
+        round: number
+    ): BattleParticipant | null;
 }
 
 export interface LairRules {
@@ -267,7 +273,27 @@ export interface HitRidersPlan {
     ): boolean;
 }
 
+export interface MasteryStrikeCtx {
+    flow: ActionFlow;
+    attackerId: string;
+    targetId: string;
+    attack: BattleAttack;
+    hit: boolean;
+}
+
+export interface MasteryHooks {
+    /** Weapon-mastery effect of a resolved strike (hit or miss) */
+    onStrike(ctx: MasteryStrikeCtx): void;
+    /** After a melee hit: whether a second adjacent creature may be struck, and the attacker with that use spent */
+    cleave(
+        attacker: BattleParticipant,
+        attack: BattleAttack,
+        round: number
+    ): { spent: BattleParticipant } | null;
+}
+
 export interface RuleSystemAttackHooks {
+    masteries?: MasteryHooks;
     /** Optional riders bought at the hit (offer for the wizard); absent means none */
     riderOptions?(
         attacker: BattleParticipant,

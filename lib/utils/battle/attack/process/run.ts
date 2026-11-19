@@ -224,17 +224,26 @@ function spendAttackAction(run: AttackRun): void {
 
     const attacker = getP(flow, attackerId);
 
+    const free = params.offHand
+        ? ruleSystemOf(flow.ctx.rules).combat.secondaryAttack?.free?.(
+              attacker,
+              params.attack,
+              params.currentRound
+          )
+        : null;
+
     put(
         flow,
-        params.offHand && actionEconomyOf(flow.ctx.rules).bonusAction
-            ? {
-                  ...attacker,
-                  actionFlags: {
-                      ...attacker.actionFlags,
-                      hasUsedBonusAction: true,
-                  },
-              }
-            : spendAttack(attacker, flow.ps, params.attack, flow.ctx.rules)
+        free ??
+            (params.offHand && actionEconomyOf(flow.ctx.rules).bonusAction
+                ? {
+                      ...attacker,
+                      actionFlags: {
+                          ...attacker.actionFlags,
+                          hasUsedBonusAction: true,
+                      },
+                  }
+                : spendAttack(attacker, flow.ps, params.attack, flow.ctx.rules))
     );
 }
 
@@ -448,6 +457,7 @@ function hitResult(run: AttackRun, stage: HitStage): ProcessAttackResult {
         bonusPercent: params.bonusPercent,
         bonusLabel: params.bonusLabel,
         obstacle: params.obstacle,
+        noAbilityMod: params.noAbilityMod,
         cunningStrike: params.cunningStrike,
         hitSpells: params.hitSpells,
         battleId,

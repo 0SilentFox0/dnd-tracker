@@ -15,6 +15,7 @@ import { applyBalanceDamageMultiplier } from '@/lib/utils/battle/damage/balance-
 import { applyResistance } from '@/lib/utils/battle/resistance';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import type { ProcessAttackResult } from '@/lib/utils/battle/types/attack-process';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleAttack } from '@/types/battle';
 
 export interface HandleMissParams {
@@ -76,6 +77,14 @@ export function handleMiss(
         );
         settleDowned(flow, targetId, attackerId);
     }
+
+    ruleSystemOf(flow.ctx.rules).combat.attack?.masteries?.onStrike({
+        flow,
+        attackerId,
+        targetId,
+        attack,
+        hit: false,
+    });
 
     fire(flow, {
         type: 'attack',

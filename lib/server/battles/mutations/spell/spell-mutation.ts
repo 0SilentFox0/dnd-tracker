@@ -20,6 +20,7 @@ import type {
     SpellMutationDeps,
 } from '@/lib/server/battles/mutations/spell/cast-types';
 import { requireActor } from '@/lib/utils/battle/common/control';
+import { assertMayCast } from '@/lib/utils/battle/common/spell-block';
 import { runWithCritChoice } from '@/lib/utils/battle/crit-choice/run-with-crit-choice';
 import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
 import type {
@@ -67,6 +68,8 @@ export function createSpellMutation(
         });
 
         if (data.cancelCasting) return cancelCast(ctx, order, caster);
+
+        assertMayCast(caster, order);
 
         const source = resolveSpellSource(ctx, caster, spell, data);
 

@@ -26,6 +26,7 @@ import { activeEffectIds } from '@/lib/utils/battle/attack/consume-effects';
 import { counterStrike } from '@/lib/utils/battle/attack/counter-strike';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
 import { nextChainTarget } from '@/lib/utils/battle/attack/process/chain';
+import { cleaveTargets } from '@/lib/utils/battle/attack/process/cleave';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import {
@@ -97,6 +98,7 @@ interface StrikeOpts {
     serverRolled: boolean;
     multiplier?: number;
     cover: boolean;
+    noAbilityMod?: boolean;
 }
 
 const liveOf = (st: PhaseState, p: BattleParticipant) =>
@@ -195,8 +197,13 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const fractions = damageFractions(targets, attack, { volley, falloff });
 
+    const masteries = ruleSystemOf(input.rules).combat.attack?.masteries;
+
+    const cleavable =
+        !!masteries?.cleave(attacker, attack, battle.currentRound);
+
     const damageFormula =
-        (volley && (targets.length > 1 || expanded)) || chain
+        (volley && (targets.length > 1 || expanded)) || chain || cleavable
             ? attackDamageParts(attacker, attack, input.rules).formula
             : null;
 
@@ -236,6 +243,8 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     if (chain && firstHit) runChain(ctx, st, targets[0], chain);
 
+    if (cleavable && firstHit) runCleave(ctx, st, targets[0]);
+
     return {
         finalInitiativeOrder: restoreHeldBack(
             st.order,
@@ -246,6 +255,41 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
         summons: st.summons,
         sceneState: st.sceneState,
     };
+}
+
+function runCleave(
+    ctx: PhaseCtx,
+    st: PhaseState,
+    first: BattleParticipant
+): void {
+    const { attack } = ctx.request;
+
+    const cleave = ruleSystemOf(ctx.input.rules).combat.attack?.masteries?.cleave(
+        st.attacker,
+        attack,
+        ctx.input.battle.currentRound
+    );
+
+    if (!cleave || !isActive(st.attacker)) return;
+
+    const [next] = cleaveTargets(
+        ctx.input.map,
+        st.order,
+        st.attacker,
+        liveOf(st, first),
+        1
+    );
+
+    if (!next) return;
+
+    st.attacker = cleave.spent;
+    st.order = mergeParticipants(st.order, [cleave.spent]);
+
+    strikeAt(ctx, st, next, 1, {
+        serverRolled: true,
+        cover: false,
+        noAbilityMod: true,
+    });
 }
 
 function runChain(
@@ -375,6 +419,7 @@ function strikeAt(
         currentRound: battle.currentRound,
         battleId,
         damageMultiplier: opts.multiplier,
+        noAbilityMod: opts.noAbilityMod,
         obstacle,
         cunningStrike: i === 0 ? data.cunningStrike : undefined,
         system: i === 0 ? data.system : undefined,

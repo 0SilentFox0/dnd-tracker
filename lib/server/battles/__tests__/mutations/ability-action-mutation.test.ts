@@ -117,6 +117,48 @@ describe('abilityActionMutation', () => {
         expect(h.battleData.pendingExtraActions ?? 0).toBe(0);
     });
 
+    describe('free grantAction (Action Surge)', () => {
+        const surge = resolved({
+            id: 'fs',
+            name: 'Сплеск дії',
+            trigger: { event: 'action' },
+            effects: [
+                {
+                    kind: 'grantAction',
+                    extraActions: 1,
+                    free: true,
+                    target: 'self',
+                },
+            ],
+        });
+
+        const withSurge = (spent: boolean): BattleParticipant => ({
+            ...hero,
+            actionFlags: { ...hero.actionFlags, hasUsedAction: spent },
+            battleData: { ...hero.battleData, resolvedAbilities: [surge] },
+        });
+
+        it('works after the action was spent and returns it', async () => {
+            const h = find(
+                (await run([withSurge(true), goblin], surge.key)).participants,
+                'hero'
+            );
+
+            expect(h.actionFlags.hasUsedAction).toBe(false);
+            expect(h.battleData.pendingExtraActions ?? 0).toBe(0);
+        });
+
+        it('before the action it banks one extra action without spending the main one', async () => {
+            const h = find(
+                (await run([withSurge(false), goblin], surge.key)).participants,
+                'hero'
+            );
+
+            expect(h.actionFlags.hasUsedAction).toBe(false);
+            expect(h.battleData.pendingExtraActions).toBe(1);
+        });
+    });
+
     it('second action in the same turn is rejected', async () => {
         const used = {
             ...hero,

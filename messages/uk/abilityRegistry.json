@@ -356,6 +356,9 @@
     "critImmunity": {
       "label": "Імунітет до критів"
     },
+    "noSpellcasting": {
+      "label": "Не може творити закляття"
+    },
     "passesWalls": {
       "label": "Проходить крізь стіни"
     },
@@ -484,6 +487,9 @@
     },
     "targetRace": {
       "label": "Раса цілі"
+    },
+    "weaponTrait": {
+      "label": "Властивість зброї"
     },
     "targetDead": {
       "label": "Ціль мертва"
@@ -1123,6 +1129,7 @@
       "autoCritAdjacent": "ближні атаки з 5 фт по цілі — критичні",
       "twoWeaponFighting": "модифікатор до шкоди другої руки",
       "critImmunity": "критичне влучання по власнику стає звичайним",
+      "noSpellcasting": "не може творити закляття",
       "passesWalls": "проходить крізь стіни та ґрати на мапі",
       "cunningAction": "Ривок, Відхід і Сховатися бонусною дією",
       "evasion": "рятівний кидок Спритності з половиною шкоди: успіх — 0, провал — половина",
@@ -1154,6 +1161,7 @@
       "targetHasCondition": "ціль має стан «{condition}»",
       "targetCreatureType": "тип істоти цілі: {types}",
       "targetRace": "раса цілі: {races}",
+      "weaponTrait": "властивість зброї: {traits}",
       "targetDead": "ціль мертва",
       "actorIsEnemy": "виконавець події — ворог",
       "hasMark": "мітка «{markId}»{bySelf, select, yes { (лише моя)} other {}}: {who}",

@@ -440,6 +440,7 @@ export function resolveOutcome(
             presetRoll: state.saveRolls.find((s) => s.participantId === id)
                 ?.roll,
             vsSpell: true,
+            rider: flow.ctx.crit?.rider,
         });
 
         const { roll, mod, bonus, total } = r;

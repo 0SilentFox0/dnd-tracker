@@ -303,6 +303,30 @@ describe('class choices', () => {
     });
 });
 
+describe('weapon mastery choice', () => {
+    it('Fighter trains weapon kinds by the class column, Barbarian only melee ones', () => {
+        const fighter = choice('Fighter', 'weapon-mastery-1');
+
+        expect(fighter).toMatchObject({
+            kind: 'option',
+            count: { scale: 'weapon-mastery-count' },
+        });
+        expect(fighter?.options?.length).toBe(38);
+
+        const longsword = fighter?.options?.find((o) => o.id === 'longsword');
+
+        expect(longsword?.abilities[0].params).toEqual({
+            weaponMastery: ['longsword'],
+        });
+
+        const barbarian = choice('Barbarian', 'weapon-mastery-1');
+
+        expect(barbarian?.options?.some((o) => o.id === 'longbow')).toBe(false);
+        expect(barbarian?.options?.some((o) => o.id === 'greataxe')).toBe(true);
+        expect(choice('Rogue', 'weapon-mastery-1')?.count).toBe(2);
+    });
+});
+
 describe('spell lists', () => {
     it('Spell.classes → lists by class name', () => {
         const spells = convertSpells(data);

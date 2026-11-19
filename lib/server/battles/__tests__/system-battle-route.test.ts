@@ -50,7 +50,7 @@ describe('module battle operations own their route settings', () => {
         const def = await getBattleOperation('crit-choice', params);
 
         expect(def).toMatchObject({
-            access: 'dm',
+            access: 'member',
             allowWhileAwaitingDm: true,
             allowWhileCritPending: true,
             respond: 'wrapped',
