@@ -1,10 +1,7 @@
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import {
-    MAX_LIBRARY_SOUNDS,
-    MAX_SOUND_BYTES,
-} from '@/lib/constants/soundboard';
-import { prisma } from '@/lib/db';
+import { MAX_SOUND_BYTES } from '@/lib/constants/soundboard';
+import { assertLibraryRoom } from '@/lib/server/soundboard/library-store';
 import { uploadSoundBytes } from '@/lib/supabase/soundboard-storage';
 import { ContentError } from '@/lib/utils/api/content-error';
 import { safeFetchBuffer, SafeFetchError } from '@/lib/utils/api/safe-fetch';
@@ -40,12 +37,7 @@ export async function importSoundFromLink(
     userId: string,
     input: { url: string }
 ): Promise<{ path: string; url: string }> {
-    const count = await prisma.soundLibraryItem.count({ where: { userId } });
-
-    if (count >= MAX_LIBRARY_SOUNDS)
-        throw new ContentError(API_ERRORS.SOUND_LIMIT, 400, undefined, {
-            max: MAX_LIBRARY_SOUNDS,
-        });
+    await assertLibraryRoom(userId);
 
     const bytes = await fetchBytes(input.url);
 

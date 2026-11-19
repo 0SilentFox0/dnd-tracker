@@ -7,7 +7,6 @@ import { createHash } from 'node:crypto';
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
-    BUILTIN_SOUND_IDS,
     BUILTIN_SOUNDS,
     MAX_LIBRARY_SOUNDS,
     PRESET_SLOTS,
@@ -146,16 +145,20 @@ async function ownedSound(
     return row;
 }
 
-export async function createLibrarySound(
-    userId: string,
-    input: CreateLibrarySoundInput
-): Promise<LibrarySoundRow> {
+export async function assertLibraryRoom(userId: string): Promise<void> {
     const count = await prisma.soundLibraryItem.count({ where: { userId } });
 
     if (count >= MAX_LIBRARY_SOUNDS)
         throw new ContentError(API_ERRORS.SOUND_LIMIT, 400, undefined, {
             max: MAX_LIBRARY_SOUNDS,
         });
+}
+
+export async function createLibrarySound(
+    userId: string,
+    input: CreateLibrarySoundInput
+): Promise<LibrarySoundRow> {
+    await assertLibraryRoom(userId);
 
     if (!soundPathOwnedBy(input.path, userId))
         throw new ContentError(API_ERRORS.FORBIDDEN, 403);
@@ -229,8 +232,6 @@ export async function findPlayableFor(
     soundId: string
 ): Promise<{ volume: number; url: string } | null> {
     if (soundId.startsWith('builtin:')) {
-        if (!BUILTIN_SOUND_IDS.has(soundId)) return null;
-
         const builtin = BUILTIN_SOUNDS.find((s) => s.id === soundId);
 
         return builtin ? { volume: 1, url: builtin.url } : null;
