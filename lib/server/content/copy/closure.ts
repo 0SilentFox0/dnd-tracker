@@ -13,8 +13,9 @@ export type CopyRow = {
 
 export function selectClosure(
     bundle: Bundle,
-    selected: ReadonlyArray<{ table: BundleTable; id: string }>
-): { rows: CopyRow[]; missing: string[] } {
+    selected: ReadonlyArray<{ table: BundleTable; id: string }>,
+    isBoundary?: (entry: CopyRow) => boolean
+): { rows: CopyRow[]; missing: string[]; boundary: CopyRow[] } {
     const index = new Map<string, CopyRow>();
 
     for (const def of BUNDLE_TABLES)
@@ -29,6 +30,10 @@ export function selectClosure(
 
     const rows: CopyRow[] = [];
 
+    const boundary: CopyRow[] = [];
+
+    const roots = new Set(selected.map((s) => s.id));
+
     const queue = selected.map((s) => s.id);
 
     while (queue.length) {
@@ -41,6 +46,12 @@ export function selectClosure(
         if (!entry) continue;
 
         seen.add(id);
+
+        if (isBoundary && !roots.has(id) && isBoundary(entry)) {
+            boundary.push(entry);
+            continue;
+        }
+
         rows.push(entry);
 
         const refs = new Set<string>();
@@ -62,5 +73,5 @@ export function selectClosure(
         }
     }
 
-    return { rows, missing: [...missing] };
+    return { rows, missing: [...missing], boundary };
 }
