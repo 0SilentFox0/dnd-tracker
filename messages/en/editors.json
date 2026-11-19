@@ -65,6 +65,20 @@
         "castEffects": "Subcast effects",
         "advanced": "Advanced"
       },
+      "burst": {
+        "radiusFeet": "Radius (feet)",
+        "dice": "Damage dice",
+        "upcastDice": "Extra dice per slot level",
+        "trigger": "Trigger on each creature"
+      },
+      "moveSummon": {
+        "feet": "Distance (feet)"
+      },
+      "grantSpell": {
+        "maxLevel": "Max spell level",
+        "onOption": "Option index",
+        "duration": "Duration (rounds)"
+      },
       "anchoredZone": {
         "radiusFeet": "Radius (feet)",
         "side": "Affects",

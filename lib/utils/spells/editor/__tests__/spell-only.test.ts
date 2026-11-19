@@ -17,13 +17,16 @@ describe('spell-only kinds', () => {
     it('список видів збігається з дискримінаторами схеми', () => {
         expect([...SPELL_ONLY_EFFECT_KINDS].sort()).toEqual([
             'anchoredZone',
+            'burst',
             'chooseOne',
             'createTerrain',
             'grantCast',
+            'grantSpell',
             'hitRider',
             'inputDice',
             'interruptCast',
             'moveSelf',
+            'moveSummon',
             'phantom',
             'summonInline',
             'teleportSelf',

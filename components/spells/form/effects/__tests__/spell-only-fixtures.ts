@@ -138,6 +138,37 @@ export const SPELL_ONLY_FIXTURES: Record<string, Fixture> = {
         },
         edit: { id: 'cells', value: '6', patch: { cells: 6 } },
     },
+    moveSummon: {
+        effect: { kind: 'moveSummon', feet: 30 },
+        edit: { id: 'feet', value: '40', patch: { feet: 40 } },
+    },
+    grantSpell: {
+        effect: {
+            kind: 'grantSpell',
+            maxLevel: 3,
+            duration: { rounds: 1 },
+        },
+        edit: { id: 'maxLevel', value: '4', patch: { maxLevel: 4 } },
+    },
+    burst: {
+        effect: {
+            kind: 'burst',
+            radiusFeet: 5,
+            dice: '2d6',
+            upcastDice: 1,
+            trigger: {
+                save: { ability: 'dexterity' },
+                effects: [
+                    {
+                        kind: 'dealDamage',
+                        amount: { spellRoll: 100 },
+                        damageType: 'cold',
+                    },
+                ],
+            },
+        },
+        edit: { id: 'radiusFeet', value: '10', patch: { radiusFeet: 10 } },
+    },
     phantom: { effect: { kind: 'phantom' } },
     interruptCast: { effect: { kind: 'interruptCast' } },
     moveSelf: { effect: { kind: 'moveSelf', to: 'adjacentToTarget' } },
