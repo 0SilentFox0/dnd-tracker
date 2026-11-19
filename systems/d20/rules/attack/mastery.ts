@@ -90,7 +90,14 @@ function graze({ flow, attackerId, targetId, attack }: MasteryStrikeCtx) {
     if (resisted.finalDamage <= 0) return;
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
-    applyFlowDamage(flow, target, resisted.finalDamage);
+    applyFlowDamage(
+        flow,
+        target,
+        resisted.finalDamage,
+        undefined,
+        undefined,
+        attack.damageType
+    );
     flow.messages.push(
         textRef('battleLog.mastery.grazeHit', {
             target: target.basicInfo.name,
@@ -143,7 +150,10 @@ function timedOnTarget(
         upsertLabeled(
             target,
             {
-                timedKey: `mastery:${mastery}@${ctx.attackerId}`,
+                timedKey:
+                    mastery === 'slow'
+                        ? 'mastery:slow'
+                        : `mastery:${mastery}@${ctx.attackerId}`,
                 name: mastery,
                 label: label(mastery),
                 type: 'debuff',
@@ -183,7 +193,13 @@ function vex({ flow, attackerId, targetId }: MasteryStrikeCtx) {
                 type: 'buff',
                 rounds: 2,
                 stackable: false,
-                abilityEffects: [flag({ flag: 'advantage', attackKind: 'all' })],
+                abilityEffects: [
+                    flag({
+                        flag: 'advantage',
+                        attackKind: 'all',
+                        againstId: targetId,
+                    }),
+                ],
                 consumeOn: 'ownAttack',
             },
             flow.ctx.round

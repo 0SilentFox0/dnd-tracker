@@ -14,6 +14,7 @@ import {
     isActive,
     replaceParticipant,
     sitsOutTurn,
+    updateParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
 import {
     resolveDowned,
@@ -507,9 +508,10 @@ export function processStartOfTurn(
 
     participants = dropHelpFrom(participants, id);
 
-    const finalParticipant = clearGuardedDamage(
-        findParticipant(participants, id) ?? updatedParticipant
-    );
+    participants = updateParticipant(participants, id, clearGuardedDamage);
+
+    const finalParticipant =
+        findParticipant(participants, id) ?? clearGuardedDamage(updatedParticipant);
 
     const unableToUseAnyAttackOrSpell =
         isActive(finalParticipant) &&

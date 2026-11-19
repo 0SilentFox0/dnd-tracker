@@ -7,6 +7,7 @@ import { enabledCritEffects } from '@/lib/utils/battle/crit-choice/catalog';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 import type { CritTrigger } from '@/lib/utils/battle/crit-choice/types';
 import { critChoiceOp } from '@/systems/d20/api/battle';
+import { useRiderRows } from '@/systems/d20/hooks/battle/useRiderChoiceDialog';
 
 export interface CritChoiceRow {
     trigger: CritTrigger;
@@ -17,6 +18,8 @@ export interface CritChoiceRow {
 
 export function useCritChoiceDialog() {
     const { battle, viewer, actions } = useBattleScene();
+
+    const { rows: riderRows } = useRiderRows();
 
     const crit = critRulesOf(battle.rules);
 
@@ -39,8 +42,17 @@ export function useCritChoiceDialog() {
     return {
         open: viewer.isDM && (pending?.triggers.length ?? 0) > 0,
         rows,
-        submit: (choices: Record<string, number | 'random'>) =>
-            actions.system.mutate(critChoiceOp({ choices })),
+        riderRows,
+        submit: (
+            choices: Record<string, number | 'random'>,
+            riders: Record<string, boolean> = {}
+        ) =>
+            actions.system.mutate(
+                critChoiceOp({
+                    choices,
+                    ...(riderRows.length > 0 && { riders }),
+                })
+            ),
         cancel: () => actions.system.mutate(critChoiceOp({ cancel: true })),
         isSubmitting: isSystemActionPending(actions.system, 'crit-choice'),
     };

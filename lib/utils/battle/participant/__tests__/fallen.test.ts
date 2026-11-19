@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { clearFallenEffects } from '@/lib/utils/battle/participant/fallen';
+import { helpAttackEffect } from '@/lib/utils/battle/actions/effects';
+import { clearFallenEffects, dropAbsentHelp } from '@/lib/utils/battle/participant/fallen';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { withDeathSaves } from '@/systems/deathsaves/rules/state';
@@ -150,5 +151,44 @@ describe('clearFallenEffects: keepsWhenDown (wfrp)', () => {
                 DEFAULT_RULES
             )[0].battleData.activeEffects
         ).toEqual([]);
+    });
+});
+
+describe('dropAbsentHelp', () => {
+    const withHelp = (helper: BattleParticipant): BattleParticipant[] => {
+        const foe = createMockParticipant();
+
+        const effect = helpAttackEffect('gob');
+
+        return [
+            helper,
+            {
+                ...foe,
+                basicInfo: { ...foe.basicInfo, id: 'foe' },
+                battleData: {
+                    ...foe.battleData,
+                    activeEffects: [{ ...charm, abilityKey: effect.timedKey }],
+                },
+            },
+        ];
+    };
+
+    it('removes Help from a fallen or reserved helper, keeps it for an active one', () => {
+        const fallen = withHelp(charmed(CombatStatus.DEAD));
+
+        expect(dropAbsentHelp(fallen)[1].battleData.activeEffects).toEqual([]);
+
+        const active = withHelp(charmed(CombatStatus.ACTIVE));
+
+        expect(dropAbsentHelp(active)).toBe(active);
+
+        const base = charmed(CombatStatus.ACTIVE);
+
+        const reserved = withHelp({
+            ...base,
+            battleData: { ...base.battleData, reserved: true },
+        });
+
+        expect(dropAbsentHelp(reserved)[1].battleData.activeEffects).toEqual([]);
     });
 });

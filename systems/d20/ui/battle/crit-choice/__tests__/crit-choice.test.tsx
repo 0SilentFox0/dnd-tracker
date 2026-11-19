@@ -24,6 +24,7 @@ const [e1, e2] = critEffectsFor('attack', 'success');
 
 const dialog = (over: Partial<Dialog> = {}): Dialog => ({
     open: true,
+    riderRows: [],
     rows: [
         {
             trigger: {
@@ -94,7 +95,7 @@ describe('CritChoiceDialog', () => {
         );
         expect(confirm).toBeEnabled();
         fireEvent.submit(document.getElementById('crit-choice-form')!);
-        expect(d.submit).toHaveBeenCalledWith({ t1: e2.id, t2: 'random' });
+        expect(d.submit).toHaveBeenCalledWith({ t1: e2.id, t2: 'random' }, {});
     });
 
     it('random-for-all submits random for every row without picking', () => {
@@ -105,7 +106,7 @@ describe('CritChoiceDialog', () => {
         fireEvent.click(
             screen.getByRole('button', { name: 'Випадково для всіх' })
         );
-        expect(d.submit).toHaveBeenCalledWith({ t1: 'random', t2: 'random' });
+        expect(d.submit).toHaveBeenCalledWith({ t1: 'random', t2: 'random' }, {});
     });
 
     it('cancel calls cancel; submitting disables every action', () => {

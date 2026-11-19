@@ -195,7 +195,8 @@ export function rollModeReasonsOf(
                     (e.flag.attackKind === 'all' ||
                         e.flag.attackKind === kind) &&
                     (!e.flag.attackAbility ||
-                        e.flag.attackAbility === abilityKey())
+                        e.flag.attackAbility === abilityKey()) &&
+                    (!e.flag.againstId || e.flag.againstId === opts.targetId)
             )
         ),
         ...(opts.targetId

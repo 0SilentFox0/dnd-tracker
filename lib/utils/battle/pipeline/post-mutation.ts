@@ -5,7 +5,7 @@ import { placeParticipants } from '@/lib/utils/battle/grid/placement';
 import { placeRevived } from '@/lib/utils/battle/grid/revive-placement';
 import { pruneExpiredTerrain } from '@/lib/utils/battle/grid/terrain';
 import { lineText } from '@/lib/utils/battle/log/lines';
-import { clearFallenEffects } from '@/lib/utils/battle/participant/fallen';
+import { clearFallenEffects, dropAbsentHelp } from '@/lib/utils/battle/participant/fallen';
 import { reserveOf } from '@/lib/utils/battle/participant/reserve';
 import type { MutationResult } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { sweepOrphanedAnchored } from '@/lib/utils/battle/spell/anchored-zone';
@@ -134,7 +134,9 @@ export function withPlacement(
             ],
         };
 
-    const cleared = clearFallenEffects(result.participants, rules);
+    const cleared = dropAbsentHelp(
+        clearFallenEffects(result.participants, rules)
+    );
 
     if (cleared !== result.participants)
         result = { ...result, participants: cleared };

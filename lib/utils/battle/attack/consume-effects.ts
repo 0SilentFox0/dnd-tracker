@@ -19,6 +19,11 @@ export const withoutEffects = (
     drop: (e: ActiveEffect) => boolean
 ): BattleParticipant => removeEffects(p, drop).participant;
 
+const againstTarget = (e: ActiveEffect, targetId: string) =>
+    !e.abilityEffects?.some(
+        (x) => x.kind === 'flag' && 'againstId' in x && x.againstId !== targetId
+    );
+
 export function consumeAttackEffects(
     ps: BattleParticipant[],
     a: {
@@ -36,6 +41,7 @@ export function consumeAttackEffects(
                 p,
                 (e) =>
                     a.existedBefore.has(effectKey(id, e.id)) &&
+                    againstTarget(e, a.targetId) &&
                     (e.consumeOn === 'ownAttack' ||
                         (a.hit && e.consumeOn === 'ownHit'))
             );

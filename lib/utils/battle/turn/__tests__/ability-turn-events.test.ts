@@ -8,6 +8,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { markGuardedDamage } from '@/lib/utils/battle/damage/regen-guard';
 import { advanceTurn } from '@/lib/utils/battle/turn/advance-turn';
 import { runAdvanceTurnLoop } from '@/lib/utils/battle/turn/run-advance-turn-loop';
 import {
@@ -39,6 +40,49 @@ describe('turn events', () => {
         expect(r.participants[0].combatStats.currentHp).toBe(13);
         expect(textOf(r.abilityMessages[0])).toContain('💚');
         expect(textOf(r.abilityMessages[0])).not.toContain('(a)');
+    });
+
+    it('regeneration stays off for one turn after a guarded damage type, then resumes', () => {
+        const regen = resolved({
+            trigger: { event: 'turnStart' },
+            effects: [
+                {
+                    kind: 'heal',
+                    amount: 3,
+                    unlessDamagedBy: ['fire'],
+                } as never,
+            ],
+        });
+
+        const troll = markGuardedDamage(
+            makeParticipant({ id: 'a', hp: 10, abilities: [regen] }),
+            'fire'
+        );
+
+        const first = processStartOfTurn(
+            troll,
+            1,
+            [troll],
+            seq(0),
+            undefined,
+            DEFAULT_RULES
+        );
+
+        expect(first.participants[0].combatStats.currentHp).toBe(10);
+        expect(first.participants[0].battleData.damagedByTypes).toBeUndefined();
+
+        const next = first.participants[0];
+
+        const second = processStartOfTurn(
+            next,
+            2,
+            first.participants,
+            seq(0),
+            undefined,
+            DEFAULT_RULES
+        );
+
+        expect(second.participants[0].combatStats.currentHp).toBe(13);
     });
 
     it('смерть від DOT дає kill-подію союзникам', () => {

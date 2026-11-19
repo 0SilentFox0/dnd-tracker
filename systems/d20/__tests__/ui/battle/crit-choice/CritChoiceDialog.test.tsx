@@ -50,6 +50,7 @@ const triggers = [
 function dialogOf(submit = vi.fn(), cancel = vi.fn()): Dialog {
     return {
         open: true,
+        riderRows: [],
         cancel,
         rows: triggers.map((t) => ({
             trigger: t,
@@ -98,7 +99,7 @@ describe('CritChoiceDialog', () => {
         expect(confirm.disabled).toBe(false);
 
         fireEvent.click(confirm);
-        expect(submit).toHaveBeenCalledWith({ t0: first.id, t1: 'random' });
+        expect(submit).toHaveBeenCalledWith({ t0: first.id, t1: 'random' }, {});
     });
 
     it('«Випадково для всіх» відправляє random для кожного ключа', () => {
@@ -109,7 +110,7 @@ describe('CritChoiceDialog', () => {
         fireEvent.click(
             screen.getByRole('button', { name: 'Випадково для всіх' })
         );
-        expect(submit).toHaveBeenCalledWith({ t0: 'random', t1: 'random' });
+        expect(submit).toHaveBeenCalledWith({ t0: 'random', t1: 'random' }, {});
     });
 
     it('«Скасувати дію» викликає cancel', () => {

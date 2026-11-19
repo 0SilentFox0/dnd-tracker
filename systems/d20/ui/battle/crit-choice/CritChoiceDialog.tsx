@@ -10,6 +10,7 @@ import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import type { CritTrigger } from '@/lib/utils/battle/crit-choice/types';
 import { useCritChoiceDialog } from '@/systems/d20/hooks/battle/useCritChoiceDialog';
+import { RiderRows } from '@/systems/d20/ui/battle/rider-choice/RiderRows';
 
 type Dialog = ReturnType<typeof useCritChoiceDialog>;
 
@@ -23,7 +24,7 @@ export function CritChoiceDialog() {
 
 // separate so the choice resets when the dialog closes
 function CritChoiceForm({
-    dialog: { rows, submit, cancel, isSubmitting },
+    dialog: { rows, riderRows, submit, cancel, isSubmitting },
 }: {
     dialog: Dialog;
 }) {
@@ -42,13 +43,18 @@ function CritChoiceForm({
 
     const [choices, setChoices] = useState<Record<string, Choice>>({});
 
+    const [spend, setSpend] = useState<Record<string, boolean>>({});
+
+    const tRider = useTranslations('battle.riderChoice');
+
     const complete = rows.every((r) => choices[r.trigger.key] !== undefined);
 
     const randomAll = () =>
         submit(
             Object.fromEntries(
                 rows.map((r) => [r.trigger.key, 'random' as const])
-            )
+            ),
+            spend
         );
 
     return (
@@ -90,7 +96,7 @@ function CritChoiceForm({
                 className="space-y-5 py-2"
                 onSubmit={(e) => {
                     e.preventDefault();
-                    submit(choices);
+                    submit(choices, spend);
                 }}
             >
                 {rows.map(({ trigger, actorName, targetName, options }) => (
@@ -153,6 +159,18 @@ function CritChoiceForm({
                         ))}
                     </fieldset>
                 ))}
+                {riderRows.length > 0 && (
+                    <fieldset className="space-y-1">
+                        <legend className="font-semibold">
+                            {tRider('title')}
+                        </legend>
+                        <RiderRows
+                            rows={riderRows}
+                            spend={spend}
+                            onChange={setSpend}
+                        />
+                    </fieldset>
+                )}
             </form>
         </ResponsiveDialog>
     );

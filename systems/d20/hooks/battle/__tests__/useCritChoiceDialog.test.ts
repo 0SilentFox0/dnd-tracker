@@ -126,4 +126,30 @@ describe('useCritChoiceDialog', () => {
         });
         expect(isSubmitting).toBe(true);
     });
+
+    it('shows rider offers next to the triggers and submits the DM answers', () => {
+        const offer = {
+            key: 'r1',
+            holderId: 'a',
+            effectId: 'e',
+            kind: 'attack',
+            die: 6,
+            total: 9,
+        };
+
+        vi.mocked(useBattleScene).mockReturnValue(
+            scene(true, { triggers: [trigger], riders: [offer] })
+        );
+
+        const { riderRows, submit } = renderHook(() => useCritChoiceDialog())
+            .result.current;
+
+        expect(riderRows).toEqual([{ offer, holderName: 'Ельф' }]);
+
+        submit({ t1: 3 }, { r1: true });
+        expect(mutate).toHaveBeenLastCalledWith({
+            action: 'crit-choice',
+            body: { choices: { t1: 3 }, riders: { r1: true } },
+        });
+    });
 });

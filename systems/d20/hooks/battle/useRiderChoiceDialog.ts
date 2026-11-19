@@ -10,15 +10,28 @@ export interface RiderChoiceRow {
     holderName: string;
 }
 
+export function useRiderRows() {
+    const { battle } = useBattleScene();
+
+    const offers = asShownCrit(battle.pendingChoice)?.riders ?? [];
+
+    const holder = (id: string) =>
+        battle.initiativeOrder.find((p) => p.basicInfo.id === id);
+
+    const rows: RiderChoiceRow[] = offers.map((offer) => ({
+        offer,
+        holderName: holder(offer.holderId)?.basicInfo.name ?? '',
+    }));
+
+    return { offers, rows, holder };
+}
+
 export function useRiderChoiceDialog() {
     const { battle, viewer, actions } = useBattleScene();
 
     const pending = asShownCrit(battle.pendingChoice);
 
-    const offers = pending?.riders ?? [];
-
-    const holder = (id: string) =>
-        battle.initiativeOrder.find((p) => p.basicInfo.id === id);
+    const { offers, rows, holder } = useRiderRows();
 
     const mine = offers.every(
         (o) =>
@@ -26,11 +39,6 @@ export function useRiderChoiceDialog() {
             (!!viewer.userId &&
                 holder(o.holderId)?.basicInfo.controlledBy === viewer.userId)
     );
-
-    const rows: RiderChoiceRow[] = offers.map((offer) => ({
-        offer,
-        holderName: holder(offer.holderId)?.basicInfo.name ?? '',
-    }));
 
     return {
         open: offers.length > 0 && pending?.triggers.length === 0 && mine,

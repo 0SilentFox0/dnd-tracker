@@ -143,6 +143,7 @@ const FlagSchema = z.discriminatedUnion('flag', [
         flag: z.literal('advantage'),
         attackKind: z.enum([...ATTACK_KINDS, 'all']),
         attackAbility: AbilityKeySchema.optional(),
+        againstId: z.string().optional(),
         consumeOn: z.literal('ownAttack').optional(),
         until: z.literal('turnEnd').optional(),
     }),

@@ -6,6 +6,7 @@ import {
     resolved,
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
+import { consumeAttackEffects, effectKey } from '@/lib/utils/battle/attack/consume-effects';
 import { findEffectMarker } from '@/lib/utils/battle/participant/state';
 import { markUsedThisTurn } from '@/lib/utils/battle/weapon-mastery/once';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
@@ -145,8 +146,49 @@ describe('weapon mastery riders', () => {
 
         expect(e?.consumeOn).toBe('ownAttack');
         expect(e?.abilityEffects).toEqual([
-            { kind: 'flag', flag: 'advantage', attackKind: 'all' },
+            {
+                kind: 'flag',
+                flag: 'advantage',
+                attackKind: 'all',
+                againstId: 't',
+            },
         ]);
+    });
+
+    it('Vex advantage is scoped to the damaged creature and survives attacks on others', () => {
+        const { a } = strike('vex', true);
+
+        const e = a.battleData.activeEffects[0];
+
+        const vexed = e.abilityEffects?.[0] as { againstId?: string };
+
+        expect(vexed.againstId).toBe('t');
+
+        const kept = consumeAttackEffects([a], {
+            attackerId: 'a',
+            targetId: 'other',
+            hit: true,
+            existedBefore: new Set([effectKey('a', e.id)]),
+        });
+
+        expect(kept[0].battleData.activeEffects).toHaveLength(1);
+
+        const spent = consumeAttackEffects([a], {
+            attackerId: 'a',
+            targetId: 't',
+            hit: true,
+            existedBefore: new Set([effectKey('a', e.id)]),
+        });
+
+        expect(spent[0].battleData.activeEffects).toHaveLength(0);
+    });
+
+    it('Slow does not stack across attackers', () => {
+        const first = strike('slow', true);
+
+        const second = strike('slow', true, { t: first.t });
+
+        expect(second.t.battleData.activeEffects).toHaveLength(1);
     });
 
     it('Topple knocks the target prone on a failed CON save (DC 8 + 3 + 3 = 14)', () => {
