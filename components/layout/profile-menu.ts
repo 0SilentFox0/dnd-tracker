@@ -8,16 +8,18 @@ import {
     UserRoundCog,
 } from 'lucide-react';
 
+type ProfileMenuId =
+    | 'help'
+    | 'password'
+    | 'preferences'
+    | 'aiKeys'
+    | 'switchAccount'
+    | 'signOut';
+
 export type ProfileMenuEntry = {
-    id:
-        | 'help'
-        | 'password'
-        | 'preferences'
-        | 'aiKeys'
-        | 'switchAccount'
-        | 'signOut';
+    id: ProfileMenuId;
     icon: LucideIcon;
-    labelKey: string;
+    labelKey: ProfileMenuId;
 } & ({ href: string } | { action: 'switchAccount' | 'signOut' });
 
 export const PROFILE_MENU: readonly ProfileMenuEntry[] = [
