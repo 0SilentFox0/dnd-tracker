@@ -1,8 +1,8 @@
 import {
+    AUDIO_FORMATS,
+    type AudioFormat,
     TRACK_CACHE_SECONDS,
-    type TrackFormat,
 } from '@/lib/constants/music';
-import { SOUND_FORMATS, type SoundFormat } from '@/lib/constants/soundboard';
 import { createClient } from '@/lib/supabase/client';
 import type { TrackUploadRequest, TrackUploadTicket } from '@/types/audio';
 
@@ -10,13 +10,13 @@ import type { TrackUploadRequest, TrackUploadTicket } from '@/types/audio';
 export async function uploadAudioViaTicket(
     requestTicket: (req: TrackUploadRequest) => Promise<TrackUploadTicket>,
     file: File | Blob,
-    format: TrackFormat | SoundFormat,
+    format: AudioFormat,
     failureKey: string
 ): Promise<TrackUploadTicket> {
     const ticket = await requestTicket({
         name: file instanceof File ? file.name : `recording.${format}`,
         size: file.size,
-        contentType: SOUND_FORMATS[format].contentType,
+        contentType: AUDIO_FORMATS[format].contentType,
     });
 
     // browsers send "audio/x-m4a" or "" for .m4a: retype from the ticket

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { BUILTIN_SOUNDS, SOUND_ICONS } from '@/lib/constants/soundboard';
+import {
+    BUILTIN_SOUNDS,
+    MAX_SOUND_BYTES,
+    SOUND_ICONS,
+} from '@/lib/constants/soundboard';
 import {
     importLinkSchema,
     playSoundSchema,
@@ -15,7 +19,7 @@ describe('soundboard schemas', () => {
         const base = { name: 'a.mp3', contentType: 'audio/mpeg' };
 
         expect(
-            soundUploadRequestSchema.safeParse({ ...base, size: 1_048_576 })
+            soundUploadRequestSchema.safeParse({ ...base, size: MAX_SOUND_BYTES })
                 .success
         ).toBe(true);
         expect(
@@ -78,5 +82,16 @@ describe('soundboard schemas', () => {
 
     it('SOUND_ICONS covers every builtin icon', () => {
         for (const b of BUILTIN_SOUNDS) expect(SOUND_ICONS).toContain(b.icon);
+    });
+});
+
+describe('sound size cap', () => {
+    it('rejects a file too big to be a 10 s clip', () => {
+        expect(
+            soundUploadRequestSchema.safeParse({
+                ...base,
+                size: MAX_SOUND_BYTES + 1,
+            }).success
+        ).toBe(false);
     });
 });

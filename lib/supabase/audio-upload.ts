@@ -47,9 +47,13 @@ async function audioBucket(
         allowedMimeTypes: contentTypesOf(formats),
     });
 
-    return ensured.ok
-        ? { ok: true, value: supabase.storage.from(name) }
-        : ensured;
+    if (!ensured.ok) {
+        console.warn('[audio-upload] ensure bucket failed', name, ensured.message);
+
+        return { ok: false, message: API_ERRORS.INTERNAL };
+    }
+
+    return { ok: true, value: supabase.storage.from(name) };
 }
 
 const newAudioPath = (ownerId: string, ext: string): string =>
@@ -103,8 +107,12 @@ export async function createAudioUploadTicket(
 
     const { data, error } = await bucket.value.createSignedUploadUrl(path);
 
-    if (error || !data)
-        return { ok: false, message: error?.message ?? API_ERRORS.INTERNAL };
+    if (error || !data) {
+        if (error)
+            console.warn('[audio-upload] signed url failed', error.message);
+
+        return { ok: false, message: API_ERRORS.INTERNAL };
+    }
 
     return {
         ok: true,

@@ -1,6 +1,11 @@
 import { playBuffer } from './player';
 
+import { SOUNDBOARD_BUCKET } from '@/lib/constants/soundboard';
 import { readAudioPrefs } from '@/lib/hooks/audio';
+import {
+    bucketObjectPath,
+    isHostedOnProjectStorage,
+} from '@/lib/utils/common/image-url';
 import { createNonceGuard } from '@/lib/utils/soundboard/dedupe';
 import { resolveBuiltinSound } from '@/lib/utils/soundboard/resolve-sound';
 import { effectiveVolume } from '@/lib/utils/soundboard/volume';
@@ -35,6 +40,12 @@ function resolvePlayable(
         };
 
     if (event.soundId.startsWith('builtin:') || typeof event.url !== 'string')
+        return null;
+
+    if (
+        !isHostedOnProjectStorage(event.url) ||
+        !bucketObjectPath(event.url, SOUNDBOARD_BUCKET)
+    )
         return null;
 
     return {

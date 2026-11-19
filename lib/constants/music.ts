@@ -10,9 +10,17 @@ export const TRACK_TITLE_MAX = 120;
 
 export const TRACK_CACHE_SECONDS = '31536000';
 
-export const TRACK_FORMATS = {
+export const AUDIO_FORMATS = {
     mp3: { ext: 'mp3', contentType: 'audio/mpeg' },
     m4a: { ext: 'm4a', contentType: 'audio/mp4' },
+    webm: { ext: 'webm', contentType: 'audio/webm' },
+} as const;
+
+export type AudioFormat = keyof typeof AUDIO_FORMATS;
+
+export const TRACK_FORMATS = {
+    mp3: AUDIO_FORMATS.mp3,
+    m4a: AUDIO_FORMATS.m4a,
 } as const;
 
 export type TrackFormat = keyof typeof TRACK_FORMATS;

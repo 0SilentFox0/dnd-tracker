@@ -22,6 +22,9 @@ vi.mock('@/lib/api/soundboard', () => ({
 }));
 vi.mock('@/lib/api/sound-library', () => ({ getSoundLibrary: vi.fn() }));
 
+const SOUND_URL =
+    'https://proj.supabase.co/storage/v1/object/public/soundboard/u1/a.mp3';
+
 const prefs = vi.hoisted(() => ({ muted: false }));
 
 vi.mock('@/lib/hooks/audio', () => ({
@@ -86,6 +89,7 @@ const sound = (id: string): LibrarySound => ({
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 beforeEach(() => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://proj.supabase.co');
     state.ctxState = 'running';
     state.sources = [];
     vi.stubGlobal('AudioContext', FakeAudioContext);
@@ -108,7 +112,7 @@ beforeEach(() => {
 
 describe('handleSoundPlayEvent', () => {
     it('plays a custom sound from event.url without any library fetch', async () => {
-        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n1', url: '/s1.mp3' });
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n1', url: SOUND_URL });
         await flush();
 
         expect(state.sources).toHaveLength(1);
@@ -127,13 +131,24 @@ describe('handleSoundPlayEvent', () => {
     });
 
     it('plays a duplicate nonce once', async () => {
-        const event = { soundId: 's1', nonce: 'n3', url: '/s1.mp3' };
+        const event = { soundId: 's1', nonce: 'n3', url: SOUND_URL };
 
         handleSoundPlayEvent('c1', event);
         handleSoundPlayEvent('c1', event);
         await flush();
 
         expect(state.sources).toHaveLength(1);
+    });
+
+    it.each([
+        ['a foreign host', 'https://evil.example/storage/v1/object/public/soundboard/u/a.mp3'],
+        ['another bucket', 'https://proj.supabase.co/storage/v1/object/public/battle-music/u/a.mp3'],
+        ['a relative path', '/s1.mp3'],
+    ])('does not play a custom url from %s', async (_name, url) => {
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n-bad', url });
+        await flush();
+
+        expect(state.sources).toHaveLength(0);
     });
 
     it('ignores an unknown id without url and malformed data', async () => {
@@ -150,7 +165,7 @@ describe('handleSoundPlayEvent', () => {
 
     it('markLocalPlay suppresses the echo', async () => {
         markLocalPlay('n7');
-        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n7', url: '/s1.mp3' });
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n7', url: SOUND_URL });
         await flush();
 
         expect(state.sources).toHaveLength(0);
@@ -158,7 +173,7 @@ describe('handleSoundPlayEvent', () => {
 
     it('does not play when muted', async () => {
         prefs.muted = true;
-        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n8', url: '/s1.mp3' });
+        handleSoundPlayEvent('c1', { soundId: 's1', nonce: 'n8', url: SOUND_URL });
         await flush();
 
         expect(state.sources).toHaveLength(0);
