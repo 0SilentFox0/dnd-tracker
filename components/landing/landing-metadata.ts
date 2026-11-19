@@ -5,6 +5,9 @@ import { BRAND, LANDING_PATH, SITE_URL } from '@/lib/constants/site';
 import { type Locale, LOCALES } from '@/lib/i18n/config';
 import { getTranslator, type Translator } from '@/lib/i18n/translator';
 
+// the file-based root card only attaches to the segment that owns it (`/`); child routes must point at it
+const OG_CARD = { url: '/opengraph-image.png', width: 1200, height: 630 };
+
 const OG_LOCALE: Record<Locale, string> = { en: 'en_US', uk: 'uk_UA' };
 
 export async function buildLandingMetadata(locale: Locale): Promise<Metadata> {
@@ -32,11 +35,15 @@ export async function buildLandingMetadata(locale: Locale): Promise<Metadata> {
             ),
             title,
             description,
+            ...(locale !== 'en' && {
+                images: [{ ...OG_CARD, alt: BRAND.name }],
+            }),
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
+            ...(locale !== 'en' && { images: [OG_CARD.url] }),
         },
     };
 }

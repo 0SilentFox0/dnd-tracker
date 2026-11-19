@@ -46,11 +46,17 @@ describe.each(['en', 'uk'] as const)('landing metadata (%s)', (locale) => {
         });
     });
 
-    it('leaves images to the root opengraph-image so the brand card applies', async () => {
+    it('uses the brand card, never the old screenshot', async () => {
         const meta = await buildLandingMetadata(locale);
 
-        expect(meta.openGraph).not.toHaveProperty('images');
-        expect(meta.twitter).not.toHaveProperty('images');
-        expect(JSON.stringify(meta)).not.toMatch(/https?:\/\/|\.webp/);
+        const images = JSON.stringify([meta.openGraph, meta.twitter]);
+
+        expect(images).not.toMatch(/\.webp/);
+
+        if (locale === 'en') {
+            expect(meta.openGraph).not.toHaveProperty('images');
+        } else {
+            expect(images).toContain('/opengraph-image.png');
+        }
     });
 });
