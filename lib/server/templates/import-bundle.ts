@@ -37,24 +37,49 @@ export interface ImportLayer {
 const isOverrideId = (layer: ImportLayer | undefined, id: string) =>
     !!layer && Object.hasOwn(layer.overrides, id);
 
+export interface ImportOptions {
+    /** source id → id of an existing row in the target; mapped, not written */
+    reuse?: ReadonlyMap<string, string>;
+    /** copy between campaigns: no sourceId/sourceHash/slug */
+    detached?: true;
+}
+
 type ParsedBundle = z.infer<typeof BundleSchema>;
 
-function assertBackgroundRefs(bundle: ParsedBundle, layer?: ImportLayer) {
+function assertBackgroundRefs(
+    bundle: ParsedBundle,
+    layer?: ImportLayer,
+    reuse?: ReadonlyMap<string, string>
+) {
     for (const background of layer ? [] : bundle.backgrounds) {
         const error = backgroundReferenceError(
             {
                 originFeatId: background.originFeatId,
                 choices: background.choices,
             },
-            bundle.feats,
-            new Set(bundle.spells.map((s) => s.id))
+            [
+                ...bundle.feats,
+                ...[...(reuse?.keys() ?? [])].map((id) => ({
+                    id,
+                    type: 'origin',
+                })),
+            ],
+            new Set([
+                ...bundle.spells.map((s) => s.id),
+                ...(reuse?.keys() ?? []),
+            ])
         );
 
         if (error) throw new BundleInvalidError(error);
     }
 }
 
-function buildIdMap(tx: TemplateDb, bundle: ParsedBundle, layer?: ImportLayer) {
+function buildIdMap(
+    tx: TemplateDb,
+    bundle: ParsedBundle,
+    layer?: ImportLayer,
+    reuse?: ReadonlyMap<string, string>
+) {
     const idMap = new Map<string, string>();
 
     for (const t of BUNDLE_TABLES) {
@@ -114,6 +139,8 @@ function buildIdMap(tx: TemplateDb, bundle: ParsedBundle, layer?: ImportLayer) {
         }
     }
 
+    for (const [from, to] of reuse ?? []) idMap.set(from, to);
+
     return idMap;
 }
 
@@ -121,6 +148,7 @@ function buildWrites({
     bundle,
     idMap,
     layer,
+    options,
     targetCampaignId,
     warnings,
     hashes,
@@ -129,6 +157,7 @@ function buildWrites({
     bundle: ParsedBundle;
     idMap: Map<string, string>;
     layer?: ImportLayer;
+    options?: ImportOptions;
     targetCampaignId: string;
     warnings: string[];
     hashes: TableHashes;
@@ -152,6 +181,7 @@ function buildWrites({
                     if (
                         typeof ref === 'string' &&
                         !layer &&
+                        !options?.reuse?.has(ref) &&
                         !idsByTable.get(target!)!.has(ref)
                     ) {
                         warnings.push(`${t.key} ${row.id}: ${col} → null`);
@@ -167,7 +197,14 @@ function buildWrites({
 
                 (hashes[t.key] ??= {})[row.id] = sourceHash;
 
-                const stored = !layer
+                const stored = options?.detached
+                    ? {
+                          id: idMap.get(row.id)!,
+                          sourceId: null,
+                          sourceHash: null,
+                          ...(t.columns.includes('slug') && { slug: null }),
+                      }
+                    : !layer
                     ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash }
                     : isOverrideId(layer, row.id)
                       ? {
@@ -203,7 +240,8 @@ export async function importBundle(
     tx: TemplateDb,
     raw: Bundle,
     targetCampaignId: string,
-    layer?: ImportLayer
+    layer?: ImportLayer,
+    options?: ImportOptions
 ) {
     const parsed = BundleSchema.safeParse(raw);
 
@@ -215,11 +253,11 @@ export async function importBundle(
 
     const bundle = parsed.data;
 
-    assertBackgroundRefs(bundle, layer);
+    assertBackgroundRefs(bundle, layer, options?.reuse);
 
     const warnings: string[] = [];
 
-    const idMap = buildIdMap(tx, bundle, layer);
+    const idMap = buildIdMap(tx, bundle, layer, options?.reuse);
 
     const foreign = layer
         ? []
@@ -244,6 +282,7 @@ export async function importBundle(
         bundle,
         idMap,
         layer,
+        options,
         targetCampaignId,
         warnings,
         hashes,
