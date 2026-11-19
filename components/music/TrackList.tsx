@@ -43,7 +43,7 @@ function TrackLink({ track }: { track: CampaignTrack }) {
             href={href}
             target="_blank"
             rel="noreferrer noopener"
-            className="block truncate text-xs text-hud-muted underline-offset-2 hover:text-hud-bone hover:underline"
+            className="block truncate text-center text-xs text-hud-muted underline-offset-2 hover:text-hud-bone hover:underline"
         >
             {href.replace(/^https?:\/\//, '')}
         </a>
@@ -66,7 +66,7 @@ export function TrackList({
     const fileKind = t('music.list.fileKind');
 
     return (
-        <ol className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <ol className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-2">
             {tracks.map((track, i) => {
                 const playing = preview.playingId === track.id;
 
@@ -78,38 +78,35 @@ export function TrackList({
                     <li key={track.id} className="min-w-0">
                         <HudCard
                             tone={playing ? 'active' : 'default'}
-                            className="flex h-full flex-col gap-1.5 p-2.5"
+                            className="flex h-full flex-col gap-1 p-2"
                         >
-                            <div className="flex items-center gap-1.5">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    aria-label={
-                                        playing
-                                            ? t('music.list.pause')
-                                            : t('music.list.play')
-                                    }
-                                    aria-pressed={playing}
-                                    className="shrink-0"
-                                    onClick={() => preview.toggle(track)}
-                                >
-                                    {playing ? (
-                                        <Pause className="size-4" />
-                                    ) : (
-                                        <Play className="size-4" />
-                                    )}
-                                </Button>
-                                <TrackTitleInput
-                                    key={track.title}
-                                    track={track}
-                                    onRename={(title) =>
-                                        actions.onRename(track.id, title)
-                                    }
-                                    className="flex-1"
-                                />
-                            </div>
+                            <Button
+                                variant="ghost"
+                                aria-label={
+                                    playing
+                                        ? t('music.list.pause')
+                                        : t('music.list.play')
+                                }
+                                aria-pressed={playing}
+                                className="h-14 w-full bg-white/5"
+                                onClick={() => preview.toggle(track)}
+                            >
+                                {playing ? (
+                                    <Pause className="size-6" />
+                                ) : (
+                                    <Play className="size-6" />
+                                )}
+                            </Button>
+                            <TrackTitleInput
+                                key={track.title}
+                                track={track}
+                                onRename={(title) =>
+                                    actions.onRename(track.id, title)
+                                }
+                                className="w-full text-center"
+                            />
                             <TrackLink track={track} />
-                            <div className="flex items-center gap-2 text-xs text-hud-muted">
+                            <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-hud-muted">
                                 <span className="rounded bg-white/5 px-1.5 py-0.5">
                                     {kindLabel(track, fileKind)}
                                 </span>
@@ -142,10 +139,10 @@ export function TrackList({
                                     />
                                 </div>
                             )}
-                            <div className="mt-auto flex items-center justify-end gap-0.5">
+                            <div className="mt-auto flex items-center justify-center">
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     aria-label={t('music.list.earlier')}
                                     disabled={busy || i === 0}
                                     onClick={() => actions.onMove(track.id, -1)}
@@ -154,7 +151,7 @@ export function TrackList({
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     aria-label={t('music.list.later')}
                                     disabled={busy || i === tracks.length - 1}
                                     onClick={() => actions.onMove(track.id, 1)}
@@ -163,7 +160,7 @@ export function TrackList({
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     aria-label={t('common.actions.edit')}
                                     onClick={() => actions.onEdit(track)}
                                 >
@@ -171,7 +168,7 @@ export function TrackList({
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    size="icon"
+                                    size="icon-sm"
                                     aria-label={t('common.actions.delete')}
                                     onClick={() => actions.onDelete(track)}
                                 >
