@@ -31,11 +31,13 @@ export function PercentileResultLines({
                 <div className="text-hud-gold">
                     {p.fortune.kind === 'sl'
                         ? tf('usedSl')
-                        : p.fortune.kind === 'advantage'
-                          ? tf('usedAdvantage')
-                          : p.fortune.firstRoll !== undefined
-                          ? tf('used', { first: p.fortune.firstRoll })
-                          : `${tf('label')}: ${tf('reroll')}`}
+                        : p.fortune.kind === 'notFail'
+                          ? tf('usedNotFail')
+                          : p.fortune.kind === 'advantage'
+                            ? tf('usedAdvantage')
+                            : p.fortune.firstRoll !== undefined
+                              ? tf('used', { first: p.fortune.firstRoll })
+                              : `${tf('label')}: ${tf('reroll')}`}
                 </div>
             )}
             {p.momentumUsed && (

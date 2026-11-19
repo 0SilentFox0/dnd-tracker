@@ -16,6 +16,13 @@ export interface PercentileTestInput {
     slModel?: SlModel;
     rng: Rng;
     presetRoll?: number;
+    /** Fate "I Will Not Fail" (p133): the result is chosen instead of rolled */
+    forced?: ForcedResult;
+}
+
+export interface ForcedResult {
+    outcome: 'success' | 'critical';
+    minSl?: number;
 }
 
 export interface PercentileTestResult {
@@ -94,7 +101,10 @@ export function resolvePercentileTest({
     slModel = 'clamped',
     rng,
     presetRoll,
+    forced,
 }: PercentileTestInput): PercentileTestResult {
+    if (forced) return forceResult(target, mode, forced, rng, presetRoll);
+
     const rawRoll = rollPercentile(rng, presetRoll);
 
     const straight = resolveSingle(
@@ -126,6 +136,28 @@ export function resolvePercentileTest({
         rawRoll,
         reversed: flippedWins,
         target,
+        mode,
+    };
+}
+
+function forceResult(
+    target: number,
+    mode: TestMode,
+    { outcome, minSl = 0 }: ForcedResult,
+    rng: Rng,
+    presetRoll?: number
+): PercentileTestResult {
+    const rawRoll = rollPercentile(rng, presetRoll);
+
+    return {
+        rawRoll,
+        roll: rawRoll,
+        reversed: false,
+        target,
+        outcome,
+        sl: Math.max(0, minSl),
+        auto: 'success',
+        doubles: outcome === 'critical',
         mode,
     };
 }

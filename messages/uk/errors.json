@@ -461,6 +461,7 @@
   "conditionUnknown": "Невідомий стан для цієї системи",
   "conditionTestUnavailable": "Цей стан зараз не можна спробувати зняти",
   "noFortune": "У героя немає Удачі",
+  "noFate": "У героя немає Долі",
   "abilityCooldown": "Перезарядка: ще {rounds, plural, one {# раунд} few {# раунди} many {# раундів} other {# раунду}}",
   "battleStateChanged": "Стан бою змінився",
   "mazeDark": "Темрява — ніхто не може діяти",

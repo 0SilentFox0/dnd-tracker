@@ -26,6 +26,8 @@ export function D100RollBody({
 
     const left = (attacker && wfrpState(attacker).fortune) ?? 0;
 
+    const fateLeft = (attacker && wfrpState(attacker).fate) ?? 0;
+
     const momentum =
         judged.attackerSide !== undefined &&
         heldBy(SCENE_SLOT.read(judged.sceneState) ?? {}, judged.attackerSide);
@@ -58,10 +60,11 @@ export function D100RollBody({
                 locked={lockedRollSource(state)}
                 fortune={{
                     available:
-                        left >= 1 &&
+                        (left >= 1 || fateLeft >= 1) &&
                         state.targetIds.length === 1 &&
                         state.index === 0,
                     left,
+                    fateLeft,
                     value: FORTUNE_INPUT.read(state.system)?.kind ?? null,
                     onChange: (kind) =>
                         actions.setSystemInput(

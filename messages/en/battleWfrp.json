@@ -68,6 +68,7 @@
     "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
     "fortuneSl": "{name} spends Fortune: +1 SL",
     "fortuneAdvantage": "{name} spends Fortune: Advantage",
+    "fateNotFail": "{name} spends Fate: I Will Not Fail",
     "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
     "critWound": "🩸 Critical wound for {target}: {text}",
     "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious",
@@ -104,12 +105,15 @@
       "off": "Off",
       "reroll": "Reroll",
       "sl": "+1 SL",
+      "notFail": "I Will Not Fail",
+      "fateLeft": "Fate left: {count}",
       "left": "Fortune left: {count}",
       "firstRoll": "First roll",
       "secondRoll": "Second roll (reroll)",
       "used": "Fortune: reroll (first roll {first})",
       "usedSl": "Fortune: +1 SL",
-      "usedAdvantage": "Fortune: Advantage"
+      "usedAdvantage": "Fortune: Advantage",
+      "usedNotFail": "Fate: I Will Not Fail"
     }
   },
   "crit": {

@@ -11,17 +11,23 @@ import { cn } from '@/lib/utils';
 
 export type RollSource = 'server' | 'manual';
 
-export type FortuneChoice = 'reroll' | 'sl' | null;
+export type FortuneChoice = 'reroll' | 'sl' | 'notFail' | null;
 
 const SOURCES: RollSource[] = ['server', 'manual'];
 
-const FORTUNE_OPTIONS: FortuneChoice[] = [null, 'reroll', 'sl'];
+const fortuneOptions = (fortuneLeft: number, fateLeft: number) =>
+    [
+        null,
+        ...(fortuneLeft >= 1 ? (['reroll', 'sl'] as const) : []),
+        ...(fateLeft >= 1 ? (['notFail'] as const) : []),
+    ] as FortuneChoice[];
 
 interface D100RollPickerProps {
     locked?: RollSource;
     fortune: {
         available: boolean;
         left: number;
+        fateLeft?: number;
         value: FortuneChoice;
         onChange: (value: FortuneChoice) => void;
     };
@@ -44,6 +50,8 @@ export function D100RollPicker({
     const [first, setFirst] = useState<number>();
 
     const source = locked ?? chosen;
+
+    const options = fortuneOptions(fortune.left, fortune.fateLeft ?? 0);
 
     const pickFortune = (value: FortuneChoice) => {
         setFirst(undefined);
@@ -102,20 +110,22 @@ export function D100RollPicker({
                 <div className="mt-3">
                     <div className="text-sm text-[var(--hud-muted)]">
                         {tf('left', { count: fortune.left })}
+                        {fortune.fateLeft !== undefined &&
+                            ` · ${tf('fateLeft', { count: fortune.fateLeft })}`}
                     </div>
                     <div
                         role="group"
                         aria-label={tf('label')}
-                        className="mt-1 grid h-9 grid-cols-3 border border-white/20"
+                        className="mt-1 flex h-9 border border-white/20"
                     >
-                        {FORTUNE_OPTIONS.map((m) => (
+                        {options.map((m) => (
                             <HudButton
                                 key={m ?? 'off'}
                                 type="button"
                                 aria-pressed={fortune.value === m}
                                 onClick={() => pickFortune(m)}
                                 className={cn(
-                                    'border-l border-white/20 text-sm first:border-l-0',
+                                    'flex-1 border-l border-white/20 text-sm first:border-l-0',
                                     fortune.value === m
                                         ? 'bg-white/10 font-bold text-[var(--ink)]'
                                         : 'text-hud-soft'

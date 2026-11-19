@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { LOCATIONS } from '../rules/combat/constants';
 import { FORTUNE_INPUT } from '../rules/percentile/fortune';
 
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
@@ -10,7 +11,11 @@ const Body = z.object({
     system: z
         .object({
             key: z.literal('wfrp'),
-            data: z.object({ kind: z.enum(['reroll', 'sl']) }),
+            data: z.object({
+                kind: z.enum(['reroll', 'sl', 'notFail']),
+                critical: z.boolean().optional(),
+                location: z.enum(LOCATIONS).optional(),
+            }),
         })
         .optional(),
     secondRoll: roll.optional(),
@@ -20,12 +25,16 @@ export const WfrpFortuneInputSchema = Body.transform(
     ({ system, secondRoll }): SystemSlot | undefined => {
         if (!system) return undefined;
 
-        const { kind } = system.data;
+        const { kind, critical, location } = system.data;
 
         return FORTUNE_INPUT.write({
             kind,
             ...(kind === 'reroll' &&
                 secondRoll !== undefined && { manualReroll: secondRoll }),
+            ...(kind === 'notFail' && {
+                ...(critical && { critical }),
+                ...(critical && location && { location }),
+            }),
         });
     }
 );

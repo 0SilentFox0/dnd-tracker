@@ -9,8 +9,9 @@ import {
 import { resolveModeSources } from '../percentile/advantage';
 import {
     applyFortune,
+    forcedOf,
     FORTUNE_INPUT,
-    spentFortune,
+    spentFor,
 } from '../percentile/fortune';
 import { ACTION_SLOT } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
@@ -91,6 +92,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                 slModel: editionOf(ctx.rules).slModel,
                 rng,
                 presetRoll: preset,
+                forced: forcedOf(fortuneInput, cn),
             }),
         fortuneInput,
         passes,
@@ -156,9 +158,11 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             textRef(
                 fortune.kind === 'reroll'
                     ? 'battleWfrp.log.fortuneReroll'
-                    : reverse
-                      ? 'battleWfrp.log.fortuneAdvantage'
-                      : 'battleWfrp.log.fortuneSl',
+                    : fortune.kind === 'notFail'
+                      ? 'battleWfrp.log.fateNotFail'
+                      : reverse
+                        ? 'battleWfrp.log.fortuneAdvantage'
+                        : 'battleWfrp.log.fortuneSl',
                 { name: caster.basicInfo.name, first: fortune.firstRoll ?? 0 }
             )
         );
@@ -171,7 +175,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         spendFortune || dropChannelled
             ? (p: BattleParticipant) =>
                   withWfrpState(p, {
-                      ...(spendFortune && spentFortune(p)),
+                      ...(fortune && spentFor(p, fortune.kind)),
                       ...(dropChannelled && { channelledSl: undefined }),
                   })
             : undefined;

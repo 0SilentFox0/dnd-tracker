@@ -1,5 +1,6 @@
 import type { EditionProfile } from '../edition';
 import {
+    type ForcedResult,
     type PercentileTestResult,
     resolvePercentileTest,
 } from '../percentile';
@@ -17,6 +18,8 @@ export interface OpposedInput {
     /** Advantage sources of the defence that is chosen (a parry is a melee test, a dodge is not) */
     defenderModes?: Partial<Record<DefenseKind, ModeSources>>;
     edition?: Pick<EditionProfile, 'slModel' | 'opposedModel'>;
+    /** The attacker's result is chosen (Fate): wins by at least +1 SL (p133) */
+    attackerForced?: ForcedResult;
     rng: Rng;
     presetRolls?: { attacker?: number; defender?: number };
 }
@@ -37,6 +40,7 @@ export function resolveOpposed({
     attackerModes,
     defenderModes,
     edition,
+    attackerForced,
     rng,
     presetRolls,
 }: OpposedInput): OpposedResult {
@@ -57,6 +61,7 @@ export function resolveOpposed({
         slModel: edition?.slModel,
         rng,
         presetRoll: presetRolls?.attacker,
+        forced: attackerForced,
     });
 
     const defender = {
@@ -71,7 +76,9 @@ export function resolveOpposed({
         kind: best.kind,
     };
 
-    const netSl = attacker.sl - defender.sl;
+    const netSl = attackerForced
+        ? Math.max(1, attacker.sl - defender.sl)
+        : attacker.sl - defender.sl;
 
     const attackerSucceeded =
         attacker.outcome === 'success' || attacker.outcome === 'critical';

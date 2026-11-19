@@ -48,9 +48,11 @@ export function CastResultLines({ cast }: { cast: PercentileCastDetails }) {
                 <div className="text-hud-gold">
                     {cast.fortune.kind === 'sl'
                         ? tf('usedSl')
-                        : cast.fortune.firstRoll !== undefined
-                          ? tf('used', { first: cast.fortune.firstRoll })
-                          : `${tf('label')}: ${tf('reroll')}`}
+                        : cast.fortune.kind === 'notFail'
+                          ? tf('usedNotFail')
+                          : cast.fortune.firstRoll !== undefined
+                            ? tf('used', { first: cast.fortune.firstRoll })
+                            : `${tf('label')}: ${tf('reroll')}`}
                 </div>
             )}
         </div>

@@ -8,7 +8,9 @@ import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { SystemInputCtx } from '@/lib/utils/rules/systems/types';
 
 export function assertWfrpInput(system: SystemSlot, ctx: SystemInputCtx): void {
-    if (!FORTUNE_INPUT.read(system)) return;
+    const input = FORTUNE_INPUT.read(system);
+
+    if (!input) return;
 
     const { actor } = ctx;
 
@@ -17,6 +19,11 @@ export function assertWfrpInput(system: SystemSlot, ctx: SystemInputCtx): void {
 
     const allowed = ctx.kind === 'attack' ? ctx.targetCount === 1 : ctx.tested;
 
-    if (!allowed || (wfrpState(actor).fortune ?? 0) < 1)
-        throw ruleErrorOf('action_rejected', API_ERRORS.NO_FORTUNE);
+    const pool = input.kind === 'notFail' ? 'fate' : 'fortune';
+
+    if (!allowed || (wfrpState(actor)[pool] ?? 0) < 1)
+        throw ruleErrorOf(
+            'action_rejected',
+            pool === 'fate' ? API_ERRORS.NO_FATE : API_ERRORS.NO_FORTUNE
+        );
 }

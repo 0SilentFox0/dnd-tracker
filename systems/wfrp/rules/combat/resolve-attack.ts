@@ -12,8 +12,9 @@ import type { PercentileAttackDetails } from '../percentile/details';
 import { DIFFICULTY_SL } from '../percentile/difficulty';
 import {
     applyFortune,
+    forcedOf,
     FORTUNE_INPUT,
-    spentFortune,
+    spentFor,
 } from '../percentile/fortune';
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
 import { withWfrpState } from '../state';
@@ -268,16 +269,24 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fumbleFrom = qualityFumbleFrom(refsOf(attack));
 
+    const fortuneInput = FORTUNE_INPUT.read(ctx.system);
+
+    const forced = forcedOf(fortuneInput);
+
+    const chosenLocation =
+        forced?.outcome === 'critical' ? fortuneInput?.location : undefined;
+
+    const locationOf = () =>
+        chosenLocation ? { location: chosenLocation } : {};
+
     const fumbled = (roll: number) =>
-        fumbleFrom !== undefined && roll >= fumbleFrom;
+        !forced && fumbleFrom !== undefined && roll >= fumbleFrom;
 
     const talentSl = collectModifiers(
         withSelf(participants, attacker),
         attacker.basicInfo.id,
         { stat: 'attackBonus', attackKind: attackKindOf(attack.type) }
     ).flat;
-
-    const fortuneInput = FORTUNE_INPUT.read(ctx.system);
 
     const reverse = edition.advantageModel === 'reverse';
 
@@ -303,7 +312,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 ? 'battleWfrp.log.fortuneReroll'
                 : shown.kind === 'advantage'
                   ? 'battleWfrp.log.fortuneAdvantage'
-                  : 'battleWfrp.log.fortuneSl',
+                  : shown.kind === 'notFail'
+                    ? 'battleWfrp.log.fateNotFail'
+                    : 'battleWfrp.log.fortuneSl',
             { name: attacker.basicInfo.name, first: shown.firstRoll ?? 0 }
         );
 
@@ -313,7 +324,10 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             ...r,
             lines: [...r.lines, fortuneLine],
             attackerUpdate: (p) =>
-                withWfrpState(r.attackerUpdate?.(p) ?? p, spentFortune(p)),
+                withWfrpState(
+                    r.attackerUpdate?.(p) ?? p,
+                    spentFor(p, fortune.kind)
+                ),
             attackRoll: {
                 ...r.attackRoll,
                 ...(attack && {
@@ -343,6 +357,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 slModel: edition.slModel,
                 rng,
                 presetRoll,
+                forced,
             });
 
             const isHit =
@@ -351,10 +366,15 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
             return {
                 roll: test.roll,
-                result: toResult(ctx, detailsOf(test, test.sl), isHit, {
-                    spent: false,
-                    gainedBy: null,
-                }),
+                result: toResult(
+                    ctx,
+                    detailsOf(test, test.sl, locationOf()),
+                    isHit,
+                    {
+                        spent: false,
+                        gainedBy: null,
+                    }
+                ),
             };
         };
 
@@ -412,11 +432,13 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 },
             }),
             edition,
+            attackerForced: forced,
             rng,
             presetRolls,
         });
 
         const details = detailsOf(result.attacker, result.netSl, {
+            ...locationOf(),
             defender: {
                 kind: result.defender.kind,
                 roll: result.defender.roll,

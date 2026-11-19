@@ -26,9 +26,16 @@
 - Не виконано: повний `test:run`, battle-sweep homm/dnd5e на prodcopy (раз після W1–W4), живий прогін WFRP-бою в браузері на стенді гілки (стенд не розгорнуто).
 - Наприкінці епіка: `/simplify`, оновити `docs/architecture/rule-systems.md` і `docs/STATUS.md` (додати W2), Opus-рев'ю гілки, деплой окремо.
 
+## Стан після сесії 2 (2026-11-20)
+
+- Крок 0 пройдено: `resolve-attack.ts` цілий, tsc/тести зелені; W0–W2 закомічено ОДНИМ комітом `90367ca66` (хвилі переплетені в файлах, розділити без зламаних проміжних комітів не вийшло).
+- `meta.ts` `budgetKb.battle` 110→111 (uk-скоуп battle перейшов 110 KB).
+- **M08 `notFail` («I Will Not Fail», с. 133) зроблено** як вхід атаки/касту: `FortuneKind` + `'notFail'`, `critical?`/`location?`; `resolvePercentileTest({ forced })`, `resolveOpposed({ attackerForced })` (net ≥ +1 SL), `spentFor(p, kind)`/`spentFate`/`forcedOf`; `assertWfrpInput` перевіряє Fate (`API_ERRORS.NO_FATE`); у пікері третій варіант «Я не зазнаю невдачі» (показується при `fate ≥ 1`); канон-тест `canon/fate.test.ts`. Не зроблено: UI вибору Critical + локації (схема й рушій уже приймають `critical`/`location`); sheet-тест (`SheetRollBody`) без Fate.
+- **Дизайн `howDidThatMiss` ЗАТВЕРДЖЕНО власником: пауза-вікно як `pendingCritChoice`** — влучання по учаснику з Fate>0 не застосовується одразу, сцена ставить pending-реакцію (зразки реплей-механізму: `lib/utils/battle/crit-choice/*`, `lib/utils/battle/counter/pending.ts`, `lib/server/battles/mutations/counter-window/`, збереження `pendingChoice` у `store/{load,save}-battle.ts`, редакція для гравців `redactPendingForPlayers`, дельти `client-delta`/`apply-delta`). Власник цілі (або DM за відсутнього) обирає «витратити Fate» → атака скасована (без шкоди/крита, Fate −1) або «прийняти» → застосування як зараз.
+
 ## Хвости W2 (не зроблено)
 
-1. **Fate витрата (M08)** — нова бойова операція за зразком `channel` (`systems/wfrp/server/index.ts` `operations`, `server/battle/*-mutation.ts`, `lib/api` + хук): режими
+1. **Fate витрата (M08)** — `notFail` ЗРОБЛЕНО (див. вище); лишилось `notToday` (краще разом із W3: смерть/Unconscious/крит-лічильник) і `howDidThatMiss` (вікно реакції) — нова бойова операція за зразком `channel` (`systems/wfrp/server/index.ts` `operations`, `server/battle/*-mutation.ts`, `lib/api` + хук): режими
    - `notFail` («I Will Not Fail», с. 133): замість кидка обрати успіх, у протиборчому +1 SL мінімум; крит → вибір локації. Найпростіше як вхід атаки/тесту; `FORTUNE_INPUT` — єдиний слот `wfrp` у `ctx.system`, тож треба або розширити його `kind`, або об'єднати вхід;
    - `notToday` («Not Today»): замість смерті — вибуття з сутички (хук `onZeroHp`/операція), без подальшої участі;
    - `howDidThatMiss` («How Did That Miss?»): скасувати ефекти атаки після кидка до шкоди/крита — потребує вікна реакції (дивись `counter-window` mutation) або відкату останньої дії; рішення дизайну потрібне.

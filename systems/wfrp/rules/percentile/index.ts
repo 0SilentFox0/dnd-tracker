@@ -4,6 +4,7 @@ export {
     type DifficultyKey,
 } from './difficulty';
 export {
+    type ForcedResult,
     type PercentileOutcome,
     type PercentileTestInput,
     type PercentileTestResult,

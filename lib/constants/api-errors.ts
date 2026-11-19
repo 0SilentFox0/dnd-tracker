@@ -521,6 +521,7 @@ export const API_ERRORS = {
     CONDITION_UNKNOWN: 'errors.conditionUnknown',
     CONDITION_TEST_UNAVAILABLE: 'errors.conditionTestUnavailable',
     NO_FORTUNE: 'errors.noFortune',
+    NO_FATE: 'errors.noFate',
     OUT_OF_AMMO: 'errors.outOfAmmo',
     WEAPON_RELOADING: 'errors.weaponReloading',
     ABILITY_COOLDOWN: 'errors.abilityCooldown',

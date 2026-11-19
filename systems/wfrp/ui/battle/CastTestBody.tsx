@@ -15,6 +15,8 @@ export function CastTestBody({
 
     const left = (caster && wfrpState(caster).fortune) ?? 0;
 
+    const fateLeft = (caster && wfrpState(caster).fate) ?? 0;
+
     if (!cast) return null;
 
     const rolled = state.castServer
@@ -40,8 +42,9 @@ export function CastTestBody({
             </div>
             <D100RollPicker
                 fortune={{
-                    available: left >= 1,
+                    available: left >= 1 || fateLeft >= 1,
                     left,
+                    fateLeft,
                     value: FORTUNE_INPUT.read(state.castSystem)?.kind ?? null,
                     onChange: (kind) =>
                         actions.setCastSystem(

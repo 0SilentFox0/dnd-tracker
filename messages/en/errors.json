@@ -461,6 +461,7 @@
   "conditionUnknown": "Unknown condition for this system",
   "conditionTestUnavailable": "This condition cannot be tested for right now",
   "noFortune": "The hero has no Fortune",
+  "noFate": "The hero has no Fate",
   "abilityCooldown": "Cooldown: {rounds, plural, one {# round} other {# rounds}} left",
   "battleStateChanged": "The battle state changed",
   "mazeDark": "Darkness — nobody can act",

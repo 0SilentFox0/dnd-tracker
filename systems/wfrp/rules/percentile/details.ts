@@ -11,7 +11,10 @@ export interface PercentileAttackDetails {
     momentumUsed?: boolean;
     /** Opposed melee test; survives the privacy strip of `defender`. */
     opposed?: boolean;
-    fortune?: { kind: 'reroll' | 'sl' | 'advantage'; firstRoll?: number };
+    fortune?: {
+        kind: 'reroll' | 'sl' | 'advantage' | 'notFail';
+        firstRoll?: number;
+    };
 }
 
 export interface PercentileCastDetails {
@@ -25,5 +28,5 @@ export interface PercentileCastDetails {
     outcome: 'critical' | 'success' | 'failure' | 'fumble';
     overcastSteps: number;
     miscast: 'minor' | 'major' | 'wrath' | null;
-    fortune?: { kind: 'reroll' | 'sl'; firstRoll?: number };
+    fortune?: { kind: 'reroll' | 'sl' | 'notFail'; firstRoll?: number };
 }
