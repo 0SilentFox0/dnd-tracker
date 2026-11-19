@@ -38,6 +38,8 @@ export const IDENTITY_BUCKET: Record<IdentityKind, string> = {
 
 const PLACEHOLDER_RE = /-subclass(?:es)?-\d+$/;
 
+const ICONED_CHOICE_IDS = new Set(['weapon-mastery-1']);
+
 const bare = (slug: string) => slug.slice(SRD_PREFIX.length);
 
 export function expectedTargets(data: SrdData): IdentityTarget[] {
@@ -87,7 +89,12 @@ export function expectedTargets(data: SrdData): IdentityTarget[] {
 
     const features = (groups: ClassFeatureGroup[], scope: string) =>
         groups.flatMap((g) =>
-            g.abilities
+            [
+                ...g.abilities,
+                ...(g.choices ?? []).filter((c) =>
+                    ICONED_CHOICE_IDS.has(c.id)
+                ),
+            ]
                 .filter((a) => !PLACEHOLDER_RE.test(a.id))
                 .map((a) => ({
                     kind: 'features' as const,

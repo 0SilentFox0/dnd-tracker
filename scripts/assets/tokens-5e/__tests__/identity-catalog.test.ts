@@ -85,7 +85,7 @@ describe('expectedTargets', () => {
                 'backgrounds',
                 'feats',
             ].map(count)
-        ).toEqual([181, 9, 12, 12, 4, 20]);
+        ).toEqual([186, 9, 12, 12, 4, 20]);
     });
 });
 
