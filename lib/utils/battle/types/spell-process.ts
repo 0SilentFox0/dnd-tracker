@@ -62,5 +62,6 @@ export interface CastSpellResult {
     fizzled?: boolean;
     details?: SystemSlot;
     spellDamage?: TerrainDamage;
+    spellDice?: string;
     concentration?: { casterId: string; castId: string };
 }

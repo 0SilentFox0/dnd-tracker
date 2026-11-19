@@ -262,6 +262,7 @@ export const battleMapObject = z.object({
                 spellName: z.string().max(120),
                 dc: z.number().int().min(1).max(40),
                 side: z.enum(['enemies', 'all']),
+                dice: z.string().max(20).optional(),
                 centre: mapCellSchema.optional(),
                 triggers: z.object({
                     onEnter: ZoneTriggerSchema.optional(),

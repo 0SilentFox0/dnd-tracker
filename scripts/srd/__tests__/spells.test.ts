@@ -65,7 +65,7 @@ describe('convertSpells', () => {
                 kind: 'template',
                 shape: 'circle',
                 size: 20,
-                side: 'enemy',
+                side: 'all',
                 maxTargets: 20,
                 range: 150,
             },
@@ -109,7 +109,7 @@ describe('convertSpells', () => {
             kind: 'template',
             shape: 'line',
             size: 100,
-            side: 'enemy',
+            side: 'all',
             maxTargets: 20,
         });
         expect(spell('fire-bolt')).toMatchObject({

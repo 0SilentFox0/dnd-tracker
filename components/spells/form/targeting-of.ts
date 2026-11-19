@@ -19,12 +19,14 @@ export function targetingOf(
 
     const side = multi?.side ?? 'enemy';
 
+    const areaSide = side === 'all' ? 'enemy' : side;
+
     const maxTargets = multi?.maxTargets ?? 3;
 
     if (kind === 'area')
         return {
             kind,
-            side,
+            side: areaSide,
             maxTargets,
             ...range,
             ...(previous.kind === 'area' && previous.chain

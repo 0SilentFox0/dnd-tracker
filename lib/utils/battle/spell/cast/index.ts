@@ -44,6 +44,7 @@ import {
     isPerTarget,
     readsEventDamage,
     type SpellCastState,
+    spellDiceOf,
     targetOf,
 } from '@/lib/utils/battle/spell/cast/state';
 import { inlineSummonRequests } from '@/lib/utils/battle/spell/cast/summon-inline';
@@ -453,6 +454,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         ability: state.ability,
         spellId: spell.id,
         saveDc: state.saveDc,
+        dice: spellDiceOf(state),
         round: currentRound,
     });
 
@@ -505,6 +507,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             spell,
             castLevel,
             saveDc: state.saveDc,
+            dice: spellDiceOf(state),
             round: currentRound,
             castId,
             concentrationOf: tag,

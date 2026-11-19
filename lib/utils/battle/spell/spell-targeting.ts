@@ -523,8 +523,13 @@ function resolveRaw(
             if (
                 picked.some(
                     (p) =>
-                        !(isActive(p) || (wanted === 'ally' && isDying(p))) ||
-                        !isHostile(map, caster, p) !== (wanted === 'ally')
+                        !(
+                            isActive(p) ||
+                            ((wanted === 'ally' || wanted === 'all') &&
+                                isDying(p))
+                        ) ||
+                        (wanted !== 'all' &&
+                            !isHostile(map, caster, p) !== (wanted === 'ally'))
                 )
             ) {
                 return fail(
@@ -620,7 +625,7 @@ const HOSTILE_KINDS = new Set(['enemy', 'area', 'template', 'allEnemies']);
 
 function hostile(targeting: SpellTargetingDef): boolean {
     if (targeting.kind === 'area' || targeting.kind === 'template')
-        return targeting.side === 'enemy';
+        return targeting.side !== 'ally';
 
     return HOSTILE_KINDS.has(targeting.kind);
 }

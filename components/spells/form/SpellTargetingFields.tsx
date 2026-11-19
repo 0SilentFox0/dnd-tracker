@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 
 import {
+    AREA_SIDE_KEYS,
     resolutionKeysOf,
     SPELL_SIDE_KEYS,
     TARGETING_KINDS,
@@ -194,15 +195,28 @@ export function SpellTargetingFields({
                             onValueChange={(side) =>
                                 onChange({
                                     ...value,
-                                    targeting: {
-                                        ...targeting,
-                                        side: side as 'ally' | 'enemy',
-                                    },
+                                    targeting:
+                                        targeting.kind === 'template'
+                                            ? {
+                                                  ...targeting,
+                                                  side: side as
+                                                      | 'ally'
+                                                      | 'enemy'
+                                                      | 'all',
+                                              }
+                                            : {
+                                                  ...targeting,
+                                                  side: side as
+                                                      | 'ally'
+                                                      | 'enemy',
+                                              },
                                 })
                             }
                             placeholder={tp('side')}
                             options={options(
-                                SPELL_SIDE_KEYS,
+                                targeting.kind === 'template'
+                                    ? SPELL_SIDE_KEYS
+                                    : AREA_SIDE_KEYS,
                                 'spellEditor.power.sides'
                             )}
                         />

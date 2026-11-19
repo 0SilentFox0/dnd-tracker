@@ -21,6 +21,7 @@ import {
     isDamageEffect,
     SPELL_ONLY_KINDS,
     type SpellCastState,
+    spellDiceOf,
 } from '@/lib/utils/battle/spell/cast/state';
 import type { CastSpellResult } from '@/lib/utils/battle/types/spell-process';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
@@ -316,6 +317,7 @@ export function finishSpellAction(
         ...(state.transforms.length > 0 && { transforms: state.transforms }),
         messages: flow.messages,
         ...(spellDamage && { spellDamage }),
+        ...(spellDiceOf(state) && { spellDice: spellDiceOf(state) }),
         ...(details && { details }),
         ...(fizzled && { fizzled }),
     };

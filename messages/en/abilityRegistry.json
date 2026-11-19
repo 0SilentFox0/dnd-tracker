@@ -1045,6 +1045,7 @@
       "heal": "{revive, select, yes {revival} other {healing}} {amount}",
       "dot": "{type} {amount}/round × {rounds} rd.{linked, select, yes {, while the condition lasts} other {}}",
       "hot": "healing {amount}/round × {rounds} rd.",
+      "hotTemp": "temp HP {amount}/round × {rounds} rd.",
       "tempHp": "temporary HP {amount}",
       "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds} rd.",
       "charm": "switches to the caster's side × {rounds} rd.",

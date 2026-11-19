@@ -206,6 +206,7 @@ const BASE_EFFECT_REGISTRY: {
         static: false,
         fields: [
             { ...AMOUNT, name: 'healPerRound' },
+            { name: 'temp', input: 'toggle', optional: true },
             TARGET_FIELD,
             REQUIRED_DURATION,
         ],

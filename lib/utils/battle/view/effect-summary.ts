@@ -49,9 +49,12 @@ export function effectSummary(e: ActiveEffect, t: Translator): LogLine[] {
             : []),
         ...(e.hotHeal
             ? [
-                  textRef('battle.view.effects.hot', {
-                      heal: e.hotHeal.healPerRound,
-                  }),
+                  textRef(
+                      e.hotHeal.temp
+                          ? 'battle.view.effects.hotTemp'
+                          : 'battle.view.effects.hot',
+                      { heal: e.hotHeal.healPerRound }
+                  ),
               ]
             : []),
         e.zone

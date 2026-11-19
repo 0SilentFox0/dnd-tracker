@@ -2,6 +2,7 @@ import type { SpellRow } from '../lib/types';
 
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
 import type {
+    InlineCast,
     SpellEffect,
     SpellTargeting,
     SpellZone,
@@ -13,6 +14,54 @@ export type SpellOverride = Partial<
 >;
 
 const rounds = (n: number) => ({ rounds: n });
+
+// canon durations: 1 minute = 10 rounds, 10 minutes = 100, 1 hour = 600
+const MINUTE = 10;
+
+const TEN_MINUTES = 100;
+
+const HOUR = 600;
+
+export const FRIENDLY_FIRE_SPELLS: ReadonlySet<string> = new Set(
+    [
+        'acid-splash',
+        'burning-hands',
+        'circle-of-death',
+        'cloudkill',
+        'color-spray',
+        'cone-of-cold',
+        'confusion',
+        'delayed-blast-fireball',
+        'earthquake',
+        'entangle',
+        'faerie-fire',
+        'fear',
+        'fire-storm',
+        'fireball',
+        'flame-strike',
+        'freezing-sphere',
+        'gust-of-wind',
+        'hypnotic-pattern',
+        'ice-storm',
+        'incendiary-cloud',
+        'insect-plague',
+        'lightning-bolt',
+        'meteor-swarm',
+        'moonbeam',
+        'prismatic-spray',
+        'shatter',
+        'sleep',
+        'sleet-storm',
+        'stinking-cloud',
+        'sunbeam',
+        'sunburst',
+        'thunderwave',
+        'vitriolic-sphere',
+        'web',
+        'weird',
+        'wall-of-fire',
+    ].map((slug) => `srd-2024_${slug}`)
+);
 
 const NO_DAMAGE: SpellOverride = {
     dice: 0,
@@ -63,7 +112,7 @@ const sphere = (
     kind: 'template',
     shape: 'circle',
     size: radius,
-    side: 'enemy',
+    side: 'all',
     maxTargets: 20,
     exact: true,
     range,
@@ -78,6 +127,52 @@ const noCasting: ZoneTrigger = {
             duration: rounds(1),
         },
     ],
+};
+
+const areaSave = (
+    ability: NonNullable<ZoneTrigger['save']>['ability'],
+    damageType: string
+): ZoneTrigger => ({
+    save: { ability },
+    saveHalf: true,
+    effects: [{ kind: 'dealDamage', amount: { spellRoll: 100 }, damageType }],
+});
+
+const repeatDamage = (
+    label: string,
+    cost: 'action' | 'bonusAction',
+    cast: InlineCast
+): SpellEffect => ({
+    kind: 'grantCast',
+    label,
+    cost,
+    duration: rounds(MINUTE),
+    cast,
+});
+
+const strike = (damageType: string): NonRandomEffect => ({
+    kind: 'dealDamage',
+    amount: { spellRoll: 100 },
+    damageType,
+});
+
+const gp = (
+    name: string,
+    minGp: number,
+    consumed: boolean,
+    qty = 1
+): NonNullable<SpellOverride['ingredients']>[number] => ({
+    name,
+    qty,
+    minGp,
+    consumed,
+    focus: false,
+});
+
+const vampiricHeal: NonRandomEffect = {
+    kind: 'heal',
+    amount: { percentOf: 'eventDamage', value: 50 },
+    target: 'self',
 };
 
 // sides/targets of popular spells and timed buffs (flat approximations of 1d4 bonuses), checked by hand against SRD 5.2
@@ -352,7 +447,13 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 kind: 'flag',
                 flag: 'conditionImmunity',
                 conditions: ['frightened'],
-                duration: rounds(10),
+                duration: rounds(MINUTE),
+            },
+            {
+                kind: 'hot',
+                healPerRound: { formula: 'max(0, cha_mod)' },
+                temp: true,
+                duration: rounds(MINUTE),
             },
         ],
         upcastTargets: 1,
@@ -368,7 +469,22 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
             },
         ],
     },
-    'srd-2024_spiritual-weapon': { addAbilityMod: true },
+    // no concentration in 2024; the bonus-action attack repeats while the weapon lasts (upcast dice stay on the first hit)
+    'srd-2024_spiritual-weapon': {
+        addAbilityMod: true,
+        concentration: false,
+        spellEffects: [
+            strike('force'),
+            repeatDamage('Spiritual Weapon', 'bonusAction', {
+                targeting: { kind: 'enemy', range: 60 },
+                resolution: { kind: 'attack' },
+                dice: 1,
+                dieSides: 8,
+                addAbilityMod: true,
+                effects: [strike('force')],
+            }),
+        ],
+    },
     'srd-2024_scorching-ray': {
         targeting: {
             kind: 'area',
@@ -759,7 +875,7 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
         resolution: { kind: 'auto' },
         spellEffects: [smite('2d6', 'radiant', { upcastDice: 1 })],
     },
-    // the CON save only guards the held item: the opening damage is automatic, the bonus-action repeat stays manual
+    // the CON save only guards the held item: the opening damage is automatic, the bonus-action repeat is a grant
     // 2d4 + 4 temp HP; the +5 per slot level above 1 stays manual
     'srd-2024_false-life': {
         dice: 2,
@@ -771,7 +887,19 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
             { kind: 'tempHp', amount: { spellRoll: 100 }, target: 'self' },
         ],
     },
-    'srd-2024_heat-metal': { resolution: { kind: 'auto' } },
+    'srd-2024_heat-metal': {
+        resolution: { kind: 'auto' },
+        spellEffects: [
+            strike('fire'),
+            repeatDamage('Heat Metal', 'bonusAction', {
+                targeting: { kind: 'enemy', range: 60 },
+                resolution: { kind: 'auto' },
+                dice: 2,
+                dieSides: 8,
+                effects: [strike('fire')],
+            }),
+        ],
+    },
     'srd-2024_disintegrate': { damageBonus: 40 },
     'srd-2024_finger-of-death': { damageBonus: 30 },
     'srd-2024_hypnotic-pattern': {
@@ -830,11 +958,11 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
     },
     'srd-2024_aura-of-life': { spellEffects: [resist('necrotic')] },
 
-    // zone effects last at most 10 rounds on the map; spikes hurt on entering the zone, not per 5 feet moved
+    // spikes hurt on entering the zone, not per 5 feet moved
     'srd-2024_fog-cloud': {
         ...NO_DAMAGE,
         targeting: sphere(20, 120, {
-            rounds: 10,
+            rounds: HOUR,
             terrain: ['obscured'],
             side: 'all',
         }),
@@ -842,7 +970,7 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
     'srd-2024_darkness': {
         ...NO_DAMAGE,
         targeting: sphere(15, 60, {
-            rounds: 10,
+            rounds: TEN_MINUTES,
             terrain: ['obscured'],
             side: 'all',
         }),
@@ -862,7 +990,7 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
     'srd-2024_spike-growth': {
         ...NO_DAMAGE,
         targeting: sphere(20, 150, {
-            rounds: 10,
+            rounds: TEN_MINUTES,
             terrain: ['difficult'],
             side: 'all',
             onEnter: {
@@ -909,6 +1037,198 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
                 rounds: 99,
             },
         ],
+    },
+    // zone triggers roll the cast dice again (upcast included); terrain, 10-ft cloud drift and moving the sphere are not modelled
+    'srd-2024_spirit-guardians': {
+        targeting: { kind: 'self' },
+        resolution: { kind: 'auto' },
+        spellEffects: [
+            {
+                kind: 'anchoredZone',
+                radiusFeet: 15,
+                side: 'enemies',
+                excludeBearer: true,
+                onEnter: areaSave('wisdom', 'radiant'),
+                onTurnStart: areaSave('wisdom', 'radiant'),
+                duration: rounds(TEN_MINUTES),
+            },
+        ],
+    },
+    'srd-2024_flaming-sphere': {
+        ...NO_DAMAGE,
+        dice: 2,
+        dieSides: 6,
+        upcastDice: 1,
+        targeting: {
+            kind: 'template',
+            shape: 'circle',
+            size: 5,
+            side: 'all',
+            maxTargets: 20,
+            exact: true,
+            range: 60,
+        },
+        resolution: { kind: 'auto' },
+        spellEffects: [
+            {
+                kind: 'summonInline',
+                name: 'Flaming Sphere',
+                size: 'medium',
+                ac: 10,
+                hp: null,
+                count: 1,
+                aura: {
+                    radiusFeet: 5,
+                    side: 'all',
+                    onEnter: areaSave('dexterity', 'fire'),
+                    onTurnStart: areaSave('dexterity', 'fire'),
+                },
+                duration: rounds(MINUTE),
+            },
+        ],
+    },
+    'srd-2024_call-lightning': {
+        targeting: {
+            kind: 'template',
+            shape: 'circle',
+            size: 5,
+            side: 'all',
+            maxTargets: 20,
+            exact: true,
+            range: 120,
+        },
+        spellEffects: [
+            strike('lightning'),
+            repeatDamage('Call Lightning', 'action', {
+                targeting: {
+                    kind: 'template',
+                    shape: 'circle',
+                    size: 5,
+                    side: 'all',
+                    maxTargets: 20,
+                    exact: true,
+                    range: 120,
+                },
+                resolution: {
+                    kind: 'save',
+                    ability: 'dexterity',
+                    onSuccess: 'half',
+                },
+                dice: 3,
+                dieSides: 10,
+                effects: [strike('lightning')],
+            }),
+        ],
+    },
+    'srd-2024_cloudkill': {
+        targeting: sphere(20, 120, {
+            rounds: TEN_MINUTES,
+            terrain: ['obscured'],
+            side: 'all',
+            onEnter: areaSave('constitution', 'poison'),
+            onTurnStart: areaSave('constitution', 'poison'),
+        }),
+    },
+    'srd-2024_insect-plague': {
+        targeting: sphere(20, 300, {
+            rounds: TEN_MINUTES,
+            terrain: ['difficult'],
+            side: 'all',
+            onEnter: areaSave('constitution', 'piercing'),
+            onTurnStart: areaSave('constitution', 'piercing'),
+        }),
+    },
+    'srd-2024_incendiary-cloud': {
+        targeting: sphere(20, 150, {
+            rounds: MINUTE,
+            terrain: ['obscured'],
+            side: 'all',
+            onEnter: areaSave('dexterity', 'fire'),
+            onTurnStart: areaSave('dexterity', 'fire'),
+        }),
+    },
+    // after the opening save the wall burns whoever enters or starts a turn in it; the one-sided 10-ft heat is not modelled
+    'srd-2024_wall-of-fire': {
+        targeting: {
+            kind: 'template',
+            shape: 'line',
+            size: 60,
+            side: 'all',
+            maxTargets: 20,
+            range: 120,
+            zone: {
+                rounds: MINUTE,
+                side: 'all',
+                onEnter: { effects: [strike('fire')] },
+                onTurnStart: { effects: [strike('fire')] },
+            },
+        },
+    },
+    // heals half of the damage dealt; the repeat is an action on a later turn
+    'srd-2024_vampiric-touch': {
+        spellEffects: [
+            strike('necrotic'),
+            vampiricHeal,
+            repeatDamage('Vampiric Touch', 'action', {
+                targeting: { kind: 'enemy', range: 5 },
+                resolution: { kind: 'attack' },
+                dice: 3,
+                dieSides: 6,
+                effects: [strike('necrotic'), vampiricHeal],
+            }),
+        ],
+    },
+    // secondary effects of attack/save spells; a miss or a passed save skips them
+    'srd-2024_guiding-bolt': {
+        spellEffects: [
+            strike('radiant'),
+            {
+                kind: 'flag',
+                flag: 'advantageForAttackers',
+                duration: rounds(1),
+            },
+        ],
+    },
+    'srd-2024_ray-of-sickness': {
+        spellEffects: [
+            strike('poison'),
+            {
+                kind: 'applyCondition',
+                condition: 'poisoned',
+                duration: rounds(2),
+            },
+        ],
+    },
+    'srd-2024_thunderwave': {
+        spellEffects: [
+            strike('thunder'),
+            { kind: 'push', feet: 10, from: 'caster' },
+        ],
+    },
+    // per-target components are priced for one target; the stock check is a floor, not a count of targets
+    'srd-2024_astral-projection': {
+        ingredients: [gp('Jacinth', 1000, true), gp('Silver bar', 100, true)],
+    },
+    'srd-2024_clone': {
+        ingredients: [
+            gp('Diamond', 1000, true),
+            gp('Sealable vessel', 2000, false),
+        ],
+    },
+    'srd-2024_legend-lore': {
+        ingredients: [
+            gp('Incense', 250, true),
+            gp('Ivory strips', 50, false, 4),
+        ],
+    },
+    'srd-2024_secret-chest': {
+        ingredients: [
+            gp('Chest of rare materials', 5000, false),
+            gp('Tiny replica of the chest', 50, false),
+        ],
+    },
+    'srd-2024_create-undead': {
+        ingredients: [gp('Black onyx stone', 150, false)],
     },
     // everyone inside, the caster included, loses spellcasting; magic items and area suppression stay manual
     'srd-2024_antimagic-field': {

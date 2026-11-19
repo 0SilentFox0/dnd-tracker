@@ -3,6 +3,7 @@ import { syncMapAuras } from '@/lib/utils/abilities/engine/effects/map-auras';
 import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { placeParticipants } from '@/lib/utils/battle/grid/placement';
 import { placeRevived } from '@/lib/utils/battle/grid/revive-placement';
+import { pruneExpiredTerrain } from '@/lib/utils/battle/grid/terrain';
 import { lineText } from '@/lib/utils/battle/log/lines';
 import { clearFallenEffects } from '@/lib/utils/battle/participant/fallen';
 import { reserveOf } from '@/lib/utils/battle/participant/reserve';
@@ -60,6 +61,28 @@ export function withVictory(
             battleActionToEvent({ ...battleAction, round }),
         ],
     };
+}
+
+export function withoutTimedTerrainOnEnd(
+    map: BattleMapConfig | null,
+    before: BattleStatus,
+    result: MutationResult
+): MutationResult {
+    if (
+        result.scene?.status !== BattleStatus.COMPLETED ||
+        before === BattleStatus.COMPLETED
+    )
+        return result;
+
+    const current = result.scene.map !== undefined ? result.scene.map : map;
+
+    const pruned = current
+        ? pruneExpiredTerrain(current, Number.POSITIVE_INFINITY)
+        : null;
+
+    return pruned
+        ? { ...result, scene: { ...result.scene, map: pruned } }
+        : result;
 }
 
 export function withPlacement(

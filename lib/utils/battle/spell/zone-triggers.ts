@@ -88,7 +88,8 @@ function fire(
 
     if (!zone) return { participants: ps, messages: [], failed: false };
 
-    const { casterId, spellId, spellName, dc, side, concentrationOf } = zone;
+    const { casterId, spellId, spellName, dc, side, concentrationOf, dice } =
+        zone;
 
     return fireTrigger(
         ps,
@@ -100,6 +101,7 @@ function fire(
             side,
             concentrationOf,
             hitKey: zoneId,
+            ...(dice && { dice }),
         },
         zone.triggers[kind],
         kind,

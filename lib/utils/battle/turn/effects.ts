@@ -57,16 +57,35 @@ export function applyDOTEffects(
 
 export function applyHOTEffects(participant: BattleParticipant): {
     newHp: number;
+    newTempHp: number;
     healMessages: LogLine[];
 } {
     let currentHp = participant.combatStats.currentHp;
 
+    let tempHp = participant.combatStats.tempHp;
+
     const healMessages: LogLine[] = [];
 
-    if (currentHp <= 0) return { newHp: currentHp, healMessages };
+    if (currentHp <= 0)
+        return { newHp: currentHp, newTempHp: tempHp, healMessages };
 
     for (const effect of participant.battleData.activeEffects) {
         if (!effect.hotHeal) continue;
+
+        if (effect.hotHeal.temp) {
+            if (effect.hotHeal.healPerRound > tempHp) {
+                tempHp = effect.hotHeal.healPerRound;
+                healMessages.push(
+                    textRef('battleLog.turn.hotTemp', {
+                        name: participant.basicInfo.name,
+                        heal: tempHp,
+                        effect: effectName(effect),
+                    })
+                );
+            }
+
+            continue;
+        }
 
         const healed = Math.min(
             participant.combatStats.maxHp,
@@ -85,7 +104,7 @@ export function applyHOTEffects(participant: BattleParticipant): {
         currentHp = healed;
     }
 
-    return { newHp: currentHp, healMessages };
+    return { newHp: currentHp, newTempHp: tempHp, healMessages };
 }
 
 const isRoundCounted = (e: ActiveEffect) =>

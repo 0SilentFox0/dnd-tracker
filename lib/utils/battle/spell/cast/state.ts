@@ -233,3 +233,10 @@ export function actionOf(
         }
     );
 }
+
+export const spellDiceOf = (
+    state: Pick<SpellCastState, 'diceCount' | 'diceSides'>
+): string | undefined =>
+    state.diceCount > 0 && state.diceSides > 0
+        ? `${state.diceCount}d${state.diceSides}`
+        : undefined;

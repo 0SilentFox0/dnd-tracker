@@ -28,6 +28,7 @@ interface ZoneHazardInput {
     concentrationOf?: TerrainDamage['concentrationOf'];
     casterId?: string;
     dc?: number;
+    dice?: string;
     centre?: GridPoint;
     castKey?: string;
 }
@@ -57,6 +58,7 @@ export function spellZoneHazard({
     concentrationOf,
     casterId,
     dc,
+    dice,
     centre,
     castKey,
 }: ZoneHazardInput): BattleMapConfig | null {
@@ -80,9 +82,9 @@ export function spellZoneHazard({
 
     const zoneId = zoneIdOf(casterId, spell, round, castKey);
 
-    const registers =
-        !!casterId &&
-        !!(zone.onEnter || zone.onTurnStart || zone.onExit || concentrationOf);
+    const hasTriggers = !!(zone.onEnter || zone.onTurnStart || zone.onExit);
+
+    const registers = !!casterId && (hasTriggers || !!concentrationOf);
 
     const painted = applyTerrain(map, zoneCells, {
         kind: 'hazard',
@@ -93,14 +95,15 @@ export function spellZoneHazard({
             difficult: true as const,
         }),
         ...(zone.terrain?.includes('obscured') && { obscured: true as const }),
-        ...(spellDamage && {
-            damage: {
-                ...spellDamage,
-                spellId: spell.id,
-                ...(casterId && { casterId }),
-                ...(concentrationOf && { concentrationOf }),
-            },
-        }),
+        ...(spellDamage &&
+            !hasTriggers && {
+                damage: {
+                    ...spellDamage,
+                    spellId: spell.id,
+                    ...(casterId && { casterId }),
+                    ...(concentrationOf && { concentrationOf }),
+                },
+            }),
     });
 
     if (!registers || !casterId) return painted;
@@ -111,6 +114,7 @@ export function spellZoneHazard({
         spellName: spell.name,
         dc,
         side: zone.side ?? 'enemies',
+        ...(dice && { dice }),
         ...(centre && { centre }),
         triggers: {
             ...(zone.onEnter && { onEnter: zone.onEnter }),

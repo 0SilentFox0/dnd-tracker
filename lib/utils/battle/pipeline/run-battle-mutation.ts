@@ -28,6 +28,7 @@ import {
 } from '@/lib/utils/battle/modes/server';
 import { reserveOf } from '@/lib/utils/battle/participant/reserve';
 import {
+    withoutTimedTerrainOnEnd,
     withPlacement,
     withVictory,
 } from '@/lib/utils/battle/pipeline/post-mutation';
@@ -348,13 +349,13 @@ export async function runGuardedBattleOperationCore<TBody>(
         loaded.meta.rules
     );
 
+    const ended = isDryRun
+        ? victorious
+        : withoutTimedTerrainOnEnd(map, loaded.scene.status, victorious);
+
     const result = isDryRun
         ? victorious
-        : withModeAfterSettle(
-              victorious.scene?.map ?? map,
-              loaded.scene,
-              victorious
-          );
+        : withModeAfterSettle(ended.scene?.map ?? map, loaded.scene, ended);
 
     if (isDryRun) {
         return {

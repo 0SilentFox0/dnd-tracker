@@ -375,3 +375,94 @@ describe('anchoredZone', () => {
         );
     });
 });
+
+describe('anchoredZone with cast dice', () => {
+    const rollTrigger = (saveHalf: boolean) => ({
+        save: { ability: 'wisdom' as const },
+        ...(saveHalf && { saveHalf: true as const }),
+        effects: [
+            {
+                kind: 'dealDamage' as const,
+                amount: { spellRoll: 100 },
+                damageType: 'radiant',
+                target: 'eventTarget' as const,
+            },
+        ],
+    });
+
+    const castWithDice = (dc: number) => {
+        const c = mage();
+
+        const spell: CastableSpell = {
+            ...spellOf(
+                aura({
+                    side: 'enemies',
+                    onEnter: rollTrigger(true),
+                    endsWhenStartOutside: false,
+                    duration: { rounds: 100 },
+                })
+            ),
+            definition: {
+                ...spellOf(aura()).definition,
+                dice: 3,
+                dieSides: 8,
+                effects: [
+                    aura({
+                        side: 'enemies',
+                        onEnter: rollTrigger(true),
+                        endsWhenStartOutside: false,
+                        duration: { rounds: 100 },
+                    }),
+                ],
+            },
+        };
+
+        const r = castSpell({
+            caster: {
+                ...c,
+                spellcasting: { ...c.spellcasting, spellSaveDC: dc },
+            },
+            spell,
+            targetIds: ['king'],
+            allParticipants: [c, king(), walker(16)],
+            currentRound: 1,
+            battleId: 'b',
+            diceRolls: [4, 4, 4],
+            dice: { count: 3, sides: 8 },
+            rng: () => 0.5,
+            map,
+            rules: {
+                ...DEFAULT_RULES,
+                concentration: { enabled: true, dcCap: null },
+            },
+        });
+
+        return r.allParticipantsUpdated as BattleParticipant[];
+    };
+
+    it('stores the cast dice and a 10-minute duration on the aura', () => {
+        const effect = get(
+            castWithDice(99),
+            'king'
+        ).battleData.activeEffects.find((e) => e.anchoredZone);
+
+        expect(effect).toMatchObject({
+            duration: 100,
+            anchoredZone: { dice: '3d8' },
+        });
+    });
+
+    it('rolls the dice on entering: full on a failed save, half on a passed one', () => {
+        const failed = walk(castWithDice(99), 16, 12);
+
+        expect(get(failed.participants, 'walker').combatStats.currentHp).toBe(
+            85
+        );
+
+        const passed = walk(castWithDice(1), 16, 12);
+
+        expect(get(passed.participants, 'walker').combatStats.currentHp).toBe(
+            93
+        );
+    });
+});

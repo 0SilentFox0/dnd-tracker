@@ -73,7 +73,8 @@
     },
     "sides": {
       "enemy": "Enemies",
-      "ally": "Allies"
+      "ally": "Allies",
+      "all": "Everyone in the area"
     }
   },
   "effects": {

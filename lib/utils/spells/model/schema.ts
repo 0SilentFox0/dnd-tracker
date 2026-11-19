@@ -64,11 +64,14 @@ export const TEMPLATE_SHAPES = [
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
+export const ZONE_MAX_ROUNDS = 600;
+
 export const ZoneTriggerSchema = z.object({
     save: z.object({ ability: z.enum(ABILITY_KEYS) }).optional(),
     effects: z.array(NonRandomEffectSchema).max(4),
     pull: z.literal('centre').optional(),
     attack: z.literal('spell').optional(),
+    saveHalf: z.literal(true).optional(),
 });
 
 export type ZoneTrigger = z.infer<typeof ZoneTriggerSchema>;
@@ -76,7 +79,7 @@ export type ZoneTrigger = z.infer<typeof ZoneTriggerSchema>;
 export const ZONE_TERRAIN = ['difficult', 'obscured'] as const;
 
 export const SpellZoneSchema = z.object({
-    rounds: z.number().int().min(1).max(10),
+    rounds: z.number().int().min(1).max(ZONE_MAX_ROUNDS),
     label: z.string().max(60).optional(),
     terrain: z.array(z.enum(ZONE_TERRAIN)).min(1).max(2).optional(),
     side: z.enum(['enemies', 'all']).optional(),
@@ -131,7 +134,7 @@ export const SpellTargetingSchema = z.discriminatedUnion('kind', [
             kind: z.literal('template'),
             shape: z.enum(TEMPLATE_SHAPES),
             size: z.number().int().min(5).max(120),
-            side: z.enum(['ally', 'enemy']),
+            side: z.enum(['ally', 'enemy', 'all']),
             maxTargets: z.number().int().min(1).max(20),
             range: rangeField,
             zone: SpellZoneSchema.optional(),
@@ -258,7 +261,7 @@ const CreateTerrainSchema = z.object({
     terrain: z.enum(['wall', 'difficult']),
     shape: z.enum(['cell', 'line']),
     cells: z.number().int().min(1).max(20),
-    rounds: z.number().int().min(1).max(100),
+    rounds: z.number().int().min(1).max(ZONE_MAX_ROUNDS),
 });
 
 export const AnchoredZoneSchema = z.object({
@@ -269,7 +272,9 @@ export const AnchoredZoneSchema = z.object({
     onEnter: ZoneTriggerSchema.optional(),
     onTurnStart: ZoneTriggerSchema.optional(),
     endsWhenStartOutside: z.boolean().optional(),
-    duration: DurationSchema,
+    duration: z.object({
+        rounds: z.number().int().min(1).max(ZONE_MAX_ROUNDS),
+    }),
 });
 
 export const SUMMON_INLINE_SIZES = [

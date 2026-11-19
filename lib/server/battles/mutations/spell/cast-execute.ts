@@ -311,6 +311,7 @@ async function finalizeCast(
         concentrationOf: result.concentration,
         casterId: caster.basicInfo.id,
         dc,
+        dice: result.spellDice,
         centre: resolution.centre,
         castKey: result.concentration?.castId,
     });

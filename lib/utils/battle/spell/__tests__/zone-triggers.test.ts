@@ -475,3 +475,73 @@ describe('spellTerrainEffects', () => {
         });
     });
 });
+
+describe('zones with cast dice', () => {
+    const roll = {
+        kind: 'dealDamage' as const,
+        amount: { spellRoll: 100 },
+        damageType: 'radiant',
+        target: 'eventTarget' as const,
+    };
+
+    const dicey = (dc: number, saveHalf = true) =>
+        zoneMap(
+            {
+                rounds: 100,
+                onTurnStart: {
+                    save: { ability: 'wisdom' },
+                    ...(saveHalf && { saveHalf: true as const }),
+                    effects: [roll],
+                },
+            },
+            { dice: '3d8', dc, spellDamage: { amount: 9, type: 'radiant' } }
+        );
+
+    const hpAfter = (map: BattleMapConfig) =>
+        zoneTurnStart(map, [caster, foe({ x: 4, y: 4 })], 'foe', {
+            rules: DEFAULT_RULES,
+            round: 2,
+            rng: () => 0,
+        }).participants.find((p) => p.basicInfo.id === 'foe')?.combatStats
+            .currentHp;
+
+    it('rolls the stored dice per trigger: full on a failed save', () => {
+        expect(hpAfter(dicey(99))).toBe(17);
+    });
+
+    it('halves the roll on a passed save when saveHalf is set', () => {
+        expect(hpAfter(dicey(1))).toBe(19);
+    });
+
+    it('skips the effect on a passed save without saveHalf', () => {
+        expect(hpAfter(dicey(1, false))).toBe(20);
+    });
+
+    it('stores the dice on the zone and paints no hazard damage when triggers exist', () => {
+        const map = dicey(10);
+
+        expect(Object.values(map.spellZones ?? {})[0]).toMatchObject({
+            dice: '3d8',
+        });
+        expect(map.terrain?.['4:4']?.damage).toBeUndefined();
+    });
+
+    it('a zone without triggers still paints the hazard damage (HoMM fire wall)', () => {
+        const map = zoneMap(
+            { rounds: 3 },
+            { spellDamage: { amount: 7, type: 'fire' } }
+        );
+
+        expect(map.terrain?.['4:4']?.damage).toMatchObject({
+            amount: 7,
+            type: 'fire',
+        });
+    });
+
+    it('canon durations survive past the old 10-round cap', () => {
+        const map = dicey(10);
+
+        expect(pruneExpiredTerrain(map, 11)?.terrain?.['4:4']).toBeDefined();
+        expect(map.terrain?.['4:4']?.untilRound).toBe(100);
+    });
+});

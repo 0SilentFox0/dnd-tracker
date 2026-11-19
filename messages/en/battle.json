@@ -357,6 +357,7 @@
       "guardian": "Guardian",
       "dot": "{damage} damage ({type}) each round",
       "hot": "+{heal} HP each round",
+      "hotTemp": "temp HP to {heal} each round",
       "zone": "in the aura zone until {name}'s next turn",
       "owner": "the owner",
       "permanent": "lasts permanently",

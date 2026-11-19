@@ -376,6 +376,7 @@ const DotSchema = z.object({
 const HotSchema = z.object({
     kind: z.literal('hot'),
     healPerRound: AmountSchema,
+    temp: z.literal(true).optional(),
     duration: DurationSchema,
     ...target,
 });

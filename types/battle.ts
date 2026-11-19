@@ -72,6 +72,7 @@ export interface ActiveEffect {
     };
     hotHeal?: {
         healPerRound: number;
+        temp?: true;
     };
     fxElement?: string;
     fxAura?: FxAuraKind;

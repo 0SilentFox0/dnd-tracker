@@ -10,6 +10,7 @@ import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import type { ConcentrationTag } from '@/lib/utils/battle/concentration';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import { savesOf } from '@/lib/utils/battle/saves/access';
+import { rollDice } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ZoneTrigger } from '@/lib/utils/spells/model/schema';
@@ -38,6 +39,7 @@ export interface FireSource {
     excludeId?: string;
     attackBonus?: number;
     anchorId?: string;
+    dice?: string;
 }
 
 export interface Fired {
@@ -118,6 +120,8 @@ export function fireTrigger(
 
     const messages: LogLine[] = [];
 
+    let halved = false;
+
     if (trigger.save) {
         const res = savesOf(ctx.rules).roll({
             target: findParticipant(next, targetId) ?? target,
@@ -140,7 +144,10 @@ export function fireTrigger(
             })
         );
 
-        if (res.success) return { participants: next, messages, failed: false };
+        if (res.success && !trigger.saveHalf)
+            return { participants: next, messages, failed: false };
+
+        halved = res.success;
     }
 
     const zoneAttack = ruleSystemOf(ctx.rules).combat.zoneAttack;
@@ -179,11 +186,16 @@ export function fireTrigger(
         if (!hit) return { participants: next, messages, failed: false };
     }
 
+    const rolled = src.dice ? rollDice(src.dice, ctx.rng) : undefined;
+
     const event = {
         type: 'spellCast' as const,
         phase: 'after' as const,
         actorId: src.casterId,
         targetIds: [targetId],
+        ...(rolled !== undefined && {
+            roll: halved ? Math.floor(rolled / 2) : rolled,
+        }),
     };
 
     const known =

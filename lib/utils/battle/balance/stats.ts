@@ -108,9 +108,9 @@ function spellTargets(targeting: SpellTargeting): number {
             return 1;
         case 'area':
         case 'template':
-            return targeting.side === 'enemy'
-                ? Math.min(targeting.maxTargets, TYPICAL_TARGETS)
-                : 0;
+            return targeting.side === 'ally'
+                ? 0
+                : Math.min(targeting.maxTargets, TYPICAL_TARGETS);
         case 'allEnemies':
         case 'everyone':
             return TYPICAL_TARGETS;

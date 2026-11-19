@@ -15,6 +15,7 @@ interface SummonInlineInput {
     spell: { id: string; name: string; level: number };
     castLevel: number;
     saveDc: number | undefined;
+    dice?: string;
     round: number;
     castId: string;
     concentrationOf?: { casterId: string; castId: string };
@@ -30,6 +31,7 @@ export function inlineSummonRequests({
     spell,
     castLevel,
     saveDc,
+    dice,
     round,
     castId,
     concentrationOf,
@@ -46,6 +48,7 @@ export function inlineSummonRequests({
             spellId: spell.id,
             spellName: spell.name,
             ...(saveDc !== undefined && { dc: saveDc }),
+            ...(dice && { dice }),
             radiusFeet: e.aura.radiusFeet,
             side: e.aura.side,
             ...(e.aura.onEnter && { onEnter: e.aura.onEnter }),

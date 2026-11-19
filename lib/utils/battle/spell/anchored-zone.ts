@@ -53,6 +53,7 @@ const sourceOf = ({ bearerId, effect, state }: Anchor): FireSource => ({
     anchorId: effect.id,
     ...(state.excludeBearer && { excludeId: bearerId }),
     ...(state.attackBonus !== undefined && { attackBonus: state.attackBonus }),
+    ...(state.dice && { dice: state.dice }),
 });
 
 function inRadius(

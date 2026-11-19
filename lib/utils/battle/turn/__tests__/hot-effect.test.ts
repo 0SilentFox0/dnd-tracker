@@ -181,3 +181,66 @@ describe('dot з кубиками', () => {
         ).toBe(26);
     });
 });
+
+describe('hot with temp', () => {
+    const tempHot: Effect = {
+        kind: 'hot',
+        healPerRound: 5,
+        temp: true,
+        duration: { rounds: 3 },
+        target: 'eventTarget',
+    };
+
+    const cast = (tempHp: number) => {
+        const ps = [
+            makeParticipant({ id: 'o' }),
+            makeParticipant({
+                id: 't',
+                hp: 10,
+                maxHp: 20,
+                side: ParticipantSide.ALLY,
+            }),
+        ];
+
+        ps[1].combatStats.tempHp = tempHp;
+
+        return applyEffect({
+            participants: ps,
+            ability: resolved({
+                trigger: { event: 'action' },
+                effects: [tempHot],
+            }),
+            effectIndex: 0,
+            ownerId: 'o',
+            effect: tempHot,
+            targetIds: ['t'],
+            event: { type: 'action', actorId: 'o', abilityKey: 'k' },
+            ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
+        }).participants[1];
+    };
+
+    const turn = (target: ReturnType<typeof cast>) =>
+        processStartOfTurn(
+            target,
+            2,
+            [target],
+            undefined,
+            undefined,
+            DEFAULT_RULES
+        ).participant.combatStats;
+
+    it('tags the buff as temp and grants temp HP, not healing', () => {
+        const target = cast(0);
+
+        expect(target.battleData.activeEffects[0].hotHeal).toEqual({
+            healPerRound: 5,
+            temp: true,
+        });
+        expect(turn(target)).toMatchObject({ currentHp: 10, tempHp: 5 });
+    });
+
+    it('keeps the larger pool instead of summing', () => {
+        expect(turn(cast(8)).tempHp).toBe(8);
+        expect(turn(cast(2)).tempHp).toBe(5);
+    });
+});

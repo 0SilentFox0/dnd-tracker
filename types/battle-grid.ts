@@ -159,6 +159,7 @@ export interface AnchoredZoneState {
     onTurnStart?: ZoneTrigger;
     endsWhenStartOutside?: boolean;
     attackBonus?: number;
+    dice?: string;
 }
 
 export interface PendingHit {
@@ -177,6 +178,7 @@ export interface SpellZoneRuntime {
     spellName: string;
     dc?: number;
     side: 'enemies' | 'all';
+    dice?: string;
     centre?: GridPoint;
     triggers: {
         onEnter?: ZoneTrigger;

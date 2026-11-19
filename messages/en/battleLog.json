@@ -161,6 +161,7 @@
     "dot": "{name}: {damage} {type} damage from {effect}",
     "dotReduced": "{name}: {damage} (of {base}) {type} damage from {effect}",
     "hot": "{name}: +{heal} HP from {effect}",
+    "hotTemp": "{name}: temp HP raised to {heal} by {effect}",
     "effectsEnded": "effects ended: {names}",
     "effectsEndedCap": "Effects ended: {names}",
     "extraTurn": "{name} gets an extra turn"

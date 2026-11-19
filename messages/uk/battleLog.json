@@ -161,6 +161,7 @@
     "dot": "{name}: {damage} {type} шкоди від {effect}",
     "dotReduced": "{name}: {damage} (з {base}) {type} шкоди від {effect}",
     "hot": "{name}: +{heal} HP від {effect}",
+    "hotTemp": "{name}: тимчасові HP до {heal} від {effect}",
     "effectsEnded": "ефекти завершилися: {names}",
     "effectsEndedCap": "Ефекти завершилися: {names}",
     "extraTurn": "{name} отримує додатковий хід"

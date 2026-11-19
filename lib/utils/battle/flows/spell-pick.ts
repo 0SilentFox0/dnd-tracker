@@ -63,7 +63,9 @@ export function spellTargetSide(s: BookSpell | null): SpellPick['targetSide'] {
 
     if (t.kind === 'ally' || t.kind === 'enemy') return t.kind;
 
-    return t.kind === 'area' || t.kind === 'template' ? t.side : undefined;
+    if (t.kind === 'area') return t.side;
+
+    return t.kind === 'template' && t.side !== 'all' ? t.side : undefined;
 }
 
 const AUTO_TARGETING = [

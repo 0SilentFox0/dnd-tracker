@@ -20,6 +20,7 @@ interface AnchoredZoneInput {
     ability: ResolvedAbility;
     spellId: string;
     saveDc: number | undefined;
+    dice?: string;
     round: number;
 }
 
@@ -31,6 +32,7 @@ export function applyAnchoredZones({
     ability,
     spellId,
     saveDc,
+    dice,
     round,
 }: AnchoredZoneInput): void {
     for (const { effect, index } of anchoredZonesOf(effects)) {
@@ -56,6 +58,7 @@ export function applyAnchoredZones({
                         spellId,
                         spellName: ability.name,
                         ...(saveDc !== undefined && { dc: saveDc }),
+                        ...(dice && { dice }),
                         radiusFeet: effect.radiusFeet,
                         side: effect.side,
                         ...(effect.excludeBearer && { excludeBearer: true }),

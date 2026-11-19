@@ -6,7 +6,7 @@ import {
 } from '../lib/open5e';
 import { bySlug, parseDiceExpr, titleCase } from '../lib/text';
 import type { SpellRow } from '../lib/types';
-import { SPELL_OVERRIDES } from '../overrides/spells';
+import { FRIENDLY_FIRE_SPELLS, SPELL_OVERRIDES } from '../overrides/spells';
 import { schoolName } from './spell-groups';
 
 import { parseMaterial } from '@/lib/server/compendium-import/adapters/spell-patterns/ingredients';
@@ -126,7 +126,12 @@ export function convertSpell(
         lists: f.classes.map((c) => titleCase(c.replace(/^srd-2024_/, ''))),
     };
 
-    return { ...base, ...SPELL_OVERRIDES[row.pk] };
+    const merged = { ...base, ...SPELL_OVERRIDES[row.pk] };
+
+    return merged.targeting.kind === 'template' &&
+        FRIENDLY_FIRE_SPELLS.has(row.pk)
+        ? { ...merged, targeting: { ...merged.targeting, side: 'all' } }
+        : merged;
 }
 
 export function convertSpells(data: Open5eData): SpellRow[] {

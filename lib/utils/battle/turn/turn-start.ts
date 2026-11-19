@@ -298,6 +298,7 @@ function applyStartOfTurnDamage(
             combatStats: {
                 ...updatedParticipant.combatStats,
                 currentHp: hotResult.newHp,
+                tempHp: hotResult.newTempHp,
             },
         };
         healMessages.push(...hotResult.healMessages);

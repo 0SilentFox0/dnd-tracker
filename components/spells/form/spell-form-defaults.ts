@@ -34,6 +34,8 @@ export const resolutionKeysOf = (magic: boolean) =>
 export const spellCostKeysOf = (magic: boolean) =>
     magic ? SPELL_COST_KEYS.filter((k) => k !== 'long') : SPELL_COST_KEYS;
 
-export const SPELL_SIDE_KEYS = ['enemy', 'ally'];
+export const SPELL_SIDE_KEYS = ['enemy', 'ally', 'all'];
+
+export const AREA_SIDE_KEYS = ['enemy', 'ally'];
 
 export const DIE_SIDES = [4, 6, 8, 10, 12];

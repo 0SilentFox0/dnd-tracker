@@ -416,18 +416,24 @@ export function applyHot(
                     rounds: effect.duration.rounds,
                     stackable: ability.stackable === true,
                     maxStacks: ability.maxStacks,
-                    hotHeal: { healPerRound: heal },
+                    hotHeal: {
+                        healPerRound: heal,
+                        ...(effect.temp && { temp: true as const }),
+                    },
                 },
                 ctx.round
             )
         );
         messages.push(
-            textRef('abilityText.log.hot', {
-                ability: ability.name,
-                amount: heal,
-                target: t.basicInfo.name,
-                rounds: effect.duration.rounds,
-            })
+            textRef(
+                effect.temp ? 'abilityText.log.hotTemp' : 'abilityText.log.hot',
+                {
+                    ability: ability.name,
+                    amount: heal,
+                    target: t.basicInfo.name,
+                    rounds: effect.duration.rounds,
+                }
+            )
         );
     }
 
@@ -468,7 +474,7 @@ export const describeDot = (e: Of<'dot'>): Segment[] => [
 ];
 
 export const describeHot = (e: Of<'hot'>): Segment[] => [
-    seg('summary.effects.hot', {
+    seg(e.temp ? 'summary.effects.hotTemp' : 'summary.effects.hot', {
         amount: amountSegment(e.healPerRound),
         rounds: rounds(e),
     }),
