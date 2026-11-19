@@ -1,4 +1,5 @@
 import type { CampaignSound } from '@prisma/client';
+import { createHash } from 'node:crypto';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -71,17 +72,22 @@ export async function listSounds(campaignId: string): Promise<SoundList> {
     return { sounds: rows.map(toRow), hiddenBuiltin };
 }
 
-export async function soundsVersion(campaignId: string): Promise<string> {
-    const [agg, hidden] = await Promise.all([
-        prisma.campaignSound.aggregate({
-            where: { campaignId },
-            _count: true,
-            _max: { createdAt: true },
-        }),
-        hiddenBuiltinOf(campaignId),
-    ]);
+export function soundsEtag(list: SoundList): string {
+    const canonical = JSON.stringify({
+        sounds: list.sounds.map((sound) => [
+            sound.id,
+            sound.name,
+            sound.url,
+            sound.volume,
+            sound.color,
+            sound.icon,
+            sound.sortOrder,
+            sound.durationMs,
+        ]),
+        hiddenBuiltin: [...list.hiddenBuiltin].sort(),
+    });
 
-    return `${agg._count}-${agg._max.createdAt?.getTime() ?? 0}-${hidden.length}`;
+    return createHash('sha1').update(canonical).digest('hex');
 }
 
 export async function createSound(
@@ -105,6 +111,13 @@ export async function createSound(
     const verified = await verifyUploadedSound(input.path);
 
     if (!verified.ok) throw new ContentError(verified.message, 400);
+
+    const duplicate = await prisma.campaignSound.findFirst({
+        where: { campaignId, url: verified.value },
+        select: { id: true },
+    });
+
+    if (duplicate) throw new ContentError(API_ERRORS.SOUND_FILE_INVALID, 400);
 
     const last = await prisma.campaignSound.aggregate({
         where: { campaignId },
@@ -138,12 +151,12 @@ export async function updateSound(
 ): Promise<Sound> {
     await ownedSound(campaignId, soundId);
 
-    return toSound(
-        await prisma.campaignSound.update({
-            where: { id: soundId },
-            data: patch,
-        })
-    );
+    await prisma.campaignSound.updateMany({
+        where: { id: soundId, campaignId },
+        data: patch,
+    });
+
+    return toSound(await ownedSound(campaignId, soundId));
 }
 
 export async function deleteSound(
@@ -152,7 +165,9 @@ export async function deleteSound(
 ): Promise<void> {
     const row = await ownedSound(campaignId, soundId);
 
-    await prisma.campaignSound.delete({ where: { id: soundId } });
+    await prisma.campaignSound.deleteMany({
+        where: { id: soundId, campaignId },
+    });
 
     const path = soundObjectPath(row.url);
 

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/utils/common/logger', () => ({ logger: { error: vi.fn() } }));
 
 const h = vi.hoisted(() => ({
     findFirst: vi.fn(),
@@ -41,5 +42,15 @@ describe('publishSoundPlay', () => {
         await publishSoundPlay('c1', event);
 
         expect(h.trigger).toHaveBeenCalledTimes(1);
+    });
+
+    it('still publishes to the show channel when the battle lookup fails', async () => {
+        h.findFirst.mockRejectedValue(new Error('db down'));
+
+        await expect(publishSoundPlay('c1', event)).resolves.toBeUndefined();
+
+        expect(h.trigger.mock.calls.map((c) => c[1])).toEqual([
+            'private-show-c1',
+        ]);
     });
 });

@@ -10,9 +10,9 @@ const h = vi.hoisted(() => ({
             findFirst: vi.fn(),
             create: vi.fn(),
             update: vi.fn(),
-            delete: vi.fn(),
+            updateMany: vi.fn(async () => ({ count: 1 })),
+            deleteMany: vi.fn(async () => ({ count: 1 })),
             aggregate: vi.fn(),
-            updateMany: vi.fn((a: unknown) => a),
         },
         campaign: { findUnique: vi.fn(), update: vi.fn() },
         $transaction: vi.fn(async (ops: unknown[]) => ops),
@@ -36,7 +36,8 @@ import {
     findPlayable,
     reorderSounds,
     setHiddenBuiltin,
-    soundsVersion,
+    soundsEtag,
+    updateSound,
 } from '../sound-store';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -65,6 +66,7 @@ describe('soundboard store', () => {
             _max: { sortOrder: 1 },
         });
         h.db.campaignSound.create.mockResolvedValue(row);
+        h.db.campaignSound.findFirst.mockResolvedValue(null);
     });
 
     it('rejects creation at the limit', async () => {
@@ -122,8 +124,8 @@ describe('soundboard store', () => {
 
         await deleteSound('c1', 's1');
 
-        expect(h.db.campaignSound.delete).toHaveBeenCalledWith({
-            where: { id: 's1' },
+        expect(h.db.campaignSound.deleteMany).toHaveBeenCalledWith({
+            where: { id: 's1', campaignId: 'c1' },
         });
         expect(h.remove).toHaveBeenCalledWith(`p:${row.url}`);
     });
@@ -172,20 +174,85 @@ describe('soundboard store', () => {
         });
     });
 
-    it('soundsVersion changes with the count', async () => {
-        h.db.campaignSound.aggregate.mockResolvedValue({
-            _count: 3,
-            _max: { createdAt: row.createdAt },
+    it('rejects registering the same stored object twice', async () => {
+        h.db.campaignSound.findFirst.mockResolvedValue(row);
+
+        await expect(
+            createSound('c1', { path: 'c1/a.mp3', name: 'Boom' })
+        ).rejects.toMatchObject({
+            message: API_ERRORS.SOUND_FILE_INVALID,
+            status: 400,
         });
-        h.db.campaign.findUnique.mockResolvedValue({ hiddenBuiltinSounds: [] });
+        expect(h.db.campaignSound.create).not.toHaveBeenCalled();
+    });
 
-        const a = await soundsVersion('c1');
+    it('updates within the campaign', async () => {
+        h.db.campaignSound.findFirst
+            .mockResolvedValueOnce(row)
+            .mockResolvedValueOnce({ ...row, name: 'New' });
 
-        h.db.campaignSound.aggregate.mockResolvedValue({
-            _count: 4,
-            _max: { createdAt: row.createdAt },
+        const sound = await updateSound('c1', 's1', { name: 'New' });
+
+        expect(h.db.campaignSound.updateMany).toHaveBeenCalledWith({
+            where: { id: 's1', campaignId: 'c1' },
+            data: { name: 'New' },
         });
-
-        expect(await soundsVersion('c1')).not.toBe(a);
+        expect(sound.name).toBe('New');
     });
 });
+
+describe('soundsEtag', () => {
+    const list = {
+        sounds: [
+            { ...toCustom('a'), name: 'A' },
+            { ...toCustom('b'), name: 'B' },
+        ],
+        hiddenBuiltin: ['builtin:x', 'builtin:y'],
+    };
+
+    it('is stable for an identical list', () => {
+        expect(soundsEtag(structuredClone(list))).toBe(soundsEtag(list));
+    });
+
+    it('changes with name, volume, order and hidden swap', () => {
+        const base = soundsEtag(list);
+
+        const renamed = structuredClone(list);
+
+        renamed.sounds[0].name = 'Z';
+
+        const louder = structuredClone(list);
+
+        louder.sounds[0].volume = 0.1;
+
+        const reordered = {
+            ...list,
+            sounds: [list.sounds[1], list.sounds[0]],
+        };
+
+        const swapped = { ...list, hiddenBuiltin: ['builtin:x', 'builtin:z'] };
+
+        const tags = [renamed, louder, reordered, swapped].map(soundsEtag);
+
+        expect(new Set([base, ...tags]).size).toBe(5);
+    });
+
+    it('ignores hidden order', () => {
+        expect(
+            soundsEtag({ ...list, hiddenBuiltin: ['builtin:y', 'builtin:x'] })
+        ).toBe(soundsEtag(list));
+    });
+});
+
+function toCustom(id: string) {
+    return {
+        id,
+        name: id,
+        url: `https://x/${id}.mp3`,
+        volume: 0.5,
+        color: null,
+        icon: null,
+        sortOrder: 0,
+        durationMs: null,
+    };
+}
