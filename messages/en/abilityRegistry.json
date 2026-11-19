@@ -592,6 +592,7 @@
     "sense": "Sense",
     "range": "Range, feet",
     "attackAbility": "Only attacks with this ability",
+    "againstId": "Only against this participant (id)",
     "consumeOn": "Ends after the first attack",
     "school": "School",
     "spellIds": "Spells (one of them, at random)",

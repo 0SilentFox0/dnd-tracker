@@ -66,6 +66,7 @@ const BASE_FLAG_REGISTRY: {
                 optional: true,
                 options: ABILITY_OPTIONS,
             },
+            { name: 'againstId', input: 'text', optional: true },
             {
                 name: 'consumeOn',
                 input: 'select',
