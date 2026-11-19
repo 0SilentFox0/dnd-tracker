@@ -65,7 +65,7 @@ async function loadReuseTargets(
 
     for (const t of BUNDLE_TABLES) {
         const rows = await delegateOf(tx, t).findMany({
-            where: { id: { in: ids } },
+            where: { campaignId: targetCampaignId, id: { in: ids } },
             select: {
                 id: true,
                 campaignId: true,
