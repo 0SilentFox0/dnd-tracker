@@ -74,7 +74,7 @@ const txFlags = h.tx.userOnboardingFlag as unknown as Mocks;
 
 const txPresets = h.tx.soundPreset as unknown as Mocks;
 
-const txItemsLock = () => h.tx.$executeRaw as ReturnType<typeof vi.fn>;
+const txLock = () => h.tx.$executeRaw as ReturnType<typeof vi.fn>;
 
 describe('library store', () => {
     beforeEach(() => {
@@ -106,7 +106,7 @@ describe('library store', () => {
         expect(presets.createMany).not.toHaveBeenCalled();
         expect(txFlags.upsert).toHaveBeenCalledTimes(1);
         expect(
-            JSON.stringify(txItemsLock().mock.calls[0])
+            JSON.stringify(txLock().mock.calls[0])
         ).toContain('sound-presets:u1');
     });
 
@@ -116,7 +116,7 @@ describe('library store', () => {
         await getLibrary('u1');
 
         expect(h.db.$transaction).not.toHaveBeenCalled();
-        expect(txItemsLock()).not.toHaveBeenCalled();
+        expect(txLock()).not.toHaveBeenCalled();
         expect(txPresets.createMany).not.toHaveBeenCalled();
     });
 
@@ -169,7 +169,7 @@ describe('library store', () => {
 
         await deleteLibrarySound('u1', 's1');
 
-        expect(txItemsLock()).toHaveBeenCalledTimes(1);
+        expect(txLock()).toHaveBeenCalledTimes(1);
         expect(presets.update).not.toHaveBeenCalled();
         expect(items.deleteMany).not.toHaveBeenCalled();
         expect(txPresets.update).toHaveBeenCalledTimes(2);
@@ -213,7 +213,7 @@ describe('library store', () => {
                 source: 'upload',
             })
         ).rejects.toMatchObject({ message: API_ERRORS.SOUND_LIMIT });
-        expect(txItemsLock()).toHaveBeenCalledTimes(1);
+        expect(txLock()).toHaveBeenCalledTimes(1);
         expect(txItems.create).not.toHaveBeenCalled();
     });
 
