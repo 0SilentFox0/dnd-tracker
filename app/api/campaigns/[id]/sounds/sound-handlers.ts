@@ -148,12 +148,12 @@ export async function deleteSoundHandler(campaignId: string, soundId: string) {
     }
 }
 
-async function dmWrite<S extends z.ZodType>(
+async function dmWrite<T>(
     req: Request,
     campaignId: string,
-    schema: S,
+    schema: z.ZodType<T>,
     action: string,
-    write: (body: z.infer<S>) => Promise<void>
+    write: (body: T) => Promise<void>
 ) {
     try {
         const access = await requireDM(campaignId);

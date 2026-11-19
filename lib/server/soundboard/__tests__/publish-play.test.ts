@@ -5,7 +5,9 @@ vi.mock('@/lib/utils/common/logger', () => ({ logger: { error: vi.fn() } }));
 
 const h = vi.hoisted(() => ({
     findFirst: vi.fn(),
-    trigger: vi.fn(async () => undefined),
+    trigger: vi.fn(
+        async (_p: unknown, _c: string, _e: string, _d: unknown) => undefined
+    ),
 }));
 
 vi.mock('@/lib/db', () => ({

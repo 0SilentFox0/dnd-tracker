@@ -41,7 +41,7 @@ vi.mock('@/lib/utils/api/rate-limit', async (orig) => ({
 const forbidden = () => NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
 
 const ctx = (extra: Record<string, string> = {}) => ({
-    params: Promise.resolve({ id: 'camp', ...extra }),
+    params: Promise.resolve({ id: 'camp', soundId: '', ...extra }),
 });
 
 const req = (method: string, body?: unknown, headers?: HeadersInit) =>
