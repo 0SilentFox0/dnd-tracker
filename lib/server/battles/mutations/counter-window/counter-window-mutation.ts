@@ -1,6 +1,9 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
-import type { CounterWindowBody, SpellRequestData } from '@/lib/schemas/battles';
+import type {
+    CounterWindowBody,
+    SpellRequestData,
+} from '@/lib/schemas/battles';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import {
@@ -83,7 +86,8 @@ function counterRequest(
 
 export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
     const spellRunner =
-        deps.spell ?? ((options: SpellOptions) => createSpellMutation(undefined, options));
+        deps.spell ??
+        ((options: SpellOptions) => createSpellMutation(undefined, options));
 
     const now = deps.now ?? Date.now;
 
@@ -120,12 +124,17 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
         });
 
         try {
-            const replayed = await run(requesterCtx, hidden.request, undefined, {
-                seed: hidden.seed,
-                ...('countered' in outcome && {
-                    counteredBy: outcome.countered,
-                }),
-            });
+            const replayed = await run(
+                requesterCtx,
+                hidden.request,
+                undefined,
+                {
+                    seed: hidden.seed,
+                    ...('countered' in outcome && {
+                        counteredBy: outcome.countered,
+                    }),
+                }
+            );
 
             return {
                 ...replayed,
@@ -216,19 +225,16 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
     ): Promise<MutationResult> => {
         const pending = counterPendingOf(ctx.scene.pendingChoice);
 
-        if (!pending || pending.shown.windowId !== body.windowId)
-            throw stale();
+        if (!pending || pending.shown.windowId !== body.windowId) throw stale();
 
         if (body.action === 'closeAll') {
-            if (!ctx.isDM)
-                throw new BattleAccessError(403, API_ERRORS.DM_ONLY);
+            if (!ctx.isDM) throw new BattleAccessError(403, API_ERRORS.DM_ONLY);
 
             return closeResolve(ctx, pending);
         }
 
         if (body.action === 'expire') {
-            const wait =
-                new Date(pending.shown.deadline).getTime() - now();
+            const wait = new Date(pending.shown.deadline).getTime() - now();
 
             if (wait > EXPIRE_SKEW_MS)
                 throw new BattleRuleError(
@@ -287,10 +293,7 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
             skipCounter: true,
             serverRolls: true,
             rng: mulberry32(pending.hidden.seed + 1 + pending.hidden.attempts),
-        })(
-            ctx,
-            counterRequest(offer, reactor, actorId, body.slotLevel)
-        );
+        })(ctx, counterRequest(offer, reactor, actorId, body.slotLevel));
 
         const base = {
             participants: cast.participants,
@@ -312,11 +315,15 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
 
         const caster = findParticipant(ctx.participants, actorId);
 
-        const next = answered(pending, body.reactorId, 'failed', {
-            deadline: counterDeadline(now()),
-        });
-
-        next.hidden = { ...next.hidden, attempts: pending.hidden.attempts + 1 };
+        const next: CounterPending = {
+            ...answered(pending, body.reactorId, 'failed', {
+                deadline: counterDeadline(now()),
+            }),
+            hidden: {
+                ...pending.hidden,
+                attempts: pending.hidden.attempts + 1,
+            },
+        };
 
         const events = [
             ...base.events,

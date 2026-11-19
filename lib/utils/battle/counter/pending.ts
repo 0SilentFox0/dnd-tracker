@@ -1,4 +1,4 @@
-import type { CounterOffer,HiddenCounter, ShownCounter } from './types';
+import type { CounterOffer, HiddenCounter, ShownCounter } from './types';
 
 import { COUNTER_WINDOW_MS } from '@/lib/constants/battle';
 import type { SpellRequestData } from '@/lib/schemas/battles';

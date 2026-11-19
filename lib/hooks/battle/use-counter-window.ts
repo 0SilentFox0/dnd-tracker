@@ -36,14 +36,13 @@ function useCounterContext() {
 
     const shown = asShownCounter(battle.pendingChoice);
 
-    const controls = (id: string) =>
-        !!viewer.userId &&
-        battle.initiativeOrder.find((p) => p.basicInfo.id === id)?.basicInfo
-            .controlledBy === viewer.userId;
+    const infoOf = (id: string) =>
+        battle.initiativeOrder.find((p) => p.basicInfo.id === id)?.basicInfo;
 
-    const nameOf = (id: string) =>
-        battle.initiativeOrder.find((p) => p.basicInfo.id === id)?.basicInfo
-            .name ?? '';
+    const controls = (id: string) =>
+        !!viewer.userId && infoOf(id)?.controlledBy === viewer.userId;
+
+    const nameOf = (id: string) => infoOf(id)?.name ?? '';
 
     return { shown, viewer, controls, nameOf };
 }
@@ -51,8 +50,8 @@ function useCounterContext() {
 const retryAfterOf = (error: unknown): number | null => {
     if (!(error instanceof ApiError) || error.status !== 422) return null;
 
-    const wait = (error.body as { params?: { retryAfterMs?: unknown } })
-        ?.params?.retryAfterMs;
+    const wait = (error.body as { params?: { retryAfterMs?: unknown } })?.params
+        ?.retryAfterMs;
 
     return typeof wait === 'number' ? wait : null;
 };
