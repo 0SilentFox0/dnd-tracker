@@ -1462,8 +1462,11 @@
             "target": "self"
           },
           {
-            "kind": "note",
-            "text": "Temporary Hit Points = Proficiency Bonus"
+            "kind": "tempHp",
+            "amount": {
+              "formula": "prof"
+            },
+            "target": "self"
           }
         ]
       },

@@ -61,7 +61,8 @@
                 "rest": "long",
                 "uses": {
                   "scale": "rages"
-                }
+                },
+                "shortRegain": 1
               }
             },
             "effects": [
@@ -905,6 +906,9 @@
                 "rest": "long",
                 "uses": {
                   "formula": "max(1, cha_mod)"
+                },
+                "shortRegain": {
+                  "formula": "min(1, floor(class_level / 5)) * max(1, cha_mod)"
                 }
               }
             },
@@ -1984,7 +1988,8 @@
           "4"
         ],
         "pool": {
-          "rest": "short"
+          "rest": "long",
+          "regain": 1
         }
       },
       {
@@ -2229,15 +2234,16 @@
             },
             "limits": {
               "perRest": {
-                "rest": "short",
+                "rest": "long",
                 "uses": {
                   "scale": "wild-shape-uses"
-                }
+                },
+                "shortRegain": 1
               }
             },
             "effects": [
               {
-                "kind": "heal",
+                "kind": "tempHp",
                 "amount": {
                   "formula": "class_level"
                 },
@@ -4867,7 +4873,8 @@
           "3"
         ],
         "pool": {
-          "rest": "short"
+          "rest": "long",
+          "regain": 1
         }
       },
       {

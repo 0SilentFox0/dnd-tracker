@@ -5979,7 +5979,8 @@
     "lists": [
       "Sorcerer",
       "Wizard"
-    ]
+    ],
+    "damageBonus": 40
   },
   {
     "slug": "srd-2024_dispel-evil-and-good",
@@ -6211,6 +6212,8 @@
         "kind": "hitRider",
         "attackKind": "melee",
         "extraDice": "2d8",
+        "upcastDice": 1,
+        "maxDice": 5,
         "damageType": "radiant",
         "charges": 1,
         "duration": {
@@ -7131,7 +7134,8 @@
     "ingredients": [],
     "targeting": {
       "kind": "enemy",
-      "range": 120
+      "range": 120,
+      "projectiles": true
     },
     "resolution": {
       "kind": "attack"
@@ -7147,7 +7151,8 @@
     ],
     "lists": [
       "Warlock"
-    ]
+    ],
+    "fixedDice": true
   },
   {
     "slug": "srd-2024_elementalism",
@@ -7781,7 +7786,7 @@
     "casting": {
       "text": "action"
     },
-    "dice": 0,
+    "dice": 2,
     "concentration": false,
     "ritual": false,
     "componentFlags": {
@@ -7803,11 +7808,21 @@
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "tempHp",
+        "amount": {
+          "spellRoll": 100
+        },
+        "target": "self"
+      }
+    ],
     "lists": [
       "Sorcerer",
       "Wizard"
-    ]
+    ],
+    "dieSides": 4,
+    "damageBonus": 4
   },
   {
     "slug": "srd-2024_fear",
@@ -8091,7 +8106,8 @@
       "Sorcerer",
       "Warlock",
       "Wizard"
-    ]
+    ],
+    "damageBonus": 30
   },
   {
     "slug": "srd-2024_fire-bolt",
@@ -10417,9 +10433,7 @@
       "range": 60
     },
     "resolution": {
-      "kind": "save",
-      "ability": "constitution",
-      "onSuccess": "none"
+      "kind": "auto"
     },
     "spellEffects": [
       {
@@ -11004,6 +11018,23 @@
       {
         "kind": "applyCondition",
         "condition": "charmed",
+        "duration": {
+          "rounds": 10
+        },
+        "breakOnDamage": true
+      },
+      {
+        "kind": "applyCondition",
+        "condition": "incapacitated",
+        "duration": {
+          "rounds": 10
+        },
+        "breakOnDamage": true
+      },
+      {
+        "kind": "modifyStat",
+        "stat": "speed",
+        "percent": -100,
         "duration": {
           "rounds": 10
         }
@@ -12577,7 +12608,8 @@
       "kind": "area",
       "side": "enemy",
       "maxTargets": 3,
-      "range": 120
+      "range": 120,
+      "projectiles": true
     },
     "resolution": {
       "kind": "auto"
@@ -12596,7 +12628,9 @@
       "Wizard"
     ],
     "dieSides": 4,
-    "upcastTargets": 1
+    "upcastTargets": 1,
+    "fixedDice": true,
+    "damageBonus": 1
   },
   {
     "slug": "srd-2024_magic-mouth",
@@ -14485,7 +14519,8 @@
         "amount": {
           "spellRoll": 100
         },
-        "damageType": "psychic"
+        "damageType": "psychic",
+        "killIfHpAtMost": 100
       }
     ],
     "lists": [
@@ -16000,7 +16035,8 @@
       "kind": "area",
       "side": "enemy",
       "maxTargets": 3,
-      "range": 120
+      "range": 120,
+      "projectiles": true
     },
     "resolution": {
       "kind": "attack"
@@ -16018,7 +16054,8 @@
       "Sorcerer",
       "Wizard"
     ],
-    "upcastTargets": 1
+    "upcastTargets": 1,
+    "fixedDice": true
   },
   {
     "slug": "srd-2024_scrying",
@@ -16570,6 +16607,7 @@
         "kind": "hitRider",
         "attackKind": "melee",
         "extraDice": "2d6",
+        "upcastDice": 1,
         "damageType": "radiant",
         "charges": 1,
         "duration": {
