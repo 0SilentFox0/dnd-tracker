@@ -15,6 +15,7 @@ import { wfrpSheetBlock } from './rules/characteristics/sheet-block';
 import { assertWfrpAction } from './rules/combat/assert-action';
 import { isOutOfFight, wfrpOnRevived } from './rules/combat/critical';
 import { wfrpActionDetails } from './rules/combat/details';
+import { wfrpAttackBlocked } from './rules/combat/disarm';
 import { extractWfrpAttacks } from './rules/combat/extract-attacks';
 import { wfrpHitModel, wfrpHitModelFor } from './rules/combat/hit-model';
 import { wfrpInitiative } from './rules/combat/initiative';
@@ -144,6 +145,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         abortedRoll: wfrpAbortedRoll,
         details: wfrpActionDetails,
         attackTarget: wfrpAttackTarget,
+        attackBlocked: wfrpAttackBlocked,
         damage: wfrpDamage,
         onZeroHp: wfrpOnZeroHp,
         autoUnconsciousAtZero: (rules) =>

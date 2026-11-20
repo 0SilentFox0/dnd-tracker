@@ -14,6 +14,7 @@ import {
 import type { WfrpItemStats } from './stats';
 
 import { isRecord } from '@/lib/utils/common/is-record';
+import { WFRP_CONDITION_KEYS } from '@/systems/wfrp/constants/conditions';
 
 // Zod-free read-path twin of WfrpItemStatsSchema (the registry graph must stay Zod-free); guard.test keeps them in agreement.
 type Rec = Record<string, unknown>;
@@ -39,7 +40,7 @@ export function qualityList(v: unknown): QualityRef[] | null {
     for (const r of v) {
         if (
             !isRecord(r) ||
-            !onlyKeys(r, ['key', 'value']) ||
+            !onlyKeys(r, ['key', 'value', 'condition', 'location']) ||
             typeof r.key !== 'string' ||
             !Object.hasOwn(QUALITY_REGISTRY, r.key)
         )
@@ -53,9 +54,26 @@ export function qualityList(v: unknown): QualityRef[] | null {
         if (r.value !== undefined && !num(r.value, 1, QUALITY_VALUE_MAX, true))
             return null;
 
-        out.push(
-            r.value === undefined ? { key } : { key, value: r.value as number }
-        );
+        if (r.condition !== undefined && key !== 'inflict') return null;
+
+        if (
+            r.location !== undefined &&
+            (key !== 'inflict' || !oneOf(r.location, LOCATIONS))
+        )
+            return null;
+
+        if (
+            r.condition !== undefined &&
+            !oneOf(r.condition, WFRP_CONDITION_KEYS)
+        )
+            return null;
+
+        out.push({
+            key,
+            ...(r.value !== undefined && { value: r.value as number }),
+            ...(r.condition !== undefined && { condition: r.condition }),
+            ...(r.location !== undefined && { location: r.location }),
+        });
     }
 
     return out;

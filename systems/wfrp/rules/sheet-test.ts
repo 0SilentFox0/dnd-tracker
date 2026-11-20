@@ -6,9 +6,9 @@ import {
 } from './characteristics/constants';
 import { skillTarget, value } from './characteristics/derive';
 import { readCharacteristics } from './characteristics/keys';
-import { type HitLocation,LOCATIONS } from './combat/constants';
+import { ACCEPTED_SPOTS, type HitSpot } from './combat/constants';
 import { fateLeftOf, fateSpendsOn } from './combat/fate';
-import { selfSlMod, selfTestMod } from './conditions/test-mod';
+import { selfModes, selfSlMod, selfTestMod } from './conditions/test-mod';
 import { resolveModeSources } from './percentile/advantage';
 import {
     DIFFICULTY_KEYS,
@@ -39,7 +39,7 @@ type WfrpTestBody = {
     fortune?: SheetFortuneKind;
     rerolls?: number;
     critical?: boolean;
-    location?: HitLocation;
+    location?: HitSpot;
 } & ({ characteristic: CharacteristicKey } | { skill: string; spec?: string });
 
 export function acceptsWfrpSheetTest(
@@ -55,7 +55,7 @@ export function acceptsWfrpSheetTest(
 
     if (
         body.location !== undefined &&
-        !(LOCATIONS as readonly string[]).includes(body.location)
+        !(ACCEPTED_SPOTS as readonly string[]).includes(body.location)
     )
         return false;
 
@@ -129,7 +129,15 @@ export function rollWfrpSheetTest({
 
     const edge = spend === 'advantage';
 
-    const modeOf = resolveModeSources({ advantage: edge && reverse ? 1 : 0 });
+    const modeOf = resolveModeSources({
+        advantage: edge && reverse ? 1 : 0,
+        disadvantage: selfModes(
+            participant,
+            'test',
+            edition,
+            'skill' in body ? body.skill : undefined
+        ).disadvantage,
+    });
 
     const input: FortuneInput | undefined =
         spend === 'advantage'

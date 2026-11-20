@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/constants/characteristics';
@@ -16,6 +17,7 @@ import {
     MUTATION_EFFECTS_MAX,
 } from '@/systems/wfrp/constants/mutations';
 import {
+    FUMBLE_KINDS,
     MARKER_KEYS,
     MUTATION_SLOTS,
     SLOT_EFFECTS,
@@ -37,6 +39,8 @@ export const newEffect = (type: TableEffect['type']): TableEffect => {
     if (type === 'marker') return { type, key: MARKER_KEYS[0] };
 
     if (type === 'death') return { type };
+
+    if (type === 'fumble') return { type, kind: FUMBLE_KINDS[0] };
 
     if (type === 'characteristic')
         return { type, key: CHARACTERISTIC_KEYS[0], amount: -5 };
@@ -161,6 +165,23 @@ export function EffectFields({
                     }
                 />
             )}
+            {effect.type === 'fumble' && (
+                <SelectField
+                    aria-label={t('effect.fumble')}
+                    value={effect.kind}
+                    options={FUMBLE_KINDS.map((kind) => ({
+                        value: kind,
+                        label: t(`fumbleKinds.${kind}`),
+                    }))}
+                    onValueChange={(kind) =>
+                        onChange({
+                            ...effect,
+                            kind: kind as typeof effect.kind,
+                        })
+                    }
+                    triggerClassName="min-h-11 w-48"
+                />
+            )}
             {effect.type === 'marker' && (
                 <SelectField
                     aria-label={t('marker')}
@@ -173,6 +194,30 @@ export function EffectFields({
                         onChange({ ...effect, key: key as typeof effect.key })
                     }
                     triggerClassName="min-h-11 w-40"
+                />
+            )}
+            {effect.type === 'marker' && (
+                <Input
+                    type="number"
+                    className="min-h-11 w-20"
+                    aria-label={t('rounds')}
+                    min={1}
+                    max={20}
+                    value={effect.rounds ?? ''}
+                    onChange={(e) => {
+                        const { rounds: _drop, ...rest } = effect;
+
+                        const n = Math.trunc(Number(e.target.value));
+
+                        onChange(
+                            e.target.value === '' || !Number.isFinite(n)
+                                ? rest
+                                : {
+                                      ...rest,
+                                      rounds: Math.max(1, Math.min(20, n)),
+                                  }
+                        );
+                    }}
                 />
             )}
             <Button

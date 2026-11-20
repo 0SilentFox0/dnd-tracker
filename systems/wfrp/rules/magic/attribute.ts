@@ -1,8 +1,10 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import { isWfrpConditionKey } from '../conditions/catalog';
+import { editionOf } from '../edition';
 
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { replaceParticipant } from '@/lib/utils/abilities/engine/core/participants';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionResult } from '@/lib/utils/rules/systems/types';
 import type { SpellMagic } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -12,7 +14,8 @@ export function wfrpLoreAttribute(
     ps: BattleParticipant[],
     targetIds: string[],
     magic: SpellMagic,
-    round: number
+    round: number,
+    rules?: Ruleset
 ): SystemConditionResult {
     const attribute = magic.attribute;
 
@@ -35,6 +38,7 @@ export function wfrpLoreAttribute(
             sourceName: dynamicTextRef(
                 `battleWfrp.conditions.${attribute.condition}.label`
             ),
+            ...(rules && { edition: editionOf(rules) }),
         });
 
         participants = replaceParticipant(participants, applied.participant);

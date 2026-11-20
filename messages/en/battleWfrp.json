@@ -74,6 +74,10 @@
     "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
     "counterCrit": "🛡️ The defender's critical hit wounds {name}: {text}",
     "critWound": "🩸 Critical wound for {target}: {text}",
+    "groupForbidden": "🚫 {name} cannot use a {group} ranged weapon without training in it",
+    "blackpowderPass": "{name}: gunfire shock — Cool test {roll}, SL {sl}: resisted",
+    "blackpowderFail": "{name}: gunfire shock — Cool test {roll}, SL {sl}: failed",
+    "armourWorn": "🪓 {target}: armour worn down by {amount} AP",
     "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious",
     "psychologyPass": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: resisted",
     "psychologyFail": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: failed",
@@ -88,15 +92,29 @@
     "frenzyStart": "{name} works into a Frenzy — Willpower test {roll} / {target}",
     "frenzyEnd": "{name}'s Frenzy ends, the fighter is Fatigued",
     "critDeath": "☠️ {target} is killed outright: {text}",
+    "critWoundAt": "🩸 Critical wound for {target} ({place}): {text}",
+    "critHitAt": "🩸 Critical wound for {target} ({place}, +{bonus} damage): {text}",
+    "critDeathAt": "☠️ {target} is killed outright ({place}): {text}",
     "dying": "⏳ {name} is dying: {rounds} round(s) left unless healed",
     "diedOfWounds": "☠️ {name} succumbs to their critical wounds",
     "fateHowDidThatMiss": "{name} spends Fate: How Did That Miss? — the attack by {attacker} has no effect",
     "fateNotToday": "{name} spends Fate: Not Today! — leaves the fight alive",
     "momentumSecondAttack": "{name} spends Momentum on an attack with the second weapon",
     "leadershipTransfer": "{name} spends Momentum: Leadership (SL {sl}), {ally} gains Momentum",
+    "disengageMomentum": "{name} spends Momentum and moves out of melee without penalty",
+    "disengageSuccess": "{name} disengages from melee (SL {sl} against {foeSl})",
+    "disengageFailed": "{name} fails to disengage (SL {sl} against {foeSl}), the foes gain Momentum",
+    "runDeclared": "{name} runs: the Movement of this turn doubles",
+    "sprintResult": "{name} sprints (SL {sl}): {yards} extra yards of Movement",
+    "sprintFailed": "{name} fails to sprint (SL {sl})",
+    "chargeMomentum": "{name} charges {target} from {yards} yards and gains Momentum; the Action must be a melee attack",
+    "chargeDeclared": "{name} charges {target}; the Action must be a melee attack",
     "leadershipFailed": "{name} spends Momentum: Leadership failed (SL {sl})",
     "fortuneCondition": "{name} spends Fortune: {condition} removed",
-    "fortuneRerolls": "{name} spends Fortune: {rolls} rerolls"
+    "fortuneRerolls": "{name} spends Fortune: {rolls} rerolls",
+    "fumbleDrop": "{name} fumbles and drops the weapon; the next Action goes to picking it up",
+    "fumbleOops": "{name} fumbles (oops {roll}): {text}",
+    "fumbleMisfire": "{name}: misfire ({roll}): {text}"
   },
   "passion": {
     "frenzy": "Frenzy",
@@ -149,6 +167,10 @@
       "locations": {
         "head": "Head",
         "arm": "Arm",
+        "leftArm": "Left arm",
+        "rightArm": "Right arm",
+        "leftLeg": "Left leg",
+        "rightLeg": "Right leg",
         "body": "Body",
         "leg": "Leg"
       }
@@ -163,12 +185,18 @@
     "momentum": {
       "title": "Momentum",
       "secondAttack": "Second attack",
+      "disengage": "Disengage (action, test)",
+      "disengageFree": "Disengage (spend Momentum)",
+      "run": "Run (double Movement)",
+      "sprint": "Sprint (action, Athletics)",
+      "charge": "Charge",
       "leadership": "Pass Momentum",
       "ally": "Ally",
       "reason": {
         "none": "No Momentum",
         "used": "Already used this turn",
         "action": "Take your main action first",
+        "cast": "No second attack after casting a spell",
         "weapons": "Two melee weapons required"
       }
     }
@@ -221,5 +249,25 @@
       "crit": "Critical wound"
     },
     "total": "Total damage"
+  },
+  "fumble": {
+    "labels": {
+      "loseAction": "Lost Action",
+      "loseMove": "Lost Move",
+      "slPenalty": "-1 SL (fumble)"
+    },
+    "oops": {
+      "1": "Lose 1 Wound, ignoring Toughness and Armour",
+      "2": "The weapon takes 1 Damage; next Round you act last",
+      "3": "Next Round your Action has -1 SL",
+      "4": "You lose your next Move",
+      "5": "You miss your next Action",
+      "6": "A random leg is hurt for 1d10 Rounds (counts as a Critical Wound)",
+      "7": "You hit a random ally in range, otherwise you are Stunned"
+    },
+    "misfire": {
+      "1": "The weapon fails to fire; reload it",
+      "2": "The weapon explodes and hurts your primary arm"
+    }
   }
 }

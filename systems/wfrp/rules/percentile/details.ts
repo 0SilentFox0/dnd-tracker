@@ -1,12 +1,14 @@
-import type { DefenseKind, HitLocation } from '../combat/constants';
+import type { DefenseKind, HitSpot } from '../combat/constants';
 
 export interface PercentileAttackDetails {
     roll: number;
     target: number;
     sl: number;
     netSl: number;
-    location: HitLocation;
+    location: HitSpot;
     doubles: boolean;
+    /** A failed test that rolled a double (p165) or hit Dangerous (p305) */
+    fumble?: true;
     defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
     momentumUsed?: boolean;
     /** Personal Momentum acted as Advantage on the test (canon5e, p168) */

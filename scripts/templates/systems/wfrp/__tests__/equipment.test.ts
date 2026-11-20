@@ -98,9 +98,9 @@ describe('equipmentIssues', () => {
             'slot "shield" needs gear with one "shield X" quality',
         ],
         [
-            'wrap quality',
-            withStats(rows[0], { qualities: [{ key: 'wrap' }] }),
-            'wrap',
+            'unimplemented quality',
+            withStats(rows[0], { qualities: [{ key: 'trapBlade' }] }),
+            'trapBlade',
         ],
         [
             'bow without twoHanded',

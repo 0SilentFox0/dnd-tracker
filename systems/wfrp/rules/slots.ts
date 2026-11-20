@@ -1,8 +1,10 @@
 import type { Characteristics } from './characteristics/keys';
 import type { SheetWfrpBlock } from './characteristics/sheet-block';
 import type { WfrpParticipantStats } from './combat/participant';
+import { WEAPON_REACHES } from './equipment/constants';
 import { qualityList } from './equipment/guard';
 import type { QualityRef } from './equipment/qualities';
+import type { WfrpWeaponStats } from './equipment/stats';
 import type {
     PercentileAttackDetails,
     PercentileCastDetails,
@@ -12,15 +14,32 @@ import { isRecord } from '@/lib/utils/common/is-record';
 import { defineSlot } from '@/lib/utils/rules/systems/slot';
 import type { ParticipantSide } from '@/types/battle';
 
+export type WfrpHand = 'main' | 'off';
+
+type WeaponReach = NonNullable<WfrpWeaponStats['reach']>;
+
 export interface WfrpAttackSlot {
     qualities: QualityRef[];
     flaws: QualityRef[];
     noSb?: boolean;
     magical?: true;
-    /** Wielded in the shield (off) hand */
-    offHand?: true;
+    /** Hand the weapon is held in; absent for trait, unarmed and spell attacks */
+    hand?: WfrpHand;
     /** Weapon group, picks the Melee/Ranged skill speciality */
     group?: string;
+    /** Needs both hands, canon gear only: unusable with either arm disabled (p164) */
+    twoHanded?: true;
+    /** Weapon reach, canon gear only (p300) */
+    reach?: WeaponReach;
+}
+
+// Legacy rows stored `hand: true` (main) and `offHand: true` (off)
+function handOf(raw: Record<string, unknown>): WfrpHand | undefined {
+    if (raw.hand === 'main' || raw.hand === 'off') return raw.hand;
+
+    if (raw.offHand === true) return 'off';
+
+    return raw.hand === true ? 'main' : undefined;
 }
 
 export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
@@ -36,9 +55,14 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
         qualities,
         flaws,
         ...(typeof raw.group === 'string' && { group: raw.group }),
+        ...(typeof raw.reach === 'string' &&
+            (WEAPON_REACHES as readonly string[]).includes(raw.reach) && {
+                reach: raw.reach as WeaponReach,
+            }),
+        ...(raw.twoHanded === true && { twoHanded: true as const }),
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.magical === true && { magical: true as const }),
-        ...(raw.offHand === true && { offHand: true as const }),
+        ...(handOf(raw) && { hand: handOf(raw) }),
     };
 });
 
@@ -90,6 +114,8 @@ export const SCENE_SLOT = defineSlot<SceneMomentum>('wfrp', (raw) => {
     ) as SceneMomentum;
 });
 
+export type WfrpMoveMode = 'run' | 'sprint' | 'charge';
+
 export interface WfrpParticipantState {
     fortune?: number;
     /** Current Fate where Fate is its own pool (canon5e) */
@@ -100,7 +126,13 @@ export interface WfrpParticipantState {
     outOfFight?: true;
     /** Spent Momentum on the second weapon's attack this turn (p167) */
     momentumAttack?: true;
+    /** Hand of the last weapon attack this turn, or `cast` after a spell (p167) */
+    lastHand?: WfrpHand | 'cast';
+    /** A melee attack hit this turn: the Parry weapon's second attack is then unopposed (p304), canon gear */
+    meleeHit?: true;
     channelledSl?: number;
+    /** Movement chosen this turn, canon5e (p163); a Charge limits attacks to melee */
+    moveMode?: WfrpMoveMode;
     /** Critical Wounds taken this battle, canon5e (p172) */
     critWounds?: number;
     /** Rounds left before a critically wounded, unconscious fighter dies (p172) */
@@ -185,7 +217,14 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...(raw.momentumAttack === true && {
                 momentumAttack: true as const,
             }),
+            ...((raw.lastHand === 'main' ||
+                raw.lastHand === 'off' ||
+                raw.lastHand === 'cast') && { lastHand: raw.lastHand }),
+            ...(raw.meleeHit === true && { meleeHit: true as const }),
             ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
+            ...((raw.moveMode === 'run' ||
+                raw.moveMode === 'sprint' ||
+                raw.moveMode === 'charge') && { moveMode: raw.moveMode }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
             ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),
             ...(finite(raw.sin) && { sin: raw.sin }),

@@ -68,20 +68,30 @@ describe('canon5e condition ticks', () => {
         expect(hpAfter(tick(make(10, [['poisoned', 1]]), () => 0.5))).toBe(9);
     });
 
-    bookExample(185, 'Ablaze is reduced by TB and the weakest location (no minimum)', () => {
-        const high = tick(make(20, [['ablaze', 1]]), () => 0.999);
+    bookExample(
+        185,
+        'Ablaze is reduced by TB and the weakest location (no minimum)',
+        () => {
+            const high = tick(make(20, [['ablaze', 1]]), () => 0.999);
 
-        const low = tick(make(20, [['ablaze', 1]]), () => 0);
+            const low = tick(make(20, [['ablaze', 1]]), () => 0);
 
-        expect(hpAfter(low)).toBe(20);
-        expect(20 - hpAfter(high)).toBe(10 - 3);
-    });
+            expect(hpAfter(low)).toBe(20);
+            expect(20 - hpAfter(high)).toBe(10 - 3);
+        }
+    );
 
-    bookExample(185, 'Bleeding at 0 Wounds: a failed Endurance test knocks out', () => {
-        const r = tick(make(1, [['bleeding', 1]]), () => 0.99);
+    bookExample(
+        185,
+        'Bleeding at 0 Wounds: a failed Endurance test knocks out',
+        () => {
+            const r = tick(make(1, [['bleeding', 1]]), () => 0.99);
 
-        expect(r.participants[0].combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-    });
+            expect(r.participants[0].combatStats.status).toBe(
+                CombatStatus.UNCONSCIOUS
+            );
+        }
+    );
 
     bookExample(185, 'Bleeding above 0 Wounds never knocks out', () => {
         const r = tick(make(10, [['bleeding', 1]]), () => 0.99);
@@ -105,7 +115,9 @@ describe('canon5e condition ticks', () => {
             rules: CANON_RULES,
         });
 
-        expect(r.participants[0].combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+        expect(r.participants[0].combatStats.status).toBe(
+            CombatStatus.UNCONSCIOUS
+        );
         expect(r.messages).toHaveLength(1);
     });
 });

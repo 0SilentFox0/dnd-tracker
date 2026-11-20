@@ -327,6 +327,7 @@ export type ActionAssertCtx =
           attack: BattleAttack;
           targets: BattleParticipant[];
           participants: BattleParticipant[];
+          rules?: Ruleset;
       }
     | { kind: 'cast'; actor: BattleParticipant };
 
@@ -342,6 +343,12 @@ export interface RuleSystemCombat {
     assertAction?(ctx: ActionAssertCtx): void;
     /** Off-hand attacks; absent means never */
     secondaryAttack?: OffHandRules;
+    /** The attacker cannot use this attack right now (e.g. a disarmed hand); absent means never */
+    attackBlocked?(
+        attacker: BattleParticipant,
+        attack: BattleAttack,
+        rules: Ruleset
+    ): boolean;
     /** Lair actions and the lair toggle; absent means none */
     sceneActions?: LairRules;
     /** Ability of an attack and its roll and damage modifiers; absent means the attack type's default ability */
@@ -365,7 +372,10 @@ export interface RuleSystemCombat {
         hit: boolean;
     };
     dice: number;
-    attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
+    attacksOf?(input: {
+        rows: EquippedArtifactRow[];
+        rules?: Ruleset;
+    }): ExtractedAttack[];
     participantFields?(
         row: { characteristics?: unknown },
         gear?: ArmourGear
@@ -412,7 +422,10 @@ export interface RuleSystemCombat {
         ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng; roll?: boolean }
     ): InitiativeScore;
     /** Starting values the participant builders use instead of the d20 sheet columns */
-    baseStats?(row: { characteristics?: unknown }): {
+    baseStats?(
+        row: { characteristics?: unknown },
+        gear?: ArmourGear
+    ): {
         initiative: number;
         speed: number;
     };

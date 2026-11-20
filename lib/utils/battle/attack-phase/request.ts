@@ -220,6 +220,12 @@ export function validateAttackRequest(
                 : REJECT.noAttackAvailable
         );
 
+    if (ruleSystemOf(rules).combat.attackBlocked?.(attacker, attack, rules))
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.ATTACK_HAND_DISABLED
+        );
+
     if (data.offHand) assertOffHand(attacker, attack, rules);
     else if (attack.hand === 'off')
         throw new BattleRuleError(
@@ -235,6 +241,7 @@ export function validateAttackRequest(
         attack,
         targets: chosenTargets,
         participants: order,
+        rules,
     });
 
     if (data.cunningStrike?.length) {

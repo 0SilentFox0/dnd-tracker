@@ -74,6 +74,10 @@
     "critHit": "🩸 Критична рана для {target} (+{bonus} шкоди): {text}",
     "counterCrit": "🛡️ Критичне влучання захисника ранить {name}: {text}",
     "critWound": "🩸 Критична рана для {target}: {text}",
+    "groupForbidden": "🚫 {name} не може стріляти зі зброї групи {group} без навчання в ній",
+    "blackpowderPass": "{name}: шок від пострілу — тест Холоднокровності {roll}, SL {sl}: витримано",
+    "blackpowderFail": "{name}: шок від пострілу — тест Холоднокровності {roll}, SL {sl}: провалено",
+    "armourWorn": "🪓 {target}: броня зношена на {amount} AP",
     "unconscious": "💤 {name} падає на 0 Ран і втрачає свідомість",
     "psychologyPass": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: стійкість",
     "psychologyFail": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: провал",
@@ -88,15 +92,29 @@
     "frenzyStart": "{name} впадає в Шал — тест Сили волі {roll} / {target}",
     "frenzyEnd": "{name}: Шал минає, боєць стає Втомленим",
     "critDeath": "☠️ {target} гине на місці: {text}",
+    "critWoundAt": "🩸 Критична рана для {target} ({place}): {text}",
+    "critHitAt": "🩸 Критична рана для {target} ({place}, +{bonus} шкоди): {text}",
+    "critDeathAt": "☠️ {target} гине на місці ({place}): {text}",
     "dying": "⏳ {name} помирає: лишилось раундів — {rounds}, якщо не зцілити",
     "diedOfWounds": "☠️ {name} гине від критичних ран",
     "fateHowDidThatMiss": "{name} витрачає Долю: «Як він схибив?» — атака {attacker} не має ефекту",
     "fateNotToday": "{name} витрачає Долю: «Не сьогодні!» — виходить із сутички живим",
     "momentumSecondAttack": "{name} витрачає Momentum на атаку другою зброєю",
     "leadershipTransfer": "{name} витрачає Momentum: Лідерство (РУ {sl}), {ally} отримує Momentum",
+    "disengageMomentum": "{name} витрачає Momentum і виходить із ближнього бою без штрафу",
+    "disengageSuccess": "{name} виходить із ближнього бою (РУ {sl} проти {foeSl})",
+    "disengageFailed": "{name} не вдається вийти з бою (РУ {sl} проти {foeSl}), вороги отримують Momentum",
+    "runDeclared": "{name} біжить: рух цього ходу подвоєно",
+    "sprintResult": "{name} робить спринт (РУ {sl}): додатково {yards} ярдів руху",
+    "sprintFailed": "{name} не вдається спринт (РУ {sl})",
+    "chargeMomentum": "{name} біжить на {target} з {yards} ярдів і отримує Momentum; дія має бути ближньою атакою",
+    "chargeDeclared": "{name} біжить на {target}; дія має бути ближньою атакою",
     "leadershipFailed": "{name} витрачає Momentum: Лідерство провалено (РУ {sl})",
     "fortuneCondition": "{name} витрачає Удачу: знято стан {condition}",
-    "fortuneRerolls": "{name} витрачає Удачу: перекидань {rolls}"
+    "fortuneRerolls": "{name} витрачає Удачу: перекидань {rolls}",
+    "fumbleDrop": "{name} схибив і випустив зброю; наступна Дія піде на підняття",
+    "fumbleOops": "{name} схибив (oops {roll}): {text}",
+    "fumbleMisfire": "{name}: осічка ({roll}): {text}"
   },
   "passion": {
     "frenzy": "Шал",
@@ -149,6 +167,10 @@
       "locations": {
         "head": "Голова",
         "arm": "Рука",
+        "leftArm": "Ліва рука",
+        "rightArm": "Права рука",
+        "leftLeg": "Ліва нога",
+        "rightLeg": "Права нога",
         "body": "Тулуб",
         "leg": "Нога"
       }
@@ -163,12 +185,18 @@
     "momentum": {
       "title": "Momentum",
       "secondAttack": "Друга атака",
+      "disengage": "Відступити (дія, тест)",
+      "disengageFree": "Відступити (витратити Momentum)",
+      "run": "Біг (подвійний рух)",
+      "sprint": "Спринт (дія, Атлетика)",
+      "charge": "Розбіг",
       "leadership": "Передати Momentum",
       "ally": "Союзник",
       "reason": {
         "none": "Немає Momentum",
         "used": "Уже використано цього ходу",
         "action": "Спершу виконайте основну дію",
+        "cast": "Після закляття другої атаки немає",
         "weapons": "Потрібні дві зброї ближнього бою"
       }
     }
@@ -221,5 +249,25 @@
       "crit": "Критична рана"
     },
     "total": "Усього шкоди"
+  },
+  "fumble": {
+    "labels": {
+      "loseAction": "Втрачена Дія",
+      "loseMove": "Втрачений Рух",
+      "slPenalty": "-1 SL (фамбл)"
+    },
+    "oops": {
+      "1": "Втрата 1 Wound, ігноруючи Toughness і броню",
+      "2": "Зброя отримує 1 пошкодження; наступного раунду ви дієте останнім",
+      "3": "Наступного раунду ваша Дія має -1 SL",
+      "4": "Ви втрачаєте наступний Рух",
+      "5": "Ви пропускаєте наступну Дію",
+      "6": "Випадкова нога ушкоджена на 1d10 раундів (рахується як Critical Wound)",
+      "7": "Ви б'єте випадкового союзника в зоні досяжності, інакше отримуєте Stunned"
+    },
+    "misfire": {
+      "1": "Зброя не стріляє; потрібне перезаряджання",
+      "2": "Зброя вибухає й ранить вашу основну руку"
+    }
   }
 }

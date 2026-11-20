@@ -27,11 +27,15 @@ describe('DEFAULT_TABLES', () => {
             TABLE_SLOTS.map((slot) =>
                 slot === 'wrath'
                     ? 4
-                    : slot === 'downtimeEvent'
-                      ? 10
-                      : slot.startsWith('mutation')
-                        ? 6
-                        : 5
+                    : slot === 'oops'
+                      ? 7
+                      : slot === 'misfire'
+                        ? 2
+                        : slot === 'downtimeEvent'
+                          ? 10
+                          : slot.startsWith('mutation')
+                            ? 6
+                            : 5
             )
         );
     });

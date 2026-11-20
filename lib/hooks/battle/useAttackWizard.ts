@@ -37,14 +37,20 @@ export function useAttackWizard(
 
     const order = scene.battle.initiativeOrder;
 
+    const { rules } = scene.battle;
+
     const attackPools = useMemo(() => {
-        const all = attacker?.battleData.attacks ?? [];
+        const blocked = ruleSystemOf(rules).combat.attackBlocked;
+
+        const all = (attacker?.battleData.attacks ?? []).filter(
+            (a) => !attacker || !blocked?.(attacker, a, rules)
+        );
 
         return {
             main: all.filter((a) => a.hand !== 'off'),
             off: all.filter((a) => a.hand === 'off'),
         };
-    }, [attacker]);
+    }, [attacker, rules]);
 
     const attacks = state.offHand ? attackPools.off : attackPools.main;
 

@@ -77,6 +77,10 @@
         "locations": {
           "head": "head",
           "arm": "arm",
+          "leftArm": "left arm",
+          "rightArm": "right arm",
+          "leftLeg": "left leg",
+          "rightLeg": "right leg",
           "body": "body",
           "leg": "leg"
         },

@@ -11,7 +11,10 @@ type EquippedStatsRow = { slot: string; systemStats: unknown };
 export const parseWfrpStats = (raw: unknown): WfrpItemStats | null =>
     readStats(raw);
 
-export function armourAp(equipped: EquippedStatsRow[]): {
+export function armourAp(
+    equipped: EquippedStatsRow[],
+    opts: { singleShield?: boolean } = {}
+): {
     ap: Record<HitLocation, number>;
     armourOnly: Record<HitLocation, number>;
     flexible: boolean;
@@ -28,7 +31,7 @@ export function armourAp(equipped: EquippedStatsRow[]): {
 
     let allFlexible = true;
 
-    let shield = 0;
+    const shields: number[] = [];
 
     const twoHanded = equipped.some((row) => {
         const stats =
@@ -63,12 +66,15 @@ export function armourAp(equipped: EquippedStatsRow[]): {
         ) {
             const x = qualityValue(stats.qualities, 'shield');
 
-            if (x) {
-                shield += x;
-                for (const l of SHIELD_LOCATIONS) ap[l] += x;
-            }
+            if (x) shields.push(x);
         }
     }
+
+    const counted = opts.singleShield ? [Math.max(0, ...shields)] : shields;
+
+    const shield = counted.reduce((a, b) => a + b, 0);
+
+    if (shield) for (const l of SHIELD_LOCATIONS) ap[l] += shield;
 
     for (const l of LOCATIONS) {
         ap[l] = Math.min(ap[l], AP_CAP);

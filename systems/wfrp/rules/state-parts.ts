@@ -1,13 +1,20 @@
 import { fortuneMax } from './characteristics/keys';
 import { isFrenzied } from './traits/frenzy';
+import { editionOf } from './edition';
 import { PARTICIPANT_SLOT } from './slots';
 import { wfrpState, withWfrpState } from './state';
 
+import {
+    findParticipant,
+    replaceParticipant,
+} from '@/lib/utils/abilities/engine/core/participants';
 import { withAttacksLeft } from '@/lib/utils/battle/attack/attacks-left';
 import type {
     PersistPart,
     StoredPart,
+    TurnHook,
     TurnStateReset,
+    TurnSubjectCtx,
 } from '@/lib/utils/rules/systems/types';
 
 /** Fortune: the saved value, else its maximum; Fate: only once spent (absent = the characteristic) */
@@ -41,15 +48,49 @@ export const wfrpPersist: PersistPart = ({ participant }, acc) => ({
 export const wfrpResetState: TurnStateReset = (p, scope) => {
     if (scope !== 'turn') return p;
 
-    const { conditionTests, momentumAttack } = wfrpState(p);
+    const { conditionTests, momentumAttack, lastHand, moveMode, meleeHit } =
+        wfrpState(p);
 
     const cleared =
-        conditionTests || momentumAttack
+        conditionTests || momentumAttack || lastHand || moveMode || meleeHit
             ? withWfrpState(p, {
                   conditionTests: undefined,
                   momentumAttack: undefined,
+                  lastHand: undefined,
+                  moveMode: undefined,
+                  meleeHit: undefined,
               })
             : p;
 
     return isFrenzied(cleared) ? withAttacksLeft(cleared, 1) : cleared;
+};
+
+/** Same-hand and Charge blocks belong to the owner's turn: they must not leak into off-turn strikes (p164, p167) */
+export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
+    participants,
+    id,
+    rules,
+}) => {
+    const p = findParticipant(participants, id);
+
+    if (!p || editionOf(rules).momentumModel !== 'participant')
+        return { participants, messages: [] };
+
+    const { momentumAttack, lastHand, moveMode, meleeHit } = wfrpState(p);
+
+    if (!momentumAttack && !lastHand && !moveMode && !meleeHit)
+        return { participants, messages: [] };
+
+    return {
+        participants: replaceParticipant(
+            participants,
+            withWfrpState(p, {
+                momentumAttack: undefined,
+                lastHand: undefined,
+                moveMode: undefined,
+                meleeHit: undefined,
+            })
+        ),
+        messages: [],
+    };
 };

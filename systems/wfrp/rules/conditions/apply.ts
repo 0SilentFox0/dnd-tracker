@@ -1,5 +1,6 @@
 import { isOutOfFight } from '../combat/critical';
 import { loseMomentum } from '../combat/momentum';
+import { participantStats } from '../combat/participant';
 import { editionOf, type EditionProfile } from '../edition';
 import {
     isWfrpConditionKey,
@@ -135,10 +136,53 @@ export function applyWfrpConditionTo(
             },
         };
 
+    const canon = input.edition?.conditionModel === 'sl';
+
+    if (canon && key === 'unconscious')
+        next = reduceWfrpCondition(next, 'stunned', 'all').participant;
+
+    const stats = participantStats(next);
+
+    const knockedOut =
+        canon &&
+        key === 'stunned' &&
+        stats !== undefined &&
+        conditionLevel(next, 'stunned') > stats.tb;
+
+    if (knockedOut) {
+        const faint = applyWfrpConditionTo(next, {
+            key: 'unconscious',
+            round: input.round,
+            sourceName: dynamicTextRef(labelKey(key)),
+            edition: input.edition,
+        });
+
+        return {
+            participant: faint.participant,
+            messages: [message, ...faint.messages],
+        };
+    }
+
     return { participant: loseMomentum(next), messages: [message] };
 }
 
+/** `by` levels are removed one by one (the book removes one more per SL past the first) */
 export function reduceWfrpCondition(
+    p: BattleParticipant,
+    key: WfrpConditionKey,
+    by: number | 'all'
+): { participant: BattleParticipant; removed: boolean } {
+    if (by === 'all') return reduceOnce(p, key, 'all');
+
+    let result = { participant: p, removed: conditionLevel(p, key) === 0 };
+
+    for (let i = 0; i < Math.max(1, by) && !result.removed; i++)
+        result = reduceOnce(result.participant, key, 1);
+
+    return result;
+}
+
+function reduceOnce(
     p: BattleParticipant,
     key: WfrpConditionKey,
     by: 1 | 'all'

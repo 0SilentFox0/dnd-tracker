@@ -27,10 +27,16 @@ export interface EditionProfile {
     woundModel: 'knockdown' | 'critical';
     /** `percent`: condition levels shift the test target by 10%; `sl`: the worst penalising level costs that many SL, Stunned halves Move, Prone/Blinded/Surprised give melee attackers Advantage or SL (p184-187) */
     conditionModel: 'percent' | 'sl';
+    /** `zone`: head/arm/body/leg; `side`: arms and legs split into left and right, a disarmed arm blocks that hand (p164) */
+    hitLocationModel: 'zone' | 'side';
+    /** `none`: a fumbled attack is a plain miss; `drop`: the weapon is dropped and the next Action retrieves it; `oops`: a table (p165) */
+    fumbleModel: 'none' | 'drop' | 'oops';
     /** `broken`: a failed Fear test costs a Broken level; `extended`: Fear is an Extended Cool test (SL accumulates to the rating, meanwhile no Momentum and the source attacks with Advantage), Terror breaks by rating (p183-184) */
     psychologyModel: 'broken' | 'extended';
     /** `legacy`: one endeavour per hero, Challenging tests, income by SL, rest wound recovery by days; `canon5e`: up to 3 endeavours, Income at Average (+2 SL) paid in dice by Status and halved on failure, Heal = IB + SL, a downtime period restores all Wounds (p170, p190, p196, p199) */
     downtimeModel: 'legacy' | 'canon5e';
+    /** `canon`: worn armour is 1 Enc lighter, coins weigh 1 Enc per 200, overburdened characters lose Movement and Agility (p299) */
+    gearModel: 'legacy' | 'canon';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -48,8 +54,11 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         attackTarget: 'characteristic',
         woundModel: 'knockdown',
         conditionModel: 'percent',
+        hitLocationModel: 'zone',
+        fumbleModel: 'none',
         psychologyModel: 'broken',
         downtimeModel: 'legacy',
+        gearModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -65,7 +74,10 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         attackTarget: 'skill',
         woundModel: 'critical',
         conditionModel: 'sl',
+        hitLocationModel: 'side',
+        fumbleModel: 'drop',
         psychologyModel: 'extended',
         downtimeModel: 'canon5e',
+        gearModel: 'canon',
     },
 };

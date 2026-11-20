@@ -32,7 +32,11 @@ const base = { participantId: z.string().min(1) };
 
 export const momentumSchema = z
     .discriminatedUnion('mode', [
-        z.object({ mode: z.literal('secondAttack'), ...base }),
+        z.object({
+            mode: z.literal('secondAttack'),
+            ...base,
+            serverRoll: z.boolean().optional(),
+        }),
         z.object({
             mode: z.literal('leadership'),
             ...base,
@@ -83,7 +87,7 @@ export function momentumMutation(
     const at = { battleId: ctx.scene.id, round: ctx.scene.round };
 
     if (body.mode === 'secondAttack') {
-        const blocker = secondAttackBlocker(actor);
+        const blocker = secondAttackBlocker(actor, ctx.meta.rules);
 
         if (blocker === 'used') throw reject(API_ERRORS.MOMENTUM_ATTACK_USED);
 

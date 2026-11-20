@@ -8,6 +8,8 @@
     "miscastMinor": "Minor miscast",
     "miscastMajor": "Major miscast",
     "wrath": "Wrath of the Gods",
+    "oops": "Fumble (Oops)",
+    "misfire": "Misfire",
     "downtimeEvent": "Downtime events",
     "mutationPhysical": "Mutations: physical",
     "mutationMental": "Mutations: mental"
@@ -24,10 +26,12 @@
     "characteristic": "Characteristic",
     "move": "Move",
     "maxWounds": "Max Wounds",
-    "death": "Death"
+    "death": "Death",
+    "fumble": "Fumble effect"
   },
   "amount": "Amount",
   "condition": "Condition",
+  "rounds": "Rounds",
   "levels": "Levels",
   "marker": "Marker",
   "markers": {
@@ -43,5 +47,13 @@
   "reset": "Reset to default",
   "defaultHint": "This table uses the built-in rows. Customize to edit a copy.",
   "customHint": "The last row always ends at 100.",
-  "characteristic": "Characteristic"
+  "characteristic": "Characteristic",
+  "fumbleKinds": {
+    "loseAction": "Lose next Action",
+    "loseMove": "Lose next Move",
+    "slPenalty": "-1 SL next Round",
+    "actLast": "Act last next Round",
+    "weaponDamage": "Weapon damaged",
+    "legPenalty": "Leg penalty (Critical Wound)"
+  }
 }

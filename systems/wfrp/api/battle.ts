@@ -41,3 +41,27 @@ export const momentumOp = (body: MomentumBody): SystemOpBody => ({
     action: 'momentum',
     body,
 });
+
+export const disengageOp = (body: {
+    participantId: string;
+    roll?: number;
+    serverRoll?: boolean;
+}): SystemOpBody => ({
+    action: 'disengage',
+    body,
+});
+
+export type MovementOpBody =
+    | { kind: 'run'; participantId: string }
+    | {
+          kind: 'sprint';
+          participantId: string;
+          roll?: number;
+          serverRoll?: boolean;
+      }
+    | { kind: 'charge'; participantId: string; targetId: string };
+
+export const movementOp = (body: MovementOpBody): SystemOpBody => ({
+    action: 'movement',
+    body,
+});

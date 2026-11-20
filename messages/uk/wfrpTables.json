@@ -8,6 +8,8 @@
     "miscastMinor": "Малий збій магії",
     "miscastMajor": "Великий збій магії",
     "wrath": "Гнів богів",
+    "oops": "Фамбл (Oops)",
+    "misfire": "Осічка",
     "downtimeEvent": "Події простою",
     "mutationPhysical": "Мутації: тіло",
     "mutationMental": "Мутації: розум"
@@ -24,10 +26,12 @@
     "characteristic": "Характеристика",
     "move": "Рух",
     "maxWounds": "Макс. Wounds",
-    "death": "Смерть"
+    "death": "Смерть",
+    "fumble": "Ефект фамблу"
   },
   "amount": "Кількість",
   "condition": "Стан",
+  "rounds": "Раунди",
   "levels": "Рівні",
   "marker": "Маркер",
   "markers": {
@@ -43,5 +47,13 @@
   "reset": "Скинути до дефолту",
   "defaultHint": "Ця таблиця використовує вбудовані рядки. Натисніть «Налаштувати», щоб редагувати копію.",
   "customHint": "Останній рядок завжди закінчується на 100.",
-  "characteristic": "Характеристика"
+  "characteristic": "Характеристика",
+  "fumbleKinds": {
+    "loseAction": "Втрата наступної Дії",
+    "loseMove": "Втрата наступного Руху",
+    "slPenalty": "-1 SL наступного раунду",
+    "actLast": "Дія останнім наступного раунду",
+    "weaponDamage": "Зброя пошкоджена",
+    "legPenalty": "Штраф ноги (Critical Wound)"
+  }
 }

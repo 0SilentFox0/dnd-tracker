@@ -2,7 +2,8 @@ import { editionOf } from '../edition';
 import { applyWfrpCrit } from './crit-effect';
 import { rollCrit } from './crit-table';
 import { isOutOfFight, startDeathTimer } from './critical';
-import { asLocation, hitLocation } from './location';
+import { asLocation, hitLocation, sideOf } from './location';
+import { participantStats } from './participant';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -46,13 +47,26 @@ function criticalOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
     if (!ctx.manual && excess > 0) {
         // a critical hit already rolled at the struck spot: the second wound lands elsewhere (p171)
-        const location = ctx.crit
-            ? hitLocation(rollDie(100, ctx.rng))
-            : asLocation(ctx.location);
+        const spot = ctx.crit
+            ? hitLocation(
+                  rollDie(100, ctx.rng),
+                  editionOf(ctx.rules).hitLocationModel === 'side'
+              )
+            : ctx.location;
+
+        const location = asLocation(spot);
 
         const applied = applyWfrpCrit(
             next,
-            rollCrit(location, ctx.rules, ctx.rng, undefined, excess * 10),
+            rollCrit(
+                location,
+                ctx.rules,
+                ctx.rng,
+                undefined,
+                excess * 10,
+                sideOf(spot),
+                participantStats(next)?.tb ?? 0
+            ),
             ctx.round ?? 0,
             editionOf(ctx.rules)
         );
@@ -104,7 +118,15 @@ export function wfrpOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
         const applied = applyWfrpCrit(
             next,
             {
-                ...rollCrit(asLocation(ctx.location), ctx.rules, ctx.rng),
+                ...rollCrit(
+                    asLocation(ctx.location),
+                    ctx.rules,
+                    ctx.rng,
+                    undefined,
+                    0,
+                    sideOf(ctx.location),
+                    participantStats(next)?.tb ?? 0
+                ),
                 bonusDamage: 0,
             },
             ctx.round ?? 0

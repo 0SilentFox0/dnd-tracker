@@ -33,17 +33,27 @@ const withConds = (
     );
 
 describe('canon5e conditions', () => {
-    bookExample(184, 'a condition costs 1 SL per level, no target shift', () => {
-        const p = withConds(['fatigued', 2]);
+    bookExample(
+        184,
+        'a condition costs 1 SL per level, no target shift',
+        () => {
+            const p = withConds(['fatigued', 2]);
 
-        expect(selfSlMod(p, CANON)).toBe(-2);
-        expect(selfTestMod(p, 'test', CANON)).toBe(0);
-    });
+            expect(selfSlMod(p, CANON)).toBe(-2);
+            expect(selfTestMod(p, 'test', CANON)).toBe(0);
+        }
+    );
 
-    bookExample(184, 'different conditions do not add: the worst level counts', () => {
-        expect(selfSlMod(withConds(['fatigued', 1], ['poisoned', 3]), CANON)).toBe(-3);
-        expect(selfSlMod(withConds(['entangled', 2]), CANON)).toBe(0);
-    });
+    bookExample(
+        184,
+        'different conditions do not add: the worst level counts',
+        () => {
+            expect(
+                selfSlMod(withConds(['fatigued', 1], ['poisoned', 3]), CANON)
+            ).toBe(-3);
+            expect(selfSlMod(withConds(['entangled', 2]), CANON)).toBe(0);
+        }
+    );
 
     it('the legacy model keeps percent shifts', () => {
         const p = withConds(['fatigued', 2]);
@@ -64,7 +74,10 @@ describe('canon5e conditions', () => {
             advantage: 1,
             sl: 0,
         });
-        expect(againstSl(withConds(['prone'], ['blinded']), 'melee', CANON).advantage).toBe(2);
+        expect(
+            againstSl(withConds(['prone'], ['blinded']), 'melee', CANON)
+                .advantage
+        ).toBe(2);
         expect(againstSl(withConds(['prone']), 'ranged', CANON)).toEqual({
             advantage: 0,
             sl: 0,

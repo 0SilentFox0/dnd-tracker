@@ -9,6 +9,8 @@ type Model = Pick<EditionProfile, 'conditionModel'>;
 
 const SURPRISED_MELEE_SL = 2;
 
+const SIGHT_SKILLS: ReadonlySet<string> = new Set(['climb', 'ride']);
+
 const levelsOf = (p: BattleParticipant | undefined) =>
     p?.battleData?.activeEffects
         ? WFRP_CONDITION_KEYS.map((key) => ({
@@ -54,14 +56,18 @@ export function selfSlMod(
     return worst > 0 ? -worst : 0;
 }
 
-/** Blinded attacks with Disadvantage (p185) */
+/** Blinded: Disadvantage to attacks and to tests that lean on sight, e.g. Climb or Ride (p185) */
 export function selfModes(
     p: BattleParticipant | undefined,
     kind: 'attack' | 'test',
-    edition: Model
+    edition: Model,
+    skill?: string
 ): ModeSources {
+    const sighted =
+        kind === 'attack' || (!!skill && SIGHT_SKILLS.has(skill));
+
     return isSl(edition) &&
-        kind === 'attack' &&
+        sighted &&
         levelsOf(p).some((c) => c.key === 'blinded')
         ? { disadvantage: 1 }
         : {};
@@ -84,6 +90,12 @@ export function againstMod(
         );
     }, 0);
 }
+
+/** A Surprised fighter cannot defend in opposed tests (p187) */
+export const cannotDefend = (
+    p: BattleParticipant | undefined,
+    edition: Model
+): boolean => isSl(edition) && levelsOf(p).some((c) => c.key === 'surprised');
 
 /** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187); ranged attacks are unaffected */
 export function againstSl(

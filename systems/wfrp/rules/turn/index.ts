@@ -1,5 +1,5 @@
 import { wfrpConditionsTurnStart } from '../conditions/tick';
-import { wfrpResetState } from '../state-parts';
+import { wfrpEndTurnState, wfrpResetState } from '../state-parts';
 import {
     wfrpFrenzyRoundStart,
     wfrpFrenzyTurnStart,
@@ -18,6 +18,7 @@ export const WFRP_TURN: RuleSystemTurn = {
         (ctx) => wfrpFrenzyTurnStart(ctx.participants, ctx.id, ctx),
     ],
     onSkippedTurn: [wfrpOnSkippedTurn],
+    onTurnEnd: [wfrpEndTurnState],
     onRoundStart: [
         (ctx) => wfrpFearRound(ctx.participants, ctx),
         (ctx) => wfrpFrenzyRoundStart(ctx.participants, ctx),

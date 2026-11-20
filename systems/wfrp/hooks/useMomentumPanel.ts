@@ -2,24 +2,39 @@
 
 import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
-import { momentumOp } from '@/systems/wfrp/api/battle';
+import { disengageOp, momentumOp, movementOp } from '@/systems/wfrp/api/battle';
+import {
+    engagedFoes,
+    isSurrounded,
+} from '@/systems/wfrp/rules/combat/engagement';
 import {
     hasMomentum,
     type SecondAttackBlocker,
     secondAttackBlocker,
 } from '@/systems/wfrp/rules/combat/momentum';
 import { editionOf } from '@/systems/wfrp/rules/edition';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface MomentumPanel {
+    holds: boolean;
+    canDisengage: boolean;
+    disengage(roll?: number): void;
     blocker: SecondAttackBlocker | null;
     allies: { id: string; name: string }[];
+    canRun: boolean;
+    canSprint: boolean;
+    canCharge: boolean;
+    chargeTargets: { id: string; name: string }[];
+    run(): void;
+    sprint(roll?: number): void;
+    charge(targetId: string): void;
     secondAttack(): void;
     leadership(allyId: string, roll?: number): void;
     isPending: boolean;
 }
 
-/** Null unless it is the holder's turn, the edition keeps Momentum per participant and the hero holds it. */
+/** Null unless it is the hero's turn in an edition that keeps Momentum per participant and something is available. */
 export function useMomentumPanel(
     hero: BattleParticipant
 ): MomentumPanel | null {
@@ -27,15 +42,44 @@ export function useMomentumPanel(
 
     if (
         editionOf(battle.rules).momentumModel !== 'participant' ||
-        !hasMomentum(hero) ||
         turn.current?.basicInfo.id !== hero.basicInfo.id
     )
         return null;
 
     const participantId = hero.basicInfo.id;
 
+    const holds = hasMomentum(hero);
+
+    const foes = engagedFoes(hero, battle.initiativeOrder, battle.map);
+
+    const canDisengage =
+        foes.length > 0 &&
+        !isSurrounded(foes) &&
+        (holds || !hero.actionFlags.hasUsedAction);
+
+    const freeMove = !wfrpState(hero).moveMode;
+
+    const canSprint = freeMove && !hero.actionFlags.hasUsedAction;
+
+    const canCharge =
+        freeMove &&
+        foes.length === 0 &&
+        !hero.battleData.movementUsed &&
+        !hero.actionFlags.hasUsedAction;
+
+    if (!holds && !canDisengage && !freeMove) return null;
+
     return {
-        blocker: secondAttackBlocker(hero),
+        holds,
+        canDisengage,
+        disengage: (roll) =>
+            actions.system.mutate(
+                disengageOp({
+                    participantId,
+                    ...(roll === undefined ? { serverRoll: true } : { roll }),
+                })
+            ),
+        blocker: secondAttackBlocker(hero, battle.rules),
         allies: battle.initiativeOrder
             .filter(
                 (p) =>
@@ -44,6 +88,32 @@ export function useMomentumPanel(
                     isActive(p)
             )
             .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name })),
+        canRun: freeMove,
+        canSprint,
+        canCharge,
+        chargeTargets: canCharge
+            ? battle.initiativeOrder
+                  .filter(
+                      (p) =>
+                          p.basicInfo.side !== hero.basicInfo.side &&
+                          isActive(p)
+                  )
+                  .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name }))
+            : [],
+        run: () =>
+            actions.system.mutate(movementOp({ kind: 'run', participantId })),
+        sprint: (roll) =>
+            actions.system.mutate(
+                movementOp({
+                    kind: 'sprint',
+                    participantId,
+                    ...(roll === undefined ? { serverRoll: true } : { roll }),
+                })
+            ),
+        charge: (targetId) =>
+            actions.system.mutate(
+                movementOp({ kind: 'charge', participantId, targetId })
+            ),
         secondAttack: () =>
             actions.system.mutate(
                 momentumOp({ mode: 'secondAttack', participantId })
@@ -57,6 +127,9 @@ export function useMomentumPanel(
                     ...(roll === undefined ? { serverRoll: true } : { roll }),
                 })
             ),
-        isPending: isSystemActionPending(actions.system, 'momentum'),
+        isPending:
+            isSystemActionPending(actions.system, 'momentum') ||
+            isSystemActionPending(actions.system, 'disengage') ||
+            isSystemActionPending(actions.system, 'movement'),
     };
 }

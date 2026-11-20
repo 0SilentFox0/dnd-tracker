@@ -1,4 +1,4 @@
-import type { HitLocation } from '../../rules/combat/constants';
+import type { HitSpot } from '../../rules/combat/constants';
 import { editionOf } from '../../rules/edition/read';
 import {
     FORTUNE_INPUT,
@@ -12,8 +12,8 @@ export interface FortuneExtras {
     rerolls?: { value: number; set: (n: number) => void };
     notFail?: {
         critical: boolean;
-        location?: HitLocation;
-        set: (critical: boolean, location?: HitLocation) => void;
+        location?: HitSpot;
+        set: (critical: boolean, location?: HitSpot) => void;
     };
 }
 
