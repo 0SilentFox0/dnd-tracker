@@ -19,7 +19,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { MarkerPickerDialog } from '@/components/world/MarkerPickerDialog';
+import { MarkerPickerDialog } from '@/components/world/nav/MarkerPickerDialog';
 import { SECTION_ICON_KEYS } from '@/lib/constants/scenario';
 import { sectionIcon } from '@/lib/utils/scenario/section-icon';
 import type {

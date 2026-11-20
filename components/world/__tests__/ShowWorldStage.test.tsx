@@ -19,7 +19,7 @@ vi.mock('@/lib/api/world', () => ({
 vi.mock('next/image', () => ({
     default: (p: { alt: string }) => <img alt={p.alt} />,
 }));
-vi.mock('@/components/world/WorldMapView', () => ({
+vi.mock('@/components/world/map/WorldMapView', () => ({
     WorldMapView: (p: {
         detail: {
             map: { id: string };

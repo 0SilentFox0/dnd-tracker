@@ -1,6 +1,6 @@
 'use client';
 
-import { MarkerBubble } from '@/components/world/MarkerBubble';
+import { MarkerBubble } from '@/components/world/nav/MarkerBubble';
 import type { WorldMarker } from '@/types/world';
 
 interface PlayerMarkerBubbleProps {

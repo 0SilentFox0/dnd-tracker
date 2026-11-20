@@ -15,7 +15,7 @@ import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { MarkerBubble } from '@/components/world/MarkerBubble';
+import { MarkerBubble } from '@/components/world/nav/MarkerBubble';
 import {
     WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_NAME_MAX,

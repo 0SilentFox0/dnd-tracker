@@ -1,8 +1,7 @@
 import { MapPin } from 'lucide-react';
 
-import { MARKER_ICON } from './marker-icons';
-
 import { HudButton } from '@/components/hud';
+import { MARKER_ICON } from '@/components/world/marker-icons';
 import {
     WORLD_LABEL_ZOOM,
     WORLD_LABEL_ZOOM_COMPACT,

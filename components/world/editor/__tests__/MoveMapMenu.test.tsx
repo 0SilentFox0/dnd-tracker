@@ -18,7 +18,7 @@ let picker: {
     onPick(ref: ScenarioMarkerRef): void;
 } | null = null;
 
-vi.mock('@/components/world/MarkerPickerDialog', () => ({
+vi.mock('@/components/world/nav/MarkerPickerDialog', () => ({
     MarkerPickerDialog: (props: NonNullable<typeof picker>) => {
         picker = props;
 

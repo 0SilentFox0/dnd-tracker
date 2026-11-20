@@ -4,9 +4,8 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPin, X } from 'lucide-react';
 
-import { MARKER_ICON } from './marker-icons';
-
 import { HudButton, HudIconButton } from '@/components/hud';
+import { MARKER_ICON } from '@/components/world/marker-icons';
 import type { WorldMarker } from '@/types/world';
 
 interface MarkerBubbleProps {

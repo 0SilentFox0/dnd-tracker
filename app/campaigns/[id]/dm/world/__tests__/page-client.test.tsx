@@ -99,7 +99,7 @@ vi.mock('@/components/world/travel/TravelPanel', () => ({
         </div>
     ),
 }));
-vi.mock('@/components/world/WorldMapView', () => ({
+vi.mock('@/components/world/map/WorldMapView', () => ({
     WorldMapView: ({
         slots,
     }: {
@@ -115,7 +115,7 @@ vi.mock('@/components/world/editor/maps/NewWorldMapDialog', () => ({
 vi.mock('@/components/world/editor/WorldBreadcrumbs', () => ({
     WorldBreadcrumbs: () => null,
 }));
-vi.mock('@/components/world/MapTree', () => ({
+vi.mock('@/components/world/nav/MapTree', () => ({
     MapTree: ({
         footer,
         onOpen,

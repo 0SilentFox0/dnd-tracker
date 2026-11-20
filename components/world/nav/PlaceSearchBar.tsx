@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { MARKER_ICON } from './marker-icons';
-
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { HudButton, HudToggleChip } from '@/components/hud';
+import { MARKER_ICON } from '@/components/world/marker-icons';
 import { WORLD_MARKER_ICON_KEYS } from '@/lib/constants/world';
 import { useSearch } from '@/lib/hooks/common';
 import type { MarkerKind, WorldMarker } from '@/types/world';

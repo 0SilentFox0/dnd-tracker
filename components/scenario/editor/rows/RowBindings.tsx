@@ -10,7 +10,7 @@ import { SlidePickerDialog } from '../dialogs/SlidePickerDialog';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { MarkerChip } from '@/components/scenario/chips/MarkerChip';
-import { MarkerPickerDialog } from '@/components/world/MarkerPickerDialog';
+import { MarkerPickerDialog } from '@/components/world/nav/MarkerPickerDialog';
 import { useBattleBriefs } from '@/lib/hooks/battles';
 import { useDeck } from '@/lib/hooks/show';
 import type {

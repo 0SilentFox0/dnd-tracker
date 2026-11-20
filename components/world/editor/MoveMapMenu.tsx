@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Move } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
-import { MarkerPickerDialog } from '@/components/world/MarkerPickerDialog';
+import { MarkerPickerDialog } from '@/components/world/nav/MarkerPickerDialog';
 import { subtreeMapIds } from '@/lib/utils/world/tree';
 import type { WorldMapSummary, WorldMarker } from '@/types/world';
 

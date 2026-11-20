@@ -17,7 +17,7 @@ import { WorldPins } from './WorldPins';
 import { WorldZones } from './WorldZones';
 import { ZoneVertexHandles } from './ZoneVertexHandles';
 
-import './world-atlas.css';
+import '../world-atlas.css';
 import { Button } from '@/components/ui/button';
 import { WORLD_MAX_ZOOM, WORLD_SNAP_PX } from '@/lib/constants/world';
 import {

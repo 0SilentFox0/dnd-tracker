@@ -21,11 +21,11 @@ import {
     WorldToolbar,
     WorldToolHint,
 } from '@/components/world/editor/WorldToolbar';
-import { MapTree } from '@/components/world/MapTree';
+import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { CompassRose } from '@/components/world/marker-icons';
+import { MapTree } from '@/components/world/nav/MapTree';
 import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
-import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
