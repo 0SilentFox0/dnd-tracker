@@ -22,7 +22,6 @@ const f = (hasValue = false, implemented = true): Entry => ({
     implemented,
 });
 
-// verify against 5e book
 export const QUALITY_REGISTRY = {
     damaging: q(),
     impale: q(),

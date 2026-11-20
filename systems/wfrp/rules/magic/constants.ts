@@ -1,10 +1,10 @@
 import type { SpellMagicKind } from '@/lib/utils/spells/model/schema';
 
-// verify against 5e book
+// p235
 export const CAST_SKILL = { key: 'language', spec: 'magick' } as const;
-// verify against 5e book
+// legacy overcast model; canon uses the Overcast table (p236)
 export const OVERCAST_SL_STEP = 2;
-// verify against 5e book
+// p237
 export const ARMOUR_SL_PER_AP = 1;
 // legacy only; canon5e has no cap (p236)
 export const CHANNEL_MAX_SL = 10;
@@ -12,24 +12,21 @@ export const CHANNEL_MAX_SL = 10;
 /** canon5e channelling (p236): a mishap drains 1d10 SL and shifts the miscast roll by this per SL lost */
 export const CHANNEL_LOSS_DIE = 10;
 export const CHANNEL_MISCAST_STEP = 10;
-// verify against 5e book
+// legacy only; canon bars only Petty from Overcasting (p236)
 export const NO_OVERCAST_KINDS: ReadonlySet<SpellMagicKind> = new Set([
     'petty',
     'blessing',
     'miracle',
 ]);
-// verify against 5e book
 export const PRAY_SKILL = { key: 'pray' } as const;
-// verify against 5e book
 export const PRAYER_KINDS: ReadonlySet<SpellMagicKind> = new Set([
     'blessing',
     'miracle',
 ]);
-// verify against 5e book
+// legacy only; canon caps at IB + WB (p236)
 export const MAX_OVERCAST_STEPS = 3;
-// verify against 5e book
+// legacy only; canon cascades past 00 (p238)
 export const MAJOR_MISCAST_ROLLS: ReadonlySet<number> = new Set([99, 100]);
-// verify against 5e book
 export const WORST_ROLL = 100;
 
 export const CRIT_BONUS_DEFAULT = 'totalPower' as const;

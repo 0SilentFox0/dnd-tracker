@@ -9,7 +9,7 @@ import {
 
 export { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL, type WfrpConditionKey };
 
-// All values: verify against 5e book.
+// legacy condition model only; the `sl` model costs SL per level
 export const BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL = 0.1;
 export const CONDITION_TEST_STEP = -10;
 export const BLINDED_SELF_ATTACK = -20;

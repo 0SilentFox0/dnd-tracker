@@ -32,7 +32,7 @@ export type QualityRoll = {
 
 type Refs = { qualities: QualityRef[]; flaws: QualityRef[] };
 
-// All numbers: verify against 5e book
+// legacy only; canon uses SL (p304-305)
 const TO_HIT: Partial<Record<QualityKey, number>> = {
     accurate: 10,
     imprecise: -10,

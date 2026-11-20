@@ -1,4 +1,3 @@
-// All values: verify against 5e book.
 export const AP_MAX_PER_LAYER = 8;
 
 export const AP_CAP = 12;

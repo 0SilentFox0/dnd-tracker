@@ -1,4 +1,4 @@
-// All values: verify against 5e book.
+// legacy only; canon uses +1/+2 SL (p166)
 export const OUTNUMBERING_BONUS = 10;
 
 /** Engaged foes that make a character Surrounded: no Disengage (p163) */

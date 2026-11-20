@@ -21,7 +21,7 @@ export type WeaponProfile = {
 // Matches wfrp `distance` (2 yd per cell); the registry cannot be imported from here without a cycle
 export const WFRP_CELL_FEET = 6;
 
-// verify against 5e book
+// legacy only; canon engage range is canonEngageCells (p166)
 const REACH_FEET: Record<NonNullable<WfrpWeaponStats['reach']>, number> = {
     personal: 3,
     'very-short': 3,
