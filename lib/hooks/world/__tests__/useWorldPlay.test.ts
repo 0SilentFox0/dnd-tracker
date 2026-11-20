@@ -72,3 +72,65 @@ describe('useWorldPlay Esc', () => {
         input.remove();
     });
 });
+
+const setViewport = (matches: boolean) => {
+    window.matchMedia = ((query: string) => ({
+        matches,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+};
+
+describe('useWorldPlay fullscreen', () => {
+    it('Esc exits fullscreen after the details and before the selection', () => {
+        const { result } = renderHook(() => useWorldPlay('c1', 'm1'));
+
+        act(() => result.current.select('k1'));
+        act(() => result.current.fullscreen.toggle());
+        act(() => result.current.details.set(true));
+
+        esc();
+
+        expect(result.current.details.open).toBe(false);
+        expect(result.current.fullscreen.full).toBe(true);
+
+        esc();
+
+        expect(result.current.fullscreen.full).toBe(false);
+        expect(result.current.selectedMarker?.id).toBe('k1');
+
+        esc();
+
+        expect(result.current.selectedMarker).toBeNull();
+    });
+
+    it('openDetails on desktop exits fullscreen and focuses the marker keeping zoom', () => {
+        setViewport(true);
+
+        const { result } = renderHook(() => useWorldPlay('c1', 'm1'));
+
+        act(() => result.current.select('k1'));
+        act(() => result.current.fullscreen.toggle());
+        act(() => result.current.openDetails());
+
+        expect(result.current.fullscreen.full).toBe(false);
+        expect(result.current.details.open).toBe(true);
+        expect(result.current.focus?.zoom).toBe(1);
+        expect(result.current.focus?.point).toEqual({ x: 0.2, y: 0.3 });
+    });
+
+    it('openDetails on a phone keeps fullscreen and does not focus', () => {
+        setViewport(false);
+
+        const { result } = renderHook(() => useWorldPlay('c1', 'm1'));
+
+        act(() => result.current.select('k1'));
+        act(() => result.current.fullscreen.toggle());
+        act(() => result.current.openDetails());
+
+        expect(result.current.fullscreen.full).toBe(true);
+        expect(result.current.details.open).toBe(true);
+        expect(result.current.focus).toBeUndefined();
+    });
+});

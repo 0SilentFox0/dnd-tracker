@@ -44,6 +44,12 @@ export type DeleteWorldLayerMode = 'ungroup' | 'delete';
 
 export type MarkerKind = 'point' | 'zone';
 export type MapPoint = { x: number; y: number };
+
+export interface MapFocus {
+    point: MapPoint;
+    seq: number;
+    zoom?: number;
+}
 export type Polygon = [number, number][];
 
 export interface WorldMapSummary {

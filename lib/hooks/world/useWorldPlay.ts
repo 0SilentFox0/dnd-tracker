@@ -4,11 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { useLayerVisibility } from './useLayerVisibility';
+import { useMapFocus } from './useMapFocus';
+import { useMapFullscreen } from './useMapFullscreen';
 import { useWorldView } from './useWorldView';
 
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
+import { escapeStep } from '@/lib/utils/world/escape-step';
 import { markerAnchor } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
-import type { MapPoint, WorldHero, WorldViewLayer } from '@/types/world';
+import type { WorldHero, WorldViewLayer } from '@/types/world';
 
 const NO_LAYERS: WorldViewLayer[] = [];
 
@@ -27,15 +31,7 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
 
     const [selectedId, select] = useState<string | null>(null);
 
-    const [focus, setFocus] = useState<
-        { point: MapPoint; seq: number } | undefined
-    >();
-
-    const focusPoint = useCallback(
-        (point: MapPoint) =>
-            setFocus((f) => ({ point, seq: (f?.seq ?? 0) + 1 })),
-        []
-    );
+    const { focus, focusPoint } = useMapFocus();
 
     const focusHero = useCallback(
         (hero: WorldHero) => focusPoint({ x: hero.x, y: hero.y }),
@@ -53,19 +49,33 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
 
     const hasSelection = selectedId !== null;
 
+    const fullscreen = useMapFullscreen();
+
+    const { full, exit } = fullscreen;
+
+    const desktop = useMediaQuery(DESKTOP_QUERY);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (
                 e.key !== 'Escape' ||
                 e.defaultPrevented ||
-                (!detailsOpen && !hasSelection) ||
                 isTyping(e.target) ||
                 (e.target instanceof Element &&
                     e.target.closest('[role=dialog]'))
             )
                 return;
 
-            if (detailsOpen) setDetailsOpen(false);
+            const step = escapeStep({
+                details: detailsOpen,
+                full,
+                selection: hasSelection,
+            });
+
+            if (step === null) return;
+
+            if (step === 'details') setDetailsOpen(false);
+            else if (step === 'fullscreen') exit();
             else select(null);
 
             e.preventDefault();
@@ -74,7 +84,7 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         window.addEventListener('keydown', onKey);
 
         return () => window.removeEventListener('keydown', onKey);
-    }, [detailsOpen, hasSelection]);
+    }, [detailsOpen, hasSelection, full, exit]);
 
     const pickPlace = useCallback(
         (id: string) => {
@@ -105,6 +115,17 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
             ? m.childMapId
             : null;
 
+    const openDetails = () => {
+        if (!selectedMarker) return;
+
+        if (desktop) {
+            exit();
+            focusPoint(markerAnchor(selectedMarker), 1);
+        }
+
+        setDetailsOpen(true);
+    };
+
     const openChild = (id: string) => {
         const m = view.data?.markers.find((x) => x.id === id);
 
@@ -130,6 +151,8 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         select: selectMarker,
         pickPlace,
         details: { open: detailsOpen, set: setDetailsOpen },
+        openDetails,
+        fullscreen,
         tree: { open: treeOpen, set: setTreeOpen },
         focus,
         focusHero,

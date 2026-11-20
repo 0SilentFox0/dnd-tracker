@@ -13,6 +13,8 @@ import {
     useMapDrawing,
     type WorldMode,
 } from './useMapDrawing';
+import { useMapFocus } from './useMapFocus';
+import { useMapFullscreen } from './useMapFullscreen';
 import { useMoveTarget } from './useMoveTarget';
 import { useRemoveMarker } from './useRemoveMarker';
 import { useWorldEditor } from './useWorldEditor';
@@ -21,6 +23,8 @@ import { useWorldHeroes } from './useWorldHeroes';
 import { useWorldMap } from './useWorldMap';
 import { useWorldMaps } from './useWorldMaps';
 
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
+import { escapeStep } from '@/lib/utils/world/escape-step';
 import { markerAnchor, polygonCentroid } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
 import { insertSharedPoints } from '@/lib/utils/world/zone-snap';
@@ -275,6 +279,14 @@ export function useWorldEditorPage({
 
     const hasSelection = selectedId !== null;
 
+    const { focus, focusPoint } = useMapFocus();
+
+    const fullscreen = useMapFullscreen();
+
+    const { full, exit } = fullscreen;
+
+    const desktop = useMediaQuery(DESKTOP_QUERY);
+
     useEffect(() => {
         // capture phase + preventDefault so useMapDrawing skips presses consumed here
         const onKey = (e: KeyboardEvent) => {
@@ -287,8 +299,18 @@ export function useWorldEditorPage({
             )
                 return;
 
-            if (detailsVisible) setDetailsOpen(false);
-            else if (drawingActive || !hasSelection) return;
+            const step = escapeStep({
+                details: detailsVisible,
+                drawing: drawingActive,
+                full,
+                selection: hasSelection,
+            });
+
+            // drawing Esc belongs to useMapDrawing
+            if (step === null || step === 'drawing') return;
+
+            if (step === 'details') setDetailsOpen(false);
+            else if (step === 'fullscreen') exit();
             else select(null);
 
             e.preventDefault();
@@ -300,7 +322,7 @@ export function useWorldEditorPage({
         window.addEventListener('keydown', onKey, true);
 
         return () => window.removeEventListener('keydown', onKey, true);
-    }, [detailsVisible, drawingActive, hasSelection]);
+    }, [detailsVisible, drawingActive, hasSelection, full, exit]);
 
     const setMode = useCallback(
         (next: WorldMode) => {
@@ -390,6 +412,17 @@ export function useWorldEditorPage({
     const selectedMarker = selectedId
         ? markers.find((m) => m.id === selectedId)
         : undefined;
+
+    const openDetails = () => {
+        if (!selectedMarker) return;
+
+        if (desktop) {
+            exit();
+            focusPoint(markerAnchor(selectedMarker), 1);
+        }
+
+        setDetailsOpen(true);
+    };
 
     const bubbleOpen =
         tool === 'select' && !eyes.asHeroId && !!selectedMarker && !detailsOpen;
@@ -489,7 +522,8 @@ export function useWorldEditorPage({
             details: { open: detailsOpen, set: setDetailsOpen },
             tree: { open: treeOpen, set: setTreeOpen },
         },
-        actions: { openMap, changeEyes },
+        actions: { openMap, changeEyes, openDetails },
+        view: { focus, fullscreen },
         handlers,
         card,
         enemy,

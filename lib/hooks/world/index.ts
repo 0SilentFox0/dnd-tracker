@@ -13,6 +13,8 @@ export {
     type WorldTool,
 } from './useMapDrawing';
 export { useMapFields } from './useMapFields';
+export { useMapFocus } from './useMapFocus';
+export { useMapFullscreen } from './useMapFullscreen';
 export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';
 export { useMoveTarget } from './useMoveTarget';

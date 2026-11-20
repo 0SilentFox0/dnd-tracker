@@ -107,4 +107,27 @@ describe('useViewport', () => {
 
         expect(result.current.wasDragged()).toBe(true);
     });
+
+    it('rescale multiplies the offset and keeps the zoom', () => {
+        const { result } = setup();
+
+        act(() => result.current.focusOn(0.2, 0.3, 2));
+
+        const { x, y } = result.current.offset;
+
+        act(() => result.current.rescale(0.5));
+
+        expect(result.current.zoom).toBe(2);
+        expect(result.current.offset.x).toBeCloseTo(x * 0.5);
+        expect(result.current.offset.y).toBeCloseTo(y * 0.5);
+    });
+
+    it('focusOn with zoom 1 keeps the current zoom', () => {
+        const { result } = setup();
+
+        act(() => result.current.focusOn(0.2, 0.3, 2));
+        act(() => result.current.focusOn(0.8, 0.7, 1));
+
+        expect(result.current.zoom).toBe(2);
+    });
 });
