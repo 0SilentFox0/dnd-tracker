@@ -31,6 +31,7 @@ interface WorldPinsProps {
         current: { id: string; point: MapPoint } | null;
         onMove(id: string, clientX: number, clientY: number): void;
         onEnd(id: string, clientX: number, clientY: number): void;
+        onCancel(): void;
     };
     handlers: PinHandlers;
 }
@@ -48,13 +49,19 @@ export function WorldPins({
     drag,
     handlers,
 }: WorldPinsProps) {
-    const { current: dragging, onMove: onDragMove, onEnd: onDragEnd } = drag;
+    const {
+        current: dragging,
+        onMove: onDragMove,
+        onEnd: onDragEnd,
+        onCancel: onDragCancel,
+    } = drag;
 
     const { bind } = usePinGesture<string>({
         draggable: !!handlers.onMarkerDrag,
         onClick: handlers.onMarkerClick,
         onDragMove: (id, e) => onDragMove(id, e.clientX, e.clientY),
         onDragEnd: (id, e) => onDragEnd(id, e.clientX, e.clientY),
+        onCancel: onDragCancel,
     });
 
     const points = markers.filter((m) => m.kind !== 'zone');

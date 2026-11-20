@@ -40,7 +40,12 @@ const point: WorldMarker = {
 
 const props = {
     selectedId: null,
-    drag: { current: null, onMove: () => {}, onEnd: () => {} },
+    drag: {
+        current: null,
+        onMove: () => {},
+        onEnd: () => {},
+        onCancel: () => {},
+    },
     handlers: {},
 };
 

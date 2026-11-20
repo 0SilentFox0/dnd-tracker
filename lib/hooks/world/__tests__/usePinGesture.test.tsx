@@ -24,7 +24,12 @@ function setup(draggable = true) {
 
     const { result } = renderHook(() => usePinGesture({ draggable, ...cb }));
 
-    return { b: result.current.bind('p1') as Required<ReturnType<typeof result.current.bind>>, cb };
+    return {
+        b: result.current.bind('p1') as Required<
+            ReturnType<typeof result.current.bind>
+        >,
+        cb,
+    };
 }
 
 describe('usePinGesture', () => {
@@ -68,6 +73,18 @@ describe('usePinGesture', () => {
         b.onPointerMove(ev(30, 10));
         b.onPointerCancel(ev(30, 10));
         b.onPointerUp(ev(30, 10));
+        expect(cb.onCancel).toHaveBeenCalledTimes(1);
+        expect(cb.onDragEnd).not.toHaveBeenCalled();
+        expect(cb.onClick).not.toHaveBeenCalled();
+    });
+
+    it('Escape mid-drag cancels: no drag end, no click', () => {
+        const { b, cb } = setup();
+
+        b.onPointerDown(ev(10, 10));
+        b.onPointerMove(ev(40, 10));
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        b.onPointerUp(ev(40, 10));
         expect(cb.onCancel).toHaveBeenCalledTimes(1);
         expect(cb.onDragEnd).not.toHaveBeenCalled();
         expect(cb.onClick).not.toHaveBeenCalled();

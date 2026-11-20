@@ -412,7 +412,8 @@ export function WorldMapView({
                                     layers={layers.items}
                                     hidden={layers.hidden}
                                     width={Math.round(
-                                        box.width * Math.min(zoom, MAX_SIZES_ZOOM)
+                                        box.width *
+                                            Math.min(zoom, MAX_SIZES_ZOOM)
                                     )}
                                 />
                             ) : null}
@@ -533,6 +534,7 @@ export function WorldMapView({
                                                 pointAt(x, y)
                                             );
                                         },
+                                        onCancel: () => setDragging(null),
                                     }}
                                     handlers={handlers}
                                 />
