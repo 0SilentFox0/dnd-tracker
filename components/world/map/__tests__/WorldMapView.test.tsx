@@ -913,11 +913,19 @@ describe('WorldMapView card slot', () => {
         render(
             <WorldMapView
                 detail={detail([
-                    marker({ id: 'p', name: 'Town', layerId: 'l1' }),
+                    marker({
+                        id: 'p',
+                        name: 'Town',
+                        layerId: 'l1',
+                        x: 0.2,
+                        y: 0.2,
+                    }),
                     marker({
                         id: 'q',
                         name: 'Port',
                         layerId: 'l1',
+                        x: 0.8,
+                        y: 0.8,
                         icon: 'city',
                         color: '#aa0000',
                     }),

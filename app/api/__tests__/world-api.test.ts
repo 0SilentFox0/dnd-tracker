@@ -524,7 +524,7 @@ describe('world API', () => {
             );
         });
 
-        it('зона: x/y — центроїд, колір за замовчуванням, sortOrder max+1', async () => {
+        it('зона: x/y — центроїд, колір null (діє стиль шару), sortOrder max+1', async () => {
             vi.mocked(prisma.worldMarker.aggregate).mockResolvedValue({
                 _count: 2,
                 _max: { sortOrder: 4 },
@@ -559,7 +559,7 @@ describe('world API', () => {
 
             expect(data.x).toBeCloseTo(0.2);
             expect(data.y).toBeCloseTo(0.2);
-            expect(data.color).toBe('#d3b060');
+            expect(data.color).toBeNull();
             expect(data.sortOrder).toBe(5);
             expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith(
                 'c1',
