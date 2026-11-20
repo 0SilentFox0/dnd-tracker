@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => {
@@ -26,6 +27,8 @@ const m = vi.hoisted(() => {
         ownedMap: vi.fn(),
         clearShow: vi.fn(),
         publish: vi.fn(),
+        inUse: vi.fn(),
+        removeFiles: vi.fn(),
     };
 });
 
@@ -39,6 +42,14 @@ vi.mock('@/lib/server/world/world-events', () => ({
 }));
 vi.mock('@/lib/supabase/world-map-storage', () => ({
     ownedWorldMapPath: () => true,
+    removeWorldMapFiles: m.removeFiles,
+}));
+vi.mock('@/lib/server/world/map-store', () => ({
+    worldImageInUse: m.inUse,
+}));
+vi.mock('next/server', async (orig) => ({
+    ...(await orig<typeof import('next/server')>()),
+    after: (fn: () => unknown) => fn(),
 }));
 vi.mock('@/lib/utils/api/as-dm', async () => {
     const { handleApiError } = await import('@/lib/utils/api/error-handler');
@@ -254,6 +265,82 @@ describe('layerHeroesHandler', () => {
     });
 });
 
+describe('layer image files', () => {
+    beforeEach(() => {
+        m.db.worldLayer.update.mockResolvedValue(row());
+        m.db.worldMarker.findMany.mockResolvedValue([]);
+        m.inUse.mockResolvedValue(false);
+        m.db.worldLayer.findUnique.mockResolvedValue(
+            row({ imageUrl: 'https://x.test/old.png' })
+        );
+    });
+
+    it('removes the old file when the image is replaced', async () => {
+        await layerPatchHandler(
+            json({ imageUrl: 'https://x.test/new.png' }, 'PATCH'),
+            'c1',
+            'l1'
+        );
+
+        await vi.waitFor(() =>
+            expect(m.removeFiles).toHaveBeenCalledWith('c1', [
+                'https://x.test/old.png',
+            ])
+        );
+    });
+
+    it('removes the file when the image is cleared', async () => {
+        await layerPatchHandler(json({ imageUrl: null }, 'PATCH'), 'c1', 'l1');
+
+        await vi.waitFor(() =>
+            expect(m.removeFiles).toHaveBeenCalledWith('c1', [
+                'https://x.test/old.png',
+            ])
+        );
+    });
+
+    it('keeps a file that is still referenced', async () => {
+        m.inUse.mockResolvedValue(true);
+
+        await layerPatchHandler(
+            json({ imageUrl: 'https://x.test/new.png' }, 'PATCH'),
+            'c1',
+            'l1'
+        );
+
+        await new Promise((r) => setTimeout(r, 10));
+
+        expect(m.removeFiles).not.toHaveBeenCalled();
+    });
+
+    it('removes the file when the layer is deleted', async () => {
+        await layerDeleteHandler(del(), 'c1', 'l1');
+
+        await vi.waitFor(() =>
+            expect(m.removeFiles).toHaveBeenCalledWith('c1', [
+                'https://x.test/old.png',
+            ])
+        );
+    });
+
+    it('answers 404 when the layer vanished before the write', async () => {
+        m.db.worldLayer.delete.mockRejectedValueOnce(
+            Object.assign(
+                new Prisma.PrismaClientKnownRequestError('gone', {
+                    code: 'P2025',
+                    clientVersion: 'x',
+                }),
+                {}
+            )
+        );
+
+        const res = await layerDeleteHandler(del(), 'c1', 'l1');
+
+        expect(res.status).toBe(404);
+        expect(m.removeFiles).not.toHaveBeenCalled();
+    });
+});
+
 describe('layerDeleteHandler', () => {
     it('deletes an empty layer at once', async () => {
         m.db.worldMarker.findMany.mockResolvedValue([]);
@@ -286,7 +373,11 @@ describe('layerDeleteHandler', () => {
             { id: 'k1', childMap: null },
         ]);
 
-        const res = await layerDeleteHandler(del('?markers=ungroup'), 'c1', 'l1');
+        const res = await layerDeleteHandler(
+            del('?markers=ungroup'),
+            'c1',
+            'l1'
+        );
 
         expect(res.status).toBe(200);
         expect(m.db.worldMarker.updateMany).toHaveBeenCalledWith({
@@ -303,7 +394,11 @@ describe('layerDeleteHandler', () => {
             { id: 'k1', childMap: null },
         ]);
 
-        const res = await layerDeleteHandler(del('?markers=delete'), 'c1', 'l1');
+        const res = await layerDeleteHandler(
+            del('?markers=delete'),
+            'c1',
+            'l1'
+        );
 
         expect(res.status).toBe(200);
         expect(m.db.worldMarker.deleteMany).toHaveBeenCalledWith({
@@ -320,7 +415,11 @@ describe('layerDeleteHandler', () => {
             { id: 'k1', childMap: { id: 'm2' } },
         ]);
 
-        const res = await layerDeleteHandler(del('?markers=delete'), 'c1', 'l1');
+        const res = await layerDeleteHandler(
+            del('?markers=delete'),
+            'c1',
+            'l1'
+        );
 
         expect(res.status).toBe(409);
         expect(m.db.worldMarker.deleteMany).not.toHaveBeenCalled();

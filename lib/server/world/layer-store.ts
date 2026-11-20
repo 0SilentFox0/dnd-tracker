@@ -1,4 +1,4 @@
-import type { WorldLayer as LayerRow } from '@prisma/client';
+import { Prisma, type WorldLayer as LayerRow } from '@prisma/client';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { MAX_WORLD_LAYERS } from '@/lib/constants/world';
@@ -91,3 +91,8 @@ export async function createLayer(
 
     return toWorldLayer(row);
 }
+
+// the layer vanished between the ownership check and the write
+export const isMissingRecord = (e: unknown) =>
+    e instanceof Prisma.PrismaClientKnownRequestError &&
+    (e.code === 'P2025' || e.code === 'P2003');

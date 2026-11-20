@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { clampRect, moveRect, resizeRect } from '../layer-rect';
+import {
+    clampRect,
+    initialLayerRect,
+    moveRect,
+    resizeRect,
+} from '../layer-rect';
 
 const r = { x: 0.2, y: 0.2, w: 0.4, h: 0.4 };
 
@@ -35,5 +40,14 @@ describe('layer-rect', () => {
             w: 2,
             h: 0.02,
         });
+    });
+
+    it('keeps the image aspect ratio for the first rect', () => {
+        expect(initialLayerRect(2000, 1000, 1)).toMatchObject({
+            w: 0.5,
+            h: 0.25,
+        });
+        expect(initialLayerRect(1000, 2000, 1)).toMatchObject({ w: 0.5, h: 1 });
+        expect(initialLayerRect(1000, 1000, 2).h).toBeCloseTo(1);
     });
 });

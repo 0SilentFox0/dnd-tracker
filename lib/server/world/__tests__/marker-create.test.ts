@@ -10,6 +10,7 @@ const m = vi.hoisted(() => {
         transaction: vi.fn(),
         aggregateOutside: vi.fn(),
         createOutside: vi.fn(),
+        updateOutside: vi.fn(),
         findLayer: vi.fn(),
     };
 });
@@ -17,13 +18,20 @@ const m = vi.hoisted(() => {
 vi.mock('@/lib/db', () => ({
     prisma: {
         $transaction: m.transaction,
-        worldMarker: { aggregate: m.aggregateOutside, create: m.createOutside },
+        worldMarker: {
+            aggregate: m.aggregateOutside,
+            create: m.createOutside,
+            update: m.updateOutside,
+        },
         worldLayer: { findFirst: m.findLayer },
     },
 }));
 vi.mock('@/lib/server/world/lock', () => ({ lockWorldMap: m.lockWorldMap }));
 vi.mock('@/lib/server/world/map-handlers', () => ({
     ownedMap: vi.fn().mockResolvedValue({ id: 'map1' }),
+    ownedMarker: vi
+        .fn()
+        .mockResolvedValue({ id: 'k1', mapId: 'map1', kind: 'point' }),
 }));
 vi.mock('@/lib/server/world/map-store', () => ({
     toWorldMarker: (v: unknown) => v,
@@ -43,7 +51,10 @@ vi.mock('@/lib/utils/api/as-dm', async () => {
     };
 });
 
-import { createWorldMarkerHandler } from '../marker-handlers';
+import {
+    createWorldMarkerHandler,
+    updateWorldMarkerHandler,
+} from '../marker-handlers';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { MAX_MARKERS_PER_MAP } from '@/lib/constants/world';
@@ -61,6 +72,26 @@ const req = (extra: Record<string, unknown> = {}) =>
             ...extra,
         }),
     });
+
+describe('updateWorldMarkerHandler layerId', () => {
+    it('answers 404 for a layer of another map', async () => {
+        m.findLayer.mockResolvedValue(null);
+
+        const res = await updateWorldMarkerHandler(
+            new Request('http://localhost/x', {
+                method: 'PATCH',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ layerId: 'x' }),
+            }),
+            'c1',
+            'k1'
+        );
+
+        expect(res.status).toBe(404);
+        expect((await res.json()).error).toBe(API_ERRORS.WORLD_LAYER_NOT_FOUND);
+        expect(m.updateOutside).not.toHaveBeenCalled();
+    });
+});
 
 describe('createWorldMarkerHandler', () => {
     beforeEach(() => {
@@ -105,13 +136,18 @@ describe('createWorldMarkerHandler', () => {
     it('stores layerId of a layer on the same map', async () => {
         m.findLayer.mockResolvedValue({ id: 'l1' });
 
-        const res = await createWorldMarkerHandler(req({ layerId: 'l1' }), 'c1');
+        const res = await createWorldMarkerHandler(
+            req({ layerId: 'l1' }),
+            'c1'
+        );
 
         expect(res.status).toBe(201);
         expect(m.findLayer).toHaveBeenCalledWith(
             expect.objectContaining({ where: { id: 'l1', mapId: 'map1' } })
         );
-        expect(m.tx.worldMarker.create.mock.calls[0][0].data.layerId).toBe('l1');
+        expect(m.tx.worldMarker.create.mock.calls[0][0].data.layerId).toBe(
+            'l1'
+        );
     });
 
     it('answers 404 for a layer of another map', async () => {

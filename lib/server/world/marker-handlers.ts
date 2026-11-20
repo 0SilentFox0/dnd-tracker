@@ -9,6 +9,7 @@ import {
     updateWorldMarkerSchema,
 } from '@/lib/schemas/world';
 import { ContentError } from '@/lib/server/content/errors';
+import { isMissingRecord } from '@/lib/server/world/layer-store';
 import { lockWorldMap } from '@/lib/server/world/lock';
 import {
     clearShowAfterDelete,
@@ -47,34 +48,43 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
 
         const { x, y } = zone ? polygonCentroid(zone) : body;
 
-        const created = await prisma.$transaction(async (tx) => {
-            await lockWorldMap(tx, body.mapId);
+        let created;
 
-            const { _count, _max } = await tx.worldMarker.aggregate({
-                where: { mapId: body.mapId },
-                _count: true,
-                _max: { sortOrder: true },
+        try {
+            created = await prisma.$transaction(async (tx) => {
+                await lockWorldMap(tx, body.mapId);
+
+                const { _count, _max } = await tx.worldMarker.aggregate({
+                    where: { mapId: body.mapId },
+                    _count: true,
+                    _max: { sortOrder: true },
+                });
+
+                if (_count >= MAX_MARKERS_PER_MAP)
+                    throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
+
+                return tx.worldMarker.create({
+                    data: {
+                        mapId: body.mapId,
+                        kind: body.kind,
+                        x,
+                        y,
+                        polygon: body.polygon ?? undefined,
+                        name: body.name,
+                        icon: body.icon ?? null,
+                        description: body.description ?? null,
+                        color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+                        layerId: body.layerId ?? null,
+                        sortOrder: (_max.sortOrder ?? -1) + 1,
+                    },
+                });
             });
+        } catch (e) {
+            if (body.layerId && isMissingRecord(e))
+                return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
 
-            if (_count >= MAX_MARKERS_PER_MAP)
-                throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
-
-            return tx.worldMarker.create({
-                data: {
-                    mapId: body.mapId,
-                    kind: body.kind,
-                    x,
-                    y,
-                    polygon: body.polygon ?? undefined,
-                    name: body.name,
-                    icon: body.icon ?? null,
-                    description: body.description ?? null,
-                    color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
-                    layerId: body.layerId ?? null,
-                    sortOrder: (_max.sortOrder ?? -1) + 1,
-                },
-            });
-        });
+            throw e;
+        }
 
         publishWorldChanged(campaignId, body.mapId);
 
@@ -121,11 +131,20 @@ export function updateWorldMarkerHandler(
             data.y = y;
         }
 
-        const updated = await prisma.worldMarker.update({
-            where: { id: markerId },
-            data,
-            include: { childMap: { select: { id: true } } },
-        });
+        let updated;
+
+        try {
+            updated = await prisma.worldMarker.update({
+                where: { id: markerId },
+                data,
+                include: { childMap: { select: { id: true } } },
+            });
+        } catch (e) {
+            if (layerId && isMissingRecord(e))
+                return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
+
+            throw e;
+        }
 
         publishWorldChanged(campaignId, owned.mapId);
 

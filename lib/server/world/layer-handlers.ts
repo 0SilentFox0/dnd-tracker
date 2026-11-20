@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after,NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -11,6 +11,7 @@ import {
 } from '@/lib/schemas/world';
 import {
     createLayer,
+    isMissingRecord,
     listDmLayers,
     toWorldLayer,
     WorldLayerError,
@@ -19,14 +20,27 @@ import {
     clearShowAfterDelete,
     ownedMap,
 } from '@/lib/server/world/map-handlers';
+import { worldImageInUse } from '@/lib/server/world/map-store';
 import { publishWorldChanged } from '@/lib/server/world/world-events';
-import { ownedWorldMapPath } from '@/lib/supabase/world-map-storage';
+import {
+    ownedWorldMapPath,
+    removeWorldMapFiles,
+} from '@/lib/supabase/world-map-storage';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { withDM } from '@/lib/utils/api/as-dm';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { parseBody } from '@/lib/utils/api/parse-body';
 
 const withHeroes = { heroes: { select: { characterId: true } } } as const;
+
+function removeUnusedImage(campaignId: string, url: string | null) {
+    if (!url) return;
+
+    after(async () => {
+        if (!(await worldImageInUse(campaignId, url)))
+            await removeWorldMapFiles(campaignId, [url]);
+    });
+}
 
 const ownedLayer = (campaignId: string, layerId: string) =>
     loadOwned(
@@ -71,8 +85,7 @@ export function layerCreateHandler(
 
             return NextResponse.json(created, { status: 201 });
         } catch (e) {
-            if (e instanceof WorldLayerError)
-                return errorResponse(e.code, 409);
+            if (e instanceof WorldLayerError) return errorResponse(e.code, 409);
 
             throw e;
         }
@@ -113,6 +126,9 @@ export function layerPatchHandler(
             data,
             include: withHeroes,
         });
+
+        if (body.imageUrl !== undefined && body.imageUrl !== layer.imageUrl)
+            removeUnusedImage(campaignId, layer.imageUrl);
 
         publishWorldChanged(campaignId, layer.mapId);
 
@@ -168,12 +184,10 @@ export function layerDeleteHandler(
 ) {
     return withDM(campaignId, 'delete world layer', async () => {
         const query = deleteWorldLayerQuerySchema.safeParse({
-            markers:
-                new URL(req.url).searchParams.get('markers') ?? undefined,
+            markers: new URL(req.url).searchParams.get('markers') ?? undefined,
         });
 
-        if (!query.success)
-            return errorResponse(API_ERRORS.INVALID_BODY, 400);
+        if (!query.success) return errorResponse(API_ERRORS.INVALID_BODY, 400);
 
         const mode = query.data.markers;
 
@@ -194,19 +208,28 @@ export function layerDeleteHandler(
         )
             return errorResponse(API_ERRORS.WORLD_LAYER_HAS_MARKERS, 409);
 
-        await prisma.$transaction(async (tx) => {
-            if (markers.length > 0) {
-                if (mode === 'ungroup')
-                    await tx.worldMarker.updateMany({
-                        where: { layerId },
-                        data: { layerId: null },
-                    });
-                else
-                    await tx.worldMarker.deleteMany({ where: { layerId } });
-            }
+        try {
+            await prisma.$transaction(async (tx) => {
+                if (markers.length > 0) {
+                    if (mode === 'ungroup')
+                        await tx.worldMarker.updateMany({
+                            where: { layerId },
+                            data: { layerId: null },
+                        });
+                    else
+                        await tx.worldMarker.deleteMany({ where: { layerId } });
+                }
 
-            await tx.worldLayer.delete({ where: { id: layerId } });
-        });
+                await tx.worldLayer.delete({ where: { id: layerId } });
+            });
+        } catch (e) {
+            if (isMissingRecord(e))
+                return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
+
+            throw e;
+        }
+
+        removeUnusedImage(campaignId, layer.imageUrl);
 
         if (mode === 'delete' && markers.length > 0)
             clearShowAfterDelete(campaignId, {

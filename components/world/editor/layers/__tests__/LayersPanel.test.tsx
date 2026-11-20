@@ -125,6 +125,14 @@ describe('LayersPanel', () => {
         expect(remove).toHaveBeenCalledWith({ id: 'l1', mode: 'ungroup' });
     });
 
+    it('warns that kept markers become visible to everyone', async () => {
+        renderPanel([layer()], [{ id: 'k', layerId: 'l1' }]);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Видалити шар' }));
+
+        expect(await screen.findByText(/стануть видимі всім/)).toBeTruthy();
+    });
+
     it('deletes with markers on explicit choice', async () => {
         renderPanel([layer()], [{ id: 'k', layerId: 'l1' }]);
 
@@ -140,7 +148,9 @@ describe('LayersPanel', () => {
         renderPanel([layer()]);
 
         fireEvent.click(screen.getByRole('button', { name: 'Видалити шар' }));
-        fireEvent.click(await screen.findByRole('button', { name: 'Видалити' }));
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'Видалити' })
+        );
 
         await waitFor(() =>
             expect(remove).toHaveBeenCalledWith({ id: 'l1', mode: undefined })

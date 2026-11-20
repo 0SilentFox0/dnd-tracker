@@ -134,7 +134,9 @@ export function LayerRow({
             <SelectField
                 aria-label={t('visibility.label')}
                 value={layer.visibility}
-                onValueChange={(v) => void f.setVisibility(v as LayerVisibility)}
+                onValueChange={(v) =>
+                    void f.setVisibility(v as LayerVisibility)
+                }
                 options={VISIBILITIES.map((v) => ({
                     value: v,
                     label: t(`visibility.${v}`),
@@ -143,7 +145,7 @@ export function LayerRow({
             {layer.visibility === 'heroes' ? (
                 <LayerHeroPicker
                     heroes={heroes}
-                    selected={layer.heroIds}
+                    selected={f.heroIds}
                     onToggle={(id, on) => void f.toggleHero(id, on)}
                 />
             ) : null}

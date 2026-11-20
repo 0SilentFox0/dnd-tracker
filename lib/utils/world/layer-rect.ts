@@ -44,3 +44,17 @@ export function resizeRect(
         h,
     });
 }
+
+// width is a fraction of the map width, height a fraction of the map height
+export const initialLayerRect = (
+    imageWidth: number,
+    imageHeight: number,
+    mapAspect: number,
+    width = 0.5
+): LayerRect =>
+    clampRect({
+        x: 0,
+        y: 0,
+        w: width,
+        h: (width * mapAspect * imageHeight) / imageWidth,
+    });

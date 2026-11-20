@@ -16,6 +16,7 @@ import {
     orphanedImagesOfSubtree,
     readWorldMapDetail,
     toWorldMap,
+    worldImageInUse,
 } from '@/lib/server/world/map-store';
 import { listPublicMapNotes } from '@/lib/server/world/note-store';
 import { listHeroesOnMap } from '@/lib/server/world/travel-store';
@@ -291,11 +292,9 @@ export function updateWorldMapHandler(
         }
 
         if (replacesImage) {
-            const stillUsed = await prisma.worldMap.count({
-                where: { campaignId, imageUrl: owned.imageUrl },
-            });
+            const stillUsed = await worldImageInUse(campaignId, owned.imageUrl);
 
-            if (stillUsed === 0)
+            if (!stillUsed)
                 after(() => removeWorldMapFiles(campaignId, [owned.imageUrl]));
         }
 

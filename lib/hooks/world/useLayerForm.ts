@@ -7,16 +7,11 @@ import { useCommittedName } from './useCommittedName';
 import type { useWorldEditor } from './useWorldEditor';
 import { useWorldMapUpload } from './useWorldMapUpload';
 
-import {
-    DEFAULT_ZONE_COLOR,
-    WORLD_LAYER_OPACITY,
-} from '@/lib/constants/world';
+import { DEFAULT_ZONE_COLOR, WORLD_LAYER_OPACITY } from '@/lib/constants/world';
 import { useDebouncedCommit, useNotify } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
-import { clampRect } from '@/lib/utils/world/layer-rect';
+import { initialLayerRect } from '@/lib/utils/world/layer-rect';
 import type { LayerVisibility, WorldLayer } from '@/types/world';
-
-const FIRST_IMAGE_WIDTH = 0.5;
 
 interface Options {
     campaignId: string;
@@ -66,10 +61,23 @@ export function useLayerForm({
         opacityCommit.schedule(value);
     };
 
+    const [heroIds, setHeroIds] = useState(layer.heroIds);
+
+    const serverHeroes = layer.heroIds.join(',');
+
+    const [syncedHeroes, setSyncedHeroes] = useState(serverHeroes);
+
+    if (syncedHeroes !== serverHeroes && !layers.setHeroes.isPending) {
+        setSyncedHeroes(serverHeroes);
+        setHeroIds(layer.heroIds);
+    }
+
     const toggleHero = (heroId: string, on: boolean) => {
         const ids = on
-            ? [...layer.heroIds, heroId]
-            : layer.heroIds.filter((id) => id !== heroId);
+            ? [...heroIds.filter((id) => id !== heroId), heroId]
+            : heroIds.filter((id) => id !== heroId);
+
+        setHeroIds(ids);
 
         return layers.setHeroes.mutateOk({ id: layer.id, heroIds: ids });
     };
@@ -88,14 +96,7 @@ export function useLayerForm({
         // the first image keeps its own aspect ratio on the map
         const rect = layer.imageUrl
             ? undefined
-            : clampRect({
-                  x: 0,
-                  y: 0,
-                  w: FIRST_IMAGE_WIDTH,
-                  h:
-                      (FIRST_IMAGE_WIDTH * image.width * mapAspect) /
-                      image.height,
-              });
+            : initialLayerRect(image.width, image.height, mapAspect);
 
         const ok = await save(
             rect
@@ -119,6 +120,7 @@ export function useLayerForm({
         changeOpacity,
         opacityRange: WORLD_LAYER_OPACITY,
         setVisibility: (visibility: LayerVisibility) => save({ visibility }),
+        heroIds,
         toggleHero,
         uploadImage,
         uploading,

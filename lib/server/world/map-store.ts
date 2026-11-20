@@ -102,18 +102,33 @@ export async function readWorldMapDetail(
     };
 }
 
+export async function worldImageInUse(campaignId: string, imageUrl: string) {
+    const [maps, layers] = await Promise.all([
+        prisma.worldMap.count({ where: { campaignId, imageUrl } }),
+        prisma.worldLayer.count({ where: { imageUrl, map: { campaignId } } }),
+    ]);
+
+    return maps + layers > 0;
+}
+
 export async function orphanedImagesOfSubtree(
     campaignId: string,
     rootMapId: string
 ): Promise<string[]> {
-    const rows = await prisma.worldMap.findMany({
-        where: { campaignId },
-        select: {
-            id: true,
-            imageUrl: true,
-            parentMarker: { select: { mapId: true } },
-        },
-    });
+    const [rows, layers] = await Promise.all([
+        prisma.worldMap.findMany({
+            where: { campaignId },
+            select: {
+                id: true,
+                imageUrl: true,
+                parentMarker: { select: { mapId: true } },
+            },
+        }),
+        prisma.worldLayer.findMany({
+            where: { map: { campaignId }, imageUrl: { not: null } },
+            select: { mapId: true, imageUrl: true },
+        }),
+    ]);
 
     const inTree = new Set(
         subtreeMapIds(
@@ -125,15 +140,23 @@ export async function orphanedImagesOfSubtree(
         )
     );
 
+    const images = [
+        ...rows.map((r) => ({ inTree: inTree.has(r.id), url: r.imageUrl })),
+        ...layers.map((l) => ({
+            inTree: inTree.has(l.mapId),
+            url: l.imageUrl,
+        })),
+    ];
+
     const usedOutside = new Set(
-        rows.filter((r) => !inTree.has(r.id)).map((r) => r.imageUrl)
+        images.filter((i) => !i.inTree).map((i) => i.url)
     );
 
     return [
         ...new Set(
-            rows
-                .filter((r) => inTree.has(r.id) && !usedOutside.has(r.imageUrl))
-                .map((r) => r.imageUrl)
+            images
+                .filter((i) => i.inTree && i.url && !usedOutside.has(i.url))
+                .map((i) => i.url as string)
         ),
     ];
 }
