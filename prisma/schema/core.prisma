@@ -1270,6 +1270,7 @@ model WorldLayerHero {
   character   Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@id([layerId, characterId])
+  @@index([characterId])
   @@map("world_layer_heroes")
 }
 

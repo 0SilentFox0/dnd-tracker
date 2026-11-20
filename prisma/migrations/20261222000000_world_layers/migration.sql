@@ -50,3 +50,6 @@ ALTER TABLE "world_layer_heroes" ADD CONSTRAINT "world_layer_heroes_layerId_fkey
 
 -- AddForeignKey
 ALTER TABLE "world_layer_heroes" ADD CONSTRAINT "world_layer_heroes_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "characters"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- CreateIndex
+CREATE INDEX "world_layer_heroes_characterId_idx" ON "world_layer_heroes"("characterId");
