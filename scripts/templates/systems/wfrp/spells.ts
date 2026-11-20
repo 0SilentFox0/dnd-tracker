@@ -23,16 +23,15 @@ export type GrimSpellKind = (typeof GRIM_SPELL_KINDS)[number];
 
 export const GRIM_DARK_LISTS = ['Pact Rites', 'Grave Rites'] as const;
 
-export const GRIM_CORE_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> =
-    {
-        petty: ['Cantrips'],
-        arcane: ['School of Embers', 'School of Gloam'],
-        hedge: ['Fenlore'],
-        witchcraft: ['Thornwitchery'],
-        chaos: [...GRIM_DARK_LISTS],
-        blessing: ['Hearth Rites'],
-        miracle: ['Hearth Rites'],
-    };
+export const GRIM_CORE_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> = {
+    petty: ['Cantrips'],
+    arcane: ['School of Embers', 'School of Gloam'],
+    hedge: ['Fenlore'],
+    witchcraft: ['Thornwitchery'],
+    chaos: [...GRIM_DARK_LISTS],
+    blessing: ['Hearth Rites'],
+    miracle: ['Hearth Rites'],
+};
 
 export const GRIM_ARCANE_LISTS = [
     'School of Embers',
@@ -105,7 +104,12 @@ export const INGREDIENT_PENCE = [6, 240] as const;
 
 const PENCE_PER_GP = 240;
 
-const INGREDIENT_KINDS: readonly string[] = ['arcane', 'hedge', 'witchcraft', 'chaos'];
+const INGREDIENT_KINDS: readonly string[] = [
+    'arcane',
+    'hedge',
+    'witchcraft',
+    'chaos',
+];
 
 export const FORBIDDEN_CONDITIONS: readonly string[] = [
     'unconscious',
@@ -136,7 +140,11 @@ export function spellMagicOf(row: Row): { cn: number; kind: string } | null {
 
 const SPELL_ROLL = { spellRoll: 100 };
 
-function effectIssues(effects: unknown[], issues: string[]): string | null {
+function effectIssues(
+    effects: unknown[],
+    issues: string[],
+    missile: boolean
+): string | null {
     if (effects.length > 1) issues.push('a spell may have at most one effect');
 
     let kind: string | null = null;
@@ -154,10 +162,17 @@ function effectIssues(effects: unknown[], issues: string[]): string | null {
 
         kind ??= k;
 
-        if (
-            JSON.stringify((e as Record<string, unknown>).amount) !==
-            JSON.stringify(SPELL_ROLL)
-        )
+        const amount = (e as Record<string, unknown>).amount;
+
+        if (missile && k === 'dealDamage') {
+            if (
+                !(Number.isInteger(amount) && (amount as number) >= 0) &&
+                !(typeof amount === 'string' && /^\d+d\d+$/.test(amount))
+            )
+                issues.push(
+                    'missile damage amount must be a whole number or dice'
+                );
+        } else if (JSON.stringify(amount) !== JSON.stringify(SPELL_ROLL))
             issues.push(`${k} amount must be { spellRoll: 100 }`);
 
         if (
@@ -336,7 +351,14 @@ export function spellIssues(row: Row): string[] {
 
     const effects = Array.isArray(row.spellEffects) ? row.spellEffects : [];
 
-    const effect = effectIssues(effects, issues);
+    const missile = !!magic && isRecord(magic.missile);
+
+    const effect = effectIssues(effects, issues, missile);
+
+    if (missile) {
+        if (effect !== 'dealDamage')
+            issues.push('missile needs a dealDamage effect');
+    }
 
     const dice = typeof row.dice === 'number' ? row.dice : 0;
 
@@ -364,9 +386,11 @@ export function spellIssues(row: Row): string[] {
                 'manual spells carry no effect, attribute or dice (the table resolves them)'
             );
     } else {
-        if (effects.length > 0 !== dice >= 1)
+        if (missile ? dice !== 0 : effects.length > 0 !== dice >= 1)
             issues.push(
-                'dice must be ≥ 1 exactly when the spell has an effect'
+                missile
+                    ? 'a missile spell carries no dice'
+                    : 'dice must be ≥ 1 exactly when the spell has an effect'
             );
 
         if (effects.length === 0 && !attribute)
@@ -384,14 +408,21 @@ export function spellIssues(row: Row): string[] {
             issues.push(`attribute condition "${condition}" is not allowed`);
     }
 
-    if (!manual && (row.targeting !== undefined || effects.length > 0 || attribute))
+    if (
+        !manual &&
+        (row.targeting !== undefined || effects.length > 0 || attribute)
+    )
         targetingIssues(row.targeting, effect, !!attribute, issues);
 
     const upcast = row.upcastDice;
 
     if (magic?.overcast === 'dice') {
-        if (upcast !== 1 || dice < 1)
-            issues.push('overcast "dice" needs upcastDice 1 and dice ≥ 1');
+        if (missile ? upcast !== undefined : upcast !== 1 || dice < 1)
+            issues.push(
+                missile
+                    ? 'a missile spell carries no upcastDice'
+                    : 'overcast "dice" needs upcastDice 1 and dice ≥ 1'
+            );
     } else if (upcast !== undefined)
         issues.push('upcastDice needs overcast "dice"');
 

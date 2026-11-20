@@ -189,9 +189,10 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
           ? canonMiscast
           : legacyMiscast;
 
-    const critBonus: CritBonus | undefined = canon && critical
-        ? (fortuneInput?.critBonus ?? CRIT_BONUS_DEFAULT)
-        : undefined;
+    const critBonus: CritBonus | undefined =
+        canon && critical
+            ? (fortuneInput?.critBonus ?? CRIT_BONUS_DEFAULT)
+            : undefined;
 
     const overcastAllowed = canon
         ? success &&
@@ -305,6 +306,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         details: ACTION_SLOT.write({
             cast: {
                 roll: test.roll,
+                ...(test.rawRoll !== test.roll && { rawRoll: test.rawRoll }),
                 target: test.target,
                 sl: test.sl,
                 cn,

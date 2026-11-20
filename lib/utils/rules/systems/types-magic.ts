@@ -1,5 +1,5 @@
 import type { SystemSlot } from './slot';
-import type { ApplyDamageConsequences } from './types';
+import type { ApplyDamageConsequences, MitigateResult } from './types';
 import type { SystemConditionResult } from './types-conditions';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
@@ -105,6 +105,19 @@ export interface RuleSystemCastReaction {
     };
 }
 
+export interface SpellHitCtx {
+    caster: BattleParticipant;
+    target: BattleParticipant;
+    magic: SpellMagic;
+    /** Effect amount after the falloff share */
+    amount: number;
+    /** Flat damage the overcast added; the cast level and dice are untouched */
+    overcastDamage: number;
+    cast: CastTestResult;
+    rules: Ruleset;
+    rng: Rng;
+}
+
 /** Casting-test magic: the cast is a roll with a miscast, not a spent resource */
 export interface RuleSystemTestedMagic {
     /** Ingredients are optional: spending one cancels the miscast instead of gating the cast */
@@ -115,6 +128,8 @@ export interface RuleSystemTestedMagic {
         who: { name: string; spell: string }
     ): CastTestResult;
     castTest(ctx: CastTestCtx): CastTestResult;
+    /** Mitigated damage of one spell hit; null = the core keeps its own path */
+    spellHit?(ctx: SpellHitCtx): MitigateResult | null;
     /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
     castPreview(
         caster: BattleParticipant,

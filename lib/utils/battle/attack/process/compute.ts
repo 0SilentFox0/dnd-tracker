@@ -8,6 +8,7 @@ import {
     scaleAdditionalDamage,
 } from '../../damage/balance-multiplier';
 import { applyHeroDmDamageMultiplier } from '../../damage/hero-dm-multiplier';
+import { mitigatedSteps } from '../../damage/mitigated-steps';
 import { applyObstacle, obstacleStep } from '../../damage/obstacle';
 import { multiplierRow, ruleRow, stepRow, totalRow } from '../../damage/rows';
 import { applyWeaponFlat } from '../../damage/weapon-flat';
@@ -501,19 +502,7 @@ function mitigateHit(
 
     if (!result) return null;
 
-    let running = 0;
-
-    const steps = result.steps.map<DamageStep>((s) => {
-        running += s.value;
-
-        return {
-            label: s.label,
-            side: s.side,
-            kind: 'flat',
-            value: s.value,
-            after: running,
-        };
-    });
+    const steps = mitigatedSteps(result.steps);
 
     const rows = [
         ...result.steps.map((s) =>

@@ -42,6 +42,13 @@ export const SpellMagicSchema = z.object({
             levels: z.number().int().min(1).max(3),
         })
         .optional(),
+    missile: z
+        .object({
+            wpb: z.boolean().default(true),
+            ignore: z.array(z.enum(['tb', 'ap'])).max(2).optional(),
+            perSl: z.number().int().min(0).max(5).optional(),
+        })
+        .optional(),
 });
 
 export type SpellMagic = z.infer<typeof SpellMagicSchema>;

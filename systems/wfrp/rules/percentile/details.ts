@@ -32,6 +32,8 @@ export interface PercentileAttackDetails {
 
 export interface PercentileCastDetails {
     roll: number;
+    /** Present only when advantage flipped the roll; the hit location of a spell reads this */
+    rawRoll?: number;
     target: number;
     sl: number;
     cn: number;

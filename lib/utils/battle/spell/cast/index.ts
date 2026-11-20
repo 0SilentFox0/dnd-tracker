@@ -359,6 +359,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             ? { magic: percentile, spellMagic, cast: test }
             : undefined;
 
+    if (settle) state.tested = settle;
+
     if (settle && !settle.cast.success) {
         spendCastCost(state, cost);
         settleCastTest(state, settle);

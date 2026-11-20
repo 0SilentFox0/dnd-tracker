@@ -1,3 +1,5 @@
+import type { WeatherKind } from '@/types/battle-grid';
+
 // All values: verify against 5e book.
 export const OUTNUMBERING_BONUS = 10;
 
@@ -48,18 +50,11 @@ export const AIM_SL = 1;
 /** The shooter moved before firing (p166) */
 export const MOVED_SL = -1;
 
-/** Ranged SL by map weather, the worse of it and an obscured target counts (p166: fog or poor light -1, rain and wind -2, extreme weather or pitch black -3) */
-export const WEATHER_SL = {
+/** Ranged SL by map weather; only conditions the book names (p166: fog -1, rain -2), other kinds are 0 */
+export const WEATHER_SL: Partial<Record<WeatherKind, number>> = {
     fog: -1,
     rain: -2,
-    snow: -2,
-    storm: -3,
-    blizzard: -3,
-    embers: 0,
-    crypt: -1,
-} as const;
-
-export const OBSCURED_SL = -1;
+};
 
 export const MIN_DAMAGE = 1;
 

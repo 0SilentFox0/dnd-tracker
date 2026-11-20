@@ -11,6 +11,10 @@ import type { SpellPower } from '@/lib/utils/battle/spell/power';
 import type { TransformRequest } from '@/lib/utils/battle/transform/types';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import type {
+    CastTestResult,
+    RuleSystemTestedMagic,
+} from '@/lib/utils/rules/systems/types';
+import type {
     AnchoredZoneEffect,
     BurstEffect,
     GrantCastEffect,
@@ -18,6 +22,7 @@ import type {
     HitRiderEffect,
     SpellDefinition,
     SpellEffect,
+    SpellMagic,
 } from '@/lib/utils/spells/model/schema';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
@@ -56,6 +61,11 @@ export interface SpellCastState {
     saveDc: number | undefined;
     attackBonus?: number;
     overcastDamage: number;
+    tested?: {
+        magic: RuleSystemTestedMagic;
+        spellMagic: SpellMagic;
+        cast: CastTestResult;
+    };
     battleId: string;
     actionModifiers: Record<string, StaticEffect[]>;
     rng: () => number;

@@ -14,6 +14,7 @@ import {
 } from '@/lib/utils/battle/common/action-flow';
 import { applyBalanceDamageMultiplier } from '@/lib/utils/battle/damage/balance-multiplier';
 import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
+import { mitigatedSteps } from '@/lib/utils/battle/damage/mitigated-steps';
 import { bothOnMap, cellsOf, footprintDistance } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { dealsNoDamage } from '@/lib/utils/battle/participant/state';
@@ -260,7 +261,9 @@ function dealSpellDamage(
               Math.floor((raw * share) / 100)
           ).damage;
 
-    if (planned <= 0) return;
+    const missile = !lethal && !!state.tested?.spellMagic.missile;
+
+    if (planned <= 0 && !missile) return;
 
     if (dealsNoDamage(getP(flow, casterIdOf(state)))) {
         flow.messages.push(
@@ -274,6 +277,7 @@ function dealSpellDamage(
     }
 
     if (
+        planned > 0 &&
         effect.delayIfBeyond &&
         scheduleHit(
             state,
@@ -285,9 +289,27 @@ function dealSpellDamage(
     )
         return;
 
+    const hit =
+        missile && state.tested
+            ? state.tested.magic.spellHit?.({
+                  caster: getP(flow, casterIdOf(state)),
+                  target,
+                  magic: state.tested.spellMagic,
+                  amount: planned,
+                  overcastDamage: state.overcastDamage,
+                  cast: state.tested.cast,
+                  rules: flow.ctx.rules,
+                  rng: state.rng,
+              })
+            : null;
+
+    if (!hit && planned <= 0) return;
+
+    const damaged = hit?.amount ?? planned;
+
     const resisted = lethal
         ? { finalDamage: planned, steps: [], immunityApplied: false }
-        : applyResistance(target, planned, effect.damageType ?? 'magic', {
+        : applyResistance(target, damaged, effect.damageType ?? 'magic', {
               participants: flow.ps,
               fromSpell: true,
               school: spell.groupId,
@@ -297,6 +319,14 @@ function dealSpellDamage(
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
     state.dealt += resisted.finalDamage;
+
+    if (hit?.afterHit) {
+        const applied = hit.afterHit(getP(flow, id), flow.ctx.round);
+
+        put(flow, applied.participant);
+        flow.messages.push(applied.message);
+    }
+
     applyFlowDamage(
         flow,
         target,
@@ -308,6 +338,7 @@ function dealSpellDamage(
     absorbSpellDamage(state, id, resisted.finalDamage);
     state.damageSteps[id] = [
         ...(state.damageSteps[id] ?? []),
+        ...(hit ? mitigatedSteps(hit.steps) : []),
         ...resisted.steps,
     ];
 

@@ -259,6 +259,9 @@
   "damage": {
     "steps": {
       "weapon": "Weapon",
+      "spell": "Spell damage",
+      "wpb": "Willpower bonus",
+      "overcast": "Overcast",
       "sb": "Strength bonus",
       "netSl": "Net SL",
       "tb": "Toughness bonus",

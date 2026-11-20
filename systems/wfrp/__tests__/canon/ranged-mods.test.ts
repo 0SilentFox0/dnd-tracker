@@ -198,29 +198,24 @@ describe('canon: ranged modifiers (p166-167)', () => {
         ]);
     });
 
-    bookExample(
-        166,
-        'fog -1, rain -2, storm -3 and an obscured target -1 SL',
-        () => {
-            const weather = (kind: 'fog' | 'rain' | 'storm') =>
-                mods(shooter(), prey(25), {
-                    map: testMap(100, 20, { weather: kind }),
-                });
+    bookExample(166, 'fog -1 and rain -2 SL; kinds the book does not name are 0', () => {
+        const weather = (kind: 'fog' | 'rain' | 'storm' | 'snow') =>
+            mods(shooter(), prey(25), {
+                map: testMap(100, 20, { weather: kind }),
+            });
 
-            expect(weather('fog')).toEqual([{ key: 'weather', sl: -1 }]);
-            expect(weather('rain')).toEqual([{ key: 'weather', sl: -2 }]);
-            expect(weather('storm')).toEqual([{ key: 'weather', sl: -3 }]);
-            expect(
-                mods(shooter(), prey(25), {
-                    map: testMap(100, 20, {
-                        terrain: {
-                            '25:5': { kind: 'difficult', obscured: true },
-                        },
-                    }),
-                })
-            ).toEqual([{ key: 'weather', sl: -1 }]);
-        }
-    );
+        expect(weather('fog')).toEqual([{ key: 'weather', sl: -1 }]);
+        expect(weather('rain')).toEqual([{ key: 'weather', sl: -2 }]);
+        expect(weather('storm')).toEqual([]);
+        expect(weather('snow')).toEqual([]);
+        expect(
+            mods(shooter(), prey(25), {
+                map: testMap(100, 20, {
+                    terrain: { '25:5': { kind: 'difficult', obscured: true } },
+                }),
+            })
+        ).toEqual([]);
+    });
 
     bookExample(167, 'called shot -2 SL on a ranged attack too', () => {
         expect(

@@ -20,6 +20,7 @@ import { canonWeaponUse } from './weapon-use';
 import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import type { Rng } from '@/lib/utils/common/rng';
 import type {
     DamageCtx,
     DamageResult,
@@ -27,9 +28,10 @@ import type {
     MitigateResult,
     MitigateStep,
 } from '@/lib/utils/rules/systems/types';
+import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-const step = (key: string, value: number): MitigateStep => ({
+export const step = (key: string, value: number): MitigateStep => ({
     key,
     value,
     label: dynamicTextRef(
@@ -43,7 +45,32 @@ const step = (key: string, value: number): MitigateStep => ({
 const critRank = (c: CritResult) =>
     c.death ? Infinity : Number(c.id.split('.')[1]);
 
-const totalLabel = textRef('battleWfrp.damage.total');
+export const totalLabel = textRef('battleWfrp.damage.total');
+
+export function wardedHit(
+    target: BattleParticipant,
+    rng: Rng
+): MitigateResult | null {
+    const ward = wardRoll(target, rng);
+
+    if (!ward?.saved) return null;
+
+    return {
+        amount: 0,
+        steps: [
+            {
+                key: 'ward',
+                value: 0,
+                label: textRef('battleWfrp.damage.steps.ward', {
+                    roll: ward.roll,
+                    ward: participantStats(target)?.ward ?? 0,
+                }),
+                side: 'target',
+            },
+        ],
+        totalLabel,
+    };
+}
 
 export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     const { attacker, target } = ctx;
@@ -52,25 +79,9 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (ctx.amount <= 0) return { amount: 0, steps: [], totalLabel };
 
-    const ward = wardRoll(target, ctx.rng);
+    const warded = wardedHit(target, ctx.rng);
 
-    if (ward?.saved) {
-        return {
-            amount: 0,
-            steps: [
-                {
-                    key: 'ward',
-                    value: 0,
-                    label: textRef('battleWfrp.damage.steps.ward', {
-                        roll: ward.roll,
-                        ward: participantStats(target)?.ward ?? 0,
-                    }),
-                    side: 'target',
-                },
-            ],
-            totalLabel,
-        };
-    }
+    if (warded) return warded;
 
     const sb = participantStats(attacker)?.sb ?? 0;
 

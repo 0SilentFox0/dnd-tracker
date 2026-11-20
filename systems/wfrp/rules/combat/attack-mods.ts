@@ -20,7 +20,6 @@ import {
     ENCLOSED_SL,
     HIGH_GROUND_SL,
     MOVED_SL,
-    OBSCURED_SL,
     OFFHAND_SL_PENALTY,
     OUTNUMBERED_SL,
     RANGE_BAND_SL,
@@ -33,7 +32,6 @@ import { shotBand } from './range-band';
 
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
-import { isObscured } from '@/lib/utils/battle/grid/terrain';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -184,14 +182,8 @@ export function meleeAttackMods(ctx: AttackModCtx): AttackMod[] {
     ]);
 }
 
-const weatherSl = (
-    map: BattleMapConfig | null | undefined,
-    target: BattleParticipant
-) =>
-    Math.min(
-        map?.weather ? WEATHER_SL[map.weather] : 0,
-        isObscured(map, target) ? OBSCURED_SL : 0
-    );
+const weatherSl = (map: BattleMapConfig | null | undefined) =>
+    (map?.weather && WEATHER_SL[map.weather]) || 0;
 
 const aimedAt = (attacker: BattleParticipant, target: BattleParticipant) => {
     const aim = wfrpState(attacker).aim;
@@ -233,7 +225,7 @@ export function rangedAttackMods(ctx: AttackModCtx): AttackMod[] {
             key: 'moved',
             sl: (attacker.battleData.movementUsed ?? 0) > 0 ? MOVED_SL : 0,
         },
-        { key: 'weather', sl: weatherSl(map, target) },
+        { key: 'weather', sl: weatherSl(map) },
         { key: 'intoMelee', sl: 0, ...(intoMelee && { disadvantage: 1 }) },
     ]);
 }
