@@ -1719,7 +1719,7 @@
       },
       {
         "max": 30,
-        "text": "Aethyric shock wounds you through armour.",
+        "text": "Eldritch shock wounds you through armour.",
         "effects": [
           {
             "type": "wounds",
@@ -1771,7 +1771,7 @@
       },
       {
         "max": 65,
-        "text": "A swarm of aethyric vermin engages you.",
+        "text": "A swarm of spectral vermin engages you.",
         "effects": []
       },
       {
@@ -1817,7 +1817,7 @@
       },
       {
         "max": 100,
-        "text": "Aethyric feedback bursts outward and floors everyone near.",
+        "text": "Magical feedback bursts outward and floors everyone near.",
         "effects": [
           {
             "type": "wounds",
