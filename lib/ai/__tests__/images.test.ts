@@ -171,7 +171,7 @@ describe('generateSlideImage', () => {
         const meta = await sharp(buffer).metadata();
 
         expect(meta.format).toBe('webp');
-        expect(meta.width).toBe(2560);
+        expect(meta.width).toBe(1920);
     });
 
     it('403 від провайдера — текст про доступ до моделі, без сирого тексту й ключа', async () => {

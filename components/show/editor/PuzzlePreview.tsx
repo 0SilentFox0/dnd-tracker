@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import { generatePuzzle } from '@/lib/utils/puzzle/generate';
 import type { PuzzleSpec } from '@/types/show';
 
@@ -27,7 +28,7 @@ export function PuzzlePreview({
             className="max-h-72 w-full rounded bg-black"
         >
             <image
-                href={imageUrl}
+                href={toMediaUrl(imageUrl)}
                 width={spec.imageWidth}
                 height={spec.imageHeight}
                 preserveAspectRatio="none"

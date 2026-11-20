@@ -1,5 +1,7 @@
 export const WORLD_MAPS_BUCKET = 'world-maps';
-export const WORLD_MAP_MAX_EDGE_PX = 6000;
+export const WORLD_MAP_MAX_EDGE_PX = 4096;
+
+export const WORLD_MAP_UPLOAD_QUALITY = 0.8;
 
 // iOS Safari caps a canvas around 16.7 Mpx
 export const WORLD_MAP_MAX_PIXELS = 16_000_000;

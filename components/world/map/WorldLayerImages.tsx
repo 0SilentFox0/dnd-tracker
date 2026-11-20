@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { WorldViewLayer } from '@/types/world';
 
 interface WorldLayerImagesProps {
@@ -32,7 +33,7 @@ export function WorldLayerImages({
                         }}
                     >
                         <Image
-                            src={layer.imageUrl}
+                            src={toMediaUrl(layer.imageUrl)}
                             alt={layer.name}
                             fill
                             draggable={false}

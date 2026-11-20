@@ -5,6 +5,7 @@ import { Sparkles } from 'lucide-react';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { useParticipantFace } from '@/lib/hooks/battle';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { ActiveEffect } from '@/types/battle';
 
 export function EffectIcon({
@@ -26,7 +27,7 @@ export function EffectIcon({
             >
                 {face.avatar ? (
                     <Image
-                        src={face.avatar}
+                        src={toMediaUrl(face.avatar)}
                         alt={face.name}
                         fill
                         sizes={`${size}px`}

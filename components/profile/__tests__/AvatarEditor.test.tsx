@@ -17,6 +17,7 @@ vi.mock('@/lib/hooks/common', () => ({ useConfirm: () => confirm }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@/lib/utils/common/image-url', () => ({
     isHostedOnProjectStorage: (url: string) => url.startsWith('https://sb/'),
+    toMediaUrl: (url: string) => url,
 }));
 
 const user = (avatarUrl: string | null) => ({

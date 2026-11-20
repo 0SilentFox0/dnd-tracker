@@ -16,6 +16,7 @@ import {
     regionFillPath,
     UNIT,
 } from '@/lib/utils/battle/grid';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -54,7 +55,7 @@ export function MapMinimap({
 
     const height = Math.round(maxSide * Math.min(1, win.rows / win.cols));
 
-    const src = map.background ?? DEFAULT_MAP_BACKGROUND;
+    const src = toMediaUrl(map.background ?? DEFAULT_MAP_BACKGROUND);
 
     const { aspect, imgProps } = useLoadedAspect(src);
 

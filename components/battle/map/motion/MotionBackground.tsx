@@ -12,6 +12,7 @@ import {
     stepMotion,
 } from '@/lib/utils/battle/map-motion';
 import { subscribe } from '@/lib/utils/canvas/ticker';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { BattleMapConfig, MapMotion } from '@/types/battle-grid';
 
 const REST_PX_PER_S = 0.5;
@@ -31,7 +32,7 @@ export function MotionBackground({
     phone: boolean;
     onReady?: () => void;
 }) {
-    const src = map.background ?? DEFAULT_MAP_BACKGROUND;
+    const src = toMediaUrl(map.background ?? DEFAULT_MAP_BACKGROUND);
 
     const { aspect, imgProps } = useLoadedAspect(src, onReady);
 

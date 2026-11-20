@@ -31,6 +31,7 @@ import {
 } from '@/lib/hooks/common';
 import { useMarkerBubblePosition, type WorldTool } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
 import { hintPosition } from '@/lib/utils/world/hint-position';
 import { snapPoint } from '@/lib/utils/world/zone-snap';
@@ -411,7 +412,7 @@ export function WorldMapView({
                     {size.width > 0 ? (
                         <div className="absolute inset-0" style={layerStyle}>
                             <Image
-                                src={map.imageUrl}
+                                src={toMediaUrl(map.imageUrl)}
                                 alt={map.name}
                                 fill
                                 priority

@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 
 interface ImageZoomDialogProps {
     src: string;
@@ -33,7 +34,7 @@ export function ImageZoomDialog({
             {square ? (
                 <div className="relative mx-auto aspect-square w-full max-w-[min(80vh,640px)]">
                     <Image
-                        src={src}
+                        src={toMediaUrl(src)}
                         alt={name}
                         fill
                         sizes="640px"
@@ -42,7 +43,7 @@ export function ImageZoomDialog({
                 </div>
             ) : (
                 <OptimizedImage
-                    src={src}
+                    src={toMediaUrl(src)}
                     alt={name}
                     width={1200}
                     height={1600}

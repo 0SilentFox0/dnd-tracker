@@ -144,4 +144,20 @@ describe('useAudioElementSync', () => {
         rerender(<Harness {...base} src={null} />);
         expect(api.failed).toBe(false);
     });
+
+    it('flags a failed file when the src is rewritten to the media host', () => {
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://proj.supabase.co');
+        vi.stubEnv('NEXT_PUBLIC_MEDIA_BASE_URL', 'https://media.example.dev');
+
+        const src = 'https://proj.supabase.co/storage/v1/object/public/m/1.mp3';
+
+        const { getByTestId } = render(<Harness {...base} src={src} />);
+
+        act(() => {
+            getByTestId('audio').dispatchEvent(new Event('error'));
+        });
+        expect(api.failed).toBe(true);
+
+        vi.unstubAllEnvs();
+    });
 });

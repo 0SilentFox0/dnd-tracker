@@ -89,6 +89,26 @@ describe('artifact resources', () => {
         expect(resolveIcon).not.toHaveBeenCalled();
     });
 
+    it('a replaced icon is stored under a fresh object name, never the stable artifact id', async () => {
+        db.artifact.findFirst.mockResolvedValue({
+            id: 'a1',
+            campaignId: 'c1',
+            icon: 'https://x/old.png',
+        });
+        db.artifact.update.mockResolvedValue({ id: 'a1' });
+        resolveIcon.mockResolvedValue({ ok: true, value: 'https://x/new.png' });
+
+        await updateContent(artifactsResource, actor, 'a1', {
+            icon: 'data:image/png;base64,AAA',
+        });
+
+        const options = resolveIcon.mock.calls[0][1] as {
+            objectBaseName: string;
+        };
+
+        expect(options.objectBaseName).toMatch(/^a1-.+/);
+    });
+
     it('сет з артефактом іншої кампанії → 400 ContentError', async () => {
         db.artifactSet.findFirst.mockResolvedValue({
             id: 's1',

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { cn } from '@/lib/utils';
 import { isDown } from '@/lib/utils/battle/participant/state';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface PortraitProps {
@@ -52,7 +53,7 @@ export function Portrait({
         >
             {avatar ? (
                 <Image
-                    src={avatar}
+                    src={toMediaUrl(avatar)}
                     alt={name}
                     fill
                     sizes={`${size}px`}

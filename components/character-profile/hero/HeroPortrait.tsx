@@ -7,6 +7,7 @@ import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 
 interface HeroPortraitProps {
     src: string | null | undefined;
@@ -55,7 +56,7 @@ export function HeroPortrait({
                 className={frame}
             >
                 <OptimizedImage
-                    src={src}
+                    src={toMediaUrl(src)}
                     alt={name}
                     width={640}
                     height={853}
@@ -63,7 +64,7 @@ export function HeroPortrait({
                 />
             </HudButton>
             <ImageZoomDialog
-                src={src}
+                src={toMediaUrl(src)}
                 name={name}
                 open={open}
                 onOpenChange={setOpen}
