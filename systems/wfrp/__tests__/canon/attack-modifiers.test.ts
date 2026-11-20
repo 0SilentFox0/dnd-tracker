@@ -297,7 +297,9 @@ describe('canon: ranged situation modifiers (p165-166)', () => {
         () => {
             const a = unit('a', 0);
 
-            const friend = unit('f', 11);
+            const friend = withWfrpState(unit('f', 11), {
+                engagedWith: { t: 2 },
+            });
 
             const c = ctxOf(a, target, bow(), {
                 participants: [a, target, friend],
@@ -476,8 +478,12 @@ describe('canon: melee situation modifiers (p166)', () => {
 
         ally.battleData.position = { x: 1, y: 1 };
 
+        const linked = withWfrpState(ally, {
+            engagedWith: { [foe.basicInfo.id]: 2 },
+        });
+
         const m = modsOf(
-            ctxOf(a, foe, sword(), { participants: [a, ally, foe] }),
+            ctxOf(a, foe, sword(), { participants: [a, linked, foe] }),
             'melee',
             { highGround: 'attacker' }
         );

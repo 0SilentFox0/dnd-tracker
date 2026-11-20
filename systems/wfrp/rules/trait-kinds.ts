@@ -39,7 +39,11 @@ export const BREATH_KINDS = [
     'smoke',
 ] as const;
 
-export const TALENT_KINDS = ['ambidextrous', 'dualWielder'] as const;
+export const TALENT_KINDS = [
+    'ambidextrous',
+    'dualWielder',
+    'trickRider',
+] as const;
 
 export const CREATURE_TRAITS = ['swarm', 'fly', 'painless', 'undead'] as const;
 

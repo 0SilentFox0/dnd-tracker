@@ -43,6 +43,7 @@ import {
 } from '../traits/passions';
 import { coolTarget, isSuccess } from '../traits/psych-test';
 import { sizeHitMod } from '../traits/size';
+import { hasTalent } from '../traits/talents';
 import { helplessKillsOf, isHelpless } from './attack-mods/helpless';
 import { collectAttackMods } from './attack-mods';
 import {
@@ -53,7 +54,14 @@ import {
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { canonDefence } from './defence';
-import { engagedFoes, isOutnumbering, isSurrounded } from './engagement';
+import { defensiveSl } from './defensive';
+import {
+    engagementJournal,
+    foesOnAttack,
+    isOutnumbering,
+    isSurrounded,
+    withEngagement,
+} from './engagement';
 import { fateLeftOf, fateSpendsOn } from './fate';
 import { fumbleModelOf, fumbleOutcome } from './fumble';
 import { asLocation, hitLocation, sideOf } from './location';
@@ -65,6 +73,7 @@ import {
     settle,
     withMomentum,
 } from './momentum';
+import { mountedDodgeModes } from './mounted';
 import { resolveOpposed } from './opposed';
 import { participantChars } from './participant';
 import { rangeContext, rangedOpposition } from './range-band';
@@ -493,7 +502,15 @@ function withFumble(ctx: ResolveAttackCtx, r: ResolvedAttack): ResolvedAttack {
 const surroundedNote = (ctx: ResolveAttackCtx) =>
     editionOf(ctx.rules).momentumModel === 'participant' &&
     attackKindOf(ctx.attack.type) === AttackType.MELEE &&
-    isSurrounded(engagedFoes(ctx.target, ctx.participants, ctx.map))
+    isSurrounded(
+        foesOnAttack(
+            ctx.target,
+            ctx.attacker,
+            ctx.participants,
+            ctx.map,
+            engagementJournal(ctx.rules)
+        )
+    )
         ? [
               textRef('battleWfrp.log.targetSurrounded', {
                   name: ctx.target.basicInfo.name,
@@ -654,15 +671,86 @@ function resolveHelpless(
     };
 }
 
+// A melee exchange links the pair in the attack journal; a won grapple declaration holds the foe instead of wounding it (p163, p167)
+function withMeleeLedger(
+    ctx: ResolveAttackCtx,
+    r: ResolvedAttack
+): ResolvedAttack {
+    if (
+        !engagementJournal(ctx.rules) ||
+        attackKindOf(ctx.attack.type) !== AttackType.MELEE
+    )
+        return r;
+
+    const { attacker, target } = ctx;
+
+    const grapple =
+        r.isHit &&
+        FORTUNE_INPUT.read(ctx.system)?.mods?.grapple === true &&
+        wfrpState(target).grapple?.with !== attacker.basicInfo.id;
+
+    const edition = editionOf(ctx.rules);
+
+    const linked = (
+        p: BattleParticipant,
+        otherId: string,
+        holder: boolean,
+        own?: (q: BattleParticipant) => BattleParticipant
+    ) => {
+        const engaged = withEngagement(own ? own(p) : p, otherId);
+
+        return grapple
+            ? withWfrpState(engaged, { grapple: { with: otherId, holder } })
+            : engaged;
+    };
+
+    return {
+        ...r,
+        ...(grapple && {
+            isHit: false,
+            attackRoll: { ...r.attackRoll, isHit: false },
+            lines: [
+                ...r.lines,
+                textRef('battleWfrp.log.grappled', {
+                    name: attacker.basicInfo.name,
+                    target: target.basicInfo.name,
+                }),
+            ],
+        }),
+        attackerUpdate: (p) =>
+            linked(p, target.basicInfo.id, true, r.attackerUpdate),
+        targetUpdate: (p) =>
+            linked(p, attacker.basicInfo.id, false, (q) => {
+                const prior = r.targetUpdate?.(q) ?? q;
+
+                return grapple
+                    ? applyWfrpConditionTo(prior, {
+                          key: 'entangled',
+                          round: 0,
+                          edition,
+                          sourceName: attacker.basicInfo.name,
+                      }).participant
+                    : prior;
+            }),
+    };
+}
+
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
     const core = resolveAttackCore(ctx);
 
-    const resolved = withAimSpent(
+    const resolved = withMeleeLedger(
         ctx,
-        withFumble(ctx, {
-            ...core,
-            lines: [...core.lines, ...modLines(core), ...surroundedNote(ctx)],
-        })
+        withAimSpent(
+            ctx,
+            withFumble(ctx, {
+                ...core,
+                lines: [
+                    ...core.lines,
+                    ...modLines(core),
+                    ...surroundedNote(ctx),
+                ],
+            })
+        )
     );
 
     const hand = ATTACK_SLOT.read(ctx.attack.system)?.hand;
@@ -741,7 +829,8 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const offHandPenalty =
         edition.momentumModel === 'participant' &&
-        ATTACK_SLOT.read(attack.system)?.hand === 'off'
+        ATTACK_SLOT.read(attack.system)?.hand === 'off' &&
+        !hasTalent(attacker, 'ambidextrous')
             ? OFFHAND_SL_PENALTY
             : 0;
 
@@ -923,6 +1012,10 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 attackerSlMod: rangedSl,
                 attackerSlOnSuccess: attackSl.onSuccess,
                 defenderSlMod: selfSlMod(target, edition),
+                ...(canonMods && {
+                    defenderSlByKind: defensiveSl(target),
+                    defenderModes: { dodge: mountedDodgeModes(target) },
+                }),
                 attackerModes: {
                     advantage: fortuneAdvantage + (attackMods?.advantage ?? 0),
                     disadvantage:
@@ -1130,6 +1223,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 },
                 defenderModes: {
                     parry: { advantage: hasMomentum(target) ? 1 : 0 },
+                    ...(canonMods && { dodge: mountedDodgeModes(target) }),
                 },
             }),
             edition,

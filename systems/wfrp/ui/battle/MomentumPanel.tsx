@@ -10,8 +10,11 @@ import { HudButton } from '@/components/hud';
 import type { HeroPanelProps } from '@/components/systems/types';
 import { cn } from '@/lib/utils';
 import { useMomentumPanel } from '@/systems/wfrp/hooks/useMomentumPanel';
+import { DEFENSIVE_SKILLS } from '@/systems/wfrp/rules/combat/defensive';
 
 const SOURCES = ['server', 'manual'] as const;
+
+const GRAPPLE_CHOICES = ['damage', 'entangle', 'free'] as const;
 
 const btn =
     'h-9 w-full border border-white/25 px-2 text-left text-sm text-[var(--bone)] disabled:opacity-40';
@@ -32,6 +35,10 @@ export function MomentumPanel({ hero }: HeroPanelProps) {
     const [charging, setCharging] = useState(false);
 
     const [aiming, setAiming] = useState(false);
+
+    const [defending, setDefending] = useState(false);
+
+    const [grappling, setGrappling] = useState(false);
 
     const [ally, setAlly] = useState('');
 
@@ -178,6 +185,72 @@ export function MomentumPanel({ hero }: HeroPanelProps) {
                                 }}
                             >
                                 {f.name}
+                            </HudButton>
+                        ))}
+                </>
+            )}
+            {panel.canDefend && (
+                <>
+                    <HudButton
+                        type="button"
+                        disabled={panel.isPending}
+                        aria-expanded={defending}
+                        className={btn}
+                        onClick={() => setDefending(!defending)}
+                    >
+                        {t('defensive')}
+                    </HudButton>
+                    {defending &&
+                        DEFENSIVE_SKILLS.map((skill) => (
+                            <HudButton
+                                key={skill}
+                                type="button"
+                                disabled={panel.isPending}
+                                className={btn}
+                                onClick={() => {
+                                    setDefending(false);
+                                    panel.defend(skill);
+                                }}
+                            >
+                                {t(`defensiveSkill.${skill}`)}
+                            </HudButton>
+                        ))}
+                </>
+            )}
+            {panel.canFlee && (
+                <HudButton
+                    type="button"
+                    disabled={panel.isPending}
+                    className={btn}
+                    onClick={panel.flee}
+                >
+                    {t('flee')}
+                </HudButton>
+            )}
+            {panel.canGrapple && (
+                <>
+                    <HudButton
+                        type="button"
+                        disabled={panel.isPending}
+                        aria-expanded={grappling}
+                        className={btn}
+                        onClick={() => setGrappling(!grappling)}
+                    >
+                        {t('grapple')}
+                    </HudButton>
+                    {grappling &&
+                        GRAPPLE_CHOICES.map((choice) => (
+                            <HudButton
+                                key={choice}
+                                type="button"
+                                disabled={panel.isPending}
+                                className={btn}
+                                onClick={() => {
+                                    setGrappling(false);
+                                    panel.grapple(choice);
+                                }}
+                            >
+                                {t(`grappleChoice.${choice}`)}
                             </HudButton>
                         ))}
                 </>

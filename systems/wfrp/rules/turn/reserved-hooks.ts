@@ -13,5 +13,3 @@ const unchanged = (ctx: { participants: TurnHookCtx['participants'] }) => ({
 export const wfrpSwarmRoundEnd: TurnHook<TurnSubjectCtx> = unchanged;
 
 export const wfrpRegenerate: TurnHook<TurnStartCtx> = unchanged;
-
-export const wfrpEngagementExpiry: TurnHook<TurnSubjectCtx> = unchanged;

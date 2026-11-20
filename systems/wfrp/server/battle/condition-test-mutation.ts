@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import { engagedFoes } from '../../rules/combat/engagement';
+import {
+    engagedFoes,
+    engagementJournal,
+} from '../../rules/combat/engagement';
 import { editionOf } from '../../rules/edition';
 import { wfrpState, withWfrpState } from '../../rules/state';
 
@@ -77,7 +80,12 @@ export function conditionTestMutation(
     if (
         body.condition === 'broken' &&
         editionOf(ctx.meta.rules).momentumModel === 'participant' &&
-        engagedFoes(actor, ctx.participants, ctx.meta.map).length > 0
+        engagedFoes(
+            actor,
+            ctx.participants,
+            ctx.meta.map,
+            engagementJournal(ctx.meta.rules)
+        ).length > 0
     )
         throw new BattleRuleError(
             'action_rejected',

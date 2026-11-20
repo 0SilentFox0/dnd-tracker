@@ -127,6 +127,16 @@ export function AttackModsPicker({
                         {t('enclosed')}
                     </Toggle>
                 )}
+                {kind === 'melee' && (
+                    <Toggle
+                        on={!!mods.grapple}
+                        onClick={() =>
+                            set({ grapple: mods.grapple ? undefined : true })
+                        }
+                    >
+                        {t('grapple')}
+                    </Toggle>
+                )}
             </Row>
             {helpless && (
                 <div className="mt-1 flex items-center gap-2 text-sm text-hud-soft">

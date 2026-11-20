@@ -44,7 +44,12 @@ export const rangedMods: AttackModSource = ({ ctx, edition, kind, input }) => {
     if ((attacker.battleData.movementUsed ?? 0) > 0)
         mods.push({ key: 'moved', sl: -1 });
 
-    const others = engagedFoes(target, participants, map).filter(
+    const others = engagedFoes(
+        target,
+        participants,
+        map,
+        edition.actionsModel === 'canon'
+    ).filter(
         (f) => f.basicInfo.id !== attacker.basicInfo.id
     );
 

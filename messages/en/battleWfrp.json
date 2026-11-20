@@ -111,6 +111,18 @@
     "attackMod": "{mod}: {sl} SL",
     "attackModFlat": "{mod}",
     "aimed": "{name} takes aim at {target}: +1 SL on the next shot",
+    "defensiveParry": "{name} stands on the defensive: +2 SL to Parry until the next turn",
+    "defensiveDodge": "{name} stands on the defensive: +2 SL to Dodge until the next turn",
+    "defensiveMagick": "{name} stands on the defensive: +2 SL to Language (Magick) against dispels until the next turn",
+    "fled": "{name} flees from {foes} foe(s) without Disengage: Broken, the foes gain Momentum and may strike",
+    "grappled": "{name} grapples {target}: both are locked in a hold, {target} is Entangled",
+    "grappleLost": "{name} is no longer held: the grapple ends",
+    "grappleFailed": "{name} fails to overpower {target} in the grapple",
+    "grappleFree": "{name} breaks free of the grapple with {target} (SL {sl})",
+    "grappleEntangle": "{name} tightens the hold on {target} (SL {sl})",
+    "grappleDamage": "{name} wrenches {target} in the grapple (SL {sl}): {damage} Wounds",
+    "mounted": "{name} is now riding {mount}",
+    "dismounted": "{name} dismounts",
     "helplessKill": "{name} finishes the helpless {target}",
     "momentumSecondAttack": "{name} spends Momentum on an attack with the second weapon",
     "leadershipTransfer": "{name} spends Momentum: Leadership (SL {sl}), {ally} gains Momentum",
@@ -217,7 +229,12 @@
       "situation": "Terrain",
       "cover": "Target in cover",
       "enclosed": "Cramped space",
-      "helplessRoll": "Helpless target: chosen roll"
+      "helplessRoll": "Helpless target: chosen roll",
+      "grapple": "Grapple"
+    },
+    "mounted": {
+      "label": "Mount",
+      "none": "On foot"
     },
     "momentum": {
       "title": "Momentum",
@@ -228,6 +245,19 @@
       "sprint": "Sprint (action, Athletics)",
       "charge": "Charge",
       "aim": "Aim (action)",
+      "defensive": "On the Defensive (action)",
+      "defensiveSkill": {
+        "parry": "Parry +2 SL",
+        "dodge": "Dodge +2 SL",
+        "magick": "Language (Magick) +2 SL"
+      },
+      "flee": "Flee (no Disengage)",
+      "grapple": "Grapple (action, Strength)",
+      "grappleChoice": {
+        "damage": "Wound the foe",
+        "entangle": "Tighten the hold",
+        "free": "Break free"
+      },
       "leadership": "Pass Momentum",
       "ally": "Ally",
       "reason": {
@@ -261,7 +291,9 @@
     "helpless": "Helpless target",
     "size": "Size",
     "surrounded": "Surrounded",
-    "outnumbered": "Outnumbering"
+    "outnumbered": "Outnumbering",
+    "cavalry": "Cavalry weapon from the saddle",
+    "mountedFoe": "Foe on a larger mount"
   },
   "crit": {
     "head": {

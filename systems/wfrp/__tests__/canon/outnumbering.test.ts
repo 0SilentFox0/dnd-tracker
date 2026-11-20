@@ -7,6 +7,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { withStats } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { collectAttackMods } from '@/systems/wfrp/rules/combat/attack-mods';
 import { isOutnumbering } from '@/systems/wfrp/rules/combat/engagement';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
 import type { TraitSize } from '@/systems/wfrp/rules/trait-kinds';
 import { outnumberWeight } from '@/systems/wfrp/rules/traits/size';
 import type { BattleParticipant } from '@/types/battle';
@@ -134,7 +135,14 @@ describe('canon: Outnumbered and Surrounded are SL on the attack test (p166)', (
             ctx: {
                 attacker: attackers[0],
                 target,
-                participants: [...attackers, target],
+                participants: [
+                    ...attackers.map((a) =>
+                        withWfrpState(a, {
+                            engagedWith: { [target.basicInfo.id]: 2 },
+                        })
+                    ),
+                    target,
+                ],
                 map: null,
             } as never,
             edition: CANON,

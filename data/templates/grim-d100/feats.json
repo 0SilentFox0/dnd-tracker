@@ -786,7 +786,15 @@
     "type": "general",
     "description": "No penalty for acting with the off hand.",
     "xpCost": 100,
-    "maxRank": 1
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Both-Handed",
+        "trigger": { "event": "passive" },
+        "effects": [{ "kind": "wfrpTalent", "talent": "ambidextrous" }]
+      }
+    ]
   },
   {
     "slug": "keen-sense-smell",
@@ -1257,7 +1265,15 @@
     "type": "general",
     "description": "Free off-hand attack with no Momentum cost.",
     "xpCost": 100,
-    "maxRank": 1
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Twin Blades",
+        "trigger": { "event": "passive" },
+        "effects": [{ "kind": "wfrpTalent", "talent": "dualWielder" }]
+      }
+    ]
   },
   {
     "slug": "skim-the-till",

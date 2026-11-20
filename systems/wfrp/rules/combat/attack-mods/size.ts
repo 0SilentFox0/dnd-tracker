@@ -1,5 +1,5 @@
 import { sizeRangedSl } from '../../traits/size';
-import { engagedFoes, isOutnumbering, isSurrounded } from '../engagement';
+import { foesOnAttack, isOutnumbering, isSurrounded } from '../engagement';
 import type { AttackModSource } from './types';
 
 const SURROUNDED_SL = 2;
@@ -14,7 +14,9 @@ export const sizeMods: AttackModSource = ({ ctx, edition, kind }) => {
             ? [{ key: 'size', sl: sizeRangedSl(attacker, target) }]
             : [];
 
-    if (isSurrounded(engagedFoes(target, participants, map)))
+    const journal = edition.actionsModel === 'canon';
+
+    if (isSurrounded(foesOnAttack(target, attacker, participants, map, journal)))
         return [{ key: 'surrounded', sl: SURROUNDED_SL }];
 
     return isOutnumbering(
@@ -22,7 +24,8 @@ export const sizeMods: AttackModSource = ({ ctx, edition, kind }) => {
         target,
         participants,
         map,
-        edition.sizeModel === 'canon'
+        edition.sizeModel === 'canon',
+        journal
     )
         ? [{ key: 'outnumbered', sl: OUTNUMBERED_SL }]
         : [];

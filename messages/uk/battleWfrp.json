@@ -111,6 +111,18 @@
     "attackMod": "{mod}: {sl} SL",
     "attackModFlat": "{mod}",
     "aimed": "{name} цілиться в {target}: +1 SL до наступного пострілу",
+    "defensiveParry": "{name} переходить до оборони: +2 SL до Parry до наступного ходу",
+    "defensiveDodge": "{name} переходить до оборони: +2 SL до Dodge до наступного ходу",
+    "defensiveMagick": "{name} переходить до оборони: +2 SL до Language (Magick) проти розсіювання до наступного ходу",
+    "fled": "{name} тікає від {foes} ворог(ів) без Disengage: Broken, вороги отримують Momentum і можуть вдарити",
+    "grappled": "{name} хапає {target}: обидва в захваті, {target} Entangled",
+    "grappleLost": "{name} більше не тримає: захват закінчився",
+    "grappleFailed": "{name} не здолав {target} у захваті",
+    "grappleFree": "{name} вириває з захвату {target} (SL {sl})",
+    "grappleEntangle": "{name} міцніше стискає {target} (SL {sl})",
+    "grappleDamage": "{name} ламає {target} у захваті (SL {sl}): {damage} ран",
+    "mounted": "{name} тепер верхи на {mount}",
+    "dismounted": "{name} зіскакує з коня",
     "helplessKill": "{name} добиває безпорадного {target}",
     "momentumSecondAttack": "{name} витрачає Momentum на атаку другою зброєю",
     "leadershipTransfer": "{name} витрачає Momentum: Лідерство (РУ {sl}), {ally} отримує Momentum",
@@ -217,7 +229,12 @@
       "situation": "Місцевість",
       "cover": "Ціль в укритті",
       "enclosed": "Тісний простір",
-      "helplessRoll": "Безпорадна ціль: обраний кидок"
+      "helplessRoll": "Безпорадна ціль: обраний кидок",
+      "grapple": "Захват"
+    },
+    "mounted": {
+      "label": "Скакун",
+      "none": "Пішки"
     },
     "momentum": {
       "title": "Momentum",
@@ -228,6 +245,19 @@
       "sprint": "Спринт (дія, Атлетика)",
       "charge": "Розбіг",
       "aim": "Цілитися (дія)",
+      "defensive": "Оборона (дія)",
+      "defensiveSkill": {
+        "parry": "Parry +2 SL",
+        "dodge": "Dodge +2 SL",
+        "magick": "Language (Magick) +2 SL"
+      },
+      "flee": "Тікати (без Disengage)",
+      "grapple": "Захват (дія, Сила)",
+      "grappleChoice": {
+        "damage": "Завдати ран",
+        "entangle": "Стиснути міцніше",
+        "free": "Вирватися"
+      },
       "leadership": "Передати Momentum",
       "ally": "Союзник",
       "reason": {
@@ -261,7 +291,9 @@
     "helpless": "Безпорадна ціль",
     "size": "Розмір",
     "surrounded": "В оточенні",
-    "outnumbered": "Чисельна перевага"
+    "outnumbered": "Чисельна перевага",
+    "cavalry": "Кавалерійська зброя з сідла",
+    "mountedFoe": "Ворог на більшому коні"
   },
   "crit": {
     "head": {

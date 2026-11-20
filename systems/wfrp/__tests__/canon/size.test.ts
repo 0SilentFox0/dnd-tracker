@@ -239,7 +239,10 @@ describe('canon: bigger fighters ignore smaller foes when leaving melee (p360)',
     const run = (moverSize: TraitSize, foeSize: TraitSize) => {
         const mover = unit('m', moverSize, {}, 3);
 
-        const foe = unit('f', foeSize, {}, 1, ParticipantSide.ENEMY);
+        const foe = withWfrpState(
+            unit('f', foeSize, {}, 1, ParticipantSide.ENEMY),
+            { engagedWith: { m: 2 } }
+        );
 
         return () =>
             wfrpOnMoveEnd({

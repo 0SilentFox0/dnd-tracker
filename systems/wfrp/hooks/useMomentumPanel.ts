@@ -6,12 +6,17 @@ import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import {
     aimOp,
+    defensiveOp,
     disengageOp,
+    fleeOp,
+    grappleOp,
     momentumOp,
     movementOp,
 } from '@/systems/wfrp/api/battle';
+import type { DefensiveSkill } from '@/systems/wfrp/rules/combat/defensive';
 import {
     engagedFoes,
+    engagementJournal,
     isSurrounded,
 } from '@/systems/wfrp/rules/combat/engagement';
 import {
@@ -36,6 +41,12 @@ export interface MomentumPanel {
     canAim: boolean;
     aimTargets: { id: string; name: string }[];
     aim(targetId: string): void;
+    canDefend: boolean;
+    defend(skill: DefensiveSkill): void;
+    canFlee: boolean;
+    flee(): void;
+    canGrapple: boolean;
+    grapple(choice: 'damage' | 'entangle' | 'free', roll?: number): void;
     run(): void;
     sprint(roll?: number): void;
     charge(targetId: string): void;
@@ -60,7 +71,12 @@ export function useMomentumPanel(
 
     const holds = hasMomentum(hero);
 
-    const foes = engagedFoes(hero, battle.initiativeOrder, battle.map);
+    const foes = engagedFoes(
+        hero,
+        battle.initiativeOrder,
+        battle.map,
+        engagementJournal(battle.rules)
+    );
 
     const canDisengage =
         foes.length > 0 &&
@@ -84,7 +100,26 @@ export function useMomentumPanel(
             (a) => attackKindOf(a.type) === AttackType.RANGED
         );
 
-    if (!holds && !canDisengage && !freeMove && !canAim) return null;
+    const canon = editionOf(battle.rules).actionsModel === 'canon';
+
+    const canDefend = canon && !hero.actionFlags.hasUsedAction;
+
+    const canFlee = canon && freeMove && foes.length > 0;
+
+    const canGrapple =
+        canon &&
+        !hero.actionFlags.hasUsedAction &&
+        wfrpState(hero).grapple !== undefined;
+
+    if (
+        !holds &&
+        !canDisengage &&
+        !freeMove &&
+        !canAim &&
+        !canDefend &&
+        !canGrapple
+    )
+        return null;
 
     return {
         holds,
@@ -129,6 +164,20 @@ export function useMomentumPanel(
             : [],
         aim: (targetId) =>
             actions.system.mutate(aimOp({ participantId, targetId })),
+        canDefend,
+        defend: (skill) =>
+            actions.system.mutate(defensiveOp({ participantId, skill })),
+        canFlee,
+        flee: () => actions.system.mutate(fleeOp(participantId)),
+        canGrapple,
+        grapple: (choice, roll) =>
+            actions.system.mutate(
+                grappleOp({
+                    participantId,
+                    choice,
+                    ...(roll === undefined ? { serverRoll: true } : { roll }),
+                })
+            ),
         run: () =>
             actions.system.mutate(movementOp({ kind: 'run', participantId })),
         sprint: (roll) =>
@@ -160,6 +209,9 @@ export function useMomentumPanel(
             isSystemActionPending(actions.system, 'momentum') ||
             isSystemActionPending(actions.system, 'disengage') ||
             isSystemActionPending(actions.system, 'aim') ||
+            isSystemActionPending(actions.system, 'defensive') ||
+            isSystemActionPending(actions.system, 'flee') ||
+            isSystemActionPending(actions.system, 'grapple') ||
             isSystemActionPending(actions.system, 'movement'),
     };
 }

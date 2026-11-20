@@ -6,6 +6,8 @@ import { qualityDefence, qualityWraps } from '../equipment/quality-effects';
 import { REACH_RANK } from '../equipment/weapon-profile';
 import { ATTACK_SLOT } from '../slots';
 import { parryVsBiggerSl } from '../traits/size';
+import { hasTalent } from '../traits/talents';
+import { defensiveSl } from './defensive';
 import { participantChars, participantStats } from './participant';
 import { canonWeaponUse } from './weapon-use';
 
@@ -57,6 +59,8 @@ export function canonDefence(
 
     const attackerReach = incoming.slot?.reach;
 
+    const ambidextrous = hasTalent(defender, 'ambidextrous');
+
     const candidates = (defender.battleData.attacks ?? [])
         .filter((a) => attackKindOf(a.type) !== AttackType.RANGED)
         .map((a) => {
@@ -74,7 +78,9 @@ export function canonDefence(
                     : 0;
 
             const offHand =
-                slot?.hand === 'off' && !hasQuality(refs.qualities, 'parry')
+                slot?.hand === 'off' &&
+                !hasQuality(refs.qualities, 'parry') &&
+                !ambidextrous
                     ? OFF_HAND_SL
                     : 0;
 
@@ -104,9 +110,14 @@ export function canonDefence(
             ? parryVsBiggerSl(defender, attacker)
             : 0;
 
+    const stance = defensiveSl(defender);
+
     return {
         parryTarget: best?.target ?? ws,
-        sl: { parry: (best?.sl ?? shield + wrap) + bigger, dodge: shield },
+        sl: {
+            parry: (best?.sl ?? shield + wrap) + bigger + stance.parry,
+            dodge: shield + stance.dodge,
+        },
         ...(best && { weapon: best.weapon }),
     };
 }

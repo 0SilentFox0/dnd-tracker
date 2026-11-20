@@ -205,7 +205,8 @@
       "options": {
         "talent": {
           "ambidextrous": "Амбідекстр",
-          "dualWielder": "Двозбройний"
+          "dualWielder": "Двозбройний",
+          "trickRider": "Майстер верхової їзди"
         }
       }
     },

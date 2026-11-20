@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { skillTarget } from '../../rules/characteristics/derive';
 import {
+    dualWielderFree,
     grantSecondAttack,
     hasMomentum,
     loseMomentum,
@@ -81,7 +82,12 @@ export function momentumMutation(
 
     assertCanAct(ctx, actor.basicInfo.id);
 
-    if (!hasMomentum(actor)) throw reject(API_ERRORS.MOMENTUM_NONE);
+    const freeSecond =
+        body.mode === 'secondAttack' &&
+        dualWielderFree(actor, ctx.meta.rules);
+
+    if (!hasMomentum(actor) && !freeSecond)
+        throw reject(API_ERRORS.MOMENTUM_NONE);
 
     const id = actor.basicInfo.id;
 
@@ -94,7 +100,7 @@ export function momentumMutation(
 
         if (blocker) throw reject(API_ERRORS.SECOND_ATTACK_UNAVAILABLE);
 
-        const next = grantSecondAttack(actor);
+        const next = grantSecondAttack(actor, freeSecond);
 
         const action = newBattleAction(
             actor,

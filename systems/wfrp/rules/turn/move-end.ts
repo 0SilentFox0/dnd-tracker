@@ -1,5 +1,5 @@
 import { moveOf } from '../characteristics/derive';
-import { engagedFoes } from '../combat/engagement';
+import { engagedFoes, engagementJournal } from '../combat/engagement';
 import { withMomentum } from '../combat/momentum';
 import { yardsToFeet } from '../combat/movement';
 import { participantChars } from '../combat/participant';
@@ -47,12 +47,17 @@ function moveEndChecks(ctx: MoveEndCtx): TurnHookResult {
           }
         : null;
 
-    const foes = (before ? engagedFoes(before, participants, map) : []).filter(
+    const journal = engagementJournal(rules);
+
+    const foes = (
+        before ? engagedFoes(before, participants, map, journal) : []
+    ).filter(
         (f) => edition.sizeModel !== 'canon' || !isBiggerThan(mover, f)
     );
 
     if (
         foes.length > 0 &&
+        wfrpState(mover).moveMode !== 'flee' &&
         !hasEffectMarker(mover, EffectMarker.DISENGAGED) &&
         !foes.some((f) => isAdjacentOnMap(map, f, mover))
     )

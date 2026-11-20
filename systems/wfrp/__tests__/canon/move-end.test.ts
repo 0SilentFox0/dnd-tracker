@@ -54,7 +54,10 @@ const foeAt = (x: number): BattleParticipant => {
         controlledBy: 'dm',
     });
 
-    return { ...base, battleData: { ...base.battleData, position: { x, y: 0 } } };
+    return withWfrpState(
+        { ...base, battleData: { ...base.battleData, position: { x, y: 0 } } },
+        { engagedWith: { hero: 2 } }
+    );
 };
 
 const ctxOf = (participants: BattleParticipant[]) => {

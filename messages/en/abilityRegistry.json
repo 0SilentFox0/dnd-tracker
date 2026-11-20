@@ -205,7 +205,8 @@
       "options": {
         "talent": {
           "ambidextrous": "Ambidextrous",
-          "dualWielder": "Dual Wielder"
+          "dualWielder": "Dual Wielder",
+          "trickRider": "Trick Rider"
         }
       }
     },

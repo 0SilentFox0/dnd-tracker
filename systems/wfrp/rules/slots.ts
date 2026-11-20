@@ -152,7 +152,7 @@ export interface WfrpParticipantState {
     actLastRound?: number;
     /** Defensive stance: the skill the fighter parries or dodges with until its next turn */
     defensive?: { skill: string };
-    /** Round an engagement with each foe began, keyed by foe id */
+    /** Attack journal: round-starts an engagement with each foe still lasts, keyed by foe id (canon actionsModel) */
     engagedWith?: Record<string, number>;
     /** Locked in a grapple, `holder` marks the one holding */
     grapple?: { with: string; holder: boolean };
@@ -164,8 +164,8 @@ export interface WfrpParticipantState {
     actLastNext?: true;
     /** Oops -1 SL on every test: `next` until the next round begins, then `now` for that whole round */
     oopsPenalty?: 'next' | 'now';
-    /** Riding a mount, by participant id */
-    mounted?: { mountId: string };
+    /** Riding a mount (DM switch): its id and Strength Bonus, which a mounted Charge uses (p168) */
+    mounted?: { mountId: string; sb?: number };
     /** Critical Wounds taken this battle, canon5e (p172) */
     critWounds?: number;
     /** Rounds left before a critically wounded, unconscious fighter dies (p172) */
@@ -364,7 +364,10 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             }),
             ...(isRecord(raw.mounted) &&
                 typeof raw.mounted.mountId === 'string' && {
-                    mounted: { mountId: raw.mounted.mountId },
+                    mounted: {
+                        mountId: raw.mounted.mountId,
+                        ...(finite(raw.mounted.sb) && { sb: raw.mounted.sb }),
+                    },
                 }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
             ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),
