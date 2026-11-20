@@ -50,6 +50,21 @@
         }
       }
     },
+    "frenzy": {
+      "label": "Frenzy",
+      "hint": "Enters a Frenzy on a Willpower test: an extra melee attack each round and +1 damage, immune to other psychology; Fatigued afterwards.",
+      "defaultName": "Frenzy"
+    },
+    "hatred": {
+      "label": "Hatred",
+      "hint": "+1 SL against the named group in melee and at range, ignores its Fear. Put the group in the name, in brackets, as written in the race or creature type field (e.g. Goblins).",
+      "defaultName": "Hatred (Goblins)"
+    },
+    "animosity": {
+      "label": "Animosity",
+      "hint": "Must pass a Psychology test when meeting the named group. Put the group in the name, in brackets, as written in the race or creature type field (e.g. Goblins).",
+      "defaultName": "Animosity (Elves)"
+    },
     "regenerate": {
       "label": "Regenerate",
       "hint": "Heals 1d10 Wounds at the start of its turn.",

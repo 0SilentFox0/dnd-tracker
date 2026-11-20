@@ -229,6 +229,14 @@ export function validateAttackRequest(
 
     assertAttackAllowed(attacker, attack, chosenTargets);
 
+    ruleSystemOf(rules).combat.assertAction?.({
+        kind: 'attack',
+        actor: attacker,
+        attack,
+        targets: chosenTargets,
+        participants: order,
+    });
+
     if (data.cunningStrike?.length) {
         const { rejected } = ruleSystemOf(rules).combat.attack?.hitRiders?.({
             attacker,

@@ -1,6 +1,12 @@
 import { wfrpConditionsTurnStart } from '../conditions/tick';
 import { wfrpResetState } from '../state-parts';
-import { wfrpPsychology } from '../traits/psychology';
+import {
+    wfrpFrenzyRoundStart,
+    wfrpFrenzyTurnStart,
+    wfrpPassionsJoin,
+    wfrpPassionsRoundStart,
+} from '../traits/passions';
+import { wfrpFearRound, wfrpPsychology } from '../traits/psychology';
 import { wfrpOnSkippedTurn } from './skipped-turn';
 
 import type { RuleSystemTurn } from '@/lib/utils/rules/systems/types';
@@ -9,7 +15,16 @@ export const WFRP_TURN: RuleSystemTurn = {
     resetState: [wfrpResetState],
     onTurnStart: [
         (ctx) => wfrpConditionsTurnStart(ctx.participants, ctx.id, ctx),
+        (ctx) => wfrpFrenzyTurnStart(ctx.participants, ctx.id, ctx),
     ],
     onSkippedTurn: [wfrpOnSkippedTurn],
-    onJoin: [(ctx) => wfrpPsychology(ctx.participants, ctx)],
+    onRoundStart: [
+        (ctx) => wfrpFearRound(ctx.participants, ctx),
+        (ctx) => wfrpFrenzyRoundStart(ctx.participants, ctx),
+        (ctx) => wfrpPassionsRoundStart(ctx.participants, ctx),
+    ],
+    onJoin: [
+        (ctx) => wfrpPsychology(ctx.participants, ctx),
+        (ctx) => wfrpPassionsJoin(ctx.participants, ctx),
+    ],
 };

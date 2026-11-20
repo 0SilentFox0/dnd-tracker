@@ -141,7 +141,7 @@ describe('grim bestiary end to end', () => {
                 )
             );
 
-            expect(wfrpState(tested).psychologyTested).toEqual({
+            expect(wfrpState(tested).psychologyTested).toMatchObject({
                 terror: 2,
                 fear: 2,
             });

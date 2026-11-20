@@ -1,13 +1,16 @@
 import { AVERAGE_SIZE } from './constants';
 
+import { resolvedAbilitiesOf } from '@/lib/utils/abilities/engine/core/participants';
 import type { AnyEffect } from '@/lib/utils/abilities/schema';
 import type { WfrpEffect } from '@/systems/wfrp/rules/ability-effects';
 import {
     isWfrpEffectKind,
+    type PsychologyKind,
     TRAIT_SIZES,
     type TraitSize,
 } from '@/systems/wfrp/rules/trait-kinds';
 import type { ResolvedAbility } from '@/types/abilities';
+import type { BattleParticipant } from '@/types/battle';
 
 export interface TraitEntry {
     ability: ResolvedAbility;
@@ -33,6 +36,15 @@ export function traitEntries(
 export const traitEffects = (
     abilities: readonly ResolvedAbility[]
 ): WfrpEffect[] => traitEntries(abilities).map((e) => e.effect);
+
+export const psychologyOf = (
+    p: BattleParticipant
+): { kind: PsychologyKind; value: number }[] =>
+    traitEffects(resolvedAbilitiesOf(p)).flatMap((e) =>
+        e.kind === 'wfrpPsychology'
+            ? [{ kind: e.psychology, value: e.value }]
+            : []
+    );
 
 export const sizeStep = (size: TraitSize | undefined): number =>
     TRAIT_SIZES.indexOf(size ?? AVERAGE_SIZE);

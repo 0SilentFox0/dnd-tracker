@@ -79,6 +79,14 @@
     "psychologyFail": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: провал",
     "psychologyPassHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: стійкість",
     "psychologyFailHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: провал",
+    "fearProgress": "{name}: Страх {value} від {source} — тест {roll}, РУ {sl}: зібрано {total}/{value}",
+    "fearOvercome": "{name}: Страх {value} від {source} — тест {roll}, РУ {sl}: {total}/{value}, страх подолано",
+    "passionPass": "{name}: {passion} ({group}) щодо {source} — тест {roll} / {target}, РУ {sl}: стримано",
+    "passionFail": "{name}: {passion} ({group}) щодо {source} — тест {roll} / {target}, РУ {sl}: провал, поклик бере гору",
+    "passionCalm": "{name}: {passion} ({group}) — повторний тест {roll} / {target}, РУ {sl}: заспокоївся",
+    "passionRage": "{name}: {passion} ({group}) — повторний тест {roll} / {target}, РУ {sl}: досі в люті",
+    "frenzyStart": "{name} впадає в Шал — тест Сили волі {roll} / {target}",
+    "frenzyEnd": "{name}: Шал минає, боєць стає Втомленим",
     "critDeath": "☠️ {target} гине на місці: {text}",
     "dying": "⏳ {name} помирає: лишилось раундів — {rounds}, якщо не зцілити",
     "diedOfWounds": "☠️ {name} гине від критичних ран",
@@ -89,6 +97,11 @@
     "leadershipFailed": "{name} витрачає Momentum: Лідерство провалено (РУ {sl})",
     "fortuneCondition": "{name} витрачає Удачу: знято стан {condition}",
     "fortuneRerolls": "{name} витрачає Удачу: перекидань {rolls}"
+  },
+  "passion": {
+    "frenzy": "Шал",
+    "hatred": "Ненависть",
+    "animosity": "Ворожість"
   },
   "psychology": {
     "fear": "Страх",
@@ -204,6 +217,7 @@
       "ward": "Оберіг: d10 {roll} проти {ward}, удар поглинуто",
       "size": "Розмір",
       "minimum": "Мінімальна шкода",
+      "frenzy": "Шал",
       "crit": "Критична рана"
     },
     "total": "Усього шкоди"

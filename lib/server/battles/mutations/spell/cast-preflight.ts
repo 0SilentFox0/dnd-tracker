@@ -147,6 +147,11 @@ export async function assertCasterMayCast(
             tested,
         });
 
+    ruleSystemOf(ctx.meta.rules).combat.assertAction?.({
+        kind: 'cast',
+        actor: caster,
+    });
+
     if (!data.preview && !legendaryAbility)
         assertActionAvailable(ctx, caster, spell, free, !!grant?.noAction);
 

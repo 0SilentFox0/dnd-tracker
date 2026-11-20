@@ -180,7 +180,8 @@
     "attackNotFound": "The attack was not found among the unit's attacks",
     "spellNotFound": "The spell was not found in the library",
     "diceFormat": "A dice formula like 1d6 or 2d8+1 is required",
-    "traitRangeOnlyBreathRanged": "Range (rangeFt) is only valid for the Breath and Ranged trait attacks"
+    "traitRangeOnlyBreathRanged": "Range (rangeFt) is only valid for the Breath and Ranged trait attacks",
+    "traitPassionGroup": "Hatred and Animosity need a target group; Frenzy takes none"
   },
   "read": {
     "partialInvalid": "Some of the stored abilities have invalid data — fix or remove them before saving",

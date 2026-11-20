@@ -27,6 +27,8 @@ export interface EditionProfile {
     woundModel: 'knockdown' | 'critical';
     /** `percent`: condition levels shift the test target by 10%; `sl`: the worst penalising level costs that many SL, Stunned halves Move, Prone/Blinded/Surprised give melee attackers Advantage or SL (p184-187) */
     conditionModel: 'percent' | 'sl';
+    /** `broken`: a failed Fear test costs a Broken level; `extended`: Fear is an Extended Cool test (SL accumulates to the rating, meanwhile no Momentum and the source attacks with Advantage), Terror breaks by rating (p183-184) */
+    psychologyModel: 'broken' | 'extended';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -44,6 +46,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         attackTarget: 'characteristic',
         woundModel: 'knockdown',
         conditionModel: 'percent',
+        psychologyModel: 'broken',
     },
     canon5e: {
         advanceStep: 5,
@@ -59,5 +62,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         attackTarget: 'skill',
         woundModel: 'critical',
         conditionModel: 'sl',
+        psychologyModel: 'extended',
     },
 };

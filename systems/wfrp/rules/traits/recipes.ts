@@ -14,6 +14,7 @@ import type {
 } from '@/lib/utils/abilities/templates/types';
 import type { WfrpEffect } from '@/systems/wfrp/rules/ability-effects';
 import {
+    PASSION_GROUP_MAX,
     PSYCHOLOGY_KINDS,
     TRAIT_SIZES,
 } from '@/systems/wfrp/rules/trait-kinds';
@@ -68,6 +69,30 @@ const note = (id: string): Recipe => ({
     }),
 });
 
+const groupOf = (name: string): string =>
+    (/\(([^)]+)\)/.exec(name)?.[1] ?? name).trim().slice(0, PASSION_GROUP_MAX);
+
+const passion = (id: 'frenzy' | 'hatred' | 'animosity'): Recipe => ({
+    id,
+    category: 'traits',
+    scopes: ['ability'],
+    textKey: `wfrpTraits.recipes.${id}`,
+    params: [],
+    build: (_v, ctx) => ({
+        ability: {
+            name: ctx.name,
+            trigger: PASSIVE,
+            effects: [
+                trait({
+                    kind: 'wfrpPassion',
+                    passion: id,
+                    ...(id !== 'frenzy' && { group: groupOf(ctx.name) }),
+                }),
+            ],
+        },
+    }),
+});
+
 const attack = (
     id: 'bite' | 'claw' | 'weapon' | 'breath' | 'ranged',
     extra: ParamDef[] = []
@@ -117,6 +142,9 @@ export const TRAIT_RECIPES: readonly Recipe[] = [
             }),
         ]
     ),
+    passion('frenzy'),
+    passion('hatred'),
+    passion('animosity'),
     {
         id: 'regenerate',
         category: 'traits',

@@ -1,7 +1,9 @@
 import { fortuneMax } from './characteristics/keys';
+import { isFrenzied } from './traits/frenzy';
 import { PARTICIPANT_SLOT } from './slots';
 import { wfrpState, withWfrpState } from './state';
 
+import { withAttacksLeft } from '@/lib/utils/battle/attack/attacks-left';
 import type {
     PersistPart,
     StoredPart,
@@ -41,10 +43,13 @@ export const wfrpResetState: TurnStateReset = (p, scope) => {
 
     const { conditionTests, momentumAttack } = wfrpState(p);
 
-    return conditionTests || momentumAttack
-        ? withWfrpState(p, {
-              conditionTests: undefined,
-              momentumAttack: undefined,
-          })
-        : p;
+    const cleared =
+        conditionTests || momentumAttack
+            ? withWfrpState(p, {
+                  conditionTests: undefined,
+                  momentumAttack: undefined,
+              })
+            : p;
+
+    return isFrenzied(cleared) ? withAttacksLeft(cleared, 1) : cleared;
 };

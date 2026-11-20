@@ -340,5 +340,9 @@
   "2026-11-20-wfrp-fate-fortune": {
     "title": "Grim d100 (5e): Fate, Fortune and Momentum",
     "body": "Advantage instead of an SL bonus, personal Momentum and how it is spent (second attack, Leadership), Fate: I Will Not Fail, How Did That Miss? and Not Today!, Fortune: several rerolls and removing a condition."
+  },
+  "2026-11-20-wfrp-psychology": {
+    "title": "Grim d100 (5e): Fear, Terror, Frenzy and Hatred",
+    "body": "Fear is an extended Cool test: each roll adds or takes away SL from a running total up to the Fear rating, meanwhile no Momentum and the source attacks with Advantage. Terror breaks by rating. Frenzy gives an extra melee attack and +1 damage, Hatred gives +1 SL against its group, Animosity forces a Psychology test."
   }
 }

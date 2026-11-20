@@ -155,6 +155,20 @@
         }
       }
     },
+    "wfrpPassion": {
+      "label": "WFRP: Пристрасть",
+      "fields": {
+        "passion": "Вид",
+        "group": "Цільова група"
+      },
+      "options": {
+        "passion": {
+          "frenzy": "Шал",
+          "hatred": "Ненависть",
+          "animosity": "Ворожість"
+        }
+      }
+    },
     "wfrpAttack": {
       "label": "WFRP: Атака-риса",
       "fields": {
@@ -1124,6 +1138,7 @@
       "wfrpWard": "Ward {value}+",
       "wfrpSize": "Розмір: {size}",
       "wfrpPsychology": "{psychology} {value}",
+      "wfrpPassion": "{passion}{hasGroup, select, yes { ({group})} other {}}",
       "wfrpAttack": "{attack} +{damage}{magical, select, yes {, магічна} other {}}"
     },
     "flags": {

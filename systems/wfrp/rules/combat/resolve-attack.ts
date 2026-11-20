@@ -25,6 +25,8 @@ import {
 } from '../percentile/fortune';
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
 import { withWfrpState } from '../state';
+import { isAfraid, isAfraidOf } from '../traits/fear';
+import { hatesTarget, HATRED_SL_BONUS } from '../traits/passions';
 import { sizeHitMod } from '../traits/size';
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
 import { applyWfrpCrit } from './crit-effect';
@@ -199,7 +201,10 @@ function personalMomentum(
     const attackerWon = gainedBy === 'attacker';
 
     return {
-        gained: attackerWon && !hasMomentum(ctx.attacker),
+        gained:
+            attackerWon &&
+            !hasMomentum(ctx.attacker) &&
+            !isAfraid(ctx.attacker),
         attackerUpdate: (p) =>
             attackerWon ? withMomentum(p, true) : loseMomentum(p),
         ...(parried && {
@@ -370,7 +375,12 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fortuneEdge = fortuneInput?.kind === 'sl';
 
-    const slBonus = (fortuneEdge && !reverse ? 1 : 0) + talentSl;
+    const hatred =
+        edition.psychologyModel === 'extended' && hatesTarget(attacker, target)
+            ? HATRED_SL_BONUS
+            : 0;
+
+    const slBonus = (fortuneEdge && !reverse ? 1 : 0) + talentSl + hatred;
 
     const fortuneAdvantage = fortuneEdge && reverse ? 1 : 0;
 
@@ -531,7 +541,8 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                     advantage:
                         (spent ? 1 : 0) +
                         fortuneAdvantage +
-                        meleeAgainst.advantage,
+                        meleeAgainst.advantage +
+                        (isAfraidOf(target, attacker.basicInfo.id) ? 1 : 0),
                     disadvantage: selfModes(attacker, 'attack', edition)
                         .disadvantage,
                 },

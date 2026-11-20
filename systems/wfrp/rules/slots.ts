@@ -108,6 +108,23 @@ export interface WfrpParticipantState {
     sin?: number;
     conditionTests?: string[];
     psychologyTested?: Partial<Record<string, number>>;
+    /** Unresolved Fear by source id, canon5e (p183): SL gathered so far toward `rating`, `round` of the last roll */
+    fear?: Record<string, FearEntry>;
+    /** In a Frenzy, canon5e (p184) */
+    frenzy?: true;
+    /** Hatred the fighter failed to master, canon5e (p184): must attack the group; `round` is when it took hold */
+    compelled?: Record<string, CompelEntry>;
+}
+
+export interface CompelEntry {
+    group: string;
+    round: number;
+}
+
+export interface FearEntry {
+    rating: number;
+    sl: number;
+    round: number;
 }
 
 const finite = (v: unknown): v is number =>
@@ -122,6 +139,40 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ? Object.fromEntries(
                   Object.entries(raw.psychologyTested).filter(([, v]) =>
                       finite(v)
+                  )
+              )
+            : undefined;
+
+        const fear = isRecord(raw.fear)
+            ? Object.fromEntries(
+                  Object.entries(raw.fear).flatMap(([id, e]) =>
+                      isRecord(e) &&
+                      finite(e.rating) &&
+                      finite(e.sl) &&
+                      finite(e.round)
+                          ? [
+                                [
+                                    id,
+                                    {
+                                        rating: e.rating,
+                                        sl: e.sl,
+                                        round: e.round,
+                                    },
+                                ],
+                            ]
+                          : []
+                  )
+              )
+            : undefined;
+
+        const compelled = isRecord(raw.compelled)
+            ? Object.fromEntries(
+                  Object.entries(raw.compelled).flatMap(([k, e]) =>
+                      isRecord(e) &&
+                      typeof e.group === 'string' &&
+                      finite(e.round)
+                          ? [[k, { group: e.group, round: e.round }]]
+                          : []
                   )
               )
             : undefined;
@@ -143,6 +194,10 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                     (k): k is string => typeof k === 'string'
                 ),
             }),
+            ...(raw.frenzy === true && { frenzy: true as const }),
+            ...(fear && Object.keys(fear).length > 0 && { fear }),
+            ...(compelled &&
+                Object.keys(compelled).length > 0 && { compelled }),
             ...(tested && {
                 psychologyTested: tested as Record<string, number>,
             }),

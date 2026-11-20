@@ -155,6 +155,20 @@
         }
       }
     },
+    "wfrpPassion": {
+      "label": "WFRP: Passion",
+      "fields": {
+        "passion": "Kind",
+        "group": "Target group"
+      },
+      "options": {
+        "passion": {
+          "frenzy": "Frenzy",
+          "hatred": "Hatred",
+          "animosity": "Animosity"
+        }
+      }
+    },
     "wfrpAttack": {
       "label": "WFRP: Trait attack",
       "fields": {
@@ -1124,6 +1138,7 @@
       "wfrpWard": "Ward {value}+",
       "wfrpSize": "Size: {size}",
       "wfrpPsychology": "{psychology} {value}",
+      "wfrpPassion": "{passion}{hasGroup, select, yes { ({group})} other {}}",
       "wfrpAttack": "{attack} +{damage}{magical, select, yes {, magical} other {}}"
     },
     "flags": {
