@@ -11,10 +11,12 @@ export const wfrpEngagementAge: TurnHook<TurnHookCtx> = ({ participants }) => ({
         if (!journal) return p;
 
         const aged = Object.fromEntries(
-            Object.entries(journal)
-                .map(([id, age]) => [id, Math.min(age, ENGAGEMENT_FRESH) - 1])
-                .filter(([, age]) => (age as number) > 0)
-        ) as Record<string, number>;
+            Object.entries(journal).flatMap(([id, age]) => {
+                const left = Math.min(age, ENGAGEMENT_FRESH) - 1;
+
+                return left > 0 ? [[id, left]] : [];
+            })
+        );
 
         return withWfrpState(p, {
             engagedWith: Object.keys(aged).length > 0 ? aged : undefined,

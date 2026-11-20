@@ -1,23 +1,19 @@
 import { z } from 'zod';
 
-import { editionOf } from '../../rules/edition';
 import { withWfrpState } from '../../rules/state';
+import { actorOnTurn, applyChanges, reject, requireCanon } from './own-turn';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { AttackType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { currentOf, requireActor } from '@/lib/utils/battle/common/control';
-import { newBattleAction } from '@/lib/utils/battle/common/new-action';
-import { logFields } from '@/lib/utils/battle/log/lines';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { applyMainActionUsed } from '@/lib/utils/battle/participant/helpers';
 import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { battleActionToEvent, BattleRuleError } from '@/lib/utils/battle/store';
-import { assertCanAct } from '@/lib/utils/battle/turn';
+import { BattleRuleError } from '@/lib/utils/battle/store';
 
 export const aimSchema = z
     .object({
@@ -28,30 +24,14 @@ export const aimSchema = z
 
 export type AimBody = z.infer<typeof aimSchema>;
 
-const reject = (message: string) =>
-    new BattleRuleError('action_rejected', message);
-
 /** Aim (an Action): +1 SL to the next ranged attack on this target, lost by any other action or movement (p165) */
 export function aimMutation(
     ctx: BattleMutationContext,
     body: AimBody
 ): MutationResult {
-    if (editionOf(ctx.meta.rules).actionsModel !== 'canon')
-        throw new BattleRuleError(
-            'invalid_target',
-            API_ERRORS.MOMENTUM_UNSUPPORTED
-        );
+    requireCanon(ctx);
 
-    const actor = requireActor(ctx, body.participantId, {
-        missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
-        forbidden: API_ERRORS.FORBIDDEN,
-        inactive: { code: 'action_rejected', message: API_ERRORS.ACTION_USED },
-    });
-
-    if (currentOf(ctx)?.basicInfo.id !== actor.basicInfo.id)
-        throw reject(API_ERRORS.ACTION_USED);
-
-    assertCanAct(ctx, actor.basicInfo.id);
+    const actor = actorOnTurn(ctx, body.participantId);
 
     if (actor.actionFlags.hasUsedAction)
         throw new BattleRuleError('action_used', API_ERRORS.ACTION_USED);
@@ -71,32 +51,13 @@ export function aimMutation(
         aim: { targetId: target.basicInfo.id },
     });
 
-    return {
-        participants: ctx.participants.map((p) =>
-            p.basicInfo.id === next.basicInfo.id ? next : p
-        ),
-        pending: ctx.pending,
-        events: [
-            battleActionToEvent(
-                newBattleAction(
-                    actor,
-                    'ability',
-                    {
-                        battleId: ctx.scene.id,
-                        round: ctx.scene.round,
-                        targets: [next],
-                    },
-                    {
-                        actionDetails: {},
-                        ...logFields(
-                            textRef('battleWfrp.log.aimed', {
-                                name: actor.basicInfo.name,
-                                target: target.basicInfo.name,
-                            })
-                        ),
-                    }
-                )
-            ),
-        ],
-    };
+    return applyChanges(
+        ctx,
+        actor,
+        [next],
+        textRef('battleWfrp.log.aimed', {
+            name: actor.basicInfo.name,
+            target: target.basicInfo.name,
+        })
+    );
 }

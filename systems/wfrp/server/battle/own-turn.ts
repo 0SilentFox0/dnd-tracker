@@ -1,3 +1,5 @@
+import { editionOf } from '../../rules/edition';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { currentOf, requireActor } from '@/lib/utils/battle/common/control';
 import { newBattleAction } from '@/lib/utils/battle/common/new-action';
@@ -13,6 +15,14 @@ import type { TextRef } from '@/types/text';
 
 export const reject = (message: string) =>
     new BattleRuleError('action_rejected', message);
+
+export function requireCanon(ctx: BattleMutationContext): void {
+    if (editionOf(ctx.meta.rules).actionsModel !== 'canon')
+        throw new BattleRuleError(
+            'invalid_target',
+            API_ERRORS.MOMENTUM_UNSUPPORTED
+        );
+}
 
 /** The participant whose turn it is, able to act and controlled by the caller */
 export function actorOnTurn(

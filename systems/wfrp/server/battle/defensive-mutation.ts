@@ -1,9 +1,8 @@
 import { z } from 'zod';
 
 import { DEFENSIVE_SKILLS } from '../../rules/combat/defensive';
-import { editionOf } from '../../rules/edition';
 import { withWfrpState } from '../../rules/state';
-import { actorOnTurn, applyChanges } from './own-turn';
+import { actorOnTurn, applyChanges, requireCanon } from './own-turn';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -35,11 +34,7 @@ export function defensiveMutation(
     ctx: BattleMutationContext,
     body: DefensiveBody
 ): MutationResult {
-    if (editionOf(ctx.meta.rules).actionsModel !== 'canon')
-        throw new BattleRuleError(
-            'invalid_target',
-            API_ERRORS.MOMENTUM_UNSUPPORTED
-        );
+    requireCanon(ctx);
 
     const actor = actorOnTurn(ctx, body.participantId);
 

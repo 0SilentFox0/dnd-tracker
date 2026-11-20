@@ -5,7 +5,7 @@ import { withMomentum } from '../../rules/combat/momentum';
 import { applyWfrpConditionTo } from '../../rules/conditions/apply';
 import { editionOf } from '../../rules/edition';
 import { wfrpState, withWfrpState } from '../../rules/state';
-import { actorOnTurn, applyChanges, reject } from './own-turn';
+import { actorOnTurn, applyChanges, reject, requireCanon } from './own-turn';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -13,7 +13,6 @@ import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { BattleRuleError } from '@/lib/utils/battle/store';
 
 export const fleeSchema = z.object({ participantId: z.string().min(1) }).strict();
 
@@ -26,13 +25,9 @@ export function fleeMutation(
 ): MutationResult {
     const { rules, map } = ctx.meta;
 
-    const edition = editionOf(rules);
+    requireCanon(ctx);
 
-    if (edition.actionsModel !== 'canon')
-        throw new BattleRuleError(
-            'invalid_target',
-            API_ERRORS.MOMENTUM_UNSUPPORTED
-        );
+    const edition = editionOf(rules);
 
     const actor = actorOnTurn(ctx, body.participantId);
 

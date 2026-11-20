@@ -76,20 +76,16 @@ export const wfrpRegenerate: TurnHook<TurnStartCtx> = ({
 
     const canon = editionOf(rules).traitModel === 'canon';
 
+    const hp = Math.min(p.combatStats.maxHp, p.combatStats.currentHp + roll);
+
     const r = canon
         ? regenerateOnRoll(p, roll)
         : {
-              healed: Math.min(roll, p.combatStats.maxHp - p.combatStats.currentHp),
+              healed: hp - p.combatStats.currentHp,
               critHealed: false,
               participant: {
                   ...p,
-                  combatStats: {
-                      ...p.combatStats,
-                      currentHp: Math.min(
-                          p.combatStats.maxHp,
-                          p.combatStats.currentHp + roll
-                      ),
-                  },
+                  combatStats: { ...p.combatStats, currentHp: hp },
               },
           };
 

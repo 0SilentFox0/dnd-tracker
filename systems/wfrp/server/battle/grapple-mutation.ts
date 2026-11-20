@@ -14,7 +14,7 @@ import { resolvePercentileTest } from '../../rules/percentile';
 import { resolveModeSources } from '../../rules/percentile/advantage';
 import { wfrpState, withWfrpState } from '../../rules/state';
 import { isBiggerThan, sizeOpposedStrength } from '../../rules/traits/size';
-import { actorOnTurn, applyChanges, reject } from './own-turn';
+import { actorOnTurn, applyChanges, reject, requireCanon } from './own-turn';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -103,13 +103,9 @@ export function grappleMutation(
     ctx: BattleMutationContext,
     body: GrappleBody
 ): MutationResult {
-    const edition = editionOf(ctx.meta.rules);
+    requireCanon(ctx);
 
-    if (edition.actionsModel !== 'canon')
-        throw new BattleRuleError(
-            'invalid_target',
-            API_ERRORS.MOMENTUM_UNSUPPORTED
-        );
+    const edition = editionOf(ctx.meta.rules);
 
     const actor = actorOnTurn(ctx, body.participantId);
 
