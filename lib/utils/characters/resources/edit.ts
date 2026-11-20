@@ -12,7 +12,7 @@ export function editResources(
         string,
         Pick<AbilityPool, 'max' | 'rest'> & { regain?: number }
     > = {},
-    opts?: { fateMax?: number }
+    opts?: { fateMax?: number; fateLimit?: number }
 ): CharacterResources {
     if (patch.reset)
         return opts?.fateMax === undefined
@@ -26,6 +26,9 @@ export function editResources(
 
     if (patch.fortune !== undefined && opts?.fateMax !== undefined)
         next.fortune = Math.min(opts.fateMax, Math.max(0, patch.fortune));
+
+    if (patch.fate !== undefined && opts?.fateLimit !== undefined)
+        next.fate = Math.min(opts.fateLimit, Math.max(0, patch.fate));
 
     if (patch.sin !== undefined && opts?.fateMax !== undefined)
         next.sin = patch.sin;

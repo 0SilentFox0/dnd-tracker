@@ -31,6 +31,7 @@ const model = (available: boolean, fortune?: 'reroll' | 'sl') => {
         view: {
             judged: { target: null, attackerSide: undefined },
             attacker: {
+                abilities: {},
                 battleData: {
                     system: {
                         key: 'wfrp',

@@ -27,8 +27,10 @@ const mount = (corruption?: {
                         data: {
                             wounds: { max: 10 },
                             move: { walkYd: 8, runYd: 16 },
-                            fate: 2,
+                            fate: 3,
+                            fateLeft: 1,
                             fortune: 2,
+                            fortuneMax: 4,
                             sin: 0,
                             ...(corruption && { corruption }),
                         },
@@ -53,5 +55,12 @@ describe('HeroStats', () => {
         mount();
 
         expect(screen.queryByText('3/6')).toBeNull();
+    });
+
+    it('shows Fate left/total and Fortune/max separately', () => {
+        mount();
+
+        expect(screen.getAllByText('1/3').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('2/4').length).toBeGreaterThan(0);
     });
 });

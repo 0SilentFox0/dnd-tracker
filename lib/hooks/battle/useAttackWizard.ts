@@ -144,6 +144,7 @@ export function useAttackWizard(
     );
 
     const view = {
+        rules: scene.battle.rules,
         cunning: cunningOffer && {
             options: cunningOffer.options.map((o) => ({
                 ...o,

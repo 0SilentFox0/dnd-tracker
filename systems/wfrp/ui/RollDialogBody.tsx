@@ -6,19 +6,25 @@ import { RollResultView } from '@/components/character-profile/combat/RollResult
 import type { RollDialogBodyProps } from '@/components/systems/types';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
+import { useSheetFortune } from '@/systems/wfrp/hooks';
 import {
     DIFFICULTY_KEYS,
     type DifficultyKey,
 } from '@/systems/wfrp/rules/percentile/difficulty';
+import { FortunePicker } from '@/systems/wfrp/ui/battle/FortunePicker';
 
 export function RollDialogBody({
     result,
     difficulty,
     setDifficulty,
+    extra,
+    setExtra,
 }: RollDialogBodyProps) {
     const t = useTranslations('rest.sheetRoll');
 
     const tg = useTranslations('gameTerms');
+
+    const fortune = useSheetFortune({ extra, setExtra });
 
     return (
         <>
@@ -35,6 +41,7 @@ export function RollDialogBody({
                     triggerClassName="w-full"
                 />
             </div>
+            {fortune && !result && <FortunePicker {...fortune} />}
             {result?.kind === 'percentile' && (
                 <RollResultView
                     total={result.roll}
@@ -57,6 +64,15 @@ export function RollDialogBody({
                     <div className="text-xs text-hud-muted">
                         {tg(`difficulty.${result.difficulty as DifficultyKey}`)}
                     </div>
+                    {result.fortune && (
+                        <div className="text-xs text-hud-muted">
+                            {t(
+                                result.fortune.kind === 'notFail'
+                                    ? 'fortune.usedNotFail'
+                                    : 'fortune.used'
+                            )}
+                        </div>
+                    )}
                 </RollResultView>
             )}
         </>

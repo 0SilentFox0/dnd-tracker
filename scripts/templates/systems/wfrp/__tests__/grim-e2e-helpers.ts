@@ -17,6 +17,7 @@ import { woundsMax } from '@/systems/wfrp/rules/characteristics/derive';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { planDraft } from '@/systems/wfrp/rules/creation/plan';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
 import { must } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -163,6 +164,30 @@ export const meleeOf = (p: BattleParticipant) =>
         `${p.basicInfo.name} melee`
     );
 
+export function readyOf(
+    ctx: BattleMutationContext,
+    attackerId: string,
+    fate: Record<string, number> = {}
+): BattleMutationContext {
+    const turnIndex = ctx.participants.findIndex(
+        (p) => p.basicInfo.id === attackerId
+    );
+
+    return {
+        ...ctx,
+        participants: ctx.participants.map((p) =>
+            withWfrpState(
+                {
+                    ...p,
+                    actionFlags: { ...p.actionFlags, hasUsedAction: false },
+                },
+                { fate: fate[p.basicInfo.id] ?? 0 }
+            )
+        ),
+        scene: { ...ctx.scene, turnIndex },
+    };
+}
+
 export async function strike(
     ctx: BattleMutationContext,
     attackerId: string,
@@ -172,18 +197,7 @@ export async function strike(
     rng: [number, number] = NO_WARD,
     endTurn = false
 ) {
-    const turnIndex = ctx.participants.findIndex(
-        (p) => p.basicInfo.id === attackerId
-    );
-
-    const ready: BattleMutationContext = {
-        ...ctx,
-        participants: ctx.participants.map((p) => ({
-            ...p,
-            actionFlags: { ...p.actionFlags, hasUsedAction: false },
-        })),
-        scene: { ...ctx.scene, turnIndex },
-    };
+    const ready = readyOf(ctx, attackerId);
 
     const out = await attackMutation(
         { ...ready, rng: firstThen(...rng) },

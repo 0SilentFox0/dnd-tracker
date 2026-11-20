@@ -13,6 +13,7 @@ const Body = z.object({
             key: z.literal('wfrp'),
             data: z.object({
                 kind: z.enum(['reroll', 'sl', 'notFail']),
+                rerolls: z.number().int().min(1).max(9).optional(),
                 critical: z.boolean().optional(),
                 location: z.enum(LOCATIONS).optional(),
             }),
@@ -25,12 +26,13 @@ export const WfrpFortuneInputSchema = Body.transform(
     ({ system, secondRoll }): SystemSlot | undefined => {
         if (!system) return undefined;
 
-        const { kind, critical, location } = system.data;
+        const { kind, rerolls, critical, location } = system.data;
 
         return FORTUNE_INPUT.write({
             kind,
             ...(kind === 'reroll' &&
                 secondRoll !== undefined && { manualReroll: secondRoll }),
+            ...(kind === 'reroll' && rerolls && { rerolls }),
             ...(kind === 'notFail' && {
                 ...(critical && { critical }),
                 ...(critical && location && { location }),

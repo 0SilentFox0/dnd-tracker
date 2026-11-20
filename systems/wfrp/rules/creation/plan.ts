@@ -145,6 +145,7 @@ export function planDraft(
             base,
             move: profile.move,
             fate: profile.fate,
+            ...(profile.fortune !== undefined && { fortune: profile.fortune }),
             extraWounds: profile.extraWounds,
             talents,
         },

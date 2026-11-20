@@ -20,6 +20,7 @@ import {
     applyFortune,
     forcedOf,
     FORTUNE_INPUT,
+    spentFate,
     spentFor,
 } from '../percentile/fortune';
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
@@ -28,6 +29,7 @@ import { sizeHitMod } from '../traits/size';
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
+import { fateLeftOf, fateSpendsOn } from './fate';
 import { hitLocation } from './location';
 import { percentileLines } from './log';
 import {
@@ -218,7 +220,10 @@ function withCounterCrit(
         attackerUpdate: (p) =>
             applyWfrpCrit(r.attackerUpdate?.(p) ?? p, crit, 0, edition)
                 .participant,
-        lines: [...r.lines, textRef('battleWfrp.log.counterCrit', { name, text: crit.text })],
+        lines: [
+            ...r.lines,
+            textRef('battleWfrp.log.counterCrit', { name, text: crit.text }),
+        ],
     };
 }
 
@@ -260,6 +265,55 @@ function toResult(
             system: ACTION_SLOT.write({ attack: details }),
             margin: details.netSl,
             location: details.location,
+        },
+    };
+}
+
+// How Did That Miss (p133): the defender's Fate cancels a hit with every consequence, incl. Momentum and the counter-crit.
+function negateByFate(
+    ctx: ResolveAttackCtx,
+    r: ResolvedAttack,
+    edition: Pick<EditionProfile, 'fortunePools'>
+): ResolvedAttack {
+    const { target, attacker } = ctx;
+
+    if (
+        edition.fortunePools !== 'split' ||
+        !r.isHit ||
+        fateLeftOf(target) < 1 ||
+        !ctx.crit?.negate?.({
+            holder: target,
+            actorId: attacker.basicInfo.id,
+            cost: 'battleWfrp.ui.fateReaction.spend',
+        })
+    )
+        return r;
+
+    const attack = ACTION_SLOT.read(r.attackRoll.system)?.attack;
+
+    const { attackerUpdate: _a, scene: _s, ...rest } = r;
+
+    return {
+        ...rest,
+        isHit: false,
+        lines: [
+            ...r.lines,
+            textRef('battleWfrp.log.fateHowDidThatMiss', {
+                name: target.basicInfo.name,
+                attacker: attacker.basicInfo.name,
+            }),
+        ],
+        targetUpdate: (p) => withWfrpState(p, spentFate(p)),
+        attackRoll: {
+            ...r.attackRoll,
+            isHit: false,
+            isCritical: false,
+            ...(attack && {
+                system: ACTION_SLOT.write(
+                    { attack: { ...attack, negated: true } },
+                    r.attackRoll.system
+                ),
+            }),
         },
     };
 }
@@ -332,14 +386,20 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 : fortune;
 
         const fortuneLine = textRef(
-            shown.kind === 'reroll'
-                ? 'battleWfrp.log.fortuneReroll'
-                : shown.kind === 'advantage'
-                  ? 'battleWfrp.log.fortuneAdvantage'
-                  : shown.kind === 'notFail'
-                    ? 'battleWfrp.log.fateNotFail'
-                    : 'battleWfrp.log.fortuneSl',
-            { name: attacker.basicInfo.name, first: shown.firstRoll ?? 0 }
+            shown.kind === 'reroll' && fortune.spent > 1
+                ? 'battleWfrp.log.fortuneRerolls'
+                : shown.kind === 'reroll'
+                  ? 'battleWfrp.log.fortuneReroll'
+                  : shown.kind === 'advantage'
+                    ? 'battleWfrp.log.fortuneAdvantage'
+                    : shown.kind === 'notFail'
+                      ? 'battleWfrp.log.fateNotFail'
+                      : 'battleWfrp.log.fortuneSl',
+            {
+                name: attacker.basicInfo.name,
+                first: shown.firstRoll ?? 0,
+                rolls: fortune.spent,
+            }
         );
 
         const attack = ACTION_SLOT.read(r.attackRoll.system)?.attack;
@@ -350,7 +410,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             attackerUpdate: (p) =>
                 withWfrpState(
                     r.attackerUpdate?.(p) ?? p,
-                    spentFor(p, fortune.kind)
+                    spentFor(p, fortune.kind, fortune.spent)
                 ),
             attackRoll: {
                 ...r.attackRoll,
@@ -414,10 +474,11 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             (preset) => rangedOnce(preset),
             fortuneInput,
             (r) => r.result.isHit,
-            manualRoll
+            manualRoll,
+            { repeat: fateSpendsOn(ctx.rules) }
         );
 
-        return marked(result.result, fortune);
+        return marked(negateByFate(ctx, result.result, edition), fortune);
     }
 
     const d = participantChars(target);
@@ -494,7 +555,10 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 target: result.defender.target,
             },
             opposed: true,
-            ...(spent && { momentumUsed: true }),
+            ...(spent &&
+                (personal
+                    ? { momentumAdvantage: true as const }
+                    : { momentumUsed: true })),
         });
 
         const counterCrit =
@@ -504,17 +568,15 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 : undefined;
 
         const resolved = toResult(
-                ctx,
-                details,
-                result.isHit && !fumbled(result.attacker.roll),
-                {
-                    spent,
-                    gainedBy: result.attackerWon ? 'attacker' : 'defender',
-                },
-                personal
-                    ? { parried: result.defender.kind === 'parry' }
-                    : undefined
-            );
+            ctx,
+            details,
+            result.isHit && !fumbled(result.attacker.roll),
+            {
+                spent,
+                gainedBy: result.attackerWon ? 'attacker' : 'defender',
+            },
+            personal ? { parried: result.defender.kind === 'parry' } : undefined
+        );
 
         return {
             roll: result.attacker.roll,
@@ -539,8 +601,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             ),
         fortuneInput,
         (r) => r.resolved.isHit,
-        manualRoll
+        manualRoll,
+        { repeat: fateSpendsOn(ctx.rules) }
     );
 
-    return marked(result.resolved, fortune);
+    return marked(negateByFate(ctx, result.resolved, edition), fortune);
 }

@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { SectionBinding } from '@/lib/utils/characters/form/bindings';
 import { value } from '@/systems/wfrp/rules/characteristics';
@@ -60,7 +61,7 @@ export function CharacteristicsEditor({
                 ))}
             </div>
             {withExtras && (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     <div className="min-w-0">
                         <Label htmlFor="char-move" className="text-xs">
                             {t('move')}
@@ -83,6 +84,35 @@ export function CharacteristicsEditor({
                             max={9}
                             value={data.fate}
                             onCommit={(v) => set('fate', v)}
+                        />
+                    </div>
+                    <div className="min-w-0">
+                        <Label htmlFor="char-fortune" className="text-xs">
+                            {t('fortuneMax')}
+                        </Label>
+                        <Input
+                            id="char-fortune"
+                            type="number"
+                            min={0}
+                            max={9}
+                            placeholder={String(data.fate)}
+                            value={data.fortune ?? ''}
+                            onChange={(e) =>
+                                set(
+                                    'fortune',
+                                    e.target.value === ''
+                                        ? undefined
+                                        : Math.min(
+                                              9,
+                                              Math.max(
+                                                  0,
+                                                  Math.trunc(
+                                                      Number(e.target.value)
+                                                  )
+                                              )
+                                          )
+                                )
+                            }
                         />
                     </div>
                     <div className="min-w-0">

@@ -430,7 +430,17 @@ export type SheetTestSubject =
 
 export type SheetRollBody =
     | (SheetRollSubject & { useInspiration?: boolean })
-    | (SheetTestSubject & { difficulty?: string });
+    | (SheetTestSubject & { difficulty?: string } & SheetRollExtra);
+
+export type SheetFortuneKind = 'advantage' | 'reroll' | 'notFail';
+
+/** Module-owned extra input of a sheet test; `critical`/`location` apply to `notFail` */
+export interface SheetRollExtra {
+    fortune?: SheetFortuneKind;
+    rerolls?: number;
+    critical?: boolean;
+    location?: string;
+}
 
 export type SheetRollResult = SheetD20RollResult | SheetPercentileRollResult;
 
@@ -446,6 +456,7 @@ export interface SheetPercentileRollResult {
     auto: 'success' | 'failure' | null;
     difficulty: string;
     mode: 'normal' | 'advantage' | 'disadvantage';
+    fortune?: { kind: SheetFortuneKind; firstRoll?: number; spent: number };
 }
 
 export interface SheetD20RollResult {
@@ -479,6 +490,7 @@ export type AwardXpBody = {
 
 export type ResourcesEditBody = {
     fortune?: number;
+    fate?: number;
     sin?: number;
     hp?: number;
     tempHp?: number;

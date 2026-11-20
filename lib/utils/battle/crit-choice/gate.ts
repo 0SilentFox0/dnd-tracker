@@ -6,6 +6,8 @@ import {
 import type {
     CritPicker,
     CritTrigger,
+    NegateOffer,
+    NegatePicker,
     RiderOffer,
     RiderPicker,
 } from './types';
@@ -24,15 +26,21 @@ export function createCritGate(opts: {
     choices?: Record<string, number>;
     disabled?: DisabledCrits;
     riderChoices?: Record<string, boolean>;
+    negateChoices?: Record<string, boolean>;
 }): {
     pick: CritPicker;
     triggers: CritTrigger[];
     offers: RiderOffer[];
+    negations: NegateOffer[];
     spent: SpentRider[];
 } {
     const triggers: CritTrigger[] = [];
 
     const offers: RiderOffer[] = [];
+
+    const negations: NegateOffer[] = [];
+
+    const negateSeen = new Map<string, number>();
 
     const spent: SpentRider[] = [];
 
@@ -106,5 +114,32 @@ export function createCritGate(opts: {
         return { bonus, die: held.die };
     };
 
-    return { pick: Object.assign(pick, { rider }), triggers, offers, spent };
+    const negate: NegatePicker = (info) => {
+        const holderId = info.holder.basicInfo.id;
+
+        const base = `negate:${holderId}`;
+
+        const n = negateSeen.get(base) ?? 0;
+
+        negateSeen.set(base, n + 1);
+
+        const key = `${base}:${n}`;
+
+        negations.push({
+            key,
+            holderId,
+            actorId: info.actorId,
+            cost: info.cost,
+        });
+
+        return !!opts.negateChoices?.[key];
+    };
+
+    return {
+        pick: Object.assign(pick, { rider, negate }),
+        triggers,
+        offers,
+        negations,
+        spent,
+    };
 }

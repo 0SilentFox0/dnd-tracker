@@ -42,6 +42,7 @@ export async function runWithCritChoice(
         rng,
         choices: opts.resume?.choices,
         riderChoices: opts.resume?.riderChoices,
+        negateChoices: opts.resume?.negateChoices,
         disabled: {
             success: criticals.disabledSuccess,
             fail: criticals.disabledFail,
@@ -65,7 +66,8 @@ export async function runWithCritChoice(
 
     const critPause = opts.enabled && gate.triggers.length > 0;
 
-    if (!critPause && gate.offers.length === 0) return result;
+    if (!critPause && gate.offers.length === 0 && gate.negations.length === 0)
+        return result;
 
     return {
         participants: ctx.participants,
@@ -78,6 +80,9 @@ export async function runWithCritChoice(
                     actorId: opts.actorId,
                     triggers: critPause ? gate.triggers : [],
                     ...(gate.offers.length > 0 && { riders: gate.offers }),
+                    ...(gate.negations.length > 0 && {
+                        negations: gate.negations,
+                    }),
                 },
                 hidden: {
                     request: opts.request,

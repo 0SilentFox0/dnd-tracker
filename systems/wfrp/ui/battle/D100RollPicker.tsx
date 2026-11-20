@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { D100Input } from './D100Input';
+import type { FortuneChoice, FortuneExtras } from './fortune-controls';
+import { FortunePicker } from './FortunePicker';
 
 import { AiRollButton } from '@/components/battle/hud/DiceInput';
 import { HudButton } from '@/components/hud';
@@ -11,20 +13,13 @@ import { cn } from '@/lib/utils';
 
 export type RollSource = 'server' | 'manual';
 
-export type FortuneChoice = 'reroll' | 'sl' | 'notFail' | null;
+export type { FortuneChoice };
 
 const SOURCES: RollSource[] = ['server', 'manual'];
 
-const fortuneOptions = (fortuneLeft: number, fateLeft: number) =>
-    [
-        null,
-        ...(fortuneLeft >= 1 ? (['reroll', 'sl'] as const) : []),
-        ...(fateLeft >= 1 ? (['notFail'] as const) : []),
-    ] as FortuneChoice[];
-
 interface D100RollPickerProps {
     locked?: RollSource;
-    fortune: {
+    fortune: FortuneExtras & {
         available: boolean;
         left: number;
         fateLeft?: number;
@@ -50,8 +45,6 @@ export function D100RollPicker({
     const [first, setFirst] = useState<number>();
 
     const source = locked ?? chosen;
-
-    const options = fortuneOptions(fortune.left, fortune.fateLeft ?? 0);
 
     const pickFortune = (value: FortuneChoice) => {
         setFirst(undefined);
@@ -107,35 +100,15 @@ export function D100RollPicker({
                 </div>
             )}
             {fortune.available && (
-                <div className="mt-3">
-                    <div className="text-sm text-[var(--hud-muted)]">
-                        {tf('left', { count: fortune.left })}
-                        {fortune.fateLeft !== undefined &&
-                            ` · ${tf('fateLeft', { count: fortune.fateLeft })}`}
-                    </div>
-                    <div
-                        role="group"
-                        aria-label={tf('label')}
-                        className="mt-1 flex h-9 border border-white/20"
-                    >
-                        {options.map((m) => (
-                            <HudButton
-                                key={m ?? 'off'}
-                                type="button"
-                                aria-pressed={fortune.value === m}
-                                onClick={() => pickFortune(m)}
-                                className={cn(
-                                    'flex-1 border-l border-white/20 text-sm first:border-l-0',
-                                    fortune.value === m
-                                        ? 'bg-white/10 font-bold text-[var(--ink)]'
-                                        : 'text-hud-soft'
-                                )}
-                            >
-                                {tf(m ?? 'off')}
-                            </HudButton>
-                        ))}
-                    </div>
-                </div>
+                <FortunePicker
+                    left={fortune.left}
+                    fateLeft={fortune.fateLeft}
+                    value={fortune.value}
+                    onChange={pickFortune}
+                    advantageLabel={fortune.advantageLabel}
+                    rerolls={source === 'server' ? fortune.rerolls : undefined}
+                    notFail={fortune.notFail}
+                />
             )}
             {source === 'manual' ? (
                 manualRoll()

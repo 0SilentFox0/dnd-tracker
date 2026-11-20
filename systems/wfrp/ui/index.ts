@@ -71,6 +71,18 @@ const ChannelDialog = dynamic(() =>
     import('./battle/ChannelDialog').then((m) => m.ChannelDialog)
 );
 
+const FateReactionDialog = dynamic(() =>
+    import('./battle/FateReactionDialog').then((m) => m.FateReactionDialog)
+);
+
+const FateWaitingNotice = dynamic(() =>
+    import('./battle/FateWaitingNotice').then((m) => m.FateWaitingNotice)
+);
+
+const MomentumPanel = dynamic(() =>
+    import('./battle/MomentumPanel').then((m) => m.MomentumPanel)
+);
+
 const SpellMagicFields = dynamic(() =>
     import('./spells/SpellMagicFields').then((m) => m.SpellMagicFields)
 );
@@ -83,6 +95,9 @@ const battle: SystemBattleUi = {
     ChannelLabel,
     ConditionTestPanel,
     ConditionsDialog: SystemConditionsDialog,
+    heroPanels: [MomentumPanel],
+    dialogs: [FateReactionDialog],
+    notices: [FateWaitingNotice],
 };
 
 export const WFRP_MODULE_UI: SystemUi = {
@@ -112,7 +127,13 @@ export const WFRP_MODULE_UI: SystemUi = {
     RestBadges,
     ResourceFields,
     ActionResult,
-    resourceDefaults: (sheet) => ({
-        sin: String(SHEET_SLOT.read(sheet.systemSlot)?.sin ?? 0),
-    }),
+    resourceDefaults: (sheet) => {
+        const block = SHEET_SLOT.read(sheet.systemSlot);
+
+        return {
+            fortune: String(block?.fortune ?? 0),
+            fate: String(block?.fateLeft ?? 0),
+            sin: String(block?.sin ?? 0),
+        };
+    },
 };

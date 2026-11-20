@@ -24,6 +24,7 @@ import type {
     CharacterListItem,
     CharacterSheet,
     SheetRollBody,
+    SheetRollExtra,
     SheetRollResult,
     SheetTotal,
 } from '@/types/characters';
@@ -45,6 +46,9 @@ export interface RollDialogBodyProps {
     result: SheetRollResult | null;
     difficulty: string;
     setDifficulty: (difficulty: string) => void;
+    /** Module-owned extra roll input (e.g. a Fortune spend), merged into a test body */
+    extra: SheetRollExtra;
+    setExtra: (extra: SheetRollExtra) => void;
 }
 
 export interface StatsFieldsProps {

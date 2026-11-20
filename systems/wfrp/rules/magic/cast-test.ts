@@ -1,4 +1,5 @@
 import { skillTarget, value } from '../characteristics/derive';
+import { fateSpendsOn } from '../combat/fate';
 import { participantChars } from '../combat/participant';
 import { selfSlMod, selfTestMod } from '../conditions/test-mod';
 import { editionOf } from '../edition';
@@ -43,8 +44,7 @@ export function castTargetOf(
 
     return (
         (skillTarget(chars, CAST_SKILL.key, CAST_SKILL.spec)?.target ??
-            value(chars, 'int')) +
-        selfTestMod(caster, 'test', editionOf(rules))
+            value(chars, 'int')) + selfTestMod(caster, 'test', editionOf(rules))
     );
 }
 
@@ -110,7 +110,8 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             }),
         fortuneInput,
         passes,
-        presetRoll
+        presetRoll,
+        { repeat: fateSpendsOn(ctx.rules) }
     );
 
     const success = passes(test);
@@ -170,14 +171,20 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
     if (fortune)
         lines.push(
             textRef(
-                fortune.kind === 'reroll'
-                    ? 'battleWfrp.log.fortuneReroll'
-                    : fortune.kind === 'notFail'
-                      ? 'battleWfrp.log.fateNotFail'
-                      : reverse
-                        ? 'battleWfrp.log.fortuneAdvantage'
-                        : 'battleWfrp.log.fortuneSl',
-                { name: caster.basicInfo.name, first: fortune.firstRoll ?? 0 }
+                fortune.kind === 'reroll' && fortune.spent > 1
+                    ? 'battleWfrp.log.fortuneRerolls'
+                    : fortune.kind === 'reroll'
+                      ? 'battleWfrp.log.fortuneReroll'
+                      : fortune.kind === 'notFail'
+                        ? 'battleWfrp.log.fateNotFail'
+                        : reverse
+                          ? 'battleWfrp.log.fortuneAdvantage'
+                          : 'battleWfrp.log.fortuneSl',
+                {
+                    name: caster.basicInfo.name,
+                    first: fortune.firstRoll ?? 0,
+                    rolls: fortune.spent,
+                }
             )
         );
 
@@ -189,7 +196,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         spendFortune || dropChannelled
             ? (p: BattleParticipant) =>
                   withWfrpState(p, {
-                      ...(fortune && spentFor(p, fortune.kind)),
+                      ...(fortune && spentFor(p, fortune.kind, fortune.spent)),
                       ...(dropChannelled && { channelledSl: undefined }),
                   })
             : undefined;

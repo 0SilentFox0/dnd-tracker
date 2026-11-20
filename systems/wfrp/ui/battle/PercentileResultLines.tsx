@@ -35,13 +35,20 @@ export function PercentileResultLines({
                           ? tf('usedNotFail')
                           : p.fortune.kind === 'advantage'
                             ? tf('usedAdvantage')
-                            : p.fortune.firstRoll !== undefined
-                              ? tf('used', { first: p.fortune.firstRoll })
-                              : `${tf('label')}: ${tf('reroll')}`}
+                            : p.fortune.rolls
+                              ? tf('usedRerolls', {
+                                    rolls: p.fortune.rolls.length,
+                                })
+                              : p.fortune.firstRoll !== undefined
+                                ? tf('used', { first: p.fortune.firstRoll })
+                                : `${tf('label')}: ${tf('reroll')}`}
                 </div>
             )}
             {p.momentumUsed && (
                 <div className="text-hud-gold">{t('momentum.spent')}</div>
+            )}
+            {p.momentumAdvantage && (
+                <div className="text-hud-gold">{t('momentum.advantage')}</div>
             )}
             {hit && (p.opposed ?? !!p.defender) && (
                 <div className="text-hud-gold">{t('momentum.gained')}</div>

@@ -59,6 +59,8 @@ export function SpeciesStep({ form }: { form: WfrpDraftFormState }) {
                                     fate: profile.fate,
                                     wounds: profile.extraWounds,
                                 })}
+                                {profile.fortune !== undefined &&
+                                    ` · ${t('fortune')} ${profile.fortune}`}
                             </span>
                             <span className="block text-hud-muted">
                                 {t('mods', {

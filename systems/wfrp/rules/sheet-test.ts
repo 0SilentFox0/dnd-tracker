@@ -6,28 +6,41 @@ import {
 } from './characteristics/constants';
 import { skillTarget, value } from './characteristics/derive';
 import { readCharacteristics } from './characteristics/keys';
+import { type HitLocation,LOCATIONS } from './combat/constants';
+import { fateLeftOf, fateSpendsOn } from './combat/fate';
 import { selfSlMod, selfTestMod } from './conditions/test-mod';
+import { resolveModeSources } from './percentile/advantage';
 import {
     DIFFICULTY_KEYS,
     DIFFICULTY_SL,
     type DifficultyKey,
 } from './percentile/difficulty';
+import {
+    applyFortune,
+    forcedOf,
+    type FortuneInput,
+} from './percentile/fortune';
 import { resolvePercentileTest } from './percentile/resolve';
 import { skillDef } from './skills/catalog';
 import { editionOf } from './edition';
+import { wfrpState } from './state';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/utils/api/content-error';
-import type { SheetTestInput } from '@/lib/utils/rules/systems/types';
 import type {
-    SheetPercentileRollResult,
-    SheetRollBody,
-} from '@/types/characters';
+    SheetTestInput,
+    SheetTestResult,
+} from '@/lib/utils/rules/systems/types';
+import type { SheetFortuneKind, SheetRollBody } from '@/types/characters';
 
-type WfrpTestBody = { kind: 'test'; difficulty?: DifficultyKey } & (
-    | { characteristic: CharacteristicKey }
-    | { skill: string; spec?: string }
-);
+type WfrpTestBody = {
+    kind: 'test';
+    difficulty?: DifficultyKey;
+    fortune?: SheetFortuneKind;
+    rerolls?: number;
+    critical?: boolean;
+    location?: HitLocation;
+} & ({ characteristic: CharacteristicKey } | { skill: string; spec?: string });
 
 export function acceptsWfrpSheetTest(
     body: SheetRollBody
@@ -37,6 +50,12 @@ export function acceptsWfrpSheetTest(
     if (
         body.difficulty !== undefined &&
         !(DIFFICULTY_KEYS as readonly string[]).includes(body.difficulty)
+    )
+        return false;
+
+    if (
+        body.location !== undefined &&
+        !(LOCATIONS as readonly string[]).includes(body.location)
     )
         return false;
 
@@ -59,7 +78,7 @@ export function rollWfrpSheetTest({
     rules,
     t,
     presetRoll,
-}: SheetTestInput): SheetPercentileRollResult {
+}: SheetTestInput): SheetTestResult {
     if (!acceptsWfrpSheetTest(body))
         throw new ContentError(API_ERRORS.ROLL_KIND_MISMATCH, 400);
 
@@ -92,17 +111,67 @@ export function rollWfrpSheetTest({
         target = skill.target;
     }
 
-    const r = resolvePercentileTest({
-        target: target + selfTestMod(participant, 'test', editionOf(rules)),
-        slModifier:
-            DIFFICULTY_SL[difficulty] +
-            selfSlMod(participant, editionOf(rules)),
-        doubles: false,
-        slModel: editionOf(rules).slModel,
-        mode: 'normal',
-        rng,
+    const edition = editionOf(rules);
+
+    const spend = body.fortune;
+
+    const fortuneLeft = spend ? (wfrpState(participant).fortune ?? 0) : 0;
+
+    const fateLeft = spend ? fateLeftOf(participant) : 0;
+
+    if (spend === 'notFail' ? fateLeft < 1 : spend && fortuneLeft < 1)
+        throw new ContentError(
+            spend === 'notFail' ? API_ERRORS.NO_FATE : API_ERRORS.NO_FORTUNE,
+            409
+        );
+
+    const reverse = edition.advantageModel === 'reverse';
+
+    const edge = spend === 'advantage';
+
+    const modeOf = resolveModeSources({ advantage: edge && reverse ? 1 : 0 });
+
+    const input: FortuneInput | undefined =
+        spend === 'advantage'
+            ? { kind: 'sl' }
+            : spend
+              ? {
+                    kind: spend,
+                    rerolls: Math.min(body.rerolls ?? 1, fortuneLeft),
+                    ...(spend === 'notFail' &&
+                        body.critical && { critical: true }),
+                }
+              : undefined;
+
+    const slModifier =
+        DIFFICULTY_SL[difficulty] +
+        selfSlMod(participant, edition) +
+        (edge && !reverse ? 1 : 0) +
+        modeOf.slMod;
+
+    const { result: r, fortune } = applyFortune(
+        (preset) =>
+            resolvePercentileTest({
+                target: target + selfTestMod(participant, 'test', edition),
+                slModifier,
+                doubles: false,
+                slModel: edition.slModel,
+                mode: modeOf.mode,
+                rng,
+                presetRoll: preset,
+                forced: forcedOf(input),
+            }),
+        input,
+        (t) => t.outcome === 'success' || t.outcome === 'critical',
         presetRoll,
-    });
+        { repeat: fateSpendsOn(rules) }
+    );
+
+    const resourcesAfter = fortune
+        ? fortune.kind === 'notFail'
+            ? { fate: fateLeft - 1 }
+            : { fortune: fortuneLeft - fortune.spent }
+        : undefined;
 
     return {
         kind: 'percentile',
@@ -116,5 +185,15 @@ export function rollWfrpSheetTest({
         auto: r.auto,
         difficulty,
         mode: r.mode,
+        ...(fortune && {
+            fortune: {
+                kind: fortune.kind === 'sl' ? 'advantage' : fortune.kind,
+                ...(fortune.firstRoll !== undefined && {
+                    firstRoll: fortune.firstRoll,
+                }),
+                spent: fortune.spent,
+            },
+        }),
+        ...(resourcesAfter && { resourcesAfter }),
     };
 }

@@ -1,10 +1,11 @@
 import { useTranslations } from 'next-intl';
 
+import { fateLeftOf } from '../../rules/combat/fate';
 import { heldBy } from '../../rules/combat/momentum';
-import { FORTUNE_INPUT } from '../../rules/percentile/fortune';
 import { SCENE_SLOT } from '../../rules/slots';
 import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
+import { fortuneControls } from './fortune-controls';
 
 import { btn } from '@/components/battle/wizards/attack/shared';
 import { HudButton } from '@/components/hud';
@@ -26,7 +27,7 @@ export function D100RollBody({
 
     const left = (attacker && wfrpState(attacker).fortune) ?? 0;
 
-    const fateLeft = (attacker && wfrpState(attacker).fate) ?? 0;
+    const fateLeft = attacker ? fateLeftOf(attacker) : 0;
 
     const momentum =
         judged.attackerSide !== undefined &&
@@ -65,11 +66,9 @@ export function D100RollBody({
                         state.index === 0,
                     left,
                     fateLeft,
-                    value: FORTUNE_INPUT.read(state.system)?.kind ?? null,
-                    onChange: (kind) =>
-                        actions.setSystemInput(
-                            kind && FORTUNE_INPUT.write({ kind })
-                        ),
+                    ...fortuneControls(state.system, view.rules, (slot) =>
+                        actions.setSystemInput(slot ?? null)
+                    ),
                 }}
                 onRoll={actions.roll}
                 onAuto={actions.aiRoll}

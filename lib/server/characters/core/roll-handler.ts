@@ -13,6 +13,7 @@ import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { ContentError } from '@/lib/server/content/errors';
+import { readResources } from '@/lib/utils/characters/resources/schema';
 import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
@@ -74,6 +75,11 @@ export async function rollForSheet(
 
     const inspired = body.kind !== 'test' && !!body.useInspiration;
 
+    const spends = body.kind === 'test' && !!body.fortune;
+
+    if (spends)
+        await assertNotInActiveBattle(character.campaignId, [character.id]);
+
     if (inspired) {
         if (!rerollTokenOn(rules))
             throw new ContentError(API_ERRORS.OOC_INSPIRATION_DISABLED, 409);
@@ -104,7 +110,7 @@ export async function rollForSheet(
             };
     }
 
-    const result = system.sheetTest.roll({
+    const { resourcesAfter, ...result } = system.sheetTest.roll({
         participant,
         character,
         body,
@@ -114,7 +120,31 @@ export async function rollForSheet(
         t: await getTranslator(await getRequestLocale()),
     });
 
+    const before = readResources(character.resources);
+
     const logged = await prisma.$transaction(async (tx) => {
+        if (resourcesAfter) {
+            const row = (await lockCharacters(tx, [character.id])).get(
+                character.id
+            );
+
+            const now = readResources(row?.resources);
+
+            if (now.fortune !== before.fortune) return 'staleFortune';
+
+            if (now.fate !== before.fate) return 'staleFate';
+
+            await tx.character.update({
+                where: { id: character.id },
+                data: {
+                    resources: {
+                        ...now,
+                        ...resourcesAfter,
+                    } as Prisma.InputJsonValue,
+                },
+            });
+        }
+
         if (inspired) {
             const token = system.combat.rerollToken;
 
@@ -161,6 +191,11 @@ export async function rollForSheet(
 
         return true;
     });
+
+    if (logged === 'staleFortune')
+        throw new ContentError(API_ERRORS.NO_FORTUNE, 409);
+
+    if (logged === 'staleFate') throw new ContentError(API_ERRORS.NO_FATE, 409);
 
     if (!logged) throw new ContentError(API_ERRORS.NO_INSPIRATION, 409);
 

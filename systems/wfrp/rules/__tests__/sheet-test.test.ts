@@ -11,6 +11,8 @@ import { ContentError } from '@/lib/utils/api/content-error';
 import { mulberry32 } from '@/lib/utils/common/rng';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SheetTestInput } from '@/lib/utils/rules/systems/types';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
+import type { SheetPercentileRollResult } from '@/types/characters';
 
 const characteristics = {
     base: { ws: 45, ag: 40 },
@@ -43,6 +45,8 @@ const fails = (body: unknown, status: number, message: string) => {
     }
 };
 
+const targetOf = (r: unknown) => (r as SheetPercentileRollResult).target;
+
 describe('rollWfrpSheetTest', () => {
     it('participant conditions modify the target', () => {
         const fatigued = applyWfrpConditionTo(makeParticipant({ id: 'a' }), {
@@ -58,8 +62,8 @@ describe('rollWfrpSheetTest', () => {
         const body = { kind: 'test', characteristic: 'ws' };
 
         expect(
-            rollWfrpSheetTest(input(body, { participant: fatigued })).target
-        ).toBe(rollWfrpSheetTest(input(body)).target - 10);
+            targetOf(rollWfrpSheetTest(input(body, { participant: fatigued })))
+        ).toBe(targetOf(rollWfrpSheetTest(input(body))) - 10);
     });
 
     it('characteristic test defaults to challenging', () => {
@@ -168,5 +172,99 @@ describe('acceptsWfrpSheetTest', () => {
         expect(
             acceptsWfrpSheetTest({ kind: 'check', ability: 'strength' })
         ).toBe(false);
+    });
+});
+
+describe('rollWfrpSheetTest: Fortune and Fate', () => {
+    const body = { kind: 'test', characteristic: 'ws' } as const;
+
+    const hero = (state: { fortune?: number; fate?: number }) =>
+        withWfrpState(makeParticipant({ id: 'a' }), state);
+
+    it('a reroll that fixes the test spends only the rerolls used', () => {
+        const r = rollWfrpSheetTest(
+            input(
+                { ...body, fortune: 'reroll' },
+                { participant: hero({ fortune: 2 }), presetRoll: 90 }
+            )
+        );
+
+        const fortune = (r as SheetPercentileRollResult).fortune;
+
+        expect(fortune?.kind).toBe('reroll');
+        expect(r.resourcesAfter).toEqual({
+            fortune: 2 - (fortune?.spent ?? 0),
+        });
+    });
+
+    it('notFail spends Fate and turns a failure into a success', () => {
+        const r = rollWfrpSheetTest(
+            input(
+                { ...body, fortune: 'notFail' },
+                { participant: hero({ fortune: 1, fate: 2 }), presetRoll: 90 }
+            )
+        );
+
+        expect(r.kind === 'percentile' && r.outcome).toBe('success');
+        expect(r.resourcesAfter).toEqual({ fate: 1 });
+    });
+
+    it('notFail with critical forces a critical', () => {
+        const r = rollWfrpSheetTest(
+            input(
+                {
+                    ...body,
+                    fortune: 'notFail',
+                    critical: true,
+                    location: 'arm',
+                },
+                { participant: hero({ fortune: 1, fate: 2 }), presetRoll: 90 }
+            )
+        );
+
+        expect(r.kind === 'percentile' && r.outcome).toBe('critical');
+        expect(r.resourcesAfter).toEqual({ fate: 1 });
+    });
+
+    it('rejects an unknown location', () => {
+        expect(
+            acceptsWfrpSheetTest({
+                kind: 'test',
+                characteristic: 'ws',
+                location: 'tail',
+            } as never)
+        ).toBe(false);
+    });
+
+    it('advantage spends one Fortune', () => {
+        const r = rollWfrpSheetTest(
+            input(
+                { ...body, fortune: 'advantage' },
+                { participant: hero({ fortune: 1 }) }
+            )
+        );
+
+        expect(r.resourcesAfter).toEqual({ fortune: 0 });
+    });
+
+    it('no Fortune left is a 409', () => {
+        try {
+            rollWfrpSheetTest(
+                input(
+                    { ...body, fortune: 'advantage' },
+                    { participant: hero({ fortune: 0 }) }
+                )
+            );
+            expect.unreachable();
+        } catch (error) {
+            expect(error).toMatchObject({
+                status: 409,
+                message: API_ERRORS.NO_FORTUNE,
+            });
+        }
+    });
+
+    it('a plain test leaves the resources alone', () => {
+        expect(rollWfrpSheetTest(input(body)).resourcesAfter).toBeUndefined();
     });
 });

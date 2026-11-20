@@ -27,6 +27,7 @@ const model = (over: { fortune?: boolean; state?: object } = {}) => {
                 armourSl: 0,
             },
             caster: {
+                abilities: {},
                 battleData: {
                     system: {
                         key: 'wfrp',

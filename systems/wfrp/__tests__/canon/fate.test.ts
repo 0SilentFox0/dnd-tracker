@@ -11,7 +11,7 @@ import {
     FORTUNE_INPUT,
     spentFor,
 } from '@/systems/wfrp/rules/percentile/fortune';
-import { wfrpState,withWfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 
 describe('canon: Fate, "I Will Not Fail!" (p133)', () => {
     bookExample(
@@ -84,7 +84,7 @@ describe('canon: Fate, "I Will Not Fail!" (p133)', () => {
             () => true
         );
 
-        expect(fortune).toEqual({ kind: 'notFail' });
+        expect(fortune).toEqual({ kind: 'notFail', spent: 1 });
     });
 
     it('notFail input keeps the chosen critical location only with a critical', () => {

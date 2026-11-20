@@ -1,6 +1,13 @@
 import { skillTarget, value } from '../characteristics/derive';
 import { MIN_DAMAGE } from '../combat/constants';
-import { clearDeathTimer, tickDeathTimer } from '../combat/critical';
+import {
+    clearDeathTimer,
+    isOutOfFight,
+    notToday,
+    notTodayLine,
+    tickDeathTimer,
+} from '../combat/critical';
+import { fateSpendsOn } from '../combat/fate';
 import { participantChars, participantStats } from '../combat/participant';
 import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
@@ -185,27 +192,35 @@ export function wfrpSkippedTurn(
 ): SystemConditionResult {
     const p = findParticipant(ps, id);
 
-    if (!p || p.combatStats.status !== CombatStatus.UNCONSCIOUS)
+    if (
+        !p ||
+        p.combatStats.status !== CombatStatus.UNCONSCIOUS ||
+        isOutOfFight(p)
+    )
         return { participants: ps, messages: [] };
 
     const timer = tickDeathTimer(p);
 
-    if (timer)
+    if (timer) {
+        const saved = notTodayLine(p, timer.participant);
+
         return {
             participants: replaceParticipant(ps, timer.participant),
             messages: [
-                textRef(
-                    timer.died
-                        ? 'battleWfrp.log.diedOfWounds'
-                        : 'battleWfrp.log.dying',
-                    { name: p.basicInfo.name, rounds: timer.left }
-                ),
+                saved ??
+                    textRef(
+                        timer.died
+                            ? 'battleWfrp.log.diedOfWounds'
+                            : 'battleWfrp.log.dying',
+                        { name: p.basicInfo.name, rounds: timer.left }
+                    ),
             ],
         };
+    }
 
     const bleeding = conditionLevel(p, 'bleeding');
 
-    if (bleeding === 0 || p.combatStats.currentHp > 0)
+    if (bleeding === 0 || p.combatStats.currentHp > 0 || isOutOfFight(p))
         return { participants: ps, messages: [] };
 
     if (editionOf(ctx.rules).conditionModel === 'sl') {
@@ -227,6 +242,14 @@ export function wfrpSkippedTurn(
         if (roll > bleeding) return { participants: ps, messages: [] };
     } else if (ctx.rng() >= BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding)
         return { participants: ps, messages: [] };
+
+    const saved = fateSpendsOn(ctx.rules) ? notToday(p) : null;
+
+    if (saved)
+        return {
+            participants: replaceParticipant(ps, saved),
+            messages: [notTodayLine(p, saved)!],
+        };
 
     const dead: BattleParticipant = {
         ...p,

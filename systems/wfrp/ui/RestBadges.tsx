@@ -11,9 +11,19 @@ export function RestBadges({ sheet }: RestBadgesProps) {
 
     const block = SHEET_SLOT.read(sheet.systemSlot);
 
-    return block ? (
-        <HudPill tone="gold">
-            {t('fortune', { current: block.fortune, max: block.fortuneMax })}
-        </HudPill>
-    ) : null;
+    if (!block) return null;
+
+    return (
+        <>
+            <HudPill tone="gold">
+                {t('fortune', {
+                    current: block.fortune,
+                    max: block.fortuneMax,
+                })}
+            </HudPill>
+            <HudPill tone="gold">
+                {t('fate', { current: block.fateLeft ?? block.fate })}
+            </HudPill>
+        </>
+    );
 }

@@ -6,6 +6,7 @@ export type SpeciesProfile = {
     mods: Partial<Record<CharacteristicKey, number>>;
     move: number;
     fate: number;
+    fortune?: number;
     extraWounds: number;
     talents: string[];
     randomTalentCount: number;

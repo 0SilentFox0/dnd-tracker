@@ -12,6 +12,7 @@ import {
     redactCharacteristics,
 } from './rules/characteristics/reconcile';
 import { wfrpSheetBlock } from './rules/characteristics/sheet-block';
+import { isOutOfFight, wfrpOnRevived } from './rules/combat/critical';
 import { wfrpActionDetails } from './rules/combat/details';
 import { extractWfrpAttacks } from './rules/combat/extract-attacks';
 import { wfrpHitModel, wfrpHitModelFor } from './rules/combat/hit-model';
@@ -95,7 +96,11 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         initial: initialCharacteristics,
     },
     resources: {
-        limits: (row) => ({ fateMax: fortuneMax(readCharacteristics(row)) }),
+        limits: (row) => {
+            const c = readCharacteristics(row);
+
+            return { fateMax: fortuneMax(c), fateLimit: c.fate };
+        },
         seed: (characteristics) => ({
             fortune: fortuneMax(readCharacteristics({ characteristics })),
         }),
@@ -141,6 +146,8 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         onZeroHp: wfrpOnZeroHp,
         autoUnconsciousAtZero: (rules) =>
             editionOf(rules).woundModel !== 'critical',
+        keepsDown: isOutOfFight,
+        onRevived: wfrpOnRevived,
         onDamaged: [wfrpLoseChannelled],
         turn: WFRP_TURN,
         hitModel: wfrpHitModel,

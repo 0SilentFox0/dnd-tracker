@@ -14,16 +14,21 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useSheetRoll } from '@/lib/hooks/characters';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cryptoRandom } from '@/lib/utils/common/dice';
-import type { SheetRollBody, SheetRollResult } from '@/types/characters';
+import type {
+    SheetRollBody,
+    SheetRollExtra,
+    SheetRollResult,
+} from '@/types/characters';
 
 export type { SheetRollRequest };
 
 function rollBody(
     subject: SheetRollBody,
     difficulty: string,
-    useInspiration: boolean
+    useInspiration: boolean,
+    extra: SheetRollExtra
 ): SheetRollBody {
-    if (subject.kind === 'test') return { ...subject, difficulty };
+    if (subject.kind === 'test') return { ...subject, difficulty, ...extra };
 
     return { ...subject, ...(useInspiration && { useInspiration: true }) };
 }
@@ -51,6 +56,8 @@ export function SheetRollDialog({
 
     const [difficulty, setDifficulty] = useState('challenging');
 
+    const [extra, setExtra] = useState<SheetRollExtra>({});
+
     const [result, setResult] = useState<SheetRollResult | null>(null);
 
     const [error, setError] = useState<string | null>(null);
@@ -60,6 +67,7 @@ export function SheetRollDialog({
         setError(null);
         setUseInspiration(false);
         setDifficulty('challenging');
+        setExtra({});
         onClose();
     };
 
@@ -70,11 +78,12 @@ export function SheetRollDialog({
 
         try {
             const r = await roll.mutateAsync(
-                rollBody(request.subject, difficulty, useInspiration)
+                rollBody(request.subject, difficulty, useInspiration, extra)
             );
 
             setResult(r);
             setUseInspiration(false);
+            setExtra({});
 
             if (r.kind === 'check')
                 void stage.current?.play({
@@ -119,6 +128,8 @@ export function SheetRollDialog({
                     result={result}
                     difficulty={difficulty}
                     setDifficulty={setDifficulty}
+                    extra={extra}
+                    setExtra={setExtra}
                 />
             )}
             {error && <FormAlert>{error}</FormAlert>}

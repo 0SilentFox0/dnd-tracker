@@ -17,7 +17,7 @@ import {
 } from './constants';
 import { LOCATION_WEIGHTS } from './location';
 import { participantChars, participantStats } from './participant';
-import { winChance, winChanceFor } from './win-chance';
+import { momentumWinChance, winChance, winChanceFor } from './win-chance';
 
 import { diceAverage } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -105,7 +105,14 @@ const hitModelOf = (
 
 export const wfrpHitModel = hitModelOf(winChance);
 
-const canonModel = hitModelOf(winChanceFor(EDITION_PROFILES.canon5e));
+const canonProfile = EDITION_PROFILES.canon5e;
+
+const canonModel = hitModelOf(
+    canonProfile.advantageModel === 'reverse' &&
+        canonProfile.momentumModel === 'participant'
+        ? momentumWinChance(canonProfile)
+        : winChanceFor(canonProfile)
+);
 
 export const wfrpHitModelFor = (
     rules: Pick<Ruleset, 'system'>

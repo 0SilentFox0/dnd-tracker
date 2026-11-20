@@ -1,7 +1,7 @@
 import { editionOf } from '../edition';
 import { applyWfrpCrit } from './crit-effect';
 import { rollCrit } from './crit-table';
-import { startDeathTimer } from './critical';
+import { isOutOfFight, startDeathTimer } from './critical';
 import { asLocation, hitLocation } from './location';
 
 import { CombatStatus } from '@/lib/constants/battle';
@@ -19,7 +19,9 @@ function criticalOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
     if (
         after.combatStats.currentHp > 0 ||
-        after.combatStats.status === CombatStatus.DEAD
+        after.combatStats.status === CombatStatus.DEAD ||
+        (isOutOfFight(before) &&
+            before.combatStats.status !== CombatStatus.ACTIVE)
     )
         return { participant: after, participants, messages: [] };
 

@@ -4,7 +4,8 @@
     "profile": {
       "mods": {},
       "move": 4,
-      "fate": 2,
+      "fate": 4,
+      "fortune": 3,
       "extraWounds": 0,
       "talents": [
         "Quick Study"
@@ -132,7 +133,8 @@
         "fel": -10
       },
       "move": 3,
-      "fate": 0,
+      "fate": 2,
+      "fortune": 2,
       "extraWounds": 1,
       "talents": [
         "Stone Sense",
@@ -219,6 +221,7 @@
       },
       "move": 3,
       "fate": 2,
+      "fortune": 3,
       "extraWounds": 0,
       "talents": [
         "Light Step",
@@ -312,7 +315,8 @@
         "t": -10
       },
       "move": 5,
-      "fate": 0,
+      "fate": 1,
+      "fortune": 2,
       "extraWounds": 0,
       "talents": [
         "Twilight Eyes",

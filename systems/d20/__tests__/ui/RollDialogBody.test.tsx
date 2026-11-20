@@ -25,6 +25,8 @@ const check = (
 const body = (result: SheetRollResult | null) =>
     render(
         <RollDialogBody
+            extra={{}}
+            setExtra={() => {}}
             request={{
                 label: 'x',
                 subject: { kind: 'check', skill: 'stealth' },

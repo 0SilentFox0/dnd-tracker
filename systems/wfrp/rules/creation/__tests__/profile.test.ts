@@ -84,6 +84,8 @@ describe('SpeciesProfileSchema', () => {
         expect(parse({ move: 0 }).success).toBe(false);
         expect(parse({ move: 13 }).success).toBe(false);
         expect(parse({ fate: 10 }).success).toBe(false);
+        expect(parse({ fortune: 10 }).success).toBe(false);
+        expect(parse({ fortune: 3 }).success).toBe(true);
         expect(parse({ extraWounds: 4 }).success).toBe(false);
         expect(parse({ randomTalentCount: 6 }).success).toBe(false);
         expect(parse({ talents: Array(21).fill('a') }).success).toBe(false);

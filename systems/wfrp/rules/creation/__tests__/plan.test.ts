@@ -44,6 +44,17 @@ const errorsOf = (picks: CreationPicks, c: CreationCtx = ctx) => {
 };
 
 describe('planDraft', () => {
+    it('carries species fortune into characteristics', () => {
+        const r = planDraft(rolled, {
+            ...ctx,
+            profile: parseProfile({ ...profile, fortune: 3 }),
+        });
+
+        if (!r.ok) throw new Error(r.errors.join());
+
+        expect(r.characteristics.fortune).toBe(3);
+    });
+
     it('rolled: applies mods, species fields, career, fixed talent and bonuses', () => {
         const r = planDraft(rolled, ctx);
 
@@ -63,6 +74,7 @@ describe('planDraft', () => {
         });
         expect(r.characteristics.move).toBe(3);
         expect(r.characteristics.fate).toBe(2);
+        expect(r.characteristics.fortune).toBeUndefined();
         expect(r.characteristics.extraWounds).toBe(1);
         expect(r.characteristics.career).toEqual({
             careerId: 'c1',

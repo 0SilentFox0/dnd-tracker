@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { EDITION_PROFILES } from '../../edition';
 import { wfrpHitModel } from '../hit-model';
-import { winChance } from '../win-chance';
+import { momentumWinChance, winChance, winChanceFor } from '../win-chance';
 
 import {
     buildPartyPower,
@@ -244,5 +245,48 @@ describe('computeFairScaling for wfrp', () => {
         expect(Number.isFinite(s.dmgScale)).toBe(true);
         expect(Number.isFinite(s.units.rat.hpMult)).toBe(true);
         expect(Number.isFinite(s.units.rat.dmgMult)).toBe(true);
+    });
+});
+
+describe('winChance modes and Momentum', () => {
+    const canon = EDITION_PROFILES.canon5e;
+
+    const points: Array<[number, number]> = [
+        [30, 30],
+        [50, 40],
+        [40, 60],
+        [70, 35],
+    ];
+
+    it('Advantage never lowers the attacker chance', () => {
+        const normal = winChanceFor(canon);
+
+        const advantage = winChanceFor(canon, { attacker: 'advantage' });
+
+        for (const [a, d] of points)
+            expect(advantage(a, d)).toBeGreaterThanOrEqual(normal(a, d));
+
+        expect(advantage(40, 40)).toBeGreaterThan(normal(40, 40));
+    });
+
+    it('stationary Momentum lies between normal and Advantage', () => {
+        const normal = winChanceFor(canon);
+
+        const advantage = winChanceFor(canon, { attacker: 'advantage' });
+
+        const momentum = momentumWinChance(canon);
+
+        for (const [a, d] of points) {
+            expect(momentum(a, d)).toBeGreaterThanOrEqual(normal(a, d) - 1e-9);
+            expect(momentum(a, d)).toBeLessThanOrEqual(advantage(a, d) + 1e-9);
+        }
+    });
+
+    it('legacy winChance ignores modes and keeps its values', () => {
+        expect(winChanceFor(EDITION_PROFILES.legacy)(40, 40)).toBe(
+            winChance(40, 40)
+        );
+        expect(winChance(40, 40)).toBeGreaterThan(0.3);
+        expect(winChance(40, 40)).toBeLessThan(0.7);
     });
 });

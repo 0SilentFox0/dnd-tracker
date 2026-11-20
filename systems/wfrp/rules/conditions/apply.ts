@@ -1,3 +1,4 @@
+import { isOutOfFight } from '../combat/critical';
 import { loseMomentum } from '../combat/momentum';
 import { editionOf, type EditionProfile } from '../edition';
 import {
@@ -189,7 +190,8 @@ export function reduceWfrpCondition(
         removed &&
         key === 'unconscious' &&
         next.combatStats.status === CombatStatus.UNCONSCIOUS &&
-        next.combatStats.currentHp > 0
+        next.combatStats.currentHp > 0 &&
+        !isOutOfFight(next)
     ) {
         next = {
             ...next,

@@ -82,7 +82,8 @@
         },
         "momentum": {
           "gained": "Momentum отримано",
-          "spent": "Momentum витрачено"
+          "spent": "Momentum витрачено",
+          "advantage": "Momentum: перевага"
         }
       }
     }

@@ -20,6 +20,8 @@ const btn =
 export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
     const t = useTranslations('battleWfrp.ui.test');
 
+    const tf = useTranslations('battleWfrp.ui.fortune');
+
     const text = useText();
 
     const panel = useConditionTestPanel(hero);
@@ -37,24 +39,36 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
 
     return (
         <div className="mt-2 space-y-1.5">
-            {panel.items.map(({ key, label, stand }) => (
+            {panel.items.map(({ key, label, stand, testable }) => (
                 <div key={key}>
-                    <HudButton
-                        type="button"
-                        disabled={panel.isPending}
-                        aria-expanded={open === key}
-                        className={btn}
-                        onClick={() =>
-                            stand
-                                ? run(key)
-                                : setOpen(open === key ? null : key)
-                        }
-                    >
-                        {stand
-                            ? t('stand')
-                            : t('attempt', { condition: text(label) })}
-                    </HudButton>
-                    {open === key && (
+                    {testable && (
+                        <HudButton
+                            type="button"
+                            disabled={panel.isPending}
+                            aria-expanded={open === key}
+                            className={btn}
+                            onClick={() =>
+                                stand
+                                    ? run(key)
+                                    : setOpen(open === key ? null : key)
+                            }
+                        >
+                            {stand
+                                ? t('stand')
+                                : t('attempt', { condition: text(label) })}
+                        </HudButton>
+                    )}
+                    {panel.canRemoveWithFortune && (
+                        <HudButton
+                            type="button"
+                            disabled={panel.isPending}
+                            className={cn(btn, testable && 'mt-1')}
+                            onClick={() => panel.removeWithFortune(key)}
+                        >
+                            {tf('removeCondition')} · {text(label)}
+                        </HudButton>
+                    )}
+                    {testable && open === key && (
                         <div className="pb-1">
                             <div className="mt-2 grid h-9 grid-cols-2 border border-white/20">
                                 {SOURCES.map((m) => (

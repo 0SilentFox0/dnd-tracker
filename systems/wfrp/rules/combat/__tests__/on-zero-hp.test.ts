@@ -5,7 +5,14 @@ import { wfrpOnZeroHp } from '../on-zero-hp';
 import { CombatStatus } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { mulberry32 } from '@/lib/utils/common/rng';
+import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
+
+const CANON_RULES = RulesetSchema.parse({
+    ...WFRP_RULES,
+    edition: { preset: 'canon5e' },
+});
 
 const run = (
     beforeStatus: (typeof CombatStatus)[keyof typeof CombatStatus]
@@ -46,5 +53,29 @@ describe('wfrpOnZeroHp', () => {
 
         expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
         expect(r.messages).toEqual([]);
+    });
+
+    it('canon: an out-of-fight fighter restored to ACTIVE can fall again', () => {
+        const before = withWfrpState(
+            makeParticipant({ id: 'a', hp: 5, maxHp: 20 }),
+            { outOfFight: true }
+        );
+
+        const after = {
+            ...before,
+            combatStats: { ...before.combatStats, currentHp: 0 },
+        };
+
+        const r = wfrpOnZeroHp({
+            before,
+            after,
+            amount: 8,
+            rng: mulberry32(1),
+            participants: [after],
+            rules: CANON_RULES,
+            round: 1,
+        });
+
+        expect(r.messages.length).toBeGreaterThan(0);
     });
 });

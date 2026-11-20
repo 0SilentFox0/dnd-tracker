@@ -16,6 +16,7 @@ import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { armourAp } from '@/systems/wfrp/rules/equipment/armour';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
 import type { BattleAttack } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -165,6 +166,8 @@ describe('extractWfrpAttacks', () => {
             damageBonus: 2,
             ammo: { capacity: 3 },
         });
+        expect(ATTACK_SLOT.read(attacks[1].system)?.offHand).toBe(true);
+        expect(ATTACK_SLOT.read(attacks[0].system)?.offHand).toBeUndefined();
     });
 
     it('the same weapon in main hand and shield slot gets independent ids', () => {

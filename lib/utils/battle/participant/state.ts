@@ -19,10 +19,19 @@ export function autoUnconscious(rules?: Ruleset): boolean {
     );
 }
 
+export function keepsDown(p: BattleParticipant, rules?: Ruleset): boolean {
+    return (
+        !!rules &&
+        p.combatStats.status === CombatStatus.UNCONSCIOUS &&
+        ruleSystemOf(rules).combat.keepsDown?.(p) === true
+    );
+}
+
 export function statusForHp(
     p: BattleParticipant,
     hp: number,
-    kill = false
+    kill = false,
+    rules?: Ruleset
 ): CombatStatusType {
     const { status } = p.combatStats;
 
@@ -33,7 +42,9 @@ export function statusForHp(
             ? CombatStatus.DEAD
             : CombatStatus.UNCONSCIOUS;
 
-    return status === CombatStatus.UNCONSCIOUS ? CombatStatus.ACTIVE : status;
+    return status === CombatStatus.UNCONSCIOUS && !keepsDown(p, rules)
+        ? CombatStatus.ACTIVE
+        : status;
 }
 
 export function isDown(p: BattleParticipant): boolean {

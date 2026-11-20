@@ -336,5 +336,9 @@
   "2026-11-19-bard-die": {
     "title": "Bardic Inspiration",
     "body": "A Bard can give an ally an inspiration die. When an attack or a saving throw would fail, the ally is asked whether to spend the die and add it to the roll."
+  },
+  "2026-11-20-wfrp-fate-fortune": {
+    "title": "Grim d100 (5e): Fate, Fortune and Momentum",
+    "body": "Advantage instead of an SL bonus, personal Momentum and how it is spent (second attack, Leadership), Fate: I Will Not Fail, How Did That Miss? and Not Today!, Fortune: several rerolls and removing a condition."
   }
 }

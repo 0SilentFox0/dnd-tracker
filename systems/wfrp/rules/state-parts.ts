@@ -12,8 +12,7 @@ import type {
 export const wfrpFromStored: StoredPart = (p, { stored }) => {
     const chars = PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics;
 
-    const fortune =
-        stored.resources?.fortune ?? (chars && fortuneMax(chars));
+    const fortune = stored.resources?.fortune ?? (chars && fortuneMax(chars));
 
     const fate = stored.resources?.fate;
 
@@ -37,7 +36,15 @@ export const wfrpPersist: PersistPart = ({ participant }, acc) => ({
     },
 });
 
-export const wfrpResetState: TurnStateReset = (p, scope) =>
-    scope === 'turn' && wfrpState(p).conditionTests
-        ? withWfrpState(p, { conditionTests: undefined })
+export const wfrpResetState: TurnStateReset = (p, scope) => {
+    if (scope !== 'turn') return p;
+
+    const { conditionTests, momentumAttack } = wfrpState(p);
+
+    return conditionTests || momentumAttack
+        ? withWfrpState(p, {
+              conditionTests: undefined,
+              momentumAttack: undefined,
+          })
         : p;
+};

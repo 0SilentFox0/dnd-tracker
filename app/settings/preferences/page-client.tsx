@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { PaletteSwitcher } from '@/components/layout/PaletteSwitcher';
 import { Input } from '@/components/ui/input';
 import {
     SelectField,
@@ -63,6 +64,10 @@ export function PreferencesClient() {
                 <div className="space-y-2">
                     <p className="text-sm text-hud-muted">{t('language')}</p>
                     <LocaleSwitcher />
+                </div>
+                <div className="space-y-2">
+                    <p className="text-sm text-hud-muted">{t('theme')}</p>
+                    <PaletteSwitcher />
                 </div>
                 <div className="space-y-2">
                     <label

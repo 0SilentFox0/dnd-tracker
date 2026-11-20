@@ -517,6 +517,7 @@ describe('resolveWfrpAttack fortune', () => {
         expect(attackOf(r.attackRoll)?.fortune).toEqual({
             kind: 'reroll',
             firstRoll: 90,
+            spent: 1,
         });
     });
 
@@ -572,7 +573,10 @@ describe('resolveWfrpAttack fortune', () => {
             key: 'wfrp',
             data: { fortune: 0 },
         });
-        expect(attackOf(boosted.attackRoll)?.fortune).toEqual({ kind: 'sl' });
+        expect(attackOf(boosted.attackRoll)?.fortune).toEqual({
+            kind: 'sl',
+            spent: 1,
+        });
     });
 });
 

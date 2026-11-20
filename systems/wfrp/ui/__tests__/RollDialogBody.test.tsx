@@ -6,6 +6,10 @@ import { RollDialogBody } from '../RollDialogBody';
 
 import type { SheetRollResult } from '@/types/characters';
 
+const sheetFortune = vi.hoisted(() => vi.fn((): unknown => null));
+
+vi.mock('@/systems/wfrp/hooks', () => ({ useSheetFortune: sheetFortune }));
+
 vi.mock('@/components/ui/select-field', () => ({
     SelectField: ({
         value,
@@ -52,11 +56,41 @@ const result: SheetRollResult = {
 describe('wfrp RollDialogBody', () => {
     afterEach(cleanup);
 
+    it('offers Critical and a hit location for notFail', () => {
+        const set = vi.fn();
+
+        sheetFortune.mockReturnValueOnce({
+            left: 1,
+            fateLeft: 1,
+            value: 'notFail',
+            onChange: () => {},
+            advantageLabel: true,
+            notFail: { critical: true, location: undefined, set },
+        });
+        render(
+            <RollDialogBody
+                extra={{ fortune: 'notFail', critical: true }}
+                setExtra={() => {}}
+                request={request}
+                result={null}
+                difficulty="challenging"
+                setDifficulty={() => {}}
+            />
+        );
+        fireEvent.click(
+            screen.getByText('battleWfrp.ui.fortune.locations.arm')
+        );
+
+        expect(set).toHaveBeenCalledWith(true, 'arm');
+    });
+
     it('lets the DM pick a difficulty', () => {
         const setDifficulty = vi.fn();
 
         render(
             <RollDialogBody
+                extra={{}}
+                setExtra={() => {}}
                 request={request}
                 result={null}
                 difficulty="challenging"
@@ -73,6 +107,8 @@ describe('wfrp RollDialogBody', () => {
     it('shows roll, target, SL, outcome and the reversed and auto marks', () => {
         render(
             <RollDialogBody
+                extra={{}}
+                setExtra={() => {}}
                 request={request}
                 result={result}
                 difficulty="challenging"

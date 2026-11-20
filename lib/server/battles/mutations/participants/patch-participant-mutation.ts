@@ -24,6 +24,7 @@ import {
 } from '@/lib/utils/battle/store';
 import { advanceAfterRemoval } from '@/lib/utils/battle/turn';
 import { rngOf } from '@/lib/utils/common/rng';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { PatchParticipantData } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
@@ -220,7 +221,7 @@ function updateHp(
         combatStats: {
             ...participant.combatStats,
             currentHp: newHp,
-            status: statusForHp(participant, newHp, kill),
+            status: statusForHp(participant, newHp, kill, ctx.meta.rules),
         },
     };
 
@@ -304,7 +305,7 @@ function revive(
 
     const newHp = Math.min(1, participant.combatStats.maxHp);
 
-    const revived: BattleParticipant = {
+    const woke: BattleParticipant = {
         ...participant,
         combatStats: {
             ...participant.combatStats,
@@ -312,6 +313,9 @@ function revive(
             status: CombatStatus.ACTIVE,
         },
     };
+
+    const revived =
+        ruleSystemOf(ctx.meta.rules).combat.onRevived?.(woke) ?? woke;
 
     const participants = settleStatusChange(
         participant,

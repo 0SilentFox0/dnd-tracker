@@ -33,6 +33,10 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useSheetRoll: () => h.roll,
 }));
+vi.mock('@/systems/wfrp/hooks', async (orig) => ({
+    ...(await orig<object>()),
+    useSheetFortune: () => null,
+}));
 vi.mock('@/lib/hooks/systems', () => ({
     useCampaignSystem: (_id: string, key: string) => ({
         system: { key, modules: key === 'homm' ? ['inspiration'] : undefined },

@@ -76,6 +76,24 @@ describe('CharacteristicsEditor', () => {
         expect(set).toHaveBeenLastCalledWith('extraWounds', 1);
     });
 
+    it('commits Fortune max and clears it when emptied', () => {
+        const { set } = setup();
+
+        fireEvent.change(document.getElementById('char-fortune')!, {
+            target: { value: '5' },
+        });
+        expect(set).toHaveBeenLastCalledWith('fortune', 5);
+    });
+
+    it('clears Fortune max when emptied', () => {
+        const { set } = setup({ fortune: 5 });
+
+        fireEvent.change(document.getElementById('char-fortune')!, {
+            target: { value: '' },
+        });
+        expect(set).toHaveBeenLastCalledWith('fortune', undefined);
+    });
+
     it('hides the extras when withExtras is false', () => {
         setup({}, false);
         expect(document.getElementById('char-move')).toBeNull();

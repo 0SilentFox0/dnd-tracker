@@ -27,7 +27,8 @@
     "stats": "Move {move} · Fate {fate} · Extra wounds {wounds}",
     "mods": "Bonuses: {mods}",
     "noMods": "no bonuses",
-    "talents": "Talents: {names}"
+    "talents": "Talents: {names}",
+    "fortune": "Fortune"
   },
   "career": {
     "hint": "A career sets starting skills and the advancement path.",
@@ -112,6 +113,7 @@
     "mods": "Characteristic bonuses",
     "move": "Move",
     "fate": "Fate",
+    "fortune": "Fortune",
     "extraWounds": "Extra wounds",
     "randomTalentCount": "Random talent count",
     "talents": "Fixed talents",

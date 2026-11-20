@@ -17,6 +17,8 @@ export interface WfrpAttackSlot {
     flaws: QualityRef[];
     noSb?: boolean;
     magical?: true;
+    /** Wielded in the shield (off) hand */
+    offHand?: true;
     /** Weapon group, picks the Melee/Ranged skill speciality */
     group?: string;
 }
@@ -36,6 +38,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
         ...(typeof raw.group === 'string' && { group: raw.group }),
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.magical === true && { magical: true as const }),
+        ...(raw.offHand === true && { offHand: true as const }),
     };
 });
 
@@ -93,6 +96,10 @@ export interface WfrpParticipantState {
     fate?: number;
     /** Personal Momentum, canon5e only (p168) */
     momentum?: true;
+    /** Fled the fight alive through Fate "Not Today" (p133), canon5e */
+    outOfFight?: true;
+    /** Spent Momentum on the second weapon's attack this turn (p167) */
+    momentumAttack?: true;
     channelledSl?: number;
     /** Critical Wounds taken this battle, canon5e (p172) */
     critWounds?: number;
@@ -123,6 +130,10 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...(finite(raw.fortune) && { fortune: raw.fortune }),
             ...(finite(raw.fate) && { fate: raw.fate }),
             ...(raw.momentum === true && { momentum: true as const }),
+            ...(raw.outOfFight === true && { outOfFight: true as const }),
+            ...(raw.momentumAttack === true && {
+                momentumAttack: true as const,
+            }),
             ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
             ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),

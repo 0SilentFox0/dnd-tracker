@@ -116,6 +116,54 @@ export const WFRP_MODULE_SERVER: SystemServer = {
                 };
             },
         },
+        'fortune-condition': {
+            settings: {
+                access: 'member',
+                missing: API_ERRORS.FORTUNE_CONDITION_UNAVAILABLE,
+            },
+            load: async () => {
+                const { fortuneConditionMutation, fortuneConditionSchema } =
+                    await import('./battle/fortune-condition-mutation');
+
+                return {
+                    schema: fortuneConditionSchema,
+                    mutate: fortuneConditionMutation,
+                };
+            },
+        },
+        'fate-reaction': {
+            settings: {
+                access: 'member',
+                allowWhileAwaitingDm: true,
+                allowWhileCritPending: true,
+                respond: 'wrapped',
+                missing: API_ERRORS.FATE_REACTION_NONE,
+            },
+            load: async (deps) => {
+                const { createFateReactionMutation, fateReactionSchema } =
+                    await import('./battle/fate-reaction-mutation');
+
+                return {
+                    schema: fateReactionSchema,
+                    mutate: createFateReactionMutation(deps),
+                };
+            },
+        },
+        momentum: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { momentumMutation, momentumSchema } = await import(
+                    './battle/momentum-mutation'
+                );
+
+                return { schema: momentumSchema, mutate: momentumMutation };
+            },
+        },
         channel: {
             settings: {
                 access: 'member',

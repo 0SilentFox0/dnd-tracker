@@ -1,8 +1,9 @@
 import { useTranslations } from 'next-intl';
 
-import { FORTUNE_INPUT } from '../../rules/percentile/fortune';
+import { fateLeftOf } from '../../rules/combat/fate';
 import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
+import { fortuneControls } from './fortune-controls';
 
 import type { CastTestProps } from '@/components/systems/types';
 
@@ -15,7 +16,7 @@ export function CastTestBody({
 
     const left = (caster && wfrpState(caster).fortune) ?? 0;
 
-    const fateLeft = (caster && wfrpState(caster).fate) ?? 0;
+    const fateLeft = caster ? fateLeftOf(caster) : 0;
 
     if (!cast) return null;
 
@@ -45,11 +46,9 @@ export function CastTestBody({
                     available: left >= 1 || fateLeft >= 1,
                     left,
                     fateLeft,
-                    value: FORTUNE_INPUT.read(state.castSystem)?.kind ?? null,
-                    onChange: (kind) =>
-                        actions.setCastSystem(
-                            kind && FORTUNE_INPUT.write({ kind })
-                        ),
+                    ...fortuneControls(state.castSystem, view.rules, (slot) =>
+                        actions.setCastSystem(slot ?? null)
+                    ),
                 }}
                 onRoll={actions.setCastRoll}
                 onAuto={() => actions.setCastRoll()}

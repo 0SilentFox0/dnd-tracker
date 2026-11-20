@@ -27,6 +27,14 @@ export type HitDieInput = z.infer<typeof hitDieSchema>;
 
 const difficulty = z.string().max(40).optional();
 
+const fortune = z.enum(['advantage', 'reroll', 'notFail']).optional();
+
+const rerolls = z.number().int().min(1).max(9).optional();
+
+const critical = z.boolean().optional();
+
+const location = z.string().max(20).optional();
+
 export const sheetRollSchema = z.union([
     z.object({
         kind: z.literal('check'),
@@ -48,6 +56,10 @@ export const sheetRollSchema = z.union([
             kind: z.literal('test'),
             characteristic: z.string().max(40),
             difficulty,
+            fortune,
+            rerolls,
+            critical,
+            location,
         })
         .strict(),
     z
@@ -56,6 +68,10 @@ export const sheetRollSchema = z.union([
             skill: z.string().max(60),
             spec: z.string().max(60).optional(),
             difficulty,
+            fortune,
+            rerolls,
+            critical,
+            location,
         })
         .strict(),
 ]);
@@ -83,6 +99,7 @@ export const resourcesEditSchema = z
         exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
         dead: z.boolean().optional(),
         fortune: z.number().int().min(0).max(9).optional(),
+        fate: z.number().int().min(0).max(9).optional(),
         sin: z.number().int().min(0).max(10).optional(),
         reset: z.literal(true).optional(),
         charges: z

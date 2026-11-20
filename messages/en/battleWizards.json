@@ -82,7 +82,8 @@
         },
         "momentum": {
           "gained": "Momentum gained",
-          "spent": "Momentum spent"
+          "spent": "Momentum spent",
+          "advantage": "Momentum: Advantage"
         }
       }
     }

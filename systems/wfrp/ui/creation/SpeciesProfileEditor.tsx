@@ -156,6 +156,16 @@ export function SpeciesProfileEditor({
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {numberField(t('move'), 'move', 1, 12)}
                 {numberField(t('fate'), 'fate', 0, 9)}
+                <FormField label={t('fortune')}>
+                    <BoundedNumberInput
+                        aria-label={t('fortune')}
+                        className="min-h-11"
+                        value={profile.fortune ?? profile.fate}
+                        min={0}
+                        max={9}
+                        onCommit={(v) => edit({ fortune: v })}
+                    />
+                </FormField>
                 {numberField(t('extraWounds'), 'extraWounds', 0, 3)}
                 {numberField(t('randomTalentCount'), 'randomTalentCount', 0, 5)}
             </div>

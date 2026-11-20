@@ -53,7 +53,7 @@ const wizard = (serverJudged: boolean) => {
             cover: new Set<string>(),
             rollMode: 'normal',
             inspirationAvailable: false,
-            attacker: { battleData: {} },
+            attacker: { abilities: {}, battleData: {} },
             judged: {
                 target: { target: 41, label: 'WS' },
                 sceneState: undefined,

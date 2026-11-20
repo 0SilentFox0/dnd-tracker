@@ -25,13 +25,18 @@ export const WFRP_META = {
             dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
         },
         budgetKb: {
-            battle: 111,
+            battle: 113,
             member: 113,
             dm: 117,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },
     whatsNew: [
+        {
+            id: '2026-11-20-wfrp-fate-fortune',
+            date: '2026-11-20',
+            audience: 'all',
+        },
         {
             id: '2026-11-09-wfrp-corruption',
             date: '2026-11-09',

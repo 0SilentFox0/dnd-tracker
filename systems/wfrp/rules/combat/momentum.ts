@@ -1,7 +1,13 @@
-import type { SceneMomentum } from '../slots';
+import { ATTACK_SLOT, type SceneMomentum } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
 
-import type { BattleParticipant, ParticipantSide } from '@/types/battle';
+import { AttackType } from '@/lib/constants/battle';
+import { withAttacksLeft } from '@/lib/utils/battle/attack/attacks-left';
+import type {
+    BattleAttack,
+    BattleParticipant,
+    ParticipantSide,
+} from '@/types/battle';
 
 export const heldBy = (m: SceneMomentum, side: ParticipantSide): boolean =>
     m[side] === true;
@@ -53,4 +59,32 @@ export const loseMomentum = (p: BattleParticipant): BattleParticipant =>
 /** Momentum is spent on a second attack or Disengage; false when there is none to spend (p168) */
 export function spendMomentum(p: BattleParticipant): BattleParticipant | null {
     return hasMomentum(p) ? loseMomentum(p) : null;
+}
+
+export type SecondAttackBlocker = 'none' | 'used' | 'action' | 'weapons';
+
+/** One extra attack per turn (p167-168): after the main action, with melee weapons in both hands */
+export function secondAttackBlocker(
+    p: BattleParticipant
+): SecondAttackBlocker | null {
+    if (!hasMomentum(p)) return 'none';
+
+    if (wfrpState(p).momentumAttack) return 'used';
+
+    if (!p.actionFlags.hasUsedAction) return 'action';
+
+    const melee = p.battleData.attacks.filter(
+        (a) => a.type === AttackType.MELEE
+    );
+
+    const off = (a: BattleAttack) =>
+        ATTACK_SLOT.read(a.system)?.offHand === true;
+
+    return melee.some(off) && melee.some((a) => !off(a)) ? null : 'weapons';
+}
+
+export function grantSecondAttack(p: BattleParticipant): BattleParticipant {
+    const spent = loseMomentum(p);
+
+    return withAttacksLeft(withWfrpState(spent, { momentumAttack: true }), 1);
 }

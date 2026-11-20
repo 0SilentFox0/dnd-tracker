@@ -40,6 +40,7 @@ export const SpeciesProfileSchema = z.strictObject({
         .default({}),
     move: z.number().int().min(1).max(12).default(4),
     fate: z.number().int().min(0).max(9).default(0),
+    fortune: z.number().int().min(0).max(9).optional(),
     extraWounds: z.number().int().min(0).max(3).default(0),
     talents: z.array(z.string().min(1).max(100)).max(20).default([]),
     randomTalentCount: z.number().int().min(0).max(5).default(0),

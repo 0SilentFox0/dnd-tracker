@@ -81,7 +81,14 @@
     "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed",
     "critDeath": "☠️ {target} is killed outright: {text}",
     "dying": "⏳ {name} is dying: {rounds} round(s) left unless healed",
-    "diedOfWounds": "☠️ {name} succumbs to their critical wounds"
+    "diedOfWounds": "☠️ {name} succumbs to their critical wounds",
+    "fateHowDidThatMiss": "{name} spends Fate: How Did That Miss? — the attack by {attacker} has no effect",
+    "fateNotToday": "{name} spends Fate: Not Today! — leaves the fight alive",
+    "momentumSecondAttack": "{name} spends Momentum on an attack with the second weapon",
+    "leadershipTransfer": "{name} spends Momentum: Leadership (SL {sl}), {ally} gains Momentum",
+    "leadershipFailed": "{name} spends Momentum: Leadership failed (SL {sl})",
+    "fortuneCondition": "{name} spends Fortune: {condition} removed",
+    "fortuneRerolls": "{name} spends Fortune: {rolls} rerolls"
   },
   "psychology": {
     "fear": "Fear",
@@ -119,7 +126,38 @@
       "used": "Fortune: reroll (first roll {first})",
       "usedSl": "Fortune: +1 SL",
       "usedAdvantage": "Fortune: Advantage",
-      "usedNotFail": "Fate: I Will Not Fail"
+      "usedNotFail": "Fate: I Will Not Fail",
+      "advantage": "Advantage",
+      "rerolls": "Rerolls",
+      "usedRerolls": "Fortune: {rolls} rerolls",
+      "critical": "Critical",
+      "location": "Location",
+      "removeCondition": "Fortune: remove",
+      "locations": {
+        "head": "Head",
+        "arm": "Arm",
+        "body": "Body",
+        "leg": "Leg"
+      }
+    },
+    "fateReaction": {
+      "title": "Fate reaction",
+      "body": "{attacker}'s attack hit {name}. Spend Fate to make the attack have no effect?",
+      "spend": "Spend Fate — it misses",
+      "accept": "Take the hit",
+      "waiting": "Waiting for the Fate decision"
+    },
+    "momentum": {
+      "title": "Momentum",
+      "secondAttack": "Second attack",
+      "leadership": "Pass Momentum",
+      "ally": "Ally",
+      "reason": {
+        "none": "No Momentum",
+        "used": "Already used this turn",
+        "action": "Take your main action first",
+        "weapons": "Two melee weapons required"
+      }
     }
   },
   "crit": {

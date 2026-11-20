@@ -565,7 +565,7 @@
   "careerInSpeciesTable": "Кар'єру використовує профіль виду чи персонаж — спершу приберіть її звідти",
   "featInSpeciesTable": "Рису використовує профіль виду чи кар'єра — спершу приберіть її звідти",
   "speciesProfileNotReady": "Для цього виду ще не налаштовано профіль створення",
-  "systemDraftInvalid":"Вибір створення героя недійсний",
+  "systemDraftInvalid": "Вибір створення героя недійсний",
   "outOfAmmo": "Немає боєприпасів",
   "weaponReloading": "Зброя перезаряджається",
   "effectOutsideComposition": "Ефект належить модулю, який не входить до рульової системи кампанії",
@@ -576,5 +576,13 @@
   "battleMapNotFound": "Карту не знайдено в бібліотеці кампанії",
   "battleMapTooLarge": "Ця карта завелика для бою",
   "battleMapTooManyEdges": "Ця карта має забагато стін і ґрат, щоб зберегти її як власну карту бою",
-  "battleMapRelinkStarted": "Карту в розпочатому бої не можна замінити: скиньте бій або натисніть «Оновити карту»"
+  "battleMapRelinkStarted": "Карту в розпочатому бої не можна замінити: скиньте бій або натисніть «Оновити карту»",
+  "fateReactionNone": "Немає реакції Долі, що очікує",
+  "momentumUnsupported": "У цій редакції Momentum не витрачається",
+  "momentumNone": "У героя немає Momentum",
+  "momentumAttackUsed": "Додаткову атаку за Momentum уже використано цього ходу",
+  "secondAttackUnavailable": "Додаткова атака недоступна",
+  "leadershipAllyInvalid": "Союзник не підходить для передачі Momentum",
+  "leadershipSkillMissing": "У героя немає навички Лідерство",
+  "fortuneConditionUnavailable": "Зняти стан Удачею неможливо"
 }

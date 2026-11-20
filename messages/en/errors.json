@@ -565,7 +565,7 @@
   "careerInSpeciesTable": "The career is used by a species profile or a character — remove it there first",
   "featInSpeciesTable": "The feat is used by a species profile or a career — remove it there first",
   "speciesProfileNotReady": "This species has no creation profile yet",
-  "systemDraftInvalid":"The hero creation choices are invalid",
+  "systemDraftInvalid": "The hero creation choices are invalid",
   "outOfAmmo": "Out of ammunition",
   "weaponReloading": "The weapon is reloading",
   "effectOutsideComposition": "The effect belongs to a module outside this campaign's rule system",
@@ -576,5 +576,13 @@
   "battleMapNotFound": "The map was not found in the campaign library",
   "battleMapTooLarge": "This map is too large for a battle",
   "battleMapTooManyEdges": "This map has too many walls and bars to keep as the battle's own map",
-  "battleMapRelinkStarted": "The map of a started battle cannot be swapped: reset the battle or press \"Update map\""
+  "battleMapRelinkStarted": "The map of a started battle cannot be swapped: reset the battle or press \"Update map\"",
+  "fateReactionNone": "No Fate reaction is pending",
+  "momentumUnsupported": "Momentum cannot be spent in this edition",
+  "momentumNone": "The hero has no Momentum",
+  "momentumAttackUsed": "The Momentum attack was already used this turn",
+  "secondAttackUnavailable": "The second attack is unavailable",
+  "leadershipAllyInvalid": "This ally cannot receive Momentum",
+  "leadershipSkillMissing": "The hero has no Leadership skill",
+  "fortuneConditionUnavailable": "A condition cannot be removed with Fortune"
 }

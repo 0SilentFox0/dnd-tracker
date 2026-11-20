@@ -1,3 +1,4 @@
+import { ProfileShell } from '@/components/profile/ProfileShell';
 import { LocaleScope } from '@/lib/i18n/locale-scope';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -5,7 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <LocaleScope
             namespaces={['common', 'validation', 'onboarding', 'soundboard']}
         >
-            {children}
+            <ProfileShell>{children}</ProfileShell>
         </LocaleScope>
     );
 }

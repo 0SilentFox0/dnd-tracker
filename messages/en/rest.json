@@ -50,7 +50,9 @@
     "exhaustion": "Exhaustion",
     "charge": "{name} (of {uses})",
     "chargeSpent": "{name}: spent",
-    "sin": "Sin"
+    "sin": "Sin",
+    "fortune": "Fortune",
+    "fate": "Fate"
   },
   "sheetRoll": {
     "roll": "Roll",
@@ -63,6 +65,15 @@
     "auto": {
       "success": "auto success",
       "failure": "auto failure"
+    },
+    "fortune": {
+      "label": "Fortune",
+      "off": "Off",
+      "advantage": "Advantage",
+      "reroll": "Reroll",
+      "notFail": "I Will Not Fail",
+      "used": "Fortune spent",
+      "usedNotFail": "Fate spent"
     }
   },
   "hitDice": {
@@ -89,7 +100,8 @@
     "xp": "Experience {value}",
     "xpNext": " / {next}",
     "levelUp": "· level up available",
-    "fortune": "Fortune {current}/{max}"
+    "fortune": "Fortune {current}/{max}",
+    "fate": "Fate {current}"
   },
   "dm": {
     "resources": "Resources"

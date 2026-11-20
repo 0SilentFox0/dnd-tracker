@@ -81,7 +81,14 @@
     "psychologyFailHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: провал",
     "critDeath": "☠️ {target} гине на місці: {text}",
     "dying": "⏳ {name} помирає: лишилось раундів — {rounds}, якщо не зцілити",
-    "diedOfWounds": "☠️ {name} гине від критичних ран"
+    "diedOfWounds": "☠️ {name} гине від критичних ран",
+    "fateHowDidThatMiss": "{name} витрачає Долю: «Як він схибив?» — атака {attacker} не має ефекту",
+    "fateNotToday": "{name} витрачає Долю: «Не сьогодні!» — виходить із сутички живим",
+    "momentumSecondAttack": "{name} витрачає Momentum на атаку другою зброєю",
+    "leadershipTransfer": "{name} витрачає Momentum: Лідерство (РУ {sl}), {ally} отримує Momentum",
+    "leadershipFailed": "{name} витрачає Momentum: Лідерство провалено (РУ {sl})",
+    "fortuneCondition": "{name} витрачає Удачу: знято стан {condition}",
+    "fortuneRerolls": "{name} витрачає Удачу: перекидань {rolls}"
   },
   "psychology": {
     "fear": "Страх",
@@ -119,7 +126,38 @@
       "used": "Витрачено Удачу: перекидання (перший кидок {first})",
       "usedSl": "Витрачено Удачу: +1 РУ",
       "usedAdvantage": "Витрачено Удачу: перевага",
-      "usedNotFail": "Витрачено Долю: «Я не зазнаю невдачі»"
+      "usedNotFail": "Витрачено Долю: «Я не зазнаю невдачі»",
+      "advantage": "Перевага",
+      "rerolls": "Перекидань",
+      "usedRerolls": "Витрачено Удачу: перекидань {rolls}",
+      "critical": "Критичне влучання",
+      "location": "Локація",
+      "removeCondition": "Удача: зняти",
+      "locations": {
+        "head": "Голова",
+        "arm": "Рука",
+        "body": "Тулуб",
+        "leg": "Нога"
+      }
+    },
+    "fateReaction": {
+      "title": "Реакція Долі",
+      "body": "Атака {attacker} влучила в {name}. Витратити Долю, щоб атака не мала ефекту?",
+      "spend": "Витратити Долю — промах",
+      "accept": "Прийняти удар",
+      "waiting": "Очікуємо рішення щодо Долі"
+    },
+    "momentum": {
+      "title": "Momentum",
+      "secondAttack": "Друга атака",
+      "leadership": "Передати Momentum",
+      "ally": "Союзник",
+      "reason": {
+        "none": "Немає Momentum",
+        "used": "Уже використано цього ходу",
+        "action": "Спершу виконайте основну дію",
+        "weapons": "Потрібні дві зброї ближнього бою"
+      }
     }
   },
   "crit": {

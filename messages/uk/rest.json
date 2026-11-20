@@ -50,7 +50,9 @@
     "exhaustion": "Виснаження",
     "charge": "{name} (з {uses})",
     "chargeSpent": "{name}: витрачено",
-    "sin": "Гріх"
+    "sin": "Гріх",
+    "fortune": "Удача",
+    "fate": "Доля"
   },
   "sheetRoll": {
     "roll": "Кинути",
@@ -63,6 +65,15 @@
     "auto": {
       "success": "автоуспіх",
       "failure": "автопровал"
+    },
+    "fortune": {
+      "label": "Удача",
+      "off": "Вимк.",
+      "advantage": "Перевага",
+      "reroll": "Перекинути",
+      "notFail": "Я не зазнаю невдачі",
+      "used": "Витрачено Удачу",
+      "usedNotFail": "Витрачено Долю"
     }
   },
   "hitDice": {
@@ -89,7 +100,8 @@
     "xp": "Досвід {value}",
     "xpNext": " / {next}",
     "levelUp": "· доступне підвищення рівня",
-    "fortune": "Удача {current}/{max}"
+    "fortune": "Удача {current}/{max}",
+    "fate": "Доля {current}"
   },
   "dm": {
     "resources": "Ресурси"

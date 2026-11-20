@@ -192,6 +192,7 @@ export function useSpellBook(
     const castChoices = useCastChoices(state, targets);
 
     const view = {
+        rules: scene.battle.rules,
         castChoices,
         cast: castPreview && {
             ...castPreview,

@@ -67,7 +67,8 @@ export function useSheetRoll(campaignId: string, characterId: string) {
         mutationFn: (body: SheetRollBody) =>
             postSheetRoll(campaignId, characterId, body),
         invalidateKeys: (_r, body) =>
-            'useInspiration' in body && body.useInspiration
+            ('useInspiration' in body && body.useInspiration) ||
+            ('fortune' in body && body.fortune)
                 ? heroKeys(campaignId, characterId)
                 : [characterKeys.log(campaignId, characterId)],
     });

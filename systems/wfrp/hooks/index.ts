@@ -13,7 +13,10 @@ export {
 } from './useDowntime';
 export { useEncumbrance } from './useEncumbrance';
 export { type EquippedAp, equippedApOf, useEquippedAp } from './useEquippedAp';
+export { type FateReactionRow, useFateReaction } from './useFateReaction';
+export { type MomentumPanel, useMomentumPanel } from './useMomentumPanel';
 export { useRaceProfiles, useSaveRaceProfile } from './useRaceProfiles';
+export { type SheetFortune, useSheetFortune } from './useSheetFortune';
 export {
     useWfrpDraftForm,
     type WfrpDraftFormOptions,

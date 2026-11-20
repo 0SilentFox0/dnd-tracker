@@ -38,9 +38,27 @@ export interface RiderOffer {
     total: number;
 }
 
+export interface NegateInfo {
+    holder: BattleParticipant;
+    actorId: string;
+    /** i18n key of the price shown to the holder */
+    cost: string;
+}
+
+/** Offers the holder to cancel a hit at a price; the answer arrives through the replay */
+export type NegatePicker = (info: NegateInfo) => boolean;
+
+export interface NegateOffer {
+    key: string;
+    holderId: string;
+    actorId: string;
+    cost: string;
+}
+
 export type CritPicker = {
     (info: CritTriggerInfo): CriticalEffect | undefined;
     rider?: RiderPicker;
+    negate?: NegatePicker;
 };
 
 export interface PendingCritChoice {
@@ -48,6 +66,7 @@ export interface PendingCritChoice {
     actorId: string;
     triggers: CritTrigger[];
     riders?: RiderOffer[];
+    negations?: NegateOffer[];
 }
 
 export interface CritPendingHidden {
@@ -62,4 +81,5 @@ export interface CritResume {
     seed: number;
     choices: Record<string, number>;
     riderChoices?: Record<string, boolean>;
+    negateChoices?: Record<string, boolean>;
 }

@@ -244,6 +244,7 @@
     "spec": "Specialisation",
     "addSkill": "Add",
     "noSkillAdvances": "No skill advances yet",
-    "removeSkill": "Remove: {name}"
+    "removeSkill": "Remove: {name}",
+    "fortuneMax": "Fortune max"
   }
 }

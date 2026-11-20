@@ -148,4 +148,83 @@ describe('D100RollPicker', () => {
         );
         expect(screen.getByText('Перший кидок')).toBeInTheDocument();
     });
+
+    it('canon labels the SL option Advantage', () => {
+        render(
+            <D100RollPicker
+                fortune={fortune({
+                    available: true,
+                    left: 1,
+                    advantageLabel: true,
+                })}
+                onRoll={vi.fn()}
+                onAuto={vi.fn()}
+            />
+        );
+        expect(
+            screen.getByRole('button', { name: 'Перевага' })
+        ).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: '+1 РУ' })).toBeNull();
+    });
+
+    it('a reroll shows a 1..left counter and reports the pick', () => {
+        const set = vi.fn();
+
+        render(
+            <D100RollPicker
+                fortune={fortune({
+                    available: true,
+                    left: 3,
+                    value: 'reroll',
+                    rerolls: { value: 1, set },
+                })}
+                onRoll={vi.fn()}
+                onAuto={vi.fn()}
+            />
+        );
+        expect(screen.getByRole('group', { name: 'Перекидань' })).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: '3' }));
+        expect(set).toHaveBeenCalledWith(3);
+    });
+
+    it('hides the rerolls counter for manual rolls', () => {
+        render(
+            <D100RollPicker
+                locked="manual"
+                fortune={fortune({
+                    available: true,
+                    left: 3,
+                    value: 'reroll',
+                    rerolls: { value: 1, set: vi.fn() },
+                })}
+                onRoll={vi.fn()}
+                onAuto={vi.fn()}
+            />
+        );
+        expect(screen.queryByRole('group', { name: 'Перекидань' })).toBeNull();
+    });
+
+    it('I Will Not Fail offers Critical and then a hit location', () => {
+        const set = vi.fn();
+
+        render(
+            <D100RollPicker
+                fortune={fortune({
+                    available: true,
+                    left: 0,
+                    fateLeft: 1,
+                    value: 'notFail',
+                    notFail: { critical: true, set },
+                })}
+                onRoll={vi.fn()}
+                onAuto={vi.fn()}
+            />
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'Голова' }));
+        expect(set).toHaveBeenCalledWith(true, 'head');
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Критичне влучання' })
+        );
+        expect(set).toHaveBeenLastCalledWith(false, undefined);
+    });
 });

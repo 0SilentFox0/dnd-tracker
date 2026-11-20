@@ -28,6 +28,7 @@ import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences'
 import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
 import { regenSuppressed } from '@/lib/utils/battle/damage/regen-guard';
 import { isDying } from '@/lib/utils/battle/death-saves';
+import { keepsDown } from '@/lib/utils/battle/participant/state';
 import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { forgoDice } from '@/lib/utils/common/dice';
 import { durationRef } from '@/lib/utils/duration/format';
@@ -203,18 +204,20 @@ export function applyHeal(
 
         if (hp <= before && isActive(t)) continue;
 
+        const raised = hp > 0 && !keepsDown(t, ctx.rules);
+
         const healed = {
             ...t,
             combatStats: {
                 ...t.combatStats,
                 currentHp: hp,
-                status: hp > 0 ? CombatStatus.ACTIVE : t.combatStats.status,
+                status: raised ? CombatStatus.ACTIVE : t.combatStats.status,
             },
         };
 
         ps = replaceParticipant(
             ps,
-            hp > 0
+            raised
                 ? (ruleSystemOf(ctx.rules).combat.onRevived?.(healed) ?? healed)
                 : healed
         );

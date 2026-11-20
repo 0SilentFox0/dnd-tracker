@@ -52,7 +52,10 @@ export interface SheetTestInput {
     presetRoll?: number;
 }
 
-export type SheetTestResult = SheetRollResult;
+/** `resourcesAfter` holds the absolute resource values the roll leaves (Fortune/Fate spend); the handler writes them under lock */
+export type SheetTestResult = SheetRollResult & {
+    resourcesAfter?: Pick<CharacterResources, 'fortune' | 'fate'>;
+};
 
 export type SystemInputCtx =
     | { kind: 'attack'; actor: BattleParticipant; targetCount: number }
@@ -116,7 +119,10 @@ export interface RuleSystemDefinition {
         ): unknown;
     };
     resources?: {
-        limits?(row: { characteristics?: unknown }): { fateMax?: number };
+        limits?(row: { characteristics?: unknown }): {
+            fateMax?: number;
+            fateLimit?: number;
+        };
         seed?(characteristics: unknown): Partial<CharacterResources>;
     };
     sheetTest: {

@@ -1,4 +1,5 @@
 import type { HitLocation } from '../combat/constants';
+import { fateLeftOf } from '../combat/fate';
 import { wfrpState } from '../state';
 import type { ForcedResult } from './resolve';
 
@@ -10,6 +11,8 @@ export type FortuneKind = 'reroll' | 'sl' | 'notFail';
 export interface FortuneInput {
     kind: FortuneKind;
     manualReroll?: number;
+    /** Canon5e reroll count, 1..9 (p133) */
+    rerolls?: number;
     /** `notFail` only: choose a Critical and, with it, the hit location (p133) */
     critical?: boolean;
     location?: HitLocation;
@@ -20,7 +23,7 @@ const KINDS: readonly unknown[] = ['reroll', 'sl', 'notFail'];
 export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
     if (typeof raw !== 'object' || raw === null) return undefined;
 
-    const { kind, manualReroll, critical, location } = raw as Record<
+    const { kind, manualReroll, rerolls, critical, location } = raw as Record<
         string,
         unknown
     >;
@@ -30,6 +33,10 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
     return {
         kind: kind as FortuneKind,
         ...(typeof manualReroll === 'number' && { manualReroll }),
+        ...(typeof rerolls === 'number' &&
+            Number.isInteger(rerolls) &&
+            rerolls >= 1 &&
+            rerolls <= 9 && { rerolls }),
         ...(critical === true && { critical }),
         ...(typeof location === 'string' && {
             location: location as HitLocation,
@@ -37,17 +44,20 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
     };
 });
 
-export const spentFortune = (p: BattleParticipant): { fortune: number } => ({
-    fortune: Math.max(0, (wfrpState(p).fortune ?? 0) - 1),
+export const spentFortune = (
+    p: BattleParticipant,
+    n = 1
+): { fortune: number } => ({
+    fortune: Math.max(0, (wfrpState(p).fortune ?? 0) - n),
 });
 
 export const spentFate = (p: BattleParticipant): { fate: number } => ({
-    fate: Math.max(0, (wfrpState(p).fate ?? 0) - 1),
+    fate: Math.max(0, fateLeftOf(p) - 1),
 });
 
-/** What the spend costs: Fate for `notFail`, Fortune otherwise */
-export const spentFor = (p: BattleParticipant, kind: FortuneKind) =>
-    kind === 'notFail' ? spentFate(p) : spentFortune(p);
+/** What the spend costs: Fate for `notFail`, `n` Fortune otherwise */
+export const spentFor = (p: BattleParticipant, kind: FortuneKind, n = 1) =>
+    kind === 'notFail' ? spentFate(p) : spentFortune(p, n);
 
 export const forcedOf = (
     fortune: FortuneInput | undefined,
@@ -57,22 +67,59 @@ export const forcedOf = (
         ? { outcome: fortune.critical ? 'critical' : 'success', minSl }
         : undefined;
 
-/** `test(preset, first)` runs one test; a reroll receives the first result. An `sl` Fortune is the caller's job (it adds the bonus inside `test`); so is `notFail` (it forces the result inside `test`). */
+export interface FortuneUse {
+    kind: FortuneKind;
+    firstRoll?: number;
+    /** Every reroll's roll, in order (canon5e repeat only) */
+    rolls?: number[];
+    /** Points actually spent: rerolls used, else 1 */
+    spent: number;
+}
+
+/**
+ * `test(preset, first)` runs one test; a reroll receives the previous result. An `sl` Fortune is the caller's job (it adds the bonus inside `test`); so is `notFail` (it forces the result inside `test`).
+ * `repeat` (canon5e, p133) rerolls up to `rerolls` times until the test passes and charges only the rerolls used; a manual roll covers the first reroll only.
+ */
 export function applyFortune<T extends { roll: number }>(
     test: (preset?: number, first?: T) => T,
     fortune: FortuneInput | undefined,
     isSuccess: (r: T) => boolean,
-    firstPreset?: number
-): { result: T; fortune?: { kind: FortuneKind; firstRoll?: number } } {
+    firstPreset?: number,
+    opts: { repeat?: boolean } = {}
+): { result: T; fortune?: FortuneUse } {
     const first = test(firstPreset);
 
-    if (fortune?.kind === 'reroll' && !isSuccess(first))
+    if (fortune?.kind === 'reroll' && !isSuccess(first)) {
+        const limit = opts.repeat ? (fortune.rerolls ?? 1) : 1;
+
+        const rolls: number[] = [];
+
+        let result = first;
+
+        while (
+            rolls.length < limit &&
+            (rolls.length === 0 || !isSuccess(result))
+        ) {
+            result = test(
+                rolls.length === 0 ? fortune.manualReroll : undefined,
+                result
+            );
+
+            rolls.push(result.roll);
+        }
+
         return {
-            result: test(fortune.manualReroll, first),
-            fortune: { kind: 'reroll', firstRoll: first.roll },
+            result,
+            fortune: {
+                kind: 'reroll',
+                firstRoll: first.roll,
+                ...(rolls.length > 1 && { rolls }),
+                spent: rolls.length,
+            },
         };
+    }
 
     return fortune?.kind === 'sl' || fortune?.kind === 'notFail'
-        ? { result: first, fortune: { kind: fortune.kind } }
+        ? { result: first, fortune: { kind: fortune.kind, spent: 1 } }
         : { result: first };
 }

@@ -1,5 +1,6 @@
 import { FORTUNE_INPUT } from '../percentile/fortune';
 import { wfrpState } from '../state';
+import { fateLeftOf } from './fate';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
@@ -19,11 +20,15 @@ export function assertWfrpInput(system: SystemSlot, ctx: SystemInputCtx): void {
 
     const allowed = ctx.kind === 'attack' ? ctx.targetCount === 1 : ctx.tested;
 
-    const pool = input.kind === 'notFail' ? 'fate' : 'fortune';
+    const isFate = input.kind === 'notFail';
 
-    if (!allowed || (wfrpState(actor)[pool] ?? 0) < 1)
+    const left = isFate ? fateLeftOf(actor) : (wfrpState(actor).fortune ?? 0);
+
+    const need = input.kind === 'reroll' ? (input.rerolls ?? 1) : 1;
+
+    if (!allowed || left < need)
         throw ruleErrorOf(
             'action_rejected',
-            pool === 'fate' ? API_ERRORS.NO_FATE : API_ERRORS.NO_FORTUNE
+            isFate ? API_ERRORS.NO_FATE : API_ERRORS.NO_FORTUNE
         );
 }

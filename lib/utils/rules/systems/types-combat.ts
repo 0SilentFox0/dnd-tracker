@@ -381,6 +381,8 @@ export interface RuleSystemCombat {
     autoUnconsciousAtZero?(rules: Ruleset): boolean;
     /** A participant raised above 0 HP (heal, victory revive) leaves the system's dying state */
     onRevived?(p: BattleParticipant): BattleParticipant;
+    /** Stays down above 0 HP (healing, DM HP edits and status settling never raise it) */
+    keepsDown?(p: BattleParticipant): boolean;
     /** A downed participant still in the fight (d20: dying, not stable); its side has not lost yet */
     holdsOn?(p: BattleParticipant): boolean;
     turn?: RuleSystemTurn;

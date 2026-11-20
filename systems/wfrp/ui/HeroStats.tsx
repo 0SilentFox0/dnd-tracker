@@ -39,13 +39,13 @@ export function HeroStats() {
                 size="lg"
                 label={t('fate')}
                 short={t('short.fate')}
-                value={String(block.fate)}
+                value={`${block.fateLeft ?? block.fate}/${block.fate}`}
             />
             <HudStatChip
                 size="lg"
                 label={t('fortune')}
                 short={t('short.fortune')}
-                value={String(block.fortune)}
+                value={`${block.fortune}/${block.fortuneMax ?? block.fortune}`}
             />
             <HudStatChip
                 size="lg"

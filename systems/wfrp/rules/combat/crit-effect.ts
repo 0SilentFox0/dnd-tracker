@@ -1,7 +1,7 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { EditionProfile } from '../edition';
 import type { CritResult } from './crit-table';
-import { recordCritWound } from './critical';
+import { notTodayLine, recordCritWound } from './critical';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
@@ -18,7 +18,7 @@ export function applyWfrpCrit(
 ): { participant: BattleParticipant; message: LogLine } {
     const counted = edition?.woundModel === 'critical';
 
-    const message =
+    const base =
         counted && crit.death
             ? textRef('battleWfrp.log.critDeath', {
                   target: target.basicInfo.name,
@@ -63,10 +63,12 @@ export function applyWfrpCrit(
         );
     }
 
+    const final = counted
+        ? recordCritWound(participant, crit.death)
+        : participant;
+
     return {
-        participant: counted
-            ? recordCritWound(participant, crit.death)
-            : participant,
-        message,
+        participant: final,
+        message: notTodayLine(target, final) ?? base,
     };
 }

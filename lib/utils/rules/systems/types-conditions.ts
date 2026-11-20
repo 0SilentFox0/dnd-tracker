@@ -26,7 +26,7 @@ export interface SystemConditionApply {
     source?: ActiveEffect['source'];
     sourceName: LogLine;
     concealed?: true;
-    /** Lets a system pick its edition-dependent effects (WFRP Stunned) */
+    /** Lets a system pick its edition-dependent effects */
     rules?: Ruleset;
 }
 

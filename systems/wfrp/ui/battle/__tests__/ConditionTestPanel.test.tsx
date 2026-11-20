@@ -21,10 +21,17 @@ const hero = {} as unknown as ConditionTestPanelProps['hero'];
 
 const panel = (over: Partial<Panel> = {}): Panel => ({
     items: [
-        { key: 'prone', label: 'Збитий', stand: true },
-        { key: 'stunned', label: 'Приголомшений', stand: false },
+        { key: 'prone', label: 'Збитий', stand: true, testable: true },
+        {
+            key: 'stunned',
+            label: 'Приголомшений',
+            stand: false,
+            testable: true,
+        },
     ],
     attempt: vi.fn(),
+    removeWithFortune: vi.fn(),
+    canRemoveWithFortune: false,
     isPending: false,
     ...over,
 });

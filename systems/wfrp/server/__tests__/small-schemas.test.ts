@@ -161,3 +161,24 @@ describe('profile-refs', () => {
         expect(parseSpeciesProfile('nope')).toBeNull();
     });
 });
+
+describe('WfrpFortuneInputSchema rerolls', () => {
+    it('keeps a valid reroll count only for a reroll', () => {
+        const slot = WfrpFortuneInputSchema.parse({
+            system: { key: 'wfrp', data: { kind: 'reroll', rerolls: 3 } },
+        });
+
+        expect(FORTUNE_INPUT.read(slot)?.rerolls).toBe(3);
+
+        const notFail = WfrpFortuneInputSchema.parse({
+            system: { key: 'wfrp', data: { kind: 'notFail', rerolls: 3 } },
+        });
+
+        expect(FORTUNE_INPUT.read(notFail)?.rerolls).toBeUndefined();
+        expect(() =>
+            WfrpFortuneInputSchema.parse({
+                system: { key: 'wfrp', data: { kind: 'reroll', rerolls: 10 } },
+            })
+        ).toThrow();
+    });
+});

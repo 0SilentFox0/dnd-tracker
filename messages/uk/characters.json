@@ -244,6 +244,7 @@
     "spec": "Спеціалізація",
     "addSkill": "Додати",
     "noSkillAdvances": "Підвищень навичок ще немає",
-    "removeSkill": "Прибрати: {name}"
+    "removeSkill": "Прибрати: {name}",
+    "fortuneMax": "Максимум Удачі"
   }
 }

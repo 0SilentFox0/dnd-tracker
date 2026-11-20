@@ -119,7 +119,13 @@ describe('system ui registry', () => {
             'RollTitle',
         ];
 
-        expect(Object.keys(systemUiOf('wfrp').battle).sort()).toEqual(wfrpOnly);
+        const generic = ['dialogs', 'heroPanels', 'notices'];
+
+        expect(
+            Object.keys(systemUiOf('wfrp').battle)
+                .filter((k) => !generic.includes(k))
+                .sort()
+        ).toEqual(wfrpOnly);
         expect(systemUiOf('wfrp').SpellMagicFields).toBeDefined();
 
         for (const key of ['homm', 'dnd5e'] as const) {
