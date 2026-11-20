@@ -135,7 +135,7 @@
       },
       "world": {
         "title": "World map",
-        "body": "Draw a continent map, place locations and zones, and move heroes between maps. The map can be shown to players through \"Show\" - everyone sees only their own fog."
+        "body": "Build mode: pick a tool (Shift-click pins it), place points and zones - zone borders snap to neighbours. Click a marker for its card: description, nested map, move map. The tree on the left switches between maps. The map can be shown to players through \"Show\"."
       },
       "compendium-import": {
         "title": "Compendium import: four steps",
@@ -145,7 +145,7 @@
     "player": {
       "world": {
         "title": "World map",
-        "body": "Here you can see your heroes and discovered locations. Tap a location to read its notes, either shared with the party or your own private ones."
+        "body": "Here you can see your heroes and discovered locations. Tap a place for its card, then \"Read more\" for notes, shared with the party or your own private ones. The tree and the search help you find places."
       },
       "character": {
         "title": "Your hero sheet",

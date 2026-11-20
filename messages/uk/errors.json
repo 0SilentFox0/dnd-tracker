@@ -265,7 +265,6 @@
   "worldMapNotFound": "Карту не знайдено",
   "worldMarkerNotFound": "Маркер не знайдено",
   "worldRootExists": "Коренева карта вже є",
-  "worldNestedExists": "У маркера вже є вкладена карта",
   "worldMapsLimit": "Забагато карт",
   "worldMarkersLimit": "Забагато маркерів на карті",
   "worldImageForeign": "Картинка карти має бути завантажена у сховище цієї кампанії",

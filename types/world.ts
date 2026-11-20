@@ -31,6 +31,7 @@ export interface WorldMarker {
     icon: string | null;
     color: string | null;
     dmNote: string | null;
+    description: string | null;
     alwaysVisible: boolean;
     sortOrder: number;
     childMapId: string | null;
@@ -62,7 +63,7 @@ export type UpdateWorldMapData = Partial<
         | 'entryX'
         | 'entryY'
     >
->;
+> & { parentMarkerId?: string };
 export type CreateWorldMarkerData = {
     mapId: string;
     kind: MarkerKind;
@@ -72,6 +73,7 @@ export type CreateWorldMarkerData = {
     name: string;
     icon?: string;
     color?: string;
+    description?: string;
 };
 export type UpdateWorldMarkerData = Partial<
     Pick<
@@ -83,6 +85,7 @@ export type UpdateWorldMarkerData = Partial<
         | 'icon'
         | 'color'
         | 'dmNote'
+        | 'description'
         | 'alwaysVisible'
         | 'sortOrder'
     >

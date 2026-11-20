@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapPath, subtreeMapIds } from '../tree';
+import { mapPath, subtreeMapIds, treeDepth, treeOrder } from '../tree';
 
 import type { WorldMapSummary } from '@/types/world';
 
@@ -56,5 +56,42 @@ describe('subtreeMapIds', () => {
             'r',
         ]);
         expect(subtreeMapIds(maps, 'a').sort()).toEqual(['a', 'a1', 'a1x']);
+    });
+});
+
+describe('treeOrder', () => {
+    it('depth-first, siblings keep input order', () => {
+        const maps = [
+            m('b', 'r'),
+            m('a1', 'a'),
+            m('r', null),
+            m('a', 'r'),
+            m('x', null),
+        ];
+
+        expect(treeOrder(maps).map((x) => x.id)).toEqual([
+            'r',
+            'b',
+            'a',
+            'a1',
+            'x',
+        ]);
+    });
+
+    it('orphans become roots, cycles are dropped without hanging', () => {
+        expect(
+            treeOrder([m('o', 'gone'), m('c1', 'c2'), m('c2', 'c1')]).map(
+                (x) => x.id
+            )
+        ).toEqual(['o']);
+    });
+});
+
+describe('treeDepth', () => {
+    it('counts ancestors', () => {
+        const maps = [m('r', null), m('a', 'r'), m('b', 'a')];
+
+        expect(treeDepth(maps, 'r')).toBe(0);
+        expect(treeDepth(maps, 'b')).toBe(2);
     });
 });

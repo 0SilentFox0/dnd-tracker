@@ -37,20 +37,15 @@
     "entry": "Entry point",
     "entryPlacing": "Click on the map…",
     "entrySet": "Set entry point",
-    "entryOnMap": "Entry point: set on the map",
     "children": "Nested maps · {count}",
     "childrenEmpty": "Select a marker and create a nested map for it.",
     "image": "Image",
     "replaceImage": "Replace image",
     "deleteMap": "Delete map",
-    "inspector": "Inspector",
-    "inspectorEmpty": "Select a point or zone on the map — its settings will appear here.",
     "closePanel": "Close panel",
     "icon": "Icon",
-    "icons": "Icons",
     "zoneColor": "Zone color",
     "redrawZone": "Redraw zone",
-    "redrawOutline": "Redraw outline",
     "drawNewZone": "Draw the new zone…",
     "drawing": "Draw…",
     "outline": "Outline",
@@ -69,7 +64,10 @@
     "mapParams": "Map settings",
     "emptyTitle": "Upload a continent map",
     "emptyDescription": "The journey starts here: cities, zones and entrances to nested maps are placed on it.",
-    "upload": "Upload map"
+    "upload": "Upload map",
+    "description": "Description",
+    "pointColor": "Point colour",
+    "colorDefault": "Default"
   },
   "toolbar": {
     "group": "Tools",
@@ -78,10 +76,14 @@
     "zone": "Zone",
     "entry": "Entry point",
     "move": "Heroes",
-    "closeZone": "Close zone",
     "undoVertex": "Step back",
     "toParent": "To parent map: {name}",
-    "settings": "Map settings"
+    "settings": "Map settings",
+    "pinHint": "Shift-click or double-click to pin the tool",
+    "snap": "Snapping",
+    "snapHint": "Vertices snap to neighbouring zones (Alt disables)",
+    "done": "Done",
+    "cancel": "Cancel"
   },
   "hint": {
     "point": "<key>Click</key> the map to place a point · <key>Esc</key> to cancel",
@@ -178,8 +180,8 @@
     "myHeroes": "My heroes",
     "openMap": "Open map",
     "pickMarker": "Select a marker on the map to see and leave notes.",
-    "places": "Discovered places",
-    "loadFailed": "Could not load the world map"
+    "loadFailed": "Could not load the world map",
+    "journal": "Journal and heroes"
   },
   "show": {
     "present": "Show the map to players",
@@ -232,5 +234,40 @@
     "heroesUnique": "Heroes must not repeat",
     "noteEmpty": "The note is empty",
     "noteMax": "Note: up to {maximum} characters"
+  },
+  "vertex": {
+    "vertex": "Vertex {index}",
+    "insert": "Add vertex",
+    "keys": "Arrow keys move, Shift for larger steps, Enter saves, Escape cancels"
+  },
+  "tree": {
+    "label": "Maps",
+    "toggle": "Maps"
+  },
+  "bubble": {
+    "more": "Read more",
+    "openMap": "Open map",
+    "close": "Close",
+    "createMap": "Create a map for this place",
+    "open": "Open",
+    "moveMap": "Move map…",
+    "redraw": "Redraw",
+    "mapBlock": "Nested map"
+  },
+  "moveMap": {
+    "title": "Move map to a place"
+  },
+  "search": {
+    "label": "Search places",
+    "placeholder": "Name or description",
+    "empty": "Nothing found",
+    "kindPoint": "Points",
+    "kindZone": "Zones",
+    "legend": "Filters"
+  },
+  "mode": {
+    "label": "Mode",
+    "build": "Build",
+    "play": "Play"
   }
 }

@@ -41,3 +41,33 @@ export function subtreeMapIds(
 
     return ids;
 }
+
+export const treeDepth = (maps: WorldMapSummary[], id: string): number =>
+    mapPath(maps, id).length - 1;
+
+export function treeOrder(maps: WorldMapSummary[]): WorldMapSummary[] {
+    const ids = new Set(maps.map((m) => m.id));
+
+    const out: WorldMapSummary[] = [];
+
+    const seen = new Set<string>();
+
+    const walk = (parent: string | null) => {
+        for (const m of maps) {
+            if (
+                (m.parentMapId && ids.has(m.parentMapId)
+                    ? m.parentMapId
+                    : null) === parent &&
+                !seen.has(m.id)
+            ) {
+                seen.add(m.id);
+                out.push(m);
+                walk(m.id);
+            }
+        }
+    };
+
+    walk(null);
+
+    return out;
+}

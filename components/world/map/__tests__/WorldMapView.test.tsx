@@ -24,6 +24,7 @@ const marker = (o: Partial<WorldMarker>): WorldMarker => ({
     icon: null,
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
@@ -104,15 +105,37 @@ describe('WorldMapView', () => {
         expect(screen.getByRole('button', { name: 'Forest' })).toBeTruthy();
     });
 
-    it('keeps the hint at the top so it never covers the bottom-right zoom buttons', () => {
-        render(<WorldMapView detail={detail([])} hint={<p>підказка</p>} />);
+    it('shows the hint beside the mouse pointer and hides it for touch', () => {
+        const { container } = render(
+            <WorldMapView
+                detail={detail([])}
+                slots={{ hint: <p>hint text</p> }}
+            />
+        );
 
-        const wrap = screen.getByText('підказка').parentElement as HTMLElement;
+        const root = container.querySelector('.atlas-map') as HTMLElement;
 
-        expect(wrap.className).toContain('top-2');
-        expect(wrap.className).toContain('right-2');
-        expect(wrap.className).toContain('left-2');
-        expect(wrap.className).not.toContain('bottom-');
+        expect(screen.queryByText('hint text')).toBeNull();
+
+        fireEvent.pointerMove(root, {
+            pointerType: 'mouse',
+            clientX: 100,
+            clientY: 80,
+        });
+
+        const wrap = screen.getByTestId('world-map-hint');
+
+        expect(screen.getByText('hint text')).toBeTruthy();
+        expect(wrap.style.left).toMatch(/px$/);
+        expect(wrap.style.top).toMatch(/px$/);
+
+        fireEvent.pointerMove(root, {
+            pointerType: 'touch',
+            clientX: 100,
+            clientY: 80,
+        });
+
+        expect(screen.queryByText('hint text')).toBeNull();
     });
 
     it('clicking the background reports a normalised point', () => {
@@ -219,8 +242,8 @@ describe('WorldMapView', () => {
         render(
             <WorldMapView
                 detail={detail([marker({ id: 'p', name: 'Town' })])}
-                tool="point"
                 handlers={{ onMarkerDrag, onMapClick }}
+                edit={{ tool: 'point' }}
             />
         );
 
@@ -266,8 +289,8 @@ describe('WorldMapView', () => {
         render(
             <WorldMapView
                 detail={detail([marker({ id: 'p', name: 'Town' })])}
-                tool="point"
                 handlers={{ onMapClick }}
+                edit={{ tool: 'point' }}
             />
         );
 
@@ -289,8 +312,8 @@ describe('WorldMapView', () => {
         render(
             <WorldMapView
                 detail={detail([marker({ id: 'p', name: 'Town' })])}
-                tool="zone"
                 handlers={{ onMarkerClick: undefined }}
+                edit={{ tool: 'zone' }}
             />
         );
 
@@ -329,8 +352,8 @@ describe('WorldMapView', () => {
         const { container, rerender } = render(
             <WorldMapView
                 detail={detail([zone])}
-                tool="select"
                 handlers={{ onMarkerClick }}
+                edit={{ tool: 'select' }}
             />
         );
 
@@ -349,8 +372,8 @@ describe('WorldMapView', () => {
         rerender(
             <WorldMapView
                 detail={detail([zone])}
-                tool="point"
                 handlers={{ onMarkerClick }}
+                edit={{ tool: 'point' }}
             />
         );
 
@@ -359,6 +382,40 @@ describe('WorldMapView', () => {
                 'data-interactive'
             )
         ).toBe('false');
+    });
+
+    it('double-clicking a zone area opens it as a marker; elsewhere it is a map double-click', () => {
+        const onMarkerDoubleClick = vi.fn();
+
+        const onMapDoubleClick = vi.fn();
+
+        const zone = marker({
+            id: 'z',
+            kind: 'zone',
+            name: 'Forest',
+            polygon: ring([
+                [0.1, 0.1],
+                [0.4, 0.1],
+                [0.2, 0.4],
+            ]),
+        });
+
+        const { container } = render(
+            <WorldMapView
+                detail={detail([zone])}
+                handlers={{ onMarkerDoubleClick, onMapDoubleClick }}
+                edit={{ tool: 'select' }}
+            />
+        );
+
+        fireEvent.doubleClick(container.querySelector('polygon') as Element);
+
+        expect(onMarkerDoubleClick).toHaveBeenCalledWith('z');
+        expect(onMapDoubleClick).not.toHaveBeenCalled();
+
+        fireEvent.doubleClick(box(), { clientX: 700, clientY: 500 });
+
+        expect(onMapDoubleClick).toHaveBeenCalledTimes(1);
     });
 
     it('clicking a zone area in move mode resolves the zone as a target', () => {
@@ -378,8 +435,8 @@ describe('WorldMapView', () => {
         const { container } = render(
             <WorldMapView
                 detail={detail([zone])}
-                tool="move"
                 handlers={{ onMarkerClick }}
+                edit={{ tool: 'move' }}
             />
         );
 
@@ -417,6 +474,7 @@ describe('WorldMapView', () => {
                     zone,
                 ])}
                 selectedId="p"
+                fog={{ shapes: [], radius: 0.05 }}
             />
         );
 
@@ -459,12 +517,14 @@ describe('WorldMapView', () => {
         const { container } = render(
             <WorldMapView
                 detail={detail([])}
-                tool="zone"
-                draft={[
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.3, y: 0.2 },
-                    { x: 0.2, y: 0.4 },
-                ]}
+                edit={{
+                    tool: 'zone',
+                    draft: [
+                        { x: 0.1, y: 0.1 },
+                        { x: 0.3, y: 0.2 },
+                        { x: 0.2, y: 0.4 },
+                    ],
+                }}
             />
         );
 
@@ -477,10 +537,12 @@ describe('WorldMapView', () => {
         const { container } = render(
             <WorldMapView
                 detail={detail([])}
-                draft={[
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.3, y: 0.2 },
-                ]}
+                edit={{
+                    draft: [
+                        { x: 0.1, y: 0.1 },
+                        { x: 0.3, y: 0.2 },
+                    ],
+                }}
             />
         );
 
@@ -593,5 +655,207 @@ describe('WorldMapView', () => {
         expect((box().firstElementChild as HTMLElement).style.transform).toBe(
             'translate(-800px, -600px) scale(3)'
         );
+    });
+});
+
+describe('WorldMapView zone snapping', () => {
+    const neighbour = marker({
+        id: 'z',
+        kind: 'zone',
+        name: 'Forest',
+        polygon: ring([
+            [0.1, 0.1],
+            [0.4, 0.1],
+            [0.2, 0.4],
+        ]),
+    });
+
+    const click = (x: number, y: number, altKey = false) => {
+        fireEvent.pointerDown(box(), { pointerId: 1, clientX: x, clientY: y });
+        fireEvent.pointerUp(box(), {
+            pointerId: 1,
+            clientX: x,
+            clientY: y,
+            altKey,
+        });
+    };
+
+    const snap = (enabled: boolean) => ({
+        zones: [neighbour.polygon as [number, number][]],
+        enabled,
+    });
+
+    it('a zone click near a vertex lands exactly on it', () => {
+        const onMapClick = vi.fn();
+
+        render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+            />
+        );
+        click(84, 63);
+
+        expect(onMapClick).toHaveBeenCalledWith({ x: 0.1, y: 0.1 });
+    });
+
+    it('Alt or disabled snapping passes the raw point', () => {
+        const onMapClick = vi.fn();
+
+        const { rerender } = render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+            />
+        );
+
+        click(88, 66, true);
+        expect(onMapClick).toHaveBeenLastCalledWith({ x: 0.11, y: 0.11 });
+
+        rerender(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(false) }}
+            />
+        );
+        click(88, 66);
+        expect(onMapClick).toHaveBeenLastCalledWith({ x: 0.11, y: 0.11 });
+    });
+
+    it('a click outside the snap radius is not moved', () => {
+        const onMapClick = vi.fn();
+
+        render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+            />
+        );
+        click(160, 120);
+
+        expect(onMapClick).toHaveBeenCalledWith({ x: 0.2, y: 0.2 });
+    });
+
+    it('snap radius in normalized units shrinks as zoom grows', () => {
+        const onMapClick = vi.fn();
+
+        const at = { x: 0.106, y: 0.106 };
+
+        const { rerender } = render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+            />
+        );
+
+        click(at.x * 800, at.y * 600);
+        expect(onMapClick).toHaveBeenLastCalledWith({ x: 0.1, y: 0.1 });
+
+        rerender(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+                focus={{ point: { x: 0.5, y: 0.5 }, seq: 1 }}
+            />
+        );
+        click(at.x * 2400 - 800, at.y * 1800 - 600);
+
+        const last = onMapClick.mock.calls.at(-1)?.[0];
+
+        expect(last.x).toBeCloseTo(0.106, 3);
+        expect(last.y).toBeCloseTo(0.106, 3);
+    });
+
+    it('shows vertex handles only for the selected zone in select mode with onVertexChange', () => {
+        const { container, rerender } = render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                selectedId="z"
+                handlers={{ onVertexChange: vi.fn() }}
+            />
+        );
+
+        expect(container.querySelectorAll('[data-vertex]')).toHaveLength(3);
+
+        rerender(
+            <WorldMapView
+                detail={detail([neighbour])}
+                selectedId="z"
+                handlers={{ onVertexChange: vi.fn() }}
+                edit={{ tool: 'zone' }}
+            />
+        );
+        expect(container.querySelectorAll('[data-vertex]')).toHaveLength(0);
+    });
+
+    it('double-click on a vertex removes it, keeping at least three', () => {
+        const onVertexChange = vi.fn();
+
+        const square = marker({
+            id: 'q',
+            kind: 'zone',
+            name: 'Sq',
+            polygon: ring([
+                [0.1, 0.1],
+                [0.4, 0.1],
+                [0.4, 0.4],
+                [0.1, 0.4],
+            ]),
+        });
+
+        const { container } = render(
+            <WorldMapView
+                detail={detail([square])}
+                selectedId="q"
+                handlers={{ onVertexChange }}
+            />
+        );
+
+        fireEvent.doubleClick(
+            container.querySelector('[data-vertex="0"]') as Element
+        );
+
+        expect(onVertexChange).toHaveBeenCalledWith('q', [
+            [0.4, 0.1],
+            [0.4, 0.4],
+            [0.1, 0.4],
+            [0.4, 0.1],
+        ]);
+    });
+});
+
+describe('WorldMapView card slot', () => {
+    it('renders the card outside the transformed layers and swallows pointer events', () => {
+        const onMapClick = vi.fn();
+
+        render(
+            <WorldMapView
+                detail={detail([])}
+                handlers={{ onMapClick }}
+                slots={{
+                    card: { point: { x: 0.5, y: 0.5 }, content: <p>bubble</p> },
+                }}
+            />
+        );
+
+        const card = screen.getByTestId('world-map-card');
+
+        expect(card.parentElement).toBe(box());
+        expect(['above', 'below']).toContain(card.dataset.placement);
+
+        fireEvent.pointerDown(card, {
+            pointerId: 1,
+            clientX: 400,
+            clientY: 300,
+        });
+        fireEvent.pointerUp(card, { pointerId: 1, clientX: 400, clientY: 300 });
+
+        expect(onMapClick).not.toHaveBeenCalled();
     });
 });

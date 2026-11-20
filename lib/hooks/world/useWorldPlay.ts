@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { useWorldView } from './useWorldView';
 
+import { markerAnchor } from '@/lib/utils/world/geometry';
+import { isTyping } from '@/lib/utils/world/is-typing';
 import type { MapPoint, WorldHero } from '@/types/world';
 
 export function useWorldPlay(campaignId: string, mapId: string | null) {
@@ -20,28 +22,105 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         { point: MapPoint; seq: number } | undefined
     >();
 
-    const openMap = useCallback(
-        (id: string) => {
-            select(null);
-            router.push(`${pathname}?map=${id}`);
-        },
-        [router, pathname]
-    );
-
-    const focusHero = useCallback(
-        (hero: WorldHero) =>
-            setFocus((f) => ({
-                point: { x: hero.x, y: hero.y },
-                seq: (f?.seq ?? 0) + 1,
-            })),
+    const focusPoint = useCallback(
+        (point: MapPoint) =>
+            setFocus((f) => ({ point, seq: (f?.seq ?? 0) + 1 })),
         []
     );
 
+    const focusHero = useCallback(
+        (hero: WorldHero) => focusPoint({ x: hero.x, y: hero.y }),
+        [focusPoint]
+    );
+
+    const [detailsOpen, setDetailsOpen] = useState(false);
+
+    const [treeOpen, setTreeOpen] = useState(false);
+
+    const selectMarker = useCallback((id: string | null) => {
+        select(id);
+        setDetailsOpen(false);
+    }, []);
+
+    const hasSelection = selectedId !== null;
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (
+                e.key !== 'Escape' ||
+                e.defaultPrevented ||
+                (!detailsOpen && !hasSelection) ||
+                isTyping(e.target) ||
+                (e.target instanceof Element &&
+                    e.target.closest('[role=dialog]'))
+            )
+                return;
+
+            if (detailsOpen) setDetailsOpen(false);
+            else select(null);
+
+            e.preventDefault();
+        };
+
+        window.addEventListener('keydown', onKey);
+
+        return () => window.removeEventListener('keydown', onKey);
+    }, [detailsOpen, hasSelection]);
+
+    const pickPlace = useCallback(
+        (id: string) => {
+            const m = view.data?.markers.find((x) => x.id === id);
+
+            if (!m) return;
+
+            selectMarker(id);
+            focusPoint(markerAnchor(m));
+        },
+        [view.data, selectMarker, focusPoint]
+    );
+
+    const openMap = useCallback(
+        (id: string) => {
+            selectMarker(null);
+            setTreeOpen(false);
+            router.push(`${pathname}?map=${id}`);
+        },
+        [router, pathname, selectMarker]
+    );
+
+    const selectedMarker =
+        view.data?.markers.find((m) => m.id === selectedId) ?? null;
+
+    const visibleChild = (m: { childMapId: string | null }) =>
+        m.childMapId && view.data?.maps.some((x) => x.id === m.childMapId)
+            ? m.childMapId
+            : null;
+
+    const openChild = (id: string) => {
+        const m = view.data?.markers.find((x) => x.id === id);
+
+        const child = m && visibleChild(m);
+
+        if (child) openMap(child);
+    };
+
     return {
         view,
-        selectedMarker:
-            view.data?.markers.find((m) => m.id === selectedId) ?? null,
-        select,
+        selectedMarker,
+        card: {
+            point: selectedMarker ? markerAnchor(selectedMarker) : null,
+            canOpenChild: !!selectedMarker && !!visibleChild(selectedMarker),
+        },
+        openChild,
+        handlers: {
+            onMarkerClick: selectMarker,
+            onMarkerDoubleClick: openChild,
+            onMapClick: () => selectMarker(null),
+        },
+        select: selectMarker,
+        pickPlace,
+        details: { open: detailsOpen, set: setDetailsOpen },
+        tree: { open: treeOpen, set: setTreeOpen },
         focus,
         focusHero,
         openMap,

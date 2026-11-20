@@ -46,6 +46,7 @@ const marker = (
     icon: null,
     color: null,
     dmNote: 'secret',
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,

@@ -13,7 +13,7 @@ vi.mock('@/lib/hooks/world', () => ({
     useWorldDive: (p: unknown) => ({ shown: p, phase: 'idle', origin: null }),
 }));
 
-vi.mock('@/components/world/WorldMapView', () => ({
+vi.mock('@/components/world/map/WorldMapView', () => ({
     WorldMapView: () => <div />,
 }));
 

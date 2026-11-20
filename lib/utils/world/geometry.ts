@@ -1,5 +1,10 @@
 import { clamp } from '@/lib/utils/common/clamp';
-import type { MapPoint, Polygon, RevealShape } from '@/types/world';
+import type {
+    MapPoint,
+    Polygon,
+    RevealShape,
+    WorldMarker,
+} from '@/types/world';
 
 const DUPLICATE_EPS = 0.002;
 
@@ -45,6 +50,20 @@ export function closePolygon(points: MapPoint[]): Polygon | null {
     return ring;
 }
 
+export function polygonArea(ring: Polygon): number {
+    let sum = 0;
+
+    for (let i = 0; i < ring.length; i++) {
+        const [x0, y0] = ring[i];
+
+        const [x1, y1] = ring[(i + 1) % ring.length];
+
+        sum += x0 * y1 - x1 * y0;
+    }
+
+    return Math.abs(sum) / 2;
+}
+
 export function polygonCentroid(polygon: Polygon): MapPoint {
     const ring =
         polygon.length > 1 &&
@@ -82,6 +101,13 @@ export function polygonCentroid(polygon: Polygon): MapPoint {
 
     return { x: cx / (3 * area2), y: cy / (3 * area2) };
 }
+
+export const markerAnchor = (
+    m: Pick<WorldMarker, 'kind' | 'x' | 'y' | 'polygon'>
+): MapPoint =>
+    m.kind === 'zone' && m.polygon
+        ? polygonCentroid(m.polygon)
+        : { x: m.x, y: m.y };
 
 export function fitBox(
     container: { width: number; height: number },
@@ -252,4 +278,29 @@ export function zoneTouchesReveal(
 
         return false;
     });
+}
+
+const NUDGE = 0.002;
+
+const NUDGE_LARGE = 0.01;
+
+const ARROWS: Record<string, [number, number]> = {
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+};
+
+/** Normalized vertex offset for an arrow key (Shift = larger step); null for other keys. */
+export function nudgeStep(
+    key: string,
+    large: boolean
+): { dx: number; dy: number } | null {
+    const dir = ARROWS[key];
+
+    if (!dir) return null;
+
+    const step = large ? NUDGE_LARGE : NUDGE;
+
+    return { dx: dir[0] * step, dy: dir[1] * step };
 }

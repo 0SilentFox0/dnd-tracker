@@ -8,6 +8,7 @@ import {
     WORLD_DM_NOTE_MAX,
     WORLD_MAP_MAX_EDGE_PX,
     WORLD_MAP_UPLOAD_TYPES,
+    WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_MARKER_ICON_KEYS,
     WORLD_NAME_MAX,
     WORLD_NOTE_MAX,
@@ -66,6 +67,7 @@ export const updateWorldMapSchema = z
             .max(REVEAL_RADIUS_RANGE.max),
         entryX: coord,
         entryY: coord,
+        parentMarkerId: z.string().min(1),
     })
     .partial()
     .strict()
@@ -84,6 +86,7 @@ export const createWorldMarkerSchema = z
         name: nameSchema,
         icon: iconSchema.optional(),
         color: hexColor.optional(),
+        description: z.string().max(WORLD_MARKER_DESCRIPTION_MAX).optional(),
     })
     .superRefine((v, ctx) => {
         if (v.kind === 'zone' && !v.polygon) {
@@ -112,6 +115,7 @@ export const updateWorldMarkerSchema = z
         icon: iconSchema.nullable(),
         color: hexColor.nullable(),
         dmNote: z.string().max(WORLD_DM_NOTE_MAX).nullable(),
+        description: z.string().max(WORLD_MARKER_DESCRIPTION_MAX).nullable(),
         alwaysVisible: z.boolean(),
         sortOrder: z.number().int().min(0),
     })

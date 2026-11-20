@@ -15,20 +15,24 @@ import { WorldFog } from './WorldFog';
 import { WorldHeroes } from './WorldHeroes';
 import { WorldPins } from './WorldPins';
 import { WorldZones } from './WorldZones';
+import { ZoneVertexHandles } from './ZoneVertexHandles';
 
-import './world-atlas.css';
+import '../world-atlas.css';
 import { Button } from '@/components/ui/button';
-import { WORLD_MAX_ZOOM } from '@/lib/constants/world';
+import { WORLD_MAX_ZOOM, WORLD_SNAP_PX } from '@/lib/constants/world';
 import {
     useElementSize,
     useReducedMotion,
     useViewport,
 } from '@/lib/hooks/common';
-import type { WorldTool } from '@/lib/hooks/world';
+import { useMarkerBubblePosition, type WorldTool } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
+import { hintPosition } from '@/lib/utils/world/hint-position';
+import { snapPoint } from '@/lib/utils/world/zone-snap';
 import type {
     MapPoint,
+    Polygon,
     RevealShape,
     WorldHero,
     WorldMapDetail,
@@ -43,39 +47,123 @@ const FOCUS_ZOOM = 3;
 export interface WorldMapViewProps {
     detail: WorldMapDetail;
     selectedId?: string | null;
-    draft?: MapPoint[];
-    tool?: WorldTool;
+    edit?: {
+        tool?: WorldTool;
+        draft?: MapPoint[];
+        snap?: { zones: Polygon[]; enabled: boolean };
+    };
     handlers?: {
         onMapClick?(p: MapPoint): void;
         onMapDoubleClick?(p: MapPoint): void;
         onMarkerClick?(id: string): void;
+        onMarkerDoubleClick?(id: string): void;
         onMarkerDrag?(id: string, p: MapPoint): void;
         onHeroClick?(id: string): void;
+        onVertexChange?(markerId: string, polygon: Polygon): void;
     };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
     focus?: { point: MapPoint; seq: number };
-    overlay?: ReactNode;
-    hint?: ReactNode;
+    slots?: {
+        overlay?: ReactNode;
+        card?: { point: MapPoint; content: ReactNode };
+        hint?: ReactNode;
+    };
     compact?: boolean;
     className?: string;
+}
+
+const zoneIdAt = (target: EventTarget | null, tool: WorldTool) =>
+    (tool === 'select' || tool === 'move') && target instanceof Element
+        ? target.closest<SVGElement>('[data-zone-id]')?.dataset.zoneId
+        : undefined;
+
+const CARD_FALLBACK_SIZE = { width: 256, height: 140 };
+
+function CardSlot({
+    card,
+    box,
+    zoom,
+    offset,
+}: {
+    card: { point: MapPoint; content: ReactNode };
+    box: { width: number; height: number };
+    zoom: number;
+    offset: { x: number; y: number };
+}) {
+    const { ref, size } = useElementSize<HTMLDivElement>();
+
+    const pos = useMarkerBubblePosition({
+        point: card.point,
+        box,
+        zoom,
+        offset,
+        size: size.width > 0 ? size : CARD_FALLBACK_SIZE,
+    });
+
+    return (
+        <div
+            ref={ref}
+            data-testid="world-map-card"
+            data-placement={pos.placement}
+            className="absolute z-20 w-max max-w-[calc(100%-1rem)]"
+            style={{ left: pos.left, top: pos.top }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+            onDoubleClick={(e) => e.stopPropagation()}
+        >
+            {card.content}
+        </div>
+    );
+}
+
+interface HintPointer {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+function CursorHint({
+    pointer,
+    children,
+}: {
+    pointer: HintPointer;
+    children: ReactNode;
+}) {
+    const { ref, size } = useElementSize<HTMLDivElement>();
+
+    const pos = hintPosition(pointer, pointer, size);
+
+    return (
+        <div
+            ref={ref}
+            data-testid="world-map-hint"
+            className="pointer-events-none absolute z-10"
+            style={{ left: pos.left, top: pos.top }}
+        >
+            {children}
+        </div>
+    );
 }
 
 export function WorldMapView({
     detail,
     selectedId,
-    draft,
-    tool = 'select',
+    edit,
     handlers = {},
     fog,
     heroes,
     focus,
-    overlay,
-    hint,
+    slots,
     compact = false,
     className,
 }: WorldMapViewProps) {
     const { map, markers } = detail;
+
+    const { tool = 'select', draft, snap } = edit ?? {};
+
+    const { overlay, card, hint } = slots ?? {};
 
     const t = useTranslations('world.zoom');
 
@@ -106,6 +194,46 @@ export function WorldMapView({
             { zoom, offset }
         );
 
+    const snappedAt = (
+        clientX: number,
+        clientY: number,
+        alt: boolean,
+        skip?: Polygon | null
+    ) => {
+        const p = pointAt(clientX, clientY);
+
+        return snap?.enabled && !alt
+            ? snapPoint(
+                  p,
+                  snap.zones.filter((z) => z !== skip),
+                  WORLD_SNAP_PX / (box.width * zoom),
+                  box.height / box.width
+              )
+            : p;
+    };
+
+    const [preview, setPreview] = useState<{
+        id: string;
+        polygon: Polygon;
+    } | null>(null);
+
+    const shownMarkers = preview
+        ? markers.map((m) =>
+              m.id === preview.id ? { ...m, polygon: preview.polygon } : m
+          )
+        : markers;
+
+    const editingZone =
+        tool === 'select' && handlers.onVertexChange
+            ? shownMarkers.find(
+                  (m) => m.id === selectedId && m.kind === 'zone' && m.polygon
+              )
+            : undefined;
+
+    const [hoveredZone, setHoveredZone] = useState<string | null>(null);
+
+    const [pointer, setPointer] = useState<HintPointer | null>(null);
+
     const [cursor, setCursor] = useState<MapPoint | null>(null);
 
     useEffect(() => {
@@ -133,14 +261,15 @@ export function WorldMapView({
 
         if (wasDragged()) return;
 
-        const zoneId =
-            (tool === 'select' || tool === 'move') &&
-            e.target instanceof Element
-                ? e.target.closest<SVGElement>('[data-zone-id]')?.dataset.zoneId
-                : undefined;
+        const zoneId = zoneIdAt(e.target, tool);
 
         if (zoneId) handlers.onMarkerClick?.(zoneId);
-        else handlers.onMapClick?.(pointAt(e.clientX, e.clientY));
+        else
+            handlers.onMapClick?.(
+                tool === 'zone'
+                    ? snappedAt(e.clientX, e.clientY, e.altKey)
+                    : pointAt(e.clientX, e.clientY)
+            );
     };
 
     return (
@@ -151,6 +280,25 @@ export function WorldMapView({
                 'atlas-map relative h-full min-h-[16rem] w-full overflow-hidden rounded-xl border border-hud-rule',
                 className
             )}
+            onPointerMove={(e) => {
+                if (!hint) return;
+
+                if (e.pointerType === 'touch') {
+                    if (pointer) setPointer(null);
+
+                    return;
+                }
+
+                const r = e.currentTarget.getBoundingClientRect();
+
+                setPointer({
+                    x: e.clientX - r.left,
+                    y: e.clientY - r.top,
+                    width: r.width,
+                    height: r.height,
+                });
+            }}
+            onPointerLeave={() => setPointer(null)}
         >
             <div ref={outerRef} className="absolute inset-0">
                 {/* container is always mounted so useViewport can attach its wheel listener on the first commit */}
@@ -172,16 +320,29 @@ export function WorldMapView({
                     onPointerMove={(e) => {
                         bind.onPointerMove(e);
 
+                        const over = zoneIdAt(e.target, tool) ?? null;
+
+                        if (over !== hoveredZone) setHoveredZone(over);
+
                         if (tool === 'zone' && draft?.length)
-                            setCursor(pointAt(e.clientX, e.clientY));
+                            setCursor(
+                                snappedAt(e.clientX, e.clientY, e.altKey)
+                            );
                     }}
                     onPointerUp={onBackgroundUp}
                     onPointerCancel={bind.onPointerCancel}
-                    onDoubleClick={(e) =>
-                        handlers.onMapDoubleClick?.(
-                            pointAt(e.clientX, e.clientY)
-                        )
-                    }
+                    onPointerLeave={() => setHoveredZone(null)}
+                    onDoubleClick={(e) => {
+                        const zoneId = zoneIdAt(e.target, tool);
+
+                        if (zoneId) handlers.onMarkerDoubleClick?.(zoneId);
+                        else
+                            handlers.onMapDoubleClick?.(
+                                tool === 'zone'
+                                    ? snappedAt(e.clientX, e.clientY, e.altKey)
+                                    : pointAt(e.clientX, e.clientY)
+                            );
+                    }}
                 >
                     {size.width > 0 ? (
                         <div className="absolute inset-0" style={layerStyle}>
@@ -195,7 +356,7 @@ export function WorldMapView({
                                 className="pointer-events-none object-fill select-none"
                             />
                             <WorldZones
-                                markers={markers}
+                                markers={shownMarkers}
                                 selectedId={selectedId}
                                 draft={draft}
                                 cursor={tool === 'zone' ? cursor : null}
@@ -203,6 +364,34 @@ export function WorldMapView({
                                     tool === 'select' || tool === 'move'
                                 }
                             />
+                            {editingZone?.polygon && handlers.onVertexChange ? (
+                                <ZoneVertexHandles
+                                    markerId={editingZone.id}
+                                    polygon={editingZone.polygon}
+                                    zoom={zoom}
+                                    pointAt={(x, y, alt) =>
+                                        snappedAt(
+                                            x,
+                                            y,
+                                            alt,
+                                            markers.find(
+                                                (m) => m.id === editingZone.id
+                                            )?.polygon
+                                        )
+                                    }
+                                    onPreview={(polygon) =>
+                                        setPreview(
+                                            polygon
+                                                ? {
+                                                      id: editingZone.id,
+                                                      polygon,
+                                                  }
+                                                : null
+                                        )
+                                    }
+                                    onChange={handlers.onVertexChange}
+                                />
+                            ) : null}
                             {draft?.map((p, i) => (
                                 <span
                                     key={i}
@@ -245,6 +434,10 @@ export function WorldMapView({
                                     markers={markers}
                                     zoom={zoom}
                                     compact={compact}
+                                    labels={{
+                                        hoveredId: hoveredZone,
+                                        fogless: !fog,
+                                    }}
                                     selectedId={selectedId}
                                     drag={{
                                         current: dragging,
@@ -275,12 +468,18 @@ export function WorldMapView({
                             {overlay}
                         </div>
                     ) : null}
+                    {card && size.width > 0 ? (
+                        <CardSlot
+                            card={card}
+                            box={box}
+                            zoom={zoom}
+                            offset={offset}
+                        />
+                    ) : null}
                 </div>
             </div>
-            {hint ? (
-                <div className="pointer-events-none absolute top-2 right-2 left-2 z-10 flex justify-center">
-                    {hint}
-                </div>
+            {hint && pointer ? (
+                <CursorHint pointer={pointer}>{hint}</CursorHint>
             ) : null}
             <div
                 data-tour="world.zoom"

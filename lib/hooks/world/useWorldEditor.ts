@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { worldKeys } from './keys';
 
+import { ApiError } from '@/lib/api/client';
 import {
     createWorldMap,
     createWorldMarker,
@@ -14,7 +15,8 @@ import {
     updateWorldMap,
     updateWorldMarker,
 } from '@/lib/api/world';
-import { useCrudMutation } from '@/lib/hooks/common';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { useCrudMutation, useOptionalNotify } from '@/lib/hooks/common';
 import type {
     CreateWorldMapData,
     CreateWorldMarkerData,
@@ -22,6 +24,15 @@ import type {
     UpdateWorldMarkerData,
     WorldMapDetail,
 } from '@/types/world';
+
+const MOVE_ERROR_KEYS: Record<
+    string,
+    'worldMoveCycle' | 'worldRootImmovable' | 'worldNestedExists'
+> = {
+    [API_ERRORS.WORLD_MOVE_CYCLE]: 'worldMoveCycle',
+    [API_ERRORS.WORLD_ROOT_IMMOVABLE]: 'worldRootImmovable',
+    [API_ERRORS.WORLD_NESTED_EXISTS]: 'worldNestedExists',
+};
 
 type Settled = {
     status: string;
@@ -39,6 +50,10 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
     const queryClient = useQueryClient();
 
     const t = useTranslations('world.errors');
+
+    const tErrors = useTranslations('validation');
+
+    const notify = useOptionalNotify();
 
     const mapKey = worldKeys.map(campaignId, mapId ?? '');
 
@@ -92,10 +107,37 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
         })
     );
 
+    const moveMap = useStable(
+        useCrudMutation({
+            mutationFn: ({
+                id,
+                parentMarkerId,
+            }: {
+                id: string;
+                parentMarkerId: string;
+            }) => updateWorldMap(campaignId, id, { parentMarkerId }),
+            invalidateKeys: [
+                worldKeys.maps(campaignId),
+                worldKeys.mapAll(campaignId),
+            ],
+            onError: (e) => {
+                const key =
+                    e instanceof ApiError && e.errorKey
+                        ? MOVE_ERROR_KEYS[e.errorKey]
+                        : undefined;
+
+                notify(key ? tErrors(key) : t('saveMap'));
+            },
+        })
+    );
+
     const removeMap = useStable(
         useCrudMutation({
             mutationFn: (id: string) => deleteWorldMap(campaignId, id),
-            invalidateKeys: [worldKeys.maps(campaignId)],
+            invalidateKeys: [
+                worldKeys.maps(campaignId),
+                worldKeys.mapAll(campaignId),
+            ],
             errorText: t('deleteMap'),
         })
     );
@@ -160,7 +202,12 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
 
     return useMemo(
         () => ({
-            map: { create: createMap, update: updateMap, remove: removeMap },
+            map: {
+                create: createMap,
+                update: updateMap,
+                move: moveMap,
+                remove: removeMap,
+            },
             marker: {
                 create: createMarker,
                 update: updateMarker,
@@ -169,6 +216,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
             isPending: [
                 createMap,
                 updateMap,
+                moveMap,
                 removeMap,
                 createMarker,
                 updateMarker,
@@ -178,6 +226,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
         [
             createMap,
             updateMap,
+            moveMap,
             removeMap,
             createMarker,
             updateMarker,

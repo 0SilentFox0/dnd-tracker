@@ -7,6 +7,7 @@ import {
     distToSegment,
     fitBox,
     isRevealed,
+    nudgeStep,
     pointInPolygon,
     polygonCentroid,
     toMapPoint,
@@ -299,5 +300,16 @@ describe('zoneTouchesReveal', () => {
         expect(zoneTouchesReveal(sq, [pt(0.5, 0.6 + 0.3 * 1.1)], 0.1, 3)).toBe(
             false
         );
+    });
+});
+
+describe('nudgeStep', () => {
+    it('maps arrows to offsets and Shift to a larger step', () => {
+        expect(nudgeStep('ArrowRight', false)).toEqual({ dx: 0.002, dy: 0 });
+        expect(nudgeStep('ArrowUp', true)).toEqual({ dx: 0, dy: -0.01 });
+    });
+
+    it('ignores other keys', () => {
+        expect(nudgeStep('a', false)).toBeNull();
     });
 });

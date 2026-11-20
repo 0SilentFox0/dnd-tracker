@@ -100,6 +100,7 @@ const markerRow = (over: Record<string, unknown> = {}) => ({
     icon: null,
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     map: { campaignId: 'c1' },

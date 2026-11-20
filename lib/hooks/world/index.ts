@@ -1,11 +1,18 @@
 export { worldKeys } from './keys';
 export type { WorldEditorCtx } from './types';
 export { useHeroEyes } from './useHeroEyes';
-export { useMapDrawing, type WorldTool } from './useMapDrawing';
+export {
+    MODE_TOOLS,
+    useMapDrawing,
+    type WorldMode,
+    type WorldTool,
+} from './useMapDrawing';
 export { useMapFields } from './useMapFields';
+export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';
 export { useMoveTarget } from './useMoveTarget';
 export { useNotesPanel } from './useNotesPanel';
+export { useRemoveMap } from './useRemoveMap';
 export { useRemoveMarker } from './useRemoveMarker';
 export { useShowWorld } from './useShowWorld';
 export { useTravelLog } from './useTravelLog';

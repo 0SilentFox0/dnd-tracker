@@ -93,6 +93,7 @@ const markerRow = (id: string, x: number, y: number) => ({
     icon: null,
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     map: { campaignId: 'c1' },

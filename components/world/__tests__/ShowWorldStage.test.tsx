@@ -19,7 +19,7 @@ vi.mock('@/lib/api/world', () => ({
 vi.mock('next/image', () => ({
     default: (p: { alt: string }) => <img alt={p.alt} />,
 }));
-vi.mock('@/components/world/WorldMapView', () => ({
+vi.mock('@/components/world/map/WorldMapView', () => ({
     WorldMapView: (p: {
         detail: {
             map: { id: string };
@@ -197,6 +197,7 @@ describe('ShowWorldStage', () => {
                 {
                     ...marker('seen'),
                     dmNote: 'DM-SECRET-NOTE',
+                    description: null,
                     alwaysVisible: false,
                 },
                 {
@@ -239,11 +240,13 @@ describe('ShowWorldStage', () => {
                     ...marker('a'),
                     name: 'HIDDEN-NAME',
                     dmNote: 'DM-SECRET-NOTE',
+                    description: null,
                     alwaysVisible: false,
                 },
                 {
                     ...marker('b'),
                     dmNote: 'DM-SECRET-NOTE',
+                    description: null,
                     alwaysVisible: true,
                 },
             ],
