@@ -25,7 +25,7 @@ import {
     useReducedMotion,
     useViewport,
 } from '@/lib/hooks/common';
-import type { WorldTool } from '@/lib/hooks/world';
+import { useMarkerBubblePosition, type WorldTool } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
 import { snapPoint } from '@/lib/utils/world/zone-snap';
@@ -61,9 +61,49 @@ export interface WorldMapViewProps {
     heroes?: WorldHero[];
     focus?: { point: MapPoint; seq: number };
     overlay?: ReactNode;
+    card?: { point: MapPoint; content: ReactNode };
     hint?: ReactNode;
     compact?: boolean;
     className?: string;
+}
+
+const CARD_FALLBACK_SIZE = { width: 256, height: 140 };
+
+function CardSlot({
+    card,
+    box,
+    zoom,
+    offset,
+}: {
+    card: { point: MapPoint; content: ReactNode };
+    box: { width: number; height: number };
+    zoom: number;
+    offset: { x: number; y: number };
+}) {
+    const { ref, size } = useElementSize<HTMLDivElement>();
+
+    const pos = useMarkerBubblePosition({
+        point: card.point,
+        box,
+        zoom,
+        offset,
+        size: size.width > 0 ? size : CARD_FALLBACK_SIZE,
+    });
+
+    return (
+        <div
+            ref={ref}
+            data-testid="world-map-card"
+            data-placement={pos.placement}
+            className="absolute z-20 w-max max-w-[calc(100%-1rem)]"
+            style={{ left: pos.left, top: pos.top }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+            onDoubleClick={(e) => e.stopPropagation()}
+        >
+            {card.content}
+        </div>
+    );
 }
 
 export function WorldMapView({
@@ -77,6 +117,7 @@ export function WorldMapView({
     heroes,
     focus,
     overlay,
+    card,
     hint,
     compact = false,
     className,
@@ -354,6 +395,14 @@ export function WorldMapView({
                             ) : null}
                             {overlay}
                         </div>
+                    ) : null}
+                    {card && size.width > 0 ? (
+                        <CardSlot
+                            card={card}
+                            box={box}
+                            zoom={zoom}
+                            offset={offset}
+                        />
                     ) : null}
                 </div>
             </div>

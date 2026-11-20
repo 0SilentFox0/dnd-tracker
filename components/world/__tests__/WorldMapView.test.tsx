@@ -740,3 +740,27 @@ describe('WorldMapView zone snapping', () => {
         ]);
     });
 });
+
+describe('WorldMapView card slot', () => {
+    it('renders the card outside the transformed layers and swallows pointer events', () => {
+        const onMapClick = vi.fn();
+
+        render(
+            <WorldMapView
+                detail={detail([])}
+                card={{ point: { x: 0.5, y: 0.5 }, content: <p>bubble</p> }}
+                handlers={{ onMapClick }}
+            />
+        );
+
+        const card = screen.getByTestId('world-map-card');
+
+        expect(card.parentElement).toBe(box());
+        expect(card.dataset.placement).toBe('above');
+
+        fireEvent.pointerDown(card, { pointerId: 1, clientX: 400, clientY: 300 });
+        fireEvent.pointerUp(card, { pointerId: 1, clientX: 400, clientY: 300 });
+
+        expect(onMapClick).not.toHaveBeenCalled();
+    });
+});

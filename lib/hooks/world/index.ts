@@ -3,6 +3,7 @@ export type { WorldEditorCtx } from './types';
 export { useHeroEyes } from './useHeroEyes';
 export { useMapDrawing, type WorldTool } from './useMapDrawing';
 export { useMapFields } from './useMapFields';
+export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';
 export { useMoveTarget } from './useMoveTarget';
 export { useNotesPanel } from './useNotesPanel';
