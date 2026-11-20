@@ -2,6 +2,8 @@
 
 import { useRef, useState } from 'react';
 
+import { type HeroSelection, useHeroSelection } from './useHeroSelection';
+
 import type { RosterHero } from './useWorldHeroes';
 import { useWorldMaps } from './useWorldMaps';
 import { useWorldTravel } from './useWorldTravel';
@@ -23,6 +25,7 @@ interface Options {
     target: MapPoint | null;
     selectedMarker: WorldMarker | null;
     onMoved?(e: TravelMoved): void;
+    selection?: HeroSelection;
 }
 
 export function useTravelPanel({
@@ -33,8 +36,12 @@ export function useTravelPanel({
     target,
     selectedMarker,
     onMoved,
+    selection,
 }: Options) {
-    const [picked, setPicked] = useState<string[]>([]);
+    const ownSelection = useHeroSelection(heroes);
+
+    const { selected, toggle, allSelected, selectAll } =
+        selection ?? ownSelection;
 
     const [rest, setRest] = useState<TravelRest>('none');
 
@@ -49,20 +56,6 @@ export function useTravelPanel({
     const { data: rules } = useCampaignRules(campaignId);
 
     const maps = useWorldMaps(campaignId);
-
-    const selected = picked.filter((id) => heroes.some((h) => h.id === id));
-
-    const toggle = (id: string) =>
-        setPicked(
-            selected.includes(id)
-                ? selected.filter((x) => x !== id)
-                : [...selected, id]
-        );
-
-    const allSelected = heroes.length > 0 && selected.length === heroes.length;
-
-    const selectAll = () =>
-        setPicked(allSelected ? [] : heroes.map((h) => h.id));
 
     const busy = useRef(false);
 

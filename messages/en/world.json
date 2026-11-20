@@ -214,7 +214,11 @@
     "saveMarker": "Could not save the marker",
     "deleteMarker": "Could not delete the marker",
     "saveNote": "Could not save the note",
-    "deleteNote": "Could not delete the note"
+    "deleteNote": "Could not delete the note",
+    "saveSession": "Could not save the session",
+    "deleteSession": "Could not delete the session",
+    "saveEnemy": "Could not save the enemy",
+    "deleteEnemy": "Could not delete the enemy"
   },
   "validation": {
     "coordinateOutOfBounds": "Coordinate is outside the map",

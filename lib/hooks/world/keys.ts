@@ -9,4 +9,8 @@ export const worldKeys = {
     partyView: (campaignId: string, mapId: string) =>
         ['world-view', campaignId, mapId, 'party'] as const,
     log: (campaignId: string) => ['world-log', campaignId] as const,
+    sessions: (campaignId: string) => ['world-sessions', campaignId] as const,
+    trailAll: (campaignId: string) => ['world-trail', campaignId] as const,
+    trail: (campaignId: string, mapId: string) =>
+        ['world-trail', campaignId, mapId] as const,
 };

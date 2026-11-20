@@ -9,6 +9,8 @@ import { YEAR_CACHE_SECONDS } from '@/lib/constants/storage';
 import { createClient } from '@/lib/supabase/client';
 import type { SlideUploadTicket } from '@/types/show';
 import type {
+    CreateEnemyData,
+    CreateSessionData,
     CreateWorldMapData,
     CreateWorldMarkerData,
     CreateWorldNoteData,
@@ -16,14 +18,19 @@ import type {
     ExitRequest,
     RestRequest,
     TravelRequest,
+    UpdateEnemyData,
+    UpdateSessionData,
     UpdateWorldMapData,
     UpdateWorldMarkerData,
+    WorldEnemyPin,
     WorldHero,
     WorldMap,
     WorldMapDetail,
     WorldMapSummary,
     WorldMarker,
     WorldNote,
+    WorldSession,
+    WorldTrailData,
     WorldTravelEntry,
     WorldUploadRequest,
     WorldView,
@@ -153,4 +160,57 @@ export const restHeroes = (campaignId: string, data: RestRequest) =>
         campaignId,
         '/world/rest',
         data
+    );
+
+export const getSessions = (campaignId: string) =>
+    campaignGet<WorldSession[]>(campaignId, '/world/sessions', {
+        cache: 'no-store',
+    });
+
+export const startSession = (campaignId: string, data: CreateSessionData) =>
+    campaignPost<WorldSession>(campaignId, '/world/sessions', data);
+
+export const updateSession = (
+    campaignId: string,
+    id: string,
+    data: UpdateSessionData
+) => campaignPatch<WorldSession>(campaignId, `/world/sessions/${id}`, data);
+
+export const deleteSession = (campaignId: string, id: string) =>
+    campaignDelete<{ ok: true }>(campaignId, `/world/sessions/${id}`);
+
+export const getTrail = (campaignId: string, mapId: string) =>
+    campaignGet<WorldTrailData>(
+        campaignId,
+        `/world/trail?mapId=${encodeURIComponent(mapId)}`,
+        { cache: 'no-store' }
+    );
+
+export const createEnemy = (
+    campaignId: string,
+    mapId: string,
+    data: CreateEnemyData
+) =>
+    campaignPost<WorldEnemyPin>(
+        campaignId,
+        `/world/maps/${mapId}/enemies`,
+        data
+    );
+
+export const updateEnemy = (
+    campaignId: string,
+    mapId: string,
+    id: string,
+    data: UpdateEnemyData
+) =>
+    campaignPatch<WorldEnemyPin>(
+        campaignId,
+        `/world/maps/${mapId}/enemies/${id}`,
+        data
+    );
+
+export const deleteEnemy = (campaignId: string, mapId: string, id: string) =>
+    campaignDelete<{ ok: true }>(
+        campaignId,
+        `/world/maps/${mapId}/enemies/${id}`
     );
