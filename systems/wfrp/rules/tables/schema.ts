@@ -29,6 +29,9 @@ export const TABLE_SLOTS = [
     'mutationMental',
 ] as const;
 
+/** Rolled duration: NdM with an optional flat or TB (Toughness Bonus) offset, e.g. 1d10-TB */
+export const ROUNDS_DICE = /^\d{1,2}d\d{1,3}([+-](\d{1,3}|TB))?$/;
+
 export type TableSlot = (typeof TABLE_SLOTS)[number];
 
 export const MUTATION_SLOTS = [
@@ -53,7 +56,12 @@ export type TableEffect =
     | { type: 'damage'; amount: number }
     | { type: 'wounds'; amount: number }
     | { type: 'condition'; key: WfrpConditionKey; levels: number }
-    | { type: 'marker'; key: (typeof MARKER_KEYS)[number]; rounds?: number }
+    | {
+          type: 'marker';
+          key: (typeof MARKER_KEYS)[number];
+          rounds?: number;
+          roundsDice?: string;
+      }
     | { type: 'fumble'; kind: FumbleKind }
     | { type: 'death' }
     | { type: 'characteristic'; key: CharacteristicKey; amount: number }
@@ -83,6 +91,7 @@ const EffectSchema = z.discriminatedUnion('type', [
         type: z.literal('marker'),
         key: z.enum(MARKER_KEYS),
         rounds: z.number().int().min(1).max(20).optional(),
+        roundsDice: z.string().regex(ROUNDS_DICE).optional(),
     }),
     z.strictObject({ type: z.literal('fumble'), kind: z.enum(FUMBLE_KINDS) }),
     z.strictObject({ type: z.literal('death') }),

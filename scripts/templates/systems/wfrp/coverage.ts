@@ -29,6 +29,23 @@ import { ARMOUR_KINDS, QUALITY_REGISTRY } from '@/systems/wfrp/rules/equipment';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { TRAIT_RECIPES } from '@/systems/wfrp/rules/traits/recipes';
 
+// Canon-only gear qualities the fixed Grim roster does not carry; the roster is locked by the grim-d100 plan
+const GRIM_UNCARRIED = new Set([
+    'penetrating',
+    'accurate',
+    'blackpowder',
+    'defensive',
+    'parry',
+    'entangle',
+    'wrap',
+    'inflict',
+    'unreliable',
+    'unbalanced',
+    'bulky',
+    'lightweight',
+    'practical',
+]);
+
 type Part = 'characteristics' | 'skills' | 'talents';
 
 const TIERS = Array.from({ length: CAREER_TIER_COUNT }, (_, i) => i + 1);
@@ -322,7 +339,7 @@ function equipmentCoverage(artifacts: Row[]): string[] {
     );
 
     for (const key of IMPLEMENTED_QUALITIES)
-        if (!carried.has(key))
+        if (!carried.has(key) && !GRIM_UNCARRIED.has(key))
             warnings.push(
                 `artifacts: ${QUALITY_REGISTRY[key].kind} "${key}" has no carrier`
             );

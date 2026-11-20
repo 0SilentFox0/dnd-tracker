@@ -31,13 +31,18 @@ const CANON_RULES = RulesetSchema.parse({
 
 const LEGACY_RULES = RulesetSchema.parse(WFRP_RULES);
 
-const attack = (offHand: boolean, hand = true): BattleAttack =>
+const attack = (
+    offHand: boolean,
+    hand = true,
+    twoHanded = false
+): BattleAttack =>
     ({
         id: 'a',
         type: 'melee',
         system: ATTACK_SLOT.write({
             qualities: [],
             flaws: [],
+            ...(twoHanded && { twoHanded: true as const }),
             ...(hand && {
                 hand: offHand ? ('off' as const) : ('main' as const),
             }),
@@ -135,6 +140,31 @@ describe('canon: left and right hit locations (p164)', () => {
             )
         ).toBe(false);
     });
+
+    bookExample(
+        164,
+        'a two-handed or bow attack is blocked when either arm is disarmed',
+        () => {
+            const bow = attack(false, true, true);
+
+            expect(
+                wfrpAttackBlocked(disarmedBy('left'), bow, CANON_RULES)
+            ).toBe(true);
+            expect(
+                wfrpAttackBlocked(disarmedBy('right'), bow, CANON_RULES)
+            ).toBe(true);
+            expect(
+                wfrpAttackBlocked(
+                    disarmedBy('left'),
+                    attack(false),
+                    CANON_RULES
+                )
+            ).toBe(false);
+            expect(
+                wfrpAttackBlocked(disarmedBy('left'), bow, LEGACY_RULES)
+            ).toBe(false);
+        }
+    );
 
     it('legacy never blocks an attack', () => {
         expect(

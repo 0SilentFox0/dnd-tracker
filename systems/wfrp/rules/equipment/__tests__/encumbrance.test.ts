@@ -51,4 +51,22 @@ describe('encumbrance', () => {
         expect(encumbrance([gear(7)], chars(40, 30)).over).toBe(false);
         expect(encumbrance([gear(7.5)], chars(40, 30)).over).toBe(true);
     });
+
+    it('reports the burden tier and oversized count', () => {
+        const heavy = encumbrance([gear(3), gear(8)], chars(40, 30));
+
+        expect(heavy.tier).toBe(1);
+        expect(heavy.oversized).toBe(1);
+    });
+
+    it('reduces worn items by 1 and adds coins', () => {
+        expect(
+            encumbrance([{ ...gear(3), worn: true }], chars(40, 30), {
+                coins: 400,
+            }).carried
+        ).toBe(4);
+    });
+
+    it('keeps the plain total without worn items or coins', () =>
+        expect(encumbrance([gear(3)], chars(40, 30)).carried).toBe(3));
 });

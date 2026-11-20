@@ -21,7 +21,9 @@
     "accurate": "Accurate",
     "blast": "Blast",
     "pistol": "Pistol",
+    "blackpowder": "Blackpowder",
     "shield": "Shield",
+    "parry": "Parry",
     "defensive": "Defensive",
     "fast": "Fast",
     "flexible": "Flexible",
@@ -37,8 +39,12 @@
     "undamaging": "Undamaging",
     "unreliable": "Unreliable",
     "dangerous": "Dangerous",
+    "unbalanced": "Unbalanced",
     "slow": "Slow",
-    "reload": "Reload"
+    "reload": "Reload",
+    "bulky": "Bulky",
+    "lightweight": "Lightweight",
+    "practical": "Practical"
   },
   "money": {
     "gc": "gc",
@@ -47,6 +53,8 @@
   },
   "encumbrance": {
     "label": "Carried: {carried} / {limit}",
-    "over": "Overencumbered: carrying more than the limit"
+    "over": "Overencumbered: carrying more than the limit",
+    "oversized": "Only one oversized item (4+ Enc) can be carried; you have {count}",
+    "tier": "Overburdened: Movement and Agility penalty (tier {tier})"
   }
 }

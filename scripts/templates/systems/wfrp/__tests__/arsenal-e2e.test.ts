@@ -231,7 +231,7 @@ describe('grim arsenal and magic end to end', () => {
         expect(sword).toMatchObject({ type: 'melee', damageBonus: 4 });
         expect(bow).toMatchObject({
             type: 'ranged',
-            range: '180 ft',
+            range: '150 ft',
             ammo: { capacity: 1, reload: 1 },
         });
         expect(ATTACK_SLOT.read(bow.system)?.noSb).toBe(true);

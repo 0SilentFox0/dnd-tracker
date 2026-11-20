@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { HitLocation } from '../combat/constants';
+import { type HitLocation, LOCATIONS } from '../combat/constants';
 import {
     AP_MAX_PER_LAYER,
     ARMOUR_KINDS,
@@ -10,15 +10,27 @@ import {
 } from './constants';
 import { QUALITY_KEYS, QUALITY_REGISTRY, type QualityRef } from './qualities';
 
+import { WFRP_CONDITION_KEYS } from '@/systems/wfrp/constants/conditions';
+
 export const QualityRefSchema: z.ZodType<QualityRef> = z
     .strictObject({
         key: z.enum(QUALITY_KEYS),
         value: z.number().int().min(1).max(QUALITY_VALUE_MAX).optional(),
+        condition: z.enum(WFRP_CONDITION_KEYS).optional(),
+        location: z.enum(LOCATIONS).optional(),
     })
     .refine(
         (r) => QUALITY_REGISTRY[r.key].hasValue === (r.value !== undefined),
         { message: 'quality value mismatch', path: ['value'] }
-    );
+    )
+    .refine((r) => r.condition === undefined || r.key === 'inflict', {
+        message: 'condition only on inflict',
+        path: ['condition'],
+    })
+    .refine((r) => r.location === undefined || r.key === 'inflict', {
+        message: 'location only on inflict',
+        path: ['location'],
+    });
 
 const weight = z.number().min(0).max(1000);
 

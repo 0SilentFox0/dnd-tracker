@@ -3,6 +3,7 @@ import { applyWfrpCrit } from './crit-effect';
 import { rollCrit } from './crit-table';
 import { isOutOfFight, startDeathTimer } from './critical';
 import { asLocation, hitLocation, sideOf } from './location';
+import { participantStats } from './participant';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -63,7 +64,8 @@ function criticalOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
                 ctx.rng,
                 undefined,
                 excess * 10,
-                sideOf(spot)
+                sideOf(spot),
+                participantStats(next)?.tb ?? 0
             ),
             ctx.round ?? 0,
             editionOf(ctx.rules)
@@ -122,7 +124,8 @@ export function wfrpOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
                     ctx.rng,
                     undefined,
                     0,
-                    sideOf(ctx.location)
+                    sideOf(ctx.location),
+                    participantStats(next)?.tb ?? 0
                 ),
                 bonusDamage: 0,
             },

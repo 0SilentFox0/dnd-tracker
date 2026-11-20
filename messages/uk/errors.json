@@ -465,6 +465,7 @@
   "frenzyMeleeOnly": "Шал: можливі лише ближні атаки",
   "frenzyNoCast": "Шал: не можна творити закляття",
   "hatredCompelled": "Ненависть: треба атакувати {group}",
+  "rangedGroupForbidden": "Не можна стріляти зі зброї групи {group} без навчання в ній",
   "abilityCooldown": "Перезарядка: ще {rounds, plural, one {# раунд} few {# раунди} many {# раундів} other {# раунду}}",
   "battleStateChanged": "Стан бою змінився",
   "mazeDark": "Темрява — ніхто не може діяти",

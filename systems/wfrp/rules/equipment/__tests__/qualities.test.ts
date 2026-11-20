@@ -19,21 +19,27 @@ const IMPLEMENTED = [
     'fast',
     'blast',
     'pistol',
+    'blackpowder',
+    'entangle',
     'shield',
     'reload',
     'flexible',
+    'defensive',
+    'parry',
+    'wrap',
+    'inflict',
+    'unbalanced',
+    'bulky',
+    'lightweight',
 ];
 
 const STORED_ONLY = [
-    'defensive',
     'distract',
-    'entangle',
-    'wrap',
     'spread',
     'trapBlade',
     'unbreakable',
-    'inflict',
     'repeater',
+    'practical',
 ];
 
 describe('QUALITY_REGISTRY', () => {

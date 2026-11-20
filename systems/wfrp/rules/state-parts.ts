@@ -48,15 +48,17 @@ export const wfrpPersist: PersistPart = ({ participant }, acc) => ({
 export const wfrpResetState: TurnStateReset = (p, scope) => {
     if (scope !== 'turn') return p;
 
-    const { conditionTests, momentumAttack, lastHand, moveMode } = wfrpState(p);
+    const { conditionTests, momentumAttack, lastHand, moveMode, meleeHit } =
+        wfrpState(p);
 
     const cleared =
-        conditionTests || momentumAttack || lastHand || moveMode
+        conditionTests || momentumAttack || lastHand || moveMode || meleeHit
             ? withWfrpState(p, {
                   conditionTests: undefined,
                   momentumAttack: undefined,
                   lastHand: undefined,
                   moveMode: undefined,
+                  meleeHit: undefined,
               })
             : p;
 
@@ -74,9 +76,9 @@ export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
     if (!p || editionOf(rules).momentumModel !== 'participant')
         return { participants, messages: [] };
 
-    const { momentumAttack, lastHand, moveMode } = wfrpState(p);
+    const { momentumAttack, lastHand, moveMode, meleeHit } = wfrpState(p);
 
-    if (!momentumAttack && !lastHand && !moveMode)
+    if (!momentumAttack && !lastHand && !moveMode && !meleeHit)
         return { participants, messages: [] };
 
     return {
@@ -86,6 +88,7 @@ export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
                 momentumAttack: undefined,
                 lastHand: undefined,
                 moveMode: undefined,
+                meleeHit: undefined,
             })
         ),
         messages: [],

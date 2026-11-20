@@ -465,6 +465,7 @@
   "frenzyMeleeOnly": "Frenzied: only melee attacks are possible",
   "frenzyNoCast": "Frenzied: no spells can be cast",
   "hatredCompelled": "Hatred: must attack {group}",
+  "rangedGroupForbidden": "Cannot use a {group} ranged weapon without training in it",
   "abilityCooldown": "Cooldown: {rounds, plural, one {# round} other {# rounds}} left",
   "battleStateChanged": "The battle state changed",
   "mazeDark": "Darkness — nobody can act",

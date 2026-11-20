@@ -530,6 +530,7 @@ export const API_ERRORS = {
     FRENZY_MELEE_ONLY: 'errors.frenzyMeleeOnly',
     FRENZY_NO_CAST: 'errors.frenzyNoCast',
     HATRED_COMPELLED: 'errors.hatredCompelled',
+    RANGED_GROUP_FORBIDDEN: 'errors.rangedGroupForbidden',
     FATE_REACTION_NONE: 'errors.fateReactionNone',
     MOMENTUM_UNSUPPORTED: 'errors.momentumUnsupported',
     MOMENTUM_NONE: 'errors.momentumNone',

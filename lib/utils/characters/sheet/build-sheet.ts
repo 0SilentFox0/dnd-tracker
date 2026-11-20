@@ -142,6 +142,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     const systemSlot = system.characteristics.sheetBlock({
         characteristics: c.characteristics,
         resources: readResources(c.resources),
+        participant: p,
     });
 
     const blockCtx: SheetBlockCtx = {

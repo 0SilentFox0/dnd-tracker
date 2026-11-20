@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { bookExample } from './book-example';
 
 import '@/lib/server/systems/registry';
-import { AttackType, CombatStatus, EffectMarker } from '@/lib/constants/battle';
+import { AttackType, EffectMarker } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
@@ -54,6 +54,11 @@ const fighter = (id: string): BattleParticipant => {
                 {
                     ...DEFAULT_CHARACTERISTICS,
                     base: { ...DEFAULT_CHARACTERISTICS.base, ws: 30, bs: 30 },
+                    skillAdvances: {
+                        'ranged:bow': 1,
+                        'ranged:blackpowder': 1,
+                        'ranged:engineering': 1,
+                    },
                 },
                 { tb: 3 }
             ),
@@ -224,6 +229,37 @@ describe('canon: fumble (p165)', () => {
 
         expect(out.hp).toBeLessThan(20);
     });
+
+    bookExample(
+        165,
+        'misfire: the explosion deals the weapon damage to the shooter, less TB',
+        () => {
+            const attacker = fighter('a');
+
+            const target = fighter('t');
+
+            const rolls = [fraction(95), 0.1, 0.3];
+
+            const gun = {
+                ...weapon(AttackType.RANGED, 'blackpowder'),
+                damageBonus: 12,
+            } as BattleAttack;
+
+            const r = resolveWfrpAttack({
+                attacker,
+                target,
+                attack: gun,
+                participants: [attacker, target],
+                rules: canon,
+                rng: () => rolls.shift() ?? 0.5,
+                manualRoll: 99,
+            });
+
+            const after = r.attackerUpdate?.(attacker) ?? attacker;
+
+            expect(after.combatStats.currentHp).toBe(20 - (12 - 3));
+        }
+    );
 
     bookExample(165, 'a 99 on a bow is a normal fumble, not a misfire', () => {
         const out = run(canon, 99, { type: AttackType.RANGED, group: 'bow' });

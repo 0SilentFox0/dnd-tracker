@@ -39,6 +39,7 @@ export interface CharacterHpInput {
 export interface SheetBlockInput {
     characteristics: unknown;
     resources: CharacterResources;
+    participant?: BattleParticipant;
 }
 
 export interface SheetTestInput {
@@ -160,6 +161,10 @@ export interface ArmourGear {
     ap: Record<string, number>;
     armourOnly?: Record<string, number>;
     flexible?: boolean;
+    /** Overburden tier of the carried load, 0 = none */
+    burden?: number;
+    /** Shield rating carried, 0 = none */
+    shield?: number;
 }
 
 export interface UnitBuild {
@@ -193,7 +198,28 @@ export interface RuleSystemCurrency {
 }
 
 export interface RuleSystemEquipment {
-    armourAp(equipped: { slot: string; systemStats: unknown }[]): ArmourGear;
+    /** `rules` lets a system drop gear data the edition does not use */
+    armourAp(
+        equipped: { slot: string; systemStats: unknown }[],
+        rules?: Ruleset
+    ): ArmourGear;
+    /** Overburden tier from everything the character carries, 0 = none */
+    burden?(input: {
+        rows: {
+            id?: string;
+            slot: string;
+            systemStats: unknown;
+            carried?: true;
+        }[];
+        specials: {
+            artifactId?: string;
+            systemStats: unknown;
+            quantity: number;
+        }[];
+        coins: number;
+        characteristics: unknown;
+        rules: Ruleset;
+    }): number;
 }
 
 export type * from './types-actions';

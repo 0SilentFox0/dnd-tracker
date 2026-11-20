@@ -7,7 +7,7 @@ export interface PercentileAttackDetails {
     netSl: number;
     location: HitSpot;
     doubles: boolean;
-    /** A failed test that rolled a double (p165) */
+    /** A failed test that rolled a double (p165) or hit Dangerous (p305) */
     fumble?: true;
     defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
     momentumUsed?: boolean;

@@ -30,6 +30,23 @@ const SLOT: Record<HitLocation, TableSlot> = {
     leg: 'critLeg',
 };
 
+const ROUNDS_TERM = /^(\d+)d(\d+)(?:([+-])(\d+|TB))?$/;
+
+/** Rolls a `roundsDice` duration (min 1 round) */
+function rollRounds(expr: string, tb: number, rng: Rng): number {
+    const m = ROUNDS_TERM.exec(expr);
+
+    if (!m) return 1;
+
+    const dice = Array.from({ length: Number(m[1]) }, () =>
+        rollDie(Number(m[2]), rng)
+    ).reduce((a, b) => a + b, 0);
+
+    const offset = m[4] === 'TB' ? tb : Number(m[4] ?? 0);
+
+    return Math.max(1, dice + (m[3] === '-' ? -offset : offset));
+}
+
 export function rollCrit(
     location: HitLocation,
     rules: Pick<Ruleset, 'tables'>,
@@ -37,7 +54,8 @@ export function rollCrit(
     presetRoll?: number,
     /** +10 per Wound beyond what dropped the target to 0 (p171) */
     bonus = 0,
-    side?: HitSide
+    side?: HitSide,
+    tb = 0
 ): CritResult {
     const slot = SLOT[location];
 
@@ -78,10 +96,14 @@ export function rollCrit(
         else if (e.type === 'marker') {
             result.markers.push(e.key);
 
-            if (e.rounds)
+            const rounds = e.roundsDice
+                ? rollRounds(e.roundsDice, tb, rng)
+                : e.rounds;
+
+            if (rounds)
                 result.markerRounds = {
                     ...result.markerRounds,
-                    [e.key]: e.rounds,
+                    [e.key]: rounds,
                 };
         } else if (e.type === 'death') result.death = true;
     }

@@ -35,6 +35,8 @@ export interface EditionProfile {
     psychologyModel: 'broken' | 'extended';
     /** `legacy`: one endeavour per hero, Challenging tests, income by SL, rest wound recovery by days; `canon5e`: up to 3 endeavours, Income at Average (+2 SL) paid in dice by Status and halved on failure, Heal = IB + SL, a downtime period restores all Wounds (p170, p190, p196, p199) */
     downtimeModel: 'legacy' | 'canon5e';
+    /** `canon`: worn armour is 1 Enc lighter, coins weigh 1 Enc per 200, overburdened characters lose Movement and Agility (p299) */
+    gearModel: 'legacy' | 'canon';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -56,6 +58,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         fumbleModel: 'none',
         psychologyModel: 'broken',
         downtimeModel: 'legacy',
+        gearModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -75,5 +78,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         fumbleModel: 'drop',
         psychologyModel: 'extended',
         downtimeModel: 'canon5e',
+        gearModel: 'canon',
     },
 };

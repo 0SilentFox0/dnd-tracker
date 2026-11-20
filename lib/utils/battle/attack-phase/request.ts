@@ -241,6 +241,7 @@ export function validateAttackRequest(
         attack,
         targets: chosenTargets,
         participants: order,
+        rules,
     });
 
     if (data.cunningStrike?.length) {

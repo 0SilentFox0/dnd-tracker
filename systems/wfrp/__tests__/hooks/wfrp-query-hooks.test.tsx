@@ -12,7 +12,6 @@ import {
     useDeleteCareer,
     useUpdateCareer,
 } from '@/systems/wfrp/hooks/careers';
-import { encumbranceItemsOf } from '@/systems/wfrp/hooks/useEncumbrance';
 import {
     useRaceProfiles,
     useSaveRaceProfile,
@@ -205,29 +204,5 @@ describe('useWfrpSpecies', () => {
         expect(
             renderHook(() => useWfrpSpecies({ enabled: true })).result.current
         ).toEqual([]);
-    });
-});
-
-describe('encumbranceItemsOf', () => {
-    it('weighs grid and backpack once and resolves special items by artifact', () => {
-        const grid = [{ id: 'a', systemStats: { w: 1 } }] as never;
-
-        const backpack = [{ id: 'b', systemStats: { w: 2 } }] as never;
-
-        const specials = [
-            { artifactId: 'b', quantity: 3 },
-            { artifactId: null, quantity: 2 },
-            { artifactId: 'missing', quantity: 1 },
-        ] as never;
-
-        const items = encumbranceItemsOf(grid, backpack, specials);
-
-        expect(items).toEqual([
-            { systemStats: { w: 1 }, quantity: 1 },
-            { systemStats: { w: 2 }, quantity: 1 },
-            { systemStats: { w: 2 }, quantity: 3 },
-            { systemStats: undefined, quantity: 2 },
-            { systemStats: undefined, quantity: 1 },
-        ]);
     });
 });

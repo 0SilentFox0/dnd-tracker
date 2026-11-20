@@ -5,6 +5,8 @@ import { rollSlot, rowText } from '../tables/resolve';
 import type { TableEffect, TableSlot } from '../tables/schema';
 import { applyWfrpCrit } from './crit-effect';
 import type { CritResult } from './crit-table';
+import { computeWfrpDamage } from './damage';
+import { apAt, participantStats } from './participant';
 
 import { EffectMarker } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -41,6 +43,24 @@ export const fumbleModelOf = (
     edition.fumbleModel === 'drop' && rules.tables.oops
         ? 'oops'
         : edition.fumbleModel;
+
+export interface BlastWeapon {
+    weapon: number;
+    noSb?: boolean;
+}
+
+/** Misfire catastrophe: the weapon's full Damage (+0 SL) to the primary arm, reduced by TB and arm AP (p165) */
+const blastWounds = (attacker: BattleParticipant, blast: BlastWeapon) => {
+    const stats = participantStats(attacker);
+
+    return computeWfrpDamage({
+        weapon: blast.weapon,
+        sb: blast.noSb ? 0 : (stats?.sb ?? 0),
+        netSl: 0,
+        tb: stats?.tb ?? 0,
+        ap: apAt(stats, 'arm'),
+    }).total;
+};
 
 const timed = (
     p: BattleParticipant,
@@ -125,11 +145,18 @@ function tableOutcome(
     attacker: BattleParticipant,
     rules: Pick<Ruleset, 'tables'>,
     edition: FumbleEdition,
-    rng: Rng
+    rng: Rng,
+    blast?: BlastWeapon
 ): FumbleOutcome {
     const { row, roll } = rollSlot(rules, slot, rng);
 
     const text = rowText(row);
+
+    const exploded =
+        blast &&
+        row.effects.some(
+            (e) => e.type === 'fumble' && e.kind === 'weaponDamage'
+        );
 
     return {
         update: (p) =>
@@ -137,10 +164,12 @@ function tableOutcome(
                 (acc, e) => applyEffect(acc, e, { edition, rng, text }),
                 p
             ),
-        wounds: row.effects.reduce(
-            (sum, e) => (e.type === 'wounds' ? sum + e.amount : sum),
-            0
-        ),
+        wounds: exploded
+            ? blastWounds(attacker, blast)
+            : row.effects.reduce(
+                  (sum, e) => (e.type === 'wounds' ? sum + e.amount : sum),
+                  0
+              ),
         lines: [
             textRef(`battleWfrp.log.${key}`, {
                 name: attacker.basicInfo.name,
@@ -159,8 +188,9 @@ export function fumbleOutcome(input: {
     edition: FumbleEdition;
     rules: Pick<Ruleset, 'tables'>;
     rng: Rng;
+    blast?: BlastWeapon;
 }): FumbleOutcome | undefined {
-    const { details, attacker, group, edition, rules, rng } = input;
+    const { details, attacker, group, edition, rules, rng, blast } = input;
 
     const model = fumbleModelOf(edition, rules);
 
@@ -173,7 +203,8 @@ export function fumbleOutcome(input: {
             attacker,
             rules,
             edition,
-            rng
+            rng,
+            blast
         );
 
     if (model === 'oops')

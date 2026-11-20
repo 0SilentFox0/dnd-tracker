@@ -1,5 +1,6 @@
-import { moveOf, runYards } from '../characteristics/derive';
+import { moveOf } from '../characteristics/derive';
 import type { Characteristics } from '../characteristics/keys';
+import { burdenedMove, type BurdenTier } from '../equipment/encumbrance';
 
 const FEET_PER_YARD = 3;
 
@@ -10,13 +11,19 @@ export type ChargeBand = 'far' | 'momentum' | 'near';
 /** Charge (p163): beyond Run range it is impossible; from at least Move yards away the charger gains Momentum */
 export function chargeBand(
     c: Characteristics,
-    distanceYards: number
+    distanceYards: number,
+    tier: BurdenTier = 0
 ): ChargeBand {
-    if (distanceYards > runYards(c)) return 'far';
+    const move = burdenedMove(moveOf(c), tier);
 
-    return distanceYards >= moveOf(c) ? 'momentum' : 'near';
+    if (distanceYards > move * 4) return 'far';
+
+    return distanceYards >= move ? 'momentum' : 'near';
 }
 
 /** Sprint (p163): Run yards plus the SL of the Athletics test, on top of the turn's Move */
-export const sprintYards = (c: Characteristics, sl: number): number =>
-    runYards(c) + Math.max(0, sl);
+export const sprintYards = (
+    c: Characteristics,
+    sl: number,
+    tier: BurdenTier = 0
+): number => burdenedMove(moveOf(c), tier) * 4 + Math.max(0, sl);

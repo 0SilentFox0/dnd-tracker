@@ -8,6 +8,10 @@ import { NumberField } from './NumberField';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import {
+    WFRP_CONDITION_KEYS,
+    type WfrpConditionKey,
+} from '@/systems/wfrp/constants/conditions';
+import {
     QUALITY_KEYS,
     QUALITY_REGISTRY,
     QUALITY_VALUE_MAX,
@@ -34,6 +38,13 @@ export function QualityListEditor({
 
     const tq = useTranslations('wfrpEquipment.qualities');
 
+    const tc = useTranslations('battleWfrp.conditions');
+
+    const conditionOptions = WFRP_CONDITION_KEYS.map((k) => ({
+        value: k,
+        label: tc(`${k}.label`),
+    }));
+
     const [pick, setPick] = useState('');
 
     const options = QUALITY_KEYS.filter(
@@ -48,7 +59,13 @@ export function QualityListEditor({
 
         onChange([
             ...value,
-            QUALITY_REGISTRY[key].hasValue ? { key, value: 1 } : { key },
+            {
+                key,
+                ...(QUALITY_REGISTRY[key].hasValue && { value: 1 }),
+                ...(key === 'inflict' && {
+                    condition: WFRP_CONDITION_KEYS[0],
+                }),
+            },
         ]);
         setPick('');
     };
@@ -57,7 +74,11 @@ export function QualityListEditor({
         onChange(
             value.map((r, i) =>
                 i === index
-                    ? { key: r.key, ...(next !== undefined && { value: next }) }
+                    ? {
+                          key: r.key,
+                          ...(r.condition && { condition: r.condition }),
+                          ...(next !== undefined && { value: next }),
+                      }
                     : r
             )
         );
@@ -75,6 +96,29 @@ export function QualityListEditor({
                             <span className="min-w-0 flex-1 self-center text-sm">
                                 {tq(r.key)}
                             </span>
+                            {r.condition && (
+                                <div className="w-32">
+                                    <SelectField
+                                        id={`${id}-${r.key}-condition`}
+                                        value={r.condition}
+                                        onValueChange={(c) =>
+                                            onChange(
+                                                value.map((x, j) =>
+                                                    j === i
+                                                        ? {
+                                                              ...x,
+                                                              condition:
+                                                                  c as WfrpConditionKey,
+                                                          }
+                                                        : x
+                                                )
+                                            )
+                                        }
+                                        options={conditionOptions}
+                                        triggerClassName="min-h-11 w-full"
+                                    />
+                                </div>
+                            )}
                             {QUALITY_REGISTRY[r.key].hasValue && (
                                 <div className="w-24">
                                     <NumberField
