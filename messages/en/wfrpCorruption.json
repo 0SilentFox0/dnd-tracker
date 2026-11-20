@@ -29,7 +29,19 @@
     "result": "Result",
     "undo": "Undo",
     "undoConfirm": "Undo the last corruption grant?",
-    "undone": "Undone"
+    "undone": "Undone",
+    "manual": "Enter points manually",
+    "degree": "Exposure degree",
+    "skill": "Test",
+    "degrees": {
+      "minor": "Minor",
+      "moderate": "Moderate",
+      "major": "Major"
+    },
+    "skills": {
+      "endurance": "Endurance (physical)",
+      "cool": "Cool (spiritual)"
+    }
   },
   "summary": {
     "noTest": "No test needed",
@@ -39,7 +51,8 @@
     "mutation": "New mutation",
     "typeRoll": "Kind (d100): {roll}",
     "capped": "Mutation limit reached",
-    "pointsCapped": "Points capped"
+    "pointsCapped": "Points capped",
+    "exposure": "Exposure ({degree}), {skill}: {roll} vs {target}, SL {sl} → {points} pts"
   },
   "mutations": {
     "physical": {

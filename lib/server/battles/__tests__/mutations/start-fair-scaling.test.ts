@@ -1,3 +1,7 @@
+vi.mock('@/lib/server/battles/participant-sources', () => ({
+    assertJoinGuards: vi.fn(async () => undefined),
+}));
+
 import { describe, expect, it, vi } from 'vitest';
 
 import '@/lib/server/systems/registry';

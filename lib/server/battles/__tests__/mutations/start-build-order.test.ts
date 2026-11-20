@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ fromCharacter: vi.fn(), fromUnit: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+    fromCharacter: vi.fn(),
+    fromUnit: vi.fn(),
+    assertJoinGuards: vi.fn(async () => undefined),
+}));
 
 vi.mock('@/lib/db', () => ({
     prisma: {
@@ -22,6 +26,9 @@ vi.mock('@/lib/server/battles/mutations/start/start-fair-scaling', () => ({
                 battleData: { ...p.battleData, hpMultiplier: 1.5 },
             }))
     ),
+}));
+vi.mock('@/lib/server/battles/participant-sources', () => ({
+    assertJoinGuards: mocks.assertJoinGuards,
 }));
 vi.mock('@/lib/server/battles/participant/from-character', () => ({
     createBattleParticipantFromCharacter: mocks.fromCharacter,
@@ -113,5 +120,24 @@ describe('buildStartOrder: резерв', () => {
 
         expect(order.map((p) => p.basicInfo.id)).not.toContain('foreign');
         expect(mocks.fromCharacter).not.toHaveBeenCalled();
+    });
+});
+
+describe('buildStartOrder: join guards', () => {
+    it('a rejected join guard aborts the start', async () => {
+        mocks.assertJoinGuards.mockRejectedValueOnce(new Error('soul lost'));
+
+        await expect(
+            buildStartOrder(
+                'b1',
+                'c1',
+                [{ id: 'h1', type: 'character', side: 'ally' }],
+                null,
+                DEFAULT_RULES
+            )
+        ).rejects.toThrow('soul lost');
+        expect(mocks.assertJoinGuards).toHaveBeenCalledWith('c1', [
+            { id: 'h1' },
+        ]);
     });
 });

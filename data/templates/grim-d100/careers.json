@@ -1229,7 +1229,7 @@
     ],
     "tier1_skills": [
       "melee:basic",
-      "melee:parry",
+      "melee:polearm",
       "endurance",
       "athletics",
       "cool"
@@ -1291,7 +1291,7 @@
     "tier4_skills": [
       "leadership",
       "cool",
-      "melee:parry"
+      "melee:polearm"
     ],
     "tier4_talents": [
       "Veteran's Poise",
@@ -1358,7 +1358,7 @@
     ],
     "tier3_skills": [
       "leadership",
-      "melee:parry",
+      "melee:polearm",
       "dodge"
     ],
     "tier3_talents": [
@@ -1388,6 +1388,193 @@
     "tier4_trappings": [
       "Company seal",
       "Fine boots"
+    ]
+  },
+  {
+    "slug": "emissary",
+    "name": "Emissary",
+    "class": "Courtier",
+    "tier1_name": "Dispatch Bearer",
+    "tier1_status": "Silver 2",
+    "tier1_characteristics": [
+      "t",
+      "int",
+      "fel"
+    ],
+    "tier1_skills": [
+      "art:writing",
+      "athletics",
+      "charm",
+      "dodge",
+      "drive",
+      "endurance",
+      "haggle",
+      "lore:heraldry",
+      "lore:politics",
+      "ride"
+    ],
+    "tier1_talents": [
+      "Fast Talker",
+      "Court Manners",
+      "Lettered",
+      "Winning Ways"
+    ],
+    "tier1_trappings": [
+      "Sealed dispatch case",
+      "Travel cloak",
+      "Stick of sealing wax"
+    ],
+    "tier2_name": "Emissary",
+    "tier2_status": "Silver 4",
+    "tier2_characteristics": [
+      "i"
+    ],
+    "tier2_skills": [
+      "bribery",
+      "cool",
+      "entertain",
+      "gossip",
+      "intuition",
+      "language:old-script"
+    ],
+    "tier2_talents": [
+      "Court Manners",
+      "Easy Talker",
+      "Tongue for Tongues",
+      "Road-Worn"
+    ],
+    "tier2_trappings": [
+      "Courier badge",
+      "Folding route map"
+    ],
+    "tier3_name": "Plenipotentiary",
+    "tier3_status": "Gold 2",
+    "tier3_characteristics": [
+      "wp"
+    ],
+    "tier3_skills": [
+      "drink",
+      "intimidate",
+      "language:trade-cant",
+      "leadership"
+    ],
+    "tier3_talents": [
+      "Silver Tongue",
+      "Haggler's Instinct"
+    ],
+    "tier3_trappings": [
+      "Fine formal coat",
+      "Signet ring",
+      "Bundle of credentials"
+    ],
+    "tier4_name": "Grand Legate",
+    "tier4_status": "Gold 5",
+    "tier4_characteristics": [
+      "dex"
+    ],
+    "tier4_skills": [
+      "lore:law",
+      "signs"
+    ],
+    "tier4_talents": [
+      "Parade-Ground Voice"
+    ],
+    "tier4_trappings": [
+      "Letters patent",
+      "Ornate seal",
+      "Dress boots"
+    ]
+  },
+  {
+    "slug": "quarry-taker",
+    "name": "Quarry Taker",
+    "class": "Ranger",
+    "tier1_name": "Warrant Runner",
+    "tier1_status": "Silver 1",
+    "tier1_characteristics": [
+      "ws",
+      "s",
+      "ag"
+    ],
+    "tier1_skills": [
+      "athletics",
+      "charm",
+      "cool",
+      "gossip",
+      "haggle",
+      "intuition",
+      "melee:basic",
+      "perception",
+      "lockpicking",
+      "stealth"
+    ],
+    "tier1_talents": [
+      "Lock Whisperer",
+      "Cudgel Work",
+      "Winning Ways"
+    ],
+    "tier1_trappings": [
+      "Manacles",
+      "Warrant scroll",
+      "Stout cudgel"
+    ],
+    "tier2_name": "Quarry Taker",
+    "tier2_status": "Silver 3",
+    "tier2_characteristics": [
+      "bs"
+    ],
+    "tier2_skills": [
+      "bribery",
+      "endurance",
+      "intimidate",
+      "survival",
+      "ranged:crossbow",
+      "track"
+    ],
+    "tier2_talents": [
+      "Road-Worn",
+      "Oarsman's Back"
+    ],
+    "tier2_trappings": [
+      "Light crossbow",
+      "Snare net",
+      "Hound leash",
+      "Waxed coat",
+      "Trail map"
+    ],
+    "tier3_name": "Master Taker",
+    "tier3_status": "Silver 5",
+    "tier3_characteristics": [
+      "t"
+    ],
+    "tier3_skills": [
+      "animal-care",
+      "climb",
+      "ride",
+      "swim"
+    ],
+    "tier3_talents": [
+      "Steady Aim"
+    ],
+    "tier3_trappings": [
+      "Saddle and bridle",
+      "Writ of commission"
+    ],
+    "tier4_name": "Warrant Marshal",
+    "tier4_status": "Gold 1",
+    "tier4_characteristics": [
+      "wp"
+    ],
+    "tier4_skills": [
+      "drive",
+      "lore:law"
+    ],
+    "tier4_talents": [
+      "Tough Hide"
+    ],
+    "tier4_trappings": [
+      "Marshal's badge",
+      "Sealed ledger"
     ]
   }
 ]

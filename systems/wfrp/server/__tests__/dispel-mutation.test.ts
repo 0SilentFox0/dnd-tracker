@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dispelMutation } from '../battle/dispel-mutation';
+import { dispelMutation, dispelSchema } from '../battle/dispel-mutation';
 import { malignantMutation } from '../battle/malignant-mutation';
 
 import '@/lib/server/systems/registry';
@@ -10,7 +10,6 @@ import {
     participant,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
-import { bookExample } from '@/systems/wfrp/__tests__/canon/book-example';
 import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
@@ -50,51 +49,34 @@ const ctxOf = (
     return { ...c, meta: { ...c.meta, rules: rulesOf(preset) } };
 };
 
-const body = { participantId: 'hero', targetId: 'foe', mode: 'reactive' } as const;
+const body = {
+    participantId: 'hero',
+    targetId: 'foe',
+    mode: 'persistent',
+} as const;
 
 const find = (out: { participants: BattleParticipant[] }, id: string) =>
     out.participants.find((p) => p.basicInfo.id === id)!;
 
 describe('Dispel action', () => {
-    bookExample(237, 'a won opposed test clears the last cast and uses the round', () => {
-        const out = dispelMutation(ctxOf([hero(), foe()]), { ...body, roll: 10 });
-
-        expect(wfrpState(find(out, 'foe')).lastCast).toBeUndefined();
-        expect(wfrpState(find(out, 'hero')).dispelRound).toBeDefined();
-        expect(out.events).toHaveLength(1);
-    });
-
-    it('only one reactive attempt per round', () => {
-        const c = ctxOf([hero(), foe()]);
-
-        const used = withWfrpState(hero(), { dispelRound: c.scene.round });
-
-        expect(() =>
-            dispelMutation(ctxOf([used, foe()]), { ...body, roll: 10 })
-        ).toThrow('errors.dispelUsed');
-    });
-
-    it('needs a spell to dispel', () => {
-        const bare = participant('foe', { side: ParticipantSide.ENEMY });
-
-        expect(() =>
-            dispelMutation(ctxOf([hero(), bare]), { ...body, roll: 10 })
-        ).toThrow('errors.dispelNoTarget');
+    it('reactive mode is gone: a reactive Dispel is an offer in the cast window', () => {
+        expect(
+            dispelSchema.safeParse({ ...body, mode: 'reactive' }).success
+        ).toBe(false);
     });
 
     it('a persistent attempt needs a held spell with a CN', () => {
         expect(() =>
-            dispelMutation(ctxOf([hero(), foe()]), {
-                ...body,
-                mode: 'persistent',
-                roll: 10,
-            })
-        ).toThrow();
+            dispelMutation(ctxOf([hero(), foe()]), { ...body, roll: 10 })
+        ).toThrow('errors.dispelNoTarget');
     });
 
     it('is unavailable outside canon5e', () => {
         expect(() =>
-            dispelMutation(ctxOf([hero(), foe()], 'legacy'), { ...body, roll: 10 })
+            dispelMutation(ctxOf([hero(), foe()], 'legacy'), {
+                ...body,
+                roll: 10,
+            })
         ).toThrow();
     });
 });

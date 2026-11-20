@@ -11,6 +11,7 @@ import {
     wfrpCastTest,
 } from './cast-test';
 import { channelTargetOf, wfrpChannel } from './channel';
+import { wfrpCastReaction } from './dispel-reaction';
 import { wfrpMiscast } from './miscast';
 
 import { textRef } from '@/lib/i18n/text-ref';
@@ -82,6 +83,7 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
     miscast: wfrpMiscast,
     attribute: wfrpLoreAttribute,
     badge: channelBadge,
+    reaction: wfrpCastReaction,
 };
 
 export const WFRP_MAGIC: RuleSystemMagic = {

@@ -1,12 +1,16 @@
+import type { AppMessageKey } from '@/lib/i18n/text-ref';
 import type { SpellRequestData } from '@/lib/schemas/battles';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 
 export interface CounterOffer {
     reactorId: string;
-    spellId: string;
+    spellId?: string;
     grantKey?: string;
     slotLevels: number[];
     dm: boolean;
     answer?: 'pass' | 'failed';
+    /** Answered by the rule system's cast reaction instead of a counter spell */
+    system?: { label: AppMessageKey };
 }
 
 export interface ShownCounter {
@@ -26,6 +30,8 @@ export interface HiddenCounter {
     userId: string;
     isDM: boolean;
     attempts: number;
+    /** The system's view of the held cast, given back to its reaction; never sent to clients */
+    system?: SystemSlot;
 }
 
 export interface InterruptSpell {

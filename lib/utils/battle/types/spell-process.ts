@@ -55,6 +55,8 @@ export interface CastSpellParams {
     ingredientUsed?: boolean;
     castTest?: { roll?: number; serverRoll?: true; system?: SystemSlot };
     dryRun?: boolean;
+    /** Name of who cancelled a tested cast after its roll: the cost is paid, nothing lands */
+    cancelledBy?: string;
 }
 
 export interface CastSpellResult {

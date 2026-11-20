@@ -14,29 +14,72 @@ export const GRIM_SPELL_KINDS = [
     'arcane',
     'hedge',
     'witchcraft',
+    'chaos',
     'blessing',
     'miracle',
 ] as const satisfies readonly SpellMagicKind[];
 
 export type GrimSpellKind = (typeof GRIM_SPELL_KINDS)[number];
 
+export const GRIM_DARK_LISTS = ['Pact Rites', 'Grave Rites'] as const;
+
+export const GRIM_CORE_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> =
+    {
+        petty: ['Cantrips'],
+        arcane: ['School of Embers', 'School of Gloam'],
+        hedge: ['Fenlore'],
+        witchcraft: ['Thornwitchery'],
+        chaos: [...GRIM_DARK_LISTS],
+        blessing: ['Hearth Rites'],
+        miracle: ['Hearth Rites'],
+    };
+
+export const GRIM_ARCANE_LISTS = [
+    'School of Embers',
+    'School of Gloam',
+    'School of Radiance',
+    'School of Alloy',
+    'School of Verdance',
+    'School of Firmament',
+    'School of Dusk',
+    'School of Wilds',
+    'Common Arcana',
+] as const;
+
+export const GRIM_CULT_LISTS = [
+    'Hearth Rites',
+    'Rites of the Tide',
+    'Rites of the Still Hour',
+    'Rites of the Banner',
+    'Rites of the Gambler',
+    'Rites of the Green Cradle',
+    'Rites of Mercy',
+    'Rites of the Forged Crown',
+    'Rites of the Deep Wood',
+    'Rites of the Winter Wolf',
+    'Rites of the Scales',
+    'Rites of the Forge-Fathers',
+] as const;
+
 export const GRIM_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> = {
     petty: ['Cantrips'],
-    arcane: ['School of Embers', 'School of Gloam'],
+    arcane: GRIM_ARCANE_LISTS,
     hedge: ['Fenlore'],
     witchcraft: ['Thornwitchery'],
-    blessing: ['Hearth Rites'],
-    miracle: ['Hearth Rites'],
+    chaos: GRIM_DARK_LISTS,
+    blessing: GRIM_CULT_LISTS,
+    miracle: GRIM_CULT_LISTS,
 };
 
 export const SPELL_CN_BANDS: Record<GrimSpellKind, readonly [number, number]> =
     {
-        petty: [0, 2],
-        arcane: [3, 12],
-        hedge: [3, 12],
-        witchcraft: [3, 12],
+        petty: [0, 0],
+        arcane: [0, 20],
+        hedge: [0, 12],
+        witchcraft: [3, 18],
+        chaos: [3, 18],
         blessing: [0, 0],
-        miracle: [6, 14],
+        miracle: [0, 0],
     };
 
 export const SPELL_KEYS: readonly string[] = [
@@ -53,13 +96,16 @@ export const SPELL_KEYS: readonly string[] = [
     'ingredients',
     'componentFlags',
     'lists',
+    'executionMode',
+    // native rows only
+    'concentration',
 ];
 
 export const INGREDIENT_PENCE = [6, 240] as const;
 
 const PENCE_PER_GP = 240;
 
-const INGREDIENT_KINDS: readonly string[] = ['arcane', 'hedge', 'witchcraft'];
+const INGREDIENT_KINDS: readonly string[] = ['arcane', 'hedge', 'witchcraft', 'chaos'];
 
 export const FORBIDDEN_CONDITIONS: readonly string[] = [
     'unconscious',
@@ -274,8 +320,18 @@ export function spellIssues(row: Row): string[] {
     if (kind) {
         const allowed = GRIM_SPELL_LISTS[kind];
 
-        if (lists.length !== 1 || !allowed.includes(String(lists[0])))
-            issues.push(`lists must be one of: ${allowed.join(', ')}`);
+        const strings = lists.map(String);
+
+        const bad =
+            lists.length < 1 ||
+            (kind !== 'blessing' && lists.length !== 1) ||
+            new Set(strings).size !== strings.length ||
+            strings.some((name) => !allowed.includes(name));
+
+        if (bad)
+            issues.push(
+                `lists must be ${kind === 'blessing' ? 'unique entries of' : 'one of'}: ${allowed.join(', ')}`
+            );
     }
 
     const effects = Array.isArray(row.spellEffects) ? row.spellEffects : [];
@@ -284,14 +340,38 @@ export function spellIssues(row: Row): string[] {
 
     const dice = typeof row.dice === 'number' ? row.dice : 0;
 
-    if (effects.length > 0 !== dice >= 1)
-        issues.push('dice must be ≥ 1 exactly when the spell has an effect');
-
     const attribute =
         magic && isRecord(magic.attribute) ? magic.attribute : null;
 
-    if (effects.length === 0 && !attribute)
-        issues.push('spell has neither an effect nor an attribute');
+    const manual = row.executionMode === 'manual';
+
+    if (
+        row.executionMode !== undefined &&
+        row.executionMode !== 'native' &&
+        !manual
+    )
+        issues.push('executionMode must be "native" or "manual"');
+
+    if (
+        row.concentration !== undefined &&
+        (typeof row.concentration !== 'boolean' || manual)
+    )
+        issues.push('concentration must be a boolean on a native spell');
+
+    if (manual) {
+        if (effects.length > 0 || attribute || dice !== 0)
+            issues.push(
+                'manual spells carry no effect, attribute or dice (the table resolves them)'
+            );
+    } else {
+        if (effects.length > 0 !== dice >= 1)
+            issues.push(
+                'dice must be ≥ 1 exactly when the spell has an effect'
+            );
+
+        if (effects.length === 0 && !attribute)
+            issues.push('spell has neither an effect nor an attribute');
+    }
 
     if (attribute) {
         const condition = String(attribute.condition);
@@ -304,7 +384,7 @@ export function spellIssues(row: Row): string[] {
             issues.push(`attribute condition "${condition}" is not allowed`);
     }
 
-    if (row.targeting !== undefined || effects.length > 0 || attribute)
+    if (!manual && (row.targeting !== undefined || effects.length > 0 || attribute))
         targetingIssues(row.targeting, effect, !!attribute, issues);
 
     const upcast = row.upcastDice;
@@ -350,13 +430,11 @@ export function unitSpellIssues(unit: Row, spells: Map<string, Row>): string[] {
 
         if (!magic) return [];
 
-        const cn = magic.kind === 'blessing' ? 0 : magic.cn;
-
         const ceiling = castCeiling(unit, magic.kind);
 
-        return cn > ceiling
+        return magic.cn > ceiling
             ? [
-                  `knownSpells "${name}" CN ${cn} is above the best SL ${ceiling} this unit can reach`,
+                  `knownSpells "${name}" CN ${magic.cn} is above the best SL ${ceiling} this unit can reach`,
               ]
             : [];
     });

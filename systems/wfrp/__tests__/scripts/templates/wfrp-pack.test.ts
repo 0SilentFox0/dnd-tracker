@@ -243,6 +243,26 @@ describe('validatePack: wfrp', () => {
         expect(careerSkillIssue('perception')).toBeNull();
     });
 
+    it('requires earningSkill to be a valid tier skill', () => {
+        const data = load();
+
+        data.careers[0].tier1_skills = ['perception'];
+        data.careers[0].tier1_earningSkill = 'perception';
+        expect(
+            issuesOf(data).filter((i) => i.includes('earningSkill'))
+        ).toEqual([]);
+
+        data.careers[0].tier1_earningSkill = 'dodge';
+        expect(issuesOf(data)).toContain(
+            'careers #1 "Vermin Hunter": tier1_earningSkill "dodge" is not one of the tier skills'
+        );
+
+        data.careers[0].tier1_earningSkill = 'sailing';
+        expect(issuesOf(data)).toContain(
+            'careers #1 "Vermin Hunter": tier1_earningSkill "sailing" unknown skill'
+        );
+    });
+
     it('rejects a malformed tier status', () => {
         const data = load();
 
@@ -660,14 +680,14 @@ describe('validatePack: wfrp spells', () => {
             'casting.magic is required',
         ],
         [
-            'a chaos kind',
-            (d) => (d.spells[0].casting.magic.kind = 'chaos'),
-            'kind "chaos" is not used by Grim spells',
+            'an unknown kind',
+            (d) => (d.spells[0].casting.magic.kind = 'bogus'),
+            'kind "bogus" is not used by Grim spells',
         ],
         [
             'a CN above the band',
             (d) => (d.spells[0].casting.magic.cn = 3),
-            'CN 3 is outside 0–2 for petty',
+            'CN 3 is outside 0–0 for petty',
         ],
         [
             'petty dice overcast',
@@ -811,8 +831,8 @@ describe('validatePack: wfrp artifacts', () => {
         ],
         [
             'an unused group',
-            (s) => (s.systemStats.group = 'explosives'),
-            w + 'group "explosives" is not used by Grim items',
+            (s) => (s.systemStats.group = 'entangling'),
+            w + 'group "entangling" is not used by Grim items',
         ],
         [
             'an unimplemented quality',
@@ -832,12 +852,12 @@ describe('validatePack: wfrp artifacts', () => {
         [
             'a price above the band',
             (s) => (s.systemStats.price = 5000),
-            w + 'price 5000 p is outside 6–480 p for basic',
+            w + 'price 5000 p is outside 6–1440 p for basic',
         ],
         [
             'a fractional price',
             (s) => (s.systemStats.price = 10.5),
-            w + 'price 10.5 p is outside 6–480 p for basic',
+            w + 'price 10.5 p is outside 6–1440 p for basic',
         ],
         [
             'reload without ammoCapacity',

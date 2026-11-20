@@ -27,7 +27,12 @@ export function UndoableResultDialog({
     labels: UndoableResultDialogLabels;
     result: ReactNode | null;
     submit: { onClick: () => void; disabled: boolean };
-    undo: { onConfirm: () => Promise<void>; pending: boolean; done: boolean };
+    undo: {
+        onConfirm: () => Promise<void>;
+        pending: boolean;
+        done: boolean;
+        hidden?: boolean;
+    };
     onClosed?: () => void;
     children: ReactNode;
 }) {
@@ -65,14 +70,16 @@ export function UndoableResultDialog({
                 title={labels.title}
                 footer={
                     result ? (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            disabled={undo.done || undo.pending}
-                            onClick={revert}
-                        >
-                            {undo.done ? labels.undone : labels.undo}
-                        </Button>
+                        undo.hidden ? null : (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={undo.done || undo.pending}
+                                onClick={revert}
+                            >
+                                {undo.done ? labels.undone : labels.undo}
+                            </Button>
+                        )
                     ) : (
                         <Button
                             type="button"

@@ -135,7 +135,7 @@ export interface WfrpParticipantState {
     channelledNow?: true;
     /** SL lost to a channelling mishap: the next miscast roll gets +10 per SL (canon5e, p236) */
     miscastSl?: number;
-    /** The spell cast last, until the caster's next turn: the target of a reactive Dispel (canon5e, p237) */
+    /** The spell cast last, until the caster's next turn: read by the reactive Dispel window (canon5e, p237) */
     lastCast?: LastCast;
     /** Persistent Dispel in progress: SL gathered against the held spell (canon5e, p237) */
     dispelProgress?: { targetId: string; castId: string; progress: number };
@@ -165,6 +165,8 @@ export interface WfrpParticipantState {
 export interface LastCast {
     spell: string;
     sl: number;
+    at?: { x: number; y: number };
+    targets?: { x: number; y: number }[];
     critBonus?: 'criticalDamage' | 'totalPower' | 'unstoppableForce';
 }
 
@@ -264,6 +266,22 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                     lastCast: {
                         spell: raw.lastCast.spell,
                         sl: raw.lastCast.sl,
+                        ...(isRecord(raw.lastCast.at) &&
+                            finite(raw.lastCast.at.x) &&
+                            finite(raw.lastCast.at.y) && {
+                                at: {
+                                    x: raw.lastCast.at.x,
+                                    y: raw.lastCast.at.y,
+                                },
+                            }),
+                        ...(Array.isArray(raw.lastCast.targets) && {
+                            targets: raw.lastCast.targets.flatMap(
+                                (t: unknown) =>
+                                    isRecord(t) && finite(t.x) && finite(t.y)
+                                        ? [{ x: t.x, y: t.y }]
+                                        : []
+                            ),
+                        }),
                         ...((raw.lastCast.critBonus === 'criticalDamage' ||
                             raw.lastCast.critBonus === 'totalPower' ||
                             raw.lastCast.critBonus === 'unstoppableForce') && {

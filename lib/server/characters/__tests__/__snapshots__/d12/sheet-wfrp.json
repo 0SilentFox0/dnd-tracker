@@ -114,6 +114,22 @@
           "kind": "basic"
         },
         {
+          "key": "bribery",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "charm-animal",
+          "characteristic": "wp",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
           "key": "charm",
           "characteristic": "fel",
           "target": 30,
@@ -232,7 +248,7 @@
           "target": 30,
           "advances": 0,
           "trained": true,
-          "kind": "advanced"
+          "kind": "basic"
         },
         {
           "key": "navigation",
@@ -283,15 +299,15 @@
           "kind": "basic"
         },
         {
-          "key": "swim",
-          "characteristic": "s",
+          "key": "animal-care",
+          "characteristic": "int",
           "target": 30,
           "advances": 0,
-          "trained": true,
-          "kind": "basic"
+          "trained": false,
+          "kind": "advanced"
         },
         {
-          "key": "animal-care",
+          "key": "animal-training",
           "characteristic": "int",
           "target": 30,
           "advances": 0,
@@ -347,8 +363,16 @@
           "kind": "advanced"
         },
         {
+          "key": "sail",
+          "characteristic": "ag",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
           "key": "signs",
-          "characteristic": "i",
+          "characteristic": "int",
           "target": 30,
           "advances": 0,
           "trained": false,
@@ -357,6 +381,14 @@
         {
           "key": "sleight-of-hand",
           "characteristic": "dex",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "swim",
+          "characteristic": "s",
           "target": 30,
           "advances": 0,
           "trained": false,

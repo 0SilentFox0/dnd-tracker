@@ -107,10 +107,24 @@ describe('rollCrit with rules.tables', () => {
             id: 'leg.5',
             text: dynamicTextRef('battleWfrp.crit.leg.5'),
             bonusDamage: 4,
-            conditions: [],
+            conditions: [{ key: 'prone', levels: 1 }],
             markers: ['crippled'],
             death: false,
         });
+    });
+
+    it('shipped arm rows: wrenched arm is timed, dislocated shoulder stays until reset', () => {
+        const wrenched = rollCrit('arm', withTables({}), rng, 55);
+
+        expect(wrenched.markers).toEqual(['disarmed']);
+        expect(wrenched.markerRounds).toBeUndefined();
+        expect(wrenched.markerRoundsRolled?.disarmed).toBeDefined();
+
+        const shoulder = rollCrit('arm', withTables({}), rng, 100);
+
+        expect(shoulder.markers).toEqual(['disarmed']);
+        expect(shoulder.markerRounds).toBeUndefined();
+        expect(shoulder.markerRoundsRolled).toBeUndefined();
     });
 
     it('partial override leaves other slots default and null is default', () => {

@@ -51,6 +51,7 @@ export interface CastPlan {
     serverRolls: boolean;
     system: SystemSlot | undefined;
     pickedSpell?: { id: string; name: string; level: number };
+    cancelledBy?: string;
 }
 
 export type SpellDefinition = Spellcast['definition'];

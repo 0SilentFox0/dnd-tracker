@@ -69,7 +69,7 @@ export const movementOp = (body: MovementOpBody): SystemOpBody => ({
 export interface DispelBody {
     participantId: string;
     targetId: string;
-    mode: 'reactive' | 'persistent';
+    mode: 'persistent';
     roll?: number;
     serverRoll?: boolean;
 }

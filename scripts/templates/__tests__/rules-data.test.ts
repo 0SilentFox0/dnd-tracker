@@ -16,6 +16,29 @@ const rulesOf = (key: string) => readPack(key).rules;
 
 const roundTrip = (value: unknown) => JSON.parse(JSON.stringify(value));
 
+const INERT_SECTIONS = [
+    "criticals",
+    "formulas",
+    "heroScaling",
+    "saves",
+    "concentration",
+    "conditions",
+    "actions",
+    "classes",
+    "deathSaves",
+];
+
+const WFRP_PACKS = ["grim-d100", "grim-d100-empty"];
+
+const withoutInert = (rules: object) => ({
+    ...Object.fromEntries(
+        Object.entries(roundTrip(rules)).filter(
+            ([name]) => !INERT_SECTIONS.includes(name)
+        )
+    ),
+    morale: { enabled: false },
+});
+
 const canonOver = <T extends { advancement: object }>(rules: T) => ({
     ...roundTrip(rules),
     edition: { preset: 'canon5e' },
@@ -27,14 +50,18 @@ const canonOver = <T extends { advancement: object }>(rules: T) => ({
 
 describe('rules.json of the packs', () => {
     it.each(listPackKeys())(
-        '%s: rules.json is a complete Ruleset of the pack system',
+        '%s: rules.json is a Ruleset of the pack system, complete apart from the inert d20 sections of wfrp packs',
         (key) => {
             const pack = readPack(key);
 
             const parsed = RulesetSchema.parse(pack.rules);
 
             expect(parsed.system.key).toBe(pack.manifest.system);
-            expect(roundTrip(parsed)).toEqual(pack.rules);
+            expect(
+                WFRP_PACKS.includes(key)
+                    ? withoutInert(parsed)
+                    : roundTrip(parsed)
+            ).toEqual(pack.rules);
         }
     );
 
@@ -43,7 +70,9 @@ describe('rules.json of the packs', () => {
     });
 
     it('grim-d100-empty carries the code default WFRP_RULES', () => {
-        expect(rulesOf('grim-d100-empty')).toEqual(canonOver(WFRP_RULES));
+        expect(rulesOf('grim-d100-empty')).toEqual(
+            withoutInert(canonOver(WFRP_RULES))
+        );
     });
 
     it('grim-d100 equals the old patch merged over WFRP_RULES', () => {
@@ -65,7 +94,7 @@ describe('rules.json of the packs', () => {
             ticksRequired: [10, 12, 14],
         };
 
-        expect(rulesOf('grim-d100')).toEqual(expected);
+        expect(rulesOf('grim-d100')).toEqual(withoutInert(expected));
     });
 
     it('the shells have no kinds, only the English locale and no errors', () => {

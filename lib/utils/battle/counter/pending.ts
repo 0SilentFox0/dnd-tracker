@@ -4,6 +4,7 @@ import { COUNTER_WINDOW_MS } from '@/lib/constants/battle';
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { MutationResult } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type { PendingChoice } from '@/lib/utils/battle/store/types';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface CounterPending {
@@ -45,6 +46,7 @@ export function openCounterWindow(
         serverRolls: boolean;
         now: number;
         seed: number;
+        system?: SystemSlot;
     }
 ): MutationResult {
     return {
@@ -68,6 +70,7 @@ export function openCounterWindow(
                     userId: ctx.userId,
                     isDM: ctx.isDM,
                     attempts: 0,
+                    ...(args.system && { system: args.system }),
                 } satisfies HiddenCounter,
             },
         },

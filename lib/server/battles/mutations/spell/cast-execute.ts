@@ -35,7 +35,7 @@ import { battleActionToEvent, BattleRuleError } from '@/lib/utils/battle/store';
 import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { applyTransforms } from '@/lib/utils/battle/transform/apply-transforms';
 import { sanitizeLogEntry } from '@/lib/utils/battle/view';
-import { currencyValueOf } from '@/lib/utils/rules/systems';
+import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
 const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
@@ -46,6 +46,13 @@ const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
         !flat.some(isDamageEffect)
     );
 };
+
+/** The cast is a system Casting test (not a free, legendary or granted cast) */
+export const runsCastTest = ({ ctx, source }: Pick<CastPlan, 'ctx' | 'source'>) =>
+    !source.free &&
+    !source.legendaryAbility &&
+    !source.grant &&
+    !!ruleSystemOf(ctx.meta.rules).magic.tested;
 
 export async function executeCast(
     plan: CastPlan,
@@ -94,6 +101,9 @@ export async function executeCast(
         rules: ctx.meta.rules,
         ...(data.preview && { dryRun: true }),
         ...(plan.ingredients && { ingredientUsed: true }),
+        ...(plan.cancelledBy !== undefined && {
+            cancelledBy: plan.cancelledBy,
+        }),
         ...(!free &&
             !legendaryAbility &&
             !grant && {

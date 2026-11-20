@@ -9,7 +9,10 @@ import {
     counteredResult,
     openCounterIfAny,
 } from '@/lib/server/battles/mutations/spell/cast-counter';
-import { executeCast } from '@/lib/server/battles/mutations/spell/cast-execute';
+import {
+    executeCast,
+    runsCastTest,
+} from '@/lib/server/battles/mutations/spell/cast-execute';
 import { resolvePicks } from '@/lib/server/battles/mutations/spell/cast-pick';
 import {
     assertCasterMayCast,
@@ -19,6 +22,7 @@ import {
     chooseSlot,
     loadCastableSpell,
 } from '@/lib/server/battles/mutations/spell/cast-preflight';
+import { openCastReactionIfAny } from '@/lib/server/battles/mutations/spell/cast-reaction';
 import {
     prepareCastDice,
     resolveCastTargets,
@@ -188,8 +192,14 @@ export function createSpellMutation(
             ...picks,
         };
 
-        if (replay?.counteredBy !== undefined)
-            return counteredResult(plan, replay.counteredBy);
+        if (replay?.counteredBy !== undefined) {
+            if (!runsCastTest(plan))
+                return counteredResult(plan, replay.counteredBy);
+
+            plan.cancelledBy = replay.counteredBy;
+        }
+
+        let seed = replay?.seed;
 
         if (
             !data.preview &&
@@ -210,6 +220,11 @@ export function createSpellMutation(
             });
 
             if (paused) return paused;
+
+            const reacted = await openCastReactionIfAny(plan);
+
+            if (reacted && 'seed' in reacted) seed = reacted.seed;
+            else if (reacted) return reacted;
         }
 
         return runWithCritChoice(
@@ -223,7 +238,7 @@ export function createSpellMutation(
                     !data.preview &&
                     options.critPause !== false,
                 resume,
-                seed: replay?.seed,
+                seed,
                 run: (rolls) => executeCast(plan, rolls),
             }
         );

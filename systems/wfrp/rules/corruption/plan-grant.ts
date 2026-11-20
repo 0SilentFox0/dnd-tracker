@@ -38,6 +38,7 @@ export type GrantInput = {
     at: string;
     presets?: GrantPresets;
     species?: CorruptionSpecies;
+    exposure?: GrantSummary['exposure'];
 };
 
 export function planGrant({
@@ -50,6 +51,7 @@ export function planGrant({
     at,
     presets = {},
     species = 'human',
+    exposure,
 }: GrantInput): { state: CorruptionState; summary: GrantSummary } {
     const prev = c.corruption ?? EMPTY_CORRUPTION;
 
@@ -67,6 +69,7 @@ export function planGrant({
         points,
         total,
         threshold,
+        ...(exposure && { exposure }),
         ...(raw > POINTS_MAX && { pointsCapped: true as const }),
     };
 

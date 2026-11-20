@@ -85,7 +85,7 @@ function buildBlock({
         entries.set(skillAdvanceKey(key, spec), { key, ...(spec && { spec }) });
 
     for (const def of SKILL_CATALOG) {
-        if (def.spec === 'none') add(def.key);
+        if (def.spec === 'none' || def.specOptional) add(def.key);
 
         for (const spec of def.basicSpecs ?? []) add(def.key, spec);
     }

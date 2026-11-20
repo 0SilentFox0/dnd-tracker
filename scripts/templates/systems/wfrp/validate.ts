@@ -123,7 +123,8 @@ export function careerSkillIssue(value: string): string | null {
     if (def.spec === 'none')
         return spec === undefined ? null : 'takes no specialisation';
 
-    if (spec === undefined) return 'needs a specialisation';
+    if (spec === undefined)
+        return def.specOptional ? null : 'needs a specialisation';
 
     if (def.spec === 'fixed')
         return def.specs?.includes(spec) ? null : 'unknown specialisation';
@@ -148,6 +149,21 @@ function validateCareerTiers(data: WfrpData, issues: string[]) {
                 if (issue)
                     issues.push(
                         `${where}: ${careerTierKey(n, 'skills')} "${skill}" ${issue}`
+                    );
+            }
+
+            const earning = value[careerTierKey(n, 'earningSkill')];
+
+            if (typeof earning === 'string' && earning !== '') {
+                const issue = careerSkillIssue(earning);
+
+                if (issue)
+                    issues.push(
+                        `${where}: ${careerTierKey(n, 'earningSkill')} "${earning}" ${issue}`
+                    );
+                else if (!(Array.isArray(skills) ? skills : []).includes(earning))
+                    issues.push(
+                        `${where}: ${careerTierKey(n, 'earningSkill')} "${earning}" is not one of the tier skills`
                     );
             }
 

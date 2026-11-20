@@ -30,5 +30,13 @@
       "name": "Old Blood",
       "description": "The Veyl are a long-lived people of the deep forests, shaped by memories that outlast kingdoms. They are graceful and aloof, and slow to share what they know."
     }
+  },
+  {
+    "slug": "thornkin",
+    "name": "Thornkin",
+    "passiveAbility": {
+      "name": "Leaf and Shadow",
+      "description": "The Thornkin keep to the wild edges of the forest, trusting the trail over the road. They are keen-eyed and quiet, and move through the undergrowth as if it were home."
+    }
   }
 ]

@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/server/systems/campaign-system', () => ({
+    systemSelectionOfCampaign: vi.fn(async () => null),
+}));
+vi.mock('@/lib/server/systems/lookup', () => ({
+    systemServerOf: vi.fn(),
+}));
 vi.mock('@/lib/db', () => ({
     prisma: {
         character: { findMany: vi.fn() },
@@ -10,7 +16,12 @@ vi.mock('@/lib/db', () => ({
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
-import { assertParticipantSources } from '@/lib/server/battles/participant-sources';
+import {
+    assertJoinGuards,
+    assertParticipantSources,
+} from '@/lib/server/battles/participant-sources';
+import { systemSelectionOfCampaign } from '@/lib/server/systems/campaign-system';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 
 const characters = vi.mocked(prisma.character.findMany);
 
@@ -69,5 +80,47 @@ describe('assertParticipantSources', () => {
         ).resolves.toBeUndefined();
         expect(characters).not.toHaveBeenCalled();
         expect(units).not.toHaveBeenCalled();
+    });
+
+    it('a system join guard rejects the character with 409', async () => {
+        characters.mockResolvedValue([
+            { id: 'h1', characteristics: {} },
+        ] as never);
+        vi.mocked(systemSelectionOfCampaign).mockResolvedValueOnce({ key: 'x' });
+        vi.mocked(systemServerOf).mockReturnValueOnce({
+            participant: { joinGuards: [() => 'errors.guarded'] },
+        } as never);
+
+        await expect(
+            assertParticipantSources('c1', [{ id: 'h1', type: 'character' }])
+        ).rejects.toMatchObject({ status: 409, message: 'errors.guarded' });
+    });
+
+    it('without a system or guards the character passes', async () => {
+        characters.mockResolvedValue([{ id: 'h1' }] as never);
+
+        await expect(
+            assertParticipantSources('c1', [{ id: 'h1', type: 'character' }])
+        ).resolves.toBeUndefined();
+    });
+});
+
+describe('assertJoinGuards', () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it('rejects a guarded character at battle start', async () => {
+        vi.mocked(systemSelectionOfCampaign).mockResolvedValueOnce({ key: 'x' });
+        vi.mocked(systemServerOf).mockReturnValueOnce({
+            participant: { joinGuards: [() => 'errors.guarded'] },
+        } as never);
+
+        await expect(
+            assertJoinGuards('c1', [{ characteristics: {} }])
+        ).rejects.toMatchObject({ status: 409, message: 'errors.guarded' });
+    });
+
+    it('skips the system lookup without characters', async () => {
+        await expect(assertJoinGuards('c1', [])).resolves.toBeUndefined();
+        expect(systemSelectionOfCampaign).not.toHaveBeenCalled();
     });
 });

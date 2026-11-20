@@ -18,7 +18,7 @@ export function GrantSummaryView({
 
     const text = useText();
 
-    const { test, mutation } = summary;
+    const { test, mutation, exposure } = summary;
 
     return (
         <ul className="space-y-2 text-sm text-hud-bone">
@@ -28,7 +28,19 @@ export function GrantSummaryView({
                     threshold: summary.threshold,
                 })}
             </li>
-            {!test && <li>{t('summary.noTest')}</li>}
+            {exposure && (
+                <li>
+                    {t('summary.exposure', {
+                        degree: t(`grant.degrees.${exposure.degree}`),
+                        skill: t(`grant.skills.${exposure.skill}`),
+                        roll: exposure.test.roll,
+                        target: exposure.test.target,
+                        sl: exposure.test.sl,
+                        points: summary.points,
+                    })}
+                </li>
+            )}
+            {!test && !exposure && <li>{t('summary.noTest')}</li>}
             {summary.pointsCapped && <li>{t('summary.pointsCapped')}</li>}
             {test && (
                 <li>

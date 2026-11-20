@@ -24,6 +24,19 @@ export const WEAPON_GROUPS = [
     'explosives',
 ] as const;
 
+export const GEAR_CATEGORIES = [
+    'food',
+    'clothing',
+    'tools',
+    'books',
+    'animals',
+    'poisons',
+    'herbs',
+    'trappings',
+    'prosthetics',
+    'magical',
+] as const;
+
 export const WEAPON_REACHES = [
     'personal',
     'very-short',

@@ -23,6 +23,9 @@ import type { BattleParticipant } from '@/types/battle';
 
 const SEED_SPACE = 2 ** 32;
 
+export const counterSeed = (ctx: Pick<BattleMutationContext, 'rng'>) =>
+    Math.floor((ctx.rng ?? Math.random)() * SEED_SPACE);
+
 /** Pauses the cast for a counter window when an enemy can interrupt it; null = resolve normally */
 export async function openCounterIfAny(args: {
     ctx: BattleMutationContext;
@@ -86,7 +89,7 @@ export async function openCounterIfAny(args: {
         request: { ...data, diceRolls: args.diceRolls },
         serverRolls: args.serverRolls,
         now: Date.now(),
-        seed: Math.floor((ctx.rng ?? Math.random)() * SEED_SPACE),
+        seed: counterSeed(ctx),
     });
 }
 

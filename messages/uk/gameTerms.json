@@ -264,7 +264,12 @@
     "language": "Мова",
     "trade": "Ремесло",
     "art": "Мистецтво",
-    "performance": "Виступ"
+    "performance": "Виступ",
+    "bribery": "Підкуп",
+    "charm-animal": "Чарування тварин",
+    "animal-training": "Дресирування",
+    "sail": "Плавання під вітрилами",
+    "play": "Гра на інструменті"
   },
   "wfrpSpecs": {
     "melee": {
@@ -272,7 +277,6 @@
       "cavalry": "Кавалерійський",
       "fencing": "Фехтування",
       "flail": "Ціп",
-      "parry": "Парирування",
       "polearm": "Древкова зброя",
       "two-handed": "Дворучний",
       "brawling": "Кулачний бій"
@@ -286,6 +290,50 @@
       "explosives": "Вибухівка",
       "sling": "Праща",
       "throwing": "Метальна зброя"
+    },
+    "entertain": {
+      "acting": "Акторство",
+      "comedy": "Комедія",
+      "singing": "Спів",
+      "storytelling": "Оповідання"
+    },
+    "ride": {
+      "horse": "Кінь",
+      "mule": "Мул",
+      "griffon": "Грифон",
+      "pegasus": "Пегас"
+    },
+    "stealth": {
+      "rural": "Сільська місцевість",
+      "underground": "Підземелля",
+      "urban": "Місто"
+    },
+    "animal-training": {
+      "dog": "Пес",
+      "hawk": "Яструб",
+      "horse": "Кінь",
+      "pigeon": "Голуб",
+      "boar": "Кабан"
+    },
+    "channelling": {
+      "ember": "Жар",
+      "gale": "Буря",
+      "tide": "Прилив",
+      "stone": "Камінь",
+      "thorn": "Терен",
+      "frost": "Паморозь",
+      "dusk": "Присмерк",
+      "dawn": "Світанок",
+      "ash": "Попіл",
+      "magic": "Магія"
+    },
+    "signs": {
+      "guild": "Гільдія",
+      "ranger": "Лісник",
+      "scout": "Розвідник",
+      "thief": "Злодій",
+      "vagabond": "Волоцюга",
+      "warden": "Вартовий"
     }
   },
   "testOutcome": {

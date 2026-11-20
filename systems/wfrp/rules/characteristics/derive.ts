@@ -54,10 +54,17 @@ export function skillTarget(
 
     if (def.spec === 'none' && spec) return null;
 
-    if (def.spec === 'fixed' && (!spec || !def.specs?.includes(spec)))
+    if (
+        def.spec === 'fixed' &&
+        (spec ? !def.specs?.includes(spec) : !def.specOptional)
+    )
         return null;
 
-    if (def.spec === 'open' && (!spec || !SPEC_RE.test(spec))) return null;
+    if (
+        def.spec === 'open' &&
+        (spec ? !SPEC_RE.test(spec) : !def.specOptional)
+    )
+        return null;
 
     const key = skillAdvanceKey(skillKey, spec);
 
@@ -66,7 +73,7 @@ export function skillTarget(
     const advances = c.skillAdvances[key] ?? 0;
 
     const trained =
-        def.kind === 'basic' ||
+        (def.kind === 'basic' && !def.basicSpecs) ||
         (!!spec && !!def.basicSpecs?.includes(spec)) ||
         advances > 0;
 

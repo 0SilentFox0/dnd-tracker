@@ -18,3 +18,34 @@ export const CANON_BODY_MAX_ROLL = {
 } as const;
 
 export type CorruptionSpecies = keyof typeof CANON_BODY_MAX_ROLL;
+
+export const EXPOSURE_DEGREES = ['minor', 'moderate', 'major'] as const;
+
+export type ExposureDegree = (typeof EXPOSURE_DEGREES)[number];
+
+export const EXPOSURE_SKILLS = ['endurance', 'cool'] as const;
+
+export type ExposureSkill = (typeof EXPOSURE_SKILLS)[number];
+
+/** canon5e (p187-188): points on failure and on success by the lowest SL of each band, highest band first */
+export const EXPOSURE_POINTS: Record<
+    ExposureDegree,
+    { failure: number; bySl: readonly { minSl: number; points: number }[] }
+> = {
+    minor: { failure: 1, bySl: [{ minSl: 0, points: 0 }] },
+    moderate: {
+        failure: 2,
+        bySl: [
+            { minSl: 1, points: 0 },
+            { minSl: 0, points: 1 },
+        ],
+    },
+    major: {
+        failure: 3,
+        bySl: [
+            { minSl: 4, points: 0 },
+            { minSl: 1, points: 1 },
+            { minSl: 0, points: 2 },
+        ],
+    },
+};

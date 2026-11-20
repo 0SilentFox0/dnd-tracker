@@ -2,6 +2,7 @@ import { LOCATIONS } from '../combat/constants';
 import {
     AP_MAX_PER_LAYER,
     ARMOUR_KINDS,
+    GEAR_CATEGORIES,
     QUALITY_VALUE_MAX,
     WEAPON_GROUPS,
     WEAPON_REACHES,
@@ -93,10 +94,19 @@ export function readStats(raw: unknown): WfrpItemStats | null {
         price: raw.price as number,
     };
 
-    if (raw.type === 'gear')
-        return onlyKeys(raw, ['type', 'weight', 'price', 'qualities'])
-            ? { type: 'gear', ...weightPrice, qualities }
+    if (raw.type === 'gear') {
+        if (
+            !onlyKeys(raw, ['type', 'category', 'weight', 'price', 'qualities'])
+        )
+            return null;
+
+        if (raw.category === undefined)
+            return { type: 'gear', ...weightPrice, qualities };
+
+        return oneOf(raw.category, GEAR_CATEGORIES)
+            ? { type: 'gear', category: raw.category, ...weightPrice, qualities }
             : null;
+    }
 
     if (raw.type === 'armour') {
         const loc = raw.locations;

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { catalogOfPack } from '../../../lib/i18n-convert';
 import { wfrpI18nIssues } from '../i18n';
-import { GRIM_SPELL_LISTS } from '../spells';
+import { GRIM_CORE_SPELL_LISTS } from '../spells';
 import { fixturePack, grimData, grimPack } from './pack-helpers';
 
 import { emptyBundle } from '@/lib/server/templates/bundle';
@@ -35,7 +35,7 @@ describe('wfrp catalog', () => {
             }
         }
 
-        for (const name of Object.values(GRIM_SPELL_LISTS).flat())
+        for (const name of Object.values(GRIM_CORE_SPELL_LISTS).flat())
             expect(has('n', name)).toBe(true);
     });
 

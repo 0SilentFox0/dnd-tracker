@@ -231,9 +231,9 @@
     "arm": {
       "1": "The arm bones ache from the strike.",
       "2": "A deep cut, blood seeping through the sleeve.",
-      "3": "Fingers spasm open and the weapon drops.",
+      "3": "The arm is wrenched out of line: the weapon drops and the arm hangs useless for a few rounds.",
       "4": "An artery is opened, blood spurts forth.",
-      "5": "The arm hangs limp, the weapon slips away.",
+      "5": "The shoulder is thrown out of its socket: the arm is useless until it is reset.",
       "death": "The limb is torn away and the victim bleeds out within moments."
     },
     "body": {
@@ -249,7 +249,7 @@
       "2": "A shin wound leaves a trail of blood.",
       "3": "Legs swept, the foe sprawls in the mud.",
       "4": "Tendon severed, the foe falls screaming.",
-      "5": "The knee is shattered, no more walking.",
+      "5": "The knee is thrown out of joint: the foe drops and the leg is useless until it is reset.",
       "death": "The limb is severed and the victim bleeds out within moments."
     }
   },

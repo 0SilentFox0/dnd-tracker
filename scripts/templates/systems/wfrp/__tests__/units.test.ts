@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { UNIT_BAND_EXCEPTIONS } from '../unit-exceptions';
 import { rebuildTrait, unitIssues, unitWounds } from '../units';
 
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
@@ -166,5 +167,53 @@ describe('unitIssues', () => {
         expect(unitIssues(row)).toContain(
             'characteristics.base has unknown keys (corruption)'
         );
+    });
+});
+
+describe('unit band exceptions', () => {
+    const row = (slug: string, bs: number, damage: number) => ({
+        slug,
+        name: 'Ash Hound',
+        level: 1,
+        maxHp: 8,
+        speed: 42,
+        initiative: 40,
+        gridSize: 1,
+        statblock: { creatureType: 'Beasts' },
+        characteristics: {
+            base: { ...all40, ws: bs, bs, s: 30, t: 30 },
+            move: 7,
+        },
+        abilities: [
+            {
+                id: 'bite',
+                name: `Bite +${damage}`,
+                trigger: { event: 'passive' },
+                effects: [{ kind: 'wfrpAttack', attack: 'bite', damage }],
+            },
+        ],
+    });
+
+    const bandIssues = (r: ReturnType<typeof row>) =>
+        unitIssues(r).filter(
+            (i) => i.includes('max(ws, bs)') || i.includes('damage')
+        );
+
+    it('flags a deviation without an exception', () => {
+        expect(bandIssues(row('plain', 10, 9)).length).toBeGreaterThan(0);
+    });
+
+    it('lets a listed slug go below the combat min and above the damage band', () => {
+        UNIT_BAND_EXCEPTIONS['test-outlier'] = {
+            reason: 'test',
+            combatBelowMin: true,
+            attackDamage: true,
+        };
+
+        try {
+            expect(bandIssues(row('test-outlier', 10, 9))).toEqual([]);
+        } finally {
+            delete UNIT_BAND_EXCEPTIONS['test-outlier'];
+        }
     });
 });

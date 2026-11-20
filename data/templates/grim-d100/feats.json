@@ -740,5 +740,1444 @@
     "type": "origin",
     "description": "Veyl. Carries the memory of generations. The DM may share a relevant piece of old lore.",
     "maxRank": 1
+  },
+  {
+    "slug": "wildwalker",
+    "name": "Wildwalker",
+    "type": "origin",
+    "description": "Thornkin. Advantage on Stealth in the countryside, and finds the easy way through wild land.",
+    "maxRank": 1
+  },
+  {
+    "slug": "winning-ways",
+    "name": "Winning Ways",
+    "type": "general",
+    "description": "+5 Fellowship; an easy charm that makes people want to agree.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "easy-talker",
+    "name": "Easy Talker",
+    "type": "general",
+    "description": "Advantage on Gossip tests, and quick to find where the rumours are traded.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "steadied-weave",
+    "name": "Steadied Weave",
+    "type": "general",
+    "description": "Roll twice on the minor miscast table and keep the better result.",
+    "xpCost": 100,
+    "maxRank": 2
+  },
+  {
+    "slug": "alley-prowler",
+    "name": "Alley Prowler",
+    "type": "general",
+    "description": "Advantage on Stealth in towns; knows the quick routes through the streets.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "both-handed",
+    "name": "Both-Handed",
+    "type": "general",
+    "description": "No penalty for acting with the off hand.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "keen-sense-smell",
+    "name": "Keen Sense (Smell)",
+    "type": "general",
+    "description": "Advantage on Perception tests that rely on smell.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "keen-sense-taste",
+    "name": "Keen Sense (Taste)",
+    "type": "general",
+    "description": "Advantage on Perception tests that rely on taste.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "keen-sense-touch",
+    "name": "Keen Sense (Touch)",
+    "type": "general",
+    "description": "Advantage on Perception tests that rely on touch.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-embers",
+    "name": "Lore Casting (Embers)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Embers.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-gloam",
+    "name": "Lore Casting (Gloam)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Gloam.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-radiance",
+    "name": "Lore Casting (Radiance)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Radiance.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-alloy",
+    "name": "Lore Casting (Alloy)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Alloy.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-verdance",
+    "name": "Lore Casting (Verdance)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Verdance.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-firmament",
+    "name": "Lore Casting (Firmament)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Firmament.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-dusk",
+    "name": "Lore Casting (Dusk)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Dusk.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lore-casting-wilds",
+    "name": "Lore Casting (Wilds)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the School of Wilds.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "quibbler",
+    "name": "Quibbler",
+    "type": "general",
+    "description": "Drag foes into a pointless debate with an opposed Charm test.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "artist-s-gift-painting",
+    "name": "Artist's Gift (Painting)",
+    "type": "general",
+    "description": "Art can always be advanced; gains a bonus when working in painting.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "artist-s-gift-sculpture",
+    "name": "Artist's Gift (Sculpture)",
+    "type": "general",
+    "description": "Art can always be advanced; gains a bonus when working in sculpture.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "artist-s-gift-weaving",
+    "name": "Artist's Gift (Weaving)",
+    "type": "general",
+    "description": "Art can always be advanced; gains a bonus when working in weaving.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "artist-s-gift-calligraphy",
+    "name": "Artist's Gift (Calligraphy)",
+    "type": "general",
+    "description": "Art can always be advanced; gains a bonus when working in calligraphy.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "striking-looks",
+    "name": "Striking Looks",
+    "type": "general",
+    "description": "Charm on those drawn to you gains an added effect.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "simmering-fury",
+    "name": "Simmering Fury",
+    "type": "general",
+    "description": "Fall into a frenzy without a test and enjoy its benefits.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "blade-bind",
+    "name": "Blade Bind",
+    "type": "general",
+    "description": "Trade damage to make the foe lose a defence option.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unremarked",
+    "name": "Unremarked",
+    "type": "general",
+    "description": "Blend in among social betters when dressed for the part.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "reckless-rush",
+    "name": "Reckless Rush",
+    "type": "general",
+    "description": "Charging adds damage to the blow.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-hearth",
+    "name": "Patron's Boon (Hearth)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Hearth Rites.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-tide",
+    "name": "Patron's Boon (Tide)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Tide.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-still-hour",
+    "name": "Patron's Boon (Still Hour)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Still Hour.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-banner",
+    "name": "Patron's Boon (Banner)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Banner.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-gambler",
+    "name": "Patron's Boon (Gambler)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Gambler.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-green-cradle",
+    "name": "Patron's Boon (Green Cradle)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Green Cradle.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-mercy",
+    "name": "Patron's Boon (Mercy)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of Mercy.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-forged-crown",
+    "name": "Patron's Boon (Forged Crown)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Forged Crown.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-deep-wood",
+    "name": "Patron's Boon (Deep Wood)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Deep Wood.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-winter-wolf",
+    "name": "Patron's Boon (Winter Wolf)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Winter Wolf.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-scales",
+    "name": "Patron's Boon (Scales)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Scales.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "patron-s-boon-forge-fathers",
+    "name": "Patron's Boon (Forge-Fathers)",
+    "type": "general",
+    "description": "Grants the faithful every blessing of the Rites of the Forge-Fathers.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "palm-greaser",
+    "name": "Palm Greaser",
+    "type": "general",
+    "description": "Gauge a bribe's price; advantage on Bribery.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "stacked-deck",
+    "name": "Stacked Deck",
+    "type": "general",
+    "description": "Reroll opposed Gamble tests on doubles; edge when cheating.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "measured-blow",
+    "name": "Measured Blow",
+    "type": "general",
+    "description": "Smaller penalty for called shots in melee.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "seasoned-reveller",
+    "name": "Seasoned Reveller",
+    "type": "general",
+    "description": "Modest drinking has no effect on you.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "feline-landing",
+    "name": "Feline Landing",
+    "type": "general",
+    "description": "Falls count as controlled; advantage on Athletics when falling.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "dark-weave-pact",
+    "name": "Dark Weave (Pact)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the Pact Rites at a cost to the soul.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "dark-weave-grave",
+    "name": "Dark Weave (Grave)",
+    "type": "general",
+    "description": "Lets the hero cast spells from the Grave Rites at a cost to the soul.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "battle-press",
+    "name": "Battle Press",
+    "type": "general",
+    "description": "Counts as two combatants when working out outnumbering.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "roadside-brewer",
+    "name": "Roadside Brewer",
+    "type": "general",
+    "description": "One free brewing endeavour each session, no workshop needed.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gifted-craftsman-smith",
+    "name": "Gifted Craftsman (Smith)",
+    "type": "general",
+    "description": "Advantage on the Smith trade; may advance it freely.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gifted-craftsman-carpenter",
+    "name": "Gifted Craftsman (Carpenter)",
+    "type": "general",
+    "description": "Advantage on the Carpenter trade; may advance it freely.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gifted-craftsman-tanner",
+    "name": "Gifted Craftsman (Tanner)",
+    "type": "general",
+    "description": "Advantage on the Tanner trade; may advance it freely.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gifted-craftsman-cook",
+    "name": "Gifted Craftsman (Cook)",
+    "type": "general",
+    "description": "Advantage on the Cook trade; may advance it freely.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gifted-craftsman-mason",
+    "name": "Gifted Craftsman (Mason)",
+    "type": "general",
+    "description": "Advantage on the Mason trade; may advance it freely.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gifted-craftsman-weaver",
+    "name": "Gifted Craftsman (Weaver)",
+    "type": "general",
+    "description": "Advantage on the Weaver trade; may advance it freely.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "lawless-earner",
+    "name": "Lawless Earner",
+    "type": "general",
+    "description": "Doubles income from criminal enterprise.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "supple-frame",
+    "name": "Supple Frame",
+    "type": "general",
+    "description": "Squeeze through narrow gaps; advantage on Athletics to escape.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "whip-hand",
+    "name": "Whip Hand",
+    "type": "general",
+    "description": "Animals act and move at your word; advantage on Drive.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "pinpoint-shot",
+    "name": "Pinpoint Shot",
+    "type": "general",
+    "description": "Smaller penalty for called shots at range.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "relic-sense",
+    "name": "Relic Sense",
+    "type": "general",
+    "description": "Feel the magic in an item by touch.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "gaming-streak",
+    "name": "Gaming Streak",
+    "type": "general",
+    "description": "Advantage on Gamble tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "weapon-wrest",
+    "name": "Weapon Wrest",
+    "type": "general",
+    "description": "Trade damage to disarm the foe on a high SL.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "diversion",
+    "name": "Diversion",
+    "type": "general",
+    "description": "Spend your Move on an opposed test to unsettle a foe.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "marked-fate",
+    "name": "Marked Fate",
+    "type": "origin",
+    "description": "Knowing how your end will come steadies your nerve and grants a bonus.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "formation-drill",
+    "name": "Formation Drill",
+    "type": "general",
+    "description": "Allies disengage freely; bonus when standing shoulder to shoulder.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "twin-blades",
+    "name": "Twin Blades",
+    "type": "general",
+    "description": "Free off-hand attack with no Momentum cost.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "skim-the-till",
+    "name": "Skim the Till",
+    "type": "general",
+    "description": "Earn income through Bribery or Evaluate instead.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "tight-quarters-fighter",
+    "name": "Tight-Quarters Fighter",
+    "type": "general",
+    "description": "Ignore melee penalties for cramped spaces.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "quick-draw",
+    "name": "Quick Draw",
+    "type": "general",
+    "description": "Fire a pistol before initiative begins.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unafraid-beasts",
+    "name": "Unafraid (Beasts)",
+    "type": "general",
+    "description": "Immune to fear caused by Beasts.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unafraid-raiders",
+    "name": "Unafraid (Raiders)",
+    "type": "general",
+    "description": "Immune to fear caused by Raiders.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unafraid-restless-dead",
+    "name": "Unafraid (Restless Dead)",
+    "type": "general",
+    "description": "Immune to fear caused by the Restless Dead.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unafraid-cultists",
+    "name": "Unafraid (Cultists)",
+    "type": "general",
+    "description": "Immune to fear caused by Cultists.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unafraid-constructs",
+    "name": "Unafraid (Constructs)",
+    "type": "general",
+    "description": "Immune to fear caused by Constructs.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unafraid-horrors",
+    "name": "Unafraid (Horrors)",
+    "type": "general",
+    "description": "Immune to fear caused by Horrors.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "false-attack",
+    "name": "False Attack",
+    "type": "general",
+    "description": "While you hold Momentum, force the foe to defend with Intuition.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "field-bandager",
+    "name": "Field Bandager",
+    "type": "general",
+    "description": "Advantage on Heal; can improvise bandages.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "line-and-net",
+    "name": "Line and Net",
+    "type": "general",
+    "description": "Feed the party by fishing.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "penance-bearer",
+    "name": "Penance Bearer",
+    "type": "general",
+    "description": "Ignore pain and critical wound penalties.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "bolt-for-it",
+    "name": "Bolt for It",
+    "type": "general",
+    "description": "Gain extra movement when you disengage from a fight or flee it.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "swift-stride",
+    "name": "Swift Stride",
+    "type": "general",
+    "description": "+1 Move.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "blood-fury",
+    "name": "Blood Fury",
+    "type": "general",
+    "description": "Pass a Willpower test to fly into a frenzy: extra attacks, and fear no longer slows you.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "dread-aspect",
+    "name": "Dread Aspect",
+    "type": "general",
+    "description": "Your menacing look forces foes in melee to pass a nerve test before standing against you.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "bitter-grudge-beasts",
+    "name": "Bitter Grudge (Beasts)",
+    "type": "general",
+    "description": "Deep hatred of beasts: you feel compelled to attack them whenever you can.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "bitter-grudge-raiders",
+    "name": "Bitter Grudge (Raiders)",
+    "type": "general",
+    "description": "Deep hatred of raiders: you feel compelled to attack them whenever you can.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "bitter-grudge-restless-dead",
+    "name": "Bitter Grudge (Restless Dead)",
+    "type": "general",
+    "description": "Deep hatred of restless dead: you feel compelled to attack them whenever you can.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "wrathful-prayer",
+    "name": "Wrathful Prayer",
+    "type": "general",
+    "description": "Miracles that wound your foes deal extra damage.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "sacred-sight",
+    "name": "Sacred Sight",
+    "type": "general",
+    "description": "Sense hallowed ground and the presence of divine power nearby.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "game-finder",
+    "name": "Game Finder",
+    "type": "general",
+    "description": "Hunting feeds you automatically, plus as many others as your Initiative Bonus.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "flurry-strike",
+    "name": "Flurry Strike",
+    "type": "general",
+    "description": "Once per round, give up Momentum to make an extra attack.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "powder-hand",
+    "name": "Powder Hand",
+    "type": "general",
+    "description": "Ignore the Dangerous flaw on powder weapons.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fervent-cause-faith",
+    "name": "Fervent Cause (Faith)",
+    "type": "general",
+    "description": "Advantage on Charm tests when you speak for your faith.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fervent-cause-guild",
+    "name": "Fervent Cause (Guild)",
+    "type": "general",
+    "description": "Advantage on Charm tests when you speak for your guild.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fervent-cause-homeland",
+    "name": "Fervent Cause (Homeland)",
+    "type": "general",
+    "description": "Advantage on Charm tests when you speak for your homeland.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "slow-to-bleed",
+    "name": "Slow to Bleed",
+    "type": "general",
+    "description": "When you would gain Bleeding conditions, gain one fewer.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "short-blade-trick",
+    "name": "Short-Blade Trick",
+    "type": "general",
+    "description": "Use an opposed trick action to cancel the reach advantage of a longer weapon.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "rallying-voice",
+    "name": "Rallying Voice",
+    "type": "general",
+    "description": "Advantage on Leadership tests made in combat.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "hard-head",
+    "name": "Hard Head",
+    "type": "general",
+    "description": "The first Stunned condition you gain each encounter is reduced by one.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "unbowed-will",
+    "name": "Unbowed Will",
+    "type": "general",
+    "description": "Advantage on Cool tests to resist the influence of others.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "spring-back",
+    "name": "Spring Back",
+    "type": "general",
+    "description": "Advantage on acrobatic tests; stand up from Prone by passing a test.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "clean-incantation",
+    "name": "Clean Incantation",
+    "type": "general",
+    "description": "Reduce your minor miscast roll by 20.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "rite-keeper-tide",
+    "name": "Rite Keeper (Tide)",
+    "type": "general",
+    "description": "Learn and memorise the miracles of the Rites of Tide; unlocks them.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "rite-keeper-banner",
+    "name": "Rite Keeper (Banner)",
+    "type": "general",
+    "description": "Learn and memorise the miracles of the Rites of Banner; unlocks them.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "rite-keeper-mercy",
+    "name": "Rite Keeper (Mercy)",
+    "type": "general",
+    "description": "Learn and memorise the miracles of the Rites of Mercy; unlocks them.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "respected-rogue",
+    "name": "Respected Rogue",
+    "type": "general",
+    "description": "Your dubious past no longer draws suspicion from others.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "quick-feet",
+    "name": "Quick Feet",
+    "type": "general",
+    "description": "+5 Agility per rank.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "lip-reader",
+    "name": "Lip Reader",
+    "type": "general",
+    "description": "Read speech by sight with an Intuition test.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fortune-s-favour",
+    "name": "Fortune's Favour",
+    "type": "general",
+    "description": "+1 maximum Fortune per rank.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "masterwork-maker",
+    "name": "Masterwork Maker",
+    "type": "general",
+    "description": "Create one extraordinary work with a craft art you know; take again for each new work.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "spell-ward",
+    "name": "Spell Ward",
+    "type": "general",
+    "description": "Reduce the SL of spells affecting you by 3; you cannot cast spells yourself.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "weave-sense",
+    "name": "Weave Sense",
+    "type": "general",
+    "description": "Notice spellcasting nearby even if you cannot cast spells yourself.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "steady-shooter",
+    "name": "Steady Shooter",
+    "type": "general",
+    "description": "+5 Ballistic Skill per rank.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "face-changer",
+    "name": "Face Changer",
+    "type": "general",
+    "description": "Alter your appearance with posture and clothing.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "spellbinding-speaker",
+    "name": "Spellbinding Speaker",
+    "type": "general",
+    "description": "Sound convincing on any topic; bonus to speech-based tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "seasoned-tradesman-smith",
+    "name": "Seasoned Tradesman (Smith)",
+    "type": "general",
+    "description": "On smith trade tests, use the rolled SL or the unit die, whichever is better.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "seasoned-tradesman-carpenter",
+    "name": "Seasoned Tradesman (Carpenter)",
+    "type": "general",
+    "description": "On carpenter trade tests, use the rolled SL or the unit die, whichever is better.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "seasoned-tradesman-brewer",
+    "name": "Seasoned Tradesman (Brewer)",
+    "type": "general",
+    "description": "On brewer trade tests, use the rolled SL or the unit die, whichever is better.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "looming-menace",
+    "name": "Looming Menace",
+    "type": "general",
+    "description": "Advantage on Intimidate tests; thieves think twice before targeting you.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "accent-mimic",
+    "name": "Accent Mimic",
+    "type": "general",
+    "description": "Advantage on acting and comedy tests; you can copy accents.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "deft-hands",
+    "name": "Deft Hands",
+    "type": "general",
+    "description": "+5 Dexterity per rank.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "gentle-birth",
+    "name": "Gentle Birth",
+    "type": "general",
+    "description": "Treated as one Status tier higher when well dressed.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "trouble-sniffer",
+    "name": "Trouble Sniffer",
+    "type": "general",
+    "description": "Advantage on Intuition tests to find fights and gambling.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "coin-lore",
+    "name": "Coin Lore",
+    "type": "general",
+    "description": "Advantage on tests to identify the origin of coins and artefacts.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "alms-charm",
+    "name": "Alms Charm",
+    "type": "general",
+    "description": "Advantage on Charm tests while begging.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "true-ear",
+    "name": "True Ear",
+    "type": "general",
+    "description": "Learn tunes by ear; advantage on singing and playing tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "minor-gift",
+    "name": "Minor Gift",
+    "type": "general",
+    "description": "Manifest three petty spells; unlocks petty magic.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "sea-dog",
+    "name": "Sea Dog",
+    "type": "general",
+    "description": "At sea, use the rolled SL or the unit die on Row and Sail tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "inner-compass",
+    "name": "Inner Compass",
+    "type": "general",
+    "description": "Advantage on Navigation tests; you always know where north is.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "dose-maker",
+    "name": "Dose Maker",
+    "type": "general",
+    "description": "Yield an extra dose when you create remedies.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "helm-craft",
+    "name": "Helm Craft",
+    "type": "general",
+    "description": "Advantage on Row and Sail tests when passing through danger.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "dogged-pursuit",
+    "name": "Dogged Pursuit",
+    "type": "general",
+    "description": "Pass a test to keep pace with an opponent who disengages.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "hardened-against-poison",
+    "name": "Hardened Against (Poison)",
+    "type": "general",
+    "description": "Once per session, gain a bonus to resist poison.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "hardened-against-plague",
+    "name": "Hardened Against (Plague)",
+    "type": "general",
+    "description": "Once per session, gain a bonus to resist plague.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "hardened-against-cold",
+    "name": "Hardened Against (Cold)",
+    "type": "general",
+    "description": "Once per session, gain a bonus to resist cold.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "grim-resolve",
+    "name": "Grim Resolve",
+    "type": "general",
+    "description": "Pass a Cool test to keep Momentum when you gain a condition.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "untainted-soul",
+    "name": "Untainted Soul",
+    "type": "general",
+    "description": "Resist taint: double the Corruption you can bear before a mutation test.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "swift-reload",
+    "name": "Swift Reload",
+    "type": "general",
+    "description": "Reduce the Reload flaw rating by one.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "charge-stopper",
+    "name": "Charge Stopper",
+    "type": "general",
+    "description": "Pass an Initiative test to make a free attack against a charging enemy.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "turn-the-tables",
+    "name": "Turn the Tables",
+    "type": "general",
+    "description": "Keep Momentum when you are struck but your own test succeeded.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "counterstrike",
+    "name": "Counterstrike",
+    "type": "general",
+    "description": "Win an opposed defence and deal damage back to the attacker.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fast-mender",
+    "name": "Fast Mender",
+    "type": "general",
+    "description": "Heal 2 extra Wounds whenever a healing test succeeds.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "saddle-hardened",
+    "name": "Saddle Hardened",
+    "type": "general",
+    "description": "Ride steadily in poor conditions and direct your mount's actions.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "deep-scholar-lore",
+    "name": "Deep Scholar (Lore)",
+    "type": "general",
+    "description": "Per rank, a bonus to SL on tests of one chosen lore specialisation.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "sharp-mind",
+    "name": "Sharp Mind",
+    "type": "general",
+    "description": "+5 Intelligence per rank; a quick, retentive wit.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "wall-climber",
+    "name": "Wall Climber",
+    "type": "general",
+    "description": "Advantage on Climb tests; you can scale sheer surfaces.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "plot-weaver",
+    "name": "Plot Weaver",
+    "type": "general",
+    "description": "Gain extra yield from Gossip tests or Lore (Politics) tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "deck-steady",
+    "name": "Deck Steady",
+    "type": "general",
+    "description": "Never seasick, and gain Advantage on tests while at sea.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "weave-seer",
+    "name": "Weave Seer",
+    "type": "general",
+    "description": "You can perceive the currents of magic around you.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "double-life",
+    "name": "Double Life",
+    "type": "general",
+    "description": "Keep a second persona with its own career and standing.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "tail-master",
+    "name": "Tail Master",
+    "type": "general",
+    "description": "Follow a mark unseen and sense when to drop the trail.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "sharp-senses",
+    "name": "Sharp Senses",
+    "type": "general",
+    "description": "+5 Initiative per rank; senses that snap to every change.",
+    "xpCost": 100,
+    "maxRank": 3,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Sharp Senses",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crack-marksman",
+    "name": "Crack Marksman",
+    "type": "general",
+    "description": "Ignore prone and cover penalties on ranged attacks.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "danger-sense",
+    "name": "Danger Sense",
+    "type": "general",
+    "description": "Test Intuition to notice traps and ambushes before they spring.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "long-shot",
+    "name": "Long Shot",
+    "type": "general",
+    "description": "Reduced penalties on ranged attacks at long range.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "page-turner",
+    "name": "Page Turner",
+    "type": "general",
+    "description": "Read a page at a glance; double SL on Extended Research tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "giant-s-bane",
+    "name": "Giant's Bane",
+    "type": "general",
+    "description": "Gain Momentum when charged by a larger creature.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fast-runner",
+    "name": "Fast Runner",
+    "type": "general",
+    "description": "Advantage on Athletics tests to run and jump.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "stout-heart",
+    "name": "Stout Heart",
+    "type": "general",
+    "description": "The first time you are Broken each encounter, reduce it by one.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "terrain-strider-terrain",
+    "name": "Terrain Strider (Terrain)",
+    "type": "general",
+    "description": "Ignore movement penalties in one chosen type of terrain.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "quick-reckoner",
+    "name": "Quick Reckoner",
+    "type": "general",
+    "description": "Advantage on Evaluate tests; you track passing time accurately.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "heavy-hitter",
+    "name": "Heavy Hitter",
+    "type": "general",
+    "description": "Deal extra melee damage, and more when you hold Advantage.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "vital-strike",
+    "name": "Vital Strike",
+    "type": "general",
+    "description": "Roll crits twice and choose one; no penalty to a silent takedown.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "spring-legs",
+    "name": "Spring Legs",
+    "type": "general",
+    "description": "Use rolled SL or the unit die on Athletics jumps.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "dutiful-aide",
+    "name": "Dutiful Aide",
+    "type": "general",
+    "description": "Ignore Status penalties when using Charm on superiors.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "telling-shot",
+    "name": "Telling Shot",
+    "type": "general",
+    "description": "+1 ranged damage; ignore partial armour, and Impale hits weak points.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "stubborn-grit",
+    "name": "Stubborn Grit",
+    "type": "general",
+    "description": "Once per encounter, gain one fewer Fatigued condition.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "focused-mind",
+    "name": "Focused Mind",
+    "type": "general",
+    "description": "Once per session, ignore negative modifiers on one test.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "jack-of-repairs",
+    "name": "Jack of Repairs",
+    "type": "general",
+    "description": "Repair almost anything; Trade skills count as basic for you.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "memory-palace",
+    "name": "Memory Palace",
+    "type": "general",
+    "description": "Perfectly recall large amounts of information.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "battle-weaver",
+    "name": "Battle Weaver",
+    "type": "general",
+    "description": "Cast a low-CN spell as a free action during combat.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "snare-wise",
+    "name": "Snare Wise",
+    "type": "general",
+    "description": "Advantage on Set Trap tests; you rig snares quickly.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "saddle-acrobat",
+    "name": "Saddle Acrobat",
+    "type": "general",
+    "description": "Use Perform skills and Dodge while mounted.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "tunnel-stalker",
+    "name": "Tunnel Stalker",
+    "type": "general",
+    "description": "Advantage on Stealth underground; you track your depth.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "mighty-arm",
+    "name": "Mighty Arm",
+    "type": "general",
+    "description": "+5 Strength per rank; a heavy, well-muscled arm.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "field-commander",
+    "name": "Field Commander",
+    "type": "general",
+    "description": "Allies may use your Leadership instead of their Cool.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "barge-hand",
+    "name": "Barge Hand",
+    "type": "general",
+    "description": "Use rolled SL or the unit die on Row or Sail on rivers.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "deep-pockets",
+    "name": "Deep Pockets",
+    "type": "general",
+    "description": "Earn extra coin from your career income.",
+    "xpCost": 100,
+    "maxRank": 2
+  },
+  {
+    "slug": "always-ready",
+    "name": "Always Ready",
+    "type": "general",
+    "description": "Once per session, produce a small trapping you need.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "wild-spark",
+    "name": "Wild Spark",
+    "type": "general",
+    "description": "Learn one spell from a colour or witch lore without a gate.",
+    "xpCost": 100,
+    "maxRank": 1
   }
 ]
