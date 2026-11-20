@@ -13,6 +13,7 @@ import { BREATH_CONDITION } from '../traits/constants';
 import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
 import { withFireWounds } from '../traits/regeneration';
 import { sizeDamageBonus, sizeMeleeDamage, wardRoll } from '../traits/size';
+import { helplessKillsOf, isHelpless } from './attack-mods/helpless';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
@@ -24,8 +25,9 @@ import {
     participantStats,
     withArmourWear,
 } from './participant';
+import { pointBlankBetween } from './range-band';
 import { canonWeaponUse } from './weapon-use';
-import { wornWeaponDamage } from './weapon-wear';
+import { isBrokenWeapon, wornWeaponDamage } from './weapon-wear';
 
 import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -60,7 +62,20 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const location = asLocation(ctx.location);
 
-    if (ctx.amount <= 0) return { amount: 0, steps: [], totalLabel };
+    const edition = editionOf(ctx.rules);
+
+    const slain =
+        edition.gearModel === 'canon' &&
+        helplessKillsOf(ctx.rules) &&
+        isHelpless(target) &&
+        target.combatStats.currentHp > 0 &&
+        (attackKindOf(ctx.attack.type) === AttackType.MELEE ||
+            pointBlankBetween(attacker, target, ctx.rules));
+
+    if (ctx.amount <= 0 && !slain) return { amount: 0, steps: [], totalLabel };
+
+    if (edition.gearModel === 'canon' && isBrokenWeapon(attacker, ctx.attack))
+        return { amount: 0, steps: [], totalLabel };
 
     const ward = wardRoll(target, ctx.rng);
 
@@ -82,11 +97,12 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         };
     }
 
-    const sb = chargeSb(attacker, participantStats(attacker)?.sb ?? 0);
+    const ownSb = participantStats(attacker)?.sb ?? 0;
+
+    const sb =
+        edition.actionsModel === 'canon' ? chargeSb(attacker, ownSb) : ownSb;
 
     const slot = ATTACK_SLOT.read(ctx.attack.system);
-
-    const edition = editionOf(ctx.rules);
 
     const breath = edition.traitModel === 'canon' ? slot?.breath : undefined;
 
@@ -122,7 +138,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const size =
         edition.sizeModel === 'canon'
-            ? sizeMeleeDamage(attacker, ctx.attack, sb)
+            ? sizeMeleeDamage(attacker, ctx.attack, sb, ctx.offTurn)
             : sizeDamageBonus(
                   attacker,
                   target,
@@ -136,15 +152,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             : 0;
 
     const base = computeWfrpDamage({
-        weapon:
-            breath
-                ? breathDamage(breath, {
-                      sb: participantStats(attacker)?.sb ?? 0,
-                      tb: participantStats(attacker)?.tb ?? 0,
-                  })
-                : gear === 'canon'
-                  ? wornWeaponDamage(ctx.weapon, attacker, ctx.attack)
-                  : ctx.weapon,
+        weapon: breath
+            ? breathDamage(breath, {
+                  sb: participantStats(attacker)?.sb ?? 0,
+                  tb: participantStats(attacker)?.tb ?? 0,
+              })
+            : gear === 'canon'
+              ? wornWeaponDamage(ctx.weapon, attacker, ctx.attack)
+              : ctx.weapon,
         sb: appliedSb,
         netSl: margin,
         size,
@@ -181,6 +196,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     const lower = (a: CritResult, b: CritResult) =>
         critRank(b) < critRank(a) ? b : a;
 
+    if (slain && base.total < target.combatStats.currentHp) {
+        steps.push(
+            step('helplessKill', target.combatStats.currentHp - base.total)
+        );
+
+        base.total = target.combatStats.currentHp;
+    }
+
     const crit =
         ctx.crit && (counted || target.combatStats.currentHp > 0)
             ? effect.minDamage === 0 && gear === 'canon'
@@ -207,8 +230,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             : []),
     ];
 
-    const wear =
-        (effect.armourWear ?? 0) + (breath === 'acid' && hit ? 1 : 0);
+    const wear = (effect.armourWear ?? 0) + (breath === 'acid' && hit ? 1 : 0);
 
     if (!crit && !conditions.length && !wear)
         return { amount: base.total, steps, totalLabel };

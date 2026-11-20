@@ -97,9 +97,10 @@ export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
     if (!p || editionOf(rules).momentumModel !== 'participant')
         return { participants, messages: [] };
 
-    const { momentumAttack, lastHand, moveMode, meleeHit } = wfrpState(p);
+    const { momentumAttack, lastHand, moveMode, meleeHit, breathRoll } =
+        wfrpState(p);
 
-    if (!momentumAttack && !lastHand && !moveMode && !meleeHit)
+    if (!momentumAttack && !lastHand && !moveMode && !meleeHit && !breathRoll)
         return { participants, messages: [] };
 
     return {
@@ -110,6 +111,7 @@ export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
                 lastHand: undefined,
                 moveMode: undefined,
                 meleeHit: undefined,
+                breathRoll: undefined,
             })
         ),
         messages: [],

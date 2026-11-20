@@ -85,7 +85,6 @@ export function wfrpDeclaredExtension(ctx: {
 
     if (
         editionOf(ctx.rules).magicModel !== 'canon5e' ||
-        magic.overcast === null ||
         NO_OVERCAST_KINDS.has(magic.kind)
     )
         return undefined;
@@ -94,7 +93,7 @@ export function wfrpDeclaredExtension(ctx: {
 
     return declared
         ? overcastExtension(
-              allowedOvercast(declared, magic.overcast === 'dice')
+              allowedOvercast(declared, !!magic.missile)
           )
         : undefined;
 }
@@ -226,8 +225,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const overcastAllowed = canon
         ? success &&
-          (prayer ||
-              (magic.overcast !== null && !NO_OVERCAST_KINDS.has(magic.kind)))
+          (prayer || !NO_OVERCAST_KINDS.has(magic.kind))
         : success &&
           magic.overcast !== null &&
           !NO_OVERCAST_KINDS.has(magic.kind);
@@ -243,7 +241,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         canon && !prayer && overcastAllowed
             ? allowedOvercast(
                   fortuneInput?.overcast ?? {},
-                  magic.overcast === 'dice'
+                  !!magic.missile
               )
             : {};
 
@@ -259,7 +257,9 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
           : canon
             ? spread
                 ? overcastDamage(spread)
-                : overcastValue('damage', overcastBudget)
+                : magic.missile
+                  ? overcastValue('damage', overcastBudget)
+                  : 0
             : Math.min(
                   MAX_OVERCAST_STEPS,
                   Math.max(0, Math.floor((test.sl - cn) / OVERCAST_SL_STEP))
@@ -331,7 +331,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
     const remember = canon && success;
 
     const casterUpdate =
-        spendFortune || dropChannelled || markCast || remember
+        spendFortune || dropChannelled || markCast || remember || canon
             ? (
                   p: BattleParticipant,
                   final?: { targets: readonly GridPoint[] }
@@ -341,6 +341,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                   return withWfrpState(p, {
                       ...(fortune && spentFor(p, fortune.kind, fortune.spent)),
                       ...(dropChannelled && { channelledSl: undefined }),
+                      ...(canon && { aim: undefined }),
                       ...(markCast && { lastHand: 'cast' as const }),
                       ...(remember && {
                           lastCast: {

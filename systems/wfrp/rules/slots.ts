@@ -171,6 +171,8 @@ export interface WfrpParticipantState {
     weaponWear?: Record<string, number>;
     /** Oops: act last in the next round; the round-start hook moves the fighter to the end and clears it */
     actLastNext?: true;
+    /** Oops: initiative slot the fighter returns to once its act-last round has passed */
+    actLastSlot?: number;
     /** Oops -1 SL on every test: `next` until the next round begins, then `now` for that whole round */
     oopsPenalty?: 'next' | 'now';
     /** Riding a mount (DM switch): its id and Strength Bonus, which a mounted Charge uses (p168) */
@@ -380,6 +382,7 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                 }),
             ...(weaponWear && { weaponWear }),
             ...(raw.actLastNext === true && { actLastNext: true as const }),
+            ...(finite(raw.actLastSlot) && { actLastSlot: raw.actLastSlot }),
             ...((raw.oopsPenalty === 'next' || raw.oopsPenalty === 'now') && {
                 oopsPenalty: raw.oopsPenalty,
             }),

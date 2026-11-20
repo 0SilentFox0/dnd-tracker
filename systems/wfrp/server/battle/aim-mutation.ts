@@ -6,6 +6,7 @@ import { actorOnTurn, applyChanges, reject, requireCanon } from './own-turn';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { AttackType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
+import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { applyMainActionUsed } from '@/lib/utils/battle/participant/helpers';
@@ -44,7 +45,12 @@ export function aimMutation(
         (a) => attackKindOf(a.type) === AttackType.RANGED
     );
 
-    if (!target || !armed || !isHostile(ctx.meta.map, actor, target))
+    if (
+        !target ||
+        !isActive(target) ||
+        !armed ||
+        !isHostile(ctx.meta.map, actor, target)
+    )
         throw reject(API_ERRORS.ABILITY_TARGET_INVALID);
 
     const next = withWfrpState(applyMainActionUsed(actor), {

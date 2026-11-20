@@ -6,6 +6,7 @@ import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
+import type { BattleParticipant } from '@/types/battle';
 
 export type RangeBand = 'pointBlank' | 'short' | 'medium' | 'long' | 'extreme';
 
@@ -59,6 +60,19 @@ export function weaponRangeYd(range: string | undefined): number | null {
 /** Thrown weapons: Range is Strength Bonus times a multiplier (Rock SB x3) */
 export const sbRangeFt = (sb: number, multiplier: number): number =>
     Math.max(1, sb) * multiplier * FEET_PER_YARD;
+
+export function pointBlankBetween(
+    attacker: BattleParticipant,
+    target: BattleParticipant,
+    rules: ResolveAttackCtx['rules']
+): boolean {
+    if (!attacker.battleData.position || !target.battleData.position)
+        return false;
+
+    const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
+
+    return (cells * cellFeetOf(rules)) / FEET_PER_YARD <= POINT_BLANK_YD;
+}
 
 export function rangeContext(
     ctx: Pick<

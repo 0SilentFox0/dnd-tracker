@@ -47,7 +47,13 @@ const run = (
     wfrpCastTest({
         caster: caster(over),
         spell,
-        magic: { cn: 2, kind: 'arcane', overcast: 'dice', ...magic },
+        magic: {
+            cn: 2,
+            kind: 'arcane',
+            overcast: 'dice',
+            missile: true,
+            ...magic,
+        },
         rules,
         rng: mulberry32(1),
         presetRoll,

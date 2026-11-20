@@ -46,7 +46,10 @@ const sword = (unbreakable = false): BattleAttack =>
         }),
     }) as unknown as BattleAttack;
 
-const fighter = (id: string, side: ParticipantSide = ParticipantSide.ALLY): BattleParticipant => {
+const fighter = (
+    id: string,
+    side: ParticipantSide = ParticipantSide.ALLY
+): BattleParticipant => {
     const base = makeParticipant({ id, hp: 20, maxHp: 20, side });
 
     return {
@@ -66,7 +69,11 @@ const fighter = (id: string, side: ParticipantSide = ParticipantSide.ALLY): Batt
 
 const fraction = (roll: number) => (roll - 0.5) / 100;
 
-const fumble = (oops: number, attack = sword(), others: BattleParticipant[] = []) => {
+const fumble = (
+    oops: number,
+    attack = sword(),
+    others: BattleParticipant[] = []
+) => {
     const attacker = fighter('a');
 
     const target = fighter('t', ParticipantSide.ENEMY);
@@ -92,12 +99,16 @@ const roundStart = (participants: BattleParticipant[]) =>
     wfrpRoundOrder({ participants, round: 2, rng: NO_RNG, rules }).participants;
 
 describe('canon: Oops table (p165)', () => {
-    bookExample(165, 'oops 3-4: the weapon takes 1 Damage and you act last next round', () => {
-        const { after } = fumble(30);
+    bookExample(
+        165,
+        'oops 3-4: the weapon takes 1 Damage and you act last next round',
+        () => {
+            const { after } = fumble(30);
 
-        expect(wfrpState(after).weaponWear).toEqual({ w: 1 });
-        expect(wfrpState(after).actLastNext).toBe(true);
-    });
+            expect(wfrpState(after).weaponWear).toEqual({ w: 1 });
+            expect(wfrpState(after).actLastNext).toBe(true);
+        }
+    );
 
     bookExample(165, 'oops 3-4: an Unbreakable weapon is not damaged', () => {
         const { after } = fumble(30, sword(true));
@@ -106,60 +117,114 @@ describe('canon: Oops table (p165)', () => {
         expect(wfrpState(after).actLastNext).toBe(true);
     });
 
-    bookExample(164, 'a damaged weapon deals 1 less Damage per point, never below +0', () => {
-        const { after, attacker } = fumble(30);
+    bookExample(
+        164,
+        'a damaged weapon deals 1 less Damage per point, never below +0',
+        () => {
+            const { after, attacker } = fumble(30);
 
-        expect(wornWeaponDamage(5, attacker, sword())).toBe(5);
-        expect(wornWeaponDamage(5, after, sword())).toBe(4);
-        expect(wornWeaponDamage(0, after, sword())).toBe(0);
-    });
+            expect(wornWeaponDamage(5, attacker, sword())).toBe(5);
+            expect(wornWeaponDamage(5, after, sword())).toBe(4);
+            expect(wornWeaponDamage(0, after, sword())).toBe(0);
+        }
+    );
 
-    bookExample(165, 'oops 3-4: next round the fumbler moves to the end of the order', () => {
-        const { after } = fumble(30);
+    bookExample(
+        165,
+        'oops 3-4: next round the fumbler moves to the end of the order',
+        () => {
+            const { after } = fumble(30);
 
-        const order = roundStart([after, fighter('b'), fighter('c')]);
+            const order = roundStart([after, fighter('b'), fighter('c')]);
 
-        expect(order.map((p) => p.basicInfo.id)).toEqual(['b', 'c', 'a']);
-        expect(wfrpState(order[2]).actLastNext).toBeUndefined();
-    });
+            expect(order.map((p) => p.basicInfo.id)).toEqual(['b', 'c', 'a']);
+            expect(wfrpState(order[2]).actLastNext).toBeUndefined();
+        }
+    );
 
-    bookExample(165, 'oops 3-4: without the flag the order is untouched', () => {
-        const order = roundStart([fighter('a'), fighter('b')]);
+    bookExample(
+        165,
+        'oops 3-4: the fumbler returns to its initiative slot after the penalty round',
+        () => {
+            const { after } = fumble(30);
 
-        expect(order.map((p) => p.basicInfo.id)).toEqual(['a', 'b']);
-    });
+            const r2 = roundStart([
+                fighter('b'),
+                after,
+                fighter('c'),
+                fighter('d'),
+            ]);
 
-    bookExample(165, 'oops 5-6: -1 SL on every test in the following round only', () => {
-        const { after } = fumble(50);
+            expect(r2.map((p) => p.basicInfo.id)).toEqual(['b', 'c', 'd', 'a']);
 
-        expect(wfrpState(after).oopsPenalty).toBe('next');
-        expect(selfSlMod(after, CANON)).toBe(0);
+            const r3 = roundStart(r2);
 
-        const during = roundStart([after])[0];
+            expect(r3.map((p) => p.basicInfo.id)).toEqual(['b', 'a', 'c', 'd']);
+            expect(wfrpState(r3[1]).actLastSlot).toBeUndefined();
 
-        expect(selfSlMod(during, CANON)).toBe(-1);
+            const r4 = roundStart(r3);
 
-        const later = roundStart([during])[0];
+            expect(r4.map((p) => p.basicInfo.id)).toEqual(['b', 'a', 'c', 'd']);
+        }
+    );
 
-        expect(selfSlMod(later, CANON)).toBe(0);
-        expect(wfrpState(later).oopsPenalty).toBeUndefined();
-    });
+    bookExample(
+        165,
+        'oops 3-4: without the flag the order is untouched',
+        () => {
+            const order = roundStart([fighter('a'), fighter('b')]);
 
-    bookExample(165, 'oops 10: a random ally is named, with the units die as the SL', () => {
-        const { r, after } = fumble(95, sword(), [fighter('x')]);
+            expect(order.map((p) => p.basicInfo.id)).toEqual(['a', 'b']);
+        }
+    );
 
-        expect(JSON.stringify(r.lines)).toContain('battleWfrp.log.fumbleAlly"');
-        expect(
-            after.battleData.activeEffects.some((e) => e.name.includes('stunned'))
-        ).toBe(false);
-    });
+    bookExample(
+        165,
+        'oops 5-6: -1 SL on every test in the following round only',
+        () => {
+            const { after } = fumble(50);
+
+            expect(wfrpState(after).oopsPenalty).toBe('next');
+            expect(selfSlMod(after, CANON)).toBe(0);
+
+            const during = roundStart([after])[0];
+
+            expect(selfSlMod(during, CANON)).toBe(-1);
+
+            const later = roundStart([during])[0];
+
+            expect(selfSlMod(later, CANON)).toBe(0);
+            expect(wfrpState(later).oopsPenalty).toBeUndefined();
+        }
+    );
+
+    bookExample(
+        165,
+        'oops 10: a random ally is named, with the units die as the SL',
+        () => {
+            const { r, after } = fumble(95, sword(), [fighter('x')]);
+
+            expect(JSON.stringify(r.lines)).toContain(
+                'battleWfrp.log.fumbleAlly"'
+            );
+            expect(
+                after.battleData.activeEffects.some((e) =>
+                    e.name.includes('stunned')
+                )
+            ).toBe(false);
+        }
+    );
 
     bookExample(165, 'oops 10: with no ally in reach you stun yourself', () => {
         const { r, after } = fumble(95);
 
-        expect(JSON.stringify(r.lines)).toContain('battleWfrp.log.fumbleAllyNone');
+        expect(JSON.stringify(r.lines)).toContain(
+            'battleWfrp.log.fumbleAllyNone'
+        );
         expect(
-            after.battleData.activeEffects.some((e) => e.name.includes('stunned'))
+            after.battleData.activeEffects.some((e) =>
+                e.name.includes('stunned')
+            )
         ).toBe(true);
     });
 

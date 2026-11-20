@@ -353,6 +353,7 @@
       "size": "Size",
       "minimum": "Minimum damage",
       "frenzy": "Frenzy",
+      "helplessKill": "Helpless",
       "crit": "Critical wound",
       "spell": "Spell damage",
       "wpb": "Willpower bonus",

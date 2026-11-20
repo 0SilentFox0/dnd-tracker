@@ -43,7 +43,13 @@ const cast = (
             skillAdvances: { 'language:magick': 10 },
         }),
         spell,
-        magic: { cn: 1, kind: 'arcane', overcast: 'dice', ...magic },
+        magic: {
+            cn: 1,
+            kind: 'arcane',
+            overcast: 'dice',
+            missile: true,
+            ...magic,
+        },
         rules: canon,
         rng: mulberry32(1),
         presetRoll: 10,
@@ -114,11 +120,29 @@ describe('canon5e overcast by direction', () => {
     });
 
     bookExample(236, 'damage is only a magic missile direction', () => {
-        const r = cast({ damage: 3, range: 2 }, { overcast: 'targets' });
+        const r = cast(
+            { damage: 3, range: 2 },
+            { overcast: 'targets', missile: false }
+        );
 
         expect(r.overcastSteps).toBe(0);
         expect(r.extension?.rangeMul).toBe(2);
     });
+
+    bookExample(
+        236,
+        'a spell without a listed overcast column can still be overcast',
+        () => {
+            const r = cast({ range: 2 }, { overcast: null, missile: false });
+
+            expect(r.extension?.rangeMul).toBe(2);
+            expect(r.overcastSteps).toBe(0);
+            expect(
+                cast(undefined, { overcast: null, missile: false })
+                    .overcastSteps
+            ).toBe(0);
+        }
+    );
 
     bookExample(236, 'Petty spells cannot be overcast', () => {
         const r = cast({ range: 2 }, { kind: 'petty', cn: 0 });

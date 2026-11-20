@@ -235,13 +235,14 @@ function tableOutcome(
 
     const text = rowText(row);
 
-    const wear = key === 'fumbleOops' ? wearOf(attacker, edition, scene) : undefined;
+    const wear =
+        key === 'fumbleOops' ? wearOf(attacker, edition, scene) : undefined;
 
-    const ally = row.effects.some(
-        (e) => e.type === 'fumble' && e.kind === 'hitAlly'
-    )
-        ? allyHit(attacker, details, scene, rng)
-        : undefined;
+    const ally =
+        edition.gearModel === 'canon' &&
+        row.effects.some((e) => e.type === 'fumble' && e.kind === 'hitAlly')
+            ? allyHit(attacker, details, scene, rng)
+            : undefined;
 
     const exploded =
         blast &&

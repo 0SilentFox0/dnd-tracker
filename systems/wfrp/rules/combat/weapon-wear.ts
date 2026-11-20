@@ -36,6 +36,12 @@ export const wornWeaponDamage = (
 
 const BROKEN_WEAR = 1000;
 
+export const isBrokenWeapon = (
+    p: BattleParticipant,
+    attack: Pick<BattleAttack, 'id' | 'name'>
+): boolean =>
+    (wfrpState(p).weaponWear?.[attackWearKey(attack)] ?? 0) >= BROKEN_WEAR;
+
 /** A snapped weapon (Trap Blade, p305) deals no damage; Unbreakable survives */
 export function breakWeapon(
     p: BattleParticipant,

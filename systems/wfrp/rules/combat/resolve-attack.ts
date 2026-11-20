@@ -662,14 +662,6 @@ function resolveHelpless(
                 target: name,
             }),
         ],
-        targetUpdate: (p) => ({
-            ...p,
-            combatStats: {
-                ...p.combatStats,
-                currentHp: 0,
-                status: CombatStatus.DEAD,
-            },
-        }),
     };
 }
 

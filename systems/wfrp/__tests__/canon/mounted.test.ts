@@ -9,17 +9,24 @@ import {
     participant,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { withStats } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { collectAttackMods } from '@/systems/wfrp/rules/combat/attack-mods';
 import {
     chargeSb,
     mountedDodgeModes,
 } from '@/systems/wfrp/rules/combat/mounted';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
 import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import { mountedMutation } from '@/systems/wfrp/server/battle/mounted-mutation';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
+
+const CANON_RULES = RulesetSchema.parse({
+    ...WFRP_RULES,
+    edition: { preset: 'canon5e' },
+});
 
 const lance = (group: string, reach = 'long'): BattleAttack =>
     ({
@@ -49,7 +56,13 @@ const modsOf = (
     attack: BattleAttack
 ) =>
     collectAttackMods({
-        ctx: { attacker, target, attack, participants: all, map: null } as never,
+        ctx: {
+            attacker,
+            target,
+            attack,
+            participants: all,
+            map: null,
+        } as never,
         edition: CANON,
         kind: 'melee',
     });
@@ -57,64 +70,108 @@ const modsOf = (
 describe('canon: Mounted (p168)', () => {
     const horse = unit('horse', 'large');
 
-    bookExample(168, 'a Cavalry weapon from the saddle against a smaller foe gains Advantage', () => {
-        const rider = withWfrpState(unit('r', 'average'), {
-            mounted: { mountId: 'horse' },
-        });
+    bookExample(
+        168,
+        'a Cavalry weapon from the saddle against a smaller foe gains Advantage',
+        () => {
+            const rider = withWfrpState(unit('r', 'average'), {
+                mounted: { mountId: 'horse' },
+            });
 
-        const foe = unit('f', 'average', ParticipantSide.ENEMY);
+            const foe = unit('f', 'average', ParticipantSide.ENEMY);
 
-        const r = modsOf(rider, foe, [rider, horse, foe], lance('cavalry'));
+            const r = modsOf(rider, foe, [rider, horse, foe], lance('cavalry'));
 
-        expect(r.advantage).toBe(1);
-        expect(modsOf(rider, foe, [rider, horse, foe], lance('basic')).advantage).toBe(0);
-    });
+            expect(r.advantage).toBe(1);
+            expect(
+                modsOf(rider, foe, [rider, horse, foe], lance('basic'))
+                    .advantage
+            ).toBe(0);
+        }
+    );
 
-    bookExample(168, 'a smaller foe without a Long weapon attacks the rider at Disadvantage', () => {
-        const rider = withWfrpState(unit('r', 'average', ParticipantSide.ENEMY), {
-            mounted: { mountId: 'horse' },
-        });
+    bookExample(
+        168,
+        'a smaller foe without a Long weapon attacks the rider at Disadvantage',
+        () => {
+            const rider = withWfrpState(
+                unit('r', 'average', ParticipantSide.ENEMY),
+                {
+                    mounted: { mountId: 'horse' },
+                }
+            );
 
-        const foe = unit('f', 'average');
+            const foe = unit('f', 'average');
 
-        expect(modsOf(foe, rider, [foe, rider, horse], lance('basic', 'average')).disadvantage).toBe(1);
-        expect(modsOf(foe, rider, [foe, rider, horse], lance('basic', 'long')).disadvantage).toBe(0);
-    });
+            expect(
+                modsOf(
+                    foe,
+                    rider,
+                    [foe, rider, horse],
+                    lance('basic', 'average')
+                ).disadvantage
+            ).toBe(1);
+            expect(
+                modsOf(foe, rider, [foe, rider, horse], lance('basic', 'long'))
+                    .disadvantage
+            ).toBe(0);
+        }
+    );
 
-    bookExample(168, 'a rider dodges at Disadvantage unless a Trick Rider', () => {
-        const mounted = { mounted: { mountId: 'horse' } };
+    bookExample(
+        168,
+        'a rider dodges at Disadvantage unless a Trick Rider',
+        () => {
+            const mounted = { mounted: { mountId: 'horse' } };
 
-        expect(mountedDodgeModes(withWfrpState(unit('r', 'average'), mounted))).toEqual({ disadvantage: 1 });
+            expect(
+                mountedDodgeModes(withWfrpState(unit('r', 'average'), mounted))
+            ).toEqual({ disadvantage: 1 });
 
-        const trick = unit('t', 'average', ParticipantSide.ALLY, [
-            trait([{ kind: 'wfrpTalent', talent: 'trickRider' }], { key: 'tr' }),
-        ]);
+            const trick = unit('t', 'average', ParticipantSide.ALLY, [
+                trait([{ kind: 'wfrpTalent', talent: 'trickRider' }], {
+                    key: 'tr',
+                }),
+            ]);
 
-        expect(mountedDodgeModes(withWfrpState(trick, mounted))).toEqual({});
-        expect(mountedDodgeModes(unit('p', 'average'))).toEqual({});
-    });
+            expect(mountedDodgeModes(withWfrpState(trick, mounted))).toEqual(
+                {}
+            );
+            expect(mountedDodgeModes(unit('p', 'average'))).toEqual({});
+        }
+    );
 
-    bookExample(168, 'a mounted Charge strikes with the mount Strength Bonus', () => {
-        const rider = withWfrpState(unit('r', 'average'), {
-            moveMode: 'charge',
-            mounted: { mountId: 'horse', sb: 5 },
-        });
+    bookExample(
+        168,
+        'a mounted Charge strikes with the mount Strength Bonus',
+        () => {
+            const rider = withWfrpState(unit('r', 'average'), {
+                moveMode: 'charge',
+                mounted: { mountId: 'horse', sb: 5 },
+            });
 
-        expect(chargeSb(rider, 3)).toBe(5);
-        expect(chargeSb(withWfrpState(rider, { moveMode: 'run' }), 3)).toBe(3);
-    });
+            expect(chargeSb(rider, 3)).toBe(5);
+            expect(chargeSb(withWfrpState(rider, { moveMode: 'run' }), 3)).toBe(
+                3
+            );
+        }
+    );
 
     bookExample(168, 'the DM seats a rider and dismounts it', () => {
         const base = participant('rider', { controlledBy: 'user-1' });
 
-        const ps = [
-            base,
-            participant('horse', { side: ParticipantSide.ALLY }),
-        ];
+        const ps = [base, participant('horse', { side: ParticipantSide.ALLY })];
 
-        const c = context({ participants: ps, isDM: true });
+        const c = context({
+            participants: ps,
+            isDM: true,
+            meta: { ...context().meta, rules: CANON_RULES },
+        });
 
-        const up = mountedMutation(c, { participantId: 'rider', mountId: 'horse' });
+        const up = mountedMutation(c, {
+            participantId: 'rider',
+            mountId: 'horse',
+        });
 
         const seated = up.participants.find((p) => p.basicInfo.id === 'rider')!;
 
@@ -126,7 +183,44 @@ describe('canon: Mounted (p168)', () => {
         );
 
         expect(
-            wfrpState(down.participants.find((p) => p.basicInfo.id === 'rider')!).mounted
+            wfrpState(
+                down.participants.find((p) => p.basicInfo.id === 'rider')!
+            ).mounted
         ).toBeUndefined();
     });
+
+    bookExample(
+        168,
+        'the mount must be a living ally and no cycle may form',
+        () => {
+            const c = context({
+                participants: [
+                    participant('rider', { controlledBy: 'user-1' }),
+                    participant('foe', { side: ParticipantSide.ENEMY }),
+                    participant('horse', { side: ParticipantSide.ALLY }),
+                ],
+                isDM: true,
+                meta: { ...context().meta, rules: CANON_RULES },
+            });
+
+            expect(() =>
+                mountedMutation(c, { participantId: 'rider', mountId: 'foe' })
+            ).toThrow();
+            expect(() =>
+                mountedMutation(c, { participantId: 'rider', mountId: 'rider' })
+            ).toThrow();
+
+            const up = mountedMutation(c, {
+                participantId: 'rider',
+                mountId: 'horse',
+            });
+
+            expect(() =>
+                mountedMutation(
+                    { ...c, participants: up.participants },
+                    { participantId: 'horse', mountId: 'rider' }
+                )
+            ).toThrow();
+        }
+    );
 });

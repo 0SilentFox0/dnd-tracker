@@ -64,9 +64,10 @@ export const sizeSbFactor = (p: BattleParticipant): number =>
 export function sizeMeleeDamage(
     attacker: BattleParticipant,
     attack: BattleAttack,
-    sb: number
+    sb: number,
+    offTurn = false
 ): number {
-    if (attackKindOf(attack.type) === AttackType.RANGED) return 0;
+    if (attackKindOf(attack.type) === AttackType.RANGED || offTurn) return 0;
 
     if (
         ATTACK_SLOT.read(attack.system)?.free ||

@@ -13,6 +13,7 @@ import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
 import { attackOf, slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { isHelpless } from '@/systems/wfrp/rules/combat/attack-mods/helpless';
+import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';
 import { resolveWfrpAttack } from '@/systems/wfrp/rules/combat/resolve-attack';
 import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
@@ -173,23 +174,65 @@ describe('canon: helpless targets (p166)', () => {
         ).toBeFalsy();
     });
 
-    bookExample(166, 'with helplessKills the hit kills outright', () => {
-        const target = sleeper(1);
+    const mitigate = (
+        target: BattleParticipant,
+        rules = rulesOf(true),
+        type: AttackType = AttackType.MELEE
+    ) =>
+        mitigateWfrpDamage({
+            attacker: unit('a', 0),
+            target,
+            weapon: 0,
+            amount: 0,
+            margin: 0,
+            location: 'body',
+            crit: false,
+            attack: attackWith(type, '150/450 ft'),
+            rng: () => 0.5,
+            rules,
+        });
 
-        const r = run(target, attackWith(AttackType.MELEE), {}, rulesOf(true));
+    bookExample(
+        166,
+        'with helplessKills the hit deals lethal damage through the normal path',
+        () => {
+            const target = sleeper(1);
 
-        expect(r.targetUpdate?.(target).combatStats.status).toBe(
-            CombatStatus.DEAD
-        );
-    });
+            const r = run(
+                target,
+                attackWith(AttackType.MELEE),
+                {},
+                rulesOf(true)
+            );
+
+            expect(
+                (r.targetUpdate?.(target) ?? target).combatStats.status
+            ).not.toBe(CombatStatus.DEAD);
+            expect(mitigate(target).amount).toBe(target.combatStats.currentHp);
+        }
+    );
+
+    bookExample(
+        166,
+        'the helpless kill needs Point Blank for a ranged attack',
+        () => {
+            expect(
+                mitigate(sleeper(1), rulesOf(true), AttackType.RANGED).amount
+            ).toBeGreaterThan(0);
+            expect(
+                mitigate(sleeper(30), rulesOf(true), AttackType.RANGED).amount
+            ).toBe(0);
+        }
+    );
 
     bookExample(166, 'without the rule the target is only hit', () => {
         const target = sleeper(1);
 
         const r = run(target, attackWith(AttackType.MELEE));
 
-        expect(r.targetUpdate?.(target).combatStats.status).not.toBe(
-            CombatStatus.DEAD
-        );
+        expect(
+            (r.targetUpdate?.(target) ?? target).combatStats.status
+        ).not.toBe(CombatStatus.DEAD);
+        expect(mitigate(target, rulesOf()).amount).toBe(0);
     });
 });
