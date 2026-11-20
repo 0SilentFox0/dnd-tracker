@@ -42,10 +42,7 @@ export function sessionStartHandler(req: Request, campaignId: string) {
             return NextResponse.json(created, { status: 201 });
         } catch (e) {
             if (e instanceof WorldSessionError)
-                return errorResponse(
-                    e.code,
-                    e.code === API_ERRORS.WORLD_SESSION_CONFLICT ? 409 : 400
-                );
+                return errorResponse(e.code, 409);
 
             throw e;
         }

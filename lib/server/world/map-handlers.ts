@@ -15,6 +15,7 @@ import {
     readWorldMapDetail,
     toWorldMap,
 } from '@/lib/server/world/map-store';
+import { listEnemies } from '@/lib/server/world/enemy-store';
 import { listPublicMapNotes } from '@/lib/server/world/note-store';
 import { listHeroesOnMap } from '@/lib/server/world/travel-store';
 import { publishWorldChanged } from '@/lib/server/world/world-events';
@@ -176,9 +177,10 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
         if (detail instanceof NextResponse) return detail;
 
-        const [heroes, notes] = await Promise.all([
+        const [heroes, notes, enemies] = await Promise.all([
             listHeroesOnMap(campaignId, mapId),
             listPublicMapNotes(mapId, access.userId),
+            listEnemies(mapId),
         ]);
 
         return NextResponse.json({
@@ -186,6 +188,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
             markers: detail.markers,
             heroes,
             notes,
+            enemies,
         });
     });
 }

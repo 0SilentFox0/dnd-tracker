@@ -126,7 +126,7 @@ describe('sessions', () => {
 
         const res = await sessionStartHandler(req({ name: 'New' }), 'c1');
 
-        expect(res.status).toBe(400);
+        expect(res.status).toBe(409);
         expect((await res.json()).error).toBe(API_ERRORS.WORLD_SESSION_LIMIT);
         expect(m.create).not.toHaveBeenCalled();
     });
