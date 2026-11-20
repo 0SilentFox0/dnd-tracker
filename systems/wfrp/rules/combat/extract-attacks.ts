@@ -1,5 +1,5 @@
 import { type WeaponProfile, weaponProfile } from '../equipment/weapon-profile';
-import { ATTACK_SLOT } from '../slots';
+import { ATTACK_SLOT, type WfrpHand } from '../slots';
 
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 import { AttackType } from '@/lib/constants/battle';
@@ -33,14 +33,9 @@ export function extractWfrpAttacks({
         seen.add(row.id);
 
         return [
-            wfrpAttackFromProfile(
-                id,
-                row.name,
-                profile,
-                slot === ArtifactSlot.SHIELD
-                    ? { offHand: true, hand: true }
-                    : { hand: true }
-            ),
+            wfrpAttackFromProfile(id, row.name, profile, {
+                hand: slot === ArtifactSlot.SHIELD ? 'off' : 'main',
+            }),
         ];
     });
 }
@@ -49,7 +44,7 @@ export function wfrpAttackFromProfile(
     id: string,
     name: string,
     profile: WeaponProfile,
-    extra?: { magical?: true; offHand?: true; hand?: true }
+    extra?: { magical?: true; hand?: WfrpHand }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
 
@@ -79,8 +74,7 @@ export function wfrpAttackFromProfile(
             ...(profile.group && { group: profile.group }),
             ...(!profile.addSb && { noSb: true }),
             ...(extra?.magical && { magical: true as const }),
-            ...(extra?.offHand && { offHand: true as const }),
-            ...(extra?.hand && { hand: true as const }),
+            ...(extra?.hand && { hand: extra.hand }),
         }),
         noLevelDice: true,
         ...(profile.ammoCapacity !== undefined && {

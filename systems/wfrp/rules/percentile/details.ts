@@ -7,6 +7,8 @@ export interface PercentileAttackDetails {
     netSl: number;
     location: HitSpot;
     doubles: boolean;
+    /** A failed test that rolled a double (p165) */
+    fumble?: true;
     defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
     momentumUsed?: boolean;
     /** Personal Momentum acted as Advantage on the test (canon5e, p168) */

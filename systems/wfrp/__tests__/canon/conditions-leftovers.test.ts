@@ -68,16 +68,20 @@ const endTest = (p: BattleParticipant, key: string, presetRoll: number) =>
     });
 
 describe('canon5e conditions: leftovers', () => {
-    bookExample(186, 'more Stunned than Toughness Bonus knocks the target out', () => {
-        const three = make(['stunned', 3]);
+    bookExample(
+        186,
+        'more Stunned than Toughness Bonus knocks the target out',
+        () => {
+            const three = make(['stunned', 3]);
 
-        expect(conditionLevel(three, 'unconscious')).toBe(0);
+            expect(conditionLevel(three, 'unconscious')).toBe(0);
 
-        const four = make(['stunned', 4]);
+            const four = make(['stunned', 4]);
 
-        expect(conditionLevel(four, 'unconscious')).toBe(1);
-        expect(four.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-    });
+            expect(conditionLevel(four, 'unconscious')).toBe(1);
+            expect(four.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+        }
+    );
 
     bookExample(187, 'falling Unconscious loses every Stunned', () => {
         const p = make(['stunned', 4]);
@@ -85,47 +89,75 @@ describe('canon5e conditions: leftovers', () => {
         expect(conditionLevel(p, 'stunned')).toBe(0);
     });
 
-    bookExample(185, 'a removal test takes one more level per SL past the first', () => {
-        const p = make(['ablaze', 3]);
+    bookExample(
+        185,
+        'a removal test takes one more level per SL past the first',
+        () => {
+            const p = make(['ablaze', 3]);
 
-        expect(conditionLevel(endTest(p, 'ablaze', 10).participants[0], 'ablaze')).toBe(1);
-        expect(conditionLevel(endTest(p, 'ablaze', 25).participants[0], 'ablaze')).toBe(2);
-    });
+            expect(
+                conditionLevel(
+                    endTest(p, 'ablaze', 10).participants[0],
+                    'ablaze'
+                )
+            ).toBe(1);
+            expect(
+                conditionLevel(
+                    endTest(p, 'ablaze', 25).participants[0],
+                    'ablaze'
+                )
+            ).toBe(2);
+        }
+    );
 
-    bookExample(186, 'Fatigued comes after the last Stunned only without one already', () => {
-        const plain = endTest(make(['stunned', 1]), 'stunned', 3).participants[0];
+    bookExample(
+        186,
+        'Fatigued comes after the last Stunned only without one already',
+        () => {
+            const plain = endTest(make(['stunned', 1]), 'stunned', 3)
+                .participants[0];
 
-        expect(conditionLevel(plain, 'fatigued')).toBe(1);
+            expect(conditionLevel(plain, 'fatigued')).toBe(1);
 
-        const tired = endTest(make(['stunned', 1], ['fatigued', 1]), 'stunned', 3)
-            .participants[0];
+            const tired = endTest(
+                make(['stunned', 1], ['fatigued', 1]),
+                'stunned',
+                3
+            ).participants[0];
 
-        expect(conditionLevel(tired, 'fatigued')).toBe(1);
-    });
+            expect(conditionLevel(tired, 'fatigued')).toBe(1);
+        }
+    );
 
     bookExample(185, 'Blinded gives Disadvantage to sight-based tests', () => {
         const p = make(['blinded']);
 
-        expect(selfModes(p, 'test', CANON, 'climb')).toEqual({ disadvantage: 1 });
+        expect(selfModes(p, 'test', CANON, 'climb')).toEqual({
+            disadvantage: 1,
+        });
         expect(selfModes(p, 'test', CANON, 'endurance')).toEqual({});
     });
 
-    bookExample(187, 'a Surprised defender cannot defend in an opposed test', () => {
-        expect(cannotDefend(make(['surprised']), CANON)).toBe(true);
-        expect(cannotDefend(make(['prone']), CANON)).toBe(false);
+    bookExample(
+        187,
+        'a Surprised defender cannot defend in an opposed test',
+        () => {
+            expect(cannotDefend(make(['surprised']), CANON)).toBe(true);
+            expect(cannotDefend(make(['prone']), CANON)).toBe(false);
 
-        const r = resolveOpposed({
-            attackerTarget: 50,
-            defenderTargets: [{ kind: 'parry', target: 99 }],
-            edition: CANON,
-            defenderHelpless: true,
-            rng: () => 0,
-            presetRolls: { attacker: 10, defender: 1 },
-        });
+            const r = resolveOpposed({
+                attackerTarget: 50,
+                defenderTargets: [{ kind: 'parry', target: 99 }],
+                edition: CANON,
+                defenderHelpless: true,
+                rng: () => 0,
+                presetRolls: { attacker: 10, defender: 1 },
+            });
 
-        expect(r.defender.outcome).toBe('failure');
-        expect(r.isHit).toBe(true);
-    });
+            expect(r.defender.outcome).toBe('failure');
+            expect(r.isHit).toBe(true);
+        }
+    );
 
     bookExample(186, 'Entangled costs no SL and gives no melee edge', () => {
         const p = make(['entangled', 2]);

@@ -192,12 +192,15 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const dropChannelled = channelled > 0;
 
+    const markCast = editionOf(ctx.rules).momentumModel === 'participant';
+
     const casterUpdate =
-        spendFortune || dropChannelled
+        spendFortune || dropChannelled || markCast
             ? (p: BattleParticipant) =>
                   withWfrpState(p, {
                       ...(fortune && spentFor(p, fortune.kind, fortune.spent)),
                       ...(dropChannelled && { channelledSl: undefined }),
+                      ...(markCast && { lastHand: 'cast' as const }),
                   })
             : undefined;
 

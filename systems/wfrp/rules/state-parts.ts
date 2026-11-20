@@ -1,11 +1,18 @@
 import { fortuneMax } from './characteristics/keys';
+import { editionOf } from './edition';
 import { PARTICIPANT_SLOT } from './slots';
 import { wfrpState, withWfrpState } from './state';
 
+import {
+    findParticipant,
+    replaceParticipant,
+} from '@/lib/utils/abilities/engine/core/participants';
 import type {
     PersistPart,
     StoredPart,
+    TurnHook,
     TurnStateReset,
+    TurnSubjectCtx,
 } from '@/lib/utils/rules/systems/types';
 
 /** Fortune: the saved value, else its maximum; Fate: only once spent (absent = the characteristic) */
@@ -39,12 +46,43 @@ export const wfrpPersist: PersistPart = ({ participant }, acc) => ({
 export const wfrpResetState: TurnStateReset = (p, scope) => {
     if (scope !== 'turn') return p;
 
-    const { conditionTests, momentumAttack } = wfrpState(p);
+    const { conditionTests, momentumAttack, lastHand, moveMode } = wfrpState(p);
 
-    return conditionTests || momentumAttack
+    return conditionTests || momentumAttack || lastHand || moveMode
         ? withWfrpState(p, {
               conditionTests: undefined,
               momentumAttack: undefined,
+              lastHand: undefined,
+              moveMode: undefined,
           })
         : p;
+};
+
+/** Same-hand and Charge blocks belong to the owner's turn: they must not leak into off-turn strikes (p164, p167) */
+export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
+    participants,
+    id,
+    rules,
+}) => {
+    const p = findParticipant(participants, id);
+
+    if (!p || editionOf(rules).momentumModel !== 'participant')
+        return { participants, messages: [] };
+
+    const { momentumAttack, lastHand, moveMode } = wfrpState(p);
+
+    if (!momentumAttack && !lastHand && !moveMode)
+        return { participants, messages: [] };
+
+    return {
+        participants: replaceParticipant(
+            participants,
+            withWfrpState(p, {
+                momentumAttack: undefined,
+                lastHand: undefined,
+                moveMode: undefined,
+            })
+        ),
+        messages: [],
+    };
 };

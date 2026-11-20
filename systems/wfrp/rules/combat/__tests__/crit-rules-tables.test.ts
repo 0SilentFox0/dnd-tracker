@@ -63,6 +63,45 @@ describe('rollCrit with rules.tables', () => {
         });
     });
 
+    it('marker rounds make the marker timed; without rounds it stays permanent', () => {
+        const rows: TableRow[] = [
+            {
+                max: 50,
+                effects: [{ type: 'marker', key: 'disarmed', rounds: 3 }],
+            },
+            { max: 100, effects: [{ type: 'marker', key: 'crippled' }] },
+        ];
+
+        const apply = (roll: number) => {
+            const crit = rollCrit(
+                'head',
+                withTables({ critHead: rows }),
+                rng,
+                roll
+            );
+
+            return {
+                crit,
+                effect: applyWfrpCrit(
+                    makeParticipant({ id: 't', hp: 20, maxHp: 20 }),
+                    crit,
+                    1
+                ).participant.battleData.activeEffects[0],
+            };
+        };
+
+        const timed = apply(10);
+
+        expect(timed.crit.markerRounds).toEqual({ disarmed: 3 });
+        expect(timed.effect.permanent).toBeUndefined();
+        expect(timed.effect.duration).toBe(3);
+
+        const forever = apply(100);
+
+        expect(forever.crit.markerRounds).toBeUndefined();
+        expect(forever.effect.permanent).toBe(true);
+    });
+
     it('empty section equals the shipped defaults', () => {
         expect(rollCrit('leg', withTables({}), rng, 100)).toEqual({
             id: 'leg.5',

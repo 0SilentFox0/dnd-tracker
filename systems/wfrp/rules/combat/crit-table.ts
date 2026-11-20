@@ -15,6 +15,8 @@ export interface CritResult {
     bonusDamage: number;
     conditions: { key: WfrpConditionKey; levels: number }[];
     markers: string[];
+    /** Duration of a marker in rounds; a marker without an entry is permanent */
+    markerRounds?: Partial<Record<string, number>>;
     /** Which arm or leg was struck (canon5e) */
     side?: HitSide;
     /** The roll ran past the table (or hit a `death` row), p171-176 */
@@ -73,8 +75,15 @@ export function rollCrit(
         if (e.type === 'damage') result.bonusDamage += e.amount;
         else if (e.type === 'condition')
             result.conditions.push({ key: e.key, levels: e.levels });
-        else if (e.type === 'marker') result.markers.push(e.key);
-        else if (e.type === 'death') result.death = true;
+        else if (e.type === 'marker') {
+            result.markers.push(e.key);
+
+            if (e.rounds)
+                result.markerRounds = {
+                    ...result.markerRounds,
+                    [e.key]: e.rounds,
+                };
+        } else if (e.type === 'death') result.death = true;
     }
 
     return result;

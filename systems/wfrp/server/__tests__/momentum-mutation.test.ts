@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { momentumMutation } from '../battle/momentum-mutation';
 
 import '@/lib/server/systems/registry';
-import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { ParticipantSide } from '@/lib/constants/battle';
 import {
     context,
     participant,
@@ -71,6 +71,7 @@ const heroOf = (opts: {
     return withWfrpState(hero, {
         momentum: opts.momentum === false ? undefined : true,
         momentumAttack: opts.spent ? true : undefined,
+        lastHand: 'main',
     });
 };
 
@@ -166,6 +167,16 @@ describe('canon: Leadership hand-off (p169)', () => {
         expect(JSON.stringify(out.events)).toContain(
             'battleWfrp.log.leadershipFailed'
         );
+    });
+
+    bookExample(169, 'is a Free Action: the Action stays unspent', () => {
+        const out = momentumMutation(
+            ctxOf(heroOf({ usedAction: false })),
+            lead(95)
+        );
+
+        expect(find(out, 'hero').actionFlags.hasUsedAction).toBe(false);
+        expect(hasMomentum(find(out, 'hero'))).toBe(false);
     });
 
     it('rejects an enemy or the hero as the ally', () => {

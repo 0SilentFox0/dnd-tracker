@@ -32,7 +32,11 @@ const base = { participantId: z.string().min(1) };
 
 export const momentumSchema = z
     .discriminatedUnion('mode', [
-        z.object({ mode: z.literal('secondAttack'), ...base }),
+        z.object({
+            mode: z.literal('secondAttack'),
+            ...base,
+            serverRoll: z.boolean().optional(),
+        }),
         z.object({
             mode: z.literal('leadership'),
             ...base,

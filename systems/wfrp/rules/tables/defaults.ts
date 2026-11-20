@@ -161,6 +161,61 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
             textKey: 'battleWfrp.crit.leg.5',
         },
     ],
+    oops: [
+        {
+            max: 20,
+            effects: [{ type: 'wounds', amount: 1 }],
+            textKey: 'battleWfrp.fumble.oops.1',
+        },
+        {
+            max: 40,
+            effects: [
+                { type: 'fumble', kind: 'weaponDamage' },
+                { type: 'fumble', kind: 'actLast' },
+            ],
+            textKey: 'battleWfrp.fumble.oops.2',
+        },
+        {
+            max: 60,
+            effects: [{ type: 'fumble', kind: 'slPenalty' }],
+            textKey: 'battleWfrp.fumble.oops.3',
+        },
+        {
+            max: 70,
+            effects: [{ type: 'fumble', kind: 'loseMove' }],
+            textKey: 'battleWfrp.fumble.oops.4',
+        },
+        {
+            max: 80,
+            effects: [{ type: 'fumble', kind: 'loseAction' }],
+            textKey: 'battleWfrp.fumble.oops.5',
+        },
+        {
+            max: 90,
+            effects: [{ type: 'fumble', kind: 'legPenalty' }],
+            textKey: 'battleWfrp.fumble.oops.6',
+        },
+        {
+            max: 100,
+            effects: [{ type: 'condition', key: 'stunned', levels: 1 }],
+            textKey: 'battleWfrp.fumble.oops.7',
+        },
+    ],
+    misfire: [
+        {
+            max: 80,
+            effects: [{ type: 'fumble', kind: 'loseAction' }],
+            textKey: 'battleWfrp.fumble.misfire.1',
+        },
+        {
+            max: 100,
+            effects: [
+                { type: 'wounds', amount: 4 },
+                { type: 'fumble', kind: 'weaponDamage' },
+            ],
+            textKey: 'battleWfrp.fumble.misfire.2',
+        },
+    ],
     miscastMinor: [
         {
             max: 20,

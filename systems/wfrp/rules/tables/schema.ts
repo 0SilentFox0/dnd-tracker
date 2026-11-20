@@ -22,6 +22,8 @@ export const TABLE_SLOTS = [
     'miscastMinor',
     'miscastMajor',
     'wrath',
+    'oops',
+    'misfire',
     'downtimeEvent',
     'mutationPhysical',
     'mutationMental',
@@ -34,13 +36,25 @@ export const MUTATION_SLOTS = [
     'mutationMental',
 ] as const satisfies readonly TableSlot[];
 
+export const FUMBLE_KINDS = [
+    'loseAction',
+    'loseMove',
+    'slPenalty',
+    'actLast',
+    'weaponDamage',
+    'legPenalty',
+] as const;
+
+export type FumbleKind = (typeof FUMBLE_KINDS)[number];
+
 export const MARKER_KEYS = ['winded', 'disarmed', 'crippled'] as const;
 
 export type TableEffect =
     | { type: 'damage'; amount: number }
     | { type: 'wounds'; amount: number }
     | { type: 'condition'; key: WfrpConditionKey; levels: number }
-    | { type: 'marker'; key: (typeof MARKER_KEYS)[number] }
+    | { type: 'marker'; key: (typeof MARKER_KEYS)[number]; rounds?: number }
+    | { type: 'fumble'; kind: FumbleKind }
     | { type: 'death' }
     | { type: 'characteristic'; key: CharacteristicKey; amount: number }
     | { type: 'move'; amount: number }
@@ -65,11 +79,16 @@ const EffectSchema = z.discriminatedUnion('type', [
         key: z.enum(WFRP_CONDITION_KEYS),
         levels: z.number().int().min(1).max(WFRP_CONDITION_MAX_LEVEL),
     }),
-    z.strictObject({ type: z.literal('marker'), key: z.enum(MARKER_KEYS) }),
+    z.strictObject({
+        type: z.literal('marker'),
+        key: z.enum(MARKER_KEYS),
+        rounds: z.number().int().min(1).max(20).optional(),
+    }),
+    z.strictObject({ type: z.literal('fumble'), kind: z.enum(FUMBLE_KINDS) }),
     z.strictObject({ type: z.literal('death') }),
 ]);
 
-const RowSchema = z.strictObject({
+export const RowSchema = z.strictObject({
     max: z.number().int().min(1).max(CRIT_ROLL_CAP),
     text: z.string().max(200).optional(),
     effects: z.array(EffectSchema).max(4),
@@ -99,7 +118,7 @@ const MutationEffectSchema = z.discriminatedUnion('type', [
     }),
 ]);
 
-const MutationRowSchema = z.strictObject({
+export const MutationRowSchema = z.strictObject({
     max: RowSchema.shape.max,
     text: RowSchema.shape.text,
     effects: z.array(MutationEffectSchema).max(MUTATION_EFFECTS_MAX),
@@ -118,6 +137,8 @@ export const SLOT_EFFECTS: Record<TableSlot, readonly TableEffect['type'][]> = {
     miscastMinor: ['wounds', 'condition'],
     miscastMajor: ['wounds', 'condition'],
     wrath: ['wounds', 'condition'],
+    oops: ['wounds', 'condition', 'fumble'],
+    misfire: ['wounds', 'condition', 'fumble'],
     downtimeEvent: ['wounds', 'condition'],
     mutationPhysical: ['characteristic', 'move', 'maxWounds'],
     mutationMental: ['characteristic', 'move', 'maxWounds'],

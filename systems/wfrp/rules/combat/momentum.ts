@@ -63,7 +63,12 @@ export function spendMomentum(p: BattleParticipant): BattleParticipant | null {
     return hasMomentum(p) ? loseMomentum(p) : null;
 }
 
-export type SecondAttackBlocker = 'none' | 'used' | 'action' | 'weapons';
+export type SecondAttackBlocker =
+    | 'none'
+    | 'used'
+    | 'action'
+    | 'cast'
+    | 'weapons';
 
 /** One extra attack per turn (p167-168): after the main action, with melee weapons in both hands */
 export function secondAttackBlocker(
@@ -76,18 +81,33 @@ export function secondAttackBlocker(
 
     if (!p.actionFlags.hasUsedAction) return 'action';
 
-    const melee = p.battleData.attacks.filter(
-        (a) => a.type === AttackType.MELEE && !wfrpAttackBlocked(p, a, rules)
-    );
+    const { lastHand } = wfrpState(p);
 
-    const off = (a: BattleAttack) =>
-        ATTACK_SLOT.read(a.system)?.offHand === true;
+    if (lastHand === 'cast') return 'cast';
 
-    return melee.some(off) && melee.some((a) => !off(a)) ? null : 'weapons';
+    if (lastHand !== 'main' && lastHand !== 'off') return 'action';
+
+    const otherHand = (a: BattleAttack) => {
+        const hand = ATTACK_SLOT.read(a.system)?.hand;
+
+        return hand !== undefined && hand !== lastHand;
+    };
+
+    return p.battleData.attacks.some(
+        (a) =>
+            a.type === AttackType.MELEE &&
+            otherHand(a) &&
+            !wfrpAttackBlocked(p, a, rules)
+    )
+        ? null
+        : 'weapons';
 }
 
 export function grantSecondAttack(p: BattleParticipant): BattleParticipant {
     const spent = loseMomentum(p);
 
-    return withAttacksLeft(withWfrpState(spent, { momentumAttack: true }), 1);
+    return withAttacksLeft(
+        withWfrpState(spent, { momentumAttack: true }),
+        (spent.battleData.attacksLeft ?? 0) + 1
+    );
 }

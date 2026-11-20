@@ -13,10 +13,15 @@ import {
     LOCATION_WEIGHTS,
     sideOf,
 } from '@/systems/wfrp/rules/combat/location';
-import { hasMomentum, secondAttackBlocker, withMomentum } from '@/systems/wfrp/rules/combat/momentum';
+import {
+    hasMomentum,
+    secondAttackBlocker,
+    withMomentum,
+} from '@/systems/wfrp/rules/combat/momentum';
 import { reverseRoll } from '@/systems/wfrp/rules/percentile';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleAttack } from '@/types/battle';
 
 const CANON_RULES = RulesetSchema.parse({
@@ -33,8 +38,9 @@ const attack = (offHand: boolean, hand = true): BattleAttack =>
         system: ATTACK_SLOT.write({
             qualities: [],
             flaws: [],
-            ...(hand && { hand: true as const }),
-            ...(offHand && { offHand: true as const }),
+            ...(hand && {
+                hand: offHand ? ('off' as const) : ('main' as const),
+            }),
         }),
     }) as BattleAttack;
 
@@ -49,23 +55,27 @@ const disarmedBy = (side: 'left' | 'right' | undefined) => {
 };
 
 describe('canon: left and right hit locations (p164)', () => {
-    bookExample(164, 'reversed roll picks head, arms, body and legs by side', () => {
-        const spot = (reversed: number) =>
-            hitLocation(reverseRoll(reversed), true);
+    bookExample(
+        164,
+        'reversed roll picks head, arms, body and legs by side',
+        () => {
+            const spot = (reversed: number) =>
+                hitLocation(reverseRoll(reversed), true);
 
-        expect(spot(5)).toBe('head');
-        expect(spot(9)).toBe('head');
-        expect(spot(10)).toBe('leftArm');
-        expect(spot(24)).toBe('leftArm');
-        expect(spot(25)).toBe('rightArm');
-        expect(spot(44)).toBe('rightArm');
-        expect(spot(45)).toBe('body');
-        expect(spot(79)).toBe('body');
-        expect(spot(80)).toBe('leftLeg');
-        expect(spot(89)).toBe('leftLeg');
-        expect(spot(90)).toBe('rightLeg');
-        expect(spot(100)).toBe('rightLeg');
-    });
+            expect(spot(5)).toBe('head');
+            expect(spot(9)).toBe('head');
+            expect(spot(10)).toBe('leftArm');
+            expect(spot(24)).toBe('leftArm');
+            expect(spot(25)).toBe('rightArm');
+            expect(spot(44)).toBe('rightArm');
+            expect(spot(45)).toBe('body');
+            expect(spot(79)).toBe('body');
+            expect(spot(80)).toBe('leftLeg');
+            expect(spot(89)).toBe('leftLeg');
+            expect(spot(90)).toBe('rightLeg');
+            expect(spot(100)).toBe('rightLeg');
+        }
+    );
 
     it('legacy keeps the four zones', () => {
         expect(hitLocation(41)).toBe('arm');
@@ -84,16 +94,24 @@ describe('canon: left and right hit locations (p164)', () => {
     });
 
     it('the crit result remembers the side of an arm or leg only', () => {
-        expect(rollCrit('arm', WFRP_RULES, () => 0, 1, 0, 'left').side).toBe('left');
-        expect(rollCrit('body', WFRP_RULES, () => 0, 1, 0, 'left').side).toBeUndefined();
+        expect(rollCrit('arm', WFRP_RULES, () => 0, 1, 0, 'left').side).toBe(
+            'left'
+        );
+        expect(
+            rollCrit('body', WFRP_RULES, () => 0, 1, 0, 'left').side
+        ).toBeUndefined();
     });
 
-    bookExample(164, 'a disarmed right arm blocks main-hand attacks only', () => {
-        const p = disarmedBy('right');
+    bookExample(
+        164,
+        'a disarmed right arm blocks main-hand attacks only',
+        () => {
+            const p = disarmedBy('right');
 
-        expect(wfrpAttackBlocked(p, attack(false), CANON_RULES)).toBe(true);
-        expect(wfrpAttackBlocked(p, attack(true), CANON_RULES)).toBe(false);
-    });
+            expect(wfrpAttackBlocked(p, attack(false), CANON_RULES)).toBe(true);
+            expect(wfrpAttackBlocked(p, attack(true), CANON_RULES)).toBe(false);
+        }
+    );
 
     bookExample(164, 'a disarmed left arm blocks off-hand attacks only', () => {
         const p = disarmedBy('left');
@@ -110,7 +128,11 @@ describe('canon: left and right hit locations (p164)', () => {
 
     it('a handless attack (trait, unarmed, spell) is never blocked', () => {
         expect(
-            wfrpAttackBlocked(disarmedBy('right'), attack(false, false), CANON_RULES)
+            wfrpAttackBlocked(
+                disarmedBy('right'),
+                attack(false, false),
+                CANON_RULES
+            )
         ).toBe(false);
     });
 
@@ -121,7 +143,9 @@ describe('canon: left and right hit locations (p164)', () => {
     });
 
     it('Momentum is not spendable on a second attack when the off hand is disarmed', () => {
-        const p = withMomentum(disarmedBy('left'), true);
+        const p = withWfrpState(withMomentum(disarmedBy('left'), true), {
+            lastHand: 'main',
+        });
 
         const armed = {
             ...p,

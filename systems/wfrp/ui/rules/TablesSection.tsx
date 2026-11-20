@@ -40,6 +40,8 @@ function DefaultRows({ slot }: { slot: TableSlot }) {
 
         if (e.type === 'death') return t('effect.death');
 
+        if (e.type === 'fumble') return t(`fumbleKinds.${e.kind}`);
+
         if (e.type === 'characteristic')
             return `${tt(`gameTerms.characteristics.${e.key}.short`)} ${signed(e.amount)}`;
 

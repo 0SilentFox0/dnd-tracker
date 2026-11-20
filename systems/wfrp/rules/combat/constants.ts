@@ -1,7 +1,13 @@
 // All values: verify against 5e book.
 export const OUTNUMBERING_BONUS = 10;
 
+/** Engaged foes that make a character Surrounded: no Disengage (p163) */
+export const SURROUNDED_FOES = 3;
+
 export const MOMENTUM_SL_BONUS = 1;
+
+/** SL penalty of an attack with the off hand (p167) */
+export const OFFHAND_SL_PENALTY = 2;
 
 export const MIN_DAMAGE = 1;
 

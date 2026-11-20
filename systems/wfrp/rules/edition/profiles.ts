@@ -29,6 +29,8 @@ export interface EditionProfile {
     conditionModel: 'percent' | 'sl';
     /** `zone`: head/arm/body/leg; `side`: arms and legs split into left and right, a disarmed arm blocks that hand (p164) */
     hitLocationModel: 'zone' | 'side';
+    /** `none`: a fumbled attack is a plain miss; `drop`: the weapon is dropped and the next Action retrieves it; `oops`: a table (p165) */
+    fumbleModel: 'none' | 'drop' | 'oops';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -47,6 +49,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         woundModel: 'knockdown',
         conditionModel: 'percent',
         hitLocationModel: 'zone',
+        fumbleModel: 'none',
     },
     canon5e: {
         advanceStep: 5,
@@ -63,5 +66,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         woundModel: 'critical',
         conditionModel: 'sl',
         hitLocationModel: 'side',
+        fumbleModel: 'drop',
     },
 };

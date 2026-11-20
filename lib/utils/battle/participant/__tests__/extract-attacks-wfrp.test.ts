@@ -166,8 +166,8 @@ describe('extractWfrpAttacks', () => {
             damageBonus: 2,
             ammo: { capacity: 3 },
         });
-        expect(ATTACK_SLOT.read(attacks[1].system)?.offHand).toBe(true);
-        expect(ATTACK_SLOT.read(attacks[0].system)?.offHand).toBeUndefined();
+        expect(ATTACK_SLOT.read(attacks[1].system)?.hand).toBe('off');
+        expect(ATTACK_SLOT.read(attacks[0].system)?.hand).toBe('main');
     });
 
     it('the same weapon in main hand and shield slot gets independent ids', () => {

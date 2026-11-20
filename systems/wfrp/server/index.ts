@@ -10,6 +10,10 @@ import {
 } from '@/systems/wfrp/rules/characteristics/schema';
 import { wfrpHitModel } from '@/systems/wfrp/rules/combat/hit-model';
 import { WfrpItemStatsSchema } from '@/systems/wfrp/rules/equipment/stats';
+import {
+    MutationRowSchema,
+    RowSchema,
+} from '@/systems/wfrp/rules/tables/schema';
 import { WFRP_AI } from '@/systems/wfrp/server/ai';
 import { WfrpFortuneInputSchema } from '@/systems/wfrp/server/attack-input';
 import { careerToImportRecord } from '@/systems/wfrp/server/careers/import-record';
@@ -42,7 +46,11 @@ export const WFRP_MODULE_SERVER: SystemServer = {
         careers: {
             resource: careersResource,
             toImportRecord: careerToImportRecord,
-            sharedSchemas: [[careerTierSchema, 'CareerTier']],
+            sharedSchemas: [
+                [careerTierSchema, 'CareerTier'],
+                [RowSchema, 'WfrpTableRow'],
+                [MutationRowSchema, 'WfrpMutationRow'],
+            ],
         },
     },
     contentRefs: WFRP_CONTENT_REFS,
@@ -156,6 +164,10 @@ export const WFRP_MODULE_SERVER: SystemServer = {
                 rateLimitScope: 'attack',
                 missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
             },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
             load: async () => {
                 const { momentumMutation, momentumSchema } = await import(
                     './battle/momentum-mutation'
@@ -164,12 +176,54 @@ export const WFRP_MODULE_SERVER: SystemServer = {
                 return { schema: momentumSchema, mutate: momentumMutation };
             },
         },
+        disengage: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
+            load: async () => {
+                const { disengageMutation, disengageSchema } = await import(
+                    './battle/disengage-mutation'
+                );
+
+                return { schema: disengageSchema, mutate: disengageMutation };
+            },
+        },
+        movement: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
+            load: async () => {
+                const { movementMutation, movementSchema } = await import(
+                    './battle/movement-mutation'
+                );
+
+                return { schema: movementSchema, mutate: movementMutation };
+            },
+        },
         channel: {
             settings: {
                 access: 'member',
                 blockedByMode: true,
                 rateLimitScope: 'attack',
                 missing: API_ERRORS.BATTLE_CHANNEL_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
             },
             load: async () => {
                 const { channelMutation, channelSchema } = await import(

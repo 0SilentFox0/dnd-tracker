@@ -27,10 +27,16 @@ import {
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
 import { withWfrpState } from '../state';
 import { sizeHitMod } from '../traits/size';
-import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
+import {
+    MOMENTUM_SL_BONUS,
+    OFFHAND_SL_PENALTY,
+    OUTNUMBERING_BONUS,
+} from './constants';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
+import { isOutnumbering } from './engagement';
 import { fateLeftOf, fateSpendsOn } from './fate';
+import { fumbleModelOf, fumbleOutcome } from './fumble';
 import { asLocation, hitLocation, sideOf } from './location';
 import { percentileLines } from './log';
 import {
@@ -47,11 +53,12 @@ import { AttackType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
-    isActive,
+    replaceParticipant,
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
+import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { rollDie } from '@/lib/utils/common/dice';
 import type {
@@ -59,7 +66,6 @@ import type {
     ResolvedAttack,
 } from '@/lib/utils/rules/systems/types';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
-import type { BattleMapConfig } from '@/types/battle-grid';
 
 const attackCharacteristicOf = (attack: BattleAttack) =>
     (attackKindOf(attack.type) === AttackType.RANGED ? 'bs' : 'ws') as
@@ -95,7 +101,7 @@ const attackerTargetOf = (
     selfTestMod(attacker, 'attack', edition ?? EDITION_PROFILES.legacy);
 
 // Best parry target among the defender's melee weapons; bare Weapon Skill without one.
-function parryTargetOf(
+export function parryTargetOf(
     defender: BattleParticipant,
     edition: Pick<EditionProfile, 'attackTarget'>
 ): number {
@@ -128,33 +134,6 @@ export const wfrpAttackTarget = (
     ),
     target: attackerTargetOf(attacker, attack),
 });
-
-// Positions are required: without a map nobody counts as outnumbering.
-function isOutnumbering(
-    attacker: BattleParticipant,
-    target: BattleParticipant,
-    participants: BattleParticipant[],
-    map: BattleMapConfig | null | undefined
-): boolean {
-    const near = (
-        of: BattleParticipant,
-        side: BattleParticipant['basicInfo']['side']
-    ) =>
-        participants.filter(
-            (p) =>
-                p.basicInfo.side === side &&
-                isActive(p) &&
-                (p.basicInfo.id === of.basicInfo.id ||
-                    isAdjacentOnMap(map, p, of))
-        ).length;
-
-    if (!isAdjacentOnMap(map, attacker, target)) return false;
-
-    return (
-        near(target, attacker.basicInfo.side) >=
-        2 * near(attacker, target.basicInfo.side)
-    );
-}
 
 export const wfrpAbortedRoll = (ctx: ResolveAttackCtx): AttackRollResult => ({
     isHit: false,
@@ -323,7 +302,8 @@ const detailsOf = (
     t: PercentileTestResult,
     netSl: number,
     extra: Partial<PercentileAttackDetails> = {},
-    split = false
+    split = false,
+    fumbles = true
 ): PercentileAttackDetails => ({
     roll: t.roll,
     target: t.target,
@@ -331,6 +311,7 @@ const detailsOf = (
     netSl,
     location: hitLocation(t.rawRoll, split),
     doubles: t.doubles,
+    ...(fumbles && t.outcome === 'fumble' && { fumble: true as const }),
     ...extra,
 });
 
@@ -346,7 +327,79 @@ const refsOf = (attack: BattleAttack) => {
     return { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] };
 };
 
+function woundAttacker(
+    ctx: ResolveAttackCtx,
+    before: BattleParticipant,
+    wounds: number
+): BattleParticipant {
+    const after = dropBreakOnDamage(
+        {
+            ...before,
+            combatStats: {
+                ...before.combatStats,
+                currentHp: Math.max(0, before.combatStats.currentHp - wounds),
+            },
+        },
+        wounds
+    );
+
+    return applyDamageConsequences({
+        before,
+        after,
+        amount: wounds,
+        rules: ctx.rules,
+        rng: ctx.rng,
+        participants: replaceParticipant(ctx.participants, after),
+    }).participant;
+}
+
+function withFumble(ctx: ResolveAttackCtx, r: ResolvedAttack): ResolvedAttack {
+    const details = ACTION_SLOT.read(r.attackRoll.system)?.attack;
+
+    const fumble =
+        details &&
+        fumbleOutcome({
+            details,
+            attacker: ctx.attacker,
+            group: ATTACK_SLOT.read(ctx.attack.system)?.group,
+            edition: editionOf(ctx.rules),
+            rules: ctx.rules,
+            rng: ctx.rng,
+        });
+
+    if (!fumble) return r;
+
+    return {
+        ...r,
+        lines: [...r.lines, ...fumble.lines],
+        attackerUpdate: (p) => {
+            const updated = fumble.update(r.attackerUpdate?.(p) ?? p);
+
+            return fumble.wounds > 0
+                ? woundAttacker(ctx, updated, fumble.wounds)
+                : updated;
+        },
+    };
+}
+
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
+    const resolved = withFumble(ctx, resolveAttackCore(ctx));
+
+    const hand = ATTACK_SLOT.read(ctx.attack.system)?.hand;
+
+    if (!hand || editionOf(ctx.rules).momentumModel !== 'participant')
+        return resolved;
+
+    return {
+        ...resolved,
+        attackerUpdate: (p) =>
+            withWfrpState(resolved.attackerUpdate?.(p) ?? p, {
+                lastHand: hand,
+            }),
+    };
+}
+
+function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
     const { attacker, target, attack, participants, rng, manualRoll } = ctx;
 
     const edition = editionOf(ctx.rules);
@@ -354,6 +407,8 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
     const toHit = qualityToHit(refsOf(attack));
 
     const fumbleFrom = qualityFumbleFrom(refsOf(attack));
+
+    const fumbles = fumbleModelOf(edition, ctx.rules) !== 'none';
 
     const fortuneInput = FORTUNE_INPUT.read(ctx.system);
 
@@ -383,7 +438,14 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fortuneEdge = fortuneInput?.kind === 'sl';
 
-    const slBonus = (fortuneEdge && !reverse ? 1 : 0) + talentSl;
+    const offHandPenalty =
+        edition.momentumModel === 'participant' &&
+        ATTACK_SLOT.read(attack.system)?.hand === 'off'
+            ? OFFHAND_SL_PENALTY
+            : 0;
+
+    const slBonus =
+        (fortuneEdge && !reverse ? 1 : 0) + talentSl - offHandPenalty;
 
     const fortuneAdvantage = fortuneEdge && reverse ? 1 : 0;
 
@@ -473,7 +535,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 roll: test.roll,
                 result: toResult(
                     ctx,
-                    detailsOf(test, test.sl, locationOf(), split),
+                    detailsOf(test, test.sl, locationOf(), split, fumbles),
                     isHit,
                     {
                         spent: false,
@@ -560,20 +622,26 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             presetRolls,
         });
 
-        const details = detailsOf(result.attacker, result.netSl, {
-            ...locationOf(),
-            defender: {
-                kind: result.defender.kind,
-                roll: result.defender.roll,
-                sl: result.defender.sl,
-                target: result.defender.target,
+        const details = detailsOf(
+            result.attacker,
+            result.netSl,
+            {
+                ...locationOf(),
+                defender: {
+                    kind: result.defender.kind,
+                    roll: result.defender.roll,
+                    sl: result.defender.sl,
+                    target: result.defender.target,
+                },
+                opposed: true,
+                ...(spent &&
+                    (personal
+                        ? { momentumAdvantage: true as const }
+                        : { momentumUsed: true })),
             },
-            opposed: true,
-            ...(spent &&
-                (personal
-                    ? { momentumAdvantage: true as const }
-                    : { momentumUsed: true })),
-        }, split);
+            split,
+            fumbles
+        );
 
         const counterCrit =
             edition.woundModel === 'critical' &&

@@ -64,6 +64,8 @@ export function applyWfrpCrit(
         }).participant;
 
     for (const key of crit.markers) {
+        const timed = crit.markerRounds?.[key];
+
         const marker = crit.side ? sidedMarker(key, crit.side) : key;
 
         participant = upsertLabeled(
@@ -73,8 +75,8 @@ export function applyWfrpCrit(
                 name: `crit.wfrp.${crit.id}.${marker}`,
                 label: crit.text,
                 type: 'debuff',
-                rounds: PERMANENT_ROUNDS,
-                permanent: true,
+                rounds: timed ?? PERMANENT_ROUNDS,
+                permanent: timed === undefined,
                 stackable: true,
                 effects: [{ type: marker, value: 1 }],
             },
