@@ -26,11 +26,22 @@ export function forbiddenTermIssues(pack: Pack): PackIssue[] {
             })
         );
 
+    // The engine kind id `chaos` is a code identifier, not content text.
+    const scanned = (kind: string, row: Record<string, unknown>) => {
+        const casting = row.casting as
+            | { magic?: { kind?: unknown } }
+            | undefined;
+
+        return kind === 'spells' && casting?.magic?.kind === 'chaos'
+            ? { ...row, casting: { magic: { ...casting.magic, kind: '' } } }
+            : row;
+    };
+
     const rowIssues = Object.entries(pack.rows).flatMap(([kind, rows]) =>
         (rows ?? []).flatMap((row, index) =>
             scan(
                 `${kind} #${index + 1}${typeof row.name === 'string' ? ` "${row.name}"` : ''}`,
-                row,
+                scanned(kind, row),
                 { kind, slug: row.slug }
             )
         )

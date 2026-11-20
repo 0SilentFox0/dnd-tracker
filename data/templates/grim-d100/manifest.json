@@ -27,10 +27,10 @@
   "credits": "Original content.",
   "counts": {
     "races": 5,
-    "careers": 18,
+    "careers": 70,
     "feats": 228,
     "units": 32,
-    "spells": 32,
-    "artifacts": 59
+    "spells": 252,
+    "artifacts": 291
   }
 }

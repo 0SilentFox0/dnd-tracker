@@ -21,6 +21,11 @@ const fields: FieldDef[] = [
     jsonField('ingredients'),
     { key: 'dice', type: 'dice' },
     { key: 'dieSides', type: 'int' },
+    {
+        key: 'executionMode',
+        type: 'enum',
+        enumValues: ['native', 'manual'],
+    },
     { key: 'concentration', type: 'bool' },
     { key: 'ritual', type: 'bool' },
     { key: 'stackable', type: 'bool' },

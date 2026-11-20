@@ -8,130 +8,440 @@
       "fortune": 3,
       "extraWounds": 0,
       "talents": [
-        "Quick Study"
+        "Marked Fate"
       ],
-      "randomTalentCount": 3,
+      "randomTalentCount": 4,
       "randomTalents": [
         {
-          "featId": "Snap Reaction",
+          "featId": "Keen Sighting",
+          "max": 2
+        },
+        {
+          "featId": "Both-Handed",
+          "max": 5
+        },
+        {
+          "featId": "Artist's Gift (Painting)",
+          "max": 7
+        },
+        {
+          "featId": "Striking Looks",
           "max": 10
         },
         {
-          "featId": "Tough Hide",
+          "featId": "Palm Greaser",
+          "max": 12
+        },
+        {
+          "featId": "Stacked Deck",
+          "max": 15
+        },
+        {
+          "featId": "Feline Landing",
+          "max": 17
+        },
+        {
+          "featId": "Steel Nerves",
           "max": 20
         },
         {
-          "featId": "Keen Sighting",
+          "featId": "Supple Frame",
+          "max": 22
+        },
+        {
+          "featId": "Bolt for It",
+          "max": 25
+        },
+        {
+          "featId": "Easy Talker",
+          "max": 27
+        },
+        {
+          "featId": "Hard Head",
           "max": 30
         },
         {
-          "featId": "Hearty Eater",
+          "featId": "Quick Feet",
+          "max": 32
+        },
+        {
+          "featId": "Tongue for Tongues",
+          "max": 35
+        },
+        {
+          "featId": "Steady Shooter",
+          "max": 37
+        },
+        {
+          "featId": "Accent Mimic",
           "max": 40
         },
         {
-          "featId": "Silver Tongue",
+          "featId": "Night Owl",
+          "max": 42
+        },
+        {
+          "featId": "Deft Hands",
+          "max": 45
+        },
+        {
+          "featId": "Gentle Birth",
+          "max": 47
+        },
+        {
+          "featId": "Trouble Sniffer",
           "max": 50
+        },
+        {
+          "featId": "Inner Compass",
+          "max": 52
+        },
+        {
+          "featId": "True Ear",
+          "max": 55
+        },
+        {
+          "featId": "Untainted Soul",
+          "max": 57
         },
         {
           "featId": "Lettered",
           "max": 60
         },
         {
-          "featId": "Road-Worn",
+          "featId": "Hardened Against (Poison)",
+          "max": 62
+        },
+        {
+          "featId": "Wildwalker",
+          "max": 65
+        },
+        {
+          "featId": "Sharp Mind",
+          "max": 67
+        },
+        {
+          "featId": "Deck Steady",
           "max": 70
         },
         {
-          "featId": "Weather Eye",
+          "featId": "Sharp Senses",
+          "max": 72
+        },
+        {
+          "featId": "Hearty Eater",
+          "max": 75
+        },
+        {
+          "featId": "Oarsman's Back",
+          "max": 77
+        },
+        {
+          "featId": "Pack Mule",
           "max": 80
         },
         {
-          "featId": "Night Owl",
+          "featId": "Winning Ways",
+          "max": 82
+        },
+        {
+          "featId": "Quick Reckoner",
+          "max": 85
+        },
+        {
+          "featId": "Dutiful Aide",
+          "max": 87
+        },
+        {
+          "featId": "Jack of Repairs",
           "max": 90
         },
         {
-          "featId": "Steel Nerves",
+          "featId": "Tunnel Stalker",
+          "max": 92
+        },
+        {
+          "featId": "Oxen Constitution",
+          "max": 95
+        },
+        {
+          "featId": "Mighty Arm",
+          "max": 97
+        },
+        {
+          "featId": "Blade Practice",
           "max": 100
         }
       ],
       "careerTable": [
         {
-          "careerId": "Archivist",
-          "max": 6
+          "careerId": "Compounder",
+          "max": 1
+        },
+        {
+          "careerId": "Mechanician",
+          "max": 2
+        },
+        {
+          "careerId": "Advocate",
+          "max": 3
+        },
+        {
+          "careerId": "Cloister Sister",
+          "max": 5
         },
         {
           "careerId": "Bonesetter",
-          "max": 12
+          "max": 6
         },
         {
-          "careerId": "Chandler",
+          "careerId": "Shrine Minister",
+          "max": 11
+        },
+        {
+          "careerId": "Archivist",
+          "max": 13
+        },
+        {
+          "careerId": "Arcanist",
+          "max": 14
+        },
+        {
+          "careerId": "Firebrand",
+          "max": 15
+        },
+        {
+          "careerId": "Craftwright",
+          "max": 17
+        },
+        {
+          "careerId": "Alms Seeker",
           "max": 19
         },
         {
-          "careerId": "Lamplighter",
-          "max": 25
+          "careerId": "Case Seeker",
+          "max": 20
         },
         {
-          "careerId": "Crier",
+          "careerId": "Trade Factor",
+          "max": 21
+        },
+        {
+          "careerId": "Vermin Warden",
+          "max": 23
+        },
+        {
+          "careerId": "Burgess",
+          "max": 26
+        },
+        {
+          "careerId": "Lantern Guard",
+          "max": 27
+        },
+        {
+          "careerId": "Court Confidant",
+          "max": 28
+        },
+        {
+          "careerId": "Limner",
+          "max": 29
+        },
+        {
+          "careerId": "Blade Adept",
+          "max": 30
+        },
+        {
+          "careerId": "Emissary",
           "max": 31
         },
         {
-          "careerId": "Masquer",
+          "careerId": "Landed Heir",
+          "max": 32
+        },
+        {
+          "careerId": "Household Hand",
+          "max": 35
+        },
+        {
+          "careerId": "Shadow Agent",
+          "max": 36
+        },
+        {
+          "careerId": "Castellan",
           "max": 37
         },
         {
-          "careerId": "Shepherd",
-          "max": 44
+          "careerId": "Tithe Marshal",
+          "max": 38
+        },
+        {
+          "careerId": "Village Charmer",
+          "max": 39
         },
         {
           "careerId": "Ashburner",
-          "max": 50
-        },
-        {
-          "careerId": "Pathfinder",
-          "max": 56
+          "max": 40
         },
         {
           "careerId": "Falconer",
-          "max": 62
+          "max": 42
+        },
+        {
+          "careerId": "Shaft Digger",
+          "max": 43
+        },
+        {
+          "careerId": "Omen Reader",
+          "max": 44
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 45
+        },
+        {
+          "careerId": "Shepherd",
+          "max": 50
+        },
+        {
+          "careerId": "Quarry Taker",
+          "max": 51
+        },
+        {
+          "careerId": "Stage Driver",
+          "max": 52
+        },
+        {
+          "careerId": "Showman",
+          "max": 54
+        },
+        {
+          "careerId": "Scourge Pilgrim",
+          "max": 56
+        },
+        {
+          "careerId": "Courier",
+          "max": 57
+        },
+        {
+          "careerId": "Pack Trader",
+          "max": 58
+        },
+        {
+          "careerId": "Highway Marshal",
+          "max": 59
+        },
+        {
+          "careerId": "Inquisitor",
+          "max": 60
         },
         {
           "careerId": "Ferry Keeper",
-          "max": 69
+          "max": 62
         },
         {
-          "careerId": "Eel Fisher",
-          "max": 75
+          "careerId": "Channel Pilot",
+          "max": 63
+        },
+        {
+          "careerId": "Water Patrol",
+          "max": 65
+        },
+        {
+          "careerId": "Waterway Hand",
+          "max": 68
+        },
+        {
+          "careerId": "Deckhand",
+          "max": 70
+        },
+        {
+          "careerId": "Contraband Runner",
+          "max": 71
+        },
+        {
+          "careerId": "Dock Porter",
+          "max": 73
+        },
+        {
+          "careerId": "Shore Scavenger",
+          "max": 74
         },
         {
           "careerId": "Dicer",
-          "max": 81
+          "max": 75
+        },
+        {
+          "careerId": "Goods Broker",
+          "max": 76
+        },
+        {
+          "careerId": "Barrow Delver",
+          "max": 77
+        },
+        {
+          "careerId": "Street Schemer",
+          "max": 79
+        },
+        {
+          "careerId": "Highwayman",
+          "max": 83
+        },
+        {
+          "careerId": "Gang Enforcer",
+          "max": 84
         },
         {
           "careerId": "Lockbreaker",
           "max": 87
         },
         {
-          "careerId": "Shieldbearer",
+          "careerId": "Hex Caster",
+          "max": 88
+        },
+        {
+          "careerId": "Mounted Lancer",
+          "max": 90
+        },
+        {
+          "careerId": "Gatekeeper",
+          "max": 92
+        },
+        {
+          "careerId": "Sworn Rider",
+          "max": 93
+        },
+        {
+          "careerId": "Cage Brawler",
           "max": 94
         },
         {
+          "careerId": "Hired Fist",
+          "max": 95
+        },
+        {
           "careerId": "Sellsword",
+          "max": 99
+        },
+        {
+          "careerId": "Holy Blade",
           "max": 100
         }
       ],
       "skillPicks": {
         "count": 5,
         "options": [
-          "athletics",
+          "animal-care",
           "charm",
           "cool",
+          "evaluate",
           "gossip",
           "haggle",
-          "intuition",
+          "language:trade-cant",
+          "language:old-script",
+          "leadership",
+          "lore:local-lore",
           "melee:basic",
-          "perception",
-          "ride",
-          "research"
+          "ranged:bow"
         ]
       },
       "languages": [
@@ -145,81 +455,371 @@
       "mods": {
         "ws": 10,
         "t": 10,
-        "wp": 20,
+        "i": -10,
         "ag": -10,
         "dex": 10,
+        "wp": 20,
         "fel": -10
       },
       "move": 3,
       "fate": 2,
       "fortune": 2,
-      "extraWounds": 1,
+      "extraWounds": 0,
       "talents": [
-        "Stone Sense",
-        "Deep Sight"
+        "Spell Ward",
+        "Night Owl",
+        "Pack Mule"
       ],
-      "randomTalentCount": 1,
+      "randomTalentCount": 0,
       "randomTalents": [
         {
-          "featId": "Oxen Constitution",
-          "max": 25
+          "featId": "Keen Sighting",
+          "max": 2
         },
         {
-          "featId": "Steady Hands",
-          "max": 50
+          "featId": "Both-Handed",
+          "max": 5
         },
         {
-          "featId": "Iron Stomach",
-          "max": 75
+          "featId": "Artist's Gift (Painting)",
+          "max": 7
+        },
+        {
+          "featId": "Striking Looks",
+          "max": 10
+        },
+        {
+          "featId": "Palm Greaser",
+          "max": 12
+        },
+        {
+          "featId": "Stacked Deck",
+          "max": 15
+        },
+        {
+          "featId": "Feline Landing",
+          "max": 17
         },
         {
           "featId": "Steel Nerves",
+          "max": 20
+        },
+        {
+          "featId": "Supple Frame",
+          "max": 22
+        },
+        {
+          "featId": "Bolt for It",
+          "max": 25
+        },
+        {
+          "featId": "Easy Talker",
+          "max": 27
+        },
+        {
+          "featId": "Hard Head",
+          "max": 30
+        },
+        {
+          "featId": "Quick Feet",
+          "max": 32
+        },
+        {
+          "featId": "Tongue for Tongues",
+          "max": 35
+        },
+        {
+          "featId": "Steady Shooter",
+          "max": 37
+        },
+        {
+          "featId": "Accent Mimic",
+          "max": 40
+        },
+        {
+          "featId": "Night Owl",
+          "max": 42
+        },
+        {
+          "featId": "Deft Hands",
+          "max": 45
+        },
+        {
+          "featId": "Gentle Birth",
+          "max": 47
+        },
+        {
+          "featId": "Trouble Sniffer",
+          "max": 50
+        },
+        {
+          "featId": "Inner Compass",
+          "max": 52
+        },
+        {
+          "featId": "True Ear",
+          "max": 55
+        },
+        {
+          "featId": "Untainted Soul",
+          "max": 57
+        },
+        {
+          "featId": "Lettered",
+          "max": 60
+        },
+        {
+          "featId": "Hardened Against (Poison)",
+          "max": 62
+        },
+        {
+          "featId": "Wildwalker",
+          "max": 65
+        },
+        {
+          "featId": "Sharp Mind",
+          "max": 67
+        },
+        {
+          "featId": "Deck Steady",
+          "max": 70
+        },
+        {
+          "featId": "Sharp Senses",
+          "max": 72
+        },
+        {
+          "featId": "Hearty Eater",
+          "max": 75
+        },
+        {
+          "featId": "Oarsman's Back",
+          "max": 77
+        },
+        {
+          "featId": "Pack Mule",
+          "max": 80
+        },
+        {
+          "featId": "Winning Ways",
+          "max": 82
+        },
+        {
+          "featId": "Quick Reckoner",
+          "max": 85
+        },
+        {
+          "featId": "Dutiful Aide",
+          "max": 87
+        },
+        {
+          "featId": "Jack of Repairs",
+          "max": 90
+        },
+        {
+          "featId": "Tunnel Stalker",
+          "max": 92
+        },
+        {
+          "featId": "Oxen Constitution",
+          "max": 95
+        },
+        {
+          "featId": "Mighty Arm",
+          "max": 97
+        },
+        {
+          "featId": "Blade Practice",
           "max": 100
         }
       ],
       "careerTable": [
         {
-          "careerId": "Archivist",
-          "max": 8
+          "careerId": "Compounder",
+          "max": 1
+        },
+        {
+          "careerId": "Mechanician",
+          "max": 4
+        },
+        {
+          "careerId": "Advocate",
+          "max": 6
         },
         {
           "careerId": "Bonesetter",
-          "max": 16
+          "max": 7
         },
         {
-          "careerId": "Chandler",
-          "max": 26
+          "careerId": "Archivist",
+          "max": 9
         },
         {
-          "careerId": "Lamplighter",
-          "max": 32
+          "careerId": "Firebrand",
+          "max": 11
         },
         {
-          "careerId": "Crier",
+          "careerId": "Craftwright",
+          "max": 17
+        },
+        {
+          "careerId": "Alms Seeker",
+          "max": 18
+        },
+        {
+          "careerId": "Case Seeker",
+          "max": 20
+        },
+        {
+          "careerId": "Trade Factor",
+          "max": 24
+        },
+        {
+          "careerId": "Vermin Warden",
+          "max": 25
+        },
+        {
+          "careerId": "Burgess",
+          "max": 31
+        },
+        {
+          "careerId": "Lantern Guard",
+          "max": 34
+        },
+        {
+          "careerId": "Court Confidant",
+          "max": 36
+        },
+        {
+          "careerId": "Limner",
+          "max": 37
+        },
+        {
+          "careerId": "Blade Adept",
           "max": 38
         },
         {
-          "careerId": "Ashburner",
-          "max": 48
+          "careerId": "Emissary",
+          "max": 40
+        },
+        {
+          "careerId": "Landed Heir",
+          "max": 41
+        },
+        {
+          "careerId": "Household Hand",
+          "max": 42
+        },
+        {
+          "careerId": "Shadow Agent",
+          "max": 43
+        },
+        {
+          "careerId": "Castellan",
+          "max": 45
+        },
+        {
+          "careerId": "Tithe Marshal",
+          "max": 47
+        },
+        {
+          "careerId": "Falconer",
+          "max": 49
+        },
+        {
+          "careerId": "Shaft Digger",
+          "max": 54
         },
         {
           "careerId": "Pathfinder",
+          "max": 55
+        },
+        {
+          "careerId": "Shepherd",
           "max": 56
         },
         {
-          "careerId": "Ferry Keeper",
-          "max": 62
+          "careerId": "Quarry Taker",
+          "max": 60
         },
         {
-          "careerId": "Lockbreaker",
+          "careerId": "Stage Driver",
+          "max": 61
+        },
+        {
+          "careerId": "Showman",
+          "max": 63
+        },
+        {
+          "careerId": "Courier",
+          "max": 65
+        },
+        {
+          "careerId": "Pack Trader",
+          "max": 67
+        },
+        {
+          "careerId": "Ferry Keeper",
+          "max": 69
+        },
+        {
+          "careerId": "Channel Pilot",
+          "max": 70
+        },
+        {
+          "careerId": "Waterway Hand",
           "max": 72
         },
         {
-          "careerId": "Shieldbearer",
-          "max": 88
+          "careerId": "Deckhand",
+          "max": 73
+        },
+        {
+          "careerId": "Contraband Runner",
+          "max": 75
+        },
+        {
+          "careerId": "Dock Porter",
+          "max": 77
+        },
+        {
+          "careerId": "Shore Scavenger",
+          "max": 78
+        },
+        {
+          "careerId": "Goods Broker",
+          "max": 79
+        },
+        {
+          "careerId": "Highwayman",
+          "max": 82
+        },
+        {
+          "careerId": "Gang Enforcer",
+          "max": 83
+        },
+        {
+          "careerId": "Lockbreaker",
+          "max": 84
+        },
+        {
+          "careerId": "Gatekeeper",
+          "max": 87
+        },
+        {
+          "careerId": "Cage Brawler",
+          "max": 90
+        },
+        {
+          "careerId": "Hired Fist",
+          "max": 93
         },
         {
           "careerId": "Sellsword",
+          "max": 96
+        },
+        {
+          "careerId": "Death Vower",
           "max": 100
         }
       ],
@@ -227,19 +827,21 @@
         "count": 5,
         "options": [
           "drink",
+          "cool",
           "endurance",
+          "entertain",
           "evaluate",
-          "gamble",
           "intimidate",
-          "melee:two-handed",
-          "perception",
-          "trade:smelting",
-          "climb",
-          "cool"
+          "lore:delver-kin",
+          "lore:geology",
+          "lore:metallurgy",
+          "melee:basic",
+          "trade:smelting"
         ]
       },
       "languages": [
-        "language:old-script"
+        "language:old-script",
+        "language:stone-tongue"
       ]
     }
   },
@@ -250,7 +852,8 @@
         "ws": -10,
         "bs": 10,
         "s": -10,
-        "ag": 10,
+        "t": -10,
+        "i": 20,
         "dex": 10,
         "wp": 10,
         "fel": 10
@@ -260,76 +863,361 @@
       "fortune": 3,
       "extraWounds": 0,
       "talents": [
-        "Light Step",
-        "Underfoot"
+        "Keen Sense (Taste)",
+        "Night Owl",
+        "Hardened Against (Plague)"
       ],
       "randomTalentCount": 2,
       "randomTalents": [
         {
-          "featId": "Iron Stomach",
+          "featId": "Keen Sighting",
+          "max": 2
+        },
+        {
+          "featId": "Both-Handed",
+          "max": 5
+        },
+        {
+          "featId": "Artist's Gift (Painting)",
+          "max": 7
+        },
+        {
+          "featId": "Striking Looks",
+          "max": 10
+        },
+        {
+          "featId": "Palm Greaser",
+          "max": 12
+        },
+        {
+          "featId": "Stacked Deck",
+          "max": 15
+        },
+        {
+          "featId": "Feline Landing",
+          "max": 17
+        },
+        {
+          "featId": "Steel Nerves",
           "max": 20
         },
         {
-          "featId": "Light Fingers",
+          "featId": "Supple Frame",
+          "max": 22
+        },
+        {
+          "featId": "Bolt for It",
+          "max": 25
+        },
+        {
+          "featId": "Easy Talker",
+          "max": 27
+        },
+        {
+          "featId": "Hard Head",
+          "max": 30
+        },
+        {
+          "featId": "Quick Feet",
+          "max": 32
+        },
+        {
+          "featId": "Tongue for Tongues",
+          "max": 35
+        },
+        {
+          "featId": "Steady Shooter",
+          "max": 37
+        },
+        {
+          "featId": "Accent Mimic",
           "max": 40
         },
         {
-          "featId": "Green Thumb",
+          "featId": "Night Owl",
+          "max": 42
+        },
+        {
+          "featId": "Deft Hands",
+          "max": 45
+        },
+        {
+          "featId": "Gentle Birth",
+          "max": 47
+        },
+        {
+          "featId": "Trouble Sniffer",
+          "max": 50
+        },
+        {
+          "featId": "Inner Compass",
+          "max": 52
+        },
+        {
+          "featId": "True Ear",
+          "max": 55
+        },
+        {
+          "featId": "Untainted Soul",
+          "max": 57
+        },
+        {
+          "featId": "Lettered",
           "max": 60
         },
         {
-          "featId": "Haggler's Instinct",
+          "featId": "Hardened Against (Poison)",
+          "max": 62
+        },
+        {
+          "featId": "Wildwalker",
+          "max": 65
+        },
+        {
+          "featId": "Sharp Mind",
+          "max": 67
+        },
+        {
+          "featId": "Deck Steady",
+          "max": 70
+        },
+        {
+          "featId": "Sharp Senses",
+          "max": 72
+        },
+        {
+          "featId": "Hearty Eater",
+          "max": 75
+        },
+        {
+          "featId": "Oarsman's Back",
+          "max": 77
+        },
+        {
+          "featId": "Pack Mule",
           "max": 80
         },
         {
-          "featId": "Keen Ears",
+          "featId": "Winning Ways",
+          "max": 82
+        },
+        {
+          "featId": "Quick Reckoner",
+          "max": 85
+        },
+        {
+          "featId": "Dutiful Aide",
+          "max": 87
+        },
+        {
+          "featId": "Jack of Repairs",
+          "max": 90
+        },
+        {
+          "featId": "Tunnel Stalker",
+          "max": 92
+        },
+        {
+          "featId": "Oxen Constitution",
+          "max": 95
+        },
+        {
+          "featId": "Mighty Arm",
+          "max": 97
+        },
+        {
+          "featId": "Blade Practice",
           "max": 100
         }
       ],
       "careerTable": [
         {
+          "careerId": "Compounder",
+          "max": 1
+        },
+        {
+          "careerId": "Mechanician",
+          "max": 2
+        },
+        {
+          "careerId": "Advocate",
+          "max": 4
+        },
+        {
           "careerId": "Bonesetter",
           "max": 6
         },
         {
-          "careerId": "Chandler",
-          "max": 18
+          "careerId": "Archivist",
+          "max": 8
         },
         {
-          "careerId": "Lamplighter",
-          "max": 26
+          "careerId": "Firebrand",
+          "max": 10
         },
         {
-          "careerId": "Masquer",
+          "careerId": "Craftwright",
+          "max": 15
+        },
+        {
+          "careerId": "Alms Seeker",
+          "max": 19
+        },
+        {
+          "careerId": "Case Seeker",
+          "max": 21
+        },
+        {
+          "careerId": "Trade Factor",
+          "max": 25
+        },
+        {
+          "careerId": "Vermin Warden",
+          "max": 28
+        },
+        {
+          "careerId": "Burgess",
+          "max": 31
+        },
+        {
+          "careerId": "Lantern Guard",
+          "max": 33
+        },
+        {
+          "careerId": "Court Confidant",
           "max": 34
         },
         {
-          "careerId": "Shepherd",
+          "careerId": "Limner",
+          "max": 36
+        },
+        {
+          "careerId": "Emissary",
+          "max": 37
+        },
+        {
+          "careerId": "Household Hand",
+          "max": 43
+        },
+        {
+          "careerId": "Shadow Agent",
+          "max": 44
+        },
+        {
+          "careerId": "Castellan",
           "max": 46
         },
         {
+          "careerId": "Tithe Marshal",
+          "max": 47
+        },
+        {
           "careerId": "Ashburner",
-          "max": 52
+          "max": 50
         },
         {
           "careerId": "Falconer",
+          "max": 52
+        },
+        {
+          "careerId": "Shaft Digger",
+          "max": 53
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 54
+        },
+        {
+          "careerId": "Shepherd",
+          "max": 57
+        },
+        {
+          "careerId": "Quarry Taker",
           "max": 58
         },
         {
-          "careerId": "Ferry Keeper",
-          "max": 64
+          "careerId": "Stage Driver",
+          "max": 60
         },
         {
-          "careerId": "Eel Fisher",
+          "careerId": "Showman",
+          "max": 63
+        },
+        {
+          "careerId": "Courier",
+          "max": 65
+        },
+        {
+          "careerId": "Pack Trader",
+          "max": 67
+        },
+        {
+          "careerId": "Highway Marshal",
+          "max": 68
+        },
+        {
+          "careerId": "Ferry Keeper",
+          "max": 69
+        },
+        {
+          "careerId": "Channel Pilot",
+          "max": 70
+        },
+        {
+          "careerId": "Water Patrol",
+          "max": 71
+        },
+        {
+          "careerId": "Waterway Hand",
           "max": 74
         },
         {
+          "careerId": "Deckhand",
+          "max": 75
+        },
+        {
+          "careerId": "Contraband Runner",
+          "max": 79
+        },
+        {
+          "careerId": "Dock Porter",
+          "max": 82
+        },
+        {
           "careerId": "Dicer",
-          "max": 86
+          "max": 83
+        },
+        {
+          "careerId": "Goods Broker",
+          "max": 84
+        },
+        {
+          "careerId": "Barrow Delver",
+          "max": 85
+        },
+        {
+          "careerId": "Street Schemer",
+          "max": 88
+        },
+        {
+          "careerId": "Highwayman",
+          "max": 89
+        },
+        {
+          "careerId": "Gang Enforcer",
+          "max": 90
         },
         {
           "careerId": "Lockbreaker",
           "max": 94
+        },
+        {
+          "careerId": "Gatekeeper",
+          "max": 96
+        },
+        {
+          "careerId": "Cage Brawler",
+          "max": 97
         },
         {
           "careerId": "Sellsword",
@@ -339,20 +1227,22 @@
       "skillPicks": {
         "count": 5,
         "options": [
-          "athletics",
           "charm",
+          "drink",
           "dodge",
-          "gossip",
+          "gamble",
           "haggle",
+          "intuition",
+          "lore:local-lore",
           "perception",
           "sleight-of-hand",
           "stealth",
-          "trade:cheesemaking",
-          "drink"
+          "trade:cook"
         ]
       },
       "languages": [
-        "language:trade-cant"
+        "language:trade-cant",
+        "language:hearth-cant"
       ]
     }
   },
@@ -360,73 +1250,326 @@
     "race": "veyl",
     "profile": {
       "mods": {
+        "ws": 10,
+        "bs": 10,
         "i": 20,
         "ag": 10,
         "dex": 10,
         "int": 10,
-        "wp": 10,
-        "s": -10,
-        "t": -10
+        "wp": 10
       },
       "move": 5,
       "fate": 1,
       "fortune": 2,
       "extraWounds": 0,
       "talents": [
-        "Twilight Eyes",
-        "Long Memory"
+        "Keen Sighting",
+        "Night Owl",
+        "Lettered"
       ],
-      "randomTalentCount": 1,
+      "randomTalentCount": 0,
       "randomTalents": [
         {
           "featId": "Keen Sighting",
+          "max": 2
+        },
+        {
+          "featId": "Both-Handed",
+          "max": 5
+        },
+        {
+          "featId": "Artist's Gift (Painting)",
+          "max": 7
+        },
+        {
+          "featId": "Striking Looks",
+          "max": 10
+        },
+        {
+          "featId": "Palm Greaser",
+          "max": 12
+        },
+        {
+          "featId": "Stacked Deck",
+          "max": 15
+        },
+        {
+          "featId": "Feline Landing",
+          "max": 17
+        },
+        {
+          "featId": "Steel Nerves",
+          "max": 20
+        },
+        {
+          "featId": "Supple Frame",
+          "max": 22
+        },
+        {
+          "featId": "Bolt for It",
           "max": 25
         },
         {
-          "featId": "Lamp-Lit Studies",
+          "featId": "Easy Talker",
+          "max": 27
+        },
+        {
+          "featId": "Hard Head",
+          "max": 30
+        },
+        {
+          "featId": "Quick Feet",
+          "max": 32
+        },
+        {
+          "featId": "Tongue for Tongues",
+          "max": 35
+        },
+        {
+          "featId": "Steady Shooter",
+          "max": 37
+        },
+        {
+          "featId": "Accent Mimic",
+          "max": 40
+        },
+        {
+          "featId": "Night Owl",
+          "max": 42
+        },
+        {
+          "featId": "Deft Hands",
+          "max": 45
+        },
+        {
+          "featId": "Gentle Birth",
+          "max": 47
+        },
+        {
+          "featId": "Trouble Sniffer",
           "max": 50
         },
         {
-          "featId": "Snap Reaction",
+          "featId": "Inner Compass",
+          "max": 52
+        },
+        {
+          "featId": "True Ear",
+          "max": 55
+        },
+        {
+          "featId": "Untainted Soul",
+          "max": 57
+        },
+        {
+          "featId": "Lettered",
+          "max": 60
+        },
+        {
+          "featId": "Hardened Against (Poison)",
+          "max": 62
+        },
+        {
+          "featId": "Wildwalker",
+          "max": 65
+        },
+        {
+          "featId": "Sharp Mind",
+          "max": 67
+        },
+        {
+          "featId": "Deck Steady",
+          "max": 70
+        },
+        {
+          "featId": "Sharp Senses",
+          "max": 72
+        },
+        {
+          "featId": "Hearty Eater",
           "max": 75
         },
         {
-          "featId": "Court Manners",
+          "featId": "Oarsman's Back",
+          "max": 77
+        },
+        {
+          "featId": "Pack Mule",
+          "max": 80
+        },
+        {
+          "featId": "Winning Ways",
+          "max": 82
+        },
+        {
+          "featId": "Quick Reckoner",
+          "max": 85
+        },
+        {
+          "featId": "Dutiful Aide",
+          "max": 87
+        },
+        {
+          "featId": "Jack of Repairs",
+          "max": 90
+        },
+        {
+          "featId": "Tunnel Stalker",
+          "max": 92
+        },
+        {
+          "featId": "Oxen Constitution",
+          "max": 95
+        },
+        {
+          "featId": "Mighty Arm",
+          "max": 97
+        },
+        {
+          "featId": "Blade Practice",
           "max": 100
         }
       ],
       "careerTable": [
         {
+          "careerId": "Compounder",
+          "max": 2
+        },
+        {
+          "careerId": "Advocate",
+          "max": 6
+        },
+        {
+          "careerId": "Bonesetter",
+          "max": 8
+        },
+        {
           "careerId": "Archivist",
-          "max": 10
+          "max": 12
         },
         {
-          "careerId": "Crier",
-          "max": 22
+          "careerId": "Arcanist",
+          "max": 16
         },
         {
-          "careerId": "Masquer",
+          "careerId": "Craftwright",
+          "max": 19
+        },
+        {
+          "careerId": "Case Seeker",
+          "max": 21
+        },
+        {
+          "careerId": "Trade Factor",
+          "max": 26
+        },
+        {
+          "careerId": "Burgess",
+          "max": 28
+        },
+        {
+          "careerId": "Lantern Guard",
+          "max": 29
+        },
+        {
+          "careerId": "Court Confidant",
+          "max": 31
+        },
+        {
+          "careerId": "Limner",
           "max": 32
         },
         {
-          "careerId": "Pathfinder",
-          "max": 46
+          "careerId": "Blade Adept",
+          "max": 34
+        },
+        {
+          "careerId": "Emissary",
+          "max": 37
+        },
+        {
+          "careerId": "Landed Heir",
+          "max": 40
+        },
+        {
+          "careerId": "Shadow Agent",
+          "max": 43
+        },
+        {
+          "careerId": "Castellan",
+          "max": 45
+        },
+        {
+          "careerId": "Ashburner",
+          "max": 47
         },
         {
           "careerId": "Falconer",
+          "max": 50
+        },
+        {
+          "careerId": "Omen Reader",
+          "max": 51
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 56
+        },
+        {
+          "careerId": "Quarry Taker",
+          "max": 59
+        },
+        {
+          "careerId": "Showman",
           "max": 62
         },
         {
-          "careerId": "Eel Fisher",
-          "max": 70
+          "careerId": "Courier",
+          "max": 63
         },
         {
-          "careerId": "Lockbreaker",
-          "max": 78
+          "careerId": "Ferry Keeper",
+          "max": 64
         },
         {
-          "careerId": "Shieldbearer",
-          "max": 86
+          "careerId": "Deckhand",
+          "max": 79
+        },
+        {
+          "careerId": "Contraband Runner",
+          "max": 80
+        },
+        {
+          "careerId": "Dicer",
+          "max": 83
+        },
+        {
+          "careerId": "Street Schemer",
+          "max": 85
+        },
+        {
+          "careerId": "Highwayman",
+          "max": 88
+        },
+        {
+          "careerId": "Mounted Lancer",
+          "max": 92
+        },
+        {
+          "careerId": "Gatekeeper",
+          "max": 94
+        },
+        {
+          "careerId": "Sworn Rider",
+          "max": 95
+        },
+        {
+          "careerId": "Cage Brawler",
+          "max": 97
+        },
+        {
+          "careerId": "Hired Fist",
+          "max": 98
         },
         {
           "careerId": "Sellsword",
@@ -436,16 +1579,17 @@
       "skillPicks": {
         "count": 5,
         "options": [
-          "art:masks",
           "cool",
-          "dodge",
+          "entertain",
           "evaluate",
-          "intuition",
-          "lore:heraldry",
+          "leadership",
+          "melee:basic",
+          "navigation",
           "perception",
+          "play:harp",
           "ranged:bow",
-          "stealth",
-          "performance:oratory"
+          "sail",
+          "swim"
         ]
       },
       "languages": [
@@ -476,15 +1620,200 @@
         "Wildwalker"
       ],
       "randomTalentCount": 0,
-      "randomTalents": [],
+      "randomTalents": [
+        {
+          "featId": "Keen Sighting",
+          "max": 2
+        },
+        {
+          "featId": "Both-Handed",
+          "max": 5
+        },
+        {
+          "featId": "Artist's Gift (Painting)",
+          "max": 7
+        },
+        {
+          "featId": "Striking Looks",
+          "max": 10
+        },
+        {
+          "featId": "Palm Greaser",
+          "max": 12
+        },
+        {
+          "featId": "Stacked Deck",
+          "max": 15
+        },
+        {
+          "featId": "Feline Landing",
+          "max": 17
+        },
+        {
+          "featId": "Steel Nerves",
+          "max": 20
+        },
+        {
+          "featId": "Supple Frame",
+          "max": 22
+        },
+        {
+          "featId": "Bolt for It",
+          "max": 25
+        },
+        {
+          "featId": "Easy Talker",
+          "max": 27
+        },
+        {
+          "featId": "Hard Head",
+          "max": 30
+        },
+        {
+          "featId": "Quick Feet",
+          "max": 32
+        },
+        {
+          "featId": "Tongue for Tongues",
+          "max": 35
+        },
+        {
+          "featId": "Steady Shooter",
+          "max": 37
+        },
+        {
+          "featId": "Accent Mimic",
+          "max": 40
+        },
+        {
+          "featId": "Night Owl",
+          "max": 42
+        },
+        {
+          "featId": "Deft Hands",
+          "max": 45
+        },
+        {
+          "featId": "Gentle Birth",
+          "max": 47
+        },
+        {
+          "featId": "Trouble Sniffer",
+          "max": 50
+        },
+        {
+          "featId": "Inner Compass",
+          "max": 52
+        },
+        {
+          "featId": "True Ear",
+          "max": 55
+        },
+        {
+          "featId": "Untainted Soul",
+          "max": 57
+        },
+        {
+          "featId": "Lettered",
+          "max": 60
+        },
+        {
+          "featId": "Hardened Against (Poison)",
+          "max": 62
+        },
+        {
+          "featId": "Wildwalker",
+          "max": 65
+        },
+        {
+          "featId": "Sharp Mind",
+          "max": 67
+        },
+        {
+          "featId": "Deck Steady",
+          "max": 70
+        },
+        {
+          "featId": "Sharp Senses",
+          "max": 72
+        },
+        {
+          "featId": "Hearty Eater",
+          "max": 75
+        },
+        {
+          "featId": "Oarsman's Back",
+          "max": 77
+        },
+        {
+          "featId": "Pack Mule",
+          "max": 80
+        },
+        {
+          "featId": "Winning Ways",
+          "max": 82
+        },
+        {
+          "featId": "Quick Reckoner",
+          "max": 85
+        },
+        {
+          "featId": "Dutiful Aide",
+          "max": 87
+        },
+        {
+          "featId": "Jack of Repairs",
+          "max": 90
+        },
+        {
+          "featId": "Tunnel Stalker",
+          "max": 92
+        },
+        {
+          "featId": "Oxen Constitution",
+          "max": 95
+        },
+        {
+          "featId": "Mighty Arm",
+          "max": 97
+        },
+        {
+          "featId": "Blade Practice",
+          "max": 100
+        }
+      ],
       "careerTable": [
         {
           "careerId": "Archivist",
           "max": 1
         },
         {
+          "careerId": "Arcanist",
+          "max": 5
+        },
+        {
+          "careerId": "Craftwright",
+          "max": 10
+        },
+        {
+          "careerId": "Court Confidant",
+          "max": 14
+        },
+        {
+          "careerId": "Limner",
+          "max": 18
+        },
+        {
           "careerId": "Emissary",
           "max": 25
+        },
+        {
+          "careerId": "Landed Heir",
+          "max": 31
+        },
+        {
+          "careerId": "Shadow Agent",
+          "max": 35
         },
         {
           "careerId": "Ashburner",
@@ -495,12 +1824,48 @@
           "max": 52
         },
         {
+          "careerId": "Omen Reader",
+          "max": 57
+        },
+        {
           "careerId": "Pathfinder",
           "max": 68
         },
         {
           "careerId": "Quarry Taker",
           "max": 70
+        },
+        {
+          "careerId": "Showman",
+          "max": 75
+        },
+        {
+          "careerId": "Courier",
+          "max": 78
+        },
+        {
+          "careerId": "Shore Scavenger",
+          "max": 79
+        },
+        {
+          "careerId": "Highwayman",
+          "max": 85
+        },
+        {
+          "careerId": "Mounted Lancer",
+          "max": 90
+        },
+        {
+          "careerId": "Gatekeeper",
+          "max": 92
+        },
+        {
+          "careerId": "Sworn Rider",
+          "max": 94
+        },
+        {
+          "careerId": "Cage Brawler",
+          "max": 96
         },
         {
           "careerId": "Sellsword",

@@ -44,12 +44,7 @@ describe('grim-d100 catalog', () => {
     });
 
     it('has no coverage warnings', () => {
-        const pending =
-            /^spells: (kind "chaos"|list "(Pact|Grave) Rites") has no spell$|^artifacts: weapon group "(engineering|explosives)" has no item$/;
-
-        expect(grimCoverage(data).filter((w) => !pending.test(w))).toEqual(
-            []
-        );
+        expect(grimCoverage(data)).toEqual([]);
     });
 
     it('units have unique names, a creature type and a level', () => {
