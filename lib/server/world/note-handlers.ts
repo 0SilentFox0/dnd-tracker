@@ -6,6 +6,7 @@ import {
     createWorldNoteSchema,
     updateWorldNoteSchema,
 } from '@/lib/schemas/world';
+import { listLayerInputs } from '@/lib/server/world/layer-store';
 import { ownedMarker } from '@/lib/server/world/map-handlers';
 import { readWorldMapDetail } from '@/lib/server/world/map-store';
 import { noteInclude as include, toNote } from '@/lib/server/world/note-store';
@@ -33,9 +34,12 @@ async function markerVisibleToPlayer(
 
     if (!detail) return false;
 
+    const layers = await listLayerInputs(marker.mapId);
+
     return visibleMarkerIds({
         map: detail.map,
         markers: detail.markers,
+        layers,
         reveals,
         viewer: { userId, heroIds },
     }).has(marker.id);

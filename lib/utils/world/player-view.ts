@@ -3,6 +3,8 @@ import { mapPath } from './tree';
 
 import type {
     HeroPosition,
+    LayerRect,
+    LayerVisibility,
     MapPoint,
     RevealShape,
     WorldHero,
@@ -11,6 +13,7 @@ import type {
     WorldMarker,
     WorldNote,
     WorldView,
+    WorldViewLayer,
 } from '@/types/world';
 
 export type NoteRow = Omit<WorldNote, 'mine'>;
@@ -21,9 +24,29 @@ export type HeroInfo = {
     controlledBy: string;
 };
 
+export interface LayerInput {
+    id: string;
+    name: string;
+    color: string | null;
+    visibility: LayerVisibility;
+    heroIds: string[];
+    imageUrl: string | null;
+    rect: LayerRect;
+    opacity: number;
+}
+
+export const layerVisibleTo = (
+    layer: Pick<LayerInput, 'visibility' | 'heroIds'>,
+    heroIds: string[]
+): boolean =>
+    layer.visibility === 'all' ||
+    (layer.visibility === 'heroes' &&
+        layer.heroIds.some((id) => heroIds.includes(id)));
+
 export interface WorldViewInput {
     map: WorldMap;
     markers: WorldMarker[];
+    layers: LayerInput[];
     allMaps: WorldMapSummary[];
     positions: HeroPosition[];
     heroNames: Map<string, HeroInfo>;
@@ -39,14 +62,15 @@ export interface WorldViewInput {
 
 type MarkerVisibilityInput = Pick<
     WorldViewInput,
-    'map' | 'markers' | 'reveals' | 'viewer'
+    'map' | 'markers' | 'layers' | 'reveals' | 'viewer'
 >;
 
 function pointOnMap(
     pos: HeroPosition,
     mapId: string,
     byId: Map<string, WorldMapSummary>,
-    markers: WorldMarker[]
+    markers: WorldMarker[],
+    layerOk: (m: WorldMarker) => boolean
 ): MapPoint | null {
     if (pos.mapId === mapId) return { x: pos.x, y: pos.y };
 
@@ -62,7 +86,7 @@ function pointOnMap(
         if (cur.parentMapId === mapId) {
             const entry = markers.find((m) => m.id === cur.parentMarkerId);
 
-            return entry ? { x: entry.x, y: entry.y } : null;
+            return entry && layerOk(entry) ? { x: entry.x, y: entry.y } : null;
         }
     }
 
@@ -87,7 +111,18 @@ function visibility(input: MarkerVisibilityInput) {
     const visible = (p: MapPoint) =>
         !fog || isRevealed(p, shapes, map.revealRadius, aspect);
 
+    const visibleLayers = new Map(
+        input.layers
+            .filter((l) => layerVisibleTo(l, viewer.heroIds))
+            .map((l) => [l.id, l])
+    );
+
+    const layerOk = (m: WorldMarker) =>
+        m.layerId == null || visibleLayers.has(m.layerId);
+
     const markers = input.markers.filter((m) => {
+        if (!layerOk(m)) return false;
+
         if (!fog || m.alwaysVisible) return true;
 
         return (
@@ -98,7 +133,7 @@ function visibility(input: MarkerVisibilityInput) {
         );
     });
 
-    return { own, fog, shapes, visible, markers };
+    return { own, fog, shapes, visible, markers, visibleLayers, layerOk };
 }
 
 export function visibleMarkerIds(input: MarkerVisibilityInput): Set<string> {
@@ -138,18 +173,29 @@ export function buildWorldView(input: WorldViewInput): WorldView {
         shapes,
         visible,
         markers: visibleMarkers,
+        visibleLayers,
+        layerOk,
     } = visibility(input);
 
     const byId = new Map(allMaps.map((m) => [m.id, m]));
 
     const markers = visibleMarkers.map((m) => ({ ...m, dmNote: null }));
 
+    const layers: WorldViewLayer[] = [...visibleLayers.values()].map((l) => ({
+        id: l.id,
+        name: l.name,
+        color: l.color,
+        imageUrl: l.imageUrl,
+        rect: l.rect,
+        opacity: l.opacity,
+    }));
+
     const heroes: WorldHero[] = [];
 
     for (const pos of input.positions) {
         const info = input.heroNames.get(pos.characterId);
 
-        const at = info ? pointOnMap(pos, map.id, byId, input.markers) : null;
+        const at = info ? pointOnMap(pos, map.id, byId, input.markers, layerOk) : null;
 
         if (!info || !at) continue;
 
@@ -198,6 +244,7 @@ export function buildWorldView(input: WorldViewInput): WorldView {
             ? allMaps
             : allMaps.filter((m) => withPath.has(m.id)),
         notes,
+        layers,
         fog,
     };
 }

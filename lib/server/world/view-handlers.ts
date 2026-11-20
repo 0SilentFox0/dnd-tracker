@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { worldViewQuerySchema } from '@/lib/schemas/world';
+import { listLayerInputs } from '@/lib/server/world/layer-store';
 import {
     listWorldMaps,
     readWorldMapDetail,
@@ -202,6 +203,8 @@ export async function viewHandler(req: Request, campaignId: string) {
 
         if (!detail) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
+        const layers = await listLayerInputs(target);
+
         const notes = await viewNotes(target, asHero, access.userId);
 
         const heroNames = await heroNamesOf(campaignId, positions);
@@ -210,6 +213,7 @@ export async function viewHandler(req: Request, campaignId: string) {
             buildWorldView({
                 map: detail.map,
                 markers: detail.markers,
+                layers,
                 allMaps,
                 positions,
                 heroNames,
