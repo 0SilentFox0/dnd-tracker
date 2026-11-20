@@ -1,5 +1,6 @@
 import { useId } from 'react';
 
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import { pieceDiag, type PuzzlePiece } from '@/lib/utils/puzzle/generate';
 import type { PuzzleSpec } from '@/types/show';
 
@@ -41,7 +42,7 @@ export function PuzzlePieceView({
                     style={{ pointerEvents: 'auto' }}
                 >
                     <image
-                        href={imageUrl}
+                        href={toMediaUrl(imageUrl)}
                         width={spec.imageWidth}
                         height={spec.imageHeight}
                     />

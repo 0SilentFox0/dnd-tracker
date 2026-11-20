@@ -11,6 +11,10 @@
     "title": "Grim d100 (5e): downtime",
     "body": "Each downtime period allows up to three endeavours. Income is an Average test paid in dice by Status tier and halved on a failure, healing uses Endurance and Heal (IB + SL), and the period restores all Wounds."
   },
+  "2026-11-20-world-layers": {
+    "title": "World map: layers",
+    "body": "The DM can group markers into layers: each layer has a color, visibility (DM only, everyone or chosen heroes) and an optional overlay image that can be moved and resized. Players see only the layers they are allowed to and can toggle them in the legend. \"Through the hero's eyes\" shows the DM the same layers the hero sees."
+  },
   "2026-11-20-world-trail": {
     "title": "World map: sessions and hero trails",
     "body": "The DM can start sessions on the world map; every travel step is stamped with its session, and the map draws each session's trail as a colored line with a legend and step bubbles. Heroes can be dragged straight to a new spot, and the DM can pin enemies that only the DM sees. Players see the trail of their own heroes."

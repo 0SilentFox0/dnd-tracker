@@ -25,10 +25,10 @@ export const WFRP_META = {
             dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
         },
         budgetKb: {
-            battle: 113.5,
-            member: 116.5,
-            // W8 gear texts (qualities, groups) grew the wfrp scopes past their old budgets; W9 reactive Dispel label tipped member/dm over
-            dm: 121.5,
+            battle: 115,
+            member: 117.7,
+            // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels grew the wfrp scopes past their old budgets
+            dm: 122,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },

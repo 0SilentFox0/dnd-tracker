@@ -157,7 +157,7 @@ export const artifactsResource = defineResource<
                   icon: await persistIcon(
                       actor.campaignId,
                       data.icon,
-                      existing.id
+                      `${existing.id}-${randomUUID()}`
                   ),
               };
     },

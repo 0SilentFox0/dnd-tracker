@@ -16,6 +16,7 @@ export { useCoarsePointer } from './useCoarsePointer';
 export { useConfirm } from './useConfirm';
 export { useCrudMutation } from './useCrudMutation';
 export { useCssVarHeight } from './useCssVarHeight';
+export { useDebouncedCommit } from './useDebouncedCommit';
 export { useDebouncedValue } from './useDebouncedValue';
 export {
     type DiceRollerPick,

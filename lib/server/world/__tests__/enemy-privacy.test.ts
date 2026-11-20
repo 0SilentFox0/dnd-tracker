@@ -14,6 +14,7 @@ const m = vi.hoisted(() => ({
     sessions: vi.fn(),
     enemyFind: vi.fn(),
     enemies: vi.fn(),
+    layers: vi.fn(),
 }));
 
 const ENEMY = {
@@ -42,6 +43,9 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/lib/server/world/map-store', () => ({
     listWorldMaps: m.listMaps,
     readWorldMapDetail: m.detail,
+}));
+vi.mock('@/lib/server/world/layer-store', () => ({
+    listLayerInputs: m.layers,
 }));
 vi.mock('@/lib/server/world/enemy-store', () => ({
     listEnemies: m.enemies,
@@ -91,6 +95,18 @@ beforeEach(() => {
     m.sessions.mockResolvedValue([]);
     m.enemies.mockResolvedValue([ENEMY]);
     m.enemyFind.mockResolvedValue([ENEMY]);
+    m.layers.mockResolvedValue([
+        {
+            id: 'l1',
+            name: 'Open layer',
+            color: null,
+            visibility: 'all',
+            heroIds: [],
+            imageUrl: null,
+            rect: { x: 0, y: 0, w: 1, h: 1 },
+            opacity: 1,
+        },
+    ]);
 });
 
 describe('enemy pin privacy', () => {
@@ -107,6 +123,12 @@ describe('enemy pin privacy', () => {
         expect(res.status).toBe(200);
         expect(text).not.toContain(ENEMY.name);
         expect(text).not.toContain(ENEMY.id);
+        expect(text).not.toContain('enemies');
+
+        const { layers } = JSON.parse(text);
+
+        expect(layers).toHaveLength(1);
+        expect(JSON.stringify(layers)).not.toContain('dmNote');
         expect(m.enemies).not.toHaveBeenCalled();
         expect(m.enemyFind).not.toHaveBeenCalled();
     });

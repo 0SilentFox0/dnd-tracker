@@ -67,6 +67,11 @@ export function SessionsPanel({ campaignId }: { campaignId: string }) {
                             <span className="min-w-0 flex-1 truncate">
                                 {s.name}
                             </span>
+                            {s.entryCount === undefined ? null : (
+                                <span className="shrink-0 text-xs text-hud-muted">
+                                    {t('entryCount', { count: s.entryCount })}
+                                </span>
+                            )}
                             {s.active ? <Badge>{t('active')}</Badge> : null}
                             <HudIconButton
                                 aria-label={`${t('edit')}: ${s.name}`}

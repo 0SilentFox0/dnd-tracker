@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type MediaHandle, useDriftSync } from './useDriftSync';
 
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { BattleAudioState } from '@/types/audio';
 
 export interface MediaSyncInput {
@@ -80,7 +81,7 @@ export function useAudioElementSync(input: MediaSyncInput): {
 
         if (!attached || !el) return;
 
-        const want = unlocked ? src : null;
+        const want = unlocked && src ? toMediaUrl(src) : null;
 
         const current = el.getAttribute('src');
 
@@ -139,7 +140,9 @@ export function useAudioElementSync(input: MediaSyncInput): {
 
         if (!el) return;
 
-        if (src && el.getAttribute('src') !== src) el.src = src;
+        const resolved = src ? toMediaUrl(src) : null;
+
+        if (resolved && el.getAttribute('src') !== resolved) el.src = resolved;
         else if (!el.getAttribute('src')) el.src = SILENT_WAV;
 
         void el.play().catch(() => undefined);
@@ -148,6 +151,8 @@ export function useAudioElementSync(input: MediaSyncInput): {
     return {
         ref,
         prime,
-        failed: failedSrc !== null && failedSrc === (unlocked ? src : null),
+        failed:
+            failedSrc !== null &&
+            failedSrc === (unlocked && src ? toMediaUrl(src) : null),
     };
 }

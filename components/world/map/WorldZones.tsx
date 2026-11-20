@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 
 import { DEFAULT_ZONE_COLOR } from '@/lib/constants/world';
 import { edgeKey, sharedEdges } from '@/lib/utils/world/zone-snap';
@@ -42,7 +42,10 @@ interface WorldZonesProps {
     draft?: MapPoint[];
     cursor?: MapPoint | null;
     interactive?: boolean;
+    showEdges?: boolean;
 }
+
+const FEATHER = 0.008;
 
 export function WorldZones({
     markers,
@@ -50,10 +53,16 @@ export function WorldZones({
     draft,
     cursor,
     interactive = false,
+    showEdges = false,
 }: WorldZonesProps) {
     const last = draft?.[draft.length - 1];
 
-    const edges = uniqueEdges(markers);
+    const featherId = useId();
+
+    const edges = useMemo(
+        () => (showEdges ? uniqueEdges(markers) : []),
+        [showEdges, markers]
+    );
 
     const shared = useMemo(
         () =>
@@ -72,23 +81,37 @@ export function WorldZones({
             className="pointer-events-none absolute inset-0 size-full"
             aria-hidden
         >
-            {markers.map((m) => {
-                if (m.kind !== 'zone' || !m.polygon) return null;
+            <defs>
+                <filter
+                    id={featherId}
+                    filterUnits="userSpaceOnUse"
+                    x={-0.1}
+                    y={-0.1}
+                    width={1.2}
+                    height={1.2}
+                >
+                    <feGaussianBlur stdDeviation={FEATHER} />
+                </filter>
+            </defs>
+            <g filter={`url(#${featherId})`}>
+                {markers.map((m) => {
+                    if (m.kind !== 'zone' || !m.polygon) return null;
 
-                const selected = m.id === selectedId;
+                    const selected = m.id === selectedId;
 
-                return (
-                    <polygon
-                        key={m.id}
-                        data-zone-id={m.id}
-                        data-interactive={interactive}
-                        className="atlas-zone-area"
-                        points={asPoints(m.polygon)}
-                        fill={m.color ?? DEFAULT_ZONE_COLOR}
-                        fillOpacity={selected ? 0.38 : 0.28}
-                    />
-                );
-            })}
+                    return (
+                        <polygon
+                            key={m.id}
+                            data-zone-id={m.id}
+                            data-interactive={interactive}
+                            className="atlas-zone-area"
+                            points={asPoints(m.polygon)}
+                            fill={m.color ?? DEFAULT_ZONE_COLOR}
+                            fillOpacity={selected ? 0.74 : 0.6}
+                        />
+                    );
+                })}
+            </g>
             {edges.map((e) => (
                 <path
                     key={`u-${e.key}`}

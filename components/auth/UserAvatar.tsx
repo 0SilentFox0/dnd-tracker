@@ -4,7 +4,7 @@ import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { avatarHue, avatarInitials } from '@/lib/utils/auth/avatar';
 import type { SessionUser } from '@/lib/utils/auth/session-user';
-import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
+import { isHostedOnProjectStorage, toMediaUrl } from '@/lib/utils/common/image-url';
 
 export function UserAvatar({
     user,
@@ -33,7 +33,7 @@ export function UserAvatar({
         >
             {user?.avatarUrl ? (
                 <Image
-                    src={user.avatarUrl}
+                    src={toMediaUrl(user.avatarUrl)}
                     alt=""
                     fill
                     sizes={sizes}

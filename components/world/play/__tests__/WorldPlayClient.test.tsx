@@ -46,6 +46,7 @@ const marker = {
     alwaysVisible: true,
     sortOrder: 0,
     childMapId: 'm2',
+    layerId: null,
 } as WorldMarker;
 
 const view = (): WorldView => ({
@@ -97,6 +98,7 @@ const view = (): WorldView => ({
         },
     ],
     notes: [],
+    layers: [],
     fog: true,
 });
 
@@ -184,6 +186,43 @@ describe('WorldPlayClient', () => {
         fireEvent.click(screen.getByRole('treeitem', { name: 'Cellar' }));
 
         expect(push).toHaveBeenCalledWith('/campaigns/c1/world?map=m2');
+    });
+
+    it('shows no layer legend when the view has no layers', async () => {
+        renderClient('m1');
+
+        await screen.findByRole('button', { name: 'Town' });
+
+        expect(screen.queryByLabelText('Шари')).toBeNull();
+    });
+
+    it('hides markers of a layer toggled off in the legend', async () => {
+        vi.mocked(api.getWorldView).mockResolvedValue({
+            ...view(),
+            markers: [{ ...marker, layerId: 'l1' }],
+            layers: [
+                {
+                    id: 'l1',
+                    name: 'Sea',
+                    color: null,
+                    imageUrl: null,
+                    imageRect: null,
+                    opacity: 1,
+                } as unknown as WorldView['layers'][number],
+            ],
+        });
+
+        renderClient('m1');
+
+        expect(
+            await screen.findByRole('button', { name: 'Town' })
+        ).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: /Sea/ }));
+
+        await waitFor(() =>
+            expect(screen.queryByRole('button', { name: 'Town' })).toBeNull()
+        );
     });
 
     it('subscribes to the show channel so the page updates live', () => {

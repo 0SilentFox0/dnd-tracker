@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { prisma } from '@/lib/db';
 import {
     worldDiscardUploadSchema,
     worldUploadRequestSchema,
 } from '@/lib/schemas/world';
+import { worldImageInUse } from '@/lib/server/world/map-store';
 import {
     createWorldMapUploadTicket,
     ownedWorldMapPath,
@@ -41,11 +41,8 @@ export function discardWorldUploadHandler(req: Request, campaignId: string) {
         if (!ownedWorldMapPath(campaignId, body.imageUrl))
             return errorResponse(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
 
-        const used = await prisma.worldMap.count({
-            where: { campaignId, imageUrl: body.imageUrl },
-        });
-
-        if (used === 0) await removeWorldMapFiles(campaignId, [body.imageUrl]);
+        if (!(await worldImageInUse(campaignId, body.imageUrl)))
+            await removeWorldMapFiles(campaignId, [body.imageUrl]);
 
         return NextResponse.json({ ok: true });
     });

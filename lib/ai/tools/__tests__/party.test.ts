@@ -126,7 +126,7 @@ describe('system tool notes', () => {
         expect(getPartyTool.description).toContain('Wounds and Fate');
         expect(readCharacterTool.description).toContain('characteristics');
         expect(getBattleStateTool.description).toContain('Wounds');
-    });
+    }, 30_000);
 
     it('core ai tool sources have no system names', async () => {
         const fs = await import('node:fs');

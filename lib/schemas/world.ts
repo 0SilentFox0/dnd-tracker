@@ -6,6 +6,7 @@ import {
     POLYGON_MAX_VERTICES,
     REVEAL_RADIUS_RANGE,
     WORLD_DM_NOTE_MAX,
+    WORLD_LAYER_OPACITY,
     WORLD_MAP_MAX_EDGE_PX,
     WORLD_MAP_UPLOAD_TYPES,
     WORLD_MARKER_DESCRIPTION_MAX,
@@ -88,6 +89,7 @@ export const createWorldMarkerSchema = z
         icon: iconSchema.optional(),
         color: hexColor.optional(),
         description: z.string().max(WORLD_MARKER_DESCRIPTION_MAX).optional(),
+        layerId: z.string().min(1).nullable().optional(),
     })
     .superRefine((v, ctx) => {
         if (v.kind === 'zone' && !v.polygon) {
@@ -119,6 +121,7 @@ export const updateWorldMarkerSchema = z
         description: z.string().max(WORLD_MARKER_DESCRIPTION_MAX).nullable(),
         alwaysVisible: z.boolean(),
         sortOrder: z.number().int().min(0),
+        layerId: z.string().min(1).nullable(),
     })
     .partial()
     .strict()
@@ -247,3 +250,50 @@ export const updateEnemySchema = createEnemySchema
         (o) => Object.keys(o).length > 0,
         'world.validation.nothingToUpdate'
     );
+
+const layerCoord = z.number().min(-1).max(2);
+
+const layerSize = z.number().min(0.02).max(2);
+
+export const layerRectSchema = z.object({
+    x: layerCoord,
+    y: layerCoord,
+    w: layerSize,
+    h: layerSize,
+});
+
+export const createWorldLayerSchema = z.object({
+    mapId: z.string().min(1),
+    name: nameSchema,
+    color: hexColor.optional(),
+});
+
+export const updateWorldLayerSchema = z
+    .object({
+        name: nameSchema,
+        color: hexColor.nullable(),
+        visibility: z.enum(['dm', 'all', 'heroes']),
+        imageUrl: imageUrl.nullable(),
+        rect: layerRectSchema,
+        opacity: z
+            .number()
+            .min(WORLD_LAYER_OPACITY.min)
+            .max(WORLD_LAYER_OPACITY.max),
+        sortOrder: z.number().int().min(0),
+    })
+    .partial()
+    .strict()
+    .refine(
+        (o) => Object.keys(o).length > 0,
+        'world.validation.nothingToUpdate'
+    );
+
+export const setLayerHeroesSchema = z.object({
+    heroIds: z
+        .array(z.string().min(1))
+        .max(MAX_TRAVEL_HEROES * 5, 'world.validation.heroesMax'),
+});
+
+export const deleteWorldLayerQuerySchema = z.object({
+    markers: z.enum(['ungroup', 'delete']).optional(),
+});

@@ -1,3 +1,47 @@
+export type LayerVisibility = 'dm' | 'all' | 'heroes';
+export interface LayerRect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
+export interface WorldLayer {
+    id: string;
+    mapId: string;
+    name: string;
+    color: string | null;
+    visibility: LayerVisibility;
+    heroIds: string[];
+    sortOrder: number;
+    imageUrl: string | null;
+    rect: LayerRect;
+    opacity: number;
+}
+
+export type WorldViewLayer = Pick<
+    WorldLayer,
+    'id' | 'name' | 'color' | 'imageUrl' | 'rect' | 'opacity'
+>;
+export type CreateWorldLayerData = {
+    mapId: string;
+    name: string;
+    color?: string;
+};
+export type UpdateWorldLayerData = Partial<
+    Pick<
+        WorldLayer,
+        | 'name'
+        | 'color'
+        | 'visibility'
+        | 'imageUrl'
+        | 'rect'
+        | 'opacity'
+        | 'sortOrder'
+    >
+>;
+export type DeleteWorldLayerMode = 'ungroup' | 'delete';
+
 export type MarkerKind = 'point' | 'zone';
 export type MapPoint = { x: number; y: number };
 export type Polygon = [number, number][];
@@ -35,6 +79,7 @@ export interface WorldMarker {
     alwaysVisible: boolean;
     sortOrder: number;
     childMapId: string | null;
+    layerId: string | null;
 }
 
 export interface WorldMapDetail {
@@ -43,6 +88,7 @@ export interface WorldMapDetail {
     heroes?: WorldHero[];
     notes?: WorldNote[];
     enemies?: WorldEnemyPin[];
+    layers?: WorldLayer[];
 }
 
 export type CreateWorldMapData = {
@@ -75,6 +121,7 @@ export type CreateWorldMarkerData = {
     icon?: string;
     color?: string;
     description?: string;
+    layerId?: string | null;
 };
 export type UpdateWorldMarkerData = Partial<
     Pick<
@@ -89,6 +136,7 @@ export type UpdateWorldMarkerData = Partial<
         | 'description'
         | 'alwaysVisible'
         | 'sortOrder'
+        | 'layerId'
     >
 >;
 export type WorldUploadRequest = {
@@ -145,6 +193,7 @@ export interface WorldView {
     reveals: RevealShape[];
     maps: WorldMapSummary[];
     notes: WorldNote[];
+    layers: WorldViewLayer[];
     fog: boolean;
 }
 
@@ -205,7 +254,13 @@ export interface WorldSession {
     startedAt: string;
     endedAt: string | null;
     active: boolean;
+    entryCount?: number;
 }
+
+export type WorldTrailSession = Omit<
+    WorldSession,
+    'description' | 'active' | 'entryCount'
+>;
 
 export interface TrailEntry {
     id: string;
@@ -218,7 +273,7 @@ export interface TrailEntry {
 }
 
 export interface WorldTrailData {
-    sessions: WorldSession[];
+    sessions: WorldTrailSession[];
     entries: TrailEntry[];
 }
 

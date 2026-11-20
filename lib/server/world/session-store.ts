@@ -23,7 +23,10 @@ export class WorldSessionError extends Error {
     }
 }
 
-export const toWorldSession = (row: WorldSessionRow): WorldSession => ({
+export const toWorldSession = (
+    row: WorldSessionRow,
+    entryCount?: number
+): WorldSession => ({
     id: row.id,
     name: row.name,
     description: row.description,
@@ -31,17 +34,35 @@ export const toWorldSession = (row: WorldSessionRow): WorldSession => ({
     startedAt: row.startedAt.toISOString(),
     endedAt: row.endedAt ? row.endedAt.toISOString() : null,
     active: row.endedAt === null,
+    ...(entryCount === undefined ? {} : { entryCount }),
 });
 
-export const listSessions = async (
-    campaignId: string
-): Promise<WorldSession[]> =>
-    (
-        await prisma.worldSession.findMany({
+export async function listSessions(
+    campaignId: string,
+    opts: { withCounts?: boolean } = {}
+): Promise<WorldSession[]> {
+    const [rows, counts] = await Promise.all([
+        prisma.worldSession.findMany({
             where: { campaignId },
             orderBy: { startedAt: 'desc' },
-        })
-    ).map(toWorldSession);
+        }),
+        opts.withCounts
+            ? prisma.worldTravelLog.groupBy({
+                  by: ['sessionId'],
+                  where: { campaignId, sessionId: { not: null } },
+                  _count: { _all: true },
+              })
+            : null,
+    ]);
+
+    const byId = counts
+        ? new Map(counts.map((c) => [c.sessionId, c._count._all]))
+        : null;
+
+    return rows.map((row) =>
+        toWorldSession(row, byId ? (byId.get(row.id) ?? 0) : undefined)
+    );
+}
 
 export const activeSessionId = async (
     campaignId: string

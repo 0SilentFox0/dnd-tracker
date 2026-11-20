@@ -28,6 +28,7 @@ const marker = (o: Partial<WorldMarker>): WorldMarker => ({
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    layerId: null,
     ...o,
 });
 
@@ -857,5 +858,20 @@ describe('WorldMapView card slot', () => {
         fireEvent.pointerUp(card, { pointerId: 1, clientX: 400, clientY: 300 });
 
         expect(onMapClick).not.toHaveBeenCalled();
+    });
+
+    it('hides markers of hidden layers', () => {
+        render(
+            <WorldMapView
+                detail={detail([
+                    marker({ id: 'p', name: 'Town', layerId: 'l1' }),
+                    marker({ id: 'q', name: 'Port' }),
+                ])}
+                layers={{ items: [], hidden: new Set(['l1']) }}
+            />
+        );
+
+        expect(screen.queryByRole('button', { name: 'Town' })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Port' })).toBeTruthy();
     });
 });

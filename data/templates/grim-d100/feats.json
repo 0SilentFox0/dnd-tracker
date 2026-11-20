@@ -1241,7 +1241,6 @@
     "name": "Marked Fate",
     "type": "origin",
     "description": "Knowing how your end will come steadies your nerve and grants a bonus.",
-    "xpCost": 100,
     "maxRank": 1
   },
   {

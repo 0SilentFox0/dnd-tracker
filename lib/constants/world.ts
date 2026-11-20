@@ -1,5 +1,7 @@
 export const WORLD_MAPS_BUCKET = 'world-maps';
-export const WORLD_MAP_MAX_EDGE_PX = 6000;
+export const WORLD_MAP_MAX_EDGE_PX = 4096;
+
+export const WORLD_MAP_UPLOAD_QUALITY = 0.8;
 
 // iOS Safari caps a canvas around 16.7 Mpx
 export const WORLD_MAP_MAX_PIXELS = 16_000_000;
@@ -24,6 +26,10 @@ export const WORLD_SESSION_NAME_MAX = WORLD_NAME_MAX;
 export const WORLD_SESSION_DESCRIPTION_MAX = 600;
 export const MAX_WORLD_SESSIONS = 200;
 export const MAX_WORLD_ENEMY_PINS = 200;
+export const MAX_WORLD_LAYERS = 20;
+export const WORLD_LAYER_OPACITY = { min: 0.05, max: 1 } as const;
+export const WORLD_LAYER_COORD = { min: -1, max: 2 } as const;
+export const WORLD_LAYER_SIZE = { min: 0.02, max: 2 } as const;
 export const TRAIL_ENTRY_LIMIT = 500;
 export const HERO_DRAG_THRESHOLD_PX = 6;
 export const WORLD_NO_SESSION_COLOR = '#8a8a8a';
@@ -61,7 +67,8 @@ export const WORLD_MARKER_ICONS = Object.fromEntries(
 
 export const WORLD_LABEL_ZOOM = 2.5;
 export const WORLD_ZONE_LABEL_HIDE_ZOOM = 4;
-export const WORLD_ZONE_LABEL_CONFLICT = 0.06;
+export const WORLD_ZONE_LABEL_CONFLICT = 0.04;
+export const WORLD_MINOR_PIN_ZOOM = 1.8;
 export const WORLD_LABEL_ZOOM_COMPACT = 4;
 export const WORLD_ZONE_LABEL_CONFLICT_COMPACT = 0.14;
 export const WORLD_SNAP_PX = 8;

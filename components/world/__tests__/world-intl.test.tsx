@@ -29,6 +29,7 @@ const marker: WorldMarker = {
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    layerId: null,
 };
 
 const ctx = {

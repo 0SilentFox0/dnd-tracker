@@ -20,6 +20,8 @@ Server pages call the GET handler's own function (`readBattleScene`, `readCharac
 
 ## Egress
 
+- Public Storage images and audio can be served through a Cloudflare cache Worker (`infra/media-worker`, host in `NEXT_PUBLIC_MEDIA_BASE_URL`). `toMediaUrl` rewrites the host at render time only; stored URLs stay canonical Supabase URLs, uploads still go to Supabase, unsetting the variable and redeploying rolls back (`NEXT_PUBLIC_*` is inlined at build). Free Workers plan: 100k requests/day.
+
 Supabase free tier egress is a hard constraint: avoid re-reading large rows, prefer deltas over refetches, keep polling slow, serve Storage images through `next/image` (cached by Vercel) with long `cacheControl` on immutable uploads.
 
 ### Shared assets
@@ -59,6 +61,7 @@ Themed surfaces use Tailwind tokens from `app/globals.css` (`bg-hud-page/surface
 
 ## Rate limiting deploy notes
 
+- Upstash Redis `critnest-ratelimit` (free plan, fra1) is provisioned through the Vercel Marketplace and connected to production and preview; it injects `KV_REST_API_URL`/`KV_REST_API_TOKEN`, which `lib/redis.ts` reads. `RATE_LIMIT_ALLOW_MEMORY=1` stays as the safety net: a Redis outage degrades to per-instance memory limits instead of 503 for battles.
 - Sensitive routes (`failClosed`, e.g. battle mutations, audio) answer 503 in production when Upstash is not configured. Before the first production deploy set `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`, or temporarily `RATE_LIMIT_ALLOW_MEMORY=1` (per-instance memory limits instead of 503).
 - It never fails closed on Vercel `preview`/`development` (`VERCEL_ENV`) or outside `NODE_ENV=production`.
 - IP limits (`lib/utils/api/ip-rate-limit.ts`) trust proxy headers on Vercel only; behind a self-hosted proxy set `TRUST_PROXY=1`, otherwise all clients share one `untrusted-proxy` bucket.

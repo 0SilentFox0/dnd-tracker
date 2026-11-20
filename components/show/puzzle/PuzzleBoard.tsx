@@ -5,6 +5,7 @@ import { PuzzlePieceView } from './PuzzlePieceView';
 import type { PuzzleScene } from './types';
 
 import { cn } from '@/lib/utils';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import { pieceDiag } from '@/lib/utils/puzzle/generate';
 import { isHeldByOther } from '@/lib/utils/puzzle/hold';
 
@@ -29,7 +30,7 @@ export function PuzzleBoard({
         >
             {state.solved ? (
                 <Image
-                    src={scene.imageUrl}
+                    src={toMediaUrl(scene.imageUrl)}
                     alt=""
                     fill
                     sizes="100vw"

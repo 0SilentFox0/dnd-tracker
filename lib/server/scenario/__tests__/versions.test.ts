@@ -54,7 +54,7 @@ describe('versions', () => {
         ).toBe(true);
     });
 
-    it('pruneVersions лишає 50 найновіших', async () => {
+    it('pruneVersions лишає 20 найновіших', async () => {
         db.scenarioPageVersion.findMany.mockResolvedValueOnce([
             { id: 'old1' },
             { id: 'old2' },
@@ -63,7 +63,7 @@ describe('versions', () => {
         expect(db.scenarioPageVersion.findMany).toHaveBeenCalledWith({
             where: { pageId: 'p' },
             orderBy: { createdAt: 'desc' },
-            skip: 50,
+            skip: 20,
             select: { id: true },
         });
         expect(db.scenarioPageVersion.deleteMany).toHaveBeenCalledWith({

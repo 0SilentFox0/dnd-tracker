@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Skull } from 'lucide-react';
 
@@ -9,7 +9,7 @@ import { sealStyle } from './WorldPins';
 import { HudButton } from '@/components/hud';
 import { MARKER_ICON } from '@/components/world/marker-icons';
 import { DEFAULT_ENEMY_COLOR } from '@/lib/constants/world';
-import { exceedsDragThreshold } from '@/lib/utils/world/hero-drag';
+import { usePinGesture } from '@/lib/hooks/world';
 import type { MapPoint, WorldEnemyPin } from '@/types/world';
 
 export interface WorldEnemiesProps {
@@ -32,18 +32,31 @@ export function WorldEnemies({
 }: WorldEnemiesProps) {
     const t = useTranslations('world.enemy');
 
-    const gesture = useRef<{
-        id: string;
-        start: { x: number; y: number };
-        active: boolean;
-    } | null>(null);
-
     const [dragging, setDragging] = useState<{
         id: string;
         point: MapPoint;
     } | null>(null);
 
-    const draggable = !!handlers.onEnemyDrag;
+    const { bind } = usePinGesture<string>({
+        draggable: !!handlers.onEnemyDrag,
+        onClick: (id) => {
+            setDragging(null);
+            handlers.onEnemyClick?.(id);
+        },
+        onDragMove: (id, e) => {
+            const point = toPoint(e.clientX, e.clientY);
+
+            setDragging(point ? { id, point } : null);
+        },
+        onDragEnd: (id, e) => {
+            setDragging(null);
+
+            const to = toPoint(e.clientX, e.clientY);
+
+            if (to) handlers.onEnemyDrag?.(id, to);
+        },
+        onCancel: () => setDragging(null),
+    });
 
     return (
         <>
@@ -67,68 +80,7 @@ export function WorldEnemies({
                             transform: `translate(-50%, -50%) scale(${1 / zoom})`,
                             touchAction: 'none',
                         }}
-                        onPointerDown={(e) => {
-                            e.stopPropagation();
-                            gesture.current = {
-                                id: enemy.id,
-                                start: { x: e.clientX, y: e.clientY },
-                                active: false,
-                            };
-
-                            try {
-                                e.currentTarget.setPointerCapture?.(
-                                    e.pointerId
-                                );
-                            } catch {
-                                // synthetic pointer events have no active pointer
-                            }
-                        }}
-                        onPointerMove={(e) => {
-                            const g = gesture.current;
-
-                            if (!g || !draggable) return;
-
-                            e.stopPropagation();
-
-                            if (
-                                !g.active &&
-                                !exceedsDragThreshold(g.start, {
-                                    x: e.clientX,
-                                    y: e.clientY,
-                                })
-                            )
-                                return;
-
-                            g.active = true;
-
-                            const point = toPoint(e.clientX, e.clientY);
-
-                            setDragging(point ? { id: g.id, point } : null);
-                        }}
-                        onPointerUp={(e) => {
-                            const g = gesture.current;
-
-                            gesture.current = null;
-                            setDragging(null);
-
-                            if (!g) return;
-
-                            e.stopPropagation();
-
-                            if (!g.active) {
-                                handlers.onEnemyClick?.(g.id);
-
-                                return;
-                            }
-
-                            const to = toPoint(e.clientX, e.clientY);
-
-                            if (to) handlers.onEnemyDrag?.(g.id, to);
-                        }}
-                        onPointerCancel={() => {
-                            gesture.current = null;
-                            setDragging(null);
-                        }}
+                        {...bind(enemy.id)}
                         onDoubleClick={(e) => e.stopPropagation()}
                     >
                         <span

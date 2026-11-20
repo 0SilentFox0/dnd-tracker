@@ -10,12 +10,12 @@ import { ShowWorldStage } from '@/components/show/world/ShowWorldStage';
 import { SLIDE_CROSSFADE_MS } from '@/lib/constants/show';
 import { useSlideLayers } from '@/lib/hooks/show';
 import { cn } from '@/lib/utils';
-import { isSupabaseStorageUrl } from '@/lib/utils/common/image-url';
+import { isSupabaseStorageUrl, toMediaUrl } from '@/lib/utils/common/image-url';
 import { stageMode, visibleSlide } from '@/lib/utils/show/player-view';
 import type { ShowState } from '@/types/show';
 
 const imageProps = (src: string) => ({
-    src,
+    src: toMediaUrl(src),
     fill: true,
     sizes: '100vw',
     unoptimized: !isSupabaseStorageUrl(src),

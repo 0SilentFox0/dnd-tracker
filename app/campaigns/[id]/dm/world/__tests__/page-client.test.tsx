@@ -35,6 +35,7 @@ vi.mock('@/lib/hooks/world/useWorldEditor', () => ({
     useWorldEditor: () => ({
         marker: { create: {}, update: {}, remove: {} },
         map: { update: {} },
+        layers: { create: {}, update: {}, remove: {}, heroes: {} },
     }),
 }));
 vi.mock('@/lib/hooks/world/useWorldHeroes', () => ({

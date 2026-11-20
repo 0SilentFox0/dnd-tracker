@@ -11,6 +11,7 @@ import {
     YT_STATE,
     type YtPlayer,
 } from '@/lib/utils/audio/youtube-iframe-api';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { CampaignTrack } from '@/types/audio';
 
 export interface TrackPreview {
@@ -33,7 +34,7 @@ function fileSource(
     onEnd: () => void,
     onError: () => void
 ): Source {
-    const audio = new Audio(url);
+    const audio = new Audio(toMediaUrl(url));
 
     // after stop the old source stays silent: an interrupted play() is rejected once the next track already plays
     let alive = true;

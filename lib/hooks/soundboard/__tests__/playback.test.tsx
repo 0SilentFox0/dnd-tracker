@@ -124,6 +124,22 @@ describe('handleSoundPlayEvent', () => {
         expect(getSoundLibrary).not.toHaveBeenCalled();
     });
 
+    it('fetches a custom sound through the media host when configured', async () => {
+        vi.stubEnv('NEXT_PUBLIC_MEDIA_BASE_URL', 'https://media.example.dev');
+        handleSoundPlayEvent('c1', {
+            soundId: 's1',
+            nonce: 'n-media',
+            url: SOUND_URL,
+        });
+        await flush();
+
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringMatching(/^https:\/\/media\.example\.dev\/storage\/v1\/object\/public\//)
+        );
+        vi.unstubAllEnvs();
+        vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://proj.supabase.co');
+    });
+
     it('plays a builtin by id without a url', async () => {
         handleSoundPlayEvent('c1', { soundId: 'builtin:bell', nonce: 'n2' });
         await flush();

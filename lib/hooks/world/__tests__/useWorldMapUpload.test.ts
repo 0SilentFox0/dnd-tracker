@@ -34,7 +34,7 @@ describe('useWorldMapUpload', () => {
         vi.clearAllMocks();
     });
 
-    it('downscales a large image to 6000px on the long edge', async () => {
+    it('downscales a large image to 4096px on the long edge', async () => {
         bitmap(8000, 2000);
 
         const { result } = renderHook(() => useWorldMapUpload('c1'));
@@ -47,13 +47,13 @@ describe('useWorldMapUpload', () => {
 
         expect(out).toEqual({
             imageUrl: 'https://x/m.webp',
-            width: 6000,
-            height: 1500,
+            width: 4096,
+            height: 1024,
         });
         expect(resizeImageToBlob).toHaveBeenCalledWith(
             expect.any(File),
-            6000,
-            undefined,
+            4096,
+            0.8,
             16_000_000
         );
     });

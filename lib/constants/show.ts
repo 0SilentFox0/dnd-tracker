@@ -18,7 +18,9 @@ export const SLIDE_TITLE_MAX = 80;
 
 export const SLIDE_CAPTION_MAX = 200;
 
-export const SLIDE_MAX_EDGE_PX = 2560;
+export const SLIDE_MAX_EDGE_PX = 1920;
+
+export const SLIDE_UPLOAD_QUALITY = 0.8;
 
 /** The bucket also accepts what is mirrored by URL (resolveImageForPersistence). */
 export const SLIDE_FORMATS = {

@@ -118,5 +118,893 @@
   "Last Light": {
     "palette": "radiant",
     "subject": "a lone golden flame guttering in vast darkness, casting a final stubborn halo"
+  },
+  "True North Sense": {
+    "palette": "neutral gold",
+    "subject": "a small glowing arrow of light floating above an open palm and pointing through dark fog, faint compass ripples spreading outward"
+  },
+  "Gentle Beast": {
+    "palette": "neutral gold",
+    "subject": "an open hand held out calmly toward a deer's wet nose, soft golden light easing between them"
+  },
+  "Leaf Light Tread": {
+    "palette": "neutral gold",
+    "subject": "a bare foot stepping across fallen leaves leaving no mark, a faint green shimmer rising from the soles"
+  },
+  "Larder Keeping": {
+    "palette": "neutral gold",
+    "subject": "a loaf of bread and a wedge of cheese under a pale frosty glass dome, a soft cool glow around them"
+  },
+  "Leech Touch": {
+    "palette": "neutral gold",
+    "subject": "a fingertip pressed to a glass of dark red liquid, a thin thread of red light flowing back along the arm"
+  },
+  "Distant Ear": {
+    "palette": "neutral gold",
+    "subject": "a cupped ear with ripples of golden sound travelling to it across a long dark corridor from a faint far door"
+  },
+  "Carried Whisper": {
+    "palette": "neutral gold",
+    "subject": "a mouth silhouette with a curling thread of sound arcing across a room to land at a distant stone, small glints"
+  },
+  "Candle Gust": {
+    "palette": "neutral gold",
+    "subject": "a single candle flame bending sharply in a breath of wind, a tiny curl of smoke and sparks flying off"
+  },
+  "Lantern Glow": {
+    "palette": "neutral gold",
+    "subject": "a small fist of warm golden light floating above a palm, illuminating swirls of drifting dust in a dark cave"
+  },
+  "Tumbler Ease": {
+    "palette": "neutral gold",
+    "subject": "a small glass tumbler sliding softly across a table into an open palm, a thin streak of golden glow behind it"
+  },
+  "Hat Critter": {
+    "palette": "neutral gold",
+    "subject": "a small furry creature peeking out from under a worn tall hat, glowing sparks falling around the brim"
+  },
+  "Palm Flame": {
+    "palette": "neutral gold",
+    "subject": "a small calm flame floating above an open palm, its soft orange light lighting the fingertips"
+  },
+  "Wisp Lanterns": {
+    "palette": "neutral gold",
+    "subject": "three small drifting orbs of pale golden light bobbing in a dark passage, trailing slender curls of smoke"
+  },
+  "Dry Cloak": {
+    "palette": "neutral gold",
+    "subject": "a rain-soaked cloak steaming as it dries on a hook, pale warm glow wicking the water into drifting vapour"
+  },
+  "Clear Cup": {
+    "palette": "neutral gold",
+    "subject": "a cloudy goblet of muddy water turning crystal-clear from the rim down, a gentle bright ring of light"
+  },
+  "Quick Mould": {
+    "palette": "neutral gold",
+    "subject": "a lump of grey clay in two hands forming itself into a small bowl, swirls of golden light shaping the sides"
+  },
+  "Static Bite": {
+    "palette": "neutral gold",
+    "subject": "a fingertip and a metal doorknob with a snapping blue-white spark leaping between them, tiny crackling forks"
+  },
+  "Thumb Spring": {
+    "palette": "neutral gold",
+    "subject": "a thumb flicking a small stone into the air, a bright arc of golden light following its path"
+  },
+  "Nudge": {
+    "palette": "neutral gold",
+    "subject": "a single pointing finger pushing out a faint ripple of light that shoves a small cup across a table"
+  },
+  "Drowse Touch": {
+    "palette": "neutral gold",
+    "subject": "a finger lightly touching a drooping eyelid, drifting motes of pale blue sleep dust sinking in slow spirals"
+  },
+  "Palm Hop": {
+    "palette": "neutral gold",
+    "subject": "a hand tilted with a small pebble leaping from one palm to the other along a glowing golden arc"
+  },
+  "Phantom Murmurs": {
+    "palette": "neutral gold",
+    "subject": "faint ghostly speech curls of pale smoke rising from an empty corner of a dim room, a cold flicker of candlelight"
+  },
+  "Tainted Sense": {
+    "palette": "neutral gold",
+    "subject": "a single open eye with a faint dark violet ring in its pupil above a few curling threads of sickly smoke"
+  },
+  "Mantle Ward": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a shimmering translucent cloak of light draped over a pair of shoulders, deflecting small glowing sparks"
+  },
+  "Conjured Edge": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a plain sword blade wreathed in a bright violet edge of light, a glowing line along the steel"
+  },
+  "Shaft Turning": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "an arrow in flight veering aside in a gentle arc around a hand raised in a calm gesture, violet motes"
+  },
+  "Spanning Light": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a long narrow bridge made of glowing violet light stretching across a dark chasm toward a distant ledge"
+  },
+  "Burst Orb": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a swelling orb of violet-white energy exploding outward in a ring of fragments and a shockwave"
+  },
+  "Lance Bolt": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a single lance of crackling violet-white light shooting from an outstretched palm with a streak of sparks"
+  },
+  "Elemental Exhale": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a plume of flame, frost and sparks pouring from an open mouth silhouette in three twisted streams"
+  },
+  "Arcing Strike": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a bolt of violet lightning leaping from a raised hand and branching into two prongs that strike twice"
+  },
+  "Acid Veins": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a forearm whose veins glow with sickly green acid light, small drops sizzling where they drip onto stone"
+  },
+  "Gloom Sight": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "an open eye with a pupil of glowing violet light peering through a heavy veil of deep black darkness"
+  },
+  "Flicker Wreath": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a ring of low trembling violet flames circling a figure's feet, drifting sparks rising around the waist"
+  },
+  "Overhead Bastion": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a broad translucent shield of violet light held up above a head as arrows bounce harmlessly off it"
+  },
+  "Slip Grip": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a heavy iron sword sliding greasily out of a gloved hand, a slick sheen of violet light on the hilt"
+  },
+  "Sky Lift": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a pair of boots rising from the ground in a spiral of wind and violet motes, a cloak billowing"
+  },
+  "Ribbon Guard": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a long ribbon of violet light winding in a protective spiral around a raised forearm, small sparks deflected"
+  },
+  "Unseen Hand": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a ghostly translucent hand of violet light lifting a heavy key off a table in an empty candle-lit room"
+  },
+  "Plain Veil": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a figure fading into a plain grey veil of mist so that only an outline of violet light remains"
+  },
+  "Binding Wrap": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "glowing violet bands of light spiralling around a pair of ankles and tightening into a knot, motes scattering"
+  },
+  "Menace Mantle": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a dark cloak of violet shadow with sharp glowing edges draped over a looming silhouette, a cold aura around it"
+  },
+  "Shove Wave": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a visible ring of violet force bursting outward from a thrust palm, scattering dust and flipping tin cups"
+  },
+  "Hush Field": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a faint violet dome of stillness over an open palm with sound ripples dying away at its edge"
+  },
+  "Short Step": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a footprint at one spot and another footprint a few yards ahead joined by a thin arc of violet light"
+  },
+  "Dread Mantle": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a heavy shroud of black and violet mist rolling around a figure's shoulders, pale eyes glowing under the hood"
+  },
+  "Ward Shell": {
+    "palette": "neutral gold with violet arcane accents",
+    "subject": "a large translucent shell of pale violet light curling protectively around a crouched silhouette, ripples on its surface"
+  },
+  "Claw Bloom": {
+    "palette": "ochre and brown amber",
+    "subject": "a hand with sharp curved golden-brown claws growing out of the fingertips, a warm amber glow on the nails"
+  },
+  "Wild Shape": {
+    "palette": "ochre and brown amber",
+    "subject": "a silhouette halfway between a human and a prowling wolf, shifting fur and amber light flowing along its back"
+  },
+  "Herd Command": {
+    "palette": "ochre and brown amber",
+    "subject": "a raised hand and a charging herd of silhouetted beasts halting in a cloud of dust, amber light on the horns"
+  },
+  "Fang and Feather Speech": {
+    "palette": "ochre and brown amber",
+    "subject": "a wolf's head and a hawk's head leaning toward an open ear with amber speech curls drifting between them"
+  },
+  "Carrion Cloud": {
+    "palette": "ochre and brown amber",
+    "subject": "a swarm of dark crows and flies swirling thickly in a spiral cloud above a battlefield, ochre light behind it"
+  },
+  "Stalker Pelt": {
+    "palette": "ochre and brown amber",
+    "subject": "a prowling cat's spotted pelt draped across a pair of shoulders, rippling in the dusk with amber highlights"
+  },
+  "Gilded Javelin": {
+    "palette": "ochre and brown amber",
+    "subject": "a slim javelin made entirely of glowing amber-gold light hurtling from a raised hand with a streak of sparks"
+  },
+  "Feral Surge": {
+    "palette": "ochre and brown amber",
+    "subject": "a snarling wolf silhouette with an explosion of amber energy bursting from its chest as it leaps forward"
+  },
+  "Quiet Circle": {
+    "palette": "bone-white and violet",
+    "subject": "a ring of white stones around a still candle with faint violet-white mist drifting inside the circle"
+  },
+  "Reaper Blade": {
+    "palette": "bone-white and violet",
+    "subject": "a long pale scythe-shaped blade of bone-white light curving over an outstretched hand, violet mist drifting from it"
+  },
+  "Spirit Whirl": {
+    "palette": "bone-white and violet",
+    "subject": "a spiral of pale violet ghostly shrouded figures swirling in a gale across a dark moor, tendrils of cold light"
+  },
+  "Soul Draw": {
+    "palette": "bone-white and violet",
+    "subject": "a tendril of pale violet light flowing out of a fallen warrior's chest into an outstretched hand, bone-white glow"
+  },
+  "Last Whisper": {
+    "palette": "bone-white and violet",
+    "subject": "a single parted pair of lips beside a pale ghostly curl of breath fading into the dark, violet shimmer"
+  },
+  "Dusk Shroud": {
+    "palette": "bone-white and violet",
+    "subject": "a veil of bone-white and violet mist wrapping around a figure standing at the edge of a darkening twilight field"
+  },
+  "Vital Siphon": {
+    "palette": "bone-white and violet",
+    "subject": "red and violet streaks of light flowing from an open wound into a cupped hand, bone-white sparks around it"
+  },
+  "Mercy Stroke": {
+    "palette": "bone-white and violet",
+    "subject": "a single dagger point hovering over a fallen silhouette in pale violet light, a single gentle falling tear of glow"
+  },
+  "Cinder Mantle": {
+    "palette": "fire",
+    "subject": "a cloak of glowing orange embers draped over a pair of shoulders, drifting sparks trailing upward"
+  },
+  "Sear Seal": {
+    "palette": "fire",
+    "subject": "a glowing red-hot fingertip pressed over a bleeding gash, a thin line of steam and sealed skin"
+  },
+  "Brow Blaze": {
+    "palette": "fire",
+    "subject": "a thin crown of dancing fire hovering above a brow, firelight reflecting in a pair of narrowed eyes"
+  },
+  "Flame Curtain": {
+    "palette": "fire",
+    "subject": "a tall sheet of roaring orange flame hanging in the air across a stone corridor, heat shimmer and sparks"
+  },
+  "Rallying Embers": {
+    "palette": "fire",
+    "subject": "a small glowing ember held in a cupped palm bursting into warm sparks that land softly on nearby raised hands"
+  },
+  "Blaze Brand": {
+    "palette": "fire",
+    "subject": "a glowing red-hot branding iron shape of pure fire pressing into a sword blade, trailing smoke and sparks"
+  },
+  "Furnace Burst": {
+    "palette": "fire",
+    "subject": "a roaring ball of orange fire exploding outward from a clenched fist, cracks of molten light across the ground"
+  },
+  "Cleansing Burn": {
+    "palette": "fire",
+    "subject": "a wave of clean white-orange flame sweeping across a field of dark crawling vermin, ash rising in spirals"
+  },
+  "Static Cage": {
+    "palette": "deep blue and silver",
+    "subject": "a cage of crackling blue-white lightning arcs surrounding a floating small star, silver stars glittering behind"
+  },
+  "Falling Star": {
+    "palette": "deep blue and silver",
+    "subject": "a blazing silver star meteor streaking down from a deep blue night sky leaving a long fiery tail"
+  },
+  "Forked Arc": {
+    "palette": "deep blue and silver",
+    "subject": "a branching fork of deep blue lightning striking from a night sky into a rod held high, silver sparks"
+  },
+  "Fickle Omen": {
+    "palette": "deep blue and silver",
+    "subject": "three small glowing stars drifting out of place across a deep blue sky, a faint silver thread trying to join them"
+  },
+  "Ill-Starred Mark": {
+    "palette": "deep blue and silver",
+    "subject": "a dim cracked star burning low above a lone silhouette, a faint dark mark on the ground below"
+  },
+  "Omen Glance": {
+    "palette": "deep blue and silver",
+    "subject": "a single open eye reflecting a field of silver stars, a thin ray of light pointing downward"
+  },
+  "Omen Reading": {
+    "palette": "deep blue and silver",
+    "subject": "a hand tracing a path between silver constellations in a deep blue night sky, faint lines of light connecting the stars"
+  },
+  "Omen of Ruin": {
+    "palette": "deep blue and silver",
+    "subject": "a blood-dark star with a broken silver ring falling over a quiet field, cold streaks of light"
+  },
+  "Bark Hide": {
+    "palette": "nature",
+    "subject": "a forearm with skin turning to thick ridged tree bark, small green leaves sprouting from the elbow"
+  },
+  "Soil Vigour": {
+    "palette": "nature",
+    "subject": "a glowing green sprout rising out of cupped hands holding dark earth, warm healing light spreading outward"
+  },
+  "Burrow Pool": {
+    "palette": "nature",
+    "subject": "a small neat hollow of rainwater forming in dark loam under a glowing green leaf, ripples spreading outward"
+  },
+  "Loam Meal": {
+    "palette": "nature",
+    "subject": "a handful of rich dark soil being transformed into a loaf-shaped lump of golden-green grain, warm glowing light"
+  },
+  "Briar Thicket": {
+    "palette": "nature",
+    "subject": "a mass of thick thorny green briars bursting from the ground to wrap around a pair of boots"
+  },
+  "Root Survey": {
+    "palette": "nature",
+    "subject": "a glowing network of pale green roots spreading under the soil beneath a field, seen as in a cutaway"
+  },
+  "Wilt Mending": {
+    "palette": "nature",
+    "subject": "a drooping withered flower lifting its petals back to bright colours under a gentle green glow of a palm"
+  },
+  "Mending Surge": {
+    "palette": "nature",
+    "subject": "a bright spiral of green and gold leaves winding around a wounded forearm, the cut closing with light"
+  },
+  "Purging Halo": {
+    "palette": "radiant",
+    "subject": "a bright golden halo of fire burning around a dark mass of crawling shadows, pale flames and sparks"
+  },
+  "Flare Flash": {
+    "palette": "radiant",
+    "subject": "a blinding burst of golden-white light between two raised fingers, rays flaring outward and a dazzled silhouette"
+  },
+  "Calm Mind": {
+    "palette": "radiant",
+    "subject": "a still pool of golden light in a cupped hand with gentle concentric ripples smoothing away, soft glow"
+  },
+  "Fiend Sunder": {
+    "palette": "radiant",
+    "subject": "a bright golden spear of light splitting a dark horned silhouette in two, pieces falling away in smoke"
+  },
+  "Lattice Snare": {
+    "palette": "radiant",
+    "subject": "a cage-like lattice of golden light lines locking around a stumbling silhouette, glowing joints"
+  },
+  "Sanctum Glow": {
+    "palette": "radiant",
+    "subject": "a floor circle of glowing golden light protecting a sleeping silhouette while dark shapes press at the edge"
+  },
+  "Mending Gleam": {
+    "palette": "radiant",
+    "subject": "a bright golden-white wash of light flowing over a wounded arm with soft cleansing sparks dissolving the dirt"
+  },
+  "Quicksilver Mind": {
+    "palette": "radiant",
+    "subject": "a brain-shaped silhouette filled with fast darting threads of golden light, sparks bouncing between them"
+  },
+  "Smelt Touch": {
+    "palette": "grey-bronze steel",
+    "subject": "a fingertip pressed to a heavy iron nail turning glowing red and soft like molten metal, steam and sparks"
+  },
+  "Temper Bands": {
+    "palette": "grey-bronze steel",
+    "subject": "glowing grey-bronze rings of tempering heat sliding along a long sword blade, faint steam and bright steel sheen"
+  },
+  "Reforge Edge": {
+    "palette": "grey-bronze steel",
+    "subject": "a notched blade being smoothed in a spiral of grey-bronze and orange sparks, the edge becoming razor bright"
+  },
+  "Scale Mirage": {
+    "palette": "grey-bronze steel",
+    "subject": "a pile of dull lead coins shimmering into piles of golden coins with ripples of grey-bronze light"
+  },
+  "Weight Shift": {
+    "palette": "grey-bronze steel",
+    "subject": "a heavy iron anvil floating loosely beside a feather pressing down on a scale, grey-bronze ripples"
+  },
+  "Soft Iron": {
+    "palette": "grey-bronze steel",
+    "subject": "a bar of iron bending like warm clay in a gentle pair of hands, soft grey-bronze glow around the bend"
+  },
+  "Gilt Illusion": {
+    "palette": "grey-bronze steel",
+    "subject": "a plain iron ring wearing a thin shimmering coat of illusory gold that peels away in sparkling flakes"
+  },
+  "Ore Wrench": {
+    "palette": "grey-bronze steel",
+    "subject": "a metal nail and horseshoe tearing free of a boot and a chest strap into the air, grey-bronze streaks of force"
+  },
+  "Web of Seeming": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a delicate web of shadowy grey threads spun between a cobweb corner and a candle, ghostly images in the strands"
+  },
+  "Thought Slip": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a single glowing thread of grey light slipping out of a head silhouette, a faint knot of fading memory"
+  },
+  "Throttling Dark": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a thick black fog curling like a hand around a throat silhouette, desaturated violet highlights at the edge"
+  },
+  "Borrowed Face": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a plain blank mask with a ghostly image of a different face gliding across its surface, shadowy grey and violet light"
+  },
+  "Murk Bank": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a rolling bank of thick black fog drowning a quiet lane, violet and grey light pressing from inside"
+  },
+  "Night Mount": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a huge dark horse formed of black smoke and shadow with burning pale eyes galloping out of mist"
+  },
+  "Dark Door": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a tall door-shaped gap of pure black opening in a wall of stone, a violet rim of light around it"
+  },
+  "Cloak of Nothing": {
+    "palette": "desaturated shadow grey and necrotic violet",
+    "subject": "a cloak of shadow fading into the surrounding wall so that only a faint desaturated outline remains"
+  },
+  "Hearth Cheer": {
+    "palette": "murky marsh green",
+    "subject": "a small warm hearth fire with a steaming kettle and soft green marsh light curling around cosy shapes"
+  },
+  "Fruitful Plea": {
+    "palette": "murky marsh green",
+    "subject": "a cupped pair of hands pleading toward an apple tree in blossom, soft green light settling on the branches"
+  },
+  "Mire Stride": {
+    "palette": "murky marsh green",
+    "subject": "a bare foot stepping across a reedy bog on a thin crust of glowing green light, bubbles rising nearby"
+  },
+  "Dreamless Cup": {
+    "palette": "murky marsh green",
+    "subject": "a clay cup of dark herbal tea with a thin curl of pale green steam and a drifting moth falling asleep"
+  },
+  "Charged Draught": {
+    "palette": "murky marsh green",
+    "subject": "a clay flask of bubbling green liquid crackling with small sparks of light, steam curling off the neck"
+  },
+  "Owl Eyes": {
+    "palette": "murky marsh green",
+    "subject": "a pair of large round glowing owl eyes shining in dark marsh reeds, soft green light on the feathers"
+  },
+  "Warding Knot": {
+    "palette": "murky marsh green",
+    "subject": "a thick cord tied in an elaborate knot dangling from a doorframe with a faint green glow in its loops"
+  },
+  "Lost Flock Sight": {
+    "palette": "murky marsh green",
+    "subject": "a vision of scattered sheep silhouettes in a misty marsh seen within a ring of green light held in one hand"
+  },
+  "Barren Touch": {
+    "palette": "dark green and bruise purple",
+    "subject": "a withered dark hand resting on a blossoming plant that turns grey and cracks, thorns coiled around the wrist"
+  },
+  "Crawling Plague": {
+    "palette": "dark green and bruise purple",
+    "subject": "a swarm of fat black beetles pouring from an open palm over a field of dying thorny vines"
+  },
+  "Pinprick Doll": {
+    "palette": "dark green and bruise purple",
+    "subject": "a small cloth doll pierced by a single thorn with a bruise-purple glow spreading from the puncture"
+  },
+  "Age Mask": {
+    "palette": "dark green and bruise purple",
+    "subject": "a smooth young face-shaped mask cracking and wrinkling at the edges like old bark, thorny vines creeping across"
+  },
+  "Haunted Hearth": {
+    "palette": "dark green and bruise purple",
+    "subject": "a cold dead hearth with pale ghostly green flames flickering and a thorny briar climbing the chimney"
+  },
+  "Pale Mending": {
+    "palette": "dark green and bruise purple",
+    "subject": "a bruise-purple wound closing under a pale thorny vine of light, drops of dew glowing along it"
+  },
+  "Ill Gaze": {
+    "palette": "dark green and bruise purple",
+    "subject": "a single glaring eye wreathed in dark thorns radiating thin cracks of bruise-purple light across a stone wall"
+  },
+  "Snapped Laces Hex": {
+    "palette": "dark green and bruise purple",
+    "subject": "a pair of leather boots with a loose frayed knotted lace snapping with a faint dark purple glow"
+  },
+  "Unmake Minor Fiend": {
+    "palette": "crimson and black",
+    "subject": "a small crimson horned shape unravelling into black smoke and red sparks inside a ring of broken light"
+  },
+  "Eightfold Seal": {
+    "palette": "crimson and black",
+    "subject": "an eight-pointed star ring of crimson light drawn in the air around an empty pedestal, dark smoke spiralling"
+  },
+  "Fiend Scent": {
+    "palette": "crimson and black",
+    "subject": "a nose silhouette sniffing at a twisting thread of crimson-black smoke leading across a cold floor"
+  },
+  "Rend the Veil": {
+    "palette": "crimson and black",
+    "subject": "a jagged tear in a dark curtain of air with crimson-black light pouring through from the other side"
+  },
+  "Septic Bloom": {
+    "palette": "crimson and black",
+    "subject": "a cluster of black and crimson mould flowers blooming over a wounded arm, spores drifting up"
+  },
+  "Plague Mist": {
+    "palette": "crimson and black",
+    "subject": "a heavy low mist of sickly crimson-black vapour creeping over cracked ground, small black flies swirling"
+  },
+  "Rotten Stream": {
+    "palette": "crimson and black",
+    "subject": "a torrent of foul black and crimson sludge pouring from a clenched fist across a stone floor, steam rising"
+  },
+  "Honeyed Surrender": {
+    "palette": "crimson and black",
+    "subject": "a hand offering a dripping golden-red cup of sweet nectar toward a swooning silhouette, dark velvet shadows"
+  },
+  "Pain Turned Sweet": {
+    "palette": "crimson and black",
+    "subject": "a grimacing wound where flowing blood becomes shining crimson rose petals, a dark glow around the cut"
+  },
+  "Fickle Gift": {
+    "palette": "crimson and black",
+    "subject": "a crimson-wrapped gift box opening with half its contents glittering and half writhing in black smoke"
+  },
+  "Warping Coil": {
+    "palette": "crimson and black",
+    "subject": "a limb twisting into a spiralling coil of crimson and black energy, bones and shadow bending"
+  },
+  "Mirage Swirl": {
+    "palette": "crimson and black",
+    "subject": "a swirling vortex of crimson and black illusory shapes spinning around a dazzled bystander"
+  },
+  "Betrayal Whisper": {
+    "palette": "crimson and black",
+    "subject": "a hand slipping a glowing crimson thread behind a friend's back, a small black dagger shape reflected in a mirror"
+  },
+  "Grave Rising": {
+    "palette": "necrotic",
+    "subject": "a skeletal hand bursting from fresh black soil with pale green light pouring from the hole"
+  },
+  "Bone Binding": {
+    "palette": "necrotic",
+    "subject": "loose pale bones lifting into the air and clicking together into a skeletal silhouette bound by glowing green threads"
+  },
+  "Howling Skull": {
+    "palette": "necrotic",
+    "subject": "a screaming flying skull wreathed in sickly green fire racing forward through the dark with trailing wisps"
+  },
+  "Vigour of the Dead": {
+    "palette": "necrotic",
+    "subject": "a pale glowing green flame burning behind the ribcage of a dark armoured silhouette, bones gleaming"
+  },
+  "Keen Hand Boon": {
+    "palette": "radiant",
+    "subject": "a hand clenched around a sword hilt surrounded by a soft golden halo, light running down the blade"
+  },
+  "Held Breath Boon": {
+    "palette": "radiant",
+    "subject": "a single glowing bubble of air held within cupped hands beneath dark water, soft golden light on the surface"
+  },
+  "Silver Tongue Boon": {
+    "palette": "neutral gold",
+    "subject": "a golden tongue-like flame curling from a pair of lips silhouette, a soft glow falling on listeners"
+  },
+  "Honest Heart Boon": {
+    "palette": "radiant",
+    "subject": "a bare open hand pressed over a chest with a steady golden light shining through the fingers"
+  },
+  "Stout Heart Boon": {
+    "palette": "radiant",
+    "subject": "a plain beating heart wrapped in a glowing golden chain of light, warm rays spreading outward"
+  },
+  "Deft Fingers Boon": {
+    "palette": "neutral gold",
+    "subject": "a pair of slender fingers threading a bright needle through cloth with a soft golden afterglow"
+  },
+  "Second Chance Boon": {
+    "palette": "radiant",
+    "subject": "a coin spinning in the air above an open palm, a golden halo trailing a second bright coin behind it"
+  },
+  "Light Foot Boon": {
+    "palette": "nature",
+    "subject": "a single bare foot pressed lightly onto a rippling puddle without breaking the surface, soft golden light"
+  },
+  "Iron Hide Boon": {
+    "palette": "radiant",
+    "subject": "a bare forearm shining with a soft sheen of golden armour-like skin as a blade glances off it"
+  },
+  "Sure Aim Boon": {
+    "palette": "forest green",
+    "subject": "a bow drawn taut with a glowing golden mark floating at the end of the arrow's line"
+  },
+  "Strong Arm Boon": {
+    "palette": "radiant",
+    "subject": "a bulging forearm lifting a heavy stone block, warm golden glow around the muscles and dust falling"
+  },
+  "Shame Ward Boon": {
+    "palette": "radiant",
+    "subject": "a raised open palm with a golden shimmer in front of a stone-faced silhouette that lowers its weapon"
+  },
+  "Fever Ease Boon": {
+    "palette": "radiant",
+    "subject": "a damp cloth on a feverish brow with cool golden light and drifting steam lifting away"
+  },
+  "Hallowed Edge Boon": {
+    "palette": "radiant",
+    "subject": "a plain sword blade edged with glowing golden fire, tiny motes rising along its length"
+  },
+  "Cruel Cut Boon": {
+    "palette": "radiant",
+    "subject": "a bloodied dagger with a pale golden glow on its edge, two thin slash lines crossing in the air"
+  },
+  "Shrug It Off Boon": {
+    "palette": "radiant",
+    "subject": "a pair of shoulders shaking off a heavy dark cloak of shadow with a bright golden glow underneath"
+  },
+  "Clear Head Boon": {
+    "palette": "radiant",
+    "subject": "a still glowing golden lantern inside a clear head silhouette, calm concentric ripples around it"
+  },
+  "Quick Wits Boon": {
+    "palette": "radiant",
+    "subject": "three sparkling thought sparks flicking between temples with a quick golden afterglow"
+  },
+  "Stilled Sails": {
+    "palette": "teal",
+    "subject": "a ship's flapping sail slackening and hanging smooth above a mirror-calm sea, soft teal glow along the horizon"
+  },
+  "Brine Lungs": {
+    "palette": "teal",
+    "subject": "dark teal water swirling around a choking throat silhouette with rising bubbles and a faint sickly shimmer"
+  },
+  "Favouring Gale": {
+    "palette": "teal",
+    "subject": "a ship's billowing full sail driven by a rushing teal-white wind swirl across a dawn sea"
+  },
+  "Tide Larder": {
+    "palette": "teal",
+    "subject": "a woven net hauled from a glowing teal sea full of silver fish, a ripple of light around the net"
+  },
+  "Deck Heave": {
+    "palette": "teal",
+    "subject": "a tilting ship deck with a stumbling silhouette sliding sideways, teal spray and a rolling swell"
+  },
+  "Surface Stride": {
+    "palette": "teal",
+    "subject": "a bare foot stepping across the surface of a calm sea with concentric teal ripples glowing under the sole"
+  },
+  "Death Knell": {
+    "palette": "pale silver necrotic",
+    "subject": "a single dark bell hanging in a misty twilight with silver rings of faint sound drifting outward"
+  },
+  "Parting Rite": {
+    "palette": "pale silver necrotic",
+    "subject": "a dim lantern floating away from a dark hand over still water, pale silver glow on drifting mist"
+  },
+  "Threshold Line": {
+    "palette": "pale silver necrotic",
+    "subject": "a faint pale silver line drawn across a stone floor with a dark shape halted on the far side"
+  },
+  "Reprieve": {
+    "palette": "pale silver necrotic",
+    "subject": "a guttering candle flame held in place by a pale silver hand of light, wax stopped in mid-drip"
+  },
+  "Smiting Ash": {
+    "palette": "pale silver necrotic",
+    "subject": "a ring of falling pale silver ash particles bursting outward from a central glowing point, drifting like snow"
+  },
+  "Reaper Mien": {
+    "palette": "pale silver necrotic",
+    "subject": "a gaunt skull-pale shape glowing silver beneath a dark cowl, cold mist drifting around the edges"
+  },
+  "Blinding Standard": {
+    "palette": "steel grey and gold",
+    "subject": "a tall banner pole raised high with a blazing flash of golden-steel light blasting from the cloth"
+  },
+  "Scout Sight": {
+    "palette": "steel grey and gold",
+    "subject": "a spyglass raised toward a golden sky seeing far away lit silhouettes, steel and gold light on the brass"
+  },
+  "Shield Wall Glow": {
+    "palette": "steel grey and gold",
+    "subject": "a row of steel shields with a soft golden glow shining along their rims, a gold edge of light along the line"
+  },
+  "Blessed Spear": {
+    "palette": "steel grey and gold",
+    "subject": "a long spear with a head wreathed in steel-and-gold light, tiny sparks trailing from the point"
+  },
+  "Battle Fury": {
+    "palette": "steel grey and gold",
+    "subject": "a ring of red-gold flames flaring around a row of raised sword hands, sparks and war cries unseen"
+  },
+  "Steadfast Ranks": {
+    "palette": "steel grey and gold",
+    "subject": "a tight formation of identical raised steel helmets under a gold banner, light running along the line"
+  },
+  "Open Door Riddle": {
+    "palette": "neutral gold",
+    "subject": "a keyhole with a glowing golden thread pulling a tumbler lock open from within, coins in the dark"
+  },
+  "Prowler Sight": {
+    "palette": "neutral gold",
+    "subject": "a pair of narrowed eyes glowing gold in a dark alley beneath the brim of a hat, glinting coin light"
+  },
+  "Loaded Fate": {
+    "palette": "neutral gold",
+    "subject": "a pair of dice with a golden glow around a six and a bright coin spinning above them"
+  },
+  "Light Fingers Boon": {
+    "palette": "neutral gold",
+    "subject": "a hand lifting a golden coin from a pouch with nimble fingers, a faint streak of light and sparkles"
+  },
+  "Borrowed Mask": {
+    "palette": "neutral gold",
+    "subject": "three different expressionless masks fanning out from a single hand with gold shimmer and a purse glinting beside them"
+  },
+  "Fading Memory": {
+    "palette": "neutral gold",
+    "subject": "a gold-lit silhouette fading into the backdrop of a crowded market while onlookers look away, soft haze"
+  },
+  "Sudden Orchard": {
+    "palette": "nature",
+    "subject": "bare earth erupting into rows of apple trees heavy with fruit and blossoms, green and golden light"
+  },
+  "Green Canopy": {
+    "palette": "nature",
+    "subject": "a gentle woven canopy of leaves and vines arching above a sleeping camp, dappled green-gold light through the leaves"
+  },
+  "Cradle Kin": {
+    "palette": "nature",
+    "subject": "a single glowing green ripple spreading through a forest with tiny silhouettes of animals lit up among the roots"
+  },
+  "Cradle Relief": {
+    "palette": "nature",
+    "subject": "soft green petals falling over a row of tired weary hands, a gentle green light lifting the weight from them"
+  },
+  "Gentle Hands": {
+    "palette": "nature",
+    "subject": "two cupped hands holding a tiny green glowing seedling above a bandaged wound, warm light in the leaves"
+  },
+  "Bond Blessing": {
+    "palette": "nature",
+    "subject": "two hands joined with a thread of green and gold vines wrapped around the wrists, leaves and petals around them"
+  },
+  "Monk Fortitude": {
+    "palette": "soft white radiant",
+    "subject": "a calm robed silhouette sitting cross-legged under a rain of soft white light, unmoved by falling stones"
+  },
+  "Soothing Hush": {
+    "palette": "soft white radiant",
+    "subject": "a soft white feather drifting down over a trembling hand, calming ripples of pale light fading outward"
+  },
+  "Merciful Tears": {
+    "palette": "soft white radiant",
+    "subject": "a single glowing tear falling onto a deep cut and sealing it with a bright white shimmer"
+  },
+  "Cleansed Slate": {
+    "palette": "soft white radiant",
+    "subject": "a dark stained slate wiped clean by a hand of soft white light, the smudges lifting away as sparkles"
+  },
+  "Draw the Poison": {
+    "palette": "soft white radiant",
+    "subject": "a dark green thread of poison being drawn out of a pale arm into a glowing cup, soft white light"
+  },
+  "Shouldered Pain": {
+    "palette": "soft white radiant",
+    "subject": "a small shadowy dark patch transferring from one shoulder to the gentle white-lit shoulder of another silhouette"
+  },
+  "Radiant Zeal": {
+    "palette": "radiant gold and ember",
+    "subject": "a ring of golden-ember light surrounding a raised fist with sparks of fire climbing up the arm"
+  },
+  "Spellward Shout": {
+    "palette": "radiant gold and ember",
+    "subject": "a golden-ember sound wave bursting from a shouting mouth silhouette and dispersing incoming violet sparks"
+  },
+  "Hallowed Hammer": {
+    "palette": "radiant gold and ember",
+    "subject": "a heavy hammer head glowing with a gold and ember light, small sparks on the striking face"
+  },
+  "Spirit Pyre": {
+    "palette": "radiant gold and ember",
+    "subject": "a tall pillar of pale gold flame leaping from a pyre of dry wood, tiny ember souls rising"
+  },
+  "Twin Star Fall": {
+    "palette": "radiant gold and ember",
+    "subject": "two bright golden comets with ember tails slamming down together onto a dark plain"
+  },
+  "Hate the Wicked": {
+    "palette": "radiant gold and ember",
+    "subject": "a clenched fist raised in front of a shadowed crowd with a gold and ember glow lighting the knuckles"
+  },
+  "Beastsense": {
+    "palette": "forest green",
+    "subject": "a wolf's ear and a hawk's eye floating together, a green-gold glow around them in the dark forest"
+  },
+  "Wild Ally": {
+    "palette": "forest green",
+    "subject": "a lean shadowed wolf stepping out of green foliage beside a lifted hand, dappled forest light on its fur"
+  },
+  "Stag Leap": {
+    "palette": "forest green",
+    "subject": "a great antlered stag bounding over a fallen log with green leaves swirling around its legs, mist behind"
+  },
+  "Huntmaster Trail": {
+    "palette": "forest green",
+    "subject": "a glowing line of paw prints on a mossy forest floor leading far into green mist, a hand pointing"
+  },
+  "Snare Roots": {
+    "palette": "forest green",
+    "subject": "a mass of glowing green roots bursting from forest soil and gripping ankles, leaves shaking loose"
+  },
+  "Fang Gift": {
+    "palette": "forest green",
+    "subject": "a pair of long gleaming fangs growing from a jaw silhouette amid green forest light and drifting leaves"
+  },
+  "Frost Pelt": {
+    "palette": "ice blue",
+    "subject": "a thick white frosted wolf pelt cloak over a pair of shoulders with ice crystals along its edges, ice blue glow"
+  },
+  "Cold Verdict": {
+    "palette": "ice blue",
+    "subject": "a jagged spear of ice blue light slamming down from a stormy sky into a snowy plain"
+  },
+  "Winter Glare": {
+    "palette": "ice blue",
+    "subject": "a pair of pale icy blue eyes glowing in a dark hood amid a swirling blizzard"
+  },
+  "Pack Frenzy": {
+    "palette": "ice blue",
+    "subject": "three howling wolf silhouettes leaping with ice blue light flaring along their fur and snow whirling"
+  },
+  "Frostbite Bolt": {
+    "palette": "ice blue",
+    "subject": "a battleaxe head sheathed in ice blue frost with white mist curling from its edge as it swings"
+  },
+  "Pack Howl": {
+    "palette": "ice blue",
+    "subject": "a huge white wolf's head tipped back in a howl under a frozen moon, ice blue ripples of sound"
+  },
+  "Even-Handed Blade": {
+    "palette": "neutral gold",
+    "subject": "a plain sword balanced horizontally like scales above a pale gold light, two gleaming pans on either end"
+  },
+  "Honest Tongue": {
+    "palette": "neutral gold",
+    "subject": "a single golden flame in the shape of a tongue burning steadily, lit by a ring of balanced light"
+  },
+  "Unswayed Judge": {
+    "palette": "neutral gold",
+    "subject": "a pair of golden scales perfectly level in a calm beam of light, ignoring a shower of tempting coins"
+  },
+  "Truth Bind": {
+    "palette": "neutral gold",
+    "subject": "a gold chain of light wrapped around a mouth silhouette while a dark lie curls away as smoke"
+  },
+  "Owl Counsel": {
+    "palette": "neutral gold",
+    "subject": "a wise owl perched above a pair of golden scales with large glowing eyes, feathers lit by soft light"
+  },
+  "Witness Aura": {
+    "palette": "neutral gold",
+    "subject": "a ring of soft golden light around a speaking silhouette with a circle of listening shadows leaning in"
   }
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPinned, PenLine } from 'lucide-react';
 
+import { MarkerLayerField } from '../layers/MarkerLayerField';
 import { MarkerIconGrid } from '../maps/MapFieldParts';
 import { NewWorldMapDialog } from '../maps/NewWorldMapDialog';
 import { markerIcon } from '../marker-icon-options';
@@ -140,6 +141,10 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                             onBlur={m.commitNote}
                         />
                     </label>
+                    <MarkerLayerField
+                        value={marker.layerId}
+                        onChange={(id) => void m.setLayer(id)}
+                    />
                     <label className="flex items-center justify-between gap-3 text-sm">
                         <span>
                             {t('editor.knownLocation')}

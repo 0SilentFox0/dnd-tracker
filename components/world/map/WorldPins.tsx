@@ -1,3 +1,5 @@
+'use client';
+
 import { MapPin } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
@@ -8,8 +10,9 @@ import {
     WORLD_ZONE_LABEL_CONFLICT,
     WORLD_ZONE_LABEL_CONFLICT_COMPACT,
 } from '@/lib/constants/world';
-import { DRAG_THRESHOLD } from '@/lib/hooks/common';
+import { usePinGesture } from '@/lib/hooks/world';
 import { markerAnchor } from '@/lib/utils/world/geometry';
+import { isMinorPin, pinHiddenAtZoom } from '@/lib/utils/world/pin-tier';
 import { zoneLabelSize, zoneLabelVisible } from '@/lib/utils/world/zone-labels';
 import type { MapPoint, WorldMarker } from '@/types/world';
 
@@ -29,6 +32,7 @@ interface WorldPinsProps {
         current: { id: string; point: MapPoint } | null;
         onMove(id: string, clientX: number, clientY: number): void;
         onEnd(id: string, clientX: number, clientY: number): void;
+        onCancel(): void;
     };
     handlers: PinHandlers;
 }
@@ -46,9 +50,29 @@ export function WorldPins({
     drag,
     handlers,
 }: WorldPinsProps) {
-    const { current: dragging, onMove: onDragMove, onEnd: onDragEnd } = drag;
+    const {
+        current: dragging,
+        onMove: onDragMove,
+        onEnd: onDragEnd,
+        onCancel: onDragCancel,
+    } = drag;
 
-    const points = markers.filter((m) => m.kind !== 'zone');
+    const { bind } = usePinGesture<string>({
+        draggable: !!handlers.onMarkerDrag,
+        onClick: handlers.onMarkerClick,
+        onDragMove: (id, e) => onDragMove(id, e.clientX, e.clientY),
+        onDragEnd: (id, e) => onDragEnd(id, e.clientX, e.clientY),
+        onCancel: onDragCancel,
+    });
+
+    const isPinned = (m: WorldMarker) =>
+        m.id === selectedId || m.id === dragging?.id;
+
+    const points = markers.filter(
+        (m) => m.kind !== 'zone' && !pinHiddenAtZoom(m, zoom, isPinned(m))
+    );
+
+    const labelBlockers = points.filter((m) => !isMinorPin(m));
 
     const shownZoneLabels: MapPoint[] = [];
 
@@ -59,7 +83,7 @@ export function WorldPins({
                     dragging?.id === m.id ? dragging.point : markerAnchor(m);
 
                 if (m.kind === 'zone') {
-                    const clashes = points.some(
+                    const clashes = labelBlockers.some(
                         (p) =>
                             Math.hypot(p.x - spot.x, p.y - spot.y) <
                             WORLD_ZONE_LABEL_CONFLICT
@@ -110,9 +134,11 @@ export function WorldPins({
                     );
                 }
 
+                if (pinHiddenAtZoom(m, zoom, isPinned(m))) return null;
+
                 const Icon = (m.icon && MARKER_ICON[m.icon]) || MapPin;
 
-                const draggable = !!handlers.onMarkerDrag;
+                const minor = isMinorPin(m);
 
                 return (
                     <HudButton
@@ -123,6 +149,7 @@ export function WorldPins({
                             m.id === points[0]?.id ? 'world.marker' : undefined
                         }
                         data-selected={m.id === selectedId}
+                        data-minor={minor}
                         data-labels={
                             zoom >=
                             (compact
@@ -137,56 +164,7 @@ export function WorldPins({
                             touchAction: 'none',
                         }}
                         className="atlas-pin absolute"
-                        onPointerDown={(e) => {
-                            e.stopPropagation();
-                            e.currentTarget.dataset.startX = String(e.clientX);
-                            e.currentTarget.dataset.startY = String(e.clientY);
-                            try {
-                                e.currentTarget.setPointerCapture?.(
-                                    e.pointerId
-                                );
-                            } catch {
-                                // synthetic pointer events from the tour have no active pointer
-                            }
-                        }}
-                        onPointerMove={(e) => {
-                            if (
-                                !draggable ||
-                                e.currentTarget.dataset.startX === undefined
-                            )
-                                return;
-
-                            const moved =
-                                Math.hypot(
-                                    e.clientX -
-                                        Number(e.currentTarget.dataset.startX),
-                                    e.clientY -
-                                        Number(e.currentTarget.dataset.startY)
-                                ) > DRAG_THRESHOLD;
-
-                            if (moved) onDragMove(m.id, e.clientX, e.clientY);
-                        }}
-                        onPointerUp={(e) => {
-                            const startX = e.currentTarget.dataset.startX;
-
-                            if (startX === undefined) return;
-
-                            e.stopPropagation();
-
-                            const moved =
-                                draggable &&
-                                Math.hypot(
-                                    e.clientX - Number(startX),
-                                    e.clientY -
-                                        Number(e.currentTarget.dataset.startY)
-                                ) > DRAG_THRESHOLD;
-
-                            delete e.currentTarget.dataset.startX;
-                            delete e.currentTarget.dataset.startY;
-
-                            if (moved) onDragEnd(m.id, e.clientX, e.clientY);
-                            else handlers.onMarkerClick?.(m.id);
-                        }}
+                        {...bind(m.id)}
                         onDoubleClick={(e) => {
                             e.stopPropagation();
                             handlers.onMarkerDoubleClick?.(m.id);
@@ -196,7 +174,10 @@ export function WorldPins({
                             className="atlas-seal"
                             style={m.color ? sealStyle(m.color) : undefined}
                         >
-                            <Icon className="size-4" aria-hidden />
+                            <Icon
+                                className={minor ? 'size-2.5' : 'size-4'}
+                                aria-hidden
+                            />
                         </span>
                         <span className="atlas-label">{m.name}</span>
                     </HudButton>

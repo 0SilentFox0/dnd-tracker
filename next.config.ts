@@ -37,21 +37,24 @@ export const STATIC_CSP_HEADER = {
     value: STATIC_REPORT_ONLY_CSP,
 };
 
-function supabaseImagePatterns() {
-    const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!raw) return [];
-
-    const { protocol, hostname, port } = new URL(raw);
-
+function storageImagePatterns() {
     return [
-        {
-            protocol: protocol.replace(':', '') as 'http' | 'https',
-            hostname,
-            ...(port ? { port } : {}),
-            pathname: '/storage/v1/object/public/**',
-        },
-    ];
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_MEDIA_BASE_URL,
+    ].flatMap((raw) => {
+        if (!raw) return [];
+
+        const { protocol, hostname, port } = new URL(raw);
+
+        return [
+            {
+                protocol: protocol.replace(':', '') as 'http' | 'https',
+                hostname,
+                ...(port ? { port } : {}),
+                pathname: '/storage/v1/object/public/**',
+            },
+        ];
+    });
 }
 
 const nextConfig: NextConfig = {
@@ -111,7 +114,7 @@ const nextConfig: NextConfig = {
                 hostname: 'static.wikia.nocookie.net',
                 pathname: '/**',
             },
-            ...supabaseImagePatterns(),
+            ...storageImagePatterns(),
         ],
     },
 };

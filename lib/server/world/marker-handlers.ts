@@ -9,6 +9,7 @@ import {
     updateWorldMarkerSchema,
 } from '@/lib/schemas/world';
 import { ContentError } from '@/lib/server/content/errors';
+import { isMissingRecord } from '@/lib/server/world/layer-store';
 import { lockWorldMap } from '@/lib/server/world/lock';
 import {
     clearShowAfterDelete,
@@ -24,6 +25,12 @@ import { withDM } from '@/lib/utils/api/as-dm';
 import { parseBody } from '@/lib/utils/api/parse-body';
 import { polygonCentroid } from '@/lib/utils/world/geometry';
 
+const layerOnMap = async (layerId: string, mapId: string) =>
+    (await prisma.worldLayer.findFirst({
+        where: { id: layerId, mapId },
+        select: { id: true },
+    })) !== null;
+
 export function createWorldMarkerHandler(req: Request, campaignId: string) {
     return withDM(campaignId, 'create world marker', async () => {
         const body = await parseBody(createWorldMarkerSchema, req);
@@ -34,37 +41,50 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
 
         if (map instanceof NextResponse) return map;
 
+        if (body.layerId && !(await layerOnMap(body.layerId, body.mapId)))
+            return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
+
         const zone = body.kind === 'zone' && body.polygon ? body.polygon : null;
 
         const { x, y } = zone ? polygonCentroid(zone) : body;
 
-        const created = await prisma.$transaction(async (tx) => {
-            await lockWorldMap(tx, body.mapId);
+        let created;
 
-            const { _count, _max } = await tx.worldMarker.aggregate({
-                where: { mapId: body.mapId },
-                _count: true,
-                _max: { sortOrder: true },
+        try {
+            created = await prisma.$transaction(async (tx) => {
+                await lockWorldMap(tx, body.mapId);
+
+                const { _count, _max } = await tx.worldMarker.aggregate({
+                    where: { mapId: body.mapId },
+                    _count: true,
+                    _max: { sortOrder: true },
+                });
+
+                if (_count >= MAX_MARKERS_PER_MAP)
+                    throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
+
+                return tx.worldMarker.create({
+                    data: {
+                        mapId: body.mapId,
+                        kind: body.kind,
+                        x,
+                        y,
+                        polygon: body.polygon ?? undefined,
+                        name: body.name,
+                        icon: body.icon ?? null,
+                        description: body.description ?? null,
+                        color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+                        layerId: body.layerId ?? null,
+                        sortOrder: (_max.sortOrder ?? -1) + 1,
+                    },
+                });
             });
+        } catch (e) {
+            if (body.layerId && isMissingRecord(e))
+                return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
 
-            if (_count >= MAX_MARKERS_PER_MAP)
-                throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
-
-            return tx.worldMarker.create({
-                data: {
-                    mapId: body.mapId,
-                    kind: body.kind,
-                    x,
-                    y,
-                    polygon: body.polygon ?? undefined,
-                    name: body.name,
-                    icon: body.icon ?? null,
-                    description: body.description ?? null,
-                    color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
-                    sortOrder: (_max.sortOrder ?? -1) + 1,
-                },
-            });
-        });
+            throw e;
+        }
 
         publishWorldChanged(campaignId, body.mapId);
 
@@ -86,9 +106,17 @@ export function updateWorldMarkerHandler(
 
         if (body instanceof NextResponse) return body;
 
-        const { x, y, polygon, ...rest } = body;
+        if (body.layerId && !(await layerOnMap(body.layerId, owned.mapId)))
+            return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
+
+        const { x, y, polygon, layerId, ...rest } = body;
 
         const data: Prisma.WorldMarkerUpdateInput = { ...rest };
+
+        if (layerId !== undefined)
+            data.layer = layerId
+                ? { connect: { id: layerId } }
+                : { disconnect: true };
 
         if (owned.kind === 'zone') {
             if (polygon === null)
@@ -103,11 +131,20 @@ export function updateWorldMarkerHandler(
             data.y = y;
         }
 
-        const updated = await prisma.worldMarker.update({
-            where: { id: markerId },
-            data,
-            include: { childMap: { select: { id: true } } },
-        });
+        let updated;
+
+        try {
+            updated = await prisma.worldMarker.update({
+                where: { id: markerId },
+                data,
+                include: { childMap: { select: { id: true } } },
+            });
+        } catch (e) {
+            if (layerId && isMissingRecord(e))
+                return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
+
+            throw e;
+        }
 
         publishWorldChanged(campaignId, owned.mapId);
 

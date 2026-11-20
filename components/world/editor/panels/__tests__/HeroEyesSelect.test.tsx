@@ -69,6 +69,8 @@ describe('HeroEyesSelect layout', () => {
 
         expect(label.className).toContain('w-full');
         expect(label.className).toContain('lg:w-auto');
+        expect(label.className).toContain('min-w-0');
+        expect(label.className).toContain('max-w-full');
     });
 });
 

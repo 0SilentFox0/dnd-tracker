@@ -17,6 +17,7 @@ const m = vi.hoisted(() => ({
     update: vi.fn(),
     del: vi.fn(),
     publish: vi.fn(),
+    groupBy: vi.fn(),
 }));
 
 vi.mock('server-only', () => ({}));
@@ -34,6 +35,7 @@ vi.mock('@/lib/db', () => {
     return {
         prisma: {
             worldSession,
+            worldTravelLog: { groupBy: m.groupBy },
             $transaction: (fn: (tx: unknown) => unknown) =>
                 fn({ worldSession }),
         },
@@ -72,6 +74,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     m.requireDM.mockResolvedValue({ userId: 'u1', isDM: true });
     m.count.mockResolvedValue(0);
+    m.groupBy.mockResolvedValue([]);
     m.create.mockImplementation(async ({ data }) => row(data));
 });
 
@@ -85,6 +88,23 @@ describe('sessions', () => {
             startedAt: 'desc',
         });
         expect((await res.json())[0]).toMatchObject({ id: 's1', active: true });
+    });
+
+    it('lists entry counts per session with a single groupBy', async () => {
+        m.findMany.mockResolvedValue([row(), row({ id: 's2' })]);
+        m.groupBy.mockResolvedValue([
+            { sessionId: 's1', _count: { _all: 7 } },
+        ]);
+
+        const body = await (await sessionsListHandler('c1')).json();
+
+        expect(m.groupBy).toHaveBeenCalledTimes(1);
+        expect(m.groupBy.mock.calls[0][0]).toMatchObject({
+            by: ['sessionId'],
+        });
+        expect(body.map((s: { entryCount: number }) => s.entryCount)).toEqual([
+            7, 0,
+        ]);
     });
 
     it('start closes the active session before creating and picks the next palette colour', async () => {

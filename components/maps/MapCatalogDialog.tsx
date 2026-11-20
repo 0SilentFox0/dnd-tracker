@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useMapCatalog } from '@/lib/hooks/battle-maps';
 import { useSearch } from '@/lib/hooks/common';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 
 const EMPTY_ENTRIES: MapCatalogEntry[] = [];
@@ -97,7 +98,7 @@ export function MapCatalogDialog({
                                     >
                                         {entry.previewUrl ? (
                                             <Image
-                                                src={entry.previewUrl}
+                                                src={toMediaUrl(entry.previewUrl)}
                                                 alt=""
                                                 width={160}
                                                 height={100}
@@ -127,7 +128,7 @@ export function MapCatalogDialog({
                                         </h3>
                                         {selected.previewUrl ? (
                                             <Image
-                                                src={selected.previewUrl}
+                                                src={toMediaUrl(selected.previewUrl)}
                                                 alt={selected.name}
                                                 width={640}
                                                 height={640}
