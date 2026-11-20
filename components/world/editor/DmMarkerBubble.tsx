@@ -9,6 +9,7 @@ import { MoveMapMenu } from './MoveMapMenu';
 import { useEditorMarkerFields } from './use-editor-fields';
 import { useWorldEditorContext } from './WorldEditorContext';
 
+import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -52,6 +53,16 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                         e.key === 'Enter' && e.currentTarget.blur()
                     }
                 />
+                {marker.kind === 'point' ? (
+                    <div className="flex items-center gap-2 text-xs">
+                        <ColorSwatch
+                            color={m.color}
+                            label={t('editor.pointColor')}
+                            onChange={m.pickColor}
+                        />
+                        {t('editor.pointColor')}
+                    </div>
+                ) : null}
                 <label className="flex items-center justify-between gap-2 text-xs">
                     {t('editor.knownLocation')}
                     <Switch

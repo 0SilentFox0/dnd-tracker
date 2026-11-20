@@ -74,3 +74,39 @@ describe('WorldPins compact mode', () => {
         expect(container.querySelectorAll('.atlas-zone-label')).toHaveLength(1);
     });
 });
+
+describe('WorldPins point colour', () => {
+    it('tints the seal of a coloured point and leaves the default otherwise', () => {
+        const { container, rerender } = render(
+            <WorldPins
+                markers={[{ ...point, color: '#ff0000' }]}
+                zoom={1}
+                {...props}
+            />
+        );
+
+        expect(
+            container.querySelector<HTMLElement>('.atlas-seal')?.style
+                .background
+        ).toContain('#ff0000');
+
+        rerender(<WorldPins markers={[point]} zoom={1} {...props} />);
+
+        expect(
+            container.querySelector<HTMLElement>('.atlas-seal')?.style
+                .background
+        ).toBe('');
+    });
+
+    it('does not tint zone seals', () => {
+        const { container } = render(
+            <WorldPins
+                markers={[{ ...zone('Z', 0.3), color: '#ff0000' }]}
+                zoom={1}
+                {...props}
+            />
+        );
+
+        expect(container.querySelector('.atlas-seal')).toBeNull();
+    });
+});
