@@ -258,9 +258,9 @@
       "aim": "Цілитися (дія)",
       "defensive": "Оборона (дія)",
       "defensiveSkill": {
-        "parry": "Parry +2 SL",
-        "dodge": "Dodge +2 SL",
-        "magick": "Language (Magick) +2 SL"
+        "parry": "Парирування +2 SL",
+        "dodge": "Ухилення +2 SL",
+        "magick": "Мова (Магія) +2 SL"
       },
       "flee": "Тікати (без Disengage)",
       "grapple": "Захват (дія, Сила)",

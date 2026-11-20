@@ -4,7 +4,7 @@ import { isFlier } from '../traits/creature';
 
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
-import { bothOnMap,cellsOf } from '@/lib/utils/battle/grid/occupancy';
+import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
 
 export type RangeBand = 'pointBlank' | 'short' | 'medium' | 'long' | 'extreme';
@@ -70,7 +70,14 @@ export function rangeContext(
 
     const rangeYd = weaponRangeYd(attack.range);
 
-    if (rangeYd === null || !bothOnMap(map, attacker, target)) return null;
+    // a helpless (unconscious) target is off the occupancy grid but still stands where it fell
+    if (
+        rangeYd === null ||
+        !map ||
+        !attacker.battleData.position ||
+        !target.battleData.position
+    )
+        return null;
 
     const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
 
