@@ -602,17 +602,14 @@ export function WorldEditorPageClient({
                                                                     (h) => h.id
                                                                 )}
                                                                 target={
-                                                                    moveTarget.point
+                                                                    moveTarget
                                                                 }
-                                                                selectedMarker={
-                                                                    moveTarget.marker
-                                                                }
-                                                                hasActiveSession={
-                                                                    !!sessions.active
-                                                                }
-                                                                selection={
-                                                                    heroSelection
-                                                                }
+                                                                session={{
+                                                                    hasActive:
+                                                                        !!sessions.active,
+                                                                    selection:
+                                                                        heroSelection,
+                                                                }}
                                                                 actions={{
                                                                     onPickTarget:
                                                                         () =>

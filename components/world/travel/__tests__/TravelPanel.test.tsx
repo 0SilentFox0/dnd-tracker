@@ -59,10 +59,13 @@ const mapSummary = (id: string, parentMarkerId: string | null) => ({
 });
 
 const renderPanel = (
-    over: Partial<Omit<TravelPanelProps, 'actions'>> &
-        Pick<TravelPanelProps['actions'], 'onMoved'> = {}
+    over: Partial<Omit<TravelPanelProps, 'actions' | 'target'>> &
+        Pick<TravelPanelProps['actions'], 'onMoved'> & {
+            point?: TravelPanelProps['target']['point'];
+            selectedMarker?: TravelPanelProps['target']['marker'];
+        } = {}
 ) => {
-    const { onMoved, ...rest } = over;
+    const { onMoved, point, selectedMarker, ...rest } = over;
 
     return render(
         <QueryClientProvider
@@ -77,10 +80,12 @@ const renderPanel = (
                 mapId="m1"
                 heroes={heroes}
                 onMapIds={['h1', 'h2']}
-                target={{ x: 0.3, y: 0.6 }}
-                selectedMarker={null}
                 actions={{ onPickTarget: vi.fn(), onMoved }}
                 {...rest}
+                target={{
+                    point: 'point' in over ? (point ?? null) : { x: 0.3, y: 0.6 },
+                    marker: selectedMarker ?? null,
+                }}
             />
         </QueryClientProvider>
     );
@@ -144,7 +149,7 @@ describe('TravelPanel', () => {
         expect(move().disabled).toBe(false);
 
         cleanup();
-        renderPanel({ target: null });
+        renderPanel({ point: null });
         fireEvent.click(screen.getByRole('button', { name: 'Aria' }));
 
         expect(move().disabled).toBe(true);

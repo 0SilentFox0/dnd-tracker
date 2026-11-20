@@ -126,8 +126,7 @@ function TravelBody({
                 mapId={viewId}
                 heroes={roster.heroes}
                 onMapIds={(detail.data?.heroes ?? []).map((h) => h.id)}
-                target={target.point}
-                selectedMarker={target.marker}
+                target={target}
                 actions={{ onPickTarget: () => undefined, onMoved: moved }}
             />
         </div>

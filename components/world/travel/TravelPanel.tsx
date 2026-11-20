@@ -22,10 +22,8 @@ export interface TravelPanelProps {
     mapId: string;
     heroes: RosterHero[];
     onMapIds: string[];
-    target: MapPoint | null;
-    selectedMarker: WorldMarker | null;
-    hasActiveSession?: boolean;
-    selection?: HeroSelection;
+    target: { point: MapPoint | null; marker: WorldMarker | null };
+    session?: { hasActive?: boolean; selection?: HeroSelection };
     actions: { onPickTarget(): void; onMoved?(e: TravelMoved): void };
 }
 
@@ -35,11 +33,13 @@ export function TravelPanel({
     heroes,
     onMapIds,
     target,
-    selectedMarker,
-    hasActiveSession,
-    selection,
+    session,
     actions,
 }: TravelPanelProps) {
+    const { point: targetPoint, marker: selectedMarker } = target;
+
+    const { hasActive: hasActiveSession, selection } = session ?? {};
+
     const { onPickTarget, onMoved } = actions;
 
     const t = useTranslations('world.travel');
@@ -51,7 +51,7 @@ export function TravelPanel({
         mapId,
         heroes,
         onMapIds,
-        target,
+        target: targetPoint,
         selectedMarker,
         onMoved,
         selection,
@@ -98,7 +98,7 @@ export function TravelPanel({
             </div>
 
             <p className="text-xs text-hud-muted">
-                {target ? t('targetPicked') : t('targetHint')}
+                {targetPoint ? t('targetPicked') : t('targetHint')}
                 {selectedMarker
                     ? ` ${t('marker', { name: selectedMarker.name })}`
                     : ''}
