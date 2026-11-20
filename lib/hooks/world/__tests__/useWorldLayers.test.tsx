@@ -8,7 +8,9 @@ import { worldKeys } from '../keys';
 import { useLayerVisibility } from '../useLayerVisibility';
 import { useWorldLayers } from '../useWorldLayers';
 
+import { ApiError } from '@/lib/api/client';
 import { deleteWorldLayer, setWorldLayerHeroes } from '@/lib/api/world';
+import { useOptionalNotify } from '@/lib/hooks/common/useNotify';
 
 vi.mock('@/lib/api/world', () => ({
     createWorldLayer: vi.fn(),
@@ -17,7 +19,7 @@ vi.mock('@/lib/api/world', () => ({
     deleteWorldLayer: vi.fn(),
 }));
 vi.mock('@/lib/hooks/common/useNotify', () => ({
-    useOptionalNotify: () => vi.fn(),
+    useOptionalNotify: vi.fn(() => vi.fn()),
 }));
 
 let client: QueryClient;
@@ -86,5 +88,32 @@ describe('useLayerVisibility', () => {
         act(() => result.current.toggle('a'));
 
         expect(result.current.isShown('a')).toBe(true);
+    });
+
+    it('remove explains a 409 conflict, not the generic text', async () => {
+        const notify = vi.fn();
+
+        vi.mocked(useOptionalNotify).mockReturnValue(notify);
+        vi.mocked(deleteWorldLayer).mockRejectedValue(
+            new ApiError(
+                'x',
+                409,
+                '/api/x',
+                undefined,
+                'errors.worldLayerHasMarkers'
+            )
+        );
+
+        const { result } = renderHook(() => useWorldLayers('c1', 'map1'), {
+            wrapper,
+        });
+
+        await act(async () => {
+            await result.current.remove.mutateOk({ id: 'l1', mode: 'delete' });
+        });
+
+        expect(notify).toHaveBeenCalledWith(
+            expect.stringContaining('deleteLayerNested')
+        );
     });
 });

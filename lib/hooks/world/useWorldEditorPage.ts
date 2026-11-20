@@ -106,7 +106,9 @@ export function useWorldEditorPage({
 
     // a deleted layer or one of another map silently stops being active
     const activeLayerId =
-        wantedLayerId && layerIds.includes(wantedLayerId) ? wantedLayerId : null;
+        wantedLayerId && layerIds.includes(wantedLayerId)
+            ? wantedLayerId
+            : null;
 
     const imageEditId =
         wantedImageEditId && layerIds.includes(wantedImageEditId)
@@ -356,7 +358,7 @@ export function useWorldEditorPage({
             setEnemyId(id);
         },
         onEnemyDrag:
-            tool === 'move'
+            tool === 'select' || tool === 'move'
                 ? (id: string, p: MapPoint) =>
                       void enemyEditor.update.mutateOk({
                           id,

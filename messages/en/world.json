@@ -223,6 +223,7 @@
     "createLayer": "Could not create the layer",
     "saveLayer": "Could not save the layer",
     "deleteLayer": "Could not delete the layer",
+    "deleteLayerNested": "Some markers on this layer lead to nested maps. Move them to another layer or remove the nested maps first",
     "saveEnemy": "Could not save the enemy",
     "deleteEnemy": "Could not delete the enemy"
   },
