@@ -24,6 +24,12 @@ import { withDM } from '@/lib/utils/api/as-dm';
 import { parseBody } from '@/lib/utils/api/parse-body';
 import { polygonCentroid } from '@/lib/utils/world/geometry';
 
+const layerOnMap = async (layerId: string, mapId: string) =>
+    (await prisma.worldLayer.findFirst({
+        where: { id: layerId, mapId },
+        select: { id: true },
+    })) !== null;
+
 export function createWorldMarkerHandler(req: Request, campaignId: string) {
     return withDM(campaignId, 'create world marker', async () => {
         const body = await parseBody(createWorldMarkerSchema, req);
@@ -33,6 +39,9 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
         const map = await ownedMap(campaignId, body.mapId);
 
         if (map instanceof NextResponse) return map;
+
+        if (body.layerId && !(await layerOnMap(body.layerId, body.mapId)))
+            return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
 
         const zone = body.kind === 'zone' && body.polygon ? body.polygon : null;
 
@@ -61,6 +70,7 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
                     icon: body.icon ?? null,
                     description: body.description ?? null,
                     color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+                    layerId: body.layerId ?? null,
                     sortOrder: (_max.sortOrder ?? -1) + 1,
                 },
             });
@@ -86,9 +96,17 @@ export function updateWorldMarkerHandler(
 
         if (body instanceof NextResponse) return body;
 
-        const { x, y, polygon, ...rest } = body;
+        if (body.layerId && !(await layerOnMap(body.layerId, owned.mapId)))
+            return errorResponse(API_ERRORS.WORLD_LAYER_NOT_FOUND, 404);
+
+        const { x, y, polygon, layerId, ...rest } = body;
 
         const data: Prisma.WorldMarkerUpdateInput = { ...rest };
+
+        if (layerId !== undefined)
+            data.layer = layerId
+                ? { connect: { id: layerId } }
+                : { disconnect: true };
 
         if (owned.kind === 'zone') {
             if (polygon === null)

@@ -10,6 +10,7 @@ const m = vi.hoisted(() => {
         transaction: vi.fn(),
         aggregateOutside: vi.fn(),
         createOutside: vi.fn(),
+        findLayer: vi.fn(),
     };
 });
 
@@ -17,6 +18,7 @@ vi.mock('@/lib/db', () => ({
     prisma: {
         $transaction: m.transaction,
         worldMarker: { aggregate: m.aggregateOutside, create: m.createOutside },
+        worldLayer: { findFirst: m.findLayer },
     },
 }));
 vi.mock('@/lib/server/world/lock', () => ({ lockWorldMap: m.lockWorldMap }));
@@ -46,7 +48,7 @@ import { createWorldMarkerHandler } from '../marker-handlers';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { MAX_MARKERS_PER_MAP } from '@/lib/constants/world';
 
-const req = () =>
+const req = (extra: Record<string, unknown> = {}) =>
     new Request('http://localhost/x', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -56,6 +58,7 @@ const req = () =>
             x: 0.1,
             y: 0.2,
             name: 'A',
+            ...extra,
         }),
     });
 
@@ -96,6 +99,28 @@ describe('createWorldMarkerHandler', () => {
 
         expect(res.status).toBe(409);
         expect((await res.json()).error).toBe(API_ERRORS.WORLD_MARKERS_LIMIT);
+        expect(m.tx.worldMarker.create).not.toHaveBeenCalled();
+    });
+
+    it('stores layerId of a layer on the same map', async () => {
+        m.findLayer.mockResolvedValue({ id: 'l1' });
+
+        const res = await createWorldMarkerHandler(req({ layerId: 'l1' }), 'c1');
+
+        expect(res.status).toBe(201);
+        expect(m.findLayer).toHaveBeenCalledWith(
+            expect.objectContaining({ where: { id: 'l1', mapId: 'map1' } })
+        );
+        expect(m.tx.worldMarker.create.mock.calls[0][0].data.layerId).toBe('l1');
+    });
+
+    it('answers 404 for a layer of another map', async () => {
+        m.findLayer.mockResolvedValue(null);
+
+        const res = await createWorldMarkerHandler(req({ layerId: 'x' }), 'c1');
+
+        expect(res.status).toBe(404);
+        expect((await res.json()).error).toBe(API_ERRORS.WORLD_LAYER_NOT_FOUND);
         expect(m.tx.worldMarker.create).not.toHaveBeenCalled();
     });
 });

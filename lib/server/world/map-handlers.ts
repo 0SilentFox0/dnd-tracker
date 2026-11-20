@@ -10,6 +10,7 @@ import {
 } from '@/lib/schemas/world';
 import { clearShowWorld } from '@/lib/server/show/show-store';
 import { listEnemies } from '@/lib/server/world/enemy-store';
+import { listDmLayers } from '@/lib/server/world/layer-store';
 import {
     listWorldMaps,
     orphanedImagesOfSubtree,
@@ -177,10 +178,11 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
         if (detail instanceof NextResponse) return detail;
 
-        const [heroes, notes, enemies] = await Promise.all([
+        const [heroes, notes, enemies, layers] = await Promise.all([
             listHeroesOnMap(campaignId, mapId),
             listPublicMapNotes(mapId, access.userId),
             listEnemies(mapId),
+            listDmLayers(mapId),
         ]);
 
         return NextResponse.json({
@@ -189,6 +191,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
             heroes,
             notes,
             enemies,
+            layers,
         });
     });
 }
