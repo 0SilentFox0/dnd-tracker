@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPin, Music } from 'lucide-react';
 
-import { MarkerPickerDialog } from '../dialogs/MarkerPickerDialog';
 import { SectionTrackDialog } from '../dialogs/SectionTrackDialog';
 import { OrderButtons } from './OrderButtons';
 
@@ -20,6 +19,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { MarkerPickerDialog } from '@/components/world/MarkerPickerDialog';
 import { SECTION_ICON_KEYS } from '@/lib/constants/scenario';
 import { sectionIcon } from '@/lib/utils/scenario/section-icon';
 import type {
