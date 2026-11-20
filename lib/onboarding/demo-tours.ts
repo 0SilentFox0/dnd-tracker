@@ -104,13 +104,16 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
         step('world', 'crumbs', { route: '/world' }),
         step('world', 'map'),
         step('world', 'marker'),
-        step('world', 'notes', {
+        step('world', 'bubble', {
             clickFromTarget: 'world.marker',
+            placement: 'top',
+        }),
+        step('world', 'notes', {
+            clickFromTarget: 'world.more',
             placement: 'left',
         }),
-        step('world', 'open-map', { placement: 'left' }),
         step('world', 'zoom', { placement: 'top' }),
-        step('world', 'places', { placement: 'left' }),
+        step('world', 'places', { placement: 'right' }),
         step('world', 'journal', { placement: 'left' }),
     ]),
     tour('music', '/dm/music', [

@@ -249,7 +249,7 @@ describe('DemoTourCoordinator', () => {
             }
         ).steps;
 
-        const notes = steps.find((step) => step.id === 'world.notes')!;
+        const notes = steps.find((step) => step.id === 'world.bubble')!;
 
         const marker = document.createElement('button');
 
@@ -257,7 +257,7 @@ describe('DemoTourCoordinator', () => {
         marker.addEventListener('pointerup', () => {
             const panel = document.createElement('div');
 
-            panel.setAttribute('data-tour', 'world.notes');
+            panel.setAttribute('data-tour', 'world.bubble');
             document.body.append(panel);
         });
         document.body.append(marker);
@@ -265,10 +265,10 @@ describe('DemoTourCoordinator', () => {
         await notes.before?.();
 
         expect(
-            document.querySelector('[data-tour="world.notes"]')
+            document.querySelector('[data-tour="world.bubble"]')
         ).toBeTruthy();
         marker.remove();
-        document.querySelector('[data-tour="world.notes"]')?.remove();
+        document.querySelector('[data-tour="world.bubble"]')?.remove();
 
         const places = document.createElement('div');
 

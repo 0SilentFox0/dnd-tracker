@@ -45,3 +45,13 @@
 ## Нотатки
 
 Публічні («Спільні») бачать усі, хто знає маркер; приватні («Мої») — лише автор. ДМ у панелі маркера бачить тільки публічні (`GET /world/maps/[id]` віддає `notes` лише публічні) і видаляє їх з підтвердженням. Нотатка гравця до невидимого маркера → 403.
+
+## UX редактора й гравця (2026-11-20)
+
+- **Режими** (`WorldMode`, `MODE_TOOLS` у `useMapDrawing`): «Будувати» (select/point/zone/entry) і «Грати» (лише герої). Esc виходить на домашній інструмент режиму. Інструмент закріплюється Shift-кліком/подвійним кліком (`pinned`); без закріплення точка/вхід/зона після завершення повертають `select`.
+- **Дерево карт:** `MapTree` (спільний для DM і гравця) і `treeOrder`/`treeDepth` у `lib/utils/world/tree.ts`; гравець бачить лише відомі карти. Заміна старих `MapStrip`/`MarkerStrip`/`WorldInspectorBar`.
+- **Картка маркера:** `MarkerBubble` (DM: `DmMarkerBubble`, гравець: `PlayerMarkerBubble`) позиціонується `useMarkerBubblePosition` у screen-space слоті `card` у `WorldMapView`. Нотатки/деталі відкриваються лише через «Докладніше». Подвійний клік по маркеру з вкладеною картою відкриває її. Пошук місць — `PlaceSearchBar` (`pickPlace` фокусує маркер).
+- **Прилипання зон:** `snapPoint`/`sharedEdges` (`lib/utils/world/zone-snap.ts`, радіус `WORLD_SNAP_PX`, Alt вимикає); спільні ребра малюються одним суцільним `<path data-shared-edge>`; вершини редагуються `ZoneVertexHandles` (`changeVertices`).
+- **Перенесення карти:** `editor.map.move` → `updateWorldMapHandler` з `checkMove`: корінь не рухається (`worldRootImmovable`), цикл заборонено (`worldMoveCycle`), цільовий маркер має бути вільним, без вкладеної карти й на іншій карті.
+- **`description`:** `world_markers.description` (nullable, показується в картці й панелі нотаток); колір точки (`color`) тонує печатку.
+- **Demo-тур:** кроки `world.bubble` (клік по маркеру) → `world.notes` (клік «Докладніше», `world.more`); `world.places` = дерево карт.

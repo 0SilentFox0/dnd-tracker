@@ -1,4 +1,8 @@
 {
+  "2026-11-20-world-map-ux": {
+    "title": "World map: tree, bubbles and snapping",
+    "body": "The map editor has Build and Play modes, a tree of maps, a card bubble on each marker with a description, shared zone borders with snapping and vertex editing, and a map can be moved under another marker. Players get the same tree, a place search and the bubble."
+  },
   "2026-11-19-copy-maps": {
     "title": "Copy maps to other campaigns",
     "body": "Battle maps can now be copied to your other campaigns from the Maps page. The background image is copied too; maps with an existing name or over the target's limits are skipped."

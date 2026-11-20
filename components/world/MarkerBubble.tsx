@@ -31,6 +31,7 @@ export function MarkerBubble({ marker, actions, children }: MarkerBubbleProps) {
         <div
             role="group"
             aria-label={marker.name}
+            data-tour="world.bubble"
             className="w-64 max-w-full rounded-lg border border-hud-rule bg-black/90 p-3 text-sm text-hud-ink shadow-lg"
         >
             <div className="flex items-start gap-2">
@@ -61,6 +62,7 @@ export function MarkerBubble({ marker, actions, children }: MarkerBubbleProps) {
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
                 <HudButton
+                    data-tour="world.more"
                     className="text-xs text-hud-gold-bright underline"
                     onClick={actions.onMore}
                 >
