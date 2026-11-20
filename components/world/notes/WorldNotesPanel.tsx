@@ -49,6 +49,12 @@ export function WorldNotesPanel({
         >
             <h2 className="hud-sc text-base text-hud-ink">{marker.name}</h2>
 
+            {marker.description ? (
+                <p className="text-sm break-words whitespace-pre-line text-hud-muted">
+                    {marker.description}
+                </p>
+            ) : null}
+
             {isDM ? null : (
                 <HudChipTabs
                     ariaLabel={t('tabs')}

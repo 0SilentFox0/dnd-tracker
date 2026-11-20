@@ -186,8 +186,8 @@
     "myHeroes": "My heroes",
     "openMap": "Open map",
     "pickMarker": "Select a marker on the map to see and leave notes.",
-    "places": "Discovered places",
-    "loadFailed": "Could not load the world map"
+    "loadFailed": "Could not load the world map",
+    "journal": "Journal and heroes"
   },
   "show": {
     "present": "Show the map to players",
