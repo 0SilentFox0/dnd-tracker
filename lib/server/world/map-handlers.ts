@@ -77,7 +77,7 @@ export function clearShowAfterDelete(
 }
 
 export async function subtreeTargets(campaignId: string, rootMapId: string) {
-    const rows = await db.worldMap.findMany({
+    const rows = await prisma.worldMap.findMany({
         where: { campaignId },
         select: { id: true, parentMarker: { select: { mapId: true } } },
     });
