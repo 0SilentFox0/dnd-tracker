@@ -14,6 +14,7 @@ import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import { useMalignantToggle } from '@/systems/wfrp/hooks/useMalignantToggle';
 import { WFRP_CONDITIONS } from '@/systems/wfrp/rules/conditions';
+import { wfrpIcon } from '@/systems/wfrp/ui/icons';
 import type { BattleParticipant } from '@/types/battle';
 
 const FORM_ID = 'system-conditions-form';
@@ -26,6 +27,12 @@ const toInt = (v: string): number | undefined => {
 
 const inRange = (n: number | undefined, max: number) =>
     n !== undefined && n >= 1 && n <= max;
+
+function ConditionGlyph({ name }: { name: string }) {
+    const Icon = wfrpIcon('conditions', name);
+
+    return Icon ? <Icon size={18} /> : null;
+}
 
 export function SystemConditionsDialog({
     participant,
@@ -213,7 +220,12 @@ function DialogBody({
                             checked={selected === key}
                             onClick={() => setSelected(key)}
                             text={{
-                                title: tCondition(key, 'label'),
+                                title: (
+                                    <span className="flex items-center gap-1.5">
+                                        <ConditionGlyph name={key} />
+                                        {tCondition(key, 'label')}
+                                    </span>
+                                ),
                                 note: tCondition(key, 'description'),
                             }}
                         />

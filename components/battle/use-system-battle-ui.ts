@@ -1,6 +1,7 @@
 import {
     type SystemBattleUi,
     type SystemUi,
+    type SystemUiIcon,
     systemUiOf,
 } from '@/components/systems';
 import { useBattleSceneData } from '@/lib/hooks/battle';
@@ -22,4 +23,10 @@ export function useRerollTokenUi(): SystemUi['rerollToken'] {
     const { system } = useBattleSceneData().battle.rules;
 
     return systemUiOf(system.key, system.modules).rerollToken;
+}
+
+export function useSystemUiIcon(key: string): SystemUiIcon | undefined {
+    const { system } = useBattleSceneData().battle.rules;
+
+    return systemUiOf(system.key, system.modules).uiIcons?.[key];
 }

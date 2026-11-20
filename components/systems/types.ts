@@ -266,9 +266,13 @@ export interface SystemBattleUi {
     ConditionTestPanel?: ComponentType<ConditionTestPanelProps>;
 }
 
+export type SystemUiIcon = ComponentType<{ className?: string }>;
+
 export interface SystemUi {
     battle: SystemBattleUi;
     fx?: SystemFx;
+    /** Glyphs a module draws itself; an effect points at one with `icon: "ui:<key>"` */
+    uiIcons?: Record<string, SystemUiIcon>;
     SpellMagicFields?: ComponentType<SpellMagicFieldsProps>;
     HeroStats: ComponentType;
     StatsTab: ComponentType<StatsTabProps>;

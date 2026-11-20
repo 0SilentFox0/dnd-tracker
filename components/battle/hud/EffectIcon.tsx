@@ -3,10 +3,26 @@
 import Image from 'next/image';
 import { Sparkles } from 'lucide-react';
 
+import { useSystemUiIcon } from '@/components/battle/use-system-battle-ui';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { useParticipantFace } from '@/lib/hooks/battle';
 import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { ActiveEffect } from '@/types/battle';
+
+const UI_ICON_PREFIX = 'ui:';
+
+function SystemGlyph({ name, size }: { name: string; size: number }) {
+    const Glyph = useSystemUiIcon(name) ?? Sparkles;
+
+    return (
+        <span
+            className="flex shrink-0 items-center justify-center border border-current bg-black/40"
+            style={{ width: size, height: size }}
+        >
+            <Glyph className="size-[70%]" />
+        </span>
+    );
+}
 
 export function EffectIcon({
     effect,
@@ -41,6 +57,11 @@ export function EffectIcon({
     }
 
     const inner = Math.round(size * 0.7);
+
+    if (icon?.startsWith(UI_ICON_PREFIX))
+        return (
+            <SystemGlyph name={icon.slice(UI_ICON_PREFIX.length)} size={size} />
+        );
 
     return (
         <span

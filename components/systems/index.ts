@@ -21,5 +21,6 @@ export type {
     SystemBattleUi,
     SystemConditionsDialogProps,
     SystemUi,
+    SystemUiIcon,
     UnitStatsFieldsProps,
 } from './types';
