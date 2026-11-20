@@ -1,6 +1,6 @@
 import { useId, useMemo } from 'react';
 
-import { DEFAULT_ZONE_COLOR } from '@/lib/constants/world';
+import { DEFAULT_ZONE_COLOR, ZONE_FILL_DEFAULT } from '@/lib/constants/world';
 import { edgeKey, sharedEdges } from '@/lib/utils/world/zone-snap';
 import type { MapPoint, WorldMarker } from '@/types/world';
 
@@ -99,6 +99,8 @@ export function WorldZones({
 
                     const selected = m.id === selectedId;
 
+                    const base = m.fillOpacity ?? ZONE_FILL_DEFAULT;
+
                     return (
                         <polygon
                             key={m.id}
@@ -107,7 +109,7 @@ export function WorldZones({
                             className="atlas-zone-area"
                             points={asPoints(m.polygon)}
                             fill={m.color ?? DEFAULT_ZONE_COLOR}
-                            fillOpacity={selected ? 0.74 : 0.6}
+                            fillOpacity={selected ? Math.min(1, base + 0.14) : base}
                         />
                     );
                 })}

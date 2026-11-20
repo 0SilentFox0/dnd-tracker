@@ -154,6 +154,7 @@ export function WorldPins({
                             clashes,
                             overlaps,
                             hovered,
+                            labelMode: m.labelMode ?? 'auto',
                         })
                     )
                         return null;

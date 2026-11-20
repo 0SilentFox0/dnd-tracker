@@ -5,6 +5,7 @@ import {
     type ReactNode,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -24,7 +25,11 @@ import { ZoneVertexHandles } from './ZoneVertexHandles';
 
 import '../world-atlas.css';
 import { Button } from '@/components/ui/button';
-import { WORLD_MAX_ZOOM, WORLD_SNAP_PX } from '@/lib/constants/world';
+import {
+    NO_LAYER_KEY,
+    WORLD_MAX_ZOOM,
+    WORLD_SNAP_PX,
+} from '@/lib/constants/world';
 import {
     useElementSize,
     useReducedMotion,
@@ -35,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { toMediaUrl } from '@/lib/utils/common/image-url';
 import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
 import { hintPosition } from '@/lib/utils/world/hint-position';
+import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { snapPoint } from '@/lib/utils/world/zone-snap';
 import type {
     LayerRect,
@@ -265,21 +271,14 @@ export function WorldMapView({
 
     const layerHidden = layers?.hidden;
 
-    const visibleMarkers = layerHidden?.size
-        ? markers.filter((m) => !m.layerId || !layerHidden.has(m.layerId))
-        : markers;
-
-    const layerColors = new Map(
-        (layers?.items ?? []).flatMap((l) => (l.color ? [[l.id, l.color]] : []))
+    const styled = useMemo(
+        () => applyLayerStyle(markers, layers?.items ?? []),
+        [markers, layers?.items]
     );
 
-    const pinMarkers = visibleMarkers.map((m) => {
-        const tint = m.layerId ? layerColors.get(m.layerId) : undefined;
-
-        return m.kind === 'point' && !m.color && tint
-            ? { ...m, color: tint }
-            : m;
-    });
+    const visibleMarkers = layerHidden?.size
+        ? styled.filter((m) => !layerHidden.has(m.layerId ?? NO_LAYER_KEY))
+        : styled;
 
     const shownMarkers = preview
         ? visibleMarkers.map((m) =>
@@ -554,7 +553,7 @@ export function WorldMapView({
                                 }
                             >
                                 <WorldPins
-                                    markers={pinMarkers}
+                                    markers={visibleMarkers}
                                     zoom={zoom}
                                     screen={{
                                         box: {

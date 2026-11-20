@@ -64,12 +64,14 @@ describe('WorldPins compact mode', () => {
             container.querySelector('.atlas-pin')?.getAttribute('data-labels')
         ).toBe('true');
 
-        rerender(<WorldPins
+        rerender(
+            <WorldPins
                 markers={[point]}
                 zoom={3}
                 screen={{ box, compact: true }}
                 {...props}
-            />);
+            />
+        );
 
         expect(
             container.querySelector('.atlas-pin')?.getAttribute('data-labels')
@@ -85,14 +87,54 @@ describe('WorldPins compact mode', () => {
 
         expect(container.querySelectorAll('.atlas-zone-label')).toHaveLength(2);
 
-        rerender(<WorldPins
+        rerender(
+            <WorldPins
                 markers={markers}
                 zoom={1}
                 screen={{ box, compact: true }}
                 {...props}
-            />);
+            />
+        );
 
         expect(container.querySelectorAll('.atlas-zone-label')).toHaveLength(1);
+    });
+});
+
+describe('WorldPins zone label mode', () => {
+    const count = (el: HTMLElement) =>
+        el.querySelectorAll('.atlas-zone-label').length;
+
+    it('hidden hides the label even when hovered', () => {
+        const { container } = render(
+            <WorldPins
+                markers={[{ ...zone('A', 0.3), labelMode: 'hidden' }]}
+                zoom={1}
+                labels={{ hoveredId: 'A', fogless: true }}
+                {...props}
+            />
+        );
+
+        expect(count(container)).toBe(0);
+    });
+
+    it('always shows the label despite a clash with a pin', () => {
+        const clashing = { ...point, x: 0.3, y: 0.5 };
+
+        const z = { ...zone('A', 0.3), labelMode: 'always' as const };
+
+        const { container, rerender } = render(
+            <WorldPins
+                markers={[{ ...z, labelMode: null }, clashing]}
+                zoom={1}
+                {...props}
+            />
+        );
+
+        expect(count(container)).toBe(0);
+
+        rerender(<WorldPins markers={[z, clashing]} zoom={1} {...props} />);
+
+        expect(count(container)).toBe(1);
     });
 });
 
@@ -265,7 +307,9 @@ describe('WorldPins clusters', () => {
             { zoom: 2 }
         );
 
-        expect(screen.getByLabelText('world.pinCluster {"name":"Keep","count":2}')).not.toBeNull();
+        expect(
+            screen.getByLabelText('world.pinCluster {"name":"Keep","count":2}')
+        ).not.toBeNull();
     });
 
     it('keeps the selected pin out of a cluster', () => {
