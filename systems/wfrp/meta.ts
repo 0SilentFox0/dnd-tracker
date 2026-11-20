@@ -26,7 +26,7 @@ export const WFRP_META = {
         },
         budgetKb: {
             battle: 113,
-            member: 114,
+            member: 114.5,
             dm: 118.5,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },

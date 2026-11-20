@@ -92,7 +92,13 @@ export function useHeroDrag({ toPoint, groupFor, onDrop, positions }: Options) {
             if (g.cancelled) return;
 
             if (!g.active) {
-                if (!exceedsDragThreshold(g.start, e)) return;
+                if (
+                    !exceedsDragThreshold(g.start, {
+                        x: e.clientX,
+                        y: e.clientY,
+                    })
+                )
+                    return;
 
                 g.active = true;
             }

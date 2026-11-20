@@ -90,7 +90,13 @@ export function WorldEnemies({
 
                             e.stopPropagation();
 
-                            if (!g.active && !exceedsDragThreshold(g.start, e))
+                            if (
+                                !g.active &&
+                                !exceedsDragThreshold(g.start, {
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                })
+                            )
                                 return;
 
                             g.active = true;

@@ -10,6 +10,7 @@ import { useCrudMutation } from '@/lib/hooks/common';
 import type {
     CreateEnemyData,
     UpdateEnemyData,
+    WorldEnemyPin,
     WorldMapDetail,
 } from '@/types/world';
 
@@ -29,7 +30,12 @@ export function useWorldEnemies(campaignId: string, mapId: string) {
         errorText: t('saveEnemy'),
     });
 
-    const update = useCrudMutation({
+    const update = useCrudMutation<
+        WorldEnemyPin,
+        { id: string; data: UpdateEnemyData },
+        Error,
+        WorldMapDetail | undefined
+    >({
         mutationFn: ({ id, data }: { id: string; data: UpdateEnemyData }) =>
             updateEnemy(campaignId, mapId, id, data),
         onMutate: async ({ id, data }) => {
@@ -50,11 +56,7 @@ export function useWorldEnemies(campaignId: string, mapId: string) {
 
             return prev;
         },
-        onError: (
-            _e: unknown,
-            _v: unknown,
-            prev: WorldMapDetail | undefined
-        ) => {
+        onError: (_e, _v, prev) => {
             if (prev) queryClient.setQueryData(mapKey, prev);
         },
         invalidateKeys,

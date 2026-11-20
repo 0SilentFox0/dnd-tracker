@@ -130,8 +130,8 @@ describe('trailHandler', () => {
             { id: 'h1', name: 'Aria', avatar: null, controlledBy: 'u2' },
         ]);
         m.logs.mockResolvedValue([
-            log({ id: 'solo', characterIds: ['h1'], sessionId: 's1' }),
             log({ id: 'mixed', characterIds: ['h1', 'h2'], sessionId: 's1' }),
+            log({ id: 'solo', characterIds: ['h1'], sessionId: 's1' }),
         ]);
 
         const { entries } = await (await call()).json();

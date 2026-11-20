@@ -15,6 +15,7 @@ const detail = {
     map: { id: 'm2', name: 'Печера', entryX: 0.5, entryY: 0.5 },
     markers: [{ id: 'k1', name: 'Місто' }],
     heroes: [],
+    enemies: [],
 };
 
 vi.mock('@/lib/hooks/world/useWorldMaps', () => ({
@@ -41,6 +42,30 @@ vi.mock('@/lib/hooks/world/useWorldHeroes', () => ({
 }));
 vi.mock('@/lib/hooks/world/useHeroEyes', () => ({
     useHeroEyes: () => ({ asHeroId: null, setAsHeroId: vi.fn(), view: {} }),
+}));
+vi.mock('@/lib/hooks/world/useWorldEnemies', () => ({
+    useWorldEnemies: () => ({ create: {}, update: {}, remove: {} }),
+}));
+vi.mock('@/lib/hooks/world/useWorldTrail', () => ({
+    useWorldTrail: () => ({ data: undefined }),
+}));
+vi.mock('@/lib/hooks/world/useWorldSessions', () => ({
+    useWorldSessions: () => ({ active: undefined }),
+}));
+vi.mock('@/lib/hooks/world/useWorldTravel', () => ({
+    useWorldTravel: () => ({ travel: { mutateOk: vi.fn() } }),
+}));
+vi.mock('@/components/world/nav/TrailLegend', () => ({
+    TrailLegend: () => null,
+}));
+vi.mock('@/components/world/nav/TrailBubble', () => ({
+    TrailBubble: () => null,
+}));
+vi.mock('@/components/world/travel/SessionsPanel', () => ({
+    SessionsPanel: () => null,
+}));
+vi.mock('@/components/world/editor/EnemyCard', () => ({
+    EnemyCard: () => null,
 }));
 vi.mock('@/lib/hooks/world/useRemoveMarker', () => ({
     useRemoveMarker: () => undefined,

@@ -41,6 +41,8 @@ vi.mock('@/lib/db', () => ({
             findMany: vi.fn(),
         },
         worldNote: { findMany: vi.fn() },
+        worldEnemyPin: { findMany: vi.fn() },
+        worldSession: { findFirst: vi.fn() },
         campaignShow: { findUnique: vi.fn() },
     },
 }));
