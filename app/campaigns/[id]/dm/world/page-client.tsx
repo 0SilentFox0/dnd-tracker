@@ -26,6 +26,7 @@ import { CompassRose } from '@/components/world/marker-icons';
 import { MapTree } from '@/components/world/nav/MapTree';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
+import { SessionsPanel } from '@/components/world/travel/SessionsPanel';
 import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
 import { useMediaQuery } from '@/lib/hooks/common';
@@ -34,6 +35,7 @@ import {
     type TravelMoved,
     useTrailView,
     useWorldEditorPage,
+    useWorldSessions,
     useWorldTrail,
 } from '@/lib/hooks/world';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
@@ -82,6 +84,8 @@ export function WorldEditorPageClient({
         useWorldTrail(campaignId, mapId).data,
         detail.data ? detail.data.map.width / detail.data.map.height : 1
     );
+
+    const sessions = useWorldSessions(campaignId);
 
     const trailBubble = trail.selected ? (
         <TrailBubble
@@ -427,7 +431,7 @@ export function WorldEditorPageClient({
                                                     ) : null}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
-                                                        <div className="lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <div className="flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
                                                             <TravelPanel
                                                                 campaignId={
                                                                     campaignId
@@ -448,6 +452,9 @@ export function WorldEditorPageClient({
                                                                 selectedMarker={
                                                                     moveTarget.marker
                                                                 }
+                                                                hasActiveSession={
+                                                                    !!sessions.active
+                                                                }
                                                                 actions={{
                                                                     onPickTarget:
                                                                         () =>
@@ -466,6 +473,11 @@ export function WorldEditorPageClient({
                                                                             }
                                                                         ),
                                                                 }}
+                                                            />
+                                                            <SessionsPanel
+                                                                campaignId={
+                                                                    campaignId
+                                                                }
                                                             />
                                                         </div>
                                                     ) : null}

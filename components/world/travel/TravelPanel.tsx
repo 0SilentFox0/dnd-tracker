@@ -23,6 +23,7 @@ export interface TravelPanelProps {
     onMapIds: string[];
     target: MapPoint | null;
     selectedMarker: WorldMarker | null;
+    hasActiveSession?: boolean;
     actions: { onPickTarget(): void; onMoved?(e: TravelMoved): void };
 }
 
@@ -33,11 +34,14 @@ export function TravelPanel({
     onMapIds,
     target,
     selectedMarker,
+    hasActiveSession,
     actions,
 }: TravelPanelProps) {
     const { onPickTarget, onMoved } = actions;
 
     const t = useTranslations('world.travel');
+
+    const tSessions = useTranslations('world.sessions');
 
     const panel = useTravelPanel({
         campaignId,
@@ -141,6 +145,12 @@ export function TravelPanel({
                     </Button>
                 ) : null}
             </div>
+
+            {hasActiveSession === false ? (
+                <p className="text-xs text-hud-gold-bright">
+                    {tSessions('hint')}
+                </p>
+            ) : null}
 
             {panel.restOff ? (
                 <p className="text-xs text-hud-muted">{t('restOff')}</p>
