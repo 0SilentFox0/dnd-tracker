@@ -28,7 +28,9 @@ export function TrailBubble({
     const name = session?.name ?? t('trail.noSession');
 
     const description =
-        session && 'description' in session && typeof session.description === 'string'
+        session &&
+        'description' in session &&
+        typeof session.description === 'string'
             ? session.description
             : null;
 

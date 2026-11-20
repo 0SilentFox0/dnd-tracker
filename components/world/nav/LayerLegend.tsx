@@ -26,7 +26,9 @@ export function LayerLegend({ layers, hidden, onToggle }: LayerLegendProps) {
                 <span
                     aria-hidden
                     className="size-2.5 rounded-full"
-                    style={{ background: layer.color ?? WORLD_NO_SESSION_COLOR }}
+                    style={{
+                        background: layer.color ?? WORLD_NO_SESSION_COLOR,
+                    }}
                 />
                 {layer.name}
             </span>
@@ -34,7 +36,7 @@ export function LayerLegend({ layers, hidden, onToggle }: LayerLegendProps) {
     }));
 
     return (
-        <div className="hud-surface max-w-full rounded-md border border-hud-rule px-2 py-1">
+        <div className="hud-surface max-w-full rounded-md border border-hud-rule bg-hud-surface/90 px-2 py-1 backdrop-blur-sm">
             <HudChipTabs ariaLabel={t('legend')} items={items} />
         </div>
     );

@@ -421,6 +421,7 @@ export function WorldMapView({
                                 selectedId={selectedId}
                                 draft={draft}
                                 cursor={tool === 'zone' ? cursor : null}
+                                showEdges={tool === 'zone'}
                                 interactive={
                                     tool === 'select' || tool === 'move'
                                 }

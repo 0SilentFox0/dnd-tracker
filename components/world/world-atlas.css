@@ -89,7 +89,7 @@
 
 .atlas-zone-area { transition: fill-opacity 0.15s ease-out; }
 .atlas-zone-area[data-interactive="true"] { pointer-events: visiblePainted; cursor: pointer; }
-.atlas-zone-area[data-interactive="true"]:hover { fill-opacity: 0.36; }
+.atlas-zone-area[data-interactive="true"]:hover { fill-opacity: 0.7; }
 
 .atlas-draft-dot {
   position: absolute;
