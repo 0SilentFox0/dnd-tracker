@@ -13,15 +13,45 @@ export type CreationRolls = {
     randomTalents: string[];
 };
 
-export function rollCreation(rng: Rng, profile: SpeciesProfile): CreationRolls {
+/** Legacy: the first career roll plus one more; canon5e (p36): the first plus two more, three distinct options */
+export const CAREER_ROLLS = { legacy: 2, canon5e: 3 } as const;
+
+const CAREER_REROLL_ATTEMPTS = 20;
+
+function rollCareers(
+    rng: Rng,
+    table: SpeciesProfile['careerTable'],
+    count: number
+) {
+    const rolls: CreationRolls['careerRolls'] = [];
+
+    for (let i = 0; i < count; i++) {
+        let { row, roll } = rollTable(table, rng);
+
+        for (
+            let attempt = 0;
+            count > CAREER_ROLLS.legacy &&
+            attempt < CAREER_REROLL_ATTEMPTS &&
+            rolls.some((r) => r.careerId === row.careerId);
+            attempt++
+        )
+            ({ row, roll } = rollTable(table, rng));
+
+        rolls.push({ careerId: row.careerId, roll });
+    }
+
+    return rolls;
+}
+
+export function rollCreation(
+    rng: Rng,
+    profile: SpeciesProfile,
+    careerRollCount: number = CAREER_ROLLS.legacy
+): CreationRolls {
     const { careerTable, randomTalents, randomTalentCount } = profile;
 
     const careerRolls = careerTable.length
-        ? Array.from({ length: 2 }, () => {
-              const { row, roll } = rollTable(careerTable, rng);
-
-              return { careerId: row.careerId, roll };
-          })
+        ? rollCareers(rng, careerTable, careerRollCount)
         : [];
 
     const statRolls = CHARACTERISTIC_KEYS.map(

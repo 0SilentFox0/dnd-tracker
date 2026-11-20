@@ -17,6 +17,7 @@ export interface WfrpDraftRollsOptions {
     reveal: Reveal;
     profile?: SpeciesProfile;
     enabled: boolean;
+    careerRollCount?: number;
     names: { career(id: string): string; feat(id: string): string };
     career: {
         mode: CareerMode;
@@ -37,6 +38,7 @@ export function useWfrpDraftRolls({
     reveal,
     profile,
     enabled,
+    careerRollCount,
     names,
     career,
     stats,
@@ -59,8 +61,8 @@ export function useWfrpDraftRolls({
     const careerMode = career.mode;
 
     const rollAll = useCallback(
-        () => (profile && enabled ? rollCreation(rng, profile) : undefined),
-        [enabled, profile, rng]
+        () => (profile && enabled ? rollCreation(rng, profile, careerRollCount) : undefined),
+        [enabled, profile, rng, careerRollCount]
     );
 
     const rollCareer = useCallback(() => {

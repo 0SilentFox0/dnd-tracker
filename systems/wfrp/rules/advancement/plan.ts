@@ -7,6 +7,7 @@ import {
     SKILL_ADVANCE_KEY_RE,
 } from '../characteristics/keys';
 import type { DowntimeState } from '../downtime/types';
+import { isAdvancedSkill } from './canon';
 import { type CareerCtx, careerPrice, tickKey } from './career';
 import { advanceCost, advanceTarget, talentCost } from './cost';
 import type { AdvancementRules } from './rules';
@@ -22,7 +23,8 @@ export type PurchaseError =
     | 'MAX_RANK'
     | 'UNKNOWN_KEY'
     | 'UNKNOWN_TALENT'
-    | 'TALENT_NO_COST';
+    | 'TALENT_NO_COST'
+    | 'ADVANCE_OUT_OF_CAREER';
 
 export type PurchaseTalent = {
     id: string;
@@ -39,6 +41,8 @@ export type PurchaseInput = {
     step?: number;
     /** Flat talent price (`xpTables: canon5e`) */
     flatTalent?: boolean;
+    /** `xpTables: canon5e`: out-of-career talents and advanced skills cannot be bought (p44, p197) */
+    careerOnly?: boolean;
     talent?: PurchaseTalent;
     career?: CareerCtx;
     now: string;
@@ -173,6 +177,14 @@ export function planPurchase(input: PurchaseInput): PurchaseResult {
         request.key,
         priced.cost
     );
+
+    if (
+        input.careerOnly &&
+        outOfCareer !== null &&
+        (request.kind === 'talent' ||
+            (request.kind === 'skill' && isAdvancedSkill(request.key)))
+    )
+        return { ok: false, error: 'ADVANCE_OUT_OF_CAREER' };
 
     const key = tickKey(request.kind, request.key);
 

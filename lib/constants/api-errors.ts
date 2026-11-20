@@ -282,6 +282,7 @@ export const API_ERRORS = {
     ADVANCE_INSUFFICIENT_XP: 'errors.advanceInsufficientXp',
     ADVANCE_AT_LIMIT: 'errors.advanceAtLimit',
     ADVANCE_MAX_RANK: 'errors.advanceMaxRank',
+    ADVANCE_OUT_OF_CAREER: 'errors.advanceOutOfCareer',
     ADVANCE_UNKNOWN: 'errors.advanceUnknown',
     ADVANCE_LEDGER_EMPTY: 'errors.advanceLedgerEmpty',
     ADVANCE_LEDGER_STALE: 'errors.advanceLedgerStale',

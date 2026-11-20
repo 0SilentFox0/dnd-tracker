@@ -31,6 +31,7 @@ import {
 import {
     CANON_FREE_POINT_MAX,
     type CanonCtx,
+    CAREER_ROLLS,
     DISTRIBUTION_CAP,
 } from '@/systems/wfrp/rules/creation';
 import { editionOf } from '@/systems/wfrp/rules/edition';
@@ -185,6 +186,7 @@ export function useWfrpDraftForm({
         reveal,
         profile,
         enabled: !!creation,
+        careerRollCount: CAREER_ROLLS[edition.creationMode],
         names: { career: careerName, feat: featName },
         career: {
             mode: draft.career.mode,
