@@ -10,6 +10,7 @@ import { multiplierRow, stepRow } from '@/lib/utils/battle/damage/rows';
 import { signed } from '@/lib/utils/common/format';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SpellPowerSource } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { DamageRow } from '@/types/battle-actions';
 
@@ -42,8 +43,21 @@ export function computeSpellPower(input: {
     extra?: StaticEffect[];
     addAbilityMod?: boolean;
     damageBonus?: number;
+    spell?: SpellPowerSource;
+    overcastDamage?: number;
 }): SpellPower {
     const { caster, rolls } = input;
+
+    const flat =
+        input.spell &&
+        ruleSystemOf(input.rules).magic.spellPower?.({
+            caster,
+            spell: input.spell,
+            overcastDamage: input.overcastDamage ?? 0,
+            rules: input.rules,
+        });
+
+    if (flat) return flat;
 
     if (rolls.length === 0) return { heal: 0, damage: 0, breakdown: [] };
 

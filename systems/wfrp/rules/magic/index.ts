@@ -13,6 +13,7 @@ import {
 import { channelTargetOf, wfrpChannel } from './channel';
 import { wfrpCastReaction } from './dispel-reaction';
 import { wfrpMiscast } from './miscast';
+import { wfrpSoakSpellDamage, wfrpSpellPower } from './spell-damage';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { noMagic } from '@/lib/utils/battle/spell/none';
@@ -90,4 +91,6 @@ export const WFRP_MAGIC: RuleSystemMagic = {
     ...noMagic,
     upcast: { steps: upcastSteps },
     tested: WFRP_TESTED_MAGIC,
+    spellPower: wfrpSpellPower,
+    soakSpellDamage: wfrpSoakSpellDamage,
 };

@@ -329,12 +329,15 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             extra: actionModifiers[casterId],
             addAbilityMod: def.addAbilityMod,
             damageBonus: (def.damageBonus ?? 0) + overcastDamage || undefined,
+            spell: source,
+            overcastDamage,
         }),
         saveDc:
             params.grant?.dc ??
             spellSaveDc(params.rules, readyCaster, params.grant?.dcAbility),
         attackBonus: params.grant?.attackBonus,
         overcastDamage,
+        castDetails: test?.details,
         battleId,
         actionModifiers,
         rng,

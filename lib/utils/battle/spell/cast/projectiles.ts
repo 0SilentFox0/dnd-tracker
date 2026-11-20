@@ -54,6 +54,8 @@ export function runProjectiles(
             damageBonus:
                 (spell.definition.damageBonus ?? 0) + state.overcastDamage ||
                 undefined,
+            spell,
+            overcastDamage: state.overcastDamage,
         });
         state.attackRolls =
             shots.indexOf(id) === index ? saved.attackRolls : [];

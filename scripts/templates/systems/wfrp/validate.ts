@@ -7,6 +7,7 @@ import {
     wfrpDataOf,
 } from './common';
 import { equipmentIssues } from './equipment';
+import { unlistedPowerIssues } from './spell-damage';
 import { FORBIDDEN_CONDITIONS, spellIssues, unitSpellIssues } from './spells';
 import { unitIssues } from './units';
 
@@ -161,7 +162,9 @@ function validateCareerTiers(data: WfrpData, issues: string[]) {
                     issues.push(
                         `${where}: ${careerTierKey(n, 'earningSkill')} "${earning}" ${issue}`
                     );
-                else if (!(Array.isArray(skills) ? skills : []).includes(earning))
+                else if (
+                    !(Array.isArray(skills) ? skills : []).includes(earning)
+                )
                     issues.push(
                         `${where}: ${careerTierKey(n, 'earningSkill')} "${earning}" is not one of the tier skills`
                     );
@@ -230,12 +233,16 @@ function validateFeatAbilities(data: WfrpData, issues: string[]) {
 }
 
 export const GRIM_TABLE_SLOTS = [
+    'critHead',
+    'critArm',
+    'critBody',
+    'critLeg',
     'miscastMinor',
     'miscastMajor',
     'wrath',
 ] as const;
 
-export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 10];
+export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 20];
 
 export const TABLE_TEXT_MAX = 120;
 
@@ -296,7 +303,19 @@ function validateRules(rules: WfrpData['rules'], issues: string[]) {
 
 function validateSpells(data: WfrpData, issues: string[]) {
     data.spells.forEach((row, index) => {
-        for (const issue of spellIssues(row))
+        const effects = Array.isArray(row.spellEffects) ? row.spellEffects : [];
+
+        const first = effects[0];
+
+        const kind =
+            typeof first === 'object' && first !== null && 'kind' in first
+                ? String(first.kind)
+                : null;
+
+        for (const issue of [
+            ...spellIssues(row),
+            ...unlistedPowerIssues(row, kind),
+        ])
             issues.push(`${label('spells', index, row.name)}: ${issue}`);
     });
 }

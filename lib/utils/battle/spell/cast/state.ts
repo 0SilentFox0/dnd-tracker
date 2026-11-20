@@ -10,6 +10,7 @@ import { logFields } from '@/lib/utils/battle/log/lines';
 import type { SpellPower } from '@/lib/utils/battle/spell/power';
 import type { TransformRequest } from '@/lib/utils/battle/transform/types';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type {
     AnchoredZoneEffect,
     BurstEffect,
@@ -56,6 +57,7 @@ export interface SpellCastState {
     saveDc: number | undefined;
     attackBonus?: number;
     overcastDamage: number;
+    castDetails?: SystemSlot;
     battleId: string;
     actionModifiers: Record<string, StaticEffect[]>;
     rng: () => number;

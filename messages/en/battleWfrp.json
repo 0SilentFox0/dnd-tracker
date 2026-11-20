@@ -264,7 +264,11 @@
       "size": "Size",
       "minimum": "Minimum damage",
       "frenzy": "Frenzy",
-      "crit": "Critical wound"
+      "crit": "Critical wound",
+      "spell": "Spell damage",
+      "wpb": "Willpower bonus",
+      "spellScale": "Spell bonus",
+      "overcast": "Overcast"
     },
     "total": "Total damage"
   },
