@@ -19,11 +19,15 @@ export class WorldLayerError extends Error {
 const toVisibility = (v: string): LayerVisibility =>
     v === 'all' || v === 'heroes' ? v : 'dm';
 
+const ORDER = [{ sortOrder: 'asc' }, { createdAt: 'asc' }] as const;
+
+const WITH_HEROES = { heroes: { select: { characterId: true } } } as const;
+
 export async function listLayerInputs(mapId: string): Promise<LayerInput[]> {
     const rows = await prisma.worldLayer.findMany({
         where: { mapId },
-        include: { heroes: { select: { characterId: true } } },
-        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        include: WITH_HEROES,
+        orderBy: [...ORDER],
     });
 
     return rows.map((r) => ({
@@ -37,8 +41,6 @@ export async function listLayerInputs(mapId: string): Promise<LayerInput[]> {
         opacity: r.opacity,
     }));
 }
-
-const ORDER = [{ sortOrder: 'asc' }, { createdAt: 'asc' }] as const;
 
 export const toWorldLayer = (
     row: LayerRow & { heroes: { characterId: string }[] }
@@ -58,7 +60,7 @@ export const toWorldLayer = (
 export async function listDmLayers(mapId: string): Promise<WorldLayer[]> {
     const rows = await prisma.worldLayer.findMany({
         where: { mapId },
-        include: { heroes: { select: { characterId: true } } },
+        include: WITH_HEROES,
         orderBy: [...ORDER],
     });
 
@@ -86,7 +88,7 @@ export async function createLayer(
             visibility: 'dm',
             sortOrder: (_max.sortOrder ?? -1) + 1,
         },
-        include: { heroes: { select: { characterId: true } } },
+        include: WITH_HEROES,
     });
 
     return toWorldLayer(row);
