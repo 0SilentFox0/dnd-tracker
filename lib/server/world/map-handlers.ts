@@ -184,6 +184,40 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
     });
 }
 
+async function checkMove(
+    campaignId: string,
+    owned: { id: string; parentMarkerId: string | null },
+    parentMarkerId: string
+) {
+    if (owned.parentMarkerId === null)
+        return errorResponse(API_ERRORS.WORLD_ROOT_IMMOVABLE, 409);
+
+    const marker = await ownedMarker(campaignId, parentMarkerId);
+
+    if (marker instanceof NextResponse) return marker;
+
+    if (marker.childMap && marker.childMap.id !== owned.id)
+        return errorResponse(API_ERRORS.WORLD_NESTED_EXISTS, 409);
+
+    const rows = await prisma.worldMap.findMany({
+        where: { campaignId },
+        select: { id: true, parentMarker: { select: { mapId: true } } },
+    });
+
+    const subtree = subtreeMapIds(
+        rows.map((r) => ({
+            id: r.id,
+            parentMapId: r.parentMarker?.mapId ?? null,
+        })),
+        owned.id
+    );
+
+    if (subtree.includes(marker.mapId))
+        return errorResponse(API_ERRORS.WORLD_MOVE_CYCLE, 409);
+
+    return null;
+}
+
 export function updateWorldMapHandler(
     req: Request,
     campaignId: string,
@@ -206,11 +240,33 @@ export function updateWorldMapHandler(
         if (newImage !== undefined && !ownedWorldMapPath(campaignId, newImage))
             return errorResponse(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
 
-        const updated = await prisma.worldMap.update({
-            where: { id: mapId },
-            data: body,
-            include: { parentMarker: { select: { mapId: true } } },
-        });
+        if (body.parentMarkerId !== undefined) {
+            const blocked = await checkMove(
+                campaignId,
+                owned,
+                body.parentMarkerId
+            );
+
+            if (blocked) return blocked;
+        }
+
+        let updated;
+
+        try {
+            updated = await prisma.worldMap.update({
+                where: { id: mapId },
+                data: body,
+                include: { parentMarker: { select: { mapId: true } } },
+            });
+        } catch (e) {
+            if (
+                e instanceof Prisma.PrismaClientKnownRequestError &&
+                e.code === 'P2002'
+            )
+                return errorResponse(API_ERRORS.WORLD_NESTED_EXISTS, 409);
+
+            throw e;
+        }
 
         if (replacesImage) {
             const stillUsed = await prisma.worldMap.count({

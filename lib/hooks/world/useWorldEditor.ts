@@ -92,6 +92,24 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
         })
     );
 
+    const moveMap = useStable(
+        useCrudMutation({
+            mutationFn: ({
+                id,
+                parentMarkerId,
+            }: {
+                id: string;
+                parentMarkerId: string;
+            }) => updateWorldMap(campaignId, id, { parentMarkerId }),
+            invalidateKeys: (_d, { id }) => [
+                worldKeys.maps(campaignId),
+                worldKeys.map(campaignId, id),
+                ...(mapId && mapId !== id ? [mapKey] : []),
+            ],
+            errorText: t('saveMap'),
+        })
+    );
+
     const removeMap = useStable(
         useCrudMutation({
             mutationFn: (id: string) => deleteWorldMap(campaignId, id),
@@ -160,7 +178,12 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
 
     return useMemo(
         () => ({
-            map: { create: createMap, update: updateMap, remove: removeMap },
+            map: {
+                create: createMap,
+                update: updateMap,
+                move: moveMap,
+                remove: removeMap,
+            },
             marker: {
                 create: createMarker,
                 update: updateMarker,
@@ -169,6 +192,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
             isPending: [
                 createMap,
                 updateMap,
+                moveMap,
                 removeMap,
                 createMarker,
                 updateMarker,
@@ -178,6 +202,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
         [
             createMap,
             updateMap,
+            moveMap,
             removeMap,
             createMarker,
             updateMarker,

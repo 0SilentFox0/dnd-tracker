@@ -266,6 +266,8 @@
   "worldMarkerNotFound": "Маркер не знайдено",
   "worldRootExists": "Коренева карта вже є",
   "worldNestedExists": "У маркера вже є вкладена карта",
+  "worldMoveCycle": "Карту не можна перемістити у її власну гілку",
+  "worldRootImmovable": "Кореневу карту не можна перемістити",
   "worldMapsLimit": "Забагато карт",
   "worldMarkersLimit": "Забагато маркерів на карті",
   "worldImageForeign": "Картинка карти має бути завантажена у сховище цієї кампанії",

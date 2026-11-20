@@ -24,6 +24,7 @@ const zone = (id: string, x: number): WorldMarker => ({
     icon: null,
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,

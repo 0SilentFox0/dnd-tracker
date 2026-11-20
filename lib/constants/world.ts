@@ -16,6 +16,7 @@ export const WORLD_MAP_FORMATS = {
 export const WORLD_NAME_MAX = 80;
 export const WORLD_DM_NOTE_MAX = 4000;
 export const WORLD_NOTE_MAX = 2000;
+export const WORLD_MARKER_DESCRIPTION_MAX = 600;
 export const MAX_TRAVEL_HEROES = 20;
 export const TRAVEL_LOG_LIMIT = 50;
 export const MAX_WORLD_MAPS = 200;

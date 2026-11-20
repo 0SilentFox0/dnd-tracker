@@ -306,6 +306,8 @@ export const API_ERRORS = {
     WORLD_MARKER_NOT_FOUND: 'errors.worldMarkerNotFound',
     WORLD_ROOT_EXISTS: 'errors.worldRootExists',
     WORLD_NESTED_EXISTS: 'errors.worldNestedExists',
+    WORLD_MOVE_CYCLE: 'errors.worldMoveCycle',
+    WORLD_ROOT_IMMOVABLE: 'errors.worldRootImmovable',
     WORLD_MAPS_LIMIT: 'errors.worldMapsLimit',
     WORLD_MARKERS_LIMIT: 'errors.worldMarkersLimit',
     WORLD_IMAGE_FOREIGN: 'errors.worldImageForeign',

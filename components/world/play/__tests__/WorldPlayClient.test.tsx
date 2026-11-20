@@ -42,6 +42,7 @@ const marker = {
     icon: null,
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: true,
     sortOrder: 0,
     childMapId: 'm2',

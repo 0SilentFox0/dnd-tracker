@@ -40,6 +40,7 @@ const marker = (over: Partial<WorldMarker> = {}): WorldMarker => ({
     icon: null,
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,

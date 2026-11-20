@@ -197,6 +197,7 @@ describe('ShowWorldStage', () => {
                 {
                     ...marker('seen'),
                     dmNote: 'DM-SECRET-NOTE',
+                    description: null,
                     alwaysVisible: false,
                 },
                 {
@@ -239,11 +240,13 @@ describe('ShowWorldStage', () => {
                     ...marker('a'),
                     name: 'HIDDEN-NAME',
                     dmNote: 'DM-SECRET-NOTE',
+                    description: null,
                     alwaysVisible: false,
                 },
                 {
                     ...marker('b'),
                     dmNote: 'DM-SECRET-NOTE',
+                    description: null,
                     alwaysVisible: true,
                 },
             ],
