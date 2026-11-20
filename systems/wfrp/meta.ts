@@ -26,9 +26,9 @@ export const WFRP_META = {
         },
         budgetKb: {
             battle: 114,
-            member: 116,
-            // W8 gear texts (qualities, groups) grew the wfrp scopes past their old budgets
-            dm: 121,
+            member: 117,
+            // W8 gear texts plus world layers/errors messages grew the wfrp scopes past their old budgets
+            dm: 122,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },
