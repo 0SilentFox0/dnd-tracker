@@ -52,6 +52,21 @@ describe('WorldZones', () => {
         expect(polys[1].getAttribute('stroke')).toBeNull();
     });
 
+    it('strokes own edges darker than the zone colour and shared edges with ink', () => {
+        const { container } = render(<WorldZones markers={[a, b]} />);
+
+        expect(
+            container
+                .querySelector('[data-shared-edge]')
+                ?.getAttribute('stroke')
+        ).toBe('var(--atlas-ink)');
+        expect(
+            container
+                .querySelector('[data-edge]:not([data-shared-edge])')
+                ?.getAttribute('stroke')
+        ).toBe('color-mix(in srgb, #336699 60%, black)');
+    });
+
     it('draws solid borders and renders a shared edge once', () => {
         const { container } = render(<WorldZones markers={[a, b]} />);
 

@@ -3,7 +3,6 @@
 import type { MouseEvent, ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-    Check,
     CornerLeftUp,
     LogIn,
     type LucideIcon,
@@ -130,7 +129,7 @@ export function WorldToolbar({
 
     const t = useTranslations('world.toolbar');
 
-    const { tool, setTool, pinned, draft, finish, undoVertex } = drawing;
+    const { tool, setTool, pinned, draft, undoVertex } = drawing;
 
     const parent = detail?.map.parentMapId
         ? maps.find((m) => m.id === detail.map.parentMapId)
@@ -189,12 +188,6 @@ export function WorldToolbar({
                                 <span
                                     aria-hidden
                                     className="mx-0.5 h-6 w-px shrink-0 bg-hud-rule"
-                                />
-                                <ToolButton
-                                    label={t('closeZone')}
-                                    Icon={Check}
-                                    disabled={draft.length < 3}
-                                    onClick={finish}
                                 />
                                 <ToolButton
                                     label={t('undoVertex')}

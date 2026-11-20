@@ -75,7 +75,6 @@
     "zone": "Zone",
     "entry": "Entry point",
     "move": "Heroes",
-    "closeZone": "Close zone",
     "undoVertex": "Step back",
     "toParent": "To parent map: {name}",
     "settings": "Map settings",

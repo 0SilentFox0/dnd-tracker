@@ -5,16 +5,16 @@ import type { MapPoint, WorldMarker } from '@/types/world';
 const asPoints = (ring: [number, number][]) =>
     ring.map(([x, y]) => `${x},${y}`).join(' ');
 
-type Edge = { key: string; d: string };
+type Edge = { key: string; d: string; color: string };
 
 function uniqueEdges(markers: WorldMarker[]): Edge[] {
-    const rings = markers.flatMap((m) =>
-        m.kind === 'zone' && m.polygon ? [m.polygon] : []
-    );
-
     const edges = new Map<string, Edge>();
 
-    for (const ring of rings) {
+    for (const m of markers) {
+        if (m.kind !== 'zone' || !m.polygon) continue;
+
+        const ring = m.polygon;
+
         ring.forEach((a, i) => {
             const b = ring[(i + 1) % ring.length];
 
@@ -26,6 +26,7 @@ function uniqueEdges(markers: WorldMarker[]): Edge[] {
                 edges.set(key, {
                     key,
                     d: `M${a[0]},${a[1]}L${b[0]},${b[1]}`,
+                    color: m.color ?? DEFAULT_ZONE_COLOR,
                 });
         });
     }
@@ -101,7 +102,11 @@ export function WorldZones({
                     data-shared-edge={shared.has(e.key) || undefined}
                     d={e.d}
                     fill="none"
-                    stroke="var(--atlas-ink)"
+                    stroke={
+                        shared.has(e.key)
+                            ? 'var(--atlas-ink)'
+                            : `color-mix(in srgb, ${e.color} 60%, black)`
+                    }
                     strokeWidth={2}
                     vectorEffect="non-scaling-stroke"
                 />

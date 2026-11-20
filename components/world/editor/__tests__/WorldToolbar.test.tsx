@@ -179,7 +179,7 @@ describe('WorldToolbar', () => {
             ).toBe(true);
     });
 
-    it('offers finishing the zone only with three vertices', () => {
+    it('offers undoing a vertex only while drawing', () => {
         renderBar(
             drawing({
                 tool: 'zone',
@@ -190,13 +190,7 @@ describe('WorldToolbar', () => {
             })
         );
 
-        expect(
-            (
-                screen.getByRole('button', {
-                    name: 'Замкнути зону',
-                }) as HTMLButtonElement
-            ).disabled
-        ).toBe(true);
+        expect(screen.queryByRole('button', { name: 'Замкнути зону' })).toBeNull();
         expect(
             (
                 screen.getByRole('button', {
