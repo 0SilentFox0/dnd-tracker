@@ -45,7 +45,7 @@ interface WorldZonesProps {
     showEdges?: boolean;
 }
 
-const FEATHER = 0.02;
+const FEATHER = 0.008;
 
 export function WorldZones({
     markers,
@@ -107,7 +107,7 @@ export function WorldZones({
                             className="atlas-zone-area"
                             points={asPoints(m.polygon)}
                             fill={m.color ?? DEFAULT_ZONE_COLOR}
-                            fillOpacity={selected ? 0.68 : 0.55}
+                            fillOpacity={selected ? 0.74 : 0.6}
                         />
                     );
                 })}

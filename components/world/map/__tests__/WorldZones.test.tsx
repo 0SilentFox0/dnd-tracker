@@ -41,15 +41,15 @@ const b = zone('b', [
 ]);
 
 describe('WorldZones', () => {
-    it('fills at 0.55 (0.68 selected) through a feather blur with no stroke', () => {
+    it('fills at 0.6 (0.74 selected) through a feather blur with no stroke', () => {
         const { container } = render(
             <WorldZones markers={[a, b]} selectedId="a" />
         );
 
         const polys = container.querySelectorAll('polygon[data-zone-id]');
 
-        expect(polys[0].getAttribute('fill-opacity')).toBe('0.68');
-        expect(polys[1].getAttribute('fill-opacity')).toBe('0.55');
+        expect(polys[0].getAttribute('fill-opacity')).toBe('0.74');
+        expect(polys[1].getAttribute('fill-opacity')).toBe('0.6');
         expect(polys[1].getAttribute('stroke')).toBeNull();
         expect(container.querySelector('g[filter]')).not.toBeNull();
         expect(container.querySelector('filter')?.children).toHaveLength(1);
