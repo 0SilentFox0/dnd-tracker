@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { DEFAULT_ZONE_COLOR } from '@/lib/constants/world';
 import { edgeKey, sharedEdges } from '@/lib/utils/world/zone-snap';
 import type { MapPoint, WorldMarker } from '@/types/world';
@@ -53,10 +55,14 @@ export function WorldZones({
 
     const edges = uniqueEdges(markers);
 
-    const shared = sharedEdges(
-        markers.flatMap((m) =>
-            m.kind === 'zone' && m.polygon ? [m.polygon] : []
-        )
+    const shared = useMemo(
+        () =>
+            sharedEdges(
+                markers.flatMap((m) =>
+                    m.kind === 'zone' && m.polygon ? [m.polygon] : []
+                )
+            ),
+        [markers]
     );
 
     return (

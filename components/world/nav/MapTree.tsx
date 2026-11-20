@@ -1,6 +1,7 @@
 'use client';
 
 import type { KeyboardEvent, ReactNode } from 'react';
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { HudButton } from '@/components/hud';
@@ -20,7 +21,7 @@ interface MapTreeProps {
 export function MapTree({ maps, activeId, onOpen, footer }: MapTreeProps) {
     const t = useTranslations('world.tree');
 
-    const ordered = treeOrder(maps);
+    const ordered = useMemo(() => treeOrder(maps), [maps]);
 
     const focusable = ordered.some((m) => m.id === activeId)
         ? activeId

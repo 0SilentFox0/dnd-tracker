@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { closePolygon } from '@/lib/utils/world/geometry';
+import { isTyping } from '@/lib/utils/world/is-typing';
 import type { MapPoint, Polygon } from '@/types/world';
 
 export type WorldTool = 'select' | 'point' | 'zone' | 'entry' | 'move';
@@ -44,11 +45,6 @@ export const TOOL_HOTKEYS: Record<string, WorldTool> = {
     m: 'move',
     ь: 'move',
 };
-
-const isTyping = (t: EventTarget | null) =>
-    t instanceof HTMLElement &&
-    (t.isContentEditable ||
-        ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 
 export function useMapDrawing(
     actions: Actions,

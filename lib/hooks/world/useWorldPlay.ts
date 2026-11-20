@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useWorldView } from './useWorldView';
 
 import { markerAnchor } from '@/lib/utils/world/geometry';
+import { isTyping } from '@/lib/utils/world/is-typing';
 import type { MapPoint, WorldHero } from '@/types/world';
 
 export function useWorldPlay(campaignId: string, mapId: string | null) {
@@ -49,11 +50,7 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
                 e.key !== 'Escape' ||
                 e.defaultPrevented ||
                 (!detailsOpen && !hasSelection) ||
-                (e.target instanceof HTMLElement &&
-                    (e.target.isContentEditable ||
-                        ['INPUT', 'TEXTAREA', 'SELECT'].includes(
-                            e.target.tagName
-                        ))) ||
+                isTyping(e.target) ||
                 (e.target instanceof Element &&
                     e.target.closest('[role=dialog]'))
             )

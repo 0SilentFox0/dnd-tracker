@@ -20,6 +20,7 @@ import { useWorldMap } from './useWorldMap';
 import { useWorldMaps } from './useWorldMaps';
 
 import { markerAnchor, polygonCentroid } from '@/lib/utils/world/geometry';
+import { isTyping } from '@/lib/utils/world/is-typing';
 import type {
     CreateWorldMarkerData,
     MapPoint,
@@ -28,11 +29,6 @@ import type {
 } from '@/types/world';
 
 const NO_MARKERS: WorldMarker[] = [];
-
-const isTyping = (t: EventTarget | null) =>
-    t instanceof HTMLElement &&
-    (t.isContentEditable ||
-        ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 
 interface Options {
     campaignId: string;

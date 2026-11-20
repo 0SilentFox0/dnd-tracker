@@ -23,7 +23,9 @@ export function ModeSwitch({
                     key={m}
                     tall
                     active={value === m}
-                    onClick={() => value !== m && onChange(m)}
+                    onClick={() => {
+                        if (value !== m) onChange(m);
+                    }}
                 >
                     {t(m)}
                 </HudToggleChip>
