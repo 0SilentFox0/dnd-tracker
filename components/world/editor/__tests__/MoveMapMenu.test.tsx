@@ -13,6 +13,7 @@ vi.unmock('next-intl');
 let picker: {
     open: boolean;
     excludeMapIds?: string[];
+    title?: string;
     markerFilter?: (m: WorldMarker) => boolean;
     onPick(ref: ScenarioMarkerRef): void;
 } | null = null;
@@ -67,6 +68,7 @@ describe('MoveMapMenu', () => {
         fireEvent.click(screen.getByRole('button', { name: /Перенести/ }));
 
         expect(screen.getByText('picker-open')).toBeTruthy();
+        expect(picker?.title).toBe('Перемістити карту до місця');
         expect(picker?.excludeMapIds?.sort()).toEqual(['a', 'b']);
         expect(
             picker?.markerFilter?.({ childMapId: null } as WorldMarker)

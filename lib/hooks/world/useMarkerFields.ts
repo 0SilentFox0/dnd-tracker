@@ -20,11 +20,11 @@ interface Options {
 export function useMarkerFields({ marker, editor, select }: Options) {
     const [note, setNote] = useState(marker.dmNote ?? '');
 
-    const [color, setColor] = useState(marker.color ?? DEFAULT_ZONE_COLOR);
+    const [color, setColor] = useState<string | null>(marker.color);
 
     const colorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-    const pendingColor = useRef<string | null>(null);
+    const pendingColor = useRef<{ value: string | null } | null>(null);
 
     const savedNote = useRef(marker.dmNote ?? '');
 
@@ -54,7 +54,7 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         const next = pendingColor.current;
 
         pendingColor.current = null;
-        void saveRef.current({ color: next });
+        void saveRef.current({ color: next.value });
     }, []);
 
     useEffect(() => flushColor, [flushColor]);
@@ -77,10 +77,10 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         void save({ description: next || null });
     };
 
-    const pickColor = (c: string) => {
+    const pickColor = (c: string | null) => {
         setColor(c);
         clearTimeout(colorTimer.current);
-        pendingColor.current = c;
+        pendingColor.current = { value: c };
         colorTimer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
     };
 
@@ -97,7 +97,9 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         setDescription,
         commitDescription,
         color,
+        colorValue: color ?? DEFAULT_ZONE_COLOR,
         pickColor,
+        resetColor: () => pickColor(null),
         save,
         remove,
     };

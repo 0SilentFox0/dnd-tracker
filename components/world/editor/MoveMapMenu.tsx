@@ -26,6 +26,8 @@ export function MoveMapMenu({
 }: MoveMapMenuProps) {
     const t = useTranslations('world.bubble');
 
+    const tMove = useTranslations('world.moveMap');
+
     const [open, setOpen] = useState(false);
 
     const excluded = useMemo(() => subtreeMapIds(maps, map.id), [maps, map.id]);
@@ -44,6 +46,7 @@ export function MoveMapMenu({
             <MarkerPickerDialog
                 campaignId={campaignId}
                 open={open}
+                title={tMove('title')}
                 onOpenChange={setOpen}
                 excludeMapIds={excluded}
                 markerFilter={isFree}

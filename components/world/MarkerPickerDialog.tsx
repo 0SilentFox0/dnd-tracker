@@ -27,6 +27,7 @@ interface Props {
     onPick(ref: ScenarioMarkerRef): void;
     excludeMapIds?: string[];
     markerFilter?: (m: WorldMarker) => boolean;
+    title?: string;
 }
 
 const markerFields = (m: WorldMarker) => [m.name];
@@ -103,6 +104,7 @@ export function MarkerPickerDialog({
     onPick,
     excludeMapIds,
     markerFilter,
+    title,
 }: Props) {
     const t = useTranslations('scenario.markerPicker');
 
@@ -208,7 +210,7 @@ export function MarkerPickerDialog({
             hud
             open={open}
             onOpenChange={onOpenChange}
-            title={t('title')}
+            title={title ?? t('title')}
         >
             {body}
         </ResponsiveDialog>

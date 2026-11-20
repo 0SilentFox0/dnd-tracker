@@ -6,11 +6,11 @@ import { PenLine, Trash2 } from 'lucide-react';
 
 import { MarkerIconGrid } from './maps/MapFieldParts';
 import { NewWorldMapDialog } from './maps/NewWorldMapDialog';
+import { MarkerColorField } from './MarkerColorField';
 import { MoveMapMenu } from './MoveMapMenu';
 import { useEditorMarkerFields } from './use-editor-fields';
 import { useWorldEditorContext } from './WorldEditorContext';
 
-import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -77,20 +77,17 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                     />
                 ) : null}
                 <div className="flex items-center gap-2 text-xs">
-                    <ColorSwatch
-                        color={m.color}
+                    <MarkerColorField
                         label={t(
                             marker.kind === 'zone'
                                 ? 'editor.zoneColor'
                                 : 'editor.pointColor'
                         )}
-                        onChange={m.pickColor}
+                        color={m.colorValue}
+                        isCustom={m.color !== null}
+                        onPick={m.pickColor}
+                        onReset={m.resetColor}
                     />
-                    {t(
-                        marker.kind === 'zone'
-                            ? 'editor.zoneColor'
-                            : 'editor.pointColor'
-                    )}
                 </div>
                 <label className="flex items-center justify-between gap-2 text-xs">
                     {t('editor.knownLocation')}

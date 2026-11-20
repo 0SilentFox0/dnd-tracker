@@ -7,12 +7,12 @@ import { MapPinned, PenLine } from 'lucide-react';
 import { MarkerIconGrid } from '../maps/MapFieldParts';
 import { NewWorldMapDialog } from '../maps/NewWorldMapDialog';
 import { markerIcon } from '../marker-icon-options';
+import { MarkerColorField } from '../MarkerColorField';
 import { useEditorMarkerFields } from '../use-editor-fields';
 import { useWorldEditorContext } from '../WorldEditorContext';
 import { DmMarkerNotes } from './DmMarkerNotes';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
-import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
@@ -88,22 +88,24 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                                 onPick={(icon) => void m.save({ icon })}
                             />
                             <div className="flex items-center gap-3 text-sm">
-                                <ColorSwatch
-                                    color={m.color}
+                                <MarkerColorField
                                     label={t('editor.pointColor')}
-                                    onChange={m.pickColor}
+                                    color={m.colorValue}
+                                    isCustom={m.color !== null}
+                                    onPick={m.pickColor}
+                                    onReset={m.resetColor}
                                 />
-                                {t('editor.pointColor')}
                             </div>
                         </>
                     ) : (
                         <div className="flex items-center gap-3 text-sm">
-                            <ColorSwatch
-                                color={m.color}
+                            <MarkerColorField
                                 label={t('editor.zoneColor')}
-                                onChange={m.pickColor}
+                                color={m.colorValue}
+                                isCustom={m.color !== null}
+                                onPick={m.pickColor}
+                                onReset={m.resetColor}
                             />
-                            {t('editor.zoneColor')}
                         </div>
                     )}
                     {marker.kind === 'zone' ? (
