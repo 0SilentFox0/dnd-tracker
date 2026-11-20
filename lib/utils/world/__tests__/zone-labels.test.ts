@@ -54,3 +54,40 @@ describe('zoneLabelVisible', () => {
         ).toBe(true);
     });
 });
+
+describe('zoneLabelVisible labelMode', () => {
+    it('hidden wins even when hovered', () => {
+        expect(
+            zoneLabelVisible({ ...base, hovered: true, labelMode: 'hidden' })
+        ).toBe(false);
+        expect(
+            zoneLabelVisible({ ...base, known: true, labelMode: 'hidden' })
+        ).toBe(false);
+    });
+
+    it('always shows despite clashes, overlaps and high zoom', () => {
+        expect(
+            zoneLabelVisible({
+                ...base,
+                zoom: 8,
+                clashes: true,
+                overlaps: true,
+                labelMode: 'always',
+            })
+        ).toBe(true);
+    });
+
+    it('auto behaves like no mode', () => {
+        const cases = [
+            { ...base },
+            { ...base, zoom: 5 },
+            { ...base, clashes: true },
+            { ...base, hovered: true, overlaps: true },
+        ];
+
+        for (const c of cases)
+            expect(zoneLabelVisible({ ...c, labelMode: 'auto' })).toBe(
+                zoneLabelVisible(c)
+            );
+    });
+});

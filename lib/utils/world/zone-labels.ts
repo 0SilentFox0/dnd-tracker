@@ -1,6 +1,6 @@
 import { WORLD_ZONE_LABEL_HIDE_ZOOM } from '@/lib/constants/world';
 import { polygonArea } from '@/lib/utils/world/geometry';
-import type { Polygon } from '@/types/world';
+import type { Polygon, ZoneLabelMode } from '@/types/world';
 
 const MIN_SIZE = 11;
 
@@ -29,9 +29,10 @@ export interface ZoneLabelInput {
     clashes: boolean;
     overlaps: boolean;
     hovered: boolean;
+    labelMode?: ZoneLabelMode;
 }
 
-/** Known or fogless zones always label; others hide when zoomed in, clashing or overlapping, unless hovered. */
+/** `hidden`/`always` override everything; otherwise known or fogless zones always label; others hide when zoomed in, clashing or overlapping, unless hovered. */
 export function zoneLabelVisible({
     zoom,
     known,
@@ -39,7 +40,12 @@ export function zoneLabelVisible({
     clashes,
     overlaps,
     hovered,
+    labelMode = 'auto',
 }: ZoneLabelInput): boolean {
+    if (labelMode === 'hidden') return false;
+
+    if (labelMode === 'always') return true;
+
     if (hovered) return true;
 
     if (clashes || overlaps) return false;
