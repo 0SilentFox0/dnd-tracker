@@ -137,12 +137,12 @@ export function LayerRow({
                     label: tm(`markerKinds.${value}`),
                 }))}
             />
-            <div className="flex items-center gap-2 text-xs">
-                <label className="flex flex-1 items-center gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                <label className="flex min-w-0 flex-1 basis-40 items-center gap-2">
                     {t('zoneOpacity')}
                     <Slider
                         aria-label={t('zoneOpacity')}
-                        className="flex-1"
+                        className="min-w-0 flex-1"
                         value={f.zoneOpacity.value}
                         min={f.zoneOpacity.min}
                         max={1}
@@ -155,6 +155,7 @@ export function LayerRow({
                         type="button"
                         size="sm"
                         variant="ghost"
+                        className="shrink-0"
                         onClick={f.zoneOpacity.reset}
                     >
                         {t('zoneOpacityReset')}
@@ -239,11 +240,11 @@ export function LayerRow({
                 ) : null}
             </div>
             {layer.imageUrl ? (
-                <label className="flex items-center gap-2 text-xs">
+                <label className="flex min-w-0 items-center gap-2 text-xs">
                     {t('opacity')}
                     <Slider
                         aria-label={t('opacity')}
-                        className="flex-1"
+                        className="min-w-0 flex-1"
                         value={f.opacity}
                         min={f.opacityRange.min}
                         max={f.opacityRange.max}

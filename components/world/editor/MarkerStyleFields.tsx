@@ -84,8 +84,8 @@ export function MarkerStyleFields({
             ) : null}
             {zone ? (
                 <>
-                    <label className="flex items-center justify-between gap-2">
-                        {ts('labelMode.label')}
+                    <label className="flex min-w-0 items-center justify-between gap-2">
+                        <span className="min-w-0">{ts('labelMode.label')}</span>
                         <SelectField
                             aria-label={ts('labelMode.label')}
                             value={form.labelMode ?? ''}
@@ -100,15 +100,15 @@ export function MarkerStyleFields({
                                 value: v,
                                 label: ts(`labelMode.${v}`),
                             }))}
-                            triggerClassName="w-40"
+                            triggerClassName="w-40 max-w-full shrink-0"
                         />
                     </label>
-                    <div className="flex items-center gap-2">
-                        <label className="flex flex-1 items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <label className="flex min-w-0 flex-1 basis-40 items-center gap-2">
                             {ts('opacity')}
                             <Slider
                                 aria-label={ts('opacity')}
-                                className="flex-1"
+                                className="min-w-0 flex-1"
                                 value={opacity}
                                 min={WORLD_ZONE_OPACITY_MIN}
                                 max={1}
@@ -121,6 +121,7 @@ export function MarkerStyleFields({
                                 type="button"
                                 size="sm"
                                 variant="ghost"
+                                className="shrink-0"
                                 onClick={() => form.changeFillOpacity(null)}
                             >
                                 {ts('opacityReset')}
