@@ -185,7 +185,7 @@ export function WorldPlayClient({
                                 {isDesktop ? (
                                     <aside
                                         data-tour="world.places"
-                                        className="hud-surface overflow-y-auto rounded-md border border-hud-rule p-1 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)]"
+                                        className="hud-surface relative overflow-y-auto rounded-md border border-hud-rule p-1 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)]"
                                     >
                                         {mapTree}
                                     </aside>
@@ -281,7 +281,7 @@ export function WorldPlayClient({
                                     </div>
                                 </div>
                                 {isDesktop ? (
-                                    <div className="flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
+                                    <div className="relative flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
                                         {marker && play.details.open ? (
                                             notes
                                         ) : (

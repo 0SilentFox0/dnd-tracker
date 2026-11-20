@@ -304,13 +304,13 @@ export function WorldEditorPageClient({
                                                 </div>
                                                 <div className="flex min-h-0 flex-col gap-2 lg:flex-1 lg:flex-row">
                                                     {isDesktop && treeShown ? (
-                                                        <aside className="hud-surface w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
+                                                        <aside className="hud-surface relative w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
                                                             {mapTree}
                                                         </aside>
                                                     ) : null}
                                                     {isDesktop &&
                                                     layersShown ? (
-                                                        <aside className="hud-surface w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
+                                                        <aside className="hud-surface relative w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
                                                             {layersPanel}
                                                         </aside>
                                                     ) : null}
@@ -610,7 +610,7 @@ export function WorldEditorPageClient({
                                                     </div>
                                                     {isDesktop &&
                                                     detailsOpen ? (
-                                                        <aside className="hud-surface rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <aside className="hud-surface relative rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
                                                             <div className="mb-2 flex justify-end">
                                                                 <Button
                                                                     size="sm"
@@ -629,7 +629,7 @@ export function WorldEditorPageClient({
                                                     ) : null}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
-                                                        <div className="flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <div className="relative flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
                                                             <TravelPanel
                                                                 campaignId={
                                                                     campaignId
