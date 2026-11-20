@@ -449,6 +449,15 @@ export function WorldMapView({
                             className="atlas-top-layer absolute inset-0"
                             style={layerStyle}
                         >
+                            {trails ? (
+                                <WorldTrails
+                                    {...trails}
+                                    zoom={zoom}
+                                    interactive={
+                                        tool === 'select' || tool === 'move'
+                                    }
+                                />
+                            ) : null}
                             <div
                                 className="contents"
                                 onPointerDownCapture={() =>
@@ -494,9 +503,6 @@ export function WorldMapView({
                                     />
                                 ) : null}
                             </div>
-                            {trails ? (
-                                <WorldTrails {...trails} zoom={zoom} />
-                            ) : null}
                             {heroes?.length ? (
                                 <WorldHeroes
                                     heroes={heroes}

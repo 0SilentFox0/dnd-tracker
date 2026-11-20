@@ -62,6 +62,13 @@ export function useWorldEditorPage({
 
     const [enemyId, setEnemyId] = useState<string | null>(null);
 
+    const [enemyMapId, setEnemyMapId] = useState(mapId);
+
+    if (mapId !== enemyMapId) {
+        setEnemyMapId(mapId);
+        setEnemyId(null);
+    }
+
     const eyes = useHeroEyes(campaignId, mapId);
 
     const [selectedId, select] = useState<string | null>(

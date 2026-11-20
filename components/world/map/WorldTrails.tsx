@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { HudButton } from '@/components/hud';
 import { WORLD_NO_SESSION_COLOR } from '@/lib/constants/world';
+import { cn } from '@/lib/utils';
 import type { Trail } from '@/lib/utils/world/trail';
 import type { WorldSession } from '@/types/world';
 
@@ -12,6 +13,7 @@ export interface WorldTrailsProps {
     sessions: WorldSession[];
     visible: ReadonlySet<string | null>;
     zoom: number;
+    interactive?: boolean;
     selectedEntryId?: string | null;
     onSelect(entryId: string): void;
 }
@@ -27,6 +29,7 @@ export function WorldTrails({
     sessions,
     visible,
     zoom,
+    interactive = true,
     selectedEntryId,
     onSelect,
 }: WorldTrailsProps) {
@@ -87,7 +90,7 @@ export function WorldTrails({
                                 strokeWidth={14}
                                 style={{
                                     vectorEffect: 'non-scaling-stroke',
-                                    pointerEvents: 'stroke',
+                                    pointerEvents: interactive ? 'stroke' : 'none',
                                     cursor: 'pointer',
                                 }}
                                 onPointerDown={stop}
@@ -121,7 +124,12 @@ export function WorldTrails({
                                 session: name,
                                 kind: t(`travel.kinds.${node.kind}`),
                             })}
-                            className="pointer-events-auto absolute rounded-full border-2 border-black/70"
+                            className={cn(
+                                'absolute rounded-full border-2 border-black/70',
+                                interactive
+                                    ? 'pointer-events-auto'
+                                    : 'pointer-events-none'
+                            )}
                             style={{
                                 left: `${node.x * 100}%`,
                                 top: `${node.y * 100}%`,

@@ -79,4 +79,41 @@ describe('travel log session stamp', () => {
         expect(m.logCreate.mock.calls[0][0].data.sessionId).toBe('s2');
         expect(m.logCreate.mock.calls[1][0].data.sessionId).toBeNull();
     });
+
+    it('commitTravel retries with a null session on an FK violation', async () => {
+        const { prisma } = await import('@/lib/db');
+
+        m.activeSessionId.mockResolvedValue('gone');
+        vi.mocked(prisma.$transaction).mockRejectedValueOnce(
+            Object.assign(new Error('fk'), { code: 'P2003' })
+        );
+
+        await commitTravel(travelArgs() as never);
+
+        expect(m.logCreate.mock.calls.map((c) => c[0].data.sessionId)).toEqual([
+            'gone',
+            null,
+        ]);
+    });
+
+    it('writeRestLog retries with a null session on an FK violation', async () => {
+        m.activeSessionId.mockResolvedValue('gone');
+        m.logCreate.mockRejectedValueOnce(
+            Object.assign(new Error('fk'), { code: 'P2003' })
+        );
+
+        await writeRestLog({
+            campaignId: 'c1',
+            userId: 'u1',
+            mapId: 'm1',
+            kind: 'short',
+            characterIds: ['h1'],
+            at: { x: 0.1, y: 0.2 },
+        });
+
+        expect(m.logCreate.mock.calls.map((c) => c[0].data.sessionId)).toEqual([
+            'gone',
+            null,
+        ]);
+    });
 });

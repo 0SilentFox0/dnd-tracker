@@ -51,15 +51,32 @@ export function EnemyCard({
 
     const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-    useEffect(() => () => clearTimeout(timer.current), []);
+    const pendingColor = useRef<string | null>(null);
+
+    const saveRef = useRef(onSave);
+
+    useEffect(() => {
+        saveRef.current = onSave;
+    });
+
+    const flushColor = () => {
+        clearTimeout(timer.current);
+
+        if (pendingColor.current === null) return;
+
+        const next = pendingColor.current;
+
+        pendingColor.current = null;
+        saveRef.current({ color: next });
+    };
+
+    useEffect(() => flushColor, []);
 
     const pickColor = (next: string) => {
         setColor(next);
+        pendingColor.current = next;
         clearTimeout(timer.current);
-        timer.current = setTimeout(
-            () => onSave({ color: next }),
-            COLOR_DEBOUNCE_MS
-        );
+        timer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
     };
 
     const commitNote = () => {
@@ -76,6 +93,8 @@ export function EnemyCard({
                 if (e.key !== 'Escape') return;
 
                 e.preventDefault();
+                commitName();
+                commitNote();
                 onClose();
             }}
             className={cn(

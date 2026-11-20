@@ -95,6 +95,20 @@ export type DestMap = {
     height: number;
 };
 
+// the session may be deleted between the read and the insert (FK violation)
+async function withSessionRetry(
+    sessionId: Promise<string | null>,
+    write: (sessionId: string | null) => PromiseLike<unknown>
+): Promise<void> {
+    try {
+        await write(await sessionId);
+    } catch (e) {
+        if ((e as { code?: string }).code !== 'P2003') throw e;
+
+        await write(null);
+    }
+}
+
 export async function commitTravel(args: {
     campaignId: string;
     userId: string;
@@ -134,11 +148,10 @@ export async function commitTravel(args: {
 
     const first = plan.moves[0];
 
-    const sessionId = await activeSessionId(campaignId);
-
     const from = first ? args.positions.get(first.characterId) : null;
 
-    await prisma.$transaction([
+    const write = (sessionId: string | null) =>
+        prisma.$transaction([
         ...plan.moves.map((m) =>
             prisma.worldPosition.upsert({
                 where: { characterId: m.characterId },
@@ -176,6 +189,8 @@ export async function commitTravel(args: {
             },
         }),
     ]);
+
+    await withSessionRetry(activeSessionId(campaignId), write);
 }
 
 export async function writeRestLog(args: {
@@ -188,20 +203,22 @@ export async function writeRestLog(args: {
 }): Promise<void> {
     const { mapId, at } = args;
 
-    await prisma.worldTravelLog.create({
-        data: {
-            campaignId: args.campaignId,
-            mapId,
-            characterIds: args.characterIds,
-            from: { mapId, ...at },
-            to: { mapId, ...at },
-            toMarkerId: null,
-            rest: args.kind,
-            kind: 'rest',
-            byUserId: args.userId,
-            sessionId: await activeSessionId(args.campaignId),
-        },
-    });
+    await withSessionRetry(activeSessionId(args.campaignId), (sessionId) =>
+        prisma.worldTravelLog.create({
+            data: {
+                campaignId: args.campaignId,
+                mapId,
+                characterIds: args.characterIds,
+                from: { mapId, ...at },
+                to: { mapId, ...at },
+                toMarkerId: null,
+                rest: args.kind,
+                kind: 'rest',
+                byUserId: args.userId,
+                sessionId,
+            },
+        })
+    );
 }
 
 export async function readTravelLog(

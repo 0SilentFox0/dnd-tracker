@@ -330,6 +330,7 @@ export function WorldEditorPageClient({
                                                                                   ids,
                                                                                   to
                                                                               ) =>
+                                                                                  !travel.isPending &&
                                                                                   void travel.mutateOk(
                                                                                       {
                                                                                           mapId: d
