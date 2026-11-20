@@ -51,7 +51,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
 
     const t = useTranslations('world.errors');
 
-    const tErrors = useTranslations('errors');
+    const tErrors = useTranslations('validation');
 
     const notify = useOptionalNotify();
 
