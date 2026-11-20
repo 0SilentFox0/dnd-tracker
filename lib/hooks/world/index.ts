@@ -4,6 +4,7 @@ export { useCommittedName } from './useCommittedName';
 export { type HeroDragHandlers, useHeroDrag } from './useHeroDrag';
 export { useHeroEyes } from './useHeroEyes';
 export { type HeroSelection, useHeroSelection } from './useHeroSelection';
+export { useLayerVisibility } from './useLayerVisibility';
 export {
     MODE_TOOLS,
     useMapDrawing,
@@ -27,6 +28,7 @@ export { useWorldEditor } from './useWorldEditor';
 export { useWorldEditorPage } from './useWorldEditorPage';
 export { useWorldEnemies } from './useWorldEnemies';
 export { type RosterHero, useWorldHeroes } from './useWorldHeroes';
+export { useWorldLayers } from './useWorldLayers';
 export { useWorldMap } from './useWorldMap';
 export { useWorldMaps } from './useWorldMaps';
 export { useWorldMapUpload } from './useWorldMapUpload';

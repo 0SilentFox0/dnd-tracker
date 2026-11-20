@@ -220,6 +220,9 @@
     "deleteNote": "Could not delete the note",
     "saveSession": "Could not save the session",
     "deleteSession": "Could not delete the session",
+    "createLayer": "Could not create the layer",
+    "saveLayer": "Could not save the layer",
+    "deleteLayer": "Could not delete the layer",
     "saveEnemy": "Could not save the enemy",
     "deleteEnemy": "Could not delete the enemy"
   },
