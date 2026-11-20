@@ -75,6 +75,7 @@ const view = (markers: WorldMarker[]): WorldView => ({
     maps: [],
     notes: [],
     fog: true,
+    layers: [],
 });
 
 const show = (over: Partial<ShowState> = {}) =>

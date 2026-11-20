@@ -135,7 +135,7 @@ export function LayerImageRect({
                     key={corner}
                     type="button"
                     data-corner={corner}
-                    aria-label={t('corner.' + corner)}
+                    aria-label={t(`corner.${corner}`)}
                     className="atlas-vertex"
                     style={{
                         ...CORNERS[corner],

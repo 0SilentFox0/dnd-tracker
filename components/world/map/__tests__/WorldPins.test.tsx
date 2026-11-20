@@ -28,6 +28,7 @@ const zone = (id: string, x: number): WorldMarker => ({
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    layerId: null,
 });
 
 const point: WorldMarker = {
