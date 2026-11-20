@@ -79,7 +79,8 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         colorCommit.schedule(c);
     };
 
-    const setLayer = (layerId: string) => save({ layerId: layerId || null });
+    const setLayer = (layerId: string) =>
+        save({ layerId: layerId || null });
 
     const remove = useRemoveMarker({ marker, editor, select });
 
@@ -95,7 +96,8 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         commitDescription,
         color,
         colorValue: color ?? DEFAULT_ZONE_COLOR,
-        isCustomColor: !!color && color.toLowerCase() !== DEFAULT_ZONE_COLOR,
+        isCustomColor:
+            !!color && color.toLowerCase() !== DEFAULT_ZONE_COLOR,
         pickColor,
         resetColor: () => pickColor(null),
         labelMode: marker.labelMode,

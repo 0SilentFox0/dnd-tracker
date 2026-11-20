@@ -25,7 +25,11 @@ import {
     WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_NAME_MAX,
 } from '@/lib/constants/world';
-import { DESKTOP_QUERY, useIsMobile, useMediaQuery } from '@/lib/hooks/common';
+import {
+    DESKTOP_QUERY,
+    useIsMobile,
+    useMediaQuery,
+} from '@/lib/hooks/common';
 import type { WorldMarker } from '@/types/world';
 
 interface DmMarkerBubbleProps {
@@ -50,6 +54,8 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
 
     const layer = detail?.layers?.find((l) => l.id === marker.layerId);
 
+    const shown = { ...marker, icon: marker.icon ?? layer?.icon ?? null };
+
     const child = marker.childMapId
         ? maps.find((x) => x.id === marker.childMapId)
         : undefined;
@@ -57,7 +63,7 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
     if (onMap)
         return (
             <MarkerBubble
-                marker={marker}
+                marker={shown}
                 actions={{
                     ...actions,
                     onOpenMap: marker.childMapId
@@ -68,7 +74,7 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
         );
 
     return (
-        <MarkerBubble marker={marker} actions={actions} embedded={sheet}>
+        <MarkerBubble marker={shown} actions={actions} embedded={sheet}>
             <div className="min-w-0 flex-1 space-y-2">
                 <Input
                     aria-label={t('name')}

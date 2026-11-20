@@ -29,7 +29,7 @@ export interface ZoneLabelInput {
     clashes: boolean;
     overlaps: boolean;
     hovered: boolean;
-    labelMode?: ZoneLabelMode;
+    labelMode?: ZoneLabelMode | null;
 }
 
 /** `hidden`/`always` override everything; otherwise known or fogless zones always label; others hide when zoomed in, clashing or overlapping, unless hovered. */

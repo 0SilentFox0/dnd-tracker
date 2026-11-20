@@ -13,7 +13,7 @@ export function useLayerVisibility(layerIds: string[]) {
     const hidden = useMemo(() => {
         const alive = new Set(key ? key.split('\0') : []);
 
-        alive.add(NO_LAYER_KEY);
+        if (alive.size > 0) alive.add(NO_LAYER_KEY);
 
         return new Set([...off].filter((id) => alive.has(id)));
     }, [off, key]);

@@ -956,7 +956,22 @@ describe('WorldMapView card slot', () => {
                     marker({ id: 'p', name: 'Town', layerId: 'l1' }),
                     marker({ id: 'q', name: 'Port' }),
                 ])}
-                layers={{ items: [], hidden: new Set([NO_LAYER_KEY]) }}
+                layers={{
+                    items: [
+                        {
+                            id: 'l1',
+                            name: 'Roads',
+                            color: null,
+                            imageUrl: null,
+                            rect: { x: 0, y: 0, w: 1, h: 1 },
+                            opacity: 1,
+                            icon: null,
+                            zoneOpacity: null,
+                            zoneLabels: 'auto',
+                        },
+                    ],
+                    hidden: new Set([NO_LAYER_KEY]),
+                }}
             />
         );
 

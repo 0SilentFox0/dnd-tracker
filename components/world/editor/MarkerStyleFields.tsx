@@ -65,7 +65,7 @@ export function MarkerStyleFields({
                     </Button>
                 ) : null}
             </FieldRow>
-            {!zone && layer && (iconInherited || marker.icon) ? (
+            {!zone && layer?.icon && (iconInherited || marker.icon) ? (
                 <FieldRow label={t('editor.icon')}>
                     {iconInherited ? (
                         <span className="text-hud-muted">
@@ -94,7 +94,7 @@ export function MarkerStyleFields({
                                     (v || null) as ZoneLabelMode | null
                                 )
                             }
-                            allowNone
+                            allowNone={!!layer}
                             noneLabel={ts('labelMode.inherit')}
                             options={ZONE_LABEL_MODES.map((v) => ({
                                 value: v,

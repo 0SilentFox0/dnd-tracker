@@ -10,11 +10,7 @@ const CORE_WHATS_NEW: WhatsNewEntry[] = [
     { id: '2026-11-20-world-layers', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-trail', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-map-ux', date: '2026-11-20', audience: 'all' },
-    {
-        id: '2026-11-19-counterspell-window',
-        date: '2026-11-19',
-        audience: 'all',
-    },
+    { id: '2026-11-19-counterspell-window', date: '2026-11-19', audience: 'all' },
     { id: '2026-11-19-copy-maps', date: '2026-11-19', audience: 'dm' },
     { id: '2026-11-copy-content', date: '2026-11-19', audience: 'dm' },
     {

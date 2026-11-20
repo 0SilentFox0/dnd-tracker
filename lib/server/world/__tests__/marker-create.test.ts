@@ -132,6 +132,22 @@ describe('updateWorldMarkerHandler style', () => {
     it('rejects an unknown labelMode', async () => {
         expect((await patch({ labelMode: 'x' })).status).toBe(400);
     });
+
+    it('null resets fillOpacity', async () => {
+        await patch({ fillOpacity: null });
+
+        expect(m.updateOutside.mock.calls[0][0].data).toMatchObject({
+            fillOpacity: null,
+        });
+    });
+
+    it.each([0.05, 1.2])('rejects fillOpacity %s', async (fillOpacity) => {
+        expect((await patch({ fillOpacity })).status).toBe(400);
+    });
+
+    it('rejects an unknown icon key', async () => {
+        expect((await patch({ icon: 'not-an-icon' })).status).toBe(400);
+    });
 });
 
 describe('createWorldMarkerHandler', () => {

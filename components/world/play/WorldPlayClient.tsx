@@ -28,6 +28,7 @@ import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
 import { useTrailView, useWorldPlay, useWorldTrail } from '@/lib/hooks/world';
+import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
@@ -119,7 +120,7 @@ export function WorldPlayClient({
                         marker && !play.details.open ? (
                             <PlayerMarkerBubble
                                 key={marker.id}
-                                marker={marker}
+                                marker={applyLayerStyle([marker], play.layers.items)[0]}
                                 embedded={!isDesktop}
                                 actions={{
                                     onMore: play.openDetails,
@@ -192,7 +193,7 @@ export function WorldPlayClient({
                                 ) : null}
                                 <div className="flex min-w-0 flex-col gap-2">
                                     <PlaceSearchBar
-                                        markers={view.markers}
+                                        markers={play.styledMarkers}
                                         onPick={play.pickPlace}
                                     />
                                     <div

@@ -377,7 +377,6 @@
     "deleteEmptyDescription": "У шарі немає маркерів.",
     "markerLayer": "Шар",
     "noLayer": "Без шару",
-    "unlayered": "Без шару",
     "icon": "Іконка шару",
     "iconNone": "Без іконки",
     "zoneOpacity": "Прозорість зон",

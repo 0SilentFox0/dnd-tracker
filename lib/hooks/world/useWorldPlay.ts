@@ -12,9 +12,12 @@ import { useWorldView } from './useWorldView';
 import { escapeStep } from '@/lib/utils/world/escape-step';
 import { markerAnchor } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
-import type { WorldHero, WorldViewLayer } from '@/types/world';
+import { applyLayerStyle } from '@/lib/utils/world/marker-style';
+import type { WorldHero, WorldMarker, WorldViewLayer } from '@/types/world';
 
 const NO_LAYERS: WorldViewLayer[] = [];
+
+const NO_MARKERS: WorldMarker[] = [];
 
 export function useWorldPlay(campaignId: string, mapId: string | null) {
     const router = useRouter();
@@ -128,8 +131,14 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         if (child) openMap(child);
     };
 
+    const styledMarkers = useMemo(
+        () => applyLayerStyle(view.data?.markers ?? NO_MARKERS, layerItems),
+        [view.data?.markers, layerItems]
+    );
+
     return {
         view,
+        styledMarkers,
         layers: {
             items: layerItems,
             hidden,

@@ -52,7 +52,7 @@ function FileButton({
     const input = useRef<HTMLInputElement>(null);
 
     return (
-        <>
+        <span className="relative inline-flex">
             <HiddenFileInput
                 ref={input}
                 accept={accept}
@@ -66,7 +66,7 @@ function FileButton({
                 onClick={() => input.current?.click()}
                 {...props}
             />
-        </>
+        </span>
     );
 }
 

@@ -41,7 +41,7 @@ export function LayerLegend({
 
     const items = layers.map((l) => chip(l.id, l.name, l.color));
 
-    if (showUnlayered) items.push(chip(NO_LAYER_KEY, t('unlayered'), null));
+    if (showUnlayered) items.push(chip(NO_LAYER_KEY, t('noLayer'), null));
 
     return (
         <div className="hud-surface max-w-full rounded-md border border-hud-rule bg-hud-surface/90 px-2 py-1 backdrop-blur-sm">

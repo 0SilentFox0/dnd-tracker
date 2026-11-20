@@ -377,7 +377,6 @@
     "deleteEmptyDescription": "The layer has no markers.",
     "markerLayer": "Layer",
     "noLayer": "No layer",
-    "unlayered": "No layer",
     "icon": "Layer icon",
     "iconNone": "No icon",
     "zoneOpacity": "Zone opacity",

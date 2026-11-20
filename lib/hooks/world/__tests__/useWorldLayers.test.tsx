@@ -103,12 +103,26 @@ describe('useLayerVisibility', () => {
         expect(result.current.isShown('a')).toBe(true);
 
         rerender({ ids: ['a', 'b'] });
-        rerender({ ids: [] });
+        rerender({ ids: ['b'] });
 
         expect(result.current.hidden.has(NO_LAYER_KEY)).toBe(true);
 
         act(() => result.current.toggle(NO_LAYER_KEY));
 
+        expect(result.current.isShown(null)).toBe(true);
+    });
+
+    it('shows unlayered markers when there are no layers', () => {
+        const { result, rerender } = renderHook(
+            ({ ids }) => useLayerVisibility(ids),
+            { initialProps: { ids: ['a'] } }
+        );
+
+        act(() => result.current.toggle(NO_LAYER_KEY));
+
+        rerender({ ids: [] });
+
+        expect(result.current.hidden.size).toBe(0);
         expect(result.current.isShown(null)).toBe(true);
     });
 

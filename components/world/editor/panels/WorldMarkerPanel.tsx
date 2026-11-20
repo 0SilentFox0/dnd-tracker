@@ -47,9 +47,12 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
     const m = useEditorMarkerFields(marker);
 
-    const HeaderIcon = markerIcon(marker);
-
     const layer = detail?.layers?.find((l) => l.id === marker.layerId);
+
+    const HeaderIcon = markerIcon({
+        ...marker,
+        icon: marker.icon ?? layer?.icon ?? null,
+    });
 
     const child = marker.childMapId
         ? maps.find((x) => x.id === marker.childMapId)
