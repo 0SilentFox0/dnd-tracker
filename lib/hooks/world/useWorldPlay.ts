@@ -6,9 +6,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useLayerVisibility } from './useLayerVisibility';
 import { useMapFocus } from './useMapFocus';
 import { useMapFullscreen } from './useMapFullscreen';
+import { useOpenMarkerDetails } from './useOpenMarkerDetails';
 import { useWorldView } from './useWorldView';
 
-import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { escapeStep } from '@/lib/utils/world/escape-step';
 import { markerAnchor } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
@@ -52,8 +52,6 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
     const fullscreen = useMapFullscreen();
 
     const { full, exit } = fullscreen;
-
-    const desktop = useMediaQuery(DESKTOP_QUERY);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -115,16 +113,12 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
             ? m.childMapId
             : null;
 
-    const openDetails = () => {
-        if (!selectedMarker) return;
-
-        if (desktop) {
-            exit();
-            focusPoint(markerAnchor(selectedMarker), 1);
-        }
-
-        setDetailsOpen(true);
-    };
+    const openDetails = useOpenMarkerDetails({
+        marker: selectedMarker,
+        exitFullscreen: exit,
+        focusPoint,
+        setDetailsOpen,
+    });
 
     const openChild = (id: string) => {
         const m = view.data?.markers.find((x) => x.id === id);

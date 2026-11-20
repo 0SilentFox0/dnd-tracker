@@ -16,6 +16,7 @@ import {
 import { useMapFocus } from './useMapFocus';
 import { useMapFullscreen } from './useMapFullscreen';
 import { useMoveTarget } from './useMoveTarget';
+import { useOpenMarkerDetails } from './useOpenMarkerDetails';
 import { useRemoveMarker } from './useRemoveMarker';
 import { useWorldEditor } from './useWorldEditor';
 import { useWorldEnemies } from './useWorldEnemies';
@@ -23,7 +24,6 @@ import { useWorldHeroes } from './useWorldHeroes';
 import { useWorldMap } from './useWorldMap';
 import { useWorldMaps } from './useWorldMaps';
 
-import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { escapeStep } from '@/lib/utils/world/escape-step';
 import { markerAnchor, polygonCentroid } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
@@ -285,8 +285,6 @@ export function useWorldEditorPage({
 
     const { full, exit } = fullscreen;
 
-    const desktop = useMediaQuery(DESKTOP_QUERY);
-
     useEffect(() => {
         // capture phase + preventDefault so useMapDrawing skips presses consumed here
         const onKey = (e: KeyboardEvent) => {
@@ -413,16 +411,12 @@ export function useWorldEditorPage({
         ? markers.find((m) => m.id === selectedId)
         : undefined;
 
-    const openDetails = () => {
-        if (!selectedMarker) return;
-
-        if (desktop) {
-            exit();
-            focusPoint(markerAnchor(selectedMarker), 1);
-        }
-
-        setDetailsOpen(true);
-    };
+    const openDetails = useOpenMarkerDetails({
+        marker: selectedMarker,
+        exitFullscreen: exit,
+        focusPoint,
+        setDetailsOpen,
+    });
 
     const bubbleOpen =
         tool === 'select' && !eyes.asHeroId && !!selectedMarker && !detailsOpen;
