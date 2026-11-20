@@ -1,6 +1,7 @@
 import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { listWorldMaps } from '@/lib/server/world/map-store';
+import { activeSessionId } from '@/lib/server/world/session-store';
 import {
     dedupePoint,
     type HeroPos,
@@ -133,6 +134,8 @@ export async function commitTravel(args: {
 
     const first = plan.moves[0];
 
+    const sessionId = await activeSessionId(campaignId);
+
     const from = first ? args.positions.get(first.characterId) : null;
 
     await prisma.$transaction([
@@ -169,6 +172,7 @@ export async function commitTravel(args: {
                 rest: args.rest,
                 kind: args.kind,
                 byUserId: args.userId,
+                sessionId,
             },
         }),
     ]);
@@ -195,6 +199,7 @@ export async function writeRestLog(args: {
             rest: args.kind,
             kind: 'rest',
             byUserId: args.userId,
+            sessionId: await activeSessionId(args.campaignId),
         },
     });
 }
