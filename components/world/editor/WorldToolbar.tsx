@@ -265,7 +265,7 @@ export function WorldToolHint({
     return (
         <p
             role="status"
-            className="pointer-events-none max-w-[min(34rem,calc(100%-1rem))] rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-center text-xs text-hud-ink"
+            className="pointer-events-none w-max max-w-[min(22rem,calc(100vw-2rem))] rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-center text-xs text-hud-ink"
         >
             {t.rich(tool, { key, vertices })}
         </p>

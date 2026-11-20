@@ -28,6 +28,7 @@ import {
 import { useMarkerBubblePosition, type WorldTool } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
+import { hintPosition } from '@/lib/utils/world/hint-position';
 import { snapPoint } from '@/lib/utils/world/zone-snap';
 import type {
     MapPoint,
@@ -112,6 +113,36 @@ function CardSlot({
             onDoubleClick={(e) => e.stopPropagation()}
         >
             {card.content}
+        </div>
+    );
+}
+
+interface HintPointer {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+function CursorHint({
+    pointer,
+    children,
+}: {
+    pointer: HintPointer;
+    children: ReactNode;
+}) {
+    const { ref, size } = useElementSize<HTMLDivElement>();
+
+    const pos = hintPosition(pointer, pointer, size);
+
+    return (
+        <div
+            ref={ref}
+            data-testid="world-map-hint"
+            className="pointer-events-none absolute z-10"
+            style={{ left: pos.left, top: pos.top }}
+        >
+            {children}
         </div>
     );
 }
@@ -201,6 +232,8 @@ export function WorldMapView({
 
     const [hoveredZone, setHoveredZone] = useState<string | null>(null);
 
+    const [pointer, setPointer] = useState<HintPointer | null>(null);
+
     const [cursor, setCursor] = useState<MapPoint | null>(null);
 
     useEffect(() => {
@@ -247,6 +280,25 @@ export function WorldMapView({
                 'atlas-map relative h-full min-h-[16rem] w-full overflow-hidden rounded-xl border border-hud-rule',
                 className
             )}
+            onPointerMove={(e) => {
+                if (!hint) return;
+
+                if (e.pointerType === 'touch') {
+                    if (pointer) setPointer(null);
+
+                    return;
+                }
+
+                const r = e.currentTarget.getBoundingClientRect();
+
+                setPointer({
+                    x: e.clientX - r.left,
+                    y: e.clientY - r.top,
+                    width: r.width,
+                    height: r.height,
+                });
+            }}
+            onPointerLeave={() => setPointer(null)}
         >
             <div ref={outerRef} className="absolute inset-0">
                 {/* container is always mounted so useViewport can attach its wheel listener on the first commit */}
@@ -426,10 +478,8 @@ export function WorldMapView({
                     ) : null}
                 </div>
             </div>
-            {hint ? (
-                <div className="pointer-events-none absolute top-2 right-2 left-2 z-10 flex justify-center">
-                    {hint}
-                </div>
+            {hint && pointer ? (
+                <CursorHint pointer={pointer}>{hint}</CursorHint>
             ) : null}
             <div
                 data-tour="world.zoom"

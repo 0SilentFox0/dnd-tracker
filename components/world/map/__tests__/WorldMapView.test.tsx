@@ -105,20 +105,37 @@ describe('WorldMapView', () => {
         expect(screen.getByRole('button', { name: 'Forest' })).toBeTruthy();
     });
 
-    it('keeps the hint at the top so it never covers the bottom-right zoom buttons', () => {
-        render(
+    it('shows the hint beside the mouse pointer and hides it for touch', () => {
+        const { container } = render(
             <WorldMapView
                 detail={detail([])}
-                slots={{ hint: <p>підказка</p> }}
+                slots={{ hint: <p>hint text</p> }}
             />
         );
 
-        const wrap = screen.getByText('підказка').parentElement as HTMLElement;
+        const root = container.querySelector('.atlas-map') as HTMLElement;
 
-        expect(wrap.className).toContain('top-2');
-        expect(wrap.className).toContain('right-2');
-        expect(wrap.className).toContain('left-2');
-        expect(wrap.className).not.toContain('bottom-');
+        expect(screen.queryByText('hint text')).toBeNull();
+
+        fireEvent.pointerMove(root, {
+            pointerType: 'mouse',
+            clientX: 100,
+            clientY: 80,
+        });
+
+        const wrap = screen.getByTestId('world-map-hint');
+
+        expect(screen.getByText('hint text')).toBeTruthy();
+        expect(wrap.style.left).toMatch(/px$/);
+        expect(wrap.style.top).toMatch(/px$/);
+
+        fireEvent.pointerMove(root, {
+            pointerType: 'touch',
+            clientX: 100,
+            clientY: 80,
+        });
+
+        expect(screen.queryByText('hint text')).toBeNull();
     });
 
     it('clicking the background reports a normalised point', () => {
@@ -457,6 +474,7 @@ describe('WorldMapView', () => {
                     zone,
                 ])}
                 selectedId="p"
+                fog={{ shapes: [], radius: 0.05 }}
             />
         );
 
