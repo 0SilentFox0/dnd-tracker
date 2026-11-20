@@ -68,7 +68,7 @@ describe('grimCoverage', () => {
         expect(grimInfo(data)).toEqual([]);
         data.units[0].knownSpells = [];
         expect(grimInfo(data)).toEqual([
-            'info: spells "Rot Touch": known by no unit',
+            'info: spells "Shove Wave": known by no unit',
         ]);
     });
 

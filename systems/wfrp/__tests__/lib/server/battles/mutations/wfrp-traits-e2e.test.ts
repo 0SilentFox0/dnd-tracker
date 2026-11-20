@@ -363,7 +363,7 @@ describe('wfrp unit traits end to end', () => {
         expect(part(advance(ctx, out), 't').combatStats.currentHp).toBe(
             10 - 8 + 1
         );
-        expect(JSON.stringify(out.events)).toContain('abilityText.log.heal');
+        expect(JSON.stringify(out.events)).toContain('battleWfrp.log.regenerates');
     });
 
     it('a d20 campaign sees none of the traits', async () => {

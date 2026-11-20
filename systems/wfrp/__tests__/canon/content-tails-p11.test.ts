@@ -52,7 +52,7 @@ const ctx: CreationCtx = {
         tier1: {
             c: {
                 characteristics: ['int'],
-                skills: ['x'],
+                skills: ['x', 'y', 'z'],
                 talents: [],
                 trappings: [],
             },
@@ -66,7 +66,7 @@ const draft = (speciesTalents?: string[]) =>
             career: { mode: 'choice', careerId: 'c' },
             stats: { mode: 'rolled', rolls: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5] },
             talents: [],
-            canon: { careerSkills: { x: 3 }, speciesTalents },
+            canon: { careerSkills: { x: 3, y: 3, z: 2 }, speciesTalents },
         },
         ctx
     );
@@ -105,7 +105,7 @@ describe('canon p29-34: species talent pairs', () => {
                     rolls: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
                 },
                 talents: [],
-                canon: { careerSkills: { x: 3 } },
+                canon: { careerSkills: { x: 3, y: 3, z: 2 } },
             },
             plain
         );

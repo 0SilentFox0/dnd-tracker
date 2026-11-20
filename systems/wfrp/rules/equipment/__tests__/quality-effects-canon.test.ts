@@ -77,14 +77,20 @@ describe('qualityEffects (canon gear)', () => {
         const p = (q: QualityRef[], f: QualityRef[] = []) =>
             qualityAttackSl({ qualities: q, flaws: f }, 'canon');
 
-        expect(p([{ key: 'precise' }])).toEqual({ penalty: 0, onSuccess: 1 });
+        expect(p([{ key: 'precise' }])).toEqual({
+            penalty: 0,
+            onSuccess: 1,
+            onFail: 0,
+        });
         expect(p([], [{ key: 'imprecise' }])).toEqual({
             penalty: -1,
             onSuccess: 0,
+            onFail: 0,
         });
         expect(p([{ key: 'precise' }], [{ key: 'imprecise' }])).toEqual({
             penalty: -1,
             onSuccess: 0,
+            onFail: 0,
         });
         expect(
             qualityToHit(

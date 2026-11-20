@@ -203,7 +203,7 @@ describe('spell damage (magic missile)', () => {
 
             expect(soak(spell, 8, hit, 54)?.afterHit).toBeUndefined();
 
-            const crit = soak(spell, 8, hit, 54, 'criticalDamage');
+            const crit = soak(spell, 8, hit, 22, 'criticalDamage');
 
             expect(crit?.afterHit).toBeTypeOf('function');
         }

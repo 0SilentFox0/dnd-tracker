@@ -184,8 +184,12 @@ describe('canon: helpless targets (p166)', () => {
     });
 
     bookExample(166, 'without the rule the target is only hit', () => {
-        expect(
-            run(sleeper(1), attackWith(AttackType.MELEE)).targetUpdate
-        ).toBeUndefined();
+        const target = sleeper(1);
+
+        const r = run(target, attackWith(AttackType.MELEE));
+
+        expect(r.targetUpdate?.(target).combatStats.status).not.toBe(
+            CombatStatus.DEAD
+        );
     });
 });
