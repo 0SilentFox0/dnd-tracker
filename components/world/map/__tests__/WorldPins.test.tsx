@@ -263,7 +263,7 @@ describe('WorldPins clusters', () => {
             { zoom: 2 }
         );
 
-        expect(screen.getByLabelText('Keep and 2 more')).not.toBeNull();
+        expect(screen.getByLabelText('world.pinCluster {"name":"Keep","count":2}')).not.toBeNull();
     });
 
     it('keeps the selected pin out of a cluster', () => {
@@ -337,7 +337,7 @@ describe('WorldPins clusters', () => {
         fireEvent.click(container.querySelector('[data-cluster]')!);
 
         expect(onClusterZoom).not.toHaveBeenCalled();
-        expect(screen.getByLabelText('Places here')).not.toBeNull();
+        expect(screen.getByLabelText('world.pinClusterList')).not.toBeNull();
     });
 
     it('zooming in splits a cluster into single pins', () => {

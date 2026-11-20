@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WorldPlayClient } from '../WorldPlayClient';
@@ -251,8 +251,10 @@ describe('WorldPlayClient', () => {
 
         const bubble = await screen.findByRole('dialog', { name: 'Town' });
 
-        expect(bubble.textContent).toContain('Old market town');
-        expect(screen.getByText('Відкрити карту')).toBeTruthy();
+        expect(bubble.textContent).toContain('Town');
+        expect(
+            within(bubble).getByRole('button', { name: 'Відкрити карту' })
+        ).toBeTruthy();
     });
 
     it('on a phone the bubble is a bottom sheet with the name once', async () => {
@@ -291,7 +293,7 @@ describe('WorldPlayClient', () => {
 
         await screen.findByRole('dialog', { name: 'Town' });
 
-        expect(screen.queryByText('Відкрити карту')).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Відкрити карту' })).toBeNull();
     });
 
     it('double-click on a pin with an open child map opens it', async () => {
@@ -326,7 +328,7 @@ describe('WorldPlayClient', () => {
         renderClient('m1');
 
         click(await screen.findByRole('button', { name: 'Town' }));
-        fireEvent.click(await screen.findByText('Докладніше'));
+        fireEvent.click(await screen.findByRole('button', { name: 'Докладніше' }));
 
         await waitFor(() =>
             expect(screen.getByLabelText('Нова нотатка')).toBeTruthy()
