@@ -25,7 +25,7 @@
 | `WorldZones` (`FEATHER`, `fillOpacity` 0.6/0.74), `WorldPins` (`sealStyle`) | читають стиль через `resolveMarkerStyle` |
 | `lib/server/assistant/actions/world-service/*` | ті самі Zod-схеми; нові поля додаються й сюди, інакше асистент їх не побачить |
 
-Нового мінімум: `resolveMarkerStyle`, шість колонок, поля в двох формах, псевдорядок легенди.
+Нового мінімум: `resolveMarkerStyle`, п'ять колонок, поля в двох формах, псевдорядок легенди.
 
 ## Дані (expand-only міграція `20261223000000_world_style`)
 
