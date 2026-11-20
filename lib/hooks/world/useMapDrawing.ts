@@ -78,9 +78,11 @@ export function useMapDrawing(
 
         if (!polygon) return;
 
-        setDraft([]);
         actions.onZone(polygon);
-    }, [draft, actions]);
+
+        if (pinned) setDraft([]);
+        else setTool('select');
+    }, [draft, actions, pinned, setTool]);
 
     useEffect(() => {
         if (!enabled) return;

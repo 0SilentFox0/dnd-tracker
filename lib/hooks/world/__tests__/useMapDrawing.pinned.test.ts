@@ -30,6 +30,34 @@ describe('useMapDrawing pinned tool', () => {
         expect(result.current.tool).toBe('select');
     });
 
+    it('a zone returns to select after finishing unless pinned', () => {
+        const triangle = [
+            { x: 0.1, y: 0.1 },
+            { x: 0.5, y: 0.1 },
+            { x: 0.3, y: 0.5 },
+        ];
+
+        const draw = (pin: boolean) => {
+            const a = actions();
+
+            const { result } = renderHook(() => useMapDrawing(a));
+
+            act(() => result.current.setTool('zone', pin));
+            triangle.forEach((p) =>
+                act(() => result.current.handlers.onMapClick(p))
+            );
+            act(() => result.current.finish());
+
+            return { tool: result.current.tool, a };
+        };
+
+        const free = draw(false);
+
+        expect(free.a.onZone).toHaveBeenCalledTimes(1);
+        expect(free.tool).toBe('select');
+        expect(draw(true).tool).toBe('zone');
+    });
+
     it('a pinned tool stays; choosing another tool unpins', () => {
         const { result } = renderHook(() => useMapDrawing(actions()));
 
