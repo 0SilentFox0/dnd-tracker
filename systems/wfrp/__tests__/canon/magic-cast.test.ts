@@ -12,9 +12,9 @@ import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { caster } from '@/systems/wfrp/rules/magic/__tests__/fixtures';
 import { armourSl } from '@/systems/wfrp/rules/magic/armour';
 import { wfrpCastTest } from '@/systems/wfrp/rules/magic/cast-test';
-import { OVERCAST_TABLE } from '@/systems/wfrp/rules/magic/constants';
 import { WFRP_TESTED_MAGIC } from '@/systems/wfrp/rules/magic/index';
 import { wfrpMiscast } from '@/systems/wfrp/rules/magic/miscast';
+import { OVERCAST_COLUMNS } from '@/systems/wfrp/rules/magic/overcast';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ACTION_SLOT } from '@/systems/wfrp/rules/slots';
@@ -154,10 +154,10 @@ describe('canon5e casting', () => {
         236,
         'overcast budget follows the table and is capped at IB + WPB',
         () => {
-            expect(OVERCAST_TABLE.map((r) => r.sl)).toEqual([
+            expect(OVERCAST_COLUMNS.damage.map((r) => r.sl)).toEqual([
                 1, 2, 3, 5, 8, 13, 18,
             ]);
-            expect(OVERCAST_TABLE.map((r) => r.damage)).toEqual([
+            expect(OVERCAST_COLUMNS.damage.map((r) => r.value)).toEqual([
                 1, 2, 3, 4, 5, 6, 7,
             ]);
 

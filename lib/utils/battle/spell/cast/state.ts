@@ -23,6 +23,7 @@ import type {
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { BattleAction, DamageStep } from '@/types/battle-actions';
+import type { GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type ChosenSpell = Omit<CastableSpell, 'definition'> & {
@@ -58,6 +59,8 @@ export interface SpellCastState {
     attackBonus?: number;
     overcastDamage: number;
     castDetails?: SystemSlot;
+    /** Cells of the targets that remain when the roll could not pay for all declared ones */
+    finalTargets?: readonly GridPoint[];
     battleId: string;
     actionModifiers: Record<string, StaticEffect[]>;
     rng: () => number;

@@ -58,7 +58,13 @@ export function settleCastTest(
     const casterId = state.caster.basicInfo.id;
 
     if (cast.casterUpdate)
-        put(state.flow, cast.casterUpdate(getP(state.flow, casterId)));
+        put(
+            state.flow,
+            cast.casterUpdate(
+                getP(state.flow, casterId),
+                state.finalTargets && { targets: state.finalTargets }
+            )
+        );
 
     if (!cast.miscast) return;
 

@@ -32,17 +32,30 @@ export interface CastTestCtx {
     system?: SystemSlot;
 }
 
+/** What an overcast adds beyond the spell's listed range, targets, area and duration; absent fields change nothing */
+export interface CastExtension {
+    rangeMul?: number;
+    extraTargets?: number;
+    areaMul?: number;
+    durationMul?: number;
+}
+
 export interface CastTestResult {
     success: boolean;
     margin: number;
     overcastSteps: number;
     /** Flat damage the overcast adds; when set, `overcastSteps` no longer raises the cast level or adds dice */
     overcastDamage?: number;
+    /** The extension the roll paid for; targets, range and area beyond it are dropped by the cast */
+    extension?: CastExtension;
     miscast: string | null;
     details: SystemSlot;
     lines: LogLine[];
-    /** Applied by the pipeline to the up-to-date caster (spent resources, banked state) */
-    casterUpdate?: (p: BattleParticipant) => BattleParticipant;
+    /** Applied by the pipeline to the up-to-date caster (spent resources, banked state); `final.targets` is set when the cast dropped targets the roll could not pay for */
+    casterUpdate?: (
+        p: BattleParticipant,
+        final?: { targets: readonly GridPoint[] }
+    ) => BattleParticipant;
 }
 
 export type CastResourceGate =
@@ -116,6 +129,12 @@ export interface RuleSystemTestedMagic {
         who: { name: string; spell: string }
     ): CastTestResult;
     castTest(ctx: CastTestCtx): CastTestResult;
+    /** The extension a request declares before the roll, for validating targets, range and area */
+    declaredExtension?(ctx: {
+        system?: SystemSlot;
+        magic: SpellMagic;
+        rules: Ruleset;
+    }): CastExtension | undefined;
     /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
     castPreview(
         caster: BattleParticipant,

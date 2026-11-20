@@ -23,6 +23,7 @@ import {
     settleCastTest,
 } from '@/lib/utils/battle/spell/cast/cast-test';
 import { applyTo } from '@/lib/utils/battle/spell/cast/effects';
+import { applyCastExtension } from '@/lib/utils/battle/spell/cast/extension';
 import {
     finishSpellAction,
     spendCastCost,
@@ -92,9 +93,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         isDMCast = false,
     } = params;
 
-    const targetIds = [...new Set(requestedIds)];
+    let targetIds = [...new Set(requestedIds)];
 
-    const spell: ChosenSpell = {
+    let spell: ChosenSpell = {
         ...source,
         definition: {
             ...source.definition,
@@ -105,7 +106,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         },
     };
 
-    const def = spell.definition;
+    let def = spell.definition;
 
     if (def.executionMode === 'manual') {
         const message = actionReason('manualSpell');
@@ -236,6 +237,35 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
               })
             : rolled;
 
+    const extended = applyCastExtension(
+        spell,
+        targetIds,
+        spellMagic
+            ? percentile?.declaredExtension?.({
+                  system: params.castTest?.system,
+                  magic: spellMagic,
+                  rules: params.rules,
+              })
+            : undefined,
+        test?.extension,
+        {
+            caster: readyCaster,
+            participants: flow.ps,
+            rules: params.rules,
+            aim: params.aim,
+        }
+    );
+
+    spell = extended.spell;
+    def = spell.definition;
+    targetIds = extended.targetIds;
+
+    const finalTargets = extended.dropped
+        ? targetIds.flatMap(
+              (id) => findParticipant(flow.ps, id)?.battleData.position ?? []
+          )
+        : undefined;
+
     const overcastDice = test?.overcastDamage === undefined;
 
     const overcastSteps =
@@ -338,6 +368,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         attackBonus: params.grant?.attackBonus,
         overcastDamage,
         castDetails: test?.details,
+        finalTargets,
         battleId,
         actionModifiers,
         rng,
@@ -355,7 +386,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         dealt: 0,
     };
 
-    if (test) flow.messages.push(...test.lines);
+    if (test) flow.messages.push(...test.lines, ...extended.messages);
 
     const settle =
         percentile && spellMagic && test

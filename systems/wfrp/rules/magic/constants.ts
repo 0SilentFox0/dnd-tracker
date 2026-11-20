@@ -32,27 +32,6 @@ export const MAJOR_MISCAST_ROLLS: ReadonlySet<number> = new Set([99, 100]);
 // verify against 5e book
 export const WORST_ROLL = 100;
 
-/** Canon5e overcast table (p236): from this SL on, the listed bonus is available; values are cumulative per row */
-export interface OvercastRow {
-    sl: number;
-    damage: number;
-    targets: number;
-    rangeMul: number;
-    aoeMul: number;
-    durationMul: number;
-}
-
-// AoE x3 at SL 8 is unreadable in the extracted page; it carries the SL 5 value
-export const OVERCAST_TABLE: readonly OvercastRow[] = [
-    { sl: 1, damage: 1, targets: 0, rangeMul: 1, aoeMul: 1, durationMul: 1 },
-    { sl: 2, damage: 2, targets: 1, rangeMul: 2, aoeMul: 1, durationMul: 1 },
-    { sl: 3, damage: 3, targets: 1, rangeMul: 2, aoeMul: 1, durationMul: 2 },
-    { sl: 5, damage: 4, targets: 1, rangeMul: 2, aoeMul: 2, durationMul: 2 },
-    { sl: 8, damage: 5, targets: 2, rangeMul: 3, aoeMul: 2, durationMul: 2 },
-    { sl: 13, damage: 6, targets: 2, rangeMul: 3, aoeMul: 2, durationMul: 3 },
-    { sl: 18, damage: 7, targets: 3, rangeMul: 4, aoeMul: 3, durationMul: 3 },
-];
-
 export const CRIT_BONUS_DEFAULT = 'totalPower' as const;
 
 export const SIN_WRATH_STEP = 10;

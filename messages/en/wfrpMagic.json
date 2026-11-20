@@ -13,6 +13,7 @@
     "channelLost": "{name} loses {lost} SL of the pool, {left} left",
     "channelKept": "{name} holds the pool of {left} SL",
     "wrath": "{name} stirs divine wrath! {effect}",
+    "overcastTrimmed": "{name} declared {declared} SL of overcast but only {available} SL are available: the spread is cut back",
     "ingredientAverts": "{name} burns an ingredient and the miscast of {spell} fizzles out",
     "ingredientLowers": "{name} burns an ingredient and the miscast of {spell} is weakened to a minor one",
     "dispelSuccess": "{name} dispels {spell} of {caster}: SL {sl}, the spell has no effect",
@@ -58,6 +59,17 @@
         "totalPower": "Total power",
         "unstoppableForce": "Unstoppable force"
       },
+      "overcastTitle": "Overcast (up to {cap} SL beyond CN)",
+      "overcastSpent": "Declared {spent} of {cap} SL; cut after the roll if the SL fall short",
+      "overcastDim": {
+        "damage": "Damage",
+        "targets": "Targets",
+        "range": "Range",
+        "aoe": "Area",
+        "duration": "Duration"
+      },
+      "overcastMore": "More {dim}",
+      "overcastLess": "Less {dim}",
       "blessing": "Blessing overcast",
       "blessings": {
         "rangeYards": "Range",

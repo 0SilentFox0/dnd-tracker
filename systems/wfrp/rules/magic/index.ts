@@ -9,6 +9,7 @@ import {
     isPrayerKind,
     prayTargetOf,
     wfrpCastTest,
+    wfrpDeclaredExtension,
 } from './cast-test';
 import { channelTargetOf, wfrpChannel } from './channel';
 import { wfrpCastReaction } from './dispel-reaction';
@@ -66,6 +67,7 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
         };
     },
     castTest: wfrpCastTest,
+    declaredExtension: wfrpDeclaredExtension,
     castPreview: (caster, kind, rules) => {
         const prayer = isPrayerKind(kind);
 
