@@ -140,6 +140,24 @@ export function useWorldEditorPage({
         hotkey: tool === 'select',
     });
 
+    const [snapEnabled, setSnapEnabled] = useState(true);
+
+    const snapZones = useMemo(
+        () =>
+            (detail.data?.markers ?? NO_MARKERS).flatMap((m) =>
+                m.kind === 'zone' && m.polygon && m.id !== redrawId
+                    ? [m.polygon]
+                    : []
+            ),
+        [detail.data?.markers, redrawId]
+    );
+
+    const changeVertices = useCallback(
+        (id: string, polygon: Polygon) =>
+            void editor.marker.update.mutateOk({ id, data: { polygon } }),
+        [editor.marker.update]
+    );
+
     const closePanel = useCallback(() => {
         select(null);
         setSettingsOpen(false);
@@ -208,12 +226,22 @@ export function useWorldEditorPage({
     return {
         ctx,
         data: { maps, detail, roster },
-        tools: { eyes, drawing, moveTarget, editor },
+        tools: {
+            eyes,
+            drawing,
+            moveTarget,
+            editor,
+            snap: {
+                zones: snapZones,
+                enabled: snapEnabled,
+                setEnabled: setSnapEnabled,
+            },
+        },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: {
             create: { open: creating, set: setCreating },
             settings: { open: settingsOpen, set: setSettingsOpen },
         },
-        actions: { openMap, changeEyes },
+        actions: { openMap, changeEyes, changeVertices },
     };
 }

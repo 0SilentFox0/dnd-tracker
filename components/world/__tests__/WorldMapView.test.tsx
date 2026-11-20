@@ -596,3 +596,147 @@ describe('WorldMapView', () => {
         );
     });
 });
+
+describe('WorldMapView zone snapping', () => {
+    const neighbour = marker({
+        id: 'z',
+        kind: 'zone',
+        name: 'Forest',
+        polygon: ring([
+            [0.1, 0.1],
+            [0.4, 0.1],
+            [0.2, 0.4],
+        ]),
+    });
+
+    const click = (x: number, y: number, altKey = false) => {
+        fireEvent.pointerDown(box(), { pointerId: 1, clientX: x, clientY: y });
+        fireEvent.pointerUp(box(), {
+            pointerId: 1,
+            clientX: x,
+            clientY: y,
+            altKey,
+        });
+    };
+
+    const snap = (enabled: boolean) => ({
+        zones: [neighbour.polygon as [number, number][]],
+        enabled,
+    });
+
+    it('a zone click near a vertex lands exactly on it', () => {
+        const onMapClick = vi.fn();
+
+        render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                tool="zone"
+                snap={snap(true)}
+                handlers={{ onMapClick }}
+            />
+        );
+        click(88, 66);
+
+        expect(onMapClick).toHaveBeenCalledWith({ x: 0.1, y: 0.1 });
+    });
+
+    it('Alt or disabled snapping passes the raw point', () => {
+        const onMapClick = vi.fn();
+
+        const { rerender } = render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                tool="zone"
+                snap={snap(true)}
+                handlers={{ onMapClick }}
+            />
+        );
+
+        click(88, 66, true);
+        expect(onMapClick).toHaveBeenLastCalledWith({ x: 0.11, y: 0.11 });
+
+        rerender(
+            <WorldMapView
+                detail={detail([neighbour])}
+                tool="zone"
+                snap={snap(false)}
+                handlers={{ onMapClick }}
+            />
+        );
+        click(88, 66);
+        expect(onMapClick).toHaveBeenLastCalledWith({ x: 0.11, y: 0.11 });
+    });
+
+    it('a click outside the snap radius is not moved', () => {
+        const onMapClick = vi.fn();
+
+        render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                tool="zone"
+                snap={snap(true)}
+                handlers={{ onMapClick }}
+            />
+        );
+        click(160, 120);
+
+        expect(onMapClick).toHaveBeenCalledWith({ x: 0.2, y: 0.2 });
+    });
+
+    it('shows vertex handles only for the selected zone in select mode with onVertexChange', () => {
+        const { container, rerender } = render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                selectedId="z"
+                handlers={{ onVertexChange: vi.fn() }}
+            />
+        );
+
+        expect(container.querySelectorAll('[data-vertex]')).toHaveLength(3);
+
+        rerender(
+            <WorldMapView
+                detail={detail([neighbour])}
+                selectedId="z"
+                tool="zone"
+                handlers={{ onVertexChange: vi.fn() }}
+            />
+        );
+        expect(container.querySelectorAll('[data-vertex]')).toHaveLength(0);
+    });
+
+    it('double-click on a vertex removes it, keeping at least three', () => {
+        const onVertexChange = vi.fn();
+
+        const square = marker({
+            id: 'q',
+            kind: 'zone',
+            name: 'Sq',
+            polygon: ring([
+                [0.1, 0.1],
+                [0.4, 0.1],
+                [0.4, 0.4],
+                [0.1, 0.4],
+            ]),
+        });
+
+        const { container } = render(
+            <WorldMapView
+                detail={detail([square])}
+                selectedId="q"
+                handlers={{ onVertexChange }}
+            />
+        );
+
+        fireEvent.doubleClick(
+            container.querySelector('[data-vertex="0"]') as Element
+        );
+
+        expect(onVertexChange).toHaveBeenCalledWith('q', [
+            [0.4, 0.1],
+            [0.4, 0.4],
+            [0.1, 0.4],
+            [0.4, 0.1],
+        ]);
+    });
+});

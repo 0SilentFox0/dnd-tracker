@@ -60,7 +60,7 @@ export function snapPoint(
     return vertex ?? edge ?? p;
 }
 
-const key = (a: Pt, b: Pt) => {
+export const edgeKey = (a: Pt, b: Pt) => {
     const [s, e] = [a, b].sort((u, v) => u[0] - v[0] || u[1] - v[1]);
 
     return `${s[0]},${s[1]}|${e[0]},${e[1]}`;
@@ -74,7 +74,7 @@ export function sharedEdges(zones: Polygon[]): Set<string> {
     for (const poly of zones) {
         const own = new Set<string>();
 
-        poly.forEach((a, i) => own.add(key(a, poly[(i + 1) % poly.length])));
+        poly.forEach((a, i) => own.add(edgeKey(a, poly[(i + 1) % poly.length])));
 
         for (const k of own) {
             if (seen.has(k)) shared.add(k);

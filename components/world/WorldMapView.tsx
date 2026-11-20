@@ -15,10 +15,11 @@ import { WorldFog } from './WorldFog';
 import { WorldHeroes } from './WorldHeroes';
 import { WorldPins } from './WorldPins';
 import { WorldZones } from './WorldZones';
+import { ZoneVertexHandles } from './ZoneVertexHandles';
 
 import './world-atlas.css';
 import { Button } from '@/components/ui/button';
-import { WORLD_MAX_ZOOM } from '@/lib/constants/world';
+import { WORLD_MAX_ZOOM, WORLD_SNAP_PX } from '@/lib/constants/world';
 import {
     useElementSize,
     useReducedMotion,
@@ -27,8 +28,10 @@ import {
 import type { WorldTool } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
+import { snapPoint } from '@/lib/utils/world/zone-snap';
 import type {
     MapPoint,
+    Polygon,
     RevealShape,
     WorldHero,
     WorldMapDetail,
@@ -51,7 +54,9 @@ export interface WorldMapViewProps {
         onMarkerClick?(id: string): void;
         onMarkerDrag?(id: string, p: MapPoint): void;
         onHeroClick?(id: string): void;
+        onVertexChange?(markerId: string, polygon: Polygon): void;
     };
+    snap?: { zones: Polygon[]; enabled: boolean };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
     focus?: { point: MapPoint; seq: number };
@@ -67,6 +72,7 @@ export function WorldMapView({
     draft,
     tool = 'select',
     handlers = {},
+    snap,
     fog,
     heroes,
     focus,
@@ -106,6 +112,41 @@ export function WorldMapView({
             { zoom, offset }
         );
 
+    const snappedAt = (
+        clientX: number,
+        clientY: number,
+        alt: boolean,
+        skip?: Polygon | null
+    ) => {
+        const p = pointAt(clientX, clientY);
+
+        return snap?.enabled && !alt
+            ? snapPoint(
+                  p,
+                  snap.zones.filter((z) => z !== skip),
+                  WORLD_SNAP_PX / (box.width * zoom)
+              )
+            : p;
+    };
+
+    const [preview, setPreview] = useState<{
+        id: string;
+        polygon: Polygon;
+    } | null>(null);
+
+    const shownMarkers = preview
+        ? markers.map((m) =>
+              m.id === preview.id ? { ...m, polygon: preview.polygon } : m
+          )
+        : markers;
+
+    const editingZone =
+        tool === 'select' && handlers.onVertexChange
+            ? shownMarkers.find(
+                  (m) => m.id === selectedId && m.kind === 'zone' && m.polygon
+              )
+            : undefined;
+
     const [cursor, setCursor] = useState<MapPoint | null>(null);
 
     useEffect(() => {
@@ -140,7 +181,12 @@ export function WorldMapView({
                 : undefined;
 
         if (zoneId) handlers.onMarkerClick?.(zoneId);
-        else handlers.onMapClick?.(pointAt(e.clientX, e.clientY));
+        else
+            handlers.onMapClick?.(
+                tool === 'zone'
+                    ? snappedAt(e.clientX, e.clientY, e.altKey)
+                    : pointAt(e.clientX, e.clientY)
+            );
     };
 
     return (
@@ -173,13 +219,17 @@ export function WorldMapView({
                         bind.onPointerMove(e);
 
                         if (tool === 'zone' && draft?.length)
-                            setCursor(pointAt(e.clientX, e.clientY));
+                            setCursor(
+                                snappedAt(e.clientX, e.clientY, e.altKey)
+                            );
                     }}
                     onPointerUp={onBackgroundUp}
                     onPointerCancel={bind.onPointerCancel}
                     onDoubleClick={(e) =>
                         handlers.onMapDoubleClick?.(
-                            pointAt(e.clientX, e.clientY)
+                            tool === 'zone'
+                                ? snappedAt(e.clientX, e.clientY, e.altKey)
+                                : pointAt(e.clientX, e.clientY)
                         )
                     }
                 >
@@ -195,7 +245,7 @@ export function WorldMapView({
                                 className="pointer-events-none object-fill select-none"
                             />
                             <WorldZones
-                                markers={markers}
+                                markers={shownMarkers}
                                 selectedId={selectedId}
                                 draft={draft}
                                 cursor={tool === 'zone' ? cursor : null}
@@ -203,6 +253,36 @@ export function WorldMapView({
                                     tool === 'select' || tool === 'move'
                                 }
                             />
+                            {editingZone?.polygon &&
+                            handlers.onVertexChange ? (
+                                <ZoneVertexHandles
+                                    markerId={editingZone.id}
+                                    polygon={editingZone.polygon}
+                                    zoom={zoom}
+                                    pointAt={(x, y, alt) =>
+                                        snappedAt(
+                                            x,
+                                            y,
+                                            alt,
+                                            markers.find(
+                                                (m) =>
+                                                    m.id === editingZone.id
+                                            )?.polygon
+                                        )
+                                    }
+                                    onPreview={(polygon) =>
+                                        setPreview(
+                                            polygon
+                                                ? {
+                                                      id: editingZone.id,
+                                                      polygon,
+                                                  }
+                                                : null
+                                        )
+                                    }
+                                    onChange={handlers.onVertexChange}
+                                />
+                            ) : null}
                             {draft?.map((p, i) => (
                                 <span
                                     key={i}

@@ -232,5 +232,25 @@
     "heroesUnique": "Heroes must not repeat",
     "noteEmpty": "The note is empty",
     "noteMax": "Note: up to {maximum} characters"
+  },
+  "vertex": {
+    "vertex": "Vertex {index}",
+    "insert": "Add vertex"
+  },
+  "tree": {
+    "label": "Maps"
+  },
+  "bubble": {
+    "more": "Read more",
+    "openMap": "Open map",
+    "close": "Close"
+  },
+  "search": {
+    "label": "Search places",
+    "placeholder": "Name or description",
+    "empty": "Nothing found",
+    "kindPoint": "Points",
+    "kindZone": "Zones",
+    "legend": "Filters"
   }
 }

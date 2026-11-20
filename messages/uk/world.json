@@ -232,5 +232,25 @@
     "heroesUnique": "Герої не мають повторюватися",
     "noteEmpty": "Нотатка порожня",
     "noteMax": "Нотатка — до {maximum} символів"
+  },
+  "vertex": {
+    "vertex": "Вершина {index}",
+    "insert": "Додати вершину"
+  },
+  "tree": {
+    "label": "Карти"
+  },
+  "bubble": {
+    "more": "Докладніше",
+    "openMap": "Відкрити карту",
+    "close": "Закрити"
+  },
+  "search": {
+    "label": "Пошук місць",
+    "placeholder": "Назва або опис",
+    "empty": "Нічого не знайдено",
+    "kindPoint": "Точки",
+    "kindZone": "Зони",
+    "legend": "Фільтри"
   }
 }

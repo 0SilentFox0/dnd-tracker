@@ -45,6 +45,20 @@ export function closePolygon(points: MapPoint[]): Polygon | null {
     return ring;
 }
 
+export function polygonArea(ring: Polygon): number {
+    let sum = 0;
+
+    for (let i = 0; i < ring.length; i++) {
+        const [x0, y0] = ring[i];
+
+        const [x1, y1] = ring[(i + 1) % ring.length];
+
+        sum += x0 * y1 - x1 * y0;
+    }
+
+    return Math.abs(sum) / 2;
+}
+
 export function polygonCentroid(polygon: Polygon): MapPoint {
     const ring =
         polygon.length > 1 &&

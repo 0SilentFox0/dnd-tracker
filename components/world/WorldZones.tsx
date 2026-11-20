@@ -1,8 +1,37 @@
 import { DEFAULT_ZONE_COLOR } from '@/lib/constants/world';
+import { edgeKey, sharedEdges } from '@/lib/utils/world/zone-snap';
 import type { MapPoint, WorldMarker } from '@/types/world';
 
 const asPoints = (ring: [number, number][]) =>
     ring.map(([x, y]) => `${x},${y}`).join(' ');
+
+type Edge = { key: string; d: string };
+
+function uniqueEdges(markers: WorldMarker[]): Edge[] {
+    const rings = markers.flatMap((m) =>
+        m.kind === 'zone' && m.polygon ? [m.polygon] : []
+    );
+
+    const edges = new Map<string, Edge>();
+
+    for (const ring of rings) {
+        ring.forEach((a, i) => {
+            const b = ring[(i + 1) % ring.length];
+
+            if (a[0] === b[0] && a[1] === b[1]) return;
+
+            const key = edgeKey(a, b);
+
+            if (!edges.has(key))
+                edges.set(key, {
+                    key,
+                    d: `M${a[0]},${a[1]}L${b[0]},${b[1]}`,
+                });
+        });
+    }
+
+    return [...edges.values()];
+}
 
 interface WorldZonesProps {
     markers: WorldMarker[];
@@ -21,6 +50,14 @@ export function WorldZones({
 }: WorldZonesProps) {
     const last = draft?.[draft.length - 1];
 
+    const edges = uniqueEdges(markers);
+
+    const shared = sharedEdges(
+        markers.flatMap((m) =>
+            m.kind === 'zone' && m.polygon ? [m.polygon] : []
+        )
+    );
+
     return (
         <svg
             viewBox="0 0 1 1"
@@ -31,38 +68,53 @@ export function WorldZones({
             {markers.map((m) => {
                 if (m.kind !== 'zone' || !m.polygon) return null;
 
-                const color = m.color ?? DEFAULT_ZONE_COLOR;
-
                 const selected = m.id === selectedId;
 
-                const points = asPoints(m.polygon);
-
                 return (
-                    <g key={m.id}>
-                        <polygon
-                            data-zone-id={m.id}
-                            data-interactive={interactive}
-                            className="atlas-zone-area"
-                            points={points}
-                            fill={color}
-                            fillOpacity={selected ? 0.34 : 0.22}
-                            stroke="var(--atlas-ink)"
-                            strokeWidth={selected ? 4.5 : 1.5}
-                            strokeDasharray={selected ? undefined : '6 4'}
-                            vectorEffect="non-scaling-stroke"
-                        />
-                        {selected ? (
-                            <polygon
-                                points={points}
-                                fill="none"
-                                stroke="var(--atlas-paper)"
-                                strokeWidth={1.5}
-                                vectorEffect="non-scaling-stroke"
-                            />
-                        ) : null}
-                    </g>
+                    <polygon
+                        key={m.id}
+                        data-zone-id={m.id}
+                        data-interactive={interactive}
+                        className="atlas-zone-area"
+                        points={asPoints(m.polygon)}
+                        fill={m.color ?? DEFAULT_ZONE_COLOR}
+                        fillOpacity={selected ? 0.38 : 0.28}
+                    />
                 );
             })}
+            {edges.map((e) => (
+                <g key={e.key}>
+                    <path
+                        d={e.d}
+                        fill="none"
+                        stroke="var(--atlas-paper)"
+                        strokeWidth={3.5}
+                        strokeOpacity={0.55}
+                        vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                        data-edge
+                        data-shared-edge={shared.has(e.key) || undefined}
+                        d={e.d}
+                        fill="none"
+                        stroke="var(--atlas-ink)"
+                        strokeWidth={2}
+                        vectorEffect="non-scaling-stroke"
+                    />
+                </g>
+            ))}
+            {markers.map((m) =>
+                m.kind === 'zone' && m.polygon && m.id === selectedId ? (
+                    <polygon
+                        key={m.id}
+                        points={asPoints(m.polygon)}
+                        fill="none"
+                        stroke="var(--color-hud-gold-bright, #ffe08a)"
+                        strokeWidth={3}
+                        vectorEffect="non-scaling-stroke"
+                    />
+                ) : null
+            )}
             {draft && draft.length > 1 ? (
                 <polyline
                     points={asPoints(draft.map((p) => [p.x, p.y]))}

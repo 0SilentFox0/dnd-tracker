@@ -11,8 +11,8 @@ import {
     WORLD_ZONE_LABEL_HIDE_ZOOM,
 } from '@/lib/constants/world';
 import { DRAG_THRESHOLD } from '@/lib/hooks/common';
-import { polygonCentroid } from '@/lib/utils/world/geometry';
-import type { MapPoint, WorldMarker } from '@/types/world';
+import { polygonArea, polygonCentroid } from '@/lib/utils/world/geometry';
+import type { MapPoint, Polygon, WorldMarker } from '@/types/world';
 
 export interface PinHandlers {
     onMarkerClick?(id: string): void;
@@ -31,6 +31,9 @@ interface WorldPinsProps {
     };
     handlers: PinHandlers;
 }
+
+const zoneLabelSize = (polygon: Polygon) =>
+    Math.round(Math.min(20, Math.max(11, 10 + Math.sqrt(polygonArea(polygon)) * 40)));
 
 const anchor = (m: WorldMarker): MapPoint =>
     m.kind === 'zone' && m.polygon
@@ -91,6 +94,9 @@ export function WorldPins({
                                 left: `${spot.x * 100}%`,
                                 top: `${spot.y * 100}%`,
                                 transform: `translate(-50%, -50%) scale(${1 / zoom})`,
+                                fontSize: m.polygon
+                                    ? zoneLabelSize(m.polygon)
+                                    : undefined,
                             }}
                         >
                             {m.name}

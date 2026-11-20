@@ -58,10 +58,10 @@ export function WorldEditorPageClient({
     const {
         ctx,
         data: { maps, detail, roster },
-        tools: { eyes, drawing, moveTarget, editor },
+        tools: { eyes, drawing, moveTarget, editor, snap },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: { create: creating, settings },
-        actions: { openMap, changeEyes },
+        actions: { openMap, changeEyes, changeVertices },
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
@@ -235,8 +235,11 @@ export function WorldEditorPageClient({
                                                                         }
                                                                     />
                                                                 }
+                                                                snap={snap}
                                                                 handlers={{
                                                                     ...drawing.handlers,
+                                                                    onVertexChange:
+                                                                        changeVertices,
                                                                     onMapClick:
                                                                         (p) =>
                                                                             tool ===
