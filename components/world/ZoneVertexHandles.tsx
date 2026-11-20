@@ -30,9 +30,7 @@ export function ZoneVertexHandles({
 }: ZoneVertexHandlesProps) {
     const t = useTranslations('world.vertex');
 
-    const open = polygon
-        .slice(0, -1)
-        .map(([x, y]): MapPoint => ({ x, y }));
+    const open = polygon.slice(0, -1).map(([x, y]): MapPoint => ({ x, y }));
 
     const [drag, setDrag] = useState<{
         index: number;
@@ -121,7 +119,7 @@ export function ZoneVertexHandles({
                                 remove(i);
                             }}
                         />
-                        {(
+                        {
                             <HudButton
                                 type="button"
                                 data-mid="true"
@@ -147,7 +145,7 @@ export function ZoneVertexHandles({
                                 }}
                                 onPointerCancel={end}
                             />
-                        )}
+                        }
                     </span>
                 );
             })}

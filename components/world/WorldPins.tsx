@@ -16,6 +16,7 @@ import type { MapPoint, Polygon, WorldMarker } from '@/types/world';
 
 export interface PinHandlers {
     onMarkerClick?(id: string): void;
+    onMarkerDoubleClick?(id: string): void;
     onMarkerDrag?(id: string, p: MapPoint): void;
 }
 
@@ -33,7 +34,13 @@ interface WorldPinsProps {
 }
 
 const zoneLabelSize = (polygon: Polygon) =>
-    Math.round(Math.min(20, Math.max(11, 10 + Math.sqrt(polygonArea(polygon)) * 40)));
+    Math.round(
+        Math.min(20, Math.max(11, 10 + Math.sqrt(polygonArea(polygon)) * 40))
+    );
+
+const sealStyle = (color: string) => ({
+    background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 70%, white), ${color} 62%, color-mix(in srgb, ${color} 55%, black))`,
+});
 
 const anchor = (m: WorldMarker): MapPoint =>
     m.kind === 'zone' && m.polygon
@@ -181,9 +188,15 @@ export function WorldPins({
                             if (moved) onDragEnd(m.id, e.clientX, e.clientY);
                             else handlers.onMarkerClick?.(m.id);
                         }}
-                        onDoubleClick={(e) => e.stopPropagation()}
+                        onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            handlers.onMarkerDoubleClick?.(m.id);
+                        }}
                     >
-                        <span className="atlas-seal">
+                        <span
+                            className="atlas-seal"
+                            style={m.color ? sealStyle(m.color) : undefined}
+                        >
                             <Icon className="size-4" aria-hidden />
                         </span>
                         <span className="atlas-label">{m.name}</span>

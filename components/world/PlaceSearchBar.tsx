@@ -28,7 +28,9 @@ export function PlaceSearchBar({ markers, onPick }: PlaceSearchBarProps) {
 
     const [icon, setIcon] = useState<string | null>(null);
 
-    const icons = [...new Set(markers.flatMap((m) => (m.icon ? [m.icon] : [])))];
+    const icons = [
+        ...new Set(markers.flatMap((m) => (m.icon ? [m.icon] : []))),
+    ];
 
     const active = search.isActive || kind !== null || icon !== null;
 
@@ -58,7 +60,11 @@ export function PlaceSearchBar({ markers, onPick }: PlaceSearchBarProps) {
                         active={kind === k}
                         onClick={() => setKind(kind === k ? null : k)}
                     >
-                        {t(k === 'point' ? 'search.kindPoint' : 'search.kindZone')}
+                        {t(
+                            k === 'point'
+                                ? 'search.kindPoint'
+                                : 'search.kindZone'
+                        )}
                     </HudToggleChip>
                 ))}
                 {icons.map((key) => {
@@ -71,7 +77,10 @@ export function PlaceSearchBar({ markers, onPick }: PlaceSearchBarProps) {
                             onClick={() => setIcon(icon === key ? null : key)}
                         >
                             {Icon ? (
-                                <Icon className="mr-1 inline size-3" aria-hidden />
+                                <Icon
+                                    className="mr-1 inline size-3"
+                                    aria-hidden
+                                />
                             ) : null}
                             {iconLabel(key)}
                         </HudToggleChip>

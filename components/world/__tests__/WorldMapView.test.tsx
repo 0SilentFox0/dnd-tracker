@@ -758,7 +758,11 @@ describe('WorldMapView card slot', () => {
         expect(card.parentElement).toBe(box());
         expect(card.dataset.placement).toBe('above');
 
-        fireEvent.pointerDown(card, { pointerId: 1, clientX: 400, clientY: 300 });
+        fireEvent.pointerDown(card, {
+            pointerId: 1,
+            clientX: 400,
+            clientY: 300,
+        });
         fireEvent.pointerUp(card, { pointerId: 1, clientX: 400, clientY: 300 });
 
         expect(onMapClick).not.toHaveBeenCalled();

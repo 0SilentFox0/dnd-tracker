@@ -12,7 +12,7 @@ export interface WorldEditorCtx {
     select(id: string | null): void;
     openMap(mapId: string | null): void;
     tool: WorldTool;
-    setTool(tool: WorldTool): void;
+    setTool(tool: WorldTool, pin?: boolean): void;
     redrawId: string | null;
     redraw(markerId: string | null): void;
 }

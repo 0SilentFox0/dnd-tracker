@@ -1,7 +1,13 @@
 export { worldKeys } from './keys';
 export type { WorldEditorCtx } from './types';
 export { useHeroEyes } from './useHeroEyes';
-export { useMapDrawing, type WorldTool } from './useMapDrawing';
+export {
+    MODE_HOME_TOOL,
+    MODE_TOOLS,
+    useMapDrawing,
+    type WorldMode,
+    type WorldTool,
+} from './useMapDrawing';
 export { useMapFields } from './useMapFields';
 export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';

@@ -4,14 +4,16 @@ import { useTranslations } from 'next-intl';
 import { Map as MapIcon } from 'lucide-react';
 
 import { EmptyState, QueryState } from '@/components/common/states';
+import { HudToggleChip } from '@/components/hud';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { DmMarkerBubble } from '@/components/world/editor/DmMarkerBubble';
 import { NewWorldMapDialog } from '@/components/world/editor/maps/NewWorldMapDialog';
 import { WorldMapSettings } from '@/components/world/editor/maps/WorldMapSettings';
+import { ModeSwitch } from '@/components/world/editor/ModeSwitch';
 import { HeroEyesSelect } from '@/components/world/editor/panels/HeroEyesSelect';
-import { WorldInspectorBar } from '@/components/world/editor/panels/WorldInspectorBar';
 import { WorldMarkerPanel } from '@/components/world/editor/panels/WorldMarkerPanel';
 import { WorldBreadcrumbs } from '@/components/world/editor/WorldBreadcrumbs';
 import { WorldEditorContext } from '@/components/world/editor/WorldEditorContext';
@@ -19,6 +21,7 @@ import {
     WorldToolbar,
     WorldToolHint,
 } from '@/components/world/editor/WorldToolbar';
+import { MapTree } from '@/components/world/MapTree';
 import { CompassRose } from '@/components/world/marker-icons';
 import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
@@ -26,6 +29,7 @@ import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
+import { polygonCentroid } from '@/lib/utils/world/geometry';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const ENTRY_COMPASS = {
@@ -58,9 +62,9 @@ export function WorldEditorPageClient({
     const {
         ctx,
         data: { maps, detail, roster },
-        tools: { eyes, drawing, moveTarget, editor, snap },
+        tools: { eyes, drawing, moveTarget, editor, snap, mode },
         selected: { id: selectedId, select, close: closePanel },
-        dialogs: { create: creating, settings },
+        dialogs: { create: creating, details, tree },
         actions: { openMap, changeEyes, changeVertices },
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
@@ -82,6 +86,31 @@ export function WorldEditorPageClient({
         </>
     );
 
+    const treeShown = isDesktop ? (tree.open ?? true) : tree.open === true;
+
+    const mapTree = (
+        <MapTree
+            maps={maps.data ?? []}
+            activeId={mapId}
+            onOpen={(id) => {
+                openMap(id);
+
+                if (!isDesktop) tree.set(false);
+            }}
+            footer={
+                maps.data?.length === 0 ? (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => creating.set(true)}
+                    >
+                        {t('tree.newMap')}
+                    </Button>
+                ) : undefined
+            }
+        />
+    );
+
     return (
         <WorldEditorContext.Provider value={ctx}>
             <HudPage>
@@ -97,17 +126,20 @@ export function WorldEditorPageClient({
                                           )
                                         : undefined;
 
+                                    const building =
+                                        tool === 'select' && !eyes.asHeroId;
+
+                                    const detailsOpen =
+                                        building && details.open;
+
+                                    const bubbleOpen =
+                                        building && !!marker && !details.open;
+
                                     const panel = marker ? (
                                         <WorldMarkerPanel />
                                     ) : (
                                         <WorldMapSettings key={d.map.id} />
                                     );
-
-                                    const panelOpen =
-                                        tool === 'select' &&
-                                        (!!marker || settings.open);
-
-                                    const sheetOpen = !isDesktop && panelOpen;
 
                                     return (
                                         <>
@@ -129,25 +161,31 @@ export function WorldEditorPageClient({
                                                 <div className="mb-2 shrink-0">
                                                     <WorldToolbar
                                                         drawing={drawing}
+                                                        mode={mode.value}
+                                                        snap={snap}
                                                         readOnly={
                                                             !!eyes.asHeroId
                                                         }
-                                                        onSettings={() =>
-                                                            settings.set(true)
-                                                        }
-                                                        inspector={
-                                                            isDesktop ? (
-                                                                <WorldInspectorBar
-                                                                    open={
-                                                                        panelOpen
-                                                                    }
-                                                                    onClose={
-                                                                        closePanel
-                                                                    }
-                                                                />
-                                                            ) : undefined
-                                                        }
+                                                        onSettings={() => {
+                                                            select(null);
+                                                            details.set(true);
+                                                        }}
                                                     >
+                                                        <HudToggleChip
+                                                            tall
+                                                            active={treeShown}
+                                                            onClick={() =>
+                                                                tree.set(
+                                                                    !treeShown
+                                                                )
+                                                            }
+                                                        >
+                                                            {t('tree.toggle')}
+                                                        </HudToggleChip>
+                                                        <ModeSwitch
+                                                            value={mode.value}
+                                                            onChange={mode.set}
+                                                        />
                                                         <HeroEyesSelect
                                                             heroes={
                                                                 roster.heroes
@@ -162,6 +200,11 @@ export function WorldEditorPageClient({
                                                     </WorldToolbar>
                                                 </div>
                                                 <div className="flex min-h-0 flex-col gap-2 lg:flex-1 lg:flex-row">
+                                                    {isDesktop && treeShown ? (
+                                                        <aside className="hud-surface w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
+                                                            {mapTree}
+                                                        </aside>
+                                                    ) : null}
                                                     <div
                                                         className={`relative ${MAP_HEIGHT} lg:min-w-0`}
                                                     >
@@ -236,6 +279,43 @@ export function WorldEditorPageClient({
                                                                     />
                                                                 }
                                                                 snap={snap}
+                                                                card={
+                                                                    bubbleOpen &&
+                                                                    marker
+                                                                        ? {
+                                                                              point:
+                                                                                  marker.kind ===
+                                                                                      'zone' &&
+                                                                                  marker.polygon
+                                                                                      ? polygonCentroid(
+                                                                                            marker.polygon
+                                                                                        )
+                                                                                      : {
+                                                                                            x: marker.x,
+                                                                                            y: marker.y,
+                                                                                        },
+                                                                              content:
+                                                                                  (
+                                                                                      <DmMarkerBubble
+                                                                                          key={
+                                                                                              marker.id
+                                                                                          }
+                                                                                          marker={
+                                                                                              marker
+                                                                                          }
+                                                                                          actions={{
+                                                                                              onMore: () =>
+                                                                                                  details.set(
+                                                                                                      true
+                                                                                                  ),
+                                                                                              onClose:
+                                                                                                  closePanel,
+                                                                                          }}
+                                                                                      />
+                                                                                  ),
+                                                                          }
+                                                                        : undefined
+                                                                }
                                                                 handlers={{
                                                                     ...drawing.handlers,
                                                                     onVertexChange:
@@ -268,6 +348,26 @@ export function WorldEditorPageClient({
                                                                             )
                                                                                 moveTarget.pickMarker(
                                                                                     id
+                                                                                );
+                                                                        },
+                                                                    onMarkerDoubleClick:
+                                                                        (
+                                                                            id
+                                                                        ) => {
+                                                                            const child =
+                                                                                d.markers.find(
+                                                                                    (
+                                                                                        m
+                                                                                    ) =>
+                                                                                        m.id ===
+                                                                                        id
+                                                                                )?.childMapId;
+
+                                                                            if (
+                                                                                child
+                                                                            )
+                                                                                openMap(
+                                                                                    child
                                                                                 );
                                                                         },
                                                                     onMarkerDrag:
@@ -311,7 +411,59 @@ export function WorldEditorPageClient({
                                                                 }
                                                             />
                                                         )}
+                                                        {tool === 'zone' &&
+                                                        drawing.draft.length >
+                                                            0 ? (
+                                                            <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    disabled={
+                                                                        drawing
+                                                                            .draft
+                                                                            .length <
+                                                                        3
+                                                                    }
+                                                                    onClick={
+                                                                        drawing.finish
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'toolbar.done'
+                                                                    )}
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={
+                                                                        drawing.cancel
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'toolbar.cancel'
+                                                                    )}
+                                                                </Button>
+                                                            </div>
+                                                        ) : null}
                                                     </div>
+                                                    {isDesktop &&
+                                                    detailsOpen ? (
+                                                        <aside className="hud-surface rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                            <div className="mb-2 flex justify-end">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={
+                                                                        closePanel
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'editor.closePanel'
+                                                                    )}
+                                                                </Button>
+                                                            </div>
+                                                            {panel}
+                                                        </aside>
+                                                    ) : null}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
                                                         <div className="lg:w-80 lg:shrink-0 lg:overflow-y-auto">
@@ -359,28 +511,41 @@ export function WorldEditorPageClient({
                                                 </div>
                                             </div>
                                             {isDesktop ? null : (
-                                                <ResponsiveDialog
-                                                    hud
-                                                    open={sheetOpen}
-                                                    onOpenChange={(open) => {
-                                                        if (!open) closePanel();
-                                                    }}
-                                                    title={
-                                                        marker?.name ??
-                                                        d.map.name
-                                                    }
-                                                    description={
-                                                        marker
-                                                            ? t(
-                                                                  'editor.markerParams'
-                                                              )
-                                                            : t(
-                                                                  'editor.mapParams'
-                                                              )
-                                                    }
-                                                >
-                                                    {panel}
-                                                </ResponsiveDialog>
+                                                <>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={detailsOpen}
+                                                        onOpenChange={(
+                                                            open
+                                                        ) => {
+                                                            if (!open)
+                                                                closePanel();
+                                                        }}
+                                                        title={
+                                                            marker?.name ??
+                                                            d.map.name
+                                                        }
+                                                        description={
+                                                            marker
+                                                                ? t(
+                                                                      'editor.markerParams'
+                                                                  )
+                                                                : t(
+                                                                      'editor.mapParams'
+                                                                  )
+                                                        }
+                                                    >
+                                                        {panel}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={treeShown}
+                                                        onOpenChange={tree.set}
+                                                        title={t('tree.label')}
+                                                    >
+                                                        {mapTree}
+                                                    </ResponsiveDialog>
+                                                </>
                                             )}
                                         </>
                                     );

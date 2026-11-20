@@ -29,7 +29,11 @@ describe('MapTree', () => {
 
         const items = screen.getAllByRole('treeitem');
 
-        expect(items.map((i) => i.textContent)).toEqual(['root', 'town', 'inn']);
+        expect(items.map((i) => i.textContent)).toEqual([
+            'root',
+            'town',
+            'inn',
+        ]);
         expect(items.map((i) => i.getAttribute('aria-level'))).toEqual([
             '1',
             '2',

@@ -69,7 +69,9 @@
     "mapParams": "Map settings",
     "emptyTitle": "Upload a continent map",
     "emptyDescription": "The journey starts here: cities, zones and entrances to nested maps are placed on it.",
-    "upload": "Upload map"
+    "upload": "Upload map",
+    "description": "Description",
+    "pointColor": "Point colour"
   },
   "toolbar": {
     "group": "Tools",
@@ -81,7 +83,13 @@
     "closeZone": "Close zone",
     "undoVertex": "Step back",
     "toParent": "To parent map: {name}",
-    "settings": "Map settings"
+    "settings": "Map settings",
+    "pinHint": "Shift-click or double-click to pin the tool",
+    "pinned": "Pinned",
+    "snap": "Snapping",
+    "snapHint": "Vertices snap to neighbouring zones (Alt disables)",
+    "done": "Done",
+    "cancel": "Cancel"
   },
   "hint": {
     "point": "<key>Click</key> the map to place a point · <key>Esc</key> to cancel",
@@ -238,12 +246,19 @@
     "insert": "Add vertex"
   },
   "tree": {
-    "label": "Maps"
+    "label": "Maps",
+    "toggle": "Maps",
+    "newMap": "+ New map"
   },
   "bubble": {
     "more": "Read more",
     "openMap": "Open map",
-    "close": "Close"
+    "close": "Close",
+    "createMap": "Create a map for this place",
+    "open": "Open",
+    "moveMap": "Move map…",
+    "redraw": "Redraw",
+    "mapBlock": "Nested map"
   },
   "search": {
     "label": "Search places",
@@ -252,5 +267,10 @@
     "kindPoint": "Points",
     "kindZone": "Zones",
     "legend": "Filters"
+  },
+  "mode": {
+    "label": "Mode",
+    "build": "Build",
+    "play": "Play"
   }
 }

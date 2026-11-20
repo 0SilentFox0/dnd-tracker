@@ -52,6 +52,7 @@ export interface WorldMapViewProps {
         onMapClick?(p: MapPoint): void;
         onMapDoubleClick?(p: MapPoint): void;
         onMarkerClick?(id: string): void;
+        onMarkerDoubleClick?(id: string): void;
         onMarkerDrag?(id: string, p: MapPoint): void;
         onHeroClick?(id: string): void;
         onVertexChange?(markerId: string, polygon: Polygon): void;
@@ -294,8 +295,7 @@ export function WorldMapView({
                                     tool === 'select' || tool === 'move'
                                 }
                             />
-                            {editingZone?.polygon &&
-                            handlers.onVertexChange ? (
+                            {editingZone?.polygon && handlers.onVertexChange ? (
                                 <ZoneVertexHandles
                                     markerId={editingZone.id}
                                     polygon={editingZone.polygon}
@@ -306,8 +306,7 @@ export function WorldMapView({
                                             y,
                                             alt,
                                             markers.find(
-                                                (m) =>
-                                                    m.id === editingZone.id
+                                                (m) => m.id === editingZone.id
                                             )?.polygon
                                         )
                                     }

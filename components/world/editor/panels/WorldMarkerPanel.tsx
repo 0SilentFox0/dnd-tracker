@@ -18,7 +18,11 @@ import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { WORLD_DM_NOTE_MAX, WORLD_NAME_MAX } from '@/lib/constants/world';
+import {
+    WORLD_DM_NOTE_MAX,
+    WORLD_MARKER_DESCRIPTION_MAX,
+    WORLD_NAME_MAX,
+} from '@/lib/constants/world';
 import type { WorldMarker } from '@/types/world';
 
 export function WorldMarkerPanel() {
@@ -66,13 +70,32 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                         onChange={(e) => m.setName(e.target.value)}
                         onBlur={m.commitName}
                     />
-                    {marker.kind === 'point' ? (
-                        <MarkerIconGrid
-                            aria-label={t('editor.icon')}
-                            value={marker.icon}
-                            cellClassName="h-11"
-                            onPick={(icon) => void m.save({ icon })}
+                    <label className="block space-y-1 text-sm">
+                        {t('editor.description')}
+                        <Textarea
+                            value={m.description}
+                            maxLength={WORLD_MARKER_DESCRIPTION_MAX}
+                            onChange={(e) => m.setDescription(e.target.value)}
+                            onBlur={m.commitDescription}
                         />
+                    </label>
+                    {marker.kind === 'point' ? (
+                        <>
+                            <MarkerIconGrid
+                                aria-label={t('editor.icon')}
+                                value={marker.icon}
+                                cellClassName="h-11"
+                                onPick={(icon) => void m.save({ icon })}
+                            />
+                            <div className="flex items-center gap-3 text-sm">
+                                <ColorSwatch
+                                    color={m.color}
+                                    label={t('editor.pointColor')}
+                                    onChange={m.pickColor}
+                                />
+                                {t('editor.pointColor')}
+                            </div>
+                        </>
                     ) : (
                         <div className="flex items-center gap-3 text-sm">
                             <ColorSwatch

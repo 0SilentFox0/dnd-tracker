@@ -10,8 +10,9 @@ import * as api from '@/lib/api/world';
 import { WORLD_NOTE_MAX } from '@/lib/constants/world';
 import type { WorldMarker, WorldNote } from '@/types/world';
 
-vi.mock('@/components/ui/select-field', () =>
-    import('@/components/ui/__tests__/select-field-mock')
+vi.mock(
+    '@/components/ui/select-field',
+    () => import('@/components/ui/__tests__/select-field-mock')
 );
 
 vi.unmock('next-intl');

@@ -30,8 +30,18 @@ const marker = (o: Partial<WorldMarker>): WorldMarker => ({
 });
 
 const markers = [
-    marker({ id: 'a', name: 'Altaria', icon: 'castle', description: 'Твердиня' }),
-    marker({ id: 'b', name: 'Borin', icon: 'camp', description: 'Табір драконів' }),
+    marker({
+        id: 'a',
+        name: 'Altaria',
+        icon: 'castle',
+        description: 'Твердиня',
+    }),
+    marker({
+        id: 'b',
+        name: 'Borin',
+        icon: 'camp',
+        description: 'Табір драконів',
+    }),
     marker({
         id: 'c',
         name: 'Cedar',

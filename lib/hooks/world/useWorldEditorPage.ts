@@ -1,12 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import type { WorldEditorCtx } from './types';
 import { useHeroEyes } from './useHeroEyes';
-import { useMapDrawing } from './useMapDrawing';
+import {
+    MODE_HOME_TOOL,
+    MODE_TOOLS,
+    useMapDrawing,
+    type WorldMode,
+} from './useMapDrawing';
 import { useMoveTarget } from './useMoveTarget';
 import { useRemoveMarker } from './useRemoveMarker';
 import { useWorldEditor } from './useWorldEditor';
@@ -23,6 +28,11 @@ import type {
 } from '@/types/world';
 
 const NO_MARKERS: WorldMarker[] = [];
+
+const isTyping = (t: EventTarget | null) =>
+    t instanceof HTMLElement &&
+    (t.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 
 interface Options {
     campaignId: string;
@@ -67,7 +77,11 @@ export function useWorldEditorPage({
 
     const [creating, setCreating] = useState(false);
 
-    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+
+    const [treeOpen, setTreeOpen] = useState<boolean | null>(null);
+
+    const [mode, setModeState] = useState<WorldMode>('build');
 
     const [redrawId, setRedrawId] = useState<string | null>(null);
 
@@ -128,7 +142,8 @@ export function useWorldEditorPage({
                 if (!detail.isPlaceholderData) moveTarget.pickPoint(p);
             },
         },
-        !eyes.asHeroId
+        !eyes.asHeroId,
+        MODE_TOOLS[mode]
     );
 
     const { tool, setTool } = drawing;
@@ -160,8 +175,44 @@ export function useWorldEditorPage({
 
     const closePanel = useCallback(() => {
         select(null);
-        setSettingsOpen(false);
+        setDetailsOpen(false);
     }, []);
+
+    const draftLength = drawing.draft.length;
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (
+                e.key !== 'Escape' ||
+                e.defaultPrevented ||
+                tool !== 'select' ||
+                draftLength > 0 ||
+                isTyping(e.target) ||
+                (e.target instanceof Element &&
+                    e.target.closest('[role=dialog]'))
+            )
+                return;
+
+            if (document.activeElement instanceof HTMLElement)
+                document.activeElement.blur();
+
+            closePanel();
+        };
+
+        window.addEventListener('keydown', onKey);
+
+        return () => window.removeEventListener('keydown', onKey);
+    }, [tool, draftLength, closePanel]);
+
+    const setMode = useCallback(
+        (next: WorldMode) => {
+            setModeState(next);
+            setRedrawId(null);
+            setTool(MODE_HOME_TOOL[next]);
+            closePanel();
+        },
+        [setTool, closePanel]
+    );
 
     const redraw = useCallback(
         (id: string | null) => {
@@ -176,23 +227,21 @@ export function useWorldEditorPage({
             id: string | null,
             { keepTool = false }: { keepTool?: boolean } = {}
         ) => {
-            select(null);
-            setSettingsOpen(false);
+            closePanel();
             setRedrawId(null);
             resetTarget();
 
-            if (!keepTool) setTool('select');
+            if (!keepTool) setTool(MODE_HOME_TOOL[mode]);
 
             router.replace(id ? `${pathname}?map=${id}` : pathname);
         },
-        [router, pathname, setTool, resetTarget]
+        [router, pathname, setTool, resetTarget, closePanel, mode]
     );
 
     const changeEyes = (heroId: string | null) => {
         eyes.setAsHeroId(heroId);
-        select(null);
-        setSettingsOpen(false);
-        setTool('select');
+        closePanel();
+        setTool(MODE_HOME_TOOL[mode]);
     };
 
     const ctx: WorldEditorCtx = useMemo(
@@ -231,6 +280,8 @@ export function useWorldEditorPage({
             drawing,
             moveTarget,
             editor,
+            mode: { value: mode, set: setMode },
+            pinned: drawing.pinned,
             snap: {
                 zones: snapZones,
                 enabled: snapEnabled,
@@ -240,7 +291,8 @@ export function useWorldEditorPage({
         selected: { id: selectedId, select, close: closePanel },
         dialogs: {
             create: { open: creating, set: setCreating },
-            settings: { open: settingsOpen, set: setSettingsOpen },
+            details: { open: detailsOpen, set: setDetailsOpen },
+            tree: { open: treeOpen, set: setTreeOpen },
         },
         actions: { openMap, changeEyes, changeVertices },
     };

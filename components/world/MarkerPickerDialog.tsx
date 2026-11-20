@@ -119,8 +119,7 @@ export function MarkerPickerDialog({
     const [mapId, setMapId] = useState<string | null>(null);
 
     const ordered = useMemo(
-        () =>
-            treeOrder(maps).filter((m) => !excludeMapIds?.includes(m.id)),
+        () => treeOrder(maps).filter((m) => !excludeMapIds?.includes(m.id)),
         [maps, excludeMapIds]
     );
 

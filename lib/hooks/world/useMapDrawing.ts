@@ -7,6 +7,18 @@ import type { MapPoint, Polygon } from '@/types/world';
 
 export type WorldTool = 'select' | 'point' | 'zone' | 'entry' | 'move';
 
+export type WorldMode = 'build' | 'play';
+
+export const MODE_TOOLS: Record<WorldMode, readonly WorldTool[]> = {
+    build: ['select', 'point', 'zone', 'entry'],
+    play: ['move'],
+};
+
+export const MODE_HOME_TOOL: Record<WorldMode, WorldTool> = {
+    build: 'select',
+    play: 'move',
+};
+
 interface Actions {
     onPoint(p: MapPoint): void;
     onZone(polygon: Polygon): void;
@@ -38,13 +50,20 @@ const isTyping = (t: EventTarget | null) =>
     (t.isContentEditable ||
         ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 
-export function useMapDrawing(actions: Actions, enabled = true) {
+export function useMapDrawing(
+    actions: Actions,
+    enabled = true,
+    allowed: readonly WorldTool[] = MODE_TOOLS.build
+) {
     const [tool, setToolState] = useState<WorldTool>('select');
+
+    const [pinned, setPinned] = useState(false);
 
     const [draft, setDraft] = useState<MapPoint[]>([]);
 
-    const setTool = useCallback((t: WorldTool) => {
+    const setTool = useCallback((t: WorldTool, pin = false) => {
         setToolState(t);
+        setPinned(pin);
         setDraft([]);
     }, []);
 
@@ -78,17 +97,19 @@ export function useMapDrawing(actions: Actions, enabled = true) {
 
             const hotkey = TOOL_HOTKEYS[e.key.toLowerCase()];
 
-            if (hotkey) setTool(hotkey);
-            else if (e.key === 'Escape' && tool === 'zone' && draft.length)
+            if (hotkey) {
+                if (allowed.includes(hotkey)) setTool(hotkey);
+            } else if (e.key === 'Escape' && tool === 'zone' && draft.length)
                 cancel();
-            else if (e.key === 'Escape' && tool !== 'select') setTool('select');
+            else if (e.key === 'Escape' && tool !== allowed[0])
+                setTool(allowed[0]);
             else if (e.key === 'Backspace' && tool === 'zone') undoVertex();
         };
 
         window.addEventListener('keydown', onKey);
 
         return () => window.removeEventListener('keydown', onKey);
-    }, [enabled, tool, draft.length, cancel, undoVertex, setTool]);
+    }, [enabled, tool, draft.length, cancel, undoVertex, setTool, allowed]);
 
     const handlers = useMemo<{
         onMapClick(p: MapPoint): void;
@@ -113,9 +134,12 @@ export function useMapDrawing(actions: Actions, enabled = true) {
                         return;
 
                     actions.onPoint(p);
+
+                    if (!pinned) setTool('select');
                 } else if (tool === 'zone') setDraft((d) => [...d, p]);
                 else if (tool === 'entry') {
-                    setTool('select');
+                    if (!pinned) setTool('select');
+
                     actions.onEntry(p);
                 } else if (tool === 'move') actions.onMove?.(p);
             },
@@ -123,8 +147,17 @@ export function useMapDrawing(actions: Actions, enabled = true) {
                 if (tool === 'zone') finish();
             },
         }),
-        [tool, actions, finish, setTool]
+        [tool, pinned, actions, finish, setTool]
     );
 
-    return { tool, setTool, draft, handlers, undoVertex, cancel, finish };
+    return {
+        tool,
+        setTool,
+        pinned: { value: pinned, set: setPinned },
+        draft,
+        handlers,
+        undoVertex,
+        cancel,
+        finish,
+    };
 }

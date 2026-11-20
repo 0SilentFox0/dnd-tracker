@@ -35,7 +35,11 @@ export function markerBubblePosition({
     const placement = above >= 0 ? 'above' : 'below';
 
     return {
-        left: clamp(ax - size.width / 2, 0, Math.max(0, box.width - size.width)),
+        left: clamp(
+            ax - size.width / 2,
+            0,
+            Math.max(0, box.width - size.width)
+        ),
         top: placement === 'above' ? above : ay + GAP,
         placement,
     };

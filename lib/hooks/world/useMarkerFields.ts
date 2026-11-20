@@ -28,6 +28,10 @@ export function useMarkerFields({ marker, editor, select }: Options) {
 
     const savedNote = useRef(marker.dmNote ?? '');
 
+    const [description, setDescription] = useState(marker.description ?? '');
+
+    const savedDescription = useRef(marker.description ?? '');
+
     const save = (data: UpdateWorldMarkerData) =>
         editor.marker.update.mutateOk({ id: marker.id, data });
 
@@ -64,6 +68,15 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         void save({ dmNote: next || null });
     };
 
+    const commitDescription = () => {
+        const next = description.trim();
+
+        if (next === savedDescription.current) return;
+
+        savedDescription.current = next;
+        void save({ description: next || null });
+    };
+
     const pickColor = (c: string) => {
         setColor(c);
         clearTimeout(colorTimer.current);
@@ -80,6 +93,9 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         note,
         setNote,
         commitNote,
+        description,
+        setDescription,
+        commitDescription,
         color,
         pickColor,
         save,
