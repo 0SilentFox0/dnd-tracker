@@ -95,15 +95,16 @@ export function WorldPins({
     if (clusters) {
         const { width, height } = clusters;
 
-        for (const g of clusterByPixel(
+        for (const g of clusterByPixel<WorldMarker>(
             points.filter((m) => !isPinned(m)).sort(byPinRank),
             {
                 key: (m) => m.id,
                 point: markerAnchor,
-                px: (m) => ({
-                    x: m.x * width * zoom,
-                    y: m.y * height * zoom,
-                }),
+                px: (m) => {
+                    const a = markerAnchor(m);
+
+                    return { x: a.x * width * zoom, y: a.y * height * zoom };
+                },
                 threshold,
             }
         ))
