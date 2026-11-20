@@ -20,6 +20,7 @@ const mk = (id: string, over: Partial<WorldMarker> = {}) =>
         y: 0.5,
         name: id,
         dmNote: 'SECRET',
+        description: null,
         alwaysVisible: false,
         ...over,
     }) as WorldMarker;

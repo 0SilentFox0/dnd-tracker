@@ -29,6 +29,8 @@
     "pick": "Оберіть кар'єру",
     "assign": "Призначити",
     "tier": "Рівень {tier}/4",
+    "advanceCost": "Перехід коштує {cost} XP",
+    "changeCost": "Зміна кар'єри коштує {cost} XP.",
     "ticks": "Позначок {have}/{need}",
     "advance": "Підвищити",
     "forceBody": "Позначок {have}/{need}. Підвищити попри це?"

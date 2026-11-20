@@ -29,6 +29,8 @@
     "pick": "Choose a career",
     "assign": "Assign",
     "tier": "Tier {tier}/4",
+    "advanceCost": "Advancing costs {cost} XP",
+    "changeCost": "Changing career costs {cost} XP.",
     "ticks": "Ticks {have}/{need}",
     "advance": "Advance",
     "forceBody": "Ticks {have} of {need}. Advance the career tier anyway?"

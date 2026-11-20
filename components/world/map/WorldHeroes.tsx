@@ -1,4 +1,4 @@
-import { HeroCluster } from '@/components/world/HeroCluster';
+import { HeroCluster } from '@/components/world/map/HeroCluster';
 import {
     clusterHeroes,
     HERO_CLUSTER_PX,

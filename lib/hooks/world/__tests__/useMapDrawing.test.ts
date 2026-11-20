@@ -32,14 +32,24 @@ const key = (k: string, target: EventTarget = document.body) =>
     );
 
 describe('useMapDrawing', () => {
-    it('point click creates a point and keeps the tool', () => {
+    it('point click creates a point and returns to select', () => {
         const { result, actions } = setup();
 
         act(() => result.current.setTool('point'));
         click(result, 0.2, 0.3);
 
         expect(actions.onPoint).toHaveBeenCalledWith({ x: 0.2, y: 0.3 });
+        expect(result.current.tool).toBe('select');
+    });
+
+    it('a pinned point tool stays active after placing', () => {
+        const { result } = setup();
+
+        act(() => result.current.setTool('point', true));
+        click(result, 0.2, 0.3);
+
         expect(result.current.tool).toBe('point');
+        expect(result.current.pinned.value).toBe(true);
     });
 
     it('a double click on the point tool creates one marker, a later click another', () => {
@@ -47,7 +57,7 @@ describe('useMapDrawing', () => {
 
         const { result, actions } = setup();
 
-        act(() => result.current.setTool('point'));
+        act(() => result.current.setTool('point', true));
         click(result, 0.2, 0.3);
         click(result, 0.2, 0.3);
 

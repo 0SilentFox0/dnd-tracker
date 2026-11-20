@@ -14,7 +14,7 @@ import type { FeatData } from '@/types/choices';
 interface Props {
     feats: FeatData[];
     talents: Record<string, number>;
-    rules: AdvancementRules;
+    pricing: { rules: AdvancementRules; flat?: boolean };
     available: number;
     pending: boolean;
     price: (featId: string, base: number) => CareerPrice;
@@ -24,7 +24,7 @@ interface Props {
 export function TalentRows({
     feats,
     talents,
-    rules,
+    pricing,
     available,
     pending,
     price,
@@ -51,7 +51,15 @@ export function TalentRows({
                 const priced =
                     rank >= max || feat.xpCost == null
                         ? null
-                        : price(feat.id, talentCost(feat.xpCost, rank, rules));
+                        : price(
+                              feat.id,
+                              talentCost(
+                                  feat.xpCost,
+                                  rank,
+                                  pricing.rules,
+                                  pricing.flat
+                              )
+                          );
 
                 return (
                     <AdvanceRow

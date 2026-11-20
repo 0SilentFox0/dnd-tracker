@@ -27,6 +27,7 @@ const marker = (over: Partial<WorldMarker>): WorldMarker => ({
     icon: 'city',
     color: null,
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
@@ -91,6 +92,23 @@ describe('WorldMarkerPanel', () => {
             id: 'k1',
             data: { name: 'Столиця' },
         });
+    });
+
+    it('saves the description on blur and offers a colour for points', () => {
+        renderPanel(marker({}));
+
+        const area = screen.getByLabelText('Опис');
+
+        fireEvent.change(area, { target: { value: 'Торгове місто' } });
+        fireEvent.blur(area);
+
+        expect(update).toHaveBeenCalledWith({
+            id: 'k1',
+            data: { description: 'Торгове місто' },
+        });
+        expect(screen.getAllByLabelText('Колір точки').length).toBeGreaterThan(
+            0
+        );
     });
 
     it('warns about nested maps and does not delete without confirmation', async () => {

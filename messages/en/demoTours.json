@@ -150,23 +150,23 @@
       },
       "marker": {
         "title": "Marker",
-        "description": "Clicking a marker opens its panel. Let's do that now."
+        "description": "Clicking a marker opens a small card with its name and description."
+      },
+      "bubble": {
+        "title": "Marker card",
+        "description": "The card shows the place, a short description and a \"More\" link; a place with its own map also has an \"Open map\" button."
       },
       "notes": {
         "title": "Place notes",
-        "description": "Shared notes are visible to everyone, “Mine” only to you. Writing is disabled in the demo."
-      },
-      "open-map": {
-        "title": "Nested map",
-        "description": "A marker can hold its own place map — this button opens it."
+        "description": "\"More\" opens the details. Shared notes are visible to everyone, “Mine” only to you. Writing is disabled in the demo."
       },
       "zoom": {
         "title": "Zoom",
         "description": "Zoom in, zoom out and reset to the initial scale."
       },
       "places": {
-        "title": "Open places",
-        "description": "Quick jump to the place maps you have already opened."
+        "title": "Map tree",
+        "description": "All maps as a tree; click one to open it. Places can be searched above the map."
       },
       "journal": {
         "title": "Travel log",

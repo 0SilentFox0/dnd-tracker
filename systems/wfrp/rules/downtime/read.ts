@@ -3,7 +3,7 @@ import {
     SKILL_ADVANCE_KEY_RE,
     SPEC_RE,
 } from '../characteristics/constants';
-import { MAX_DAYS } from './constants';
+import { CANON_ENDEAVOURS_MAX, MAX_DAYS } from './constants';
 import {
     type Ailment,
     AILMENTS_MAX,
@@ -77,6 +77,19 @@ function readEndeavour(raw: unknown): Endeavour | undefined {
         default:
             return undefined;
     }
+}
+
+function readEndeavours(raw: unknown): Endeavour[] | undefined {
+    if (raw === undefined) return [];
+
+    if (!Array.isArray(raw) || raw.length > CANON_ENDEAVOURS_MAX)
+        return undefined;
+
+    const list = raw.map(readEndeavour);
+
+    return list.every((e): e is Endeavour => e !== undefined)
+        ? list
+        : undefined;
 }
 
 function readAilment(raw: unknown): Ailment | undefined {
@@ -188,6 +201,8 @@ export function readDowntime(raw: unknown): DowntimeState | undefined {
     const endeavour =
         raw.endeavour === undefined ? undefined : readEndeavour(raw.endeavour);
 
+    const endeavours = readEndeavours(raw.endeavours);
+
     const training =
         raw.training === undefined ? undefined : readTraining(raw.training);
 
@@ -196,6 +211,7 @@ export function readDowntime(raw: unknown): DowntimeState | undefined {
 
     if (
         (raw.endeavour !== undefined && !endeavour) ||
+        !endeavours ||
         (raw.training !== undefined && !training) ||
         (raw.lastPeriod !== undefined && !lastPeriod)
     )
@@ -204,6 +220,7 @@ export function readDowntime(raw: unknown): DowntimeState | undefined {
     return {
         ailments,
         ...(endeavour ? { endeavour } : {}),
+        ...(endeavours.length ? { endeavours } : {}),
         ...(training ? { training } : {}),
         ...(lastPeriod ? { lastPeriod } : {}),
     };

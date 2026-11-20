@@ -5,6 +5,8 @@ import type {
     WfrpDraftIdentityInput,
     WfrpDraftInput,
 } from '@/systems/wfrp/api/types';
+import { SKILL_ADVANCE_KEY_RE } from '@/systems/wfrp/rules/characteristics/constants';
+import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
 
 const roll = z.array(z.number().int()).max(12);
 
@@ -21,6 +23,25 @@ const goals = z
         })
     )
     .max(5)
+    .optional();
+
+const skillKey = z.string().regex(SKILL_ADVANCE_KEY_RE);
+
+const canon = z
+    .object({
+        speciesRolled: z.boolean().optional(),
+        distribution: z
+            .partialRecord(
+                z.enum(CHARACTERISTIC_KEYS),
+                z.number().int().min(0).max(6)
+            )
+            .optional(),
+        speciesSkills: z.array(skillKey).max(10).optional(),
+        careerSkills: z
+            .record(skillKey, z.number().int().min(0).max(3))
+            .optional(),
+        careerTalent: z.string().min(1).max(100).optional(),
+    })
     .optional();
 
 const identity = {
@@ -52,4 +73,5 @@ export const wfrpDraftSchema = z.object({
         z.object({ mode: z.literal('free'), points: roll }),
     ]),
     talents: z.array(z.string().min(1).max(100)).max(5),
+    canon,
 }) satisfies z.ZodType<WfrpDraftInput>;

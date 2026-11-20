@@ -8,7 +8,7 @@ import {
 } from '../characteristics/keys';
 import type { DowntimeState } from '../downtime/types';
 import { type CareerCtx, careerPrice, tickKey } from './career';
-import { advanceCost, talentCost } from './cost';
+import { advanceCost, advanceTarget, talentCost } from './cost';
 import type { AdvancementRules } from './rules';
 
 export type PurchaseRequest = {
@@ -35,6 +35,10 @@ export type PurchaseInput = {
     available: number;
     request: PurchaseRequest;
     rules: AdvancementRules;
+    /** Points per purchase (`editionOf(rules).advanceStep`); 1 = legacy */
+    step?: number;
+    /** Flat talent price (`xpTables: canon5e`) */
+    flatTalent?: boolean;
     talent?: PurchaseTalent;
     career?: CareerCtx;
     now: string;
@@ -51,6 +55,7 @@ const isCharacteristicKey = (key: string): key is CharacteristicKey =>
 type Priced =
     | {
           from: number;
+          to: number;
           cost: number;
           apply: (c: Characteristics) => Characteristics;
       }
@@ -59,22 +64,26 @@ type Priced =
 function priceCharacteristic(
     c: Characteristics,
     key: string,
-    rules: AdvancementRules
+    rules: AdvancementRules,
+    step: number
 ): Priced {
     if (!isCharacteristicKey(key)) return { error: 'UNKNOWN_KEY' };
 
     const from = c.advances[key];
 
-    const cost = advanceCost('characteristic', from, rules);
+    const cost = advanceCost('characteristic', from, rules, step);
 
-    if (cost === null) return { error: 'AT_LIMIT' };
+    const to = advanceTarget(from, rules.characteristic.max, step);
+
+    if (cost === null || to === null) return { error: 'AT_LIMIT' };
 
     return {
         from,
+        to,
         cost,
         apply: (cur) => ({
             ...cur,
-            advances: { ...cur.advances, [key]: from + 1 },
+            advances: { ...cur.advances, [key]: to },
         }),
     };
 }
@@ -82,22 +91,26 @@ function priceCharacteristic(
 function priceSkill(
     c: Characteristics,
     key: string,
-    rules: AdvancementRules
+    rules: AdvancementRules,
+    step: number
 ): Priced {
     if (!SKILL_ADVANCE_KEY_RE.test(key)) return { error: 'UNKNOWN_KEY' };
 
     const from = c.skillAdvances[key] ?? 0;
 
-    const cost = advanceCost('skill', from, rules);
+    const cost = advanceCost('skill', from, rules, step);
 
-    if (cost === null) return { error: 'AT_LIMIT' };
+    const to = advanceTarget(from, rules.skill.max, step);
+
+    if (cost === null || to === null) return { error: 'AT_LIMIT' };
 
     return {
         from,
+        to,
         cost,
         apply: (cur) => ({
             ...cur,
-            skillAdvances: { ...cur.skillAdvances, [key]: from + 1 },
+            skillAdvances: { ...cur.skillAdvances, [key]: to },
         }),
     };
 }
@@ -106,7 +119,8 @@ function priceTalent(
     c: Characteristics,
     key: string,
     talent: PurchaseTalent | undefined,
-    rules: AdvancementRules
+    rules: AdvancementRules,
+    flat: boolean
 ): Priced {
     if (!talent || talent.id !== key) return { error: 'UNKNOWN_TALENT' };
 
@@ -118,7 +132,8 @@ function priceTalent(
 
     return {
         from,
-        cost: talentCost(talent.xpCost, from, rules),
+        to: from + 1,
+        cost: talentCost(talent.xpCost, from, rules, flat),
         apply: (cur) => ({
             ...cur,
             talents: { ...cur.talents, [key]: from + 1 },
@@ -134,12 +149,20 @@ const withoutTraining = ({
 export function planPurchase(input: PurchaseInput): PurchaseResult {
     const { characteristics, request, rules } = input;
 
+    const step = input.step ?? 1;
+
     const priced =
         request.kind === 'characteristic'
-            ? priceCharacteristic(characteristics, request.key, rules)
+            ? priceCharacteristic(characteristics, request.key, rules, step)
             : request.kind === 'skill'
-              ? priceSkill(characteristics, request.key, rules)
-              : priceTalent(characteristics, request.key, input.talent, rules);
+              ? priceSkill(characteristics, request.key, rules, step)
+              : priceTalent(
+                    characteristics,
+                    request.key,
+                    input.talent,
+                    rules,
+                    input.flatTalent === true
+                );
 
     if ('error' in priced) return { ok: false, error: priced.error };
 
@@ -180,7 +203,7 @@ export function planPurchase(input: PurchaseInput): PurchaseResult {
         kind: request.kind,
         key: request.key,
         from: priced.from,
-        to: priced.from + 1,
+        to: priced.to,
         cost: price,
         ...(tick ? { tick } : {}),
         ...(discounted ? { discount: discounted.discount } : {}),

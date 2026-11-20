@@ -23,6 +23,17 @@ import { cryptoRandom } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { WfrpDraftIdentityInput } from '@/systems/wfrp/api/types';
 import { useCareers } from '@/systems/wfrp/hooks/careers';
+import { FREE_POINT_MAX } from '@/systems/wfrp/rules/advancement/rules';
+import {
+    CHARACTERISTIC_KEYS,
+    type CharacteristicKey,
+} from '@/systems/wfrp/rules/characteristics/keys';
+import {
+    CANON_FREE_POINT_MAX,
+    type CanonCtx,
+    DISTRIBUTION_CAP,
+} from '@/systems/wfrp/rules/creation';
+import { editionOf } from '@/systems/wfrp/rules/edition';
 
 export type { WfrpDraftStepId };
 
@@ -41,7 +52,13 @@ export function useWfrpDraftForm({
 }: WfrpDraftFormOptions) {
     const { system } = useRuleSystem({ campaignId });
 
-    const rules = useCampaignRules(campaignId).data?.advancement;
+    const campaignRules = useCampaignRules(campaignId).data;
+
+    const rules = campaignRules?.advancement;
+
+    const edition = editionOf(campaignRules);
+
+    const canonMode = edition.creationMode === 'canon5e';
 
     const races = useRaces(campaignId);
 
@@ -61,7 +78,7 @@ export function useWfrpDraftForm({
 
     const [index, setIndex] = useState(0);
 
-    const draft = useWfrpDraftPicks();
+    const draft = useWfrpDraftPicks({ canon: canonMode });
 
     const { picks, speciesId, selectSpecies } = draft;
 
@@ -104,6 +121,23 @@ export function useWfrpDraftForm({
         [feats.data]
     );
 
+    const canonCtx = useMemo<CanonCtx | undefined>(
+        () =>
+            canonMode
+                ? {
+                      step: edition.advanceStep,
+                      tier1: Object.fromEntries(
+                          (careers.data ?? []).flatMap((c) =>
+                              c.tiers[0] ? [[c.id, c.tiers[0]]] : []
+                          )
+                      ),
+                  }
+                : undefined,
+        [canonMode, edition.advanceStep, careers.data]
+    );
+
+    const canonCareer = canonCtx?.tier1[draft.career.id ?? ''];
+
     const preview = useWfrpDraftPlan({
         picks,
         enabled: !identityOnly && !!creation,
@@ -111,6 +145,7 @@ export function useWfrpDraftForm({
         rules,
         careerIds,
         featIds,
+        canon: canonCtx,
     });
 
     const errorsFor = (id: WfrpDraftStepId) =>
@@ -119,7 +154,7 @@ export function useWfrpDraftForm({
     const stepId = steps[index];
 
     const valid: Record<WfrpDraftStepId, boolean> = {
-        species: !!profile,
+        species: !!profile && (!canonMode || errorsFor('species').length === 0),
         career:
             !!draft.career.id &&
             errorsFor('career').length === 0 &&
@@ -212,6 +247,7 @@ export function useWfrpDraftForm({
             points: draft.stats.points,
             setPoint: draft.stats.setPoint,
             budget: rules?.creation.freeBudget ?? 0,
+            freeMax: canonMode ? CANON_FREE_POINT_MAX : FREE_POINT_MAX,
         },
         talents: {
             fixed: profile?.talents ?? [],
@@ -220,9 +256,49 @@ export function useWfrpDraftForm({
             roll: rolls.talentsRoll,
             names: featName,
         },
+        canon: canonMode
+            ? {
+                  step: edition.advanceStep,
+                  speciesRolled: draft.canon.speciesRolled,
+                  setSpeciesRolled: draft.canon.setSpeciesRolled,
+                  speciesSkills: {
+                      count: profile?.skillPicks?.count ?? 0,
+                      options: profile?.skillPicks?.options ?? [],
+                      languages: profile?.languages ?? [],
+                      picked: draft.canon.speciesSkills,
+                      toggle: draft.canon.toggleSpeciesSkill,
+                  },
+                  careerSkills: {
+                      options: canonCareer?.skills ?? [],
+                      counts: draft.canon.skills,
+                      set: draft.canon.setSkill,
+                  },
+                  careerTalent: {
+                      options: canonCareer?.talents ?? [],
+                      picked: draft.canon.talent,
+                      set: draft.canon.setTalent,
+                  },
+                  trappings: canonCareer?.trappings ?? [],
+                  distribution: {
+                      keys: (canonCareer?.characteristics ?? []).filter(
+                          (k): k is CharacteristicKey =>
+                              (
+                                  CHARACTERISTIC_KEYS as readonly string[]
+                              ).includes(k)
+                      ),
+                      values: draft.canon.distribution,
+                      set: draft.canon.setBonus,
+                      cap: DISTRIBUTION_CAP[draft.stats.mode],
+                  },
+                  fateBonus:
+                      draft.canon.speciesRolled &&
+                      draft.career.mode === 'rolled' &&
+                      draft.stats.mode === 'rolled',
+              }
+            : undefined,
         careerName,
         profile,
-        xp: rules?.creation,
+        xp: canonMode ? undefined : rules?.creation,
         shown: (key: string, final: string | number) =>
             reveal.rolling && !reveal.settled.has(key) && key in reveal.display
                 ? (reveal.display[key] ?? final)

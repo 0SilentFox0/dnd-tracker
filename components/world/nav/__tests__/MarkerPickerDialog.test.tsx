@@ -110,6 +110,39 @@ describe('MarkerPickerDialog', () => {
     });
 });
 
+describe('MarkerPickerDialog props', () => {
+    it('excludeMapIds hides those maps from the tree', () => {
+        render(
+            <MarkerPickerDialog
+                campaignId="c"
+                open
+                onOpenChange={vi.fn()}
+                onPick={vi.fn()}
+                excludeMapIds={['town']}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: 'Світ' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Місто' })).toBeNull();
+    });
+
+    it('markerFilter narrows the marker list', () => {
+        render(
+            <MarkerPickerDialog
+                campaignId="c"
+                open
+                onOpenChange={vi.fn()}
+                onPick={vi.fn()}
+                markerFilter={(m) => m.name === 'Вежа'}
+            />
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'Світ' }));
+
+        expect(screen.getByRole('button', { name: /Вежа/ })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /Ринок/ })).toBeNull();
+    });
+});
+
 describe('MarkerChip', () => {
     it('«Місце недоступне», коли карти нема (404)', () => {
         world.map = { data: undefined, isError: true, isLoading: false };

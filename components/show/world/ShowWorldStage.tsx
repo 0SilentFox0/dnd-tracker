@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ShowWaiting } from '@/components/show/stage/ShowWaiting';
-import { WorldMapView } from '@/components/world/WorldMapView';
+import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { useMediaQuery, useReducedMotion } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { useShowWorld, useWorldDive } from '@/lib/hooks/world';

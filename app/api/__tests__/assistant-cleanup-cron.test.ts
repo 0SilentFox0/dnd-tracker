@@ -6,6 +6,8 @@ const cleanupNotifications = vi.hoisted(() => vi.fn());
 
 const cleanupSnapshots = vi.hoisted(() => vi.fn());
 
+const cleanupDemoCopies = vi.hoisted(() => vi.fn());
+
 vi.mock('@/lib/server/assistant/cleanup', () => ({
     cleanupAssistantData: cleanup,
 }));
@@ -14,6 +16,9 @@ vi.mock('@/lib/server/notifications/cleanup', () => ({
 }));
 vi.mock('@/lib/server/battles/cleanup', () => ({
     cleanupBattleSnapshots: cleanupSnapshots,
+}));
+vi.mock('@/lib/server/battles/demo-copy', () => ({
+    cleanupDemoBattleCopies: cleanupDemoCopies,
 }));
 
 import { GET } from '@/app/api/cron/assistant-cleanup/route';
@@ -28,6 +33,7 @@ describe('assistant cleanup cron route', () => {
             .mockReset()
             .mockResolvedValue({ notificationsDeleted: 5 });
         cleanupSnapshots.mockReset().mockResolvedValue({ snapshots: 4 });
+        cleanupDemoCopies.mockReset().mockResolvedValue({ copies: 6 });
     });
 
     it('runs cleanup only for an authorized scheduled request and reports counts', async () => {
@@ -45,6 +51,7 @@ describe('assistant cleanup cron route', () => {
             receiptsDeleted: 1,
             notificationsDeleted: 5,
             battleSnapshotsDeleted: 4,
+            demoBattleCopiesDeleted: 6,
         });
         expect(cleanup).toHaveBeenCalledOnce();
     });

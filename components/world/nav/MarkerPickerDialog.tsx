@@ -16,54 +16,32 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { WorldMapLink } from '@/components/world/WorldMapLink';
 import { DESKTOP_QUERY, useMediaQuery, useSearch } from '@/lib/hooks/common';
 import { useWorldMap, useWorldMaps } from '@/lib/hooks/world';
-import { mapPath } from '@/lib/utils/world/tree';
+import { treeDepth, treeOrder } from '@/lib/utils/world/tree';
 import type { ScenarioMarkerRef } from '@/types/scenario';
-import type { WorldMapSummary, WorldMarker } from '@/types/world';
+import type { WorldMarker } from '@/types/world';
 
 interface Props {
     campaignId: string;
     open: boolean;
     onOpenChange(open: boolean): void;
     onPick(ref: ScenarioMarkerRef): void;
+    excludeMapIds?: string[];
+    markerFilter?: (m: WorldMarker) => boolean;
+    title?: string;
 }
 
 const markerFields = (m: WorldMarker) => [m.name];
-
-const depthOf = (maps: WorldMapSummary[], id: string) =>
-    mapPath(maps, id).length - 1;
-
-function treeOrder(maps: WorldMapSummary[]): WorldMapSummary[] {
-    const ids = new Set(maps.map((m) => m.id));
-
-    const out: WorldMapSummary[] = [];
-
-    const walk = (parent: string | null) => {
-        for (const m of maps) {
-            if (
-                (m.parentMapId && ids.has(m.parentMapId)
-                    ? m.parentMapId
-                    : null) === parent &&
-                !out.includes(m)
-            ) {
-                out.push(m);
-                walk(m.id);
-            }
-        }
-    };
-
-    walk(null);
-
-    return out;
-}
 
 function MarkerList({
     campaignId,
     mapId,
     onPick,
+    markerFilter,
 }: {
     campaignId: string;
     mapId: string;
     onPick(markerId: string): void;
+    markerFilter?: (m: WorldMarker) => boolean;
 }) {
     const t = useTranslations('scenario.markerPicker');
 
@@ -72,14 +50,22 @@ function MarkerList({
         mapId
     );
 
-    const search = useSearch(data?.markers ?? [], markerFields);
+    const markers = useMemo(
+        () =>
+            markerFilter
+                ? (data?.markers ?? []).filter(markerFilter)
+                : (data?.markers ?? []),
+        [data?.markers, markerFilter]
+    );
+
+    const search = useSearch(markers, markerFields);
 
     if (isLoading) return <LoadingState />;
 
     if (isError)
         return <ErrorState error={error} onRetry={() => void refetch()} />;
 
-    if (!data?.markers.length)
+    if (!markers.length)
         return <EmptyState icon={MapPin} title={t('noMarkers')} />;
 
     return (
@@ -116,6 +102,9 @@ export function MarkerPickerDialog({
     open,
     onOpenChange,
     onPick,
+    excludeMapIds,
+    markerFilter,
+    title,
 }: Props) {
     const t = useTranslations('scenario.markerPicker');
 
@@ -131,7 +120,10 @@ export function MarkerPickerDialog({
 
     const [mapId, setMapId] = useState<string | null>(null);
 
-    const ordered = useMemo(() => treeOrder(maps), [maps]);
+    const ordered = useMemo(
+        () => treeOrder(maps).filter((m) => !excludeMapIds?.includes(m.id)),
+        [maps, excludeMapIds]
+    );
 
     const pick = (markerId: string) => {
         if (!mapId) return;
@@ -148,7 +140,7 @@ export function MarkerPickerDialog({
                     type="button"
                     variant={m.id === mapId ? 'secondary' : 'ghost'}
                     className="justify-start"
-                    style={{ paddingLeft: 12 + depthOf(maps, m.id) * 14 }}
+                    style={{ paddingLeft: 12 + treeDepth(maps, m.id) * 14 }}
                     onClick={() => setMapId(m.id)}
                 >
                     {m.name}
@@ -185,6 +177,7 @@ export function MarkerPickerDialog({
                         campaignId={campaignId}
                         mapId={mapId}
                         onPick={pick}
+                        markerFilter={markerFilter}
                     />
                 ) : (
                     <EmptyState title={t('pickMap')} />
@@ -207,6 +200,7 @@ export function MarkerPickerDialog({
                     campaignId={campaignId}
                     mapId={mapId}
                     onPick={pick}
+                    markerFilter={markerFilter}
                 />
             </div>
         );
@@ -216,7 +210,7 @@ export function MarkerPickerDialog({
             hud
             open={open}
             onOpenChange={onOpenChange}
-            title={t('title')}
+            title={title ?? t('title')}
         >
             {body}
         </ResponsiveDialog>

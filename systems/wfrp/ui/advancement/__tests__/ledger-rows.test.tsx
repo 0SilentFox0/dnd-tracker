@@ -178,7 +178,7 @@ describe('TalentRows', () => {
     afterEach(cleanup);
 
     const props = {
-        rules: DEFAULT_ADVANCEMENT_RULES,
+        pricing: { rules: DEFAULT_ADVANCEMENT_RULES },
         available: 1000,
         pending: false,
         price: (_id: string, base: number) => ({

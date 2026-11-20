@@ -48,12 +48,23 @@ vi.mock('@/lib/hooks/world/useRemoveMarker', () => ({
 vi.mock('@/components/world/editor/WorldToolbar', () => ({
     WorldToolbar: ({
         drawing,
+        children,
     }: {
-        drawing: { tool: string; setTool(t: string): void };
+        drawing: { tool: string; setTool(t: string, pin?: boolean): void };
+        children?: React.ReactNode;
     }) => (
-        <button type="button" onClick={() => drawing.setTool('move')}>
-            tool:{drawing.tool}
-        </button>
+        <div>
+            <button type="button" onClick={() => drawing.setTool('move')}>
+                tool:{drawing.tool}
+            </button>
+            <button
+                type="button"
+                onClick={() => drawing.setTool('point', true)}
+            >
+                pin-point
+            </button>
+            {children}
+        </div>
     ),
     WorldToolHint: () => null,
 }));
@@ -88,8 +99,12 @@ vi.mock('@/components/world/travel/TravelPanel', () => ({
         </div>
     ),
 }));
-vi.mock('@/components/world/WorldMapView', () => ({
-    WorldMapView: () => <div>map</div>,
+vi.mock('@/components/world/map/WorldMapView', () => ({
+    WorldMapView: ({
+        slots,
+    }: {
+        slots?: { card?: { content: React.ReactNode } };
+    }) => <div>map{slots?.card?.content}</div>,
 }));
 vi.mock('@/components/world/editor/panels/HeroEyesSelect', () => ({
     HeroEyesSelect: () => null,
@@ -100,8 +115,45 @@ vi.mock('@/components/world/editor/maps/NewWorldMapDialog', () => ({
 vi.mock('@/components/world/editor/WorldBreadcrumbs', () => ({
     WorldBreadcrumbs: () => null,
 }));
-vi.mock('@/components/world/editor/panels/WorldInspectorBar', () => ({
-    WorldInspectorBar: () => null,
+vi.mock('@/components/world/nav/MapTree', () => ({
+    MapTree: ({
+        footer,
+        onOpen,
+    }: {
+        footer?: React.ReactNode;
+        onOpen(id: string): void;
+    }) => (
+        <div>
+            <button type="button" onClick={() => onOpen('m1')}>
+                tree-open-m1
+            </button>
+            {footer}
+        </div>
+    ),
+}));
+vi.mock('@/components/world/editor/ModeSwitch', () => ({
+    ModeSwitch: ({ onChange }: { onChange(m: 'build' | 'play'): void }) => (
+        <button type="button" onClick={() => onChange('play')}>
+            mode-play
+        </button>
+    ),
+}));
+vi.mock('@/components/world/editor/DmMarkerBubble', () => ({
+    DmMarkerBubble: ({
+        actions,
+    }: {
+        actions: { onMore(): void; onClose(): void };
+    }) => (
+        <div>
+            <span>bubble</span>
+            <button type="button" onClick={actions.onMore}>
+                more
+            </button>
+            <button type="button" onClick={actions.onClose}>
+                close-bubble
+            </button>
+        </div>
+    ),
 }));
 vi.mock('@/components/world/editor/maps/WorldMapSettings', () => ({
     WorldMapSettings: () => null,
@@ -151,7 +203,7 @@ describe('WorldEditorPageClient', () => {
         expect(screen.getByText('travel-panel')).toBeTruthy();
     });
 
-    it('initialSelectedId відкриває панель маркера', () => {
+    it('initialSelectedId показує бульбашку, «Докладніше» відкриває панель маркера', () => {
         render(
             <WorldEditorPageClient
                 campaignId="c1"
@@ -161,7 +213,58 @@ describe('WorldEditorPageClient', () => {
             />
         );
 
+        expect(screen.getByText('bubble')).toBeTruthy();
+        expect(screen.queryByText('marker-panel')).toBeNull();
+
+        fireEvent.click(screen.getByText('more'));
+
         expect(screen.getByText('marker-panel')).toBeTruthy();
+        expect(screen.queryByText('bubble')).toBeNull();
+    });
+
+    it('закриття бульбашки знімає вибір', () => {
+        render(
+            <WorldEditorPageClient
+                campaignId="c1"
+                campaignName="Кампанія"
+                mapId="m2"
+                initialSelectedId="k1"
+            />
+        );
+
+        fireEvent.click(screen.getByText('close-bubble'));
+
+        expect(screen.queryByText('bubble')).toBeNull();
+    });
+
+    it('режим «Гра» вмикає інструмент героїв і панель подорожі', () => {
+        render(
+            <WorldEditorPageClient
+                campaignId="c1"
+                campaignName="Кампанія"
+                mapId="m2"
+            />
+        );
+
+        fireEvent.click(screen.getByText('mode-play'));
+
+        expect(screen.getByText('tool:move')).toBeTruthy();
+        expect(screen.getByText('travel-panel')).toBeTruthy();
+    });
+
+    it('дерево карт відкриває карту за кліком', () => {
+        render(
+            <WorldEditorPageClient
+                campaignId="c1"
+                campaignName="Кампанія"
+                mapId="m2"
+            />
+        );
+
+        fireEvent.click(screen.getByText('world.tree.toggle'));
+        fireEvent.click(screen.getByText('tree-open-m1'));
+
+        expect(replace).toHaveBeenCalledWith('/campaigns/c1/dm/world?map=m1');
     });
 
     it('без initialSelectedId маркер не вибрано', () => {
@@ -174,6 +277,7 @@ describe('WorldEditorPageClient', () => {
         );
 
         expect(screen.queryByText('marker-panel')).toBeNull();
+        expect(screen.queryByText('bubble')).toBeNull();
     });
 
     it('звичайне переміщення карту не змінює', () => {
@@ -189,5 +293,65 @@ describe('WorldEditorPageClient', () => {
         fireEvent.click(screen.getByText('plain'));
 
         expect(replace).not.toHaveBeenCalled();
+    });
+
+    describe('Esc ladder', () => {
+        const esc = () => fireEvent.keyDown(document.body, { key: 'Escape' });
+
+        const renderSelected = () =>
+            render(
+                <WorldEditorPageClient
+                    campaignId="c1"
+                    campaignName="Кампанія"
+                    mapId="m2"
+                    initialSelectedId="k1"
+                />
+            );
+
+        it('details close first, then the bubble: one step per press', () => {
+            renderSelected();
+            fireEvent.click(screen.getByText('more'));
+
+            expect(screen.getByText('marker-panel')).toBeTruthy();
+
+            esc();
+
+            expect(screen.queryByText('marker-panel')).toBeNull();
+            expect(screen.getByText('bubble')).toBeTruthy();
+
+            esc();
+
+            expect(screen.queryByText('bubble')).toBeNull();
+        });
+
+        it('a pinned tool steps back to select before the selection clears', () => {
+            renderSelected();
+            fireEvent.click(screen.getByText('pin-point'));
+
+            expect(screen.getByText('tool:point')).toBeTruthy();
+            expect(screen.queryByText('bubble')).toBeNull();
+
+            esc();
+
+            expect(screen.getByText('tool:select')).toBeTruthy();
+            expect(screen.getByText('bubble')).toBeTruthy();
+
+            esc();
+
+            expect(screen.queryByText('bubble')).toBeNull();
+        });
+
+        it('Esc with nothing open changes nothing', () => {
+            render(
+                <WorldEditorPageClient
+                    campaignId="c1"
+                    campaignName="Кампанія"
+                    mapId="m2"
+                />
+            );
+            esc();
+
+            expect(screen.getByText('tool:select')).toBeTruthy();
+        });
     });
 });

@@ -17,7 +17,7 @@ vi.mock('@/lib/hooks/world/useWorldHeroes', () => ({
         isPending: false,
     }),
 }));
-vi.mock('@/components/world/WorldMapView', () => ({
+vi.mock('@/components/world/map/WorldMapView', () => ({
     WorldMapView: (p: {
         detail: { map: { id: string }; markers: { id: string }[] };
         handlers: { onMarkerClick(id: string): void };

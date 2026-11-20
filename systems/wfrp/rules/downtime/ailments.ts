@@ -1,3 +1,4 @@
+import type { SlModel } from '../percentile/resolve';
 import { FESTERING_FAIL_WOUNDS, FESTERING_RENEW_DAYS } from './constants';
 import { rollDowntimeTest } from './roll';
 import type { Ailment, PeriodSummary } from './types';
@@ -7,7 +8,12 @@ import type { Rng } from '@/lib/utils/common/rng';
 export function tickAilments(
     ailments: Ailment[],
     days: number,
-    ctx: { endurance: number; rng: Rng; presetRolls?: number[] }
+    ctx: {
+        endurance: number;
+        rng: Rng;
+        presetRolls?: number[];
+        slModel?: SlModel;
+    }
 ): { ailments: Ailment[]; report: PeriodSummary['ailments']; wounds: number } {
     const kept: Ailment[] = [];
 
@@ -31,7 +37,8 @@ export function tickAilments(
             const { test, passed } = rollDowntimeTest(
                 ctx.endurance,
                 ctx.rng,
-                ctx.presetRolls?.[tests++]
+                ctx.presetRolls?.[tests++],
+                { slModel: ctx.slModel }
             );
 
             if (passed) {

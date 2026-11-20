@@ -9,11 +9,16 @@ import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import {
+    availableXp,
+    CAREER_ADVANCE_XP,
+    careerChangeCost,
     planCareerAdvance,
     planCareerSet,
 } from '@/systems/wfrp/rules/advancement';
 import type { Characteristics } from '@/systems/wfrp/rules/characteristics/keys';
 import { readCharacteristics } from '@/systems/wfrp/rules/characteristics/keys';
+import { editionOf } from '@/systems/wfrp/rules/edition';
+import { parseSpeciesProfile } from '@/systems/wfrp/server/profile-refs';
 import type {
     CareerAdvanceInput,
     CareerSetInput,
@@ -25,6 +30,7 @@ const ADVANCE_ERRORS = {
     NO_CAREER: API_ERRORS.CAREER_NO_CAREER,
     MAX_TIER: API_ERRORS.CAREER_MAX_TIER,
     TICKS_MISSING: API_ERRORS.CAREER_TICKS_MISSING,
+    INSUFFICIENT_XP: API_ERRORS.ADVANCE_INSUFFICIENT_XP,
 } as const;
 
 function advancementOf({ access, character }: CharacterGate) {
@@ -36,7 +42,7 @@ function advancementOf({ access, character }: CharacterGate) {
     if (character.status !== CharacterStatus.ACTIVE)
         throw new ContentError(API_ERRORS.XP_CHARACTERS_INVALID, 400);
 
-    return { planCareerSet, planCareerAdvance };
+    return { planCareerSet, planCareerAdvance, availableXp };
 }
 
 export async function setCareer(
@@ -57,15 +63,64 @@ export async function setCareer(
 
         const career = await tx.career.findFirst({
             where: { id: input.careerId, campaignId: character.campaignId },
-            select: { id: true, name: true },
+            select: { id: true, name: true, class: true },
         });
 
         if (!career) throw new ContentError(API_ERRORS.CAREER_NOT_FOUND, 404);
 
-        const next = advancement.planCareerSet(
-            readCharacteristics(locked),
-            career.id
-        );
+        const current = readCharacteristics(locked);
+
+        const canon = editionOf(access.campaign.rules).xpTables === 'canon5e';
+
+        if (canon && !access.isDM && character.race) {
+            const race = await tx.race.findFirst({
+                where: {
+                    name: character.race,
+                    campaignId: character.campaignId,
+                },
+                select: { profile: true },
+            });
+
+            const profile = parseSpeciesProfile(race?.profile);
+
+            if (
+                profile &&
+                profile.careerTable.length > 0 &&
+                !profile.careerTable.some((r) => r.careerId === career.id)
+            )
+                throw new ContentError(
+                    API_ERRORS.CAREER_NOT_IN_SPECIES_TABLE,
+                    409
+                );
+        }
+
+        if (current.career?.careerId === career.id)
+            throw new ContentError(API_ERRORS.CAREER_SAME, 409);
+
+        const previous =
+            canon && input.force !== true && current.career
+                ? await tx.career.findFirst({
+                      where: {
+                          id: current.career.careerId,
+                          campaignId: character.campaignId,
+                      },
+                      select: { class: true },
+                  })
+                : null;
+
+        const cost = previous
+            ? careerChangeCost(previous.class, career.class)
+            : 0;
+
+        if (cost > 0 && availableXp(locked.experience, current) < cost)
+            throw new ContentError(API_ERRORS.ADVANCE_INSUFFICIENT_XP, 409);
+
+        const switched = advancement.planCareerSet(current, career.id);
+
+        const next =
+            cost > 0
+                ? { ...switched, spentArchived: switched.spentArchived + cost }
+                : switched;
 
         await tx.character.update({
             where: { id: character.id },
@@ -78,7 +133,11 @@ export async function setCareer(
                 characterId: character.id,
                 actorUserId: access.userId,
                 kind: CharacterLogKind.CAREER_SET,
-                data: { careerId: career.id, name: career.name },
+                data: {
+                    careerId: career.id,
+                    name: career.name,
+                    ...(cost > 0 && { cost }),
+                },
             },
         ]);
 
@@ -102,10 +161,23 @@ export async function advanceCareer(
         if (!locked)
             throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
+        const current = readCharacteristics(locked);
+
         const plan = advancement.planCareerAdvance(
-            readCharacteristics(locked),
+            current,
             access.campaign.rules.advancement,
-            { force: input.force === true }
+            {
+                force: input.force === true,
+                ...(editionOf(access.campaign.rules).xpTables === 'canon5e' && {
+                    charge: {
+                        cost: CAREER_ADVANCE_XP,
+                        available: advancement.availableXp(
+                            locked.experience,
+                            current
+                        ),
+                    },
+                }),
+            }
         );
 
         if (!plan.ok) {
@@ -123,6 +195,8 @@ export async function advanceCareer(
             throw new ContentError(ADVANCE_ERRORS[plan.error], 409, issues);
         }
 
+        const charged = plan.next.spentArchived - current.spentArchived;
+
         await tx.character.update({
             where: { id: character.id },
             data: { characteristics: characteristicsJson(plan.next) },
@@ -138,6 +212,7 @@ export async function advanceCareer(
                     careerId: plan.next.career?.careerId,
                     tier: plan.next.career?.tier,
                     forced: input.force === true,
+                    ...(charged > 0 && { cost: charged }),
                 },
             },
         ]);

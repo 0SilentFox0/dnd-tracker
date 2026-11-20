@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_WORLD_MAP_BYTES } from '@/lib/constants/world';
+import {
+    MAX_WORLD_MAP_BYTES,
+    WORLD_MARKER_DESCRIPTION_MAX,
+} from '@/lib/constants/world';
 import {
     createWorldMapSchema,
     createWorldMarkerSchema,
@@ -110,6 +113,38 @@ describe('updateWorldMarkerSchema', () => {
         expect(
             updateWorldMarkerSchema.safeParse({ alwaysVisible: true }).success
         ).toBe(true);
+    });
+});
+
+describe('marker description and map move schemas', () => {
+    it('limits the marker description and allows null on update', () => {
+        const long = 'x'.repeat(WORLD_MARKER_DESCRIPTION_MAX + 1);
+
+        expect(
+            updateWorldMarkerSchema.safeParse({ description: null }).success
+        ).toBe(true);
+        expect(
+            updateWorldMarkerSchema.safeParse({ description: long }).success
+        ).toBe(false);
+        expect(
+            createWorldMarkerSchema.safeParse({
+                mapId: 'm1',
+                name: 'A',
+                kind: 'point',
+                x: 0.1,
+                y: 0.1,
+                description: long,
+            }).success
+        ).toBe(false);
+    });
+
+    it('accepts parentMarkerId on map update', () => {
+        expect(
+            updateWorldMapSchema.safeParse({ parentMarkerId: 'k1' }).success
+        ).toBe(true);
+        expect(
+            updateWorldMapSchema.safeParse({ parentMarkerId: '' }).success
+        ).toBe(false);
     });
 });
 

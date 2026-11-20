@@ -43,17 +43,21 @@ export type TestOutcome = {
 
 export type CoinAmount = { coin: Coin; amount: number };
 
+export type EndeavourSummary = {
+    kind: EndeavourKind;
+    test?: TestOutcome;
+    coins?: CoinAmount;
+    discount?: number;
+    patientId?: string;
+    skipped?: 'patientAbsent';
+};
+
 export type PeriodSummary = {
     skipped?: 'dead' | 'incapacitated';
     healed: number;
-    endeavour?: {
-        kind: EndeavourKind;
-        test?: TestOutcome;
-        coins?: CoinAmount;
-        discount?: number;
-        patientId?: string;
-        skipped?: 'patientAbsent';
-    };
+    endeavour?: EndeavourSummary;
+    /** 5e canon: every endeavour of the period, in order (`endeavour` is the first) */
+    endeavours?: EndeavourSummary[];
     ailments: {
         id: string;
         label: string;
@@ -84,6 +88,8 @@ export type PeriodSnapshot = {
 
 export type DowntimeState = {
     endeavour?: Endeavour;
+    /** 5e canon: up to CANON_ENDEAVOURS_MAX endeavours per period; `endeavour` mirrors the first */
+    endeavours?: Endeavour[];
     ailments: Ailment[];
     training?: TrainingCredit;
     lastPeriod?: PeriodSnapshot;

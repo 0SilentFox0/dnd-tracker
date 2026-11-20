@@ -8,6 +8,7 @@ import type { Purse } from '@/types/inventory';
 
 export type DowntimeSetBody = {
     endeavour: Endeavour | null;
+    endeavours?: Endeavour[];
     ailments?: (Omit<Ailment, 'id'> & { id?: string })[];
 };
 

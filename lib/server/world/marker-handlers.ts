@@ -59,6 +59,7 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
                     polygon: body.polygon ?? undefined,
                     name: body.name,
                     icon: body.icon ?? null,
+                    description: body.description ?? null,
                     color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
                     sortOrder: (_max.sortOrder ?? -1) + 1,
                 },

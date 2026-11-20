@@ -6,12 +6,8 @@ import { useTranslations } from 'next-intl';
 import type { useWorldEditor } from './useWorldEditor';
 
 import { useConfirm } from '@/lib/hooks/common';
+import { isTyping } from '@/lib/utils/world/is-typing';
 import type { WorldMarker } from '@/types/world';
-
-const isTyping = (t: EventTarget | null) =>
-    t instanceof HTMLElement &&
-    (t.isContentEditable ||
-        ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName));
 
 interface Options {
     marker: WorldMarker | undefined;

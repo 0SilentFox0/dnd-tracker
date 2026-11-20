@@ -42,6 +42,7 @@ export const toWorldMarker = (row: MarkerRow): WorldMarker => ({
     icon: row.icon,
     color: row.color,
     dmNote: row.dmNote,
+    description: row.description,
     alwaysVisible: row.alwaysVisible,
     sortOrder: row.sortOrder,
     childMapId: row.childMap?.id ?? null,

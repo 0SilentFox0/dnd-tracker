@@ -25,6 +25,7 @@ const marker: WorldMarker = {
     icon: null,
     color: '#d3b060',
     dmNote: null,
+    description: null,
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,

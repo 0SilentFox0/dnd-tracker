@@ -1,12 +1,17 @@
-import { skillTarget } from '../characteristics/derive';
+import { bonus, skillTarget } from '../characteristics/derive';
 import type { Characteristics } from '../characteristics/keys';
+import { EDITION_PROFILES, type EditionProfile } from '../edition/profiles';
 import {
+    CANON_INCOME_DIFFICULTY,
+    ENDEAVOUR_DIFFICULTY,
     STATUS_COIN,
     TEND_DAYS_PER_SL,
     TEND_HEAL_PER_SL,
     TRAIN_DISCOUNT_BASE,
     TRAIN_DISCOUNT_PER_SL,
 } from './constants';
+import { healEndeavourWounds } from './heal';
+import { rollIncome } from './income';
 import { rollDowntimeTest } from './roll';
 import { parseStatus } from './status';
 import type {
@@ -23,6 +28,7 @@ export type EndeavourCtx = {
     status?: string | null;
     rng: Rng;
     presetRoll?: number;
+    edition?: EditionProfile;
 };
 
 export type EndeavourOutcome = {
@@ -70,11 +76,28 @@ export function resolveEndeavour(
 
     if (!skill || !t) return {};
 
+    const model = ctx.edition ?? EDITION_PROFILES.legacy;
+
+    const canon = model.downtimeModel === 'canon5e';
+
     const { test, passed } = rollDowntimeTest(
         t.target,
         ctx.rng,
-        ctx.presetRoll
+        ctx.presetRoll,
+        {
+            difficulty:
+                canon && e.kind === 'earn'
+                    ? CANON_INCOME_DIFFICULTY
+                    : ENDEAVOUR_DIFFICULTY,
+            slModel: model.slModel,
+        }
     );
+
+    if (canon && e.kind === 'earn') {
+        const coins = rollIncome(parseStatus(ctx.status), passed, ctx.rng);
+
+        return { test, ...(coins.amount > 0 ? { coins } : {}) };
+    }
 
     if (!passed) return { test };
 
@@ -107,7 +130,12 @@ export function resolveEndeavour(
                 test,
                 tend: {
                     patientId: e.params.patientId,
-                    heal: sl * TEND_HEAL_PER_SL,
+                    heal: canon
+                        ? healEndeavourWounds(
+                              bonus(ctx.characteristics, 'int'),
+                              test.sl
+                          )
+                        : sl * TEND_HEAL_PER_SL,
                     days: sl * TEND_DAYS_PER_SL,
                 },
             };

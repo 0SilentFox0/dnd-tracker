@@ -12,6 +12,10 @@ export type SpeciesProfile = {
     randomTalentCount: number;
     randomTalents: { max: number; featId: string }[];
     careerTable: { max: number; careerId: string }[];
+    /** canon5e: `count` free skill purchases among `options` (skill advance keys) */
+    skillPicks?: { count: number; options: string[] };
+    /** canon5e: language skill keys the species knows; each starts fluent at +30 (6 purchases) */
+    languages?: string[];
 };
 
 export const isUsableProfile = (p: SpeciesProfile): boolean =>

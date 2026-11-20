@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 
+import { StatsCanonPanel } from './CanonPanels';
 import { ModeTabs } from './OptionCard';
 import type { WfrpDraftFormState } from './types';
 
@@ -47,6 +48,7 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
     const total = (i: number) =>
         STAT_FLOOR +
         (form.profile?.mods[CHARACTERISTIC_KEYS[i]] ?? 0) +
+        (form.canon?.distribution.values[CHARACTERISTIC_KEYS[i]] ?? 0) +
         values[i];
 
     return (
@@ -86,6 +88,12 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                     {t('budget', { spent, budget })}
                 </p>
             )}
+            {form.canon && (
+                <StatsCanonPanel
+                    canon={form.canon}
+                    label={(key) => tg(`${key as 'ws'}.label`)}
+                />
+            )}
             {values.length === CHARACTERISTIC_KEYS.length && (
                 <ul className="grid gap-2">
                     {CHARACTERISTIC_KEYS.map((key, i) => (
@@ -104,7 +112,7 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
                                     className="min-h-11 w-16 text-center"
                                     value={points[i]}
                                     min={FREE_POINT_MIN}
-                                    max={FREE_POINT_MAX}
+                                    max={form.stats.freeMax ?? FREE_POINT_MAX}
                                     onCommit={(v) => setPoint(i, v)}
                                     onValueChange={(v) => setPoint(i, v)}
                                 />

@@ -19,6 +19,7 @@ import { useAdvance } from '@/systems/wfrp/hooks';
 import { useCareers } from '@/systems/wfrp/hooks/careers';
 import {
     advanceCost,
+    advancementFor,
     availableXp,
     careerPrice,
 } from '@/systems/wfrp/rules/advancement';
@@ -27,6 +28,7 @@ import {
     CHARACTERISTIC_KEYS,
     readCharacteristics,
 } from '@/systems/wfrp/rules/characteristics/keys';
+import { editionOf } from '@/systems/wfrp/rules/edition';
 import { skillAdvanceKey } from '@/systems/wfrp/rules/skills/catalog';
 import { SHEET_SLOT } from '@/systems/wfrp/rules/slots';
 
@@ -52,7 +54,11 @@ export function AdvancementTab() {
     if (!character.data || !rules.data || !feats.data || !careers.data)
         return <LoadingState />;
 
-    const advancement = rules.data.advancement;
+    const edition = editionOf(rules.data);
+
+    const advancement = advancementFor(rules.data.advancement, edition);
+
+    const step = edition.advanceStep;
 
     const c = readCharacteristics(character.data);
 
@@ -101,14 +107,17 @@ export function AdvancementTab() {
                             key={key}
                             label={tc(`${key}.label`)}
                             value={value(c, key)}
-                            hint={t('advances', { count: c.advances[key] })}
+                            hint={t('advances', {
+                                count: Math.floor(c.advances[key] / step),
+                            })}
                             price={price(
                                 'characteristic',
                                 key,
                                 advanceCost(
                                     'characteristic',
                                     c.advances[key],
-                                    advancement
+                                    advancement,
+                                    step
                                 )
                             )}
                             available={available}
@@ -133,7 +142,7 @@ export function AdvancementTab() {
                         const priced = price(
                             'skill',
                             key,
-                            advanceCost('skill', advances, advancement)
+                            advanceCost('skill', advances, advancement, step)
                         );
 
                         return (
@@ -159,7 +168,8 @@ export function AdvancementTab() {
                             advanceCost(
                                 'skill',
                                 c.skillAdvances[key] ?? 0,
-                                advancement
+                                advancement,
+                                step
                             )
                         ).cost
                     }
@@ -172,7 +182,10 @@ export function AdvancementTab() {
                 <TalentRows
                     feats={feats.data}
                     talents={c.talents}
-                    rules={advancement}
+                    pricing={{
+                        rules: advancement,
+                        flat: edition.xpTables === 'canon5e',
+                    }}
                     price={(id, base) =>
                         careerPrice(ctx, advancement, 'talent', id, base)
                     }

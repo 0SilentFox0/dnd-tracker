@@ -5,12 +5,12 @@ import { useTranslations } from 'next-intl';
 import { Image as ImageIcon, MapPin, Swords, X } from 'lucide-react';
 
 import { BattlePickerDialog } from '../dialogs/BattlePickerDialog';
-import { MarkerPickerDialog } from '../dialogs/MarkerPickerDialog';
 import { SlidePickerDialog } from '../dialogs/SlidePickerDialog';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudButton } from '@/components/hud';
 import { MarkerChip } from '@/components/scenario/chips/MarkerChip';
+import { MarkerPickerDialog } from '@/components/world/nav/MarkerPickerDialog';
 import { useBattleBriefs } from '@/lib/hooks/battles';
 import { useDeck } from '@/lib/hooks/show';
 import type {

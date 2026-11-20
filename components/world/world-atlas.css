@@ -83,12 +83,13 @@
   font-size: 14px;
   color: var(--atlas-ink);
   paint-order: stroke fill;
-  -webkit-text-stroke: 3px var(--atlas-paper);
+  -webkit-text-stroke: 4px var(--atlas-paper);
+  text-shadow: 0 0 6px var(--atlas-paper);
 }
 
 .atlas-zone-area { transition: fill-opacity 0.15s ease-out; }
 .atlas-zone-area[data-interactive="true"] { pointer-events: visiblePainted; cursor: pointer; }
-.atlas-zone-area[data-interactive="true"]:hover { fill-opacity: 0.4; }
+.atlas-zone-area[data-interactive="true"]:hover { fill-opacity: 0.36; }
 
 .atlas-draft-dot {
   position: absolute;
@@ -192,4 +193,24 @@
 
 @media (prefers-reduced-motion: reduce) {
   .atlas-dive, .atlas-dive::after, .atlas-reveal { animation: none; transition: none; transform: none; }
+}
+
+.atlas-vertex {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-hud-gold-bright, #ffe08a);
+  border: 2px solid var(--atlas-ink);
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.atlas-vertex[data-mid="true"] {
+  width: 10px;
+  height: 10px;
+  background: var(--atlas-paper);
+  opacity: 0.8;
+  cursor: copy;
 }

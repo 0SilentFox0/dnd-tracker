@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { TalentsCanonPanel } from './CanonPanels';
 import type { WfrpDraftFormState } from './types';
 
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,9 @@ export function TalentsStep({ form }: { form: WfrpDraftFormState }) {
                     </>
                 )}
             </section>
+            {form.canon && (
+                <TalentsCanonPanel canon={form.canon} names={names} />
+            )}
         </div>
     );
 }

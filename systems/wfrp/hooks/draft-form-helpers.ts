@@ -32,11 +32,13 @@ export const VISIBLE_STEP_ERRORS = new Set([
     'CAREER_UNKNOWN',
     'FEAT_UNKNOWN',
     'PROFILE_NOT_READY',
+    'STATS_DISTRIBUTION',
+    'SKILL_CAP',
 ]);
 
 export const STEP_ERRORS: Record<WfrpDraftStepId, (code: string) => boolean> = {
-    species: (c) => c === 'PROFILE_NOT_READY',
-    career: (c) => c.startsWith('CAREER_'),
+    species: (c) => c === 'PROFILE_NOT_READY' || c === 'SPECIES_SKILLS',
+    career: (c) => c.startsWith('CAREER_') || c === 'SKILL_CAP',
     stats: (c) => c.startsWith('STATS_') || c.startsWith('POINTS_'),
     talents: (c) => c.startsWith('TALENT_') || c === 'FEAT_UNKNOWN',
     identity: () => false,

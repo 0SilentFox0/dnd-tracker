@@ -33,6 +33,21 @@ export const WFRP_META = {
     },
     whatsNew: [
         {
+            id: '2026-11-20-wfrp-creation',
+            date: '2026-11-20',
+            audience: 'all',
+        },
+        {
+            id: '2026-11-20-wfrp-advancement',
+            date: '2026-11-20',
+            audience: 'all',
+        },
+        {
+            id: '2026-11-20-wfrp-downtime-5e',
+            date: '2026-11-20',
+            audience: 'all',
+        },
+        {
             id: '2026-11-20-wfrp-psychology',
             date: '2026-11-20',
             audience: 'all',

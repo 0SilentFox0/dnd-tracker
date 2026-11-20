@@ -1,16 +1,17 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-    Check,
     CornerLeftUp,
     LogIn,
     type LucideIcon,
+    Magnet,
     MapPin,
     MousePointer2,
     Navigation,
     Pentagon,
+    Pin,
     Settings2,
     Undo2,
 } from 'lucide-react';
@@ -24,7 +25,12 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { useMapDrawing, WorldTool } from '@/lib/hooks/world';
+import {
+    MODE_TOOLS,
+    type useMapDrawing,
+    type WorldMode,
+    type WorldTool,
+} from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 
 const TOOLS = [
@@ -35,23 +41,35 @@ const TOOLS = [
     { key: 'move', hotkey: 'M', Icon: Navigation },
 ] as const satisfies { key: WorldTool; hotkey: string; Icon: LucideIcon }[];
 
+const PINNABLE: readonly WorldTool[] = ['point', 'zone', 'entry'];
+
 const BUTTON =
     'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-40 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10';
+
+const LABELLED = 'xl:w-auto xl:gap-1.5 xl:px-3 xl:text-sm';
 
 function ToolButton({
     label,
     hotkey,
     Icon,
+    tip,
     active,
+    pinned,
+    labelled,
     disabled,
     onClick,
+    onDoubleClick,
 }: {
     label: string;
     hotkey?: string;
+    tip?: string;
     Icon: LucideIcon;
     active?: boolean;
+    pinned?: boolean;
+    labelled?: boolean;
     disabled?: boolean;
-    onClick(): void;
+    onClick(e: MouseEvent): void;
+    onDoubleClick?(): void;
 }) {
     return (
         <Tooltip>
@@ -61,14 +79,23 @@ function ToolButton({
                     aria-label={label}
                     aria-pressed={active}
                     disabled={disabled}
+                    data-pinned={pinned || undefined}
                     onClick={onClick}
+                    onDoubleClick={onDoubleClick}
                     className={cn(
                         BUTTON,
+                        labelled && LABELLED,
                         active &&
                             'metal-gold metal-fill border-[var(--gold)] hover:bg-transparent'
                     )}
                 >
                     <Icon className="size-5" aria-hidden />
+                    {labelled ? (
+                        <span className="hidden xl:inline">{label}</span>
+                    ) : null}
+                    {pinned ? (
+                        <Pin className="size-3 shrink-0" aria-hidden />
+                    ) : null}
                 </HudButton>
             </TooltipTrigger>
             <TooltipContent side="bottom">
@@ -78,6 +105,7 @@ function ToolButton({
                         {hotkey}
                     </kbd>
                 ) : null}
+                {tip ? <span className="block text-xs">{tip}</span> : null}
             </TooltipContent>
         </Tooltip>
     );
@@ -85,22 +113,24 @@ function ToolButton({
 
 export function WorldToolbar({
     drawing,
+    mode = 'build',
+    snap,
     readOnly = false,
     onSettings,
-    inspector,
     children,
 }: {
     drawing: ReturnType<typeof useMapDrawing>;
+    mode?: WorldMode;
+    snap?: { enabled: boolean; setEnabled(v: boolean): void };
     readOnly?: boolean;
     onSettings?(): void;
-    inspector?: ReactNode;
     children?: ReactNode;
 }) {
     const { detail, maps, openMap } = useWorldEditorContext();
 
     const t = useTranslations('world.toolbar');
 
-    const { tool, setTool, draft, finish, undoVertex } = drawing;
+    const { tool, setTool, pinned, draft, undoVertex } = drawing;
 
     const parent = detail?.map.parentMapId
         ? maps.find((m) => m.id === detail.map.parentMapId)
@@ -115,28 +145,38 @@ export function WorldToolbar({
                         aria-label={t('group')}
                         className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto p-1 lg:min-w-0 lg:flex-1"
                     >
-                        {TOOLS.map(({ key, hotkey, Icon }) => (
-                            <ToolButton
-                                key={key}
-                                label={t(key)}
-                                hotkey={hotkey}
-                                Icon={Icon}
-                                active={tool === key}
-                                disabled={readOnly}
-                                onClick={() => setTool(key)}
-                            />
-                        ))}
+                        {TOOLS.filter(({ key }) =>
+                            MODE_TOOLS[mode].includes(key)
+                        ).map(({ key, hotkey, Icon }) => {
+                            const pinnable = PINNABLE.includes(key);
+
+                            return (
+                                <ToolButton
+                                    key={key}
+                                    label={t(key)}
+                                    hotkey={hotkey}
+                                    tip={pinnable ? t('pinHint') : undefined}
+                                    Icon={Icon}
+                                    labelled
+                                    active={tool === key}
+                                    pinned={tool === key && pinned.value}
+                                    disabled={readOnly}
+                                    onClick={(e) =>
+                                        setTool(key, pinnable && e.shiftKey)
+                                    }
+                                    onDoubleClick={
+                                        pinnable
+                                            ? () => setTool(key, true)
+                                            : undefined
+                                    }
+                                />
+                            );
+                        })}
                         {tool === 'zone' ? (
                             <>
                                 <span
                                     aria-hidden
                                     className="mx-0.5 h-6 w-px shrink-0 bg-hud-rule"
-                                />
-                                <ToolButton
-                                    label={t('closeZone')}
-                                    Icon={Check}
-                                    disabled={draft.length < 3}
-                                    onClick={finish}
                                 />
                                 <ToolButton
                                     label={t('undoVertex')}
@@ -174,7 +214,17 @@ export function WorldToolbar({
                                 </HudButton>
                             </>
                         ) : null}
-                        {onSettings ? (
+                        {snap && mode === 'build' ? (
+                            <ToolButton
+                                label={t('snap')}
+                                tip={t('snapHint')}
+                                Icon={Magnet}
+                                active={snap.enabled}
+                                disabled={readOnly}
+                                onClick={() => snap.setEnabled(!snap.enabled)}
+                            />
+                        ) : null}
+                        {onSettings && mode === 'build' ? (
                             <ToolButton
                                 label={t('settings')}
                                 Icon={Settings2}
@@ -192,7 +242,6 @@ export function WorldToolbar({
                         </div>
                     ) : null}
                 </div>
-                {inspector}
             </div>
         </TooltipProvider>
     );
@@ -216,7 +265,7 @@ export function WorldToolHint({
     return (
         <p
             role="status"
-            className="pointer-events-none max-w-[min(34rem,calc(100%-1rem))] rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-center text-xs text-hud-ink"
+            className="pointer-events-none w-max max-w-[min(22rem,calc(100vw-2rem))] rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-center text-xs text-hud-ink"
         >
             {t.rich(tool, { key, vertices })}
         </p>

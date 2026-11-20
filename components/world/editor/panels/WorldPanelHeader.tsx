@@ -6,10 +6,12 @@ export function WorldPanelHeader({
     badge,
     title,
     subtitle,
+    hideTitle = false,
 }: {
     badge: ReactNode;
     title: string;
     subtitle: string;
+    hideTitle?: boolean;
 }) {
     return (
         <div className="mb-4 flex items-center gap-3 border-b border-hud-rule pb-3">
@@ -17,9 +19,11 @@ export function WorldPanelHeader({
                 {badge}
             </span>
             <div className="min-w-0">
-                <h2 className="hud-sc truncate text-base text-hud-ink">
-                    {title}
-                </h2>
+                {hideTitle ? null : (
+                    <h2 className="hud-sc truncate text-base text-hud-ink">
+                        {title}
+                    </h2>
+                )}
                 <p className="truncate text-xs text-hud-muted">{subtitle}</p>
             </div>
         </div>

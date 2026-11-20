@@ -33,6 +33,8 @@ export interface EditionProfile {
     fumbleModel: 'none' | 'drop' | 'oops';
     /** `broken`: a failed Fear test costs a Broken level; `extended`: Fear is an Extended Cool test (SL accumulates to the rating, meanwhile no Momentum and the source attacks with Advantage), Terror breaks by rating (p183-184) */
     psychologyModel: 'broken' | 'extended';
+    /** `legacy`: one endeavour per hero, Challenging tests, income by SL, rest wound recovery by days; `canon5e`: up to 3 endeavours, Income at Average (+2 SL) paid in dice by Status and halved on failure, Heal = IB + SL, a downtime period restores all Wounds (p170, p190, p196, p199) */
+    downtimeModel: 'legacy' | 'canon5e';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -53,6 +55,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         hitLocationModel: 'zone',
         fumbleModel: 'none',
         psychologyModel: 'broken',
+        downtimeModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -71,5 +74,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         hitLocationModel: 'side',
         fumbleModel: 'drop',
         psychologyModel: 'extended',
+        downtimeModel: 'canon5e',
     },
 };

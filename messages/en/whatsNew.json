@@ -1,4 +1,20 @@
 {
+  "2026-11-20-wfrp-creation": {
+    "title": "Grim d100 (5e): creation by the book",
+    "body": "Hero creation follows the 5e steps: no starting XP, +6 (or +3 for a rearranged roll) to career characteristics, Fate and Fortune +1 for accepting the first results, five species skills, eight career skill advances, a tier 1 career talent and trappings. Free-point stats stay within 4–16."
+  },
+  "2026-11-20-wfrp-advancement": {
+    "title": "Grim d100 (5e): advancement in steps of five",
+    "body": "Characteristics and skills now advance in +5 purchases at the book prices (125 to 11250 and 50 to 8500), a talent costs a flat 100 XP, Advance Career costs 100 XP and a career change 100 XP within the class or 200 XP into another."
+  },
+  "2026-11-20-wfrp-downtime-5e": {
+    "title": "Grim d100 (5e): downtime",
+    "body": "Each downtime period allows up to three endeavours. Income is an Average test paid in dice by Status tier and halved on a failure, healing uses Endurance and Heal (IB + SL), and the period restores all Wounds."
+  },
+  "2026-11-20-world-map-ux": {
+    "title": "World map: tree, bubbles and snapping",
+    "body": "The map editor has Build and Play modes, a tree of maps, a card bubble on each marker with a description, shared zone borders with snapping and vertex editing, and a map can be moved under another marker. Players get the same tree, a place search and the bubble."
+  },
   "2026-11-19-copy-maps": {
     "title": "Copy maps to other campaigns",
     "body": "Battle maps can now be copied to your other campaigns from the Maps page. The background image is copied too; maps with an existing name or over the target's limits are skipped."

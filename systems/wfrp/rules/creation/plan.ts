@@ -5,6 +5,12 @@ import {
     type Characteristics,
     DEFAULT_CHARACTERISTICS,
 } from '../characteristics/keys';
+import {
+    CANON_FREE_POINT_MAX,
+    type CanonCtx,
+    type CanonPicks,
+    planCanon,
+} from './canon';
 import { isUsableProfile, type SpeciesProfile, STAT_FLOOR } from './profile';
 
 import {
@@ -19,6 +25,7 @@ export type CreationPicks = {
         | { mode: 'rearranged'; rolls: number[]; arranged: number[] }
         | { mode: 'free'; points: number[] };
     talents: string[];
+    canon?: CanonPicks;
 };
 
 export type CreationCtx = {
@@ -26,10 +33,17 @@ export type CreationCtx = {
     rules: AdvancementRules;
     careerIds: ReadonlySet<string>;
     featIds: ReadonlySet<string>;
+    /** Present = creationMode canon5e: starting XP 0, distributed bonuses, purchases, Fate */
+    canon?: CanonCtx;
 };
 
 export type PlanDraftResult =
-    | { ok: true; characteristics: Characteristics; experience: number }
+    | {
+          ok: true;
+          characteristics: Characteristics;
+          experience: number;
+          trappings: string[];
+      }
     | { ok: false; errors: string[] };
 
 const TALENT_RANK_CAP = 20;
@@ -48,7 +62,8 @@ const sameMultiset = (a: number[], b: number[]) => {
 function statValues(
     stats: CreationPicks['stats'],
     rules: AdvancementRules,
-    errors: string[]
+    errors: string[],
+    freeMax: number
 ): number[] | null {
     const count = CHARACTERISTIC_KEYS.length;
 
@@ -59,7 +74,7 @@ function statValues(
             return null;
         }
 
-        if (!inRange(stats.points, FREE_POINT_MIN, FREE_POINT_MAX))
+        if (!inRange(stats.points, FREE_POINT_MIN, freeMax))
             errors.push('POINTS_RANGE');
 
         if (
@@ -110,7 +125,26 @@ export function planDraft(
     )
         errors.push('CAREER_NOT_IN_TABLE');
 
-    const values = statValues(stats, rules, errors);
+    const values = statValues(
+        stats,
+        rules,
+        errors,
+        ctx.canon ? CANON_FREE_POINT_MAX : FREE_POINT_MAX
+    );
+
+    const canon = ctx.canon
+        ? planCanon(
+              picks.canon ?? {},
+              ctx.canon,
+              {
+                  profile,
+                  careerId: career.careerId,
+                  careerMode: career.mode,
+                  statsMode: stats.mode,
+              },
+              errors
+          )
+        : undefined;
 
     const tableFeats = new Set(profile.randomTalents.map((r) => r.featId));
 
@@ -120,7 +154,11 @@ export function planDraft(
     if (picks.talents.some((f) => !tableFeats.has(f)))
         errors.push('TALENT_NOT_IN_TABLE');
 
-    const featIds = [...profile.talents, ...picks.talents];
+    const featIds = [
+        ...profile.talents,
+        ...picks.talents,
+        ...(canon?.careerTalent ? [canon.careerTalent] : []),
+    ];
 
     if (featIds.some((f) => !ctx.featIds.has(f))) errors.push('FEAT_UNKNOWN');
 
@@ -130,7 +168,10 @@ export function planDraft(
     const base = Object.fromEntries(
         CHARACTERISTIC_KEYS.map((k, i) => [
             k,
-            STAT_FLOOR + (profile.mods[k] ?? 0) + values[i],
+            STAT_FLOOR +
+                (profile.mods[k] ?? 0) +
+                values[i] +
+                (canon?.bonus[k] ?? 0),
         ])
     ) as Characteristics['base'];
 
@@ -144,8 +185,13 @@ export function planDraft(
             ...DEFAULT_CHARACTERISTICS,
             base,
             move: profile.move,
-            fate: profile.fate,
-            ...(profile.fortune !== undefined && { fortune: profile.fortune }),
+            fate: canon?.fate ?? profile.fate,
+            ...(canon
+                ? canon.fortune !== undefined && { fortune: canon.fortune }
+                : profile.fortune !== undefined && {
+                      fortune: profile.fortune,
+                  }),
+            ...(canon && { skillAdvances: canon.skillAdvances }),
             extraWounds: profile.extraWounds,
             talents,
         },
@@ -155,8 +201,10 @@ export function planDraft(
     return {
         ok: true,
         characteristics,
-        experience:
-            rules.creation.careerBonus[career.mode] +
-            rules.creation.statBonus[stats.mode],
+        experience: canon
+            ? 0
+            : rules.creation.careerBonus[career.mode] +
+              rules.creation.statBonus[stats.mode],
+        trappings: canon?.trappings ?? [],
     };
 }

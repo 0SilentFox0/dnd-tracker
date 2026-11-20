@@ -15,6 +15,11 @@ vi.unmock('next-intl');
 const mocks = vi.hoisted(() => ({
     character: { data: undefined as unknown },
     save: vi.fn(async () => true),
+    rules: undefined as unknown,
+}));
+
+vi.mock('@/lib/hooks/campaigns', () => ({
+    useCampaignRules: () => ({ data: mocks.rules }),
 }));
 
 vi.mock('@/lib/hooks/characters', () => ({
@@ -82,6 +87,7 @@ const mount = ({
 describe('DowntimeTab', () => {
     beforeEach(() => {
         mocks.save.mockClear();
+        mocks.rules = undefined;
     });
 
     afterEach(cleanup);
@@ -195,5 +201,22 @@ describe('DowntimeTab', () => {
         });
 
         expect(screen.getByText('Мертвий: період пропущено')).toBeTruthy();
+    });
+
+    it('canon edition shows the endeavour limit and adds slots up to three', () => {
+        mocks.rules = { edition: { preset: 'canon5e' } };
+
+        mount({ downtime: { ailments: [] } });
+
+        expect(screen.getByText(/0 з 3/)).toBeTruthy();
+
+        const add = screen.getByRole('button', { name: 'Додати заняття' });
+
+        fireEvent.click(add);
+        fireEvent.click(add);
+        fireEvent.click(add);
+
+        expect(screen.getByText(/3 з 3/)).toBeTruthy();
+        expect((add as HTMLButtonElement).disabled).toBe(true);
     });
 });

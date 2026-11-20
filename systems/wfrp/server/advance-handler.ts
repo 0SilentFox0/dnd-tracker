@@ -11,6 +11,7 @@ import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import {
+    advancementFor,
     availableXp,
     planPurchase,
     planUndo,
@@ -21,6 +22,7 @@ import type {
     LedgerEntry,
 } from '@/systems/wfrp/rules/characteristics/keys';
 import { readCharacteristics } from '@/systems/wfrp/rules/characteristics/keys';
+import { editionOf } from '@/systems/wfrp/rules/edition';
 import { toCareerData } from '@/systems/wfrp/server/careers/row';
 import type { AdvanceInput } from '@/systems/wfrp/server/progression-schemas';
 
@@ -95,6 +97,8 @@ export async function advanceCharacter(
               })
             : null;
 
+        const edition = editionOf(access.campaign.rules);
+
         const plan = advancement.planPurchase({
             characteristics: readCharacteristics(locked),
             available: advancement.availableXp(
@@ -102,7 +106,9 @@ export async function advanceCharacter(
                 readCharacteristics(locked)
             ),
             request: input,
-            rules: access.campaign.rules.advancement,
+            rules: advancementFor(access.campaign.rules.advancement, edition),
+            step: edition.advanceStep,
+            flatTalent: edition.xpTables === 'canon5e',
             talent: feat ?? undefined,
             career:
                 state && row

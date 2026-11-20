@@ -79,75 +79,139 @@
     "characteristic": {
       "brackets": [
         {
+          "upTo": 1,
+          "cost": 125
+        },
+        {
+          "upTo": 2,
+          "cost": 175
+        },
+        {
+          "upTo": 3,
+          "cost": 250
+        },
+        {
+          "upTo": 4,
+          "cost": 350
+        },
+        {
           "upTo": 5,
-          "cost": 25
+          "cost": 500
+        },
+        {
+          "upTo": 6,
+          "cost": 700
+        },
+        {
+          "upTo": 7,
+          "cost": 950
+        },
+        {
+          "upTo": 8,
+          "cost": 1300
+        },
+        {
+          "upTo": 9,
+          "cost": 1800
         },
         {
           "upTo": 10,
-          "cost": 30
+          "cost": 2550
+        },
+        {
+          "upTo": 11,
+          "cost": 3600
+        },
+        {
+          "upTo": 12,
+          "cost": 5025
+        },
+        {
+          "upTo": 13,
+          "cost": 6950
+        },
+        {
+          "upTo": 14,
+          "cost": 9000
         },
         {
           "upTo": 15,
-          "cost": 40
-        },
-        {
-          "upTo": 20,
-          "cost": 50
-        },
-        {
-          "upTo": 25,
-          "cost": 70
-        },
-        {
-          "upTo": 30,
-          "cost": 90
-        },
-        {
-          "upTo": 35,
-          "cost": 120
-        },
-        {
-          "upTo": 40,
-          "cost": 150
+          "cost": 11250
         }
       ],
-      "max": 40
+      "max": 75
     },
     "skill": {
       "brackets": [
         {
+          "upTo": 1,
+          "cost": 50
+        },
+        {
+          "upTo": 2,
+          "cost": 75
+        },
+        {
+          "upTo": 3,
+          "cost": 100
+        },
+        {
+          "upTo": 4,
+          "cost": 150
+        },
+        {
           "upTo": 5,
-          "cost": 10
+          "cost": 250
+        },
+        {
+          "upTo": 6,
+          "cost": 400
+        },
+        {
+          "upTo": 7,
+          "cost": 600
+        },
+        {
+          "upTo": 8,
+          "cost": 850
+        },
+        {
+          "upTo": 9,
+          "cost": 1200
         },
         {
           "upTo": 10,
-          "cost": 15
+          "cost": 1700
+        },
+        {
+          "upTo": 11,
+          "cost": 2500
+        },
+        {
+          "upTo": 12,
+          "cost": 3500
+        },
+        {
+          "upTo": 13,
+          "cost": 4750
+        },
+        {
+          "upTo": 14,
+          "cost": 6500
         },
         {
           "upTo": 15,
-          "cost": 20
-        },
-        {
-          "upTo": 20,
-          "cost": 30
-        },
-        {
-          "upTo": 25,
-          "cost": 40
-        },
-        {
-          "upTo": 30,
-          "cost": 60
+          "cost": 8500
         }
       ],
-      "max": 30
+      "max": 75
     },
     "talentCostMultiplier": 1,
     "career": {
       "ticksRequired": [
-        8,
         10,
-        12
+        12,
+        14
       ],
       "outOfCareerMultiplier": 2
     },

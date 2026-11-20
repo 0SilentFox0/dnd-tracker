@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -27,6 +27,7 @@ const drawing = (over: Partial<ReturnType<typeof useMapDrawing>> = {}) =>
     ({
         tool: 'select',
         setTool: vi.fn(),
+        pinned: { value: false },
         draft: [],
         finish: vi.fn(),
         undoVertex: vi.fn(),
@@ -38,7 +39,8 @@ const renderBar = (
     parentMapId: string | null = null,
     onSettings?: () => void,
     extra?: ReactNode,
-    readOnly = false
+    readOnly = false,
+    props: Partial<ComponentProps<typeof WorldToolbar>> = {}
 ) =>
     render(
         <WorldEditorContext.Provider value={ctx(parentMapId)}>
@@ -46,6 +48,7 @@ const renderBar = (
                 drawing={d}
                 readOnly={readOnly}
                 onSettings={onSettings}
+                {...props}
             >
                 {extra}
             </WorldToolbar>
@@ -71,7 +74,91 @@ describe('WorldToolbar', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Точка входу' }));
 
-        expect(d.setTool).toHaveBeenCalledWith('entry');
+        expect(d.setTool).toHaveBeenCalledWith('entry', false);
+    });
+
+    it('shows text labels next to icons and keeps aria-labels for narrow screens', () => {
+        renderBar(drawing());
+
+        const button = screen.getByRole('button', { name: 'Зона' });
+
+        const label = button.querySelector('span') as HTMLElement;
+
+        expect(label.textContent).toBe('Зона');
+        expect(label.className).toContain('hidden');
+        expect(label.className).toContain('xl:inline');
+    });
+
+    it('Shift-click pins a tool, a plain click does not', () => {
+        const d = drawing();
+
+        renderBar(d);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Точка' }), {
+            shiftKey: true,
+        });
+
+        expect(d.setTool).toHaveBeenLastCalledWith('point', true);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Зона' }));
+
+        expect(d.setTool).toHaveBeenLastCalledWith('zone', false);
+    });
+
+    it('double click pins a tool; select cannot be pinned', () => {
+        const d = drawing();
+
+        renderBar(d);
+
+        fireEvent.doubleClick(screen.getByRole('button', { name: 'Зона' }));
+
+        expect(d.setTool).toHaveBeenLastCalledWith('zone', true);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Вибір' }), {
+            shiftKey: true,
+        });
+
+        expect(d.setTool).toHaveBeenLastCalledWith('select', false);
+    });
+
+    it('marks the active pinned tool', () => {
+        renderBar(drawing({ tool: 'point', pinned: { value: true } }));
+
+        expect(
+            screen
+                .getByRole('button', { name: 'Точка' })
+                .getAttribute('data-pinned')
+        ).toBe('true');
+    });
+
+    it('snapping chip toggles snap.enabled', () => {
+        const setEnabled = vi.fn();
+
+        renderBar(drawing(), null, undefined, undefined, false, {
+            snap: { enabled: true, setEnabled },
+        });
+
+        const chip = screen.getByRole('button', { name: 'Прилипання' });
+
+        expect(chip.getAttribute('aria-pressed')).toBe('true');
+
+        fireEvent.click(chip);
+
+        expect(setEnabled).toHaveBeenCalledWith(false);
+    });
+
+    it('play mode shows only the heroes tool and no snapping or settings', () => {
+        renderBar(drawing({ tool: 'move' }), null, vi.fn(), undefined, false, {
+            mode: 'play',
+            snap: { enabled: true, setEnabled: vi.fn() },
+        });
+
+        expect(screen.getByRole('button', { name: 'Герої' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Зона' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Прилипання' })).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'Налаштування карти' })
+        ).toBeNull();
     });
 
     it('read-only disables every tool and settings', () => {
@@ -84,7 +171,6 @@ describe('WorldToolbar', () => {
             'Точка',
             'Зона',
             'Точка входу',
-            'Герої',
             'Налаштування карти',
         ])
             expect(
@@ -93,7 +179,7 @@ describe('WorldToolbar', () => {
             ).toBe(true);
     });
 
-    it('offers finishing the zone only with three vertices', () => {
+    it('offers undoing a vertex only while drawing', () => {
         renderBar(
             drawing({
                 tool: 'zone',
@@ -104,13 +190,7 @@ describe('WorldToolbar', () => {
             })
         );
 
-        expect(
-            (
-                screen.getByRole('button', {
-                    name: 'Замкнути зону',
-                }) as HTMLButtonElement
-            ).disabled
-        ).toBe(true);
+        expect(screen.queryByRole('button', { name: 'Замкнути зону' })).toBeNull();
         expect(
             (
                 screen.getByRole('button', {

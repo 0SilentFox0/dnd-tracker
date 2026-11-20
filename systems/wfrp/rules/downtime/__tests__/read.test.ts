@@ -168,3 +168,27 @@ describe('downtime in characteristics', () => {
         ).toBe(true);
     });
 });
+
+describe('readDowntime endeavours', () => {
+    it('keeps a canon list of up to three endeavours', () => {
+        const list = [
+            { kind: 'rest', params: {} },
+            { kind: 'earn', params: { skill: 'charm' } },
+        ];
+
+        expect(
+            readDowntime({ ailments: [], endeavours: list })?.endeavours
+        ).toEqual(list);
+    });
+
+    it('rejects a list over the limit or with a malformed entry', () => {
+        const rest = { kind: 'rest', params: {} };
+
+        expect(
+            readDowntime({ ailments: [], endeavours: [rest, rest, rest, rest] })
+        ).toBeUndefined();
+        expect(
+            readDowntime({ ailments: [], endeavours: [{ kind: 'x' }] })
+        ).toBeUndefined();
+    });
+});

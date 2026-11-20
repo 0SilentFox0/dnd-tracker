@@ -1,12 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import type { WorldEditorCtx } from './types';
 import { useHeroEyes } from './useHeroEyes';
-import { useMapDrawing } from './useMapDrawing';
+import {
+    MODE_HOME_TOOL,
+    MODE_TOOLS,
+    useMapDrawing,
+    type WorldMode,
+} from './useMapDrawing';
 import { useMoveTarget } from './useMoveTarget';
 import { useRemoveMarker } from './useRemoveMarker';
 import { useWorldEditor } from './useWorldEditor';
@@ -14,7 +19,9 @@ import { useWorldHeroes } from './useWorldHeroes';
 import { useWorldMap } from './useWorldMap';
 import { useWorldMaps } from './useWorldMaps';
 
-import { polygonCentroid } from '@/lib/utils/world/geometry';
+import { markerAnchor, polygonCentroid } from '@/lib/utils/world/geometry';
+import { isTyping } from '@/lib/utils/world/is-typing';
+import { insertSharedPoints } from '@/lib/utils/world/zone-snap';
 import type {
     CreateWorldMarkerData,
     MapPoint,
@@ -63,11 +70,17 @@ export function useWorldEditorPage({
         if (initialSelectedId) select(initialSelectedId);
     }
 
-    const moveTarget = useMoveTarget(detail.data?.markers ?? NO_MARKERS);
+    const markers = detail.data?.markers ?? NO_MARKERS;
+
+    const moveTarget = useMoveTarget(markers);
 
     const [creating, setCreating] = useState(false);
 
-    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+
+    const [treeOpen, setTreeOpen] = useState<boolean | null>(null);
+
+    const [mode, setModeState] = useState<WorldMode>('build');
 
     const [redrawId, setRedrawId] = useState<string | null>(null);
 
@@ -85,6 +98,27 @@ export function useWorldEditorPage({
 
     const { reset: resetTarget } = moveTarget;
 
+    const mapAspect = detail.data
+        ? detail.data.map.height / detail.data.map.width
+        : 1;
+
+    const shareEdgePoints = useCallback(
+        (selfId: string | null, ring: Polygon) => {
+            const neighbours = markers.flatMap((m) =>
+                m.kind === 'zone' && m.polygon && m.id !== selfId
+                    ? [{ id: m.id, polygon: m.polygon }]
+                    : []
+            );
+
+            for (const n of insertSharedPoints(ring, neighbours, mapAspect))
+                void editor.marker.update.mutateOk({
+                    id: n.id,
+                    data: { polygon: n.polygon },
+                });
+        },
+        [markers, mapAspect, editor.marker.update]
+    );
+
     const drawing = useMapDrawing(
         {
             onPoint: (p) =>
@@ -96,6 +130,8 @@ export function useWorldEditorPage({
                     icon: 'landmark',
                 }),
             onZone: (polygon: Polygon) => {
+                shareEdgePoints(redrawId, polygon);
+
                 if (redrawId) {
                     void editor.marker.update.mutateOk({
                         id: redrawId,
@@ -128,22 +164,89 @@ export function useWorldEditorPage({
                 if (!detail.isPlaceholderData) moveTarget.pickPoint(p);
             },
         },
-        !eyes.asHeroId
+        !eyes.asHeroId,
+        MODE_TOOLS[mode]
     );
 
     const { tool, setTool } = drawing;
 
     useRemoveMarker({
-        marker: detail.data?.markers.find((m) => m.id === selectedId),
+        marker: markers.find((m) => m.id === selectedId),
         editor,
         select,
         hotkey: tool === 'select',
     });
 
+    const [snapEnabled, setSnapEnabled] = useState(true);
+
+    const snapZones = useMemo(
+        () =>
+            markers.flatMap((m) =>
+                m.kind === 'zone' && m.polygon && m.id !== redrawId
+                    ? [m.polygon]
+                    : []
+            ),
+        [markers, redrawId]
+    );
+
+    const changeVertices = useCallback(
+        (id: string, polygon: Polygon) => {
+            void editor.marker.update.mutateOk({ id, data: { polygon } });
+            shareEdgePoints(id, polygon);
+        },
+        [editor.marker.update, shareEdgePoints]
+    );
+
     const closePanel = useCallback(() => {
         select(null);
-        setSettingsOpen(false);
+        setDetailsOpen(false);
     }, []);
+
+    const draftLength = drawing.draft.length;
+
+    const detailsVisible = tool === 'select' && !eyes.asHeroId && detailsOpen;
+
+    const drawingActive =
+        !eyes.asHeroId && (tool !== MODE_HOME_TOOL[mode] || draftLength > 0);
+
+    const hasSelection = selectedId !== null;
+
+    useEffect(() => {
+        // capture phase + preventDefault so useMapDrawing skips presses consumed here
+        const onKey = (e: KeyboardEvent) => {
+            if (
+                e.key !== 'Escape' ||
+                e.defaultPrevented ||
+                isTyping(e.target) ||
+                (e.target instanceof Element &&
+                    e.target.closest('[role=dialog]'))
+            )
+                return;
+
+            if (detailsVisible) setDetailsOpen(false);
+            else if (drawingActive || !hasSelection) return;
+            else select(null);
+
+            e.preventDefault();
+
+            if (document.activeElement instanceof HTMLElement)
+                document.activeElement.blur();
+        };
+
+        window.addEventListener('keydown', onKey, true);
+
+        return () => window.removeEventListener('keydown', onKey, true);
+    }, [detailsVisible, drawingActive, hasSelection]);
+
+    const setMode = useCallback(
+        (next: WorldMode) => {
+            setModeState(next);
+            setRedrawId(null);
+            setTool(MODE_HOME_TOOL[next]);
+            closePanel();
+        },
+        [setTool, closePanel]
+    );
 
     const redraw = useCallback(
         (id: string | null) => {
@@ -158,23 +261,62 @@ export function useWorldEditorPage({
             id: string | null,
             { keepTool = false }: { keepTool?: boolean } = {}
         ) => {
-            select(null);
-            setSettingsOpen(false);
+            closePanel();
             setRedrawId(null);
             resetTarget();
 
-            if (!keepTool) setTool('select');
+            if (!keepTool) setTool(MODE_HOME_TOOL[mode]);
 
             router.replace(id ? `${pathname}?map=${id}` : pathname);
         },
-        [router, pathname, setTool, resetTarget]
+        [router, pathname, setTool, resetTarget, closePanel, mode]
     );
 
     const changeEyes = (heroId: string | null) => {
         eyes.setAsHeroId(heroId);
-        select(null);
-        setSettingsOpen(false);
-        setTool('select');
+        closePanel();
+        setTool(MODE_HOME_TOOL[mode]);
+    };
+
+    const handlers = {
+        ...drawing.handlers,
+        onVertexChange: changeVertices,
+        onMapClick: (p: MapPoint) =>
+            tool === 'select' ? select(null) : drawing.handlers.onMapClick(p),
+        onMarkerClick: (id: string) => {
+            if (tool === 'select') select(id);
+            else if (tool === 'move' && !detail.isPlaceholderData)
+                moveTarget.pickMarker(id);
+        },
+        onMarkerDoubleClick: (id: string) => {
+            const child = markers.find((m) => m.id === id)?.childMapId;
+
+            if (child) openMap(child);
+        },
+        onMarkerDrag:
+            tool === 'select' || tool === 'point'
+                ? (id: string, p: MapPoint) =>
+                      void editor.marker.update.mutateOk({
+                          id,
+                          data: { x: p.x, y: p.y },
+                      })
+                : undefined,
+    };
+
+    const selectedMarker = selectedId
+        ? markers.find((m) => m.id === selectedId)
+        : undefined;
+
+    const bubbleOpen =
+        tool === 'select' &&
+        !eyes.asHeroId &&
+        !!selectedMarker &&
+        !detailsOpen;
+
+    const card = {
+        marker: selectedMarker,
+        open: bubbleOpen,
+        point: selectedMarker ? markerAnchor(selectedMarker) : null,
     };
 
     const ctx: WorldEditorCtx = useMemo(
@@ -208,12 +350,26 @@ export function useWorldEditorPage({
     return {
         ctx,
         data: { maps, detail, roster },
-        tools: { eyes, drawing, moveTarget, editor },
+        tools: {
+            eyes,
+            drawing,
+            moveTarget,
+            editor,
+            mode: { value: mode, set: setMode },
+            snap: {
+                zones: snapZones,
+                enabled: snapEnabled,
+                setEnabled: setSnapEnabled,
+            },
+        },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: {
             create: { open: creating, set: setCreating },
-            settings: { open: settingsOpen, set: setSettingsOpen },
+            details: { open: detailsOpen, set: setDetailsOpen },
+            tree: { open: treeOpen, set: setTreeOpen },
         },
         actions: { openMap, changeEyes },
+        handlers,
+        card,
     };
 }

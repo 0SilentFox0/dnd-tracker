@@ -26,5 +26,8 @@
   "systemWithTemplate": "A rule system cannot be set together with a template",
   "systemRequired": "Choose a template or a rule system",
   "tooManySpellZones": "Too many spell zones",
-  "systemModuleConfirm": "This module changes how existing heroes are calculated: confirm the change"
+  "systemModuleConfirm": "This module changes how existing heroes are calculated: confirm the change",
+  "worldNestedExists": "The marker already has a nested map",
+  "worldMoveCycle": "A map cannot be moved into its own branch",
+  "worldRootImmovable": "The root map cannot be moved"
 }

@@ -1,7 +1,8 @@
 import { bonus, skillTarget } from '../characteristics/derive';
 import type { Characteristics } from '../characteristics/keys';
+import { editionOf } from '../edition/read';
 import { tickAilments } from './ailments';
-import { REST_HEAL_MULTIPLIER } from './constants';
+import { CANON_ENDEAVOURS_MAX, REST_HEAL_MULTIPLIER } from './constants';
 import type { EndeavourOutcome } from './endeavours';
 import { resolveEndeavour, validateEndeavour } from './endeavours';
 import { rollEvent } from './event';
@@ -10,6 +11,8 @@ import type {
     Ailment,
     CoinAmount,
     DowntimeState,
+    Endeavour,
+    EndeavourSummary,
     PeriodSnapshot,
     PeriodSummary,
 } from './types';
@@ -52,19 +55,39 @@ export type PlannedHero = {
 };
 
 type Outcome = {
-    summary?: PeriodSummary['endeavour'];
+    summary?: EndeavourSummary;
     result: EndeavourOutcome;
 };
 
+function endeavoursOf(h: PeriodHero, canon: boolean): Endeavour[] {
+    const d = h.characteristics.downtime;
+
+    if (!canon) return d?.endeavour ? [d.endeavour] : [];
+
+    return (d?.endeavours ?? (d?.endeavour ? [d.endeavour] : [])).slice(
+        0,
+        CANON_ENDEAVOURS_MAX
+    );
+}
+
+function sumCoins(outcomes: Outcome[]): CoinAmount | undefined {
+    const coins = outcomes.flatMap((o) => o.summary?.coins ?? []);
+
+    return coins.length
+        ? {
+              coin: coins[0].coin,
+              amount: coins.reduce((n, c) => n + c.amount, 0),
+          }
+        : undefined;
+}
+
 function runEndeavour(
+    e: Endeavour,
     h: PeriodHero,
     input: PeriodInput,
-    patientPresent: (id: string) => boolean
-): Outcome | undefined {
-    const e = h.characteristics.downtime?.endeavour;
-
-    if (!e) return undefined;
-
+    patientPresent: (id: string) => boolean,
+    slot: number
+): Outcome {
     if (e.kind === 'tend' && !patientPresent(e.params.patientId))
         return {
             summary: {
@@ -82,7 +105,9 @@ function runEndeavour(
         characteristics: h.characteristics,
         status: h.status,
         rng: input.rng,
-        presetRoll: input.presets?.[h.id]?.endeavour,
+        // a DM preset roll applies to the first endeavour slot only
+        presetRoll: slot === 0 ? input.presets?.[h.id]?.endeavour : undefined,
+        edition: editionOf(input.rules),
     });
 
     return {
@@ -120,27 +145,37 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
         return !!p && !p.resources.dead;
     };
 
-    const outcomes = new Map<string, Outcome>();
+    const edition = editionOf(input.rules);
+
+    const canon = edition.downtimeModel === 'canon5e';
+
+    const outcomes = new Map<string, Outcome[]>();
 
     const tendBonus = new Map<string, { heal: number; days: number }>();
 
     for (const h of heroes) {
         if (h.resources.dead || currentHp(h.resources, h.maxHp) === 0) continue;
 
-        const o = runEndeavour(h, input, patientPresent);
+        const list = endeavoursOf(h, canon).map((e, slot) =>
+            runEndeavour(e, h, input, patientPresent, slot)
+        );
 
-        if (!o) continue;
+        if (!list.length) continue;
 
-        outcomes.set(h.id, o);
+        outcomes.set(h.id, list);
 
-        const tend = o.result.tend;
+        for (const { result } of list) {
+            const tend = result.tend;
 
-        if (tend) {
-            const prev = tendBonus.get(tend.patientId) ?? { heal: 0, days: 0 };
+            if (!tend) continue;
+
+            const prev = tendBonus.get(tend.patientId);
+
+            if (canon && prev) continue;
 
             tendBonus.set(tend.patientId, {
-                heal: prev.heal + tend.heal,
-                days: prev.days + tend.days,
+                heal: (prev?.heal ?? 0) + tend.heal,
+                days: (prev?.days ?? 0) + tend.days,
             });
         }
     }
@@ -162,9 +197,14 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
             summary: PeriodSummary
         ): PlannedHero => {
             const training =
-                outcomes.get(h.id)?.result.training ?? prev.training;
+                outcomes
+                    .get(h.id)
+                    ?.map((o) => o.result.training)
+                    .findLast(Boolean) ?? prev.training;
 
-            const coins = summary.endeavour?.coins;
+            const coins = canon
+                ? sumCoins(outcomes.get(h.id) ?? [])
+                : summary.endeavour?.coins;
 
             const snapshot: PeriodSnapshot = {
                 id: input.periodId,
@@ -209,6 +249,8 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
 
         const outcome = outcomes.get(h.id);
 
+        const first = outcome?.[0];
+
         const tend = tendBonus.get(h.id);
 
         const current = currentHp(h.resources, h.maxHp);
@@ -217,14 +259,16 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
             h.characteristics.downtime?.endeavour?.kind === 'rest' &&
             !incapacitated;
 
-        const healed = healWounds({
-            current,
-            max: h.maxHp,
-            tb: bonus(h.characteristics, 't'),
-            days,
-            multiplier: rest ? REST_HEAL_MULTIPLIER : 1,
-            bonus: tend?.heal ?? 0,
-        });
+        const healed = canon
+            ? h.maxHp
+            : healWounds({
+                  current,
+                  max: h.maxHp,
+                  tb: bonus(h.characteristics, 't'),
+                  days,
+                  multiplier: rest ? REST_HEAL_MULTIPLIER : 1,
+                  bonus: tend?.heal ?? 0,
+              });
 
         const endurance =
             skillTarget(h.characteristics, 'endurance')?.target ?? 0;
@@ -232,7 +276,12 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
         const ticked = tickAilments(
             reduceNearest(prev.ailments, tend?.days ?? 0),
             days,
-            { endurance, rng: input.rng, presetRolls: presets?.ailments }
+            {
+                endurance,
+                rng: input.rng,
+                presetRolls: presets?.ailments,
+                slModel: edition.slModel,
+            }
         );
 
         const event = rollEvent(input.rules, input.rng, presets?.event);
@@ -242,7 +291,12 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
         const summary: PeriodSummary = {
             ...(incapacitated ? { skipped: 'incapacitated' as const } : {}),
             healed: healed - current,
-            ...(outcome?.summary ? { endeavour: outcome.summary } : {}),
+            ...(first?.summary ? { endeavour: first.summary } : {}),
+            ...(canon && outcome
+                ? {
+                      endeavours: outcome.flatMap((o) => o.summary ?? []),
+                  }
+                : {}),
             ailments: ticked.report,
             event,
         };

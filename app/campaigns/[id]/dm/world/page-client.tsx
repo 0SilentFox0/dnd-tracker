@@ -4,14 +4,16 @@ import { useTranslations } from 'next-intl';
 import { Map as MapIcon } from 'lucide-react';
 
 import { EmptyState, QueryState } from '@/components/common/states';
+import { HudToggleChip } from '@/components/hud';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { DmMarkerBubble } from '@/components/world/editor/DmMarkerBubble';
 import { NewWorldMapDialog } from '@/components/world/editor/maps/NewWorldMapDialog';
 import { WorldMapSettings } from '@/components/world/editor/maps/WorldMapSettings';
+import { ModeSwitch } from '@/components/world/editor/ModeSwitch';
 import { HeroEyesSelect } from '@/components/world/editor/panels/HeroEyesSelect';
-import { WorldInspectorBar } from '@/components/world/editor/panels/WorldInspectorBar';
 import { WorldMarkerPanel } from '@/components/world/editor/panels/WorldMarkerPanel';
 import { WorldBreadcrumbs } from '@/components/world/editor/WorldBreadcrumbs';
 import { WorldEditorContext } from '@/components/world/editor/WorldEditorContext';
@@ -19,10 +21,11 @@ import {
     WorldToolbar,
     WorldToolHint,
 } from '@/components/world/editor/WorldToolbar';
+import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { CompassRose } from '@/components/world/marker-icons';
+import { MapTree } from '@/components/world/nav/MapTree';
 import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
-import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
@@ -58,10 +61,12 @@ export function WorldEditorPageClient({
     const {
         ctx,
         data: { maps, detail, roster },
-        tools: { eyes, drawing, moveTarget, editor },
+        tools: { eyes, drawing, moveTarget, snap, mode },
         selected: { id: selectedId, select, close: closePanel },
-        dialogs: { create: creating, settings },
+        dialogs: { create: creating, details, tree },
         actions: { openMap, changeEyes },
+        handlers,
+        card: bubbleCard,
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
@@ -82,6 +87,20 @@ export function WorldEditorPageClient({
         </>
     );
 
+    const treeShown = isDesktop ? (tree.open ?? true) : tree.open === true;
+
+    const mapTree = (
+        <MapTree
+            maps={maps.data ?? []}
+            activeId={mapId}
+            onOpen={(id) => {
+                openMap(id);
+
+                if (!isDesktop) tree.set(false);
+            }}
+        />
+    );
+
     return (
         <WorldEditorContext.Provider value={ctx}>
             <HudPage>
@@ -91,23 +110,40 @@ export function WorldEditorPageClient({
                         mapId ? (
                             <QueryState query={detail}>
                                 {(d) => {
-                                    const marker = selectedId
-                                        ? d.markers.find(
-                                              (m) => m.id === selectedId
-                                          )
-                                        : undefined;
+                                    const { marker } = bubbleCard;
+
+                                    const building =
+                                        tool === 'select' && !eyes.asHeroId;
+
+                                    const detailsOpen =
+                                        building && details.open;
+
+                                    const bubble =
+                                        bubbleCard.open && marker ? (
+                                            <DmMarkerBubble
+                                                key={marker.id}
+                                                marker={marker}
+                                                actions={{
+                                                    onMore: () =>
+                                                        details.set(true),
+                                                    onClose: closePanel,
+                                                }}
+                                            />
+                                        ) : null;
+
+                                    const card =
+                                        bubble && bubbleCard.point && isDesktop
+                                            ? {
+                                                  point: bubbleCard.point,
+                                                  content: bubble,
+                                              }
+                                            : undefined;
 
                                     const panel = marker ? (
                                         <WorldMarkerPanel />
                                     ) : (
                                         <WorldMapSettings key={d.map.id} />
                                     );
-
-                                    const panelOpen =
-                                        tool === 'select' &&
-                                        (!!marker || settings.open);
-
-                                    const sheetOpen = !isDesktop && panelOpen;
 
                                     return (
                                         <>
@@ -129,25 +165,31 @@ export function WorldEditorPageClient({
                                                 <div className="mb-2 shrink-0">
                                                     <WorldToolbar
                                                         drawing={drawing}
+                                                        mode={mode.value}
+                                                        snap={snap}
                                                         readOnly={
                                                             !!eyes.asHeroId
                                                         }
-                                                        onSettings={() =>
-                                                            settings.set(true)
-                                                        }
-                                                        inspector={
-                                                            isDesktop ? (
-                                                                <WorldInspectorBar
-                                                                    open={
-                                                                        panelOpen
-                                                                    }
-                                                                    onClose={
-                                                                        closePanel
-                                                                    }
-                                                                />
-                                                            ) : undefined
-                                                        }
+                                                        onSettings={() => {
+                                                            select(null);
+                                                            details.set(true);
+                                                        }}
                                                     >
+                                                        <HudToggleChip
+                                                            tall
+                                                            active={treeShown}
+                                                            onClick={() =>
+                                                                tree.set(
+                                                                    !treeShown
+                                                                )
+                                                            }
+                                                        >
+                                                            {t('tree.toggle')}
+                                                        </HudToggleChip>
+                                                        <ModeSwitch
+                                                            value={mode.value}
+                                                            onChange={mode.set}
+                                                        />
                                                         <HeroEyesSelect
                                                             heroes={
                                                                 roster.heroes
@@ -162,6 +204,11 @@ export function WorldEditorPageClient({
                                                     </WorldToolbar>
                                                 </div>
                                                 <div className="flex min-h-0 flex-col gap-2 lg:flex-1 lg:flex-row">
+                                                    {isDesktop && treeShown ? (
+                                                        <aside className="hud-surface w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
+                                                            {mapTree}
+                                                        </aside>
+                                                    ) : null}
                                                     <div
                                                         className={`relative ${MAP_HEIGHT} lg:min-w-0`}
                                                     >
@@ -192,16 +239,18 @@ export function WorldEditorPageClient({
                                                                             compact={
                                                                                 !isDesktop
                                                                             }
-                                                                            hint={
-                                                                                <p
-                                                                                    role="status"
-                                                                                    className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
-                                                                                >
-                                                                                    {t(
-                                                                                        'eyes.player'
-                                                                                    )}
-                                                                                </p>
-                                                                            }
+                                                                            slots={{
+                                                                                hint: (
+                                                                                    <p
+                                                                                        role="status"
+                                                                                        className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
+                                                                                    >
+                                                                                        {t(
+                                                                                            'eyes.player'
+                                                                                        )}
+                                                                                    </p>
+                                                                                ),
+                                                                            }}
                                                                         />
                                                                     );
                                                                 }}
@@ -216,99 +265,104 @@ export function WorldEditorPageClient({
                                                                 selectedId={
                                                                     selectedId
                                                                 }
-                                                                draft={
-                                                                    drawing.draft
-                                                                }
-                                                                tool={tool}
+                                                                edit={{
+                                                                    tool,
+                                                                    draft: drawing.draft,
+                                                                    snap,
+                                                                }}
                                                                 compact={
                                                                     !isDesktop
                                                                 }
-                                                                hint={
-                                                                    <WorldToolHint
-                                                                        tool={
-                                                                            tool
-                                                                        }
-                                                                        vertices={
-                                                                            drawing
-                                                                                .draft
-                                                                                .length
-                                                                        }
-                                                                    />
-                                                                }
-                                                                handlers={{
-                                                                    ...drawing.handlers,
-                                                                    onMapClick:
-                                                                        (p) =>
-                                                                            tool ===
-                                                                            'select'
-                                                                                ? select(
-                                                                                      null
-                                                                                  )
-                                                                                : drawing.handlers.onMapClick(
-                                                                                      p
-                                                                                  ),
-                                                                    onMarkerClick:
-                                                                        (
-                                                                            id
-                                                                        ) => {
-                                                                            if (
-                                                                                tool ===
-                                                                                'select'
-                                                                            )
-                                                                                select(
-                                                                                    id
-                                                                                );
-                                                                            else if (
-                                                                                tool ===
-                                                                                    'move' &&
-                                                                                !detail.isPlaceholderData
-                                                                            )
-                                                                                moveTarget.pickMarker(
-                                                                                    id
-                                                                                );
-                                                                        },
-                                                                    onMarkerDrag:
-                                                                        tool ===
-                                                                            'select' ||
-                                                                        tool ===
-                                                                            'point'
-                                                                            ? (
-                                                                                  id,
-                                                                                  p
-                                                                              ) =>
-                                                                                  void editor.marker.update.mutateOk(
-                                                                                      {
-                                                                                          id,
-                                                                                          data: {
-                                                                                              x: p.x,
-                                                                                              y: p.y,
-                                                                                          },
-                                                                                      }
-                                                                                  )
-                                                                            : undefined,
-                                                                }}
-                                                                overlay={
-                                                                    <>
-                                                                        <CompassRose
-                                                                            className="atlas-compass pointer-events-none absolute"
-                                                                            style={{
-                                                                                ...ENTRY_COMPASS,
-                                                                                left: `${d.map.entryX * 100}%`,
-                                                                                top: `${d.map.entryY * 100}%`,
-                                                                            }}
+                                                                handlers={handlers}
+                                                                slots={{
+                                                                    hint: (
+                                                                        <WorldToolHint
+                                                                            tool={
+                                                                                tool
+                                                                            }
+                                                                            vertices={
+                                                                                drawing
+                                                                                    .draft
+                                                                                    .length
+                                                                            }
                                                                         />
-                                                                        {moveTarget.point ? (
-                                                                            <TargetMark
-                                                                                point={
-                                                                                    moveTarget.point
-                                                                                }
+                                                                    ),
+                                                                    card,
+                                                                    overlay: (
+                                                                        <>
+                                                                            <CompassRose
+                                                                                className="atlas-compass pointer-events-none absolute"
+                                                                                style={{
+                                                                                    ...ENTRY_COMPASS,
+                                                                                    left: `${d.map.entryX * 100}%`,
+                                                                                    top: `${d.map.entryY * 100}%`,
+                                                                                }}
                                                                             />
-                                                                        ) : null}
-                                                                    </>
-                                                                }
+                                                                            {moveTarget.point ? (
+                                                                                <TargetMark
+                                                                                    point={
+                                                                                        moveTarget.point
+                                                                                    }
+                                                                                />
+                                                                            ) : null}
+                                                                        </>
+                                                                    ),
+                                                                }}
                                                             />
                                                         )}
+                                                        {tool === 'zone' &&
+                                                        drawing.draft.length >
+                                                            0 ? (
+                                                            <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    disabled={
+                                                                        drawing
+                                                                            .draft
+                                                                            .length <
+                                                                        3
+                                                                    }
+                                                                    onClick={
+                                                                        drawing.finish
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'toolbar.done'
+                                                                    )}
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={
+                                                                        drawing.cancel
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'toolbar.cancel'
+                                                                    )}
+                                                                </Button>
+                                                            </div>
+                                                        ) : null}
                                                     </div>
+                                                    {isDesktop &&
+                                                    detailsOpen ? (
+                                                        <aside className="hud-surface rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                            <div className="mb-2 flex justify-end">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={
+                                                                        closePanel
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'editor.closePanel'
+                                                                    )}
+                                                                </Button>
+                                                            </div>
+                                                            {panel}
+                                                        </aside>
+                                                    ) : null}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
                                                         <div className="lg:w-80 lg:shrink-0 lg:overflow-y-auto">
@@ -356,28 +410,54 @@ export function WorldEditorPageClient({
                                                 </div>
                                             </div>
                                             {isDesktop ? null : (
-                                                <ResponsiveDialog
-                                                    hud
-                                                    open={sheetOpen}
-                                                    onOpenChange={(open) => {
-                                                        if (!open) closePanel();
-                                                    }}
-                                                    title={
-                                                        marker?.name ??
-                                                        d.map.name
-                                                    }
-                                                    description={
-                                                        marker
-                                                            ? t(
-                                                                  'editor.markerParams'
-                                                              )
-                                                            : t(
-                                                                  'editor.mapParams'
-                                                              )
-                                                    }
-                                                >
-                                                    {panel}
-                                                </ResponsiveDialog>
+                                                <>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={detailsOpen}
+                                                        onOpenChange={(
+                                                            open
+                                                        ) => {
+                                                            if (!open)
+                                                                closePanel();
+                                                        }}
+                                                        title={
+                                                            marker?.name ??
+                                                            d.map.name
+                                                        }
+                                                        description={
+                                                            marker
+                                                                ? t(
+                                                                      'editor.markerParams'
+                                                                  )
+                                                                : t(
+                                                                      'editor.mapParams'
+                                                                  )
+                                                        }
+                                                    >
+                                                        {panel}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={!!bubble}
+                                                        onOpenChange={(
+                                                            open
+                                                        ) => {
+                                                            if (!open)
+                                                                closePanel();
+                                                        }}
+                                                        title={marker?.name}
+                                                    >
+                                                        {bubble}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={treeShown}
+                                                        onOpenChange={tree.set}
+                                                        title={t('tree.label')}
+                                                    >
+                                                        {mapTree}
+                                                    </ResponsiveDialog>
+                                                </>
                                             )}
                                         </>
                                     );

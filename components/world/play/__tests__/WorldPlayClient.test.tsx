@@ -42,6 +42,7 @@ const marker = {
     icon: null,
     color: null,
     dmNote: null,
+    description: 'Old market town',
     alwaysVisible: true,
     sortOrder: 0,
     childMapId: 'm2',
@@ -98,6 +99,11 @@ const view = (): WorldView => ({
     notes: [],
     fog: true,
 });
+
+const click = (el: HTMLElement) => {
+    fireEvent.pointerDown(el, { pointerId: 1, clientX: 320, clientY: 240 });
+    fireEvent.pointerUp(el, { pointerId: 1, clientX: 320, clientY: 240 });
+};
 
 const renderClient = (mapId: string | null) =>
     renderWithConfirm(
@@ -175,7 +181,7 @@ describe('WorldPlayClient', () => {
             screen.getByRole('button', { name: 'Aria', pressed: false })
         ).toBeTruthy();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Cellar' }));
+        fireEvent.click(screen.getByRole('treeitem', { name: 'Cellar' }));
 
         expect(push).toHaveBeenCalledWith('/campaigns/c1/world?map=m2');
     });
@@ -186,20 +192,106 @@ describe('WorldPlayClient', () => {
         expect(pusherSync).toHaveBeenCalledWith('c1', true);
     });
 
-    it('opens the notes panel for a clicked marker', async () => {
+    it('the tree contains exactly the maps of the view', async () => {
+        vi.mocked(api.getWorldView).mockResolvedValue({
+            ...view(),
+            maps: view().maps.filter((m) => m.id === 'm1'),
+        });
         renderClient('m1');
 
-        const pin = await screen.findByRole('button', { name: 'Town' });
+        await screen.findByRole('button', { name: 'Town' });
 
-        fireEvent.pointerDown(pin, {
-            pointerId: 1,
-            clientX: 320,
-            clientY: 240,
-        });
-        fireEvent.pointerUp(pin, { pointerId: 1, clientX: 320, clientY: 240 });
+        expect(screen.getByRole('treeitem', { name: 'World' })).toBeTruthy();
+        expect(screen.queryByRole('treeitem', { name: 'Cellar' })).toBeNull();
+    });
+
+    it('a selected marker shows its bubble with the description and open-map', async () => {
+        renderClient('m1');
+
+        click(await screen.findByRole('button', { name: 'Town' }));
+
+        const bubble = await screen.findByRole('dialog', { name: 'Town' });
+
+        expect(bubble.textContent).toContain('Old market town');
+        expect(screen.getByText('Відкрити карту')).toBeTruthy();
+    });
+
+    it('on a phone the bubble is a bottom sheet with the name once', async () => {
+        vi.stubGlobal('matchMedia', (q: string) => ({
+            matches: false,
+            media: q,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+        }));
+        renderClient('m1');
+
+        click(await screen.findByRole('button', { name: 'Town' }));
+
+        const sheets = await screen.findAllByRole('dialog', { name: 'Town' });
+
+        expect(sheets.length).toBeGreaterThan(0);
+        expect(screen.getByText('Old market town')).toBeTruthy();
+        expect(screen.getAllByRole('heading', { name: 'Town' })).toHaveLength(1);
+
+        fireEvent.click(await screen.findByText('Докладніше'));
 
         await waitFor(() =>
             expect(screen.getByLabelText('Нова нотатка')).toBeTruthy()
         );
+        expect(screen.getAllByRole('heading', { name: 'Town' })).toHaveLength(1);
+    });
+
+    it('hides open-map when the child map is not in the view', async () => {
+        vi.mocked(api.getWorldView).mockResolvedValue({
+            ...view(),
+            maps: view().maps.filter((m) => m.id === 'm1'),
+        });
+        renderClient('m1');
+
+        click(await screen.findByRole('button', { name: 'Town' }));
+
+        await screen.findByRole('dialog', { name: 'Town' });
+
+        expect(screen.queryByText('Відкрити карту')).toBeNull();
+    });
+
+    it('double-click on a pin with an open child map opens it', async () => {
+        renderClient('m1');
+
+        fireEvent.doubleClick(
+            await screen.findByRole('button', { name: 'Town' })
+        );
+
+        expect(push).toHaveBeenCalledWith('/campaigns/c1/world?map=m2');
+    });
+
+    it('search by description finds the place and selects it', async () => {
+        renderClient('m1');
+
+        await screen.findByRole('button', { name: 'Town' });
+
+        fireEvent.change(screen.getByLabelText('Пошук місць'), {
+            target: { value: 'market' },
+        });
+        await waitFor(() =>
+            expect(
+                screen.getAllByRole('button', { name: 'Town' }).length
+            ).toBe(2)
+        );
+        fireEvent.click(screen.getAllByRole('button', { name: 'Town' })[0]);
+
+        expect(await screen.findByRole('dialog', { name: 'Town' })).toBeTruthy();
+    });
+
+    it('opens the notes panel from the bubble', async () => {
+        renderClient('m1');
+
+        click(await screen.findByRole('button', { name: 'Town' }));
+        fireEvent.click(await screen.findByText('Докладніше'));
+
+        await waitFor(() =>
+            expect(screen.getByLabelText('Нова нотатка')).toBeTruthy()
+        );
+        expect(screen.queryByRole('dialog', { name: 'Town' })).toBeNull();
     });
 });

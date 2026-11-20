@@ -64,8 +64,11 @@ describe('demo visual tours', () => {
             routeFromTarget: 'battle.open',
         });
 
-        expect(by('world', 'notes')).toMatchObject({
+        expect(by('world', 'bubble')).toMatchObject({
             clickFromTarget: 'world.marker',
+        });
+        expect(by('world', 'notes')).toMatchObject({
+            clickFromTarget: 'world.more',
         });
         expect(by('battle', 'topbar')).toMatchObject({
             clickFromTarget: 'battle.start',

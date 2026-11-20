@@ -7,18 +7,23 @@ import { MapPinned, PenLine } from 'lucide-react';
 import { MarkerIconGrid } from '../maps/MapFieldParts';
 import { NewWorldMapDialog } from '../maps/NewWorldMapDialog';
 import { markerIcon } from '../marker-icon-options';
+import { MarkerColorField } from '../MarkerColorField';
 import { useEditorMarkerFields } from '../use-editor-fields';
 import { useWorldEditorContext } from '../WorldEditorContext';
 import { DmMarkerNotes } from './DmMarkerNotes';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
-import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { WORLD_DM_NOTE_MAX, WORLD_NAME_MAX } from '@/lib/constants/world';
+import {
+    WORLD_DM_NOTE_MAX,
+    WORLD_MARKER_DESCRIPTION_MAX,
+    WORLD_NAME_MAX,
+} from '@/lib/constants/world';
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import type { WorldMarker } from '@/types/world';
 
 export function WorldMarkerPanel() {
@@ -42,6 +47,8 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
     const HeaderIcon = markerIcon(marker);
 
+    const sheet = !useMediaQuery(DESKTOP_QUERY);
+
     return (
         <div>
             <WorldPanelHeader
@@ -52,6 +59,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                     />
                 }
                 title={marker.name}
+                hideTitle={sheet}
                 subtitle={t('editor.markerSubtitle', {
                     shape: t(`shape.${marker.kind}`),
                     map: detail?.map.name ?? '',
@@ -66,21 +74,42 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                         onChange={(e) => m.setName(e.target.value)}
                         onBlur={m.commitName}
                     />
-                    {marker.kind === 'point' ? (
-                        <MarkerIconGrid
-                            aria-label={t('editor.icon')}
-                            value={marker.icon}
-                            cellClassName="h-11"
-                            onPick={(icon) => void m.save({ icon })}
+                    <label className="block space-y-1 text-sm">
+                        {t('editor.description')}
+                        <Textarea
+                            value={m.description}
+                            maxLength={WORLD_MARKER_DESCRIPTION_MAX}
+                            onChange={(e) => m.setDescription(e.target.value)}
+                            onBlur={m.commitDescription}
                         />
+                    </label>
+                    {marker.kind === 'point' ? (
+                        <>
+                            <MarkerIconGrid
+                                aria-label={t('editor.icon')}
+                                value={marker.icon}
+                                cellClassName="h-11"
+                                onPick={(icon) => void m.save({ icon })}
+                            />
+                            <div className="flex items-center gap-3 text-sm">
+                                <MarkerColorField
+                                    label={t('editor.pointColor')}
+                                    color={m.colorValue}
+                                    isCustom={m.isCustomColor}
+                                    onPick={m.pickColor}
+                                    onReset={m.resetColor}
+                                />
+                            </div>
+                        </>
                     ) : (
                         <div className="flex items-center gap-3 text-sm">
-                            <ColorSwatch
-                                color={m.color}
+                            <MarkerColorField
                                 label={t('editor.zoneColor')}
-                                onChange={m.pickColor}
+                                color={m.colorValue}
+                                isCustom={m.isCustomColor}
+                                onPick={m.pickColor}
+                                onReset={m.resetColor}
                             />
-                            {t('editor.zoneColor')}
                         </div>
                     )}
                     {marker.kind === 'zone' ? (

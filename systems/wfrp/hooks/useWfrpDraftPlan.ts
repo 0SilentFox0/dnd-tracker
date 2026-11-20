@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import {
+    type CanonCtx,
     type CreationPicks,
     planDraft,
     type PlanDraftResult,
@@ -16,6 +17,7 @@ export function useWfrpDraftPlan({
     rules,
     careerIds,
     featIds,
+    canon,
 }: {
     picks: CreationPicks;
     enabled: boolean;
@@ -23,6 +25,7 @@ export function useWfrpDraftPlan({
     rules?: PlanRules;
     careerIds: string[];
     featIds: string[];
+    canon?: CanonCtx;
 }) {
     return useMemo<PlanDraftResult | undefined>(() => {
         if (!enabled || !profile || !rules) return undefined;
@@ -32,6 +35,7 @@ export function useWfrpDraftPlan({
             rules,
             careerIds: new Set(careerIds),
             featIds: new Set(featIds),
+            canon,
         });
-    }, [enabled, profile, rules, picks, careerIds, featIds]);
+    }, [enabled, profile, rules, picks, careerIds, featIds, canon]);
 }

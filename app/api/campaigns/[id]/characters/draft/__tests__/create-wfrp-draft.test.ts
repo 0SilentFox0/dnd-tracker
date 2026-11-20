@@ -69,13 +69,24 @@ const post = (data: object) =>
         'camp'
     );
 
-const asUser = (role: string) =>
+const LEGACY_RULES = { ...WFRP_RULES, edition: { preset: 'legacy' } };
+
+const tier = (over: object = {}) => ({
+    name: 'Tier',
+    characteristics: ['ws', 'int', 'wp'],
+    skills: ['athletics', 'cool', 'dodge'],
+    talents: ['f1', 'f2'],
+    trappings: ['Rope', 'Lantern'],
+    ...over,
+});
+
+const asUser = (role: string, rules: object = LEGACY_RULES) =>
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
         userId: 'u1',
         campaign: {
             id: 'camp',
             maxLevel: 20,
-            rules: WFRP_RULES,
+            rules,
             members: [{ userId: 'u1', role }],
         },
     } as never);
@@ -237,5 +248,76 @@ describe('createWfrpDraft', () => {
 
         expect((await post(body())).status).toBe(400);
         expect(prisma.character.create).not.toHaveBeenCalled();
+    });
+
+    describe('canon5e creation', () => {
+        const canon = {
+            speciesRolled: true,
+            speciesSkills: ['a', 'b', 'c', 'd', 'e'],
+            careerSkills: { athletics: 3, cool: 3, dodge: 2 },
+            distribution: { ws: 6 },
+            careerTalent: 'f2',
+        };
+
+        beforeEach(() => {
+            asUser('player', { ...WFRP_RULES, edition: { preset: 'canon5e' } });
+            vi.mocked(prisma.race.findFirst).mockResolvedValue({
+                campaignId: 'camp',
+                name: 'Human',
+                profile: {
+                    ...profile,
+                    fortune: 3,
+                    skillPicks: {
+                        count: 5,
+                        options: ['a', 'b', 'c', 'd', 'e'],
+                    },
+                    languages: ['language:trade-cant'],
+                },
+            } as never);
+            vi.mocked(prisma.career.findMany).mockResolvedValue([
+                { id: 'c1', tiers: [tier(), tier(), tier(), tier()] },
+            ] as never);
+        });
+
+        it('creates a hero with 0 XP, purchases, Fate bonus, career talent and trappings', async () => {
+            const res = await post(body({ canon }));
+
+            expect(res.status).toBe(200);
+
+            const { data } = vi.mocked(prisma.character.create).mock
+                .calls[0][0] as { data: Record<string, unknown> };
+
+            expect(data.experience).toBe(0);
+            expect(data.characteristics).toMatchObject({
+                base: { ws: 20 + 5 + 10 + 6 },
+                fate: 3,
+                fortune: 4,
+                talents: { f1: 1, f2: 2 },
+                skillAdvances: {
+                    a: 5,
+                    athletics: 15,
+                    dodge: 10,
+                    'language:trade-cant': 30,
+                },
+            });
+            expect(prisma.characterInventory.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({
+                    items: [
+                        { name: 'Rope', quantity: 1 },
+                        { name: 'Lantern', quantity: 1 },
+                    ],
+                }),
+            });
+        });
+
+        it('rejects invalid purchases with issue codes', async () => {
+            const res = await post(
+                body({ canon: { ...canon, careerSkills: { athletics: 3 } } })
+            );
+
+            expect(res.status).toBe(400);
+            expect((await res.json()).issues).toContain('CAREER_SKILLS');
+            expect(prisma.character.create).not.toHaveBeenCalled();
+        });
     });
 });

@@ -39,9 +39,38 @@ describe('advanceCost', () => {
         expect(advanceCost('skill', 30 - 1, RULES)).toBe(60);
     });
 
+    it('step 5 prices the purchase number, not the point count', () => {
+        expect(advanceCost('characteristic', 0, RULES, 5)).toBe(25);
+        expect(advanceCost('characteristic', 20, RULES, 5)).toBe(25);
+        expect(advanceCost('characteristic', 25, RULES, 5)).toBe(30);
+    });
+
     it('returns null at the limit', () => {
         expect(advanceCost('characteristic', 40, RULES)).toBeNull();
         expect(advanceCost('skill', 30, RULES)).toBeNull();
+    });
+});
+
+describe('planPurchase step', () => {
+    it('adds step points and records the ledger in points', () => {
+        const r = buy({
+            request: { kind: 'skill', key: 'melee' },
+            step: 5,
+        });
+
+        expect(r.ok && r.next.skillAdvances.melee).toBe(5);
+        expect(r.ok && r.entry).toMatchObject({ from: 0, to: 5, cost: 10 });
+    });
+
+    it('a flat talent price ignores the rank', () => {
+        const r = buy({
+            characteristics: base({ talents: { t1: 2 } }),
+            request: { kind: 'talent', key: 't1' },
+            talent,
+            flatTalent: true,
+        });
+
+        expect(r.ok && r.entry.cost).toBe(100);
     });
 });
 
