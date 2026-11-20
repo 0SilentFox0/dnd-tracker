@@ -39,6 +39,17 @@ describe('snapPoint', () => {
         expect(snapPoint(p, [left], 0.05)).toBe(p);
     });
 
+    it('measures the radius in pixels on a non-square box', () => {
+        const p = { x: 0.3, y: 0.06 };
+
+        expect(snapPoint(p, [left], 0.05, 1)).toBe(p);
+        expect(snapPoint(p, [left], 0.05, 0.5)).toEqual({ x: 0.3, y: 0 });
+        expect(snapPoint({ x: 0.3, y: 0.14 }, [left], 0.05, 0.5)).toEqual({
+            x: 0.3,
+            y: 0.14,
+        });
+    });
+
     it('picks the nearest of several vertices', () => {
         expect(snapPoint({ x: 0.52, y: 0.01 }, [left, right], 0.1)).toEqual({
             x: 0.5,

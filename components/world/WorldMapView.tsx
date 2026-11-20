@@ -175,7 +175,8 @@ export function WorldMapView({
             ? snapPoint(
                   p,
                   snap.zones.filter((z) => z !== skip),
-                  WORLD_SNAP_PX / (box.width * zoom)
+                  WORLD_SNAP_PX / (box.width * zoom),
+                  box.height / box.width
               )
             : p;
     };

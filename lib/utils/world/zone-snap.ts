@@ -2,10 +2,10 @@ import type { MapPoint, Polygon } from '@/types/world';
 
 type Pt = [number, number];
 
-function nearestOnSegment(p: MapPoint, a: Pt, b: Pt): MapPoint {
+function nearestOnSegment(p: MapPoint, a: Pt, b: Pt, k: number): MapPoint {
     const dx = b[0] - a[0];
 
-    const dy = b[1] - a[1];
+    const dy = (b[1] - a[1]) * k;
 
     const len2 = dx * dx + dy * dy;
 
@@ -14,18 +14,21 @@ function nearestOnSegment(p: MapPoint, a: Pt, b: Pt): MapPoint {
             ? 0
             : Math.max(
                   0,
-                  Math.min(1, ((p.x - a[0]) * dx + (p.y - a[1]) * dy) / len2)
+                  Math.min(1, ((p.x - a[0]) * dx + (p.y - a[1]) * k * dy) / len2)
               );
 
-    return { x: a[0] + t * dx, y: a[1] + t * dy };
+    return { x: a[0] + t * (b[0] - a[0]), y: a[1] + t * (b[1] - a[1]) };
 }
 
-const dist = (p: MapPoint, q: MapPoint) => Math.hypot(p.x - q.x, p.y - q.y);
+const dist = (p: MapPoint, q: MapPoint, k: number) =>
+    Math.hypot(p.x - q.x, (p.y - q.y) * k);
 
+/** radius is in width-normalized units; aspect = height / width of the map box. */
 export function snapPoint(
     p: MapPoint,
     zones: Polygon[],
-    radius: number
+    radius: number,
+    aspect = 1
 ): MapPoint {
     let vertex: MapPoint | null = null;
 
@@ -39,16 +42,16 @@ export function snapPoint(
         poly.forEach((a, i) => {
             const av = { x: a[0], y: a[1] };
 
-            const dv = dist(p, av);
+            const dv = dist(p, av, aspect);
 
             if (dv <= vertexDist) {
                 vertex = av;
                 vertexDist = dv;
             }
 
-            const q = nearestOnSegment(p, a, poly[(i + 1) % poly.length]);
+            const q = nearestOnSegment(p, a, poly[(i + 1) % poly.length], aspect);
 
-            const de = dist(p, q);
+            const de = dist(p, q, aspect);
 
             if (de <= edgeDist) {
                 edge = q;

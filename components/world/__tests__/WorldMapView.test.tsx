@@ -722,6 +722,38 @@ describe('WorldMapView zone snapping', () => {
         expect(onMapClick).toHaveBeenCalledWith({ x: 0.2, y: 0.2 });
     });
 
+    it('snap radius in normalized units shrinks as zoom grows', () => {
+        const onMapClick = vi.fn();
+
+        const at = { x: 0.106, y: 0.106 };
+
+        const { rerender } = render(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+            />
+        );
+
+        click(at.x * 800, at.y * 600);
+        expect(onMapClick).toHaveBeenLastCalledWith({ x: 0.1, y: 0.1 });
+
+        rerender(
+            <WorldMapView
+                detail={detail([neighbour])}
+                handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
+                focus={{ point: { x: 0.5, y: 0.5 }, seq: 1 }}
+            />
+        );
+        click(at.x * 2400 - 800, at.y * 1800 - 600);
+
+        const last = onMapClick.mock.calls.at(-1)?.[0];
+
+        expect(last.x).toBeCloseTo(0.106, 3);
+        expect(last.y).toBeCloseTo(0.106, 3);
+    });
+
     it('shows vertex handles only for the selected zone in select mode with onVertexChange', () => {
         const { container, rerender } = render(
             <WorldMapView
