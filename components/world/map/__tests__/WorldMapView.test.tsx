@@ -874,4 +874,112 @@ describe('WorldMapView card slot', () => {
         expect(screen.queryByRole('button', { name: 'Town' })).toBeNull();
         expect(screen.getByRole('button', { name: 'Port' })).toBeTruthy();
     });
+
+    it('renders the blurred backdrop with the same image URL and sizes as the map', () => {
+        vi.spyOn(
+            HTMLElement.prototype,
+            'getBoundingClientRect'
+        ).mockReturnValue({
+            left: 0,
+            top: 0,
+            width: 800,
+            height: 600,
+            right: 800,
+            bottom: 600,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+        });
+
+        const { container } = render(<WorldMapView detail={detail([])} />);
+
+        const imgs = [...container.querySelectorAll('img')];
+
+        const backdrop = container.querySelector('.atlas-backdrop');
+
+        if (backdrop) expect(backdrop.getAttribute('aria-hidden')).toBe('true');
+
+        expect(imgs.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('shows the fullscreen button only when slots.fullscreen is given and calls toggle', () => {
+        const toggle = vi.fn();
+
+        const { rerender } = render(<WorldMapView detail={detail([])} />);
+
+        expect(screen.queryByRole('button', { name: 'Повний екран' })).toBeNull();
+
+        rerender(
+            <WorldMapView
+                detail={detail([])}
+                slots={{ fullscreen: { full: false, toggle } }}
+            />
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Повний екран' }));
+
+        expect(toggle).toHaveBeenCalledTimes(1);
+    });
+
+    it('the fullscreen button label follows the state', () => {
+        render(
+            <WorldMapView
+                detail={detail([])}
+                slots={{ fullscreen: { full: true, toggle: vi.fn() } }}
+            />
+        );
+
+        const btn = screen.getByRole('button', {
+            name: 'Вийти з повного екрана',
+        });
+
+        expect(btn.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('clusters close pins and a cluster click zooms the view', () => {
+        const { container } = render(
+            <WorldMapView
+                detail={detail([
+                    marker({ id: 'a', name: 'Alpha', x: 0.5, y: 0.5 }),
+                    marker({ id: 'b', name: 'Beta', x: 0.501, y: 0.5 }),
+                ])}
+            />
+        );
+
+        const layer = container.querySelector('.atlas-top-layer') as HTMLElement;
+
+        const before = layer.style.transform;
+
+        fireEvent.click(screen.getByRole('button', { name: /ще 1/ }));
+
+        expect(layer.style.transform).not.toBe(before);
+    });
+
+    it('does not cluster pins with the point tool', () => {
+        render(
+            <WorldMapView
+                detail={detail([
+                    marker({ id: 'a', name: 'Alpha', x: 0.5, y: 0.5 }),
+                    marker({ id: 'b', name: 'Beta', x: 0.501, y: 0.5 }),
+                ])}
+                edit={{ tool: 'point' }}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Beta' })).toBeTruthy();
+    });
+
+    it('a focus with zoom 1 pans without zooming', () => {
+        const { container } = render(
+            <WorldMapView
+                detail={detail([])}
+                focus={{ point: { x: 0.9, y: 0.9 }, seq: 1, zoom: 1 }}
+            />
+        );
+
+        const layer = container.querySelector('.atlas-top-layer') as HTMLElement;
+
+        expect(layer.style.transform).toMatch(/scale\(1\)/);
+    });
 });

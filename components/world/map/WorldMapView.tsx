@@ -4,12 +4,13 @@ import {
     type PointerEvent,
     type ReactNode,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { Minus, Plus, RotateCcw } from 'lucide-react';
+import { Maximize, Minimize, Minus, Plus, RotateCcw } from 'lucide-react';
 
 import { LayerImageRect } from './LayerImageRect';
 import { WorldEnemies } from './WorldEnemies';
@@ -37,6 +38,7 @@ import { hintPosition } from '@/lib/utils/world/hint-position';
 import { snapPoint } from '@/lib/utils/world/zone-snap';
 import type {
     LayerRect,
+    MapFocus,
     MapPoint,
     Polygon,
     RevealShape,
@@ -87,11 +89,12 @@ export interface WorldMapViewProps {
         selected: string[];
     };
     trails?: Omit<WorldTrailsProps, 'zoom'>;
-    focus?: { point: MapPoint; seq: number };
+    focus?: MapFocus;
     slots?: {
         overlay?: ReactNode;
         card?: { point: MapPoint; content: ReactNode };
         hint?: ReactNode;
+        fullscreen?: { full: boolean; toggle(): void };
     };
     compact?: boolean;
     className?: string;
@@ -102,7 +105,7 @@ const zoneIdAt = (target: EventTarget | null, tool: WorldTool) =>
         ? target.closest<SVGElement>('[data-zone-id]')?.dataset.zoneId
         : undefined;
 
-const CARD_FALLBACK_SIZE = { width: 256, height: 140 };
+const CARD_FALLBACK_SIZE = { width: 208, height: 64 };
 
 function CardSlot({
     card,
@@ -191,7 +194,7 @@ export function WorldMapView({
 
     const { tool = 'select', draft, snap } = edit ?? {};
 
-    const { overlay, card, hint } = slots ?? {};
+    const { overlay, card, hint, fullscreen } = slots ?? {};
 
     const t = useTranslations('world.zoom');
 
@@ -208,6 +211,7 @@ export function WorldMapView({
         reset,
         zoomBy,
         focusOn,
+        rescale,
     } = useViewport({ maxZoom: WORLD_MAX_ZOOM });
 
     const [dragging, setDragging] = useState<{
@@ -302,8 +306,23 @@ export function WorldMapView({
     const [cursor, setCursor] = useState<MapPoint | null>(null);
 
     useEffect(() => {
-        if (focus) focusOn(focus.point.x, focus.point.y, FOCUS_ZOOM);
+        if (focus)
+            focusOn(focus.point.x, focus.point.y, focus.zoom ?? FOCUS_ZOOM);
     }, [focus, focusOn]);
+
+    const lastWidth = useRef(0);
+
+    useLayoutEffect(() => {
+        const prev = lastWidth.current;
+
+        lastWidth.current = box.width;
+
+        // keep the viewed area when the sheet resizes (side panel, fullscreen)
+        if (prev > 0 && box.width > 0 && box.width !== prev)
+            rescale(box.width / prev);
+    }, [box.width, rescale]);
+
+    const sizes = `${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`;
 
     const layerStyle = {
         transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
@@ -365,6 +384,17 @@ export function WorldMapView({
             }}
             onPointerLeave={() => setPointer(null)}
         >
+            {size.width > 0 ? (
+                <Image
+                    src={toMediaUrl(map.imageUrl)}
+                    alt=""
+                    aria-hidden
+                    fill
+                    sizes={sizes}
+                    draggable={false}
+                    className="atlas-backdrop pointer-events-none object-cover select-none"
+                />
+            ) : null}
             <div ref={outerRef} className="absolute inset-0">
                 {/* container is always mounted so useViewport can attach its wheel listener on the first commit */}
                 <div
@@ -417,7 +447,7 @@ export function WorldMapView({
                                 fill
                                 priority
                                 draggable={false}
-                                sizes={`${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`}
+                                sizes={sizes}
                                 className="pointer-events-none object-fill select-none"
                             />
                             {layers ? (
@@ -527,7 +557,16 @@ export function WorldMapView({
                                 <WorldPins
                                     markers={pinMarkers}
                                     zoom={zoom}
-                                    screen={{ box, compact }}
+                                    screen={{
+                                        box: {
+                                            width: box.width,
+                                            height: box.height,
+                                        },
+                                        compact,
+                                        cluster:
+                                            tool !== 'point' &&
+                                            tool !== 'entry',
+                                    }}
                                     labels={{
                                         hoveredId: hoveredZone,
                                         fogless: !fog,
@@ -549,7 +588,11 @@ export function WorldMapView({
                                         },
                                         onCancel: () => setDragging(null),
                                     }}
-                                    handlers={handlers}
+                                    handlers={{
+                                        ...handlers,
+                                        onClusterZoom: (p, z) =>
+                                            focusOn(p.x, p.y, z),
+                                    }}
                                 />
                                 {enemies ? (
                                     <WorldEnemies
@@ -627,6 +670,25 @@ export function WorldMapView({
                 >
                     <RotateCcw className="size-4" />
                 </Button>
+                {fullscreen ? (
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="atlas-zoom"
+                        aria-label={t(
+                            fullscreen.full ? 'exitFullscreen' : 'fullscreen'
+                        )}
+                        aria-pressed={fullscreen.full}
+                        onClick={fullscreen.toggle}
+                    >
+                        {fullscreen.full ? (
+                            <Minimize className="size-4" />
+                        ) : (
+                            <Maximize className="size-4" />
+                        )}
+                    </Button>
+                ) : null}
             </div>
         </div>
     );

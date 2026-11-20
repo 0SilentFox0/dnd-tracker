@@ -6,6 +6,11 @@
   background: var(--atlas-paper);
 }
 
+.atlas-backdrop {
+  filter: blur(18px) brightness(.55);
+  transform: scale(1.1);
+}
+
 .atlas-sheet {
   box-shadow: 0 0 0 3px var(--atlas-paper), 0 0 0 4px var(--atlas-ink), 0 3px 18px rgba(43, 29, 18, 0.35);
 }
