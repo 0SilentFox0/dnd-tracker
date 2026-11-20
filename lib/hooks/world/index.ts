@@ -16,6 +16,7 @@ export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';
 export { useMoveTarget } from './useMoveTarget';
 export { useNotesPanel } from './useNotesPanel';
+export { usePinGesture } from './usePinGesture';
 export { useRemoveMap } from './useRemoveMap';
 export { useRemoveMarker } from './useRemoveMarker';
 export { useSessionForm } from './useSessionForm';

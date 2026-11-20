@@ -1,15 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useCommittedName } from './useCommittedName';
 import { useRemoveMarker } from './useRemoveMarker';
 import type { useWorldEditor } from './useWorldEditor';
 
 import { DEFAULT_ZONE_COLOR } from '@/lib/constants/world';
+import { useDebouncedCommit } from '@/lib/hooks/common';
 import type { UpdateWorldMarkerData, WorldMarker } from '@/types/world';
-
-const COLOR_DEBOUNCE_MS = 400;
 
 interface Options {
     marker: WorldMarker;
@@ -21,10 +20,6 @@ export function useMarkerFields({ marker, editor, select }: Options) {
     const [note, setNote] = useState(marker.dmNote ?? '');
 
     const [color, setColor] = useState<string | null>(marker.color);
-
-    const colorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-    const pendingColor = useRef<{ value: string | null } | null>(null);
 
     const savedNote = useRef(marker.dmNote ?? '');
 
@@ -40,24 +35,9 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         (next) => save({ name: next })
     );
 
-    const saveRef = useRef(save);
-
-    useEffect(() => {
-        saveRef.current = save;
-    });
-
-    const flushColor = useCallback(() => {
-        clearTimeout(colorTimer.current);
-
-        if (pendingColor.current === null) return;
-
-        const next = pendingColor.current;
-
-        pendingColor.current = null;
-        void saveRef.current({ color: next.value });
-    }, []);
-
-    useEffect(() => flushColor, [flushColor]);
+    const colorCommit = useDebouncedCommit((value: string | null) =>
+        save({ color: value })
+    );
 
     const commitNote = () => {
         const next = note.trim();
@@ -79,9 +59,7 @@ export function useMarkerFields({ marker, editor, select }: Options) {
 
     const pickColor = (c: string | null) => {
         setColor(c);
-        clearTimeout(colorTimer.current);
-        pendingColor.current = { value: c };
-        colorTimer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
+        colorCommit.schedule(c);
     };
 
     const remove = useRemoveMarker({ marker, editor, select });

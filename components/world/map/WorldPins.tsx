@@ -1,3 +1,5 @@
+'use client';
+
 import { MapPin } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
@@ -8,7 +10,7 @@ import {
     WORLD_ZONE_LABEL_CONFLICT,
     WORLD_ZONE_LABEL_CONFLICT_COMPACT,
 } from '@/lib/constants/world';
-import { DRAG_THRESHOLD } from '@/lib/hooks/common';
+import { usePinGesture } from '@/lib/hooks/world';
 import { markerAnchor } from '@/lib/utils/world/geometry';
 import { zoneLabelSize, zoneLabelVisible } from '@/lib/utils/world/zone-labels';
 import type { MapPoint, WorldMarker } from '@/types/world';
@@ -47,6 +49,13 @@ export function WorldPins({
     handlers,
 }: WorldPinsProps) {
     const { current: dragging, onMove: onDragMove, onEnd: onDragEnd } = drag;
+
+    const { bind } = usePinGesture<string>({
+        draggable: !!handlers.onMarkerDrag,
+        onClick: handlers.onMarkerClick,
+        onDragMove: (id, e) => onDragMove(id, e.clientX, e.clientY),
+        onDragEnd: (id, e) => onDragEnd(id, e.clientX, e.clientY),
+    });
 
     const points = markers.filter((m) => m.kind !== 'zone');
 
@@ -112,8 +121,6 @@ export function WorldPins({
 
                 const Icon = (m.icon && MARKER_ICON[m.icon]) || MapPin;
 
-                const draggable = !!handlers.onMarkerDrag;
-
                 return (
                     <HudButton
                         key={m.id}
@@ -137,56 +144,7 @@ export function WorldPins({
                             touchAction: 'none',
                         }}
                         className="atlas-pin absolute"
-                        onPointerDown={(e) => {
-                            e.stopPropagation();
-                            e.currentTarget.dataset.startX = String(e.clientX);
-                            e.currentTarget.dataset.startY = String(e.clientY);
-                            try {
-                                e.currentTarget.setPointerCapture?.(
-                                    e.pointerId
-                                );
-                            } catch {
-                                // synthetic pointer events from the tour have no active pointer
-                            }
-                        }}
-                        onPointerMove={(e) => {
-                            if (
-                                !draggable ||
-                                e.currentTarget.dataset.startX === undefined
-                            )
-                                return;
-
-                            const moved =
-                                Math.hypot(
-                                    e.clientX -
-                                        Number(e.currentTarget.dataset.startX),
-                                    e.clientY -
-                                        Number(e.currentTarget.dataset.startY)
-                                ) > DRAG_THRESHOLD;
-
-                            if (moved) onDragMove(m.id, e.clientX, e.clientY);
-                        }}
-                        onPointerUp={(e) => {
-                            const startX = e.currentTarget.dataset.startX;
-
-                            if (startX === undefined) return;
-
-                            e.stopPropagation();
-
-                            const moved =
-                                draggable &&
-                                Math.hypot(
-                                    e.clientX - Number(startX),
-                                    e.clientY -
-                                        Number(e.currentTarget.dataset.startY)
-                                ) > DRAG_THRESHOLD;
-
-                            delete e.currentTarget.dataset.startX;
-                            delete e.currentTarget.dataset.startY;
-
-                            if (moved) onDragEnd(m.id, e.clientX, e.clientY);
-                            else handlers.onMarkerClick?.(m.id);
-                        }}
+                        {...bind(m.id)}
                         onDoubleClick={(e) => {
                             e.stopPropagation();
                             handlers.onMarkerDoubleClick?.(m.id);
