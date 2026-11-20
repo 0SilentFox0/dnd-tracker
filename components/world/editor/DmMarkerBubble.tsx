@@ -25,7 +25,11 @@ import {
     WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_NAME_MAX,
 } from '@/lib/constants/world';
-import { useIsMobile } from '@/lib/hooks/common';
+import {
+    DESKTOP_QUERY,
+    useIsMobile,
+    useMediaQuery,
+} from '@/lib/hooks/common';
 import type { WorldMarker } from '@/types/world';
 
 interface DmMarkerBubbleProps {
@@ -44,11 +48,26 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
 
     const sheet = useIsMobile();
 
+    const onMap = useMediaQuery(DESKTOP_QUERY);
+
     const m = useEditorMarkerFields(marker);
 
     const child = marker.childMapId
         ? maps.find((x) => x.id === marker.childMapId)
         : undefined;
+
+    if (onMap)
+        return (
+            <MarkerBubble
+                marker={marker}
+                actions={{
+                    ...actions,
+                    onOpenMap: marker.childMapId
+                        ? () => m.openMap(marker.childMapId)
+                        : undefined,
+                }}
+            />
+        );
 
     return (
         <MarkerBubble marker={marker} actions={actions} embedded={sheet}>

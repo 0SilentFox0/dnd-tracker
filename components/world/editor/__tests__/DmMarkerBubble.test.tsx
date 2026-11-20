@@ -88,7 +88,20 @@ const renderBubble = (
     return actions;
 };
 
+const stubViewport = (width: number) =>
+    vi.stubGlobal('matchMedia', (q: string) => ({
+        matches: q.includes('min-width: 1024px')
+            ? width >= 1024
+            : q.includes('max-width')
+              ? width < 768
+              : false,
+        media: q,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+    }));
+
 beforeEach(() => {
+    stubViewport(800);
     remove.mockResolvedValue(true);
     removeMap.mockResolvedValue(true);
 });
@@ -99,6 +112,20 @@ afterEach(() => {
 });
 
 describe('DmMarkerBubble', () => {
+    it('on desktop renders the compact label with More and Open', () => {
+        stubViewport(1280);
+
+        const actions = renderBubble(marker({ childMapId: 'm2' }));
+
+        expect(screen.queryByLabelText('Назва')).toBeNull();
+
+        fireEvent.click(screen.getByLabelText('Докладніше'));
+        fireEvent.click(screen.getByLabelText('Відкрити карту'));
+
+        expect(actions.onMore).toHaveBeenCalled();
+        expect(openMap).toHaveBeenCalledWith('m2');
+    });
+
     it('offers the layer picker only when the map has layers', () => {
         renderBubble(marker());
 

@@ -37,6 +37,57 @@ export function MarkerBubble({
 
     const Icon = (marker.icon && MARKER_ICON[marker.icon]) || MapPin;
 
+    if (!children && !embedded)
+        return (
+            <div
+                role="dialog"
+                aria-label={marker.name}
+                onKeyDown={(e) => {
+                    if (e.key !== 'Escape') return;
+
+                    e.preventDefault();
+                    actions.onClose();
+                }}
+                data-tour="world.bubble"
+                className="flex w-52 max-w-full items-center gap-1 rounded-lg border border-hud-rule bg-black/90 p-1.5 text-sm text-hud-ink shadow-lg"
+            >
+                <Icon className="ml-1 size-4 shrink-0 text-hud-gold-bright" />
+                <p className="min-w-0 flex-1 truncate font-medium" title={marker.name}>
+                    {marker.name}
+                </p>
+                <HudIconButton
+                    size="sm"
+                    tone="muted"
+                    data-tour="world.more"
+                    aria-label={t('more')}
+                    title={t('more')}
+                    onClick={actions.onMore}
+                >
+                    <PanelRight className="size-4" />
+                </HudIconButton>
+                {actions.onOpenMap ? (
+                    <HudIconButton
+                        size="sm"
+                        tone="muted"
+                        aria-label={t('openMap')}
+                        title={t('openMap')}
+                        onClick={actions.onOpenMap}
+                    >
+                        <FolderOpen className="size-4" />
+                    </HudIconButton>
+                ) : null}
+                <HudIconButton
+                    size="sm"
+                    tone="muted"
+                    aria-label={t('close')}
+                    title={t('close')}
+                    onClick={actions.onClose}
+                >
+                    <X className="size-4" />
+                </HudIconButton>
+            </div>
+        );
+
     return (
         <div
             role="dialog"
