@@ -220,6 +220,16 @@
         "cast": "No second attack after casting a spell",
         "weapons": "Two melee weapons required"
       }
+    },
+    "situational": {
+      "title": "DM modifiers",
+      "calledShot": "Called shot",
+      "noCalledShot": "No called shot",
+      "flags": "Situation",
+      "attackerHigh": "Attacker on high ground",
+      "defenderHigh": "Defender on high ground",
+      "enclosed": "Tight space",
+      "badFooting": "Mud or water"
     }
   },
   "crit": {

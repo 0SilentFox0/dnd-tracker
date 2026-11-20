@@ -759,48 +759,119 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             disadvantage: (blind.disadvantage ?? 0) + sumDisadvantage(mods),
         });
 
-        const helplessShot =
-            canonMods &&
-            isHelpless(target) &&
-            shotBand(attacker, target, attack, ctx.map, modCtx.cellFeet) ===
-                'pointBlank';
+        const band = canonMods
+            ? shotBand(attacker, target, attack, ctx.map, modCtx.cellFeet)
+            : undefined;
 
-        const rangedOnce = (presetRoll?: number) => {
-            const test = resolvePercentileTest({
-                target:
-                    attackerTargetOf(attacker, attack, edition, use?.target) +
-                    againstMod(target, 'ranged', edition) +
-                    toHit +
-                    (canonMods ? 0 : sizeHitMod(attacker, target)),
-                slModifier:
-                    Math.min(DIFFICULTY_SL.challenging, use?.slCap ?? 0) +
-                    slBonus +
-                    selfSlMod(attacker, edition) +
-                    rangedMode.slMod,
-                mode: rangedMode.mode,
-                doubles: true,
-                slModel: edition.slModel,
-                rng,
-                presetRoll,
-                forced,
-            });
+        const helplessShot = isHelpless(target) && band === 'pointBlank';
+
+        // At Point Blank the target may oppose a ranged attack with Dodge (p165)
+        const dodgeOpposed =
+            band === 'pointBlank' &&
+            !helplessShot &&
+            !cannotDefend(target, edition);
+
+        const rangedOnce = (presetRoll?: number, presetDefender?: number) => {
+            const dodgeTarget =
+                (skillTarget(participantChars(target), 'dodge')?.target ??
+                    value(participantChars(target), 'ag')) +
+                selfTestMod(target, 'test', edition);
+
+            const opposed = dodgeOpposed
+                ? resolveOpposed({
+                      attackerTarget:
+                          attackerTargetOf(
+                              attacker,
+                              attack,
+                              edition,
+                              use?.target
+                          ) +
+                          againstMod(target, 'ranged', edition) +
+                          toHit,
+                      defenderTargets: [{ kind: 'dodge', target: dodgeTarget }],
+                      attackerSlMod:
+                          Math.min(DIFFICULTY_SL.challenging, use?.slCap ?? 0) +
+                          slBonus +
+                          selfSlMod(attacker, edition),
+                      attackerSlOnSuccess: attackSl.onSuccess,
+                      defenderSlMod: selfSlMod(target, edition),
+                      defenderSlByKind: canonDefence(
+                          target,
+                          attack,
+                          edition,
+                          attacker
+                      ).sl,
+                      attackerModes: {
+                          advantage: fortuneAdvantage,
+                          disadvantage:
+                              (blind.disadvantage ?? 0) + sumDisadvantage(mods),
+                      },
+                      edition,
+                      attackerForced: forced,
+                      defenderDoubles: edition.woundModel === 'critical',
+                      rng,
+                      presetRolls: {
+                          attacker: presetRoll,
+                          defender: presetDefender,
+                      },
+                  })
+                : undefined;
+
+            const test =
+                opposed?.attacker ??
+                resolvePercentileTest({
+                    target:
+                        attackerTargetOf(
+                            attacker,
+                            attack,
+                            edition,
+                            use?.target
+                        ) +
+                        againstMod(target, 'ranged', edition) +
+                        toHit +
+                        (canonMods ? 0 : sizeHitMod(attacker, target)),
+                    slModifier:
+                        Math.min(DIFFICULTY_SL.challenging, use?.slCap ?? 0) +
+                        slBonus +
+                        selfSlMod(attacker, edition) +
+                        rangedMode.slMod,
+                    mode: rangedMode.mode,
+                    doubles: true,
+                    slModel: edition.slModel,
+                    rng,
+                    presetRoll,
+                    forced,
+                });
 
             const isHit =
-                (test.outcome === 'success' || test.outcome === 'critical') &&
-                !fumbled(test.roll);
+                (opposed
+                    ? opposed.isHit
+                    : test.outcome === 'success' ||
+                      test.outcome === 'critical') && !fumbled(test.roll);
 
             const passed = isSuccess(test.outcome);
 
             return {
                 roll: test.roll,
+                defenderRaw: opposed?.defender.rawRoll,
                 result: toResult(
                     ctx,
                     detailsOf(
                         test,
-                        test.sl + (isHit ? attackSl.onSuccess : 0),
+                        (opposed ? opposed.netSl : test.sl) +
+                            (isHit && !opposed ? attackSl.onSuccess : 0),
                         {
                             ...locationOf(),
                             ...detailsExtra,
+                            ...(opposed && {
+                                defender: {
+                                    kind: opposed.defender.kind,
+                                    roll: opposed.defender.roll,
+                                    sl: opposed.defender.sl,
+                                    target: opposed.defender.target,
+                                },
+                                opposed: true as const,
+                            }),
                             ...(dangerous(test.roll, passed) && {
                                 fumble: true as const,
                             }),
@@ -822,7 +893,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
         };
 
         const { result, fortune } = applyFortune<ReturnType<typeof rangedOnce>>(
-            (preset) => rangedOnce(preset),
+            (preset, first) => rangedOnce(preset, first?.defenderRaw),
             fortuneInput,
             (r) => r.result.isHit,
             helplessShot ? 1 : manualRoll,

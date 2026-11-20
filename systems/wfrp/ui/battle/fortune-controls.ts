@@ -3,12 +3,15 @@ import { editionOf } from '../../rules/edition/read';
 import {
     FORTUNE_INPUT,
     type FortuneInput,
+    type Situational,
 } from '../../rules/percentile/fortune';
 
 const choicesOf = (input: FortuneInput | undefined) => ({
     ...(input?.critBonus && { critBonus: input.critBonus }),
     ...(input?.blessing && { blessing: input.blessing }),
     ...(input?.overcast && { overcast: input.overcast }),
+    ...(input?.calledShot && { calledShot: input.calledShot }),
+    ...(input?.situational && { situational: input.situational }),
 });
 
 export type FortuneChoice = 'reroll' | 'sl' | 'notFail' | null;
@@ -110,6 +113,46 @@ export function castChoices(
                 !merged.critBonus &&
                 !merged.blessing &&
                 !merged.overcast;
+
+            write(bare ? undefined : FORTUNE_INPUT.write(merged));
+        },
+    };
+}
+
+export interface SituationalControls {
+    calledShot?: HitSpot;
+    situational: Situational;
+    set: (next: Pick<FortuneInput, 'calledShot' | 'situational'>) => void;
+}
+
+/** DM-only attack modifiers (called shot, height, tight space, footing) kept beside the Fortune input */
+export function situationalControls(
+    system: Parameters<typeof FORTUNE_INPUT.read>[0],
+    write: (input: ReturnType<typeof FORTUNE_INPUT.write> | undefined) => void
+): SituationalControls {
+    const input = FORTUNE_INPUT.read(system);
+
+    return {
+        calledShot: input?.calledShot,
+        situational: input?.situational ?? {},
+        set: (next) => {
+            const flags = Object.fromEntries(
+                Object.entries(next.situational ?? {}).filter(
+                    ([, v]) => v !== undefined
+                )
+            );
+
+            const { calledShot: _c, situational: _s, ...rest } = input ?? {};
+
+            const merged = {
+                ...rest,
+                kind: input?.kind ?? ('none' as const),
+                ...(next.calledShot && { calledShot: next.calledShot }),
+                ...(Object.keys(flags).length > 0 && { situational: flags }),
+            };
+
+            const bare =
+                merged.kind === 'none' && Object.keys(merged).length === 1;
 
             write(bare ? undefined : FORTUNE_INPUT.write(merged));
         },

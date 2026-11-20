@@ -59,7 +59,12 @@ export type SheetTestResult = SheetRollResult & {
 };
 
 export type SystemInputCtx =
-    | { kind: 'attack'; actor: BattleParticipant; targetCount: number }
+    | {
+          kind: 'attack';
+          actor: BattleParticipant;
+          targetCount: number;
+          isDM: boolean;
+      }
     | {
           kind: 'cast';
           actor: BattleParticipant;

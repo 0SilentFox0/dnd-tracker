@@ -13,6 +13,7 @@ import {
 } from './rules/characteristics/reconcile';
 import { wfrpSheetBlock } from './rules/characteristics/sheet-block';
 import { assertWfrpAction } from './rules/combat/assert-action';
+import { wfrpAttackableDown } from './rules/combat/attackable-down';
 import { isOutOfFight, wfrpOnRevived } from './rules/combat/critical';
 import { wfrpActionDetails } from './rules/combat/details';
 import { wfrpAttackBlocked } from './rules/combat/disarm';
@@ -153,6 +154,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         autoUnconsciousAtZero: (rules) =>
             editionOf(rules).woundModel !== 'critical',
         keepsDown: isOutOfFight,
+        attackableDown: wfrpAttackableDown,
         onRevived: wfrpOnRevived,
         onDamaged: [wfrpLoseChannelled],
         turn: WFRP_TURN,

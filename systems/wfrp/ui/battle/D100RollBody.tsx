@@ -2,10 +2,12 @@ import { useTranslations } from 'next-intl';
 
 import { fateLeftOf } from '../../rules/combat/fate';
 import { heldBy } from '../../rules/combat/momentum';
+import { editionOf } from '../../rules/edition/read';
 import { SCENE_SLOT } from '../../rules/slots';
 import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
-import { fortuneControls } from './fortune-controls';
+import { fortuneControls, situationalControls } from './fortune-controls';
+import { SituationalPicker } from './SituationalPicker';
 
 import { btn } from '@/components/battle/wizards/attack/shared';
 import { HudButton } from '@/components/hud';
@@ -73,6 +75,14 @@ export function D100RollBody({
                 onRoll={actions.roll}
                 onAuto={actions.aiRoll}
             />
+            {view.viewerIsDM &&
+                editionOf(view.rules).combatModsModel === 'canon5e' && (
+                    <SituationalPicker
+                        {...situationalControls(state.system, (slot) =>
+                            actions.setSystemInput(slot ?? null)
+                        )}
+                    />
+                )}
             <HudButton
                 type="button"
                 onClick={actions.back}

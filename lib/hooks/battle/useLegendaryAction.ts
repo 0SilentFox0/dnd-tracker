@@ -80,7 +80,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
                               attackIndex: i,
                               needsTarget: true,
                               maxTargets: 1,
-                              candidates: enemies.filter(isAttackable),
+                              candidates: enemies.filter((p) => isAttackable(p)),
                               blocked: legendaryBlocker(
                                   participant,
                                   current,
@@ -146,7 +146,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
                     perform?.kind === 'attack' ? 1 : abilityMaxTargets(a),
                 candidates:
                     perform?.kind === 'attack'
-                        ? enemies.filter(isAttackable)
+                        ? enemies.filter((p) => isAttackable(p))
                         : bonusTargetCandidates(
                               a,
                               allies,

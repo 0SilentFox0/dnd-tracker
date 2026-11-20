@@ -188,6 +188,7 @@ export function validateAttackRequest(
             kind: 'attack',
             actor: attacker,
             targetCount: chosenTargets.length,
+            isDM: scope.isDM,
         });
 
     if (

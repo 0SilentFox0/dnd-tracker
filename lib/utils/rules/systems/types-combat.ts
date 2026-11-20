@@ -414,6 +414,8 @@ export interface RuleSystemCombat {
     onRevived?(p: BattleParticipant): BattleParticipant;
     /** Stays down above 0 HP (healing, DM HP edits and status settling never raise it) */
     keepsDown?(p: BattleParticipant): boolean;
+    /** An Unconscious participant that can still be chosen as an attack target (a Helpless body); absent means never */
+    attackableDown?(p: BattleParticipant, rules: Ruleset): boolean;
     /** A downed participant still in the fight (d20: dying, not stable); its side has not lost yet */
     holdsOn?(p: BattleParticipant): boolean;
     turn?: RuleSystemTurn;

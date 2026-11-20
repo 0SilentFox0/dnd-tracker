@@ -359,3 +359,12 @@ D4 виконано за рішенням власника (план витра�
 - **UI:** `OvercastPlanPicker` у діалозі касту (степпери SL на допустимий напрямок, підказка «РУ витрачено / IB+WPB»); тільки під `canon5e`. Живий WFRP-бій на стенді не проганявся (кінець хвилі).
 - Pre-existing: `system-install-entries` падає й на main; `tsc` показує лише стару помилку `scripts/assets/grim-icons/cli.ts(133)`.
 
+
+## Відкриті питання D2b
+
+D2b виконано за трьома рішеннями власника.
+
+- **Ручні прапорці й цілений удар (Q8):** лише DM. `SituationalPicker` (`systems/wfrp/ui/battle`) у `D100RollBody` показується, коли `view.viewerIsDM` і `combatModsModel: 'canon5e'`; пише `calledShot`/`situational` у вхід Fortune через `situationalControls` (не губиться при зміні Fortune: `choicesOf`). Сервер також відхиляє ці поля від не-DM (`assertWfrpInput`, `SystemInputCtx.isDM`, ключ `battleLog.reject.dmOnlyModifiers`).
+- **Цілити Unconscious (Q10):** причина блокера — `isAttackable` (core) = ACTIVE/dying. Додано шов `RuleSystemCombat.attackableDown(p, rules)` і необов'язковий `isAttackable(p, rules?)`; wfrp: `canon5e` + Helpless (`systems/wfrp/rules/combat/attackable-down.ts`). Підключено в серверному `run.ts` (вибрана ціль) і клієнтському `useAttackTargets`. Не змінено: readied/legendary/intent/map-marks/reach-перелік, площинні й cleave-цілі (лишаються лише ACTIVE/dying), `isUp` та перемога сторін. Без летального варіанта p167. У бою на мапі знесвідомлений токен не займає клітинок і для гравців схований туманом (DM бачить); перевірка дальності пропускається, якщо в цілі немає позиції.
+- **Point Blank Dodge (p165):** на смузі Point Blank ціль, що може захищатись, протиставляє Dodge (`resolveOpposed`, один захист `dodge`, SL-модифікатори `canonDefence.sl.dodge` — щит). Helpless/`cannotDefend` не захищаються (Helpless — як і раніше кидок 01). Нерозв'язане: книга не каже, чи вдалий дабл-крит Dodge-захисту (p165 «навіть якщо захищаєтесь») б'є стрільця — контр-крит (`counterCrit`) для ranged не моделюється. Друга вимога p165 (ціль, з якою вже Engaged, може протиставити будь-яку ближню навичку) не робилась.
+- **Каст знімає Aim:** знайдено єдину точку — `casterUpdate` тестованого касту (`magic/cast-test.ts`, `canon5e`): скидає `aim` стрільця за p167 («усе інше до пострілу»). Закляття без тесту (Petty/вільний каст не через `wfrpCastTest`) Aim не скидають.

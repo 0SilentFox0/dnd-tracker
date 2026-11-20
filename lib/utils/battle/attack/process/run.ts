@@ -129,7 +129,7 @@ export function processAttack(
     });
 
     if (
-        !isAttackable(getP(flow, targetId)) ||
+        !isAttackable(getP(flow, targetId), flow.ctx.rules) ||
         !isActive(getP(flow, attackerId))
     )
         return abortedResult(run);

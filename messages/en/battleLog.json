@@ -343,6 +343,7 @@
     "rollsRequired": "d20Roll, attackRoll or attackRolls is required",
     "oneTargetRequired": "At least one target is required",
     "fortuneNotFree": "Fortune does not apply to a free cast",
+    "dmOnlyModifiers": "Only the DM sets situational modifiers and called shots",
     "barrierDuration": "A barrier needs a duration in rounds",
     "mapOccupied": "The cell is occupied or outside the field",
     "mapEdgeOutside": "The wall or bars are outside the map",

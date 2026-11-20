@@ -1,4 +1,6 @@
 import { CombatStatus } from '@/lib/constants/battle';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
@@ -92,8 +94,12 @@ export const isDying = (p: BattleParticipant): boolean =>
     p.combatStats.status === CombatStatus.UNCONSCIOUS &&
     p.battleData.dying === true;
 
-export const isAttackable = (p: BattleParticipant): boolean =>
-    (isActive(p) || isDying(p)) &&
+export const isAttackable = (p: BattleParticipant, rules?: Ruleset): boolean =>
+    (isActive(p) ||
+        isDying(p) ||
+        (!!rules &&
+            p.combatStats.status === CombatStatus.UNCONSCIOUS &&
+            ruleSystemOf(rules).combat.attackableDown?.(p, rules) === true)) &&
     !isAirborne(p) &&
     !isEscaped(p) &&
     !isObject(p);

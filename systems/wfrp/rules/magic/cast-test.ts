@@ -296,10 +296,13 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const remember = canon && success;
 
+    const dropAim = canon && wfrpState(caster).aim !== undefined;
+
     const casterUpdate =
-        spendFortune || dropChannelled || markCast || remember
+        spendFortune || dropChannelled || markCast || remember || dropAim
             ? (p: BattleParticipant) =>
                   withWfrpState(p, {
+                      ...(dropAim && { aim: undefined }),
                       ...(fortune && spentFor(p, fortune.kind, fortune.spent)),
                       ...(dropChannelled && { channelledSl: undefined }),
                       ...(markCast && { lastHand: 'cast' as const }),
@@ -343,8 +346,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                 overcastSteps,
                 miscast,
                 ...(critBonus && { critBonus }),
-                ...(prayed &&
-                    prayed.steps > 0 && { prayerOvercast: prayed }),
+                ...(prayed && prayed.steps > 0 && { prayerOvercast: prayed }),
                 ...(spend &&
                     Object.keys(spend.spent).length > 0 && {
                         overcast: spend.spent,
