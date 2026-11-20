@@ -43,6 +43,7 @@ import {
     useWorldTrail,
     useWorldTravel,
 } from '@/lib/hooks/world';
+import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const ENTRY_COMPASS = {
@@ -192,29 +193,26 @@ export function WorldEditorPageClient({
                                             />
                                         ) : null;
 
-                                    const card =
-                                        trailBubble &&
-                                        trail.selected &&
-                                        isDesktop
-                                            ? {
-                                                  point: trail.selected.node,
-                                                  content: trailBubble,
-                                              }
-                                            : enemyCard &&
-                                                enemy.card &&
-                                                isDesktop
-                                              ? {
-                                                    point: enemy.card.point,
-                                                    content: enemyCard,
-                                                }
-                                              : bubble &&
-                                                  bubbleCard.point &&
-                                                  isDesktop
+                                    const card = pickCard({
+                                        isDesktop,
+                                        trail:
+                                            trailBubble && trail.selected
                                                 ? {
+                                                      node: trail.selected.node,
+                                                      content: trailBubble,
+                                                  }
+                                                : null,
+                                        marker:
+                                            enemyCard && enemy.card
+                                                ? {
+                                                      point: enemy.card.point,
+                                                      content: enemyCard,
+                                                  }
+                                                : {
                                                       point: bubbleCard.point,
                                                       content: bubble,
-                                                  }
-                                                : undefined;
+                                                  },
+                                    });
 
                                     const panel = marker ? (
                                         <WorldMarkerPanel />

@@ -15,7 +15,9 @@ import {
     type MapPoint,
     toTravelKind,
     type TrailEntry,
+    type WorldSession,
     type WorldTrailData,
+    type WorldTrailSession,
 } from '@/types/world';
 
 type StoredPoint = { mapId?: string; x: number; y: number };
@@ -141,6 +143,20 @@ export async function trailHandler(req: Request, campaignId: string) {
                   at: r.createdAt.toISOString(),
               }));
 
+        const toPlayerSession = ({
+            id,
+            name,
+            color,
+            startedAt,
+            endedAt,
+        }: WorldSession): WorldTrailSession => ({
+            id,
+            name,
+            color,
+            startedAt,
+            endedAt,
+        });
+
         const visible = ownOnly
             ? new Set(
                   entries.flatMap((e) => (e.sessionId ? [e.sessionId] : []))
@@ -149,7 +165,9 @@ export async function trailHandler(req: Request, campaignId: string) {
 
         return NextResponse.json({
             sessions: visible
-                ? sessions.filter((s) => visible.has(s.id))
+                ? sessions
+                      .filter((s) => visible.has(s.id))
+                      .map(toPlayerSession)
                 : sessions,
             entries,
         } satisfies WorldTrailData);

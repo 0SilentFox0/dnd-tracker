@@ -308,6 +308,7 @@
     "colorOption": "Color {color}",
     "deleteTitle": "Delete session \"{name}\"?",
     "deleteDescription": "Trails stay on the map without a session.",
+    "entryCount": "{count, plural, one {# entry} other {# entries}}",
     "hint": "Start a session so hero trails get a name and a color"
   },
   "enemy": {

@@ -6,11 +6,11 @@ import { HudButton } from '@/components/hud';
 import { WORLD_NO_SESSION_COLOR } from '@/lib/constants/world';
 import { cn } from '@/lib/utils';
 import type { Trail } from '@/lib/utils/world/trail';
-import type { WorldSession } from '@/types/world';
+import type { WorldTrailSession } from '@/types/world';
 
 export interface WorldTrailsProps {
     trails: Trail[];
-    sessions: WorldSession[];
+    sessions: WorldTrailSession[];
     visible: ReadonlySet<string | null>;
     zoom: number;
     interactive?: boolean;

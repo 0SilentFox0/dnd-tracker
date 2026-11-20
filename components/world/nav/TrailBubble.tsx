@@ -27,6 +27,9 @@ export function TrailBubble({
 
     const name = session?.name ?? t('trail.noSession');
 
+    const description =
+        session && 'description' in session ? session.description : null;
+
     return (
         <div
             role="dialog"
@@ -60,9 +63,9 @@ export function TrailBubble({
                     </HudIconButton>
                 )}
             </div>
-            {session?.description ? (
+            {description ? (
                 <p className="mt-1 line-clamp-4 text-xs break-words text-hud-muted">
-                    {session.description}
+                    {description}
                 </p>
             ) : null}
             <dl className="mt-2 space-y-1 text-xs">

@@ -5,11 +5,11 @@ import { useTranslations } from 'next-intl';
 import { HudChipTabs } from '@/components/hud/page';
 import { WORLD_NO_SESSION_COLOR } from '@/lib/constants/world';
 import type { Trail } from '@/lib/utils/world/trail';
-import type { WorldSession } from '@/types/world';
+import type { WorldTrailSession } from '@/types/world';
 
 interface TrailLegendProps {
     trails: Trail[];
-    sessions: WorldSession[];
+    sessions: WorldTrailSession[];
     visible: ReadonlySet<string | null>;
     onToggle(sessionId: string | null): void;
 }

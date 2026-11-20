@@ -238,7 +238,7 @@ export function WorldToolbar({
                     {children ? (
                         <div
                             data-slot="toolbar-extras"
-                            className="flex shrink-0 items-center gap-1 border-t border-hud-rule p-1 lg:border-t-0 lg:pl-2"
+                            className="flex max-w-full min-w-0 shrink-0 items-center gap-1 overflow-hidden border-t border-hud-rule p-1 lg:overflow-visible lg:border-t-0 lg:pl-2"
                         >
                             {children}
                         </div>

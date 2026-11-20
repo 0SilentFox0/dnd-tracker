@@ -28,6 +28,7 @@ import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
 import { useTrailView, useWorldPlay, useWorldTrail } from '@/lib/hooks/world';
+import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const MAP_HEIGHT =
@@ -230,26 +231,24 @@ export function WorldPlayClient({
                                             compact={!isDesktop}
                                             handlers={play.handlers}
                                             slots={{
-                                                card:
-                                                    trailBubble &&
-                                                    trail.selected &&
-                                                    isDesktop
-                                                        ? {
-                                                              point: trail
-                                                                  .selected
-                                                                  .node,
-                                                              content:
-                                                                  trailBubble,
-                                                          }
-                                                        : bubble &&
-                                                            play.card.point &&
-                                                            isDesktop
-                                                          ? {
-                                                                point: play.card
-                                                                    .point,
-                                                                content: bubble,
-                                                            }
-                                                          : undefined,
+                                                card: pickCard({
+                                                    isDesktop,
+                                                    trail:
+                                                        trailBubble &&
+                                                        trail.selected
+                                                            ? {
+                                                                  node: trail
+                                                                      .selected
+                                                                      .node,
+                                                                  content:
+                                                                      trailBubble,
+                                                              }
+                                                            : null,
+                                                    marker: {
+                                                        point: play.card.point,
+                                                        content: bubble,
+                                                    },
+                                                }),
                                             }}
                                         />
                                     </div>

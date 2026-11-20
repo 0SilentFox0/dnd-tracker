@@ -7,21 +7,21 @@ import {
     type Trail,
     type TrailNode,
 } from '@/lib/utils/world/trail';
-import type { WorldSession, WorldTrailData } from '@/types/world';
+import type { WorldTrailData, WorldTrailSession } from '@/types/world';
 
-const NO_SESSIONS: WorldSession[] = [];
+const NO_SESSIONS: WorldTrailSession[] = [];
 
 export interface SelectedTrailNode {
     entryId: string;
     node: TrailNode;
-    session: WorldSession | null;
+    session: WorldTrailSession | null;
 }
 
 function findSelected(
     selectedId: string | null,
     trails: Trail[],
     visible: ReadonlySet<string | null>,
-    sessions: WorldSession[]
+    sessions: WorldTrailSession[]
 ): SelectedTrailNode | null {
     if (!selectedId) return null;
 

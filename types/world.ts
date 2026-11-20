@@ -254,7 +254,13 @@ export interface WorldSession {
     startedAt: string;
     endedAt: string | null;
     active: boolean;
+    entryCount?: number;
 }
+
+export type WorldTrailSession = Omit<
+    WorldSession,
+    'description' | 'active' | 'entryCount'
+>;
 
 export interface TrailEntry {
     id: string;
@@ -267,7 +273,7 @@ export interface TrailEntry {
 }
 
 export interface WorldTrailData {
-    sessions: WorldSession[];
+    sessions: WorldTrailSession[];
     entries: TrailEntry[];
 }
 

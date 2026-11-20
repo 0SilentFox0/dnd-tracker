@@ -308,6 +308,7 @@
     "colorOption": "Колір {color}",
     "deleteTitle": "Видалити сесію «{name}»?",
     "deleteDescription": "Сліди залишаться на карті без сесії.",
+    "entryCount": "{count, plural, one {# запис} few {# записи} many {# записів} other {# запису}}",
     "hint": "Почніть сесію, щоб сліди героїв мали назву й колір"
   },
   "enemy": {
