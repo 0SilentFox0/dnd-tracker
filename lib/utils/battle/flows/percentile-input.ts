@@ -1,9 +1,13 @@
 import { parseDieInput } from './die-input';
 
+import { isExtended } from '@/lib/utils/battle/spell/extension';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import type { SpellMagicKind } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
+import type { BookSpell } from '@/types/spells';
 
 export const PERCENTILE_SIDES = 100;
 
@@ -34,4 +38,27 @@ export function castPreviewOf(
     armourSl: number;
 } | null {
     return ruleSystemOf(rules).magic.tested?.castPreview(caster, kind, rules) ?? null;
+}
+
+/** Reach the caster's planned overcast may use, for sizing the target picker; undefined without a casting test or a plan that reaches further */
+export function castReachOf(
+    caster: BattleParticipant,
+    rules: Ruleset,
+    spell: Pick<BookSpell, 'casting' | 'targeting' | 'spellEffects'>,
+    system: SystemSlot | undefined
+): CastExtension | undefined {
+    const magic = spell.casting?.magic;
+
+    const reach =
+        magic &&
+        ruleSystemOf(rules).magic.tested?.maxExtension?.({
+            caster,
+            magic,
+            targeting: spell.targeting ?? { kind: 'enemy' },
+            effects: spell.spellEffects ?? [],
+            rules,
+            system,
+        });
+
+    return isExtended(reach) ? reach : undefined;
 }

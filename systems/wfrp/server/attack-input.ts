@@ -22,6 +22,15 @@ const Body = z.object({
                 blessing: z
                     .enum(['rangeYards', 'targets', 'durationRounds'])
                     .optional(),
+                overcast: z
+                    .object({
+                        damage: z.number().int().min(0).max(30).optional(),
+                        targets: z.number().int().min(0).max(30).optional(),
+                        range: z.number().int().min(0).max(30).optional(),
+                        aoe: z.number().int().min(0).max(30).optional(),
+                        duration: z.number().int().min(0).max(30).optional(),
+                    })
+                    .optional(),
                 calledShot: z.enum(ACCEPTED_SPOTS).optional(),
                 situational: z
                     .object({
@@ -47,6 +56,7 @@ export const WfrpFortuneInputSchema = Body.transform(
             location,
             critBonus,
             blessing,
+            overcast,
             calledShot,
             situational,
         } = system.data;
@@ -55,6 +65,7 @@ export const WfrpFortuneInputSchema = Body.transform(
             kind,
             ...(critBonus && { critBonus }),
             ...(blessing && { blessing }),
+            ...(overcast && { overcast }),
             ...(calledShot && { calledShot }),
             ...(situational && { situational }),
             ...(kind === 'reroll' &&

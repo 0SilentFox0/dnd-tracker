@@ -13,6 +13,7 @@ import {
 import { channelTargetOf, wfrpChannel } from './channel';
 import { wfrpCastReaction } from './dispel-reaction';
 import { wfrpMiscast } from './miscast';
+import { maxExtensionOf } from './overcast';
 import { wfrpSpellHit } from './spell-hit';
 
 import { textRef } from '@/lib/i18n/text-ref';
@@ -66,6 +67,7 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
         };
     },
     castTest: wfrpCastTest,
+    maxExtension: maxExtensionOf,
     spellHit: wfrpSpellHit,
     castPreview: (caster, kind, rules) => {
         const prayer = isPrayerKind(kind);

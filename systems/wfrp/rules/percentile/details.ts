@@ -42,6 +42,10 @@ export interface PercentileCastDetails {
     doubles: boolean;
     outcome: 'critical' | 'success' | 'failure' | 'fumble';
     overcastSteps: number;
+    /** SL spent per overcast direction, canon5e (p236) */
+    overcast?: Partial<
+        Record<'damage' | 'targets' | 'range' | 'aoe' | 'duration', number>
+    >;
     miscast: 'minor' | 'major' | 'wrath' | null;
     /** Critical Casting bonus picked by the caster, canon5e (p235) */
     critBonus?: 'criticalDamage' | 'totalPower' | 'unstoppableForce';

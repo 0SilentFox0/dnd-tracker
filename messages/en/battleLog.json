@@ -373,6 +373,7 @@
     "riderMissSpent": "✨ {rider}: a charge was spent on the miss",
     "riderCharges": "✨ {holder}: {ability} — {charges} {charges, plural, one {charge} other {charges}} (+{dice} {type})",
     "anchoredEnds": "✨ {target}: “{spell}” ends (the turn started outside the aura)",
+    "beyondOvercast": "🔮 {spell}: {count, plural, one {# target} other {# targets}} out of overcast reach, dropped",
     "anchoredAura": "✨ {holder}: “{ability}” — {radius} ft aura",
     "autoReaction": "⚡ {holder}: reaction “{spell}” → {attacker}",
     "delayed": "⏳ {target}: “{spell}” arrives in round {round} ({feet} ft)",

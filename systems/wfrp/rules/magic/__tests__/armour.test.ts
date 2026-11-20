@@ -38,7 +38,7 @@ describe('armourSl', () => {
             name: 'Bolt',
             level: 1,
             groupId: null,
-            definition: {},
+            definition: { targeting: { kind: 'enemy' }, effects: [] },
         } as unknown as CastTestCtx['spell'];
 
         const cast = (ap: number) =>

@@ -33,11 +33,13 @@ import {
 } from '@/lib/utils/battle/modes/engine';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import { findEffectMarker } from '@/lib/utils/battle/participant/state';
+import { widenTargeting } from '@/lib/utils/battle/spell/extension';
 import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -240,6 +242,8 @@ export interface SpellMapContext {
     targetCell?: GridPoint;
     castLevel?: number;
     upcastTargets?: number;
+    /** Reach beyond the spell's own numbers (overcast): range, template size and extra targets */
+    extension?: CastExtension;
 }
 
 const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef['kind']> = new Set([
@@ -363,7 +367,7 @@ function resolveSkillRadius(
     };
 }
 
-function outOfRange(
+export function outOfRange(
     caster: BattleParticipant,
     picked: BattleParticipant[],
     range: number | undefined,
@@ -611,7 +615,7 @@ const upcastExtra = (
     spell: SpellRef,
     mapCtx?: SpellMapContext
 ): number =>
-    mapCtx?.castLevel !== undefined &&
+    (mapCtx?.castLevel !== undefined &&
     mapCtx.upcastTargets &&
     casterPicksSlot(caster, mapCtx.rules)
         ? mapCtx.upcastTargets *
@@ -619,7 +623,7 @@ const upcastExtra = (
               spell.level,
               mapCtx.castLevel
           )
-        : 0;
+        : 0) + (mapCtx?.extension?.targets ?? 0);
 
 const HOSTILE_KINDS = new Set(['enemy', 'area', 'template', 'allEnemies']);
 
@@ -662,11 +666,12 @@ export function resolveSpellTargets(
 ): SpellTargetResolution {
     const extra = upcastExtra(caster, spell, mapCtx);
 
+    const reached = widenTargeting(targeting, mapCtx?.extension);
+
     const widened =
-        extra > 0 &&
-        (targeting.kind === 'area' || targeting.kind === 'template')
-            ? { ...targeting, maxTargets: targeting.maxTargets + extra }
-            : targeting;
+        extra > 0 && (reached.kind === 'area' || reached.kind === 'template')
+            ? { ...reached, maxTargets: reached.maxTargets + extra }
+            : reached;
 
     const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
 
@@ -689,4 +694,58 @@ export function resolveSpellTargets(
         );
 
     return { ...res, targetIds };
+}
+
+/** What an overcast shortfall leaves of a resolved cast: targets beyond the actual range or count drop, an area re-resolves at its actual size */
+export function trimToExtension(
+    ps: BattleParticipant[],
+    caster: BattleParticipant,
+    spell: SpellRef,
+    targeting: SpellTargetingDef,
+    chosenIds: string[],
+    resolved: Extract<SpellTargetResolution, { ok: true }>,
+    mapCtx: SpellMapContext
+): Extract<SpellTargetResolution, { ok: true }> {
+    const empty = { ok: true as const, targetIds: [] as string[] };
+
+    if (targeting.kind === 'template') {
+        const again = resolveSpellTargets(
+            ps,
+            caster,
+            spell,
+            targeting,
+            chosenIds,
+            mapCtx
+        );
+
+        return again.ok ? again : empty;
+    }
+
+    const reach = widenTargeting(targeting, mapCtx.extension);
+
+    const inReach = resolved.targetIds.filter((id) => {
+        const p = findParticipant(ps, id);
+
+        return (
+            !p ||
+            !('range' in reach) ||
+            !mapCtx.map ||
+            !outOfRange(caster, [p], reach.range, mapCtx.rules)
+        );
+    });
+
+    for (let n = inReach.length; n > 0; n--) {
+        const again = resolveSpellTargets(
+            ps,
+            caster,
+            spell,
+            targeting,
+            inReach.slice(0, n),
+            mapCtx
+        );
+
+        if (again.ok) return again;
+    }
+
+    return resolved.targetIds.length === 0 ? resolved : empty;
 }

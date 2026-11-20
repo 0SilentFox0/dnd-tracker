@@ -7,6 +7,7 @@ import type { CritBonus } from '../../rules/percentile/fortune';
 import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
 import { castChoices, fortuneControls } from './fortune-controls';
+import { OvercastPlanPicker } from './OvercastPlanPicker';
 
 import { HudButton } from '@/components/hud';
 import type { CastTestProps } from '@/components/systems/types';
@@ -58,6 +59,7 @@ export function CastTestBody({
                       choices.set({
                           critBonus: v as CritBonus,
                           blessing: choices.blessing,
+                          overcast: choices.overcast,
                       }),
                   name: (v: string) => t(`critBonuses.${v as CritBonus}`),
                   show: kind !== 'petty',
@@ -70,6 +72,7 @@ export function CastTestBody({
                       choices.set({
                           blessing: v as BlessingDimension,
                           critBonus: choices.critBonus,
+                          overcast: choices.overcast,
                       }),
                   name: (v: string) => t(`blessings.${v as BlessingDimension}`),
                   show: kind === 'blessing',
@@ -131,6 +134,13 @@ export function CastTestBody({
                         ))}
                     </div>
                 ))}
+            {canon && view.selected && caster && (
+                <OvercastPlanPicker
+                    caster={caster}
+                    spell={view.selected}
+                    choices={choices}
+                />
+            )}
             {rolled && (
                 <div role="status" className="mt-2 text-sm text-[var(--ink)]">
                     {rolled}

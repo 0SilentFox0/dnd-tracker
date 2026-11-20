@@ -10,7 +10,10 @@ import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import { toCastableSpell } from '@/lib/utils/battle/spell/to-castable';
 import { type SummonDeps } from '@/lib/utils/battle/summon/ability-summons';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { CastResourceGate } from '@/lib/utils/rules/systems/types';
+import type {
+    CastExtension,
+    CastResourceGate,
+} from '@/lib/utils/rules/systems/types';
 import type { IngredientPlan } from '@/lib/utils/spells/ingredients/plan';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -45,6 +48,7 @@ export interface CastPlan {
     ingredients: IngredientPlan | null;
     castLevel: number | undefined;
     resolution: Resolution;
+    reach?: CastExtension;
     expected: ReturnType<typeof casterSpellDice>;
     diceRolls: number[];
     saves: ReturnType<typeof splitSaveRolls>;

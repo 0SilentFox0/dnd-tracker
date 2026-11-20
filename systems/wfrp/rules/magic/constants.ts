@@ -53,6 +53,24 @@ export const OVERCAST_TABLE: readonly OvercastRow[] = [
     { sl: 18, damage: 7, targets: 3, rangeMul: 4, aoeMul: 3, durationMul: 3 },
 ];
 
+/** Overcast directions in the order a plan beyond the budget is cut (p236) */
+export type OvercastDirection =
+    | 'damage'
+    | 'targets'
+    | 'range'
+    | 'aoe'
+    | 'duration';
+
+export type OvercastPlan = Partial<Record<OvercastDirection, number>>;
+
+export const OVERCAST_DIRECTIONS: readonly OvercastDirection[] = [
+    'targets',
+    'range',
+    'aoe',
+    'duration',
+    'damage',
+];
+
 export const CRIT_BONUS_DEFAULT = 'totalPower' as const;
 
 export const SIN_WRATH_STEP = 10;
@@ -63,6 +81,9 @@ export const BLESSING_OVERCAST = [
     { dimension: 'targets', per: 1 },
     { dimension: 'durationRounds', per: 6 },
 ] as const;
+
+/** Design bound on what a Blessing may plan to reach before its roll (steps of OVERCAST_SL_STEP); the roll decides the real reach */
+export const PRAYER_PLAN_STEPS = 3;
 
 export type BlessingDimension = (typeof BLESSING_OVERCAST)[number]['dimension'];
 

@@ -9,8 +9,10 @@ import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type {
+    SpellEffect,
     SpellMagic,
     SpellMagicKind,
+    SpellTargeting,
 } from '@/lib/utils/spells/model/schema';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -31,10 +33,31 @@ export interface CastTestCtx {
     system?: SystemSlot;
 }
 
+/** How far a cast reaches beyond the spell's own numbers (extra targets, range, area, duration) */
+export interface CastExtension {
+    targets: number;
+    rangeMul: number;
+    rangeAddFt: number;
+    aoeMul: number;
+    durationMul: number;
+    durationAddRounds: number;
+}
+
+export interface MaxExtensionCtx {
+    caster: BattleParticipant;
+    magic: SpellMagic;
+    targeting: SpellTargeting;
+    effects: readonly SpellEffect[];
+    rules: Ruleset;
+    system?: SystemSlot;
+}
+
 export interface CastTestResult {
     success: boolean;
     margin: number;
     overcastSteps: number;
+    /** What the cast actually reaches after the roll; the core trims targets, range and area beyond it */
+    extension?: CastExtension;
     /** Flat damage the overcast adds; when set, `overcastSteps` no longer raises the cast level or adds dice */
     overcastDamage?: number;
     miscast: string | null;
@@ -128,6 +151,8 @@ export interface RuleSystemTestedMagic {
         who: { name: string; spell: string }
     ): CastTestResult;
     castTest(ctx: CastTestCtx): CastTestResult;
+    /** Upper bound of the reach the caster's plan may use, known before the roll */
+    maxExtension?(ctx: MaxExtensionCtx): CastExtension;
     /** Mitigated damage of one spell hit; null = the core keeps its own path */
     spellHit?(ctx: SpellHitCtx): MitigateResult | null;
     /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */

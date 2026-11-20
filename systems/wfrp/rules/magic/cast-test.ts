@@ -1,4 +1,4 @@
-import { bonus, skillTarget, value } from '../characteristics/derive';
+import { skillTarget, value } from '../characteristics/derive';
 import { fateSpendsOn } from '../combat/fate';
 import { participantChars } from '../combat/participant';
 import { selfSlMod, selfTestMod } from '../conditions/test-mod';
@@ -25,14 +25,19 @@ import {
     MAX_OVERCAST_STEPS,
     NO_OVERCAST_KINDS,
     OVERCAST_SL_STEP,
-    OVERCAST_TABLE,
-    type OvercastRow,
     PRAY_SKILL,
     PRAYER_KINDS,
 } from './constants';
+import {
+    blessingExtension,
+    overcastCap,
+    overcastDirections,
+    spendOvercast,
+} from './overcast';
 import { prayerOvercast, prayerSteps } from './prayer-overcast';
 
 import { textRef } from '@/lib/i18n/text-ref';
+import { NO_EXTENSION } from '@/lib/utils/battle/spell/extension';
 import type { Ruleset } from '@/lib/utils/rules';
 import type {
     CastTestCtx,
@@ -63,10 +68,6 @@ export function prayTargetOf(
         (skillTarget(chars, PRAY_SKILL.key)?.target ?? value(chars, 'fel')) +
         selfTestMod(caster, 'test', editionOf(rules))
     );
-}
-
-export function overcastRowOf(budget: number): OvercastRow | undefined {
-    return OVERCAST_TABLE.filter((r) => r.sl <= budget).at(-1);
 }
 
 export const isPrayerKind = (kind: SpellMagicKind | undefined): boolean =>
@@ -195,26 +196,45 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             : undefined;
 
     const overcastAllowed = canon
-        ? success &&
-          (prayer ||
-              (magic.overcast !== null && !NO_OVERCAST_KINDS.has(magic.kind)))
+        ? success && !petty
         : success &&
           magic.overcast !== null &&
           !NO_OVERCAST_KINDS.has(magic.kind);
 
     const overcastBudget = Math.min(
-        bonus(participantChars(caster), 'int') +
-            bonus(participantChars(caster), 'wp'),
+        overcastCap(caster),
         Math.max(0, test.sl - cn) +
             (critBonus === 'totalPower' ? Math.floor(test.roll / 10) : 0)
     );
 
+    const spend =
+        canon && !prayer && overcastAllowed
+            ? spendOvercast(
+                  overcastBudget,
+                  fortuneInput?.overcast,
+                  overcastDirections(
+                      magic,
+                      ctx.spell.definition.targeting,
+                      ctx.spell.definition.effects
+                  )
+              )
+            : undefined;
+
+    const prayed =
+        canon && prayer && overcastAllowed
+            ? prayerOvercast(
+                  magic.kind,
+                  prayerSteps(test.sl),
+                  fortuneInput?.blessing
+              )
+            : undefined;
+
     const overcastSteps = !overcastAllowed
         ? 0
-        : canon && prayer
-          ? prayerSteps(test.sl)
-          : canon
-            ? (overcastRowOf(overcastBudget)?.damage ?? 0)
+        : prayed
+          ? prayed.steps
+          : spend
+            ? Object.values(spend.spent).reduce((a, b) => a + b, 0)
             : Math.min(
                   MAX_OVERCAST_STEPS,
                   Math.max(0, Math.floor((test.sl - cn) / OVERCAST_SL_STEP))
@@ -301,7 +321,13 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         success,
         margin: test.sl,
         overcastSteps,
-        ...(canon && { overcastDamage: prayer ? 0 : overcastSteps }),
+        ...(canon && { overcastDamage: spend?.damage ?? 0 }),
+        ...(canon &&
+            overcastAllowed && {
+                extension:
+                    spend?.extension ??
+                    (prayed ? blessingExtension(prayed) : NO_EXTENSION),
+            }),
         miscast,
         details: ACTION_SLOT.write({
             cast: {
@@ -317,14 +343,11 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                 overcastSteps,
                 miscast,
                 ...(critBonus && { critBonus }),
-                ...(canon &&
-                    prayer &&
-                    overcastSteps > 0 && {
-                        prayerOvercast: prayerOvercast(
-                            magic.kind,
-                            overcastSteps,
-                            fortuneInput?.blessing
-                        ),
+                ...(prayed &&
+                    prayed.steps > 0 && { prayerOvercast: prayed }),
+                ...(spend &&
+                    Object.keys(spend.spent).length > 0 && {
+                        overcast: spend.spent,
                     }),
                 ...(canon && { stepAvert: true as const }),
                 ...(fortune && { fortune }),

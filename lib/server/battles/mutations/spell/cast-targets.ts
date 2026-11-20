@@ -11,15 +11,20 @@ import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { inputDiceOf } from '@/lib/utils/battle/spell/cast/state';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
+import { isExtended } from '@/lib/utils/battle/spell/extension';
 import {
     pacifiedBlock,
     resolveSpellTargets,
+    type SpellMapContext,
 } from '@/lib/utils/battle/spell/spell-targeting';
 import { BattleRuleError, ruleErrorOf } from '@/lib/utils/battle/store';
 import { objectsNear } from '@/lib/utils/battle/summon/objects-near';
 import { assertSpellRolls } from '@/lib/utils/battle/validation/dice-checks';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { rngOf } from '@/lib/utils/common/rng';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 
 function assertTargetsNotPacified(
@@ -76,6 +81,51 @@ function assertObjectsNear(
         );
 }
 
+/** The reach the caster's plan may use, validated before the roll; undefined when the cast has no casting test or the plan reaches no further */
+export function plannedReach(
+    ctx: BattleMutationContext,
+    caster: BattleParticipant,
+    spell: Spellcast,
+    source: SpellSource,
+    system: SystemSlot | undefined
+): CastExtension | undefined {
+    const magic = spell.definition.casting?.magic;
+
+    const tested = ruleSystemOf(ctx.meta.rules).magic.tested;
+
+    if (!magic || !tested?.maxExtension) return undefined;
+
+    if (source.free || source.legendaryAbility || source.grant) return undefined;
+
+    const reach = tested.maxExtension({
+        caster,
+        magic,
+        targeting: spell.definition.targeting,
+        effects: spell.definition.effects,
+        rules: ctx.meta.rules,
+        system,
+    });
+
+    return isExtended(reach) ? reach : undefined;
+}
+
+export function castMapContext(
+    ctx: BattleMutationContext,
+    data: SpellRequestData,
+    definition: Spellcast['definition'],
+    castLevel: number | undefined,
+    extension?: CastExtension
+): SpellMapContext {
+    return {
+        map: ctx.meta.map,
+        rules: ctx.meta.rules,
+        targetCell: data.targetCell,
+        castLevel,
+        upcastTargets: definition.upcastTargets,
+        ...(extension && { extension }),
+    };
+}
+
 export function resolveCastTargets(
     ctx: BattleMutationContext,
     data: SpellRequestData,
@@ -83,7 +133,8 @@ export function resolveCastTargets(
     caster: BattleParticipant,
     spell: Spellcast,
     source: SpellSource,
-    castLevel: number | undefined
+    castLevel: number | undefined,
+    reach?: CastExtension
 ): Resolution {
     const { definition } = spell;
 
@@ -103,13 +154,7 @@ export function resolveCastTargets(
         spell,
         definition.targeting,
         data.targetIds,
-        {
-            map: ctx.meta.map,
-            rules: ctx.meta.rules,
-            targetCell: data.targetCell,
-            castLevel,
-            upcastTargets: definition.upcastTargets,
-        }
+        castMapContext(ctx, data, definition, castLevel, reach)
     );
 
     if (!resolution.ok) throw ruleErrorOf('invalid_target', resolution.error);

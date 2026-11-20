@@ -58,6 +58,18 @@
         "totalPower": "Повна сила",
         "unstoppableForce": "Нестримна сила"
       },
+      "overcastPlan": "План оверкасту (РУ, до {cap})",
+      "overcastNote": "Порожньо: усі РУ йдуть у шкоду. РУ понад результат кидка втрачаються; цілі й дальність, яких кидок не купив, відкидаються.",
+      "overcastDirections": {
+        "damage": "Шкода",
+        "targets": "Цілі",
+        "range": "Дальність",
+        "aoe": "Зона",
+        "duration": "Тривалість"
+      },
+      "overcastSpend": "РУ {spent} / {cap}",
+      "overcastMore": "Більше: {direction}",
+      "overcastLess": "Менше: {direction}",
       "blessing": "Overcast благословення",
       "blessings": {
         "rangeYards": "Дальність",
@@ -90,6 +102,14 @@
       "channelled": "Накопичено +{channelled} РУ",
       "armour": "броня −{armour}",
       "overcast": "Оверкаст ×{steps}",
+      "overcastSpent": "Оверкаст: {parts}",
+      "overcastParts": {
+        "damage": "+{n} шкоди",
+        "targets": "+{n} цілей",
+        "range": "дальність ×{n}",
+        "aoe": "зона ×{n}",
+        "duration": "тривалість ×{n}"
+      },
       "miscast": {
         "minor": "Малий збій магії",
         "major": "Великий збій магії",

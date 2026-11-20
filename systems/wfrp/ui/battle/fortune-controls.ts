@@ -8,6 +8,7 @@ import {
 const choicesOf = (input: FortuneInput | undefined) => ({
     ...(input?.critBonus && { critBonus: input.critBonus }),
     ...(input?.blessing && { blessing: input.blessing }),
+    ...(input?.overcast && { overcast: input.overcast }),
 });
 
 export type FortuneChoice = 'reroll' | 'sl' | 'notFail' | null;
@@ -80,7 +81,10 @@ export function fortuneControls(
 export interface CastChoices {
     critBonus?: FortuneInput['critBonus'];
     blessing?: FortuneInput['blessing'];
-    set: (next: Pick<FortuneInput, 'critBonus' | 'blessing'>) => void;
+    overcast?: FortuneInput['overcast'];
+    set: (
+        next: Pick<FortuneInput, 'critBonus' | 'blessing' | 'overcast'>
+    ) => void;
 }
 
 /** Cast choices that spend nothing (Critical Casting bonus, Blessing overcast) kept beside the Fortune input */
@@ -93,6 +97,7 @@ export function castChoices(
     return {
         critBonus: input?.critBonus,
         blessing: input?.blessing,
+        overcast: input?.overcast,
         set: (next) => {
             const merged = {
                 ...input,
@@ -101,7 +106,10 @@ export function castChoices(
             };
 
             const bare =
-                merged.kind === 'none' && !merged.critBonus && !merged.blessing;
+                merged.kind === 'none' &&
+                !merged.critBonus &&
+                !merged.blessing &&
+                !merged.overcast;
 
             write(bare ? undefined : FORTUNE_INPUT.write(merged));
         },

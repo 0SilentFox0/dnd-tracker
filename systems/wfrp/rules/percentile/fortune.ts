@@ -1,6 +1,10 @@
 import { ACCEPTED_SPOTS, type HitSpot } from '../combat/constants';
 import { fateLeftOf } from '../combat/fate';
-import type { BlessingDimension } from '../magic/constants';
+import {
+    type BlessingDimension,
+    OVERCAST_DIRECTIONS,
+    type OvercastPlan,
+} from '../magic/constants';
 import { wfrpState } from '../state';
 import type { ForcedResult } from './resolve';
 
@@ -27,6 +31,8 @@ export interface FortuneInput {
     critBonus?: CritBonus;
     /** Blessing casts only: the overcast dimension (p217) */
     blessing?: BlessingDimension;
+    /** Spell casts only: SL planned per overcast direction before the roll (p236) */
+    overcast?: OvercastPlan;
     /** Attacks only: the chosen Hit Location, -2 SL (p167) */
     calledShot?: HitSpot;
     /** Attacks only: situational Combat modifiers set by hand */
@@ -53,6 +59,23 @@ const BLESSING_DIMENSIONS: readonly unknown[] = [
     'targets',
     'durationRounds',
 ];
+
+function readOvercast(raw: unknown): OvercastPlan | undefined {
+    if (typeof raw !== 'object' || raw === null) return undefined;
+
+    const rec = raw as Record<string, unknown>;
+
+    const out: OvercastPlan = {};
+
+    for (const dir of OVERCAST_DIRECTIONS) {
+        const n = rec[dir];
+
+        if (typeof n === 'number' && Number.isInteger(n) && n > 0)
+            out[dir] = n;
+    }
+
+    return Object.keys(out).length ? out : undefined;
+}
 
 function readSituational(raw: unknown): Situational | undefined {
     if (typeof raw !== 'object' || raw === null) return undefined;
@@ -83,6 +106,7 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         location,
         critBonus,
         blessing,
+        overcast,
         calledShot,
         situational,
     } = raw as Record<string, unknown>;
@@ -106,6 +130,7 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         ...(BLESSING_DIMENSIONS.includes(blessing) && {
             blessing: blessing as BlessingDimension,
         }),
+        ...(readOvercast(overcast) && { overcast: readOvercast(overcast) }),
         ...(ACCEPTED_SPOTS.includes(calledShot as HitSpot) && {
             calledShot: calledShot as HitSpot,
         }),

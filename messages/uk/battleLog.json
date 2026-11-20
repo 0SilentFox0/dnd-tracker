@@ -373,6 +373,7 @@
     "riderMissSpent": "✨ {rider}: заряд витрачено на промах",
     "riderCharges": "✨ {holder}: {ability} — {charges} {charges, plural, one {заряд} few {заряди} many {зарядів} other {заряду}} (+{dice} {type})",
     "anchoredEnds": "✨ {target}: «{spell}» закінчується (початок ходу поза аурою)",
+    "beyondOvercast": "🔮 {spell}: {count, plural, one {# ціль} few {# цілі} many {# цілей} other {# цілі}} за межами оверкасту, відкинуто",
     "anchoredAura": "✨ {holder}: «{ability}» — аура {radius} фт",
     "autoReaction": "⚡ {holder}: реакція «{spell}» → {attacker}",
     "delayed": "⏳ {target}: «{spell}» прибуде в раунді {round} ({feet} фт)",
