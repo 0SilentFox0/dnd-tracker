@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { LOCATIONS } from '../rules/combat/constants';
+import { ACCEPTED_SPOTS } from '../rules/combat/constants';
 import { FORTUNE_INPUT } from '../rules/percentile/fortune';
 
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
@@ -15,7 +15,7 @@ const Body = z.object({
                 kind: z.enum(['reroll', 'sl', 'notFail']),
                 rerolls: z.number().int().min(1).max(9).optional(),
                 critical: z.boolean().optional(),
-                location: z.enum(LOCATIONS).optional(),
+                location: z.enum(ACCEPTED_SPOTS).optional(),
             }),
         })
         .optional(),

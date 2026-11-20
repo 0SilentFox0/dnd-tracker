@@ -142,6 +142,7 @@ export const API_ERRORS = {
     OFF_HAND_TWO_HANDED: 'errors.offHandTwoHanded',
     OFF_HAND_EQUIP: 'errors.offHandEquip',
     NO_OFF_HAND_WEAPON: 'errors.noOffHandWeapon',
+    ATTACK_HAND_DISABLED: 'errors.attackHandDisabled',
     INTERNAL: 'errors.internal',
     DM_ONLY: 'errors.dmOnly',
     TX_MISMATCH: 'errors.txMismatch',

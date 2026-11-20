@@ -122,6 +122,7 @@
   "offHandTwoHanded": "A two-handed weapon cannot be used for two-weapon fighting",
   "offHandEquip": "The Shield slot only takes a shield or a light weapon (class mode)",
   "noOffHandWeapon": "No weapon in the off hand",
+  "attackHandDisabled": "That hand is disabled by a wound and cannot make this attack",
   "internal": "Internal server error",
   "dmOnly": "DM only",
   "txMismatch": "Transaction mismatch",

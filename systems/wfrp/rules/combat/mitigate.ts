@@ -6,7 +6,7 @@ import { sizeDamageBonus, wardRoll } from '../traits/size';
 import { applyWfrpCrit } from './crit-effect';
 import { rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
-import { asLocation } from './location';
+import { asLocation, sideOf } from './location';
 import { participantStats } from './participant';
 
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -106,7 +106,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const crit =
         ctx.crit && (counted || target.combatStats.currentHp > 0)
-            ? rollCrit(location, ctx.rules, ctx.rng)
+            ? rollCrit(
+                  location,
+                  ctx.rules,
+                  ctx.rng,
+                  undefined,
+                  0,
+                  sideOf(ctx.location)
+              )
             : undefined;
 
     if (!crit) return { amount: base.total, steps, totalLabel };

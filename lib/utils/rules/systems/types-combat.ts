@@ -330,6 +330,12 @@ export interface RuleSystemCombat {
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
     /** Off-hand attacks; absent means never */
     secondaryAttack?: OffHandRules;
+    /** The attacker cannot use this attack right now (e.g. a disarmed hand); absent means never */
+    attackBlocked?(
+        attacker: BattleParticipant,
+        attack: BattleAttack,
+        rules: Ruleset
+    ): boolean;
     /** Lair actions and the lair toggle; absent means none */
     sceneActions?: LairRules;
     /** Ability of an attack and its roll and damage modifiers; absent means the attack type's default ability */

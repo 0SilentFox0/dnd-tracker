@@ -1,11 +1,11 @@
-import type { DefenseKind, HitLocation } from '../combat/constants';
+import type { DefenseKind, HitSpot } from '../combat/constants';
 
 export interface PercentileAttackDetails {
     roll: number;
     target: number;
     sl: number;
     netSl: number;
-    location: HitLocation;
+    location: HitSpot;
     doubles: boolean;
     defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
     momentumUsed?: boolean;

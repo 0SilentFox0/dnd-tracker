@@ -1,6 +1,6 @@
 import type { WfrpConditionKey } from '../conditions/catalog';
 import { resolveTable, rollSlot, rowText } from '../tables/resolve';
-import type { HitLocation } from './constants';
+import type { HitLocation, HitSide } from './constants';
 
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { rollDie } from '@/lib/utils/common/dice';
@@ -15,6 +15,8 @@ export interface CritResult {
     bonusDamage: number;
     conditions: { key: WfrpConditionKey; levels: number }[];
     markers: string[];
+    /** Which arm or leg was struck (canon5e) */
+    side?: HitSide;
     /** The roll ran past the table (or hit a `death` row), p171-176 */
     death: boolean;
 }
@@ -32,9 +34,13 @@ export function rollCrit(
     rng: Rng,
     presetRoll?: number,
     /** +10 per Wound beyond what dropped the target to 0 (p171) */
-    bonus = 0
+    bonus = 0,
+    side?: HitSide
 ): CritResult {
     const slot = SLOT[location];
+
+    const sided =
+        side && (location === 'arm' || location === 'leg') ? { side } : {};
 
     const roll = (presetRoll ?? rollDie(100, rng)) + bonus;
 
@@ -50,6 +56,7 @@ export function rollCrit(
             conditions: [],
             markers: [],
             death: true,
+            ...sided,
         };
 
     const result: CritResult = {
@@ -59,6 +66,7 @@ export function rollCrit(
         conditions: [],
         markers: [],
         death: false,
+        ...sided,
     };
 
     for (const e of row.effects) {

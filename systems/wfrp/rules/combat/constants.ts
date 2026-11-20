@@ -9,6 +9,31 @@ export const LOCATIONS = ['head', 'arm', 'body', 'leg'] as const;
 
 export type HitLocation = (typeof LOCATIONS)[number];
 
+export const SIDES = ['left', 'right'] as const;
+
+export type HitSide = (typeof SIDES)[number];
+
+/** Canon5e splits arms and legs into left and right (p164); AP and crit tables still key on the zone */
+export const ACCEPTED_SPOTS = [
+    ...LOCATIONS,
+    'leftArm',
+    'rightArm',
+    'leftLeg',
+    'rightLeg',
+] as const;
+
+export type HitSpot = (typeof ACCEPTED_SPOTS)[number];
+
+/** The six spots of the canon5e table, in table order */
+export const SPOTS = [
+    'head',
+    'leftArm',
+    'rightArm',
+    'body',
+    'leftLeg',
+    'rightLeg',
+] as const;
+
 export type DefenseKind = 'parry' | 'dodge' | 'shield';
 
 export const BALANCE_REF_TB = 3;

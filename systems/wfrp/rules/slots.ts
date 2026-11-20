@@ -19,6 +19,8 @@ export interface WfrpAttackSlot {
     magical?: true;
     /** Wielded in the shield (off) hand */
     offHand?: true;
+    /** Held in a hand (weapon or shield), as opposed to trait, unarmed and spell attacks */
+    hand?: true;
     /** Weapon group, picks the Melee/Ranged skill speciality */
     group?: string;
 }
@@ -39,6 +41,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.magical === true && { magical: true as const }),
         ...(raw.offHand === true && { offHand: true as const }),
+        ...(raw.hand === true && { hand: true as const }),
     };
 });
 

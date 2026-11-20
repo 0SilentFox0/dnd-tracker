@@ -80,6 +80,9 @@
     "psychologyPassHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: стійкість",
     "psychologyFailHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: провал",
     "critDeath": "☠️ {target} гине на місці: {text}",
+    "critWoundAt": "🩸 Критична рана для {target} ({place}): {text}",
+    "critHitAt": "🩸 Критична рана для {target} ({place}, +{bonus} шкоди): {text}",
+    "critDeathAt": "☠️ {target} гине на місці ({place}): {text}",
     "dying": "⏳ {name} помирає: лишилось раундів — {rounds}, якщо не зцілити",
     "diedOfWounds": "☠️ {name} гине від критичних ран",
     "fateHowDidThatMiss": "{name} витрачає Долю: «Як він схибив?» — атака {attacker} не має ефекту",
@@ -136,6 +139,10 @@
       "locations": {
         "head": "Голова",
         "arm": "Рука",
+        "leftArm": "Ліва рука",
+        "rightArm": "Права рука",
+        "leftLeg": "Ліва нога",
+        "rightLeg": "Права нога",
         "body": "Тулуб",
         "leg": "Нога"
       }

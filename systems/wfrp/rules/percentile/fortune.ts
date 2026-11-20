@@ -1,4 +1,4 @@
-import type { HitLocation } from '../combat/constants';
+import type { HitSpot } from '../combat/constants';
 import { fateLeftOf } from '../combat/fate';
 import { wfrpState } from '../state';
 import type { ForcedResult } from './resolve';
@@ -15,7 +15,7 @@ export interface FortuneInput {
     rerolls?: number;
     /** `notFail` only: choose a Critical and, with it, the hit location (p133) */
     critical?: boolean;
-    location?: HitLocation;
+    location?: HitSpot;
 }
 
 const KINDS: readonly unknown[] = ['reroll', 'sl', 'notFail'];
@@ -39,7 +39,7 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
             rerolls <= 9 && { rerolls }),
         ...(critical === true && { critical }),
         ...(typeof location === 'string' && {
-            location: location as HitLocation,
+            location: location as HitSpot,
         }),
     };
 });

@@ -3,7 +3,7 @@
 import { useProfile } from '@/components/character-profile/ProfileContext';
 import type { RollDialogBodyProps } from '@/components/systems/types';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import type { HitLocation } from '@/systems/wfrp/rules/combat/constants';
+import type { HitSpot } from '@/systems/wfrp/rules/combat/constants';
 import { editionOf } from '@/systems/wfrp/rules/edition';
 import type { FortuneKind } from '@/systems/wfrp/rules/percentile/fortune';
 import { SHEET_SLOT } from '@/systems/wfrp/rules/slots';
@@ -32,8 +32,8 @@ export interface SheetFortune {
     rerolls?: { value: number; set(n: number): void };
     notFail?: {
         critical: boolean;
-        location?: HitLocation;
-        set(critical: boolean, location?: HitLocation): void;
+        location?: HitSpot;
+        set(critical: boolean, location?: HitSpot): void;
     };
 }
 
@@ -74,7 +74,7 @@ export function useSheetFortune({
             },
             notFail: {
                 critical: extra.critical === true,
-                location: extra.location as HitLocation | undefined,
+                location: extra.location as HitSpot | undefined,
                 set: (critical, location) =>
                     setExtra({
                         fortune: 'notFail',

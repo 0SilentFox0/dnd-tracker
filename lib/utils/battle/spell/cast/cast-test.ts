@@ -42,7 +42,8 @@ export function applyCastAttribute(
         state.flow.ps,
         affectedIds(state),
         spellMagic,
-        state.flow.ctx.round
+        state.flow.ctx.round,
+        state.flow.ctx.rules
     );
 
     state.flow.ps = r.participants;

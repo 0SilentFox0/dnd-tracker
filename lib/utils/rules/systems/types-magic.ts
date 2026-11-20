@@ -107,7 +107,8 @@ export interface RuleSystemTestedMagic {
         ps: BattleParticipant[],
         targetIds: string[],
         magic: SpellMagic,
-        round: number
+        round: number,
+        rules?: Ruleset
     ): SystemConditionResult;
     /** Token badge for banked channelling */
     badge(p: BattleParticipant): ActiveEffect | null;

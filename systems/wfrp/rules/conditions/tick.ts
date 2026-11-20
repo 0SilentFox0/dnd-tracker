@@ -143,6 +143,7 @@ export function wfrpConditionsTurnStart(
                 sourceName: dynamicTextRef(
                     'battleWfrp.conditions.bleeding.label'
                 ),
+                edition,
             });
 
             participants = replaceParticipant(participants, faint.participant);

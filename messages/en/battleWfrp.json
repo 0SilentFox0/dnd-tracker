@@ -80,6 +80,9 @@
     "psychologyPassHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: resisted",
     "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed",
     "critDeath": "☠️ {target} is killed outright: {text}",
+    "critWoundAt": "🩸 Critical wound for {target} ({place}): {text}",
+    "critHitAt": "🩸 Critical wound for {target} ({place}, +{bonus} damage): {text}",
+    "critDeathAt": "☠️ {target} is killed outright ({place}): {text}",
     "dying": "⏳ {name} is dying: {rounds} round(s) left unless healed",
     "diedOfWounds": "☠️ {name} succumbs to their critical wounds",
     "fateHowDidThatMiss": "{name} spends Fate: How Did That Miss? — the attack by {attacker} has no effect",
@@ -136,6 +139,10 @@
       "locations": {
         "head": "Head",
         "arm": "Arm",
+        "leftArm": "Left arm",
+        "rightArm": "Right arm",
+        "leftLeg": "Left leg",
+        "rightLeg": "Right leg",
         "body": "Body",
         "leg": "Leg"
       }

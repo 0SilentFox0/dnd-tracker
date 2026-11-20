@@ -27,6 +27,8 @@ export interface EditionProfile {
     woundModel: 'knockdown' | 'critical';
     /** `percent`: condition levels shift the test target by 10%; `sl`: the worst penalising level costs that many SL, Stunned halves Move, Prone/Blinded/Surprised give melee attackers Advantage or SL (p184-187) */
     conditionModel: 'percent' | 'sl';
+    /** `zone`: head/arm/body/leg; `side`: arms and legs split into left and right, a disarmed arm blocks that hand (p164) */
+    hitLocationModel: 'zone' | 'side';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -44,6 +46,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         attackTarget: 'characteristic',
         woundModel: 'knockdown',
         conditionModel: 'percent',
+        hitLocationModel: 'zone',
     },
     canon5e: {
         advanceStep: 5,
@@ -59,5 +62,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         attackTarget: 'skill',
         woundModel: 'critical',
         conditionModel: 'sl',
+        hitLocationModel: 'side',
     },
 };

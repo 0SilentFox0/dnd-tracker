@@ -35,7 +35,7 @@ export function useMomentumPanel(
     const participantId = hero.basicInfo.id;
 
     return {
-        blocker: secondAttackBlocker(hero),
+        blocker: secondAttackBlocker(hero, battle.rules),
         allies: battle.initiativeOrder
             .filter(
                 (p) =>

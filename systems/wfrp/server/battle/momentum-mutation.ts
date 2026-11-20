@@ -83,7 +83,7 @@ export function momentumMutation(
     const at = { battleId: ctx.scene.id, round: ctx.scene.round };
 
     if (body.mode === 'secondAttack') {
-        const blocker = secondAttackBlocker(actor);
+        const blocker = secondAttackBlocker(actor, ctx.meta.rules);
 
         if (blocker === 'used') throw reject(API_ERRORS.MOMENTUM_ATTACK_USED);
 

@@ -78,10 +78,10 @@ describe('wfrp RollDialogBody', () => {
             />
         );
         fireEvent.click(
-            screen.getByText('battleWfrp.ui.fortune.locations.arm')
+            screen.getByText('battleWfrp.ui.fortune.locations.rightArm')
         );
 
-        expect(set).toHaveBeenCalledWith(true, 'arm');
+        expect(set).toHaveBeenCalledWith(true, 'rightArm');
     });
 
     it('lets the DM pick a difficulty', () => {

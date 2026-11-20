@@ -76,12 +76,17 @@ export function attemptWfrpConditionEnd(
         sl: t.sl,
     };
 
-    const cured = success ? reduceWfrpCondition(p, key, 1) : null;
+    const canon = edition.conditionModel === 'sl';
+
+    const cured = success
+        ? reduceWfrpCondition(p, key, canon && key !== 'bleeding' ? 1 + Math.max(0, t.sl - 1) : 1)
+        : null;
 
     const fatigue =
         cured?.removed &&
-        edition.conditionModel === 'sl' &&
-        (key === 'poisoned' || key === 'stunned')
+        canon &&
+        (key === 'poisoned' ||
+            (key === 'stunned' && conditionLevel(p, 'fatigued') === 0))
             ? applyWfrpConditionTo(cured.participant, {
                   key: 'fatigued',
                   round: ctx.round,

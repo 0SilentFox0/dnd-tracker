@@ -1,8 +1,10 @@
 import { ATTACK_SLOT, type SceneMomentum } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
+import { wfrpAttackBlocked } from './disarm';
 
 import { AttackType } from '@/lib/constants/battle';
 import { withAttacksLeft } from '@/lib/utils/battle/attack/attacks-left';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type {
     BattleAttack,
     BattleParticipant,
@@ -65,7 +67,8 @@ export type SecondAttackBlocker = 'none' | 'used' | 'action' | 'weapons';
 
 /** One extra attack per turn (p167-168): after the main action, with melee weapons in both hands */
 export function secondAttackBlocker(
-    p: BattleParticipant
+    p: BattleParticipant,
+    rules: Ruleset
 ): SecondAttackBlocker | null {
     if (!hasMomentum(p)) return 'none';
 
@@ -74,7 +77,7 @@ export function secondAttackBlocker(
     if (!p.actionFlags.hasUsedAction) return 'action';
 
     const melee = p.battleData.attacks.filter(
-        (a) => a.type === AttackType.MELEE
+        (a) => a.type === AttackType.MELEE && !wfrpAttackBlocked(p, a, rules)
     );
 
     const off = (a: BattleAttack) =>

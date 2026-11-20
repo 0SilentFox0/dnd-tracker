@@ -2,6 +2,7 @@ import { skillTarget, value } from '../characteristics/derive';
 import {
     againstMod,
     againstSl,
+    cannotDefend,
     selfModes,
     selfSlMod,
     selfTestMod,
@@ -30,7 +31,7 @@ import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { fateLeftOf, fateSpendsOn } from './fate';
-import { hitLocation } from './location';
+import { asLocation, hitLocation, sideOf } from './location';
 import { percentileLines } from './log';
 import {
     hasMomentum,
@@ -321,16 +322,23 @@ function negateByFate(
 const detailsOf = (
     t: PercentileTestResult,
     netSl: number,
-    extra: Partial<PercentileAttackDetails> = {}
+    extra: Partial<PercentileAttackDetails> = {},
+    split = false
 ): PercentileAttackDetails => ({
     roll: t.roll,
     target: t.target,
     sl: t.sl,
     netSl,
-    location: hitLocation(t.rawRoll),
+    location: hitLocation(t.rawRoll, split),
     doubles: t.doubles,
     ...extra,
 });
+
+const counterCritOf = (
+    spot: string,
+    rules: ResolveAttackCtx['rules'],
+    rng: Parameters<typeof rollCrit>[2]
+) => rollCrit(asLocation(spot), rules, rng, undefined, 0, sideOf(spot));
 
 const refsOf = (attack: BattleAttack) => {
     const slot = ATTACK_SLOT.read(attack.system);
@@ -351,8 +359,13 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const forced = forcedOf(fortuneInput);
 
-    const chosenLocation =
+    const split = edition.hitLocationModel === 'side';
+
+    const pickedLocation =
         forced?.outcome === 'critical' ? fortuneInput?.location : undefined;
+
+    const chosenLocation =
+        pickedLocation && !split ? asLocation(pickedLocation) : pickedLocation;
 
     const locationOf = () =>
         chosenLocation ? { location: chosenLocation } : {};
@@ -460,7 +473,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 roll: test.roll,
                 result: toResult(
                     ctx,
-                    detailsOf(test, test.sl, locationOf()),
+                    detailsOf(test, test.sl, locationOf(), split),
                     isHit,
                     {
                         spent: false,
@@ -542,6 +555,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             edition,
             attackerForced: forced,
             defenderDoubles: edition.woundModel === 'critical',
+            defenderHelpless: cannotDefend(target, edition),
             rng,
             presetRolls,
         });
@@ -559,12 +573,16 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 (personal
                     ? { momentumAdvantage: true as const }
                     : { momentumUsed: true })),
-        });
+        }, split);
 
         const counterCrit =
             edition.woundModel === 'critical' &&
             result.defender.outcome === 'critical'
-                ? rollCrit(hitLocation(rollDie(100, rng)), ctx.rules, rng)
+                ? counterCritOf(
+                      hitLocation(rollDie(100, rng), split),
+                      ctx.rules,
+                      rng
+                  )
                 : undefined;
 
         const resolved = toResult(

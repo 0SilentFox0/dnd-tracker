@@ -37,7 +37,9 @@ export function extractWfrpAttacks({
                 id,
                 row.name,
                 profile,
-                slot === ArtifactSlot.SHIELD ? { offHand: true } : undefined
+                slot === ArtifactSlot.SHIELD
+                    ? { offHand: true, hand: true }
+                    : { hand: true }
             ),
         ];
     });
@@ -47,7 +49,7 @@ export function wfrpAttackFromProfile(
     id: string,
     name: string,
     profile: WeaponProfile,
-    extra?: { magical?: true; offHand?: true }
+    extra?: { magical?: true; offHand?: true; hand?: true }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
 
@@ -78,6 +80,7 @@ export function wfrpAttackFromProfile(
             ...(!profile.addSb && { noSb: true }),
             ...(extra?.magical && { magical: true as const }),
             ...(extra?.offHand && { offHand: true as const }),
+            ...(extra?.hand && { hand: true as const }),
         }),
         noLevelDice: true,
         ...(profile.ammoCapacity !== undefined && {

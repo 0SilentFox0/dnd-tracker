@@ -22,6 +22,8 @@ export interface OpposedInput {
     attackerForced?: ForcedResult;
     /** The defender's successful doubles are a Critical Hit too (p165) */
     defenderDoubles?: boolean;
+    /** The defender cannot defend (Surprised, p187): the defence automatically fails */
+    defenderHelpless?: boolean;
     rng: Rng;
     presetRolls?: { attacker?: number; defender?: number };
 }
@@ -44,6 +46,7 @@ export function resolveOpposed({
     edition,
     attackerForced,
     defenderDoubles,
+    defenderHelpless,
     rng,
     presetRolls,
 }: OpposedInput): OpposedResult {
@@ -67,7 +70,7 @@ export function resolveOpposed({
         forced: attackerForced,
     });
 
-    const defender = {
+    const rolled = {
         ...resolvePercentileTest({
             target: best.target,
             slModifier: defenderSlMod + dMode.slMod,
@@ -79,6 +82,10 @@ export function resolveOpposed({
         }),
         kind: best.kind,
     };
+
+    const defender = defenderHelpless
+        ? { ...rolled, outcome: 'failure' as const, sl: 0, auto: null }
+        : rolled;
 
     const netSl = attackerForced
         ? Math.max(1, attacker.sl - defender.sl)

@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { LOCATIONS } from '../../rules/combat/constants';
+import { SPOTS } from '../../rules/combat/constants';
 import type { FortuneChoice, FortuneExtras } from './fortune-controls';
 
 import { HudButton } from '@/components/hud';
@@ -132,7 +132,7 @@ export function FortunePicker({
                     </ToggleRow>
                     {notFail.critical && (
                         <ToggleRow label={tf('location')} className="">
-                            {LOCATIONS.map((loc) => (
+                            {SPOTS.map((loc) => (
                                 <ToggleButton
                                     key={loc}
                                     on={notFail.location === loc}
