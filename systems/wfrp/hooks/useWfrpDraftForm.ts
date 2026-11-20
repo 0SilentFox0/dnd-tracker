@@ -270,6 +270,12 @@ export function useWfrpDraftForm({
                       picked: draft.canon.speciesSkills,
                       toggle: draft.canon.toggleSpeciesSkill,
                   },
+                  speciesTalents: {
+                      groups: profile?.talentChoices ?? [],
+                      picked: draft.canon.speciesTalents,
+                      set: draft.canon.setSpeciesTalent,
+                      names: featName,
+                  },
                   careerSkills: {
                       options: canonCareer?.skills ?? [],
                       counts: draft.canon.skills,

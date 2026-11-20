@@ -25,6 +25,11 @@ function resolveProfile(
     return {
         ...profile,
         talents: profile.talents.map(feat),
+        ...(profile.talentChoices && {
+            talentChoices: profile.talentChoices.map((group) =>
+                group.map(feat)
+            ),
+        }),
         randomTalents: profile.randomTalents.map((r) => ({
             ...r,
             featId: feat(r.featId),

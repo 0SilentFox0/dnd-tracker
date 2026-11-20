@@ -287,6 +287,7 @@ export function grimCoverage(data: WfrpData): string[] {
 
     for (const p of profiles) {
         (p.talents ?? []).forEach((t) => used.add(nameKey(t)));
+        (p.talentChoices ?? []).flat().forEach((t) => used.add(nameKey(t)));
         (p.randomTalents ?? []).forEach((r) => used.add(nameKey(r.featId)));
     }
 

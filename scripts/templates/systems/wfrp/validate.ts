@@ -24,6 +24,7 @@ import {
 import { SPEC_RE } from '@/systems/wfrp/rules/characteristics/keys';
 import { skillDef } from '@/systems/wfrp/rules/skills/catalog';
 import type { TableRow } from '@/systems/wfrp/rules/tables/schema';
+import { TALENT_KINDS } from '@/systems/wfrp/rules/trait-kinds';
 import { SpeciesProfileSchema } from '@/systems/wfrp/server/schemas';
 
 const label = (kind: string, index: number, name: unknown) =>
@@ -40,7 +41,12 @@ const PROFILE_KEYS = [
     'careerTable',
 ] as const;
 
-const PROFILE_LISTS = ['talents', 'randomTalents', 'careerTable'] as const;
+const PROFILE_LISTS = [
+    'talents',
+    'talentChoices',
+    'randomTalents',
+    'careerTable',
+] as const;
 
 const FEAT_STATS = ['attackBonus', 'maxHp', 'initiative'];
 
@@ -94,6 +100,13 @@ function validateProfiles(
             talents: (named.talents ?? []).map((t) =>
                 fakeId('feat', names.feats, t)
             ),
+            ...(named.talentChoices && {
+                talentChoices: named.talentChoices.map((group) =>
+                    (Array.isArray(group) ? group : []).map((t) =>
+                        fakeId('feat', names.feats, t)
+                    )
+                ),
+            }),
             randomTalents: (named.randomTalents ?? []).map((r) => ({
                 ...r,
                 featId: fakeId('feat', names.feats, r.featId),
@@ -214,10 +227,19 @@ function validateFeatAbilities(data: WfrpData, issues: string[]) {
                 );
 
             for (const effect of Array.isArray(effects) ? effects : []) {
-                const { kind, stat } = (isRecord(effect) ? effect : {}) as {
+                const { kind, stat, talent } = (
+                    isRecord(effect) ? effect : {}
+                ) as {
                     kind?: unknown;
                     stat?: unknown;
+                    talent?: unknown;
                 };
+
+                if (
+                    kind === 'wfrpTalent' &&
+                    (TALENT_KINDS as readonly unknown[]).includes(talent)
+                )
+                    continue;
 
                 if (
                     kind !== 'modifyStat' ||
@@ -225,7 +247,7 @@ function validateFeatAbilities(data: WfrpData, issues: string[]) {
                     !FEAT_STATS.includes(stat)
                 )
                     issues.push(
-                        `${where}: only modifyStat on ${FEAT_STATS.join('/')} acts on a wfrp hero`
+                        `${where}: only modifyStat on ${FEAT_STATS.join('/')} or a wfrpTalent acts on a wfrp hero`
                     );
             }
         });

@@ -470,6 +470,16 @@
         "Night Owl",
         "Pack Mule"
       ],
+      "talentChoices": [
+        [
+          "Lettered",
+          "Dogged Pursuit"
+        ],
+        [
+          "Grim Resolve",
+          "Focused Mind"
+        ]
+      ],
       "randomTalentCount": 0,
       "randomTalents": [
         {
@@ -1267,6 +1277,16 @@
         "Night Owl",
         "Lettered"
       ],
+      "talentChoices": [
+        [
+          "Level Head",
+          "Sharp Mind"
+        ],
+        [
+          "Weave Seer",
+          "Danger Sense"
+        ]
+      ],
       "randomTalentCount": 0,
       "randomTalents": [
         {
@@ -1618,6 +1638,16 @@
         "Keen Sighting",
         "Night Owl",
         "Wildwalker"
+      ],
+      "talentChoices": [
+        [
+          "Tough Hide",
+          "Weave Seer"
+        ],
+        [
+          "Lettered",
+          "Hale Constitution"
+        ]
       ],
       "randomTalentCount": 0,
       "randomTalents": [

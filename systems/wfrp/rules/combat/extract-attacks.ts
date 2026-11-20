@@ -48,6 +48,33 @@ function withGunpowder(
     );
 }
 
+const UNARMED_STATS = {
+    type: 'weapon',
+    group: 'brawling',
+    reach: 'personal',
+    damage: { addSb: true, flat: 0 },
+    qualities: [],
+    flaws: [{ key: 'undamaging' }],
+    twoHanded: false,
+    weight: 0,
+    price: 0,
+};
+
+/** Without a melee weapon a canon fighter strikes Unarmed (p301) */
+function unarmedAttack(): ExtractedAttack[] {
+    const profile = weaponProfile(UNARMED_STATS);
+
+    return profile
+        ? [
+              wfrpAttackFromProfile('unarmed', 'Unarmed Strike', profile, {
+                  hand: 'main',
+                  reach: 'personal',
+                  canon: true,
+              }),
+          ]
+        : [];
+}
+
 export function extractWfrpAttacks({
     rows,
     rules,
@@ -59,7 +86,7 @@ export function extractWfrpAttacks({
 
     const seen = new Set<string>();
 
-    return rows.flatMap(({ row, slot, carried }) => {
+    const attacks = rows.flatMap(({ row, slot, carried }) => {
         if (carried || !(isWeaponSlot(slot) || slot === ArtifactSlot.SHIELD))
             return [];
 
@@ -89,6 +116,10 @@ export function extractWfrpAttacks({
             }),
         ];
     });
+
+    return canon && !attacks.some((a) => a.type === AttackType.MELEE)
+        ? [...attacks, ...unarmedAttack()]
+        : attacks;
 }
 
 export function wfrpAttackFromProfile(

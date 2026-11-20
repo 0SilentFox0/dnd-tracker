@@ -1884,10 +1884,98 @@
     "maxRank": 1
   },
   {
-    "slug": "deep-scholar-lore",
-    "name": "Deep Scholar (Lore)",
+    "slug": "deep-scholar-folklore",
+    "name": "Deep Scholar (Folklore)",
     "type": "general",
-    "description": "Per rank, a bonus to SL on tests of one chosen lore specialisation.",
+    "description": "Per rank, +1 SL on Lore (Folklore) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-genealogy",
+    "name": "Deep Scholar (Genealogy)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Genealogy) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-heraldry",
+    "name": "Deep Scholar (Heraldry)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Heraldry) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-history",
+    "name": "Deep Scholar (History)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (History) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-law",
+    "name": "Deep Scholar (Law)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Law) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-medicine",
+    "name": "Deep Scholar (Medicine)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Medicine) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-metallurgy",
+    "name": "Deep Scholar (Metallurgy)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Metallurgy) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-politics",
+    "name": "Deep Scholar (Politics)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Politics) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-riverways",
+    "name": "Deep Scholar (Riverways)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Riverways) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-science",
+    "name": "Deep Scholar (Science)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Science) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-spirits",
+    "name": "Deep Scholar (Spirits)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Spirits) tests.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "deep-scholar-wrecks",
+    "name": "Deep Scholar (Wrecks)",
+    "type": "general",
+    "description": "Per rank, +1 SL on Lore (Wrecks) tests.",
     "xpCost": 100,
     "maxRank": 3
   },
@@ -2028,12 +2116,52 @@
     "maxRank": 1
   },
   {
-    "slug": "terrain-strider-terrain",
-    "name": "Terrain Strider (Terrain)",
+    "slug": "terrain-strider-coastal",
+    "name": "Terrain Strider (Coastal)",
     "type": "general",
-    "description": "Ignore movement penalties in one chosen type of terrain.",
+    "description": "Ignore movement penalties from coastal terrain.",
     "xpCost": 100,
-    "maxRank": 3
+    "maxRank": 1
+  },
+  {
+    "slug": "terrain-strider-desert",
+    "name": "Terrain Strider (Desert)",
+    "type": "general",
+    "description": "Ignore movement penalties from desert terrain.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "terrain-strider-rocky",
+    "name": "Terrain Strider (Rocky)",
+    "type": "general",
+    "description": "Ignore movement penalties from rocky terrain.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "terrain-strider-tundra",
+    "name": "Terrain Strider (Tundra)",
+    "type": "general",
+    "description": "Ignore movement penalties from tundra terrain.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "terrain-strider-wetland",
+    "name": "Terrain Strider (Wetland)",
+    "type": "general",
+    "description": "Ignore movement penalties from wetland terrain.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "terrain-strider-woodland",
+    "name": "Terrain Strider (Woodland)",
+    "type": "general",
+    "description": "Ignore movement penalties from woodland terrain.",
+    "xpCost": 100,
+    "maxRank": 1
   },
   {
     "slug": "quick-reckoner",
@@ -2137,7 +2265,22 @@
     "type": "general",
     "description": "Use Perform skills and Dodge while mounted.",
     "xpCost": 100,
-    "maxRank": 1
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Saddle Acrobat",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "wfrpTalent",
+            "talent": "trickRider"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "tunnel-stalker",
@@ -2194,5 +2337,21 @@
     "description": "Learn one spell from a colour or witch lore without a gate.",
     "xpCost": 100,
     "maxRank": 1
+  },
+  {
+    "slug": "level-head",
+    "name": "Level Head",
+    "type": "general",
+    "description": "+5 Willpower per rank; a calm mind that does not rattle.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "hale-constitution",
+    "name": "Hale Constitution",
+    "type": "general",
+    "description": "+5 Toughness per rank; a body that shrugs off illness and knocks.",
+    "xpCost": 100,
+    "maxRank": 3
   }
 ]
