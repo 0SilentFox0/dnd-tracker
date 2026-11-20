@@ -5,8 +5,12 @@ One file per category: `skills.md`, `talents.md`, `careers.md`, `races.md`, `spe
 ## IP rules (hard)
 
 - Never quote or closely paraphrase book text. Record only numbers, structure and mechanical meaning in your own words (structured fields, short mechanical notes).
-- Column `original name` = an ORIGINAL English name proposed for the template (not the book name); `book name` is NOT stored in the repo. Instead store only `page` so the owner can look it up. Names must pass `scripts/templates/grim-d100/forbidden-terms.ts` (check the file) and must not be thinly-disguised book names.
+- Column `original name` = an ORIGINAL English name proposed for the template (not the book name); no book name (skill, talent, spell, blessing, creature, item) is stored anywhere in the repo, not in columns and not in notes; the row number and `page` identify the entry so the owner can look it up in the book. Names must pass `scripts/templates/grim-d100/forbidden-terms.ts` (check the file) and must not be thinly-disguised book names.
 - The owner reviews and approves the `original name` column; mark every proposal `proposed`.
+
+## Units
+
+1 yd = 1 yard exactly as printed. Ranges, areas and distances in every manifest are recorded in yards (`yd`); any conversion to template feet or grid cells is done once in the generator code, never recorded or pre-applied in the manifests.
 
 ## Row format
 

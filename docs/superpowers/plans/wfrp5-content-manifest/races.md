@@ -1,15 +1,17 @@
 # Races manifest (C3): 5 species of the book
 
+Verified against PDF (pp23, 26-38; page offset 0, printed = PDF index): all profile numbers (p38 characteristic table, move, fate, fortune, no extra wounds), skill pick lists, fixed/choice talents, random talent counts (human 4, halfling 2, others 0), the 40-row random talent table and all five career columns (pp36-37) match this file. Only finding: the species table on p23 swaps the page labels of halfling and dwarf (sections are dwarf 28-29, halfling 30-31); the d100 ranges are right.
+
 Source: extract `02-character-building.md` (species table and random talent table p23; species sections p26-35; class/career table p36-37; characteristic table p38) and `tables.json` pages 23, 36, 37, 38. Only numbers, structure and mechanical meaning are recorded; no book prose and no book species names (look up by `#` and `page`: 1 human, 2 dwarf, 3 halfling, 4 high elf, 5 wood elf; table row order of the book is human, halfling, dwarf, high elf, wood elf). All original names are `proposed`.
 
-Conventions: talents by `#` of `talents.md`; `#n:spec` = talent with specialisation; `TBD-masked` = a forbidden-term or setting proper noun (language, enemy-group or province name) that needs an original replacement; skills by catalog key as in `careers.md` (`seamanship`/`instrument` are the `skills.md` proposed keys for the book's Sail/Play); `~` = book skill is grouped but catalog `spec: none` (entertain, stealth, ride). `mods` = delta from the base 20 (profile `mods` field: base value = 20 + mod, so the book rolls 2d10 + base; base values below). The profile schema (`systems/wfrp/rules/creation/schema.ts`) limits mods to -20..20, move 1-12, fate 0-9, extraWounds 0-3, randomTalentCount 0-5, tables ascending by `max` ending at 100.
+Conventions: talents by `#` of `talents.md`; `#n:spec` = talent with specialisation; `TBD-masked` = a forbidden-term or setting proper noun (language, enemy-group or province name) that needs an original replacement; skills by catalog key as in `careers.md` (`sail`/`play` are the `skills.md` catalog keys for the book's Sail/Play); `~` = book skill is grouped but catalog `spec: none` (entertain, stealth, ride). `mods` = delta from the base 20 (profile `mods` field: base value = 20 + mod, so the book rolls 2d10 + base; base values below). The profile schema (`systems/wfrp/rules/creation/schema.ts`) limits mods to -20..20, move 1-12, fate 0-9, extraWounds 0-3, randomTalentCount 0-5, tables ascending by `max` ending at 100.
 
 Summary: 5 species, existing in template: 4 (lowlander, delver, hearthkin, veyl), 1 new. Characteristic base per species is one table row (p38); no species has extra wounds in the extract (extra wounds come from the Hardy talent, #67, where the species picks it); fate and fortune read from the species text; move, fate and fortune were read from each species section and checked against the p38 table headers.
 
 Extract gaps and schema gaps:
 1. The six talent choice pairs (two each) ("A or B") of dwarf, high elf and wood elf cannot be expressed by `profile.talents` (flat list); the generator or schema needs a choice field. Listed below under "choice".
-2. The species table on p23 names pages 28 (halfling) and 30 (dwarf); the extract places dwarf on p28-29 and halfling on p30-31 (page markers in the file). Check the book.
-3. Human random-talent count is 4 in the extract (fixed talent plus 4 random); verify p27.
+2. RESOLVED: the p23 species table labels halfling as p28 and dwarf as p30 (book misprint); the sections are dwarf p28-29, halfling p30-31 (verified in the PDF). Ranges: halfling 91-94, dwarf 95-98.
+3. RESOLVED: human random-talent count is 4 (verified p27); the existing lowlander value of 3 is the template deviation.
 4. Each species has hair/eye/age/height/name tables (not recorded: flavour data, not in profile).
 
 ## Species
@@ -31,7 +33,7 @@ Existing-species deviations from canon (shape): lowlander fixed talent is a non-
 | 1 | animal-care, charm, cool, evaluate, gossip, haggle, language:TBD-masked, language:TBD-masked, leadership, lore:TBD-masked, melee:basic, ranged:bow |
 | 2 | drink, cool, endurance, entertain:storytelling~, evaluate, intimidate, lore:own-kin, lore:geology, lore:metallurgy, melee:basic, trade:any |
 | 3 | charm, drink, dodge, gamble, haggle, intuition, lore:TBD-masked, perception, sleight-of-hand, stealth:any~, trade:cook |
-| 4 | cool, entertain:singing~, evaluate, leadership, melee:basic, navigation, perception, instrument:any, ranged:bow, seamanship, swim |
+| 4 | cool, entertain:singing~, evaluate, leadership, melee:basic, navigation, perception, play:any, ranged:bow, sail, swim |
 | 5 | athletics, climb, endurance, entertain:singing~, intimidate, melee:basic, survival, perception, ranged:bow, stealth:rural~, track |
 
 ## Species-linked talents (candidate kind `origin`)

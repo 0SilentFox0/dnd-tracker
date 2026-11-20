@@ -17,6 +17,7 @@ export function careerToImportRecord(row: Career): ImportRecord {
         for (const part of [
             'name',
             'status',
+            'earningSkill',
             'characteristics',
             'skills',
             'talents',

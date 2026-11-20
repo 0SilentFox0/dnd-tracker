@@ -248,7 +248,7 @@
           "target": 30,
           "advances": 0,
           "trained": true,
-          "kind": "advanced"
+          "kind": "basic"
         },
         {
           "key": "navigation",
@@ -293,14 +293,6 @@
         {
           "key": "survival",
           "characteristic": "int",
-          "target": 30,
-          "advances": 0,
-          "trained": true,
-          "kind": "basic"
-        },
-        {
-          "key": "swim",
-          "characteristic": "s",
           "target": 30,
           "advances": 0,
           "trained": true,
@@ -380,7 +372,7 @@
         },
         {
           "key": "signs",
-          "characteristic": "i",
+          "characteristic": "int",
           "target": 30,
           "advances": 0,
           "trained": false,
@@ -389,6 +381,14 @@
         {
           "key": "sleight-of-hand",
           "characteristic": "dex",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "swim",
+          "characteristic": "s",
           "target": 30,
           "advances": 0,
           "trained": false,

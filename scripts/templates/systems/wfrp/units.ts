@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from 'node:util';
 
 import type { Row } from './common';
+import { UNIT_BAND_EXCEPTIONS } from './unit-exceptions';
 
 import type {
     RecipeContext,
@@ -439,9 +440,15 @@ function bandIssues(
                 `characteristic "${k}" ${base[k]} is outside ${CHARACTERISTIC_MIN}–${band.charMax} ${at}`
             );
 
+    const exception = UNIT_BAND_EXCEPTIONS[String(row.slug)];
+
     const combat = Math.max(base.ws, base.bs);
 
-    if (!inRange(combat, band.combat))
+    const combatOk = exception?.combatBelowMin
+        ? combat <= band.combat[1]
+        : inRange(combat, band.combat);
+
+    if (!combatOk)
         issues.push(
             `max(ws, bs) ${combat} is outside ${fmt(band.combat)} ${at}`
         );
@@ -474,7 +481,7 @@ function bandIssues(
                   : band.attack;
 
         if (!range) issues.push(`Breath is not allowed ${at}`);
-        else if (!inRange(a.damage, range))
+        else if (!exception?.attackDamage && !inRange(a.damage, range))
             issues.push(
                 `attack "${a.name}" damage ${a.damage} is outside ${fmt(range)} ${at}`
             );

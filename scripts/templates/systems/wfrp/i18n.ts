@@ -17,11 +17,12 @@ export const WFRP_CATALOG_KINDS = [...WFRP_ROW_KINDS, PACK_LIST_KIND] as const;
 type CatalogRows = Record<string, { slug: string; name?: unknown }[]>;
 
 const spellListNames = (data: WfrpData) => [
-    ...new Set(
-        data.spells
+    ...new Set([
+        ...Object.values(GRIM_SPELL_LISTS).flat(),
+        ...data.spells
             .flatMap((row) => (Array.isArray(row.lists) ? row.lists : []))
-            .filter((name): name is string => typeof name === 'string')
-    ),
+            .filter((name): name is string => typeof name === 'string'),
+    ]),
 ];
 
 function catalogRows(data: WfrpData): CatalogRows {

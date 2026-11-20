@@ -18,7 +18,8 @@ const tiers = Array.from({ length: CAREER_TIER_COUNT }, (_, i) => i + 1);
 const partField = (n: number, part: CareerTierPart): FieldDef => {
     const key = careerTierKey(n, part);
 
-    if (part === 'name' || part === 'status') return textField(key);
+    if (part === 'name' || part === 'status' || part === 'earningSkill')
+        return textField(key);
 
     if (part === 'talents')
         return { key, type: 'refList', ref: 'feats', strictRef: true };
@@ -56,6 +57,9 @@ export const CAREERS_IMPORT = defineSpec({
             out.push({
                 name: get('name'),
                 ...(get('status') !== undefined && { status: get('status') }),
+                ...(get('earningSkill') !== undefined && {
+                    earningSkill: get('earningSkill'),
+                }),
                 characteristics: get('characteristics') ?? [],
                 skills: get('skills') ?? [],
                 talents: get('talents') ?? [],

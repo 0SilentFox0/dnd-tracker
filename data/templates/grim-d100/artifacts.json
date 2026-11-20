@@ -54,5 +54,8 @@
   {"slug":"bandages","name":"Bandages","description":"Clean linen strips.","rarity":"common","slot":"item","systemStats":{"type":"gear","weight":0,"price":12,"qualities":[]}},
   {"slug":"crowbar","name":"Crowbar","description":"An iron bar flattened at one end.","rarity":"common","slot":"item","systemStats":{"type":"gear","weight":1,"price":36,"qualities":[]}},
   {"slug":"lockpicks","name":"Lockpicks","description":"Fine wire picks in a cloth roll.","rarity":"uncommon","slot":"item","systemStats":{"type":"gear","weight":0,"price":120,"qualities":[]}},
-  {"slug":"trail-rations-week","name":"Trail Rations (week)","description":"Hard bread, cheese and dried meat.","rarity":"common","slot":"item","systemStats":{"type":"gear","weight":1,"price":30,"qualities":[]}}
+  {"slug":"trail-rations-week","name":"Trail Rations (week)","description":"Hard bread, cheese and dried meat.","rarity":"common","slot":"item","systemStats":{"type":"gear","weight":1,"price":30,"qualities":[]}},
+  {"slug":"brass-fist","name":"Brass Fist","description":"A heavy brass ring set across the knuckles.","rarity":"common","slot":"weapon","systemStats":{"type":"weapon","group":"brawling","reach":"personal","damage":{"addSb":true,"flat":2},"qualities":[],"flaws":[],"twoHanded":false,"weight":0,"price":30}},
+  {"slug":"travel-cloak","name":"Travel Cloak","description":"A thick cloak for rain, wind and long roads.","rarity":"common","slot":"cloak","systemStats":{"type":"gear","category":"clothing","weight":1,"price":480,"qualities":[]}},
+  {"slug":"mail-cowl","name":"Mail Cowl","description":"A hood of linked rings that covers head and neck.","rarity":"uncommon","slot":"helmet","systemStats":{"type":"armour","locations":{"head":2,"arm":0,"body":0,"leg":0},"kind":"mail","qualities":[{"key":"flexible"}],"weight":1,"price":1440}}
 ]

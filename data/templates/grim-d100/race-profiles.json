@@ -453,5 +453,80 @@
         "language:old-script"
       ]
     }
+  },
+  {
+    "race": "thornkin",
+    "profile": {
+      "mods": {
+        "ws": 10,
+        "bs": 10,
+        "i": 20,
+        "ag": 10,
+        "dex": 10,
+        "int": 10,
+        "wp": 10
+      },
+      "move": 5,
+      "fate": 1,
+      "fortune": 2,
+      "extraWounds": 0,
+      "talents": [
+        "Keen Sighting",
+        "Night Owl",
+        "Wildwalker"
+      ],
+      "randomTalentCount": 0,
+      "randomTalents": [],
+      "careerTable": [
+        {
+          "careerId": "Archivist",
+          "max": 1
+        },
+        {
+          "careerId": "Emissary",
+          "max": 25
+        },
+        {
+          "careerId": "Ashburner",
+          "max": 42
+        },
+        {
+          "careerId": "Falconer",
+          "max": 52
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 68
+        },
+        {
+          "careerId": "Quarry Taker",
+          "max": 70
+        },
+        {
+          "careerId": "Sellsword",
+          "max": 100
+        }
+      ],
+      "skillPicks": {
+        "count": 5,
+        "options": [
+          "athletics",
+          "climb",
+          "endurance",
+          "entertain",
+          "intimidate",
+          "melee:basic",
+          "survival",
+          "perception",
+          "ranged:bow",
+          "stealth",
+          "track"
+        ]
+      },
+      "languages": [
+        "language:glade-speech",
+        "language:old-script"
+      ]
+    }
   }
 ]

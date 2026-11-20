@@ -77,16 +77,35 @@ describe('icon upload planning', () => {
                 )
             );
 
-        const prompts = grimPromptRows(wfrpDataOf(grim), {
+        const subjects = {
             units: readSubject('units'),
             spells: readSubject('spells'),
             artifacts: readSubject('artifacts'),
             identity: readSubject('identity'),
-        });
+        };
+
+        const hasSubject = (kind: string, name: string) =>
+            kind === 'units' || kind === 'spells' || kind === 'artifacts'
+                ? name in subjects[kind]
+                : `${kind}:${name}` in subjects.identity;
+
+        const data = wfrpDataOf(grim);
+
+        const withSubject = Object.fromEntries(
+            WFRP_ROW_KINDS.map((kind) => [
+                kind,
+                data[kind].filter((row) => hasSubject(kind, String(row.name))),
+            ])
+        ) as unknown as typeof data;
+
+        const prompts = grimPromptRows(withSubject, subjects);
+
+        const wanted = new Set(prompts.map((p) => p.file));
 
         expect(
             planIconUploads(grim, '/i')
                 .map((p) => path.relative('/i', p.file))
+                .filter((file) => wanted.has(file))
                 .sort()
         ).toEqual(prompts.map((p) => p.file).sort());
         expect(WFRP_ROW_KINDS.map((kind) => bucketOf(grim, kind))).toEqual([

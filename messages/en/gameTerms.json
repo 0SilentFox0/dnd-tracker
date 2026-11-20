@@ -277,7 +277,6 @@
       "cavalry": "Cavalry",
       "fencing": "Fencing",
       "flail": "Flail",
-      "parry": "Parry",
       "polearm": "Polearm",
       "two-handed": "Two-handed",
       "brawling": "Brawling"
@@ -291,6 +290,50 @@
       "explosives": "Explosives",
       "sling": "Sling",
       "throwing": "Throwing"
+    },
+    "entertain": {
+      "acting": "Acting",
+      "comedy": "Comedy",
+      "singing": "Singing",
+      "storytelling": "Storytelling"
+    },
+    "ride": {
+      "horse": "Horse",
+      "mule": "Mule",
+      "griffon": "Griffon",
+      "pegasus": "Pegasus"
+    },
+    "stealth": {
+      "rural": "Rural",
+      "underground": "Underground",
+      "urban": "Urban"
+    },
+    "animal-training": {
+      "dog": "Dog",
+      "hawk": "Hawk",
+      "horse": "Horse",
+      "pigeon": "Pigeon",
+      "boar": "Boar"
+    },
+    "channelling": {
+      "ember": "Ember",
+      "gale": "Gale",
+      "tide": "Tide",
+      "stone": "Stone",
+      "thorn": "Thorn",
+      "frost": "Frost",
+      "dusk": "Dusk",
+      "dawn": "Dawn",
+      "ash": "Ash",
+      "magic": "Magic"
+    },
+    "signs": {
+      "guild": "Guild",
+      "ranger": "Ranger",
+      "scout": "Scout",
+      "thief": "Thief",
+      "vagabond": "Vagabond",
+      "warden": "Warden"
     }
   },
   "testOutcome": {
