@@ -100,11 +100,16 @@
     "STATS_LENGTH": "A value is needed for every characteristic",
     "STATS_RANGE": "Values must be between 2 and 20",
     "STATS_NOT_PERMUTATION": "The arrangement must use the same values",
-    "POINTS_RANGE": "Values must be between 4 and 18",
+    "POINTS_RANGE": "Values are out of range (4–18; under canon rules 4–16)",
     "POINTS_BUDGET": "The values must add up to the budget",
     "TALENT_COUNT": "Too many talents",
     "TALENT_NOT_IN_TABLE": "The talent is not from the species table",
-    "FEAT_UNKNOWN": "Unknown talent"
+    "FEAT_UNKNOWN": "Unknown talent",
+    "SPECIES_SKILLS": "Pick the species skills",
+    "STATS_DISTRIBUTION": "The characteristic bonus must go to career characteristics and fit the limit",
+    "CAREER_SKILLS": "Spend exactly 8 advances on career skills",
+    "SKILL_CAP": "A skill can take at most 3 advances",
+    "TALENT_CAREER": "Pick a career talent"
   },
   "editor": {
     "title": "Species profile for character creation",
@@ -134,6 +139,22 @@
       "tableAscending": "Limits must increase",
       "tableEnd": "The last limit must be 100",
       "invalid": "Check the values and table choices"
-    }
+    },
+    "skillPicks": "Skills (5e creation)",
+    "skillPicksCount": "Picks",
+    "skillPicksOptions": "Options (skill keys, comma-separated)",
+    "languages": "Languages (skill keys, comma-separated)"
+  },
+  "canon": {
+    "speciesRolled": "I rolled the species on the Species Table and keep the first result",
+    "speciesSkills": "Species skills: {picked} of {count} (each +{points})",
+    "languages": "Languages: {names}",
+    "careerSkills": "Career skills: {spent} of {total} advances (each +{points}, at most 3 per skill)",
+    "careerTalent": "Career talent (pick one)",
+    "trappings": "Starting trappings",
+    "distribution": "Career characteristics bonus: {spent} of {cap}",
+    "fateBonus": "First results kept for species, career and characteristics: +1 Fate",
+    "dec": "Less",
+    "inc": "More"
   }
 }

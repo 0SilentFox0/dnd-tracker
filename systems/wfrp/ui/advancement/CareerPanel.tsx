@@ -13,8 +13,13 @@ import { useConfirm } from '@/lib/hooks/common';
 import { useFeats } from '@/lib/hooks/feats';
 import { useCareerOps } from '@/systems/wfrp/hooks';
 import { useCareers } from '@/systems/wfrp/hooks/careers';
+import {
+    CAREER_ADVANCE_XP,
+    careerChangeCost,
+} from '@/systems/wfrp/rules/advancement';
 import type { CareerData } from '@/systems/wfrp/rules/careers/types';
 import type { Characteristics } from '@/systems/wfrp/rules/characteristics/keys';
+import { editionOf } from '@/systems/wfrp/rules/edition';
 import { parseSkillAdvanceKey } from '@/systems/wfrp/rules/skills/catalog';
 
 interface Props {
@@ -28,11 +33,18 @@ interface PickerProps {
     careers: CareerData[];
     state: Characteristics['career'];
     pending: boolean;
+    canon: boolean;
     onAssign: (careerId: string) => Promise<unknown>;
 }
 
 // DM-only: wfrpCareers messages are loaded for the DM scope only
-function CareerPicker({ careers, state, pending, onAssign }: PickerProps) {
+function CareerPicker({
+    careers,
+    state,
+    pending,
+    canon,
+    onAssign,
+}: PickerProps) {
     const t = useTranslations('wfrpAdvancement.career');
 
     const td = useTranslations('wfrpCareers.panel');
@@ -42,14 +54,26 @@ function CareerPicker({ careers, state, pending, onAssign }: PickerProps) {
     const [pick, setPick] = useState('');
 
     const assign = async () => {
+        const cost = canon
+            ? careerChangeCost(
+                  careers.find((c) => c.id === state?.careerId)?.class,
+                  careers.find((c) => c.id === pick)?.class
+              )
+            : undefined;
+
         if (
             state &&
             !(await confirm({
                 title: td('replaceTitle'),
-                description: td('replaceBody', {
-                    tier: state.tier,
-                    have: state.ticks.length,
-                }),
+                description: [
+                    td('replaceBody', {
+                        tier: state.tier,
+                        have: state.ticks.length,
+                    }),
+                    cost !== undefined && t('changeCost', { cost }),
+                ]
+                    .filter(Boolean)
+                    .join(' '),
                 confirmLabel: t('assign'),
                 destructive: true,
             }))
@@ -106,6 +130,8 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
         ? careers.data?.find((c) => c.id === state.careerId)
         : undefined;
 
+    const canon = editionOf(rules.data).xpTables === 'canon5e';
+
     const required =
         state && state.tier < 4
             ? rules.data?.advancement.career.ticksRequired[state.tier - 1]
@@ -155,6 +181,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
             careers={careers.data ?? []}
             state={state}
             pending={ops.isPending}
+            canon={canon}
             onAssign={ops.setCareer}
         />
     );
@@ -193,6 +220,11 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
                             have: state.ticks.length,
                             need: required,
                         })}
+                    </p>
+                )}
+                {required !== undefined && canon && (
+                    <p className="text-xs text-hud-muted">
+                        {t('advanceCost', { cost: CAREER_ADVANCE_XP })}
                     </p>
                 )}
                 {state.ticks.length > 0 && (

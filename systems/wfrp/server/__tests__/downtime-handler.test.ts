@@ -183,7 +183,7 @@ describe('setDowntime', () => {
             status: 400,
         });
         expect(db.character.count).toHaveBeenCalledWith({
-            where: { id: 'p9', campaignId: 'camp', status: 'active' },
+            where: { id: { in: ['p9'] }, campaignId: 'camp', status: 'active' },
         });
     });
 

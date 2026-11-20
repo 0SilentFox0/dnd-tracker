@@ -103,6 +103,8 @@ describe('STEP_ERRORS', () => {
             'CAREER_UNKNOWN',
             'FEAT_UNKNOWN',
             'PROFILE_NOT_READY',
+            'SKILL_CAP',
+            'STATS_DISTRIBUTION',
         ]);
     });
 });

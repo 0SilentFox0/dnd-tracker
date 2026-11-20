@@ -30,6 +30,7 @@ interface Props {
     onChange: (value: Endeavour) => void;
     patients: { id: string; name: string }[];
     skills: PickerSkill[];
+    canon?: boolean;
 }
 
 const DEFAULTS: Record<EndeavourKind, Endeavour> = {
@@ -62,7 +63,13 @@ export function isEndeavourValid(e: Endeavour | undefined): boolean {
     }
 }
 
-export function EndeavourPicker({ value, onChange, patients, skills }: Props) {
+export function EndeavourPicker({
+    value,
+    onChange,
+    patients,
+    skills,
+    canon = false,
+}: Props) {
     const t = useTranslations('wfrpDowntime');
 
     const tg = useTranslations('gameTerms');
@@ -89,7 +96,9 @@ export function EndeavourPicker({ value, onChange, patients, skills }: Props) {
             />
             {value && (
                 <p className="text-xs text-hud-muted">
-                    {t(`endeavourHints.${value.kind}`)}
+                    {t(
+                        `${canon ? 'endeavourHintsCanon' : 'endeavourHints'}.${value.kind}`
+                    )}
                 </p>
             )}
             {value?.kind === 'earn' && (

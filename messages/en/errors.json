@@ -564,6 +564,8 @@
   "careerNameTaken": "The career \"{name}\" already exists",
   "foreignFeat": "The feat does not belong to this campaign",
   "foreignCareer": "The career does not belong to this campaign",
+  "careerSame": "The hero already has this career",
+  "careerNotInSpeciesTable": "The career is not in the species career table",
   "careerInSpeciesTable": "The career is used by a species profile or a character — remove it there first",
   "featInSpeciesTable": "The feat is used by a species profile or a career — remove it there first",
   "speciesProfileNotReady": "This species has no creation profile yet",

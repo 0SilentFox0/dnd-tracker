@@ -3,8 +3,12 @@ import { talentGroups } from './talent-groups';
 
 import type { RuleSystemAdvancement } from '@/lib/utils/rules/systems/types';
 
+export { advancementFor, CANON_TALENT_COST } from './canon';
 export {
+    CAREER_ADVANCE_XP,
     type CareerAdvanceResult,
+    careerChangeCost,
+    type CareerCharge,
     type CareerCtx,
     type CareerPrice,
     careerPrice,
@@ -14,7 +18,7 @@ export {
     planCareerSet,
     tickKey,
 } from './career';
-export { advanceCost, talentCost } from './cost';
+export { advanceCost, advanceTarget, talentCost } from './cost';
 export { DEFAULT_ADVANCEMENT_RULES } from './defaults';
 export {
     planPurchase,

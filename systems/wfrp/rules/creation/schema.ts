@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
     CHARACTERISTIC_KEYS,
     type CharacteristicKey,
+    SKILL_ADVANCE_KEY_RE,
 } from '../characteristics/keys';
 import type { SpeciesProfile } from './profile';
 
@@ -30,6 +31,18 @@ const careerTable = rollTableOf(z.strictObject({ max, careerId: id }));
 
 const mod = z.number().int().min(-20).max(20).optional();
 
+const skillKey = z.string().regex(SKILL_ADVANCE_KEY_RE);
+
+const skillPicks = z
+    .strictObject({
+        count: z.number().int().min(0).max(10),
+        options: z.array(skillKey).max(40),
+    })
+    .refine((p) => p.count <= p.options.length, {
+        message: 'creation.skillPicksCount',
+    })
+    .optional();
+
 export const SpeciesProfileSchema = z.strictObject({
     mods: z
         .strictObject(
@@ -46,6 +59,8 @@ export const SpeciesProfileSchema = z.strictObject({
     randomTalentCount: z.number().int().min(0).max(5).default(0),
     randomTalents: featTable,
     careerTable,
+    skillPicks,
+    languages: z.array(skillKey).max(10).optional(),
 });
 
 export function parseProfile(raw: unknown): SpeciesProfile {

@@ -8,7 +8,10 @@
     "noSummary": "No period has passed yet",
     "save": "Save",
     "clear": "Clear",
-    "trainingCredit": "Training discount ({key}): -{discount}"
+    "trainingCredit": "Training discount ({key}): -{discount}",
+    "endeavourLimit": "Endeavours this period: {count} of {max}",
+    "addEndeavour": "Add endeavour",
+    "removeEndeavour": "Remove"
   },
   "endeavours": {
     "earn": "Earn",
@@ -22,6 +25,13 @@
     "train": "Success discounts the next advance.",
     "tend": "The patient heals faster thanks to your test.",
     "rest": "Double Wound recovery.",
+    "custom": "Free text, no mechanical effect."
+  },
+  "endeavourHintsCanon": {
+    "earn": "Income: an Average (+2 SL) skill test; you earn dice by Status (Brass 2d10, Silver 1d10 per Standing level, Gold 1 crown per level), halved on a failure.",
+    "train": "Success discounts the next advance.",
+    "tend": "A Heal test restores Intelligence Bonus + SL Wounds, once per incident.",
+    "rest": "Rest between adventures; downtime restores all Wounds.",
     "custom": "Free text, no mechanical effect."
   },
   "params": {

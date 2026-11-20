@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
@@ -27,9 +28,10 @@ export function PeriodSummaryView({ summary }: { summary: PeriodSummary }) {
             sl: x.sl,
         });
 
-    const { endeavour, event } = summary;
+    const { event } = summary;
 
-    const coin = endeavour?.coins;
+    const list =
+        summary.endeavours ?? (summary.endeavour ? [summary.endeavour] : []);
 
     return (
         <ul className="space-y-1 text-sm text-hud-bone">
@@ -40,33 +42,45 @@ export function PeriodSummaryView({ summary }: { summary: PeriodSummary }) {
             {summary.healed > 0 && (
                 <li>{t('healed', { count: summary.healed })}</li>
             )}
-            {endeavour && (
-                <li>
-                    {te(endeavour.kind)}
-                    {endeavour.test && (
-                        <span className="text-hud-muted">
-                            {' '}
-                            · {test(endeavour.test)}
-                        </span>
-                    )}
-                </li>
-            )}
-            {coin && coin.amount > 0 && (
-                <li>
-                    {t('coins', {
-                        amount: coin.amount,
-                        coin: labelKeys
-                            ? text(dynamicTextRef(labelKeys[coin.coin]))
-                            : coin.coin,
-                    })}
-                </li>
-            )}
-            {!!endeavour?.discount && (
-                <li>{t('discount', { count: endeavour.discount })}</li>
-            )}
-            {endeavour?.skipped === 'patientAbsent' && (
-                <li>{t('patientAbsent')}</li>
-            )}
+            {list.map((endeavour, i) => {
+                const coin = endeavour.coins;
+
+                return (
+                    <Fragment key={i}>
+                        <li>
+                            {te(endeavour.kind)}
+                            {endeavour.test && (
+                                <span className="text-hud-muted">
+                                    {' '}
+                                    · {test(endeavour.test)}
+                                </span>
+                            )}
+                        </li>
+                        {coin && coin.amount > 0 && (
+                            <li>
+                                {t('coins', {
+                                    amount: coin.amount,
+                                    coin: labelKeys
+                                        ? text(
+                                              dynamicTextRef(
+                                                  labelKeys[coin.coin]
+                                              )
+                                          )
+                                        : coin.coin,
+                                })}
+                            </li>
+                        )}
+                        {!!endeavour.discount && (
+                            <li>
+                                {t('discount', { count: endeavour.discount })}
+                            </li>
+                        )}
+                        {endeavour.skipped === 'patientAbsent' && (
+                            <li>{t('patientAbsent')}</li>
+                        )}
+                    </Fragment>
+                );
+            })}
             {summary.ailments.map((a) => (
                 <li key={a.id}>
                     {a.expired

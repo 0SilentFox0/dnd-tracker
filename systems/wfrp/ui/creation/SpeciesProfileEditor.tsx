@@ -7,6 +7,7 @@ import { type TableRow, TableRowsEditor } from './TableRowsEditor';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';
 import { useFeats } from '@/lib/hooks/feats';
@@ -24,6 +25,12 @@ const TABLE_ERRORS: Record<string, 'tableAscending' | 'tableEnd'> = {
     'creation.tableAscending': 'tableAscending',
     'creation.tableEnd': 'tableEnd',
 };
+
+const csv = (value: string) =>
+    value
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean);
 
 const toRows = <K extends string>(
     rows: ({ max: number } & Record<K, string>)[],
@@ -169,6 +176,54 @@ export function SpeciesProfileEditor({
                 {numberField(t('extraWounds'), 'extraWounds', 0, 3)}
                 {numberField(t('randomTalentCount'), 'randomTalentCount', 0, 5)}
             </div>
+            <section aria-label={t('skillPicks')} className="space-y-2">
+                <h3 className="text-sm font-semibold">{t('skillPicks')}</h3>
+                <div className="grid gap-2 sm:grid-cols-[6rem_1fr]">
+                    <FormField label={t('skillPicksCount')}>
+                        <BoundedNumberInput
+                            aria-label={t('skillPicksCount')}
+                            className="min-h-11"
+                            value={profile.skillPicks?.count ?? 0}
+                            min={0}
+                            max={10}
+                            onCommit={(v) =>
+                                edit({
+                                    skillPicks: {
+                                        options:
+                                            profile.skillPicks?.options ?? [],
+                                        count: v,
+                                    },
+                                })
+                            }
+                        />
+                    </FormField>
+                    <FormField label={t('skillPicksOptions')}>
+                        <Input
+                            aria-label={t('skillPicksOptions')}
+                            className="min-h-11"
+                            defaultValue={(
+                                profile.skillPicks?.options ?? []
+                            ).join(', ')}
+                            onBlur={(e) =>
+                                edit({
+                                    skillPicks: {
+                                        count: profile.skillPicks?.count ?? 0,
+                                        options: csv(e.target.value),
+                                    },
+                                })
+                            }
+                        />
+                    </FormField>
+                </div>
+                <FormField label={t('languages')}>
+                    <Input
+                        aria-label={t('languages')}
+                        className="min-h-11"
+                        defaultValue={(profile.languages ?? []).join(', ')}
+                        onBlur={(e) => edit({ languages: csv(e.target.value) })}
+                    />
+                </FormField>
+            </section>
             <section aria-label={t('talents')} className="space-y-2">
                 <h3 className="text-sm font-semibold">{t('talents')}</h3>
                 <ul className="flex flex-wrap gap-2">

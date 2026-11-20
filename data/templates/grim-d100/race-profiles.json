@@ -118,6 +118,24 @@
           "careerId": "Sellsword",
           "max": 100
         }
+      ],
+      "skillPicks": {
+        "count": 5,
+        "options": [
+          "athletics",
+          "charm",
+          "cool",
+          "gossip",
+          "haggle",
+          "intuition",
+          "melee:basic",
+          "perception",
+          "ride",
+          "research"
+        ]
+      },
+      "languages": [
+        "language:trade-cant"
       ]
     }
   },
@@ -204,6 +222,24 @@
           "careerId": "Sellsword",
           "max": 100
         }
+      ],
+      "skillPicks": {
+        "count": 5,
+        "options": [
+          "drink",
+          "endurance",
+          "evaluate",
+          "gamble",
+          "intimidate",
+          "melee:two-handed",
+          "perception",
+          "trade:smelting",
+          "climb",
+          "cool"
+        ]
+      },
+      "languages": [
+        "language:old-script"
       ]
     }
   },
@@ -299,6 +335,24 @@
           "careerId": "Sellsword",
           "max": 100
         }
+      ],
+      "skillPicks": {
+        "count": 5,
+        "options": [
+          "athletics",
+          "charm",
+          "dodge",
+          "gossip",
+          "haggle",
+          "perception",
+          "sleight-of-hand",
+          "stealth",
+          "trade:cheesemaking",
+          "drink"
+        ]
+      },
+      "languages": [
+        "language:trade-cant"
       ]
     }
   },
@@ -378,6 +432,25 @@
           "careerId": "Sellsword",
           "max": 100
         }
+      ],
+      "skillPicks": {
+        "count": 5,
+        "options": [
+          "art:masks",
+          "cool",
+          "dodge",
+          "evaluate",
+          "intuition",
+          "lore:heraldry",
+          "perception",
+          "ranged:bow",
+          "stealth",
+          "performance:oratory"
+        ]
+      },
+      "languages": [
+        "language:court-speech",
+        "language:old-script"
       ]
     }
   }

@@ -3,7 +3,7 @@ import type {
     Characteristics,
     LedgerEntry,
 } from '../rules/characteristics/keys';
-import type { SpeciesProfile } from '../rules/creation';
+import type { CanonPicks, SpeciesProfile } from '../rules/creation';
 
 import type { GoalKind } from '@/lib/constants/characters';
 
@@ -23,6 +23,7 @@ export interface WfrpDraftInput extends WfrpDraftIdentityInput {
         | { mode: 'rearranged'; rolls: number[]; arranged: number[] }
         | { mode: 'free'; points: number[] };
     talents: string[];
+    canon?: CanonPicks;
 }
 
 export type AdvanceBody = PurchaseRequest;

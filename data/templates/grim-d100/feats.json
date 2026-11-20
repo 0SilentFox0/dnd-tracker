@@ -4,7 +4,7 @@
     "name": "Blade Practice",
     "type": "general",
     "description": "+1 SL on melee attack tests per rank, from steady drilling with a blade.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2,
     "abilities": [
       {
@@ -29,7 +29,7 @@
     "name": "Steady Aim",
     "type": "general",
     "description": "+1 SL on ranged attack tests per rank; a calm breath before every shot.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2,
     "abilities": [
       {
@@ -54,7 +54,7 @@
     "name": "Battle Instinct",
     "type": "general",
     "description": "+1 SL on all attack tests; a sixth sense for the flow of a fight.",
-    "xpCost": 250,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -78,7 +78,7 @@
     "name": "Tough Hide",
     "type": "general",
     "description": "+2 Wounds per rank; weathered skin that shrugs off knocks.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 3,
     "abilities": [
       {
@@ -102,7 +102,7 @@
     "name": "Oxen Constitution",
     "type": "general",
     "description": "+3 Wounds per rank; stamina that outlasts the rest of the party.",
-    "xpCost": 200,
+    "xpCost": 100,
     "maxRank": 2,
     "abilities": [
       {
@@ -200,7 +200,7 @@
     "name": "Shield Drill",
     "type": "general",
     "description": "+1 SL on melee attack tests and +2 Wounds; formation training with a shield.",
-    "xpCost": 250,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -254,7 +254,7 @@
     "name": "Last Stand Grit",
     "type": "general",
     "description": "+3 Wounds; stands firm when others would fall.",
-    "xpCost": 200,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -278,7 +278,7 @@
     "name": "Ambusher",
     "type": "general",
     "description": "+1 SL on ranged attack tests and +5 Initiative; patient and quick from cover.",
-    "xpCost": 200,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -308,7 +308,7 @@
     "name": "Fencer's Footwork",
     "type": "general",
     "description": "+1 SL on melee attack tests and +5 Initiative; light, precise steps.",
-    "xpCost": 200,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -362,7 +362,7 @@
     "name": "Cudgel Work",
     "type": "general",
     "description": "+1 SL on melee attack tests; knows how to use a stick and a street corner.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -387,7 +387,7 @@
     "name": "Knife Thrower",
     "type": "general",
     "description": "+1 SL on ranged attack tests; a knack for throwing blades true.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -412,7 +412,7 @@
     "name": "Veteran's Poise",
     "type": "general",
     "description": "+1 SL on all attack tests and +5 Initiative; the calm of someone who has seen it all before.",
-    "xpCost": 300,
+    "xpCost": 100,
     "maxRank": 1,
     "abilities": [
       {
@@ -465,7 +465,7 @@
     "name": "Alert Sleeper",
     "type": "general",
     "description": "+5 Initiative per rank; wakes at the faintest rustle.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2,
     "abilities": [
       {
@@ -537,7 +537,7 @@
     "name": "Silver Tongue",
     "type": "general",
     "description": "Persuasive speaker. Each rank, the DM grants an edge on Charm-style social tests.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2
   },
   {
@@ -561,7 +561,7 @@
     "name": "Light Fingers",
     "type": "general",
     "description": "Nimble hands. Each rank, the DM grants an edge on sleight-of-hand and pickpocketing.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2
   },
   {
@@ -569,7 +569,7 @@
     "name": "Lock Whisperer",
     "type": "general",
     "description": "Has a feel for latches and tumblers. Each rank, the DM grants an edge when picking locks.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2
   },
   {
@@ -617,7 +617,7 @@
     "name": "Steady Hands",
     "type": "general",
     "description": "Precise handiwork. Each rank, the DM grants an edge on delicate work such as surgery or repairs.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 2
   },
   {
@@ -641,7 +641,7 @@
     "name": "Parade-Ground Voice",
     "type": "general",
     "description": "A voice that carries over any din. The DM allows issuing orders to a crowd or a group of allies.",
-    "xpCost": 200,
+    "xpCost": 100,
     "maxRank": 1
   },
   {
@@ -649,7 +649,7 @@
     "name": "Steel Nerves",
     "type": "general",
     "description": "Hard to frighten. The DM grants an edge when resisting fear.",
-    "xpCost": 200,
+    "xpCost": 100,
     "maxRank": 1
   },
   {
@@ -673,7 +673,7 @@
     "name": "Fast Talker",
     "type": "general",
     "description": "Talks fast and confusingly. The DM grants an edge when talking one's way out of trouble.",
-    "xpCost": 150,
+    "xpCost": 100,
     "maxRank": 1
   },
   {

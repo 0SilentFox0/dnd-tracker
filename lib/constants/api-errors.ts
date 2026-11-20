@@ -60,6 +60,8 @@ export const API_ERRORS = {
     CAREER_TICKS_MISSING: 'errors.careerTicksMissing',
     FOREIGN_FEAT: 'errors.foreignFeat',
     FOREIGN_CAREER: 'errors.foreignCareer',
+    CAREER_SAME: 'errors.careerSame',
+    CAREER_NOT_IN_SPECIES_TABLE: 'errors.careerNotInSpeciesTable',
     CAREER_IN_SPECIES_TABLE: 'errors.careerInSpeciesTable',
     FEAT_IN_SPECIES_TABLE: 'errors.featInSpeciesTable',
     SYSTEM_DRAFT_INVALID: 'errors.systemDraftInvalid',

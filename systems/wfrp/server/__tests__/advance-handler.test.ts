@@ -32,6 +32,7 @@ vi.mock('@/systems/wfrp/rules/advancement', () => ({
     planPurchase: vi.fn(),
     planUndo: vi.fn(),
     availableXp: vi.fn(),
+    advancementFor: (rules: unknown) => rules,
 }));
 vi.mock('@/systems/wfrp/server/careers/row', () => ({
     toCareerData: (row: { tiers: unknown[] }) => ({ tiers: row.tiers }),

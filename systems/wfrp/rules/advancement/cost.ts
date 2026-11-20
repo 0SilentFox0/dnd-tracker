@@ -1,16 +1,32 @@
+import { CANON_TALENT_COST } from './canon';
 import type { AdvancementRules } from './rules';
+
+/** Next points value: `step` 1 = +1; otherwise snapped to the next multiple of step; null = at limit */
+export function advanceTarget(
+    current: number,
+    max: number,
+    step = 1
+): number | null {
+    const to = step > 1 ? (Math.floor(current / step) + 1) * step : current + 1;
+
+    return current >= max || to > max ? null : to;
+}
 
 export function advanceCost(
     kind: 'characteristic' | 'skill',
     currentAdvances: number,
-    rules: AdvancementRules
+    rules: AdvancementRules,
+    step = 1
 ): number | null {
     const track = rules[kind];
 
-    if (currentAdvances >= track.max) return null;
+    if (advanceTarget(currentAdvances, track.max, step) === null) return null;
+
+    const index =
+        step > 1 ? Math.floor(currentAdvances / step) + 1 : currentAdvances;
 
     const bracket =
-        track.brackets.find((b) => currentAdvances <= b.upTo) ??
+        track.brackets.find((b) => index <= b.upTo) ??
         track.brackets[track.brackets.length - 1];
 
     return bracket.cost;
@@ -19,6 +35,10 @@ export function advanceCost(
 export const talentCost = (
     xpCost: number,
     currentRank: number,
-    rules: AdvancementRules
+    rules: AdvancementRules,
+    flat = false
 ): number =>
-    Math.round(xpCost * (currentRank + 1) * rules.talentCostMultiplier);
+    Math.round(
+        (flat ? CANON_TALENT_COST : xpCost * (currentRank + 1)) *
+            rules.talentCostMultiplier
+    );
