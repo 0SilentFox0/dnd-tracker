@@ -64,6 +64,10 @@ export interface WorldMapViewProps {
     };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
+    dragHeroes?: {
+        onDrop(ids: string[], to: MapPoint): void;
+        selected: string[];
+    };
     trails?: Omit<WorldTrailsProps, 'zoom'>;
     focus?: { point: MapPoint; seq: number };
     slots?: {
@@ -156,6 +160,7 @@ export function WorldMapView({
     handlers = {},
     fog,
     heroes,
+    dragHeroes,
     trails,
     focus,
     slots,
@@ -196,6 +201,20 @@ export function WorldMapView({
             containerRef.current?.getBoundingClientRect() ?? box,
             { zoom, offset }
         );
+
+    const insideMapAt = (clientX: number, clientY: number) => {
+        const r = containerRef.current?.getBoundingClientRect();
+
+        if (!r) return null;
+
+        const inside =
+            clientX >= r.left &&
+            clientX <= r.right &&
+            clientY >= r.top &&
+            clientY <= r.bottom;
+
+        return inside ? pointAt(clientX, clientY) : null;
+    };
 
     const snappedAt = (
         clientX: number,
@@ -469,6 +488,14 @@ export function WorldMapView({
                                     zoom={zoom}
                                     box={box}
                                     onHeroClick={handlers.onHeroClick}
+                                    drag={
+                                        dragHeroes
+                                            ? {
+                                                  ...dragHeroes,
+                                                  toPoint: insideMapAt,
+                                              }
+                                            : undefined
+                                    }
                                 />
                             ) : null}
                             {overlay}

@@ -33,10 +33,12 @@ import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import {
     type TravelMoved,
+    useHeroSelection,
     useTrailView,
     useWorldEditorPage,
     useWorldSessions,
     useWorldTrail,
+    useWorldTravel,
 } from '@/lib/hooks/world';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
@@ -86,6 +88,10 @@ export function WorldEditorPageClient({
     );
 
     const sessions = useWorldSessions(campaignId);
+
+    const heroSelection = useHeroSelection(roster.heroes);
+
+    const { travel } = useWorldTravel(campaignId);
 
     const trailBubble = trail.selected ? (
         <TrailBubble
@@ -295,6 +301,30 @@ export function WorldEditorPageClient({
                                                                 heroes={
                                                                     d.heroes
                                                                 }
+                                                                dragHeroes={
+                                                                    tool ===
+                                                                    'move'
+                                                                        ? {
+                                                                              selected:
+                                                                                  heroSelection.selected,
+                                                                              onDrop: (
+                                                                                  ids,
+                                                                                  to
+                                                                              ) =>
+                                                                                  void travel.mutateOk(
+                                                                                      {
+                                                                                          mapId: d
+                                                                                              .map
+                                                                                              .id,
+                                                                                          characterIds:
+                                                                                              ids,
+                                                                                          to,
+                                                                                          rest: 'none',
+                                                                                      }
+                                                                                  ),
+                                                                          }
+                                                                        : undefined
+                                                                }
                                                                 trails={{
                                                                     trails: trail.trails,
                                                                     sessions:
@@ -454,6 +484,9 @@ export function WorldEditorPageClient({
                                                                 }
                                                                 hasActiveSession={
                                                                     !!sessions.active
+                                                                }
+                                                                selection={
+                                                                    heroSelection
                                                                 }
                                                                 actions={{
                                                                     onPickTarget:

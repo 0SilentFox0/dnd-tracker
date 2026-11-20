@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
@@ -10,6 +10,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import type { HeroDragHandlers } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import type { HeroClusterGroup } from '@/lib/utils/world/hero-clusters';
 
@@ -17,14 +18,22 @@ interface HeroClusterProps {
     cluster: HeroClusterGroup;
     zoom: number;
     onHeroClick?(id: string): void;
+    drag?: HeroDragHandlers;
 }
 
-export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
+export function HeroCluster({
+    cluster,
+    zoom,
+    onHeroClick,
+    drag,
+}: HeroClusterProps) {
     const t = useTranslations('world');
 
     const [open, setOpen] = useState(false);
 
     const [top, ...rest] = cluster.heroes;
+
+    const wasDrag = useRef(false);
 
     const style = {
         left: `${cluster.x * 100}%`,
@@ -55,10 +64,14 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                     top.own && 'atlas-hero-own'
                 )}
                 style={style}
-                onPointerDown={stop}
+                data-draggable={drag ? true : undefined}
+                onPointerDown={drag?.onPointerDown ?? stop}
+                onPointerMove={drag?.onPointerMove}
+                onPointerCancel={drag?.onPointerCancel}
                 onPointerUp={(e) => {
                     e.stopPropagation();
-                    onHeroClick?.(top.id);
+
+                    if (!drag?.onPointerUp(e)) onHeroClick?.(top.id);
                 }}
                 onDoubleClick={(e) => e.stopPropagation()}
             >
@@ -83,8 +96,20 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                         top.own && 'atlas-hero-own'
                     )}
                     style={style}
-                    onPointerDown={stop}
-                    onPointerUp={stop}
+                    data-draggable={drag ? true : undefined}
+                    onPointerDown={drag?.onPointerDown ?? stop}
+                    onPointerMove={drag?.onPointerMove}
+                    onPointerCancel={drag?.onPointerCancel}
+                    onPointerUp={(e) => {
+                        e.stopPropagation();
+                        wasDrag.current = !!drag?.onPointerUp(e);
+                    }}
+                    onClick={(e) => {
+                        if (!wasDrag.current) return;
+
+                        wasDrag.current = false;
+                        e.preventDefault();
+                    }}
                     onDoubleClick={(e) => e.stopPropagation()}
                 >
                     {avatar}

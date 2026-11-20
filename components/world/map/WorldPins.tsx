@@ -55,7 +55,8 @@ export function WorldPins({
     return (
         <>
             {markers.map((m) => {
-                const spot = dragging?.id === m.id ? dragging.point : markerAnchor(m);
+                const spot =
+                    dragging?.id === m.id ? dragging.point : markerAnchor(m);
 
                 if (m.kind === 'zone') {
                     const clashes = points.some(
