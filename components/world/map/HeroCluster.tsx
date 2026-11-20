@@ -44,6 +44,8 @@ export function HeroCluster({
 
     const stop = (e: React.PointerEvent) => e.stopPropagation();
 
+    const noNativeDrag = (e: React.DragEvent) => e.preventDefault();
+
     const avatar = (
         <EntityIcon
             src={top.avatar}
@@ -73,6 +75,7 @@ export function HeroCluster({
 
                     if (!drag?.onPointerUp(e)) onHeroClick?.(top.id);
                 }}
+                onDragStart={noNativeDrag}
                 onDoubleClick={(e) => e.stopPropagation()}
             >
                 {avatar}
@@ -110,6 +113,7 @@ export function HeroCluster({
                         wasDrag.current = false;
                         e.preventDefault();
                     }}
+                    onDragStart={noNativeDrag}
                     onDoubleClick={(e) => e.stopPropagation()}
                 >
                     {avatar}

@@ -58,6 +58,12 @@ const setup = (selected: string[] = []) => {
 };
 
 describe('WorldHeroes drag', () => {
+    it('cancels native HTML drag so the avatar img cannot hijack the pin drag', () => {
+        const { pin } = setup();
+
+        expect(fireEvent.dragStart(pin)).toBe(false);
+    });
+
     it('a movement below the threshold is a click', () => {
         const { onDrop, onHeroClick, pin } = setup();
 
