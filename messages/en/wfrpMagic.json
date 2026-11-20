@@ -1,4 +1,7 @@
 {
+  "dispel": {
+    "react": "Dispel the spell"
+  },
   "log": {
     "miscast": "{name} suffers a miscast! {effect}",
     "castSuccess": "{name} casts {spell}: {roll} / {target}, SL {sl} (CN {cn}) — success",
@@ -64,7 +67,6 @@
     },
     "dispel": {
       "title": "Dispel",
-      "reactive": "Dispel {spell} of {caster}",
       "persistent": "Unravel {spell} of {caster}",
       "pending": "Rolling..."
     },

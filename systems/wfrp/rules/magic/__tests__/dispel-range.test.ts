@@ -4,11 +4,11 @@ import { caster } from './fixtures';
 
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import {
-    dispelSpotOf,
+    dispelSpotsOf,
+    dispelSpotsOfCast,
     isDispelRange,
 } from '@/systems/wfrp/rules/magic/dispel-range';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 const rules = RulesetSchema.parse(WFRP_RULES);
@@ -24,30 +24,57 @@ const at = (x: number, y: number) => {
 };
 
 describe('dispel range', () => {
-    it('reactive range is measured to the spell, not to its caster', () => {
+    it('range is measured to the spell, not to its caster', () => {
         const dispeller = at(0, 0);
 
-        const far = withWfrpState(at(30, 0), {
-            lastCast: { spell: 'Bolt', sl: 1, at: { x: 1, y: 0 } },
+        const cast = { spell: 'Bolt', sl: 1, at: { x: 1, y: 0 } };
+
+        const far = at(30, 0);
+
+        expect(dispelSpotsOfCast(cast, far.battleData.position)).toEqual([
+            { x: 1, y: 0 },
+        ]);
+        expect(
+            isDispelRange(dispeller, dispelSpotsOfCast(cast), map, rules)
+        ).toBe(true);
+        expect(isDispelRange(dispeller, dispelSpotsOf(far), map, rules)).toBe(
+            false
+        );
+    });
+
+    it('falls back to the caster cell without a stored spot', () => {
+        expect(
+            dispelSpotsOfCast({ spell: 'Bolt', sl: 1 }, { x: 5, y: 5 })
+        ).toEqual([{ x: 5, y: 5 }]);
+        expect(dispelSpotsOfCast({ spell: 'Bolt', sl: 1 })).toEqual([]);
+    });
+
+    it('any of several target cells in range is enough', () => {
+        const dispeller = at(0, 0);
+
+        const spots = dispelSpotsOfCast({
+            spell: 'Bolt',
+            sl: 1,
+            at: { x: 30, y: 0 },
+            targets: [
+                { x: 30, y: 0 },
+                { x: 1, y: 0 },
+            ],
         });
 
-        expect(dispelSpotOf(far, 'reactive')).toEqual({ x: 1, y: 0 });
-        expect(
-            isDispelRange(dispeller, dispelSpotOf(far, 'reactive'), map, rules)
-        ).toBe(true);
+        expect(spots).toHaveLength(2);
+        expect(isDispelRange(dispeller, spots, map, rules)).toBe(true);
         expect(
             isDispelRange(
                 dispeller,
-                dispelSpotOf(far, 'persistent'),
+                [
+                    { x: 30, y: 0 },
+                    { x: 35, y: 0 },
+                ],
                 map,
                 rules
             )
         ).toBe(false);
-    });
-
-    it('falls back to the caster cell without a stored spot', () => {
-        const foe = at(5, 5);
-
-        expect(dispelSpotOf(foe, 'reactive')).toEqual({ x: 5, y: 5 });
+        expect(dispelSpotsOf(at(30, 0))).toEqual([{ x: 30, y: 0 }]);
     });
 });

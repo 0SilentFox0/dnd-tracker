@@ -26,9 +26,9 @@ export const WFRP_META = {
         },
         budgetKb: {
             battle: 113.5,
-            member: 116,
-            // W8 gear texts (qualities, groups) grew the wfrp scopes past their old budgets
-            dm: 121,
+            member: 116.5,
+            // W8 gear texts (qualities, groups) grew the wfrp scopes past their old budgets; W9 reactive Dispel label tipped member/dm over
+            dm: 121.5,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },

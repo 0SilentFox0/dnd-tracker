@@ -4,6 +4,7 @@ import { type HitLocation, LOCATIONS } from '../combat/constants';
 import {
     AP_MAX_PER_LAYER,
     ARMOUR_KINDS,
+    GEAR_CATEGORIES,
     QUALITY_VALUE_MAX,
     WEAPON_GROUPS,
     WEAPON_REACHES,
@@ -73,6 +74,7 @@ export const WfrpWeaponStatsSchema = z
 
 export const WfrpGearStatsSchema = z.strictObject({
     type: z.literal('gear'),
+    category: z.enum(GEAR_CATEGORIES).optional(),
     weight,
     price,
     qualities,
@@ -109,6 +111,7 @@ export type WfrpWeaponStats = {
 
 export type WfrpGearStats = {
     type: 'gear';
+    category?: (typeof GEAR_CATEGORIES)[number];
     weight: number;
     price: number;
     qualities: QualityRef[];

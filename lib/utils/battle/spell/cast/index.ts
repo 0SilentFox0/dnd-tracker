@@ -201,6 +201,16 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         };
     }
 
+    const castCells = params.aim
+        ? [params.aim]
+        : params.targetIds.flatMap((id) => {
+              const at = params.allParticipants.find(
+                  (p) => p.basicInfo.id === id
+              )?.battleData.position;
+
+              return at ? [at] : [];
+          });
+
     const rolled =
         percentile && spellMagic && !params.dryRun
             ? rollCastTest(
@@ -211,11 +221,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
                       magic: spellMagic,
                       rules: params.rules,
                       rng,
-                      at:
-                          params.aim ??
-                          params.allParticipants.find(
-                              (p) => p.basicInfo.id === params.targetIds[0]
-                          )?.battleData.position,
+                      at: castCells[0],
+                      targets: castCells,
                   },
                   params.castTest
               )
@@ -365,6 +372,23 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             sourceEffects: source.definition.effects,
             details: settle.cast.details,
             fizzled: true,
+        });
+    }
+
+    if (settle && params.cancelledBy !== undefined) {
+        spendCastCost(state, cost);
+        settleCastTest(state, settle);
+
+        return finishSpellAction(state, {
+            before,
+            targetsBefore,
+            allParticipants,
+            battleId,
+            round: currentRound,
+            sourceEffects: source.definition.effects,
+            details: settle.cast.details,
+            fizzled: true,
+            cancelledBy: params.cancelledBy,
         });
     }
 

@@ -20,23 +20,62 @@ export const GRIM_SPELL_KINDS = [
 
 export type GrimSpellKind = (typeof GRIM_SPELL_KINDS)[number];
 
+export const GRIM_CORE_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> =
+    {
+        petty: ['Cantrips'],
+        arcane: ['School of Embers', 'School of Gloam'],
+        hedge: ['Fenlore'],
+        witchcraft: ['Thornwitchery'],
+        blessing: ['Hearth Rites'],
+        miracle: ['Hearth Rites'],
+    };
+
+export const GRIM_ARCANE_LISTS = [
+    'School of Embers',
+    'School of Gloam',
+    'School of Radiance',
+    'School of Alloy',
+    'School of Verdance',
+    'School of Firmament',
+    'School of Dusk',
+    'School of Wilds',
+    'Common Arcana',
+] as const;
+
+export const GRIM_DARK_LISTS = ['Pact Rites', 'Grave Rites'] as const;
+
+export const GRIM_CULT_LISTS = [
+    'Hearth Rites',
+    'Rites of the Tide',
+    'Rites of the Still Hour',
+    'Rites of the Banner',
+    'Rites of the Gambler',
+    'Rites of the Green Cradle',
+    'Rites of Mercy',
+    'Rites of the Forged Crown',
+    'Rites of the Deep Wood',
+    'Rites of the Winter Wolf',
+    'Rites of the Scales',
+    'Rites of the Forge-Fathers',
+] as const;
+
 export const GRIM_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> = {
     petty: ['Cantrips'],
-    arcane: ['School of Embers', 'School of Gloam'],
+    arcane: GRIM_ARCANE_LISTS,
     hedge: ['Fenlore'],
-    witchcraft: ['Thornwitchery'],
-    blessing: ['Hearth Rites'],
-    miracle: ['Hearth Rites'],
+    witchcraft: ['Thornwitchery', ...GRIM_DARK_LISTS],
+    blessing: GRIM_CULT_LISTS,
+    miracle: GRIM_CULT_LISTS,
 };
 
 export const SPELL_CN_BANDS: Record<GrimSpellKind, readonly [number, number]> =
     {
-        petty: [0, 2],
-        arcane: [3, 12],
+        petty: [0, 0],
+        arcane: [3, 14],
         hedge: [3, 12],
-        witchcraft: [3, 12],
+        witchcraft: [3, 18],
         blessing: [0, 0],
-        miracle: [6, 14],
+        miracle: [3, 14],
     };
 
 export const SPELL_KEYS: readonly string[] = [

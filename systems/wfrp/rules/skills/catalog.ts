@@ -73,6 +73,8 @@ export const SKILL_CATALOG: readonly SkillDef[] = [
     basic('row', 's'),
     basic('stealth', 'ag'),
     basic('swim', 's'),
+    basic('bribery', 'fel'),
+    basic('charm-animal', 'wp'),
     {
         key: 'melee',
         characteristic: 'ws',
@@ -89,6 +91,8 @@ export const SKILL_CATALOG: readonly SkillDef[] = [
         specs: RANGED_SPECS,
     },
     advanced('animal-care', 'int'),
+    advanced('animal-training', 'int'),
+    advanced('sail', 'ag'),
     advanced('channelling', 'wp'),
     advanced('evaluate', 'int'),
     advanced('heal', 'int'),
@@ -104,6 +108,7 @@ export const SKILL_CATALOG: readonly SkillDef[] = [
     open('trade', 'dex'),
     open('art', 'dex'),
     open('performance', 'ag'),
+    open('play', 'dex'),
 ];
 
 export const skillDef = (key: string): SkillDef | undefined =>

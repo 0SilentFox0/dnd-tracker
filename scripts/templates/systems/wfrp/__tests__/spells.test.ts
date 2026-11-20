@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Row } from '../common';
-import { castCeiling, spellIssues } from '../spells';
+import { castCeiling, GRIM_SPELL_LISTS, spellIssues } from '../spells';
 
 const emberDart: Row = {
     name: 'Ember Dart',
@@ -122,5 +122,36 @@ describe('castCeiling', () => {
     it('subtracts armour from arcane casting and ignores it for prayers', () => {
         expect(castCeiling(unit, 'arcane')).toBe(3);
         expect(castCeiling(unit, 'miracle')).toBe(5);
+    });
+});
+
+describe('lists and CN bands', () => {
+    const withMagic = (kind: string, cn: number, list: string): Row => ({
+        ...emberDart,
+        ingredients: undefined,
+        componentFlags: undefined,
+        upcastDice: undefined,
+        casting: { magic: { cn, kind, overcast: null } },
+        lists: [list],
+    });
+
+    it.each([
+        ['petty', 0, 'Cantrips'],
+        ['arcane', 14, 'School of Dusk'],
+        ['witchcraft', 18, 'Grave Rites'],
+        ['blessing', 0, 'Rites of the Tide'],
+        ['miracle', 8, 'Rites of the Scales'],
+    ])('accepts %s CN %i in %s', (kind, cn, list) => {
+        expect(spellIssues(withMagic(kind, cn, list))).toEqual([]);
+    });
+
+    it('keeps petty at CN 0 and lists tied to their kind', () => {
+        expect(
+            spellIssues(withMagic('petty', 1, 'Cantrips')).join('\n')
+        ).toContain('CN 1 is outside 0–0 for petty');
+        expect(
+            spellIssues(withMagic('arcane', 5, 'Grave Rites')).join('\n')
+        ).toContain('lists must be one of');
+        expect(Object.keys(GRIM_SPELL_LISTS)).toHaveLength(6);
     });
 });

@@ -12,6 +12,7 @@ import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { assertJoinGuards } from '@/lib/server/battles/participant-sources';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { logFields } from '@/lib/utils/battle/log/lines';
@@ -162,6 +163,8 @@ export async function buildStartOrder(
     }));
 
     const { characters, units } = await loadSetupRows(campaignId, participants);
+
+    await assertJoinGuards(campaignId, characters);
 
     const characterMap = new Map(characters.map((c) => [c.id, c]));
 

@@ -3,6 +3,7 @@ import type { ApplyDamageConsequences } from './types';
 import type { SystemConditionResult } from './types-conditions';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
+import type { AppMessageKey } from '@/lib/i18n/text-ref';
 import type { D20Mode } from '@/lib/utils/battle/saves/types';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import type { Rng } from '@/lib/utils/common/rng';
@@ -24,6 +25,8 @@ export interface CastTestCtx {
     presetRoll?: number;
     /** Where the spell lands: the aimed cell, else the first target's cell */
     at?: GridPoint;
+    /** Every target's cell (or the aimed cell); `at` is the first of them */
+    targets?: readonly GridPoint[];
     /** The system's own input of the request, parsed by `SystemServer.schemas.castInput` */
     system?: SystemSlot;
 }
@@ -64,6 +67,42 @@ export interface RuleSystemMagicResource {
         caster: BattleParticipant,
         choice: CastResourceChoice
     ): BattleParticipant;
+}
+
+export interface CastReactionOffer {
+    reactorId: string;
+    label: AppMessageKey;
+}
+
+export interface CastReactionArgs {
+    casterId: string;
+    /** State before the cast: positions, who is alive, reaction budget */
+    participants: BattleParticipant[];
+    rules: Ruleset;
+    map: BattleMapConfig | null | undefined;
+    round: number;
+}
+
+/** Lets other participants answer a successful tested cast before it lands */
+export interface RuleSystemCastReaction {
+    /** Cheap prefilter before the probe cast; false = no window */
+    mayReact(args: CastReactionArgs): boolean;
+    /** `resolved` = participants after the probe cast (the system reads its own state of the caster) */
+    open(
+        args: CastReactionArgs & { resolved: BattleParticipant[] }
+    ): { offers: CastReactionOffer[]; data: SystemSlot } | null;
+    /** One reactor's answer, rolled on the server; `cancelled` = the cast has no effect */
+    answer(
+        args: CastReactionArgs & {
+            reactorId: string;
+            data: SystemSlot;
+            rng: Rng;
+        }
+    ): {
+        participants: BattleParticipant[];
+        lines: LogLine[];
+        cancelled: boolean;
+    };
 }
 
 /** Casting-test magic: the cast is a roll with a miscast, not a spent resource */
@@ -116,6 +155,7 @@ export interface RuleSystemTestedMagic {
     ): SystemConditionResult;
     /** Token badge for banked channelling */
     badge(p: BattleParticipant): ActiveEffect | null;
+    reaction?: RuleSystemCastReaction;
 }
 
 export interface SustainResult {

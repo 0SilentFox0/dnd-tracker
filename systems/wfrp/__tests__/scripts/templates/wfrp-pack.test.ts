@@ -667,7 +667,7 @@ describe('validatePack: wfrp spells', () => {
         [
             'a CN above the band',
             (d) => (d.spells[0].casting.magic.cn = 3),
-            'CN 3 is outside 0–2 for petty',
+            'CN 3 is outside 0–0 for petty',
         ],
         [
             'petty dice overcast',

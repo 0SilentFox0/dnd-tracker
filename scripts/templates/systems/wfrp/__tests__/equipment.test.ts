@@ -116,3 +116,45 @@ describe('equipmentIssues', () => {
         expect(equipmentIssues(row).join('\n')).toContain(message);
     });
 });
+
+describe('gear categories', () => {
+    const gear = (
+        slot: string,
+        category: string | undefined,
+        weight: number,
+        price: number
+    ): Row => ({
+        name: 'Test Gear',
+        description: 'A test trapping.',
+        rarity: 'common',
+        slot,
+        systemStats: {
+            type: 'gear',
+            ...(category && { category }),
+            weight,
+            price,
+            qualities: [],
+        },
+    });
+
+    it.each([
+        ['item', 'food', 1, 12],
+        ['item', 'animals', 0, 7200],
+        ['item', 'books', 1, 4800],
+        ['cloak', 'clothing', 1, 600],
+        ['item', 'magical', 1, 4800],
+    ])('accepts %s / %s', (slot, category, weight, price) => {
+        expect(equipmentIssues(gear(slot, category, weight, price))).toEqual(
+            []
+        );
+    });
+
+    it('applies the category band and rejects an unknown category', () => {
+        expect(
+            equipmentIssues(gear('item', 'food', 1, 5000)).join('\n')
+        ).toContain('is outside 1–480 p for food');
+        expect(
+            equipmentIssues(gear('item', 'pets', 0, 10)).join('\n')
+        ).toContain('category');
+    });
+});

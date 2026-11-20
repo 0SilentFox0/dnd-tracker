@@ -3,6 +3,7 @@ import { descriptionIssues, type Row } from './common';
 import { ARTIFACT_RARITY_VALUES } from '@/lib/constants/artifacts';
 import {
     ARMOUR_KINDS,
+    GEAR_CATEGORIES,
     QUALITY_REGISTRY,
     type QualityKey,
     type QualityRef,
@@ -141,7 +142,7 @@ export const ARTIFACT_KEYS: readonly string[] = [
     'systemStats',
 ];
 
-export const GRIM_ITEM_SLOTS = [
+export const GRIM_CORE_SLOTS = [
     'weapon',
     'range_weapon',
     'armor',
@@ -150,6 +151,24 @@ export const GRIM_ITEM_SLOTS = [
     'shield',
     'item',
 ] as const;
+
+export const GRIM_ITEM_SLOTS = [...GRIM_CORE_SLOTS, 'cloak'] as const;
+
+export const GEAR_CATEGORY_BANDS: Record<
+    (typeof GEAR_CATEGORIES)[number],
+    { weight: Range; price: Range }
+> = {
+    food: { weight: [0, 2], price: [1, 480] },
+    clothing: { weight: [0, 2], price: [1, 2400] },
+    tools: { weight: [0, 3], price: [1, 2400] },
+    books: { weight: [0, 1], price: [6, 9600] },
+    animals: { weight: [0, 1], price: [60, 14400] },
+    poisons: { weight: [0, 1], price: [6, 4800] },
+    herbs: { weight: [0, 1], price: [1, 480] },
+    trappings: { weight: [0, 3], price: [1, 4800] },
+    prosthetics: { weight: [0, 2], price: [60, 4800] },
+    magical: { weight: [0, 2], price: [1, 9600] },
+};
 
 export const IMPLEMENTED_QUALITIES = (
     Object.keys(QUALITY_REGISTRY) as QualityKey[]
@@ -332,12 +351,16 @@ function gearIssues(
             'shield',
             ' p'
         );
-    } else if (slot === 'item') {
+    } else if (slot === 'item' || slot === 'cloak') {
         if (g.qualities.length > 0)
-            issues.push('slot "item" takes gear without qualities');
+            issues.push(`slot "${slot}" takes gear without qualities`);
 
-        commonRange('weight', g.weight, GEAR_BAND.weight, issues, 'gear');
-        commonRange('price', g.price, GEAR_BAND.price, issues, 'gear', ' p');
+        const band = g.category ? GEAR_CATEGORY_BANDS[g.category] : GEAR_BAND;
+
+        const at = g.category ?? 'gear';
+
+        commonRange('weight', g.weight, band.weight, issues, at);
+        commonRange('price', g.price, band.price, issues, at, ' p');
     } else if (isGrimSlot(slot))
         issues.push(`slot "${slot}" does not fit gear`);
 }

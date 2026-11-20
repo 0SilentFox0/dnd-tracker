@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { bookExample } from './book-example';
 
 import '@/lib/server/systems/registry';
-import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { mulberry32 } from '@/lib/utils/common/rng';
 import { type Ruleset, RulesetSchema } from '@/lib/utils/rules/schema';
 import { caster } from '@/systems/wfrp/rules/magic/__tests__/fixtures';
@@ -14,8 +13,6 @@ import {
 } from '@/systems/wfrp/rules/magic/dispel';
 import { prayerOvercast } from '@/systems/wfrp/rules/magic/prayer-overcast';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { withWfrpState } from '@/systems/wfrp/rules/state';
-import { dispelMutation } from '@/systems/wfrp/server/battle/dispel-mutation';
 
 const rulesOf = (preset: 'legacy' | 'canon5e'): Ruleset =>
     RulesetSchema.parse({ ...WFRP_RULES, edition: { preset } });
@@ -139,46 +136,5 @@ describe('canon5e prayer overcast', () => {
 
     bookExample(220, 'Miracle: steps only, no dimension', () => {
         expect(prayerOvercast('miracle', 2)).toEqual({ steps: 2, bonus: {} });
-    });
-});
-
-const withLastCast = (p: ReturnType<typeof caster>) =>
-    withWfrpState(p, { lastCast: { spell: 'Bolt', sl: 1 } as never });
-
-describe('reactive Dispel off the dispeller turn', () => {
-    const withId = (
-        p: ReturnType<typeof caster>,
-        id: string,
-        user?: string
-    ) => ({
-        ...p,
-        basicInfo: {
-            ...p.basicInfo,
-            id,
-            controlledBy: user ?? p.basicInfo.controlledBy,
-        },
-    });
-
-    const run = (mode: 'reactive' | 'persistent') => {
-        const c = context({
-            participants: [
-                withLastCast(withId(foe, 'foe', 'dm')),
-                withId(dispeller, 'hero', 'user-1'),
-            ],
-            rng: () => 0.5,
-        });
-
-        return dispelMutation(
-            { ...c, meta: { ...c.meta, rules: canon } },
-            { participantId: 'hero', targetId: 'foe', mode, serverRoll: true }
-        );
-    };
-
-    it('lets the controlling player dispel a spell cast on another turn', () => {
-        expect(() => run('reactive')).not.toThrow();
-    });
-
-    it('keeps persistent dispel to the own turn', () => {
-        expect(() => run('persistent')).toThrow();
     });
 });

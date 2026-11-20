@@ -264,7 +264,12 @@
     "language": "Language",
     "trade": "Trade",
     "art": "Art",
-    "performance": "Performance"
+    "performance": "Performance",
+    "bribery": "Bribery",
+    "charm-animal": "Charm animal",
+    "animal-training": "Animal training",
+    "sail": "Sail",
+    "play": "Play"
   },
   "wfrpSpecs": {
     "melee": {

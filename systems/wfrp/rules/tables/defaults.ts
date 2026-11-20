@@ -62,7 +62,7 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
             max: 60,
             effects: [
                 { type: 'damage', amount: 2 },
-                { type: 'marker', key: 'disarmed' },
+                { type: 'marker', key: 'disarmed', roundsFormula: '1d10' },
             ],
             textKey: 'battleWfrp.crit.arm.3',
         },
@@ -156,6 +156,7 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
             max: 100,
             effects: [
                 { type: 'damage', amount: 4 },
+                { type: 'condition', key: 'prone', levels: 1 },
                 { type: 'marker', key: 'crippled' },
             ],
             textKey: 'battleWfrp.crit.leg.5',

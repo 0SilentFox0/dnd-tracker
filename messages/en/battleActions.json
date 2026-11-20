@@ -139,6 +139,7 @@
     "captionDamageHits": "damage: {dealt} ({hits})",
     "captionHeal": "healing: {healed} HP",
     "fizzled": "{name} fails to cast {spell}",
+    "cancelled": "{name}'s {spell} is cancelled by {by}",
     "cast": "{name} casts {spell}",
     "castCaption": "{name} casts {spell} ({caption})",
     "noSlots": "{name}: {spell} is unavailable — no spell slots"

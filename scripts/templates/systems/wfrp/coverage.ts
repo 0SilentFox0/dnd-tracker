@@ -1,11 +1,15 @@
 import type { Row, WfrpData } from './common';
 import {
-    GRIM_ITEM_SLOTS,
+    GRIM_CORE_SLOTS,
     GRIM_WEAPON_GROUPS,
     IMPLEMENTED_QUALITIES,
     itemStatsOf,
 } from './equipment';
-import { GRIM_SPELL_KINDS, GRIM_SPELL_LISTS, spellMagicOf } from './spells';
+import {
+    GRIM_CORE_SPELL_LISTS,
+    GRIM_SPELL_KINDS,
+    spellMagicOf,
+} from './spells';
 import {
     GRIM_UNIT_LEVELS,
     GRIM_UNIT_THEMES,
@@ -279,7 +283,7 @@ function spellCoverage(spells: Row[], units: Row[]): string[] {
         )
     );
 
-    for (const list of new Set(Object.values(GRIM_SPELL_LISTS).flat()))
+    for (const list of new Set(Object.values(GRIM_CORE_SPELL_LISTS).flat()))
         if (!lists.has(list))
             warnings.push(`spells: list "${list}" has no spell`);
 
@@ -320,7 +324,7 @@ function equipmentCoverage(artifacts: Row[]): string[] {
 
     const slots = new Set(artifacts.map((a) => a.slot));
 
-    for (const slot of GRIM_ITEM_SLOTS)
+    for (const slot of GRIM_CORE_SLOTS)
         if (
             slot !== 'weapon' &&
             slot !== 'range_weapon' &&

@@ -264,7 +264,12 @@
     "language": "Мова",
     "trade": "Ремесло",
     "art": "Мистецтво",
-    "performance": "Виступ"
+    "performance": "Виступ",
+    "bribery": "Підкуп",
+    "charm-animal": "Чарування тварин",
+    "animal-training": "Дресирування",
+    "sail": "Плавання під вітрилами",
+    "play": "Гра на інструменті"
   },
   "wfrpSpecs": {
     "melee": {

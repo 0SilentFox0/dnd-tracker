@@ -114,6 +114,22 @@
           "kind": "basic"
         },
         {
+          "key": "bribery",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "charm-animal",
+          "characteristic": "wp",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
           "key": "charm",
           "characteristic": "fel",
           "target": 30,
@@ -299,6 +315,14 @@
           "kind": "advanced"
         },
         {
+          "key": "animal-training",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
           "key": "channelling",
           "characteristic": "wp",
           "target": 30,
@@ -341,6 +365,14 @@
         {
           "key": "research",
           "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "sail",
+          "characteristic": "ag",
           "target": 30,
           "advances": 0,
           "trained": false,

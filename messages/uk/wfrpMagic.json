@@ -1,4 +1,7 @@
 {
+  "dispel": {
+    "react": "Розсіяти закляття"
+  },
   "log": {
     "miscast": "{name}: збій магії! {effect}",
     "castSuccess": "{name} читає «{spell}»: {roll} / {target}, РУ {sl} (СН {cn}) — успіх",
@@ -64,7 +67,6 @@
     },
     "dispel": {
       "title": "Розсіяти",
-      "reactive": "Розсіяти {spell} від {caster}",
       "persistent": "Розплести {spell} від {caster}",
       "pending": "Кидок..."
     },

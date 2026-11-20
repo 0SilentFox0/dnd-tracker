@@ -11,6 +11,8 @@ import {
     useCounterNudge,
     useCounterWindow,
 } from '@/lib/hooks/battle';
+import { textRef } from '@/lib/i18n/text-ref';
+import { useText } from '@/lib/i18n/use-text';
 
 type View = ReturnType<typeof useCounterWindow>;
 
@@ -25,7 +27,11 @@ export function CounterWindowDialog() {
 function OfferRow({ row, view }: { row: CounterOfferView; view: View }) {
     const t = useTranslations('battle.counterWindow');
 
+    const text = useText();
+
     const { offer, name, canCounter, passForPlayer } = row;
+
+    const { system } = offer;
 
     const [level, setLevel] = useState(String(offer.slotLevels[0] ?? ''));
 
@@ -43,7 +49,7 @@ function OfferRow({ row, view }: { row: CounterOfferView; view: View }) {
                     }))}
                 />
             )}
-            {canCounter && offer.slotLevels.length === 0 && (
+            {canCounter && !system && offer.slotLevels.length === 0 && (
                 <div className="text-sm text-[var(--hud-muted)]">
                     {t('grant')}
                 </div>
@@ -56,7 +62,15 @@ function OfferRow({ row, view }: { row: CounterOfferView; view: View }) {
                 >
                     {passForPlayer ? t('passForPlayer') : t('pass')}
                 </Button>
-                {canCounter && (
+                {canCounter && system && (
+                    <Button
+                        disabled={view.isPending}
+                        onClick={() => view.react(offer)}
+                    >
+                        {text(textRef(system.label))}
+                    </Button>
+                )}
+                {canCounter && !system && (
                     <Button
                         disabled={view.isPending}
                         onClick={() =>
