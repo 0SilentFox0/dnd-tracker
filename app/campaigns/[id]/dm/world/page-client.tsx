@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { DmMarkerBubble } from '@/components/world/editor/DmMarkerBubble';
 import { EnemyCard } from '@/components/world/editor/EnemyCard';
+import { LayersPanel } from '@/components/world/editor/layers/LayersPanel';
 import { NewWorldMapDialog } from '@/components/world/editor/maps/NewWorldMapDialog';
 import { WorldMapSettings } from '@/components/world/editor/maps/WorldMapSettings';
 import { ModeSwitch } from '@/components/world/editor/ModeSwitch';
@@ -24,6 +25,7 @@ import {
 } from '@/components/world/editor/WorldToolbar';
 import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { CompassRose } from '@/components/world/marker-icons';
+import { LayerLegend } from '@/components/world/nav/LayerLegend';
 import { MapTree } from '@/components/world/nav/MapTree';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
@@ -80,6 +82,7 @@ export function WorldEditorPageClient({
         handlers,
         card: bubbleCard,
         enemy,
+        layers,
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
@@ -133,6 +136,17 @@ export function WorldEditorPageClient({
         />
     );
 
+    const layersPanel = (
+        <LayersPanel
+            campaignId={campaignId}
+            layers={layers.items}
+            activeId={layers.active.id}
+            onActive={layers.active.set}
+            heroes={roster.heroes}
+            imageEdit={layers.imageEdit}
+        />
+    );
+
     return (
         <WorldEditorContext.Provider value={ctx}>
             <HudPage>
@@ -149,6 +163,11 @@ export function WorldEditorPageClient({
 
                                     const detailsOpen =
                                         building && details.open;
+
+                                    const layersShown =
+                                        mode.value === 'build' &&
+                                        !eyes.asHeroId &&
+                                        layers.panel.open;
 
                                     const bubble =
                                         bubbleCard.open && marker ? (
@@ -244,6 +263,27 @@ export function WorldEditorPageClient({
                                                         >
                                                             {t('tree.toggle')}
                                                         </HudToggleChip>
+                                                        {mode.value === 'build' &&
+                                                        !eyes.asHeroId ? (
+                                                            <HudToggleChip
+                                                                tall
+                                                                active={
+                                                                    layers.panel
+                                                                        .open
+                                                                }
+                                                                onClick={() =>
+                                                                    layers.panel.set(
+                                                                        !layers
+                                                                            .panel
+                                                                            .open
+                                                                    )
+                                                                }
+                                                            >
+                                                                {t(
+                                                                    'layers.toggle'
+                                                                )}
+                                                            </HudToggleChip>
+                                                        ) : null}
                                                         <ModeSwitch
                                                             value={mode.value}
                                                             onChange={mode.set}
@@ -265,6 +305,11 @@ export function WorldEditorPageClient({
                                                     {isDesktop && treeShown ? (
                                                         <aside className="hud-surface w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
                                                             {mapTree}
+                                                        </aside>
+                                                    ) : null}
+                                                    {isDesktop && layersShown ? (
+                                                        <aside className="hud-surface w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
+                                                            {layersPanel}
                                                         </aside>
                                                     ) : null}
                                                     <div
@@ -317,6 +362,24 @@ export function WorldEditorPageClient({
                                                             <WorldMapView
                                                                 key={d.map.id}
                                                                 detail={d}
+                                                                layers={{
+                                                                    items: layers.items,
+                                                                    hidden: layers
+                                                                        .visibility
+                                                                        .hidden,
+                                                                    edit:
+                                                                        mode.value ===
+                                                                        'build'
+                                                                            ? {
+                                                                                  layerId:
+                                                                                      layers
+                                                                                          .imageEdit
+                                                                                          .layerId,
+                                                                                  onRectChange:
+                                                                                      layers.onRectChange,
+                                                                              }
+                                                                            : undefined,
+                                                                }}
                                                                 heroes={
                                                                     d.heroes
                                                                 }
@@ -415,7 +478,22 @@ export function WorldEditorPageClient({
                                                             />
                                                         )}
                                                         {eyes.asHeroId ? null : (
-                                                            <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                                            <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
+                                                                <LayerLegend
+                                                                    layers={
+                                                                        layers.items
+                                                                    }
+                                                                    hidden={
+                                                                        layers
+                                                                            .visibility
+                                                                            .hidden
+                                                                    }
+                                                                    onToggle={
+                                                                        layers
+                                                                            .visibility
+                                                                            .toggle
+                                                                    }
+                                                                />
                                                                 <TrailLegend
                                                                     trails={
                                                                         trail.trails
@@ -614,6 +692,18 @@ export function WorldEditorPageClient({
                                                         }
                                                     >
                                                         {trailBubble}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={layersShown}
+                                                        onOpenChange={
+                                                            layers.panel.set
+                                                        }
+                                                        title={t(
+                                                            'layers.title'
+                                                        )}
+                                                    >
+                                                        {layersPanel}
                                                     </ResponsiveDialog>
                                                     <ResponsiveDialog
                                                         hud

@@ -50,11 +50,12 @@ const marker = (over: Partial<WorldMarker> = {}) =>
 
 const renderBubble = (
     m: WorldMarker,
-    actions = { onMore: vi.fn(), onClose: vi.fn() }
+    actions = { onMore: vi.fn(), onClose: vi.fn() },
+    layers: { id: string; name: string }[] = []
 ) => {
     const ctx = {
         campaignId: 'c1',
-        detail: { map: { id: 'm1' }, markers: [m] },
+        detail: { map: { id: 'm1' }, markers: [m], layers },
         maps: [
             { id: 'm1', name: 'Світ', parentMapId: null },
             { id: 'm2', name: 'Печера', parentMapId: 'm1' },
@@ -98,6 +99,17 @@ afterEach(() => {
 });
 
 describe('DmMarkerBubble', () => {
+    it('offers the layer picker only when the map has layers', () => {
+        renderBubble(marker());
+
+        expect(screen.queryByRole('combobox', { name: 'Шар' })).toBeNull();
+
+        cleanup();
+        renderBubble(marker(), undefined, [{ id: 'l1', name: 'Море' }]);
+
+        expect(screen.getByRole('combobox', { name: 'Шар' })).toBeTruthy();
+    });
+
     it('without a child map offers to create one for this marker', () => {
         renderBubble(marker());
 

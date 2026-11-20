@@ -62,6 +62,9 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         colorCommit.schedule(c);
     };
 
+    const setLayer = (layerId: string) =>
+        save({ layerId: layerId || null });
+
     const remove = useRemoveMarker({ marker, editor, select });
 
     return {
@@ -81,6 +84,7 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         pickColor,
         resetColor: () => pickColor(null),
         save,
+        setLayer,
         remove,
     };
 }

@@ -4,6 +4,7 @@ export { useCommittedName } from './useCommittedName';
 export { type HeroDragHandlers, useHeroDrag } from './useHeroDrag';
 export { useHeroEyes } from './useHeroEyes';
 export { type HeroSelection, useHeroSelection } from './useHeroSelection';
+export { useLayerForm } from './useLayerForm';
 export { useLayerVisibility } from './useLayerVisibility';
 export {
     MODE_TOOLS,
