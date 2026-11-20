@@ -12,6 +12,7 @@ import {
 } from '@/lib/constants/world';
 import { usePinGesture } from '@/lib/hooks/world';
 import { markerAnchor } from '@/lib/utils/world/geometry';
+import { isMinorPin, pinHiddenAtZoom } from '@/lib/utils/world/pin-tier';
 import { zoneLabelSize, zoneLabelVisible } from '@/lib/utils/world/zone-labels';
 import type { MapPoint, WorldMarker } from '@/types/world';
 
@@ -64,7 +65,14 @@ export function WorldPins({
         onCancel: onDragCancel,
     });
 
-    const points = markers.filter((m) => m.kind !== 'zone');
+    const isPinned = (m: WorldMarker) =>
+        m.id === selectedId || m.id === dragging?.id;
+
+    const points = markers.filter(
+        (m) => m.kind !== 'zone' && !pinHiddenAtZoom(m, zoom, isPinned(m))
+    );
+
+    const labelBlockers = points.filter((m) => !isMinorPin(m));
 
     const shownZoneLabels: MapPoint[] = [];
 
@@ -75,7 +83,7 @@ export function WorldPins({
                     dragging?.id === m.id ? dragging.point : markerAnchor(m);
 
                 if (m.kind === 'zone') {
-                    const clashes = points.some(
+                    const clashes = labelBlockers.some(
                         (p) =>
                             Math.hypot(p.x - spot.x, p.y - spot.y) <
                             WORLD_ZONE_LABEL_CONFLICT
@@ -126,7 +134,11 @@ export function WorldPins({
                     );
                 }
 
+                if (pinHiddenAtZoom(m, zoom, isPinned(m))) return null;
+
                 const Icon = (m.icon && MARKER_ICON[m.icon]) || MapPin;
+
+                const minor = isMinorPin(m);
 
                 return (
                     <HudButton
@@ -137,6 +149,7 @@ export function WorldPins({
                             m.id === points[0]?.id ? 'world.marker' : undefined
                         }
                         data-selected={m.id === selectedId}
+                        data-minor={minor}
                         data-labels={
                             zoom >=
                             (compact
@@ -161,7 +174,10 @@ export function WorldPins({
                             className="atlas-seal"
                             style={m.color ? sealStyle(m.color) : undefined}
                         >
-                            <Icon className="size-4" aria-hidden />
+                            <Icon
+                                className={minor ? 'size-2.5' : 'size-4'}
+                                aria-hidden
+                            />
                         </span>
                         <span className="atlas-label">{m.name}</span>
                     </HudButton>

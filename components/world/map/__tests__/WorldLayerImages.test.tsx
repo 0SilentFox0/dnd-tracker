@@ -27,7 +27,11 @@ const layer = (o: Partial<WorldViewLayer>): WorldViewLayer => ({
 describe('WorldLayerImages', () => {
     it('positions the image by rect and passes opacity', () => {
         render(
-            <WorldLayerImages layers={[layer({})]} hidden={new Set()} width={800} />
+            <WorldLayerImages
+                layers={[layer({})]}
+                hidden={new Set()}
+                width={800}
+            />
         );
 
         const wrap = screen.getByTestId('world-layer-l1');

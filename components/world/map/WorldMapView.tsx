@@ -264,6 +264,18 @@ export function WorldMapView({
         ? markers.filter((m) => !m.layerId || !layerHidden.has(m.layerId))
         : markers;
 
+    const layerColors = new Map(
+        (layers?.items ?? []).flatMap((l) => (l.color ? [[l.id, l.color]] : []))
+    );
+
+    const pinMarkers = visibleMarkers.map((m) => {
+        const tint = m.layerId ? layerColors.get(m.layerId) : undefined;
+
+        return m.kind === 'point' && !m.color && tint
+            ? { ...m, color: tint }
+            : m;
+    });
+
     const shownMarkers = preview
         ? visibleMarkers.map((m) =>
               m.id === preview.id ? { ...m, polygon: preview.polygon } : m
@@ -512,7 +524,7 @@ export function WorldMapView({
                                 }
                             >
                                 <WorldPins
-                                    markers={visibleMarkers}
+                                    markers={pinMarkers}
                                     zoom={zoom}
                                     compact={compact}
                                     labels={{

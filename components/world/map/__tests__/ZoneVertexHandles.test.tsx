@@ -37,7 +37,8 @@ function setup() {
     return {
         onChange,
         onPreview,
-        handle: () => document.querySelector('[data-vertex="1"]') as HTMLElement,
+        handle: () =>
+            document.querySelector('[data-vertex="1"]') as HTMLElement,
     };
 }
 

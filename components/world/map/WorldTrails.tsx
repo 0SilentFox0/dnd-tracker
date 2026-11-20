@@ -92,7 +92,9 @@ export function WorldTrails({
                                 strokeWidth={14}
                                 style={{
                                     vectorEffect: 'non-scaling-stroke',
-                                    pointerEvents: interactive ? 'stroke' : 'none',
+                                    pointerEvents: interactive
+                                        ? 'stroke'
+                                        : 'none',
                                     cursor: 'pointer',
                                 }}
                                 onPointerDown={stop}

@@ -65,7 +65,8 @@ export const WORLD_MARKER_ICONS = Object.fromEntries(
 
 export const WORLD_LABEL_ZOOM = 2.5;
 export const WORLD_ZONE_LABEL_HIDE_ZOOM = 4;
-export const WORLD_ZONE_LABEL_CONFLICT = 0.06;
+export const WORLD_ZONE_LABEL_CONFLICT = 0.04;
+export const WORLD_MINOR_PIN_ZOOM = 1.8;
 export const WORLD_LABEL_ZOOM_COMPACT = 4;
 export const WORLD_ZONE_LABEL_CONFLICT_COMPACT = 0.14;
 export const WORLD_SNAP_PX = 8;
