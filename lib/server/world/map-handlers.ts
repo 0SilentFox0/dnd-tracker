@@ -35,9 +35,15 @@ export const ownedMap = (campaignId: string, mapId: string) =>
         API_ERRORS.WORLD_MAP_NOT_FOUND
     );
 
-export const ownedMarker = (campaignId: string, markerId: string) =>
+type Db = Pick<Prisma.TransactionClient, 'worldMarker' | 'worldMap'>;
+
+export const ownedMarker = (
+    campaignId: string,
+    markerId: string,
+    db: Db = prisma
+) =>
     loadOwned(
-        prisma.worldMarker
+        db.worldMarker
             .findUnique({
                 where: { id: markerId },
                 include: {
@@ -71,7 +77,7 @@ export function clearShowAfterDelete(
 }
 
 export async function subtreeTargets(campaignId: string, rootMapId: string) {
-    const rows = await prisma.worldMap.findMany({
+    const rows = await db.worldMap.findMany({
         where: { campaignId },
         select: { id: true, parentMarker: { select: { mapId: true } } },
     });
@@ -185,6 +191,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 }
 
 async function checkMove(
+    db: Db,
     campaignId: string,
     owned: { id: string; parentMarkerId: string | null },
     parentMarkerId: string
@@ -192,14 +199,14 @@ async function checkMove(
     if (owned.parentMarkerId === null)
         return errorResponse(API_ERRORS.WORLD_ROOT_IMMOVABLE, 409);
 
-    const marker = await ownedMarker(campaignId, parentMarkerId);
+    const marker = await ownedMarker(campaignId, parentMarkerId, db);
 
     if (marker instanceof NextResponse) return marker;
 
     if (marker.childMap && marker.childMap.id !== owned.id)
         return errorResponse(API_ERRORS.WORLD_NESTED_EXISTS, 409);
 
-    const rows = await prisma.worldMap.findMany({
+    const rows = await db.worldMap.findMany({
         where: { campaignId },
         select: { id: true, parentMarker: { select: { mapId: true } } },
     });
@@ -240,24 +247,33 @@ export function updateWorldMapHandler(
         if (newImage !== undefined && !ownedWorldMapPath(campaignId, newImage))
             return errorResponse(API_ERRORS.WORLD_IMAGE_FOREIGN, 400);
 
-        if (body.parentMarkerId !== undefined) {
-            const blocked = await checkMove(
-                campaignId,
-                owned,
-                body.parentMarkerId
-            );
-
-            if (blocked) return blocked;
-        }
-
         let updated;
 
         try {
-            updated = await prisma.worldMap.update({
-                where: { id: mapId },
-                data: body,
-                include: { parentMarker: { select: { mapId: true } } },
+            const result = await prisma.$transaction(async (tx) => {
+                if (body.parentMarkerId !== undefined) {
+                    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${campaignId}))`;
+
+                    const blocked = await checkMove(
+                        tx,
+                        campaignId,
+                        owned,
+                        body.parentMarkerId
+                    );
+
+                    if (blocked) return blocked;
+                }
+
+                return tx.worldMap.update({
+                    where: { id: mapId },
+                    data: body,
+                    include: { parentMarker: { select: { mapId: true } } },
+                });
             });
+
+            if (result instanceof NextResponse) return result;
+
+            updated = result;
         } catch (e) {
             if (
                 e instanceof Prisma.PrismaClientKnownRequestError &&

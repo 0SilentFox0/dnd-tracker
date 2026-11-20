@@ -7,10 +7,13 @@ const m = vi.hoisted(() => ({
     markerFindUnique: vi.fn(),
     mapFindMany: vi.fn(),
     mapUpdate: vi.fn(),
+    lock: vi.fn(),
 }));
 
-vi.mock('@/lib/db', () => ({
-    prisma: {
+const tx = vi.hoisted(() => ({}) as Record<string, unknown>);
+
+vi.mock('@/lib/db', () => {
+    const client = {
         worldMap: {
             findUnique: m.mapFindUnique,
             findMany: m.mapFindMany,
@@ -18,8 +21,18 @@ vi.mock('@/lib/db', () => ({
             count: vi.fn().mockResolvedValue(1),
         },
         worldMarker: { findUnique: m.markerFindUnique },
-    },
-}));
+        $executeRaw: m.lock,
+    };
+
+    Object.assign(tx, client);
+
+    return {
+        prisma: {
+            ...client,
+            $transaction: (fn: (t: unknown) => unknown) => fn(tx),
+        },
+    };
+});
 vi.mock('@/lib/server/world/map-store', () => ({
     toWorldMap: (v: unknown) => v,
     listWorldMaps: vi.fn(),
@@ -98,6 +111,15 @@ describe('updateWorldMapHandler re-parenting', () => {
         expect(m.mapUpdate.mock.calls[0][0].data).toEqual({
             parentMarkerId: 'm2',
         });
+    });
+
+    it('takes the per-campaign advisory lock before checking the move', async () => {
+        await call();
+
+        expect(m.lock).toHaveBeenCalledTimes(1);
+        expect(m.lock.mock.calls[0][0].join('')).toContain(
+            'pg_advisory_xact_lock(hashtext('
+        );
     });
 
     it('rejects a marker inside the map own subtree', async () => {
