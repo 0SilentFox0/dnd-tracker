@@ -279,3 +279,28 @@ export function zoneTouchesReveal(
         return false;
     });
 }
+
+const NUDGE = 0.002;
+
+const NUDGE_LARGE = 0.01;
+
+const ARROWS: Record<string, [number, number]> = {
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+};
+
+/** Normalized vertex offset for an arrow key (Shift = larger step); null for other keys. */
+export function nudgeStep(
+    key: string,
+    large: boolean
+): { dx: number; dy: number } | null {
+    const dir = ARROWS[key];
+
+    if (!dir) return null;
+
+    const step = large ? NUDGE_LARGE : NUDGE;
+
+    return { dx: dir[0] * step, dy: dir[1] * step };
+}

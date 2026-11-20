@@ -1,10 +1,10 @@
 'use client';
 
-import { type PointerEvent, useRef, useState } from 'react';
+import { type KeyboardEvent, type PointerEvent, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { HudButton } from '@/components/hud';
-import { closePolygon } from '@/lib/utils/world/geometry';
+import { closePolygon, nudgeStep } from '@/lib/utils/world/geometry';
 import type { MapPoint, Polygon } from '@/types/world';
 
 const MIN_VERTICES = 3;
@@ -39,6 +39,8 @@ export function ZoneVertexHandles({
     } | null>(null);
 
     const moved = useRef(false);
+
+    const pending = useRef<MapPoint[] | null>(null);
 
     const pts = drag?.pts ?? open;
 
@@ -84,6 +86,42 @@ export function ZoneVertexHandles({
         if ((moved.current || drag.insert) && ring) onChange(markerId, ring);
     };
 
+    const nudge = (e: KeyboardEvent<HTMLElement>, index: number) => {
+        const step = nudgeStep(e.key, e.shiftKey);
+
+        if (!step) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const base = pending.current ?? open;
+
+        const next = base.map((p, i) =>
+            i === index
+                ? {
+                      x: Math.min(1, Math.max(0, p.x + step.dx)),
+                      y: Math.min(1, Math.max(0, p.y + step.dy)),
+                  }
+                : p
+        );
+
+        pending.current = next;
+        setDrag({ index, pts: next, insert: false });
+        onPreview(toRing(next));
+    };
+
+    const finishKeys = (commit: boolean) => {
+        const next = pending.current;
+
+        pending.current = null;
+        setDrag(null);
+        onPreview(null);
+
+        const ring = next && commit ? toRing(next) : null;
+
+        if (ring) onChange(markerId, ring);
+    };
+
     const remove = (index: number) => {
         if (open.length <= MIN_VERTICES) return;
 
@@ -107,6 +145,18 @@ export function ZoneVertexHandles({
                             aria-label={t('vertex', { index: i + 1 })}
                             className="atlas-vertex"
                             style={place(p)}
+                            aria-description={t('keys')}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === 'Escape') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    finishKeys(e.key === 'Enter');
+                                    e.currentTarget.blur();
+                                } else nudge(e, i);
+                            }}
+                            onBlur={() => {
+                                if (pending.current) finishKeys(true);
+                            }}
                             onPointerDown={(e) => start(e, i, pts)}
                             onPointerMove={move}
                             onPointerUp={(e) => {

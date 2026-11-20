@@ -237,7 +237,8 @@
   },
   "vertex": {
     "vertex": "Vertex {index}",
-    "insert": "Add vertex"
+    "insert": "Add vertex",
+    "keys": "Arrow keys move, Shift for larger steps, Enter saves, Escape cancels"
   },
   "tree": {
     "label": "Maps",
