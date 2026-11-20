@@ -34,6 +34,8 @@ const remove = vi.fn();
 
 const openMap = vi.fn();
 
+const removeMap = vi.fn();
+
 const marker = (over: Partial<WorldMarker> = {}) =>
     ({
         id: 'k1',
@@ -67,7 +69,10 @@ const renderBubble = (
                 update: { mutateOk: update },
                 remove: { mutateOk: remove },
             },
-            map: { move: { mutateOk: vi.fn() } },
+            map: {
+                move: { mutateOk: vi.fn() },
+                remove: { mutateOk: removeMap },
+            },
         },
     } as unknown as WorldEditorCtx;
 
@@ -84,6 +89,7 @@ const renderBubble = (
 
 beforeEach(() => {
     remove.mockResolvedValue(true);
+    removeMap.mockResolvedValue(true);
 });
 
 afterEach(() => {
@@ -174,5 +180,46 @@ describe('DmMarkerBubble', () => {
 
         expect(actions.onMore).toHaveBeenCalled();
         expect(actions.onClose).toHaveBeenCalled();
+    });
+
+    it('edits the public description in place', () => {
+        renderBubble(marker({ description: 'Старе' }));
+
+        const area = screen.getByLabelText('Опис');
+
+        fireEvent.change(area, { target: { value: 'Нове' } });
+        fireEvent.blur(area);
+
+        expect(update).toHaveBeenCalledWith({
+            id: 'k1',
+            data: { description: 'Нове' },
+        });
+    });
+
+    it('picks an icon for points and offers a colour for zones', () => {
+        renderBubble(marker());
+
+        expect(screen.getByRole('group', { name: 'Іконка' })).toBeTruthy();
+        expect(screen.queryByLabelText('Колір зони')).toBeNull();
+
+        cleanup();
+        renderBubble(marker({ kind: 'zone' }));
+
+        expect(screen.queryByRole('group', { name: 'Іконка' })).toBeNull();
+        expect(screen.getByLabelText('Колір зони')).toBeTruthy();
+    });
+
+    it('deletes the nested map after confirmation', async () => {
+        renderBubble(marker({ childMapId: 'm2' }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Видалити карту' }));
+
+        await screen.findByText(/Маркери й картинка карти будуть видалені/);
+
+        fireEvent.click(
+            screen.getAllByRole('button', { name: 'Видалити' }).at(-1)!
+        );
+
+        await waitFor(() => expect(removeMap).toHaveBeenCalledWith('m2'));
     });
 });

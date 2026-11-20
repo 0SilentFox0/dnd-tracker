@@ -106,7 +106,12 @@ describe('WorldMapView', () => {
     });
 
     it('keeps the hint at the top so it never covers the bottom-right zoom buttons', () => {
-        render(<WorldMapView detail={detail([])} hint={<p>підказка</p>} />);
+        render(
+            <WorldMapView
+                detail={detail([])}
+                slots={{ hint: <p>підказка</p> }}
+            />
+        );
 
         const wrap = screen.getByText('підказка').parentElement as HTMLElement;
 
@@ -220,8 +225,8 @@ describe('WorldMapView', () => {
         render(
             <WorldMapView
                 detail={detail([marker({ id: 'p', name: 'Town' })])}
-                tool="point"
                 handlers={{ onMarkerDrag, onMapClick }}
+                edit={{ tool: 'point' }}
             />
         );
 
@@ -267,8 +272,8 @@ describe('WorldMapView', () => {
         render(
             <WorldMapView
                 detail={detail([marker({ id: 'p', name: 'Town' })])}
-                tool="point"
                 handlers={{ onMapClick }}
+                edit={{ tool: 'point' }}
             />
         );
 
@@ -290,8 +295,8 @@ describe('WorldMapView', () => {
         render(
             <WorldMapView
                 detail={detail([marker({ id: 'p', name: 'Town' })])}
-                tool="zone"
                 handlers={{ onMarkerClick: undefined }}
+                edit={{ tool: 'zone' }}
             />
         );
 
@@ -330,8 +335,8 @@ describe('WorldMapView', () => {
         const { container, rerender } = render(
             <WorldMapView
                 detail={detail([zone])}
-                tool="select"
                 handlers={{ onMarkerClick }}
+                edit={{ tool: 'select' }}
             />
         );
 
@@ -350,8 +355,8 @@ describe('WorldMapView', () => {
         rerender(
             <WorldMapView
                 detail={detail([zone])}
-                tool="point"
                 handlers={{ onMarkerClick }}
+                edit={{ tool: 'point' }}
             />
         );
 
@@ -360,6 +365,40 @@ describe('WorldMapView', () => {
                 'data-interactive'
             )
         ).toBe('false');
+    });
+
+    it('double-clicking a zone area opens it as a marker; elsewhere it is a map double-click', () => {
+        const onMarkerDoubleClick = vi.fn();
+
+        const onMapDoubleClick = vi.fn();
+
+        const zone = marker({
+            id: 'z',
+            kind: 'zone',
+            name: 'Forest',
+            polygon: ring([
+                [0.1, 0.1],
+                [0.4, 0.1],
+                [0.2, 0.4],
+            ]),
+        });
+
+        const { container } = render(
+            <WorldMapView
+                detail={detail([zone])}
+                handlers={{ onMarkerDoubleClick, onMapDoubleClick }}
+                edit={{ tool: 'select' }}
+            />
+        );
+
+        fireEvent.doubleClick(container.querySelector('polygon') as Element);
+
+        expect(onMarkerDoubleClick).toHaveBeenCalledWith('z');
+        expect(onMapDoubleClick).not.toHaveBeenCalled();
+
+        fireEvent.doubleClick(box(), { clientX: 700, clientY: 500 });
+
+        expect(onMapDoubleClick).toHaveBeenCalledTimes(1);
     });
 
     it('clicking a zone area in move mode resolves the zone as a target', () => {
@@ -379,8 +418,8 @@ describe('WorldMapView', () => {
         const { container } = render(
             <WorldMapView
                 detail={detail([zone])}
-                tool="move"
                 handlers={{ onMarkerClick }}
+                edit={{ tool: 'move' }}
             />
         );
 
@@ -460,12 +499,14 @@ describe('WorldMapView', () => {
         const { container } = render(
             <WorldMapView
                 detail={detail([])}
-                tool="zone"
-                draft={[
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.3, y: 0.2 },
-                    { x: 0.2, y: 0.4 },
-                ]}
+                edit={{
+                    tool: 'zone',
+                    draft: [
+                        { x: 0.1, y: 0.1 },
+                        { x: 0.3, y: 0.2 },
+                        { x: 0.2, y: 0.4 },
+                    ],
+                }}
             />
         );
 
@@ -478,10 +519,12 @@ describe('WorldMapView', () => {
         const { container } = render(
             <WorldMapView
                 detail={detail([])}
-                draft={[
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.3, y: 0.2 },
-                ]}
+                edit={{
+                    draft: [
+                        { x: 0.1, y: 0.1 },
+                        { x: 0.3, y: 0.2 },
+                    ],
+                }}
             />
         );
 
@@ -630,12 +673,11 @@ describe('WorldMapView zone snapping', () => {
         render(
             <WorldMapView
                 detail={detail([neighbour])}
-                tool="zone"
-                snap={snap(true)}
                 handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
             />
         );
-        click(88, 66);
+        click(84, 63);
 
         expect(onMapClick).toHaveBeenCalledWith({ x: 0.1, y: 0.1 });
     });
@@ -646,9 +688,8 @@ describe('WorldMapView zone snapping', () => {
         const { rerender } = render(
             <WorldMapView
                 detail={detail([neighbour])}
-                tool="zone"
-                snap={snap(true)}
                 handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
             />
         );
 
@@ -658,9 +699,8 @@ describe('WorldMapView zone snapping', () => {
         rerender(
             <WorldMapView
                 detail={detail([neighbour])}
-                tool="zone"
-                snap={snap(false)}
                 handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(false) }}
             />
         );
         click(88, 66);
@@ -673,9 +713,8 @@ describe('WorldMapView zone snapping', () => {
         render(
             <WorldMapView
                 detail={detail([neighbour])}
-                tool="zone"
-                snap={snap(true)}
                 handlers={{ onMapClick }}
+                edit={{ tool: 'zone', snap: snap(true) }}
             />
         );
         click(160, 120);
@@ -698,8 +737,8 @@ describe('WorldMapView zone snapping', () => {
             <WorldMapView
                 detail={detail([neighbour])}
                 selectedId="z"
-                tool="zone"
                 handlers={{ onVertexChange: vi.fn() }}
+                edit={{ tool: 'zone' }}
             />
         );
         expect(container.querySelectorAll('[data-vertex]')).toHaveLength(0);
@@ -748,8 +787,10 @@ describe('WorldMapView card slot', () => {
         render(
             <WorldMapView
                 detail={detail([])}
-                card={{ point: { x: 0.5, y: 0.5 }, content: <p>bubble</p> }}
                 handlers={{ onMapClick }}
+                slots={{
+                    card: { point: { x: 0.5, y: 0.5 }, content: <p>bubble</p> },
+                }}
             />
         );
 

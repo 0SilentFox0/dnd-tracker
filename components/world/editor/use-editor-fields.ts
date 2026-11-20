@@ -1,6 +1,6 @@
 import { useWorldEditorContext } from './WorldEditorContext';
 
-import { useMapFields, useMarkerFields } from '@/lib/hooks/world';
+import { useMapFields, useMarkerFields, useRemoveMap } from '@/lib/hooks/world';
 import type { WorldMapDetail, WorldMarker } from '@/types/world';
 
 export function useEditorMapFields(detail: WorldMapDetail) {
@@ -13,10 +13,18 @@ export function useEditorMapFields(detail: WorldMapDetail) {
 }
 
 export function useEditorMarkerFields(marker: WorldMarker) {
-    const { editor, select, openMap, redraw, redrawId } =
+    const { maps, editor, select, openMap, redraw, redrawId } =
         useWorldEditorContext();
 
     const fields = useMarkerFields({ marker, editor, select });
 
-    return { ...fields, openMap, redraw, redrawing: redrawId === marker.id };
+    const removeMap = useRemoveMap(maps, editor);
+
+    return {
+        ...fields,
+        removeMap,
+        openMap,
+        redraw,
+        redrawing: redrawId === marker.id,
+    };
 }

@@ -37,20 +37,15 @@
     "entry": "Entry point",
     "entryPlacing": "Click on the map…",
     "entrySet": "Set entry point",
-    "entryOnMap": "Entry point: set on the map",
     "children": "Nested maps · {count}",
     "childrenEmpty": "Select a marker and create a nested map for it.",
     "image": "Image",
     "replaceImage": "Replace image",
     "deleteMap": "Delete map",
-    "inspector": "Inspector",
-    "inspectorEmpty": "Select a point or zone on the map — its settings will appear here.",
     "closePanel": "Close panel",
     "icon": "Icon",
-    "icons": "Icons",
     "zoneColor": "Zone color",
     "redrawZone": "Redraw zone",
-    "redrawOutline": "Redraw outline",
     "drawNewZone": "Draw the new zone…",
     "drawing": "Draw…",
     "outline": "Outline",
@@ -85,7 +80,6 @@
     "toParent": "To parent map: {name}",
     "settings": "Map settings",
     "pinHint": "Shift-click or double-click to pin the tool",
-    "pinned": "Pinned",
     "snap": "Snapping",
     "snapHint": "Vertices snap to neighbouring zones (Alt disables)",
     "done": "Done",
@@ -247,8 +241,7 @@
   },
   "tree": {
     "label": "Maps",
-    "toggle": "Maps",
-    "newMap": "+ New map"
+    "toggle": "Maps"
   },
   "bubble": {
     "more": "Read more",

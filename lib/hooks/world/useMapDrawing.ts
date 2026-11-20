@@ -91,6 +91,8 @@ export function useMapDrawing(
             if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey)
                 return;
 
+            if (e.key === 'Escape' && e.defaultPrevented) return;
+
             if (
                 e.target instanceof Element &&
                 e.target.closest('[role=dialog]')
@@ -155,7 +157,7 @@ export function useMapDrawing(
     return {
         tool,
         setTool,
-        pinned: { value: pinned, set: setPinned },
+        pinned: { value: pinned },
         draft,
         handlers,
         undoVertex,

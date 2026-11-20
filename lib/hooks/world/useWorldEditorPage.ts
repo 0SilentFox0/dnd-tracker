@@ -180,29 +180,39 @@ export function useWorldEditorPage({
 
     const draftLength = drawing.draft.length;
 
+    const detailsVisible = tool === 'select' && !eyes.asHeroId && detailsOpen;
+
+    const drawingActive =
+        !eyes.asHeroId && (tool !== MODE_HOME_TOOL[mode] || draftLength > 0);
+
+    const hasSelection = selectedId !== null;
+
     useEffect(() => {
+        // capture phase + preventDefault so useMapDrawing skips presses consumed here
         const onKey = (e: KeyboardEvent) => {
             if (
                 e.key !== 'Escape' ||
                 e.defaultPrevented ||
-                tool !== 'select' ||
-                draftLength > 0 ||
                 isTyping(e.target) ||
                 (e.target instanceof Element &&
                     e.target.closest('[role=dialog]'))
             )
                 return;
 
+            if (detailsVisible) setDetailsOpen(false);
+            else if (drawingActive || !hasSelection) return;
+            else select(null);
+
+            e.preventDefault();
+
             if (document.activeElement instanceof HTMLElement)
                 document.activeElement.blur();
-
-            closePanel();
         };
 
-        window.addEventListener('keydown', onKey);
+        window.addEventListener('keydown', onKey, true);
 
-        return () => window.removeEventListener('keydown', onKey);
-    }, [tool, draftLength, closePanel]);
+        return () => window.removeEventListener('keydown', onKey, true);
+    }, [detailsVisible, drawingActive, hasSelection]);
 
     const setMode = useCallback(
         (next: WorldMode) => {
@@ -281,7 +291,6 @@ export function useWorldEditorPage({
             moveTarget,
             editor,
             mode: { value: mode, set: setMode },
-            pinned: drawing.pinned,
             snap: {
                 zones: snapZones,
                 enabled: snapEnabled,

@@ -46,8 +46,11 @@ const FOCUS_ZOOM = 3;
 export interface WorldMapViewProps {
     detail: WorldMapDetail;
     selectedId?: string | null;
-    draft?: MapPoint[];
-    tool?: WorldTool;
+    edit?: {
+        tool?: WorldTool;
+        draft?: MapPoint[];
+        snap?: { zones: Polygon[]; enabled: boolean };
+    };
     handlers?: {
         onMapClick?(p: MapPoint): void;
         onMapDoubleClick?(p: MapPoint): void;
@@ -57,16 +60,22 @@ export interface WorldMapViewProps {
         onHeroClick?(id: string): void;
         onVertexChange?(markerId: string, polygon: Polygon): void;
     };
-    snap?: { zones: Polygon[]; enabled: boolean };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
     focus?: { point: MapPoint; seq: number };
-    overlay?: ReactNode;
-    card?: { point: MapPoint; content: ReactNode };
-    hint?: ReactNode;
+    slots?: {
+        overlay?: ReactNode;
+        card?: { point: MapPoint; content: ReactNode };
+        hint?: ReactNode;
+    };
     compact?: boolean;
     className?: string;
 }
+
+const zoneIdAt = (target: EventTarget | null, tool: WorldTool) =>
+    (tool === 'select' || tool === 'move') && target instanceof Element
+        ? target.closest<SVGElement>('[data-zone-id]')?.dataset.zoneId
+        : undefined;
 
 const CARD_FALLBACK_SIZE = { width: 256, height: 140 };
 
@@ -110,20 +119,20 @@ function CardSlot({
 export function WorldMapView({
     detail,
     selectedId,
-    draft,
-    tool = 'select',
+    edit,
     handlers = {},
-    snap,
     fog,
     heroes,
     focus,
-    overlay,
-    card,
-    hint,
+    slots,
     compact = false,
     className,
 }: WorldMapViewProps) {
     const { map, markers } = detail;
+
+    const { tool = 'select', draft, snap } = edit ?? {};
+
+    const { overlay, card, hint } = slots ?? {};
 
     const t = useTranslations('world.zoom');
 
@@ -216,11 +225,7 @@ export function WorldMapView({
 
         if (wasDragged()) return;
 
-        const zoneId =
-            (tool === 'select' || tool === 'move') &&
-            e.target instanceof Element
-                ? e.target.closest<SVGElement>('[data-zone-id]')?.dataset.zoneId
-                : undefined;
+        const zoneId = zoneIdAt(e.target, tool);
 
         if (zoneId) handlers.onMarkerClick?.(zoneId);
         else
@@ -267,13 +272,17 @@ export function WorldMapView({
                     }}
                     onPointerUp={onBackgroundUp}
                     onPointerCancel={bind.onPointerCancel}
-                    onDoubleClick={(e) =>
-                        handlers.onMapDoubleClick?.(
-                            tool === 'zone'
-                                ? snappedAt(e.clientX, e.clientY, e.altKey)
-                                : pointAt(e.clientX, e.clientY)
-                        )
-                    }
+                    onDoubleClick={(e) => {
+                        const zoneId = zoneIdAt(e.target, tool);
+
+                        if (zoneId) handlers.onMarkerDoubleClick?.(zoneId);
+                        else
+                            handlers.onMapDoubleClick?.(
+                                tool === 'zone'
+                                    ? snappedAt(e.clientX, e.clientY, e.altKey)
+                                    : pointAt(e.clientX, e.clientY)
+                            );
+                    }}
                 >
                     {size.width > 0 ? (
                         <div className="absolute inset-0" style={layerStyle}>

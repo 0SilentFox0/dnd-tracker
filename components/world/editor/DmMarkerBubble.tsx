@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { PenLine, Trash2 } from 'lucide-react';
 
+import { MarkerIconGrid } from './maps/MapFieldParts';
 import { NewWorldMapDialog } from './maps/NewWorldMapDialog';
 import { MoveMapMenu } from './MoveMapMenu';
 import { useEditorMarkerFields } from './use-editor-fields';
@@ -13,8 +14,12 @@ import { ColorSwatch } from '@/components/common/fields/ColorSwatch';
 import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { MarkerBubble } from '@/components/world/MarkerBubble';
-import { WORLD_NAME_MAX } from '@/lib/constants/world';
+import {
+    WORLD_MARKER_DESCRIPTION_MAX,
+    WORLD_NAME_MAX,
+} from '@/lib/constants/world';
 import type { WorldMarker } from '@/types/world';
 
 const LINK =
@@ -53,16 +58,40 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                         e.key === 'Enter' && e.currentTarget.blur()
                     }
                 />
+                <Textarea
+                    aria-label={t('editor.description')}
+                    placeholder={t('editor.description')}
+                    rows={2}
+                    maxLength={WORLD_MARKER_DESCRIPTION_MAX}
+                    value={m.description}
+                    onChange={(e) => m.setDescription(e.target.value)}
+                    onBlur={m.commitDescription}
+                />
                 {marker.kind === 'point' ? (
-                    <div className="flex items-center gap-2 text-xs">
-                        <ColorSwatch
-                            color={m.color}
-                            label={t('editor.pointColor')}
-                            onChange={m.pickColor}
-                        />
-                        {t('editor.pointColor')}
-                    </div>
+                    <MarkerIconGrid
+                        aria-label={t('editor.icon')}
+                        value={marker.icon}
+                        cellClassName="h-8"
+                        className="max-h-24 overflow-y-auto"
+                        onPick={(icon) => void m.save({ icon })}
+                    />
                 ) : null}
+                <div className="flex items-center gap-2 text-xs">
+                    <ColorSwatch
+                        color={m.color}
+                        label={t(
+                            marker.kind === 'zone'
+                                ? 'editor.zoneColor'
+                                : 'editor.pointColor'
+                        )}
+                        onChange={m.pickColor}
+                    />
+                    {t(
+                        marker.kind === 'zone'
+                            ? 'editor.zoneColor'
+                            : 'editor.pointColor'
+                    )}
+                </div>
                 <label className="flex items-center justify-between gap-2 text-xs">
                     {t('editor.knownLocation')}
                     <Switch
@@ -97,6 +126,14 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                                         })
                                     }
                                 />
+                            ) : null}
+                            {child ? (
+                                <HudButton
+                                    className="inline-flex items-center gap-1 text-xs text-hud-danger underline"
+                                    onClick={() => void m.removeMap(child)}
+                                >
+                                    {t('editor.deleteMap')}
+                                </HudButton>
                             ) : null}
                         </>
                     ) : (

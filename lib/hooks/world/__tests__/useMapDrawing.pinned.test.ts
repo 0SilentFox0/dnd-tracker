@@ -87,6 +87,24 @@ describe('useMapDrawing pinned tool', () => {
         expect(result.current.pinned.value).toBe(false);
     });
 
+    it('skips an Esc already consumed by another handler', () => {
+        const { result } = renderHook(() => useMapDrawing(actions()));
+
+        act(() => result.current.setTool('point', true));
+        act(() => {
+            const e = new KeyboardEvent('keydown', {
+                key: 'Escape',
+                bubbles: true,
+                cancelable: true,
+            });
+
+            e.preventDefault();
+            document.body.dispatchEvent(e);
+        });
+
+        expect(result.current.tool).toBe('point');
+    });
+
     it('play mode allows only the move hotkey and Esc keeps it', () => {
         const { result } = renderHook(() =>
             useMapDrawing(actions(), true, MODE_TOOLS.play)

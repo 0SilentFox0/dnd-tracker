@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { worldKeys } from '../keys';
 import { useWorldEditor } from '../useWorldEditor';
 
-import { updateWorldMap } from '@/lib/api/world';
 import { ApiError } from '@/lib/api/client';
+import { updateWorldMap } from '@/lib/api/world';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 
 const notifyMock = vi.fn();

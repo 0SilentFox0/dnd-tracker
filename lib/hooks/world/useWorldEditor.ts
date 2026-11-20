@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { worldKeys } from './keys';
 
+import { ApiError } from '@/lib/api/client';
 import {
     createWorldMap,
     createWorldMarker,
@@ -14,7 +15,6 @@ import {
     updateWorldMap,
     updateWorldMarker,
 } from '@/lib/api/world';
-import { ApiError } from '@/lib/api/client';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { useCrudMutation, useOptionalNotify } from '@/lib/hooks/common';
 import type {
@@ -25,7 +25,10 @@ import type {
     WorldMapDetail,
 } from '@/types/world';
 
-const MOVE_ERROR_KEYS: Record<string, string> = {
+const MOVE_ERROR_KEYS: Record<
+    string,
+    'worldMoveCycle' | 'worldRootImmovable' | 'worldNestedExists'
+> = {
     [API_ERRORS.WORLD_MOVE_CYCLE]: 'worldMoveCycle',
     [API_ERRORS.WORLD_ROOT_IMMOVABLE]: 'worldRootImmovable',
     [API_ERRORS.WORLD_NESTED_EXISTS]: 'worldNestedExists',

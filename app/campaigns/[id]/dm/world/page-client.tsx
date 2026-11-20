@@ -29,7 +29,7 @@ import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
-import { polygonCentroid } from '@/lib/utils/world/geometry';
+import { markerAnchor } from '@/lib/utils/world/geometry';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const ENTRY_COMPASS = {
@@ -97,17 +97,6 @@ export function WorldEditorPageClient({
 
                 if (!isDesktop) tree.set(false);
             }}
-            footer={
-                maps.data?.length === 0 ? (
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => creating.set(true)}
-                    >
-                        {t('tree.newMap')}
-                    </Button>
-                ) : undefined
-            }
         />
     );
 
@@ -134,6 +123,27 @@ export function WorldEditorPageClient({
 
                                     const bubbleOpen =
                                         building && !!marker && !details.open;
+
+                                    const bubble =
+                                        bubbleOpen && marker ? (
+                                            <DmMarkerBubble
+                                                key={marker.id}
+                                                marker={marker}
+                                                actions={{
+                                                    onMore: () =>
+                                                        details.set(true),
+                                                    onClose: closePanel,
+                                                }}
+                                            />
+                                        ) : null;
+
+                                    const card =
+                                        bubble && marker && isDesktop
+                                            ? {
+                                                  point: markerAnchor(marker),
+                                                  content: bubble,
+                                              }
+                                            : undefined;
 
                                     const panel = marker ? (
                                         <WorldMarkerPanel />
@@ -235,16 +245,18 @@ export function WorldEditorPageClient({
                                                                             compact={
                                                                                 !isDesktop
                                                                             }
-                                                                            hint={
-                                                                                <p
-                                                                                    role="status"
-                                                                                    className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
-                                                                                >
-                                                                                    {t(
-                                                                                        'eyes.player'
-                                                                                    )}
-                                                                                </p>
-                                                                            }
+                                                                            slots={{
+                                                                                hint: (
+                                                                                    <p
+                                                                                        role="status"
+                                                                                        className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
+                                                                                    >
+                                                                                        {t(
+                                                                                            'eyes.player'
+                                                                                        )}
+                                                                                    </p>
+                                                                                ),
+                                                                            }}
                                                                         />
                                                                     );
                                                                 }}
@@ -259,62 +271,13 @@ export function WorldEditorPageClient({
                                                                 selectedId={
                                                                     selectedId
                                                                 }
-                                                                draft={
-                                                                    drawing.draft
-                                                                }
-                                                                tool={tool}
+                                                                edit={{
+                                                                    tool,
+                                                                    draft: drawing.draft,
+                                                                    snap,
+                                                                }}
                                                                 compact={
                                                                     !isDesktop
-                                                                }
-                                                                hint={
-                                                                    <WorldToolHint
-                                                                        tool={
-                                                                            tool
-                                                                        }
-                                                                        vertices={
-                                                                            drawing
-                                                                                .draft
-                                                                                .length
-                                                                        }
-                                                                    />
-                                                                }
-                                                                snap={snap}
-                                                                card={
-                                                                    bubbleOpen &&
-                                                                    marker
-                                                                        ? {
-                                                                              point:
-                                                                                  marker.kind ===
-                                                                                      'zone' &&
-                                                                                  marker.polygon
-                                                                                      ? polygonCentroid(
-                                                                                            marker.polygon
-                                                                                        )
-                                                                                      : {
-                                                                                            x: marker.x,
-                                                                                            y: marker.y,
-                                                                                        },
-                                                                              content:
-                                                                                  (
-                                                                                      <DmMarkerBubble
-                                                                                          key={
-                                                                                              marker.id
-                                                                                          }
-                                                                                          marker={
-                                                                                              marker
-                                                                                          }
-                                                                                          actions={{
-                                                                                              onMore: () =>
-                                                                                                  details.set(
-                                                                                                      true
-                                                                                                  ),
-                                                                                              onClose:
-                                                                                                  closePanel,
-                                                                                          }}
-                                                                                      />
-                                                                                  ),
-                                                                          }
-                                                                        : undefined
                                                                 }
                                                                 handlers={{
                                                                     ...drawing.handlers,
@@ -390,25 +353,40 @@ export function WorldEditorPageClient({
                                                                                   )
                                                                             : undefined,
                                                                 }}
-                                                                overlay={
-                                                                    <>
-                                                                        <CompassRose
-                                                                            className="atlas-compass pointer-events-none absolute"
-                                                                            style={{
-                                                                                ...ENTRY_COMPASS,
-                                                                                left: `${d.map.entryX * 100}%`,
-                                                                                top: `${d.map.entryY * 100}%`,
-                                                                            }}
+                                                                slots={{
+                                                                    hint: (
+                                                                        <WorldToolHint
+                                                                            tool={
+                                                                                tool
+                                                                            }
+                                                                            vertices={
+                                                                                drawing
+                                                                                    .draft
+                                                                                    .length
+                                                                            }
                                                                         />
-                                                                        {moveTarget.point ? (
-                                                                            <TargetMark
-                                                                                point={
-                                                                                    moveTarget.point
-                                                                                }
+                                                                    ),
+                                                                    card,
+                                                                    overlay: (
+                                                                        <>
+                                                                            <CompassRose
+                                                                                className="atlas-compass pointer-events-none absolute"
+                                                                                style={{
+                                                                                    ...ENTRY_COMPASS,
+                                                                                    left: `${d.map.entryX * 100}%`,
+                                                                                    top: `${d.map.entryY * 100}%`,
+                                                                                }}
                                                                             />
-                                                                        ) : null}
-                                                                    </>
-                                                                }
+                                                                            {moveTarget.point ? (
+                                                                                <TargetMark
+                                                                                    point={
+                                                                                        moveTarget.point
+                                                                                    }
+                                                                                />
+                                                                            ) : null}
+                                                                        </>
+                                                                    ),
+                                                                }}
                                                             />
                                                         )}
                                                         {tool === 'zone' &&
@@ -536,6 +514,19 @@ export function WorldEditorPageClient({
                                                         }
                                                     >
                                                         {panel}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={!!bubble}
+                                                        onOpenChange={(
+                                                            open
+                                                        ) => {
+                                                            if (!open)
+                                                                closePanel();
+                                                        }}
+                                                        title={marker?.name}
+                                                    >
+                                                        {bubble}
                                                     </ResponsiveDialog>
                                                     <ResponsiveDialog
                                                         hud

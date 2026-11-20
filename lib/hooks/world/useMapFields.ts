@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useCommittedName } from './useCommittedName';
+import { useRemoveMap } from './useRemoveMap';
 import type { useWorldEditor } from './useWorldEditor';
 import { useWorldMapUpload } from './useWorldMapUpload';
 
@@ -11,7 +12,6 @@ import { REVEAL_RADIUS_RANGE } from '@/lib/constants/world';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { imageSizeOf } from '@/lib/utils/common/image-decode';
-import { subtreeMapIds } from '@/lib/utils/world/tree';
 import type { WorldMapDetail, WorldMapSummary } from '@/types/world';
 
 const ASPECT_TOLERANCE = 0.01;
@@ -36,8 +36,6 @@ export function useMapFields({
     const confirm = useConfirm();
 
     const t = useTranslations('world');
-
-    const tc = useTranslations('common.actions');
 
     const notify = useNotify();
 
@@ -100,18 +98,10 @@ export function useMapFields({
         if (!(await save({ ...image }))) void discard(image.imageUrl);
     };
 
+    const removeMap = useRemoveMap(maps, editor);
+
     const remove = async () => {
-        const nested = subtreeMapIds(maps, map.id).length - 1;
-
-        const ok = await confirm({
-            title: t('removeMap.title', { name: map.name }),
-            description: t('removeMap.description', { nested }),
-            confirmLabel: tc('delete'),
-            destructive: true,
-        });
-
-        if (ok && (await editor.map.remove.mutateOk(map.id)))
-            openMap(map.parentMapId);
+        if (await removeMap(map)) openMap(map.parentMapId);
     };
 
     return {

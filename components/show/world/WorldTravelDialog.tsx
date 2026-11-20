@@ -106,17 +106,17 @@ function TravelBody({
                             key={d.map.id}
                             detail={d}
                             heroes={d.heroes}
-                            tool="move"
+                            edit={{ tool: 'move' }}
                             compact={!isDesktop}
                             handlers={{
                                 onMapClick: target.pickPoint,
                                 onMarkerClick: target.pickMarker,
                             }}
-                            overlay={
-                                target.point ? (
+                            slots={{
+                                overlay: target.point ? (
                                     <TargetMark point={target.point} />
-                                ) : null
-                            }
+                                ) : null,
+                            }}
                         />
                     )}
                 </QueryState>

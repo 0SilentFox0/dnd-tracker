@@ -25,7 +25,7 @@ import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
 import { useWorldPlay } from '@/lib/hooks/world';
-import { polygonCentroid } from '@/lib/utils/world/geometry';
+import { markerAnchor } from '@/lib/utils/world/geometry';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 import type { WorldMarker } from '@/types/world';
 
@@ -187,30 +187,21 @@ export function WorldPlayClient({
                                             handlers={{
                                                 onMarkerClick: play.select,
                                                 onMarkerDoubleClick: (id) => {
-                                                    const m =
-                                                        view.markers.find(
-                                                            (x) => x.id === id
-                                                        );
+                                                    const m = view.markers.find(
+                                                        (x) => x.id === id
+                                                    );
 
                                                     if (m) openChild(m);
                                                 },
                                                 onMapClick: () =>
                                                     play.select(null),
                                             }}
-                                            card={
-                                                marker
+                                            slots={{
+                                                card: marker
                                                     ? {
-                                                          point:
-                                                              marker.kind ===
-                                                                  'zone' &&
-                                                              marker.polygon
-                                                                  ? polygonCentroid(
-                                                                        marker.polygon
-                                                                    )
-                                                                  : {
-                                                                        x: marker.x,
-                                                                        y: marker.y,
-                                                                    },
+                                                          point: markerAnchor(
+                                                              marker
+                                                          ),
                                                           content: (
                                                               <PlayerMarkerBubble
                                                                   key={
@@ -241,8 +232,8 @@ export function WorldPlayClient({
                                                               />
                                                           ),
                                                       }
-                                                    : undefined
-                                            }
+                                                    : undefined,
+                                            }}
                                         />
                                     </div>
                                 </div>

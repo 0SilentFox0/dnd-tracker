@@ -2,7 +2,6 @@ export { worldKeys } from './keys';
 export type { WorldEditorCtx } from './types';
 export { useHeroEyes } from './useHeroEyes';
 export {
-    MODE_HOME_TOOL,
     MODE_TOOLS,
     useMapDrawing,
     type WorldMode,
@@ -13,6 +12,7 @@ export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';
 export { useMoveTarget } from './useMoveTarget';
 export { useNotesPanel } from './useNotesPanel';
+export { useRemoveMap } from './useRemoveMap';
 export { useRemoveMarker } from './useRemoveMarker';
 export { useShowWorld } from './useShowWorld';
 export { useTravelLog } from './useTravelLog';

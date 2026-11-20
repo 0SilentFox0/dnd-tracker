@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { useWorldView } from './useWorldView';
@@ -41,6 +41,35 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         setDetailsOpen(false);
     }, []);
 
+    const hasSelection = selectedId !== null;
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (
+                e.key !== 'Escape' ||
+                e.defaultPrevented ||
+                (!detailsOpen && !hasSelection) ||
+                (e.target instanceof HTMLElement &&
+                    (e.target.isContentEditable ||
+                        ['INPUT', 'TEXTAREA', 'SELECT'].includes(
+                            e.target.tagName
+                        ))) ||
+                (e.target instanceof Element &&
+                    e.target.closest('[role=dialog]'))
+            )
+                return;
+
+            if (detailsOpen) setDetailsOpen(false);
+            else select(null);
+
+            e.preventDefault();
+        };
+
+        window.addEventListener('keydown', onKey);
+
+        return () => window.removeEventListener('keydown', onKey);
+    }, [detailsOpen, hasSelection]);
+
     const pickPlace = useCallback(
         (id: string) => {
             const m = view.data?.markers.find((x) => x.id === id);
@@ -75,7 +104,6 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         details: { open: detailsOpen, set: setDetailsOpen },
         tree: { open: treeOpen, set: setTreeOpen },
         focus,
-        focusPoint,
         focusHero,
         openMap,
         myHeroes: view.data?.heroes.filter((h) => h.own) ?? [],

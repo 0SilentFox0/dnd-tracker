@@ -1,5 +1,10 @@
 import { clamp } from '@/lib/utils/common/clamp';
-import type { MapPoint, Polygon, RevealShape } from '@/types/world';
+import type {
+    MapPoint,
+    Polygon,
+    RevealShape,
+    WorldMarker,
+} from '@/types/world';
 
 const DUPLICATE_EPS = 0.002;
 
@@ -96,6 +101,13 @@ export function polygonCentroid(polygon: Polygon): MapPoint {
 
     return { x: cx / (3 * area2), y: cy / (3 * area2) };
 }
+
+export const markerAnchor = (
+    m: Pick<WorldMarker, 'kind' | 'x' | 'y' | 'polygon'>
+): MapPoint =>
+    m.kind === 'zone' && m.polygon
+        ? polygonCentroid(m.polygon)
+        : { x: m.x, y: m.y };
 
 export function fitBox(
     container: { width: number; height: number },

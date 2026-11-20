@@ -27,7 +27,7 @@ const drawing = (over: Partial<ReturnType<typeof useMapDrawing>> = {}) =>
     ({
         tool: 'select',
         setTool: vi.fn(),
-        pinned: { value: false, set: vi.fn() },
+        pinned: { value: false },
         draft: [],
         finish: vi.fn(),
         undoVertex: vi.fn(),
@@ -122,9 +122,7 @@ describe('WorldToolbar', () => {
     });
 
     it('marks the active pinned tool', () => {
-        renderBar(
-            drawing({ tool: 'point', pinned: { value: true, set: vi.fn() } })
-        );
+        renderBar(drawing({ tool: 'point', pinned: { value: true } }));
 
         expect(
             screen
