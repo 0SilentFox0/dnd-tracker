@@ -13,9 +13,8 @@ import { handleApiError } from '@/lib/utils/api/error-handler';
 import { filterTrailForViewer, type TrailRow } from '@/lib/utils/world/trail';
 import {
     type MapPoint,
+    toTravelKind,
     type TrailEntry,
-    TRAVEL_KINDS,
-    type TravelKind,
     type WorldTrailData,
 } from '@/types/world';
 
@@ -23,11 +22,6 @@ type StoredPoint = { mapId?: string; x: number; y: number };
 
 const samePoint = (p: StoredPoint | null, mapId: string): MapPoint | null =>
     p && p.mapId === mapId ? { x: p.x, y: p.y } : null;
-
-const toKind = (kind: string): TravelKind =>
-    (TRAVEL_KINDS as readonly string[]).includes(kind)
-        ? (kind as TravelKind)
-        : 'travel';
 
 export async function trailHandler(req: Request, campaignId: string) {
     try {
@@ -90,8 +84,8 @@ export async function trailHandler(req: Request, campaignId: string) {
                 entries: [],
             } satisfies WorldTrailData);
 
-        const logRows = (
-            await prisma.worldTravelLog.findMany({
+        const [desc, sessions] = await Promise.all([
+            prisma.worldTravelLog.findMany({
                 where: {
                     campaignId,
                     mapId,
@@ -99,8 +93,11 @@ export async function trailHandler(req: Request, campaignId: string) {
                 },
                 orderBy: { createdAt: 'desc' },
                 take: TRAIL_ENTRY_LIMIT,
-            })
-        ).reverse();
+            }),
+            listSessions(campaignId),
+        ]);
+
+        const logRows = desc.reverse();
 
         const nameIds = ownOnly
             ? heroIds
@@ -120,7 +117,7 @@ export async function trailHandler(req: Request, campaignId: string) {
         const rows: TrailRow[] = logRows.map((r) => ({
             id: r.id,
             sessionId: r.sessionId,
-            kind: toKind(r.kind),
+            kind: toTravelKind(r.kind),
             characterIds: r.characterIds,
             names,
             from: samePoint(r.from as StoredPoint | null, mapId),
@@ -143,8 +140,6 @@ export async function trailHandler(req: Request, campaignId: string) {
                   to: r.to,
                   at: r.createdAt.toISOString(),
               }));
-
-        const sessions = await listSessions(campaignId);
 
         const visible = ownOnly
             ? new Set(

@@ -104,6 +104,11 @@ export type TravelRest = 'none' | 'short' | 'long';
 export const TRAVEL_KINDS = ['travel', 'enter', 'exit', 'rest'] as const;
 export type TravelKind = (typeof TRAVEL_KINDS)[number];
 
+export const toTravelKind = (kind: string): TravelKind =>
+    (TRAVEL_KINDS as readonly string[]).includes(kind)
+        ? (kind as TravelKind)
+        : 'travel';
+
 export interface WorldHero {
     id: string;
     name: string;

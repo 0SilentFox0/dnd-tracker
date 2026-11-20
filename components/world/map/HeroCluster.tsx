@@ -46,6 +46,14 @@ export function HeroCluster({
 
     const noNativeDrag = (e: React.DragEvent) => e.preventDefault();
 
+    const dragProps = {
+        'data-draggable': drag ? true : undefined,
+        onPointerDown: drag?.onPointerDown ?? stop,
+        onPointerMove: drag?.onPointerMove,
+        onPointerCancel: drag?.onPointerCancel,
+        onDragStart: noNativeDrag,
+    };
+
     const avatar = (
         <EntityIcon
             src={top.avatar}
@@ -66,16 +74,12 @@ export function HeroCluster({
                     top.own && 'atlas-hero-own'
                 )}
                 style={style}
-                data-draggable={drag ? true : undefined}
-                onPointerDown={drag?.onPointerDown ?? stop}
-                onPointerMove={drag?.onPointerMove}
-                onPointerCancel={drag?.onPointerCancel}
+                {...dragProps}
                 onPointerUp={(e) => {
                     e.stopPropagation();
 
                     if (!drag?.onPointerUp(e)) onHeroClick?.(top.id);
                 }}
-                onDragStart={noNativeDrag}
                 onDoubleClick={(e) => e.stopPropagation()}
             >
                 {avatar}
@@ -99,10 +103,7 @@ export function HeroCluster({
                         top.own && 'atlas-hero-own'
                     )}
                     style={style}
-                    data-draggable={drag ? true : undefined}
-                    onPointerDown={drag?.onPointerDown ?? stop}
-                    onPointerMove={drag?.onPointerMove}
-                    onPointerCancel={drag?.onPointerCancel}
+                    {...dragProps}
                     onPointerUp={(e) => {
                         e.stopPropagation();
                         wasDrag.current = !!drag?.onPointerUp(e);
@@ -113,7 +114,6 @@ export function HeroCluster({
                         wasDrag.current = false;
                         e.preventDefault();
                     }}
-                    onDragStart={noNativeDrag}
                     onDoubleClick={(e) => e.stopPropagation()}
                 >
                     {avatar}

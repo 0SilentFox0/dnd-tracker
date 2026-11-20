@@ -39,8 +39,10 @@ export function WorldTrails({
 
     if (shown.length === 0) return null;
 
+    const sessionById = new Map(sessions.map((s) => [s.id, s]));
+
     const styleOf = (sessionId: string | null) => {
-        const session = sessions.find((s) => s.id === sessionId);
+        const session = sessionId ? sessionById.get(sessionId) : undefined;
 
         return {
             color: session?.color ?? WORLD_NO_SESSION_COLOR,

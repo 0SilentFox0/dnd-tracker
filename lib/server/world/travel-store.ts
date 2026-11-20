@@ -9,7 +9,7 @@ import {
 } from '@/lib/utils/world/travel';
 import {
     type RevealShape,
-    TRAVEL_KINDS,
+    toTravelKind,
     type TravelKind,
     type TravelRest,
     type WorldHero,
@@ -284,9 +284,7 @@ export async function readTravelLog(
             ? (markerNames.get(r.toMarkerId) ?? null)
             : null,
         rest: r.rest as TravelRest,
-        kind: (TRAVEL_KINDS as readonly string[]).includes(r.kind)
-            ? (r.kind as TravelKind)
-            : 'travel',
+        kind: toTravelKind(r.kind),
         createdAt: r.createdAt.toISOString(),
     }));
 }
