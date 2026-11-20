@@ -64,4 +64,18 @@ describe('MarkerBubble', () => {
         expect(screen.getByLabelText('edit')).toBeTruthy();
         expect(screen.queryByText('Тепле місце')).toBeNull();
     });
+
+    it('embedded drops the name and the close button but keeps the description', () => {
+        render(
+            <MarkerBubble
+                embedded
+                marker={marker}
+                actions={{ onMore: vi.fn(), onClose: vi.fn() }}
+            />
+        );
+
+        expect(screen.queryByText(marker.name)).toBeNull();
+        expect(screen.getByText('Тепле місце')).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Закрити' })).toBeNull();
+    });
 });

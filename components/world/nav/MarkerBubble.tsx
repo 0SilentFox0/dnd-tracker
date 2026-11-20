@@ -60,9 +60,11 @@ export function MarkerBubble({
                     <>
                         <Icon className="mt-0.5 size-4 shrink-0 text-hud-gold-bright" />
                         <div className="min-w-0 flex-1">
-                            <p className="font-medium break-words">
-                                {marker.name}
-                            </p>
+                            {embedded ? null : (
+                                <p className="font-medium break-words">
+                                    {marker.name}
+                                </p>
+                            )}
                             {marker.description ? (
                                 <p className="mt-1 line-clamp-4 text-xs break-words text-hud-muted">
                                     {marker.description}

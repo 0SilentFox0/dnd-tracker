@@ -216,6 +216,31 @@ describe('WorldPlayClient', () => {
         expect(screen.getByText('Відкрити карту')).toBeTruthy();
     });
 
+    it('on a phone the bubble is a bottom sheet with the name once', async () => {
+        vi.stubGlobal('matchMedia', (q: string) => ({
+            matches: false,
+            media: q,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+        }));
+        renderClient('m1');
+
+        click(await screen.findByRole('button', { name: 'Town' }));
+
+        const sheets = await screen.findAllByRole('dialog', { name: 'Town' });
+
+        expect(sheets.length).toBeGreaterThan(0);
+        expect(screen.getByText('Old market town')).toBeTruthy();
+        expect(screen.getAllByRole('heading', { name: 'Town' })).toHaveLength(1);
+
+        fireEvent.click(await screen.findByText('Докладніше'));
+
+        await waitFor(() =>
+            expect(screen.getByLabelText('Нова нотатка')).toBeTruthy()
+        );
+        expect(screen.getAllByRole('heading', { name: 'Town' })).toHaveLength(1);
+    });
+
     it('hides open-map when the child map is not in the view', async () => {
         vi.mocked(api.getWorldView).mockResolvedValue({
             ...view(),

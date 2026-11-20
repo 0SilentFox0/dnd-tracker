@@ -23,6 +23,7 @@ import {
     WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_NAME_MAX,
 } from '@/lib/constants/world';
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import type { WorldMarker } from '@/types/world';
 
 export function WorldMarkerPanel() {
@@ -46,6 +47,8 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
     const HeaderIcon = markerIcon(marker);
 
+    const sheet = !useMediaQuery(DESKTOP_QUERY);
+
     return (
         <div>
             <WorldPanelHeader
@@ -56,6 +59,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                     />
                 }
                 title={marker.name}
+                hideTitle={sheet}
                 subtitle={t('editor.markerSubtitle', {
                     shape: t(`shape.${marker.kind}`),
                     map: detail?.map.name ?? '',

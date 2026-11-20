@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { WORLD_NOTE_MAX } from '@/lib/constants/world';
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { type RosterHero, useNotesPanel } from '@/lib/hooks/world';
 import type { WorldMarker, WorldNote } from '@/types/world';
 
@@ -30,6 +31,8 @@ export function WorldNotesPanel({
 }: WorldNotesPanelProps) {
     const t = useTranslations('world.notes');
 
+    const sheet = !useMediaQuery(DESKTOP_QUERY);
+
     const tc = useTranslations('common.actions');
 
     const panel = useNotesPanel({
@@ -47,7 +50,9 @@ export function WorldNotesPanel({
             className="flex flex-col gap-3"
             data-tour="world.notes"
         >
-            <h2 className="hud-sc text-base text-hud-ink">{marker.name}</h2>
+            {sheet ? null : (
+                <h2 className="hud-sc text-base text-hud-ink">{marker.name}</h2>
+            )}
 
             {marker.description ? (
                 <p className="text-sm break-words whitespace-pre-line text-hud-muted">

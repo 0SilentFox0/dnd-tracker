@@ -104,6 +104,22 @@ export function WorldPlayClient({
                         </>
                     );
 
+                    const bubble =
+                        marker && !play.details.open ? (
+                            <PlayerMarkerBubble
+                                key={marker.id}
+                                marker={marker}
+                                embedded={!isDesktop}
+                                actions={{
+                                    onMore: () => play.details.set(true),
+                                    onOpenMap: play.card.canOpenChild
+                                        ? () => play.openChild(marker.id)
+                                        : undefined,
+                                    onClose: () => play.select(null),
+                                }}
+                            />
+                        ) : null;
+
                     const notes = marker ? (
                         <WorldNotesPanel
                             campaignId={campaignId}
@@ -175,47 +191,15 @@ export function WorldPlayClient({
                                             handlers={play.handlers}
                                             slots={{
                                                 card:
-                                                    marker &&
+                                                    bubble &&
                                                     play.card.point &&
-                                                    !(
-                                                        isDesktop &&
-                                                        play.details.open
-                                                    )
-                                                    ? {
-                                                          point: play.card
-                                                              .point,
-                                                          content: (
-                                                              <PlayerMarkerBubble
-                                                                  key={
-                                                                      marker.id
-                                                                  }
-                                                                  marker={
-                                                                      marker
-                                                                  }
-                                                                  actions={{
-                                                                      onMore: () =>
-                                                                          play.details.set(
-                                                                              true
-                                                                          ),
-                                                                      onOpenMap:
-                                                                          play
-                                                                              .card
-                                                                              .canOpenChild
-                                                                              ? () =>
-                                                                                    play.openChild(
-                                                                                        marker.id
-                                                                                    )
-                                                                              : undefined,
-                                                                      onClose:
-                                                                          () =>
-                                                                              play.select(
-                                                                                  null
-                                                                              ),
-                                                                  }}
-                                                              />
-                                                          ),
-                                                      }
-                                                    : undefined,
+                                                    isDesktop
+                                                        ? {
+                                                              point: play.card
+                                                                  .point,
+                                                              content: bubble,
+                                                          }
+                                                        : undefined,
                                             }}
                                         />
                                     </div>
@@ -245,6 +229,16 @@ export function WorldPlayClient({
                             </div>
                             {isDesktop ? null : (
                                 <>
+                                    <ResponsiveDialog
+                                        hud
+                                        open={!!bubble}
+                                        onOpenChange={(open) => {
+                                            if (!open) play.select(null);
+                                        }}
+                                        title={marker?.name}
+                                    >
+                                        {bubble}
+                                    </ResponsiveDialog>
                                     <ResponsiveDialog
                                         hud
                                         open={!!marker && play.details.open}
