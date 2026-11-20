@@ -62,6 +62,11 @@ const fighter = (id: string): BattleParticipant => {
                 {
                     ...DEFAULT_CHARACTERISTICS,
                     base: { ...DEFAULT_CHARACTERISTICS.base, ws: 30, bs: 30 },
+                    skillAdvances: {
+                        'ranged:bow': 1,
+                        'ranged:blackpowder': 1,
+                        'ranged:engineering': 1,
+                    },
                 },
                 { tb: 3 }
             ),
@@ -235,6 +240,37 @@ describe('canon: fumble (p165)', () => {
         expect(out.hp).toBeLessThan(20);
     });
 
+    bookExample(
+        165,
+        'misfire: the explosion deals the weapon damage to the shooter, less TB',
+        () => {
+            const attacker = fighter('a');
+
+            const target = fighter('t');
+
+            const rolls = [fraction(95), 0.1, 0.3];
+
+            const gun = {
+                ...weapon(AttackType.RANGED, 'blackpowder'),
+                damageBonus: 12,
+            } as BattleAttack;
+
+            const r = resolveWfrpAttack({
+                attacker,
+                target,
+                attack: gun,
+                participants: [attacker, target],
+                rules: canon,
+                rng: () => rolls.shift() ?? 0.5,
+                manualRoll: 99,
+            });
+
+            const after = r.attackerUpdate?.(attacker) ?? attacker;
+
+            expect(after.combatStats.currentHp).toBe(20 - (12 - 3));
+        }
+    );
+
     bookExample(165, 'a 99 on a bow is a normal fumble, not a misfire', () => {
         const out = run(canon, 99, {
             type: AttackType.RANGED,
@@ -258,7 +294,7 @@ const textOf = (lines: unknown[]) => JSON.stringify(lines);
 describe('canon: fumble log and explosion damage (p165)', () => {
     bookExample(
         165,
-        'misfire explosion deals a profile weapon Damage bonus',
+        'misfire explosion deals the profile weapon Damage bonus reduced by TB',
         () => {
             const out = run(canon, 100, {
                 type: AttackType.RANGED,
@@ -267,7 +303,7 @@ describe('canon: fumble log and explosion damage (p165)', () => {
                 damageBonus: 7,
             });
 
-            expect(out.hp).toBe(20 - 7);
+            expect(out.hp).toBe(20 - (7 - 3));
         }
     );
 

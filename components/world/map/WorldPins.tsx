@@ -33,7 +33,7 @@ interface WorldPinsProps {
     handlers: PinHandlers;
 }
 
-const sealStyle = (color: string) => ({
+export const sealStyle = (color: string) => ({
     background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 70%, white), ${color} 62%, color-mix(in srgb, ${color} 55%, black))`,
 });
 
@@ -55,7 +55,8 @@ export function WorldPins({
     return (
         <>
             {markers.map((m) => {
-                const spot = dragging?.id === m.id ? dragging.point : markerAnchor(m);
+                const spot =
+                    dragging?.id === m.id ? dragging.point : markerAnchor(m);
 
                 if (m.kind === 'zone') {
                     const clashes = points.some(

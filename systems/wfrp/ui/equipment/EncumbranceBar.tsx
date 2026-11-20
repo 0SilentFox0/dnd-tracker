@@ -4,7 +4,12 @@ import { useTranslations } from 'next-intl';
 
 import type { Encumbrance } from '@/systems/wfrp/rules/equipment/encumbrance';
 
-export function EncumbranceBar({ carried, limit, over }: Encumbrance) {
+export function EncumbranceBar({
+    carried,
+    limit,
+    over,
+    oversized = 0,
+}: Encumbrance & { oversized?: number }) {
     const t = useTranslations('wfrpEquipment.encumbrance');
 
     const percent =
@@ -33,6 +38,11 @@ export function EncumbranceBar({ carried, limit, over }: Encumbrance) {
             </div>
             {over && (
                 <p className="mt-1 text-xs text-hud-danger">{t('over')}</p>
+            )}
+            {oversized > 1 && (
+                <p className="mt-1 text-xs text-hud-danger">
+                    {t('oversized', { count: oversized })}
+                </p>
             )}
         </div>
     );

@@ -29,6 +29,24 @@ const REACH_FEET: Record<NonNullable<WfrpWeaponStats['reach']>, number> = {
     massive: 24,
 };
 
+export const REACH_RANK: Record<
+    NonNullable<WfrpWeaponStats['reach']>,
+    number
+> = {
+    personal: 0,
+    'very-short': 1,
+    short: 2,
+    average: 3,
+    long: 4,
+    'very-long': 5,
+    massive: 6,
+};
+
+/** Canon Engage distance: 2 yd, Very Long 4 yd, Massive 6 yd; a cell is 2 yd (p300) */
+export const canonEngageCells = (
+    reach: NonNullable<WfrpWeaponStats['reach']>
+): number => (reach === 'massive' ? 3 : reach === 'very-long' ? 2 : 1);
+
 const cellsOf = (feet: number) => Math.max(1, Math.ceil(feet / WFRP_CELL_FEET));
 
 export function weaponProfile(stats: unknown): WeaponProfile | null {

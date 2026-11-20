@@ -54,6 +54,7 @@ import {
 } from '@/lib/utils/characters/resources/battle';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import { isRecord } from '@/lib/utils/common/is-record';
+import { normalizeItems } from '@/lib/utils/inventory/items';
 import { attunedRefs } from '@/lib/utils/items/resolve';
 import { type Ruleset } from '@/lib/utils/rules';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -166,7 +167,7 @@ async function loadCharacterBuildRefs(
                 attuned: attunedRefs(character.inventory),
             },
             ...(attacksOf && {
-                attacksOf: () => attacksOf({ rows: artifactRows }),
+                attacksOf: () => attacksOf({ rows: artifactRows, rules }),
             }),
         }
     );
@@ -180,6 +181,7 @@ async function loadCharacterBuildRefs(
     return {
         skills,
         artifactRows,
+        artifactsById,
         consumables,
         equippedArtifacts,
         completed,
@@ -537,6 +539,53 @@ function participantAbilities(a: {
     };
 }
 
+export function equipmentGearOf(
+    character: CharacterFromPrisma,
+    artifactRows: EquippedArtifactRow[],
+    artifactsById: Record<string, { systemStats: unknown }>,
+    rules: Ruleset
+) {
+    const equipment = ruleSystemOf(rules).equipment;
+
+    const gear = equipment?.armourAp(
+        artifactRows
+            .filter((r) => !r.carried)
+            .map(({ row, slot }) => ({ slot, systemStats: row.systemStats })),
+        rules
+    );
+
+    if (!equipment?.burden || !gear) return gear;
+
+    const inv = character.inventory;
+
+    const burden = equipment.burden({
+        rows: artifactRows.map(({ row, slot, carried }) => ({
+            id: row.id,
+            slot,
+            systemStats: row.systemStats,
+            ...(carried && { carried }),
+        })),
+        specials: normalizeItems(inv?.items).flatMap((i) => {
+            const row = i.artifactId ? artifactsById[i.artifactId] : undefined;
+
+            return row
+                ? [
+                      {
+                          artifactId: i.artifactId,
+                          systemStats: row.systemStats,
+                          quantity: i.quantity,
+                      },
+                  ]
+                : [];
+        }),
+        coins: (inv?.gold ?? 0) + (inv?.silver ?? 0) + (inv?.copper ?? 0),
+        characteristics: character.characteristics,
+        rules,
+    });
+
+    return burden > 0 ? { ...gear, burden } : gear;
+}
+
 function ingredientStockOf(character: CharacterFromPrisma, rules: Ruleset) {
     return rules.spellIngredients.enabled &&
         character.controlledBy &&
@@ -644,10 +693,11 @@ export async function createBattleParticipantFromCharacter(
         rules
     );
 
-    const equipmentGear = ruleSystemOf(rules).equipment?.armourAp(
-        artifactRows
-            .filter((r) => !r.carried)
-            .map(({ row, slot }) => ({ slot, systemStats: row.systemStats }))
+    const equipmentGear = equipmentGearOf(
+        character,
+        artifactRows,
+        refs.artifactsById,
+        rules
     );
 
     const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(
@@ -684,7 +734,10 @@ export async function createBattleParticipantFromCharacter(
         ...grantPools,
     };
 
-    const baseStats = ruleSystemOf(rules).combat.baseStats?.(character);
+    const baseStats = ruleSystemOf(rules).combat.baseStats?.(
+        character,
+        equipmentGear
+    );
 
     const participant: BattleParticipant = {
         basicInfo: basicInfoOf(character, battleId, side, instanceNumber),

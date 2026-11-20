@@ -328,6 +328,7 @@ export type ActionAssertCtx =
           targets: BattleParticipant[];
           participants: BattleParticipant[];
           map?: BattleMapConfig | null;
+          rules?: Ruleset;
       }
     | { kind: 'cast'; actor: BattleParticipant };
 
@@ -372,7 +373,10 @@ export interface RuleSystemCombat {
         hit: boolean;
     };
     dice: number;
-    attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
+    attacksOf?(input: {
+        rows: EquippedArtifactRow[];
+        rules?: Ruleset;
+    }): ExtractedAttack[];
     participantFields?(
         row: { characteristics?: unknown },
         gear?: ArmourGear,
@@ -425,7 +429,10 @@ export interface RuleSystemCombat {
         }
     ): InitiativeScore;
     /** Starting values the participant builders use instead of the d20 sheet columns */
-    baseStats?(row: { characteristics?: unknown }): {
+    baseStats?(
+        row: { characteristics?: unknown },
+        gear?: ArmourGear
+    ): {
         initiative: number;
         speed: number;
     };

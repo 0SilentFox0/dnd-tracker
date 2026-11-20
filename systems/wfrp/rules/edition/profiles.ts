@@ -37,6 +37,8 @@ export interface EditionProfile {
     downtimeModel: 'legacy' | 'canon5e';
     /** `legacy`: overcast steps from SL over CN, Major miscast on 99/00; `canon5e`: overcast table capped at IB + WPB, Critical Casting bonuses, armour repels the winds on every location, Major only under a Malignant Influence, ingredients lower a miscast one step, Sin/Wrath (p217-222, p235-238) */
     magicModel: 'legacy' | 'canon5e';
+    /** `canon`: worn armour is 1 Enc lighter, coins weigh 1 Enc per 200, overburdened characters lose Movement and Agility (p299) */
+    gearModel: 'legacy' | 'canon';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -59,6 +61,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         psychologyModel: 'broken',
         downtimeModel: 'legacy',
         magicModel: 'legacy',
+        gearModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -79,5 +82,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         psychologyModel: 'extended',
         downtimeModel: 'canon5e',
         magicModel: 'canon5e',
+        gearModel: 'canon',
     },
 };

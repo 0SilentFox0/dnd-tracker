@@ -12,6 +12,7 @@ import {
     WORLD_MARKER_ICON_KEYS,
     WORLD_NAME_MAX,
     WORLD_NOTE_MAX,
+    WORLD_SESSION_DESCRIPTION_MAX,
 } from '@/lib/constants/world';
 import { hexColorSchema, urlField } from '@/lib/schemas/common';
 
@@ -203,3 +204,46 @@ export const worldViewQuerySchema = z.object({
     asHeroId: z.string().min(1).optional(),
     asParty: z.literal('1').optional(),
 });
+
+export const worldTrailQuerySchema = z.object({ mapId: z.string().min(1) });
+
+const sessionDescription = z
+    .string()
+    .max(WORLD_SESSION_DESCRIPTION_MAX, 'world.validation.descriptionMax');
+
+export const createSessionSchema = z.object({
+    name: nameSchema,
+    description: sessionDescription.optional(),
+    color: hexColor.optional(),
+});
+
+export const updateSessionSchema = z
+    .object({
+        name: nameSchema,
+        description: sessionDescription,
+        color: hexColor,
+        end: z.literal(true),
+    })
+    .partial()
+    .strict()
+    .refine(
+        (o) => Object.keys(o).length > 0,
+        'world.validation.nothingToUpdate'
+    );
+
+export const createEnemySchema = z.object({
+    name: nameSchema,
+    x: coord,
+    y: coord,
+    icon: iconSchema.optional(),
+    color: hexColor.optional(),
+    dmNote: z.string().max(WORLD_DM_NOTE_MAX).optional(),
+});
+
+export const updateEnemySchema = createEnemySchema
+    .partial()
+    .strict()
+    .refine(
+        (o) => Object.keys(o).length > 0,
+        'world.validation.nothingToUpdate'
+    );

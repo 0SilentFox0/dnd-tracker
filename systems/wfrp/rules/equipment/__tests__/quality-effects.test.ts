@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { readStats } from '../guard';
 import type { QualityRef } from '../qualities';
 import { qualityEffects } from '../quality-effects';
 
@@ -111,5 +112,29 @@ describe('qualityEffects', () => {
         );
 
         expect(none).toEqual({ effect: { toHit: 0, damage: 0 }, steps: [] });
+    });
+});
+
+describe('Inflict without condition (legacy data)', () => {
+    it('readStats accepts it and keeps the quality', () => {
+        const stats = readStats({
+            type: 'gear',
+            weight: 1,
+            price: 1,
+            qualities: [{ key: 'inflict', value: 1 }],
+        });
+
+        expect(stats?.qualities).toEqual([{ key: 'inflict', value: 1 }]);
+    });
+
+    it('still rejects a condition on a non-inflict quality', () => {
+        expect(
+            readStats({
+                type: 'gear',
+                weight: 1,
+                price: 1,
+                qualities: [{ key: 'pummel', condition: 'bleeding' }],
+            })
+        ).toBeNull();
     });
 });

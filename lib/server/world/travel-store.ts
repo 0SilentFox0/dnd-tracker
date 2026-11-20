@@ -1,6 +1,7 @@
 import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { listWorldMaps } from '@/lib/server/world/map-store';
+import { activeSessionId } from '@/lib/server/world/session-store';
 import {
     dedupePoint,
     type HeroPos,
@@ -8,7 +9,7 @@ import {
 } from '@/lib/utils/world/travel';
 import {
     type RevealShape,
-    TRAVEL_KINDS,
+    toTravelKind,
     type TravelKind,
     type TravelRest,
     type WorldHero,
@@ -94,6 +95,20 @@ export type DestMap = {
     height: number;
 };
 
+// the session may be deleted between the read and the insert (FK violation)
+async function withSessionRetry(
+    sessionId: Promise<string | null>,
+    write: (sessionId: string | null) => PromiseLike<unknown>
+): Promise<void> {
+    try {
+        await write(await sessionId);
+    } catch (e) {
+        if ((e as { code?: string }).code !== 'P2003') throw e;
+
+        await write(null);
+    }
+}
+
 export async function commitTravel(args: {
     campaignId: string;
     userId: string;
@@ -135,7 +150,8 @@ export async function commitTravel(args: {
 
     const from = first ? args.positions.get(first.characterId) : null;
 
-    await prisma.$transaction([
+    const write = (sessionId: string | null) =>
+        prisma.$transaction([
         ...plan.moves.map((m) =>
             prisma.worldPosition.upsert({
                 where: { characterId: m.characterId },
@@ -169,9 +185,12 @@ export async function commitTravel(args: {
                 rest: args.rest,
                 kind: args.kind,
                 byUserId: args.userId,
+                sessionId,
             },
         }),
     ]);
+
+    await withSessionRetry(activeSessionId(campaignId), write);
 }
 
 export async function writeRestLog(args: {
@@ -184,19 +203,22 @@ export async function writeRestLog(args: {
 }): Promise<void> {
     const { mapId, at } = args;
 
-    await prisma.worldTravelLog.create({
-        data: {
-            campaignId: args.campaignId,
-            mapId,
-            characterIds: args.characterIds,
-            from: { mapId, ...at },
-            to: { mapId, ...at },
-            toMarkerId: null,
-            rest: args.kind,
-            kind: 'rest',
-            byUserId: args.userId,
-        },
-    });
+    await withSessionRetry(activeSessionId(args.campaignId), (sessionId) =>
+        prisma.worldTravelLog.create({
+            data: {
+                campaignId: args.campaignId,
+                mapId,
+                characterIds: args.characterIds,
+                from: { mapId, ...at },
+                to: { mapId, ...at },
+                toMarkerId: null,
+                rest: args.kind,
+                kind: 'rest',
+                byUserId: args.userId,
+                sessionId,
+            },
+        })
+    );
 }
 
 export async function readTravelLog(
@@ -262,9 +284,7 @@ export async function readTravelLog(
             ? (markerNames.get(r.toMarkerId) ?? null)
             : null,
         rest: r.rest as TravelRest,
-        kind: (TRAVEL_KINDS as readonly string[]).includes(r.kind)
-            ? (r.kind as TravelKind)
-            : 'travel',
+        kind: toTravelKind(r.kind),
         createdAt: r.createdAt.toISOString(),
     }));
 }

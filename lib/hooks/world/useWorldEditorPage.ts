@@ -15,6 +15,7 @@ import {
 import { useMoveTarget } from './useMoveTarget';
 import { useRemoveMarker } from './useRemoveMarker';
 import { useWorldEditor } from './useWorldEditor';
+import { useWorldEnemies } from './useWorldEnemies';
 import { useWorldHeroes } from './useWorldHeroes';
 import { useWorldMap } from './useWorldMap';
 import { useWorldMaps } from './useWorldMaps';
@@ -26,6 +27,7 @@ import type {
     CreateWorldMarkerData,
     MapPoint,
     Polygon,
+    UpdateEnemyData,
     WorldMarker,
 } from '@/types/world';
 
@@ -55,6 +57,17 @@ export function useWorldEditorPage({
     const editor = useWorldEditor(campaignId, mapId);
 
     const roster = useWorldHeroes(campaignId);
+
+    const enemyEditor = useWorldEnemies(campaignId, mapId ?? '');
+
+    const [enemyId, setEnemyId] = useState<string | null>(null);
+
+    const [enemyMapId, setEnemyMapId] = useState(mapId);
+
+    if (mapId !== enemyMapId) {
+        setEnemyMapId(mapId);
+        setEnemyId(null);
+    }
 
     const eyes = useHeroEyes(campaignId, mapId);
 
@@ -160,6 +173,22 @@ export function useWorldEditorPage({
                         data: { entryX: p.x, entryY: p.y },
                     });
             },
+            onEnemy: async (p: MapPoint) => {
+                if (!mapId) return;
+
+                try {
+                    const pin = await enemyEditor.create.mutateAsync({
+                        name: t('defaults.enemy'),
+                        x: p.x,
+                        y: p.y,
+                    });
+
+                    select(null);
+                    setEnemyId(pin.id);
+                } catch {
+                    // create's errorText already notified
+                }
+            },
             onMove: (p) => {
                 if (!detail.isPlaceholderData) moveTarget.pickPoint(p);
             },
@@ -199,6 +228,7 @@ export function useWorldEditorPage({
 
     const closePanel = useCallback(() => {
         select(null);
+        setEnemyId(null);
         setDetailsOpen(false);
     }, []);
 
@@ -281,11 +311,31 @@ export function useWorldEditorPage({
     const handlers = {
         ...drawing.handlers,
         onVertexChange: changeVertices,
-        onMapClick: (p: MapPoint) =>
-            tool === 'select' ? select(null) : drawing.handlers.onMapClick(p),
+        onMapClick: (p: MapPoint) => {
+            setEnemyId(null);
+
+            if (tool === 'select') select(null);
+            else drawing.handlers.onMapClick(p);
+        },
+        onEnemyClick: (id: string) => {
+            if (tool !== 'select' && tool !== 'move') return;
+
+            select(null);
+            setEnemyId(id);
+        },
+        onEnemyDrag:
+            tool === 'move'
+                ? (id: string, p: MapPoint) =>
+                      void enemyEditor.update.mutateOk({
+                          id,
+                          data: { x: p.x, y: p.y },
+                      })
+                : undefined,
         onMarkerClick: (id: string) => {
-            if (tool === 'select') select(id);
-            else if (tool === 'move' && !detail.isPlaceholderData)
+            if (tool === 'select') {
+                setEnemyId(null);
+                select(id);
+            } else if (tool === 'move' && !detail.isPlaceholderData)
                 moveTarget.pickMarker(id);
         },
         onMarkerDoubleClick: (id: string) => {
@@ -308,15 +358,37 @@ export function useWorldEditorPage({
         : undefined;
 
     const bubbleOpen =
-        tool === 'select' &&
-        !eyes.asHeroId &&
-        !!selectedMarker &&
-        !detailsOpen;
+        tool === 'select' && !eyes.asHeroId && !!selectedMarker && !detailsOpen;
 
     const card = {
         marker: selectedMarker,
         open: bubbleOpen,
         point: selectedMarker ? markerAnchor(selectedMarker) : null,
+    };
+
+    const selectedEnemy = enemyId
+        ? detail.data?.enemies?.find((e) => e.id === enemyId)
+        : undefined;
+
+    const enemy = {
+        selected: selectedEnemy,
+        card: selectedEnemy
+            ? {
+                  point: { x: selectedEnemy.x, y: selectedEnemy.y },
+                  actions: {
+                      onSave: (data: UpdateEnemyData) =>
+                          void enemyEditor.update.mutateOk({
+                              id: selectedEnemy.id,
+                              data,
+                          }),
+                      onDelete: () => {
+                          void enemyEditor.remove.mutateOk(selectedEnemy.id);
+                          setEnemyId(null);
+                      },
+                      onClose: () => setEnemyId(null),
+                  },
+              }
+            : undefined,
     };
 
     const ctx: WorldEditorCtx = useMemo(
@@ -371,5 +443,6 @@ export function useWorldEditorPage({
         actions: { openMap, changeEyes },
         handlers,
         card,
+        enemy,
     };
 }

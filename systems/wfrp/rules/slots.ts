@@ -1,8 +1,10 @@
 import type { Characteristics } from './characteristics/keys';
 import type { SheetWfrpBlock } from './characteristics/sheet-block';
 import type { WfrpParticipantStats } from './combat/participant';
+import { WEAPON_REACHES } from './equipment/constants';
 import { qualityList } from './equipment/guard';
 import type { QualityRef } from './equipment/qualities';
+import type { WfrpWeaponStats } from './equipment/stats';
 import type {
     PercentileAttackDetails,
     PercentileCastDetails,
@@ -14,6 +16,8 @@ import type { ParticipantSide } from '@/types/battle';
 
 export type WfrpHand = 'main' | 'off';
 
+type WeaponReach = NonNullable<WfrpWeaponStats['reach']>;
+
 export interface WfrpAttackSlot {
     qualities: QualityRef[];
     flaws: QualityRef[];
@@ -23,6 +27,10 @@ export interface WfrpAttackSlot {
     hand?: WfrpHand;
     /** Weapon group, picks the Melee/Ranged skill speciality */
     group?: string;
+    /** Needs both hands, canon gear only: unusable with either arm disabled (p164) */
+    twoHanded?: true;
+    /** Weapon reach, canon gear only (p300) */
+    reach?: WeaponReach;
 }
 
 // Legacy rows stored `hand: true` (main) and `offHand: true` (off)
@@ -47,6 +55,11 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
         qualities,
         flaws,
         ...(typeof raw.group === 'string' && { group: raw.group }),
+        ...(typeof raw.reach === 'string' &&
+            (WEAPON_REACHES as readonly string[]).includes(raw.reach) && {
+                reach: raw.reach as WeaponReach,
+            }),
+        ...(raw.twoHanded === true && { twoHanded: true as const }),
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.magical === true && { magical: true as const }),
         ...(handOf(raw) && { hand: handOf(raw) }),
@@ -115,6 +128,8 @@ export interface WfrpParticipantState {
     momentumAttack?: true;
     /** Hand of the last weapon attack this turn, or `cast` after a spell (p167) */
     lastHand?: WfrpHand | 'cast';
+    /** A melee attack hit this turn: the Parry weapon's second attack is then unopposed (p304), canon gear */
+    meleeHit?: true;
     channelledSl?: number;
     /** Channelled this turn, so the pool needs no upkeep test (canon5e, p236) */
     channelledNow?: true;
@@ -237,6 +252,7 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...((raw.lastHand === 'main' ||
                 raw.lastHand === 'off' ||
                 raw.lastHand === 'cast') && { lastHand: raw.lastHand }),
+            ...(raw.meleeHit === true && { meleeHit: true as const }),
             ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
             ...(raw.channelledNow === true && {
                 channelledNow: true as const,

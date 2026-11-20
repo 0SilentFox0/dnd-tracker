@@ -21,6 +21,10 @@ vi.mock('@/lib/hooks/characters', () => ({
     useStash: () => ({ data: state.stash }),
 }));
 
+vi.mock('@/lib/hooks/campaigns', () => ({
+    useCampaignRules: () => ({ data: undefined }),
+}));
+
 afterEach(() => {
     cleanup();
     state.wfrp = undefined;
@@ -115,7 +119,10 @@ describe('EquippedArmourSummary', () => {
             armor: item('armor', armour({ body: 1 })),
             shield: item('shield', gear(2)),
         };
-        state.stash = { artifacts: [{ id: 'bag', systemStats: gear(5) }] };
+        state.stash = {
+            artifacts: [{ id: 'bag', systemStats: gear(5) }],
+            purse: { gp: 0, sp: 0, cp: 0 },
+        };
 
         render(<EquippedArmourSummary campaignId="c" characterId="h" />);
 

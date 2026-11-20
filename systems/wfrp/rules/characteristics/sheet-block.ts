@@ -1,20 +1,20 @@
 import { modifiersOf } from '../corruption/modifiers';
 import { corruptionThreshold } from '../corruption/threshold';
 import type { Mutation, MutationKind } from '../corruption/types';
+import { applyBurden, asBurdenTier } from '../equipment/burden';
+import { burdenedMove } from '../equipment/encumbrance';
 import {
     parseSkillAdvanceKey,
     SKILL_CATALOG,
     skillAdvanceKey,
     skillDef,
 } from '../skills/catalog';
-import { SHEET_SLOT } from '../slots';
+import { PARTICIPANT_SLOT, SHEET_SLOT } from '../slots';
 import {
     bonus,
     moveOf,
-    runYards,
     skillTarget,
     value,
-    walkYards,
     woundsBreakdown,
     woundsMax,
 } from './derive';
@@ -69,8 +69,15 @@ export const wfrpSheetBlock = (input: SheetBlockInput): SystemSlot =>
 function buildBlock({
     characteristics,
     resources,
+    participant,
 }: SheetBlockInput): SheetWfrpBlock {
-    const c = readCharacteristics({ characteristics });
+    const stored = readCharacteristics({ characteristics });
+
+    const tier = asBurdenTier(
+        PARTICIPANT_SLOT.read(participant?.abilities.system)?.stats.burden
+    );
+
+    const c = applyBurden(stored, tier);
 
     const entries = new Map<string, { key: string; spec?: string }>();
 
@@ -117,17 +124,22 @@ function buildBlock({
 
     const mods = modifiersOf(c.corruption);
 
+    const move = burdenedMove(moveOf(c), tier);
+
     return {
         characteristics: CHARACTERISTIC_KEYS.map((key) => ({
             key,
-            base: c.base[key],
-            advances: c.advances[key],
+            base: stored.base[key],
+            advances: stored.advances[key],
             value: value(c, key),
             bonus: bonus(c, key),
-            mod: mods.characteristics[key] ?? 0,
+            mod:
+                (mods.characteristics[key] ?? 0) +
+                value(c, key) -
+                value(stored, key),
         })),
         wounds: { max: woundsMax(c), breakdown: woundsBreakdown(c) },
-        move: { value: moveOf(c), walkYd: walkYards(c), runYd: runYards(c) },
+        move: { value: move, walkYd: move * 2, runYd: move * 4 },
         skills,
         fate: c.fate,
         fortune: resources.fortune ?? fortuneMax(c),

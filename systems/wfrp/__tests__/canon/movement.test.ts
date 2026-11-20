@@ -10,7 +10,10 @@ import {
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { baseMovement } from '@/lib/utils/battle/grid/path';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
-import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import {
+    slotOf,
+    withStats,
+} from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { hasMomentum } from '@/systems/wfrp/rules/combat/momentum';
 import { chargeBand, sprintYards } from '@/systems/wfrp/rules/combat/movement';
@@ -188,4 +191,25 @@ describe('canon: Charge needs an Action (p163)', () => {
             )
         ).toThrow('errors.actionUsed');
     });
+    bookExample(
+        299,
+        'Charge and Sprint honour the Overburdened Movement penalty',
+        () => {
+            const heavy = withStats(heroOf(), { burden: 3 });
+
+            expect(() =>
+                movementMutation(ctxOf([heavy, foeOf('f1', 3)]), {
+                    kind: 'charge',
+                    participantId: 'hero',
+                    targetId: 'f1',
+                })
+            ).toThrow();
+
+            const c = participantChars(heavy);
+
+            expect(chargeBand(c, 3, 3)).toBe('far');
+            expect(sprintYards(c, 2, 3)).toBe(2);
+            expect(sprintYards(c, 2, 1)).toBe((4 - 1) * 4 + 2);
+        }
+    );
 });

@@ -1,6 +1,9 @@
+import { editionOf } from '../edition';
+import { ATTACK_SLOT } from '../slots';
 import { wfrpState } from '../state';
 import { isFrenzied, nearestFoes } from '../traits/frenzy';
 import { compelTargets, groupLabel, inGroup } from '../traits/passions';
+import { canonWeaponUse } from './weapon-use';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { AttackType } from '@/lib/constants/battle';
@@ -33,6 +36,17 @@ export function assertWfrpAction(ctx: ActionAssertCtx): void {
     }
 
     if (ctx.kind !== 'attack') return;
+
+    if (
+        ctx.rules &&
+        editionOf(ctx.rules).gearModel === 'canon' &&
+        attackKindOf(ctx.attack.type) === AttackType.RANGED &&
+        canonWeaponUse(actor, ctx.attack).forbidden
+    )
+        throw ruleErrorOf('action_rejected', {
+            message: API_ERRORS.RANGED_GROUP_FORBIDDEN,
+            params: { group: ATTACK_SLOT.read(ctx.attack.system)?.group ?? '' },
+        });
 
     for (const { group, kind } of Object.values(
         wfrpState(actor).compelled ?? {}

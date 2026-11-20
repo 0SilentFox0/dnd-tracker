@@ -42,6 +42,7 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
             worldKeys.mapAll(campaignId),
             worldKeys.maps(campaignId),
             worldKeys.log(campaignId),
+            worldKeys.trailAll(campaignId),
         ])
             void queryClient.invalidateQueries({ queryKey });
     };

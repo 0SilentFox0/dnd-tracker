@@ -1,14 +1,21 @@
+import { applyWfrpConditionTo } from '../conditions/apply';
+import type { WfrpConditionKey } from '../conditions/catalog';
 import { editionOf } from '../edition';
 import { QUALITY_REGISTRY } from '../equipment/qualities';
-import { qualityEffects } from '../equipment/quality-effects';
+import {
+    qualityEffects,
+    qualityInflicts,
+    qualityStunsOnHead,
+} from '../equipment/quality-effects';
 import { ATTACK_SLOT } from '../slots';
 import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
 import { sizeDamageBonus, wardRoll } from '../traits/size';
 import { applyWfrpCrit } from './crit-effect';
-import { rollCrit } from './crit-table';
+import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
 import { asLocation, sideOf } from './location';
-import { participantStats } from './participant';
+import { apAt, participantStats, withArmourWear } from './participant';
+import { canonWeaponUse } from './weapon-use';
 
 import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -20,6 +27,7 @@ import type {
     MitigateResult,
     MitigateStep,
 } from '@/lib/utils/rules/systems/types';
+import type { LogLine } from '@/types/text';
 
 const step = (key: string, value: number): MitigateStep => ({
     key,
@@ -31,6 +39,9 @@ const step = (key: string, value: number): MitigateStep => ({
     ),
     side: key === 'tb' || key === 'ap' ? 'target' : 'attacker',
 });
+
+const critRank = (c: CritResult) =>
+    c.death ? Infinity : Number(c.id.split('.')[1]);
 
 const totalLabel = textRef('battleWfrp.damage.total');
 
@@ -63,27 +74,39 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const sb = participantStats(attacker)?.sb ?? 0;
 
-    const ap = participantStats(target)?.ap[location] ?? 0;
+    const ap = apAt(participantStats(target), location);
 
     const slot = ATTACK_SLOT.read(ctx.attack.system);
 
+    const edition = editionOf(ctx.rules);
+
+    const gear = edition.gearModel;
+
+    const refs =
+        gear === 'canon'
+            ? canonWeaponUse(attacker, ctx.attack).refs
+            : { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] };
+
     const { effect, steps: qualitySteps } = qualityEffects(
-        { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] },
+        refs,
         {
             attackRoll: ctx.attackRoll ?? 0,
             netSl: ctx.margin,
             crit: ctx.crit,
             sb,
             ap,
-        }
+        },
+        gear
     );
+
+    const margin = effect.noSlDamage ? 0 : ctx.margin;
 
     const appliedSb = slot?.noSb ? 0 : sb;
 
     const size = sizeDamageBonus(
         attacker,
         target,
-        ctx.weapon + appliedSb + ctx.margin
+        ctx.weapon + appliedSb + margin
     );
 
     const frenzyBonus =
@@ -95,7 +118,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     const base = computeWfrpDamage({
         weapon: ctx.weapon,
         sb: appliedSb,
-        netSl: ctx.margin,
+        netSl: margin,
         size,
         tb: participantStats(target)?.tb ?? 0,
         ap,
@@ -114,30 +137,87 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (base.total !== raw) steps.push(step('minimum', base.total - raw));
 
-    const counted = editionOf(ctx.rules).woundModel === 'critical';
+    const counted = edition.woundModel === 'critical';
+
+    const rollOnce = () =>
+        rollCrit(
+            location,
+            ctx.rules,
+            ctx.rng,
+            undefined,
+            0,
+            sideOf(ctx.location),
+            participantStats(target)?.tb ?? 0
+        );
+
+    const lower = (a: CritResult, b: CritResult) =>
+        critRank(b) < critRank(a) ? b : a;
 
     const crit =
         ctx.crit && (counted || target.combatStats.currentHp > 0)
-            ? rollCrit(
-                  location,
-                  ctx.rules,
-                  ctx.rng,
-                  undefined,
-                  0,
-                  sideOf(ctx.location)
-              )
+            ? effect.minDamage === 0 && gear === 'canon'
+                ? lower(rollOnce(), rollOnce())
+                : rollOnce()
             : undefined;
 
-    if (!crit) return { amount: base.total, steps, totalLabel };
+    if (crit?.bonusDamage) steps.push(step('crit', crit.bonusDamage));
 
-    if (crit.bonusDamage > 0) steps.push(step('crit', crit.bonusDamage));
+    const conditions: WfrpConditionKey[] = [
+        ...qualityInflicts(refs, gear, location),
+        ...(location === 'head' &&
+        qualityStunsOnHead(refs, gear) &&
+        base.total >= (participantStats(target)?.tb ?? 0)
+            ? (['stunned'] as const)
+            : []),
+    ];
+
+    const wear = effect.armourWear ?? 0;
+
+    if (!crit && !conditions.length && !wear)
+        return { amount: base.total, steps, totalLabel };
 
     return {
-        amount: base.total + crit.bonusDamage,
+        amount: base.total + (crit?.bonusDamage ?? 0),
         steps,
         totalLabel,
-        afterHit: (p, round) =>
-            applyWfrpCrit(p, crit, round, editionOf(ctx.rules)),
+        afterHit: (p, round) => {
+            let participant = wear ? withArmourWear(p, location, wear) : p;
+
+            let message: LogLine | undefined = wear
+                ? textRef('battleWfrp.log.armourWorn', {
+                      target: p.basicInfo.name,
+                      amount: wear,
+                  })
+                : undefined;
+
+            for (const key of conditions) {
+                const applied = applyWfrpConditionTo(participant, {
+                    key,
+                    round,
+                    edition,
+                    sourceName: attacker.basicInfo.name,
+                });
+
+                participant = applied.participant;
+
+                message = applied.messages[0] ?? message;
+            }
+
+            if (crit) {
+                const applied = applyWfrpCrit(
+                    participant,
+                    crit,
+                    round,
+                    edition
+                );
+
+                participant = applied.participant;
+
+                message = applied.message;
+            }
+
+            return { participant, message: message ?? '' };
+        },
     };
 }
 

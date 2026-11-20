@@ -7,7 +7,10 @@ import {
     sprintYards,
     yardsToFeet,
 } from '../../rules/combat/movement';
-import { participantChars } from '../../rules/combat/participant';
+import {
+    participantChars,
+    participantStats,
+} from '../../rules/combat/participant';
 import {
     movementSlMod,
     selfModes,
@@ -15,6 +18,7 @@ import {
     selfTestMod,
 } from '../../rules/conditions/test-mod';
 import { editionOf } from '../../rules/edition';
+import { asBurdenTier } from '../../rules/equipment/burden';
 import { resolvePercentileTest } from '../../rules/percentile';
 import { resolveModeSources } from '../../rules/percentile/advantage';
 import { DIFFICULTY_SL } from '../../rules/percentile/difficulty';
@@ -111,6 +115,8 @@ export function movementMutation(
 
     const chars = participantChars(actor);
 
+    const tier = asBurdenTier(participantStats(actor)?.burden);
+
     const walkFeet = baseMovement(actor, rules);
 
     const at = { battleId: ctx.scene.id, round: ctx.scene.round };
@@ -184,7 +190,7 @@ export function movementMutation(
                 })
             );
 
-        const yards = sprintYards(chars, test.sl);
+        const yards = sprintYards(chars, test.sl, tier);
 
         return finish(
             withExtraFeet(used, yardsToFeet(yards)),
@@ -229,7 +235,7 @@ export function movementMutation(
         (cellDistance(from, to) * cellFeetOf(rules)) / yardsToFeet(1)
     );
 
-    const band = chargeBand(chars, yards);
+    const band = chargeBand(chars, yards, tier);
 
     if (band === 'far') throw reject(API_ERRORS.CHARGE_TOO_FAR);
 

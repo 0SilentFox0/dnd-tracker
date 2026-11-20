@@ -25,8 +25,9 @@ export const WFRP_META = {
             dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
         },
         budgetKb: {
-            battle: 113,
+            battle: 113.5,
             member: 116,
+            // W8 gear texts (qualities, groups) grew the wfrp scopes past their old budgets
             dm: 121,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },

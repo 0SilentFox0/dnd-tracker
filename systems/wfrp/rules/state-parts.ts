@@ -55,6 +55,7 @@ export const wfrpResetState: TurnStateReset = (p, scope) => {
         moveMode,
         channelledNow,
         lastCast,
+        meleeHit,
     } = wfrpState(p);
 
     const cleared =
@@ -63,7 +64,8 @@ export const wfrpResetState: TurnStateReset = (p, scope) => {
         lastHand ||
         moveMode ||
         channelledNow ||
-        lastCast
+        lastCast ||
+        meleeHit
             ? withWfrpState(p, {
                   conditionTests: undefined,
                   momentumAttack: undefined,
@@ -71,6 +73,7 @@ export const wfrpResetState: TurnStateReset = (p, scope) => {
                   moveMode: undefined,
                   channelledNow: undefined,
                   lastCast: undefined,
+                  meleeHit: undefined,
               })
             : p;
 
@@ -88,9 +91,9 @@ export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
     if (!p || editionOf(rules).momentumModel !== 'participant')
         return { participants, messages: [] };
 
-    const { momentumAttack, lastHand, moveMode } = wfrpState(p);
+    const { momentumAttack, lastHand, moveMode, meleeHit } = wfrpState(p);
 
-    if (!momentumAttack && !lastHand && !moveMode)
+    if (!momentumAttack && !lastHand && !moveMode && !meleeHit)
         return { participants, messages: [] };
 
     return {
@@ -100,6 +103,7 @@ export const wfrpEndTurnState: TurnHook<TurnSubjectCtx> = ({
                 momentumAttack: undefined,
                 lastHand: undefined,
                 moveMode: undefined,
+                meleeHit: undefined,
             })
         ),
         messages: [],

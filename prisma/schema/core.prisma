@@ -90,6 +90,7 @@ model Campaign {
   worldMaps            WorldMap[]
   worldPositions       WorldPosition[]
   worldTravelLog       WorldTravelLog[]
+  worldSessions        WorldSession[]
   playerNotifications  PlayerNotification[]
   acquaintances        Acquaintance[]
 
@@ -337,23 +338,23 @@ model SpellGroup {
 }
 
 model Artifact {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
   campaignId  String
   name        String
   description String?
   rarity      String?
   slot        String
-  bonuses     Json         @default("{}")
-  modifiers   Json         @default("[]")
+  bonuses     Json     @default("{}")
+  modifiers   Json     @default("[]")
   setId       String?
   icon        String?
-  createdAt   DateTime     @default(now())
-  abilities   Json         @default("[]")
-  campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  abilities   Json     @default("[]")
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   sourceId    String?
   sourceHash  String?
   slug        String?
-  systemStats Json?        @map("system_stats")
+  systemStats Json?    @map("system_stats")
 
   @@index([campaignId])
   @@index([setId])
@@ -1203,6 +1204,7 @@ model WorldMap {
   positions      WorldPosition[]
   reveals        WorldReveal[]
   travelLog      WorldTravelLog[]
+  enemyPins      WorldEnemyPin[]
 
   @@index([campaignId])
   @@map("world_maps")
@@ -1264,27 +1266,64 @@ model WorldReveal {
 }
 
 model WorldTravelLog {
-  id           String       @id @default(cuid())
+  id           String        @id @default(cuid())
   campaignId   String
   mapId        String
   characterIds String[]
   from         Json?
   to           Json
   toMarkerId   String?
-  rest         String       @default("none")
-  kind         String       @default("travel")
+  rest         String        @default("none")
+  kind         String        @default("travel")
   byUserId     String?
-  createdAt    DateTime     @default(now())
-  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  map          WorldMap     @relation(fields: [mapId], references: [id], onDelete: Cascade)
-  toMarker     WorldMarker? @relation(fields: [toMarkerId], references: [id], onDelete: SetNull)
-  byUser       User?        @relation(fields: [byUserId], references: [id], onDelete: SetNull)
+  sessionId    String?
+  createdAt    DateTime      @default(now())
+  campaign     Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  map          WorldMap      @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  session      WorldSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  toMarker     WorldMarker?  @relation(fields: [toMarkerId], references: [id], onDelete: SetNull)
+  byUser       User?         @relation(fields: [byUserId], references: [id], onDelete: SetNull)
 
   @@index([campaignId, createdAt])
   @@index([mapId])
   @@index([toMarkerId])
   @@index([byUserId])
+  @@index([sessionId])
   @@map("world_travel_log")
+}
+
+// Partial unique index world_sessions_one_active ON ("campaignId") WHERE "endedAt" IS NULL lives in the migration only; Prisma cannot describe it.
+model WorldSession {
+  id          String           @id @default(cuid())
+  campaignId  String
+  name        String
+  description String?
+  color       String
+  startedAt   DateTime         @default(now())
+  endedAt     DateTime?
+  createdAt   DateTime         @default(now())
+  campaign    Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  logs        WorldTravelLog[]
+
+  @@index([campaignId, startedAt])
+  @@map("world_sessions")
+}
+
+model WorldEnemyPin {
+  id        String   @id @default(cuid())
+  mapId     String
+  name      String
+  icon      String?
+  color     String?
+  dmNote    String?
+  x         Float
+  y         Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  map       WorldMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@index([mapId])
+  @@map("world_enemy_pins")
 }
 
 model WorldNote {

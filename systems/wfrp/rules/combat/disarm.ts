@@ -22,7 +22,7 @@ const disarmedHand = (p: BattleParticipant, hand: 'main' | 'off') =>
         : hasMarker(p, 'disarmed') ||
           hasMarker(p, sidedMarker('disarmed', 'right'));
 
-/** Canon5e: a Blinded shooter cannot make Ranged attacks (p185), a bow needs both arms, a disarmed arm leaves the weapon of that hand unusable, a bare `disarmed` marker counts as the main hand (p164); after a Momentum second attack the hand of the first one is closed (p167) */
+/** Canon5e: a Blinded shooter cannot make Ranged attacks (p185), a disarmed arm leaves the weapon of that hand (or any two-handed one, a bow included) unusable, a bare `disarmed` marker counts as the main hand (p164); after a Momentum second attack the hand of the first one is closed (p167) */
 export function wfrpAttackBlocked(
     attacker: BattleParticipant,
     attack: BattleAttack,
@@ -57,7 +57,14 @@ export function wfrpAttackBlocked(
 
     if (!hand) return false;
 
-    if (edition.hitLocationModel === 'side' && disarmedHand(attacker, hand))
+    const sided = edition.hitLocationModel === 'side';
+
+    if (
+        sided &&
+        (slot?.twoHanded
+            ? disarmedHand(attacker, 'main') || disarmedHand(attacker, 'off')
+            : disarmedHand(attacker, hand))
+    )
         return true;
 
     const state = wfrpState(attacker);
