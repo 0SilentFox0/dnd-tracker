@@ -445,7 +445,6 @@ export function WorldMapView({
                                 src={toMediaUrl(map.imageUrl)}
                                 alt={map.name}
                                 fill
-                                priority
                                 draggable={false}
                                 sizes={sizes}
                                 className="pointer-events-none object-fill select-none"
