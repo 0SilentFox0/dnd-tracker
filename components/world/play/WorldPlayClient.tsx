@@ -15,6 +15,7 @@ import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Disclosure } from '@/components/ui/disclosure';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { WorldMapView } from '@/components/world/map/WorldMapView';
+import { LayerLegend } from '@/components/world/nav/LayerLegend';
 import { MapTree } from '@/components/world/nav/MapTree';
 import { PlaceSearchBar } from '@/components/world/nav/PlaceSearchBar';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
@@ -197,7 +198,12 @@ export function WorldPlayClient({
                                         className={`relative ${MAP_HEIGHT}`}
                                         data-tour="world.map"
                                     >
-                                        <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                        <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
+                                            <LayerLegend
+                                                layers={play.layers.items}
+                                                hidden={play.layers.hidden}
+                                                onToggle={play.layers.toggle}
+                                            />
                                             <TrailLegend
                                                 trails={trail.trails}
                                                 sessions={trail.sessions}
@@ -218,6 +224,7 @@ export function WorldPlayClient({
                                                 onSelect: trail.select,
                                             }}
                                             fog={props.fog}
+                                            layers={play.layers}
                                             focus={play.focus}
                                             selectedId={marker?.id}
                                             compact={!isDesktop}

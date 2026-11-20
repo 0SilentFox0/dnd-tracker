@@ -1,13 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
+import { useLayerVisibility } from './useLayerVisibility';
 import { useWorldView } from './useWorldView';
 
 import { markerAnchor } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
-import type { MapPoint, WorldHero } from '@/types/world';
+import type { MapPoint, WorldHero, WorldViewLayer } from '@/types/world';
+
+const NO_LAYERS: WorldViewLayer[] = [];
 
 export function useWorldPlay(campaignId: string, mapId: string | null) {
     const router = useRouter();
@@ -15,6 +18,12 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
     const pathname = usePathname();
 
     const view = useWorldView(campaignId, { mapId });
+
+    const layerItems = view.data?.layers ?? NO_LAYERS;
+
+    const layerIds = useMemo(() => layerItems.map((l) => l.id), [layerItems]);
+
+    const { hidden, toggle } = useLayerVisibility(layerIds);
 
     const [selectedId, select] = useState<string | null>(null);
 
@@ -106,6 +115,7 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
 
     return {
         view,
+        layers: { items: layerItems, hidden, toggle },
         selectedMarker,
         card: {
             point: selectedMarker ? markerAnchor(selectedMarker) : null,

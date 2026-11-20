@@ -339,6 +339,9 @@ export function WorldEditorPageClient({
                                                                             fog={
                                                                                 p.fog
                                                                             }
+                                                                            layers={
+                                                                                eyes.layers
+                                                                            }
                                                                             compact={
                                                                                 !isDesktop
                                                                             }
@@ -477,7 +480,27 @@ export function WorldEditorPageClient({
                                                                 }}
                                                             />
                                                         )}
-                                                        {eyes.asHeroId ? null : (
+                                                        {eyes.asHeroId ? (
+                                                            <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                                                <LayerLegend
+                                                                    layers={
+                                                                        eyes
+                                                                            .layers
+                                                                            .items
+                                                                    }
+                                                                    hidden={
+                                                                        eyes
+                                                                            .layers
+                                                                            .hidden
+                                                                    }
+                                                                    onToggle={
+                                                                        eyes
+                                                                            .layers
+                                                                            .toggle
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        ) : (
                                                             <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
                                                                 <LayerLegend
                                                                     layers={
