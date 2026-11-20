@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { DEFAULT_ZONE_COLOR, MAX_MARKERS_PER_MAP } from '@/lib/constants/world';
+import { MAX_MARKERS_PER_MAP } from '@/lib/constants/world';
 import { prisma } from '@/lib/db';
 import {
     createWorldMarkerSchema,
@@ -73,8 +73,10 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
                         name: body.name,
                         icon: body.icon ?? null,
                         description: body.description ?? null,
-                        color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+                        color: body.color ?? null,
                         layerId: body.layerId ?? null,
+                        labelMode: body.labelMode ?? null,
+                        fillOpacity: body.fillOpacity ?? null,
                         sortOrder: (_max.sortOrder ?? -1) + 1,
                     },
                 });

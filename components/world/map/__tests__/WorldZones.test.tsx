@@ -23,6 +23,8 @@ const zone = (id: string, polygon: [number, number][]): WorldMarker => ({
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    labelMode: null,
+    fillOpacity: null,
     layerId: null,
 });
 

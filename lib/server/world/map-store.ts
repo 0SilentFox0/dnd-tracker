@@ -11,6 +11,7 @@ import type {
     WorldMapDetail,
     WorldMapSummary,
     WorldMarker,
+    ZoneLabelMode,
 } from '@/types/world';
 
 type MapRow = WorldMapRow & { parentMarker?: { mapId: string } | null };
@@ -31,6 +32,9 @@ export const toWorldMap = (row: MapRow): WorldMap => ({
     updatedAt: row.updatedAt.toISOString(),
 });
 
+const toLabelMode = (v: string | null): ZoneLabelMode | null =>
+    v === 'auto' || v === 'hidden' || v === 'always' ? v : null;
+
 export const toWorldMarker = (row: MarkerRow): WorldMarker => ({
     id: row.id,
     mapId: row.mapId,
@@ -47,6 +51,8 @@ export const toWorldMarker = (row: MarkerRow): WorldMarker => ({
     sortOrder: row.sortOrder,
     childMapId: row.childMap?.id ?? null,
     layerId: row.layerId,
+    labelMode: toLabelMode(row.labelMode),
+    fillOpacity: row.fillOpacity,
 });
 
 const toSummary = ({

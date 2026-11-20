@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import {
+    LAYER_ZONE_LABELS,
     MAX_TRAVEL_HEROES,
     MAX_WORLD_MAP_BYTES,
     POLYGON_MAX_VERTICES,
@@ -14,6 +15,8 @@ import {
     WORLD_NAME_MAX,
     WORLD_NOTE_MAX,
     WORLD_SESSION_DESCRIPTION_MAX,
+    WORLD_ZONE_OPACITY_MIN,
+    ZONE_LABEL_MODES,
 } from '@/lib/constants/world';
 import { hexColorSchema, urlField } from '@/lib/schemas/common';
 
@@ -47,6 +50,8 @@ const imageUrl = urlField(1000, 'world.validation.urlInvalid');
 const edge = z.number().int().min(1).max(WORLD_MAP_MAX_EDGE_PX);
 
 const iconSchema = z.enum(WORLD_MARKER_ICON_KEYS);
+
+const zoneOpacity = z.number().min(WORLD_ZONE_OPACITY_MIN).max(1);
 
 export const createWorldMapSchema = z.object({
     name: nameSchema,
@@ -90,6 +95,8 @@ export const createWorldMarkerSchema = z
         color: hexColor.optional(),
         description: z.string().max(WORLD_MARKER_DESCRIPTION_MAX).optional(),
         layerId: z.string().min(1).nullable().optional(),
+        labelMode: z.enum(ZONE_LABEL_MODES).optional(),
+        fillOpacity: zoneOpacity.optional(),
     })
     .superRefine((v, ctx) => {
         if (v.kind === 'zone' && !v.polygon) {
@@ -122,6 +129,8 @@ export const updateWorldMarkerSchema = z
         alwaysVisible: z.boolean(),
         sortOrder: z.number().int().min(0),
         layerId: z.string().min(1).nullable(),
+        labelMode: z.enum(ZONE_LABEL_MODES).nullable(),
+        fillOpacity: zoneOpacity.nullable(),
     })
     .partial()
     .strict()
@@ -266,6 +275,9 @@ export const createWorldLayerSchema = z.object({
     mapId: z.string().min(1),
     name: nameSchema,
     color: hexColor.optional(),
+    icon: iconSchema.optional(),
+    zoneOpacity: zoneOpacity.optional(),
+    zoneLabels: z.enum(LAYER_ZONE_LABELS).optional(),
 });
 
 export const updateWorldLayerSchema = z
@@ -280,6 +292,9 @@ export const updateWorldLayerSchema = z
             .min(WORLD_LAYER_OPACITY.min)
             .max(WORLD_LAYER_OPACITY.max),
         sortOrder: z.number().int().min(0),
+        icon: iconSchema.nullable(),
+        zoneOpacity: zoneOpacity.nullable(),
+        zoneLabels: z.enum(LAYER_ZONE_LABELS),
     })
     .partial()
     .strict()

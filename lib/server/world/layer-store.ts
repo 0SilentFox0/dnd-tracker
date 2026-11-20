@@ -7,6 +7,7 @@ import type { LayerInput } from '@/lib/utils/world/player-view';
 import type {
     CreateWorldLayerData,
     LayerVisibility,
+    LayerZoneLabels,
     WorldLayer,
 } from '@/types/world';
 
@@ -18,6 +19,9 @@ export class WorldLayerError extends Error {
 
 const toVisibility = (v: string): LayerVisibility =>
     v === 'all' || v === 'heroes' ? v : 'dm';
+
+const toZoneLabels = (v: string | null): LayerZoneLabels =>
+    v === 'hidden' ? 'hidden' : 'auto';
 
 const ORDER = [{ sortOrder: 'asc' }, { createdAt: 'asc' }] as const;
 
@@ -39,6 +43,9 @@ export async function listLayerInputs(mapId: string): Promise<LayerInput[]> {
         imageUrl: r.imageUrl,
         rect: { x: r.imgX, y: r.imgY, w: r.imgW, h: r.imgH },
         opacity: r.opacity,
+        icon: r.icon,
+        zoneOpacity: r.zoneOpacity,
+        zoneLabels: toZoneLabels(r.zoneLabels),
     }));
 }
 
@@ -55,6 +62,9 @@ export const toWorldLayer = (
     imageUrl: row.imageUrl,
     rect: { x: row.imgX, y: row.imgY, w: row.imgW, h: row.imgH },
     opacity: row.opacity,
+    icon: row.icon,
+    zoneOpacity: row.zoneOpacity,
+    zoneLabels: toZoneLabels(row.zoneLabels),
 });
 
 export async function listDmLayers(mapId: string): Promise<WorldLayer[]> {
@@ -85,6 +95,9 @@ export async function createLayer(
             mapId,
             name: data.name,
             color: data.color ?? null,
+            icon: data.icon ?? null,
+            zoneOpacity: data.zoneOpacity ?? null,
+            zoneLabels: data.zoneLabels ?? null,
             visibility: 'dm',
             sortOrder: (_max.sortOrder ?? -1) + 1,
         },

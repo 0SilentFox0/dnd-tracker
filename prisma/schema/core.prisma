@@ -1227,6 +1227,8 @@ model WorldMarker {
   alwaysVisible Boolean          @default(false)
   sortOrder     Int              @default(0)
   layerId       String?
+  labelMode     String?
+  fillOpacity   Float?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   map           WorldMap         @relation("MapMarkers", fields: [mapId], references: [id], onDelete: Cascade)
@@ -1253,6 +1255,9 @@ model WorldLayer {
   imgW       Float            @default(1)
   imgH       Float            @default(1)
   opacity    Float            @default(1)
+  icon       String?
+  zoneOpacity Float?
+  zoneLabels String?
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
   map        WorldMap         @relation(fields: [mapId], references: [id], onDelete: Cascade)

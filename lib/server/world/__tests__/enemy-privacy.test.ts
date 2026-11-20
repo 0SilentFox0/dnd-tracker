@@ -105,6 +105,9 @@ beforeEach(() => {
             imageUrl: null,
             rect: { x: 0, y: 0, w: 1, h: 1 },
             opacity: 1,
+            icon: null,
+            zoneOpacity: null,
+            zoneLabels: 'auto',
         },
     ]);
 });

@@ -53,6 +53,8 @@ const marker = (
     sortOrder: 0,
     childMapId: null,
     layerId: null,
+    labelMode: null,
+    fillOpacity: null,
     ...extra,
 });
 
@@ -97,6 +99,9 @@ const layer = (id: string, over: Partial<LayerInput> = {}): LayerInput => ({
     imageUrl: `/${id}.webp`,
     rect: { x: 0, y: 0, w: 1, h: 1 },
     opacity: 1,
+    icon: null,
+    zoneOpacity: null,
+    zoneLabels: 'auto',
     ...over,
 });
 
@@ -484,12 +489,42 @@ describe('layer visibility', () => {
 
         expect(Object.keys(v.layers[0]).sort()).toEqual([
             'color',
+            'icon',
             'id',
             'imageUrl',
             'name',
             'opacity',
             'rect',
+            'zoneLabels',
+            'zoneOpacity',
         ]);
+    });
+
+    it('exposes the style of a visible layer', () => {
+        const v = buildWorldView(
+            layered(
+                layer('l1', {
+                    visibility: 'all',
+                    icon: 'castle',
+                    zoneOpacity: 0.3,
+                    zoneLabels: 'hidden',
+                })
+            )
+        );
+
+        expect(v.layers[0]).toMatchObject({
+            icon: 'castle',
+            zoneOpacity: 0.3,
+            zoneLabels: 'hidden',
+        });
+    });
+
+    it('does not expose the style of a hidden layer', () => {
+        const v = buildWorldView(
+            layered(layer('l1', { icon: 'castle', zoneLabels: 'hidden' }))
+        );
+
+        expect(JSON.stringify(v)).not.toContain('castle');
     });
 
     it('a note on a marker of a hidden layer is not returned', () => {
