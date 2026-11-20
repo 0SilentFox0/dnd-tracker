@@ -206,6 +206,8 @@
     "reset": "Скинути масштаб"
   },
   "heroCluster": "{name} і ще {count}",
+  "pinCluster": "{name} і ще {count}",
+  "pinClusterList": "Місця тут",
   "mapLink": "Карта світу",
   "errors": {
     "chooseImage": "Оберіть картинку",

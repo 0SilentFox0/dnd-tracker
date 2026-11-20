@@ -206,6 +206,8 @@
     "reset": "Reset zoom"
   },
   "heroCluster": "{name} and {count} more",
+  "pinCluster": "{name} and {count} more",
+  "pinClusterList": "Places here",
   "mapLink": "World map",
   "errors": {
     "chooseImage": "Choose an image",

@@ -3,16 +3,27 @@
 import { MapPin } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
+import { PinCluster } from '@/components/world/map/PinCluster';
+import { sealStyle } from '@/components/world/map/seal-style';
 import { MARKER_ICON } from '@/components/world/marker-icons';
 import {
+    PIN_CLUSTER_PX,
+    PIN_CLUSTER_PX_COMPACT,
     WORLD_LABEL_ZOOM,
     WORLD_LABEL_ZOOM_COMPACT,
+    WORLD_MAX_ZOOM,
     WORLD_ZONE_LABEL_CONFLICT,
     WORLD_ZONE_LABEL_CONFLICT_COMPACT,
 } from '@/lib/constants/world';
 import { usePinGesture } from '@/lib/hooks/world';
+import type { PixelCluster } from '@/lib/utils/world/cluster';
+import { clusterByPixel, clusterZoom } from '@/lib/utils/world/cluster';
 import { markerAnchor } from '@/lib/utils/world/geometry';
-import { isMinorPin, pinHiddenAtZoom } from '@/lib/utils/world/pin-tier';
+import {
+    byPinRank,
+    isMinorPin,
+    pinHiddenAtZoom,
+} from '@/lib/utils/world/pin-tier';
 import { zoneLabelSize, zoneLabelVisible } from '@/lib/utils/world/zone-labels';
 import type { MapPoint, WorldMarker } from '@/types/world';
 
@@ -20,12 +31,17 @@ export interface PinHandlers {
     onMarkerClick?(id: string): void;
     onMarkerDoubleClick?(id: string): void;
     onMarkerDrag?(id: string, p: MapPoint): void;
+    onClusterZoom?(center: MapPoint, zoom: number): void;
 }
 
 interface WorldPinsProps {
     markers: WorldMarker[];
     zoom: number;
-    compact?: boolean;
+    screen?: {
+        box: { width: number; height: number };
+        compact?: boolean;
+        cluster?: boolean;
+    };
     labels?: { hoveredId?: string | null; fogless?: boolean };
     selectedId?: string | null;
     drag: {
@@ -37,14 +53,10 @@ interface WorldPinsProps {
     handlers: PinHandlers;
 }
 
-export const sealStyle = (color: string) => ({
-    background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 70%, white), ${color} 62%, color-mix(in srgb, ${color} 55%, black))`,
-});
-
 export function WorldPins({
     markers,
     zoom,
-    compact = false,
+    screen,
     labels,
     selectedId,
     drag,
@@ -70,6 +82,42 @@ export function WorldPins({
 
     const points = markers.filter(
         (m) => m.kind !== 'zone' && !pinHiddenAtZoom(m, zoom, isPinned(m))
+    );
+
+    const compact = !!screen?.compact;
+
+    const clusters = screen?.cluster === false ? null : screen?.box;
+
+    const threshold = compact ? PIN_CLUSTER_PX_COMPACT : PIN_CLUSTER_PX;
+
+    const grouped = new Map<string, PixelCluster<WorldMarker>>();
+
+    if (clusters) {
+        const { width, height } = clusters;
+
+        for (const g of clusterByPixel(
+            points.filter((m) => !isPinned(m)).sort(byPinRank),
+            {
+                key: (m) => m.id,
+                point: markerAnchor,
+                px: (m) => ({
+                    x: m.x * width * zoom,
+                    y: m.y * height * zoom,
+                }),
+                threshold,
+            }
+        ))
+            grouped.set(g.key, g);
+    }
+
+    const clustered = new Set(
+        [...grouped.values()].flatMap((g) =>
+            g.items.length > 1 ? g.items.map((m) => m.id) : []
+        )
+    );
+
+    const firstShown = points.find(
+        (m) => !clustered.has(m.id) || grouped.get(m.id)
     );
 
     const labelBlockers = points.filter((m) => !isMinorPin(m));
@@ -136,6 +184,34 @@ export function WorldPins({
 
                 if (pinHiddenAtZoom(m, zoom, isPinned(m))) return null;
 
+                const group = grouped.get(m.id);
+
+                if (group && group.items.length > 1)
+                    return (
+                        <PinCluster
+                            key={m.id}
+                            cluster={group}
+                            zoom={zoom}
+                            nextZoom={
+                                clusters
+                                    ? clusterZoom(group.items.map(markerAnchor), {
+                                          zoom,
+                                          box: clusters,
+                                          threshold,
+                                          maxZoom: WORLD_MAX_ZOOM,
+                                      })
+                                    : null
+                            }
+                            actions={{
+                                onZoom: (c, z) =>
+                                    handlers.onClusterZoom?.(c, z),
+                                onPick: (id) => handlers.onMarkerClick?.(id),
+                            }}
+                        />
+                    );
+
+                if (clustered.has(m.id)) return null;
+
                 const Icon = (m.icon && MARKER_ICON[m.icon]) || MapPin;
 
                 const minor = isMinorPin(m);
@@ -146,7 +222,7 @@ export function WorldPins({
                         type="button"
                         aria-label={m.name}
                         data-tour={
-                            m.id === points[0]?.id ? 'world.marker' : undefined
+                            m.id === firstShown?.id ? 'world.marker' : undefined
                         }
                         data-selected={m.id === selectedId}
                         data-minor={minor}

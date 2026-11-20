@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { WorldPins } from '../WorldPins';
 
@@ -38,6 +39,8 @@ const point: WorldMarker = {
     icon: 'city',
 };
 
+const box = { width: 1000, height: 1000 };
+
 const props = {
     selectedId: null,
     drag: {
@@ -59,7 +62,12 @@ describe('WorldPins compact mode', () => {
             container.querySelector('.atlas-pin')?.getAttribute('data-labels')
         ).toBe('true');
 
-        rerender(<WorldPins markers={[point]} zoom={3} compact {...props} />);
+        rerender(<WorldPins
+                markers={[point]}
+                zoom={3}
+                screen={{ box, compact: true }}
+                {...props}
+            />);
 
         expect(
             container.querySelector('.atlas-pin')?.getAttribute('data-labels')
@@ -75,7 +83,12 @@ describe('WorldPins compact mode', () => {
 
         expect(container.querySelectorAll('.atlas-zone-label')).toHaveLength(2);
 
-        rerender(<WorldPins markers={markers} zoom={1} compact {...props} />);
+        rerender(<WorldPins
+                markers={markers}
+                zoom={1}
+                screen={{ box, compact: true }}
+                {...props}
+            />);
 
         expect(container.querySelectorAll('.atlas-zone-label')).toHaveLength(1);
     });
@@ -190,5 +203,147 @@ describe('WorldPins zone label visibility', () => {
         );
 
         expect(container.querySelectorAll('.atlas-pin')).toHaveLength(1);
+    });
+});
+
+const messages = {
+    world: {
+        pinCluster: '{name} and {count} more',
+        pinClusterList: 'Places here',
+    },
+};
+
+const pin = (id: string, x: number, icon: string | null = 'city') => ({
+    ...point,
+    id,
+    name: id,
+    x,
+    y: 0.5,
+    icon,
+});
+
+const tree = (
+    markers: WorldMarker[],
+    extra: Partial<React.ComponentProps<typeof WorldPins>> = {}
+) => (
+    <NextIntlClientProvider locale="en" messages={messages}>
+        <WorldPins
+            markers={markers}
+            zoom={1}
+            screen={{ box }}
+            {...props}
+            {...extra}
+        />
+    </NextIntlClientProvider>
+);
+
+const renderPins = (
+    markers: WorldMarker[],
+    extra: Partial<React.ComponentProps<typeof WorldPins>> = {}
+) => render(tree(markers, extra));
+
+describe('WorldPins clusters', () => {
+    const close = [pin('A', 0.5), pin('B', 0.51)];
+
+    it('groups pins closer than the threshold into one +N cluster', () => {
+        const { container } = renderPins(close);
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(1);
+        expect(container.querySelector('[data-cluster="2"]')).not.toBeNull();
+        expect(container.textContent).toContain('+1');
+    });
+
+    it('the castle represents a cluster with a village and a city', () => {
+        renderPins(
+            [
+                pin('Town', 0.5),
+                pin('Hamlet', 0.505, 'village'),
+                pin('Keep', 0.51, 'castle'),
+            ],
+            { zoom: 2 }
+        );
+
+        expect(screen.getByLabelText('Keep and 2 more')).not.toBeNull();
+    });
+
+    it('keeps the selected pin out of a cluster', () => {
+        const { container } = renderPins(close, { selectedId: 'B' });
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(2);
+        expect(container.querySelector('[data-cluster]')).toBeNull();
+    });
+
+    it('does not cluster without screen or with cluster: false', () => {
+        const { container, rerender } = renderPins(close, {
+            screen: undefined,
+        });
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(2);
+
+        rerender(tree(close, { screen: { box, cluster: false } }));
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(2);
+    });
+
+    it('uses the wider compact threshold', () => {
+        const gap = [pin('A', 0.5), pin('B', 0.5315)];
+
+        const { container, rerender } = renderPins(gap);
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(2);
+
+        rerender(tree(gap, { screen: { box, compact: true } }));
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(1);
+    });
+
+    it('clicking a cluster below max zoom calls onClusterZoom with its centre and a larger zoom', () => {
+        const onClusterZoom = vi.fn();
+
+        const { container } = renderPins(close, {
+            handlers: { onClusterZoom },
+        });
+
+        fireEvent.click(container.querySelector('[data-cluster]')!);
+
+        const [center, zoom] = onClusterZoom.mock.calls[0];
+
+        expect(center.x).toBeCloseTo(0.505);
+        expect(zoom).toBeGreaterThan(1);
+    });
+
+    it('at max zoom a cluster opens a list and a row calls onMarkerClick', () => {
+        const onMarkerClick = vi.fn();
+
+        const { container } = renderPins(close, {
+            zoom: 8,
+            screen: { box: { width: 10, height: 10 } },
+            handlers: { onMarkerClick },
+        });
+
+        fireEvent.click(container.querySelector('[data-cluster]')!);
+        fireEvent.click(screen.getByText('B'));
+
+        expect(onMarkerClick).toHaveBeenCalledWith('B');
+    });
+
+    it('pins in one point open the list instead of zooming', () => {
+        const onClusterZoom = vi.fn();
+
+        const { container } = renderPins([pin('A', 0.5), pin('B', 0.5)], {
+            handlers: { onClusterZoom },
+        });
+
+        fireEvent.click(container.querySelector('[data-cluster]')!);
+
+        expect(onClusterZoom).not.toHaveBeenCalled();
+        expect(screen.getByLabelText('Places here')).not.toBeNull();
+    });
+
+    it('zooming in splits a cluster into single pins', () => {
+        const { container } = renderPins(close, { zoom: 4 });
+
+        expect(container.querySelector('[data-cluster]')).toBeNull();
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(2);
     });
 });

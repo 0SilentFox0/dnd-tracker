@@ -527,7 +527,7 @@ export function WorldMapView({
                                 <WorldPins
                                     markers={pinMarkers}
                                     zoom={zoom}
-                                    compact={compact}
+                                    screen={{ box, compact }}
                                     labels={{
                                         hoveredId: hoveredZone,
                                         fogless: !fog,
