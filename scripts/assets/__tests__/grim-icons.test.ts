@@ -34,7 +34,6 @@ describe('grim icon prompts', () => {
         expect(rows).toHaveLength(
             WFRP_ROW_KINDS.reduce((n, k) => n + data[k].length, 0)
         );
-        expect(rows).toHaveLength(186);
         expect(new Set(rows.map((r) => r.file)).size).toBe(rows.length);
         expect(
             rows.filter((r) => findForbiddenTerms(r.prompt).length > 0)

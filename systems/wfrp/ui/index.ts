@@ -10,6 +10,7 @@ import { CareersPage } from './dm/CareersPage';
 import { AdvancementEditor } from './AdvancementEditor';
 import { AdvancementTab } from './AdvancementTab';
 import { HeroStats } from './HeroStats';
+import { WFRP_UI_ICONS } from './icons';
 import { MagicTab } from './MagicTab';
 import { ResourceFields } from './ResourceFields';
 import { RestBadges } from './RestBadges';
@@ -108,8 +109,14 @@ const battle: SystemBattleUi = {
     notices: [FateWaitingNotice],
 };
 
+export const WFRP_UI_ICON_MAP = Object.assign(
+    {},
+    ...Object.values(WFRP_UI_ICONS)
+) as NonNullable<SystemUi['uiIcons']>;
+
 export const WFRP_MODULE_UI: SystemUi = {
     battle,
+    uiIcons: WFRP_UI_ICON_MAP,
     SpellMagicFields,
     rulesSections: {
         advancement: AdvancementSection,

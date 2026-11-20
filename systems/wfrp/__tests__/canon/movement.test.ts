@@ -19,7 +19,7 @@ import { hasMomentum } from '@/systems/wfrp/rules/combat/momentum';
 import { chargeBand, sprintYards } from '@/systems/wfrp/rules/combat/movement';
 import { participantChars } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import { movementMutation } from '@/systems/wfrp/server/battle/movement-mutation';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -53,7 +53,10 @@ const foeOf = (id: string, x: number): BattleParticipant => {
         controlledBy: 'dm',
     });
 
-    return { ...base, battleData: { ...base.battleData, position: at(x, 0) } };
+    return withWfrpState(
+        { ...base, battleData: { ...base.battleData, position: at(x, 0) } },
+        { engagedWith: { hero: 2 } }
+    );
 };
 
 const ctxOf = (participants: BattleParticipant[]) => {

@@ -29,7 +29,19 @@
     "result": "Результат",
     "undo": "Відкотити",
     "undoConfirm": "Відкотити останнє нарахування порчі?",
-    "undone": "Відкотено"
+    "undone": "Відкотено",
+    "manual": "Ввести пункти вручну",
+    "degree": "Ступінь експозиції",
+    "skill": "Тест",
+    "degrees": {
+      "minor": "Незначна",
+      "moderate": "Помірна",
+      "major": "Серйозна"
+    },
+    "skills": {
+      "endurance": "Витривалість (тілесна)",
+      "cool": "Самовладання (духовна)"
+    }
   },
   "summary": {
     "noTest": "Тест не потрібен",
@@ -39,7 +51,8 @@
     "mutation": "Нова мутація",
     "typeRoll": "Вид (d100): {roll}",
     "capped": "Досягнуто ліміт мутацій",
-    "pointsCapped": "Пункти обмежено"
+    "pointsCapped": "Пункти обмежено",
+    "exposure": "Експозиція ({degree}), {skill}: {roll} проти {target}, SL {sl} → {points} п."
   },
   "mutations": {
     "physical": {

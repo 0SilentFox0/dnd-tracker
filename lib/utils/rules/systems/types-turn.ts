@@ -17,6 +17,8 @@ export interface TurnHookCtx {
     rng: Rng;
     rules: Ruleset;
     map?: BattleMapConfig | null;
+    /** Present where a hook may deal wounds (round start, turn start) */
+    applyDamage?: ApplyDamageConsequences;
 }
 
 export interface TurnSubjectCtx extends TurnHookCtx {
@@ -24,6 +26,10 @@ export interface TurnSubjectCtx extends TurnHookCtx {
 }
 
 export interface TurnStartCtx extends TurnSubjectCtx {
+    applyDamage: ApplyDamageConsequences;
+}
+
+export interface RoundStartCtx extends TurnHookCtx {
     applyDamage: ApplyDamageConsequences;
 }
 
@@ -131,7 +137,7 @@ export interface RuleSystemTurn {
     /** The subject's turn ends, after its save-ends rolls and before effect durations count down */
     onTurnEnd?: readonly TurnHook<TurnSubjectCtx>[];
     /** A new round begins, after the round-start abilities; messages go to the round log */
-    onRoundStart?: readonly TurnHook<TurnHookCtx>[];
+    onRoundStart?: readonly TurnHook<RoundStartCtx>[];
     /** A walk ends in a base without core actions (`actions.enabled` off); throwing a `BattleRuleError` rejects the move */
     onMoveEnd?: readonly TurnHook<MoveEndCtx>[];
     /** Participants enter the fight (start, reveal, summon, late join) */

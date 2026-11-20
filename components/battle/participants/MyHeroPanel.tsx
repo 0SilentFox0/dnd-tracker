@@ -18,6 +18,7 @@ import {
     useSystemFx,
 } from '@/components/battle/use-system-battle-ui';
 import { HitFrame, PortraitFx } from '@/components/fx/PortraitFx';
+import { Disclosure } from '@/components/ui/disclosure';
 import { BattleStatus } from '@/lib/constants/battle';
 import {
     useBattleRules,
@@ -149,6 +150,17 @@ export const MyHeroPanel = memo(function MyHeroPanel({
             {!compact && <TurnTimerBar />}
             {!compact &&
                 heroPanels?.map((Panel, i) => <Panel key={i} hero={hero} />)}
+            {compact && heroPanels && heroPanels.length > 0 && (
+                <Disclosure
+                    summary={t('systemActions')}
+                    className="mt-2"
+                    triggerClassName="h-9 text-sm text-[var(--bone)]"
+                >
+                    {heroPanels.map((Panel, i) => (
+                        <Panel key={i} hero={hero} />
+                    ))}
+                </Disclosure>
+            )}
             {!compact && (charges.length > 0 || pools.length > 0) && (
                 <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-hud-text">
                     {charges.map((c) => (

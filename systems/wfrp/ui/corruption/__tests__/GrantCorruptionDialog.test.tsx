@@ -15,6 +15,12 @@ const mocks = vi.hoisted(() => ({
         data: undefined as unknown,
     },
     undo: vi.fn(async () => true),
+    rules: { data: {} as unknown },
+}));
+
+vi.mock('@/lib/hooks/campaigns', async (orig) => ({
+    ...(await orig<object>()),
+    useCampaignRules: () => mocks.rules,
 }));
 
 vi.mock('@/systems/wfrp/hooks', async (orig) => ({
@@ -49,6 +55,7 @@ const text = { message: 'wfrpCorruption.mutations.physical.3' };
 describe('GrantCorruptionDialog', () => {
     beforeEach(() => {
         mocks.grant.data = undefined;
+        mocks.rules.data = {};
         mocks.grant.mutateOk.mockClear();
         mocks.undo.mockClear();
     });
@@ -154,5 +161,74 @@ describe('GrantCorruptionDialog', () => {
                 screen.getByRole('button', { name: 'Відкотено' })
             ).toBeTruthy()
         );
+    });
+
+    describe('canon5e exposure', () => {
+        beforeEach(() => {
+            mocks.rules.data = { edition: { preset: 'canon5e' } };
+        });
+
+        it('submits the exposure form by default', () => {
+            open();
+            fireEvent.change(screen.getByLabelText('Причина'), {
+                target: { value: 'Rift' },
+            });
+            fireEvent.click(submitBtn());
+
+            expect(mocks.grant.mutateOk).toHaveBeenCalledWith({
+                exposure: { degree: 'minor', skill: 'endurance' },
+                reason: 'Rift',
+            });
+        });
+
+        it('falls back to manual points via the toggle', () => {
+            open();
+            fireEvent.click(
+                screen.getByRole('switch', { name: 'Ввести пункти вручну' })
+            );
+            fill('2', 'Warpstone');
+            fireEvent.click(submitBtn());
+
+            expect(mocks.grant.mutateOk).toHaveBeenCalledWith({
+                points: 2,
+                reason: 'Warpstone',
+            });
+        });
+
+        it('shows the exposure result without an undo for zero points', async () => {
+            mocks.grant.data = {
+                corruption: {},
+                summary: {
+                    points: 0,
+                    total: 1,
+                    threshold: 5,
+                    exposure: {
+                        degree: 'minor',
+                        skill: 'cool',
+                        test: {
+                            roll: 10,
+                            target: 40,
+                            sl: 3,
+                            outcome: 'success',
+                        },
+                    },
+                },
+            };
+            open();
+            fireEvent.change(screen.getByLabelText('Причина'), {
+                target: { value: 'Rift' },
+            });
+            fireEvent.click(submitBtn());
+
+            await waitFor(() =>
+                expect(
+                    screen.getByText(/10 проти 40, SL 3 → 0 п\./)
+                ).toBeTruthy()
+            );
+            expect(
+                screen.queryByRole('button', { name: 'Скасувати' })
+            ).toBeNull();
+            expect(screen.queryByText(/тест не потрібен/i)).toBeNull();
+        });
     });
 });

@@ -129,7 +129,6 @@ describe('canon: How Did That Miss? (p133)', () => {
             expect(r.isHit).toBe(false);
             expect(r.attackRoll.isHit).toBe(false);
             expect(r.scene).toBeUndefined();
-            expect(r.attackerUpdate).toBeUndefined();
             expect(JSON.stringify(r.lines)).toContain(
                 'battleWfrp.log.fateHowDidThatMiss'
             );

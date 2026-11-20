@@ -6,14 +6,16 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { dispelOp } from '@/systems/wfrp/api/battle';
 import { editionOf } from '@/systems/wfrp/rules/edition';
 import { canDispel } from '@/systems/wfrp/rules/magic/dispel';
-import { isDispelRange } from '@/systems/wfrp/rules/magic/dispel-range';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import {
+    dispelSpotsOf,
+    isDispelRange,
+} from '@/systems/wfrp/rules/magic/dispel-range';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface DispelTarget {
     key: string;
     targetId: string;
-    mode: 'reactive' | 'persistent';
+    mode: 'persistent';
     spell: string;
     caster: string;
 }
@@ -24,7 +26,7 @@ export interface DispelPanel {
     isPending: boolean;
 }
 
-/** Null outside canon5e or when nothing can be dispelled by this hero right now. */
+/** Persistent Dispel only; a reactive one is an offer in the counter window. Null when nothing can be unravelled right now. */
 export function useDispelPanel(hero: BattleParticipant): DispelPanel | null {
     const { battle, turn, actions } = useBattleScene();
 
@@ -39,39 +41,23 @@ export function useDispelPanel(hero: BattleParticipant): DispelPanel | null {
 
     const ownTurn = turn.current?.basicInfo.id === hero.basicInfo.id;
 
-    const reactiveSpent = wfrpState(hero).dispelRound === battle.currentRound;
-
     const targets = battle.initiativeOrder.flatMap((p): DispelTarget[] => {
-        if (!isDispelRange(hero, p, battle.map, battle.rules)) return [];
-
-        const last = wfrpState(p).lastCast;
-
         const held = sustain.info(p);
 
-        return [
-            ...(last && p.basicInfo.id !== hero.basicInfo.id && !reactiveSpent
-                ? [
-                      {
-                          key: `r:${p.basicInfo.id}`,
-                          targetId: p.basicInfo.id,
-                          mode: 'reactive' as const,
-                          spell: last.spell,
-                          caster: p.basicInfo.name,
-                      },
-                  ]
-                : []),
-            ...(held?.cn && ownTurn && !hero.actionFlags.hasUsedAction
-                ? [
-                      {
-                          key: `p:${p.basicInfo.id}`,
-                          targetId: p.basicInfo.id,
-                          mode: 'persistent' as const,
-                          spell: held.spellName,
-                          caster: p.basicInfo.name,
-                      },
-                  ]
-                : []),
-        ];
+        return held?.cn &&
+            ownTurn &&
+            !hero.actionFlags.hasUsedAction &&
+            isDispelRange(hero, dispelSpotsOf(p), battle.map, battle.rules)
+            ? [
+                  {
+                      key: `p:${p.basicInfo.id}`,
+                      targetId: p.basicInfo.id,
+                      mode: 'persistent',
+                      spell: held.spellName,
+                      caster: p.basicInfo.name,
+                  },
+              ]
+            : [];
     });
 
     if (targets.length === 0) return null;

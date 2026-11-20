@@ -177,6 +177,7 @@ interface FinishInput {
     sourceEffects: Array<{ kind: string }>;
     details?: SystemSlot;
     fizzled?: boolean;
+    cancelledBy?: string;
 }
 
 export function finishSpellAction(
@@ -190,6 +191,7 @@ export function finishSpellAction(
         sourceEffects,
         details,
         fizzled,
+        cancelledBy,
     }: FinishInput
 ): CastSpellResult {
     const { flow, spell, caster } = state;
@@ -228,7 +230,13 @@ export function finishSpellAction(
 
     const params = { name: caster.basicInfo.name, spell: spell.name };
 
-    const head = fizzled
+    const head =
+        fizzled && cancelledBy !== undefined
+            ? textRef('battleActions.spell.cancelled', {
+                  ...params,
+                  by: cancelledBy,
+              })
+            : fizzled
         ? textRef('battleActions.spell.fizzled', params)
         : parts.length > 0
           ? textRef('battleActions.spell.castCaption', {
@@ -285,6 +293,7 @@ export function finishSpellAction(
         ...(applied.length > 0 && { appliedEffects: applied }),
         spellSlotUsed: state.castLevel,
         ...(details && { system: details }),
+        ...(cancelledBy !== undefined && { countered: true as const }),
         ...(state.grant?.key && { spellGrantKey: state.grant.key }),
         ...(state.grant?.label && { spellGrantLabel: state.grant.label }),
         ...(state.chosenCastLevel !== undefined && {

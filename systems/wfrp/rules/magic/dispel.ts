@@ -1,4 +1,5 @@
 import { skillTarget, value } from '../characteristics/derive';
+import { DEFENSIVE_SL, defensiveSkillOf } from '../combat/defensive';
 import { participantChars } from '../combat/participant';
 import { editionOf } from '../edition';
 import { DIFFICULTY_SL, resolvePercentileTest } from '../percentile';
@@ -72,6 +73,7 @@ export function wfrpDispel(ctx: DispelCtx): DispelResult {
 
     const test = resolvePercentileTest({
         target: castTargetOf(dispeller, ctx.rules),
+        slModifier: defensiveSkillOf(dispeller) === 'magick' ? DEFENSIVE_SL : 0,
         slModel: editionOf(ctx.rules).slModel,
         doubles: false,
         rng: ctx.rng,

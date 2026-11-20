@@ -1,5 +1,6 @@
 import type { CharacteristicKey } from '../characteristics/constants';
 import type { TestOutcome } from '../downtime/types';
+import type { ExposureDegree, ExposureSkill } from './constants';
 
 import type { LogLine } from '@/types/text';
 
@@ -29,6 +30,12 @@ export type GrantSummary = {
     /** canon5e: the character fell to Chaos, mutation count passed its limit (p188) */
     soulLost?: MutationKind;
     test?: TestOutcome;
+    /** canon5e: the exposure test that produced `points` (p187-188) */
+    exposure?: {
+        degree: ExposureDegree;
+        skill: ExposureSkill;
+        test: TestOutcome;
+    };
     mutation?: {
         kind: MutationKind;
         typeRoll: number;

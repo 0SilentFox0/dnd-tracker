@@ -10,8 +10,8 @@ const defaults = (r: (typeof TRAIT_RECIPES)[number]) =>
     Object.fromEntries(r.params.map((p) => [p.key, p.default]));
 
 describe('trait recipes', () => {
-    it('has 18 recipes with matching ids and text keys', () => {
-        expect(TRAIT_RECIPES).toHaveLength(18);
+    it('has 19 recipes with matching ids and text keys', () => {
+        expect(TRAIT_RECIPES).toHaveLength(19);
 
         for (const r of TRAIT_RECIPES) {
             expect(r.category).toBe('traits');

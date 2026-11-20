@@ -20,6 +20,7 @@ import { careerToImportRecord } from '@/systems/wfrp/server/careers/import-recor
 import { careerTierSchema } from '@/systems/wfrp/server/careers/schema';
 import { careersResource } from '@/systems/wfrp/server/content/careers';
 import { WFRP_CONTENT_REFS } from '@/systems/wfrp/server/content/refs';
+import { soulLostGuard } from '@/systems/wfrp/server/join-guard';
 import { WFRP_OPERATIONS } from '@/systems/wfrp/server/operations';
 import {
     raceProfileSaveHandler,
@@ -27,6 +28,7 @@ import {
 } from '@/systems/wfrp/server/race-profile-routes';
 
 export const WFRP_MODULE_SERVER: SystemServer = {
+    participant: { joinGuards: [soulLostGuard] },
     schemas: {
         characteristics: CharacteristicsSchema,
         unitCharacteristics: UnitCharacteristicsSchema,
@@ -195,6 +197,83 @@ export const WFRP_MODULE_SERVER: SystemServer = {
                 );
 
                 return { schema: disengageSchema, mutate: disengageMutation };
+            },
+        },
+        aim: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { aimMutation, aimSchema } = await import(
+                    './battle/aim-mutation'
+                );
+
+                return { schema: aimSchema, mutate: aimMutation };
+            },
+        },
+        defensive: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { defensiveMutation, defensiveSchema } = await import(
+                    './battle/defensive-mutation'
+                );
+
+                return { schema: defensiveSchema, mutate: defensiveMutation };
+            },
+        },
+        flee: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { fleeMutation, fleeSchema } = await import(
+                    './battle/flee-mutation'
+                );
+
+                return { schema: fleeSchema, mutate: fleeMutation };
+            },
+        },
+        grapple: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
+            load: async () => {
+                const { grappleMutation, grappleSchema } = await import(
+                    './battle/grapple-mutation'
+                );
+
+                return { schema: grappleSchema, mutate: grappleMutation };
+            },
+        },
+        mounted: {
+            settings: {
+                access: 'dm',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { mountedMutation, mountedSchema } = await import(
+                    './battle/mounted-mutation'
+                );
+
+                return { schema: mountedSchema, mutate: mountedMutation };
             },
         },
         movement: {

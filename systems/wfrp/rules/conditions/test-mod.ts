@@ -1,5 +1,6 @@
 import type { EditionProfile } from '../edition';
 import type { ModeSources } from '../percentile/advantage';
+import { wfrpState } from '../state';
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY } from './catalog';
 import { conditionLevel } from './levels';
 
@@ -22,6 +23,12 @@ const levelsOf = (p: BattleParticipant | undefined) =>
         : [];
 
 const isSl = (edition: Model) => edition.conditionModel === 'sl';
+
+const OOPS_SL = -1;
+
+/** Oops result 5-6 (p165): -1 SL to every test for the round after the fumble */
+const oopsPenalised = (p: BattleParticipant | undefined) =>
+    !!p && wfrpState(p).oopsPenalty === 'now';
 
 /** Percent shift of the target (legacy model); zero under the `sl` model, see `selfSlMod` */
 export function selfTestMod(
@@ -55,7 +62,7 @@ export function selfSlMod(
         0
     );
 
-    return worst > 0 ? -worst : 0;
+    return (worst > 0 ? -worst : 0) + (oopsPenalised(p) ? OOPS_SL : 0);
 }
 
 /** Entangled: -1 SL on actions that involve movement, e.g. Disengage and Sprint (p186); other tests are untouched */

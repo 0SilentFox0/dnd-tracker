@@ -9,14 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { SelectField } from '@/components/ui/select-field';
 import { CONDITION_LIMITS } from '@/lib/constants/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import { useMalignantToggle } from '@/systems/wfrp/hooks/useMalignantToggle';
+import { useMountedSwitch } from '@/systems/wfrp/hooks/useMountedSwitch';
 import { WFRP_CONDITIONS } from '@/systems/wfrp/rules/conditions';
+import { wfrpIcon } from '@/systems/wfrp/ui/icons';
 import type { BattleParticipant } from '@/types/battle';
 
 const FORM_ID = 'system-conditions-form';
+
+const NO_MOUNT = '__none';
 
 const toInt = (v: string): number | undefined => {
     const n = parseInt(v, 10);
@@ -26,6 +31,12 @@ const toInt = (v: string): number | undefined => {
 
 const inRange = (n: number | undefined, max: number) =>
     n !== undefined && n >= 1 && n <= max;
+
+function ConditionGlyph({ name }: { name: string }) {
+    const Icon = wfrpIcon('conditions', name);
+
+    return Icon ? <Icon size={18} /> : null;
+}
 
 export function SystemConditionsDialog({
     participant,
@@ -60,6 +71,10 @@ function DialogBody({
     const tMagic = useTranslations('wfrpMagic.ui.malignant');
 
     const malignant = useMalignantToggle(participant);
+
+    const mounted = useMountedSwitch(participant);
+
+    const tMount = useTranslations('battleWfrp.ui.mounted');
 
     const [selected, setSelected] = useState(WFRP_CONDITIONS.catalog[0].key);
 
@@ -195,6 +210,28 @@ function DialogBody({
                 </div>
             )}
 
+            {mounted.available && mounted.mounts.length > 0 && (
+                <div className="space-y-1 pb-2">
+                    <Label htmlFor="wfrp-mounted">{tMount('label')}</Label>
+                    <SelectField
+                        id="wfrp-mounted"
+                        value={mounted.mountId || NO_MOUNT}
+                        disabled={mounted.isPending}
+                        onValueChange={(v) =>
+                            mounted.set(v === NO_MOUNT ? undefined : v)
+                        }
+                        options={[
+                            { value: NO_MOUNT, label: tMount('none') },
+                            ...mounted.mounts.map((m) => ({
+                                value: m.id,
+                                label: m.name,
+                            })),
+                        ]}
+                        triggerClassName="w-full"
+                    />
+                </div>
+            )}
+
             <form
                 id={FORM_ID}
                 noValidate
@@ -213,7 +250,12 @@ function DialogBody({
                             checked={selected === key}
                             onClick={() => setSelected(key)}
                             text={{
-                                title: tCondition(key, 'label'),
+                                title: (
+                                    <span className="flex items-center gap-1.5">
+                                        <ConditionGlyph name={key} />
+                                        {tCondition(key, 'label')}
+                                    </span>
+                                ),
                                 note: tCondition(key, 'description'),
                             }}
                         />

@@ -69,7 +69,7 @@ export const movementOp = (body: MovementOpBody): SystemOpBody => ({
 export interface DispelBody {
     participantId: string;
     targetId: string;
-    mode: 'reactive' | 'persistent';
+    mode: 'persistent';
     roll?: number;
     serverRoll?: boolean;
 }
@@ -113,4 +113,43 @@ export const passionOp = (body: {
 }): SystemOpBody => ({
     action: 'passion',
     body,
+});
+
+export const aimOp = (body: {
+    participantId: string;
+    targetId: string;
+}): SystemOpBody => ({
+    action: 'aim',
+    body,
+});
+
+export const defensiveOp = (body: {
+    participantId: string;
+    skill: 'parry' | 'dodge' | 'magick';
+}): SystemOpBody => ({
+    action: 'defensive',
+    body,
+});
+
+export const fleeOp = (participantId: string): SystemOpBody => ({
+    action: 'flee',
+    body: { participantId },
+});
+
+export const grappleOp = (body: {
+    participantId: string;
+    choice: 'damage' | 'entangle' | 'free';
+    roll?: number;
+    serverRoll?: boolean;
+}): SystemOpBody => ({
+    action: 'grapple',
+    body,
+});
+
+export const mountedOp = (
+    participantId: string,
+    mountId?: string
+): SystemOpBody => ({
+    action: 'mounted',
+    body: { participantId, ...(mountId && { mountId }) },
 });

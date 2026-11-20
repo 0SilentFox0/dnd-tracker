@@ -7,6 +7,7 @@ export interface SkillDef {
     spec: 'none' | 'fixed' | 'open';
     specs?: readonly string[];
     basicSpecs?: readonly string[];
+    specOptional?: boolean;
 }
 
 const basic = (key: string, characteristic: CharacteristicKey): SkillDef => ({
@@ -21,11 +22,29 @@ const advanced = (
     characteristic: CharacteristicKey
 ): SkillDef => ({ key, characteristic, kind: 'advanced', spec: 'none' });
 
-const open = (key: string, characteristic: CharacteristicKey): SkillDef => ({
+const open = (
+    key: string,
+    characteristic: CharacteristicKey,
+    kind: SkillDef['kind'] = 'advanced'
+): SkillDef => ({
     key,
     characteristic,
-    kind: 'advanced',
+    kind,
     spec: 'open',
+});
+
+const grouped = (
+    key: string,
+    characteristic: CharacteristicKey,
+    kind: SkillDef['kind'],
+    specs: readonly string[]
+): SkillDef => ({
+    key,
+    characteristic,
+    kind,
+    spec: 'fixed',
+    specs,
+    specOptional: true,
 });
 
 export const MELEE_SPECS = [
@@ -33,10 +52,50 @@ export const MELEE_SPECS = [
     'cavalry',
     'fencing',
     'flail',
-    'parry',
     'polearm',
     'two-handed',
     'brawling',
+] as const;
+
+export const ENTERTAIN_SPECS = [
+    'acting',
+    'comedy',
+    'singing',
+    'storytelling',
+] as const;
+
+export const RIDE_SPECS = ['horse', 'mule', 'griffon', 'pegasus'] as const;
+
+export const STEALTH_SPECS = ['rural', 'underground', 'urban'] as const;
+
+export const ANIMAL_TRAINING_SPECS = [
+    'dog',
+    'hawk',
+    'horse',
+    'pigeon',
+    'boar',
+] as const;
+
+export const CHANNELLING_SPECS = [
+    'ember',
+    'gale',
+    'tide',
+    'stone',
+    'thorn',
+    'frost',
+    'dusk',
+    'dawn',
+    'ash',
+    'magic',
+] as const;
+
+export const SIGNS_SPECS = [
+    'guild',
+    'ranger',
+    'scout',
+    'thief',
+    'vagabond',
+    'warden',
 ] as const;
 
 export const RANGED_SPECS = [
@@ -59,7 +118,7 @@ export const SKILL_CATALOG: readonly SkillDef[] = [
     basic('dodge', 'ag'),
     basic('drive', 'ag'),
     basic('endurance', 't'),
-    basic('entertain', 'fel'),
+    grouped('entertain', 'fel', 'basic', ENTERTAIN_SPECS),
     basic('gamble', 'int'),
     basic('gossip', 'fel'),
     basic('haggle', 'fel'),
@@ -69,14 +128,15 @@ export const SKILL_CATALOG: readonly SkillDef[] = [
     basic('navigation', 'i'),
     basic('survival', 'int'),
     basic('perception', 'i'),
-    basic('ride', 'ag'),
+    grouped('ride', 'ag', 'basic', RIDE_SPECS),
     basic('row', 's'),
-    basic('stealth', 'ag'),
-    basic('swim', 's'),
+    grouped('stealth', 'ag', 'basic', STEALTH_SPECS),
+    basic('bribery', 'fel'),
+    basic('charm-animal', 'wp'),
     {
         key: 'melee',
         characteristic: 'ws',
-        kind: 'advanced',
+        kind: 'basic',
         spec: 'fixed',
         specs: MELEE_SPECS,
         basicSpecs: ['basic'],
@@ -89,21 +149,25 @@ export const SKILL_CATALOG: readonly SkillDef[] = [
         specs: RANGED_SPECS,
     },
     advanced('animal-care', 'int'),
-    advanced('channelling', 'wp'),
+    grouped('animal-training', 'int', 'advanced', ANIMAL_TRAINING_SPECS),
+    advanced('swim', 's'),
+    advanced('sail', 'ag'),
+    grouped('channelling', 'wp', 'advanced', CHANNELLING_SPECS),
     advanced('evaluate', 'int'),
     advanced('heal', 'int'),
     advanced('lockpicking', 'dex'),
     advanced('pray', 'fel'),
     advanced('research', 'int'),
-    advanced('signs', 'i'),
+    grouped('signs', 'int', 'advanced', SIGNS_SPECS),
     advanced('traps', 'dex'),
     advanced('sleight-of-hand', 'dex'),
     advanced('track', 'i'),
     open('lore', 'int'),
     open('language', 'int'),
     open('trade', 'dex'),
-    open('art', 'dex'),
+    open('art', 'dex', 'basic'),
     open('performance', 'ag'),
+    open('play', 'dex'),
 ];
 
 export const skillDef = (key: string): SkillDef | undefined =>

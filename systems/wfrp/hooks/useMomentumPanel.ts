@@ -1,10 +1,22 @@
 'use client';
 
+import { AttackType } from '@/lib/constants/battle';
 import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
-import { disengageOp, momentumOp, movementOp } from '@/systems/wfrp/api/battle';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import {
+    aimOp,
+    defensiveOp,
+    disengageOp,
+    fleeOp,
+    grappleOp,
+    momentumOp,
+    movementOp,
+} from '@/systems/wfrp/api/battle';
+import type { DefensiveSkill } from '@/systems/wfrp/rules/combat/defensive';
 import {
     engagedFoes,
+    engagementJournal,
     isSurrounded,
 } from '@/systems/wfrp/rules/combat/engagement';
 import {
@@ -26,6 +38,15 @@ export interface MomentumPanel {
     canSprint: boolean;
     canCharge: boolean;
     chargeTargets: { id: string; name: string }[];
+    canAim: boolean;
+    aimTargets: { id: string; name: string }[];
+    aim(targetId: string): void;
+    canDefend: boolean;
+    defend(skill: DefensiveSkill): void;
+    canFlee: boolean;
+    flee(): void;
+    canGrapple: boolean;
+    grapple(choice: 'damage' | 'entangle' | 'free', roll?: number): void;
     run(): void;
     sprint(roll?: number): void;
     charge(targetId: string): void;
@@ -50,7 +71,12 @@ export function useMomentumPanel(
 
     const holds = hasMomentum(hero);
 
-    const foes = engagedFoes(hero, battle.initiativeOrder, battle.map);
+    const foes = engagedFoes(
+        hero,
+        battle.initiativeOrder,
+        battle.map,
+        engagementJournal(battle.rules)
+    );
 
     const canDisengage =
         foes.length > 0 &&
@@ -67,7 +93,33 @@ export function useMomentumPanel(
         !hero.battleData.movementUsed &&
         !hero.actionFlags.hasUsedAction;
 
-    if (!holds && !canDisengage && !freeMove) return null;
+    const canAim =
+        editionOf(battle.rules).actionsModel === 'canon' &&
+        !hero.actionFlags.hasUsedAction &&
+        (hero.battleData.attacks ?? []).some(
+            (a) => attackKindOf(a.type) === AttackType.RANGED
+        );
+
+    const canon = editionOf(battle.rules).actionsModel === 'canon';
+
+    const canDefend = canon && !hero.actionFlags.hasUsedAction;
+
+    const canFlee = canon && freeMove && foes.length > 0;
+
+    const canGrapple =
+        canon &&
+        !hero.actionFlags.hasUsedAction &&
+        wfrpState(hero).grapple !== undefined;
+
+    if (
+        !holds &&
+        !canDisengage &&
+        !freeMove &&
+        !canAim &&
+        !canDefend &&
+        !canGrapple
+    )
+        return null;
 
     return {
         holds,
@@ -100,6 +152,32 @@ export function useMomentumPanel(
                   )
                   .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name }))
             : [],
+        canAim,
+        aimTargets: canAim
+            ? battle.initiativeOrder
+                  .filter(
+                      (p) =>
+                          p.basicInfo.side !== hero.basicInfo.side &&
+                          isActive(p)
+                  )
+                  .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name }))
+            : [],
+        aim: (targetId) =>
+            actions.system.mutate(aimOp({ participantId, targetId })),
+        canDefend,
+        defend: (skill) =>
+            actions.system.mutate(defensiveOp({ participantId, skill })),
+        canFlee,
+        flee: () => actions.system.mutate(fleeOp(participantId)),
+        canGrapple,
+        grapple: (choice, roll) =>
+            actions.system.mutate(
+                grappleOp({
+                    participantId,
+                    choice,
+                    ...(roll === undefined ? { serverRoll: true } : { roll }),
+                })
+            ),
         run: () =>
             actions.system.mutate(movementOp({ kind: 'run', participantId })),
         sprint: (roll) =>
@@ -130,6 +208,10 @@ export function useMomentumPanel(
         isPending:
             isSystemActionPending(actions.system, 'momentum') ||
             isSystemActionPending(actions.system, 'disengage') ||
+            isSystemActionPending(actions.system, 'aim') ||
+            isSystemActionPending(actions.system, 'defensive') ||
+            isSystemActionPending(actions.system, 'flee') ||
+            isSystemActionPending(actions.system, 'grapple') ||
             isSystemActionPending(actions.system, 'movement'),
     };
 }

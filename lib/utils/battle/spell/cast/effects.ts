@@ -20,6 +20,10 @@ import { dealsNoDamage } from '@/lib/utils/battle/participant/state';
 import { applyResistance, immunityNote } from '@/lib/utils/battle/resistance';
 import { outcomeFor } from '@/lib/utils/battle/spell/cast/outcome';
 import {
+    applySoakAfterHit,
+    soakSpellHit,
+} from '@/lib/utils/battle/spell/cast/soak';
+import {
     isDamageEffect,
     NO_TARGET_KINDS,
     type SpellCastState,
@@ -285,15 +289,22 @@ function dealSpellDamage(
     )
         return;
 
+    const soak = lethal ? undefined : soakSpellHit(state, id, planned);
+
     const resisted = lethal
         ? { finalDamage: planned, steps: [], immunityApplied: false }
-        : applyResistance(target, planned, effect.damageType ?? 'magic', {
-              participants: flow.ps,
-              fromSpell: true,
-              school: spell.groupId,
-              extra: state.actionModifiers[id],
-              rules: flow.ctx.rules,
-          });
+        : applyResistance(
+              target,
+              soak?.amount ?? planned,
+              effect.damageType ?? 'magic',
+              {
+                  participants: flow.ps,
+                  fromSpell: true,
+                  school: spell.groupId,
+                  extra: state.actionModifiers[id],
+                  rules: flow.ctx.rules,
+              }
+          );
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
     state.dealt += resisted.finalDamage;
@@ -305,9 +316,11 @@ function dealSpellDamage(
         undefined,
         effect.damageType ?? 'magic'
     );
+    applySoakAfterHit(state, id, soak);
     absorbSpellDamage(state, id, resisted.finalDamage);
     state.damageSteps[id] = [
         ...(state.damageSteps[id] ?? []),
+        ...(soak?.steps ?? []),
         ...resisted.steps,
     ];
 

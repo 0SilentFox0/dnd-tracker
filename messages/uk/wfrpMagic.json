@@ -1,4 +1,7 @@
 {
+  "dispel": {
+    "react": "Розсіяти закляття"
+  },
   "log": {
     "miscast": "{name}: збій магії! {effect}",
     "castSuccess": "{name} читає «{spell}»: {roll} / {target}, РУ {sl} (СН {cn}) — успіх",
@@ -10,6 +13,7 @@
     "channelLost": "{name} втрачає {lost} РУ пулу, лишилось {left}",
     "channelKept": "{name} утримує пул у {left} РУ",
     "wrath": "{name} викликає гнів богів! {effect}",
+    "overcastTrimmed": "{name} оголосив {declared} SL overcast, але доступно лише {available} SL: розподіл урізано",
     "ingredientAverts": "{name} палить інгредієнт, і збій магії «{spell}» згасає",
     "ingredientLowers": "{name} палить інгредієнт, і збій магії «{spell}» слабшає до малого",
     "dispelSuccess": "{name} розвіює {spell} ({caster}): SL {sl}, закляття не діє",
@@ -55,6 +59,17 @@
         "totalPower": "Повна сила",
         "unstoppableForce": "Нестримна сила"
       },
+      "overcastTitle": "Overcast (до {cap} SL понад CN)",
+      "overcastSpent": "Оголошено {spent} з {cap} SL; після кидка урізається, якщо SL не вистачить",
+      "overcastDim": {
+        "damage": "Шкода",
+        "targets": "Цілі",
+        "range": "Дальність",
+        "aoe": "Площа",
+        "duration": "Тривалість"
+      },
+      "overcastMore": "Більше: {dim}",
+      "overcastLess": "Менше: {dim}",
       "blessing": "Overcast благословення",
       "blessings": {
         "rangeYards": "Дальність",
@@ -64,7 +79,6 @@
     },
     "dispel": {
       "title": "Розсіяти",
-      "reactive": "Розсіяти {spell} від {caster}",
       "persistent": "Розплести {spell} від {caster}",
       "pending": "Кидок..."
     },

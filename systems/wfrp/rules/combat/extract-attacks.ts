@@ -12,6 +12,8 @@ import {
     type WfrpAttackSlot as WfrpSlot,
     type WfrpHand,
 } from '../slots';
+import type { BreathKind } from '../trait-kinds';
+import { sbRangeFt } from './range-band';
 
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 import { AttackType } from '@/lib/constants/battle';
@@ -23,12 +25,14 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 const valueOf = (list: { key: string; value?: number }[], key: string) =>
     list.find((q) => q.key === key)?.value;
 
-// verify against 5e book: targets hit per cell of blast radius
+// Targets hit per cell of blast radius
 const BLAST_TARGETS_PER_RADIUS_CELL = 4;
 
 const GUNPOWDER_GROUPS = ['blackpowder', 'engineering', 'explosives'];
 
 const YARDS_PER_CELL = 2;
+
+const EXTREME_RANGE_FACTOR = 3;
 
 /** Blackpowder, Engineering and Explosives weapons all have Blackpowder and Damaging (p303) */
 function withGunpowder(
@@ -44,6 +48,33 @@ function withGunpowder(
     );
 }
 
+const UNARMED_STATS = {
+    type: 'weapon',
+    group: 'brawling',
+    reach: 'personal',
+    damage: { addSb: true, flat: 0 },
+    qualities: [],
+    flaws: [{ key: 'undamaging' }],
+    twoHanded: false,
+    weight: 0,
+    price: 0,
+};
+
+/** Without a melee weapon a canon fighter strikes Unarmed (p301) */
+function unarmedAttack(): ExtractedAttack[] {
+    const profile = weaponProfile(UNARMED_STATS);
+
+    return profile
+        ? [
+              wfrpAttackFromProfile('unarmed', 'Unarmed Strike', profile, {
+                  hand: 'main',
+                  reach: 'personal',
+                  canon: true,
+              }),
+          ]
+        : [];
+}
+
 export function extractWfrpAttacks({
     rows,
     rules,
@@ -55,7 +86,7 @@ export function extractWfrpAttacks({
 
     const seen = new Set<string>();
 
-    return rows.flatMap(({ row, slot, carried }) => {
+    const attacks = rows.flatMap(({ row, slot, carried }) => {
         if (carried || !(isWeaponSlot(slot) || slot === ArtifactSlot.SHIELD))
             return [];
 
@@ -85,6 +116,10 @@ export function extractWfrpAttacks({
             }),
         ];
     });
+
+    return canon && !attacks.some((a) => a.type === AttackType.MELEE)
+        ? [...attacks, ...unarmedAttack()]
+        : attacks;
 }
 
 export function wfrpAttackFromProfile(
@@ -93,10 +128,14 @@ export function wfrpAttackFromProfile(
     profile: WeaponProfile,
     extra?: {
         magical?: true;
+        free?: true;
         hand?: WfrpHand;
         reach?: NonNullable<WfrpSlot['reach']>;
         canon?: true;
         twoHanded?: true;
+        /** Strength Bonus of the wielder, for `rangeSb` thrown weapons */
+        sb?: number;
+        breath?: BreathKind;
     }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
@@ -123,6 +162,17 @@ export function wfrpAttackFromProfile(
 
     const reload = valueOf(profile.flaws, 'reload');
 
+    const rangeFt =
+        canon && profile.rangeSb !== undefined && extra?.sb !== undefined
+            ? sbRangeFt(extra.sb, profile.rangeSb)
+            : profile.rangeFt;
+
+    // Extreme band reaches 3x Range (p302): the reach check needs the far number
+    const range =
+        canon && rangeFt !== undefined
+            ? `${rangeFt}/${rangeFt * EXTREME_RANGE_FACTOR} ft`
+            : `${rangeFt} ft`;
+
     return {
         id,
         name,
@@ -133,7 +183,7 @@ export function wfrpAttackFromProfile(
         damageDice: '',
         damageBonus: profile.damageFlat,
         damageType: 'physical',
-        ...(ranged && { range: `${profile.rangeFt} ft` }),
+        ...(ranged && { range }),
         ...(blast &&
             blastRadius && {
                 targetType: 'aoe' as const,
@@ -146,9 +196,12 @@ export function wfrpAttackFromProfile(
             ...(group && { group }),
             ...(!profile.addSb && { noSb: true }),
             ...(extra?.magical && { magical: true as const }),
+            ...(extra?.free && { free: true as const }),
+            ...(extra?.breath && { breath: extra.breath }),
             ...(extra?.hand && { hand: extra.hand }),
             ...(extra?.reach && { reach: extra.reach }),
             ...(extra?.twoHanded && { twoHanded: true as const }),
+            ...(canon && profile.bladed && { bladed: true as const }),
         }),
         noLevelDice: true,
         ...(ammoCapacity !== undefined && {

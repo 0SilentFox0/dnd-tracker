@@ -175,7 +175,9 @@
         "attack": "Attack",
         "damage": "Damage +X",
         "rangeFt": "Range, feet",
-        "magical": "Magical"
+        "magical": "Magical",
+        "breath": "Breath type",
+        "free": "Free attack"
       },
       "options": {
         "attack": {
@@ -184,8 +186,47 @@
           "breath": "Breath",
           "weapon": "Weapon",
           "ranged": "Ranged"
+        },
+        "breath": {
+          "acid": "Acid",
+          "cold": "Cold",
+          "electricity": "Electricity",
+          "fire": "Fire",
+          "poison": "Poison",
+          "smoke": "Smoke"
         }
       }
+    },
+    "wfrpTalent": {
+      "label": "WFRP: Talent",
+      "fields": {
+        "talent": "Talent"
+      },
+      "options": {
+        "talent": {
+          "ambidextrous": "Ambidextrous",
+          "dualWielder": "Dual Wielder",
+          "trickRider": "Trick Rider"
+        }
+      }
+    },
+    "wfrpCreature": {
+      "label": "WFRP: Creature trait",
+      "fields": {
+        "trait": "Trait",
+        "rating": "Rating"
+      },
+      "options": {
+        "trait": {
+          "swarm": "Swarm",
+          "fly": "Fly",
+          "painless": "Painless",
+          "undead": "Undead"
+        }
+      }
+    },
+    "wfrpRegenerate": {
+      "label": "WFRP: Regenerate"
     }
   },
   "flags": {
@@ -1139,7 +1180,10 @@
       "wfrpSize": "Size: {size}",
       "wfrpPsychology": "{psychology} {value}",
       "wfrpPassion": "{passion}{hasGroup, select, yes { ({group})} other {}}",
-      "wfrpAttack": "{attack} +{damage}{magical, select, yes {, magical} other {}}"
+      "wfrpAttack": "{attack} +{damage}{magical, select, yes {, magical} other {}}",
+      "wfrpTalent": "{talent}",
+      "wfrpCreature": "{trait}{hasRating, select, yes { ({rating})} other {}}",
+      "wfrpRegenerate": "Regenerate"
     },
     "flags": {
       "sense": "{sense} {range} ft",

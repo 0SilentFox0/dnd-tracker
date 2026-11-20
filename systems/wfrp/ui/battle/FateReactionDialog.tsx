@@ -53,7 +53,7 @@ function FateReactionForm({
                 {rows.map((r) => (
                     <div key={r.key} className="flex flex-col gap-2">
                         <p>
-                            {t('body', {
+                            {t(r.trapBlade ? 'trapBlade.body' : 'body', {
                                 attacker: r.attackerName,
                                 name: r.holderName,
                             })}
@@ -65,7 +65,7 @@ function FateReactionForm({
                                     setSpend((s) => ({ ...s, [r.key]: false }))
                                 }
                             >
-                                {t('accept')}
+                                {t(r.trapBlade ? 'trapBlade.accept' : 'accept')}
                             </Button>
                             <Button
                                 variant={spend[r.key] ? 'default' : 'outline'}
@@ -73,7 +73,7 @@ function FateReactionForm({
                                     setSpend((s) => ({ ...s, [r.key]: true }))
                                 }
                             >
-                                {t('spend')}
+                                {t(r.trapBlade ? 'trapBlade.spend' : 'spend')}
                             </Button>
                         </div>
                     </div>

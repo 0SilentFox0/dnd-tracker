@@ -17,6 +17,8 @@ export interface OpposedInput {
     attackerSlMod?: number;
     /** Added to the attacker's SL only when the attacker's test is passed, before the winner is decided */
     attackerSlOnSuccess?: number;
+    /** Added to the attacker's SL only when the attacker's test is failed (Practical) */
+    attackerSlOnFail?: number;
     defenderSlMod?: number;
     /** Extra SL per defence kind on top of `defenderSlMod`; also steers which defence is chosen */
     defenderSlByKind?: Partial<Record<DefenseKind, number>>;
@@ -61,6 +63,7 @@ export function resolveOpposed({
     defenderTargets,
     attackerSlMod = 0,
     attackerSlOnSuccess = 0,
+    attackerSlOnFail = 0,
     defenderSlMod = 0,
     defenderSlByKind,
     unopposed,
@@ -100,10 +103,11 @@ export function resolveOpposed({
         rolledAttacker.outcome === 'success' ||
         rolledAttacker.outcome === 'critical';
 
-    const attacker =
-        attackerPassed && attackerSlOnSuccess
-            ? { ...rolledAttacker, sl: rolledAttacker.sl + attackerSlOnSuccess }
-            : rolledAttacker;
+    const slExtra = attackerPassed ? attackerSlOnSuccess : attackerSlOnFail;
+
+    const attacker = slExtra
+        ? { ...rolledAttacker, sl: rolledAttacker.sl + slExtra }
+        : rolledAttacker;
 
     const rolled = {
         ...(unopposed

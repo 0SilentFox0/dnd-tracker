@@ -19,6 +19,7 @@
     "damageFlat": "Damage, flat bonus",
     "addSb": "Add SB to damage",
     "twoHanded": "Two-handed",
+    "bladed": "Bladed",
     "weight": "Weight",
     "price": "Price, pence",
     "invalid": "Check the values: AP 0-8, quality values 1-20.",

@@ -22,6 +22,7 @@ vi.mock('@/lib/supabase/battle-map-storage', () => ({
 
 vi.mock('@/lib/db', () => ({
     prisma: {
+        $queryRaw: async () => [],
         $transaction: async (callback: (tx: unknown) => unknown) =>
             callback({ $queryRaw: async () => [{ id: 'c1' }] }),
         campaignMember: { findUnique: async () => ({ role: 'dm' }) },

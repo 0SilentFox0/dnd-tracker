@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 import { skillTarget } from '../../rules/characteristics/derive';
-import { engagedFoes } from '../../rules/combat/engagement';
+import {
+    engagedFoes,
+    engagementJournal,
+} from '../../rules/combat/engagement';
 import {
     chargeBand,
     sprintYards,
@@ -219,7 +222,14 @@ export function movementMutation(
     if (actor.actionFlags.hasUsedAction)
         throw new BattleRuleError('action_used', API_ERRORS.ACTION_USED);
 
-    if (engagedFoes(actor, ctx.participants, ctx.meta.map).length > 0)
+    if (
+        engagedFoes(
+            actor,
+            ctx.participants,
+            ctx.meta.map,
+            engagementJournal(rules)
+        ).length > 0
+    )
         throw reject(API_ERRORS.CHARGE_ENGAGED);
 
     if ((actor.battleData.movementUsed ?? 0) > 0)

@@ -68,7 +68,7 @@ describe('grimCoverage', () => {
         expect(grimInfo(data)).toEqual([]);
         data.units[0].knownSpells = [];
         expect(grimInfo(data)).toEqual([
-            'info: spells "Rot Touch": known by no unit',
+            'info: spells "Shove Wave": known by no unit',
         ]);
     });
 
@@ -226,27 +226,17 @@ describe('grimCoverage', () => {
         );
     });
 
-    it('flags a skill outside the class pool and a tier that adds no new skill', () => {
+    it('does not restrict canon career skills by class', () => {
         const data = load();
 
         data.careers[0].class = 'Warrior';
-        data.careers[0].tier1_skills = [
-            'melee:basic',
-            'melee:parry',
-            'dodge',
-            'cool',
-            'endurance',
-        ];
         data.careers[0].tier2_skills = ['sailing', 'intimidate', 'athletics'];
         data.careers[0].tier3_skills = ['melee:basic', 'dodge', 'cool'];
 
-        const warnings = grimCoverage(data);
-
-        expect(warnings).toContain(
-            'careers "Vermin Hunter": tier 2 skill "sailing" is outside the Warrior pool'
-        );
-        expect(warnings).toContain(
-            'careers "Vermin Hunter": tier 3 adds no new skill'
-        );
+        expect(
+            grimCoverage(data).filter(
+                (w) => w.includes('pool') || w.includes('no new skill')
+            )
+        ).toEqual([]);
     });
 });

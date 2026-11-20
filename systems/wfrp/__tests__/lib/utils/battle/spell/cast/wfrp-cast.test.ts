@@ -387,15 +387,16 @@ describe('canon5e overcast adds flat damage through the core hook', () => {
         edition: { preset: 'canon5e' },
     });
 
-    const lost = (overcast: SpellMagic['overcast']) =>
+    const lost = (overcast: SpellMagic['overcast'], missile = false) =>
         hpLost(
-            run(spellOf(magicOf({ overcast })), {
+            run(spellOf(magicOf({ overcast, missile })), {
                 rules: canon,
                 castTest: { roll: 12 },
             })
         );
 
     it('+N Damage from the table, no extra dice or cast level', () => {
-        expect(lost('dice') - lost(null)).toBe(2);
+        expect(lost('dice')).toBe(lost(null));
+        expect(lost('dice', true)).toBeGreaterThan(lost('dice'));
     });
 });

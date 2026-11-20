@@ -1,15 +1,10 @@
 import { z } from 'zod';
 
-import {
-    isCanonDispel,
-    wfrpDispel,
-    wfrpDispelPersistent,
-} from '../../rules/magic/dispel';
-import { isDispelRange } from '../../rules/magic/dispel-range';
+import { isCanonDispel, wfrpDispelPersistent } from '../../rules/magic/dispel';
+import { dispelSpotsOf, isDispelRange } from '../../rules/magic/dispel-range';
 import { wfrpState, withWfrpState } from '../../rules/state';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { textRef } from '@/lib/i18n/text-ref';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import { requireActor } from '@/lib/utils/battle/common/control';
 import { newBattleAction } from '@/lib/utils/battle/common/new-action';
@@ -28,7 +23,7 @@ export const dispelSchema = z
     .object({
         participantId: z.string().min(1),
         targetId: z.string().min(1),
-        mode: z.enum(['reactive', 'persistent']),
+        mode: z.literal('persistent'),
         roll: z.number().int().min(1).max(100).optional(),
         serverRoll: z.literal(true).optional(),
     })
@@ -55,7 +50,6 @@ export function dispelMutation(
         missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
         forbidden: API_ERRORS.FORBIDDEN,
         inactive: { code: 'action_rejected', message: API_ERRORS.ACTION_USED },
-        anyTurn: body.mode === 'reactive',
     });
 
     const target = findParticipant(ctx.participants, body.targetId);
@@ -66,126 +60,71 @@ export function dispelMutation(
             API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE
         );
 
-    if (!isDispelRange(dispeller, target, ctx.meta.map, rules))
+    if (!isDispelRange(dispeller, dispelSpotsOf(target), ctx.meta.map, rules))
         throw reject(API_ERRORS.DISPEL_OUT_OF_RANGE);
 
     const id = dispeller.basicInfo.id;
 
     const round = ctx.scene.round;
 
-    const rng = rngOf(ctx);
+    assertCanAct(ctx, id);
 
-    const presetRoll = body.serverRoll ? undefined : body.roll;
-
-    const persistent = body.mode === 'persistent';
-
-    if (persistent) {
-        assertCanAct(ctx, id);
-
-        if (dispeller.actionFlags.hasUsedAction)
-            throw new BattleRuleError('action_used', API_ERRORS.ACTION_USED);
-    } else if (wfrpState(dispeller).dispelRound === round)
-        throw reject(API_ERRORS.DISPEL_USED);
+    if (dispeller.actionFlags.hasUsedAction)
+        throw new BattleRuleError('action_used', API_ERRORS.ACTION_USED);
 
     const held = ruleSystemOf(rules).magic.sustain.info(target);
 
-    const last = wfrpState(target).lastCast;
+    if (!held?.cn) throw reject(API_ERRORS.DISPEL_NO_TARGET);
 
-    let next = dispeller;
+    const before = wfrpState(dispeller).dispelProgress;
 
-    let participants = ctx.participants;
+    const result = wfrpDispelPersistent({
+        dispeller,
+        spellName: held.spellName,
+        progress:
+            before?.targetId === target.basicInfo.id &&
+            before.castId === held.castId
+                ? before.progress
+                : 0,
+        cn: held.cn,
+        ownSpell: target.basicInfo.id === id,
+        rules,
+        rng: rngOf(ctx),
+        presetRoll: body.serverRoll ? undefined : body.roll,
+    });
 
-    let lines;
+    const next = withWfrpState(applyMainActionUsed(dispeller), {
+        dispelProgress: result.done
+            ? undefined
+            : {
+                  targetId: target.basicInfo.id,
+                  castId: held.castId,
+                  progress: result.progress,
+              },
+    });
 
-    if (persistent) {
-        if (!held?.cn) throw reject(API_ERRORS.DISPEL_NO_TARGET);
+    let participants = ctx.participants.map((p) =>
+        p === dispeller ? next : p
+    );
 
-        const before = wfrpState(dispeller).dispelProgress;
+    let lines = result.lines;
 
-        const result = wfrpDispelPersistent({
-            dispeller,
-            spellName: held.spellName,
-            progress:
-                before?.targetId === target.basicInfo.id &&
-                before.castId === held.castId
-                    ? before.progress
-                    : 0,
-            cn: held.cn,
-            ownSpell: target.basicInfo.id === id,
-            rules,
-            rng,
-            presetRoll,
-        });
+    if (result.done) {
+        const ended = ruleSystemOf(rules).magic.sustain.drop(
+            participants,
+            target.basicInfo.id,
+            result.lines[0]
+        );
 
-        lines = result.lines;
-
-        next = withWfrpState(applyMainActionUsed(dispeller), {
-            dispelProgress: result.done
-                ? undefined
-                : {
-                      targetId: target.basicInfo.id,
-                      castId: held.castId,
-                      progress: result.progress,
-                  },
-        });
-
-        participants = participants.map((p) => (p === dispeller ? next : p));
-
-        if (result.done) {
-            const ended = ruleSystemOf(rules).magic.sustain.drop(
-                participants,
-                target.basicInfo.id,
-                result.lines[0]
-            );
-
-            participants = ended.participants;
-            lines = [...lines, ...ended.messages];
-        }
-    } else {
-        if (!last) throw reject(API_ERRORS.DISPEL_NO_TARGET);
-
-        const result = wfrpDispel({
-            dispeller,
-            caster: target,
-            spellName: last.spell,
-            castSl: last.sl,
-            critBonus: last.critBonus,
-            rules,
-            rng,
-            presetRoll,
-        });
-
-        lines = result.lines;
-
-        next = withWfrpState(dispeller, { dispelRound: round });
-
-        participants = participants.map((p) => {
-            if (p === dispeller) return next;
-
-            return result.dispelled && p === target
-                ? withWfrpState(p, { lastCast: undefined })
-                : p;
-        });
+        participants = ended.participants;
+        lines = [...lines, ...ended.messages];
     }
 
     const action = newBattleAction(
         dispeller,
         'ability',
         { battleId: ctx.scene.id, round, targets: [next] },
-        {
-            actionDetails: {},
-            ...logFields(
-                lines.length
-                    ? lineText(lines, ' | ')
-                    : textRef('wfrpMagic.log.dispelFail', {
-                          name: dispeller.basicInfo.name,
-                          caster: target.basicInfo.name,
-                          spell: last?.spell ?? '',
-                          roll: 0,
-                          sl: 0,
-                      })
-            ),
-        }
+        { actionDetails: {}, ...logFields(lineText(lines, ' | ')) }
     );
 
     return {

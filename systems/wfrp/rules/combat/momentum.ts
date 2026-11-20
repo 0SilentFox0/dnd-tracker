@@ -1,6 +1,8 @@
+import { editionOf } from '../edition';
 import { ATTACK_SLOT, type SceneMomentum } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
 import { isAfraid } from '../traits/fear';
+import { hasTalent } from '../traits/talents';
 import { wfrpAttackBlocked } from './disarm';
 
 import { AttackType } from '@/lib/constants/battle';
@@ -65,6 +67,10 @@ export function spendMomentum(p: BattleParticipant): BattleParticipant | null {
     return hasMomentum(p) ? loseMomentum(p) : null;
 }
 
+/** Dual Wielder: the second weapon's attack costs no Momentum (p119) */
+export const dualWielderFree = (p: BattleParticipant, rules: Ruleset): boolean =>
+    editionOf(rules).actionsModel === 'canon' && hasTalent(p, 'dualWielder');
+
 export type SecondAttackBlocker =
     | 'none'
     | 'used'
@@ -77,7 +83,7 @@ export function secondAttackBlocker(
     p: BattleParticipant,
     rules: Ruleset
 ): SecondAttackBlocker | null {
-    if (!hasMomentum(p)) return 'none';
+    if (!hasMomentum(p) && !dualWielderFree(p, rules)) return 'none';
 
     if (wfrpState(p).momentumAttack) return 'used';
 
@@ -105,8 +111,11 @@ export function secondAttackBlocker(
         : 'weapons';
 }
 
-export function grantSecondAttack(p: BattleParticipant): BattleParticipant {
-    const spent = loseMomentum(p);
+export function grantSecondAttack(
+    p: BattleParticipant,
+    free = false
+): BattleParticipant {
+    const spent = free ? p : loseMomentum(p);
 
     return withAttacksLeft(
         withWfrpState(spent, { momentumAttack: true }),

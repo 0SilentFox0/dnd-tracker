@@ -1,7 +1,8 @@
-// All values: verify against 5e book.
 export const AP_MAX_PER_LAYER = 8;
 
 export const AP_CAP = 12;
+
+export const ARMOUR_PENALTY_MAX = 6;
 
 export const ARMOUR_KINDS = ['soft', 'mail', 'plate'] as const;
 
@@ -22,6 +23,19 @@ export const WEAPON_GROUPS = [
     'sling',
     'throwing',
     'explosives',
+] as const;
+
+export const GEAR_CATEGORIES = [
+    'food',
+    'clothing',
+    'tools',
+    'books',
+    'animals',
+    'poisons',
+    'herbs',
+    'trappings',
+    'prosthetics',
+    'magical',
 ] as const;
 
 export const WEAPON_REACHES = [

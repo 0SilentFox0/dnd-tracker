@@ -120,6 +120,7 @@
       "charmerHostile": "You cannot cast hostile spells on whoever charmed you"
     },
     "castFinished": "casting finished",
+    "extensionDropped": "{name} is beyond what the roll of {spell} could reach and is spared",
     "castProgress": "⏳ {name}: {spell} — {rounds, plural, one {# round} other {# rounds}} of casting left; the slot and charges are not spent yet",
     "noDice": "no dice",
     "formula": "{count}d{sides}",
@@ -139,6 +140,7 @@
     "captionDamageHits": "damage: {dealt} ({hits})",
     "captionHeal": "healing: {healed} HP",
     "fizzled": "{name} fails to cast {spell}",
+    "cancelled": "{name}'s {spell} is cancelled by {by}",
     "cast": "{name} casts {spell}",
     "castCaption": "{name} casts {spell} ({caption})",
     "noSlots": "{name}: {spell} is unavailable — no spell slots"

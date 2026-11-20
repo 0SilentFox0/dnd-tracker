@@ -1,3 +1,4 @@
+import { parseSkillAdvanceKey, skillDef } from '../skills/catalog';
 import type { AdvancementRules, AdvancementTrack } from './rules';
 
 /** Advancement XP Costs, p191: price of the Nth purchase (+5 each) */
@@ -47,4 +48,17 @@ export function advancementFor(
         characteristic: pick('characteristic'),
         skill: pick('skill'),
     };
+}
+
+/** Advanced skills (and non-basic specialisations) of the catalog; unknown keys count as advanced */
+export function isAdvancedSkill(advanceKey: string): boolean {
+    const { key, spec } = parseSkillAdvanceKey(advanceKey);
+
+    const def = skillDef(key);
+
+    if (!def) return true;
+
+    if (def.basicSpecs) return !spec || !def.basicSpecs.includes(spec);
+
+    return def.kind === 'advanced';
 }

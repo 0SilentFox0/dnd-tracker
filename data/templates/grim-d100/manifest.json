@@ -26,11 +26,11 @@
   "icons": {},
   "credits": "Original content.",
   "counts": {
-    "races": 4,
-    "careers": 16,
-    "feats": 50,
-    "units": 30,
-    "spells": 30,
-    "artifacts": 56
+    "races": 5,
+    "careers": 70,
+    "feats": 246,
+    "units": 80,
+    "spells": 252,
+    "artifacts": 300
   }
 }

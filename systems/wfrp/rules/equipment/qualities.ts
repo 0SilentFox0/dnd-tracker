@@ -5,12 +5,15 @@ type Entry = {
     kind: 'quality' | 'flaw';
     hasValue: boolean;
     implemented: boolean;
+    /** `false`: absent from the canon book, hidden from the editor and ignored by the engine */
+    canon?: false;
 };
 
-const q = (hasValue = false, implemented = true): Entry => ({
+const q = (hasValue = false, implemented = true, canon?: false): Entry => ({
     kind: 'quality',
     hasValue,
     implemented,
+    ...(canon === false && { canon }),
 });
 
 const f = (hasValue = false, implemented = true): Entry => ({
@@ -19,7 +22,6 @@ const f = (hasValue = false, implemented = true): Entry => ({
     implemented,
 });
 
-// verify against 5e book
 export const QUALITY_REGISTRY = {
     damaging: q(),
     impale: q(),
@@ -36,14 +38,14 @@ export const QUALITY_REGISTRY = {
     parry: q(),
     fast: q(),
     flexible: q(),
-    distract: q(true, false),
+    distract: q(true, false, false),
     entangle: q(true),
     wrap: q(),
-    spread: q(false, false),
-    trapBlade: q(false, false),
-    unbreakable: q(false, false),
+    spread: q(false, false, false),
+    trapBlade: q(),
+    unbreakable: q(),
     inflict: q(true),
-    repeater: q(true, false),
+    repeater: q(true),
     imprecise: f(),
     undamaging: f(),
     unreliable: f(),
@@ -53,7 +55,7 @@ export const QUALITY_REGISTRY = {
     reload: f(true),
     bulky: f(),
     lightweight: q(),
-    practical: q(false, false),
+    practical: q(),
 } as const satisfies Record<string, Entry>;
 
 export type QualityKey = keyof typeof QUALITY_REGISTRY;

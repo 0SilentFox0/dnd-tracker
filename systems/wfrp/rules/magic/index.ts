@@ -9,9 +9,12 @@ import {
     isPrayerKind,
     prayTargetOf,
     wfrpCastTest,
+    wfrpDeclaredExtension,
 } from './cast-test';
 import { channelTargetOf, wfrpChannel } from './channel';
+import { wfrpCastReaction } from './dispel-reaction';
 import { wfrpMiscast } from './miscast';
+import { wfrpSoakSpellDamage, wfrpSpellPower } from './spell-damage';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { noMagic } from '@/lib/utils/battle/spell/none';
@@ -64,6 +67,7 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
         };
     },
     castTest: wfrpCastTest,
+    declaredExtension: wfrpDeclaredExtension,
     castPreview: (caster, kind, rules) => {
         const prayer = isPrayerKind(kind);
 
@@ -82,10 +86,13 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
     miscast: wfrpMiscast,
     attribute: wfrpLoreAttribute,
     badge: channelBadge,
+    reaction: wfrpCastReaction,
 };
 
 export const WFRP_MAGIC: RuleSystemMagic = {
     ...noMagic,
     upcast: { steps: upcastSteps },
     tested: WFRP_TESTED_MAGIC,
+    spellPower: wfrpSpellPower,
+    soakSpellDamage: wfrpSoakSpellDamage,
 };

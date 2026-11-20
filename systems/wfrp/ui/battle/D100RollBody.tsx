@@ -1,9 +1,13 @@
 import { useTranslations } from 'next-intl';
 
+import { isHelpless } from '../../rules/combat/attack-mods/helpless';
 import { fateLeftOf } from '../../rules/combat/fate';
 import { heldBy } from '../../rules/combat/momentum';
+import { editionOf } from '../../rules/edition';
 import { SCENE_SLOT } from '../../rules/slots';
 import { wfrpState } from '../../rules/state';
+import { attackModsControls } from './attack-mods-controls';
+import { AttackModsPicker } from './AttackModsPicker';
 import { D100RollPicker } from './D100RollPicker';
 import { fortuneControls } from './fortune-controls';
 
@@ -28,6 +32,15 @@ export function D100RollBody({
     const left = (attacker && wfrpState(attacker).fortune) ?? 0;
 
     const fateLeft = attacker ? fateLeftOf(attacker) : 0;
+
+    const modsControls = attackModsControls(state.system, (slot) =>
+        actions.setSystemInput(slot ?? null)
+    );
+
+    const strikeTarget =
+        state.targetIds.length === 1
+            ? view.targets.find((p) => p.basicInfo.id === state.targetIds[0])
+            : undefined;
 
     const momentum =
         judged.attackerSide !== undefined &&
@@ -57,6 +70,13 @@ export function D100RollBody({
                     ? t('momentum.held', { side: t('momentum.side') })
                     : t('momentum.none')}
             </div>
+            {editionOf(view.rules).combatModsModel === 'canon' && (
+                <AttackModsPicker
+                    {...modsControls}
+                    kind={view.attackKind}
+                    helpless={!!strikeTarget && isHelpless(strikeTarget)}
+                />
+            )}
             <D100RollPicker
                 locked={lockedRollSource(state)}
                 fortune={{

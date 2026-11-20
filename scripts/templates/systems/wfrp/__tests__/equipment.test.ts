@@ -99,8 +99,8 @@ describe('equipmentIssues', () => {
         ],
         [
             'unimplemented quality',
-            withStats(rows[0], { qualities: [{ key: 'trapBlade' }] }),
-            'trapBlade',
+            withStats(rows[0], { qualities: [{ key: 'distract', value: 1 }] }),
+            'distract',
         ],
         [
             'bow without twoHanded',
@@ -114,5 +114,102 @@ describe('equipmentIssues', () => {
         ],
     ])('rejects %s', (_label, row, message) => {
         expect(equipmentIssues(row).join('\n')).toContain(message);
+    });
+});
+
+describe('book price bands', () => {
+    const base = rows[1].systemStats as Record<string, unknown>;
+
+    const armour = (kind: string, price: number): Row => ({
+        ...rows[1],
+        systemStats: { ...base, kind, price },
+    });
+
+    it('accepts printed book prices for armour', () => {
+        expect(equipmentIssues(armour('mail', 4800))).toEqual([]);
+        expect(equipmentIssues(armour('mail', 3840))).toEqual([]);
+    });
+
+    it('keeps a sanity ceiling', () => {
+        expect(equipmentIssues(armour('mail', 72000)).join('\n')).toContain(
+            'is outside'
+        );
+    });
+});
+
+describe('gear categories', () => {
+    const gear = (
+        slot: string,
+        category: string | undefined,
+        weight: number,
+        price: number
+    ): Row => ({
+        name: 'Test Gear',
+        description: 'A test trapping.',
+        rarity: 'common',
+        slot,
+        systemStats: {
+            type: 'gear',
+            ...(category && { category }),
+            weight,
+            price,
+            qualities: [],
+        },
+    });
+
+    it.each([
+        ['item', 'food', 1, 12],
+        ['item', 'animals', 0, 7200],
+        ['item', 'books', 1, 4800],
+        ['cloak', 'clothing', 1, 600],
+        ['item', 'magical', 1, 4800],
+        ['cloak', 'clothing', 1, 3840],
+        ['item', 'trappings', 6, 216],
+        ['item', 'animals', 6, 1],
+        ['item', 'animals', 6, 144000],
+        ['item', 'tools', 1, 19200],
+    ])('accepts %s / %s', (slot, category, weight, price) => {
+        expect(equipmentIssues(gear(slot, category, weight, price))).toEqual(
+            []
+        );
+    });
+
+    it('applies the category band and rejects an unknown category', () => {
+        expect(
+            equipmentIssues(gear('item', 'food', 1, 5000)).join('\n')
+        ).toContain('is outside 1–480 p for food');
+        expect(
+            equipmentIssues(gear('item', 'pets', 0, 10)).join('\n')
+        ).toContain('category');
+    });
+});
+
+describe('firearm and explosive groups', () => {
+    const ranged = (group: string, price: number, flat: number): Row => ({
+        ...rows[0],
+        systemStats: {
+            ...(rows[0].systemStats as Record<string, unknown>),
+            group,
+            range: group === 'explosives' ? 30 : 100,
+            damage: { addSb: false, flat },
+            price,
+            ...(group === 'explosives'
+                ? { flaws: [], twoHanded: false, ammoCapacity: undefined, weight: 0 }
+                : {}),
+        },
+    });
+
+    it('accepts book-priced engineering and explosives rows', () => {
+        expect(equipmentIssues(ranged('engineering', 24000, 10))).toEqual([]);
+        expect(equipmentIssues(ranged('explosives', 720, 12))).toEqual([]);
+    });
+
+    it('still rejects out-of-band entangling and engineering rows', () => {
+        expect(
+            equipmentIssues(ranged('entangling', 72, 0)).join('\n')
+        ).toContain('is outside 6–30 ft for entangling');
+        expect(
+            equipmentIssues(ranged('engineering', 30000, 10)).join('\n')
+        ).toContain('is outside 960–24000 p for engineering');
     });
 });

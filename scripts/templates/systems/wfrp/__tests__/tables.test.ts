@@ -18,14 +18,14 @@ describe('tableIssues', () => {
     );
 
     it('rejects a slot the template does not use', () => {
-        expect(tableIssues(asRules({ tables: { critHead: rows(8) } }))).toEqual(
-            ['rules: tables.critHead is not used by the Grim template']
+        expect(tableIssues(asRules({ tables: { downtimeEvent: rows(8) } }))).toEqual(
+            ['rules: tables.downtimeEvent is not used by the Grim template']
         );
     });
 
     it('rejects a wrong row count', () => {
-        expect(tableIssues(asRules({ tables: { wrath: rows(5) } }))).toEqual([
-            'rules: tables.wrath must have 8–10 rows (got 5)',
+        expect(tableIssues(asRules({ tables: { wrath: rows(1) } }))).toEqual([
+            'rules: tables.wrath must have 2–20 rows (got 1)',
         ]);
     });
 

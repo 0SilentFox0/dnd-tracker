@@ -124,6 +124,7 @@ export function useCounterWindow(): {
     offers: CounterOfferView[];
     isPending: boolean;
     counter(offer: CounterOffer, slotLevel?: number): void;
+    react(offer: CounterOffer): void;
     pass(offer: CounterOffer): void;
     closeAll(): void;
 } {
@@ -164,6 +165,7 @@ export function useCounterWindow(): {
         body:
             | { action: 'counter'; reactorId: string; slotLevel?: number }
             | { action: 'pass'; reactorId: string }
+            | { action: 'react'; reactorId: string }
             | { action: 'closeAll' }
     ) => {
         if (shown)
@@ -194,6 +196,7 @@ export function useCounterWindow(): {
                 ...(offer.slotLevels.length > 0 &&
                     slotLevel !== undefined && { slotLevel }),
             }),
+        react: (offer) => send({ action: 'react', reactorId: offer.reactorId }),
         pass: (offer) => send({ action: 'pass', reactorId: offer.reactorId }),
         closeAll: () => send({ action: 'closeAll' }),
     };

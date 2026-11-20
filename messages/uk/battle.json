@@ -271,6 +271,7 @@
   },
   "hero": {
     "yourTurn": "твій хід",
+    "systemActions": "Дії системи",
     "acting": "ходить",
     "turnIn": "хід через {count}",
     "cooldown": "перезарядка: {duration}",

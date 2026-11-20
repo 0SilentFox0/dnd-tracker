@@ -1,4 +1,4 @@
-import type { HitSpot } from '../combat/constants';
+import { ACCEPTED_SPOTS, type HitSpot } from '../combat/constants';
 import { fateLeftOf } from '../combat/fate';
 import type { BlessingDimension } from '../magic/constants';
 import { wfrpState } from '../state';
@@ -27,7 +27,32 @@ export interface FortuneInput {
     critBonus?: CritBonus;
     /** Blessing casts only: the overcast dimension (p217) */
     blessing?: BlessingDimension;
+    /** Attacks only: situational choices the DM or player declares */
+    mods?: WfrpAttackMods;
+    /** Casts only: overcast SL spent per dimension */
+    overcast?: WfrpOvercast;
 }
+
+export interface WfrpAttackMods {
+    calledShot?: HitSpot;
+    cover?: boolean;
+    highGround?: 'attacker' | 'defender';
+    enclosed?: boolean;
+    helplessRoll?: number;
+    grapple?: boolean;
+}
+
+export const OVERCAST_DIMENSIONS = [
+    'damage',
+    'targets',
+    'range',
+    'aoe',
+    'duration',
+] as const;
+
+export type OvercastDimension = (typeof OVERCAST_DIMENSIONS)[number];
+
+export type WfrpOvercast = Partial<Record<OvercastDimension, number>>;
 
 export type CritBonus = 'criticalDamage' | 'totalPower' | 'unstoppableForce';
 
@@ -45,6 +70,48 @@ const BLESSING_DIMENSIONS: readonly unknown[] = [
 
 const KINDS: readonly unknown[] = ['reroll', 'sl', 'notFail', 'none'];
 
+const SPOTS_ACCEPTED: readonly unknown[] = ACCEPTED_SPOTS;
+
+function modsOf(raw: unknown): WfrpAttackMods | undefined {
+    if (typeof raw !== 'object' || raw === null) return undefined;
+
+    const m = raw as Record<string, unknown>;
+
+    const out: WfrpAttackMods = {
+        ...(SPOTS_ACCEPTED.includes(m.calledShot) && {
+            calledShot: m.calledShot as HitSpot,
+        }),
+        ...(m.cover === true && { cover: true }),
+        ...((m.highGround === 'attacker' || m.highGround === 'defender') && {
+            highGround: m.highGround,
+        }),
+        ...(m.enclosed === true && { enclosed: true }),
+        ...(typeof m.helplessRoll === 'number' &&
+            Number.isInteger(m.helplessRoll) &&
+            m.helplessRoll >= 1 &&
+            m.helplessRoll <= 100 && { helplessRoll: m.helplessRoll }),
+        ...(m.grapple === true && { grapple: true }),
+    };
+
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
+function overcastOf(raw: unknown): WfrpOvercast | undefined {
+    if (typeof raw !== 'object' || raw === null) return undefined;
+
+    const out = Object.fromEntries(
+        OVERCAST_DIMENSIONS.flatMap((d) => {
+            const v = (raw as Record<string, unknown>)[d];
+
+            return typeof v === 'number' && Number.isInteger(v) && v > 0
+                ? [[d, v]]
+                : [];
+        })
+    ) as WfrpOvercast;
+
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
 export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
     if (typeof raw !== 'object' || raw === null) return undefined;
 
@@ -56,9 +123,15 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         location,
         critBonus,
         blessing,
+        mods,
+        overcast,
     } = raw as Record<string, unknown>;
 
     if (!KINDS.includes(kind)) return undefined;
+
+    const parsedMods = modsOf(mods);
+
+    const parsedOvercast = overcastOf(overcast);
 
     return {
         kind: kind as FortuneInput['kind'],
@@ -77,6 +150,8 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         ...(BLESSING_DIMENSIONS.includes(blessing) && {
             blessing: blessing as BlessingDimension,
         }),
+        ...(parsedMods && { mods: parsedMods }),
+        ...(parsedOvercast && { overcast: parsedOvercast }),
     };
 });
 

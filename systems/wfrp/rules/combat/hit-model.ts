@@ -7,6 +7,7 @@ import {
     SIZE_HIT_PER_STEP,
 } from '../traits/constants';
 import { sizeStep } from '../traits/read';
+import { sizeSbFactor } from '../traits/size';
 import {
     BALANCE_REF_AP,
     BALANCE_REF_INCOMING,
@@ -30,6 +31,14 @@ const MIN_DURABILITY = 0.25;
 
 const MAX_DURABILITY = 10;
 
+// Canon Hack wears the struck armour by 1 AP per hit: about half an AP of lasting effect over a fight
+const HACK_WEAR_AP = 0.5;
+
+const hasHack = (p: BattleParticipant) =>
+    (p.battleData.attacks ?? []).some((a) =>
+        ATTACK_SLOT.read(a.system)?.qualities.some((q) => q.key === 'hack')
+    );
+
 const sizeSteps = (p: BattleParticipant) =>
     sizeStep(participantStats(p)?.size) - sizeStep(AVERAGE_SIZE);
 
@@ -49,7 +58,8 @@ function bestHitAverage(p: BattleParticipant): number {
 }
 
 const hitModelOf = (
-    chance: RuleSystemHitModel['winChance']
+    chance: RuleSystemHitModel['winChance'],
+    canonSize = false
 ): RuleSystemHitModel => ({
     offense: (p) => value(participantChars(p), 'ws'),
     saves: (p) => p.abilities.modifiers,
@@ -60,18 +70,20 @@ const hitModelOf = (
             Math.max(
                 value(c, 'ws'),
                 skillTarget(c, 'dodge')?.target ?? value(c, 'ag')
-            ) -
-            SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p))
+            ) - (canonSize ? 0 : SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p)))
         );
     },
     winChance: chance,
     damage: (p) =>
         Math.max(
             MIN_DAMAGE,
-            bestHitAverage(p) *
-                (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p))) -
+            (canonSize
+                ? bestHitAverage(p) +
+                  sizeSbFactor(p) * (participantStats(p)?.sb ?? 0)
+                : bestHitAverage(p) *
+                  (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p)))) -
                 BALANCE_REF_TB -
-                BALANCE_REF_AP
+                (BALANCE_REF_AP - (canonSize && hasHack(p) ? HACK_WEAR_AP : 0))
         ),
     durability: (p) => {
         const w = participantStats(p);
@@ -111,7 +123,8 @@ const canonModel = hitModelOf(
     canonProfile.advantageModel === 'reverse' &&
         canonProfile.momentumModel === 'participant'
         ? momentumWinChance(canonProfile)
-        : winChanceFor(canonProfile)
+        : winChanceFor(canonProfile),
+    canonProfile.sizeModel === 'canon'
 );
 
 export const wfrpHitModelFor = (

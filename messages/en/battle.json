@@ -271,6 +271,7 @@
   },
   "hero": {
     "yourTurn": "your turn",
+    "systemActions": "System actions",
     "acting": "acting",
     "turnIn": "turn in {count}",
     "cooldown": "recharge: {duration}",

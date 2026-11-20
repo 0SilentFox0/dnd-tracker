@@ -74,7 +74,6 @@ function blastTargets({
 
     if (!aim) return [centre];
 
-    // verify against 5e book: Blast X radius in cells
     const { targets } = templateArea(
         map,
         order,

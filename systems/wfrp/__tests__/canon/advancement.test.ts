@@ -238,6 +238,43 @@ describe('canon: career write-off is reversible', () => {
         expect(back.ok && back.next.spentArchived).toBe(0);
     });
 
+    it('a trapping tick on the new career is dropped by the revert, the old ticks come back', () => {
+        const tiers = [
+            {
+                name: 'L1',
+                characteristics: [],
+                skills: [],
+                talents: [],
+                trappings: [],
+            },
+            {
+                name: 'L2',
+                characteristics: [],
+                skills: [],
+                talents: [],
+                trappings: ['Dagger'],
+            },
+        ];
+
+        const set = planCareerSet(
+            { ...hero, career: { ...hero.career!, ticks: ['trapping:rope'] } },
+            'b',
+            100
+        );
+
+        const ticked = planTrappingTick(set, tiers, 'Dagger');
+
+        expect(ticked.ok && ticked.next.career?.ticks).toEqual([
+            'trapping:dagger',
+        ]);
+
+        const back = ticked.ok && planCareerRevert(ticked.next);
+
+        expect(back && back.ok && back.next.career?.ticks).toEqual([
+            'trapping:rope',
+        ]);
+    });
+
     it('the undo record and the lost Standing survive a storage round trip', () => {
         const set = planCareerSet(
             { ...hero, career: { ...hero.career, standingLoss: 2 } },

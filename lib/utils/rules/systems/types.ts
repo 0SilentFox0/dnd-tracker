@@ -160,6 +160,8 @@ export interface RuleSystemDefinition {
 export interface ArmourGear {
     ap: Record<string, number>;
     armourOnly?: Record<string, number>;
+    /** AP of metal armour per location */
+    metalAp?: Record<string, number>;
     flexible?: boolean;
     /** Overburden tier of the carried load, 0 = none */
     burden?: number;
@@ -176,7 +178,8 @@ export interface RuleSystemTraits {
     recipes: readonly Recipe[];
     unitBuild(
         row: { id: string; characteristics?: unknown },
-        abilities: readonly ResolvedAbility[]
+        abilities: readonly ResolvedAbility[],
+        rules?: Ruleset
     ): UnitBuild;
 }
 

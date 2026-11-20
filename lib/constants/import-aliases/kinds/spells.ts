@@ -22,6 +22,7 @@ export const fieldAliases: PerField<readonly string[]> = {
     ingredients: ['інгредієнти (json)', 'ingredients', 'ingredients (json)'],
     dice: ['кістки', 'кубики', 'damage', 'шкода'],
     dieSides: ['грань кубика', 'die', 'грань', 'die sides'],
+    executionMode: ['режим виконання', 'execution mode'],
     concentration: ['концентрація'],
     ritual: ['ритуал', 'ritual'],
     stackable: ['стакається'],

@@ -16,9 +16,13 @@ import type {
     CorruptionGrantResult,
     CorruptionUndoResult,
 } from '@/systems/wfrp/rules/corruption/api-types';
+import { planExposureTest } from '@/systems/wfrp/rules/corruption/exposure';
 import { planGrant } from '@/systems/wfrp/rules/corruption/plan-grant';
 import { corruptionSpeciesOf } from '@/systems/wfrp/rules/corruption/species';
+import { corruptionThreshold } from '@/systems/wfrp/rules/corruption/threshold';
+import { EMPTY_CORRUPTION } from '@/systems/wfrp/rules/corruption/types';
 import { planCorruptionUndo } from '@/systems/wfrp/rules/corruption/undo';
+import { editionOf } from '@/systems/wfrp/rules/edition';
 import type {
     CorruptionGrantInput,
     CorruptionUndoInput,
@@ -93,18 +97,77 @@ export async function grantCorruption(
 
     const campaignId = access.campaign.id;
 
+    if (
+        'exposure' in input &&
+        editionOf(access.campaign.rules).magicModel !== 'canon5e'
+    )
+        throw new ContentError(API_ERRORS.CORRUPTION_EXPOSURE_UNSUPPORTED, 409);
+
     return withLockedCharacter(gate, async (tx, locked) => {
         const grantId = randomUUID();
 
+        const characteristics = readCharacteristics(locked);
+
+        const at = new Date().toISOString();
+
+        const plan =
+            'exposure' in input
+                ? planExposureTest({
+                      characteristics,
+                      ...input.exposure,
+                      rng: Math.random,
+                  })
+                : undefined;
+
+        const exposure =
+            plan && 'exposure' in input
+                ? { ...input.exposure, test: plan.test }
+                : undefined;
+
+        const points = plan
+            ? plan.points
+            : (input as { points: number }).points;
+
+        if (points === 0) {
+            const current = characteristics.corruption ?? EMPTY_CORRUPTION;
+
+            const summary = {
+                points: 0,
+                total: current.points,
+                threshold: corruptionThreshold(characteristics),
+                exposure,
+            };
+
+            await writeCharacterLog(tx, [
+                {
+                    campaignId,
+                    characterId: character.id,
+                    actorUserId: access.userId,
+                    kind: CharacterLogKind.CORRUPTION,
+                    data: {
+                        reason: input.reason,
+                        points: 0,
+                        total: summary.total,
+                        threshold: summary.threshold,
+                        mutation: false,
+                        summary,
+                    },
+                },
+            ]);
+
+            return { corruption: current, summary };
+        }
+
         const { state, summary } = corruption.planGrant({
-            characteristics: readCharacteristics(locked),
+            characteristics,
             rules: access.campaign.rules,
-            points: input.points,
+            points,
             reason: input.reason,
+            exposure,
             rng: Math.random,
             species: corruptionSpeciesOf({ name: character.race }),
             id: grantId,
-            at: new Date().toISOString(),
+            at,
         });
 
         await saveCorruption(tx, character.id, locked, state);
@@ -118,7 +181,7 @@ export async function grantCorruption(
                 data: {
                     grantId,
                     reason: input.reason,
-                    points: input.points,
+                    points,
                     total: summary.total,
                     threshold: summary.threshold,
                     mutation: !!summary.mutation,

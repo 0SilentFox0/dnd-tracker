@@ -13,6 +13,7 @@ import {
     counterPendingOf,
 } from '@/lib/utils/battle/counter/pending';
 import type { CounterOffer } from '@/lib/utils/battle/counter/types';
+import { lineText } from '@/lib/utils/battle/log/lines';
 import {
     type BattleMutationContext,
     BattleOperationError,
@@ -27,6 +28,7 @@ import {
 } from '@/lib/utils/battle/store';
 import type { NewBattleEvent } from '@/lib/utils/battle/store/types';
 import { mulberry32 } from '@/lib/utils/common/rng';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { slotLevel, slotRestoreOrder } from '@/lib/utils/spells/slot-keys';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -62,6 +64,8 @@ function counterRequest(
     actorId: string,
     slotLevelChoice: number | undefined
 ): SpellRequestData {
+    if (offer.spellId === undefined) throw stale();
+
     const base = {
         casterId: offer.reactorId,
         spellId: offer.spellId,
@@ -209,6 +213,68 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
         hidden: pending.hidden,
     });
 
+    function settleAnswer(
+        ctx: BattleMutationContext,
+        pending: CounterPending,
+        reactor: BattleParticipant,
+        {
+            base,
+            countered,
+        }: {
+            base: Pick<MutationResult, 'participants' | 'pending'> & {
+                events: NewBattleEvent[];
+            };
+            countered: boolean;
+        }
+    ): Promise<MutationResult> | MutationResult {
+        const { actorId } = pending.shown;
+
+        if (countered)
+            return close(
+                ctx,
+                pending,
+                { ...base, response: { countered: true } },
+                { countered: reactor.basicInfo.name }
+            );
+
+        const caster = findParticipant(ctx.participants, actorId);
+
+        const next: CounterPending = {
+            ...answered(pending, reactor.basicInfo.id, 'failed', {
+                deadline: counterDeadline(now()),
+            }),
+            hidden: {
+                ...pending.hidden,
+                attempts: pending.hidden.attempts + 1,
+            },
+        };
+
+        const events = [
+            ...base.events,
+            actorEvent(
+                ctx.scene.round,
+                caster ?? reactor,
+                textRef('battleLog.counter.saved', {
+                    caster: caster?.basicInfo.name ?? '',
+                    reactor: reactor.basicInfo.name,
+                })
+            ),
+        ];
+
+        if (allAnswered(next.shown))
+            return close(
+                ctx,
+                next,
+                { ...base, events, response: { countered: false } },
+                { resolve: true }
+            );
+
+        return withPending(
+            { ...base, events, response: { countered: false } },
+            next
+        );
+    }
+
     const answerFor = (
         ctx: BattleMutationContext,
         pending: CounterPending,
@@ -290,9 +356,47 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
                   );
         }
 
+        if (body.action === 'react' ? !offer.system : offer.system)
+            throw stale();
+
         if (offer.dm ? !ctx.isDM : !controls) throw forbidden();
 
         const { actorId } = pending.shown;
+
+        if (body.action === 'react') {
+            const reaction = ruleSystemOf(ctx.meta.rules).magic.tested
+                ?.reaction;
+
+            const { hidden } = pending;
+
+            if (!reaction || !hidden.system) throw stale();
+
+            const answer = reaction.answer({
+                casterId: actorId,
+                participants: ctx.participants,
+                rules: ctx.meta.rules,
+                map: ctx.meta.map,
+                round: ctx.scene.round,
+                reactorId: body.reactorId,
+                data: hidden.system,
+                rng: mulberry32(hidden.seed + 1 + hidden.attempts),
+            });
+
+            return settleAnswer(ctx, pending, reactor, {
+                base: {
+                    participants: answer.participants,
+                    pending: ctx.pending,
+                    events: [
+                        actorEvent(
+                            ctx.scene.round,
+                            reactor,
+                            lineText(answer.lines, ' | ')
+                        ),
+                    ],
+                },
+                countered: answer.cancelled,
+            });
+        }
 
         const cast = await spellRunner({
             critPause: false,
@@ -301,59 +405,15 @@ export function createCounterWindowMutation(deps: CounterWindowDeps = {}) {
             rng: mulberry32(pending.hidden.seed + 1 + pending.hidden.attempts),
         })(ctx, counterRequest(offer, reactor, actorId, body.slotLevel));
 
-        const base = {
-            participants: cast.participants,
-            pending: cast.pending,
-            events: cast.events,
-        };
-
-        const countered = !!(
-            cast.response?.interruptedIds as string[] | undefined
-        )?.includes(actorId);
-
-        if (countered)
-            return close(
-                ctx,
-                pending,
-                { ...base, response: { countered: true } },
-                { countered: reactor.basicInfo.name }
-            );
-
-        const caster = findParticipant(ctx.participants, actorId);
-
-        const next: CounterPending = {
-            ...answered(pending, body.reactorId, 'failed', {
-                deadline: counterDeadline(now()),
-            }),
-            hidden: {
-                ...pending.hidden,
-                attempts: pending.hidden.attempts + 1,
+        return settleAnswer(ctx, pending, reactor, {
+            base: {
+                participants: cast.participants,
+                pending: cast.pending,
+                events: cast.events,
             },
-        };
-
-        const events = [
-            ...base.events,
-            actorEvent(
-                ctx.scene.round,
-                caster ?? reactor,
-                textRef('battleLog.counter.saved', {
-                    caster: caster?.basicInfo.name ?? '',
-                    reactor: reactor.basicInfo.name,
-                })
-            ),
-        ];
-
-        if (allAnswered(next.shown))
-            return close(
-                ctx,
-                next,
-                { ...base, events, response: { countered: false } },
-                { resolve: true }
-            );
-
-        return withPending(
-            { ...base, events, response: { countered: false } },
-            next
-        );
+            countered: !!(
+                cast.response?.interruptedIds as string[] | undefined
+            )?.includes(actorId),
+        });
     };
 }

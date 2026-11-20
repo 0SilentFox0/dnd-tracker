@@ -275,10 +275,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())('grim-d100 localized clones', () => {
                 );
 
                 for (const spell of spells)
-                    expect(
-                        known.has((spell.lists as string[])[0]),
-                        spell.name
-                    ).toBe(true);
+                    for (const list of spell.lists as string[])
+                        expect(known.has(list), spell.name).toBe(true);
             }
         }
     );

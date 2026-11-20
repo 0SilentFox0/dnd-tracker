@@ -47,8 +47,10 @@ const wizard = (serverJudged: boolean) => {
             index: 0,
             diceSlots: [8],
             strikes: [{ targetId: 't', damage: [] }],
+            targetIds: ['t'],
         },
         view: {
+            targets: [],
             serverJudged,
             cover: new Set<string>(),
             rollMode: 'normal',

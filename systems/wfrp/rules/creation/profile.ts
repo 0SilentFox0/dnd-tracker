@@ -9,6 +9,8 @@ export type SpeciesProfile = {
     fortune?: number;
     extraWounds: number;
     talents: string[];
+    /** canon5e: each group is an "X or Y" starting talent; one is picked per group */
+    talentChoices?: string[][];
     randomTalentCount: number;
     randomTalents: { max: number; featId: string }[];
     careerTable: { max: number; careerId: string }[];

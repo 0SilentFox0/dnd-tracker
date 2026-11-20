@@ -134,7 +134,7 @@ export function intimidateMutation(
     const rating = Math.max(1, own.sl - foe.sl);
 
     const frightened =
-        won && !isFrenzied(target) && !isPsychImmune(ctx.participants, body.targetId);
+        won && !isFrenzied(target) && !isPsychImmune(ctx.participants, body.targetId, ctx.meta.rules);
 
     const used = applyMainActionUsed(actor);
 

@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from 'node:util';
 
 import type { Row } from './common';
+import { UNIT_BAND_EXCEPTIONS } from './unit-exceptions';
 
 import type {
     RecipeContext,
@@ -274,6 +275,7 @@ function recipeValues(id: string, e: RawEffect): RecipeValues {
         case 'breath':
         case 'ranged':
             return {
+                ...(id === 'breath' && { breath: String(e.breath ?? 'none') }),
                 damage: Number(e.damage),
                 rangeFt: rangeFtOf(
                     e,
@@ -318,13 +320,14 @@ export function unitWounds(
 
     const average = sb + 2 * tb + wpb;
 
+    // tiny and little only serve legacy campaigns; the canon template uses small
     const bySize =
         t.size === 'tiny'
             ? 1
             : t.size === 'little'
               ? tb
               : t.size === 'small'
-                ? 2 * tb + wpb
+                ? 2 * tb
                 : average * (SIZE_WOUNDS_MULTIPLIER[t.size] ?? 1);
 
     return Math.max(
@@ -439,9 +442,15 @@ function bandIssues(
                 `characteristic "${k}" ${base[k]} is outside ${CHARACTERISTIC_MIN}–${band.charMax} ${at}`
             );
 
+    const exception = UNIT_BAND_EXCEPTIONS[String(row.slug)];
+
     const combat = Math.max(base.ws, base.bs);
 
-    if (!inRange(combat, band.combat))
+    const combatOk = exception?.combatBelowMin
+        ? combat <= band.combat[1]
+        : inRange(combat, band.combat);
+
+    if (!combatOk)
         issues.push(
             `max(ws, bs) ${combat} is outside ${fmt(band.combat)} ${at}`
         );
@@ -474,7 +483,7 @@ function bandIssues(
                   : band.attack;
 
         if (!range) issues.push(`Breath is not allowed ${at}`);
-        else if (!inRange(a.damage, range))
+        else if (!exception?.attackDamage && !inRange(a.damage, range))
             issues.push(
                 `attack "${a.name}" damage ${a.damage} is outside ${fmt(range)} ${at}`
             );
@@ -525,6 +534,11 @@ export function unitIssues(row: Row): string[] {
     const t = unitTraits(row);
 
     const wounds = unitWounds(read.base, t);
+
+    if (t.size === 'tiny' || t.size === 'little')
+        issues.push(
+            `size ${t.size} is not used by the canon template: use small`
+        );
 
     if (row.initiative !== read.base.i)
         issues.push(

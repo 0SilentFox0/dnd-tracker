@@ -114,6 +114,8 @@ export interface MitigateCtx {
     attack: BattleAttack;
     rng: Rng;
     rules: Ruleset;
+    /** A free strike outside the actor's turn */
+    offTurn?: boolean;
 }
 
 export interface MitigateResult {

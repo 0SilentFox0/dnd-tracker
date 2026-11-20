@@ -17,6 +17,7 @@ export { type EquippedAp, equippedApOf, useEquippedAp } from './useEquippedAp';
 export { type FateReactionRow, useFateReaction } from './useFateReaction';
 export { useMalignantToggle } from './useMalignantToggle';
 export { type MomentumPanel, useMomentumPanel } from './useMomentumPanel';
+export { useMountedSwitch } from './useMountedSwitch';
 export {
     type PsychologyPanel,
     usePsychologyPanel,

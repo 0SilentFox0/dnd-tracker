@@ -210,7 +210,13 @@ export type SkillEntriesLoader = (input: {
     context?: CampaignSpellContext;
 }) => Promise<SkillRowEntry[]>;
 
+/** Returns an API_ERRORS key when the character may not join a battle */
+export type CharacterJoinGuard = (character: {
+    characteristics: unknown;
+}) => string | undefined;
+
 export interface SystemParticipantServer {
+    joinGuards?: readonly CharacterJoinGuard[];
     skillEntries?: readonly SkillEntriesLoader[];
     learnedSpells?: readonly LearnedSpellsLoader[];
     characterRefs?: readonly CharacterRefLoader[];

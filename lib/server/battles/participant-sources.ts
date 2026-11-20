@@ -2,8 +2,35 @@ import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
+import { systemSelectionOfCampaign } from '@/lib/server/systems/campaign-system';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 
 export type ParticipantSourceRef = { id: string; type: string };
+
+export async function assertJoinGuards(
+    campaignId: string,
+    characters: readonly { characteristics: unknown }[]
+): Promise<void> {
+    if (characters.length === 0) return;
+
+    const system = await systemSelectionOfCampaign(campaignId);
+
+    const guards = system
+        ? (systemServerOf({
+              system: {
+                  key: system.key,
+                  modules: system.modules && [...system.modules],
+              },
+          }).participant?.joinGuards ?? [])
+        : [];
+
+    for (const character of characters)
+        for (const guard of guards) {
+            const error = guard(character);
+
+            if (error) throw new ContentError(error, 409);
+        }
+}
 
 export async function assertParticipantSources(
     campaignId: string,
@@ -23,7 +50,7 @@ export async function assertParticipantSources(
         byType.character.size
             ? prisma.character.findMany({
                   where: { id: { in: [...byType.character] }, campaignId },
-                  select: { id: true },
+                  select: { id: true, characteristics: true },
               })
             : [],
         byType.unit.size
@@ -38,6 +65,8 @@ export async function assertParticipantSources(
         character: new Set(characters.map((row) => row.id)),
         unit: new Set(units.map((row) => row.id)),
     };
+
+    await assertJoinGuards(campaignId, characters);
 
     for (const ref of checked)
         if (

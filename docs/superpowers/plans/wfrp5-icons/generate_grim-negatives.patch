@@ -1,0 +1,40 @@
+--- generate_grim.py
++++ generate_grim.py
+@@ -24,7 +24,19 @@
+ generate.TYPES = {'unit', 'spell', 'artefact', 'skill'}
+ generate.ICON_NEGATIVE = ''
+ generate.NEGATIVE += ', words, numbers, runes, captions, signs'
++BASE_NEGATIVE = generate.NEGATIVE
++SHARED_EXTRA_NEGATIVE = ', book, scroll text, banner, tavern sign, coin inscription, engraved lettering, stamped marks, shop sign, label, price tag, poster, handwriting, calligraphy'
+ 
++# Per-kind negative (mirrors scripts/assets/grim-icons/negatives.ts); units keep generate.UNIT_NEGATIVE.
++ICON_NEGATIVE_BY_KIND = {
++    'careers': ', text, letters, close-up face, extreme close-up, portrait crop, crowd, text on clothing, heraldry, coat of arms',
++    'races': ', text, letters, close-up face, extreme close-up, portrait crop',
++    'feats': ', full human portrait, standing person, character, book, scroll text, banner, label',
++    'spells': ', person, character, portrait, rune circle with writing, glyphs, sigil text',
++    'artifacts': ', person, human figure, face, hands, fingers, holding, multiple items, hand holding, table setting, duplicate object, cropped item, wooden frame, book, scroll text, tavern sign, coin inscription, engraved lettering, stamped marks, shop sign, label, price tag, poster, handwriting, calligraphy',
++    'units': '',
++}
++
+ # Layout expected by `pnpm assets:grim-icons upload`: <output>/icons/<kind>/<file>.png (units too, circular token).
+ 
+ 
+@@ -68,6 +80,7 @@
+     parser.add_argument('--delay', type=float, default=0.5)
+     parser.add_argument('--redo', action='append', default=[], metavar='NAME_OR_ID')
+     parser.add_argument('--validate-only', action='store_true')
++    parser.add_argument('--legacy-negative', action='store_true', help='variant A: empty ICON_NEGATIVE for all kinds')
+     args = parser.parse_args(argv)
+     try:
+         if args.size < 32 or args.size % 8 or args.steps < 1 or args.delay < 0 or (args.limit is not None and args.limit < 1):
+@@ -86,6 +99,9 @@
+             todo = todo[:args.limit]
+         results, session = Counter(), generate.HttpSession()
+         for index, row in enumerate(todo, 1):
++            legacy = args.legacy_negative
++            generate.ICON_NEGATIVE = '' if legacy else ICON_NEGATIVE_BY_KIND[row['generation_group']]
++            generate.NEGATIVE = BASE_NEGATIVE if legacy else BASE_NEGATIVE + SHARED_EXTRA_NEGATIVE
+             status = generate.generate_one(session, row, styles, args.output, args.api_url, args.size, args.steps)
+             results[status] += 1
+             print(f"[{index}/{len(todo)}] {status}: {row['generation_group']} / {row['name']}", flush=True)

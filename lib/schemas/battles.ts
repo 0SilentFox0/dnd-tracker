@@ -624,6 +624,11 @@ export const counterWindowSchema = z.discriminatedUnion('action', [
         slotLevel: z.number().int().min(1).max(9).optional(),
     }),
     z.object({
+        action: z.literal('react'),
+        windowId: counterWindowIdSchema,
+        reactorId: z.string().min(1),
+    }),
+    z.object({
         action: z.literal('pass'),
         windowId: counterWindowIdSchema,
         reactorId: z.string().min(1),

@@ -117,6 +117,7 @@ export function applyWfrpConditionTo(
                         ? {
                               ...e,
                               description,
+                              icon: `ui:${key}`,
                               ...(input.concealed && {
                                   concealed: true as const,
                               }),

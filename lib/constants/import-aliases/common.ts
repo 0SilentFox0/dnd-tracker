@@ -3,6 +3,7 @@ export const CAREER_TIER_COUNT = 4;
 export const CAREER_TIER_PARTS = [
     'name',
     'status',
+    'earningSkill',
     'characteristics',
     'skills',
     'talents',
@@ -17,6 +18,7 @@ export const careerTierKey = (n: number, part: CareerTierPart) =>
 const CAREER_PART_WORDS: Record<CareerTierPart, readonly [string, string]> = {
     name: ['назва', 'name'],
     status: ['статус', 'status'],
+    earningSkill: ['навичка доходу', 'earning skill'],
     characteristics: ['характеристики', 'characteristics'],
     skills: ['навички', 'skills'],
     talents: ['таланти', 'talents'],

@@ -3,6 +3,7 @@ import { descriptionIssues, type Row } from './common';
 import { ARTIFACT_RARITY_VALUES } from '@/lib/constants/artifacts';
 import {
     ARMOUR_KINDS,
+    GEAR_CATEGORIES,
     QUALITY_REGISTRY,
     type QualityKey,
     type QualityRef,
@@ -45,7 +46,10 @@ export const GRIM_RANGED_GROUPS = [
     'crossbow',
     'sling',
     'throwing',
+    'entangling',
     'blackpowder',
+    'engineering',
+    'explosives',
 ] as const satisfies readonly WeaponGroup[];
 
 export const GRIM_WEAPON_GROUPS: readonly WeaponGroup[] = [
@@ -57,34 +61,34 @@ export const WEAPON_GROUP_BANDS: Record<
     (typeof GRIM_MELEE_GROUPS)[number] | (typeof GRIM_RANGED_GROUPS)[number],
     WeaponBand
 > = {
-    basic: { flat: [1, 5], addSb: true, weight: [0, 2], price: [6, 480] },
-    fencing: { flat: [3, 5], addSb: true, weight: [0, 1], price: [240, 960] },
-    brawling: { flat: [0, 3], addSb: true, weight: [0, 1], price: [6, 240] },
-    polearm: { flat: [3, 6], addSb: true, weight: [1, 3], price: [120, 720] },
+    basic: { flat: [1, 5], addSb: true, weight: [0, 2], price: [0, 1440] },
+    fencing: { flat: [3, 5], addSb: true, weight: [0, 1], price: [240, 1920] },
+    brawling: { flat: [0, 3], addSb: true, weight: [0, 1], price: [0, 240] },
+    polearm: { flat: [3, 6], addSb: true, weight: [1, 4], price: [36, 1440] },
     twohanded: {
         flat: [5, 7],
         addSb: true,
         weight: [2, 3],
-        price: [480, 1440],
+        price: [480, 5760],
         twoHanded: true,
     },
-    flail: { flat: [3, 6], addSb: true, weight: [1, 3], price: [120, 720] },
+    flail: { flat: [3, 6], addSb: true, weight: [1, 3], price: [60, 1440] },
     parry: { flat: [1, 3], addSb: true, weight: [0, 1], price: [60, 480] },
-    cavalry: { flat: [4, 7], addSb: true, weight: [2, 3], price: [480, 1440] },
+    cavalry: { flat: [4, 7], addSb: true, weight: [2, 3], price: [240, 1440] },
     bow: {
         flat: [2, 5],
         addSb: true,
         range: [90, 360],
         weight: [1, 3],
-        price: [120, 960],
+        price: [120, 2880],
         twoHanded: true,
     },
     crossbow: {
         flat: [6, 10],
         addSb: false,
         range: [120, 360],
-        weight: [1, 3],
-        price: [360, 1440],
+        weight: [0, 3],
+        price: [360, 2880],
         twoHanded: true,
         reload: true,
     },
@@ -92,23 +96,45 @@ export const WEAPON_GROUP_BANDS: Record<
         flat: [3, 7],
         addSb: false,
         range: [60, 240],
-        weight: [0, 1],
-        price: [6, 60],
+        weight: [0, 2],
+        price: [6, 72],
     },
     throwing: {
         flat: [0, 6],
         addSb: null,
         range: [12, 60],
         weight: [0, 1],
-        price: [6, 240],
+        price: [0, 360],
+    },
+    entangling: {
+        flat: [0, 1],
+        addSb: null,
+        range: [6, 30],
+        weight: [0, 1],
+        price: [60, 240],
     },
     blackpowder: {
         flat: [7, 10],
         addSb: false,
         range: [30, 360],
         weight: [0, 3],
-        price: [960, 2880],
+        price: [960, 7200],
         reload: true,
+    },
+    engineering: {
+        flat: [7, 10],
+        addSb: false,
+        range: [30, 360],
+        weight: [0, 3],
+        price: [960, 24000],
+        reload: true,
+    },
+    explosives: {
+        flat: [0, 12],
+        addSb: false,
+        range: [6, 60],
+        weight: [0, 1],
+        price: [60, 960],
     },
 };
 
@@ -116,20 +142,30 @@ export const ARMOUR_KIND_BANDS: Record<
     ArmourKind,
     { ap: Range; weight: Range; price: Range }
 > = {
-    soft: { ap: [0, 1], weight: [0, 2], price: [12, 360] },
-    mail: { ap: [0, 2], weight: [1, 3], price: [240, 1440] },
-    plate: { ap: [0, 3], weight: [1, 6], price: [480, 4800] },
+    soft: { ap: [0, 1], weight: [0, 2], price: [12, 1080] },
+    mail: { ap: [0, 2], weight: [1, 3], price: [240, 7200] },
+    plate: { ap: [0, 3], weight: [1, 6], price: [480, 5400] },
+};
+
+/** Quick armour: one full-body suit per kind (p307), exact numbers instead of per-piece bands */
+export const FULL_SUIT_BANDS: Record<
+    ArmourKind,
+    { ap: Range; weight: Range; price: Range }
+> = {
+    soft: { ap: [1, 1], weight: [0, 0], price: [1920, 1920] },
+    mail: { ap: [3, 3], weight: [4, 4], price: [10560, 10560] },
+    plate: { ap: [5, 5], weight: [10, 10], price: [21120, 21120] },
 };
 
 export const SHIELD_BAND = {
     x: [1, 3],
     weight: [0, 3],
-    price: [12, 480],
+    price: [12, 1080],
 } as const satisfies Record<string, Range>;
 
 export const GEAR_BAND = {
     weight: [0, 2],
-    price: [1, 480],
+    price: [1, 960],
 } as const satisfies Record<string, Range>;
 
 export const ARTIFACT_KEYS: readonly string[] = [
@@ -141,7 +177,7 @@ export const ARTIFACT_KEYS: readonly string[] = [
     'systemStats',
 ];
 
-export const GRIM_ITEM_SLOTS = [
+export const GRIM_CORE_SLOTS = [
     'weapon',
     'range_weapon',
     'armor',
@@ -150,6 +186,24 @@ export const GRIM_ITEM_SLOTS = [
     'shield',
     'item',
 ] as const;
+
+export const GRIM_ITEM_SLOTS = [...GRIM_CORE_SLOTS, 'cloak'] as const;
+
+export const GEAR_CATEGORY_BANDS: Record<
+    (typeof GEAR_CATEGORIES)[number],
+    { weight: Range; price: Range }
+> = {
+    food: { weight: [0, 2], price: [1, 480] },
+    clothing: { weight: [0, 2], price: [1, 5760] },
+    tools: { weight: [0, 3], price: [1, 19200] },
+    books: { weight: [0, 1], price: [6, 9600] },
+    animals: { weight: [0, 6], price: [1, 144000] },
+    poisons: { weight: [0, 1], price: [6, 4800] },
+    herbs: { weight: [0, 1], price: [1, 1080] },
+    trappings: { weight: [0, 6], price: [1, 4800] },
+    prosthetics: { weight: [0, 2], price: [60, 4800] },
+    magical: { weight: [0, 3], price: [1, 9600] },
+};
 
 export const IMPLEMENTED_QUALITIES = (
     Object.keys(QUALITY_REGISTRY) as QualityKey[]
@@ -271,9 +325,15 @@ function armourIssues(
     a: Extract<WfrpItemStats, { type: 'armour' }>,
     issues: string[]
 ) {
-    const where = slot ? ARMOUR_SLOT_LOCATION[slot] : undefined;
+    const locations = Object.values(a.locations);
 
-    if (!where && isGrimSlot(slot))
+    const fullSuit =
+        slot === 'armor' &&
+        locations.every((ap) => ap > 0 && ap === locations[0]);
+
+    const where = slot && !fullSuit ? ARMOUR_SLOT_LOCATION[slot] : undefined;
+
+    if (!where && !fullSuit && isGrimSlot(slot))
         issues.push(
             slot === 'shield'
                 ? 'slot "shield" needs gear with one "shield X" quality'
@@ -293,7 +353,7 @@ function armourIssues(
 
     qualityIssues(a.qualities, 'quality', issues);
 
-    const band = ARMOUR_KIND_BANDS[a.kind];
+    const band = fullSuit ? FULL_SUIT_BANDS[a.kind] : ARMOUR_KIND_BANDS[a.kind];
 
     for (const ap of Object.values(a.locations))
         if (outside(ap, band.ap))
@@ -332,12 +392,16 @@ function gearIssues(
             'shield',
             ' p'
         );
-    } else if (slot === 'item') {
+    } else if (slot === 'item' || slot === 'cloak') {
         if (g.qualities.length > 0)
-            issues.push('slot "item" takes gear without qualities');
+            issues.push(`slot "${slot}" takes gear without qualities`);
 
-        commonRange('weight', g.weight, GEAR_BAND.weight, issues, 'gear');
-        commonRange('price', g.price, GEAR_BAND.price, issues, 'gear', ' p');
+        const band = g.category ? GEAR_CATEGORY_BANDS[g.category] : GEAR_BAND;
+
+        const at = g.category ?? 'gear';
+
+        commonRange('weight', g.weight, band.weight, issues, at);
+        commonRange('price', g.price, band.price, issues, at, ' p');
     } else if (isGrimSlot(slot))
         issues.push(`slot "${slot}" does not fit gear`);
 }

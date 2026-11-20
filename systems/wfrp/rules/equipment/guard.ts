@@ -2,6 +2,8 @@ import { LOCATIONS } from '../combat/constants';
 import {
     AP_MAX_PER_LAYER,
     ARMOUR_KINDS,
+    ARMOUR_PENALTY_MAX,
+    GEAR_CATEGORIES,
     QUALITY_VALUE_MAX,
     WEAPON_GROUPS,
     WEAPON_REACHES,
@@ -79,6 +81,30 @@ export function qualityList(v: unknown): QualityRef[] | null {
     return out;
 }
 
+function penaltyList(raw: unknown): { skill: string; sl: number }[] | null {
+    if (raw === undefined) return [];
+
+    if (!Array.isArray(raw) || raw.length > 8) return null;
+
+    const out: { skill: string; sl: number }[] = [];
+
+    for (const r of raw) {
+        if (
+            !isRecord(r) ||
+            !onlyKeys(r, ['skill', 'sl']) ||
+            typeof r.skill !== 'string' ||
+            r.skill.length < 1 ||
+            r.skill.length > 40 ||
+            !num(r.sl, 1, ARMOUR_PENALTY_MAX, true)
+        )
+            return null;
+
+        out.push({ skill: r.skill, sl: r.sl as number });
+    }
+
+    return out;
+}
+
 const common = (r: Rec) => num(r.weight, 0, 1000) && num(r.price, 0, 1_000_000);
 
 export function readStats(raw: unknown): WfrpItemStats | null {
@@ -93,10 +119,24 @@ export function readStats(raw: unknown): WfrpItemStats | null {
         price: raw.price as number,
     };
 
-    if (raw.type === 'gear')
-        return onlyKeys(raw, ['type', 'weight', 'price', 'qualities'])
-            ? { type: 'gear', ...weightPrice, qualities }
+    if (raw.type === 'gear') {
+        if (
+            !onlyKeys(raw, ['type', 'category', 'weight', 'price', 'qualities'])
+        )
+            return null;
+
+        if (raw.category === undefined)
+            return { type: 'gear', ...weightPrice, qualities };
+
+        return oneOf(raw.category, GEAR_CATEGORIES)
+            ? {
+                  type: 'gear',
+                  category: raw.category,
+                  ...weightPrice,
+                  qualities,
+              }
             : null;
+    }
 
     if (raw.type === 'armour') {
         const loc = raw.locations;
@@ -107,6 +147,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 'locations',
                 'kind',
                 'qualities',
+                'penalty',
                 'weight',
                 'price',
             ]) ||
@@ -116,6 +157,10 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             !LOCATIONS.every((l) => num(loc[l], 0, AP_MAX_PER_LAYER, true))
         )
             return null;
+
+        const penalty = penaltyList(raw.penalty);
+
+        if (!penalty) return null;
 
         return {
             type: 'armour',
@@ -127,6 +172,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             },
             kind: raw.kind,
             qualities,
+            ...(penalty.length > 0 && { penalty }),
             ...weightPrice,
         };
     }
@@ -146,6 +192,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 'qualities',
                 'flaws',
                 'twoHanded',
+                'bladed',
                 'ammoCapacity',
                 'weight',
                 'price',
@@ -160,7 +207,8 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             !onlyKeys(dmg, ['addSb', 'flat']) ||
             typeof dmg.addSb !== 'boolean' ||
             !num(dmg.flat, -100, 100, true) ||
-            typeof raw.twoHanded !== 'boolean'
+            typeof raw.twoHanded !== 'boolean' ||
+            (raw.bladed !== undefined && typeof raw.bladed !== 'boolean')
         )
             return null;
 
@@ -190,6 +238,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             qualities,
             flaws,
             twoHanded: raw.twoHanded,
+            ...(raw.bladed === true && { bladed: true }),
             ...(raw.ammoCapacity !== undefined && {
                 ammoCapacity: raw.ammoCapacity as number,
             }),

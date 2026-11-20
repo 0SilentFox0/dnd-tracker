@@ -20,6 +20,8 @@ import { objectsNear } from '@/lib/utils/battle/summon/objects-near';
 import { assertSpellRolls } from '@/lib/utils/battle/validation/dice-checks';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { rngOf } from '@/lib/utils/common/rng';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 
 function assertTargetsNotPacified(
@@ -83,7 +85,8 @@ export function resolveCastTargets(
     caster: BattleParticipant,
     spell: Spellcast,
     source: SpellSource,
-    castLevel: number | undefined
+    castLevel: number | undefined,
+    system?: SystemSlot
 ): Resolution {
     const { definition } = spell;
 
@@ -97,6 +100,17 @@ export function resolveCastTargets(
         data.targetIds
     );
 
+    const magic = definition.casting?.magic;
+
+    const extension =
+        magic && !source.free && !legendaryAbility && !source.grant
+            ? ruleSystemOf(ctx.meta.rules).magic.tested?.declaredExtension?.({
+                  system,
+                  magic,
+                  rules: ctx.meta.rules,
+              })
+            : undefined;
+
     const resolution = resolveSpellTargets(
         order,
         caster,
@@ -109,6 +123,7 @@ export function resolveCastTargets(
             targetCell: data.targetCell,
             castLevel,
             upcastTargets: definition.upcastTargets,
+            extension,
         }
     );
 

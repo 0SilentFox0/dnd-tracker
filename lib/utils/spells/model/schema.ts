@@ -42,6 +42,15 @@ export const SpellMagicSchema = z.object({
             levels: z.number().int().min(1).max(3),
         })
         .optional(),
+    /** Damage is a magic missile: the caster's power bonus is added and the cast roll picks the hit location */
+    missile: z.boolean().optional(),
+    /** Armour (`ap`) or toughness and armour (`tbAp`) the damage ignores */
+    ignore: z.enum(['ap', 'tbAp']).optional(),
+    /** Characteristic whose bonus the flat damage or heal adds */
+    scale: z
+        .string()
+        .regex(/^[a-z]{1,4}$/)
+        .optional(),
 });
 
 export type SpellMagic = z.infer<typeof SpellMagicSchema>;
