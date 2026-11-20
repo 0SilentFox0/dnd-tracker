@@ -1,6 +1,7 @@
 import { BATTLE_CONSTANTS, CombatStatus } from '@/lib/constants/battle';
 import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import type { AttackKind } from '@/lib/utils/abilities/schema';
+import { autoUnconscious } from '@/lib/utils/battle/participant/state';
 import { applyResistance } from '@/lib/utils/battle/resistance';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -8,7 +9,8 @@ import type { LogLine } from '@/types/text';
 
 export function applyDamageToTarget(
     target: BattleParticipant,
-    totalFinalDamage: number
+    totalFinalDamage: number,
+    rules?: Ruleset
 ): BattleParticipant {
     const fromTemp = Math.min(
         target.combatStats.tempHp,
@@ -28,7 +30,7 @@ export function applyDamageToTarget(
                 tempHp: target.combatStats.tempHp - fromTemp,
                 currentHp,
                 status:
-                    currentHp <= 0
+                    currentHp <= 0 && autoUnconscious(rules)
                         ? CombatStatus.UNCONSCIOUS
                         : target.combatStats.status,
             },

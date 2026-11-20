@@ -32,6 +32,7 @@ import {
 } from './rules/combat/resolve-attack';
 import { WFRP_CONDITIONS } from './rules/conditions';
 import { WFRP_CONDITION_SET } from './rules/conditions/standard-set';
+import { editionOf } from './rules/edition';
 import { WFRP_EQUIPMENT } from './rules/equipment';
 import { WFRP_MAGIC } from './rules/magic';
 import { redactWfrpSlot } from './rules/redact';
@@ -138,6 +139,8 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         attackTarget: wfrpAttackTarget,
         damage: wfrpDamage,
         onZeroHp: wfrpOnZeroHp,
+        autoUnconsciousAtZero: (rules) =>
+            editionOf(rules).woundModel !== 'critical',
         onDamaged: [wfrpLoseChannelled],
         turn: WFRP_TURN,
         hitModel: wfrpHitModel,

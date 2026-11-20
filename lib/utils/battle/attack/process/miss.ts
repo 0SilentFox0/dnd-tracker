@@ -66,7 +66,11 @@ export function handleMiss(
             }
         ).finalDamage;
 
-        put(flow, applyDamageToTarget(target, actualGuaranteedDamage));
+        put(flow, applyDamageToTarget(
+            target,
+            actualGuaranteedDamage,
+            flow.ctx.rules
+        ));
         applyFlowDamage(
             flow,
             target,

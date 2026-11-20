@@ -99,7 +99,11 @@ export function resolveHit(p: ResolveHitParams): {
 
     const targetBefore = getP(flow, targetId);
 
-    put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage));
+    put(flow, applyDamageToTarget(
+            targetBefore,
+            guarded.targetDamage,
+            flow.ctx.rules
+        ));
     applyFlowDamage(
         flow,
         targetBefore,
@@ -112,7 +116,11 @@ export function resolveHit(p: ResolveHitParams): {
     if (guarded.guardianId) {
         const guardian = getP(flow, guarded.guardianId);
 
-        put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
+        put(flow, applyDamageToTarget(
+            guardian,
+            guarded.guardianDamage,
+            flow.ctx.rules
+        ));
         applyFlowDamage(
             flow,
             guardian,

@@ -23,19 +23,19 @@ function criticalOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
     )
         return { participant: after, participants, messages: [] };
 
-    let next: BattleParticipant = {
-        ...after,
-        combatStats: { ...after.combatStats, status: CombatStatus.UNCONSCIOUS },
-    };
+    // primitives without rules (raw spell damage) already set Unconscious at 0 HP: undo it, only crits knock out
+    let next: BattleParticipant =
+        ctx.manual || before.combatStats.status === CombatStatus.UNCONSCIOUS
+            ? after
+            : {
+                  ...after,
+                  combatStats: {
+                      ...after.combatStats,
+                      status: before.combatStats.status,
+                  },
+              };
 
     const messages: LogLine[] = [];
-
-    if (before.combatStats.status !== CombatStatus.UNCONSCIOUS)
-        messages.push(
-            textRef('battleWfrp.log.unconscious', {
-                name: after.basicInfo.name,
-            })
-        );
 
     const excess = Math.max(
         0,

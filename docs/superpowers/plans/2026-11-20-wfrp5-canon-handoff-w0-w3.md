@@ -76,3 +76,11 @@
 3. Стани (M04, M22, M23): SL-штраф `−max(level)`, Stunned ½ Move без SKIP_ACTION, Prone/Blinded/Surprised, Poisoned-тік, Ablaze `min(ap)`; L/R локації (M35). Профіль-поле `conditionModel`.
 4. W2-хвости: `howDidThatMiss` (pending-вікно), `notToday` (тепер можна: смерть є), витрата Momentum, Fortune «зняти стан», UI Critical+локації для notFail.
 5. Наприкінці: `rule-systems.md`/`STATUS.md` (W2+W3), `pnpm cycles`, sweep homm/dnd5e (після W3–W4), `/simplify`, Opus-рев'ю.
+
+## Стан після сесії 4 (2026-11-20): core-хук «0 HP без Unconscious» (закомічено)
+
+- `RuleSystemCombat.autoUnconsciousAtZero?(rules)` (відсутній = true); wfrp повертає `false` при `woundModel: 'critical'`. Читає `autoUnconscious(rules)` (`participant/state.ts`) у `applyDamageToTarget(…, rules?)` і `turn-start.ts`; сирі примітиви (`applyRawDamage`) без rules — wfrp `onZeroHp` повертає попередній статус (крім `manual`).
+- Unconscious під canon5e приходить лише з крит-ефекту (`apply.ts` ставить статус).
+- **Відкрита діра UI:** `isUp` лишився `ACTIVE && hp>0` (контракт ядра, тести state/health/line-of-fire), тож свідомий на 0 HP показується «впалим» і не є ціллю в UI (`useAttackTargets`, `spell-pick`, line-of-fire). Потрібне рішення: `isUp(p, rules?)` або маркер «awake at 0».
+- e2e grim (bestiary/arsenal) більше не вимагають status ≠ active на 0 HP.
+- Не зроблено: W3 ч2 (стани, Bleeding M21, крит захисника M20, L/R M35), хвости W2.

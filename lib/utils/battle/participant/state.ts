@@ -4,12 +4,21 @@ import {
     type EffectMarker,
 } from '@/lib/constants/battle';
 import type { AnyConditionKey } from '@/lib/utils/abilities/schema/kinds';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
 export function isUp(p: BattleParticipant): boolean {
     return (
         p.combatStats.status === CombatStatus.ACTIVE &&
         p.combatStats.currentHp > 0
+    );
+}
+
+export function autoUnconscious(rules?: Ruleset): boolean {
+    return (
+        !rules ||
+        ruleSystemOf(rules).combat.autoUnconsciousAtZero?.(rules) !== false
     );
 }
 

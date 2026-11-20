@@ -225,10 +225,6 @@ describe('grim bestiary end to end', () => {
                 part(ctx, foe.basicInfo.id).combatStats.currentHp,
                 foe.basicInfo.name
             ).toBe(0);
-            expect(
-                part(ctx, foe.basicInfo.id).combatStats.status,
-                foe.basicInfo.name
-            ).not.toBe(CombatStatus.ACTIVE);
         }
     });
 

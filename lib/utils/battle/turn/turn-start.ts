@@ -36,7 +36,10 @@ import {
     actionsPerTurnPool,
     setExtraActionPool,
 } from '@/lib/utils/battle/participant/helpers';
-import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
+import {
+    autoUnconscious,
+    hasEffectMarker,
+} from '@/lib/utils/battle/participant/state';
 import { hasAnchors } from '@/lib/utils/battle/spell/anchored-zone';
 import { pruneDeadInlineGrants } from '@/lib/utils/battle/spell/inline-grant';
 import { resolvePendingHits } from '@/lib/utils/battle/spell/pending-hits';
@@ -417,7 +420,9 @@ export function processStartOfTurn(
 
     if (
         updatedParticipant.combatStats.currentHp <= 0 &&
-        updatedParticipant.combatStats.status !== CombatStatus.DEAD
+        updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
+        (updatedParticipant.combatStats.currentHp < 0 ||
+            autoUnconscious(rules))
     ) {
         updatedParticipant = {
             ...updatedParticipant,

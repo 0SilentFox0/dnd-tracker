@@ -377,6 +377,8 @@ export interface RuleSystemCombat {
     /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
     onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
     onDamaged?: readonly DamagedHook[];
+    /** Core sets Unconscious the moment HP hits 0; `false` leaves the status to `onZeroHp` (absent means true) */
+    autoUnconsciousAtZero?(rules: Ruleset): boolean;
     /** A participant raised above 0 HP (heal, victory revive) leaves the system's dying state */
     onRevived?(p: BattleParticipant): BattleParticipant;
     /** A downed participant still in the fight (d20: dying, not stable); its side has not lost yet */
