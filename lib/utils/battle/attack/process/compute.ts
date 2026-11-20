@@ -39,6 +39,7 @@ import {
 } from '@/lib/utils/common/dice';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { MitigateResult } from '@/lib/utils/rules/systems/types';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { DamageRow, DamageStep } from '@/types/battle-actions';
@@ -56,6 +57,7 @@ export interface ComputeHitDamageParams {
         margin?: number;
         location?: string;
         totalAttackValue?: number;
+        system?: SystemSlot;
     };
     rules: Ruleset;
     damageMultiplier?: number;

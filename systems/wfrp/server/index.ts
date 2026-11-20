@@ -199,6 +199,20 @@ export const WFRP_MODULE_SERVER: SystemServer = {
                 return { schema: disengageSchema, mutate: disengageMutation };
             },
         },
+        aim: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                missing: API_ERRORS.AIM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { aimMutation, aimSchema } = await import(
+                    './battle/aim-mutation'
+                );
+
+                return { schema: aimSchema, mutate: aimMutation };
+            },
+        },
         movement: {
             settings: {
                 access: 'member',

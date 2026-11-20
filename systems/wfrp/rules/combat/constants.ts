@@ -26,6 +26,41 @@ export const ENCLOSED_LONG_SL = -2;
 
 export const CALLED_SHOT_SL = -2;
 
+/** Point Blank is 4 yards; the other bands are fractions of the weapon's Medium range (p302) */
+export const POINT_BLANK_YARDS = 4;
+
+export const FEET_PER_YARD = 3;
+
+/** Ranged SL by range band (p166) */
+export const RANGE_BAND_SL = {
+    pointBlank: 2,
+    short: 1,
+    medium: 0,
+    long: -1,
+    extreme: -2,
+} as const;
+
+/** Target in cover or Prone (p166) */
+export const COVER_SL = -1;
+
+export const AIM_SL = 1;
+
+/** The shooter moved before firing (p166) */
+export const MOVED_SL = -1;
+
+/** Ranged SL by map weather, the worse of it and an obscured target counts (p166: fog or poor light -1, rain and wind -2, extreme weather or pitch black -3) */
+export const WEATHER_SL = {
+    fog: -1,
+    rain: -2,
+    snow: -2,
+    storm: -3,
+    blizzard: -3,
+    embers: 0,
+    crypt: -1,
+} as const;
+
+export const OBSCURED_SL = -1;
+
 export const MIN_DAMAGE = 1;
 
 export const LOCATIONS = ['head', 'arm', 'body', 'leg'] as const;

@@ -56,9 +56,11 @@ export const wfrpResetState: TurnStateReset = (p, scope) => {
         channelledNow,
         lastCast,
         meleeHit,
+        aim,
     } = wfrpState(p);
 
     const cleared =
+        aim?.movementUsed ||
         conditionTests ||
         momentumAttack ||
         lastHand ||
@@ -74,6 +76,7 @@ export const wfrpResetState: TurnStateReset = (p, scope) => {
                   channelledNow: undefined,
                   lastCast: undefined,
                   meleeHit: undefined,
+                  ...(aim && { aim: { ...aim, movementUsed: 0 } }),
               })
             : p;
 

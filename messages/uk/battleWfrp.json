@@ -112,6 +112,7 @@
     "disengageMomentum": "{name} витрачає Momentum і виходить із ближнього бою без штрафу",
     "disengageSuccess": "{name} виходить із ближнього бою (РУ {sl} проти {foeSl})",
     "disengageFailed": "{name} не вдається вийти з бою (РУ {sl} проти {foeSl}), вороги отримують Momentum",
+    "aim": "{name} цілиться в {target}",
     "runDeclared": "{name} біжить: рух цього ходу подвоєно",
     "sprintResult": "{name} робить спринт (РУ {sl}): додатково {yards} ярдів руху",
     "sprintFailed": "{name} не вдається спринт (РУ {sl})",
@@ -206,6 +207,7 @@
       "secondAttack": "Друга атака",
       "disengage": "Відступити (дія, тест)",
       "disengageFree": "Відступити (витратити Momentum)",
+      "aim": "Прицілитись (дія)",
       "run": "Біг (подвійний рух)",
       "sprint": "Спринт (дія, Атлетика)",
       "charge": "Розбіг",
@@ -304,6 +306,13 @@
     "targetSurprised": "Ціль заскочена (Surprised): {sl} SL",
     "calledShot": "Приціл у локацію: {sl} SL",
     "talent": "Таланти: {sl} SL",
-    "quality": "Якості й вади зброї: {sl} SL"
+    "quality": "Якості й вади зброї: {sl} SL",
+    "range": "Дальність: {sl} SL",
+    "cover": "Ціль в укритті: {sl} SL",
+    "targetProneRanged": "Ціль лежить (Prone): {sl} SL",
+    "aim": "Приціл: {sl} SL",
+    "moved": "Рух перед пострілом: {sl} SL",
+    "weather": "Погода й видимість: {sl} SL",
+    "intoMelee": "Стрільба в ближній бій: Disadvantage"
   }
 }

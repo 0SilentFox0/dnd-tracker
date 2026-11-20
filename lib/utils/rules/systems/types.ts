@@ -176,7 +176,8 @@ export interface RuleSystemTraits {
     recipes: readonly Recipe[];
     unitBuild(
         row: { id: string; characteristics?: unknown },
-        abilities: readonly ResolvedAbility[]
+        abilities: readonly ResolvedAbility[],
+        rules?: Ruleset
     ): UnitBuild;
 }
 

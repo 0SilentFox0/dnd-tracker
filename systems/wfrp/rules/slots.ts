@@ -144,6 +144,8 @@ export interface WfrpParticipantState {
     dispelProgress?: { targetId: string; castId: string; progress: number };
     /** Round of the last reactive Dispel attempt: one per round (canon5e, p237) */
     dispelRound?: number;
+    /** Aiming at `targetId`: +1 SL on the next ranged attack at it, lost by moving or defending (canon5e, p167); `movementUsed` is the turn's movement when aimed */
+    aim?: { targetId: string; movementUsed: number };
     /** Movement chosen this turn, canon5e (p163); a Charge limits attacks to melee */
     moveMode?: WfrpMoveMode;
     /** Critical Wounds taken this battle, canon5e (p172) */
@@ -306,6 +308,14 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...((raw.moveMode === 'run' ||
                 raw.moveMode === 'sprint' ||
                 raw.moveMode === 'charge') && { moveMode: raw.moveMode }),
+            ...(isRecord(raw.aim) &&
+                typeof raw.aim.targetId === 'string' &&
+                finite(raw.aim.movementUsed) && {
+                    aim: {
+                        targetId: raw.aim.targetId,
+                        movementUsed: raw.aim.movementUsed,
+                    },
+                }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
             ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),
             ...(finite(raw.sin) && { sin: raw.sin }),

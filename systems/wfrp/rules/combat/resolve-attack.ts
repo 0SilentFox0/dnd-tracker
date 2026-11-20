@@ -45,6 +45,7 @@ import {
     meleeAttackMods,
     rangedAttackMods,
     sumAttackMods,
+    sumDisadvantage,
 } from './attack-mods';
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
 import { applyWfrpCrit } from './crit-effect';
@@ -64,6 +65,7 @@ import {
 } from './momentum';
 import { resolveOpposed } from './opposed';
 import { participantChars } from './participant';
+import { shotBand } from './range-band';
 import { canonWeaponUse, type WeaponUse } from './weapon-use';
 
 import { AttackType } from '@/lib/constants/battle';
@@ -76,6 +78,7 @@ import {
 import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
+import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { rollDie } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -168,7 +171,10 @@ export const wfrpAttackTarget = (
             characteristic === 'bs' ? 'ranged' : 'melee',
             group
         ) !== undefined
-            ? weaponSkillLabel(characteristic === 'bs' ? 'ranged' : 'melee', group)
+            ? weaponSkillLabel(
+                  characteristic === 'bs' ? 'ranged' : 'melee',
+                  group
+              )
             : undefined;
 
     return {
@@ -554,14 +560,43 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const hand = ATTACK_SLOT.read(ctx.attack.system)?.hand;
 
-    if (!hand || editionOf(ctx.rules).momentumModel !== 'participant')
-        return resolved;
+    const handed =
+        !hand || editionOf(ctx.rules).momentumModel !== 'participant'
+            ? resolved
+            : {
+                  ...resolved,
+                  attackerUpdate: (p: BattleParticipant) =>
+                      withWfrpState(resolved.attackerUpdate?.(p) ?? p, {
+                          lastHand: hand,
+                      }),
+              };
+
+    return withAimAndCover(ctx, handed);
+}
+
+// An attack or a defence ends an Aim (p167); cover is priced into the ranged test, so the core must not halve the damage as well (p166)
+function withAimAndCover(
+    ctx: ResolveAttackCtx,
+    r: ResolvedAttack
+): ResolvedAttack {
+    if (editionOf(ctx.rules).combatModsModel !== 'canon5e') return r;
+
+    const ranged = attackKindOf(ctx.attack.type) === AttackType.RANGED;
+
+    const dropAim = (p: BattleParticipant) =>
+        wfrpState(p).aim ? withWfrpState(p, { aim: undefined }) : p;
 
     return {
-        ...resolved,
-        attackerUpdate: (p) =>
-            withWfrpState(resolved.attackerUpdate?.(p) ?? p, {
-                lastHand: hand,
+        ...r,
+        ...(ranged && ctx.obstacle && { obstacleInTest: true as const }),
+        ...(wfrpState(ctx.attacker).aim && {
+            attackerUpdate: (p: BattleParticipant) =>
+                dropAim(r.attackerUpdate?.(p) ?? p),
+        }),
+        ...(!ranged &&
+            wfrpState(ctx.target).aim && {
+                targetUpdate: (p: BattleParticipant) =>
+                    dropAim(r.targetUpdate?.(p) ?? p),
             }),
     };
 }
@@ -618,6 +653,8 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
         edition,
         input: fortuneInput,
         sources: { talent: talentSl, quality: attackSl.penalty },
+        cellFeet: cellFeetOf(ctx.rules),
+        obstacle: ctx.obstacle,
     };
 
     const mods = (
@@ -628,8 +665,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const slBonus = (fortuneEdge && !reverse ? 1 : 0) + sumAttackMods(mods);
 
-    const free =
-        !!ctx.offTurn || wfrpState(attacker).momentumAttack === true;
+    const free = !!ctx.offTurn || wfrpState(attacker).momentumAttack === true;
 
     const calledShot = canonMods ? fortuneInput?.calledShot : undefined;
 
@@ -720,8 +756,14 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
         const rangedMode = resolveModeSources({
             advantage: fortuneAdvantage,
-            disadvantage: blind.disadvantage,
+            disadvantage: (blind.disadvantage ?? 0) + sumDisadvantage(mods),
         });
+
+        const helplessShot =
+            canonMods &&
+            isHelpless(target) &&
+            shotBand(attacker, target, attack, ctx.map, modCtx.cellFeet) ===
+                'pointBlank';
 
         const rangedOnce = (presetRoll?: number) => {
             const test = resolvePercentileTest({
@@ -783,7 +825,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             (preset) => rangedOnce(preset),
             fortuneInput,
             (r) => r.result.isHit,
-            manualRoll,
+            helplessShot ? 1 : manualRoll,
             { repeat: fateSpendsOn(ctx.rules) }
         );
 
@@ -878,7 +920,9 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             defenderDoubles: edition.woundModel === 'critical',
             defenderHelpless: cannotDefend(target, edition) || helpless,
             rng,
-            presetRolls: helpless ? { ...presetRolls, attacker: 1 } : presetRolls,
+            presetRolls: helpless
+                ? { ...presetRolls, attacker: 1 }
+                : presetRolls,
         });
 
         const hit = result.isHit && !fumbled(result.attacker.roll);

@@ -2,27 +2,38 @@ import {
     againstSl,
     entangledTargetSl,
     proneAttackerSl,
+    proneTargetRangedSl,
+    surprisedRangedSl,
 } from '../conditions/test-mod';
 import type { EditionProfile } from '../edition';
 import { REACH_RANK } from '../equipment/weapon-profile';
 import type { FortuneInput } from '../percentile/fortune';
 import { ATTACK_SLOT } from '../slots';
+import { wfrpState } from '../state';
 import { hatesTarget, HATRED_SL_BONUS } from '../traits/passions';
 import { sizeRangedSl } from '../traits/size';
 import {
+    AIM_SL,
     CALLED_SHOT_SL,
+    COVER_SL,
     ENCLOSED_LONG_SL,
     ENCLOSED_SL,
     HIGH_GROUND_SL,
+    MOVED_SL,
+    OBSCURED_SL,
     OFFHAND_SL_PENALTY,
     OUTNUMBERED_SL,
+    RANGE_BAND_SL,
     SURROUNDED_SL,
     TERRAIN_SL,
+    WEATHER_SL,
 } from './constants';
 import { engagedFoes, isOutnumbering, isSurrounded } from './engagement';
+import { shotBand } from './range-band';
 
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
+import { isObscured } from '@/lib/utils/battle/grid/terrain';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -39,6 +50,13 @@ export type AttackModKey =
     | 'attackerProne'
     | 'targetEntangled'
     | 'targetSurprised'
+    | 'targetProneRanged'
+    | 'range'
+    | 'cover'
+    | 'aim'
+    | 'moved'
+    | 'weather'
+    | 'intoMelee'
     | 'calledShot'
     | 'talent'
     | 'quality';
@@ -46,6 +64,7 @@ export type AttackModKey =
 export interface AttackMod {
     key: AttackModKey;
     sl: number;
+    disadvantage?: number;
 }
 
 export interface AttackModCtx {
@@ -58,6 +77,9 @@ export interface AttackModCtx {
     input: FortuneInput | undefined;
     /** SL already worked out elsewhere: talents and the weapon's qualities and flaws */
     sources: { talent: number; quality: number };
+    cellFeet: number;
+    /** The line of fire is blocked by cover */
+    obstacle?: boolean;
 }
 
 const isCanon = (e: EditionProfile) => e.combatModsModel === 'canon5e';
@@ -103,7 +125,8 @@ function commonMods(ctx: AttackModCtx): AttackMod[] {
     ];
 }
 
-const nonZero = (mods: AttackMod[]) => mods.filter((m) => m.sl !== 0);
+const nonZero = (mods: AttackMod[]) =>
+    mods.filter((m) => m.sl !== 0 || m.disadvantage);
 
 /** Melee attack modifiers, add all that apply (p166); the legacy model keeps its +10% outnumbering and size hit shift elsewhere */
 export function meleeAttackMods(ctx: AttackModCtx): AttackMod[] {
@@ -161,18 +184,62 @@ export function meleeAttackMods(ctx: AttackModCtx): AttackMod[] {
     ]);
 }
 
-/** Ranged attack modifiers; range bands, cover, aiming and weather join them with the ranged wave */
+const weatherSl = (
+    map: BattleMapConfig | null | undefined,
+    target: BattleParticipant
+) =>
+    Math.min(
+        map?.weather ? WEATHER_SL[map.weather] : 0,
+        isObscured(map, target) ? OBSCURED_SL : 0
+    );
+
+const aimedAt = (attacker: BattleParticipant, target: BattleParticipant) => {
+    const aim = wfrpState(attacker).aim;
+
+    return (
+        !!aim &&
+        aim.targetId === target.basicInfo.id &&
+        (attacker.battleData.movementUsed ?? 0) <= aim.movementUsed
+    );
+};
+
+/** Ranged attack modifiers, add all that apply (p166-167); a shot at an Engaged target gets Disadvantage */
 export function rangedAttackMods(ctx: AttackModCtx): AttackMod[] {
-    const { attacker, target, edition } = ctx;
+    const { attacker, target, attack, participants, map, edition } = ctx;
+
+    if (!isCanon(edition)) return nonZero(commonMods(ctx));
+
+    const intoMelee = engagedFoes(target, participants, map).some(
+        (f) => f.basicInfo.id !== attacker.basicInfo.id
+    );
 
     return nonZero([
         ...commonMods(ctx),
+        { key: 'sizeRanged', sl: sizeRangedSl(attacker, target) },
         {
-            key: 'sizeRanged',
-            sl: isCanon(edition) ? sizeRangedSl(attacker, target) : 0,
+            key: 'range',
+            sl: RANGE_BAND_SL[
+                shotBand(attacker, target, attack, map, ctx.cellFeet)
+            ],
         },
+        { key: 'targetSurprised', sl: surprisedRangedSl(target, edition) },
+        { key: 'cover', sl: ctx.obstacle ? COVER_SL : 0 },
+        {
+            key: 'targetProneRanged',
+            sl: ctx.obstacle ? 0 : proneTargetRangedSl(target, edition),
+        },
+        { key: 'aim', sl: aimedAt(attacker, target) ? AIM_SL : 0 },
+        {
+            key: 'moved',
+            sl: (attacker.battleData.movementUsed ?? 0) > 0 ? MOVED_SL : 0,
+        },
+        { key: 'weather', sl: weatherSl(map, target) },
+        { key: 'intoMelee', sl: 0, ...(intoMelee && { disadvantage: 1 }) },
     ]);
 }
 
 export const sumAttackMods = (mods: AttackMod[]): number =>
     mods.reduce((sum, m) => sum + m.sl, 0);
+
+export const sumDisadvantage = (mods: AttackMod[]): number =>
+    mods.reduce((sum, m) => sum + (m.disadvantage ?? 0), 0);

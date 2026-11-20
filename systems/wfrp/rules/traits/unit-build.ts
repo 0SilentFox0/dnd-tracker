@@ -1,5 +1,5 @@
 import { LOCATIONS } from '../combat/constants';
-import { wfrpAttackFromProfile } from '../combat/extract-attacks';
+import { bandsOf, wfrpAttackFromProfile } from '../combat/extract-attacks';
 import { wfrpParticipantFields } from '../combat/participant';
 import { AP_CAP } from '../equipment/constants';
 import type { WeaponProfile } from '../equipment/weapon-profile';
@@ -13,6 +13,7 @@ import {
 import { sizeStep, traitEntries } from './read';
 
 import type { ExtractedAttack } from '@/lib/utils/battle/types/participant';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { WfrpEffect } from '@/systems/wfrp/rules/ability-effects';
 import type { TraitSize } from '@/systems/wfrp/rules/trait-kinds';
@@ -57,7 +58,8 @@ function attackProfile(e: AttackEffect): WeaponProfile {
 
 export function wfrpUnitBuild(
     row: { id: string; characteristics?: unknown },
-    abilities: readonly ResolvedAbility[]
+    abilities: readonly ResolvedAbility[],
+    rules?: Ruleset
 ): { fields: SystemSlot; attacks: ExtractedAttack[] } {
     const baseSlot = wfrpParticipantFields(row);
 
@@ -103,6 +105,8 @@ export function wfrpUnitBuild(
                         attackProfile(effect),
                         {
                             sizeBaked: true,
+                            ...(rules &&
+                                bandsOf(rules) && { bands: true as const }),
                             ...(effect.magical && { magical: true as const }),
                         }
                     )

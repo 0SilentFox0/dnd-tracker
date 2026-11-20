@@ -30,6 +30,9 @@ const GUNPOWDER_GROUPS = ['blackpowder', 'engineering', 'explosives'];
 
 const YARDS_PER_CELL = 2;
 
+export const bandsOf = (rules: Ruleset) =>
+    editionOf(rules).combatModsModel === 'canon5e';
+
 /** Blackpowder, Engineering and Explosives weapons all have Blackpowder and Damaging (p303) */
 function withGunpowder(
     group: string | undefined,
@@ -52,6 +55,8 @@ export function extractWfrpAttacks({
     rules?: Ruleset;
 }): ExtractedAttack[] {
     const canon = rules ? editionOf(rules).gearModel === 'canon' : false;
+
+    const bands = rules ? bandsOf(rules) : false;
 
     const seen = new Set<string>();
 
@@ -78,6 +83,7 @@ export function extractWfrpAttacks({
             wfrpAttackFromProfile(id, row.name, profile, {
                 hand: slot === ArtifactSlot.SHIELD ? 'off' : 'main',
                 ...(reach && { reach }),
+                ...(bands && { bands: true as const }),
                 ...(canon && {
                     canon: true as const,
                     ...(profile.twoHanded && { twoHanded: true as const }),
@@ -98,6 +104,8 @@ export function wfrpAttackFromProfile(
         canon?: true;
         twoHanded?: true;
         sizeBaked?: true;
+        /** Write Medium/Extreme range so the core lets a shot reach every band (p302) */
+        bands?: true;
     }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
@@ -134,7 +142,11 @@ export function wfrpAttackFromProfile(
         damageDice: '',
         damageBonus: profile.damageFlat,
         damageType: 'physical',
-        ...(ranged && { range: `${profile.rangeFt} ft` }),
+        ...(ranged && {
+            range: extra?.bands
+                ? `${profile.rangeFt}/${(profile.rangeFt ?? 0) * 3} ft`
+                : `${profile.rangeFt} ft`,
+        }),
         ...(blast &&
             blastRadius && {
                 targetType: 'aoe' as const,

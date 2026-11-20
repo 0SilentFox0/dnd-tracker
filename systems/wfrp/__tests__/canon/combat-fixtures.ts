@@ -1,7 +1,7 @@
 import { AttackType } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
-import { attackOf,slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import { attackOf, slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { resolveWfrpAttack } from '@/systems/wfrp/rules/combat/resolve-attack';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
@@ -108,6 +108,7 @@ export function attackDetails(
         map?: BattleMapConfig | null;
         system?: ReturnType<typeof input>;
         manualRoll?: number;
+        obstacle?: boolean;
     } = {}
 ) {
     const r = resolveWfrpAttack({
@@ -120,6 +121,7 @@ export function attackDetails(
         manualRoll: opts.manualRoll ?? 5,
         map: opts.map,
         system: opts.system,
+        obstacle: opts.obstacle,
     });
 
     return { result: r, details: attackOf(r.attackRoll) };

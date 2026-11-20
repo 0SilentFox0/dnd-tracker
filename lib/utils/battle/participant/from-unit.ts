@@ -257,7 +257,11 @@ function unitAbilities(
         ...systemSlotOf(
             traits
                 ? traits.fields
-                : ruleSystemOf(rules).combat.participantFields?.(unit, undefined, rules)
+                : ruleSystemOf(rules).combat.participantFields?.(
+                      unit,
+                      undefined,
+                      rules
+                  )
         ),
         ...(statblock.creatureType && { creatureType: statblock.creatureType }),
         ...(monster && unit.cr != null && { cr: unit.cr }),
@@ -348,7 +352,8 @@ export async function createBattleParticipantFromUnit(
 
     const traits = ruleSystemOf(rules).traits?.unitBuild(
         unit,
-        resolvedAbilities
+        resolvedAbilities,
+        rules
     );
 
     const participant: BattleParticipant = {

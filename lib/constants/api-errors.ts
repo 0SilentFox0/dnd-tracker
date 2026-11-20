@@ -565,6 +565,8 @@ export const API_ERRORS = {
     DISENGAGE_SURROUNDED: 'errors.disengageSurrounded',
     DISENGAGE_SKILL_MISSING: 'errors.disengageSkillMissing',
     DISENGAGE_REQUIRED: 'errors.disengageRequired',
+    AIM_UNSUPPORTED: 'errors.aimUnsupported',
+    AIM_NO_RANGED_WEAPON: 'errors.aimNoRangedWeapon',
     MOVE_MODE_CHOSEN: 'errors.moveModeChosen',
     MOVE_SKILL_MISSING: 'errors.sprintSkillMissing',
     CHARGE_ENGAGED: 'errors.chargeEngaged',

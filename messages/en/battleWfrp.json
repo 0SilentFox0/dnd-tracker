@@ -112,6 +112,7 @@
     "disengageMomentum": "{name} spends Momentum and moves out of melee without penalty",
     "disengageSuccess": "{name} disengages from melee (SL {sl} against {foeSl})",
     "disengageFailed": "{name} fails to disengage (SL {sl} against {foeSl}), the foes gain Momentum",
+    "aim": "{name} takes aim at {target}",
     "runDeclared": "{name} runs: the Movement of this turn doubles",
     "sprintResult": "{name} sprints (SL {sl}): {yards} extra yards of Movement",
     "sprintFailed": "{name} fails to sprint (SL {sl})",
@@ -206,6 +207,7 @@
       "secondAttack": "Second attack",
       "disengage": "Disengage (action, test)",
       "disengageFree": "Disengage (spend Momentum)",
+      "aim": "Aim (action)",
       "run": "Run (double Movement)",
       "sprint": "Sprint (action, Athletics)",
       "charge": "Charge",
@@ -304,6 +306,13 @@
     "targetSurprised": "Target Surprised: {sl} SL",
     "calledShot": "Called shot: {sl} SL",
     "talent": "Talents: {sl} SL",
-    "quality": "Weapon qualities and flaws: {sl} SL"
+    "quality": "Weapon qualities and flaws: {sl} SL",
+    "range": "Range: {sl} SL",
+    "cover": "Target in cover: {sl} SL",
+    "targetProneRanged": "Target Prone: {sl} SL",
+    "aim": "Aimed shot: {sl} SL",
+    "moved": "Moved before firing: {sl} SL",
+    "weather": "Weather and visibility: {sl} SL",
+    "intoMelee": "Shooting into melee: Disadvantage"
   }
 }

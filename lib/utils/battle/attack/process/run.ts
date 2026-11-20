@@ -63,6 +63,7 @@ interface AttackRun {
     attackerId: string;
     targetId: string;
     existedBefore: ReturnType<typeof activeEffectIds>;
+    obstacle?: boolean;
 }
 
 interface DiceState {
@@ -113,6 +114,7 @@ export function processAttack(
         attackerId,
         targetId,
         existedBefore: activeEffectIds(flow.ps),
+        obstacle: params.obstacle,
     };
 
     spendAttackAction(run);
@@ -238,7 +240,10 @@ function spendAttackAction(run: AttackRun): void {
     const spent = off?.bonus
         ? {
               ...attacker,
-              actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true },
+              actionFlags: {
+                  ...attacker.actionFlags,
+                  hasUsedBonusAction: true,
+              },
           }
         : spendAttack(attacker, flow.ps, params.attack, flow.ctx.rules);
 
@@ -317,6 +322,7 @@ function attackCtx(run: AttackRun, modifiers?: Modifiers): ResolveAttackCtx {
         modifiers,
         map: flow.ctx.map,
         crit: flow.ctx.crit,
+        obstacle: params.obstacle,
     };
 }
 
@@ -332,6 +338,8 @@ function judge(run: AttackRun, actionModifiers: Modifiers): Judged {
     );
 
     if (r.scene) flow.sceneState = r.scene;
+
+    if (r.obstacleInTest) run.obstacle = false;
 
     flow.messages.push(...r.lines);
 
@@ -456,7 +464,7 @@ function hitResult(run: AttackRun, stage: HitStage): ProcessAttackResult {
         actionModifiers: actionModifiers[attackerId],
         bonusPercent: params.bonusPercent,
         bonusLabel: params.bonusLabel,
-        obstacle: params.obstacle,
+        obstacle: run.obstacle,
         noAbilityMod: params.noAbilityMod,
         cunningStrike: params.cunningStrike,
         hitSpells: params.hitSpells,
@@ -465,7 +473,7 @@ function hitResult(run: AttackRun, stage: HitStage): ProcessAttackResult {
 
     reactToAttack(run);
 
-    if (params.obstacle)
+    if (run.obstacle)
         flow.messages.unshift(
             textRef('battleLog.attack.obstacle', {
                 damage: hitDamage.totalFinalDamage,

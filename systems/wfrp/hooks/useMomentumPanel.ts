@@ -1,8 +1,15 @@
 'use client';
 
+import { AttackType } from '@/lib/constants/battle';
 import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
-import { disengageOp, momentumOp, movementOp } from '@/systems/wfrp/api/battle';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import {
+    aimOp,
+    disengageOp,
+    momentumOp,
+    movementOp,
+} from '@/systems/wfrp/api/battle';
 import {
     engagedFoes,
     isSurrounded,
@@ -29,6 +36,9 @@ export interface MomentumPanel {
     run(): void;
     sprint(roll?: number): void;
     charge(targetId: string): void;
+    canAim: boolean;
+    aimTargets: { id: string; name: string }[];
+    aim(targetId: string): void;
     secondAttack(): void;
     leadership(allyId: string, roll?: number): void;
     isPending: boolean;
@@ -67,7 +77,14 @@ export function useMomentumPanel(
         !hero.battleData.movementUsed &&
         !hero.actionFlags.hasUsedAction;
 
-    if (!holds && !canDisengage && !freeMove) return null;
+    const canAim =
+        editionOf(battle.rules).combatModsModel === 'canon5e' &&
+        !hero.actionFlags.hasUsedAction &&
+        hero.battleData.attacks.some(
+            (a) => attackKindOf(a.type) === AttackType.RANGED
+        );
+
+    if (!holds && !canDisengage && !freeMove && !canAim) return null;
 
     return {
         holds,
@@ -100,6 +117,18 @@ export function useMomentumPanel(
                   )
                   .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name }))
             : [],
+        canAim,
+        aimTargets: canAim
+            ? battle.initiativeOrder
+                  .filter(
+                      (p) =>
+                          p.basicInfo.side !== hero.basicInfo.side &&
+                          isActive(p)
+                  )
+                  .map((p) => ({ id: p.basicInfo.id, name: p.basicInfo.name }))
+            : [],
+        aim: (targetId) =>
+            actions.system.mutate(aimOp({ participantId, targetId })),
         run: () =>
             actions.system.mutate(movementOp({ kind: 'run', participantId })),
         sprint: (roll) =>
@@ -130,6 +159,7 @@ export function useMomentumPanel(
         isPending:
             isSystemActionPending(actions.system, 'momentum') ||
             isSystemActionPending(actions.system, 'disengage') ||
-            isSystemActionPending(actions.system, 'movement'),
+            isSystemActionPending(actions.system, 'movement') ||
+            isSystemActionPending(actions.system, 'aim'),
     };
 }

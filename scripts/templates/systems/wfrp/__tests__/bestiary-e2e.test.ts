@@ -103,7 +103,7 @@ describe('grim bestiary end to end', () => {
             must(drake.battleData.attacks.find((a) => a.name === 'Breath +9'))
         ).toMatchObject({
             type: 'ranged',
-            range: '36 ft',
+            range: '36/108 ft',
             targetType: 'aoe',
             blastRadius: 2,
         });

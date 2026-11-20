@@ -74,10 +74,14 @@ export interface ResolveAttackCtx {
     crit?: CritPicker;
     /** Server-rolled strike outside the actor's turn (retaliation, opportunity, readied, legendary) */
     offTurn?: { noun: TextRef };
+    /** The line of fire is blocked by an obstacle (cover) */
+    obstacle?: boolean;
 }
 
 export interface ResolvedAttack {
     isHit: boolean;
+    /** The resolver already priced the obstacle into the test, so the pipeline does not halve the damage */
+    obstacleInTest?: true;
     /** margin, location and system carry the test details */
     attackRoll: AttackRollResult;
     /** Written to actionDetails.targetAC (0 when there is no defence value) */
@@ -425,7 +429,8 @@ export interface RuleSystemCombat {
     initiative(
         p: BattleParticipant,
         ctx: {
-            rules: Pick<Ruleset, 'initiative'> & Partial<Pick<Ruleset, 'edition'>>;
+            rules: Pick<Ruleset, 'initiative'> &
+                Partial<Pick<Ruleset, 'edition'>>;
             rng: Rng;
             roll?: boolean;
         }

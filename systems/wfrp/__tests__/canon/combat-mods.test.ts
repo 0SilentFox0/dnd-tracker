@@ -93,7 +93,12 @@ describe('canon: melee attack modifiers (p166)', () => {
         const t = foe();
 
         expect(
-            mods(a, t, { participants: [a, t, allyAt('b', 5, 4)] }, bow())
+            mods(
+                a,
+                t,
+                { participants: [a, t, allyAt('b', 5, 4)] },
+                bow()
+            ).filter((m) => m.sl !== 0)
         ).toEqual([]);
     });
 
@@ -116,22 +121,28 @@ describe('canon: melee attack modifiers (p166)', () => {
         ).toEqual([]);
     });
 
-    bookExample(166, 'hand-set mud or water costs -1 SL, once with terrain', () => {
-        const a = me();
+    bookExample(
+        166,
+        'hand-set mud or water costs -1 SL, once with terrain',
+        () => {
+            const a = me();
 
-        const t = foe();
+            const t = foe();
 
-        const map = testMap(10, 10, {
-            terrain: { '4:5': { kind: 'difficult' } },
-        });
+            const map = testMap(10, 10, {
+                terrain: { '4:5': { kind: 'difficult' } },
+            });
 
-        const system = input({ situational: { badFooting: true } });
+            const system = input({ situational: { badFooting: true } });
 
-        expect(mods(a, t, { system })).toEqual([{ key: 'terrain', sl: -1 }]);
-        expect(mods(a, t, { system, map })).toEqual([
-            { key: 'terrain', sl: -1 },
-        ]);
-    });
+            expect(mods(a, t, { system })).toEqual([
+                { key: 'terrain', sl: -1 },
+            ]);
+            expect(mods(a, t, { system, map })).toEqual([
+                { key: 'terrain', sl: -1 },
+            ]);
+        }
+    );
 
     bookExample(166, 'high ground +1 SL, defender high ground -1 SL', () => {
         const a = me();
@@ -240,15 +251,19 @@ describe('legacy edition keeps its combat modifiers', () => {
         expect(target(crowd)?.mods).toBeUndefined();
     });
 
-    bookExample(360, 'a larger legacy target is harder to hit by 10% a step', () => {
-        const a = me();
+    bookExample(
+        360,
+        'a larger legacy target is harder to hit by 10% a step',
+        () => {
+            const a = me();
 
-        const hitTarget = (size?: 'large') =>
-            attackDetails(a, foe({ size }), sword(), { rules: legacyRules })
-                .details?.target;
+            const hitTarget = (size?: 'large') =>
+                attackDetails(a, foe({ size }), sword(), { rules: legacyRules })
+                    .details?.target;
 
-        expect(hitTarget('large')).toBe((hitTarget() ?? 0) + 10);
-    });
+            expect(hitTarget('large')).toBe((hitTarget() ?? 0) + 10);
+        }
+    );
 
     bookExample(166, 'canon: size does not shift the melee target', () => {
         const a = me();

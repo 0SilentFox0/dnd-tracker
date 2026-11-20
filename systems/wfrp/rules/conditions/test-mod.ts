@@ -14,6 +14,10 @@ const ENTANGLED_MELEE_SL = 1;
 
 const PRONE_ATTACKER_SL = -1;
 
+const SURPRISED_RANGED_SL = 1;
+
+const PRONE_TARGET_RANGED_SL = -1;
+
 const ENTANGLED_MOVEMENT_SL = -1;
 
 const SIGHT_SKILLS: ReadonlySet<string> = new Set(['climb', 'ride']);
@@ -79,8 +83,7 @@ export function selfModes(
     edition: Model,
     skill?: string
 ): ModeSources {
-    const sighted =
-        kind === 'attack' || (!!skill && SIGHT_SKILLS.has(skill));
+    const sighted = kind === 'attack' || (!!skill && SIGHT_SKILLS.has(skill));
 
     return isSl(edition) &&
         sighted &&
@@ -119,7 +122,8 @@ export function againstSl(
     attackKind: 'melee' | 'ranged',
     edition: Model
 ): { advantage: number; sl: number } {
-    if (!isSl(edition) || attackKind !== 'melee') return { advantage: 0, sl: 0 };
+    if (!isSl(edition) || attackKind !== 'melee')
+        return { advantage: 0, sl: 0 };
 
     const keys = levelsOf(target).map((c) => c.key);
 
@@ -153,3 +157,21 @@ export const isHelpless = (p: BattleParticipant | undefined): boolean =>
     !!p &&
     (p.combatStats.status === CombatStatus.UNCONSCIOUS ||
         levelsOf(p).some((c) => c.key === 'unconscious'));
+
+/** A Surprised target is easier to shoot: +1 SL (p166) */
+export const surprisedRangedSl = (
+    target: BattleParticipant,
+    edition: Model
+): number =>
+    isSl(edition) && levelsOf(target).some((c) => c.key === 'surprised')
+        ? SURPRISED_RANGED_SL
+        : 0;
+
+/** A Prone target is harder to shoot: -1 SL, the same line as cover (p166) */
+export const proneTargetRangedSl = (
+    target: BattleParticipant,
+    edition: Model
+): number =>
+    isSl(edition) && levelsOf(target).some((c) => c.key === 'prone')
+        ? PRONE_TARGET_RANGED_SL
+        : 0;
