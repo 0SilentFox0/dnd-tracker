@@ -96,20 +96,13 @@ export async function grantCorruption(
     return withLockedCharacter(gate, async (tx, locked) => {
         const grantId = randomUUID();
 
-        const race = character.raceId
-            ? await tx.race.findUnique({
-                  where: { id: character.raceId },
-                  select: { slug: true, name: true },
-              })
-            : null;
-
         const { state, summary } = corruption.planGrant({
             characteristics: readCharacteristics(locked),
             rules: access.campaign.rules,
             points: input.points,
             reason: input.reason,
             rng: Math.random,
-            species: corruptionSpeciesOf(race ?? { name: character.race }),
+            species: corruptionSpeciesOf({ name: character.race }),
             id: grantId,
             at: new Date().toISOString(),
         });

@@ -4,6 +4,7 @@ import type {
     CustomConditionKey,
     StandardConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
+import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
@@ -25,6 +26,7 @@ export interface ApplyConditionOptions {
     timedKey: string;
     round: number;
     rules: Ruleset;
+    rng?: Rng;
 }
 
 export interface ApplyConditionResult {
