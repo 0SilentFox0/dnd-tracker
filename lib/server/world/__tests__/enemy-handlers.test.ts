@@ -127,12 +127,7 @@ describe('enemy pins', () => {
     it('patches an enemy of the map', async () => {
         m.findUnique.mockResolvedValue(row());
 
-        const res = await enemyPatchHandler(
-            req({ x: 0.9 }),
-            'c1',
-            'm1',
-            'e1'
-        );
+        const res = await enemyPatchHandler(req({ x: 0.9 }), 'c1', 'm1', 'e1');
 
         expect(res.status).toBe(200);
         expect(m.update.mock.calls[0][0]).toMatchObject({
@@ -144,7 +139,12 @@ describe('enemy pins', () => {
     it('answers 404 for an enemy of another map', async () => {
         m.findUnique.mockResolvedValue(row({ mapId: 'm2' }));
 
-        const patch = await enemyPatchHandler(req({ x: 0.9 }), 'c1', 'm1', 'e1');
+        const patch = await enemyPatchHandler(
+            req({ x: 0.9 }),
+            'c1',
+            'm1',
+            'e1'
+        );
 
         const del = await enemyDeleteHandler('c1', 'm1', 'e1');
 
