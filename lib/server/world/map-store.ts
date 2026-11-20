@@ -46,6 +46,7 @@ export const toWorldMarker = (row: MarkerRow): WorldMarker => ({
     alwaysVisible: row.alwaysVisible,
     sortOrder: row.sortOrder,
     childMapId: row.childMap?.id ?? null,
+    layerId: row.layerId,
 });
 
 const toSummary = ({

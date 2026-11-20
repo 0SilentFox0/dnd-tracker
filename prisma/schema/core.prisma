@@ -182,6 +182,7 @@ model Character {
   campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user                User                @relation(fields: [controlledBy], references: [id], onDelete: SetNull)
   worldPosition       WorldPosition?
+  worldLayerHeroes    WorldLayerHero[]
   worldReveals        WorldReveal[]
   worldNotes          WorldNote[]
   acquaintances       Acquaintance[]
@@ -1205,6 +1206,7 @@ model WorldMap {
   reveals        WorldReveal[]
   travelLog      WorldTravelLog[]
   enemyPins      WorldEnemyPin[]
+  layers         WorldLayer[]
 
   @@index([campaignId])
   @@map("world_maps")
@@ -1224,15 +1226,51 @@ model WorldMarker {
   description   String?
   alwaysVisible Boolean          @default(false)
   sortOrder     Int              @default(0)
+  layerId       String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   map           WorldMap         @relation("MapMarkers", fields: [mapId], references: [id], onDelete: Cascade)
+  layer         WorldLayer?      @relation(fields: [layerId], references: [id], onDelete: NoAction)
   childMap      WorldMap?        @relation("NestedMap")
   notes         WorldNote[]
   arrivals      WorldTravelLog[]
 
   @@index([mapId, sortOrder])
+  @@index([layerId])
   @@map("world_markers")
+}
+
+model WorldLayer {
+  id         String           @id @default(cuid())
+  mapId      String
+  name       String
+  color      String?
+  visibility String           @default("dm")
+  sortOrder  Int              @default(0)
+  imageUrl   String?
+  imgX       Float            @default(0)
+  imgY       Float            @default(0)
+  imgW       Float            @default(1)
+  imgH       Float            @default(1)
+  opacity    Float            @default(1)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  map        WorldMap         @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  markers    WorldMarker[]
+  heroes     WorldLayerHero[]
+
+  @@index([mapId, sortOrder])
+  @@map("world_layers")
+}
+
+model WorldLayerHero {
+  layerId     String
+  characterId String
+  layer       WorldLayer @relation(fields: [layerId], references: [id], onDelete: Cascade)
+  character   Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@id([layerId, characterId])
+  @@map("world_layer_heroes")
 }
 
 model WorldPosition {
