@@ -11,9 +11,11 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 
+import { LayerImageRect } from './LayerImageRect';
 import { WorldEnemies } from './WorldEnemies';
 import { WorldFog } from './WorldFog';
 import { WorldHeroes } from './WorldHeroes';
+import { WorldLayerImages } from './WorldLayerImages';
 import { WorldPins } from './WorldPins';
 import { WorldTrails, type WorldTrailsProps } from './WorldTrails';
 import { WorldZones } from './WorldZones';
@@ -33,12 +35,14 @@ import { fitBox, toMapPoint } from '@/lib/utils/world/geometry';
 import { hintPosition } from '@/lib/utils/world/hint-position';
 import { snapPoint } from '@/lib/utils/world/zone-snap';
 import type {
+    LayerRect,
     MapPoint,
     Polygon,
     RevealShape,
     WorldEnemyPin,
     WorldHero,
     WorldMapDetail,
+    WorldViewLayer,
 } from '@/types/world';
 
 const ZOOM_STEP = 1.5;
@@ -65,6 +69,14 @@ export interface WorldMapViewProps {
         onEnemyClick?(id: string): void;
         onEnemyDrag?(id: string, p: MapPoint): void;
         onVertexChange?(markerId: string, polygon: Polygon): void;
+    };
+    layers?: {
+        items: WorldViewLayer[];
+        hidden: ReadonlySet<string>;
+        edit?: {
+            layerId: string | null;
+            onRectChange(layerId: string, rect: LayerRect): void;
+        };
     };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
@@ -164,6 +176,7 @@ export function WorldMapView({
     edit,
     handlers = {},
     fog,
+    layers,
     heroes,
     enemies,
     dragHeroes,
@@ -245,17 +258,28 @@ export function WorldMapView({
         polygon: Polygon;
     } | null>(null);
 
+    const layerHidden = layers?.hidden;
+
+    const visibleMarkers = layerHidden?.size
+        ? markers.filter((m) => !m.layerId || !layerHidden.has(m.layerId))
+        : markers;
+
     const shownMarkers = preview
-        ? markers.map((m) =>
+        ? visibleMarkers.map((m) =>
               m.id === preview.id ? { ...m, polygon: preview.polygon } : m
           )
-        : markers;
+        : visibleMarkers;
 
     const editingZone =
         tool === 'select' && handlers.onVertexChange
             ? shownMarkers.find(
                   (m) => m.id === selectedId && m.kind === 'zone' && m.polygon
               )
+            : undefined;
+
+    const editingLayer =
+        tool === 'select' && layers?.edit?.layerId
+            ? layers.items.find((l) => l.id === layers.edit?.layerId)
             : undefined;
 
     const [hoveredZone, setHoveredZone] = useState<string | null>(null);
@@ -383,6 +407,15 @@ export function WorldMapView({
                                 sizes={`${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`}
                                 className="pointer-events-none object-fill select-none"
                             />
+                            {layers ? (
+                                <WorldLayerImages
+                                    layers={layers.items}
+                                    hidden={layers.hidden}
+                                    width={Math.round(
+                                        box.width * Math.min(zoom, MAX_SIZES_ZOOM)
+                                    )}
+                                />
+                            ) : null}
                             <WorldZones
                                 markers={shownMarkers}
                                 selectedId={selectedId}
@@ -449,6 +482,15 @@ export function WorldMapView({
                             className="atlas-top-layer absolute inset-0"
                             style={layerStyle}
                         >
+                            {editingLayer && layers?.edit ? (
+                                <LayerImageRect
+                                    key={editingLayer.id}
+                                    layer={editingLayer}
+                                    zoom={zoom}
+                                    toPoint={pointAt}
+                                    onChange={layers.edit.onRectChange}
+                                />
+                            ) : null}
                             {trails ? (
                                 <WorldTrails
                                     {...trails}
@@ -468,7 +510,7 @@ export function WorldMapView({
                                 }
                             >
                                 <WorldPins
-                                    markers={markers}
+                                    markers={visibleMarkers}
                                     zoom={zoom}
                                     compact={compact}
                                     labels={{

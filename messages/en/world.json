@@ -319,5 +319,52 @@
     "notePlaceholder": "Visible only to you",
     "delete": "Delete enemy",
     "close": "Close"
+  },
+  "layers": {
+    "legend": "Layers",
+    "imageFrame": "Image frame of layer {name}",
+    "corner": {
+      "nw": "Resize from top-left corner",
+      "ne": "Resize from top-right corner",
+      "sw": "Resize from bottom-left corner",
+      "se": "Resize from bottom-right corner"
+    },
+    "title": "Layers",
+    "toggle": "Layers",
+    "empty": "No layers yet. A layer groups markers and can carry an overlay image.",
+    "add": "Add layer",
+    "defaultName": "Layer {n}",
+    "limit": "Layer limit reached",
+    "name": "Layer name",
+    "color": "Layer color",
+    "active": "New markers go here",
+    "activate": "Make active",
+    "deactivate": "Stop adding here",
+    "visibility": {
+      "label": "Visible to",
+      "dm": "DM only",
+      "all": "Everyone",
+      "heroes": "Chosen heroes"
+    },
+    "heroes": "Heroes who can see this layer",
+    "noHeroes": "No heroes in the campaign yet",
+    "image": {
+      "upload": "Upload image",
+      "replace": "Replace image",
+      "position": "Position",
+      "positionDone": "Done",
+      "remove": "Remove image",
+      "uploading": "Uploading…"
+    },
+    "opacity": "Opacity",
+    "delete": "Delete layer",
+    "deleteTitle": "Delete layer \"{name}\"?",
+    "deleteDescription": "The layer has {count, plural, one {# marker} other {# markers}}. Choose what happens to them.",
+    "deleteUngroup": "Keep markers",
+    "deleteUngroupWarning": "Kept markers leave the layer and become visible to everyone who sees the map.",
+    "deleteWithMarkers": "Delete with markers",
+    "deleteEmptyDescription": "The layer has no markers.",
+    "markerLayer": "Layer",
+    "noLayer": "No layer"
   }
 }
