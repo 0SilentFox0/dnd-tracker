@@ -1,9 +1,10 @@
 #!/usr/bin/env tsx
-// pnpm assets:grim-icons prompts [--out <dir>]   (upload: pnpm template icons grim-d100 --dir <images>)
+// pnpm assets:grim-icons prompts [--out <dir>] | check|sheet --dir <images> --kind <k> --batch <n>   (upload: pnpm template icons grim-d100 --dir <images>)
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { readPack } from '../../templates/lib/pack';
+import { readIconsFile } from '../../templates/lib/icons-file';
+import { readPack, TEMPLATES_DIR } from '../../templates/lib/pack';
 import {
     WFRP_ROW_KINDS,
     wfrpDataOf,
@@ -14,6 +15,7 @@ import {
     type PromptRow,
     toMarkdown,
 } from '../icon-prompts/compose';
+import { contactSheet, inspectImage, issuesOf } from './batch';
 import {
     type GrimPromptRow,
     grimPromptRows,
@@ -96,8 +98,101 @@ function writePrompts(out: string) {
     console.info(`${rows.length} промптів у ${out}`);
 }
 
+const BATCH_USAGE =
+    'Використання: pnpm assets:grim-icons check|sheet --dir <output-grim/icons> --kind <kind[,kind]> --batch <n> [--size 50] [--min-distance 6]';
+
+async function batchCommand(command: 'check' | 'sheet', args: string[]) {
+    const dir = flag(args, '--dir') ?? fail(BATCH_USAGE);
+
+    const kinds = (flag(args, '--kind') ?? fail(BATCH_USAGE)).split(',');
+
+    const size = Number(flag(args, '--size') ?? 50);
+
+    const batch = Number(flag(args, '--batch') ?? 1);
+
+    const minDistance = Number(flag(args, '--min-distance') ?? 6);
+
+    const pack = readPack('grim-d100');
+
+    const have = readIconsFile(
+        path.join(TEMPLATES_DIR, 'grim-d100', 'icons.json')
+    );
+
+    const slugOf = new Map(
+        WFRP_ROW_KINDS.flatMap((k) =>
+            (pack.rows[k] ?? []).map(
+                (row) => [`${k}:${String(row.name)}`, String(row.slug)] as const
+            )
+        )
+    );
+
+    const wanted = loadRows()
+        .filter(
+            (r) =>
+                kinds.includes(r.kind) &&
+                !have[r.kind]?.[slugOf.get(r.recordId) ?? r.name]
+        )
+        .slice((batch - 1) * size, batch * size);
+
+    const present = wanted.filter((r) => fs.existsSync(path.join(dir, r.file)));
+
+    const lost = wanted.filter((r) => !present.includes(r));
+
+    const reports = await Promise.all(
+        present.map((r) => inspectImage(path.join(dir, r.file)))
+    );
+
+    const round = kinds.every((k) => k === 'units');
+
+    if (command === 'sheet') {
+        const out = path.join(
+            dir,
+            '..',
+            'sheets',
+            `${kinds.join('+')}-${batch}.png`
+        );
+
+        fs.mkdirSync(path.dirname(out), { recursive: true });
+
+        await contactSheet(
+            present.map((r) => ({
+                file: path.join(dir, r.file),
+                label: r.name,
+            })),
+            out
+        );
+
+        console.info(`Контактний лист: ${out} (${present.length} іконок)`);
+
+        return;
+    }
+
+    const issues = issuesOf(reports, { round, minDistance });
+
+    console.info(
+        `Пачка ${kinds.join('+')} #${batch}: очікується ${wanted.length}, є ${present.length}, бракує ${lost.length}`
+    );
+
+    lost.forEach((r) => console.info(`  немає файлу: ${r.file}`));
+
+    issues.forEach((i) => console.info(`  ${i.file}: ${i.problem}`));
+
+    if (lost.length || issues.length) process.exitCode = 1;
+    else
+        console.info(
+            'Технічні перевірки пройдено (літери/колір — оглядом листа).'
+        );
+}
+
+function fail(message: string): never {
+    throw new Error(message);
+}
+
 async function main() {
     const [command, ...rest] = process.argv.slice(2);
+
+    if (command === 'check' || command === 'sheet')
+        return batchCommand(command, rest);
 
     if (command === 'prompts')
         return writePrompts(flag(rest, '--out') ?? DEFAULT_OUT);
