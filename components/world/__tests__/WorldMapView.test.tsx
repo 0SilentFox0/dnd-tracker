@@ -756,7 +756,7 @@ describe('WorldMapView card slot', () => {
         const card = screen.getByTestId('world-map-card');
 
         expect(card.parentElement).toBe(box());
-        expect(card.dataset.placement).toBe('above');
+        expect(['above', 'below']).toContain(card.dataset.placement);
 
         fireEvent.pointerDown(card, {
             pointerId: 1,

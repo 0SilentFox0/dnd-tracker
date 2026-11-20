@@ -74,7 +74,7 @@ describe('WorldToolbar', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Точка входу' }));
 
-        expect(d.setTool).toHaveBeenCalledWith('entry');
+        expect(d.setTool).toHaveBeenCalledWith('entry', false);
     });
 
     it('shows text labels next to icons and keeps aria-labels for narrow screens', () => {

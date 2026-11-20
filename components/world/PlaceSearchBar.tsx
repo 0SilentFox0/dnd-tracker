@@ -7,6 +7,7 @@ import { MARKER_ICON } from './marker-icons';
 
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { HudButton, HudToggleChip } from '@/components/hud';
+import { WORLD_MARKER_ICON_KEYS } from '@/lib/constants/world';
 import { useSearch } from '@/lib/hooks/common';
 import type { MarkerKind, WorldMarker } from '@/types/world';
 
@@ -16,6 +17,11 @@ interface PlaceSearchBarProps {
 }
 
 const fieldsOf = (m: WorldMarker) => [m.name, m.description];
+
+const isMarkerIconKey = (
+    key: string
+): key is (typeof WORLD_MARKER_ICON_KEYS)[number] =>
+    (WORLD_MARKER_ICON_KEYS as readonly string[]).includes(key);
 
 const KINDS = ['point', 'zone'] as const satisfies readonly MarkerKind[];
 
@@ -39,7 +45,7 @@ export function PlaceSearchBar({ markers, onPick }: PlaceSearchBarProps) {
     );
 
     const iconLabel = (key: string) =>
-        t.has(`markerKinds.${key}`) ? t(`markerKinds.${key}`) : key;
+        isMarkerIconKey(key) ? t(`markerKinds.${key}`) : key;
 
     return (
         <div className="flex flex-col gap-2">

@@ -48,12 +48,17 @@ vi.mock('@/lib/hooks/world/useRemoveMarker', () => ({
 vi.mock('@/components/world/editor/WorldToolbar', () => ({
     WorldToolbar: ({
         drawing,
+        children,
     }: {
         drawing: { tool: string; setTool(t: string): void };
+        children?: React.ReactNode;
     }) => (
-        <button type="button" onClick={() => drawing.setTool('move')}>
-            tool:{drawing.tool}
-        </button>
+        <div>
+            <button type="button" onClick={() => drawing.setTool('move')}>
+                tool:{drawing.tool}
+            </button>
+            {children}
+        </div>
     ),
     WorldToolHint: () => null,
 }));
