@@ -24,11 +24,18 @@ import {
 import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { CompassRose } from '@/components/world/marker-icons';
 import { MapTree } from '@/components/world/nav/MapTree';
+import { TrailBubble } from '@/components/world/nav/TrailBubble';
+import { TrailLegend } from '@/components/world/nav/TrailLegend';
 import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
-import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
+import {
+    type TravelMoved,
+    useTrailView,
+    useWorldEditorPage,
+    useWorldTrail,
+} from '@/lib/hooks/world';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const ENTRY_COMPASS = {
@@ -70,6 +77,19 @@ export function WorldEditorPageClient({
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
+
+    const trail = useTrailView(
+        useWorldTrail(campaignId, mapId).data,
+        detail.data ? detail.data.map.width / detail.data.map.height : 1
+    );
+
+    const trailBubble = trail.selected ? (
+        <TrailBubble
+            selected={trail.selected}
+            embedded={!isDesktop}
+            onClose={trail.clear}
+        />
+    ) : null;
 
     const emptyView = (
         <>
@@ -132,12 +152,21 @@ export function WorldEditorPageClient({
                                         ) : null;
 
                                     const card =
-                                        bubble && bubbleCard.point && isDesktop
+                                        trailBubble &&
+                                        trail.selected &&
+                                        isDesktop
                                             ? {
-                                                  point: bubbleCard.point,
-                                                  content: bubble,
+                                                  point: trail.selected.node,
+                                                  content: trailBubble,
                                               }
-                                            : undefined;
+                                            : bubble &&
+                                                bubbleCard.point &&
+                                                isDesktop
+                                              ? {
+                                                    point: bubbleCard.point,
+                                                    content: bubble,
+                                                }
+                                              : undefined;
 
                                     const panel = marker ? (
                                         <WorldMarkerPanel />
@@ -262,6 +291,19 @@ export function WorldEditorPageClient({
                                                                 heroes={
                                                                     d.heroes
                                                                 }
+                                                                trails={{
+                                                                    trails: trail.trails,
+                                                                    sessions:
+                                                                        trail.sessions,
+                                                                    visible:
+                                                                        trail.visible,
+                                                                    selectedEntryId:
+                                                                        trail
+                                                                            .selected
+                                                                            ?.entryId,
+                                                                    onSelect:
+                                                                        trail.select,
+                                                                }}
                                                                 selectedId={
                                                                     selectedId
                                                                 }
@@ -273,7 +315,9 @@ export function WorldEditorPageClient({
                                                                 compact={
                                                                     !isDesktop
                                                                 }
-                                                                handlers={handlers}
+                                                                handlers={
+                                                                    handlers
+                                                                }
                                                                 slots={{
                                                                     hint: (
                                                                         <WorldToolHint
@@ -309,6 +353,24 @@ export function WorldEditorPageClient({
                                                                     ),
                                                                 }}
                                                             />
+                                                        )}
+                                                        {eyes.asHeroId ? null : (
+                                                            <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                                                <TrailLegend
+                                                                    trails={
+                                                                        trail.trails
+                                                                    }
+                                                                    sessions={
+                                                                        trail.sessions
+                                                                    }
+                                                                    visible={
+                                                                        trail.visible
+                                                                    }
+                                                                    onToggle={
+                                                                        trail.toggle
+                                                                    }
+                                                                />
+                                                            </div>
                                                         )}
                                                         {tool === 'zone' &&
                                                         drawing.draft.length >
@@ -448,6 +510,24 @@ export function WorldEditorPageClient({
                                                         title={marker?.name}
                                                     >
                                                         {bubble}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={!!trailBubble}
+                                                        onOpenChange={(
+                                                            open
+                                                        ) => {
+                                                            if (!open)
+                                                                trail.clear();
+                                                        }}
+                                                        title={
+                                                            trail.selected
+                                                                ?.session
+                                                                ?.name ??
+                                                            t('trail.noSession')
+                                                        }
+                                                    >
+                                                        {trailBubble}
                                                     </ResponsiveDialog>
                                                     <ResponsiveDialog
                                                         hud

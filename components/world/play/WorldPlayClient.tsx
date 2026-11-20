@@ -16,6 +16,8 @@ import { Disclosure } from '@/components/ui/disclosure';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { MapTree } from '@/components/world/nav/MapTree';
+import { TrailBubble } from '@/components/world/nav/TrailBubble';
+import { TrailLegend } from '@/components/world/nav/TrailLegend';
 import { PlaceSearchBar } from '@/components/world/nav/PlaceSearchBar';
 import { WorldCrumbs } from '@/components/world/nav/WorldCrumbs';
 import { WorldNotesPanel } from '@/components/world/notes/WorldNotesPanel';
@@ -24,7 +26,7 @@ import { TravelLog } from '@/components/world/travel/TravelLog';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
-import { useWorldPlay } from '@/lib/hooks/world';
+import { useTrailView, useWorldPlay, useWorldTrail } from '@/lib/hooks/world';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const MAP_HEIGHT =
@@ -42,6 +44,13 @@ export function WorldPlayClient({
     const play = useWorldPlay(campaignId, mapId);
 
     const t = useTranslations('world');
+
+    const trail = useTrailView(
+        useWorldTrail(campaignId, mapId).data,
+        play.view.data
+            ? play.view.data.map.width / play.view.data.map.height
+            : 1
+    );
 
     usePusherShowSync(campaignId, !!mapId);
 
@@ -120,6 +129,14 @@ export function WorldPlayClient({
                             />
                         ) : null;
 
+                    const trailBubble = trail.selected ? (
+                        <TrailBubble
+                            selected={trail.selected}
+                            embedded={!isDesktop}
+                            onClose={trail.clear}
+                        />
+                    ) : null;
+
                     const notes = marker ? (
                         <WorldNotesPanel
                             campaignId={campaignId}
@@ -177,13 +194,29 @@ export function WorldPlayClient({
                                         onPick={play.pickPlace}
                                     />
                                     <div
-                                        className={MAP_HEIGHT}
+                                        className={`relative ${MAP_HEIGHT}`}
                                         data-tour="world.map"
                                     >
+                                        <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                            <TrailLegend
+                                                trails={trail.trails}
+                                                sessions={trail.sessions}
+                                                visible={trail.visible}
+                                                onToggle={trail.toggle}
+                                            />
+                                        </div>
                                         <WorldMapView
                                             key={view.map.id}
                                             detail={props.detail}
                                             heroes={props.heroes}
+                                            trails={{
+                                                trails: trail.trails,
+                                                sessions: trail.sessions,
+                                                visible: trail.visible,
+                                                selectedEntryId:
+                                                    trail.selected?.entryId,
+                                                onSelect: trail.select,
+                                            }}
                                             fog={props.fog}
                                             focus={play.focus}
                                             selectedId={marker?.id}
@@ -191,15 +224,25 @@ export function WorldPlayClient({
                                             handlers={play.handlers}
                                             slots={{
                                                 card:
-                                                    bubble &&
-                                                    play.card.point &&
+                                                    trailBubble &&
+                                                    trail.selected &&
                                                     isDesktop
                                                         ? {
-                                                              point: play.card
-                                                                  .point,
-                                                              content: bubble,
+                                                              point: trail
+                                                                  .selected
+                                                                  .node,
+                                                              content:
+                                                                  trailBubble,
                                                           }
-                                                        : undefined,
+                                                        : bubble &&
+                                                            play.card.point &&
+                                                            isDesktop
+                                                          ? {
+                                                                point: play.card
+                                                                    .point,
+                                                                content: bubble,
+                                                            }
+                                                          : undefined,
                                             }}
                                         />
                                     </div>
@@ -238,6 +281,19 @@ export function WorldPlayClient({
                                         title={marker?.name}
                                     >
                                         {bubble}
+                                    </ResponsiveDialog>
+                                    <ResponsiveDialog
+                                        hud
+                                        open={!!trailBubble}
+                                        onOpenChange={(open) => {
+                                            if (!open) trail.clear();
+                                        }}
+                                        title={
+                                            trail.selected?.session?.name ??
+                                            t('trail.noSession')
+                                        }
+                                    >
+                                        {trailBubble}
                                     </ResponsiveDialog>
                                     <ResponsiveDialog
                                         hud

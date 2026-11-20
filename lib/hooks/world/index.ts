@@ -16,6 +16,7 @@ export { useNotesPanel } from './useNotesPanel';
 export { useRemoveMap } from './useRemoveMap';
 export { useRemoveMarker } from './useRemoveMarker';
 export { useShowWorld } from './useShowWorld';
+export { type SelectedTrailNode, useTrailView } from './useTrailView';
 export { useTravelLog } from './useTravelLog';
 export { type TravelMoved, useTravelPanel } from './useTravelPanel';
 export { useWorldDive } from './useWorldDive';

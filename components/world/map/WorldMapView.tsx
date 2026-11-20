@@ -14,6 +14,7 @@ import { Minus, Plus, RotateCcw } from 'lucide-react';
 import { WorldFog } from './WorldFog';
 import { WorldHeroes } from './WorldHeroes';
 import { WorldPins } from './WorldPins';
+import { WorldTrails, type WorldTrailsProps } from './WorldTrails';
 import { WorldZones } from './WorldZones';
 import { ZoneVertexHandles } from './ZoneVertexHandles';
 
@@ -63,6 +64,7 @@ export interface WorldMapViewProps {
     };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
+    trails?: Omit<WorldTrailsProps, 'zoom'>;
     focus?: { point: MapPoint; seq: number };
     slots?: {
         overlay?: ReactNode;
@@ -154,6 +156,7 @@ export function WorldMapView({
     handlers = {},
     fog,
     heroes,
+    trails,
     focus,
     slots,
     compact = false,
@@ -457,6 +460,9 @@ export function WorldMapView({
                                     handlers={handlers}
                                 />
                             </div>
+                            {trails ? (
+                                <WorldTrails {...trails} zoom={zoom} />
+                            ) : null}
                             {heroes?.length ? (
                                 <WorldHeroes
                                     heroes={heroes}

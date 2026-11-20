@@ -274,5 +274,34 @@
     "label": "Режим",
     "build": "Побудова",
     "play": "Гра"
+  },
+  "trail": {
+    "legend": "Сліди",
+    "noSession": "Без сесії",
+    "node": "{session}: {kind}",
+    "segment": "Шлях: {session}",
+    "heroes": "Герої",
+    "step": "Крок",
+    "date": "Дата",
+    "last": "Останній крок"
+  },
+  "sessions": {
+    "title": "Сесії",
+    "new": "Нова сесія",
+    "empty": "Сесій ще немає",
+    "active": "Активна",
+    "edit": "Редагувати",
+    "end": "Завершити",
+    "delete": "Видалити",
+    "formNewTitle": "Нова сесія",
+    "formEditTitle": "Редагувати сесію",
+    "formDescription": "Подорожі героїв записуватимуться в активну сесію",
+    "name": "Назва",
+    "description": "Опис",
+    "color": "Колір",
+    "colorOption": "Колір {color}",
+    "deleteTitle": "Видалити сесію «{name}»?",
+    "deleteDescription": "Сліди залишаться на карті без сесії.",
+    "hint": "Почніть сесію, щоб сліди героїв мали назву й колір"
   }
 }

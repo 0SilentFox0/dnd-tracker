@@ -274,5 +274,34 @@
     "label": "Mode",
     "build": "Build",
     "play": "Play"
+  },
+  "trail": {
+    "legend": "Trails",
+    "noSession": "No session",
+    "node": "{session}: {kind}",
+    "segment": "Path: {session}",
+    "heroes": "Heroes",
+    "step": "Step",
+    "date": "Date",
+    "last": "Latest step"
+  },
+  "sessions": {
+    "title": "Sessions",
+    "new": "New session",
+    "empty": "No sessions yet",
+    "active": "Active",
+    "edit": "Edit",
+    "end": "End",
+    "delete": "Delete",
+    "formNewTitle": "New session",
+    "formEditTitle": "Edit session",
+    "formDescription": "Hero journeys will be recorded into the active session",
+    "name": "Name",
+    "description": "Description",
+    "color": "Color",
+    "colorOption": "Color {color}",
+    "deleteTitle": "Delete session \"{name}\"?",
+    "deleteDescription": "Trails stay on the map without a session.",
+    "hint": "Start a session so hero trails get a name and a color"
   }
 }
