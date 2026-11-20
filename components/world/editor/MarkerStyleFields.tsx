@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { FieldRow } from './FieldRow';
 import { MarkerColorField } from './MarkerColorField';
 
 import { Button } from '@/components/ui/button';
@@ -41,8 +42,8 @@ export function MarkerStyleFields({
     const opacity = form.fillOpacity ?? layer?.zoneOpacity ?? ZONE_FILL_DEFAULT;
 
     return (
-        <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="space-y-1.5">
+            <FieldRow label={t(zone ? 'editor.zoneColor' : 'editor.pointColor')}>
                 <MarkerColorField
                     label={t(zone ? 'editor.zoneColor' : 'editor.pointColor')}
                     color={form.color ?? layer?.color ?? form.colorValue}
@@ -63,12 +64,12 @@ export function MarkerStyleFields({
                         {ts('inherit')}
                     </Button>
                 ) : null}
-            </div>
+            </FieldRow>
             {!zone && layer && (iconInherited || marker.icon) ? (
-                <div className="flex flex-wrap items-center gap-2">
+                <FieldRow label={t('editor.icon')}>
                     {iconInherited ? (
                         <span className="text-hud-muted">
-                            {t('editor.icon')}: {ts('inherited')}
+                            {ts('inherited')}
                         </span>
                     ) : (
                         <Button
@@ -77,15 +78,14 @@ export function MarkerStyleFields({
                             variant="ghost"
                             onClick={() => void form.save({ icon: null })}
                         >
-                            {t('editor.icon')}: {ts('inherit')}
+                            {ts('inherit')}
                         </Button>
                     )}
-                </div>
+                </FieldRow>
             ) : null}
             {zone ? (
                 <>
-                    <label className="flex min-w-0 items-center justify-between gap-2">
-                        <span className="min-w-0">{ts('labelMode.label')}</span>
+                    <FieldRow label={ts('labelMode.label')}>
                         <SelectField
                             aria-label={ts('labelMode.label')}
                             value={form.labelMode ?? ''}
@@ -100,22 +100,18 @@ export function MarkerStyleFields({
                                 value: v,
                                 label: ts(`labelMode.${v}`),
                             }))}
-                            triggerClassName="w-40 max-w-full shrink-0"
                         />
-                    </label>
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <label className="flex min-w-0 flex-1 basis-40 items-center gap-2">
-                            {ts('opacity')}
-                            <Slider
-                                aria-label={ts('opacity')}
-                                className="min-w-0 flex-1"
-                                value={opacity}
-                                min={WORLD_ZONE_OPACITY_MIN}
-                                max={1}
-                                step={OPACITY_STEP}
-                                onValueChange={form.changeFillOpacity}
-                            />
-                        </label>
+                    </FieldRow>
+                    <FieldRow label={ts('opacity')}>
+                        <Slider
+                            aria-label={ts('opacity')}
+                            className="min-w-0 flex-1"
+                            value={opacity}
+                            min={WORLD_ZONE_OPACITY_MIN}
+                            max={1}
+                            step={OPACITY_STEP}
+                            onValueChange={form.changeFillOpacity}
+                        />
                         {form.fillOpacity !== null ? (
                             <Button
                                 type="button"
@@ -127,7 +123,7 @@ export function MarkerStyleFields({
                                 {ts('opacityReset')}
                             </Button>
                         ) : null}
-                    </div>
+                    </FieldRow>
                 </>
             ) : null}
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Crosshair, ImagePlus, Move, Trash2 } from 'lucide-react';
 
+import { FieldRow, FieldSection } from '../FieldRow';
 import { ICON_OPTIONS } from '../marker-icon-options';
 import { MarkerColorField } from '../MarkerColorField';
 import { LayerDeleteDialog } from './LayerDeleteDialog';
@@ -96,7 +97,7 @@ export function LayerRow({
         <li
             data-testid={`layer-row-${layer.id}`}
             data-active={state.active}
-            className="space-y-2 rounded-md border border-hud-rule p-2"
+            className="space-y-3 rounded-md border border-hud-rule p-2"
         >
             <div className="flex items-center gap-2">
                 <Input
@@ -117,29 +118,39 @@ export function LayerRow({
                     <Trash2 className="size-4" aria-hidden />
                 </HudIconButton>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-                <MarkerColorField
-                    label={t('color')}
-                    color={f.colorValue}
-                    isCustom={f.isCustomColor}
-                    onPick={f.pickColor}
-                    onReset={f.resetColor}
-                />
-            </div>
-            <SelectField
-                aria-label={t('icon')}
-                value={layer.icon ?? ''}
-                onValueChange={(v) => void f.setIcon(v || null)}
-                allowNone
-                noneLabel={t('iconNone')}
-                options={ICON_OPTIONS.map(({ value }) => ({
-                    value,
-                    label: tm(`markerKinds.${value}`),
-                }))}
-            />
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                <label className="flex min-w-0 flex-1 basis-40 items-center gap-2">
-                    {t('zoneOpacity')}
+            <HudButton
+                type="button"
+                aria-pressed={state.active}
+                onClick={state.onActivate}
+                className="flex w-fit max-w-full items-center gap-1.5 text-xs"
+            >
+                <Crosshair className="size-3.5" aria-hidden />
+                {state.active ? t('deactivate') : t('activate')}
+            </HudButton>
+            <FieldSection title={t('sections.appearance')}>
+                <FieldRow label={t('color')}>
+                    <MarkerColorField
+                        label={t('color')}
+                        color={f.colorValue}
+                        isCustom={f.isCustomColor}
+                        onPick={f.pickColor}
+                        onReset={f.resetColor}
+                    />
+                </FieldRow>
+                <FieldRow label={t('icon')}>
+                    <SelectField
+                        aria-label={t('icon')}
+                        value={layer.icon ?? ''}
+                        onValueChange={(v) => void f.setIcon(v || null)}
+                        allowNone
+                        noneLabel={t('iconNone')}
+                        options={ICON_OPTIONS.map(({ value }) => ({
+                            value,
+                            label: tm(`markerKinds.${value}`),
+                        }))}
+                    />
+                </FieldRow>
+                <FieldRow label={t('zoneOpacity')}>
                     <Slider
                         aria-label={t('zoneOpacity')}
                         className="min-w-0 flex-1"
@@ -149,110 +160,110 @@ export function LayerRow({
                         step={OPACITY_STEP}
                         onValueChange={f.zoneOpacity.change}
                     />
-                </label>
-                {f.zoneOpacity.isCustom ? (
-                    <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="shrink-0"
-                        onClick={f.zoneOpacity.reset}
-                    >
-                        {t('zoneOpacityReset')}
-                    </Button>
-                ) : null}
-            </div>
-            <SelectField
-                aria-label={t('zoneLabels.label')}
-                value={layer.zoneLabels}
-                onValueChange={(v) =>
-                    void f.setZoneLabels(v as LayerZoneLabels)
-                }
-                options={LAYER_ZONE_LABELS.map((v) => ({
-                    value: v,
-                    label: t(`zoneLabels.${v}`),
-                }))}
-            />
-            <HudButton
-                type="button"
-                aria-pressed={state.active}
-                onClick={state.onActivate}
-                className="flex w-full items-center justify-center gap-1.5 text-xs"
-            >
-                <Crosshair className="size-3.5" aria-hidden />
-                {state.active ? t('deactivate') : t('activate')}
-            </HudButton>
-            <SelectField
-                aria-label={t('visibility.label')}
-                value={layer.visibility}
-                onValueChange={(v) =>
-                    void f.setVisibility(v as LayerVisibility)
-                }
-                options={VISIBILITIES.map((v) => ({
-                    value: v,
-                    label: t(`visibility.${v}`),
-                }))}
-            />
-            {layer.visibility === 'heroes' ? (
-                <LayerHeroPicker
-                    heroes={heroes}
-                    selected={f.heroIds}
-                    onToggle={(id, on) => void f.toggleHero(id, on)}
-                />
-            ) : null}
-            <div className="flex flex-wrap items-center gap-2">
-                <FileButton
-                    size="sm"
-                    variant="outline"
-                    accept="image/*"
-                    inputLabel={t('image.upload')}
-                    disabled={f.uploading}
-                    onFile={(file) => void f.uploadImage(file)}
-                >
-                    <ImagePlus className="size-3.5" aria-hidden />
-                    {f.uploading
-                        ? t('image.uploading')
-                        : layer.imageUrl
-                          ? t('image.replace')
-                          : t('image.upload')}
-                </FileButton>
-                {layer.imageUrl ? (
-                    <>
+                    {f.zoneOpacity.isCustom ? (
                         <Button
-                            size="sm"
-                            variant={state.editingImage ? 'default' : 'outline'}
-                            aria-pressed={state.editingImage}
-                            onClick={state.onToggleImageEdit}
-                        >
-                            <Move className="size-3.5" aria-hidden />
-                            {state.editingImage
-                                ? t('image.positionDone')
-                                : t('image.position')}
-                        </Button>
-                        <Button
+                            type="button"
                             size="sm"
                             variant="ghost"
-                            onClick={() => void f.clearImage()}
+                            className="shrink-0"
+                            onClick={f.zoneOpacity.reset}
                         >
-                            {t('image.remove')}
+                            {t('zoneOpacityReset')}
                         </Button>
-                    </>
-                ) : null}
-            </div>
-            {layer.imageUrl ? (
-                <label className="flex min-w-0 items-center gap-2 text-xs">
-                    {t('opacity')}
-                    <Slider
-                        aria-label={t('opacity')}
-                        className="min-w-0 flex-1"
-                        value={f.opacity}
-                        min={f.opacityRange.min}
-                        max={f.opacityRange.max}
-                        step={OPACITY_STEP}
-                        onValueChange={f.changeOpacity}
+                    ) : null}
+                </FieldRow>
+                <FieldRow label={t('zoneLabels.label')}>
+                    <SelectField
+                        aria-label={t('zoneLabels.label')}
+                        value={layer.zoneLabels}
+                        onValueChange={(v) =>
+                            void f.setZoneLabels(v as LayerZoneLabels)
+                        }
+                        options={LAYER_ZONE_LABELS.map((v) => ({
+                            value: v,
+                            label: t(`zoneLabels.${v}`),
+                        }))}
                     />
-                </label>
-            ) : null}
+                </FieldRow>
+            </FieldSection>
+            <FieldSection title={t('sections.access')}>
+                <FieldRow label={t('visibility.label')}>
+                    <SelectField
+                        aria-label={t('visibility.label')}
+                        value={layer.visibility}
+                        onValueChange={(v) =>
+                            void f.setVisibility(v as LayerVisibility)
+                        }
+                        options={VISIBILITIES.map((v) => ({
+                            value: v,
+                            label: t(`visibility.${v}`),
+                        }))}
+                    />
+                </FieldRow>
+                {layer.visibility === 'heroes' ? (
+                    <LayerHeroPicker
+                        heroes={heroes}
+                        selected={f.heroIds}
+                        onToggle={(id, on) => void f.toggleHero(id, on)}
+                    />
+                ) : null}
+            </FieldSection>
+            <FieldSection title={t('sections.image')}>
+                <div className="flex flex-wrap items-center gap-2">
+                    <FileButton
+                        size="sm"
+                        variant="outline"
+                        accept="image/*"
+                        inputLabel={t('image.upload')}
+                        disabled={f.uploading}
+                        onFile={(file) => void f.uploadImage(file)}
+                    >
+                        <ImagePlus className="size-3.5" aria-hidden />
+                        {f.uploading
+                            ? t('image.uploading')
+                            : layer.imageUrl
+                              ? t('image.replace')
+                              : t('image.upload')}
+                    </FileButton>
+                    {layer.imageUrl ? (
+                        <>
+                            <Button
+                                size="sm"
+                                variant={
+                                    state.editingImage ? 'default' : 'outline'
+                                }
+                                aria-pressed={state.editingImage}
+                                onClick={state.onToggleImageEdit}
+                            >
+                                <Move className="size-3.5" aria-hidden />
+                                {state.editingImage
+                                    ? t('image.positionDone')
+                                    : t('image.position')}
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => void f.clearImage()}
+                            >
+                                {t('image.remove')}
+                            </Button>
+                        </>
+                    ) : null}
+                </div>
+                {layer.imageUrl ? (
+                    <FieldRow label={t('opacity')}>
+                        <Slider
+                            aria-label={t('opacity')}
+                            className="min-w-0 flex-1"
+                            value={f.opacity}
+                            min={f.opacityRange.min}
+                            max={f.opacityRange.max}
+                            step={OPACITY_STEP}
+                            onValueChange={f.changeOpacity}
+                        />
+                    </FieldRow>
+                ) : null}
+            </FieldSection>
             <LayerDeleteDialog
                 open={deleting}
                 name={layer.name}

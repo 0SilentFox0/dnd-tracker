@@ -335,6 +335,11 @@
       "sw": "Resize from bottom-left corner",
       "se": "Resize from bottom-right corner"
     },
+    "sections": {
+      "appearance": "Appearance",
+      "access": "Access",
+      "image": "Image"
+    },
     "title": "Layers",
     "toggle": "Layers",
     "empty": "No layers yet. A layer groups markers and can carry an overlay image.",
