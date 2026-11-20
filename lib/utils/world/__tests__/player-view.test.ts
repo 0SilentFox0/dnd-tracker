@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
     buildWorldView,
     knownMapIds,
+    type LayerInput,
+    layerVisibleTo,
     type NoteRow,
     visibleMarkerIds,
     type WorldViewInput,
@@ -50,6 +52,7 @@ const marker = (
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    layerId: null,
     ...extra,
 });
 
@@ -85,9 +88,22 @@ const note = (
     updatedAt: '',
 });
 
+const layer = (id: string, over: Partial<LayerInput> = {}): LayerInput => ({
+    id,
+    name: `Layer ${id}`,
+    color: null,
+    visibility: 'dm',
+    heroIds: [],
+    imageUrl: `/${id}.webp`,
+    rect: { x: 0, y: 0, w: 1, h: 1 },
+    opacity: 1,
+    ...over,
+});
+
 const input = (over: Partial<WorldViewInput> = {}): WorldViewInput => ({
     map,
     markers: [marker('near', 0.5, 0.5), marker('far', 0.9, 0.9)],
+    layers: [],
     allMaps: [summary(map)],
     positions: [{ characterId: 'h1', mapId: 'root', x: 0.5, y: 0.5 }],
     heroNames,
@@ -366,5 +382,154 @@ describe('buildWorldView', () => {
                 []
             ),
         ]).toEqual([]);
+    });
+});
+
+describe('layer visibility', () => {
+    const layered = (l: LayerInput, over: Partial<WorldViewInput> = {}) =>
+        input({
+            markers: [marker('near', 0.5, 0.5, { layerId: l.id })],
+            layers: [l],
+            ...over,
+        });
+
+    it('layerVisibleTo follows the visibility mode', () => {
+        expect(layerVisibleTo({ visibility: 'dm', heroIds: ['h1'] }, ['h1'])).toBe(
+            false
+        );
+        expect(layerVisibleTo({ visibility: 'all', heroIds: [] }, [])).toBe(true);
+        expect(
+            layerVisibleTo({ visibility: 'heroes', heroIds: ['h1'] }, ['h1', 'h2'])
+        ).toBe(true);
+        expect(
+            layerVisibleTo({ visibility: 'heroes', heroIds: ['h1'] }, ['h2'])
+        ).toBe(false);
+    });
+
+    it('a dm layer hides both the marker and the layer', () => {
+        const v = buildWorldView(layered(layer('l1')));
+
+        expect(v.markers).toEqual([]);
+        expect(v.layers).toEqual([]);
+    });
+
+    it('an all layer shows the marker and the layer', () => {
+        const v = buildWorldView(layered(layer('l1', { visibility: 'all' })));
+
+        expect(v.markers.map((m) => m.id)).toEqual(['near']);
+        expect(v.layers.map((l) => l.id)).toEqual(['l1']);
+    });
+
+    it('a heroes layer is shown only to listed heroes', () => {
+        const l = layer('l1', { visibility: 'heroes', heroIds: ['h1'] });
+
+        expect(buildWorldView(layered(l)).markers).toHaveLength(1);
+        expect(
+            buildWorldView(
+                layered(l, {
+                    viewer: { userId: 'u2', heroIds: ['h2'] },
+                })
+            ).layers
+        ).toEqual([]);
+    });
+
+    it('an asHero viewer with one hero follows that hero rules', () => {
+        const l = layer('l1', { visibility: 'heroes', heroIds: ['h2'] });
+
+        const v = buildWorldView(
+            layered(l, {
+                viewer: { userId: 'u1', heroIds: ['h1'], asHero: true },
+            })
+        );
+
+        expect(v.markers).toEqual([]);
+        expect(v.layers).toEqual([]);
+    });
+
+    it('a marker with an unknown layer is hidden (fail closed)', () => {
+        const v = buildWorldView(
+            input({ markers: [marker('near', 0.5, 0.5, { layerId: 'gone' })] })
+        );
+
+        expect(v.markers).toEqual([]);
+    });
+
+    it('fog still applies to a visible layer; alwaysVisible bypasses fog', () => {
+        const l = layer('l1', { visibility: 'all' });
+
+        const hidden = buildWorldView(
+            input({
+                markers: [marker('far', 0.9, 0.9, { layerId: 'l1' })],
+                layers: [l],
+            })
+        );
+
+        const always = buildWorldView(
+            input({
+                markers: [
+                    marker('far', 0.9, 0.9, { layerId: 'l1', alwaysVisible: true }),
+                ],
+                layers: [l],
+            })
+        );
+
+        expect(hidden.markers).toEqual([]);
+        expect(always.markers.map((m) => m.id)).toEqual(['far']);
+    });
+
+    it('the output layer carries no visibility or heroIds keys', () => {
+        const v = buildWorldView(
+            layered(layer('l1', { visibility: 'heroes', heroIds: ['h1'] }))
+        );
+
+        expect(Object.keys(v.layers[0]).sort()).toEqual([
+            'color',
+            'id',
+            'imageUrl',
+            'name',
+            'opacity',
+            'rect',
+        ]);
+    });
+
+    it('a note on a marker of a hidden layer is not returned', () => {
+        const v = buildWorldView(
+            layered(layer('l1'), { notes: [note('n1', 'near', 'u9', 'public')] })
+        );
+
+        expect(v.notes).toEqual([]);
+    });
+
+    it('entering a nested map from a hidden-layer marker reveals neither marker nor layer', () => {
+        const child: WorldMap = {
+            ...map,
+            id: 'child',
+            parentMarkerId: 'gate',
+            parentMapId: 'root',
+        };
+
+        const v = buildWorldView(
+            input({
+                markers: [
+                    marker('gate', 0.5, 0.5, { childMapId: 'child', layerId: 'l1' }),
+                ],
+                layers: [layer('l1')],
+                allMaps: [summary(map), summary(child)],
+                positions: [
+                    { characterId: 'h1', mapId: 'child', x: 0.1, y: 0.1 },
+                ],
+            })
+        );
+
+        expect(v.markers).toEqual([]);
+        expect(v.layers).toEqual([]);
+        expect(v.heroes).toEqual([]);
+    });
+
+    it('visibleMarkerIds respects layers', () => {
+        expect(visibleMarkerIds(layered(layer('l1'))).has('near')).toBe(false);
+        expect(
+            visibleMarkerIds(layered(layer('l1', { visibility: 'all' }))).has('near')
+        ).toBe(true);
     });
 });

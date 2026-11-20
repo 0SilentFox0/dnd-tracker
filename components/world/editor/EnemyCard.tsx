@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Trash2, X } from 'lucide-react';
 
@@ -16,11 +16,10 @@ import {
     WORLD_DM_NOTE_MAX,
     WORLD_NAME_MAX,
 } from '@/lib/constants/world';
+import { useDebouncedCommit } from '@/lib/hooks/common';
 import { useCommittedName } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import type { UpdateEnemyData, WorldEnemyPin } from '@/types/world';
-
-const COLOR_DEBOUNCE_MS = 400;
 
 interface EnemyCardProps {
     enemy: WorldEnemyPin;
@@ -49,34 +48,13 @@ export function EnemyCard({
 
     const [color, setColor] = useState(enemy.color ?? DEFAULT_ENEMY_COLOR);
 
-    const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-    const pendingColor = useRef<string | null>(null);
-
-    const saveRef = useRef(onSave);
-
-    useEffect(() => {
-        saveRef.current = onSave;
-    });
-
-    const flushColor = () => {
-        clearTimeout(timer.current);
-
-        if (pendingColor.current === null) return;
-
-        const next = pendingColor.current;
-
-        pendingColor.current = null;
-        saveRef.current({ color: next });
-    };
-
-    useEffect(() => flushColor, []);
+    const colorCommit = useDebouncedCommit((next: string) =>
+        onSave({ color: next })
+    );
 
     const pickColor = (next: string) => {
         setColor(next);
-        pendingColor.current = next;
-        clearTimeout(timer.current);
-        timer.current = setTimeout(flushColor, COLOR_DEBOUNCE_MS);
+        colorCommit.schedule(next);
     };
 
     const commitNote = () => {

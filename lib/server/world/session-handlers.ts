@@ -24,7 +24,7 @@ const ownedSession = (campaignId: string, sessionId: string) =>
 
 export function sessionsListHandler(campaignId: string) {
     return withDM(campaignId, 'list world sessions', async () =>
-        NextResponse.json(await listSessions(campaignId))
+        NextResponse.json(await listSessions(campaignId, { withCounts: true }))
     );
 }
 

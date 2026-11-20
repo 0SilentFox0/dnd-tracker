@@ -3,6 +3,7 @@ import {
     campaignGet,
     campaignPatch,
     campaignPost,
+    campaignPut,
 } from './client';
 
 import { YEAR_CACHE_SECONDS } from '@/lib/constants/storage';
@@ -11,19 +12,23 @@ import type { SlideUploadTicket } from '@/types/show';
 import type {
     CreateEnemyData,
     CreateSessionData,
+    CreateWorldLayerData,
     CreateWorldMapData,
     CreateWorldMarkerData,
     CreateWorldNoteData,
+    DeleteWorldLayerMode,
     EnterRequest,
     ExitRequest,
     RestRequest,
     TravelRequest,
     UpdateEnemyData,
     UpdateSessionData,
+    UpdateWorldLayerData,
     UpdateWorldMapData,
     UpdateWorldMarkerData,
     WorldEnemyPin,
     WorldHero,
+    WorldLayer,
     WorldMap,
     WorldMapDetail,
     WorldMapSummary,
@@ -213,4 +218,36 @@ export const deleteEnemy = (campaignId: string, mapId: string, id: string) =>
     campaignDelete<{ ok: true }>(
         campaignId,
         `/world/maps/${mapId}/enemies/${id}`
+    );
+
+export const createWorldLayer = (campaignId: string, data: CreateWorldLayerData) =>
+    campaignPost<WorldLayer>(
+        campaignId,
+        `/world/maps/${data.mapId}/layers`,
+        data
+    );
+
+export const updateWorldLayer = (
+    campaignId: string,
+    id: string,
+    data: UpdateWorldLayerData
+) => campaignPatch<WorldLayer>(campaignId, `/world/layers/${id}`, data);
+
+export const setWorldLayerHeroes = (
+    campaignId: string,
+    id: string,
+    heroIds: string[]
+) =>
+    campaignPut<WorldLayer>(campaignId, `/world/layers/${id}/heroes`, {
+        heroIds,
+    });
+
+export const deleteWorldLayer = (
+    campaignId: string,
+    id: string,
+    mode?: DeleteWorldLayerMode
+) =>
+    campaignDelete<{ ok: true }>(
+        campaignId,
+        `/world/layers/${id}${mode ? `?markers=${mode}` : ''}`
     );

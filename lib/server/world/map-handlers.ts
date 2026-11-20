@@ -10,11 +10,13 @@ import {
 } from '@/lib/schemas/world';
 import { clearShowWorld } from '@/lib/server/show/show-store';
 import { listEnemies } from '@/lib/server/world/enemy-store';
+import { listDmLayers } from '@/lib/server/world/layer-store';
 import {
     listWorldMaps,
     orphanedImagesOfSubtree,
     readWorldMapDetail,
     toWorldMap,
+    worldImageInUse,
 } from '@/lib/server/world/map-store';
 import { listPublicMapNotes } from '@/lib/server/world/note-store';
 import { listHeroesOnMap } from '@/lib/server/world/travel-store';
@@ -177,10 +179,11 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
         if (detail instanceof NextResponse) return detail;
 
-        const [heroes, notes, enemies] = await Promise.all([
+        const [heroes, notes, enemies, layers] = await Promise.all([
             listHeroesOnMap(campaignId, mapId),
             listPublicMapNotes(mapId, access.userId),
             listEnemies(mapId),
+            listDmLayers(mapId),
         ]);
 
         return NextResponse.json({
@@ -189,6 +192,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
             heroes,
             notes,
             enemies,
+            layers,
         });
     });
 }
@@ -288,11 +292,9 @@ export function updateWorldMapHandler(
         }
 
         if (replacesImage) {
-            const stillUsed = await prisma.worldMap.count({
-                where: { campaignId, imageUrl: owned.imageUrl },
-            });
+            const stillUsed = await worldImageInUse(campaignId, owned.imageUrl);
 
-            if (stillUsed === 0)
+            if (!stillUsed)
                 after(() => removeWorldMapFiles(campaignId, [owned.imageUrl]));
         }
 

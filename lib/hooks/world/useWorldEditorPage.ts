@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 
 import type { WorldEditorCtx } from './types';
 import { useHeroEyes } from './useHeroEyes';
+import { useLayerVisibility } from './useLayerVisibility';
 import {
     MODE_HOME_TOOL,
     MODE_TOOLS,
@@ -25,13 +26,17 @@ import { isTyping } from '@/lib/utils/world/is-typing';
 import { insertSharedPoints } from '@/lib/utils/world/zone-snap';
 import type {
     CreateWorldMarkerData,
+    LayerRect,
     MapPoint,
     Polygon,
     UpdateEnemyData,
+    WorldLayer,
     WorldMarker,
 } from '@/types/world';
 
 const NO_MARKERS: WorldMarker[] = [];
+
+const NO_LAYERS: WorldLayer[] = [];
 
 interface Options {
     campaignId: string;
@@ -87,6 +92,29 @@ export function useWorldEditorPage({
 
     const moveTarget = useMoveTarget(markers);
 
+    const layerItems = detail.data?.layers ?? NO_LAYERS;
+
+    const layerIds = useMemo(() => layerItems.map((l) => l.id), [layerItems]);
+
+    const layerVisibility = useLayerVisibility(layerIds);
+
+    const [wantedLayerId, setActiveLayer] = useState<string | null>(null);
+
+    const [wantedImageEditId, setImageEdit] = useState<string | null>(null);
+
+    const [layersOpen, setLayersOpen] = useState(false);
+
+    // a deleted layer or one of another map silently stops being active
+    const activeLayerId =
+        wantedLayerId && layerIds.includes(wantedLayerId)
+            ? wantedLayerId
+            : null;
+
+    const imageEditId =
+        wantedImageEditId && layerIds.includes(wantedImageEditId)
+            ? wantedImageEditId
+            : null;
+
     const [creating, setCreating] = useState(false);
 
     const [detailsOpen, setDetailsOpen] = useState(false);
@@ -102,7 +130,13 @@ export function useWorldEditorPage({
 
         try {
             select(
-                (await editor.marker.create.mutateAsync({ mapId, ...data })).id
+                (
+                    await editor.marker.create.mutateAsync({
+                        mapId,
+                        layerId: activeLayerId ?? undefined,
+                        ...data,
+                    })
+                ).id
             );
         } catch {
             // create's errorText already notified
@@ -324,7 +358,7 @@ export function useWorldEditorPage({
             setEnemyId(id);
         },
         onEnemyDrag:
-            tool === 'move'
+            tool === 'select' || tool === 'move'
                 ? (id: string, p: MapPoint) =>
                       void enemyEditor.update.mutateOk({
                           id,
@@ -391,6 +425,21 @@ export function useWorldEditorPage({
             : undefined,
     };
 
+    const changeLayerRect = useCallback(
+        (id: string, rect: LayerRect) =>
+            void editor.layers.update.mutateOk({ id, data: { rect } }),
+        [editor.layers.update]
+    );
+
+    const layers = {
+        items: layerItems,
+        visibility: layerVisibility,
+        active: { id: activeLayerId, set: setActiveLayer },
+        imageEdit: { layerId: imageEditId, set: setImageEdit },
+        panel: { open: layersOpen, set: setLayersOpen },
+        onRectChange: changeLayerRect,
+    };
+
     const ctx: WorldEditorCtx = useMemo(
         () => ({
             campaignId,
@@ -444,5 +493,6 @@ export function useWorldEditorPage({
         handlers,
         card,
         enemy,
+        layers,
     };
 }

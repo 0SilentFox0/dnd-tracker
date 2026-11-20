@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { FolderOpen, FolderPlus, PenLine, Trash2 } from 'lucide-react';
 
+import { MarkerLayerField } from './layers/MarkerLayerField';
 import { MarkerIconGrid } from './maps/MapFieldParts';
 import { NewWorldMapDialog } from './maps/NewWorldMapDialog';
 import { MarkerColorField } from './MarkerColorField';
@@ -93,6 +94,10 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                         onReset={m.resetColor}
                     />
                 </div>
+                <MarkerLayerField
+                    value={marker.layerId}
+                    onChange={(id) => void m.setLayer(id)}
+                />
                 <label className="flex items-center justify-between gap-2 text-xs">
                     {t('editor.knownLocation')}
                     <Switch

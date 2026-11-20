@@ -256,6 +256,8 @@ describe('WorldToolHint', () => {
         expect(row.getAttribute('data-slot')).toBe('toolbar-extras');
         expect(row.className).toContain('border-t');
         expect(row.className).toContain('lg:border-t-0');
+        expect(row.className).toContain('min-w-0');
+        expect(row.className).toContain('overflow-hidden');
         expect(row.parentElement?.className).toContain('flex-col');
         expect(row.parentElement?.className).toContain('lg:flex-row');
     });

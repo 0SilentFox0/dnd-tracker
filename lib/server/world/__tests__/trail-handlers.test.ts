@@ -161,6 +161,27 @@ describe('trailHandler', () => {
         expect(sessions.map((s: { id: string }) => s.id)).toEqual(['s1']);
     });
 
+    it('player sessions carry no description, active flag or count', async () => {
+        asPlayer();
+        m.heroes.mockResolvedValue([
+            { id: 'h1', name: 'Aria', avatar: null, controlledBy: 'u2' },
+        ]);
+        m.sessions.mockResolvedValue([
+            { ...session('s1'), description: 'secret plot', entryCount: 3 },
+        ]);
+        m.logs.mockResolvedValue([log({ id: 'a', sessionId: 's1' })]);
+
+        const body = await (await call()).json();
+
+        const raw = JSON.stringify(body);
+
+        expect(raw).not.toContain('description');
+        expect(raw).not.toContain('secret plot');
+        expect(raw).not.toContain('active');
+        expect(raw).not.toContain('entryCount');
+        expect(body.sessions[0]).toMatchObject({ id: 's1', color: '#fff' });
+    });
+
     it('unknown map is 404 for both roles, same as the view', async () => {
         asPlayer();
         m.heroes.mockResolvedValue([{ id: 'h1', name: 'A' }]);

@@ -20,7 +20,7 @@ export function HeroEyesSelect({
     const t = useTranslations('world.eyes');
 
     return (
-        <label className="flex h-10 w-full shrink-0 items-center gap-1.5 rounded-md border border-hud-rule bg-black/40 px-2 text-xs text-hud-muted lg:w-auto">
+        <label className="flex h-10 w-full max-w-full min-w-0 shrink-0 items-center gap-1.5 rounded-md border border-hud-rule bg-black/40 px-2 text-xs text-hud-muted lg:w-auto">
             <Eye className="size-4 shrink-0" aria-hidden />
             <span className="sr-only">{t('label')}</span>
             <SelectField

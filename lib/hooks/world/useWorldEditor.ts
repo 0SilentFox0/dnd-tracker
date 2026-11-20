@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { worldKeys } from './keys';
+import { useWorldLayers } from './useWorldLayers';
 
 import { ApiError } from '@/lib/api/client';
 import {
@@ -200,6 +201,26 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
         })
     );
 
+    const layerOps = useWorldLayers(campaignId, mapId ?? '');
+
+    const layerCreate = useStable(layerOps.create);
+
+    const layerUpdate = useStable(layerOps.update);
+
+    const layerSetHeroes = useStable(layerOps.setHeroes);
+
+    const layerRemove = useStable(layerOps.remove);
+
+    const layers = useMemo(
+        () => ({
+            create: layerCreate,
+            update: layerUpdate,
+            setHeroes: layerSetHeroes,
+            remove: layerRemove,
+        }),
+        [layerCreate, layerUpdate, layerSetHeroes, layerRemove]
+    );
+
     return useMemo(
         () => ({
             map: {
@@ -213,6 +234,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
                 update: updateMarker,
                 remove: removeMarker,
             },
+            layers,
             isPending: [
                 createMap,
                 updateMap,
@@ -231,6 +253,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
             createMarker,
             updateMarker,
             removeMarker,
+            layers,
         ]
     );
 }

@@ -28,6 +28,7 @@ const zone = (id: string, x: number): WorldMarker => ({
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    layerId: null,
 });
 
 const point: WorldMarker = {
@@ -39,7 +40,12 @@ const point: WorldMarker = {
 
 const props = {
     selectedId: null,
-    drag: { current: null, onMove: () => {}, onEnd: () => {} },
+    drag: {
+        current: null,
+        onMove: () => {},
+        onEnd: () => {},
+        onCancel: () => {},
+    },
     handlers: {},
 };
 
@@ -159,5 +165,30 @@ describe('WorldPins zone label visibility', () => {
         expect(container.querySelector('.atlas-zone-label')?.textContent).toBe(
             'A'
         );
+    });
+
+    it('hides minor pins at world zoom and shows them zoomed in', () => {
+        const village = { ...point, id: 'v', icon: 'village' };
+
+        const { container, rerender } = render(
+            <WorldPins markers={[point, village]} zoom={1} {...props} />
+        );
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(1);
+
+        rerender(<WorldPins markers={[point, village]} zoom={2} {...props} />);
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(2);
+        expect(container.querySelector('[data-minor="true"]')).not.toBeNull();
+    });
+
+    it('keeps a selected minor pin visible', () => {
+        const village = { ...point, id: 'v', icon: 'village' };
+
+        const { container } = render(
+            <WorldPins markers={[village]} zoom={1} {...props} selectedId="v" />
+        );
+
+        expect(container.querySelectorAll('.atlas-pin')).toHaveLength(1);
     });
 });
