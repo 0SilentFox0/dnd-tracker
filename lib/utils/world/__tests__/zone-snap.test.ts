@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { sharedEdges, snapPoint } from '../zone-snap';
+import {
+    insertSharedPoints,
+    insertSnapPoint,
+    sharedEdges,
+    snapPoint,
+} from '../zone-snap';
 
 import type { Polygon } from '@/types/world';
 
@@ -90,5 +95,84 @@ describe('sharedEdges', () => {
                 ],
             ]).size
         ).toBe(0);
+    });
+});
+
+const closed = (p: Polygon): Polygon => [...p, p[0]];
+
+describe('insertSnapPoint', () => {
+    it('inserts a point lying inside an edge after its start vertex', () => {
+        const res = insertSnapPoint(closed(left), { x: 0.5, y: 0.25 });
+
+        expect(res?.index).toBe(2);
+        expect(res?.polygon[2]).toEqual([0.5, 0.25]);
+        expect(res?.polygon).toHaveLength(6);
+    });
+
+    it('is a no-op for an existing vertex or a point off the ring', () => {
+        expect(insertSnapPoint(closed(left), { x: 0.5, y: 0.5 })).toBeNull();
+        expect(insertSnapPoint(closed(left), { x: 0.7, y: 0.25 })).toBeNull();
+    });
+
+    it('finds the snapped point on a non-square map', () => {
+        const aspect = 0.5;
+
+        const poly = closed([
+            [0, 0],
+            [0.7, 0.3],
+            [0.2, 0.9],
+        ]);
+
+        const p = snapPoint({ x: 0.36, y: 0.16 }, [poly], 0.05, aspect);
+
+        const res = insertSnapPoint(poly, p, aspect);
+
+        expect(res?.index).toBe(1);
+        expect(res?.polygon[1]).toEqual([p.x, p.y]);
+    });
+});
+
+describe('insertSharedPoints', () => {
+    it('splits the neighbour edge for a vertex that sits on it', () => {
+        const ring = closed([
+            [0.5, 0.2],
+            [0.8, 0.2],
+            [0.8, 0.4],
+        ]);
+
+        const out = insertSharedPoints(ring, [
+            { id: 'n', polygon: closed(left) },
+        ]);
+
+        expect(out).toHaveLength(1);
+        expect(out[0].id).toBe('n');
+        expect(out[0].polygon).toContainEqual([0.5, 0.2]);
+    });
+
+    it('returns nothing when all shared points are already vertices', () => {
+        const ring = closed([
+            [0.5, 0.5],
+            [0.5, 0],
+            [0.9, 0.2],
+        ]);
+
+        expect(
+            insertSharedPoints(ring, [{ id: 'n', polygon: closed(left) }])
+        ).toEqual([]);
+    });
+
+    it('accumulates several insertions into one neighbour update', () => {
+        const ring = closed([
+            [0.5, 0.1],
+            [0.5, 0.3],
+            [0.9, 0.2],
+        ]);
+
+        const out = insertSharedPoints(ring, [
+            { id: 'n', polygon: closed(left) },
+        ]);
+
+        expect(out).toHaveLength(1);
+        expect(out[0].polygon).toHaveLength(7);
     });
 });

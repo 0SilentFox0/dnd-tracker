@@ -88,3 +88,59 @@ export function sharedEdges(zones: Polygon[]): Set<string> {
 
     return shared;
 }
+
+const ON_EDGE_EPS = 1e-9;
+
+/** Inserts p into a closed ring when it lies strictly inside one of its edges; null when it is a vertex or off the ring. */
+export function insertSnapPoint(
+    polygon: Polygon,
+    p: MapPoint,
+    aspect = 1
+): { polygon: Polygon; index: number } | null {
+    for (let i = 0; i < polygon.length - 1; i++) {
+        const a = polygon[i];
+
+        const b = polygon[i + 1];
+
+        if (a[0] === b[0] && a[1] === b[1]) continue;
+
+        if (
+            dist(p, { x: a[0], y: a[1] }, aspect) <= ON_EDGE_EPS ||
+            dist(p, { x: b[0], y: b[1] }, aspect) <= ON_EDGE_EPS
+        )
+            return null;
+
+        if (dist(p, nearestOnSegment(p, a, b, aspect), aspect) <= ON_EDGE_EPS) {
+            const next: Polygon = [...polygon];
+
+            next.splice(i + 1, 0, [p.x, p.y]);
+
+            return { polygon: next, index: i + 1 };
+        }
+    }
+
+    return null;
+}
+
+/** Neighbour polygons that gain a vertex where a vertex of `ring` lands on their edge; empty when nothing changes. */
+export function insertSharedPoints(
+    ring: Polygon,
+    neighbours: { id: string; polygon: Polygon }[],
+    aspect = 1
+): { id: string; polygon: Polygon }[] {
+    const updated = new Map<string, Polygon>();
+
+    for (const [x, y] of ring.slice(0, -1)) {
+        for (const n of neighbours) {
+            const hit = insertSnapPoint(
+                updated.get(n.id) ?? n.polygon,
+                { x, y },
+                aspect
+            );
+
+            if (hit) updated.set(n.id, hit.polygon);
+        }
+    }
+
+    return [...updated].map(([id, polygon]) => ({ id, polygon }));
+}

@@ -21,6 +21,7 @@ import { useWorldMaps } from './useWorldMaps';
 
 import { markerAnchor, polygonCentroid } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
+import { insertSharedPoints } from '@/lib/utils/world/zone-snap';
 import type {
     CreateWorldMarkerData,
     MapPoint,
@@ -97,6 +98,27 @@ export function useWorldEditorPage({
 
     const { reset: resetTarget } = moveTarget;
 
+    const mapAspect = detail.data
+        ? detail.data.map.height / detail.data.map.width
+        : 1;
+
+    const shareEdgePoints = useCallback(
+        (selfId: string | null, ring: Polygon) => {
+            const neighbours = markers.flatMap((m) =>
+                m.kind === 'zone' && m.polygon && m.id !== selfId
+                    ? [{ id: m.id, polygon: m.polygon }]
+                    : []
+            );
+
+            for (const n of insertSharedPoints(ring, neighbours, mapAspect))
+                void editor.marker.update.mutateOk({
+                    id: n.id,
+                    data: { polygon: n.polygon },
+                });
+        },
+        [markers, mapAspect, editor.marker.update]
+    );
+
     const drawing = useMapDrawing(
         {
             onPoint: (p) =>
@@ -108,6 +130,8 @@ export function useWorldEditorPage({
                     icon: 'landmark',
                 }),
             onZone: (polygon: Polygon) => {
+                shareEdgePoints(redrawId, polygon);
+
                 if (redrawId) {
                     void editor.marker.update.mutateOk({
                         id: redrawId,
@@ -166,9 +190,11 @@ export function useWorldEditorPage({
     );
 
     const changeVertices = useCallback(
-        (id: string, polygon: Polygon) =>
-            void editor.marker.update.mutateOk({ id, data: { polygon } }),
-        [editor.marker.update]
+        (id: string, polygon: Polygon) => {
+            void editor.marker.update.mutateOk({ id, data: { polygon } });
+            shareEdgePoints(id, polygon);
+        },
+        [editor.marker.update, shareEdgePoints]
     );
 
     const closePanel = useCallback(() => {
