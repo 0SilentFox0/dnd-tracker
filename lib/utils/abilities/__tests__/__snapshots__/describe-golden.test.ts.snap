@@ -77,7 +77,8 @@ exports[`describe golden (uk) > describeAbility 1`] = `
   "effect-141-wfrpWard": "Пасивно (завжди) · Ward 9+",
   "effect-142-wfrpSize": "Пасивно (завжди) · Розмір: Великий",
   "effect-143-wfrpPsychology": "Пасивно (завжди) · Жах 2",
-  "effect-144-wfrpAttack": "Пасивно (завжди) · Дихання +5, магічна",
+  "effect-144-wfrpPassion": "Пасивно (завжди) · Ненависть (Goblins)",
+  "effect-145-wfrpAttack": "Пасивно (завжди) · Дихання +5, магічна",
   "effect-15-drainSpellSlot": "Основна дія (кнопка) · −2 слот заклинань",
   "effect-16-changeMorale": "Основна дія (кнопка) · мораль -1",
   "effect-17-mark": "Основна дія (кнопка) · мітка × 2 раунди",
@@ -795,6 +796,10 @@ exports[`describe golden (uk) > describeEffect 1`] = `
   [
     "wfrpPsychology",
     "Жах 2",
+  ],
+  [
+    "wfrpPassion",
+    "Ненависть (Goblins)",
   ],
   [
     "wfrpAttack",

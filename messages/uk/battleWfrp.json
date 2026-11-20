@@ -79,6 +79,14 @@
     "psychologyFail": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: провал",
     "psychologyPassHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: стійкість",
     "psychologyFailHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: провал",
+    "fearProgress": "{name}: Страх {value} від {source} — тест {roll}, РУ {sl}: зібрано {total}/{value}",
+    "fearOvercome": "{name}: Страх {value} від {source} — тест {roll}, РУ {sl}: {total}/{value}, страх подолано",
+    "passionPass": "{name}: {passion} ({group}) щодо {source} — тест {roll} / {target}, РУ {sl}: стримано",
+    "passionFail": "{name}: {passion} ({group}) щодо {source} — тест {roll} / {target}, РУ {sl}: провал, поклик бере гору",
+    "passionCalm": "{name}: {passion} ({group}) — повторний тест {roll} / {target}, РУ {sl}: заспокоївся",
+    "passionRage": "{name}: {passion} ({group}) — повторний тест {roll} / {target}, РУ {sl}: досі в люті",
+    "frenzyStart": "{name} впадає в Шал — тест Сили волі {roll} / {target}",
+    "frenzyEnd": "{name}: Шал минає, боєць стає Втомленим",
     "critDeath": "☠️ {target} гине на місці: {text}",
     "critWoundAt": "🩸 Критична рана для {target} ({place}): {text}",
     "critHitAt": "🩸 Критична рана для {target} ({place}, +{bonus} шкоди): {text}",
@@ -103,6 +111,11 @@
     "fumbleDrop": "{name} схибив і випустив зброю; наступна Дія піде на підняття",
     "fumbleOops": "{name} схибив (oops {roll}): {text}",
     "fumbleMisfire": "{name}: осічка ({roll}): {text}"
+  },
+  "passion": {
+    "frenzy": "Шал",
+    "hatred": "Ненависть",
+    "animosity": "Ворожість"
   },
   "psychology": {
     "fear": "Страх",
@@ -228,6 +241,7 @@
       "ward": "Оберіг: d10 {roll} проти {ward}, удар поглинуто",
       "size": "Розмір",
       "minimum": "Мінімальна шкода",
+      "frenzy": "Шал",
       "crit": "Критична рана"
     },
     "total": "Усього шкоди"

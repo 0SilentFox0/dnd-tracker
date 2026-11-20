@@ -2,6 +2,7 @@ import { editionOf } from '../edition';
 import { QUALITY_REGISTRY } from '../equipment/qualities';
 import { qualityEffects } from '../equipment/quality-effects';
 import { ATTACK_SLOT } from '../slots';
+import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
 import { sizeDamageBonus, wardRoll } from '../traits/size';
 import { applyWfrpCrit } from './crit-effect';
 import { rollCrit } from './crit-table';
@@ -9,7 +10,9 @@ import { computeWfrpDamage } from './damage';
 import { asLocation, sideOf } from './location';
 import { participantStats } from './participant';
 
+import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import type {
     DamageCtx,
     DamageResult,
@@ -83,6 +86,12 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         ctx.weapon + appliedSb + ctx.margin
     );
 
+    const frenzyBonus =
+        isFrenzied(attacker) &&
+        attackKindOf(ctx.attack.type) === AttackType.MELEE
+            ? FRENZY_DAMAGE_BONUS
+            : 0;
+
     const base = computeWfrpDamage({
         weapon: ctx.weapon,
         sb: appliedSb,
@@ -90,7 +99,10 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         size,
         tb: participantStats(target)?.tb ?? 0,
         ap,
-        extra: qualitySteps,
+        extra: [
+            ...qualitySteps,
+            ...(frenzyBonus ? [{ key: 'frenzy', value: frenzyBonus }] : []),
+        ],
         minDamage: effect.minDamage,
     });
 
@@ -124,7 +136,8 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         amount: base.total + crit.bonusDamage,
         steps,
         totalLabel,
-        afterHit: (p, round) => applyWfrpCrit(p, crit, round, editionOf(ctx.rules)),
+        afterHit: (p, round) =>
+            applyWfrpCrit(p, crit, round, editionOf(ctx.rules)),
     };
 }
 

@@ -14,6 +14,14 @@ export const PSYCHOLOGY_KINDS = ['fear', 'terror'] as const;
 
 export type PsychologyKind = (typeof PSYCHOLOGY_KINDS)[number];
 
+export const PASSION_KINDS = ['frenzy', 'hatred', 'animosity'] as const;
+
+export type PassionKind = (typeof PASSION_KINDS)[number];
+
+export const GROUP_PASSIONS: readonly PassionKind[] = ['hatred', 'animosity'];
+
+export const PASSION_GROUP_MAX = 40;
+
 export const TRAIT_ATTACKS = [
     'bite',
     'claw',
@@ -27,6 +35,7 @@ export const WFRP_EFFECT_KINDS: readonly string[] = [
     'wfrpWard',
     'wfrpSize',
     'wfrpPsychology',
+    'wfrpPassion',
     'wfrpAttack',
 ];
 

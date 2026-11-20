@@ -167,8 +167,12 @@ function statusRank(record: Row, n: number): number | null {
     return RANK[tier] * 100 + level;
 }
 
+const OPTIONAL_TRAITS: readonly string[] = ['frenzy', 'hatred', 'animosity'];
+
 export const UNIT_TRAIT_COVERAGE: readonly string[] = [
-    ...TRAIT_RECIPES.map((r) => r.id),
+    ...TRAIT_RECIPES.map((r) => r.id).filter(
+        (id) => !OPTIONAL_TRAITS.includes(id)
+    ),
     'terror',
     'magical',
 ];

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 import {
+    GROUP_PASSIONS,
+    PASSION_GROUP_MAX,
+    PASSION_KINDS,
     PSYCHOLOGY_KINDS,
     TRAIT_ATTACKS,
     TRAIT_SIZES,
@@ -32,6 +35,20 @@ const WfrpPsychologySchema = z.strictObject({
     value: z.number().int().min(1).max(10),
 });
 
+const WfrpPassionSchema = z
+    .strictObject({
+        kind: z.literal('wfrpPassion'),
+        passion: z.enum(PASSION_KINDS),
+        group: z.string().trim().min(1).max(PASSION_GROUP_MAX).optional(),
+    })
+    .refine(
+        (e) => GROUP_PASSIONS.includes(e.passion) === (e.group !== undefined),
+        {
+            message: 'abilities.validation.traitPassionGroup',
+            path: ['group'],
+        }
+    );
+
 const WfrpAttackSchema = z
     .strictObject({
         kind: z.literal('wfrpAttack'),
@@ -56,6 +73,7 @@ export const WFRP_EFFECT_SCHEMAS = [
     WfrpWardSchema,
     WfrpSizeSchema,
     WfrpPsychologySchema,
+    WfrpPassionSchema,
     WfrpAttackSchema,
 ] as const;
 

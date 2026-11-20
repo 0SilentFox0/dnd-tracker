@@ -12,6 +12,7 @@ import {
     redactCharacteristics,
 } from './rules/characteristics/reconcile';
 import { wfrpSheetBlock } from './rules/characteristics/sheet-block';
+import { assertWfrpAction } from './rules/combat/assert-action';
 import { isOutOfFight, wfrpOnRevived } from './rules/combat/critical';
 import { wfrpActionDetails } from './rules/combat/details';
 import { wfrpAttackBlocked } from './rules/combat/disarm';
@@ -132,6 +133,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
     identity: { alignments: false },
     combat: {
         input: { assert: assertWfrpInput },
+        assertAction: assertWfrpAction,
         judge: 'server',
         dice: 100,
         attacksOf: extractWfrpAttacks,

@@ -79,6 +79,14 @@
     "psychologyFail": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: failed",
     "psychologyPassHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: resisted",
     "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed",
+    "fearProgress": "{name}: Fear {value} from {source} — test {roll}, SL {sl}: {total}/{value} gathered",
+    "fearOvercome": "{name}: Fear {value} from {source} — test {roll}, SL {sl}: {total}/{value}, fear overcome",
+    "passionPass": "{name}: {passion} ({group}) toward {source} — test {roll} / {target}, SL {sl}: kept in check",
+    "passionFail": "{name}: {passion} ({group}) toward {source} — test {roll} / {target}, SL {sl}: failed, the urge takes over",
+    "passionCalm": "{name}: {passion} ({group}) — retest {roll} / {target}, SL {sl}: calms down",
+    "passionRage": "{name}: {passion} ({group}) — retest {roll} / {target}, SL {sl}: still seething",
+    "frenzyStart": "{name} works into a Frenzy — Willpower test {roll} / {target}",
+    "frenzyEnd": "{name}'s Frenzy ends, the fighter is Fatigued",
     "critDeath": "☠️ {target} is killed outright: {text}",
     "critWoundAt": "🩸 Critical wound for {target} ({place}): {text}",
     "critHitAt": "🩸 Critical wound for {target} ({place}, +{bonus} damage): {text}",
@@ -103,6 +111,11 @@
     "fumbleDrop": "{name} fumbles and drops the weapon; the next Action goes to picking it up",
     "fumbleOops": "{name} fumbles (oops {roll}): {text}",
     "fumbleMisfire": "{name}: misfire ({roll}): {text}"
+  },
+  "passion": {
+    "frenzy": "Frenzy",
+    "hatred": "Hatred",
+    "animosity": "Animosity"
   },
   "psychology": {
     "fear": "Fear",
@@ -228,6 +241,7 @@
       "ward": "Ward: d10 {roll} vs {ward}, hit negated",
       "size": "Size",
       "minimum": "Minimum damage",
+      "frenzy": "Frenzy",
       "crit": "Critical wound"
     },
     "total": "Total damage"

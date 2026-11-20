@@ -1,5 +1,6 @@
 import { ATTACK_SLOT, type SceneMomentum } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
+import { isAfraid } from '../traits/fear';
 import { wfrpAttackBlocked } from './disarm';
 
 import { AttackType } from '@/lib/constants/battle';
@@ -46,11 +47,12 @@ export function settle(
 export const hasMomentum = (p: BattleParticipant): boolean =>
     wfrpState(p).momentum === true;
 
+/** An afraid fighter cannot gain Momentum (p183) */
 export const withMomentum = (
     p: BattleParticipant,
     on: boolean
 ): BattleParticipant =>
-    hasMomentum(p) === on
+    hasMomentum(p) === on || (on && isAfraid(p))
         ? p
         : withWfrpState(p, { momentum: on ? true : undefined });
 

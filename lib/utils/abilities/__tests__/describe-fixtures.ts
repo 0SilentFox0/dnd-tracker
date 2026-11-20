@@ -244,6 +244,7 @@ const TRAIT_FIXTURES = [
     { kind: 'wfrpWard', value: 9 },
     { kind: 'wfrpSize', size: 'large' },
     { kind: 'wfrpPsychology', psychology: 'terror', value: 2 },
+    { kind: 'wfrpPassion', passion: 'hatred', group: 'Goblins' },
     {
         kind: 'wfrpAttack',
         attack: 'breath',

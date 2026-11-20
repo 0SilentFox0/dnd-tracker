@@ -10,8 +10,8 @@ const defaults = (r: (typeof TRAIT_RECIPES)[number]) =>
     Object.fromEntries(r.params.map((p) => [p.key, p.default]));
 
 describe('trait recipes', () => {
-    it('has 15 recipes with matching ids and text keys', () => {
-        expect(TRAIT_RECIPES).toHaveLength(15);
+    it('has 18 recipes with matching ids and text keys', () => {
+        expect(TRAIT_RECIPES).toHaveLength(18);
 
         for (const r of TRAIT_RECIPES) {
             expect(r.category).toBe('traits');
@@ -43,6 +43,19 @@ describe('trait recipes', () => {
             }
         }
     );
+
+    it('takes the Hatred group from the bracketed part of the name', () => {
+        const hatred = TRAIT_RECIPES.find((r) => r.id === 'hatred');
+
+        const built = hatred?.build(
+            {},
+            { scope: 'ability', name: 'Hatred (Bog Octopuses)', note: '' }
+        );
+
+        expect(built && 'ability' in built && built.ability.effects[0]).toEqual(
+            { kind: 'wfrpPassion', passion: 'hatred', group: 'Bog Octopuses' }
+        );
+    });
 
     it('honours magical and the breath range', () => {
         const breath = TRAIT_RECIPES.find((r) => r.id === 'breath');

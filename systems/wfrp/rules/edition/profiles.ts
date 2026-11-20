@@ -31,6 +31,8 @@ export interface EditionProfile {
     hitLocationModel: 'zone' | 'side';
     /** `none`: a fumbled attack is a plain miss; `drop`: the weapon is dropped and the next Action retrieves it; `oops`: a table (p165) */
     fumbleModel: 'none' | 'drop' | 'oops';
+    /** `broken`: a failed Fear test costs a Broken level; `extended`: Fear is an Extended Cool test (SL accumulates to the rating, meanwhile no Momentum and the source attacks with Advantage), Terror breaks by rating (p183-184) */
+    psychologyModel: 'broken' | 'extended';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -50,6 +52,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         conditionModel: 'percent',
         hitLocationModel: 'zone',
         fumbleModel: 'none',
+        psychologyModel: 'broken',
     },
     canon5e: {
         advanceStep: 5,
@@ -67,5 +70,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         conditionModel: 'sl',
         hitLocationModel: 'side',
         fumbleModel: 'drop',
+        psychologyModel: 'extended',
     },
 };

@@ -3,6 +3,8 @@ import type { FieldMeta } from '@/lib/utils/abilities/registry/fields';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
 import type { WfrpEffect } from '@/systems/wfrp/rules/ability-effects';
 import {
+    GROUP_PASSIONS,
+    PASSION_KINDS,
     PSYCHOLOGY_KINDS,
     TRAIT_ATTACKS,
     TRAIT_SIZES,
@@ -103,6 +105,40 @@ const psychology = {
     defaults: { psychology: 'fear', value: 1 },
 } as const;
 
+const passion = {
+    kind: 'wfrpPassion',
+    row: {
+        kind: 'wfrpPassion',
+        static: true,
+        pickable: false,
+        fields: [
+            {
+                name: 'passion',
+                input: 'select',
+                options: options(PASSION_KINDS),
+            },
+            {
+                name: 'group',
+                input: 'text',
+                optional: true,
+                visibleWhen: (v: Record<string, unknown>) =>
+                    GROUP_PASSIONS.includes(v.passion as never),
+            },
+        ],
+        describe: (e: Of<'wfrpPassion'>): Segment[] => [
+            seg('summary.effects.wfrpPassion', {
+                passion: seg(
+                    `effects.wfrpPassion.options.passion.${e.passion}`
+                ),
+                group: e.group ?? '',
+                hasGroup: e.group ? 'yes' : 'no',
+            }),
+        ],
+        apply,
+    },
+    defaults: { passion: 'frenzy' },
+} as const;
+
 const attack = {
     kind: 'wfrpAttack',
     row: {
@@ -140,5 +176,6 @@ export const WFRP_EFFECT_ROWS = [
     ward,
     size,
     psychology,
+    passion,
     attack,
 ] as const satisfies readonly SystemEffectRowInput[];

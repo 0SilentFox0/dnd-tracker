@@ -320,6 +320,16 @@ export interface RuleSystemAttackHooks {
     hitRiders?(ctx: HitRidersCtx): HitRidersPlan;
 }
 
+export type ActionAssertCtx =
+    | {
+          kind: 'attack';
+          actor: BattleParticipant;
+          attack: BattleAttack;
+          targets: BattleParticipant[];
+          participants: BattleParticipant[];
+      }
+    | { kind: 'cast'; actor: BattleParticipant };
+
 export interface RuleSystemCombat {
     /** Critical-hit thresholds and effects of the campaign rules; absent means the neutral defaults */
     crit?(rules: Ruleset): CritRules;
@@ -328,6 +338,8 @@ export interface RuleSystemCombat {
     details?: RuleSystemActionDetails;
     /** Validates the system's input of an attack or a cast before it runs */
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
+    /** Rejects an attack or a cast the actor's state forbids; absent means none */
+    assertAction?(ctx: ActionAssertCtx): void;
     /** Off-hand attacks; absent means never */
     secondaryAttack?: OffHandRules;
     /** The attacker cannot use this attack right now (e.g. a disarmed hand); absent means never */
