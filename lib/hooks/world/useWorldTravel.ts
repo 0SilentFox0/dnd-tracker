@@ -21,6 +21,7 @@ export function useWorldTravel(campaignId: string) {
         worldKeys.viewAll(campaignId),
         worldKeys.mapAll(campaignId),
         worldKeys.log(campaignId),
+        worldKeys.trailAll(campaignId),
     ];
 
     const characterKeysFor = () => [

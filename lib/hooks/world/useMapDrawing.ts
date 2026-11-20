@@ -6,12 +6,18 @@ import { closePolygon } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
 import type { MapPoint, Polygon } from '@/types/world';
 
-export type WorldTool = 'select' | 'point' | 'zone' | 'entry' | 'move';
+export type WorldTool =
+    | 'select'
+    | 'point'
+    | 'zone'
+    | 'entry'
+    | 'move'
+    | 'enemy';
 
 export type WorldMode = 'build' | 'play';
 
 export const MODE_TOOLS: Record<WorldMode, readonly WorldTool[]> = {
-    build: ['select', 'point', 'zone', 'entry'],
+    build: ['select', 'point', 'zone', 'entry', 'enemy'],
     play: ['move'],
 };
 
@@ -24,6 +30,7 @@ interface Actions {
     onPoint(p: MapPoint): void;
     onZone(polygon: Polygon): void;
     onEntry(p: MapPoint): void;
+    onEnemy(p: MapPoint): void;
     onMove?(p: MapPoint): void;
 }
 
@@ -44,6 +51,8 @@ export const TOOL_HOTKEYS: Record<string, WorldTool> = {
     у: 'entry',
     m: 'move',
     ь: 'move',
+    x: 'enemy',
+    ч: 'enemy',
 };
 
 export function useMapDrawing(
@@ -117,7 +126,7 @@ export function useMapDrawing(
     }>(
         () => ({
             onMapClick: (p) => {
-                if (tool === 'point') {
+                if (tool === 'point' || tool === 'enemy') {
                     const last = lastPoint.current;
 
                     const now = Date.now();
@@ -133,7 +142,8 @@ export function useMapDrawing(
                     )
                         return;
 
-                    actions.onPoint(p);
+                    if (tool === 'enemy') actions.onEnemy(p);
+                    else actions.onPoint(p);
 
                     if (!pinned) setTool('select');
                 } else if (tool === 'zone') setDraft((d) => [...d, p]);

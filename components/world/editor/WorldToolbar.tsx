@@ -13,6 +13,7 @@ import {
     Pentagon,
     Pin,
     Settings2,
+    Skull,
     Undo2,
 } from 'lucide-react';
 
@@ -38,10 +39,11 @@ const TOOLS = [
     { key: 'point', hotkey: 'P', Icon: MapPin },
     { key: 'zone', hotkey: 'Z', Icon: Pentagon },
     { key: 'entry', hotkey: 'E', Icon: LogIn },
+    { key: 'enemy', hotkey: 'X', Icon: Skull },
     { key: 'move', hotkey: 'M', Icon: Navigation },
 ] as const satisfies { key: WorldTool; hotkey: string; Icon: LucideIcon }[];
 
-const PINNABLE: readonly WorldTool[] = ['point', 'zone', 'entry'];
+const PINNABLE: readonly WorldTool[] = ['point', 'zone', 'entry', 'enemy'];
 
 const BUTTON =
     'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink transition-colors hover:bg-[rgba(70,54,38,.98)] disabled:opacity-40 disabled:hover:bg-[rgba(46,36,26,.95)] lg:size-10';

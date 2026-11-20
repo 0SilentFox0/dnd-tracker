@@ -11,9 +11,11 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 
+import { WorldEnemies } from './WorldEnemies';
 import { WorldFog } from './WorldFog';
 import { WorldHeroes } from './WorldHeroes';
 import { WorldPins } from './WorldPins';
+import { WorldTrails, type WorldTrailsProps } from './WorldTrails';
 import { WorldZones } from './WorldZones';
 import { ZoneVertexHandles } from './ZoneVertexHandles';
 
@@ -34,6 +36,7 @@ import type {
     MapPoint,
     Polygon,
     RevealShape,
+    WorldEnemyPin,
     WorldHero,
     WorldMapDetail,
 } from '@/types/world';
@@ -59,10 +62,18 @@ export interface WorldMapViewProps {
         onMarkerDoubleClick?(id: string): void;
         onMarkerDrag?(id: string, p: MapPoint): void;
         onHeroClick?(id: string): void;
+        onEnemyClick?(id: string): void;
+        onEnemyDrag?(id: string, p: MapPoint): void;
         onVertexChange?(markerId: string, polygon: Polygon): void;
     };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
+    enemies?: WorldEnemyPin[];
+    dragHeroes?: {
+        onDrop(ids: string[], to: MapPoint): void;
+        selected: string[];
+    };
+    trails?: Omit<WorldTrailsProps, 'zoom'>;
     focus?: { point: MapPoint; seq: number };
     slots?: {
         overlay?: ReactNode;
@@ -154,6 +165,9 @@ export function WorldMapView({
     handlers = {},
     fog,
     heroes,
+    enemies,
+    dragHeroes,
+    trails,
     focus,
     slots,
     compact = false,
@@ -193,6 +207,20 @@ export function WorldMapView({
             containerRef.current?.getBoundingClientRect() ?? box,
             { zoom, offset }
         );
+
+    const insideMapAt = (clientX: number, clientY: number) => {
+        const r = containerRef.current?.getBoundingClientRect();
+
+        if (!r) return null;
+
+        const inside =
+            clientX >= r.left &&
+            clientX <= r.right &&
+            clientY >= r.top &&
+            clientY <= r.bottom;
+
+        return inside ? pointAt(clientX, clientY) : null;
+    };
 
     const snappedAt = (
         clientX: number,
@@ -421,6 +449,15 @@ export function WorldMapView({
                             className="atlas-top-layer absolute inset-0"
                             style={layerStyle}
                         >
+                            {trails ? (
+                                <WorldTrails
+                                    {...trails}
+                                    zoom={zoom}
+                                    interactive={
+                                        tool === 'select' || tool === 'move'
+                                    }
+                                />
+                            ) : null}
                             <div
                                 className="contents"
                                 onPointerDownCapture={() =>
@@ -456,6 +493,15 @@ export function WorldMapView({
                                     }}
                                     handlers={handlers}
                                 />
+                                {enemies ? (
+                                    <WorldEnemies
+                                        enemies={enemies}
+                                        zoom={zoom}
+                                        selectedId={selectedId}
+                                        toPoint={insideMapAt}
+                                        handlers={handlers}
+                                    />
+                                ) : null}
                             </div>
                             {heroes?.length ? (
                                 <WorldHeroes
@@ -463,6 +509,14 @@ export function WorldMapView({
                                     zoom={zoom}
                                     box={box}
                                     onHeroClick={handlers.onHeroClick}
+                                    drag={
+                                        dragHeroes
+                                            ? {
+                                                  ...dragHeroes,
+                                                  toPoint: insideMapAt,
+                                              }
+                                            : undefined
+                                    }
                                 />
                             ) : null}
                             {overlay}

@@ -7,7 +7,12 @@ import { useMapDrawing } from '../useMapDrawing';
 afterEach(cleanup);
 
 const setup = () => {
-    const actions = { onPoint: vi.fn(), onZone: vi.fn(), onEntry: vi.fn() };
+    const actions = {
+        onPoint: vi.fn(),
+        onZone: vi.fn(),
+        onEntry: vi.fn(),
+        onEnemy: vi.fn(),
+    };
 
     const hook = renderHook(() => useMapDrawing(actions));
 
@@ -40,6 +45,28 @@ describe('useMapDrawing', () => {
 
         expect(actions.onPoint).toHaveBeenCalledWith({ x: 0.2, y: 0.3 });
         expect(result.current.tool).toBe('select');
+    });
+
+    it('enemy click creates an enemy, not a point, and returns to select', () => {
+        const { result, actions } = setup();
+
+        act(() => result.current.setTool('enemy'));
+        click(result, 0.4, 0.5);
+
+        expect(actions.onEnemy).toHaveBeenCalledWith({ x: 0.4, y: 0.5 });
+        expect(actions.onPoint).not.toHaveBeenCalled();
+        expect(result.current.tool).toBe('select');
+    });
+
+    it('the x hotkey and its Ukrainian twin select the enemy tool', () => {
+        const { result } = setup();
+
+        key('x');
+        expect(result.current.tool).toBe('enemy');
+
+        act(() => result.current.setTool('select'));
+        key('ч');
+        expect(result.current.tool).toBe('enemy');
     });
 
     it('a pinned point tool stays active after placing', () => {
@@ -173,7 +200,12 @@ describe('useMapDrawing', () => {
     });
 
     it('hotkeys are ignored when disabled (hero-eyes mode)', () => {
-        const actions = { onPoint: vi.fn(), onZone: vi.fn(), onEntry: vi.fn() };
+        const actions = {
+            onPoint: vi.fn(),
+            onZone: vi.fn(),
+            onEntry: vi.fn(),
+            onEnemy: vi.fn(),
+        };
 
         const { result } = renderHook(() => useMapDrawing(actions, false));
 

@@ -8,6 +8,7 @@ import { TravelLog } from './TravelLog';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import {
+    type HeroSelection,
     type RosterHero,
     type TravelMoved,
     useTravelPanel,
@@ -23,6 +24,8 @@ export interface TravelPanelProps {
     onMapIds: string[];
     target: MapPoint | null;
     selectedMarker: WorldMarker | null;
+    hasActiveSession?: boolean;
+    selection?: HeroSelection;
     actions: { onPickTarget(): void; onMoved?(e: TravelMoved): void };
 }
 
@@ -33,11 +36,15 @@ export function TravelPanel({
     onMapIds,
     target,
     selectedMarker,
+    hasActiveSession,
+    selection,
     actions,
 }: TravelPanelProps) {
     const { onPickTarget, onMoved } = actions;
 
     const t = useTranslations('world.travel');
+
+    const tSessions = useTranslations('world.sessions');
 
     const panel = useTravelPanel({
         campaignId,
@@ -47,6 +54,7 @@ export function TravelPanel({
         target,
         selectedMarker,
         onMoved,
+        selection,
     });
 
     return (
@@ -141,6 +149,12 @@ export function TravelPanel({
                     </Button>
                 ) : null}
             </div>
+
+            {hasActiveSession === false ? (
+                <p className="text-xs text-hud-gold-bright">
+                    {tSessions('hint')}
+                </p>
+            ) : null}
 
             {panel.restOff ? (
                 <p className="text-xs text-hud-muted">{t('restOff')}</p>

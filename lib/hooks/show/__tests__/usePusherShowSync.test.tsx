@@ -69,6 +69,7 @@ describe('usePusherShowSync world-changed', () => {
             worldKeys.mapAll('c1'),
             worldKeys.maps('c1'),
             worldKeys.log('c1'),
+            worldKeys.trailAll('c1'),
         ]);
     });
 

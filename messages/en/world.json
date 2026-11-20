@@ -21,7 +21,8 @@
   },
   "defaults": {
     "point": "New point",
-    "zone": "New zone"
+    "zone": "New zone",
+    "enemy": "Enemy"
   },
   "eyes": {
     "label": "Through a hero's eyes",
@@ -83,13 +84,15 @@
     "snap": "Snapping",
     "snapHint": "Vertices snap to neighbouring zones (Alt disables)",
     "done": "Done",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "enemy": "Enemy"
   },
   "hint": {
     "point": "<key>Click</key> the map to place a point · <key>Esc</key> to cancel",
     "entry": "<key>Click</key> the map — heroes will appear here · <key>Esc</key> to cancel",
     "move": "<key>Click</key> the map or a marker — it is the heroes' destination · <key>Esc</key> to exit",
-    "zone": "<key>Click</key> to add vertices{vertices, plural, =0 {} other { ({vertices})}} · <key>double-click</key> to close · <key>⌫</key> to step back · <key>Esc</key> to cancel"
+    "zone": "<key>Click</key> to add vertices{vertices, plural, =0 {} other { ({vertices})}} · <key>double-click</key> to close · <key>⌫</key> to step back · <key>Esc</key> to cancel",
+    "enemy": "<key>Click</key> the map to place a hidden enemy · <key>Esc</key> to cancel"
   },
   "newMap": {
     "titleMarker": "Map for the marker",
@@ -214,7 +217,11 @@
     "saveMarker": "Could not save the marker",
     "deleteMarker": "Could not delete the marker",
     "saveNote": "Could not save the note",
-    "deleteNote": "Could not delete the note"
+    "deleteNote": "Could not delete the note",
+    "saveSession": "Could not save the session",
+    "deleteSession": "Could not delete the session",
+    "saveEnemy": "Could not save the enemy",
+    "deleteEnemy": "Could not delete the enemy"
   },
   "validation": {
     "coordinateOutOfBounds": "Coordinate is outside the map",
@@ -233,7 +240,8 @@
     "heroesMax": "Too many heroes (maximum {maximum})",
     "heroesUnique": "Heroes must not repeat",
     "noteEmpty": "The note is empty",
-    "noteMax": "Note: up to {maximum} characters"
+    "noteMax": "Note: up to {maximum} characters",
+    "descriptionMax": "Description: up to {maximum} characters"
   },
   "vertex": {
     "vertex": "Vertex {index}",
@@ -269,5 +277,44 @@
     "label": "Mode",
     "build": "Build",
     "play": "Play"
+  },
+  "trail": {
+    "legend": "Trails",
+    "noSession": "No session",
+    "node": "{session}: {kind}",
+    "segment": "Path: {session}",
+    "heroes": "Heroes",
+    "step": "Step",
+    "date": "Date",
+    "last": "Latest step"
+  },
+  "sessions": {
+    "title": "Sessions",
+    "new": "New session",
+    "empty": "No sessions yet",
+    "active": "Active",
+    "edit": "Edit",
+    "end": "End",
+    "delete": "Delete",
+    "formNewTitle": "New session",
+    "formEditTitle": "Edit session",
+    "formDescription": "Hero journeys will be recorded into the active session",
+    "name": "Name",
+    "description": "Description",
+    "color": "Color",
+    "colorOption": "Color {color}",
+    "deleteTitle": "Delete session \"{name}\"?",
+    "deleteDescription": "Trails stay on the map without a session.",
+    "hint": "Start a session so hero trails get a name and a color"
+  },
+  "enemy": {
+    "dmOnly": "DM only",
+    "name": "Name",
+    "icon": "Icon",
+    "color": "Color",
+    "note": "DM note",
+    "notePlaceholder": "Visible only to you",
+    "delete": "Delete enemy",
+    "close": "Close"
   }
 }

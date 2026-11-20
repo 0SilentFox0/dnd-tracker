@@ -206,6 +206,12 @@
       "s4": {
         "heading": "Scenario links and mentions",
         "b0": "A row or a chapter of the scenario can be linked to a place on the map: a \"📍\" chip above the text, and the \"Show on map\" button brings up the map focused on the place. An @Place mention in the text leads to the editor with the marker selected. If the marker was deleted, the chip shows \"Place unavailable\"."
+      },
+      "s5": {
+        "heading": "Sessions, trails and enemies",
+        "b0": "Start a session in the \"Sessions\" panel: give it a name and a color. While it is active, every hero move is recorded in it and drawn on the map as a trail; the legend lists trails per session, and a click on a step opens its bubble. Ending a session stops recording, and steps made without a session are shown under \"No session\".",
+        "b1": "Drag a hero cluster on the map to move the heroes to a new point; the move is logged as a travel step.",
+        "b2": "The \"Enemy\" tool pins an enemy to the map with a name, icon, color and a private note. Enemies are visible only to you and never reach players."
       }
     }
   },
@@ -295,6 +301,10 @@
       "s2": {
         "heading": "Map on the show screen",
         "b0": "When the DM puts a map on the \"Show\", it opens for you on its own even if you haven't been there; the fog stays yours. When the DM ends the show, the open map is limited again to what you know."
+      },
+      "s3": {
+        "heading": "Trail of your heroes",
+        "b0": "The map draws the trail your own heroes have walked, as a line with steps; tap a step to see the date and who was there. Other heroes' trails and the DM's pins are not shown to you."
       }
     }
   },

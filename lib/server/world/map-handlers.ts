@@ -9,6 +9,7 @@ import {
     updateWorldMapSchema,
 } from '@/lib/schemas/world';
 import { clearShowWorld } from '@/lib/server/show/show-store';
+import { listEnemies } from '@/lib/server/world/enemy-store';
 import {
     listWorldMaps,
     orphanedImagesOfSubtree,
@@ -176,9 +177,10 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
         if (detail instanceof NextResponse) return detail;
 
-        const [heroes, notes] = await Promise.all([
+        const [heroes, notes, enemies] = await Promise.all([
             listHeroesOnMap(campaignId, mapId),
             listPublicMapNotes(mapId, access.userId),
+            listEnemies(mapId),
         ]);
 
         return NextResponse.json({
@@ -186,6 +188,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
             markers: detail.markers,
             heroes,
             notes,
+            enemies,
         });
     });
 }

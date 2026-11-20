@@ -42,6 +42,7 @@ vi.mock('@/lib/db', () => {
             delete: vi.fn(),
         },
         worldPosition: { findMany: vi.fn(async () => []) },
+        worldEnemyPin: { findMany: vi.fn(async () => []) },
         worldNote: { findMany: vi.fn() },
         campaignShow: {
             findUnique: vi.fn(async () => null),
