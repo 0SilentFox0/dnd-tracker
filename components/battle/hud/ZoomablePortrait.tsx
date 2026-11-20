@@ -7,6 +7,7 @@ import { Portrait, type PortraitProps } from './Portrait';
 
 import { ImageZoomDialog } from '@/components/common/entity/ImageZoomDialog';
 import { HudButton } from '@/components/hud';
+import { toMediaUrl } from '@/lib/utils/common/image-url';
 
 interface ZoomablePortraitProps
     extends Omit<PortraitProps, 'current' | 'extra'> {
@@ -38,7 +39,7 @@ export function ZoomablePortrait({
             </HudButton>
             {zoomed && (
                 <ImageZoomDialog
-                    src={avatar}
+                    src={toMediaUrl(avatar)}
                     name={name}
                     open
                     onOpenChange={setZoomed}
