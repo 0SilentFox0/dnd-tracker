@@ -99,3 +99,26 @@ export function armourAp(
         shield,
     };
 }
+
+/** SL lost per skill from worn armour; Practical (p299) lowers each of its piece's penalties by one level */
+export function armourTestPenalties(
+    equipped: EquippedStatsRow[]
+): Record<string, number> {
+    const out: Record<string, number> = {};
+
+    for (const row of equipped) {
+        const stats = parseWfrpStats(row.systemStats);
+
+        if (stats?.type !== 'armour' || !ARMOUR_SLOTS.has(row.slot)) continue;
+
+        const eased = hasQuality(stats.qualities, 'practical') ? 1 : 0;
+
+        for (const { skill, sl } of stats.penalty ?? []) {
+            const left = sl - eased;
+
+            if (left > 0) out[skill] = (out[skill] ?? 0) - left;
+        }
+    }
+
+    return out;
+}

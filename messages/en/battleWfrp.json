@@ -107,6 +107,9 @@
     "diedOfWounds": "☠️ {name} succumbs to their critical wounds",
     "fateHowDidThatMiss": "{name} spends Fate: How Did That Miss? — the attack by {attacker} has no effect",
     "fateNotToday": "{name} spends Fate: Not Today! — leaves the fight alive",
+    "trapBladeDrop": "Blade trapped",
+    "trapBladeCaught": "{name} traps the {weapon} of {attacker}: the weapon is yanked free and dropped",
+    "trapBladeBroken": "{name} traps the {weapon} of {attacker} and snaps it",
     "outOfRange": "{name}: {target} is beyond Extreme range, no shot",
     "swarmBite": "{swarm} swarms over {target}: {damage} Wound",
     "regenerates": "{name} regenerates {amount} Wounds",
@@ -213,7 +216,12 @@
       "body": "{attacker}'s attack hit {name}. Spend Fate to make the attack have no effect?",
       "spend": "Spend Fate — it misses",
       "accept": "Take the hit",
-      "waiting": "Waiting for the Fate decision"
+      "waiting": "Waiting for the Fate decision",
+      "trapBlade": {
+        "body": "{name} scored a Critical parrying the blade of {attacker}. Trap the blade instead of wounding?",
+        "spend": "Trap the blade",
+        "accept": "Deal the Critical Hit"
+      }
     },
     "psychology": {
       "title": "Psychology",

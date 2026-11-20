@@ -31,6 +31,14 @@ const MIN_DURABILITY = 0.25;
 
 const MAX_DURABILITY = 10;
 
+// Canon Hack wears the struck armour by 1 AP per hit: about half an AP of lasting effect over a fight
+const HACK_WEAR_AP = 0.5;
+
+const hasHack = (p: BattleParticipant) =>
+    (p.battleData.attacks ?? []).some((a) =>
+        ATTACK_SLOT.read(a.system)?.qualities.some((q) => q.key === 'hack')
+    );
+
 const sizeSteps = (p: BattleParticipant) =>
     sizeStep(participantStats(p)?.size) - sizeStep(AVERAGE_SIZE);
 
@@ -75,7 +83,7 @@ const hitModelOf = (
                 : bestHitAverage(p) *
                   (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p)))) -
                 BALANCE_REF_TB -
-                BALANCE_REF_AP
+                (BALANCE_REF_AP - (canonSize && hasHack(p) ? HACK_WEAR_AP : 0))
         ),
     durability: (p) => {
         const w = participantStats(p);

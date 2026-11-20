@@ -80,18 +80,19 @@ export function qualityToHit(p: Refs, gear: GearModel = 'legacy'): number {
         .reduce((sum, k) => sum + (TO_HIT[k] ?? 0), 0);
 }
 
-/** Canon Imprecise costs 1 SL on the attack, Precise adds 1 SL to a successful one (p305) */
+/** Canon Imprecise costs 1 SL on the attack, Precise adds 1 SL to a successful one, Practical to a failed one (p305) */
 export function qualityAttackSl(
     p: Refs,
     gear: GearModel
-): { penalty: number; onSuccess: number } {
-    if (gear !== 'canon') return { penalty: 0, onSuccess: 0 };
+): { penalty: number; onSuccess: number; onFail: number } {
+    if (gear !== 'canon') return { penalty: 0, onSuccess: 0, onFail: 0 };
 
     const set = active(p, gear);
 
     return {
         penalty: set.has('imprecise') ? -1 : 0,
         onSuccess: set.has('precise') ? 1 : 0,
+        onFail: set.has('practical') ? 1 : 0,
     };
 }
 
@@ -139,6 +140,13 @@ export const qualityParry = (p: Refs, gear: GearModel): boolean =>
 /** Canon Fast adds 2 to Combat Initiative, never when fighting with two weapons (p304) */
 export const qualityFast = (p: Refs, gear: GearModel): boolean =>
     gear === 'canon' && active(p, gear).has('fast');
+
+/** Canon Trap Blade: a Critical defence may catch a blade instead (p306); Unbreakable weapons never snap */
+export const qualityTrapBlade = (p: Refs, gear: GearModel): boolean =>
+    gear === 'canon' && active(p, gear).has('trapBlade');
+
+export const qualityUnbreakable = (p: Refs, gear: GearModel): boolean =>
+    gear === 'canon' && active(p, gear).has('unbreakable');
 
 export const qualityBlackpowder = (p: Refs, gear: GearModel): boolean =>
     gear === 'canon' && active(p, gear).has('blackpowder');

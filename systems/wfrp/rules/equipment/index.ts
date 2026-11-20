@@ -4,7 +4,7 @@ import { wfrpBurden } from './burden';
 
 import type { RuleSystemEquipment } from '@/lib/utils/rules/systems/types';
 
-export { armourAp, parseWfrpStats } from './armour';
+export { armourAp, armourTestPenalties, parseWfrpStats } from './armour';
 export { applyBurden, wfrpBurden } from './burden';
 export {
     type CarriedArtifact,

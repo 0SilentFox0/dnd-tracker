@@ -838,8 +838,8 @@ describe('validatePack: wfrp artifacts', () => {
         ],
         [
             'an unimplemented quality',
-            (s) => (s.systemStats.qualities = [{ key: 'trapBlade' }]),
-            w + 'quality "trapBlade" is not implemented',
+            (s) => (s.systemStats.qualities = [{ key: 'spread' }]),
+            w + 'quality "spread" is not implemented',
         ],
         [
             'a flaw as a quality',

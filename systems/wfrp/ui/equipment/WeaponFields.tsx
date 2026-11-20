@@ -147,6 +147,18 @@ export function WeaponFields({ value, onChange }: WeaponFieldsProps) {
                 />
                 {t('twoHanded')}
             </label>
+            <label className="flex min-h-11 items-center gap-2 text-sm">
+                <Checkbox
+                    checked={value.bladed === true}
+                    onCheckedChange={(c) =>
+                        onChange({
+                            ...value,
+                            bladed: c === true ? true : undefined,
+                        })
+                    }
+                />
+                {t('bladed')}
+            </label>
             <QualityListEditor
                 id="wfrp-weapon-q"
                 label={t('qualities')}

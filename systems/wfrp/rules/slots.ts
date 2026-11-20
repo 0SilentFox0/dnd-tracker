@@ -32,6 +32,8 @@ export interface WfrpAttackSlot {
     twoHanded?: true;
     /** Weapon reach, canon gear only (p300) */
     reach?: WeaponReach;
+    /** Blade weapon, canon gear only: Trap Blade can catch it (p305) */
+    bladed?: true;
     /** Trait attack made as a free attack: no Size damage bonus (p360) */
     free?: true;
     /** Breath type of a creature's breath attack (p358) */
@@ -65,6 +67,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
                 reach: raw.reach as WeaponReach,
             }),
         ...(raw.twoHanded === true && { twoHanded: true as const }),
+        ...(raw.bladed === true && { bladed: true as const }),
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.free === true && { free: true as const }),
         ...(isBreath(raw.breath) && { breath: raw.breath }),

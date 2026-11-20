@@ -170,6 +170,7 @@ export function wfrpAttackFromProfile(
             ...(extra?.hand && { hand: extra.hand }),
             ...(extra?.reach && { reach: extra.reach }),
             ...(extra?.twoHanded && { twoHanded: true as const }),
+            ...(canon && profile.bladed && { bladed: true as const }),
         }),
         noLevelDice: true,
         ...(ammoCapacity !== undefined && {

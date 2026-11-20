@@ -107,6 +107,9 @@
     "diedOfWounds": "☠️ {name} гине від критичних ран",
     "fateHowDidThatMiss": "{name} витрачає Долю: «Як він схибив?» — атака {attacker} не має ефекту",
     "fateNotToday": "{name} витрачає Долю: «Не сьогодні!» — виходить із сутички живим",
+    "trapBladeDrop": "Клинок упіймано",
+    "trapBladeCaught": "{name} ловить {weapon} бійця {attacker}: зброю вириває з рук, вона падає",
+    "trapBladeBroken": "{name} ловить {weapon} бійця {attacker} і ламає її",
     "outOfRange": "{name}: {target} поза межею Extreme, пострілу немає",
     "swarmBite": "{swarm} обліплює {target}: {damage} рана",
     "regenerates": "{name} регенерує {amount} ран",
@@ -213,7 +216,12 @@
       "body": "Атака {attacker} влучила в {name}. Витратити Долю, щоб атака не мала ефекту?",
       "spend": "Витратити Долю — промах",
       "accept": "Прийняти удар",
-      "waiting": "Очікуємо рішення щодо Долі"
+      "waiting": "Очікуємо рішення щодо Долі",
+      "trapBlade": {
+        "body": "{name} отримав Критичний успіх, парируючи клинок {attacker}. Зловити клинок замість поранення?",
+        "spend": "Зловити клинок",
+        "accept": "Завдати критичного удару"
+      }
     },
     "psychology": {
       "title": "Психологія",

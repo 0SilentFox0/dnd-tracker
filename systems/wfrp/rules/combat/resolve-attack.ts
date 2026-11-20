@@ -78,6 +78,7 @@ import { mountedDodgeModes } from './mounted';
 import { resolveOpposed } from './opposed';
 import { participantChars } from './participant';
 import { rangeContext, rangedOpposition } from './range-band';
+import { canTrapBlade, TRAP_BLADE_COST, trapBladeResult } from './trap-blade';
 import { canonWeaponUse, type WeaponUse } from './weapon-use';
 
 import { AttackType, CombatStatus } from '@/lib/constants/battle';
@@ -751,7 +752,9 @@ function withBreathRoll(ctx: ResolveAttackCtx): ResolvedAttack {
     const attackId = ctx.attack.id ?? ctx.attack.name;
 
     const reuse =
-        shared && shared.attackId === attackId && !shared.seen.includes(targetId)
+        shared &&
+        shared.attackId === attackId &&
+        !shared.seen.includes(targetId)
             ? shared
             : undefined;
 
@@ -759,7 +762,8 @@ function withBreathRoll(ctx: ResolveAttackCtx): ResolvedAttack {
         reuse ? { ...ctx, manualRoll: reuse.roll } : ctx
     );
 
-    const roll = reuse?.roll ?? ACTION_SLOT.read(r.attackRoll.system)?.attack?.roll;
+    const roll =
+        reuse?.roll ?? ACTION_SLOT.read(r.attackRoll.system)?.attack?.roll;
 
     if (roll === undefined) return r;
 
@@ -1059,6 +1063,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 defenderTargets: opposition,
                 attackerSlMod: rangedSl,
                 attackerSlOnSuccess: attackSl.onSuccess,
+                attackerSlOnFail: attackSl.onFail,
                 defenderSlMod: selfSlMod(target, edition),
                 ...(canonMods && {
                     defenderSlByKind: defensiveSl(target),
@@ -1144,7 +1149,12 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                     ctx,
                     detailsOf(
                         test,
-                        test.sl + (isHit ? attackSl.onSuccess : 0),
+                        test.sl +
+                            (isHit
+                                ? attackSl.onSuccess
+                                : passed
+                                  ? 0
+                                  : attackSl.onFail),
                         {
                             ...locationOf(isHit),
                             ...modsDetail,
@@ -1246,6 +1256,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 },
             ],
             attackerSlOnSuccess: attackSl.onSuccess,
+            attackerSlOnFail: attackSl.onFail,
             attackerSlMod:
                 (spent && !personal ? MOMENTUM_SL_BONUS : 0) +
                 slBonus +
@@ -1353,17 +1364,60 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                   }
                 : resolved;
 
+        const trap =
+            counterCrit &&
+            canon &&
+            result.defender.kind === 'parry' &&
+            canTrapBlade(target, attacker, attack, defence?.weapon)
+                ? { crit: counterCrit, parrySl: result.defender.sl }
+                : undefined;
+
         return {
             roll: result.attacker.roll,
             defenderRaw: unopposed ? undefined : result.defender.rawRoll,
-            resolved: counterCrit
-                ? withCounterCrit(
-                      tracked,
-                      counterCrit,
-                      edition,
-                      attacker.basicInfo.name
-                  )
-                : tracked,
+            resolved:
+                counterCrit && !trap
+                    ? withCounterCrit(
+                          tracked,
+                          counterCrit,
+                          edition,
+                          attacker.basicInfo.name
+                      )
+                    : tracked,
+            trap,
+        };
+    };
+
+    const settleTrap = (r: ReturnType<typeof meleeOnce>): ResolvedAttack => {
+        if (!r.trap) return r.resolved;
+
+        const caught = ctx.crit?.negate?.({
+            holder: target,
+            actorId: attacker.basicInfo.id,
+            cost: TRAP_BLADE_COST,
+        });
+
+        if (!caught)
+            return withCounterCrit(
+                r.resolved,
+                r.trap.crit,
+                edition,
+                attacker.basicInfo.name
+            );
+
+        const { attackerUpdate, line } = trapBladeResult({
+            defender: target,
+            attacker,
+            incoming: attack,
+            parrySl: r.trap.parrySl,
+            rng,
+        });
+
+        return {
+            ...r.resolved,
+            attackerUpdate: (p) =>
+                attackerUpdate(r.resolved.attackerUpdate?.(p) ?? p),
+            lines: [...r.resolved.lines, line],
         };
     };
 
@@ -1384,6 +1438,6 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
         ctx,
         edition,
         refs,
-        marked(negateByFate(ctx, result.resolved, edition), fortune)
+        marked(negateByFate(ctx, settleTrap(result), edition), fortune)
     );
 }

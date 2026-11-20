@@ -15,6 +15,7 @@ export type WeaponProfile = {
     flaws: QualityRef[];
     ammoCapacity?: number;
     twoHanded: boolean;
+    bladed?: true;
 };
 
 // Matches wfrp `distance` (2 yd per cell); the registry cannot be imported from here without a cycle
@@ -63,6 +64,7 @@ export function weaponProfile(stats: unknown): WeaponProfile | null {
         qualities: s.qualities,
         flaws: s.flaws,
         twoHanded: s.twoHanded,
+        ...(s.bladed && { bladed: true as const }),
         ...(s.ammoCapacity !== undefined && { ammoCapacity: s.ammoCapacity }),
     };
 
