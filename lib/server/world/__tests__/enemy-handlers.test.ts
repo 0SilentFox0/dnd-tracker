@@ -145,6 +145,7 @@ describe('enemy pins', () => {
         m.findUnique.mockResolvedValue(row({ mapId: 'm2' }));
 
         const patch = await enemyPatchHandler(req({ x: 0.9 }), 'c1', 'm1', 'e1');
+
         const del = await enemyDeleteHandler('c1', 'm1', 'e1');
 
         for (const res of [patch, del]) {

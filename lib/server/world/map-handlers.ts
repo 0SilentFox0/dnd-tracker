@@ -9,13 +9,13 @@ import {
     updateWorldMapSchema,
 } from '@/lib/schemas/world';
 import { clearShowWorld } from '@/lib/server/show/show-store';
+import { listEnemies } from '@/lib/server/world/enemy-store';
 import {
     listWorldMaps,
     orphanedImagesOfSubtree,
     readWorldMapDetail,
     toWorldMap,
 } from '@/lib/server/world/map-store';
-import { listEnemies } from '@/lib/server/world/enemy-store';
 import { listPublicMapNotes } from '@/lib/server/world/note-store';
 import { listHeroesOnMap } from '@/lib/server/world/travel-store';
 import { publishWorldChanged } from '@/lib/server/world/world-events';

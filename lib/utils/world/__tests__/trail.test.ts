@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildTrails, filterTrailForViewer } from '@/lib/utils/world/trail';
 import type { TrailRow } from '@/lib/utils/world/trail';
+import { buildTrails, filterTrailForViewer } from '@/lib/utils/world/trail';
 import type { TrailEntry } from '@/types/world';
 
 const hero = { id: 'h1', name: 'Aria' };
