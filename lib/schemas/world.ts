@@ -205,6 +205,8 @@ export const worldViewQuerySchema = z.object({
     asParty: z.literal('1').optional(),
 });
 
+export const worldTrailQuerySchema = z.object({ mapId: z.string().min(1) });
+
 const sessionDescription = z
     .string()
     .max(WORLD_SESSION_DESCRIPTION_MAX, 'world.validation.descriptionMax');
