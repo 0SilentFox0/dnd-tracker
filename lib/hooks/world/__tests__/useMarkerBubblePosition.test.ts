@@ -30,6 +30,33 @@ describe('markerBubblePosition', () => {
         expect(p.top).toBeGreaterThan(30);
     });
 
+    it('clamps vertically when the anchor is panned off-screen', () => {
+        const below = markerBubblePosition({
+            ...base,
+            point: { x: 0.5, y: 0.5 },
+            offset: { x: 0, y: 900 },
+        });
+
+        const above = markerBubblePosition({
+            ...base,
+            point: { x: 0.5, y: 0.5 },
+            offset: { x: 0, y: -900 },
+        });
+
+        expect(below.top).toBe(500);
+        expect(above.top).toBe(0);
+    });
+
+    it('keeps the card inside the box near the bottom edge', () => {
+        const p = markerBubblePosition({
+            ...base,
+            point: { x: 0.5, y: 1 },
+            size: { width: 200, height: 700 },
+        });
+
+        expect(p.top).toBe(0);
+    });
+
     it('clamps to the left and right edges', () => {
         expect(
             markerBubblePosition({ ...base, point: { x: 0, y: 0.5 } }).left

@@ -61,4 +61,20 @@ describe('WorldZones', () => {
             1
         );
     });
+
+    it('paints all underlays before any ink edge', () => {
+        const { container } = render(<WorldZones markers={[a, b]} />);
+
+        const paths = [...container.querySelectorAll('path')];
+
+        const lastUnderlay = Math.max(
+            ...paths.flatMap((p, i) =>
+                p.hasAttribute('data-edge-underlay') ? [i] : []
+            )
+        );
+
+        const firstInk = paths.findIndex((p) => p.hasAttribute('data-edge'));
+
+        expect(lastUnderlay).toBeLessThan(firstInk);
+    });
 });

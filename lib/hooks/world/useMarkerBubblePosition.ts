@@ -40,7 +40,11 @@ export function markerBubblePosition({
             0,
             Math.max(0, box.width - size.width)
         ),
-        top: placement === 'above' ? above : ay + GAP,
+        top: clamp(
+            placement === 'above' ? above : ay + GAP,
+            0,
+            Math.max(0, box.height - size.height)
+        ),
         placement,
     };
 }

@@ -83,25 +83,28 @@ export function WorldZones({
                 );
             })}
             {edges.map((e) => (
-                <g key={e.key}>
-                    <path
-                        d={e.d}
-                        fill="none"
-                        stroke="var(--atlas-paper)"
-                        strokeWidth={3.5}
-                        strokeOpacity={0.55}
-                        vectorEffect="non-scaling-stroke"
-                    />
-                    <path
-                        data-edge
-                        data-shared-edge={shared.has(e.key) || undefined}
-                        d={e.d}
-                        fill="none"
-                        stroke="var(--atlas-ink)"
-                        strokeWidth={2}
-                        vectorEffect="non-scaling-stroke"
-                    />
-                </g>
+                <path
+                    key={`u-${e.key}`}
+                    data-edge-underlay
+                    d={e.d}
+                    fill="none"
+                    stroke="var(--atlas-paper)"
+                    strokeWidth={3.5}
+                    strokeOpacity={0.55}
+                    vectorEffect="non-scaling-stroke"
+                />
+            ))}
+            {edges.map((e) => (
+                <path
+                    key={e.key}
+                    data-edge
+                    data-shared-edge={shared.has(e.key) || undefined}
+                    d={e.d}
+                    fill="none"
+                    stroke="var(--atlas-ink)"
+                    strokeWidth={2}
+                    vectorEffect="non-scaling-stroke"
+                />
             ))}
             {markers.map((m) =>
                 m.kind === 'zone' && m.polygon && m.id === selectedId ? (

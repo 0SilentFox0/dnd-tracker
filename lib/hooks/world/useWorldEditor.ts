@@ -14,7 +14,9 @@ import {
     updateWorldMap,
     updateWorldMarker,
 } from '@/lib/api/world';
-import { useCrudMutation } from '@/lib/hooks/common';
+import { ApiError } from '@/lib/api/client';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { useCrudMutation, useOptionalNotify } from '@/lib/hooks/common';
 import type {
     CreateWorldMapData,
     CreateWorldMarkerData,
@@ -22,6 +24,12 @@ import type {
     UpdateWorldMarkerData,
     WorldMapDetail,
 } from '@/types/world';
+
+const MOVE_ERROR_KEYS: Record<string, string> = {
+    [API_ERRORS.WORLD_MOVE_CYCLE]: 'worldMoveCycle',
+    [API_ERRORS.WORLD_ROOT_IMMOVABLE]: 'worldRootImmovable',
+    [API_ERRORS.WORLD_NESTED_EXISTS]: 'worldNestedExists',
+};
 
 type Settled = {
     status: string;
@@ -39,6 +47,10 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
     const queryClient = useQueryClient();
 
     const t = useTranslations('world.errors');
+
+    const tErrors = useTranslations('errors');
+
+    const notify = useOptionalNotify();
 
     const mapKey = worldKeys.map(campaignId, mapId ?? '');
 
@@ -101,19 +113,28 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
                 id: string;
                 parentMarkerId: string;
             }) => updateWorldMap(campaignId, id, { parentMarkerId }),
-            invalidateKeys: (_d, { id }) => [
+            invalidateKeys: [
                 worldKeys.maps(campaignId),
-                worldKeys.map(campaignId, id),
-                ...(mapId && mapId !== id ? [mapKey] : []),
+                worldKeys.mapAll(campaignId),
             ],
-            errorText: t('saveMap'),
+            onError: (e) => {
+                const key =
+                    e instanceof ApiError && e.errorKey
+                        ? MOVE_ERROR_KEYS[e.errorKey]
+                        : undefined;
+
+                notify(key ? tErrors(key) : t('saveMap'));
+            },
         })
     );
 
     const removeMap = useStable(
         useCrudMutation({
             mutationFn: (id: string) => deleteWorldMap(campaignId, id),
-            invalidateKeys: [worldKeys.maps(campaignId)],
+            invalidateKeys: [
+                worldKeys.maps(campaignId),
+                worldKeys.mapAll(campaignId),
+            ],
             errorText: t('deleteMap'),
         })
     );
