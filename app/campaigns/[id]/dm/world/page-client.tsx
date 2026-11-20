@@ -263,7 +263,8 @@ export function WorldEditorPageClient({
                                                         >
                                                             {t('tree.toggle')}
                                                         </HudToggleChip>
-                                                        {mode.value === 'build' &&
+                                                        {mode.value ===
+                                                            'build' &&
                                                         !eyes.asHeroId ? (
                                                             <HudToggleChip
                                                                 tall
@@ -307,7 +308,8 @@ export function WorldEditorPageClient({
                                                             {mapTree}
                                                         </aside>
                                                     ) : null}
-                                                    {isDesktop && layersShown ? (
+                                                    {isDesktop &&
+                                                    layersShown ? (
                                                         <aside className="hud-surface w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
                                                             {layersPanel}
                                                         </aside>
@@ -467,9 +469,7 @@ export function WorldEditorPageClient({
                                                                 handlers={
                                                                     handlers
                                                                 }
-                                                                focus={
-                                                                    focus
-                                                                }
+                                                                focus={focus}
                                                                 className={
                                                                     fullscreen.full
                                                                         ? 'rounded-none border-0'
@@ -531,6 +531,11 @@ export function WorldEditorPageClient({
                                                                             .layers
                                                                             .toggle
                                                                     }
+                                                                    showUnlayered={
+                                                                        eyes
+                                                                            .layers
+                                                                            .showUnlayered
+                                                                    }
                                                                 />
                                                             </div>
                                                         ) : (
@@ -548,6 +553,9 @@ export function WorldEditorPageClient({
                                                                         layers
                                                                             .visibility
                                                                             .toggle
+                                                                    }
+                                                                    showUnlayered={
+                                                                        layers.showUnlayered
                                                                     }
                                                                 />
                                                                 <TrailLegend

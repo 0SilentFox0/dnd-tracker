@@ -461,6 +461,7 @@ export function useWorldEditorPage({
     const layers = {
         items: layerItems,
         visibility: layerVisibility,
+        showUnlayered: markers.some((m) => !m.layerId),
         active: { id: activeLayerId, set: setActiveLayer },
         imageEdit: { layerId: imageEditId, set: setImageEdit },
         panel: { open: layersOpen, set: setLayersOpen },

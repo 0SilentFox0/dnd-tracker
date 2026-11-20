@@ -218,6 +218,9 @@ export function WorldPlayClient({
                                                 layers={play.layers.items}
                                                 hidden={play.layers.hidden}
                                                 onToggle={play.layers.toggle}
+                                                showUnlayered={
+                                                    play.layers.showUnlayered
+                                                }
                                             />
                                             <TrailLegend
                                                 trails={trail.trails}

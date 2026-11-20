@@ -371,6 +371,31 @@
     "deleteWithMarkers": "Delete with markers",
     "deleteEmptyDescription": "The layer has no markers.",
     "markerLayer": "Layer",
-    "noLayer": "No layer"
+    "noLayer": "No layer",
+    "unlayered": "No layer",
+    "icon": "Layer icon",
+    "iconNone": "No icon",
+    "zoneOpacity": "Zone opacity",
+    "zoneOpacityReset": "Default",
+    "zoneLabels": {
+      "label": "Zone labels",
+      "auto": "Labels: auto",
+      "hidden": "Labels: hidden"
+    }
+  },
+  "marker": {
+    "style": {
+      "inherit": "Inherit from layer",
+      "inherited": "inherited from layer",
+      "labelMode": {
+        "label": "Zone label",
+        "inherit": "Inherit",
+        "auto": "Auto",
+        "hidden": "Hidden",
+        "always": "Always"
+      },
+      "opacity": "Zone opacity",
+      "opacityReset": "Inherit"
+    }
   }
 }

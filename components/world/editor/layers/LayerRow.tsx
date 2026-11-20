@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Crosshair, ImagePlus, Move, Trash2 } from 'lucide-react';
 
+import { ICON_OPTIONS } from '../marker-icon-options';
 import { MarkerColorField } from '../MarkerColorField';
 import { LayerDeleteDialog } from './LayerDeleteDialog';
 import { LayerHeroPicker } from './LayerHeroPicker';
@@ -14,13 +15,14 @@ import { FileButton } from '@/components/ui/file-button';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { Slider } from '@/components/ui/slider';
-import { WORLD_NAME_MAX } from '@/lib/constants/world';
+import { LAYER_ZONE_LABELS, WORLD_NAME_MAX } from '@/lib/constants/world';
 import { useConfirm } from '@/lib/hooks/common';
 import { useLayerForm, type useWorldEditor } from '@/lib/hooks/world';
 import type { RosterHero } from '@/types/characters';
 import type {
     DeleteWorldLayerMode,
     LayerVisibility,
+    LayerZoneLabels,
     WorldLayer,
 } from '@/types/world';
 
@@ -55,6 +57,8 @@ export function LayerRow({
     const t = useTranslations('world.layers');
 
     const tc = useTranslations('common.actions');
+
+    const tm = useTranslations('world');
 
     const confirm = useConfirm();
 
@@ -122,6 +126,52 @@ export function LayerRow({
                     onReset={f.resetColor}
                 />
             </div>
+            <SelectField
+                aria-label={t('icon')}
+                value={layer.icon ?? ''}
+                onValueChange={(v) => void f.setIcon(v || null)}
+                allowNone
+                noneLabel={t('iconNone')}
+                options={ICON_OPTIONS.map(({ value }) => ({
+                    value,
+                    label: tm(`markerKinds.${value}`),
+                }))}
+            />
+            <div className="flex items-center gap-2 text-xs">
+                <label className="flex flex-1 items-center gap-2">
+                    {t('zoneOpacity')}
+                    <Slider
+                        aria-label={t('zoneOpacity')}
+                        className="flex-1"
+                        value={f.zoneOpacity.value}
+                        min={f.zoneOpacity.min}
+                        max={1}
+                        step={OPACITY_STEP}
+                        onValueChange={f.zoneOpacity.change}
+                    />
+                </label>
+                {f.zoneOpacity.isCustom ? (
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={f.zoneOpacity.reset}
+                    >
+                        {t('zoneOpacityReset')}
+                    </Button>
+                ) : null}
+            </div>
+            <SelectField
+                aria-label={t('zoneLabels.label')}
+                value={layer.zoneLabels}
+                onValueChange={(v) =>
+                    void f.setZoneLabels(v as LayerZoneLabels)
+                }
+                options={LAYER_ZONE_LABELS.map((v) => ({
+                    value: v,
+                    label: t(`zoneLabels.${v}`),
+                }))}
+            />
             <HudButton
                 type="button"
                 aria-pressed={state.active}

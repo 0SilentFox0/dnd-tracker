@@ -2,6 +2,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
+import { NO_LAYER_KEY } from '@/lib/constants/world';
+
 export function useLayerVisibility(layerIds: string[]) {
     const [off, setOff] = useState<ReadonlySet<string>>(new Set());
 
@@ -10,6 +12,8 @@ export function useLayerVisibility(layerIds: string[]) {
     // drop ids of layers that no longer exist
     const hidden = useMemo(() => {
         const alive = new Set(key ? key.split('\0') : []);
+
+        alive.add(NO_LAYER_KEY);
 
         return new Set([...off].filter((id) => alive.has(id)));
     }, [off, key]);
@@ -27,7 +31,7 @@ export function useLayerVisibility(layerIds: string[]) {
     );
 
     const isShown = useCallback(
-        (layerId: string | null) => layerId === null || !hidden.has(layerId),
+        (layerId: string | null) => !hidden.has(layerId ?? NO_LAYER_KEY),
         [hidden]
     );
 

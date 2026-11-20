@@ -8,7 +8,11 @@ import type { useWorldEditor } from './useWorldEditor';
 
 import { DEFAULT_ZONE_COLOR } from '@/lib/constants/world';
 import { useDebouncedCommit } from '@/lib/hooks/common';
-import type { UpdateWorldMarkerData, WorldMarker } from '@/types/world';
+import type {
+    UpdateWorldMarkerData,
+    WorldMarker,
+    ZoneLabelMode,
+} from '@/types/world';
 
 interface Options {
     marker: WorldMarker;
@@ -39,6 +43,19 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         save({ color: value })
     );
 
+    const [fillOpacity, setFillOpacity] = useState<number | null>(
+        marker.fillOpacity
+    );
+
+    const fillOpacityCommit = useDebouncedCommit((value: number | null) =>
+        save({ fillOpacity: value })
+    );
+
+    const changeFillOpacity = (value: number | null) => {
+        setFillOpacity(value);
+        fillOpacityCommit.schedule(value);
+    };
+
     const commitNote = () => {
         const next = note.trim();
 
@@ -62,8 +79,7 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         colorCommit.schedule(c);
     };
 
-    const setLayer = (layerId: string) =>
-        save({ layerId: layerId || null });
+    const setLayer = (layerId: string) => save({ layerId: layerId || null });
 
     const remove = useRemoveMarker({ marker, editor, select });
 
@@ -79,10 +95,13 @@ export function useMarkerFields({ marker, editor, select }: Options) {
         commitDescription,
         color,
         colorValue: color ?? DEFAULT_ZONE_COLOR,
-        isCustomColor:
-            !!color && color.toLowerCase() !== DEFAULT_ZONE_COLOR,
+        isCustomColor: !!color && color.toLowerCase() !== DEFAULT_ZONE_COLOR,
         pickColor,
         resetColor: () => pickColor(null),
+        labelMode: marker.labelMode,
+        setLabelMode: (labelMode: ZoneLabelMode | null) => save({ labelMode }),
+        fillOpacity,
+        changeFillOpacity,
         save,
         setLayer,
         remove,

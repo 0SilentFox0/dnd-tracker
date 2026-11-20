@@ -8,7 +8,7 @@ import { MarkerLayerField } from '../layers/MarkerLayerField';
 import { MarkerIconGrid } from '../maps/MapFieldParts';
 import { NewWorldMapDialog } from '../maps/NewWorldMapDialog';
 import { markerIcon } from '../marker-icon-options';
-import { MarkerColorField } from '../MarkerColorField';
+import { MarkerStyleFields } from '../MarkerStyleFields';
 import { MoveMapMenu } from '../MoveMapMenu';
 import { useEditorMarkerFields } from '../use-editor-fields';
 import { useWorldEditorContext } from '../WorldEditorContext';
@@ -48,6 +48,8 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
     const m = useEditorMarkerFields(marker);
 
     const HeaderIcon = markerIcon(marker);
+
+    const layer = detail?.layers.find((l) => l.id === marker.layerId);
 
     const child = marker.childMapId
         ? maps.find((x) => x.id === marker.childMapId)
@@ -90,34 +92,20 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                         />
                     </label>
                     {marker.kind === 'point' ? (
-                        <>
-                            <MarkerIconGrid
-                                aria-label={t('editor.icon')}
-                                value={marker.icon}
-                                cellClassName="h-11"
-                                onPick={(icon) => void m.save({ icon })}
-                            />
-                            <div className="flex items-center gap-3 text-sm">
-                                <MarkerColorField
-                                    label={t('editor.pointColor')}
-                                    color={m.colorValue}
-                                    isCustom={m.isCustomColor}
-                                    onPick={m.pickColor}
-                                    onReset={m.resetColor}
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex items-center gap-3 text-sm">
-                            <MarkerColorField
-                                label={t('editor.zoneColor')}
-                                color={m.colorValue}
-                                isCustom={m.isCustomColor}
-                                onPick={m.pickColor}
-                                onReset={m.resetColor}
-                            />
-                        </div>
-                    )}
+                        <MarkerIconGrid
+                            aria-label={t('editor.icon')}
+                            value={marker.icon}
+                            cellClassName="h-11"
+                            onPick={(icon) => void m.save({ icon })}
+                        />
+                    ) : null}
+                    <div className="text-sm">
+                        <MarkerStyleFields
+                            marker={marker}
+                            layer={layer}
+                            form={m}
+                        />
+                    </div>
                     {marker.kind === 'zone' ? (
                         <Button
                             type="button"

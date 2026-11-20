@@ -1,4 +1,8 @@
 {
+  "2026-11-20-world-layer-style": {
+    "title": "Map layers: style, zone opacity and labels",
+    "body": "A layer now carries its own look: an icon, a colour, zone opacity and whether zone labels show. Markers inherit it and can override any of it, a zone label can be forced hidden or always shown, and the legend can toggle markers that have no layer."
+  },
   "2026-11-20-world-viewport": {
     "title": "World map: clusters and full screen",
     "body": "Nearby pins merge into a \"+N\" badge that zooms in on click. Added a full screen mode, removed the side bars around the map, and the marker label is now compact with the details panel on the side."

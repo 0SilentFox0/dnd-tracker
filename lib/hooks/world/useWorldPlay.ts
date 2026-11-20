@@ -130,7 +130,12 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
 
     return {
         view,
-        layers: { items: layerItems, hidden, toggle },
+        layers: {
+            items: layerItems,
+            hidden,
+            toggle,
+            showUnlayered: !!view.data?.markers.some((m) => !m.layerId),
+        },
         selectedMarker,
         card: {
             point: selectedMarker ? markerAnchor(selectedMarker) : null,

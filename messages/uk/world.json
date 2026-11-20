@@ -371,6 +371,31 @@
     "deleteWithMarkers": "Видалити з маркерами",
     "deleteEmptyDescription": "У шарі немає маркерів.",
     "markerLayer": "Шар",
-    "noLayer": "Без шару"
+    "noLayer": "Без шару",
+    "unlayered": "Без шару",
+    "icon": "Іконка шару",
+    "iconNone": "Без іконки",
+    "zoneOpacity": "Прозорість зон",
+    "zoneOpacityReset": "За замовчуванням",
+    "zoneLabels": {
+      "label": "Підписи зон",
+      "auto": "Підписи: авто",
+      "hidden": "Підписи: сховані"
+    }
+  },
+  "marker": {
+    "style": {
+      "inherit": "Наслідувати від шару",
+      "inherited": "успадковано від шару",
+      "labelMode": {
+        "label": "Підпис зони",
+        "inherit": "Наслідувати",
+        "auto": "Авто",
+        "hidden": "Сховати",
+        "always": "Завжди"
+      },
+      "opacity": "Прозорість зони",
+      "opacityReset": "Наслідувати"
+    }
   }
 }

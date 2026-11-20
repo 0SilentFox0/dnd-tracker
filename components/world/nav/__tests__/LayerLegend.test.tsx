@@ -39,4 +39,31 @@ describe('LayerLegend', () => {
 
         expect(onToggle).toHaveBeenCalledWith('a');
     });
+
+    it('shows the no-layer chip only with showUnlayered and toggles it', () => {
+        const onToggle = vi.fn();
+
+        const { rerender } = render(
+            <LayerLegend
+                layers={layers}
+                hidden={new Set()}
+                onToggle={onToggle}
+            />
+        );
+
+        expect(screen.queryByText('Без шару')).toBeNull();
+
+        rerender(
+            <LayerLegend
+                layers={layers}
+                hidden={new Set()}
+                onToggle={onToggle}
+                showUnlayered
+            />
+        );
+
+        fireEvent.click(screen.getByText('Без шару'));
+
+        expect(onToggle).toHaveBeenCalledWith('__none__');
+    });
 });

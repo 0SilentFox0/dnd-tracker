@@ -27,6 +27,11 @@ export function useHeroEyes(campaignId: string, mapId: string | null) {
         asHeroId,
         setAsHeroId,
         view,
-        layers: { items, hidden, toggle },
+        layers: {
+            items,
+            hidden,
+            toggle,
+            showUnlayered: !!view.data?.markers.some((m) => !m.layerId),
+        },
     };
 }

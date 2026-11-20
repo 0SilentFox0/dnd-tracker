@@ -898,7 +898,7 @@ describe('WorldMapView card slot', () => {
     });
 
     it('a marker inherits the icon and colour of its layer and keeps its own', () => {
-        const layer = {
+        const layer: WorldViewLayer = {
             id: 'l1',
             name: 'Cities',
             color: '#00aa00',
@@ -907,8 +907,8 @@ describe('WorldMapView card slot', () => {
             opacity: 1,
             icon: 'castle',
             zoneOpacity: null,
-            zoneLabels: null,
-        } as WorldViewLayer;
+            zoneLabels: 'auto',
+        };
 
         render(
             <WorldMapView
