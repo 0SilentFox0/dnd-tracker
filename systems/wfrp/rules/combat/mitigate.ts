@@ -9,7 +9,7 @@ import {
 } from '../equipment/quality-effects';
 import { ATTACK_SLOT } from '../slots';
 import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
-import { sizeDamageBonus, wardRoll } from '../traits/size';
+import { sizeDamageBonus, sizeMeleeDamage, wardRoll } from '../traits/size';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
@@ -103,11 +103,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const appliedSb = slot?.noSb ? 0 : sb;
 
-    const size = sizeDamageBonus(
-        attacker,
-        target,
-        ctx.weapon + appliedSb + margin
-    );
+    const size =
+        edition.sizeModel === 'canon'
+            ? sizeMeleeDamage(attacker, ctx.attack, sb)
+            : sizeDamageBonus(
+                  attacker,
+                  target,
+                  ctx.weapon + appliedSb + margin
+              );
 
     const frenzyBonus =
         isFrenzied(attacker) &&

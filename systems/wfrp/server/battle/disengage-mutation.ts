@@ -164,7 +164,15 @@ export function disengageMutation(
         ...modes,
         disadvantage:
             (modes.disadvantage ?? 0) +
-            (isOutnumbered(actor, foes, ctx.participants, map) ? 1 : 0),
+            (isOutnumbered(
+                actor,
+                foes,
+                ctx.participants,
+                map,
+                edition.sizeModel === 'canon'
+            )
+                ? 1
+                : 0),
     });
 
     const rng = rngOf(ctx);

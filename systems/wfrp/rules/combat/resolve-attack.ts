@@ -43,6 +43,7 @@ import {
 } from '../traits/passions';
 import { coolTarget, isSuccess } from '../traits/psych-test';
 import { sizeHitMod } from '../traits/size';
+import { collectAttackMods } from './attack-mods';
 import {
     MOMENTUM_SL_BONUS,
     OFFHAND_SL_PENALTY,
@@ -169,7 +170,10 @@ export const wfrpAttackTarget = (
             characteristic === 'bs' ? 'ranged' : 'melee',
             group
         ) !== undefined
-            ? weaponSkillLabel(characteristic === 'bs' ? 'ranged' : 'melee', group)
+            ? weaponSkillLabel(
+                  characteristic === 'bs' ? 'ranged' : 'melee',
+                  group
+              )
             : undefined;
 
     return {
@@ -626,6 +630,29 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fortuneAdvantage = fortuneEdge && reverse ? 1 : 0;
 
+    const canonMods = edition.combatModsModel === 'canon';
+
+    const attackMods = canonMods
+        ? collectAttackMods({
+              ctx,
+              edition,
+              kind:
+                  attackKindOf(attack.type) === AttackType.RANGED
+                      ? 'ranged'
+                      : 'melee',
+              input: fortuneInput?.mods,
+          })
+        : undefined;
+
+    const modsDetail = attackMods?.mods.length
+        ? {
+              mods: attackMods.mods.map(({ key, sl }) => ({ key, sl })),
+          }
+        : {};
+
+    const sizeHit =
+        edition.sizeModel === 'legacy' ? sizeHitMod(attacker, target) : 0;
+
     const marked = (
         r: ResolvedAttack,
         fortune?: ReturnType<typeof applyFortune>['fortune']
@@ -695,8 +722,9 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
         const blind = selfModes(attacker, 'attack', edition);
 
         const rangedMode = resolveModeSources({
-            advantage: fortuneAdvantage,
-            disadvantage: blind.disadvantage,
+            advantage: fortuneAdvantage + (attackMods?.advantage ?? 0),
+            disadvantage:
+                (blind.disadvantage ?? 0) + (attackMods?.disadvantage ?? 0),
         });
 
         const rangedOnce = (presetRoll?: number) => {
@@ -705,10 +733,11 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                     attackerTargetOf(attacker, attack, edition, use?.target) +
                     againstMod(target, 'ranged', edition) +
                     toHit +
-                    sizeHitMod(attacker, target),
+                    sizeHit,
                 slModifier:
                     Math.min(DIFFICULTY_SL.challenging, use?.slCap ?? 0) +
                     slBonus +
+                    (attackMods?.sl ?? 0) +
                     selfSlMod(attacker, edition) +
                     rangedMode.slMod,
                 mode: rangedMode.mode,
@@ -734,6 +763,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                         test.sl + (isHit ? attackSl.onSuccess : 0),
                         {
                             ...locationOf(),
+                            ...modsDetail,
                             ...(dangerous(test.roll, passed) && {
                                 fumble: true as const,
                             }),
@@ -784,7 +814,9 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const canon = gear === 'canon';
 
-    const defence = canon ? canonDefence(target, attack, edition) : undefined;
+    const defence = canon
+        ? canonDefence(target, attack, edition, attacker)
+        : undefined;
 
     const unopposed =
         canon &&
@@ -801,8 +833,9 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 attackerTargetOf(attacker, attack, edition, use?.target) +
                 toHit +
                 againstMod(target, 'melee', edition) +
-                sizeHitMod(attacker, target) +
-                (isOutnumbering(attacker, target, participants, ctx.map)
+                sizeHit +
+                (!canonMods &&
+                isOutnumbering(attacker, target, participants, ctx.map)
                     ? OUTNUMBERING_BONUS
                     : 0),
             defenderTargets: [
@@ -822,6 +855,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             attackerSlMod:
                 (spent && !personal ? MOMENTUM_SL_BONUS : 0) +
                 slBonus +
+                (attackMods?.sl ?? 0) +
                 selfSlMod(attacker, edition) +
                 meleeAgainst.sl,
             defenderSlMod:
@@ -835,9 +869,11 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                         (spent ? 1 : 0) +
                         fortuneAdvantage +
                         meleeAgainst.advantage +
+                        (attackMods?.advantage ?? 0) +
                         (isAfraidOf(target, attacker.basicInfo.id) ? 1 : 0),
-                    disadvantage: selfModes(attacker, 'attack', edition)
-                        .disadvantage,
+                    disadvantage:
+                        (selfModes(attacker, 'attack', edition).disadvantage ??
+                            0) + (attackMods?.disadvantage ?? 0),
                 },
                 defenderModes: {
                     parry: { advantage: hasMomentum(target) ? 1 : 0 },
@@ -858,6 +894,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             result.netSl,
             {
                 ...locationOf(),
+                ...modsDetail,
                 ...(dangerous(
                     result.attacker.roll,
                     isSuccess(result.attacker.outcome)

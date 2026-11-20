@@ -7,6 +7,7 @@ import {
     SIZE_HIT_PER_STEP,
 } from '../traits/constants';
 import { sizeStep } from '../traits/read';
+import { sizeSbFactor } from '../traits/size';
 import {
     BALANCE_REF_AP,
     BALANCE_REF_INCOMING,
@@ -49,7 +50,8 @@ function bestHitAverage(p: BattleParticipant): number {
 }
 
 const hitModelOf = (
-    chance: RuleSystemHitModel['winChance']
+    chance: RuleSystemHitModel['winChance'],
+    canonSize = false
 ): RuleSystemHitModel => ({
     offense: (p) => value(participantChars(p), 'ws'),
     saves: (p) => p.abilities.modifiers,
@@ -60,16 +62,18 @@ const hitModelOf = (
             Math.max(
                 value(c, 'ws'),
                 skillTarget(c, 'dodge')?.target ?? value(c, 'ag')
-            ) -
-            SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p))
+            ) - (canonSize ? 0 : SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p)))
         );
     },
     winChance: chance,
     damage: (p) =>
         Math.max(
             MIN_DAMAGE,
-            bestHitAverage(p) *
-                (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p))) -
+            (canonSize
+                ? bestHitAverage(p) +
+                  sizeSbFactor(p) * (participantStats(p)?.sb ?? 0)
+                : bestHitAverage(p) *
+                  (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p)))) -
                 BALANCE_REF_TB -
                 BALANCE_REF_AP
         ),
@@ -111,7 +115,8 @@ const canonModel = hitModelOf(
     canonProfile.advantageModel === 'reverse' &&
         canonProfile.momentumModel === 'participant'
         ? momentumWinChance(canonProfile)
-        : winChanceFor(canonProfile)
+        : winChanceFor(canonProfile),
+    canonProfile.sizeModel === 'canon'
 );
 
 export const wfrpHitModelFor = (

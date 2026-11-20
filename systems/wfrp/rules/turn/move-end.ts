@@ -6,6 +6,7 @@ import { participantChars } from '../combat/participant';
 import { editionOf } from '../edition';
 import { wfrpState } from '../state';
 import { frenzyMoveAllowed, isFrenzied } from '../traits/frenzy';
+import { isBiggerThan } from '../traits/size';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { EffectMarker } from '@/lib/constants/battle';
@@ -46,7 +47,9 @@ export function wfrpOnMoveEnd(ctx: MoveEndCtx): TurnHookResult {
           }
         : null;
 
-    const foes = before ? engagedFoes(before, participants, map) : [];
+    const foes = (before ? engagedFoes(before, participants, map) : []).filter(
+        (f) => edition.sizeModel !== 'canon' || !isBiggerThan(mover, f)
+    );
 
     if (
         foes.length > 0 &&

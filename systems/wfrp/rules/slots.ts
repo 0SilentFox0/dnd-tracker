@@ -31,6 +31,8 @@ export interface WfrpAttackSlot {
     twoHanded?: true;
     /** Weapon reach, canon gear only (p300) */
     reach?: WeaponReach;
+    /** Trait attack made as a free attack: no Size damage bonus (p360) */
+    free?: true;
 }
 
 // Legacy rows stored `hand: true` (main) and `offHand: true` (off)
@@ -61,6 +63,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
             }),
         ...(raw.twoHanded === true && { twoHanded: true as const }),
         ...(raw.noSb === true && { noSb: true }),
+        ...(raw.free === true && { free: true as const }),
         ...(raw.magical === true && { magical: true as const }),
         ...(handOf(raw) && { hand: handOf(raw) }),
     };
@@ -114,7 +117,7 @@ export const SCENE_SLOT = defineSlot<SceneMomentum>('wfrp', (raw) => {
     ) as SceneMomentum;
 });
 
-export type WfrpMoveMode = 'run' | 'sprint' | 'charge';
+export type WfrpMoveMode = 'run' | 'sprint' | 'charge' | 'flee';
 
 export interface WfrpParticipantState {
     fortune?: number;
@@ -143,6 +146,22 @@ export interface WfrpParticipantState {
     dispelRound?: number;
     /** Movement chosen this turn, canon5e (p163); a Charge limits attacks to melee */
     moveMode?: WfrpMoveMode;
+    /** Aimed at this target; the next attack gains the Aim bonus (canon actionsModel) */
+    aim?: { targetId: string };
+    /** Round of the last Action taken, for end-of-turn expiry of stances and aiming */
+    actLastRound?: number;
+    /** Defensive stance: the skill the fighter parries or dodges with until its next turn */
+    defensive?: { skill: string };
+    /** Round an engagement with each foe began, keyed by foe id */
+    engagedWith?: Record<string, number>;
+    /** Locked in a grapple, `holder` marks the one holding */
+    grapple?: { with: string; holder: boolean };
+    /** Wounds from burning, counted per round until extinguished */
+    fireWounds?: number;
+    /** Wear taken by each weapon, keyed by attack id */
+    weaponWear?: Record<string, number>;
+    /** Riding a mount, by participant id */
+    mounted?: { mountId: string };
     /** Critical Wounds taken this battle, canon5e (p172) */
     critWounds?: number;
     /** Rounds left before a critically wounded, unconscious fighter dies (p172) */
@@ -219,6 +238,17 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                   )
               )
             : undefined;
+
+        const numbers = (v: unknown): Record<string, number> | undefined =>
+            isRecord(v)
+                ? (Object.fromEntries(
+                      Object.entries(v).filter(([, n]) => finite(n))
+                  ) as Record<string, number>)
+                : undefined;
+
+        const engagedWith = numbers(raw.engagedWith);
+
+        const weaponWear = numbers(raw.weaponWear);
 
         const compelled = isRecord(raw.compelled)
             ? Object.fromEntries(
@@ -302,7 +332,32 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...(finite(raw.dispelRound) && { dispelRound: raw.dispelRound }),
             ...((raw.moveMode === 'run' ||
                 raw.moveMode === 'sprint' ||
-                raw.moveMode === 'charge') && { moveMode: raw.moveMode }),
+                raw.moveMode === 'charge' ||
+                raw.moveMode === 'flee') && { moveMode: raw.moveMode }),
+            ...(isRecord(raw.aim) &&
+                typeof raw.aim.targetId === 'string' && {
+                    aim: { targetId: raw.aim.targetId },
+                }),
+            ...(finite(raw.actLastRound) && { actLastRound: raw.actLastRound }),
+            ...(isRecord(raw.defensive) &&
+                typeof raw.defensive.skill === 'string' && {
+                    defensive: { skill: raw.defensive.skill },
+                }),
+            ...(engagedWith && { engagedWith }),
+            ...(isRecord(raw.grapple) &&
+                typeof raw.grapple.with === 'string' &&
+                typeof raw.grapple.holder === 'boolean' && {
+                    grapple: {
+                        with: raw.grapple.with,
+                        holder: raw.grapple.holder,
+                    },
+                }),
+            ...(finite(raw.fireWounds) && { fireWounds: raw.fireWounds }),
+            ...(weaponWear && { weaponWear }),
+            ...(isRecord(raw.mounted) &&
+                typeof raw.mounted.mountId === 'string' && {
+                    mounted: { mountId: raw.mounted.mountId },
+                }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
             ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),
             ...(finite(raw.sin) && { sin: raw.sin }),

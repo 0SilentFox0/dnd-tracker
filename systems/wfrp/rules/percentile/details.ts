@@ -9,6 +9,8 @@ export interface PercentileAttackDetails {
     doubles: boolean;
     /** A failed test that rolled a double (p165) or hit Dangerous (p305) */
     fumble?: true;
+    /** Situational SL that shaped the test, canon combat modifiers */
+    mods?: { key: string; sl: number }[];
     defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
     momentumUsed?: boolean;
     /** Personal Momentum acted as Advantage on the test (canon5e, p168) */

@@ -30,6 +30,19 @@ export const TRAIT_ATTACKS = [
     'ranged',
 ] as const;
 
+export const BREATH_KINDS = [
+    'acid',
+    'cold',
+    'electricity',
+    'fire',
+    'poison',
+    'smoke',
+] as const;
+
+export const TALENT_KINDS = ['ambidextrous', 'dualWielder'] as const;
+
+export const CREATURE_TRAITS = ['swarm', 'fly', 'painless', 'undead'] as const;
+
 export const WFRP_EFFECT_KINDS: readonly string[] = [
     'wfrpArmour',
     'wfrpWard',
@@ -37,6 +50,9 @@ export const WFRP_EFFECT_KINDS: readonly string[] = [
     'wfrpPsychology',
     'wfrpPassion',
     'wfrpAttack',
+    'wfrpTalent',
+    'wfrpCreature',
+    'wfrpRegenerate',
 ];
 
 export const isWfrpEffectKind = (kind: string): boolean =>

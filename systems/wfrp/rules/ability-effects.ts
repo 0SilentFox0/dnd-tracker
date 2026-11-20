@@ -1,10 +1,13 @@
 import { z } from 'zod';
 
 import {
+    BREATH_KINDS,
+    CREATURE_TRAITS,
     GROUP_PASSIONS,
     PASSION_GROUP_MAX,
     PASSION_KINDS,
     PSYCHOLOGY_KINDS,
+    TALENT_KINDS,
     TRAIT_ATTACKS,
     TRAIT_SIZES,
 } from '@/systems/wfrp/rules/trait-kinds';
@@ -56,6 +59,8 @@ const WfrpAttackSchema = z
         damage: z.number().int().min(0).max(30),
         rangeFt: z.number().int().min(5).max(600).optional(),
         magical: z.literal(true).optional(),
+        breath: z.enum(BREATH_KINDS).optional(),
+        free: z.literal(true).optional(),
     })
     .refine(
         (e) =>
@@ -68,6 +73,21 @@ const WfrpAttackSchema = z
         }
     );
 
+const WfrpTalentSchema = z.strictObject({
+    kind: z.literal('wfrpTalent'),
+    talent: z.enum(TALENT_KINDS),
+});
+
+const WfrpCreatureSchema = z.strictObject({
+    kind: z.literal('wfrpCreature'),
+    trait: z.enum(CREATURE_TRAITS),
+    rating: z.number().int().min(1).max(10).optional(),
+});
+
+const WfrpRegenerateSchema = z.strictObject({
+    kind: z.literal('wfrpRegenerate'),
+});
+
 export const WFRP_EFFECT_SCHEMAS = [
     WfrpArmourSchema,
     WfrpWardSchema,
@@ -75,6 +95,9 @@ export const WFRP_EFFECT_SCHEMAS = [
     WfrpPsychologySchema,
     WfrpPassionSchema,
     WfrpAttackSchema,
+    WfrpTalentSchema,
+    WfrpCreatureSchema,
+    WfrpRegenerateSchema,
 ] as const;
 
 export type WfrpEffect = z.infer<(typeof WFRP_EFFECT_SCHEMAS)[number]>;

@@ -319,13 +319,14 @@ export function unitWounds(
 
     const average = sb + 2 * tb + wpb;
 
+    // tiny and little only serve legacy campaigns; the canon template uses small
     const bySize =
         t.size === 'tiny'
             ? 1
             : t.size === 'little'
               ? tb
               : t.size === 'small'
-                ? 2 * tb + wpb
+                ? 2 * tb
                 : average * (SIZE_WOUNDS_MULTIPLIER[t.size] ?? 1);
 
     return Math.max(
@@ -532,6 +533,11 @@ export function unitIssues(row: Row): string[] {
     const t = unitTraits(row);
 
     const wounds = unitWounds(read.base, t);
+
+    if (t.size === 'tiny' || t.size === 'little')
+        issues.push(
+            `size ${t.size} is not used by the canon template: use small`
+        );
 
     if (row.initiative !== read.base.i)
         issues.push(

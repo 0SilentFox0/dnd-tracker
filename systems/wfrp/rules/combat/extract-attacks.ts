@@ -23,7 +23,7 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 const valueOf = (list: { key: string; value?: number }[], key: string) =>
     list.find((q) => q.key === key)?.value;
 
-// verify against 5e book: targets hit per cell of blast radius
+// Targets hit per cell of blast radius
 const BLAST_TARGETS_PER_RADIUS_CELL = 4;
 
 const GUNPOWDER_GROUPS = ['blackpowder', 'engineering', 'explosives'];
@@ -93,6 +93,7 @@ export function wfrpAttackFromProfile(
     profile: WeaponProfile,
     extra?: {
         magical?: true;
+        free?: true;
         hand?: WfrpHand;
         reach?: NonNullable<WfrpSlot['reach']>;
         canon?: true;
@@ -146,6 +147,7 @@ export function wfrpAttackFromProfile(
             ...(group && { group }),
             ...(!profile.addSb && { noSb: true }),
             ...(extra?.magical && { magical: true as const }),
+            ...(extra?.free && { free: true as const }),
             ...(extra?.hand && { hand: extra.hand }),
             ...(extra?.reach && { reach: extra.reach }),
             ...(extra?.twoHanded && { twoHanded: true as const }),

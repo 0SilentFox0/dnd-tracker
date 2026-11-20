@@ -1,6 +1,6 @@
 import type { TraitSize } from '@/systems/wfrp/rules/trait-kinds';
 
-// All values: verify against 5e book.
+/** Legacy size model: percentage per step and damage multiplier */
 export const SIZE_HIT_PER_STEP = 10;
 
 export const SIZE_DAMAGE_PER_STEP = 1;

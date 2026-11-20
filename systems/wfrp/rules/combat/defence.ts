@@ -5,6 +5,7 @@ import { hasQuality } from '../equipment/qualities';
 import { qualityDefence, qualityWraps } from '../equipment/quality-effects';
 import { REACH_RANK } from '../equipment/weapon-profile';
 import { ATTACK_SLOT } from '../slots';
+import { parryVsBiggerSl } from '../traits/size';
 import { participantChars, participantStats } from './participant';
 import { canonWeaponUse } from './weapon-use';
 
@@ -40,7 +41,8 @@ const refsOf = (attack: BattleAttack) => {
 export function canonDefence(
     defender: BattleParticipant,
     attack: BattleAttack,
-    edition: Pick<EditionProfile, 'attackTarget'>
+    edition: Pick<EditionProfile, 'attackTarget' | 'sizeModel'>,
+    attacker?: BattleParticipant
 ): CanonDefence {
     const chars = participantChars(defender);
 
@@ -97,9 +99,14 @@ export function canonDefence(
         undefined
     );
 
+    const bigger =
+        attacker && edition.sizeModel === 'canon'
+            ? parryVsBiggerSl(defender, attacker)
+            : 0;
+
     return {
         parryTarget: best?.target ?? ws,
-        sl: { parry: best?.sl ?? shield + wrap, dodge: shield },
+        sl: { parry: (best?.sl ?? shield + wrap) + bigger, dodge: shield },
         ...(best && { weapon: best.weapon }),
     };
 }

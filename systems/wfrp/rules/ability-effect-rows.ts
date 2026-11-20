@@ -3,9 +3,12 @@ import type { FieldMeta } from '@/lib/utils/abilities/registry/fields';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
 import type { WfrpEffect } from '@/systems/wfrp/rules/ability-effects';
 import {
+    BREATH_KINDS,
+    CREATURE_TRAITS,
     GROUP_PASSIONS,
     PASSION_KINDS,
     PSYCHOLOGY_KINDS,
+    TALENT_KINDS,
     TRAIT_ATTACKS,
     TRAIT_SIZES,
 } from '@/systems/wfrp/rules/trait-kinds';
@@ -158,6 +161,15 @@ const attack = {
                     v.attack === 'breath' || v.attack === 'ranged',
             },
             { name: 'magical', input: 'toggle', optional: true },
+            {
+                name: 'breath',
+                input: 'select',
+                optional: true,
+                options: options(BREATH_KINDS),
+                visibleWhen: (v: Record<string, unknown>) =>
+                    v.attack === 'breath',
+            },
+            { name: 'free', input: 'toggle', optional: true },
         ],
         describe: (e: Of<'wfrpAttack'>): Segment[] => [
             seg('summary.effects.wfrpAttack', {
@@ -171,6 +183,64 @@ const attack = {
     defaults: { attack: 'bite', damage: 3 },
 } as const;
 
+const talent = {
+    kind: 'wfrpTalent',
+    row: {
+        kind: 'wfrpTalent',
+        static: true,
+        pickable: false,
+        fields: [
+            { name: 'talent', input: 'select', options: options(TALENT_KINDS) },
+        ],
+        describe: (e: Of<'wfrpTalent'>): Segment[] => [
+            seg('summary.effects.wfrpTalent', {
+                talent: seg(`effects.wfrpTalent.options.talent.${e.talent}`),
+            }),
+        ],
+        apply,
+    },
+    defaults: { talent: 'ambidextrous' },
+} as const;
+
+const creature = {
+    kind: 'wfrpCreature',
+    row: {
+        kind: 'wfrpCreature',
+        static: true,
+        pickable: false,
+        fields: [
+            {
+                name: 'trait',
+                input: 'select',
+                options: options(CREATURE_TRAITS),
+            },
+            num('rating', true),
+        ],
+        describe: (e: Of<'wfrpCreature'>): Segment[] => [
+            seg('summary.effects.wfrpCreature', {
+                trait: seg(`effects.wfrpCreature.options.trait.${e.trait}`),
+                rating: e.rating ?? 0,
+                hasRating: e.rating ? 'yes' : 'no',
+            }),
+        ],
+        apply,
+    },
+    defaults: { trait: 'swarm' },
+} as const;
+
+const regenerate = {
+    kind: 'wfrpRegenerate',
+    row: {
+        kind: 'wfrpRegenerate',
+        static: true,
+        pickable: false,
+        fields: [],
+        describe: (): Segment[] => [seg('summary.effects.wfrpRegenerate', {})],
+        apply,
+    },
+    defaults: {},
+} as const;
+
 export const WFRP_EFFECT_ROWS = [
     armour,
     ward,
@@ -178,4 +248,7 @@ export const WFRP_EFFECT_ROWS = [
     psychology,
     passion,
     attack,
+    talent,
+    creature,
+    regenerate,
 ] as const satisfies readonly SystemEffectRowInput[];

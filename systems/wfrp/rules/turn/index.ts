@@ -11,6 +11,12 @@ import {
 import { wfrpFearRound, wfrpPsychology } from '../traits/psychology';
 import { wfrpOnMoveEnd } from './move-end';
 import { wfrpPsychologyGate } from './psychology-gate';
+import {
+    wfrpEngagementExpiry,
+    wfrpRegenerate,
+    wfrpRoundOrder,
+    wfrpSwarmRoundEnd,
+} from './reserved-hooks';
 import { wfrpOnSkippedTurn } from './skipped-turn';
 
 import type { RuleSystemTurn } from '@/lib/utils/rules/systems/types';
@@ -20,18 +26,22 @@ export const WFRP_TURN: RuleSystemTurn = {
     onTurnStart: [
         (ctx) => wfrpConditionsTurnStart(ctx.participants, ctx.id, ctx),
         (ctx) => wfrpFrenzyTurnStart(ctx.participants, ctx.id, ctx),
+        wfrpRegenerate,
     ],
     actGates: [wfrpPsychologyGate],
     onSkippedTurn: [wfrpOnSkippedTurn],
     onMoveEnd: [wfrpOnMoveEnd],
     onTurnEnd: [
         wfrpEndTurnState,
+        wfrpSwarmRoundEnd,
+        wfrpEngagementExpiry,
         (ctx) =>
             editionOf(ctx.rules).magicModel === 'canon5e'
                 ? channelUpkeep(ctx.participants, ctx.id, ctx)
                 : { participants: ctx.participants, messages: [] },
     ],
     onRoundStart: [
+        wfrpRoundOrder,
         (ctx) => wfrpFearRound(ctx.participants, ctx),
         (ctx) => wfrpFrenzyRoundStart(ctx.participants, ctx),
         (ctx) => wfrpPassionsRoundStart(ctx.participants, ctx),

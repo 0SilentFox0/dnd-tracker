@@ -1,3 +1,4 @@
+import { outnumberWeight } from '../traits/size';
 import { SURROUNDED_FOES } from './constants';
 
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
@@ -8,12 +9,18 @@ import type { BattleMapConfig } from '@/types/battle-grid';
 
 type MapCfg = BattleMapConfig | null | undefined;
 
-// Positions are required: without a map nobody counts as outnumbering.
+const sum = (
+    ps: BattleParticipant[],
+    weight: (p: BattleParticipant) => number
+) => ps.reduce((n, p) => n + weight(p), 0);
+
+// Positions are required: without a map nobody counts as outnumbering. `weighted` (canon size): bigger fighters count for more, capped at the target's weight (p166, p360).
 export function isOutnumbering(
     attacker: BattleParticipant,
     target: BattleParticipant,
     participants: BattleParticipant[],
-    map: MapCfg
+    map: MapCfg,
+    weighted = false
 ): boolean {
     if (
         !isHostile(map, attacker, target) ||
@@ -21,9 +28,17 @@ export function isOutnumbering(
     )
         return false;
 
+    const attackers = engagedFoes(target, participants, map);
+
+    const defenders = engagedFoes(attacker, participants, map);
+
+    if (!weighted) return attackers.length >= 2 * defenders.length;
+
+    const cap = outnumberWeight(target);
+
     return (
-        engagedFoes(target, participants, map).length >=
-        2 * engagedFoes(attacker, participants, map).length
+        sum(attackers, (a) => Math.min(outnumberWeight(a), cap)) >=
+        2 * sum(defenders, outnumberWeight)
     );
 }
 
@@ -33,10 +48,7 @@ export const engagedFoes = (
     map: MapCfg
 ): BattleParticipant[] =>
     participants.filter(
-        (f) =>
-            isHostile(map, f, p) &&
-            isActive(f) &&
-            isAdjacentOnMap(map, f, p)
+        (f) => isHostile(map, f, p) && isActive(f) && isAdjacentOnMap(map, f, p)
     );
 
 export const isSurrounded = (foes: BattleParticipant[]): boolean =>
@@ -46,5 +58,7 @@ export const isOutnumbered = (
     p: BattleParticipant,
     foes: BattleParticipant[],
     participants: BattleParticipant[],
-    map: MapCfg
-): boolean => foes.some((f) => isOutnumbering(f, p, participants, map));
+    map: MapCfg,
+    weighted = false
+): boolean =>
+    foes.some((f) => isOutnumbering(f, p, participants, map, weighted));

@@ -175,7 +175,9 @@
         "attack": "Атака",
         "damage": "Шкода +X",
         "rangeFt": "Дальність, фути",
-        "magical": "Магічна"
+        "magical": "Магічна",
+        "breath": "Тип дихання",
+        "free": "Вільна атака"
       },
       "options": {
         "attack": {
@@ -184,8 +186,46 @@
           "breath": "Дихання",
           "weapon": "Зброя",
           "ranged": "Дальня"
+        },
+        "breath": {
+          "acid": "Кислота",
+          "cold": "Холод",
+          "electricity": "Електрика",
+          "fire": "Вогонь",
+          "poison": "Отрута",
+          "smoke": "Дим"
         }
       }
+    },
+    "wfrpTalent": {
+      "label": "WFRP: Талант",
+      "fields": {
+        "talent": "Талант"
+      },
+      "options": {
+        "talent": {
+          "ambidextrous": "Амбідекстр",
+          "dualWielder": "Двозбройний"
+        }
+      }
+    },
+    "wfrpCreature": {
+      "label": "WFRP: Риса істоти",
+      "fields": {
+        "trait": "Риса",
+        "rating": "Рейтинг"
+      },
+      "options": {
+        "trait": {
+          "swarm": "Рій",
+          "fly": "Політ",
+          "painless": "Безболісний",
+          "undead": "Нежить"
+        }
+      }
+    },
+    "wfrpRegenerate": {
+      "label": "WFRP: Регенерація"
     }
   },
   "flags": {
@@ -1139,7 +1179,10 @@
       "wfrpSize": "Розмір: {size}",
       "wfrpPsychology": "{psychology} {value}",
       "wfrpPassion": "{passion}{hasGroup, select, yes { ({group})} other {}}",
-      "wfrpAttack": "{attack} +{damage}{magical, select, yes {, магічна} other {}}"
+      "wfrpAttack": "{attack} +{damage}{magical, select, yes {, магічна} other {}}",
+      "wfrpTalent": "{talent}",
+      "wfrpCreature": "{trait}{hasRating, select, yes { ({rating})} other {}}",
+      "wfrpRegenerate": "Регенерація"
     },
     "flags": {
       "sense": "{sense} {range} фт",
