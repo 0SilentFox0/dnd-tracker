@@ -45,7 +45,7 @@ interface WorldZonesProps {
     showEdges?: boolean;
 }
 
-const FEATHER = 0.007;
+const FEATHER = 0.02;
 
 export function WorldZones({
     markers,
