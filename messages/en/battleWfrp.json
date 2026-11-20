@@ -107,6 +107,29 @@
     "diedOfWounds": "☠️ {name} succumbs to their critical wounds",
     "fateHowDidThatMiss": "{name} spends Fate: How Did That Miss? — the attack by {attacker} has no effect",
     "fateNotToday": "{name} spends Fate: Not Today! — leaves the fight alive",
+    "trapBladeDrop": "Blade trapped",
+    "trapBladeCaught": "{name} traps the {weapon} of {attacker}: the weapon is yanked free and dropped",
+    "trapBladeBroken": "{name} traps the {weapon} of {attacker} and snaps it",
+    "outOfRange": "{name}: {target} is beyond Extreme range, no shot",
+    "swarmBite": "{swarm} swarms over {target}: {damage} Wound",
+    "regenerates": "{name} regenerates {amount} Wounds",
+    "regenCrit": "{name} heals a Critical Wound",
+    "attackMod": "{mod}: {sl} SL",
+    "attackModFlat": "{mod}",
+    "aimed": "{name} takes aim at {target}: +1 SL on the next shot",
+    "defensiveParry": "{name} stands on the defensive: +2 SL to Parry until the next turn",
+    "defensiveDodge": "{name} stands on the defensive: +2 SL to Dodge until the next turn",
+    "defensiveMagick": "{name} stands on the defensive: +2 SL to Language (Magick) against dispels until the next turn",
+    "fled": "{name} flees from {foes} foe(s) without Disengage: Broken, the foes gain Momentum and may strike",
+    "grappled": "{name} grapples {target}: both are locked in a hold, {target} is Entangled",
+    "grappleLost": "{name} is no longer held: the grapple ends",
+    "grappleFailed": "{name} fails to overpower {target} in the grapple",
+    "grappleFree": "{name} breaks free of the grapple with {target} (SL {sl})",
+    "grappleEntangle": "{name} tightens the hold on {target} (SL {sl})",
+    "grappleDamage": "{name} wrenches {target} in the grapple (SL {sl}): {damage} Wounds",
+    "mounted": "{name} is now riding {mount}",
+    "dismounted": "{name} dismounts",
+    "helplessKill": "{name} finishes the helpless {target}",
     "momentumSecondAttack": "{name} spends Momentum on an attack with the second weapon",
     "leadershipTransfer": "{name} spends Momentum: Leadership (SL {sl}), {ally} gains Momentum",
     "disengageMomentum": "{name} spends Momentum and moves out of melee without penalty",
@@ -125,6 +148,8 @@
     "fumbleMisfire": "{name}: misfire ({roll}): {text}",
     "fumbleWounds": "{name} takes {wounds} Wounds from the fumble",
     "fumbleNote": "{name}: {note}",
+    "fumbleAlly": "{name} strikes {ally} by mistake (units die {sl} SL, resolve the hit by hand)",
+    "fumbleAllyNone": "{name} has no ally in reach and hits themselves in the face",
     "targetSurrounded": "{name} is surrounded: no route of escape"
   },
   "passion": {
@@ -191,7 +216,12 @@
       "body": "{attacker}'s attack hit {name}. Spend Fate to make the attack have no effect?",
       "spend": "Spend Fate — it misses",
       "accept": "Take the hit",
-      "waiting": "Waiting for the Fate decision"
+      "waiting": "Waiting for the Fate decision",
+      "trapBlade": {
+        "body": "{name} scored a Critical parrying the blade of {attacker}. Trap the blade instead of wounding?",
+        "spend": "Trap the blade",
+        "accept": "Deal the Critical Hit"
+      }
     },
     "psychology": {
       "title": "Psychology",
@@ -199,6 +229,23 @@
       "vent": "Insult / provoke {group}",
       "release": "Release from {passion} ({group})",
       "intimidate": "Intimidate {name} (action, vs Cool)"
+    },
+    "attackMods": {
+      "title": "Situation",
+      "off": "Off",
+      "calledShot": "Called shot (−2 SL)",
+      "highGround": "High ground",
+      "highAttacker": "Attacker above",
+      "highDefender": "Defender above",
+      "situation": "Terrain",
+      "cover": "Target in cover",
+      "enclosed": "Cramped space",
+      "helplessRoll": "Helpless target: chosen roll",
+      "grapple": "Grapple"
+    },
+    "mounted": {
+      "label": "Mount",
+      "none": "On foot"
     },
     "momentum": {
       "title": "Momentum",
@@ -208,6 +255,20 @@
       "run": "Run (double Movement)",
       "sprint": "Sprint (action, Athletics)",
       "charge": "Charge",
+      "aim": "Aim (action)",
+      "defensive": "On the Defensive (action)",
+      "defensiveSkill": {
+        "parry": "Parry +2 SL",
+        "dodge": "Dodge +2 SL",
+        "magick": "Language (Magick) +2 SL"
+      },
+      "flee": "Flee (no Disengage)",
+      "grapple": "Grapple (action, Strength)",
+      "grappleChoice": {
+        "damage": "Wound the foe",
+        "entangle": "Tighten the hold",
+        "free": "Break free"
+      },
       "leadership": "Pass Momentum",
       "ally": "Ally",
       "reason": {
@@ -218,6 +279,34 @@
         "weapons": "Two melee weapons required"
       }
     }
+  },
+  "attackMod": {
+    "range": {
+      "pointBlank": "Point Blank",
+      "short": "Short range",
+      "long": "Long range",
+      "extreme": "Extreme range"
+    },
+    "cover": "Target in cover",
+    "prone": "Target prone",
+    "surprised": "Target surprised",
+    "aim": "Aimed",
+    "moved": "Shooter moved",
+    "shootingIntoMelee": "Target engaged in melee: Disadvantage, the GM may redirect a stray hit",
+    "calledShot": "Called shot",
+    "highGround": "High ground",
+    "difficult": "Attacker in difficult terrain",
+    "proneSelf": "Attacker prone",
+    "entangled": "Target entangled",
+    "enclosed": "Cramped space",
+    "helpless": "Helpless target",
+    "size": "Size",
+    "swarm": "Target is a Swarm",
+    "flierShooter": "Shooter is flying",
+    "surrounded": "Surrounded",
+    "outnumbered": "Outnumbering",
+    "cavalry": "Cavalry weapon from the saddle",
+    "mountedFoe": "Foe on a larger mount"
   },
   "crit": {
     "head": {
@@ -264,7 +353,12 @@
       "size": "Size",
       "minimum": "Minimum damage",
       "frenzy": "Frenzy",
-      "crit": "Critical wound"
+      "helplessKill": "Helpless",
+      "crit": "Critical wound",
+      "spell": "Spell damage",
+      "wpb": "Willpower bonus",
+      "spellScale": "Spell bonus",
+      "overcast": "Overcast"
     },
     "total": "Total damage"
   },

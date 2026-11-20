@@ -7,10 +7,12 @@ import {
     notTodayLine,
     tickDeathTimer,
 } from '../combat/critical';
+import { inflictWounds } from '../combat/direct-damage';
 import { fateSpendsOn } from '../combat/fate';
 import { participantChars, participantStats } from '../combat/participant';
 import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
+import { withFireWounds } from '../traits/regeneration';
 import { applyWfrpConditionTo, reduceWfrpCondition } from './apply';
 import { BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL } from './catalog';
 import { conditionLevel } from './levels';
@@ -23,7 +25,6 @@ import {
     isActive,
     replaceParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
-import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { rollDie } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -80,39 +81,15 @@ export function wfrpConditionsTurnStart(
     const messages: LogLine[] = [];
 
     const hurt = (amount: number, key: 'bleeding' | 'ablaze' | 'poisoned') => {
-        const before = findParticipant(participants, id);
+        const r = inflictWounds(participants, id, amount, ctx);
 
-        if (!before || !isActive(before) || amount <= 0) return;
-
-        const after = dropBreakOnDamage(
-            {
-                ...before,
-                combatStats: {
-                    ...before.combatStats,
-                    currentHp: Math.max(
-                        0,
-                        before.combatStats.currentHp - amount
-                    ),
-                },
-            },
-            amount
-        );
-
-        const r = ctx.applyDamage({
-            before,
-            after,
-            amount,
-            rules: ctx.rules,
-            rng: ctx.rng,
-            participants: replaceParticipant(participants, after),
-            round: ctx.round,
-        });
+        if (r.name === undefined) return;
 
         participants = r.participants;
 
         messages.push(
             textRef(`battleWfrp.log.tick.${key}`, {
-                name: before.basicInfo.name,
+                name: r.name,
                 damage: amount,
             }),
             ...r.messages
@@ -172,13 +149,18 @@ export function wfrpConditionsTurnStart(
             ? Math.min(...Object.values(wfrp?.ap ?? { body: 0 }))
             : (wfrp?.ap.body ?? 0);
 
-        hurt(
-            Math.max(
-                canon ? 0 : MIN_DAMAGE,
-                rollDie(10, ctx.rng) + ablaze - 1 - (wfrp?.tb ?? 0) - armour
-            ),
-            'ablaze'
+        const burn = Math.max(
+            canon ? 0 : MIN_DAMAGE,
+            rollDie(10, ctx.rng) + ablaze - 1 - (wfrp?.tb ?? 0) - armour
         );
+
+        hurt(burn, 'ablaze');
+
+        if (edition.traitModel === 'canon')
+            participants = replaceParticipant(
+                participants,
+                withFireWounds(findParticipant(participants, id)!, burn)
+            );
     }
 
     const after = findParticipant(participants, id);

@@ -45,6 +45,8 @@ export type CanonPicks = {
     speciesRolled?: boolean;
     distribution?: Partial<Record<CharacteristicKey, number>>;
     speciesSkills?: string[];
+    /** One pick per `profile.talentChoices` group, in group order */
+    speciesTalents?: string[];
     careerSkills?: Record<string, number>;
     careerTalent?: string;
     careerTrappings?: string[];
@@ -60,6 +62,7 @@ export type CanonPlan = {
     bonus: Partial<Record<CharacteristicKey, number>>;
     skillAdvances: Record<string, number>;
     careerTalent?: string;
+    speciesTalents: string[];
     trappings: string[];
     items: StartingItem[];
     wealth: CoinAmount;
@@ -136,6 +139,16 @@ export function planCanon(
     if (!speciesPicks && speciesSkills.length) errors.push('SPECIES_SKILLS');
 
     for (const s of speciesSkills) purchases[s] = (purchases[s] ?? 0) + 1;
+
+    const groups = profile.talentChoices ?? [];
+
+    const speciesTalents = picks.speciesTalents ?? [];
+
+    if (
+        speciesTalents.length !== groups.length ||
+        groups.some((g, i) => !g.includes(speciesTalents[i]))
+    )
+        errors.push('SPECIES_TALENTS');
 
     const tier1 = ctx.tier1[careerId];
 
@@ -220,6 +233,7 @@ export function planCanon(
         items,
         wealth: startingWealthOf(tier1.status, rng),
         ticks: bonusTrappings.map(trappingTickKey),
+        speciesTalents: groups.length ? speciesTalents : [],
         careerTalent:
             talent && tier1.talents.includes(talent) ? talent : undefined,
         trappings: items.map((i) => i.name),

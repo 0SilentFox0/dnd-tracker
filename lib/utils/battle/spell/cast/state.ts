@@ -10,6 +10,7 @@ import { logFields } from '@/lib/utils/battle/log/lines';
 import type { SpellPower } from '@/lib/utils/battle/spell/power';
 import type { TransformRequest } from '@/lib/utils/battle/transform/types';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type {
     AnchoredZoneEffect,
     BurstEffect,
@@ -22,6 +23,7 @@ import type {
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { BattleAction, DamageStep } from '@/types/battle-actions';
+import type { GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type ChosenSpell = Omit<CastableSpell, 'definition'> & {
@@ -56,6 +58,9 @@ export interface SpellCastState {
     saveDc: number | undefined;
     attackBonus?: number;
     overcastDamage: number;
+    castDetails?: SystemSlot;
+    /** Cells of the targets that remain when the roll could not pay for all declared ones */
+    finalTargets?: readonly GridPoint[];
     battleId: string;
     actionModifiers: Record<string, StaticEffect[]>;
     rng: () => number;

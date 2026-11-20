@@ -50,11 +50,14 @@ const foeOf = (id: string, x: number, y: number): BattleParticipant => {
         controlledBy: 'dm',
     });
 
-    return {
-        ...base,
-        abilities: { ...base.abilities, system: chars({ ws: 30 }) },
-        battleData: { ...base.battleData, position: at(x, y) },
-    };
+    return withWfrpState(
+        {
+            ...base,
+            abilities: { ...base.abilities, system: chars({ ws: 30 }) },
+            battleData: { ...base.battleData, position: at(x, y) },
+        },
+        { engagedWith: { hero: 2 } }
+    );
 };
 
 const ctxOf = (

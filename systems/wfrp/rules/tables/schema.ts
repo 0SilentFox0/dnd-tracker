@@ -48,6 +48,7 @@ export const FUMBLE_KINDS = [
     'actLast',
     'weaponDamage',
     'legPenalty',
+    'hitAlly',
 ] as const;
 
 export type FumbleKind = (typeof FUMBLE_KINDS)[number];

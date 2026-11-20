@@ -432,11 +432,13 @@ describe('validatePack: wfrp units', () => {
         event = 'passive'
     ) => ({ id, name, trigger: { event }, effects: [effect] });
 
-    const regenerate = (event: string) =>
+    const regenerate = (event: string, legacy = false) =>
         ab(
             'regenerate',
             'Regenerate',
-            { kind: 'heal', amount: '1d10', target: 'self' },
+            legacy
+                ? { kind: 'heal', amount: '1d10', target: 'self' }
+                : { kind: 'wfrpRegenerate' },
             event
         );
 
@@ -514,8 +516,8 @@ describe('validatePack: wfrp units', () => {
             ['abilities[2] "Terror 1": unknown trait id "terror"'],
         ],
         [
-            'a passive regenerate',
-            (r) => r.abilities.push(regenerate('passive')),
+            'a turnStart heal regenerate',
+            (r) => r.abilities.push(regenerate('turnStart', true)),
             [
                 'abilities[2] "Regenerate": is not the output of the "regenerate" trait recipe',
             ],
@@ -590,7 +592,7 @@ describe('validatePack: wfrp units', () => {
         [
             'a wrong maxHp',
             (r) => (r.maxHp = 6),
-            ['maxHp 6 must equal Wounds 5'],
+            ['maxHp 6 must equal Wounds 4'],
         ],
         [
             'a characteristic out of band',
@@ -615,7 +617,7 @@ describe('validatePack: wfrp units', () => {
         ],
         [
             'Regenerate on level 1',
-            (r) => r.abilities.push(regenerate('turnStart')),
+            (r) => r.abilities.push(regenerate('passive')),
             ['Regenerate is not allowed for level 1'],
         ],
         [
@@ -643,7 +645,7 @@ describe('validatePack: wfrp units', () => {
 });
 
 describe('validatePack: wfrp spells', () => {
-    const where = 'spells #1 "Rot Touch": ';
+    const where = 'spells #1 "Shove Wave": ';
 
     type Mutate = (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -738,7 +740,7 @@ describe('validatePack: wfrp spells', () => {
         [
             'zero dice with an effect',
             (d) => (d.spells[0].dice = 0),
-            'dice must be ≥ 1 exactly when the spell has an effect',
+            'a spell with an effect needs dice ≥ 1 or a damageBonus, and one without needs neither',
         ],
         [
             'neither effect nor attribute',
@@ -795,10 +797,10 @@ describe('validatePack: wfrp spells', () => {
     it('rejects a unit that cannot reach the CN of a known spell', () => {
         const data = load();
 
-        data.units[0].knownSpells = ['Rot Touch'];
+        data.units[0].knownSpells = ['Shove Wave'];
         (data.spells[0].casting as { magic: { cn: number } }).magic.cn = 2;
         expect(issuesOf(data)).toContain(
-            'units #1 "Giant Rat": knownSpells "Rot Touch" CN 2 is above the best SL 1 this unit can reach'
+            'units #1 "Giant Rat": knownSpells "Shove Wave" CN 2 is above the best SL 1 this unit can reach'
         );
     });
 });
@@ -830,14 +832,14 @@ describe('validatePack: wfrp artifacts', () => {
             w + 'slot "ring" is not used by Grim items',
         ],
         [
-            'an unused group',
+            'a reach weapon in the entangling group',
             (s) => (s.systemStats.group = 'entangling'),
-            w + 'group "entangling" is not used by Grim items',
+            w + 'group "entangling" needs range, not reach',
         ],
         [
             'an unimplemented quality',
-            (s) => (s.systemStats.qualities = [{ key: 'trapBlade' }]),
-            w + 'quality "trapBlade" is not implemented',
+            (s) => (s.systemStats.qualities = [{ key: 'spread' }]),
+            w + 'quality "spread" is not implemented',
         ],
         [
             'a flaw as a quality',
@@ -852,12 +854,12 @@ describe('validatePack: wfrp artifacts', () => {
         [
             'a price above the band',
             (s) => (s.systemStats.price = 5000),
-            w + 'price 5000 p is outside 6–1440 p for basic',
+            w + 'price 5000 p is outside 0–1440 p for basic',
         ],
         [
             'a fractional price',
             (s) => (s.systemStats.price = 10.5),
-            w + 'price 10.5 p is outside 6–1440 p for basic',
+            w + 'price 10.5 p is outside 0–1440 p for basic',
         ],
         [
             'reload without ammoCapacity',

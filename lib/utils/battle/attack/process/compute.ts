@@ -493,6 +493,7 @@ function mitigateHit(
             attackRoll: totalAttackValue,
             attack: params.attack,
             rng: params.rng ?? Math.random,
+            ...(params.offTurn && { offTurn: true }),
         },
     }).mitigated;
 

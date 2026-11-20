@@ -10,37 +10,10 @@
     }
   },
   "tables": {
-    "miscastMinor": [
+    "critHead": [
       {
-        "max": 10,
-        "text": "A smell of scorched hair clings to you, and nothing worse.",
-        "effects": []
-      },
-      {
-        "max": 20,
-        "text": "Your ears ring with a sound only you can hear.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "deafened",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 30,
-        "text": "A wave of weariness drags at your limbs.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "fatigued",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 40,
-        "text": "Your nose bleeds freely.",
+        "max": 3,
+        "text": "A shallow scratch on the cheek leaves a dashing scar.",
         "effects": [
           {
             "type": "condition",
@@ -50,227 +23,128 @@
         ]
       },
       {
-        "max": 50,
-        "text": "Sparks jump between your teeth.",
+        "max": 9,
+        "text": "A clip to the ear sets it ringing.",
         "effects": [
           {
-            "type": "wounds",
+            "type": "damage",
             "amount": 1
-          }
-        ]
-      },
-      {
-        "max": 60,
-        "text": "Your vision swims with afterimages.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "blinded",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 70,
-        "text": "The spell recoils and knocks you off your feet.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "prone",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 80,
-        "text": "A cold spasm locks your jaw.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "stunned",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 90,
-        "text": "Pain lances behind your eyes.",
-        "effects": [
-          {
-            "type": "wounds",
-            "amount": 2
-          }
-        ]
-      },
-      {
-        "max": 100,
-        "text": "Raw power scours you from the inside.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "fatigued",
-            "levels": 1
           },
-          {
-            "type": "wounds",
-            "amount": 2
-          }
-        ]
-      }
-    ],
-    "miscastMajor": [
-      {
-        "max": 10,
-        "text": "Your shadow tears loose and claws at you before fading.",
-        "effects": [
-          {
-            "type": "wounds",
-            "amount": 2
-          }
-        ]
-      },
-      {
-        "max": 20,
-        "text": "Flames lick up your sleeves.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "ablaze",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 30,
-        "text": "Blood seeps from your eyes and ears.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "bleeding",
-            "levels": 2
-          }
-        ]
-      },
-      {
-        "max": 40,
-        "text": "The world tilts and you collapse, twitching.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "prone",
-            "levels": 1
-          },
-          {
-            "type": "condition",
-            "key": "stunned",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 50,
-        "text": "A thunderclap bursts beside your head.",
-        "effects": [
           {
             "type": "condition",
             "key": "deafened",
             "levels": 1
-          },
-          {
-            "type": "condition",
-            "key": "stunned",
-            "levels": 1
           }
         ]
       },
-      {
-        "max": 60,
-        "text": "Searing light fills your eyes.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "blinded",
-            "levels": 1
-          },
-          {
-            "type": "wounds",
-            "amount": 2
-          }
-        ]
-      },
-      {
-        "max": 70,
-        "text": "Unseen things whisper your name until you flee.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "broken",
-            "levels": 2
-          }
-        ]
-      },
-      {
-        "max": 80,
-        "text": "Your heart stutters under the backlash.",
-        "effects": [
-          {
-            "type": "wounds",
-            "amount": 4
-          },
-          {
-            "type": "condition",
-            "key": "fatigued",
-            "levels": 1
-          }
-        ]
-      },
-      {
-        "max": 90,
-        "text": "Fire bursts from your mouth and hands.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "ablaze",
-            "levels": 2
-          },
-          {
-            "type": "wounds",
-            "amount": 3
-          }
-        ]
-      },
-      {
-        "max": 100,
-        "text": "The backlash hurls you down, senseless and bleeding.",
-        "effects": [
-          {
-            "type": "condition",
-            "key": "stunned",
-            "levels": 3
-          },
-          {
-            "type": "wounds",
-            "amount": 5
-          }
-        ]
-      }
-    ],
-    "wrath": [
       {
         "max": 12,
-        "text": "A hush falls and your next breath tastes of ash.",
+        "text": "A glancing blow rakes the eye socket.",
         "effects": [
           {
+            "type": "damage",
+            "amount": 1
+          },
+          {
             "type": "condition",
-            "key": "fatigued",
+            "key": "blinded",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 17,
+        "text": "A small cut opens across the cheek.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 20,
+        "text": "Flashing lights swim before your eyes.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
             "levels": 1
           }
         ]
       },
       {
         "max": 25,
-        "text": "Your words catch in a throat gone dry.",
+        "text": "A blow lands on the eye, leaving it swollen shut.",
         "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 30,
+        "text": "A cut across the ear bleeds and deafens.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 35,
+        "text": "A heavy blow to the brow: blood runs into the eyes.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 40,
+        "text": "The jaw cracks under the blow; a lasting injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
           {
             "type": "condition",
             "key": "stunned",
@@ -279,20 +153,940 @@
         ]
       },
       {
-        "max": 37,
-        "text": "A ringing like a great bell fills your skull.",
+        "max": 45,
+        "text": "A hit to the nose; Endurance test or Stunned.",
         "effects": [
           {
+            "type": "damage",
+            "amount": 3
+          },
+          {
             "type": "condition",
-            "key": "deafened",
+            "key": "bleeding",
             "levels": 1
           }
         ]
       },
       {
         "max": 50,
-        "text": "Your knees buckle under an unseen weight.",
+        "text": "The eye socket is struck; sight returns only with treatment.",
         "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 55,
+        "text": "The jaw breaks; a serious bone injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "The hearing in one ear is destroyed for good.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 4
+          }
+        ]
+      },
+      {
+        "max": 65,
+        "text": "A crushing blow to the skull leaves you reeling.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "fatigued",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 75,
+        "text": "Teeth are knocked out; a possible amputation follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "The ear is torn apart; a possible amputation follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 3
+          }
+        ]
+      },
+      {
+        "max": 85,
+        "text": "The eye bursts; a possible amputation follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 94,
+        "text": "Eye and nose are destroyed; a possible amputation follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 3
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 99,
+        "text": "Jaw shattered and tongue lost; a serious injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 4
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 3
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "The skull is caved in; death is instant.",
+        "effects": [
+          {
+            "type": "death"
+          }
+        ]
+      }
+    ],
+    "critArm": [
+      {
+        "max": 10,
+        "text": "A jolt through the wrist makes you drop what you hold.",
+        "effects": [
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "rounds": 1
+          }
+        ]
+      },
+      {
+        "max": 20,
+        "text": "The arm goes numb: it is useless for 1d10 minus TB rounds.",
+        "effects": [
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "roundsFormula": "1d10-TB"
+          }
+        ]
+      },
+      {
+        "max": 25,
+        "text": "A cut across the upper arm.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 30,
+        "text": "A bleeding hand: items held may slip away.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 45,
+        "text": "A strained muscle: a minor lasting injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "max": 50,
+        "text": "A blow to the forearm: bleeding and a minor injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 55,
+        "text": "The arm is wrenched: item dropped, arm useless for 1d10 rounds.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "roundsFormula": "1d10"
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "A gaping wound that reopens until stitched.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 65,
+        "text": "A ligament ruptures; item dropped, a major injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "rounds": 1
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "A clean break; item dropped, Endurance test or Stunned.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "rounds": 1
+          }
+        ]
+      },
+      {
+        "max": 85,
+        "text": "A deep cut and a torn muscle.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 90,
+        "text": "The elbow is crushed; item dropped, a major injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "rounds": 1
+          }
+        ]
+      },
+      {
+        "max": 95,
+        "text": "An artery is damaged and bleeds heavily.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 4
+          }
+        ]
+      },
+      {
+        "max": 109,
+        "text": "The shoulder is dislocated; the arm is useless until reset.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "marker",
+            "key": "disarmed"
+          }
+        ]
+      },
+      {
+        "max": 115,
+        "text": "A finger is lost; a possible amputation.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 120,
+        "text": "The hand is splayed open; fingers may be lost.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 125,
+        "text": "The bicep is ripped from the bone; item dropped.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "rounds": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 130,
+        "text": "The hand is lost; a possible amputation.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "marker",
+            "key": "disarmed"
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 135,
+        "text": "The tendons are cut and the arm hangs useless.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "marker",
+            "key": "disarmed"
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 3
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 136,
+        "text": "The arm is torn away and you die of shock.",
+        "effects": [
+          {
+            "type": "death"
+          }
+        ]
+      }
+    ],
+    "critBody": [
+      {
+        "max": 10,
+        "text": "The wind is knocked out of you for a round.",
+        "effects": [
+          {
+            "type": "marker",
+            "key": "winded",
+            "rounds": 1
+          }
+        ]
+      },
+      {
+        "max": 15,
+        "text": "A gut blow: Endurance test or you vomit and lose a round.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "max": 25,
+        "text": "A flesh wound.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 30,
+        "text": "A low blow leaves you doubled over.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 35,
+        "text": "A twisted back: a minor lasting injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "max": 50,
+        "text": "Bruised ribs make you clumsy for days.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "max": 55,
+        "text": "A wrenched collar bone: one arm is useless for 1d10 rounds.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "marker",
+            "key": "disarmed",
+            "roundsFormula": "1d10"
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "A ragged wound opens.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 65,
+        "text": "Cracked ribs: a minor bone injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 70,
+        "text": "A gaping wound that reopens until stitched.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 3
+          }
+        ]
+      },
+      {
+        "max": 75,
+        "text": "A painful cut; a hard test or you scream out.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "A pulled back: a major muscle injury follows.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 85,
+        "text": "An artery is hit; later body wounds bleed more.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 4
+          }
+        ]
+      },
+      {
+        "max": 90,
+        "text": "A gut wound that may fester.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 95,
+        "text": "A fractured hip: Endurance test or you fall; a minor injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "A great chest wound that reopens until stitched.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 4
+          }
+        ]
+      },
+      {
+        "max": 105,
+        "text": "The rib cage is smashed; a major bone injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 110,
+        "text": "The spine is damaged and the legs never work again.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 3
+          },
+          {
+            "type": "marker",
+            "key": "crippled"
+          }
+        ]
+      },
+      {
+        "max": 115,
+        "text": "Internal bleeding that only surgery can stop.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 116,
+        "text": "The body is torn apart; death is instant.",
+        "effects": [
+          {
+            "type": "death"
+          }
+        ]
+      }
+    ],
+    "critLeg": [
+      {
+        "max": 10,
+        "text": "A jabbed toe: Endurance test or clumsy until your turn ends.",
+        "effects": []
+      },
+      {
+        "max": 20,
+        "text": "You lose your footing: Athletics test or fall prone.",
+        "effects": []
+      },
+      {
+        "max": 25,
+        "text": "A twisted ankle hampers the leg for 1d10 minus TB rounds.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "marker",
+            "key": "crippled",
+            "roundsFormula": "1d10-TB"
+          }
+        ]
+      },
+      {
+        "max": 40,
+        "text": "A minor cut.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 45,
+        "text": "A thigh strike: Endurance test or fall prone.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 50,
+        "text": "A sprained ankle: a minor lasting injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "max": 55,
+        "text": "A twisted knee hampers the leg for 1d10 rounds.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "marker",
+            "key": "crippled",
+            "roundsFormula": "1d10"
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "A bad cut: Endurance test or fall prone.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 65,
+        "text": "A badly twisted knee: a major muscle injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "max": 70,
+        "text": "A cut toe that may be lost after the fight.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 2
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 75,
+        "text": "A tendon ruptures; a hard test or you black out.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          },
           {
             "type": "condition",
             "key": "prone",
@@ -301,25 +1095,187 @@
         ]
       },
       {
-        "max": 62,
-        "text": "Shame burns in you until you can barely act.",
+        "max": 80,
+        "text": "A torn thigh that bleeds more until stitched.",
         "effects": [
           {
+            "type": "damage",
+            "amount": 3
+          },
+          {
             "type": "condition",
-            "key": "broken",
+            "key": "bleeding",
+            "levels": 3
+          }
+        ]
+      },
+      {
+        "max": 85,
+        "text": "A hacked leg: bleeding, a stunned fall and a broken bone.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 3
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "prone",
             "levels": 1
           }
         ]
       },
       {
-        "max": 75,
-        "text": "Your palms split open as if scourged.",
+        "max": 95,
+        "text": "A dislocated knee: the leg is useless until reset.",
         "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          },
+          {
+            "type": "marker",
+            "key": "crippled"
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "A cracked shin: a bone injury and a torn muscle.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 105,
+        "text": "A broken knee and a major bone injury.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
           {
             "type": "condition",
             "key": "bleeding",
             "levels": 1
           },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 115,
+        "text": "A crushed foot; toes or the foot itself may be lost.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 120,
+        "text": "The foot is severed.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 3
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 2
+          },
+          {
+            "type": "marker",
+            "key": "crippled"
+          }
+        ]
+      },
+      {
+        "max": 125,
+        "text": "A cut tendon: the leg never works again.",
+        "effects": [
+          {
+            "type": "damage",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 2
+          },
+          {
+            "type": "marker",
+            "key": "crippled"
+          }
+        ]
+      },
+      {
+        "max": 126,
+        "text": "The pelvis is shattered; death is instant.",
+        "effects": [
+          {
+            "type": "death"
+          }
+        ]
+      }
+    ],
+    "oops": [
+      {
+        "max": 20,
+        "text": "You catch yourself with your own weapon.",
+        "effects": [
           {
             "type": "wounds",
             "amount": 1
@@ -327,8 +1283,136 @@
         ]
       },
       {
-        "max": 87,
-        "text": "Light pours from the sky into your eyes.",
+        "max": 40,
+        "text": "Your weapon is damaged and you recover slowly, acting last next round.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "weaponDamage"
+          },
+          {
+            "type": "fumble",
+            "kind": "actLast"
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "You are out of position: -1 SL on your tests next round.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "slPenalty"
+          }
+        ]
+      },
+      {
+        "max": 70,
+        "text": "You stumble badly and lose your next Move.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "loseMove"
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "You mishandle your gear and lose your next Action.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "loseAction"
+          }
+        ]
+      },
+      {
+        "max": 90,
+        "text": "You twist your ankle: a leg suffers -1 SL for 1d10 rounds.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "legPenalty"
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "You strike a random ally; if none is near, you stun yourself.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "hitAlly"
+          }
+        ]
+      }
+    ],
+    "misfire": [
+      {
+        "max": 80,
+        "text": "The weapon fails to fire and must be reloaded.",
+        "effects": [
+          {
+            "type": "fumble",
+            "kind": "loseAction"
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "Catastrophe: the weapon explodes in your hands.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 4
+          },
+          {
+            "type": "fumble",
+            "kind": "weaponDamage"
+          }
+        ]
+      }
+    ],
+    "miscastMinor": [
+      {
+        "max": 5,
+        "text": "Your tongue trips over every spell for a few rounds.",
+        "effects": []
+      },
+      {
+        "max": 10,
+        "text": "A mutated creature is born nearby within the mile.",
+        "effects": []
+      },
+      {
+        "max": 15,
+        "text": "Startled and unable to concentrate for a moment.",
+        "effects": []
+      },
+      {
+        "max": 20,
+        "text": "Your bowels let go and you are thoroughly soiled.",
+        "effects": []
+      },
+      {
+        "max": 25,
+        "text": "Every buckle and lace on your person comes undone.",
+        "effects": []
+      },
+      {
+        "max": 30,
+        "text": "Your clothes writhe and tangle about you.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "entangled",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 35,
+        "text": "Fleeting visions of profane acts blind you.",
         "effects": [
           {
             "type": "condition",
@@ -338,19 +1422,388 @@
         ]
       },
       {
+        "max": 40,
+        "text": "All milk nearby turns sour.",
+        "effects": []
+      },
+      {
+        "max": 45,
+        "text": "A sudden chill drops the temperature and mists breath.",
+        "effects": []
+      },
+      {
+        "max": 50,
+        "text": "Your nose, eyes and ears bleed.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 55,
+        "text": "All alcohol nearby turns bitter and foul.",
+        "effects": []
+      },
+      {
+        "max": 60,
+        "text": "Visions of dark powers rattle you; a test or you break.",
+        "effects": []
+      },
+      {
+        "max": 65,
+        "text": "Your second sight fades for hours and channelling suffers.",
+        "effects": []
+      },
+      {
+        "max": 70,
+        "text": "A horrifying shriek rings in your ears.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 75,
+        "text": "You retch uncontrollably.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "Voices tempt you to corruption; a test or gain Corruption.",
+        "effects": []
+      },
+      {
+        "max": 85,
+        "text": "Corruption seeps into you.",
+        "effects": []
+      },
+      {
+        "max": 90,
+        "text": "The Wind leaves a permanent mark on your body.",
+        "effects": []
+      },
+      {
+        "max": 95,
+        "text": "Roll twice more on this table.",
+        "effects": []
+      },
+      {
         "max": 100,
-        "text": "Hearthfire scorches your skin for your failings.",
+        "text": "Cascading disaster: roll on the Major Miscast table.",
+        "effects": []
+      }
+    ],
+    "miscastMajor": [
+      {
+        "max": 5,
+        "text": "You gabble unintelligibly for a few rounds.",
+        "effects": []
+      },
+      {
+        "max": 10,
+        "text": "You stink horribly for hours.",
+        "effects": []
+      },
+      {
+        "max": 15,
+        "text": "You are flung through the air and crash down.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          },
+          {
+            "type": "wounds",
+            "amount": 5
+          }
+        ]
+      },
+      {
+        "max": 20,
+        "text": "You cannot use your casting Talent for minutes.",
+        "effects": []
+      },
+      {
+        "max": 25,
+        "text": "You float above the ground for minutes.",
+        "effects": []
+      },
+      {
+        "max": 30,
+        "text": "Aethyric shock wounds you through armour.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 5
+          }
+        ]
+      },
+      {
+        "max": 35,
+        "text": "A wild quake knocks the nearby to the ground.",
+        "effects": []
+      },
+      {
+        "max": 40,
+        "text": "Your eyes turn unnatural and blind you for hours.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 45,
+        "text": "One limb is frozen in place for hours.",
+        "effects": []
+      },
+      {
+        "max": 50,
+        "text": "Plants wither where you tread for hours.",
+        "effects": []
+      },
+      {
+        "max": 55,
+        "text": "The Winds are turbulent; casting is harder for hours.",
+        "effects": []
+      },
+      {
+        "max": 60,
+        "text": "You are wreathed in unholy flames.",
         "effects": [
           {
             "type": "condition",
             "key": "ablaze",
             "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 65,
+        "text": "A swarm of aethyric vermin engages you.",
+        "effects": []
+      },
+      {
+        "max": 70,
+        "text": "Gain a Fortune Point, but each spent costs Corruption.",
+        "effects": []
+      },
+      {
+        "max": 75,
+        "text": "Nearby fields blight and crops rot overnight.",
+        "effects": []
+      },
+      {
+        "max": 80,
+        "text": "Corruption and weariness drag you down.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "fatigued",
+            "levels": 1
           },
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 85,
+        "text": "Dark powers tempt you to betrayal; Fortune is withheld.",
+        "effects": []
+      },
+      {
+        "max": 90,
+        "text": "Seductive voices of dark powers whisper to all nearby.",
+        "effects": []
+      },
+      {
+        "max": 95,
+        "text": "The spell slips from your memory.",
+        "effects": []
+      },
+      {
+        "max": 100,
+        "text": "Aethyric feedback bursts outward and floors everyone near.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 5
+          },
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      }
+    ],
+    "wrath": [
+      {
+        "max": 5,
+        "text": "Visions of your god plague you.",
+        "effects": []
+      },
+      {
+        "max": 10,
+        "text": "Your prayers reach no further than +0 SL for a week.",
+        "effects": []
+      },
+      {
+        "max": 15,
+        "text": "Your Pray skill suffers for several rounds.",
+        "effects": []
+      },
+      {
+        "max": 20,
+        "text": "You are thrown prostrate until you prove devotion.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 25,
+        "text": "You cannot pray for a few rounds.",
+        "effects": []
+      },
+      {
+        "max": 30,
+        "text": "Skills of your deity suffer for hours.",
+        "effects": []
+      },
+      {
+        "max": 35,
+        "text": "You cannot pray for a longer spell of rounds.",
+        "effects": []
+      },
+      {
+        "max": 40,
+        "text": "Shared pain wounds you through armour.",
+        "effects": [
           {
             "type": "wounds",
             "amount": 2
           }
         ]
+      },
+      {
+        "max": 45,
+        "text": "Your allies fall, and blessings on them fail for days.",
+        "effects": []
+      },
+      {
+        "max": 50,
+        "text": "You cannot pray for many rounds.",
+        "effects": []
+      },
+      {
+        "max": 55,
+        "text": "Divine wrath scorches your flesh.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 5
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "Your deity's skills suffer for days.",
+        "effects": []
+      },
+      {
+        "max": 65,
+        "text": "Divine wounds open on your skin.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 70,
+        "text": "You are struck blind and fall.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 3
+          }
+        ]
+      },
+      {
+        "max": 75,
+        "text": "A sacrifice is demanded in blood.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 5
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "You must pray as penance for several rounds.",
+        "effects": []
+      },
+      {
+        "max": 87,
+        "text": "The flesh is purged brutally.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 11
+          }
+        ]
+      },
+      {
+        "max": 88,
+        "text": "A lesser fiend appears and attacks.",
+        "effects": []
+      },
+      {
+        "max": 95,
+        "text": "Fear of your god's wrath breaks you.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "broken",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "You must go on a Penance.",
+        "effects": []
       }
     ]
   }

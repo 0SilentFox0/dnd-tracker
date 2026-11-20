@@ -33,11 +33,13 @@ import {
 } from '@/lib/utils/battle/modes/engine';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import { findEffectMarker } from '@/lib/utils/battle/participant/state';
+import { TOUCH_FEET } from '@/lib/utils/battle/spell/attack-type';
 import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -240,6 +242,8 @@ export interface SpellMapContext {
     targetCell?: GridPoint;
     castLevel?: number;
     upcastTargets?: number;
+    /** Declared overcast extension: wider range, area and target count */
+    extension?: CastExtension;
 }
 
 const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef['kind']> = new Set([
@@ -611,7 +615,7 @@ const upcastExtra = (
     spell: SpellRef,
     mapCtx?: SpellMapContext
 ): number =>
-    mapCtx?.castLevel !== undefined &&
+    (mapCtx?.castLevel !== undefined &&
     mapCtx.upcastTargets &&
     casterPicksSlot(caster, mapCtx.rules)
         ? mapCtx.upcastTargets *
@@ -619,7 +623,28 @@ const upcastExtra = (
               spell.level,
               mapCtx.castLevel
           )
-        : 0;
+        : 0) + (mapCtx?.extension?.extraTargets ?? 0);
+
+function stretched(
+    targeting: SpellTargetingDef,
+    ext: CastExtension | undefined
+): SpellTargetingDef {
+    if (!ext) return targeting;
+
+    const rangeMul = ext.rangeMul ?? 1;
+
+    const withRange =
+        rangeMul > 1 &&
+        'range' in targeting &&
+        targeting.range !== undefined &&
+        targeting.range > TOUCH_FEET
+            ? { ...targeting, range: targeting.range * rangeMul }
+            : targeting;
+
+    return withRange.kind === 'template' && (ext.areaMul ?? 1) > 1
+        ? { ...withRange, size: withRange.size * (ext.areaMul ?? 1) }
+        : withRange;
+}
 
 const HOSTILE_KINDS = new Set(['enemy', 'area', 'template', 'allEnemies']);
 
@@ -662,11 +687,12 @@ export function resolveSpellTargets(
 ): SpellTargetResolution {
     const extra = upcastExtra(caster, spell, mapCtx);
 
+    const reached = stretched(targeting, mapCtx?.extension);
+
     const widened =
-        extra > 0 &&
-        (targeting.kind === 'area' || targeting.kind === 'template')
-            ? { ...targeting, maxTargets: targeting.maxTargets + extra }
-            : targeting;
+        extra > 0 && (reached.kind === 'area' || reached.kind === 'template')
+            ? { ...reached, maxTargets: reached.maxTargets + extra }
+            : reached;
 
     const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
 

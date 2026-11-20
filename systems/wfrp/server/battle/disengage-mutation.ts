@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { skillTarget } from '../../rules/characteristics/derive';
 import {
     engagedFoes,
+    engagementJournal,
     isOutnumbered,
     isSurrounded,
 } from '../../rules/combat/engagement';
@@ -94,7 +95,9 @@ export function disengageMutation(
 
     const map = ctx.meta.map;
 
-    const foes = engagedFoes(actor, ctx.participants, map);
+    const journal = engagementJournal(ctx.meta.rules);
+
+    const foes = engagedFoes(actor, ctx.participants, map, journal);
 
     if (foes.length === 0) throw reject(API_ERRORS.DISENGAGE_NOT_ENGAGED);
 
@@ -164,7 +167,16 @@ export function disengageMutation(
         ...modes,
         disadvantage:
             (modes.disadvantage ?? 0) +
-            (isOutnumbered(actor, foes, ctx.participants, map) ? 1 : 0),
+            (isOutnumbered(
+                actor,
+                foes,
+                ctx.participants,
+                map,
+                edition.sizeModel === 'canon',
+                journal
+            )
+                ? 1
+                : 0),
     });
 
     const rng = rngOf(ctx);

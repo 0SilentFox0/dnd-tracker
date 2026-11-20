@@ -49,7 +49,9 @@ export function QualityListEditor({
 
     const options = QUALITY_KEYS.filter(
         (k) =>
-            QUALITY_REGISTRY[k].kind === kind && !value.some((r) => r.key === k)
+            QUALITY_REGISTRY[k].kind === kind &&
+            QUALITY_REGISTRY[k].canon !== false &&
+            !value.some((r) => r.key === k)
     ).map((k) => ({ value: k, label: tq(k) }));
 
     const add = () => {

@@ -1,4 +1,5 @@
 import { descriptionIssues, type Row } from './common';
+import { spellPowerIssues } from './spell-damage';
 import { unitTraits } from './units';
 
 import { isRecord } from '@/lib/utils/common/is-record';
@@ -23,16 +24,15 @@ export type GrimSpellKind = (typeof GRIM_SPELL_KINDS)[number];
 
 export const GRIM_DARK_LISTS = ['Pact Rites', 'Grave Rites'] as const;
 
-export const GRIM_CORE_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> =
-    {
-        petty: ['Cantrips'],
-        arcane: ['School of Embers', 'School of Gloam'],
-        hedge: ['Fenlore'],
-        witchcraft: ['Thornwitchery'],
-        chaos: [...GRIM_DARK_LISTS],
-        blessing: ['Hearth Rites'],
-        miracle: ['Hearth Rites'],
-    };
+export const GRIM_CORE_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> = {
+    petty: ['Cantrips'],
+    arcane: ['School of Embers', 'School of Gloam'],
+    hedge: ['Fenlore'],
+    witchcraft: ['Thornwitchery'],
+    chaos: [...GRIM_DARK_LISTS],
+    blessing: ['Hearth Rites'],
+    miracle: ['Hearth Rites'],
+};
 
 export const GRIM_ARCANE_LISTS = [
     'School of Embers',
@@ -91,6 +91,7 @@ export const SPELL_KEYS: readonly string[] = [
     'casting',
     'targeting',
     'dice',
+    'damageBonus',
     'upcastDice',
     'spellEffects',
     'ingredients',
@@ -105,7 +106,12 @@ export const INGREDIENT_PENCE = [6, 240] as const;
 
 const PENCE_PER_GP = 240;
 
-const INGREDIENT_KINDS: readonly string[] = ['arcane', 'hedge', 'witchcraft', 'chaos'];
+const INGREDIENT_KINDS: readonly string[] = [
+    'arcane',
+    'hedge',
+    'witchcraft',
+    'chaos',
+];
 
 export const FORBIDDEN_CONDITIONS: readonly string[] = [
     'unconscious',
@@ -345,6 +351,8 @@ export function spellIssues(row: Row): string[] {
 
     const manual = row.executionMode === 'manual';
 
+    const flat = row.damageBonus !== undefined;
+
     if (
         row.executionMode !== undefined &&
         row.executionMode !== 'native' &&
@@ -359,15 +367,21 @@ export function spellIssues(row: Row): string[] {
         issues.push('concentration must be a boolean on a native spell');
 
     if (manual) {
-        if (effects.length > 0 || attribute || dice !== 0)
+        if (effects.length > 0 || attribute || dice !== 0 || flat)
             issues.push(
-                'manual spells carry no effect, attribute or dice (the table resolves them)'
+                'manual spells carry no effect, attribute, dice or damageBonus (the table resolves them)'
             );
     } else {
-        if (effects.length > 0 !== dice >= 1)
+        if (effects.length > 0 !== (dice >= 1 || flat))
             issues.push(
-                'dice must be ≥ 1 exactly when the spell has an effect'
+                'a spell with an effect needs dice ≥ 1 or a damageBonus, and one without needs neither'
             );
+
+        if (dice >= 1 && flat)
+            issues.push('dice and damageBonus are alternatives');
+
+        if (flat && !Number.isInteger(row.damageBonus))
+            issues.push('damageBonus must be an integer');
 
         if (effects.length === 0 && !attribute)
             issues.push('spell has neither an effect nor an attribute');
@@ -384,18 +398,25 @@ export function spellIssues(row: Row): string[] {
             issues.push(`attribute condition "${condition}" is not allowed`);
     }
 
-    if (!manual && (row.targeting !== undefined || effects.length > 0 || attribute))
+    if (
+        !manual &&
+        (row.targeting !== undefined || effects.length > 0 || attribute)
+    )
         targetingIssues(row.targeting, effect, !!attribute, issues);
 
     const upcast = row.upcastDice;
 
     if (magic?.overcast === 'dice') {
-        if (upcast !== 1 || dice < 1)
-            issues.push('overcast "dice" needs upcastDice 1 and dice ≥ 1');
+        if (upcast !== 1 || (dice < 1 && !flat))
+            issues.push(
+                'overcast "dice" needs upcastDice 1 and dice ≥ 1 or a damageBonus'
+            );
     } else if (upcast !== undefined)
         issues.push('upcastDice needs overcast "dice"');
 
     ingredientIssues(row, kind, issues);
+
+    issues.push(...spellPowerIssues(row, manual ? null : effect));
 
     issues.push(...descriptionIssues(row));
 

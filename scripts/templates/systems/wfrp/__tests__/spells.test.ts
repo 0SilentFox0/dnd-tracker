@@ -9,7 +9,7 @@ import {
 } from '../spells';
 
 const emberDart: Row = {
-    name: 'Ember Dart',
+    name: 'Fixture Dart',
     level: 1,
     cost: 'action',
     description: 'A hissing dart of flame that leaves its mark smouldering.',
@@ -41,7 +41,7 @@ const emberDart: Row = {
 };
 
 describe('spellIssues', () => {
-    it('accepts the Ember Dart roster row', () => {
+    it('accepts a dice damage row', () => {
         expect(spellIssues(emberDart)).toEqual([]);
     });
 
@@ -255,9 +255,9 @@ describe('chaos, blessings, miracles and manual rows', () => {
         };
 
         expect(spellIssues(manual)).toEqual([]);
-        expect(
-            spellIssues({ ...manual, dice: 1 }).join('\n')
-        ).toContain('manual spells carry no effect');
+        expect(spellIssues({ ...manual, dice: 1 }).join('\n')).toContain(
+            'manual spells carry no effect'
+        );
         expect(
             spellIssues({ ...manual, concentration: true }).join('\n')
         ).toContain('concentration');
@@ -285,5 +285,53 @@ describe('chaos, blessings, miracles and manual rows', () => {
                 new Map([['Mercy', withKind('miracle', 0, ['Hearth Rites'])]])
             )
         ).toEqual([]);
+    });
+});
+
+describe('listed spell power', () => {
+    const flat = (patch: Row): Row => ({
+        ...emberDart,
+        name: 'Ember Dart',
+        dice: 0,
+        damageBonus: 4,
+        casting: {
+            magic: { cn: 4, kind: 'arcane', overcast: 'dice', missile: true },
+        },
+        ...patch,
+    });
+
+    it('accepts a flat missile row that matches its listed Damage', () => {
+        expect(spellIssues(flat({}))).toEqual([]);
+    });
+
+    it('rejects a wrong damageBonus, dice beside a bonus and a missing missile flag', () => {
+        expect(spellIssues(flat({ damageBonus: 5 })).join('\n')).toContain(
+            'damageBonus must be 4'
+        );
+        expect(spellIssues(flat({ dice: 1 })).join('\n')).toContain(
+            'alternatives'
+        );
+        expect(
+            spellIssues(
+                flat({
+                    casting: {
+                        magic: { cn: 4, kind: 'arcane', overcast: 'dice' },
+                    },
+                })
+            ).join('\n')
+        ).toContain('missile');
+    });
+
+    it('rejects a listed spell made manual', () => {
+        expect(
+            spellIssues(
+                flat({
+                    executionMode: 'manual',
+                    dice: 0,
+                    damageBonus: undefined,
+                    spellEffects: [],
+                })
+            ).join('\n')
+        ).toContain('must be native');
     });
 });

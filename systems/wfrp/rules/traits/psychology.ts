@@ -82,7 +82,7 @@ export function wfrpPsychology(
             !inPlay(tester) ||
             psychologyOf(tester).length > 0 ||
             isFrenzied(tester) ||
-            isPsychImmune(ps, tester.basicInfo.id)
+            isPsychImmune(ps, tester.basicInfo.id, ctx.rules)
         )
             continue;
 
@@ -373,7 +373,7 @@ export function wfrpFearRound(
 
         const cleared =
             !live.has(id) ||
-            isPsychImmune(ps, id) ||
+            isPsychImmune(ps, id, ctx.rules) ||
             Object.keys(kept).length === 0;
 
         const cut = cleared ? undefined : kept;

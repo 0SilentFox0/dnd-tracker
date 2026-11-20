@@ -563,6 +563,7 @@
   "advanceInsufficientXp": "Not enough experience for this advance",
   "advanceAtLimit": "Advancement limit reached",
   "advanceMaxRank": "Talent is at its maximum rank",
+  "advanceOutOfCareer": "Outside the career only characteristics and basic skills can be advanced",
   "advanceUnknown": "Unknown advancement target",
   "advanceLedgerEmpty": "No purchases to undo",
   "advanceLedgerStale": "The last purchase cannot be undone — data was edited manually",

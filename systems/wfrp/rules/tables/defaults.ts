@@ -305,7 +305,6 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
             textKey: 'wfrpMagic.miscast.wrath.4',
         },
     ],
-    // verify against 5e book
     downtimeEvent: [
         { max: 10, effects: [], textKey: 'wfrpDowntime.events.1' },
         { max: 20, effects: [], textKey: 'wfrpDowntime.events.2' },
@@ -330,7 +329,6 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
         },
         { max: 100, effects: [], textKey: 'wfrpDowntime.events.10' },
     ],
-    // verify against 5e book
     mutationPhysical: [
         {
             max: 16,

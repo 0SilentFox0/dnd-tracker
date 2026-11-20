@@ -30,6 +30,7 @@ const model = (available: boolean, fortune?: 'reroll' | 'sl') => {
         },
         view: {
             judged: { target: null, attackerSide: undefined },
+            targets: [],
             attacker: {
                 abilities: {},
                 battleData: {

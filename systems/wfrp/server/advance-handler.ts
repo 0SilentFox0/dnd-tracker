@@ -40,6 +40,7 @@ const PURCHASE_ERRORS: Record<PurchaseError, [string, number]> = {
     UNKNOWN_KEY: [API_ERRORS.ADVANCE_UNKNOWN, 400],
     UNKNOWN_TALENT: [API_ERRORS.ADVANCE_UNKNOWN, 400],
     TALENT_NO_COST: [API_ERRORS.ADVANCE_UNKNOWN, 400],
+    ADVANCE_OUT_OF_CAREER: [API_ERRORS.ADVANCE_OUT_OF_CAREER, 409],
 };
 
 const UNDO_ERRORS = {
@@ -109,6 +110,7 @@ export async function advanceCharacter(
             rules: advancementFor(access.campaign.rules.advancement, edition),
             step: edition.advanceStep,
             flatTalent: edition.xpTables === 'canon5e',
+            careerOnly: edition.xpTables === 'canon5e',
             talent: feat ?? undefined,
             career:
                 state && row

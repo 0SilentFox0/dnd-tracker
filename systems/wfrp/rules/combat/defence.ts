@@ -5,6 +5,9 @@ import { hasQuality } from '../equipment/qualities';
 import { qualityDefence, qualityWraps } from '../equipment/quality-effects';
 import { REACH_RANK } from '../equipment/weapon-profile';
 import { ATTACK_SLOT } from '../slots';
+import { parryVsBiggerSl } from '../traits/size';
+import { hasTalent } from '../traits/talents';
+import { defensiveSl } from './defensive';
 import { participantChars, participantStats } from './participant';
 import { canonWeaponUse } from './weapon-use';
 
@@ -40,7 +43,8 @@ const refsOf = (attack: BattleAttack) => {
 export function canonDefence(
     defender: BattleParticipant,
     attack: BattleAttack,
-    edition: Pick<EditionProfile, 'attackTarget'>
+    edition: Pick<EditionProfile, 'attackTarget' | 'sizeModel'>,
+    attacker?: BattleParticipant
 ): CanonDefence {
     const chars = participantChars(defender);
 
@@ -54,6 +58,8 @@ export function canonDefence(
     const wrap = qualityWraps(incoming.refs, 'canon') ? WRAP_SL : 0;
 
     const attackerReach = incoming.slot?.reach;
+
+    const ambidextrous = hasTalent(defender, 'ambidextrous');
 
     const candidates = (defender.battleData.attacks ?? [])
         .filter((a) => attackKindOf(a.type) !== AttackType.RANGED)
@@ -72,7 +78,9 @@ export function canonDefence(
                     : 0;
 
             const offHand =
-                slot?.hand === 'off' && !hasQuality(refs.qualities, 'parry')
+                slot?.hand === 'off' &&
+                !hasQuality(refs.qualities, 'parry') &&
+                !ambidextrous
                     ? OFF_HAND_SL
                     : 0;
 
@@ -97,9 +105,19 @@ export function canonDefence(
         undefined
     );
 
+    const bigger =
+        attacker && edition.sizeModel === 'canon'
+            ? parryVsBiggerSl(defender, attacker)
+            : 0;
+
+    const stance = defensiveSl(defender);
+
     return {
         parryTarget: best?.target ?? ws,
-        sl: { parry: best?.sl ?? shield + wrap, dodge: shield },
+        sl: {
+            parry: (best?.sl ?? shield + wrap) + bigger + stance.parry,
+            dodge: shield + stance.dodge,
+        },
         ...(best && { weapon: best.weapon }),
     };
 }

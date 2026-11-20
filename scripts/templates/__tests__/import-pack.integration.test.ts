@@ -119,7 +119,7 @@ const rowCounts = async (templateId: string) => ({
 
 const unitSpellLinks = async (templateId: string) => {
     const spell = await raw.spell.findFirstOrThrow({
-        where: { campaignId: templateId, name: 'Rot Touch' },
+        where: { campaignId: templateId, name: 'Shove Wave' },
         select: { id: true },
     });
 

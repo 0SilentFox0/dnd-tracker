@@ -7,6 +7,7 @@ import type { CritBonus } from '../../rules/percentile/fortune';
 import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
 import { castChoices, fortuneControls } from './fortune-controls';
+import { OvercastPicker } from './OvercastPicker';
 
 import { HudButton } from '@/components/hud';
 import type { CastTestProps } from '@/components/systems/types';
@@ -46,6 +47,16 @@ export function CastTestBody({
     );
 
     const kind = view.selected?.casting?.magic?.kind;
+
+    const overcast = view.selected?.casting?.magic?.overcast;
+
+    const overcastable =
+        canon &&
+        caster &&
+        overcast &&
+        kind !== 'petty' &&
+        kind !== 'blessing' &&
+        kind !== 'miracle';
 
     const options = !canon
         ? []
@@ -131,6 +142,14 @@ export function CastTestBody({
                         ))}
                     </div>
                 ))}
+            {overcastable && (
+                <OvercastPicker
+                    caster={caster}
+                    value={choices.overcast}
+                    missile={overcast === 'dice'}
+                    onChange={(next) => choices.set({ overcast: next })}
+                />
+            )}
             {rolled && (
                 <div role="status" className="mt-2 text-sm text-[var(--ink)]">
                     {rolled}

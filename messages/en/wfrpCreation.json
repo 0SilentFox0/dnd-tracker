@@ -106,6 +106,7 @@
     "TALENT_NOT_IN_TABLE": "The talent is not from the species table",
     "FEAT_UNKNOWN": "Unknown talent",
     "SPECIES_SKILLS": "Pick the species skills",
+    "SPECIES_TALENTS": "Pick one talent in each species choice",
     "STATS_DISTRIBUTION": "The characteristic bonus must go to career characteristics and fit the limit",
     "CAREER_SKILLS": "Spend exactly 8 advances on career skills",
     "SKILL_CAP": "A skill can take at most 3 advances",
@@ -148,6 +149,7 @@
   "canon": {
     "speciesRolled": "I rolled the species on the Species Table and keep the first result",
     "speciesSkills": "Species skills: {picked} of {count} (each +{points})",
+    "speciesTalents": "Species talent {n} of {total} (pick one)",
     "languages": "Languages: {names}",
     "careerSkills": "Career skills: {spent} of {total} advances (each +{points}, at most 3 per skill)",
     "careerTalent": "Career talent (pick one)",

@@ -37,6 +37,7 @@ const canon = z
             )
             .optional(),
         speciesSkills: z.array(skillKey).max(10).optional(),
+        speciesTalents: z.array(z.string().min(1).max(100)).max(5).optional(),
         careerSkills: z
             .record(skillKey, z.number().int().min(0).max(3))
             .optional(),

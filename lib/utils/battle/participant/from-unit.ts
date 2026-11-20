@@ -348,7 +348,8 @@ export async function createBattleParticipantFromUnit(
 
     const traits = ruleSystemOf(rules).traits?.unitBuild(
         unit,
-        resolvedAbilities
+        resolvedAbilities,
+        rules
     );
 
     const participant: BattleParticipant = {

@@ -87,6 +87,7 @@ describe('useFateReaction', () => {
                 key: 'negate:me:0',
                 holderName: 'Фрейда',
                 attackerName: 'Гоблін',
+                trapBlade: false,
             },
         ]);
 

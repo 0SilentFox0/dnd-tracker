@@ -1,5 +1,5 @@
 import type { SystemSlot } from './slot';
-import type { ApplyDamageConsequences } from './types';
+import type { ApplyDamageConsequences, MitigateResult } from './types';
 import type { SystemConditionResult } from './types-conditions';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
@@ -13,6 +13,7 @@ import type {
     SpellMagicKind,
 } from '@/lib/utils/spells/model/schema';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
@@ -31,17 +32,30 @@ export interface CastTestCtx {
     system?: SystemSlot;
 }
 
+/** What an overcast adds beyond the spell's listed range, targets, area and duration; absent fields change nothing */
+export interface CastExtension {
+    rangeMul?: number;
+    extraTargets?: number;
+    areaMul?: number;
+    durationMul?: number;
+}
+
 export interface CastTestResult {
     success: boolean;
     margin: number;
     overcastSteps: number;
     /** Flat damage the overcast adds; when set, `overcastSteps` no longer raises the cast level or adds dice */
     overcastDamage?: number;
+    /** The extension the roll paid for; targets, range and area beyond it are dropped by the cast */
+    extension?: CastExtension;
     miscast: string | null;
     details: SystemSlot;
     lines: LogLine[];
-    /** Applied by the pipeline to the up-to-date caster (spent resources, banked state) */
-    casterUpdate?: (p: BattleParticipant) => BattleParticipant;
+    /** Applied by the pipeline to the up-to-date caster (spent resources, banked state); `final.targets` is set when the cast dropped targets the roll could not pay for */
+    casterUpdate?: (
+        p: BattleParticipant,
+        final?: { targets: readonly GridPoint[] }
+    ) => BattleParticipant;
 }
 
 export type CastResourceGate =
@@ -115,6 +129,12 @@ export interface RuleSystemTestedMagic {
         who: { name: string; spell: string }
     ): CastTestResult;
     castTest(ctx: CastTestCtx): CastTestResult;
+    /** The extension a request declares before the roll, for validating targets, range and area */
+    declaredExtension?(ctx: {
+        system?: SystemSlot;
+        magic: SpellMagic;
+        rules: Ruleset;
+    }): CastExtension | undefined;
     /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
     castPreview(
         caster: BattleParticipant,
@@ -213,6 +233,16 @@ export interface RuleSystemSustain {
     ): SustainResult;
 }
 
+/** The part of a spell the system hooks read; a chosen spell and a castable one both fit */
+export interface SpellPowerSource {
+    name: string;
+    definition: {
+        damageBonus?: number;
+        casting?: { magic?: SpellMagic };
+        effects: readonly { kind: string }[];
+    };
+}
+
 export interface SpellAttackRollCtx {
     mode: D20Mode;
     rng: () => number;
@@ -271,6 +301,24 @@ export interface RuleSystemMagic {
         castLevel?: number
     ): { count: number; sides: number } | null;
     tested?: RuleSystemTestedMagic;
+    /** Flat power of a damaging or healing spell, replacing its dice; undefined = the dice model */
+    spellPower?(ctx: {
+        caster: BattleParticipant;
+        spell: SpellPowerSource;
+        overcastDamage: number;
+        rules: Ruleset;
+    }): { heal: number; damage: number; breakdown: DamageRow[] } | undefined;
+    /** Per-target soak of a spell's damage; undefined = the generic resistance path alone */
+    soakSpellDamage?(ctx: {
+        caster: BattleParticipant;
+        target: BattleParticipant;
+        amount: number;
+        spell: SpellPowerSource;
+        /** Details of the cast roll (`CastTestResult.details`) */
+        castDetails?: SystemSlot;
+        rules: Ruleset;
+        rng: Rng;
+    }): MitigateResult | undefined;
     /** Derived save DC and attack bonus of a caster; none means the system has no such derivation */
     spellcasting?(
         input: SpellcastingInput

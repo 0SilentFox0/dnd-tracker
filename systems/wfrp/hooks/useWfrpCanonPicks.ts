@@ -21,6 +21,8 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
 
     const [speciesSkills, setSpeciesSkills] = useState<string[]>([]);
 
+    const [speciesTalents, setSpeciesTalents] = useState<string[]>([]);
+
     const [bound, setBound] = useState<CareerBound>(EMPTY);
 
     const current = useMemo<CareerBound>(
@@ -42,6 +44,14 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
                     : prev.length < count
                       ? [...prev, skill]
                       : prev
+            ),
+        []
+    );
+
+    const setSpeciesTalent = useCallback(
+        (group: number, featId: string) =>
+            setSpeciesTalents((prev) =>
+                Object.assign([], prev, { [group]: featId })
             ),
         []
     );
@@ -72,18 +82,20 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
         () => ({
             speciesRolled,
             speciesSkills,
+            speciesTalents,
             careerSkills: Object.fromEntries(
                 Object.entries(current.skills).filter(([, n]) => n > 0)
             ),
             distribution: current.distribution,
             ...(current.talent && { careerTalent: current.talent }),
         }),
-        [speciesRolled, speciesSkills, current]
+        [speciesRolled, speciesSkills, speciesTalents, current]
     );
 
     const reset = useCallback(() => {
         setSpeciesRolled(false);
         setSpeciesSkills([]);
+        setSpeciesTalents([]);
         setBound(EMPTY);
     }, []);
 
@@ -93,6 +105,8 @@ export function useWfrpCanonPicks(careerId: string | undefined) {
         setSpeciesRolled,
         speciesSkills,
         toggleSpeciesSkill,
+        speciesTalents,
+        setSpeciesTalent,
         skills: current.skills,
         setSkill,
         talent: current.talent,

@@ -101,6 +101,31 @@ export function SpeciesCanonPanel({ canon }: { canon: Canon }) {
                     </div>
                 </section>
             )}
+            {canon.speciesTalents.groups.map((group, i) => (
+                <section key={group.join('|')} className="space-y-2">
+                    <h3 className="text-sm font-semibold">
+                        {t('speciesTalents', {
+                            n: i + 1,
+                            total: canon.speciesTalents.groups.length,
+                        })}
+                    </h3>
+                    <div className="grid gap-2" role="group">
+                        {group.map((featId) => (
+                            <OptionCard
+                                key={featId}
+                                selected={
+                                    canon.speciesTalents.picked[i] === featId
+                                }
+                                onSelect={() =>
+                                    canon.speciesTalents.set(i, featId)
+                                }
+                            >
+                                {canon.speciesTalents.names(featId)}
+                            </OptionCard>
+                        ))}
+                    </div>
+                </section>
+            ))}
             {s.languages.length > 0 && (
                 <p className="text-sm text-hud-muted">
                     {t('languages', {

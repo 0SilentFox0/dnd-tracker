@@ -151,7 +151,8 @@ export function createSpellMutation(
             caster,
             spell,
             source,
-            castLevel
+            castLevel,
+            system
         );
 
         const picks = await resolvePicks(

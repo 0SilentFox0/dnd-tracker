@@ -46,5 +46,24 @@ export const psychologyOf = (
             : []
     );
 
+export const CANON_SIZES = [
+    'small',
+    'average',
+    'large',
+    'enormous',
+    'monstrous',
+] as const;
+
+export type CanonSize = (typeof CANON_SIZES)[number];
+
+/** Canon has five sizes: Tiny and Little read as Small */
+export const canonSizeOf = (size: TraitSize | undefined): CanonSize =>
+    size === 'tiny' || size === 'little'
+        ? 'small'
+        : ((size ?? AVERAGE_SIZE) as CanonSize);
+
+export const canonSizeStep = (size: TraitSize | undefined): number =>
+    CANON_SIZES.indexOf(canonSizeOf(size));
+
 export const sizeStep = (size: TraitSize | undefined): number =>
     TRAIT_SIZES.indexOf(size ?? AVERAGE_SIZE);
