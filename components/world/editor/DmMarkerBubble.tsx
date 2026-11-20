@@ -48,7 +48,7 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
 
     const m = useEditorMarkerFields(marker);
 
-    const layer = detail?.layers.find((l) => l.id === marker.layerId);
+    const layer = detail?.layers?.find((l) => l.id === marker.layerId);
 
     const child = marker.childMapId
         ? maps.find((x) => x.id === marker.childMapId)

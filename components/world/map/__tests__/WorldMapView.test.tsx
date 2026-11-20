@@ -903,7 +903,7 @@ describe('WorldMapView card slot', () => {
             name: 'Cities',
             color: '#00aa00',
             imageUrl: null,
-            rect: null,
+            rect: { x: 0, y: 0, w: 1, h: 1 },
             opacity: 1,
             icon: 'castle',
             zoneOpacity: null,

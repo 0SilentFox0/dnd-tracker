@@ -34,6 +34,8 @@ const marker = (over: Partial<WorldMarker>): WorldMarker => ({
     sortOrder: 0,
     childMapId: null,
     layerId: null,
+    labelMode: null,
+    fillOpacity: null,
     ...over,
 });
 
