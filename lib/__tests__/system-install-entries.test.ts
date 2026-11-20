@@ -33,7 +33,14 @@ const STATIC_SAFE = [
 const CLIENT_LAZY = ['app/campaigns/page.tsx'];
 
 // layouts above every gate: they reach lookups only through guarded reads (`classesEnabled` checks `isInstalled`, `ruleSystemByKey` returns undefined before install)
-const LAYOUT_SAFE = ['app/layout.tsx', 'app/campaigns/[id]/layout.tsx'];
+const LAYOUT_SAFE = [
+    'app/layout.tsx',
+    'app/campaigns/[id]/layout.tsx',
+    'app/help/layout.tsx',
+    'app/library/sounds/layout.tsx',
+    'app/profile/layout.tsx',
+    'app/settings/layout.tsx',
+];
 
 const PAIR = {
     lookup: 'lib/utils/rules/systems/lookup.ts',
@@ -130,7 +137,10 @@ describe('system install entries (fixtures)', () => {
     it('a gate or root reached through the client boundary turns the client side green', () => {
         const withGate = fake(
             {
-                'app/p/page.tsx': ['components/Client.tsx', 'components/Gate.tsx'],
+                'app/p/page.tsx': [
+                    'components/Client.tsx',
+                    'components/Gate.tsx',
+                ],
                 'components/Client.tsx': ['lib/a.ts'],
                 'components/Gate.tsx': ['components/systems/install.ts'],
                 'lib/a.ts': [PAIR.lookup],
@@ -166,7 +176,11 @@ describe('system install entries', () => {
     });
 
     it('every route and page that reaches a lookup reaches its root', () => {
-        const exempt = new Set([...STATIC_SAFE, ...CLIENT_LAZY, ...LAYOUT_SAFE]);
+        const exempt = new Set([
+            ...STATIC_SAFE,
+            ...CLIENT_LAZY,
+            ...LAYOUT_SAFE,
+        ]);
 
         expect(
             unrooted(

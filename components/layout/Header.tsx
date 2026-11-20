@@ -4,7 +4,7 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Menu, UserRound } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 import { UserAvatar } from '@/components/auth/UserAvatar';
 import { JoinBattleButton } from '@/components/campaigns/JoinBattleButton';
@@ -12,7 +12,6 @@ import { WatchShowButton } from '@/components/campaigns/WatchShowButton';
 import { HUD_SURFACE } from '@/components/hud';
 import { AbbreviationsInfoDialog } from '@/components/layout/AbbreviationsInfoDialog';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-import { PROFILE_MENU } from '@/components/layout/profile-menu';
 import { WhatsNewButton } from '@/components/onboarding/WhatsNewButton';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
-import { useProfileActions, useSessionUser } from '@/lib/hooks/auth';
+import { useSessionUser } from '@/lib/hooks/auth';
 import {
     useCampaignRules,
     useCampaignSystemSelection,
@@ -53,8 +52,6 @@ export function Header() {
             ? pathname.match(/^\/campaigns\/([^/]+)/)?.[1]
             : undefined
     );
-
-    const actions = useProfileActions();
 
     const campaignMatch = pathname?.match(/^\/campaigns\/([^/]+)/);
 
@@ -172,76 +169,20 @@ export function Header() {
                         <WatchShowButton />
                         {email && <WhatsNewButton />}
                         <AbbreviationsInfoDialog />
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
-                                >
-                                    <UserAvatar
-                                        user={sessionUser}
-                                        className="size-7"
-                                    />
-                                    <span className="sr-only">
-                                        {t('profile')}
-                                    </span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                {email && (
-                                    <>
-                                        <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
-                                            <UserAvatar
-                                                user={sessionUser}
-                                                className="size-8"
-                                            />
-                                            <span className="min-w-0">
-                                                {sessionUser?.name && (
-                                                    <span className="block truncate font-medium text-foreground">
-                                                        {sessionUser.name}
-                                                    </span>
-                                                )}
-                                                <span className="block truncate">
-                                                    {email}
-                                                </span>
-                                            </span>
-                                        </div>
-                                        <DropdownMenuSeparator />
-                                    </>
-                                )}
-                                <DropdownMenuItem asChild>
-                                    <Link href="/profile">
-                                        <UserRound className="mr-2 h-4 w-4" />
-                                        {t('profile')}
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                {PROFILE_MENU.map((entry) => (
-                                    <DropdownMenuItem
-                                        key={entry.id}
-                                        asChild={'href' in entry}
-                                        onSelect={
-                                            'action' in entry
-                                                ? () => actions[entry.action]()
-                                                : undefined
-                                        }
-                                    >
-                                        {'href' in entry ? (
-                                            <Link href={entry.href}>
-                                                <entry.icon className="mr-2 h-4 w-4" />
-                                                {t(entry.labelKey)}
-                                            </Link>
-                                        ) : (
-                                            <>
-                                                <entry.icon className="mr-2 h-4 w-4" />
-                                                {t(entry.labelKey)}
-                                            </>
-                                        )}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                            asChild
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
+                        >
+                            <Link href="/profile">
+                                <UserAvatar
+                                    user={sessionUser}
+                                    className="size-7"
+                                />
+                                <span className="sr-only">{t('profile')}</span>
+                            </Link>
+                        </Button>
                     </div>
                 </div>
                 <div className={`${width} pb-2`}>

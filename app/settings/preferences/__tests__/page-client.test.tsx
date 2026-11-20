@@ -6,6 +6,9 @@ import { PreferencesClient } from '../page-client';
 
 const set = vi.fn();
 
+vi.mock('@/components/layout/PaletteSwitcher', () => ({
+    PaletteSwitcher: () => <div data-testid="palette" />,
+}));
 vi.mock('@/lib/hooks/common', () => ({
     useSetLocale: () => ({ locale: 'en', set: vi.fn() }),
     useTimeZoneSetting: () => ({
