@@ -72,5 +72,7 @@ export const WORLD_MINOR_PIN_ZOOM = 1.8;
 export const WORLD_LABEL_ZOOM_COMPACT = 4;
 export const WORLD_ZONE_LABEL_CONFLICT_COMPACT = 0.14;
 export const WORLD_SNAP_PX = 8;
+export const PIN_CLUSTER_PX = 28;
+export const PIN_CLUSTER_PX_COMPACT = 36;
 export const WORLD_DIVE_MS = 600;
 export const WORLD_REVEAL_MS = 300;
