@@ -117,9 +117,7 @@ export function WorldPins({
         )
     );
 
-    const firstShown = points.find(
-        (m) => !clustered.has(m.id) || grouped.get(m.id)
-    );
+    const firstShown = points.find((m) => !clustered.has(m.id));
 
     const labelBlockers = points.filter((m) => !isMinorPin(m));
 

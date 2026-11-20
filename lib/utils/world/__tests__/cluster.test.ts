@@ -102,7 +102,7 @@ describe('clusterZoom', () => {
         ).toBeNull();
     });
 
-    it('returns null for duplicates in one point', () => {
+    it('returns null when all points share one spot', () => {
         expect(
             clusterZoom(
                 [
@@ -112,6 +112,21 @@ describe('clusterZoom', () => {
                 view
             )
         ).toBeNull();
+    });
+});
+
+describe('clusterZoom with partial duplicates', () => {
+    it('ignores coincident pairs and splits the closest distinct pair', () => {
+        const z = clusterZoom(
+            [
+                { x: 0.5, y: 0.5 },
+                { x: 0.5, y: 0.5 },
+                { x: 0.51, y: 0.5 },
+            ],
+            view
+        );
+
+        expect(z).toBeCloseTo((28 / 10) * 1.15);
     });
 });
 

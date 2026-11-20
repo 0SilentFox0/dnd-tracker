@@ -340,6 +340,19 @@ describe('WorldPins clusters', () => {
         expect(screen.getByLabelText('world.pinClusterList')).not.toBeNull();
     });
 
+    it('the tour marker attribute lands on a single pin, not a clustered one', () => {
+        const { container } = renderPins([
+            pin('A', 0.5),
+            pin('B', 0.51),
+            pin('C', 0.9),
+        ]);
+
+        const tagged = container.querySelectorAll('[data-tour="world.marker"]');
+
+        expect(tagged).toHaveLength(1);
+        expect(tagged[0].getAttribute('aria-label')).toBe('C');
+    });
+
     it('zooming in splits a cluster into single pins', () => {
         const { container } = renderPins(close, { zoom: 4 });
 

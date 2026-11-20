@@ -44,7 +44,7 @@ const SPREAD_MARGIN = 1.15;
 
 const MIN_STEP = 1.5;
 
-/** Zoom that splits the closest pair, or null when the list must open instead (max zoom or duplicates). */
+/** Zoom that splits the closest pair, or null when the list must open instead (max zoom or every point shared). */
 export function clusterZoom(
     points: readonly MapPoint[],
     view: {
@@ -59,16 +59,16 @@ export function clusterZoom(
     let closest = Infinity;
 
     for (let i = 0; i < points.length; i++)
-        for (let j = i + 1; j < points.length; j++)
-            closest = Math.min(
-                closest,
-                Math.hypot(
-                    (points[i].x - points[j].x) * view.box.width,
-                    (points[i].y - points[j].y) * view.box.height
-                )
+        for (let j = i + 1; j < points.length; j++) {
+            const d = Math.hypot(
+                (points[i].x - points[j].x) * view.box.width,
+                (points[i].y - points[j].y) * view.box.height
             );
 
-    if (!(closest > 0) || !Number.isFinite(closest)) return null;
+            if (d > 0) closest = Math.min(closest, d);
+        }
+
+    if (!Number.isFinite(closest)) return null;
 
     return Math.min(
         view.maxZoom,

@@ -10,7 +10,22 @@ import type { WorldMapDetail, WorldMarker } from '@/types/world';
 vi.unmock('next-intl');
 
 vi.mock('next/image', () => ({
-    default: (p: { alt: string }) => <img alt={p.alt} />,
+    default: (p: {
+        alt: string;
+        src: string;
+        sizes?: string;
+        srcSet?: string;
+        className?: string;
+    }) => (
+        <img
+            alt={p.alt}
+            src={p.src}
+            sizes={p.sizes}
+            srcSet={p.srcSet}
+            className={p.className}
+            aria-hidden={p.alt === '' ? true : undefined}
+        />
+    ),
 }));
 
 const marker = (o: Partial<WorldMarker>): WorldMarker => ({
@@ -876,30 +891,19 @@ describe('WorldMapView card slot', () => {
     });
 
     it('renders the blurred backdrop with the same image URL and sizes as the map', () => {
-        vi.spyOn(
-            HTMLElement.prototype,
-            'getBoundingClientRect'
-        ).mockReturnValue({
-            left: 0,
-            top: 0,
-            width: 800,
-            height: 600,
-            right: 800,
-            bottom: 600,
-            x: 0,
-            y: 0,
-            toJSON: () => ({}),
-        });
-
         const { container } = render(<WorldMapView detail={detail([])} />);
-
-        const imgs = [...container.querySelectorAll('img')];
 
         const backdrop = container.querySelector('.atlas-backdrop');
 
-        if (backdrop) expect(backdrop.getAttribute('aria-hidden')).toBe('true');
+        const main = screen.getByAltText('World');
 
-        expect(imgs.length).toBeGreaterThanOrEqual(1);
+        expect(backdrop).not.toBeNull();
+        expect(backdrop?.getAttribute('aria-hidden')).toBe('true');
+        expect(backdrop?.getAttribute('src')).toBe(main.getAttribute('src'));
+        expect(backdrop?.getAttribute('srcset')).toBe(
+            main.getAttribute('srcset')
+        );
+        expect(backdrop?.getAttribute('sizes')).toBe(main.getAttribute('sizes'));
     });
 
     it('shows the fullscreen button only when slots.fullscreen is given and calls toggle', () => {
@@ -971,15 +975,79 @@ describe('WorldMapView card slot', () => {
     });
 
     it('a focus with zoom 1 pans without zooming', () => {
-        const { container } = render(
+        const { container, rerender } = render(
+            <WorldMapView detail={detail([])} />
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Наблизити' }));
+
+        const layer = container.querySelector('.atlas-top-layer') as HTMLElement;
+
+        const parse = (t: string) => {
+            const m = /translate\((-?[\d.]+)px, (-?[\d.]+)px\) scale\(([\d.]+)\)/.exec(
+                t
+            );
+
+            return { x: Number(m?.[1]), y: Number(m?.[2]), scale: Number(m?.[3]) };
+        };
+
+        const before = parse(layer.style.transform);
+
+        expect(before.scale).toBeGreaterThan(1);
+
+        rerender(
             <WorldMapView
                 detail={detail([])}
                 focus={{ point: { x: 0.9, y: 0.9 }, seq: 1, zoom: 1 }}
             />
         );
 
+        const after = parse(layer.style.transform);
+
+        expect(after.scale).toBe(before.scale);
+        expect([after.x, after.y]).not.toEqual([before.x, before.y]);
+    });
+
+    it('rescales the offset when the box width changes', () => {
+        const observers: ((e: unknown[]) => void)[] = [];
+
+        vi.stubGlobal(
+            'ResizeObserver',
+            class {
+                constructor(cb: (e: unknown[]) => void) {
+                    observers.push(cb);
+                }
+                observe() {}
+                disconnect() {}
+                unobserve() {}
+            }
+        );
+
+        const { container } = render(
+            <WorldMapView
+                detail={detail([])}
+                focus={{ point: { x: 0.5, y: 0.5 }, seq: 1 }}
+            />
+        );
+
         const layer = container.querySelector('.atlas-top-layer') as HTMLElement;
 
-        expect(layer.style.transform).toMatch(/scale\(1\)/);
+        expect(layer.style.transform).toBe('translate(-800px, -600px) scale(3)');
+
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+            left: 0,
+            top: 0,
+            width: 400,
+            height: 300,
+            right: 400,
+            bottom: 300,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+        });
+
+        act(() => observers.forEach((cb) => cb([{}])));
+
+        expect(layer.style.transform).toBe('translate(-400px, -300px) scale(3)');
     });
 });
