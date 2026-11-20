@@ -38,9 +38,11 @@
 
 `diveOrigin` (`lib/utils/world/dive.ts`) бере точку маркера, з якого йде вхід; `useWorldDive` запускає провал (CSS, `WORLD_DIVE_MS`/`WORLD_REVEAL_MS`), коли нова карта вже завантажена. Без origin (вихід, маркер у тумані, інша гілка) — лише fade. За `prefers-reduced-motion` — без провалу й fade. Origin наближений, якщо карта вписана з полями.
 
-## Кластери героїв
+## Кластери героїв і пінів
 
 `clusterHeroes` (`lib/utils/world/hero-clusters.ts`) групує героїв, що стоять ближче за `HERO_CLUSTER_PX` (24 px) у піксельному просторі; `HeroCluster` показує бейдж «+N» і поповер зі списком. При зумі кластери розходяться.
+
+Піни маркерів кластеризує `clusterByPixel` (`lib/utils/world/cluster.ts`, жадібно в порядку входу): поріг `PIN_CLUSTER_PX` 28 px, у компактному режимі `PIN_CLUSTER_PX_COMPACT` 36 px (`lib/constants/world.ts`). Вхід сортується `byPinRank` (`pin-tier.ts`: castle < city < portal < dungeon < landmark < battle < без іконки < village < camp), тож першим і представником кластера стає найважливіший пін. Винятки, що ніколи не кластеризуються: вибраний, потягнутий, а також усе, коли `screen.cluster === false` (ДМ в інструменті `point`) або немає `screen.box` (режим `entry`/без виміру). `PinCluster` (`components/world/map/PinCluster.tsx`) малює печатку представника з бейджем «+N»: якщо `clusterZoom` повертає зум, що розводить найближчу пару (мінімум ×1.5, запас 1.15), клік наближає до `clusterCenter` через `onClusterZoom`; на `WORLD_MAX_ZOOM` чи при дублікатах (`null`) клік відкриває поповер зі списком, рядок якого вибирає пін (`onMarkerClick`).
 
 ## Нотатки
 
@@ -73,6 +75,18 @@
 - **API (усе `withDM`):** `world/maps/[mapId]/layers` (GET/POST), `world/layers/[layerId]` (PATCH, DELETE з `{ markers: 'ungroup' | 'delete' }`, 409 `WORLD_LAYER_HAS_MARKERS` без вибору), `PUT heroes`; `layerId` приймають POST/PATCH маркера (шар має бути тієї ж карти). Картинка шару — той самий `upload-url`/`discard-upload`, що й у карти. Ліміт — `MAX_WORLD_LAYERS`.
 - **Клієнт:** `WorldLayerImages` лежить між базовою картинкою й зонами, під `WorldFog` (туман обрізає картинку); `LayerImageRect` редагує прямокутник (drag + кути, коміт з debounce, `lib/utils/world/layer-rect.ts`). Escape під час drag піна скасовує жест (`usePinGesture`). `useLayerVisibility` — локальний перемикач показу (`hidden` ховає картинку й маркери шару), спільний для редактора ДМ, гравця (`useWorldPlay.layers`) і режиму «Очима героя» (`useHeroEyes.layers`); `LayerLegend` показується, лише якщо шари є. Панель ДМ — `components/world/editor/layers/` (`LayersPanel`), активний шар → `layerId` нових маркерів, вибір шару в картці маркера.
 - **Граблі:** шар без картинки теж віддається гравцеві (для чипа легенди); вхід у вкладену карту з маркера прихованого шару не розкриває координату (тест у `view-handlers`); `entryCount` сесій віддається лише ДМ-відповіді `GET sessions` (гравцеві `WorldTrailSession` без `description`/`active`/`entryCount`); `pickCard` (`lib/utils/world/pick-card.ts`) обирає картку слід > маркер лише на десктопі.
+
+## Вьюпорт (2026-11-20, якість A)
+
+- **Підкладка:** `WorldMapView` малює розмиту `atlas-backdrop` з тим самим URL, що й карта (без другого запиту `/_next/image`), тож порожніх смуг над/під вписаною картинкою немає.
+- **Повний екран:** `useMapFullscreen` (`lib/hooks/world/`) тримає `full` і ставить `overflow: hidden` на `<html>`; хост (обгортка карти в `WorldPlayClient` і `dm/world/page-client.tsx`) просто змінює клас на `fixed inset-0 z-50 h-dvh` без ремонту, кнопка лежить у блоці зуму (`slots.fullscreen`; у «Показі» її немає). При зміні `box` `WorldMapView` викликає `rescale(box.width / prev)`, і переглянута ділянка зберігається (бічна панель, повний екран).
+- **Esc:** `escapeStep` (`lib/utils/world/escape-step.ts`) — по кроку на натискання: `details` → `drawing` → `fullscreen` → `selection`. Слухач у capture-фазі в `useWorldEditorPage`/`useWorldPlay` робить `preventDefault`; крок `drawing` лишається за `useMapDrawing`.
+- **Компактна мітка + панель:** бульбашка маркера показує назву й іконки без опису; «Докладніше» (`openDetails`) відкриває праву колонку, на десктопі виходить з повного екрана й центрує маркер (`focusPoint(anchor, 1)`). «Перемістити карту»/«Видалити карту» ДМ перенесено в панель.
+
+**Граблі вьюпорту:**
+- Не ставити `role=dialog` на обгортку повного екрана (хост має `role=region`): слухачі Esc і `useMapDrawing` ігнорують події всередині `[role=dialog]`, драбина зламається.
+- Не перемонтовувати карту при вході/виході з повного екрана (змінювати лише клас обгортки), інакше губляться зум, офсет і вибір.
+- `sizes` підкладки має дорівнювати `sizes` карти, інакше Next запитає інший варіант і з'явиться другий запит.
 
 ## Розкладка
 
