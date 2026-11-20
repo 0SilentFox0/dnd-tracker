@@ -2,6 +2,7 @@ import { SURROUNDED_FOES } from './constants';
 
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -14,23 +15,15 @@ export function isOutnumbering(
     participants: BattleParticipant[],
     map: MapCfg
 ): boolean {
-    const near = (
-        of: BattleParticipant,
-        side: BattleParticipant['basicInfo']['side']
-    ) =>
-        participants.filter(
-            (p) =>
-                p.basicInfo.side === side &&
-                isActive(p) &&
-                (p.basicInfo.id === of.basicInfo.id ||
-                    isAdjacentOnMap(map, p, of))
-        ).length;
-
-    if (!isAdjacentOnMap(map, attacker, target)) return false;
+    if (
+        !isHostile(map, attacker, target) ||
+        !isAdjacentOnMap(map, attacker, target)
+    )
+        return false;
 
     return (
-        near(target, attacker.basicInfo.side) >=
-        2 * near(attacker, target.basicInfo.side)
+        engagedFoes(target, participants, map).length >=
+        2 * engagedFoes(attacker, participants, map).length
     );
 }
 
@@ -41,7 +34,7 @@ export const engagedFoes = (
 ): BattleParticipant[] =>
     participants.filter(
         (f) =>
-            f.basicInfo.side !== p.basicInfo.side &&
+            isHostile(map, f, p) &&
             isActive(f) &&
             isAdjacentOnMap(map, f, p)
     );

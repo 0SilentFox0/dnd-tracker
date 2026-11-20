@@ -5,7 +5,7 @@ import {
     wfrpDispel,
     wfrpDispelPersistent,
 } from '../../rules/magic/dispel';
-import { isDispelRange } from '../../rules/magic/dispel-range';
+import { dispelSpotOf, isDispelRange } from '../../rules/magic/dispel-range';
 import { wfrpState, withWfrpState } from '../../rules/state';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -66,7 +66,12 @@ export function dispelMutation(
             API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE
         );
 
-    if (!isDispelRange(dispeller, target, ctx.meta.map, rules))
+    if (!isDispelRange(
+            dispeller,
+            dispelSpotOf(target, body.mode),
+            ctx.meta.map,
+            rules
+        ))
         throw reject(API_ERRORS.DISPEL_OUT_OF_RANGE);
 
     const id = dispeller.basicInfo.id;

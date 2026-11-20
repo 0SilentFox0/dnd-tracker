@@ -6,7 +6,7 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { dispelOp } from '@/systems/wfrp/api/battle';
 import { editionOf } from '@/systems/wfrp/rules/edition';
 import { canDispel } from '@/systems/wfrp/rules/magic/dispel';
-import { isDispelRange } from '@/systems/wfrp/rules/magic/dispel-range';
+import { dispelSpotOf, isDispelRange } from '@/systems/wfrp/rules/magic/dispel-range';
 import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -42,14 +42,23 @@ export function useDispelPanel(hero: BattleParticipant): DispelPanel | null {
     const reactiveSpent = wfrpState(hero).dispelRound === battle.currentRound;
 
     const targets = battle.initiativeOrder.flatMap((p): DispelTarget[] => {
-        if (!isDispelRange(hero, p, battle.map, battle.rules)) return [];
+        const inRange = (mode: DispelTarget['mode']) =>
+            isDispelRange(
+                hero,
+                dispelSpotOf(p, mode),
+                battle.map,
+                battle.rules
+            );
 
         const last = wfrpState(p).lastCast;
 
         const held = sustain.info(p);
 
         return [
-            ...(last && p.basicInfo.id !== hero.basicInfo.id && !reactiveSpent
+            ...(last &&
+            p.basicInfo.id !== hero.basicInfo.id &&
+            !reactiveSpent &&
+            inRange('reactive')
                 ? [
                       {
                           key: `r:${p.basicInfo.id}`,
@@ -60,7 +69,10 @@ export function useDispelPanel(hero: BattleParticipant): DispelPanel | null {
                       },
                   ]
                 : []),
-            ...(held?.cn && ownTurn && !hero.actionFlags.hasUsedAction
+            ...(held?.cn &&
+            ownTurn &&
+            !hero.actionFlags.hasUsedAction &&
+            inRange('persistent')
                 ? [
                       {
                           key: `p:${p.basicInfo.id}`,

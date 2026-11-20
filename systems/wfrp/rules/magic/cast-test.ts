@@ -286,6 +286,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                           lastCast: {
                               spell: spell.name,
                               sl: test.sl,
+                              ...(ctx.at && { at: ctx.at }),
                               ...(critBonus && { critBonus }),
                           },
                       }),

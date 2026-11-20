@@ -165,6 +165,7 @@ export interface WfrpParticipantState {
 export interface LastCast {
     spell: string;
     sl: number;
+    at?: { x: number; y: number };
     critBonus?: 'criticalDamage' | 'totalPower' | 'unstoppableForce';
 }
 
@@ -264,6 +265,14 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                     lastCast: {
                         spell: raw.lastCast.spell,
                         sl: raw.lastCast.sl,
+                        ...(isRecord(raw.lastCast.at) &&
+                            finite(raw.lastCast.at.x) &&
+                            finite(raw.lastCast.at.y) && {
+                                at: {
+                                    x: raw.lastCast.at.x,
+                                    y: raw.lastCast.at.y,
+                                },
+                            }),
                         ...((raw.lastCast.critBonus === 'criticalDamage' ||
                             raw.lastCast.critBonus === 'totalPower' ||
                             raw.lastCast.critBonus === 'unstoppableForce') && {

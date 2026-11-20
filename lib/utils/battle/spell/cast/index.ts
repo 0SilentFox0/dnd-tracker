@@ -211,6 +211,11 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
                       magic: spellMagic,
                       rules: params.rules,
                       rng,
+                      at:
+                          params.aim ??
+                          params.allParticipants.find(
+                              (p) => p.basicInfo.id === params.targetIds[0]
+                          )?.battleData.position,
                   },
                   params.castTest
               )

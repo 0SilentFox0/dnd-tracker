@@ -12,7 +12,7 @@ import type {
     SpellMagicKind,
 } from '@/lib/utils/spells/model/schema';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
-import type { BattleMapConfig } from '@/types/battle-grid';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface CastTestCtx {
@@ -22,6 +22,8 @@ export interface CastTestCtx {
     rules: Ruleset;
     rng: Rng;
     presetRoll?: number;
+    /** Where the spell lands: the aimed cell, else the first target's cell */
+    at?: GridPoint;
     /** The system's own input of the request, parsed by `SystemServer.schemas.castInput` */
     system?: SystemSlot;
 }

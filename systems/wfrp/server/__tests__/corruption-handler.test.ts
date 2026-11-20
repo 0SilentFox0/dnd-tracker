@@ -8,6 +8,7 @@ import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { planExposureTest } from '@/systems/wfrp/rules/corruption/exposure';
 import { planGrant } from '@/systems/wfrp/rules/corruption/plan-grant';
 import {
     grantCorruption,
@@ -24,6 +25,9 @@ vi.mock('@/lib/server/characters/battle-lock', () => ({
 vi.mock('@/lib/server/characters/lock', () => ({ lockCharacters: vi.fn() }));
 vi.mock('@/lib/server/characters/log', () => ({ writeCharacterLog: vi.fn() }));
 vi.mock('@/lib/utils/rules/systems', () => ({ ruleSystemOf: vi.fn() }));
+vi.mock('@/systems/wfrp/rules/corruption/exposure', () => ({
+    planExposureTest: vi.fn(),
+}));
 vi.mock('@/systems/wfrp/rules/corruption/plan-grant', () => ({
     planGrant: vi.fn(),
 }));
@@ -264,5 +268,76 @@ describe('undoCorruption', () => {
                 data: { grantId: 'g1', undo: true },
             },
         ]);
+    });
+});
+
+describe('grantCorruption exposure', () => {
+    const canonGate = () => {
+        const g = gate();
+
+        (g.access.campaign as { rules: unknown }).rules = {
+            tables: {},
+            edition: { preset: 'canon5e' },
+        };
+
+        return g;
+    };
+
+    const exposure = { degree: 'major', skill: 'cool' } as const;
+
+    const test = { roll: 10, target: 40, sl: 3, outcome: 'success' } as const;
+
+    it('409 outside canon5e', async () => {
+        await expect(
+            grantCorruption(gate(), { exposure, reason: 'r' })
+        ).rejects.toMatchObject({
+            message: API_ERRORS.CORRUPTION_EXPOSURE_UNSUPPORTED,
+            status: 409,
+        });
+        expect(db.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('feeds the rolled points to planGrant', async () => {
+        lockWith({});
+        vi.mocked(planExposureTest).mockReturnValue({ points: 2, test });
+        vi.mocked(planGrant).mockReturnValue({
+            state: { points: 2, mutations: [] },
+            summary: { points: 2, total: 2, threshold: 5 },
+        } as never);
+
+        const result = await grantCorruption(canonGate(), {
+            exposure,
+            reason: 'r',
+        });
+
+        expect(result.grantId).toBeDefined();
+        expect(vi.mocked(planGrant).mock.calls[0]![0]).toMatchObject({
+            points: 2,
+            exposure: { ...exposure, test },
+        });
+    });
+
+    it('logs but changes nothing for zero points', async () => {
+        lockWith({});
+        vi.mocked(planExposureTest).mockReturnValue({ points: 0, test });
+
+        const result = await grantCorruption(canonGate(), {
+            exposure,
+            reason: 'r',
+        });
+
+        expect(planGrant).not.toHaveBeenCalled();
+        expect(db.character.update).not.toHaveBeenCalled();
+        expect(result.grantId).toBeUndefined();
+        expect(result.summary).toMatchObject({
+            points: 0,
+            exposure: { ...exposure, test },
+        });
+        expect(vi.mocked(writeCharacterLog).mock.calls[0]![1][0]).toMatchObject(
+            {
+                kind: CharacterLogKind.CORRUPTION,
+                data: { points: 0, reason: 'r' },
+            }
+        );
     });
 });

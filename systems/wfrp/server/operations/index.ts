@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import { advanceOperation } from './advance';
 import { advanceUndoOperation } from './advance-undo';
 import {
@@ -19,7 +21,8 @@ import {
 } from '@/lib/server/systems/operation-helpers';
 import type { SystemOperation } from '@/lib/server/systems/types';
 import {
-    corruptionGrantSchema,
+    corruptionExposureGrantSchema,
+    corruptionManualGrantSchema,
     corruptionUndoSchema,
 } from '@/systems/wfrp/server/corruption-schemas';
 import {
@@ -61,7 +64,10 @@ export const WFRP_OPERATIONS: Record<string, SystemOperation> = {
     },
     'corruption.grant': {
         operation: asSystemOperation(corruptionGrantOperation),
-        input: withCharacterId(corruptionGrantSchema),
+        input: z.union([
+            withCharacterId(corruptionManualGrantSchema),
+            withCharacterId(corruptionExposureGrantSchema),
+        ]),
     },
     'corruption.undo': {
         operation: asSystemOperation(corruptionUndoOperation),

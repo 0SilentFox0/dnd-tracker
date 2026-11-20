@@ -13,6 +13,10 @@ vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),
     useConfirm: () => vi.fn(),
 }));
+vi.mock('@/lib/hooks/campaigns', async (orig) => ({
+    ...(await orig<object>()),
+    useCampaignRules: () => ({ data: {} }),
+}));
 vi.mock('@/systems/wfrp/hooks', async (orig) => ({
     ...(await orig<object>()),
     useGrantCorruption: () => ({ mutateOk: vi.fn(), isPending: false }),

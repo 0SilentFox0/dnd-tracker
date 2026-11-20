@@ -93,7 +93,7 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
             max: 40,
             effects: [
                 { type: 'damage', amount: 2 },
-                { type: 'marker', key: 'winded' },
+                { type: 'marker', key: 'winded', rounds: 1 },
             ],
             textKey: 'battleWfrp.crit.body.2',
         },

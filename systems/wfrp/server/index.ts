@@ -20,6 +20,7 @@ import { careerToImportRecord } from '@/systems/wfrp/server/careers/import-recor
 import { careerTierSchema } from '@/systems/wfrp/server/careers/schema';
 import { careersResource } from '@/systems/wfrp/server/content/careers';
 import { WFRP_CONTENT_REFS } from '@/systems/wfrp/server/content/refs';
+import { soulLostGuard } from '@/systems/wfrp/server/join-guard';
 import { WFRP_OPERATIONS } from '@/systems/wfrp/server/operations';
 import {
     raceProfileSaveHandler,
@@ -27,6 +28,7 @@ import {
 } from '@/systems/wfrp/server/race-profile-routes';
 
 export const WFRP_MODULE_SERVER: SystemServer = {
+    participant: { joinGuards: [soulLostGuard] },
     schemas: {
         characteristics: CharacteristicsSchema,
         unitCharacteristics: UnitCharacteristicsSchema,
