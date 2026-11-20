@@ -110,3 +110,54 @@ describe('WorldPins point colour', () => {
         expect(container.querySelector('.atlas-seal')).toBeNull();
     });
 });
+
+describe('WorldPins zone label visibility', () => {
+    it('hides a label past the hide zoom, but keeps known and fogless ones', () => {
+        const plain = zone('A', 0.3);
+
+        const count = (el: HTMLElement) =>
+            el.querySelectorAll('.atlas-zone-label').length;
+
+        const { container, rerender } = render(
+            <WorldPins markers={[plain]} zoom={6} {...props} />
+        );
+
+        expect(count(container)).toBe(0);
+
+        rerender(
+            <WorldPins
+                markers={[{ ...plain, alwaysVisible: true }]}
+                zoom={6}
+                {...props}
+            />
+        );
+
+        expect(count(container)).toBe(1);
+
+        rerender(
+            <WorldPins
+                markers={[plain]}
+                zoom={6}
+                labels={{ fogless: true }}
+                {...props}
+            />
+        );
+
+        expect(count(container)).toBe(1);
+    });
+
+    it('shows the hovered zone name when it is hidden at the zoom', () => {
+        const { container } = render(
+            <WorldPins
+                markers={[zone('A', 0.3)]}
+                zoom={6}
+                labels={{ hoveredId: 'A' }}
+                {...props}
+            />
+        );
+
+        expect(container.querySelector('.atlas-zone-label')?.textContent).toBe(
+            'A'
+        );
+    });
+});

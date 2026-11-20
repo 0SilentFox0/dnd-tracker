@@ -7,11 +7,11 @@ import {
     WORLD_LABEL_ZOOM_COMPACT,
     WORLD_ZONE_LABEL_CONFLICT,
     WORLD_ZONE_LABEL_CONFLICT_COMPACT,
-    WORLD_ZONE_LABEL_HIDE_ZOOM,
 } from '@/lib/constants/world';
 import { DRAG_THRESHOLD } from '@/lib/hooks/common';
-import { markerAnchor, polygonArea } from '@/lib/utils/world/geometry';
-import type { MapPoint, Polygon, WorldMarker } from '@/types/world';
+import { markerAnchor } from '@/lib/utils/world/geometry';
+import { zoneLabelSize, zoneLabelVisible } from '@/lib/utils/world/zone-labels';
+import type { MapPoint, WorldMarker } from '@/types/world';
 
 export interface PinHandlers {
     onMarkerClick?(id: string): void;
@@ -23,6 +23,7 @@ interface WorldPinsProps {
     markers: WorldMarker[];
     zoom: number;
     compact?: boolean;
+    labels?: { hoveredId?: string | null; fogless?: boolean };
     selectedId?: string | null;
     drag: {
         current: { id: string; point: MapPoint } | null;
@@ -32,11 +33,6 @@ interface WorldPinsProps {
     handlers: PinHandlers;
 }
 
-const zoneLabelSize = (polygon: Polygon) =>
-    Math.round(
-        Math.min(20, Math.max(11, 10 + Math.sqrt(polygonArea(polygon)) * 40))
-    );
-
 const sealStyle = (color: string) => ({
     background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 70%, white), ${color} 62%, color-mix(in srgb, ${color} 55%, black))`,
 });
@@ -45,6 +41,7 @@ export function WorldPins({
     markers,
     zoom,
     compact = false,
+    labels,
     selectedId,
     drag,
     handlers,
@@ -75,10 +72,17 @@ export function WorldPins({
                                 WORLD_ZONE_LABEL_CONFLICT_COMPACT
                         );
 
+                    const hovered = labels?.hoveredId === m.id;
+
                     if (
-                        zoom > WORLD_ZONE_LABEL_HIDE_ZOOM ||
-                        clashes ||
-                        overlaps
+                        !zoneLabelVisible({
+                            zoom,
+                            known: m.alwaysVisible,
+                            fogless: !!labels?.fogless,
+                            clashes,
+                            overlaps,
+                            hovered,
+                        })
                     )
                         return null;
 
@@ -96,7 +100,7 @@ export function WorldPins({
                                 top: `${spot.y * 100}%`,
                                 transform: `translate(-50%, -50%) scale(${1 / zoom})`,
                                 fontSize: m.polygon
-                                    ? zoneLabelSize(m.polygon)
+                                    ? zoneLabelSize(m.polygon, zoom)
                                     : undefined,
                             }}
                         >

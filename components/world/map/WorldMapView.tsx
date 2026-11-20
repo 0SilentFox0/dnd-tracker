@@ -199,6 +199,8 @@ export function WorldMapView({
               )
             : undefined;
 
+    const [hoveredZone, setHoveredZone] = useState<string | null>(null);
+
     const [cursor, setCursor] = useState<MapPoint | null>(null);
 
     useEffect(() => {
@@ -266,6 +268,10 @@ export function WorldMapView({
                     onPointerMove={(e) => {
                         bind.onPointerMove(e);
 
+                        const over = zoneIdAt(e.target, tool) ?? null;
+
+                        if (over !== hoveredZone) setHoveredZone(over);
+
                         if (tool === 'zone' && draft?.length)
                             setCursor(
                                 snappedAt(e.clientX, e.clientY, e.altKey)
@@ -273,6 +279,7 @@ export function WorldMapView({
                     }}
                     onPointerUp={onBackgroundUp}
                     onPointerCancel={bind.onPointerCancel}
+                    onPointerLeave={() => setHoveredZone(null)}
                     onDoubleClick={(e) => {
                         const zoneId = zoneIdAt(e.target, tool);
 
@@ -375,6 +382,10 @@ export function WorldMapView({
                                     markers={markers}
                                     zoom={zoom}
                                     compact={compact}
+                                    labels={{
+                                        hoveredId: hoveredZone,
+                                        fogless: !fog,
+                                    }}
                                     selectedId={selectedId}
                                     drag={{
                                         current: dragging,
