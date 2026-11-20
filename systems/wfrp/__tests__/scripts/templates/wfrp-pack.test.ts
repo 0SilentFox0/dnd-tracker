@@ -590,7 +590,7 @@ describe('validatePack: wfrp units', () => {
         [
             'a wrong maxHp',
             (r) => (r.maxHp = 6),
-            ['maxHp 6 must equal Wounds 5'],
+            ['maxHp 6 must equal Wounds 4'],
         ],
         [
             'a characteristic out of band',

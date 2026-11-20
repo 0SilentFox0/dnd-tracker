@@ -125,7 +125,8 @@
     "fumbleMisfire": "{name}: осічка ({roll}): {text}",
     "fumbleWounds": "{name} отримує {wounds} Ран від фамблу",
     "fumbleNote": "{name}: {note}",
-    "targetSurrounded": "{name} в оточенні: шляху відступу немає"
+    "targetSurrounded": "{name} в оточенні: шляху відступу немає",
+    "targetHelpless": "{name} безпорадний: нападник обирає кидок і влучає"
   },
   "passion": {
     "frenzy": "Шал",
@@ -287,5 +288,22 @@
       "1": "Зброя не стріляє; потрібне перезаряджання",
       "2": "Зброя вибухає й ранить вашу основну руку"
     }
+  },
+  "mods": {
+    "sizeRanged": "Розмір цілі: {sl} SL",
+    "outnumbered": "Ціль у меншості: {sl} SL",
+    "surrounded": "Ціль в оточенні: {sl} SL",
+    "offHand": "Зброя в слабшій руці: {sl} SL",
+    "hatred": "Ненависть: {sl} SL",
+    "highGround": "Вигідна висота: {sl} SL",
+    "defenderHighGround": "Захисник на висоті: {sl} SL",
+    "terrain": "Бруд, вода або складний рельєф: {sl} SL",
+    "enclosed": "Тісний простір: {sl} SL",
+    "attackerProne": "Нападник лежить (Prone): {sl} SL",
+    "targetEntangled": "Ціль зв'язана (Entangled): {sl} SL",
+    "targetSurprised": "Ціль заскочена (Surprised): {sl} SL",
+    "calledShot": "Приціл у локацію: {sl} SL",
+    "talent": "Таланти: {sl} SL",
+    "quality": "Якості й вади зброї: {sl} SL"
   }
 }

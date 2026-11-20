@@ -166,11 +166,12 @@ describe('grim bestiary end to end', () => {
                 foe.basicInfo.name
             ).toBeLessThan(party[0].combatStats.maxHp);
 
+            // Trait attacks of the bestiary already include the size bonus (p360)
             if (
                 slotStats(foe.abilities.system)?.size === 'large' ||
                 slotStats(foe.abilities.system)?.size === 'enormous'
             )
-                expect(JSON.stringify(out.events)).toContain('steps.size');
+                expect(JSON.stringify(out.events)).not.toContain('steps.size');
 
             ctx = {
                 ...next,

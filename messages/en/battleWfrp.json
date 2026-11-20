@@ -125,7 +125,8 @@
     "fumbleMisfire": "{name}: misfire ({roll}): {text}",
     "fumbleWounds": "{name} takes {wounds} Wounds from the fumble",
     "fumbleNote": "{name}: {note}",
-    "targetSurrounded": "{name} is surrounded: no route of escape"
+    "targetSurrounded": "{name} is surrounded: no route of escape",
+    "targetHelpless": "{name} is helpless: the attacker picks the roll and hits"
   },
   "passion": {
     "frenzy": "Frenzy",
@@ -287,5 +288,22 @@
       "1": "The weapon fails to fire; reload it",
       "2": "The weapon explodes and hurts your primary arm"
     }
+  },
+  "mods": {
+    "sizeRanged": "Target size: {sl} SL",
+    "outnumbered": "Target outnumbered: {sl} SL",
+    "surrounded": "Target surrounded: {sl} SL",
+    "offHand": "Off-hand weapon: {sl} SL",
+    "hatred": "Hatred: {sl} SL",
+    "highGround": "High ground: {sl} SL",
+    "defenderHighGround": "Defender on high ground: {sl} SL",
+    "terrain": "Mud, water or difficult terrain: {sl} SL",
+    "enclosed": "Enclosed space: {sl} SL",
+    "attackerProne": "Attacker Prone: {sl} SL",
+    "targetEntangled": "Target Entangled: {sl} SL",
+    "targetSurprised": "Target Surprised: {sl} SL",
+    "calledShot": "Called shot: {sl} SL",
+    "talent": "Talents: {sl} SL",
+    "quality": "Weapon qualities and flaws: {sl} SL"
   }
 }
