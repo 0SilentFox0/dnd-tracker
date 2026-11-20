@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { clamp } from '@/lib/utils/common/clamp';
 import type { MapPoint } from '@/types/world';
 
@@ -49,15 +47,5 @@ export function markerBubblePosition({
     };
 }
 
-export function useMarkerBubblePosition({
-    point,
-    box,
-    zoom,
-    offset,
-    size,
-}: Args): BubblePosition {
-    return useMemo(
-        () => markerBubblePosition({ point, box, zoom, offset, size }),
-        [point, box, zoom, offset, size]
-    );
-}
+export const useMarkerBubblePosition = (args: Args): BubblePosition =>
+    markerBubblePosition(args);

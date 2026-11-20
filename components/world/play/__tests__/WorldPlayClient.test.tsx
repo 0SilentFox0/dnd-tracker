@@ -210,7 +210,7 @@ describe('WorldPlayClient', () => {
 
         click(await screen.findByRole('button', { name: 'Town' }));
 
-        const bubble = await screen.findByRole('group', { name: 'Town' });
+        const bubble = await screen.findByRole('dialog', { name: 'Town' });
 
         expect(bubble.textContent).toContain('Old market town');
         expect(screen.getByText('Відкрити карту')).toBeTruthy();
@@ -225,7 +225,7 @@ describe('WorldPlayClient', () => {
 
         click(await screen.findByRole('button', { name: 'Town' }));
 
-        await screen.findByRole('group', { name: 'Town' });
+        await screen.findByRole('dialog', { name: 'Town' });
 
         expect(screen.queryByText('Відкрити карту')).toBeNull();
     });
@@ -255,7 +255,7 @@ describe('WorldPlayClient', () => {
         );
         fireEvent.click(screen.getAllByRole('button', { name: 'Town' })[0]);
 
-        expect(await screen.findByRole('group', { name: 'Town' })).toBeTruthy();
+        expect(await screen.findByRole('dialog', { name: 'Town' })).toBeTruthy();
     });
 
     it('opens the notes panel from the bubble', async () => {
@@ -267,5 +267,6 @@ describe('WorldPlayClient', () => {
         await waitFor(() =>
             expect(screen.getByLabelText('Нова нотатка')).toBeTruthy()
         );
+        expect(screen.queryByRole('dialog', { name: 'Town' })).toBeNull();
     });
 });

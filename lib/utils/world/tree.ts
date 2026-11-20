@@ -50,14 +50,17 @@ export function treeOrder(maps: WorldMapSummary[]): WorldMapSummary[] {
 
     const out: WorldMapSummary[] = [];
 
+    const seen = new Set<string>();
+
     const walk = (parent: string | null) => {
         for (const m of maps) {
             if (
                 (m.parentMapId && ids.has(m.parentMapId)
                     ? m.parentMapId
                     : null) === parent &&
-                !out.includes(m)
+                !seen.has(m.id)
             ) {
+                seen.add(m.id);
                 out.push(m);
                 walk(m.id);
             }

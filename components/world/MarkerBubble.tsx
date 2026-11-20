@@ -29,8 +29,14 @@ export function MarkerBubble({ marker, actions, children }: MarkerBubbleProps) {
 
     return (
         <div
-            role="group"
+            role="dialog"
             aria-label={marker.name}
+            onKeyDown={(e) => {
+                if (e.key !== 'Escape') return;
+
+                e.preventDefault();
+                actions.onClose();
+            }}
             data-tour="world.bubble"
             className="w-64 max-w-full rounded-lg border border-hud-rule bg-black/90 p-3 text-sm text-hud-ink shadow-lg"
         >
