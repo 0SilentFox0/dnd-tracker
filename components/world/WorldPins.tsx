@@ -11,7 +11,7 @@ import {
     WORLD_ZONE_LABEL_HIDE_ZOOM,
 } from '@/lib/constants/world';
 import { DRAG_THRESHOLD } from '@/lib/hooks/common';
-import { polygonArea, polygonCentroid } from '@/lib/utils/world/geometry';
+import { markerAnchor, polygonArea } from '@/lib/utils/world/geometry';
 import type { MapPoint, Polygon, WorldMarker } from '@/types/world';
 
 export interface PinHandlers {
@@ -42,11 +42,6 @@ const sealStyle = (color: string) => ({
     background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 70%, white), ${color} 62%, color-mix(in srgb, ${color} 55%, black))`,
 });
 
-const anchor = (m: WorldMarker): MapPoint =>
-    m.kind === 'zone' && m.polygon
-        ? polygonCentroid(m.polygon)
-        : { x: m.x, y: m.y };
-
 export function WorldPins({
     markers,
     zoom,
@@ -64,7 +59,7 @@ export function WorldPins({
     return (
         <>
             {markers.map((m) => {
-                const spot = dragging?.id === m.id ? dragging.point : anchor(m);
+                const spot = dragging?.id === m.id ? dragging.point : markerAnchor(m);
 
                 if (m.kind === 'zone') {
                     const clashes = points.some(

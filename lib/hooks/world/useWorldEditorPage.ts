@@ -19,7 +19,7 @@ import { useWorldHeroes } from './useWorldHeroes';
 import { useWorldMap } from './useWorldMap';
 import { useWorldMaps } from './useWorldMaps';
 
-import { polygonCentroid } from '@/lib/utils/world/geometry';
+import { markerAnchor, polygonCentroid } from '@/lib/utils/world/geometry';
 import type {
     CreateWorldMarkerData,
     MapPoint,
@@ -73,7 +73,9 @@ export function useWorldEditorPage({
         if (initialSelectedId) select(initialSelectedId);
     }
 
-    const moveTarget = useMoveTarget(detail.data?.markers ?? NO_MARKERS);
+    const markers = detail.data?.markers ?? NO_MARKERS;
+
+    const moveTarget = useMoveTarget(markers);
 
     const [creating, setCreating] = useState(false);
 
@@ -149,7 +151,7 @@ export function useWorldEditorPage({
     const { tool, setTool } = drawing;
 
     useRemoveMarker({
-        marker: detail.data?.markers.find((m) => m.id === selectedId),
+        marker: markers.find((m) => m.id === selectedId),
         editor,
         select,
         hotkey: tool === 'select',
@@ -159,12 +161,12 @@ export function useWorldEditorPage({
 
     const snapZones = useMemo(
         () =>
-            (detail.data?.markers ?? NO_MARKERS).flatMap((m) =>
+            markers.flatMap((m) =>
                 m.kind === 'zone' && m.polygon && m.id !== redrawId
                     ? [m.polygon]
                     : []
             ),
-        [detail.data?.markers, redrawId]
+        [markers, redrawId]
     );
 
     const changeVertices = useCallback(
@@ -254,6 +256,47 @@ export function useWorldEditorPage({
         setTool(MODE_HOME_TOOL[mode]);
     };
 
+    const handlers = {
+        ...drawing.handlers,
+        onVertexChange: changeVertices,
+        onMapClick: (p: MapPoint) =>
+            tool === 'select' ? select(null) : drawing.handlers.onMapClick(p),
+        onMarkerClick: (id: string) => {
+            if (tool === 'select') select(id);
+            else if (tool === 'move' && !detail.isPlaceholderData)
+                moveTarget.pickMarker(id);
+        },
+        onMarkerDoubleClick: (id: string) => {
+            const child = markers.find((m) => m.id === id)?.childMapId;
+
+            if (child) openMap(child);
+        },
+        onMarkerDrag:
+            tool === 'select' || tool === 'point'
+                ? (id: string, p: MapPoint) =>
+                      void editor.marker.update.mutateOk({
+                          id,
+                          data: { x: p.x, y: p.y },
+                      })
+                : undefined,
+    };
+
+    const selectedMarker = selectedId
+        ? markers.find((m) => m.id === selectedId)
+        : undefined;
+
+    const bubbleOpen =
+        tool === 'select' &&
+        !eyes.asHeroId &&
+        !!selectedMarker &&
+        !detailsOpen;
+
+    const card = {
+        marker: selectedMarker,
+        open: bubbleOpen,
+        point: selectedMarker ? markerAnchor(selectedMarker) : null,
+    };
+
     const ctx: WorldEditorCtx = useMemo(
         () => ({
             campaignId,
@@ -303,6 +346,8 @@ export function useWorldEditorPage({
             details: { open: detailsOpen, set: setDetailsOpen },
             tree: { open: treeOpen, set: setTreeOpen },
         },
-        actions: { openMap, changeEyes, changeVertices },
+        actions: { openMap, changeEyes },
+        handlers,
+        card,
     };
 }

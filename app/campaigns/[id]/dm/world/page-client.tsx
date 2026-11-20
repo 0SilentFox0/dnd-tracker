@@ -29,7 +29,6 @@ import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
-import { markerAnchor } from '@/lib/utils/world/geometry';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const ENTRY_COMPASS = {
@@ -62,10 +61,12 @@ export function WorldEditorPageClient({
     const {
         ctx,
         data: { maps, detail, roster },
-        tools: { eyes, drawing, moveTarget, editor, snap, mode },
+        tools: { eyes, drawing, moveTarget, snap, mode },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: { create: creating, details, tree },
-        actions: { openMap, changeEyes, changeVertices },
+        actions: { openMap, changeEyes },
+        handlers,
+        card: bubbleCard,
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
@@ -109,11 +110,7 @@ export function WorldEditorPageClient({
                         mapId ? (
                             <QueryState query={detail}>
                                 {(d) => {
-                                    const marker = selectedId
-                                        ? d.markers.find(
-                                              (m) => m.id === selectedId
-                                          )
-                                        : undefined;
+                                    const { marker } = bubbleCard;
 
                                     const building =
                                         tool === 'select' && !eyes.asHeroId;
@@ -121,11 +118,8 @@ export function WorldEditorPageClient({
                                     const detailsOpen =
                                         building && details.open;
 
-                                    const bubbleOpen =
-                                        building && !!marker && !details.open;
-
                                     const bubble =
-                                        bubbleOpen && marker ? (
+                                        bubbleCard.open && marker ? (
                                             <DmMarkerBubble
                                                 key={marker.id}
                                                 marker={marker}
@@ -138,9 +132,9 @@ export function WorldEditorPageClient({
                                         ) : null;
 
                                     const card =
-                                        bubble && marker && isDesktop
+                                        bubble && bubbleCard.point && isDesktop
                                             ? {
-                                                  point: markerAnchor(marker),
+                                                  point: bubbleCard.point,
                                                   content: bubble,
                                               }
                                             : undefined;
@@ -279,80 +273,7 @@ export function WorldEditorPageClient({
                                                                 compact={
                                                                     !isDesktop
                                                                 }
-                                                                handlers={{
-                                                                    ...drawing.handlers,
-                                                                    onVertexChange:
-                                                                        changeVertices,
-                                                                    onMapClick:
-                                                                        (p) =>
-                                                                            tool ===
-                                                                            'select'
-                                                                                ? select(
-                                                                                      null
-                                                                                  )
-                                                                                : drawing.handlers.onMapClick(
-                                                                                      p
-                                                                                  ),
-                                                                    onMarkerClick:
-                                                                        (
-                                                                            id
-                                                                        ) => {
-                                                                            if (
-                                                                                tool ===
-                                                                                'select'
-                                                                            )
-                                                                                select(
-                                                                                    id
-                                                                                );
-                                                                            else if (
-                                                                                tool ===
-                                                                                    'move' &&
-                                                                                !detail.isPlaceholderData
-                                                                            )
-                                                                                moveTarget.pickMarker(
-                                                                                    id
-                                                                                );
-                                                                        },
-                                                                    onMarkerDoubleClick:
-                                                                        (
-                                                                            id
-                                                                        ) => {
-                                                                            const child =
-                                                                                d.markers.find(
-                                                                                    (
-                                                                                        m
-                                                                                    ) =>
-                                                                                        m.id ===
-                                                                                        id
-                                                                                )?.childMapId;
-
-                                                                            if (
-                                                                                child
-                                                                            )
-                                                                                openMap(
-                                                                                    child
-                                                                                );
-                                                                        },
-                                                                    onMarkerDrag:
-                                                                        tool ===
-                                                                            'select' ||
-                                                                        tool ===
-                                                                            'point'
-                                                                            ? (
-                                                                                  id,
-                                                                                  p
-                                                                              ) =>
-                                                                                  void editor.marker.update.mutateOk(
-                                                                                      {
-                                                                                          id,
-                                                                                          data: {
-                                                                                              x: p.x,
-                                                                                              y: p.y,
-                                                                                          },
-                                                                                      }
-                                                                                  )
-                                                                            : undefined,
-                                                                }}
+                                                                handlers={handlers}
                                                                 slots={{
                                                                     hint: (
                                                                         <WorldToolHint

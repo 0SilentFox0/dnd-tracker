@@ -25,9 +25,7 @@ import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
 import { useWorldPlay } from '@/lib/hooks/world';
-import { markerAnchor } from '@/lib/utils/world/geometry';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
-import type { WorldMarker } from '@/types/world';
 
 const MAP_HEIGHT =
     'h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
@@ -70,16 +68,6 @@ export function WorldPlayClient({
                     const props = viewToMapProps(view);
 
                     const marker = play.selectedMarker;
-
-                    const childOpen = marker?.childMapId
-                        ? view.maps.some((m) => m.id === marker.childMapId)
-                        : false;
-
-                    const openChild = (m: WorldMarker) =>
-                        view.maps.some((x) => x.id === m.childMapId) &&
-                        m.childMapId
-                            ? play.openMap(m.childMapId)
-                            : undefined;
 
                     const mapTree = (
                         <MapTree
@@ -184,24 +172,18 @@ export function WorldPlayClient({
                                             focus={play.focus}
                                             selectedId={marker?.id}
                                             compact={!isDesktop}
-                                            handlers={{
-                                                onMarkerClick: play.select,
-                                                onMarkerDoubleClick: (id) => {
-                                                    const m = view.markers.find(
-                                                        (x) => x.id === id
-                                                    );
-
-                                                    if (m) openChild(m);
-                                                },
-                                                onMapClick: () =>
-                                                    play.select(null),
-                                            }}
+                                            handlers={play.handlers}
                                             slots={{
-                                                card: marker
+                                                card:
+                                                    marker &&
+                                                    play.card.point &&
+                                                    !(
+                                                        isDesktop &&
+                                                        play.details.open
+                                                    )
                                                     ? {
-                                                          point: markerAnchor(
-                                                              marker
-                                                          ),
+                                                          point: play.card
+                                                              .point,
                                                           content: (
                                                               <PlayerMarkerBubble
                                                                   key={
@@ -216,11 +198,12 @@ export function WorldPlayClient({
                                                                               true
                                                                           ),
                                                                       onOpenMap:
-                                                                          childOpen &&
-                                                                          marker.childMapId
+                                                                          play
+                                                                              .card
+                                                                              .canOpenChild
                                                                               ? () =>
-                                                                                    openChild(
-                                                                                        marker
+                                                                                    play.openChild(
+                                                                                        marker.id
                                                                                     )
                                                                               : undefined,
                                                                       onClose:

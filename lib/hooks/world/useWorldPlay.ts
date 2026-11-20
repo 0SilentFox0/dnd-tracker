@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 import { useWorldView } from './useWorldView';
 
-import { polygonCentroid } from '@/lib/utils/world/geometry';
+import { markerAnchor } from '@/lib/utils/world/geometry';
 import type { MapPoint, WorldHero } from '@/types/world';
 
 export function useWorldPlay(campaignId: string, mapId: string | null) {
@@ -77,11 +77,7 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
             if (!m) return;
 
             selectMarker(id);
-            focusPoint(
-                m.kind === 'zone' && m.polygon
-                    ? polygonCentroid(m.polygon)
-                    : { x: m.x, y: m.y }
-            );
+            focusPoint(markerAnchor(m));
         },
         [view.data, selectMarker, focusPoint]
     );
@@ -95,10 +91,35 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         [router, pathname, selectMarker]
     );
 
+    const selectedMarker =
+        view.data?.markers.find((m) => m.id === selectedId) ?? null;
+
+    const visibleChild = (m: { childMapId: string | null }) =>
+        m.childMapId && view.data?.maps.some((x) => x.id === m.childMapId)
+            ? m.childMapId
+            : null;
+
+    const openChild = (id: string) => {
+        const m = view.data?.markers.find((x) => x.id === id);
+
+        const child = m && visibleChild(m);
+
+        if (child) openMap(child);
+    };
+
     return {
         view,
-        selectedMarker:
-            view.data?.markers.find((m) => m.id === selectedId) ?? null,
+        selectedMarker,
+        card: {
+            point: selectedMarker ? markerAnchor(selectedMarker) : null,
+            canOpenChild: !!selectedMarker && !!visibleChild(selectedMarker),
+        },
+        openChild,
+        handlers: {
+            onMarkerClick: selectMarker,
+            onMarkerDoubleClick: openChild,
+            onMapClick: () => selectMarker(null),
+        },
         select: selectMarker,
         pickPlace,
         details: { open: detailsOpen, set: setDetailsOpen },
