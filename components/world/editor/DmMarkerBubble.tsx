@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { PenLine, Trash2 } from 'lucide-react';
+import { FolderOpen, FolderPlus, PenLine, Trash2 } from 'lucide-react';
 
 import { MarkerIconGrid } from './maps/MapFieldParts';
 import { NewWorldMapDialog } from './maps/NewWorldMapDialog';
@@ -15,15 +15,17 @@ import { HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import {
+    BUBBLE_ACTIONS,
+    bubbleButton,
+} from '@/components/world/nav/bubble-button';
 import { MarkerBubble } from '@/components/world/nav/MarkerBubble';
 import {
     WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_NAME_MAX,
 } from '@/lib/constants/world';
+import { useIsMobile } from '@/lib/hooks/common';
 import type { WorldMarker } from '@/types/world';
-
-const LINK =
-    'inline-flex items-center gap-1 text-xs text-hud-gold-bright underline';
 
 interface DmMarkerBubbleProps {
     marker: WorldMarker;
@@ -39,6 +41,8 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
 
     const [creating, setCreating] = useState(false);
 
+    const sheet = useIsMobile();
+
     const m = useEditorMarkerFields(marker);
 
     const child = marker.childMapId
@@ -46,7 +50,7 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
         : undefined;
 
     return (
-        <MarkerBubble marker={marker} actions={actions}>
+        <MarkerBubble marker={marker} actions={actions} embedded={sheet}>
             <div className="min-w-0 flex-1 space-y-2">
                 <Input
                     aria-label={t('name')}
@@ -84,7 +88,7 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                                 : 'editor.pointColor'
                         )}
                         color={m.colorValue}
-                        isCustom={m.color !== null}
+                        isCustom={m.isCustomColor}
                         onPick={m.pickColor}
                         onReset={m.resetColor}
                     />
@@ -101,15 +105,21 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                 <div
                     role="group"
                     aria-label={t('bubble.mapBlock')}
-                    className="flex flex-wrap gap-x-3 gap-y-1"
+                    className={BUBBLE_ACTIONS}
                 >
                     {marker.childMapId ? (
                         <>
                             <HudButton
-                                className={LINK}
+                                className={bubbleButton()}
                                 onClick={() => m.openMap(marker.childMapId)}
                             >
-                                {t('bubble.open')}
+                                <FolderOpen
+                                    className="size-3.5 shrink-0"
+                                    aria-hidden
+                                />
+                                <span className="truncate">
+                                    {t('bubble.open')}
+                                </span>
                             </HudButton>
                             {child ? (
                                 <MoveMapMenu
@@ -126,41 +136,66 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                             ) : null}
                             {child ? (
                                 <HudButton
-                                    className="inline-flex items-center gap-1 text-xs text-hud-danger underline"
+                                    className={bubbleButton(true, 'col-span-2')}
                                     onClick={() => void m.removeMap(child)}
                                 >
-                                    {t('editor.deleteMap')}
+                                    <Trash2
+                                        className="size-3.5 shrink-0"
+                                        aria-hidden
+                                    />
+                                    <span className="truncate">
+                                        {t('editor.deleteMap')}
+                                    </span>
                                 </HudButton>
                             ) : null}
                         </>
                     ) : (
                         <HudButton
-                            className={LINK}
+                            className={bubbleButton(false, 'col-span-2')}
                             onClick={() => setCreating(true)}
                         >
-                            {t('bubble.createMap')}
+                            <FolderPlus
+                                className="size-3.5 shrink-0"
+                                aria-hidden
+                            />
+                            <span className="truncate">
+                                {t('bubble.createMap')}
+                            </span>
                         </HudButton>
                     )}
                 </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                <div className={BUBBLE_ACTIONS}>
                     {marker.kind === 'zone' ? (
                         <HudButton
-                            className={LINK}
+                            className={bubbleButton(
+                                false,
+                                m.redrawing
+                                    ? 'border-[var(--gold)] text-hud-gold-bright'
+                                    : undefined
+                            )}
                             aria-pressed={m.redrawing}
                             onClick={() =>
                                 m.redraw(m.redrawing ? null : marker.id)
                             }
                         >
-                            <PenLine className="size-3.5" aria-hidden />
-                            {t('bubble.redraw')}
+                            <PenLine
+                                className="size-3.5 shrink-0"
+                                aria-hidden
+                            />
+                            <span className="truncate">
+                                {t('bubble.redraw')}
+                            </span>
                         </HudButton>
                     ) : null}
                     <HudButton
-                        className="inline-flex items-center gap-1 text-xs text-hud-danger underline"
+                        className={bubbleButton(
+                            true,
+                            marker.kind === 'zone' ? undefined : 'col-span-2'
+                        )}
                         onClick={() => void m.remove()}
                     >
-                        <Trash2 className="size-3.5" aria-hidden />
-                        {tc('delete')}
+                        <Trash2 className="size-3.5 shrink-0" aria-hidden />
+                        <span className="truncate">{tc('delete')}</span>
                     </HudButton>
                 </div>
             </div>

@@ -2,10 +2,15 @@
 
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { MapPin, X } from 'lucide-react';
+import { FolderOpen, MapPin, PanelRight, X } from 'lucide-react';
 
 import { HudButton, HudIconButton } from '@/components/hud';
 import { MARKER_ICON } from '@/components/world/marker-icons';
+import {
+    BUBBLE_ACTIONS,
+    bubbleButton,
+} from '@/components/world/nav/bubble-button';
+import { cn } from '@/lib/utils';
 import type { WorldMarker } from '@/types/world';
 
 interface MarkerBubbleProps {
@@ -19,9 +24,15 @@ interface MarkerBubbleProps {
         onClose(): void;
     };
     children?: ReactNode;
+    embedded?: boolean;
 }
 
-export function MarkerBubble({ marker, actions, children }: MarkerBubbleProps) {
+export function MarkerBubble({
+    marker,
+    actions,
+    children,
+    embedded = false,
+}: MarkerBubbleProps) {
     const t = useTranslations('world.bubble');
 
     const Icon = (marker.icon && MARKER_ICON[marker.icon]) || MapPin;
@@ -37,7 +48,12 @@ export function MarkerBubble({ marker, actions, children }: MarkerBubbleProps) {
                 actions.onClose();
             }}
             data-tour="world.bubble"
-            className="w-64 max-w-full rounded-lg border border-hud-rule bg-black/90 p-3 text-sm text-hud-ink shadow-lg"
+            className={cn(
+                'text-sm text-hud-ink',
+                embedded
+                    ? 'w-full'
+                    : 'w-64 max-w-full rounded-lg border border-hud-rule bg-black/90 p-3 shadow-lg'
+            )}
         >
             <div className="flex items-start gap-2">
                 {children ?? (
@@ -55,30 +71,34 @@ export function MarkerBubble({ marker, actions, children }: MarkerBubbleProps) {
                         </div>
                     </>
                 )}
-                <HudIconButton
-                    size="sm"
-                    tone="muted"
-                    aria-label={t('close')}
-                    className="-mt-1 -mr-1 shrink-0"
-                    onClick={actions.onClose}
-                >
-                    <X className="size-4" />
-                </HudIconButton>
+                {embedded ? null : (
+                    <HudIconButton
+                        size="sm"
+                        tone="muted"
+                        aria-label={t('close')}
+                        className="-mt-1 -mr-1 shrink-0"
+                        onClick={actions.onClose}
+                    >
+                        <X className="size-4" />
+                    </HudIconButton>
+                )}
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className={cn('mt-2', BUBBLE_ACTIONS)}>
                 <HudButton
                     data-tour="world.more"
-                    className="text-xs text-hud-gold-bright underline"
+                    className={bubbleButton()}
                     onClick={actions.onMore}
                 >
-                    {t('more')}
+                    <PanelRight className="size-3.5 shrink-0" aria-hidden />
+                    <span className="truncate">{t('more')}</span>
                 </HudButton>
                 {actions.onOpenMap ? (
                     <HudButton
-                        className="text-xs text-hud-gold-bright underline"
+                        className={bubbleButton()}
                         onClick={actions.onOpenMap}
                     >
-                        {t('openMap')}
+                        <FolderOpen className="size-3.5 shrink-0" aria-hidden />
+                        <span className="truncate">{t('openMap')}</span>
                     </HudButton>
                 ) : null}
             </div>

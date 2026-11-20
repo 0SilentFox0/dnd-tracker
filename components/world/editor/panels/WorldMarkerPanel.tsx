@@ -91,7 +91,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                                 <MarkerColorField
                                     label={t('editor.pointColor')}
                                     color={m.colorValue}
-                                    isCustom={m.color !== null}
+                                    isCustom={m.isCustomColor}
                                     onPick={m.pickColor}
                                     onReset={m.resetColor}
                                 />
@@ -102,7 +102,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                             <MarkerColorField
                                 label={t('editor.zoneColor')}
                                 color={m.colorValue}
-                                isCustom={m.color !== null}
+                                isCustom={m.isCustomColor}
                                 onPick={m.pickColor}
                                 onReset={m.resetColor}
                             />

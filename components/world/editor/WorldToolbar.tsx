@@ -6,6 +6,7 @@ import {
     CornerLeftUp,
     LogIn,
     type LucideIcon,
+    Magnet,
     MapPin,
     MousePointer2,
     Navigation,
@@ -17,7 +18,7 @@ import {
 
 import { useWorldEditorContext } from './WorldEditorContext';
 
-import { HudButton, HudToggleChip } from '@/components/hud';
+import { HudButton } from '@/components/hud';
 import {
     Tooltip,
     TooltipContent,
@@ -171,18 +172,6 @@ export function WorldToolbar({
                                 />
                             );
                         })}
-                        {snap && mode === 'build' ? (
-                            <HudToggleChip
-                                tall
-                                active={snap.enabled}
-                                disabled={readOnly}
-                                title={t('snapHint')}
-                                className="shrink-0"
-                                onClick={() => snap.setEnabled(!snap.enabled)}
-                            >
-                                {t('snap')}
-                            </HudToggleChip>
-                        ) : null}
                         {tool === 'zone' ? (
                             <>
                                 <span
@@ -224,6 +213,16 @@ export function WorldToolbar({
                                     </span>
                                 </HudButton>
                             </>
+                        ) : null}
+                        {snap && mode === 'build' ? (
+                            <ToolButton
+                                label={t('snap')}
+                                tip={t('snapHint')}
+                                Icon={Magnet}
+                                active={snap.enabled}
+                                disabled={readOnly}
+                                onClick={() => snap.setEnabled(!snap.enabled)}
+                            />
                         ) : null}
                         {onSettings && mode === 'build' ? (
                             <ToolButton
