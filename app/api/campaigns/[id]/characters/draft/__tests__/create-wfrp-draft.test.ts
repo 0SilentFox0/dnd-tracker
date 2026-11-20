@@ -303,6 +303,9 @@ describe('createWfrpDraft', () => {
             expect(prisma.characterInventory.create).toHaveBeenCalledWith({
                 data: expect.objectContaining({
                     items: [
+                        { name: 'Clothing', quantity: 1 },
+                        { name: 'Dagger', quantity: 1 },
+                        { name: 'Pouch', quantity: 1 },
                         { name: 'Rope', quantity: 1 },
                         { name: 'Lantern', quantity: 1 },
                     ],

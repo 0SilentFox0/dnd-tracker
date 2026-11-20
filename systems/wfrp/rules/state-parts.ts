@@ -48,15 +48,29 @@ export const wfrpPersist: PersistPart = ({ participant }, acc) => ({
 export const wfrpResetState: TurnStateReset = (p, scope) => {
     if (scope !== 'turn') return p;
 
-    const { conditionTests, momentumAttack, lastHand, moveMode } = wfrpState(p);
+    const {
+        conditionTests,
+        momentumAttack,
+        lastHand,
+        moveMode,
+        channelledNow,
+        lastCast,
+    } = wfrpState(p);
 
     const cleared =
-        conditionTests || momentumAttack || lastHand || moveMode
+        conditionTests ||
+        momentumAttack ||
+        lastHand ||
+        moveMode ||
+        channelledNow ||
+        lastCast
             ? withWfrpState(p, {
                   conditionTests: undefined,
                   momentumAttack: undefined,
                   lastHand: undefined,
                   moveMode: undefined,
+                  channelledNow: undefined,
+                  lastCast: undefined,
               })
             : p;
 

@@ -144,25 +144,15 @@ describe('canon: Movement (p163)', () => {
         expect(chargeBand(c, 17)).toBe('far');
     });
 
-    bookExample(163, 'Charge from Move yards away gains Momentum', () => {
+    bookExample(163, 'declaring a Charge grants no Momentum by itself', () => {
         const out = movementMutation(ctxOf([heroOf(), foeOf('f1', 3)]), {
             kind: 'charge',
             participantId: 'hero',
             targetId: 'f1',
         });
 
-        expect(hasMomentum(hero(out))).toBe(true);
-        expect(wfrpState(hero(out)).moveMode).toBe('charge');
-    });
-
-    bookExample(163, 'Charge from a short distance gives no Momentum', () => {
-        const out = movementMutation(ctxOf([heroOf(0, 6), foeOf('f1', 2)]), {
-            kind: 'charge',
-            participantId: 'hero',
-            targetId: 'f1',
-        });
-
         expect(hasMomentum(hero(out))).toBe(false);
+        expect(wfrpState(hero(out)).moveMode).toBe('charge');
     });
 
     bookExample(163, 'cannot Charge while Engaged or beyond Run', () => {

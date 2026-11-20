@@ -42,7 +42,7 @@
     },
     "deafened": {
       "label": "Deafened",
-      "description": "Cannot hear"
+      "description": "Cannot understand speech; an Endurance test removes it"
     },
     "unconscious": {
       "label": "Unconscious",
@@ -85,6 +85,14 @@
     "passionFail": "{name}: {passion} ({group}) toward {source} — test {roll} / {target}, SL {sl}: failed, the urge takes over",
     "passionCalm": "{name}: {passion} ({group}) — retest {roll} / {target}, SL {sl}: calms down",
     "passionRage": "{name}: {passion} ({group}) — retest {roll} / {target}, SL {sl}: still seething",
+    "frenzyFail": "{name} fails to work into a Frenzy — Willpower test {roll} / {target}",
+    "frenzyCharge": "{name} is Frenzied: must move towards and attack the nearest foe ({foe})",
+    "animosityVent": "{name} insults and provokes {group}, the urge is spent",
+    "passionRelease": "The GM releases {name} from {passion} ({group})",
+    "intimidateImmune": "{name} is immune to Intimidate by {source} (Hatred)",
+    "intimidateWin": "{name} intimidates {target} — Intimidate {roll} / {own}, SL {sl} against Cool SL {foeSl}: Fear {rating}",
+    "intimidateLose": "{name} fails to intimidate {target} — SL {sl} against Cool SL {foeSl}",
+    "intimidateNoEffect": "{target} cannot be frightened right now",
     "frenzyStart": "{name} works into a Frenzy — Willpower test {roll} / {target}",
     "frenzyEnd": "{name}'s Frenzy ends, the fighter is Fatigued",
     "critDeath": "☠️ {target} is killed outright: {text}",
@@ -110,7 +118,10 @@
     "fortuneRerolls": "{name} spends Fortune: {rolls} rerolls",
     "fumbleDrop": "{name} fumbles and drops the weapon; the next Action goes to picking it up",
     "fumbleOops": "{name} fumbles (oops {roll}): {text}",
-    "fumbleMisfire": "{name}: misfire ({roll}): {text}"
+    "fumbleMisfire": "{name}: misfire ({roll}): {text}",
+    "fumbleWounds": "{name} takes {wounds} Wounds from the fumble",
+    "fumbleNote": "{name}: {note}",
+    "targetSurrounded": "{name} is surrounded: no route of escape"
   },
   "passion": {
     "frenzy": "Frenzy",
@@ -177,6 +188,13 @@
       "spend": "Spend Fate — it misses",
       "accept": "Take the hit",
       "waiting": "Waiting for the Fate decision"
+    },
+    "psychology": {
+      "title": "Psychology",
+      "frenzy": "Enter Frenzy (Willpower test)",
+      "vent": "Insult / provoke {group}",
+      "release": "Release from {passion} ({group})",
+      "intimidate": "Intimidate {name} (action, vs Cool)"
     },
     "momentum": {
       "title": "Momentum",

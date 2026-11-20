@@ -8,7 +8,7 @@ import {
     selfTestMod,
 } from '../conditions/test-mod';
 import { EDITION_PROFILES, editionOf, type EditionProfile } from '../edition';
-import { weaponSkillTarget } from '../edition/attack-skill';
+import { weaponSkillLabel, weaponSkillTarget } from '../edition/attack-skill';
 import { qualityFumbleFrom, qualityToHit } from '../equipment/quality-effects';
 import {
     type PercentileTestResult,
@@ -36,7 +36,7 @@ import {
 } from './constants';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
-import { isOutnumbering } from './engagement';
+import { engagedFoes, isOutnumbering, isSurrounded } from './engagement';
 import { fateLeftOf, fateSpendsOn } from './fate';
 import { fumbleModelOf, fumbleOutcome } from './fumble';
 import { asLocation, hitLocation, sideOf } from './location';
@@ -63,6 +63,7 @@ import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { rollDie } from '@/lib/utils/common/dice';
+import type { Ruleset } from '@/lib/utils/rules';
 import type {
     ResolveAttackCtx,
     ResolvedAttack,
@@ -129,13 +130,32 @@ export function parryTargetOf(
 
 export const wfrpAttackTarget = (
     attacker: BattleParticipant,
-    attack: BattleAttack
-) => ({
-    label: textRef(
-        `gameTerms.characteristics.${attackCharacteristicOf(attack)}.label`
-    ),
-    target: attackerTargetOf(attacker, attack),
-});
+    attack: BattleAttack,
+    rules: Ruleset
+) => {
+    const edition = editionOf(rules);
+
+    const characteristic = attackCharacteristicOf(attack);
+
+    const group = ATTACK_SLOT.read(attack.system)?.group;
+
+    const skill =
+        edition.attackTarget === 'skill' &&
+        weaponSkillTarget(
+            participantChars(attacker),
+            characteristic === 'bs' ? 'ranged' : 'melee',
+            group
+        ) !== undefined
+            ? weaponSkillLabel(characteristic === 'bs' ? 'ranged' : 'melee', group)
+            : undefined;
+
+    return {
+        label:
+            skill ??
+            textRef(`gameTerms.characteristics.${characteristic}.label`),
+        target: attackerTargetOf(attacker, attack, edition),
+    };
+};
 
 export const wfrpAbortedRoll = (ctx: ResolveAttackCtx): AttackRollResult => ({
     isHit: false,
@@ -336,7 +356,7 @@ function woundAttacker(
     ctx: ResolveAttackCtx,
     before: BattleParticipant,
     wounds: number
-): BattleParticipant {
+) {
     const after = dropBreakOnDamage(
         {
             ...before,
@@ -355,7 +375,7 @@ function woundAttacker(
         rules: ctx.rules,
         rng: ctx.rng,
         participants: replaceParticipant(ctx.participants, after),
-    }).participant;
+    });
 }
 
 function withFumble(ctx: ResolveAttackCtx, r: ResolvedAttack): ResolvedAttack {
@@ -366,6 +386,7 @@ function withFumble(ctx: ResolveAttackCtx, r: ResolvedAttack): ResolvedAttack {
         fumbleOutcome({
             details,
             attacker: ctx.attacker,
+            weapon: ctx.attack,
             group: ATTACK_SLOT.read(ctx.attack.system)?.group,
             edition: editionOf(ctx.rules),
             rules: ctx.rules,
@@ -374,21 +395,72 @@ function withFumble(ctx: ResolveAttackCtx, r: ResolvedAttack): ResolvedAttack {
 
     if (!fumble) return r;
 
+    const applied = (p: BattleParticipant) =>
+        fumble.update(r.attackerUpdate?.(p) ?? p);
+
+    const draws: number[] = [];
+
+    const recording = () => {
+        const v = ctx.rng();
+
+        draws.push(v);
+
+        return v;
+    };
+
+    const woundLines =
+        fumble.wounds > 0
+            ? [
+                  textRef('battleWfrp.log.fumbleWounds', {
+                      name: ctx.attacker.basicInfo.name,
+                      wounds: fumble.wounds,
+                  }),
+                  ...woundAttacker(
+                      { ...ctx, rng: recording },
+                      applied(ctx.attacker),
+                      fumble.wounds
+                  ).messages,
+              ]
+            : [];
+
     return {
         ...r,
-        lines: [...r.lines, ...fumble.lines],
+        lines: [...r.lines, ...fumble.lines, ...woundLines],
         attackerUpdate: (p) => {
-            const updated = fumble.update(r.attackerUpdate?.(p) ?? p);
+            if (fumble.wounds <= 0) return applied(p);
 
-            return fumble.wounds > 0
-                ? woundAttacker(ctx, updated, fumble.wounds)
-                : updated;
+            let i = 0;
+
+            // Replays the dry run's draws so the log and the applied state agree
+            const replay = () => draws[i++] ?? ctx.rng();
+
+            return woundAttacker(
+                { ...ctx, rng: replay },
+                applied(p),
+                fumble.wounds
+            ).participant;
         },
     };
 }
 
+const surroundedNote = (ctx: ResolveAttackCtx) =>
+    editionOf(ctx.rules).momentumModel === 'participant' &&
+    attackKindOf(ctx.attack.type) === AttackType.MELEE &&
+    isSurrounded(engagedFoes(ctx.target, ctx.participants, ctx.map))
+        ? [
+              textRef('battleWfrp.log.targetSurrounded', {
+                  name: ctx.target.basicInfo.name,
+              }),
+          ]
+        : [];
+
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
-    const resolved = withFumble(ctx, resolveAttackCore(ctx));
+    const core = resolveAttackCore(ctx);
+
+    const resolved = withFumble(ctx, {
+        ...core,
+        lines: [...core.lines, ...surroundedNote(ctx)],
+    });
 
     const hand = ATTACK_SLOT.read(ctx.attack.system)?.hand;
 

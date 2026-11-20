@@ -27,13 +27,11 @@ export type HitDieInput = z.infer<typeof hitDieSchema>;
 
 const difficulty = z.string().max(40).optional();
 
-const fortune = z.enum(['advantage', 'reroll', 'notFail']).optional();
+const fortune = z.string().max(20).optional();
 
 const rerolls = z.number().int().min(1).max(9).optional();
 
 const critical = z.boolean().optional();
-
-const location = z.string().max(20).optional();
 
 export const sheetRollSchema = z.union([
     z.object({
@@ -59,7 +57,6 @@ export const sheetRollSchema = z.union([
             fortune,
             rerolls,
             critical,
-            location,
         })
         .strict(),
     z
@@ -71,7 +68,6 @@ export const sheetRollSchema = z.union([
             fortune,
             rerolls,
             critical,
-            location,
         })
         .strict(),
 ]);

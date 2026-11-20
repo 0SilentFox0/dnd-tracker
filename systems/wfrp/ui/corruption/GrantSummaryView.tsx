@@ -7,7 +7,13 @@ import { MutationEffects } from './MutationEffects';
 import { useText } from '@/lib/i18n/use-text';
 import type { GrantSummary } from '@/systems/wfrp/rules/corruption/types';
 
-export function GrantSummaryView({ summary }: { summary: GrantSummary }) {
+export function GrantSummaryView({
+    summary,
+    name,
+}: {
+    summary: GrantSummary;
+    name?: string;
+}) {
     const t = useTranslations('wfrpCorruption');
 
     const text = useText();
@@ -47,6 +53,11 @@ export function GrantSummaryView({ summary }: { summary: GrantSummary }) {
                     </p>
                     <p>{text(mutation.text)}</p>
                     <MutationEffects effects={mutation.effects} />
+                </li>
+            )}
+            {summary.soulLost && name && (
+                <li className="text-hud-danger">
+                    {t('soulLost', { name, kind: summary.soulLost })}
                 </li>
             )}
             {summary.capped && <li>{t('summary.capped')}</li>}

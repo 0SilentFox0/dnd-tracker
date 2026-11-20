@@ -1,6 +1,7 @@
 import type { WfrpConditionKey } from '../conditions/catalog';
 import { resolveTable, rollSlot, rowText } from '../tables/resolve';
 import type { HitLocation, HitSide } from './constants';
+import { type RolledRounds, rollRoundsFormula } from './rounds-formula';
 
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { rollDie } from '@/lib/utils/common/dice';
@@ -17,6 +18,8 @@ export interface CritResult {
     markers: string[];
     /** Duration of a marker in rounds; a marker without an entry is permanent */
     markerRounds?: Partial<Record<string, number>>;
+    /** Rolled formula durations, resolved against the target's TB when applied */
+    markerRoundsRolled?: Partial<Record<string, RolledRounds>>;
     /** Which arm or leg was struck (canon5e) */
     side?: HitSide;
     /** The roll ran past the table (or hit a `death` row), p171-176 */
@@ -78,7 +81,12 @@ export function rollCrit(
         else if (e.type === 'marker') {
             result.markers.push(e.key);
 
-            if (e.rounds)
+            if (e.roundsFormula)
+                result.markerRoundsRolled = {
+                    ...result.markerRoundsRolled,
+                    [e.key]: rollRoundsFormula(e.roundsFormula, rng),
+                };
+            else if (e.rounds)
                 result.markerRounds = {
                     ...result.markerRounds,
                     [e.key]: e.rounds,

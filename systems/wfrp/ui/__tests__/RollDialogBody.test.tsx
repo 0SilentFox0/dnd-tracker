@@ -56,7 +56,7 @@ const result: SheetRollResult = {
 describe('wfrp RollDialogBody', () => {
     afterEach(cleanup);
 
-    it('offers Critical and a hit location for notFail', () => {
+    it('offers Critical but no hit location for a sheet notFail', () => {
         const set = vi.fn();
 
         sheetFortune.mockReturnValueOnce({
@@ -65,7 +65,7 @@ describe('wfrp RollDialogBody', () => {
             value: 'notFail',
             onChange: () => {},
             advantageLabel: true,
-            notFail: { critical: true, location: undefined, set },
+            notFail: { critical: true, set },
         });
         render(
             <RollDialogBody
@@ -77,11 +77,13 @@ describe('wfrp RollDialogBody', () => {
                 setDifficulty={() => {}}
             />
         );
-        fireEvent.click(
-            screen.getByText('battleWfrp.ui.fortune.locations.rightArm')
-        );
+        expect(
+            screen.queryByText('battleWfrp.ui.fortune.locations.rightArm')
+        ).toBeNull();
 
-        expect(set).toHaveBeenCalledWith(true, 'rightArm');
+        fireEvent.click(screen.getByText('battleWfrp.ui.fortune.critical'));
+
+        expect(set).toHaveBeenCalledWith(false, undefined);
     });
 
     it('lets the DM pick a difficulty', () => {

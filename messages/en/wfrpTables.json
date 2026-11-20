@@ -32,6 +32,7 @@
   "amount": "Amount",
   "condition": "Condition",
   "rounds": "Rounds",
+  "roundsFormula": "Rounds formula (e.g. 1d10 - TB; overrides rounds)",
   "levels": "Levels",
   "marker": "Marker",
   "markers": {

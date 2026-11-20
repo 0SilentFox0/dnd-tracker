@@ -24,18 +24,24 @@ import {
     type StashResult,
 } from '@/lib/utils/inventory/stash-actions';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { readCharacteristics } from '@/systems/wfrp/rules/characteristics/keys';
+import {
+    type Characteristics,
+    readCharacteristics,
+} from '@/systems/wfrp/rules/characteristics/keys';
 import type {
     DowntimePeriodResult,
     DowntimeSetResult,
 } from '@/systems/wfrp/rules/downtime/api-types';
+import type { PeriodCareer } from '@/systems/wfrp/rules/downtime/career-duty';
 import { MAX_DAYS } from '@/systems/wfrp/rules/downtime/constants';
 import { validateEndeavour } from '@/systems/wfrp/rules/downtime/endeavours';
 import type { PeriodHero } from '@/systems/wfrp/rules/downtime/plan-period';
 import { planPeriod } from '@/systems/wfrp/rules/downtime/plan-period';
 import type {
     Ailment,
+    CareerMark,
     DowntimeState,
+    PeriodSnapshot,
 } from '@/systems/wfrp/rules/downtime/types';
 import { editionOf } from '@/systems/wfrp/rules/edition';
 import { toCareerData } from '@/systems/wfrp/server/careers/row';
@@ -195,7 +201,18 @@ export async function setDowntime(
 
         const characteristics = readCharacteristics(locked);
 
-        if (list.some((e) => downtime.validateEndeavour(e, characteristics)))
+        const earningSkill =
+            canon &&
+            characteristics.career &&
+            list.some((e) => e.kind === 'earn')
+                ? await earningSkillOf(tx, campaignId, characteristics.career)
+                : undefined;
+
+        if (
+            list.some((e) =>
+                downtime.validateEndeavour(e, characteristics, earningSkill)
+            )
+        )
             throw new ContentError(API_ERRORS.SKILL_UNTRAINED, 409);
 
         const prev: DowntimeState = characteristics.downtime ?? {
@@ -252,14 +269,23 @@ async function loadCareerStatuses(campaignId: string, rows: HeroRow[]) {
 
     const careerById = new Map(careers.map((row) => [row.id, row]));
 
-    return (c: Hero) => {
+    return (c: Hero): { status?: string; career?: PeriodCareer } => {
         const state = c.characteristics.career;
 
         const row = state && careerById.get(state.careerId);
 
-        return row
-            ? toCareerData(row).tiers[state.tier - 1]?.status
-            : undefined;
+        if (!state || !row) return {};
+
+        const { tiers } = toCareerData(row);
+
+        return {
+            status: tiers[state.tier - 1]?.status,
+            career: {
+                state,
+                statuses: tiers.map((t) => t.status),
+                earningSkill: tiers[0]?.earningSkill,
+            },
+        };
     };
 }
 
@@ -267,7 +293,9 @@ function periodHeroes(
     rows: HeroRow[],
     locked: Locked,
     campaign: Campaign,
-    statusOf: (c: Hero) => PeriodHero['status']
+    careerOf: ReturnType<typeof loadCareerStatuses> extends Promise<infer F>
+        ? F
+        : never
 ): PeriodHero[] {
     return rows.map((row) => {
         const fresh = locked.get(row.id);
@@ -284,7 +312,7 @@ function periodHeroes(
                 rules: campaign.rules,
                 characteristics: hero.characteristics,
             }).total,
-            status: statusOf(hero),
+            ...careerOf(hero),
         };
     });
 }
@@ -367,7 +395,7 @@ export async function passPeriod(
 
     const { ids, rows } = await loadActiveHeroes(access, input.characterIds);
 
-    const statusOf = await loadCareerStatuses(campaign.id, rows);
+    const careerOf = await loadCareerStatuses(campaign.id, rows);
 
     const periodId = randomUUID();
 
@@ -375,7 +403,7 @@ export async function passPeriod(
         const locked = await lockCharacters(tx, ids);
 
         const planned = system.planPeriod({
-            heroes: periodHeroes(rows, locked, campaign, statusOf),
+            heroes: periodHeroes(rows, locked, campaign, careerOf),
             days: input.days,
             rules: campaign.rules,
             rng: Math.random,
@@ -399,6 +427,42 @@ export async function passPeriod(
     });
 }
 
+function restoredCareer(current: Characteristics, before?: CareerMark) {
+    if (!before || !current.career) return {};
+
+    const { standingLoss: _loss, ...rest } = current.career;
+
+    return { career: { ...rest, ...before } };
+}
+
+async function earningSkillOf(
+    tx: Tx,
+    campaignId: string,
+    career: NonNullable<Characteristics['career']>
+) {
+    const row = await tx.career.findFirst({
+        where: { id: career.careerId, campaignId },
+    });
+
+    return row ? toCareerData(row).tiers[0]?.earningSkill : undefined;
+}
+
+const careerMoved = (
+    hero: Parameters<typeof readCharacteristics>[0],
+    snapshot: PeriodSnapshot
+) => {
+    const after = snapshot.after.career;
+
+    const career = readCharacteristics(hero).career;
+
+    return (
+        !!after &&
+        (career?.tier !== after.tier ||
+            (!!after.careerId && career?.careerId !== after.careerId) ||
+            (career?.standingLoss ?? 0) !== (after.standingLoss ?? 0))
+    );
+};
+
 function checkUndoable(locked: Locked, ids: string[], periodId: string) {
     const stale = () => new ContentError(API_ERRORS.DOWNTIME_STALE, 409);
 
@@ -419,7 +483,8 @@ function checkUndoable(locked: Locked, ids: string[], periodId: string) {
             hero.resources.hp !== snapshot.after.hp ||
             !sameIds ||
             JSON.stringify(d.training) !==
-                JSON.stringify(snapshot.after.training)
+                JSON.stringify(snapshot.after.training) ||
+            careerMoved(hero, snapshot)
         )
             throw stale();
 
@@ -480,11 +545,17 @@ function restoredHeroes(checked: Checked) {
             ...(before.training ? { training: before.training } : {}),
         };
 
+        const current = readCharacteristics(hero);
+
         return {
             id,
             resources,
             downtime,
-            characteristics: { ...readCharacteristics(hero), downtime },
+            characteristics: {
+                ...current,
+                downtime,
+                ...restoredCareer(current, before.career),
+            },
         };
     });
 }

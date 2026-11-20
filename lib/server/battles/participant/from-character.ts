@@ -524,7 +524,8 @@ function participantAbilities(a: {
         ...systemSlotOf(
             ruleSystemOf(rules).combat.participantFields?.(
                 character,
-                equipmentGear
+                equipmentGear,
+                rules
             )
         ),
         primaryAbility,

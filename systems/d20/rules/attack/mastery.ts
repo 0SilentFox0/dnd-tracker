@@ -259,6 +259,7 @@ function topple(ctx: MasteryStrikeCtx) {
             timedKey: `mastery:topple@${attackerId}`,
             round: flow.ctx.round,
             rules: flow.ctx.rules,
+            rng: flow.ctx.rng,
         }
     );
 

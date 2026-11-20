@@ -9,6 +9,7 @@ import type {
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError, dmEvent } from '@/lib/utils/battle/store';
+import { rngOf } from '@/lib/utils/common/rng';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
 const WFRP_CONDITION_MAX_ROUNDS = 99;
@@ -75,6 +76,7 @@ export function systemConditionMutation(
             rounds: body.rounds,
             round,
             rules: ctx.meta.rules,
+            rng: rngOf(ctx),
             sourceName: textRef('battleLog.dm.name'),
         });
 

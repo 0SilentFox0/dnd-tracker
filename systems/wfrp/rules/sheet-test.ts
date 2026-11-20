@@ -6,7 +6,6 @@ import {
 } from './characteristics/constants';
 import { skillTarget, value } from './characteristics/derive';
 import { readCharacteristics } from './characteristics/keys';
-import { ACCEPTED_SPOTS, type HitSpot } from './combat/constants';
 import { fateLeftOf, fateSpendsOn } from './combat/fate';
 import { selfModes, selfSlMod, selfTestMod } from './conditions/test-mod';
 import { resolveModeSources } from './percentile/advantage';
@@ -19,6 +18,8 @@ import {
     applyFortune,
     forcedOf,
     type FortuneInput,
+    SHEET_FORTUNE_KINDS,
+    type SheetFortuneKind,
 } from './percentile/fortune';
 import { resolvePercentileTest } from './percentile/resolve';
 import { skillDef } from './skills/catalog';
@@ -31,7 +32,7 @@ import type {
     SheetTestInput,
     SheetTestResult,
 } from '@/lib/utils/rules/systems/types';
-import type { SheetFortuneKind, SheetRollBody } from '@/types/characters';
+import type { SheetRollBody } from '@/types/characters';
 
 type WfrpTestBody = {
     kind: 'test';
@@ -39,7 +40,6 @@ type WfrpTestBody = {
     fortune?: SheetFortuneKind;
     rerolls?: number;
     critical?: boolean;
-    location?: HitSpot;
 } & ({ characteristic: CharacteristicKey } | { skill: string; spec?: string });
 
 export function acceptsWfrpSheetTest(
@@ -54,8 +54,8 @@ export function acceptsWfrpSheetTest(
         return false;
 
     if (
-        body.location !== undefined &&
-        !(ACCEPTED_SPOTS as readonly string[]).includes(body.location)
+        body.fortune !== undefined &&
+        !(SHEET_FORTUNE_KINDS as readonly string[]).includes(body.fortune)
     )
         return false;
 

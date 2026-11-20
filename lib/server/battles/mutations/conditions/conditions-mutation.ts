@@ -21,6 +21,7 @@ import type {
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError, dmEvent } from '@/lib/utils/battle/store';
+import { rngOf } from '@/lib/utils/common/rng';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -118,6 +119,7 @@ export function battleConditionsMutation(
                 timedKey: `dm:${body.condition}@${round}${body.sourceId ? `:${body.sourceId}` : ''}`,
                 round,
                 rules: ctx.meta.rules,
+                rng: rngOf(ctx),
             }
         );
 

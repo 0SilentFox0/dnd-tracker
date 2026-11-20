@@ -92,7 +92,7 @@ export function useAttackWizard(
     const judged = {
         target:
             serverJudged && attacker && attack
-                ? (attackTarget?.(attacker, attack) ?? null)
+                ? (attackTarget?.(attacker, attack, scene.battle.rules) ?? null)
                 : null,
         sceneState,
         attackerSide: attacker?.basicInfo.side,
@@ -101,7 +101,7 @@ export function useAttackWizard(
                 ? Object.fromEntries(
                       attacks.map((a) => [
                           a.id ?? a.name,
-                          attackTarget?.(attacker, a)?.target,
+                          attackTarget?.(attacker, a, scene.battle.rules)?.target,
                       ])
                   )
                 : {},

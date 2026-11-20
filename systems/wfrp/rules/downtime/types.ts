@@ -4,6 +4,14 @@ import type { Coin } from '@/lib/constants/inventory';
 import type { WfrpConditionKey } from '@/systems/wfrp/constants/conditions';
 import type { LogLine } from '@/types/text';
 
+/** Mirror of `CareerSnapshot` (characteristics/keys imports this file) */
+export type CareerMark = {
+    careerId: string;
+    tier: 1 | 2 | 3 | 4;
+    ticks: string[];
+    standingLoss?: number;
+};
+
 export type AilmentKind = 'festering' | 'disease' | 'injury';
 
 export type Ailment = {
@@ -50,11 +58,19 @@ export type EndeavourSummary = {
     discount?: number;
     patientId?: string;
     skipped?: 'patientAbsent';
+    /** Wounds a fumbled Heal inflicted on the patient */
+    fumbleWounds?: number;
 };
 
 export type PeriodSummary = {
     skipped?: 'dead' | 'incapacitated';
     healed: number;
+    /** Hardly Working: no Income taken, one coin granted (p199) */
+    hardlyWorking?: boolean;
+    /** Burdens of Power: Earning Test of a top-level hero who skipped Income (p196) */
+    burden?: { test: TestOutcome; lost?: 'standing' | 'tier' };
+    /** Wounds regained by the daily Endurance tests after period losses (p170) */
+    recovered?: number;
     endeavour?: EndeavourSummary;
     /** 5e canon: every endeavour of the period, in order (`endeavour` is the first) */
     endeavours?: EndeavourSummary[];
@@ -80,8 +96,21 @@ export type PeriodSnapshot = {
     id: string;
     at: string;
     days: number;
-    before: { hp?: number; ailments: Ailment[]; training?: TrainingCredit };
-    after: { hp?: number; ailmentIds: string[]; training?: TrainingCredit };
+    before: {
+        hp?: number;
+        ailments: Ailment[];
+        training?: TrainingCredit;
+        /** Career state before Income / Burdens of Power changed it */
+        career?: CareerMark;
+    };
+    after: {
+        hp?: number;
+        ailmentIds: string[];
+        training?: TrainingCredit;
+        career?: Pick<CareerMark, 'tier' | 'standingLoss'> & {
+            careerId?: string;
+        };
+    };
     coins?: CoinAmount;
     summary: PeriodSummary;
 };

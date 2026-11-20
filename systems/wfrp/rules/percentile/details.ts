@@ -36,6 +36,17 @@ export interface PercentileCastDetails {
     outcome: 'critical' | 'success' | 'failure' | 'fumble';
     overcastSteps: number;
     miscast: 'minor' | 'major' | 'wrath' | null;
+    /** Critical Casting bonus picked by the caster, canon5e (p235) */
+    critBonus?: 'criticalDamage' | 'totalPower' | 'unstoppableForce';
+    /** An ingredient lowers the miscast one step instead of cancelling it, canon5e (p235) */
+    stepAvert?: true;
+    /** Prayer overcast bonuses (range, targets, duration) the core has no target for, canon5e (p217-222) */
+    prayerOvercast?: {
+        steps: number;
+        bonus: Partial<
+            Record<'rangeYards' | 'targets' | 'durationRounds', number>
+        >;
+    };
     fortune?: {
         kind: 'reroll' | 'sl' | 'notFail';
         firstRoll?: number;

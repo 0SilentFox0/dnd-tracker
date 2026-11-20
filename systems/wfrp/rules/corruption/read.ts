@@ -170,5 +170,8 @@ export function readCorruption(raw: unknown): CorruptionState | undefined {
         points: (raw.points as number | undefined) ?? 0,
         mutations,
         ...(last ? { last } : {}),
+        ...(raw.soulLost === 'physical' || raw.soulLost === 'mental'
+            ? { soulLost: raw.soulLost }
+            : {}),
     };
 }

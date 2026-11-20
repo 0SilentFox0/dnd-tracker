@@ -14,5 +14,11 @@ export const careerSetSchema = z.object({
 
 export const careerAdvanceSchema = z.object({ force: z.boolean().optional() });
 
+export const careerTrappingSchema = z.object({
+    name: z.string().trim().min(1).max(100),
+});
+
+export type CareerTrappingInput = z.infer<typeof careerTrappingSchema>;
+
 export type CareerSetInput = z.infer<typeof careerSetSchema>;
 export type CareerAdvanceInput = z.infer<typeof careerAdvanceSchema>;

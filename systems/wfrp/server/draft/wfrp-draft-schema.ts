@@ -41,6 +41,7 @@ const canon = z
             .record(skillKey, z.number().int().min(0).max(3))
             .optional(),
         careerTalent: z.string().min(1).max(100).optional(),
+        careerTrappings: z.array(z.string().min(1).max(100)).max(2).optional(),
     })
     .optional();
 

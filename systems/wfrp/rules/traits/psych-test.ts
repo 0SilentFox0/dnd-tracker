@@ -24,7 +24,8 @@ export function selfTest(
     p: BattleParticipant,
     edition: EditionProfile,
     rng: Rng,
-    base: number = coolTarget(p)
+    base: number = coolTarget(p),
+    presetRoll?: number
 ) {
     const target = base + selfTestMod(p, 'test', edition);
 
@@ -33,6 +34,7 @@ export function selfTest(
         rng,
         slModel: edition.slModel,
         slModifier: selfSlMod(p, edition),
+        presetRoll,
     });
 
     return { t, target, passed: isSuccess(t.outcome) };

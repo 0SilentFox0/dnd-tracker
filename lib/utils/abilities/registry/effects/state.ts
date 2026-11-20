@@ -77,6 +77,7 @@ function applyConditionToTargets(
             timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
             round: ctx.round,
             rules: ctx.rules,
+            rng: ctx.rng,
         });
 
         ps = result.participants;

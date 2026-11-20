@@ -216,7 +216,6 @@ describe('rollWfrpSheetTest: Fortune and Fate', () => {
                     ...body,
                     fortune: 'notFail',
                     critical: true,
-                    location: 'arm',
                 },
                 { participant: hero({ fortune: 1, fate: 2 }), presetRoll: 90 }
             )
@@ -226,12 +225,12 @@ describe('rollWfrpSheetTest: Fortune and Fate', () => {
         expect(r.resourcesAfter).toEqual({ fate: 1 });
     });
 
-    it('rejects an unknown location', () => {
+    it('rejects an unknown Fortune kind', () => {
         expect(
             acceptsWfrpSheetTest({
                 kind: 'test',
                 characteristic: 'ws',
-                location: 'tail',
+                fortune: 'gold',
             } as never)
         ).toBe(false);
     });

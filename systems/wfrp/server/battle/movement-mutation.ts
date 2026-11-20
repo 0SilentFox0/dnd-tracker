@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 import { skillTarget } from '../../rules/characteristics/derive';
 import { engagedFoes } from '../../rules/combat/engagement';
-import { withMomentum } from '../../rules/combat/momentum';
 import {
     chargeBand,
     sprintYards,
@@ -10,6 +9,7 @@ import {
 } from '../../rules/combat/movement';
 import { participantChars } from '../../rules/combat/participant';
 import {
+    movementSlMod,
     selfModes,
     selfSlMod,
     selfTestMod,
@@ -159,7 +159,10 @@ export function movementMutation(
         const test = resolvePercentileTest({
             target: skill.target + selfTestMod(actor, 'test', edition),
             slModifier:
-                selfSlMod(actor, edition) + mode.slMod + DIFFICULTY_SL.average,
+                selfSlMod(actor, edition) +
+                movementSlMod(actor, edition) +
+                mode.slMod +
+                DIFFICULTY_SL.average,
             slModel: edition.slModel,
             mode: mode.mode,
             rng: rngOf(ctx),
@@ -236,20 +239,11 @@ export function movementMutation(
 
     const name = actor.basicInfo.name;
 
-    return band === 'momentum'
-        ? finish(
-              withMomentum(charging, true),
-              textRef('battleWfrp.log.chargeMomentum', {
-                  name,
-                  target: target.basicInfo.name,
-                  yards,
-              })
-          )
-        : finish(
-              charging,
-              textRef('battleWfrp.log.chargeDeclared', {
-                  name,
-                  target: target.basicInfo.name,
-              })
-          );
+    return finish(
+        charging,
+        textRef('battleWfrp.log.chargeDeclared', {
+            name,
+            target: target.basicInfo.name,
+        })
+    );
 }

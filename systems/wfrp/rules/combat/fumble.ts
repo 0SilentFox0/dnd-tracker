@@ -1,18 +1,20 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { EditionProfile } from '../edition';
 import type { PercentileAttackDetails } from '../percentile/details';
+import { ATTACK_SLOT } from '../slots';
 import { rollSlot, rowText } from '../tables/resolve';
 import type { TableEffect, TableSlot } from '../tables/schema';
 import { applyWfrpCrit } from './crit-effect';
 import type { CritResult } from './crit-table';
+import { participantStats } from './participant';
 
 import { EffectMarker } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
-import { rollDie } from '@/lib/utils/common/dice';
+import { rollDice, rollDie } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 const MISFIRE_GROUPS = ['blackpowder', 'engineering', 'explosives'];
@@ -119,10 +121,30 @@ function applyEffect(
     return p;
 }
 
+const NOTE_KINDS = ['actLast', 'weaponDamage'];
+
+/** Full weapon Damage at +0 SL, ignoring TB and AP; profile weapons have a flat `damageBonus` and no dice */
+function weaponDamageOf(
+    attacker: BattleParticipant,
+    weapon: BattleAttack | undefined,
+    rng: Rng
+): number {
+    if (!weapon) return 0;
+
+    const sb = ATTACK_SLOT.read(weapon.system)?.noSb
+        ? 0
+        : (participantStats(attacker)?.sb ?? 0);
+
+    const dice = weapon.damageDice ? rollDice(weapon.damageDice, rng) : 0;
+
+    return dice + (weapon.damageBonus ?? 0) + sb;
+}
+
 function tableOutcome(
     slot: TableSlot,
     key: 'fumbleOops' | 'fumbleMisfire',
     attacker: BattleParticipant,
+    weapon: BattleAttack | undefined,
     rules: Pick<Ruleset, 'tables'>,
     edition: FumbleEdition,
     rng: Rng
@@ -131,6 +153,14 @@ function tableOutcome(
 
     const text = rowText(row);
 
+    const explodes =
+        slot === 'misfire' &&
+        row.effects.some(
+            (e) => e.type === 'fumble' && e.kind === 'weaponDamage'
+        );
+
+    const explosion = explodes ? weaponDamageOf(attacker, weapon, rng) : 0;
+
     return {
         update: (p) =>
             row.effects.reduce(
@@ -138,7 +168,10 @@ function tableOutcome(
                 p
             ),
         wounds: row.effects.reduce(
-            (sum, e) => (e.type === 'wounds' ? sum + e.amount : sum),
+            (sum, e) =>
+                e.type === 'wounds'
+                    ? sum + (explosion > 0 ? explosion : e.amount)
+                    : sum,
             0
         ),
         lines: [
@@ -147,6 +180,18 @@ function tableOutcome(
                 roll,
                 text,
             }),
+            ...row.effects.flatMap((e) =>
+                e.type === 'fumble' && NOTE_KINDS.includes(e.kind)
+                    ? [
+                          textRef('battleWfrp.log.fumbleNote', {
+                              name: attacker.basicInfo.name,
+                              note: dynamicTextRef(
+                                  `wfrpTables.fumbleKinds.${e.kind}`
+                              ),
+                          }),
+                      ]
+                    : []
+            ),
         ],
     };
 }
@@ -155,12 +200,13 @@ function tableOutcome(
 export function fumbleOutcome(input: {
     details: PercentileAttackDetails;
     attacker: BattleParticipant;
+    weapon?: BattleAttack;
     group?: string;
     edition: FumbleEdition;
     rules: Pick<Ruleset, 'tables'>;
     rng: Rng;
 }): FumbleOutcome | undefined {
-    const { details, attacker, group, edition, rules, rng } = input;
+    const { details, attacker, weapon, group, edition, rules, rng } = input;
 
     const model = fumbleModelOf(edition, rules);
 
@@ -171,6 +217,7 @@ export function fumbleOutcome(input: {
             'misfire',
             'fumbleMisfire',
             attacker,
+            weapon,
             rules,
             edition,
             rng
@@ -181,6 +228,7 @@ export function fumbleOutcome(input: {
             'oops',
             'fumbleOops',
             attacker,
+            weapon,
             rules,
             edition,
             rng

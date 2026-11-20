@@ -327,6 +327,7 @@ export type ActionAssertCtx =
           attack: BattleAttack;
           targets: BattleParticipant[];
           participants: BattleParticipant[];
+          map?: BattleMapConfig | null;
       }
     | { kind: 'cast'; actor: BattleParticipant };
 
@@ -374,7 +375,8 @@ export interface RuleSystemCombat {
     attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
     participantFields?(
         row: { characteristics?: unknown },
-        gear?: ArmourGear
+        gear?: ArmourGear,
+        rules?: Ruleset
     ): SystemSlot;
     /** Ranks participants with equal initiative: higher wins */
     tieBreak(p: BattleParticipant): number;
@@ -386,7 +388,8 @@ export interface RuleSystemCombat {
     /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
     attackTarget?(
         attacker: BattleParticipant,
-        attack: BattleAttack
+        attack: BattleAttack,
+        rules: Ruleset
     ): { label: LogLine; target: number };
     /** Crit-dice rule and, when `ctx.hit` is set, the system's own damage mitigation of that hit */
     damage(ctx: DamageCtx): DamageResult;
@@ -415,7 +418,11 @@ export interface RuleSystemCombat {
     /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
     initiative(
         p: BattleParticipant,
-        ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng; roll?: boolean }
+        ctx: {
+            rules: Pick<Ruleset, 'initiative'> & Partial<Pick<Ruleset, 'edition'>>;
+            rng: Rng;
+            roll?: boolean;
+        }
     ): InitiativeScore;
     /** Starting values the participant builders use instead of the d20 sheet columns */
     baseStats?(row: { characteristics?: unknown }): {

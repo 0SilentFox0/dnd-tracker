@@ -18,6 +18,9 @@ import {
     secondAttackBlocker,
     withMomentum,
 } from '@/systems/wfrp/rules/combat/momentum';
+import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
+import { movementSlMod } from '@/systems/wfrp/rules/conditions/test-mod';
+import { EDITION_PROFILES } from '@/systems/wfrp/rules/edition';
 import { reverseRoll } from '@/systems/wfrp/rules/percentile';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
@@ -159,5 +162,60 @@ describe('canon: left and right hit locations (p164)', () => {
         expect(hasMomentum(armed)).toBe(true);
         expect(secondAttackBlocker(armed, CANON_RULES)).toBe('weapons');
         expect(secondAttackBlocker(armed, LEGACY_RULES)).toBeNull();
+    });
+});
+
+const withCondition = (key: 'blinded' | 'entangled') =>
+    applyWfrpConditionTo(makeParticipant({ id: 'c' }), {
+        key,
+        round: 0,
+        edition: EDITION_PROFILES.canon5e,
+        sourceName: '',
+    }).participant;
+
+const shot = (group?: string): BattleAttack =>
+    ({
+        id: 's',
+        type: 'ranged',
+        system: ATTACK_SLOT.write({
+            qualities: [],
+            flaws: [],
+            ...(group && { group }),
+        }),
+    }) as BattleAttack;
+
+describe('canon: conditions and hands block attacks (p164, p185-186)', () => {
+    bookExample(185, 'a Blinded fighter cannot make Ranged attacks', () => {
+        const p = withCondition('blinded');
+
+        expect(wfrpAttackBlocked(p, shot(), CANON_RULES)).toBe(true);
+        expect(wfrpAttackBlocked(p, attack(false), CANON_RULES)).toBe(false);
+        expect(wfrpAttackBlocked(p, shot(), LEGACY_RULES)).toBe(false);
+    });
+
+    bookExample(164, 'a bow needs both arms', () => {
+        expect(
+            wfrpAttackBlocked(disarmedBy('left'), shot('bow'), CANON_RULES)
+        ).toBe(true);
+        expect(
+            wfrpAttackBlocked(
+                disarmedBy('left'),
+                shot('blackpowder'),
+                CANON_RULES
+            )
+        ).toBe(false);
+    });
+
+    bookExample(186, 'Entangled costs -1 SL on movement only', () => {
+        const p = withCondition('entangled');
+
+        expect(movementSlMod(p, EDITION_PROFILES.canon5e)).toBe(-1);
+        expect(movementSlMod(p, EDITION_PROFILES.legacy)).toBe(0);
+        expect(
+            movementSlMod(
+                makeParticipant({ id: 'x' }),
+                EDITION_PROFILES.canon5e
+            )
+        ).toBe(0);
     });
 });

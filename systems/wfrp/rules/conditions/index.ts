@@ -1,8 +1,8 @@
 import {
-    applyWfrpCondition,
     reduceWfrpConditionIn,
     UNTIMED_CONDITIONS,
 } from './apply';
+import { applyWfrpConditionShocking } from './apply-shock';
 import {
     isWfrpConditionKey,
     WFRP_CONDITION_KEYS,
@@ -42,7 +42,7 @@ export const WFRP_CONDITIONS: RuleSystemConditions = {
     list: wfrpConditions,
     apply: (ps, id, input) =>
         isWfrpConditionKey(input.key)
-            ? applyWfrpCondition(ps, id, { ...input, key: input.key })
+            ? applyWfrpConditionShocking(ps, id, { ...input, key: input.key })
             : { participants: ps, messages: [] },
     reduce: reduceWfrpConditionIn,
     keepDownedAfterVictory: true,

@@ -28,6 +28,7 @@ import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface AttackRequest {
     attackerId: string;
@@ -135,7 +136,8 @@ export interface ValidatedAttackRequest {
 export function validateAttackRequest(
     scope: ActorScope,
     data: AttackRequest,
-    rules: Ruleset
+    rules: Ruleset,
+    map?: BattleMapConfig | null
 ): ValidatedAttackRequest {
     const order = scope.participants;
 
@@ -241,6 +243,7 @@ export function validateAttackRequest(
         attack,
         targets: chosenTargets,
         participants: order,
+        map,
     });
 
     if (data.cunningStrike?.length) {

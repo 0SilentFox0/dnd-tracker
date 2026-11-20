@@ -79,6 +79,14 @@ const FateWaitingNotice = dynamic(() =>
     import('./battle/FateWaitingNotice').then((m) => m.FateWaitingNotice)
 );
 
+const DispelPanel = dynamic(() =>
+    import('./battle/DispelPanel').then((m) => m.DispelPanel)
+);
+
+const PsychologyPanel = dynamic(() =>
+    import('./battle/PsychologyPanel').then((m) => m.PsychologyPanel)
+);
+
 const MomentumPanel = dynamic(() =>
     import('./battle/MomentumPanel').then((m) => m.MomentumPanel)
 );
@@ -95,7 +103,7 @@ const battle: SystemBattleUi = {
     ChannelLabel,
     ConditionTestPanel,
     ConditionsDialog: SystemConditionsDialog,
-    heroPanels: [MomentumPanel],
+    heroPanels: [MomentumPanel, PsychologyPanel, DispelPanel],
     dialogs: [FateReactionDialog],
     notices: [FateWaitingNotice],
 };

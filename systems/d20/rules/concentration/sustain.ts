@@ -324,6 +324,11 @@ export const D20_SUSTAIN: RuleSystemSustain = {
     holds: (rules, spell) =>
         rules.concentration.enabled && spell.concentration === true,
     holding: hasConcentration,
+    info: (p) => {
+        const held = concentrationOn(p)?.concentration;
+
+        return held && { castId: held.castId, spellName: held.spellName };
+    },
     begin: (ps, { casterId, castId, spellName, rounds, round }) =>
         beginConcentration(ps, casterId, castId, spellName, rounds, round),
     drop: dropConcentration,

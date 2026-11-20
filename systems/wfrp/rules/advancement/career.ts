@@ -1,4 +1,5 @@
 import type {
+    CareerSnapshot,
     CareerState,
     Characteristics,
     LedgerEntry,
@@ -8,6 +9,8 @@ import type { AdvancementRules } from './rules';
 export type CareerTierDef = {
     name: string;
     status?: string;
+    /** Skill of the Income Endeavour, set on the first level (p199) */
+    earningSkill?: string;
     characteristics: string[];
     skills: string[];
     talents: string[];
@@ -70,10 +73,61 @@ export const inCareer = (
 ): boolean =>
     ctx.tiers.slice(0, ctx.state.tier).some((tier) => listed(tier, kind, key));
 
+const snapshotOf = (career: CareerState): CareerSnapshot => ({
+    careerId: career.careerId,
+    tier: career.tier,
+    ticks: career.ticks,
+    ...(career.standingLoss ? { standingLoss: career.standingLoss } : {}),
+});
+
+const ledgerTopOf = (c: Characteristics) => c.ledger.at(-1)?.id ?? null;
+
+/** `cost` > 0 stores an undo record: the XP is written off and `planCareerRevert` takes it back */
 export const planCareerSet = (
     c: Characteristics,
-    careerId: string
-): Characteristics => ({ ...c, career: { careerId, tier: 1, ticks: [] } });
+    careerId: string,
+    cost = 0
+): Characteristics => ({
+    ...c,
+    spentArchived: c.spentArchived + cost,
+    career: {
+        careerId,
+        tier: 1,
+        ticks: [],
+        ...(cost > 0 && {
+            lastChange: {
+                ...(c.career && { from: snapshotOf(c.career) }),
+                cost,
+                ledgerTop: ledgerTopOf(c),
+            },
+        }),
+    },
+});
+
+export type CareerRevertResult =
+    | { ok: true; next: Characteristics }
+    | { ok: false; error: 'NOTHING_TO_REVERT' | 'STALE' };
+
+/** Undo the last charged career change while nothing was bought after it; refunds the XP */
+export function planCareerRevert(c: Characteristics): CareerRevertResult {
+    const change = c.career?.lastChange;
+
+    if (!change) return { ok: false, error: 'NOTHING_TO_REVERT' };
+
+    if (change.ledgerTop !== ledgerTopOf(c))
+        return { ok: false, error: 'STALE' };
+
+    const { career: _career, ...rest } = c;
+
+    return {
+        ok: true,
+        next: {
+            ...rest,
+            spentArchived: Math.max(0, c.spentArchived - change.cost),
+            ...(change.from && { career: change.from }),
+        },
+    };
+}
 
 export function planCareerAdvance(
     c: Characteristics,
@@ -97,17 +151,58 @@ export function planCareerAdvance(
     if (charge && charge.available < charge.cost)
         return { ok: false, error: 'INSUFFICIENT_XP' };
 
+    const { standingLoss: _loss, lastChange: _last, ...kept } = career;
+
     return {
         ok: true,
         next: {
             ...c,
             spentArchived: c.spentArchived + (charge?.cost ?? 0),
             career: {
-                ...career,
+                ...kept,
                 tier: (career.tier + 1) as CareerState['tier'],
                 ticks: [],
+                ...(charge && {
+                    lastChange: {
+                        from: snapshotOf(career),
+                        cost: charge.cost,
+                        ledgerTop: ledgerTopOf(c),
+                    },
+                }),
             },
         },
+    };
+}
+
+export type TrappingTickResult =
+    | { ok: true; next: Characteristics }
+    | { ok: false; error: 'NO_CAREER' | 'MAX_TIER' | 'NOT_LISTED' | 'ALREADY' };
+
+export const trappingTickKey = (name: string) =>
+    `trapping:${name.trim().toLowerCase()}`.slice(0, 100);
+
+/** Acquiring a trapping of the next career level ticks one tracker box (p191) */
+export function planTrappingTick(
+    c: Characteristics,
+    tiers: CareerTierDef[],
+    name: string
+): TrappingTickResult {
+    const career = c.career;
+
+    if (!career) return { ok: false, error: 'NO_CAREER' };
+
+    if (career.tier === 4) return { ok: false, error: 'MAX_TIER' };
+
+    const key = trappingTickKey(name);
+
+    if (!tiers[career.tier]?.trappings.some((t) => trappingTickKey(t) === key))
+        return { ok: false, error: 'NOT_LISTED' };
+
+    if (career.ticks.includes(key)) return { ok: false, error: 'ALREADY' };
+
+    return {
+        ok: true,
+        next: { ...c, career: { ...career, ticks: [...career.ticks, key] } },
     };
 }
 

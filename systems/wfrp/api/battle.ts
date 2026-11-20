@@ -65,3 +65,52 @@ export const movementOp = (body: MovementOpBody): SystemOpBody => ({
     action: 'movement',
     body,
 });
+
+export interface DispelBody {
+    participantId: string;
+    targetId: string;
+    mode: 'reactive' | 'persistent';
+    roll?: number;
+    serverRoll?: boolean;
+}
+
+export const dispelOp = (body: DispelBody): SystemOpBody => ({
+    action: 'dispel',
+    body,
+});
+
+export const malignantOp = (
+    participantId: string,
+    on: boolean
+): SystemOpBody => ({
+    action: 'malignant',
+    body: { participantId, on },
+});
+
+export const frenzyOp = (body: {
+    participantId: string;
+    roll?: number;
+    serverRoll?: boolean;
+}): SystemOpBody => ({
+    action: 'frenzy',
+    body,
+});
+
+export const intimidateOp = (body: {
+    participantId: string;
+    targetId: string;
+    roll?: number;
+    serverRoll?: boolean;
+}): SystemOpBody => ({
+    action: 'intimidate',
+    body,
+});
+
+export const passionOp = (body: {
+    participantId: string;
+    mode: 'vent' | 'release';
+    key?: string;
+}): SystemOpBody => ({
+    action: 'passion',
+    body,
+});

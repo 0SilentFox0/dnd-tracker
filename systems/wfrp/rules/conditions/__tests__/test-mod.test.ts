@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { wfrpAbilitiesOf } from '../../combat/participant';
 import { wfrpAttackTarget } from '../../combat/resolve-attack';
 import { EDITION_PROFILES } from '../../edition';
+import { WFRP_RULES } from '../../rules-preset';
 import { applyWfrpConditionTo } from '../apply';
 import type { WfrpConditionKey } from '../catalog';
 import { againstMod, selfTestMod } from '../test-mod';
@@ -90,7 +91,7 @@ describe('wfrpAttackTarget', () => {
         };
 
         expect(
-            wfrpAttackTarget(attacker(withConds(['fatigued', 1])), sword).target
-        ).toBe(wfrpAttackTarget(attacker(base), sword).target - 10);
+            wfrpAttackTarget(attacker(withConds(['fatigued', 1])), sword, WFRP_RULES).target
+        ).toBe(wfrpAttackTarget(attacker(base), sword, WFRP_RULES).target - 10);
     });
 });

@@ -19,7 +19,12 @@ vi.mock('@/systems/wfrp/hooks', async (orig) => ({
     useUndoCorruption: () => ({ mutateOk: vi.fn(), isPending: false }),
 }));
 
-type Corruption = { points: number; threshold: number; mutations: unknown[] };
+type Corruption = {
+    points: number;
+    threshold: number;
+    mutations: unknown[];
+    soulLost?: string;
+};
 
 const mount = (
     corruption: Corruption | undefined,
@@ -34,6 +39,7 @@ const mount = (
             canEdit={false}
             sheet={
                 {
+                    identity: { name: 'Герой' },
                     viewer: { isDM, isOwner: !isDM },
                     review: { pending },
                     ...(wfrp && {
@@ -57,6 +63,12 @@ const mutation = (text: unknown, effects: unknown[]) => ({
 
 describe('CorruptionBlock', () => {
     afterEach(cleanup);
+
+    it('shows the lost soul', () => {
+        mount({ points: 3, threshold: 6, mutations: [], soulLost: 'mental' });
+
+        expect(screen.getByRole('status').textContent).toContain('Герой');
+    });
 
     it('owner sees points and threshold without the grant button', () => {
         mount({ points: 3, threshold: 6, mutations: [] });

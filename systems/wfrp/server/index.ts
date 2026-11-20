@@ -78,6 +78,8 @@ export const WFRP_MODULE_SERVER: SystemServer = {
             },
             career: { POST: { operation: 'career.set' } },
             'career.advance': { POST: { operation: 'career.advance' } },
+            'career.revert': { POST: { operation: 'career.revert' } },
+            'career.trapping': { POST: { operation: 'career.trapping' } },
             corruption: { POST: { operation: 'corruption.grant' } },
             'corruption.undo': { POST: { operation: 'corruption.undo' } },
             downtime: { PUT: { operation: 'downtime.set' } },
@@ -212,6 +214,93 @@ export const WFRP_MODULE_SERVER: SystemServer = {
                 );
 
                 return { schema: movementSchema, mutate: movementMutation };
+            },
+        },
+        dispel: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
+            load: async () => {
+                const { dispelMutation, dispelSchema } = await import(
+                    './battle/dispel-mutation'
+                );
+
+                return { schema: dispelSchema, mutate: dispelMutation };
+            },
+        },
+        frenzy: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
+            load: async () => {
+                const { frenzyMutation, frenzySchema } = await import(
+                    './battle/frenzy-mutation'
+                );
+
+                return { schema: frenzySchema, mutate: frenzyMutation };
+            },
+        },
+        intimidate: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            serverDice: {
+                placeholder: { serverRoll: true },
+                roll: () => ({ serverRoll: true }),
+            },
+            load: async () => {
+                const { intimidateMutation, intimidateSchema } = await import(
+                    './battle/intimidate-mutation'
+                );
+
+                return {
+                    schema: intimidateSchema,
+                    mutate: intimidateMutation,
+                };
+            },
+        },
+        passion: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { passionMutation, passionSchema } = await import(
+                    './battle/passion-mutation'
+                );
+
+                return { schema: passionSchema, mutate: passionMutation };
+            },
+        },
+        malignant: {
+            settings: {
+                access: 'dm',
+                missing: API_ERRORS.MOMENTUM_UNSUPPORTED,
+            },
+            load: async () => {
+                const { malignantMutation, malignantSchema } = await import(
+                    './battle/malignant-mutation'
+                );
+
+                return { schema: malignantSchema, mutate: malignantMutation };
             },
         },
         channel: {

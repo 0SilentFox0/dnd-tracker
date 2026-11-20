@@ -8,19 +8,24 @@ import type { Rng } from '@/lib/utils/common/rng';
 export type DowntimeRollOptions = {
     difficulty?: DifficultyKey;
     slModel?: SlModel;
+    doubles?: boolean;
 };
 
 export function rollDowntimeTest(
     target: number,
     rng: Rng,
     presetRoll?: number,
-    { difficulty = ENDEAVOUR_DIFFICULTY, slModel }: DowntimeRollOptions = {}
+    {
+        difficulty = ENDEAVOUR_DIFFICULTY,
+        slModel,
+        doubles = false,
+    }: DowntimeRollOptions = {}
 ): { test: TestOutcome; passed: boolean } {
     const r = resolvePercentileTest({
         target,
         slModifier: DIFFICULTY_SL[difficulty],
         slModel,
-        doubles: false,
+        doubles,
         mode: 'normal',
         rng,
         presetRoll,

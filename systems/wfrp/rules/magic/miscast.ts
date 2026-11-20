@@ -1,6 +1,8 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import { editionOf } from '../edition';
+import { wfrpState, withWfrpState } from '../state';
 import { rollSlot, rowText } from '../tables/resolve';
+import { CHANNEL_MISCAST_STEP, SIN_WRATH_STEP } from './constants';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import {
@@ -33,6 +35,14 @@ export function wfrpMiscast(
 
     if (!caster) return { participants: ps, messages: [] };
 
+    const canonModel = editionOf(ctx.rules).magicModel === 'canon5e';
+
+    const canonWrath = kind === 'wrath' && canonModel;
+
+    const sin = canonWrath ? (wfrpState(caster).sin ?? 0) : 0;
+
+    const lostSl = canonModel ? (wfrpState(caster).miscastSl ?? 0) : 0;
+
     const { row } = rollSlot(
         ctx.rules,
         kind === 'wrath'
@@ -41,7 +51,8 @@ export function wfrpMiscast(
               ? 'miscastMajor'
               : 'miscastMinor',
         ctx.rng,
-        ctx.presetRoll
+        ctx.presetRoll,
+        sin * SIN_WRATH_STEP + lostSl * CHANNEL_MISCAST_STEP
     );
 
     const effect = rowText(row);
@@ -55,7 +66,12 @@ export function wfrpMiscast(
         ),
     ];
 
-    let participants = ps;
+    let participants = lostSl
+        ? replaceParticipant(
+              ps,
+              withWfrpState(caster, { miscastSl: undefined })
+          )
+        : ps;
 
     for (const e of row.effects) {
         if (e.type !== 'condition') continue;
@@ -81,7 +97,13 @@ export function wfrpMiscast(
         0
     );
 
-    const before = findParticipant(participants, casterId);
+    const found = findParticipant(participants, casterId);
+
+    const pool = canonModel ? (found && wfrpState(found).channelledSl) : 0;
+
+    // The pool is parked during the wound so it cannot trigger a second Cool test
+    const before =
+        pool && found ? withWfrpState(found, { channelledSl: undefined }) : found;
 
     if (wounds > 0 && before) {
         const after = dropBreakOnDamage(
@@ -111,6 +133,26 @@ export function wfrpMiscast(
         participants = r.participants;
 
         messages.push(...r.messages);
+
+        const hurt = pool ? findParticipant(participants, casterId) : undefined;
+
+        if (hurt)
+            participants = replaceParticipant(
+                participants,
+                withWfrpState(hurt, { channelledSl: pool })
+            );
+    }
+
+    if (canonWrath && sin > 0) {
+        const current = findParticipant(participants, casterId);
+
+        if (current)
+            participants = replaceParticipant(
+                participants,
+                withWfrpState(current, {
+                    sin: sin > 1 ? sin - 1 : undefined,
+                })
+            );
     }
 
     return { participants, messages };

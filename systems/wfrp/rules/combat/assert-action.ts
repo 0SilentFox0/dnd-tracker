@@ -1,6 +1,6 @@
 import { wfrpState } from '../state';
-import { isFrenzied } from '../traits/frenzy';
-import { compelTargets, inGroup } from '../traits/passions';
+import { isFrenzied, nearestFoes } from '../traits/frenzy';
+import { compelTargets, groupLabel, inGroup } from '../traits/passions';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { AttackType } from '@/lib/constants/battle';
@@ -19,19 +19,32 @@ export function assertWfrpAction(ctx: ActionAssertCtx): void {
         if (attackKindOf(ctx.attack.type) !== AttackType.MELEE)
             throw ruleErrorOf('action_rejected', API_ERRORS.FRENZY_MELEE_ONLY);
 
+        const nearest = nearestFoes(ctx.participants, actor, ctx.map);
+
+        if (
+            nearest.length > 0 &&
+            !ctx.targets.every((t) =>
+                nearest.some((n) => n.basicInfo.id === t.basicInfo.id)
+            )
+        )
+            throw ruleErrorOf('invalid_target', API_ERRORS.FRENZY_NEAREST_FOE);
+
         return;
     }
 
     if (ctx.kind !== 'attack') return;
 
-    for (const { group } of Object.values(wfrpState(actor).compelled ?? {})) {
+    for (const { group, kind } of Object.values(
+        wfrpState(actor).compelled ?? {}
+    )) {
         if (
+            kind !== 'animosity' &&
             compelTargets(ctx.participants, actor, group).length > 0 &&
             !ctx.targets.every((t) => inGroup(t, group))
         )
             throw ruleErrorOf('invalid_target', {
                 message: API_ERRORS.HATRED_COMPELLED,
-                params: { group },
+                params: { group: groupLabel(group) },
             });
     }
 }

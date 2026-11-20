@@ -12,6 +12,7 @@ const text = z.string().trim().min(1).max(100);
 export const careerTierSchema = z.object({
     name: text,
     status: z.string().trim().max(100).optional(),
+    earningSkill: z.string().regex(SKILL_ADVANCE_KEY_RE).optional(),
     characteristics: z.array(z.enum(CHARACTERISTIC_KEYS)).max(LIST_MAX),
     skills: z.array(z.string().regex(SKILL_ADVANCE_KEY_RE)).max(LIST_MAX),
     talents: z.array(z.string().trim().min(1).max(100)).max(LIST_MAX),

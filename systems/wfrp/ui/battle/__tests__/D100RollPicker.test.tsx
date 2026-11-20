@@ -214,7 +214,7 @@ describe('D100RollPicker', () => {
                     left: 0,
                     fateLeft: 1,
                     value: 'notFail',
-                    notFail: { critical: true, set },
+                    notFail: { critical: true, withLocation: true, set },
                 })}
                 onRoll={vi.fn()}
                 onAuto={vi.fn()}

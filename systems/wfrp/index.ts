@@ -33,6 +33,7 @@ import {
     wfrpAbortedRoll,
     wfrpAttackTarget,
 } from './rules/combat/resolve-attack';
+import { wfrpVentAfterAttack } from './rules/combat/vent-after-attack';
 import { WFRP_CONDITIONS } from './rules/conditions';
 import { WFRP_CONDITION_SET } from './rules/conditions/standard-set';
 import { editionOf } from './rules/edition';
@@ -134,6 +135,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
     combat: {
         input: { assert: assertWfrpInput },
         assertAction: assertWfrpAction,
+        afterAttack: [wfrpVentAfterAttack],
         judge: 'server',
         dice: 100,
         attacksOf: extractWfrpAttacks,

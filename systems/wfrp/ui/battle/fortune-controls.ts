@@ -5,6 +5,11 @@ import {
     type FortuneInput,
 } from '../../rules/percentile/fortune';
 
+const choicesOf = (input: FortuneInput | undefined) => ({
+    ...(input?.critBonus && { critBonus: input.critBonus }),
+    ...(input?.blessing && { blessing: input.blessing }),
+});
+
 export type FortuneChoice = 'reroll' | 'sl' | 'notFail' | null;
 
 export interface FortuneExtras {
@@ -12,6 +17,8 @@ export interface FortuneExtras {
     rerolls?: { value: number; set: (n: number) => void };
     notFail?: {
         critical: boolean;
+        /** Offers the struck-location choice (battle only: a sheet test strikes nobody) */
+        withLocation?: boolean;
         location?: HitSpot;
         set: (critical: boolean, location?: HitSpot) => void;
     };
@@ -33,9 +40,18 @@ export function fortuneControls(
     const put = (next: FortuneInput) => write(FORTUNE_INPUT.write(next));
 
     return {
-        value: input?.kind ?? null,
-        onChange: (kind) =>
-            write(kind ? FORTUNE_INPUT.write({ kind }) : undefined),
+        value: !input || input.kind === 'none' ? null : input.kind,
+        onChange: (kind) => {
+            const choices = choicesOf(input);
+
+            write(
+                kind
+                    ? FORTUNE_INPUT.write({ ...choices, kind })
+                    : Object.keys(choices).length
+                      ? FORTUNE_INPUT.write({ ...choices, kind: 'none' })
+                      : undefined
+            );
+        },
         ...(canon && {
             advantageLabel: true,
             rerolls: {
@@ -44,10 +60,12 @@ export function fortuneControls(
             },
             notFail: {
                 critical: input?.critical === true,
+                withLocation: true,
                 location: input?.location,
                 set: (critical, location) =>
                     input &&
                     put({
+                        ...choicesOf(input),
                         kind: input.kind,
                         ...(critical && {
                             critical,
@@ -56,5 +74,36 @@ export function fortuneControls(
                     }),
             },
         }),
+    };
+}
+
+export interface CastChoices {
+    critBonus?: FortuneInput['critBonus'];
+    blessing?: FortuneInput['blessing'];
+    set: (next: Pick<FortuneInput, 'critBonus' | 'blessing'>) => void;
+}
+
+/** Cast choices that spend nothing (Critical Casting bonus, Blessing overcast) kept beside the Fortune input */
+export function castChoices(
+    system: Parameters<typeof FORTUNE_INPUT.read>[0],
+    write: (input: ReturnType<typeof FORTUNE_INPUT.write> | undefined) => void
+): CastChoices {
+    const input = FORTUNE_INPUT.read(system);
+
+    return {
+        critBonus: input?.critBonus,
+        blessing: input?.blessing,
+        set: (next) => {
+            const merged = {
+                ...input,
+                kind: input?.kind ?? ('none' as const),
+                ...next,
+            };
+
+            const bare =
+                merged.kind === 'none' && !merged.critBonus && !merged.blessing;
+
+            write(bare ? undefined : FORTUNE_INPUT.write(merged));
+        },
     };
 }

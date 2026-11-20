@@ -3,11 +3,12 @@
 import { useProfile } from '@/components/character-profile/ProfileContext';
 import type { RollDialogBodyProps } from '@/components/systems/types';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import type { HitSpot } from '@/systems/wfrp/rules/combat/constants';
 import { editionOf } from '@/systems/wfrp/rules/edition';
-import type { FortuneKind } from '@/systems/wfrp/rules/percentile/fortune';
+import type {
+    FortuneKind,
+    SheetFortuneKind,
+} from '@/systems/wfrp/rules/percentile/fortune';
 import { SHEET_SLOT } from '@/systems/wfrp/rules/slots';
-import type { SheetFortuneKind } from '@/types/characters';
 
 type FortuneChoice = FortuneKind | null;
 
@@ -32,8 +33,7 @@ export interface SheetFortune {
     rerolls?: { value: number; set(n: number): void };
     notFail?: {
         critical: boolean;
-        location?: HitSpot;
-        set(critical: boolean, location?: HitSpot): void;
+        set(critical: boolean): void;
     };
 }
 
@@ -63,7 +63,7 @@ export function useSheetFortune({
     return {
         left,
         fateLeft,
-        value: kind ? TO_CHOICE[kind] : null,
+        value: kind ? TO_CHOICE[kind as SheetFortuneKind] : null,
         onChange: (value) =>
             setExtra(value ? { fortune: FROM_CHOICE[value] } : {}),
         advantageLabel: editionOf(rules).advantageModel === 'reverse',
@@ -74,14 +74,10 @@ export function useSheetFortune({
             },
             notFail: {
                 critical: extra.critical === true,
-                location: extra.location as HitSpot | undefined,
-                set: (critical, location) =>
+                set: (critical) =>
                     setExtra({
                         fortune: 'notFail',
-                        ...(critical && {
-                            critical,
-                            ...(location && { location }),
-                        }),
+                        ...(critical && { critical }),
                     }),
             },
         }),

@@ -1,8 +1,11 @@
+import { bonus } from '../characteristics/derive';
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { EditionProfile } from '../edition';
 import type { CritResult } from './crit-table';
 import { notTodayLine, recordCritWound } from './critical';
 import { sidedMarker, spotOf } from './location';
+import { participantChars } from './participant';
+import { resolveRounds } from './rounds-formula';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
@@ -64,7 +67,11 @@ export function applyWfrpCrit(
         }).participant;
 
     for (const key of crit.markers) {
-        const timed = crit.markerRounds?.[key];
+        const rolled = crit.markerRoundsRolled?.[key];
+
+        const timed = rolled
+            ? resolveRounds(rolled, bonus(participantChars(target), 't'))
+            : crit.markerRounds?.[key];
 
         const marker = crit.side ? sidedMarker(key, crit.side) : key;
 

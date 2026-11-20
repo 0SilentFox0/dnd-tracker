@@ -5,6 +5,7 @@ import {
     type Characteristics,
     DEFAULT_CHARACTERISTICS,
 } from '../characteristics/keys';
+import type { CoinAmount } from '../downtime/types';
 import {
     CANON_FREE_POINT_MAX,
     type CanonCtx,
@@ -12,6 +13,7 @@ import {
     planCanon,
 } from './canon';
 import { isUsableProfile, type SpeciesProfile, STAT_FLOOR } from './profile';
+import type { StartingItem } from './trappings';
 
 import {
     FREE_POINT_MAX,
@@ -43,6 +45,8 @@ export type PlanDraftResult =
           characteristics: Characteristics;
           experience: number;
           trappings: string[];
+          items: StartingItem[];
+          wealth?: CoinAmount;
       }
     | { ok: false; errors: string[] };
 
@@ -198,13 +202,23 @@ export function planDraft(
         career.careerId
     );
 
+    const ticked =
+        canon && canon.ticks.length && characteristics.career
+            ? {
+                  ...characteristics,
+                  career: { ...characteristics.career, ticks: canon.ticks },
+              }
+            : characteristics;
+
     return {
         ok: true,
-        characteristics,
+        characteristics: ticked,
         experience: canon
             ? 0
             : rules.creation.careerBonus[career.mode] +
               rules.creation.statBonus[stats.mode],
         trappings: canon?.trappings ?? [],
+        items: canon?.items ?? [],
+        ...(canon && { wealth: canon.wealth }),
     };
 }

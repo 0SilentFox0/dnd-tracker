@@ -220,6 +220,24 @@ export function EffectFields({
                     }}
                 />
             )}
+            {effect.type === 'marker' && (
+                <Input
+                    className="min-h-11 w-28"
+                    aria-label={t('roundsFormula')}
+                    placeholder="1d10 - TB"
+                    maxLength={20}
+                    value={effect.roundsFormula ?? ''}
+                    onChange={(e) => {
+                        const { roundsFormula: _drop, ...rest } = effect;
+
+                        onChange(
+                            e.target.value === ''
+                                ? rest
+                                : { ...rest, roundsFormula: e.target.value }
+                        );
+                    }}
+                />
+            )}
             <Button
                 type="button"
                 variant="ghost"

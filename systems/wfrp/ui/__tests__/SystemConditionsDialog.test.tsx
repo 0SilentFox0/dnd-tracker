@@ -3,6 +3,14 @@ import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
+vi.mock('@/systems/wfrp/hooks/useMalignantToggle', () => ({
+    useMalignantToggle: () => ({
+        available: false,
+        on: false,
+        isPending: false,
+        toggle: vi.fn(),
+    }),
+}));
 
 import { SystemConditionsDialog } from '../SystemConditionsDialog';
 

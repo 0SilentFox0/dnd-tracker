@@ -1,6 +1,6 @@
 import { modifiersOf } from '../corruption/modifiers';
 import { corruptionThreshold } from '../corruption/threshold';
-import type { Mutation } from '../corruption/types';
+import type { Mutation, MutationKind } from '../corruption/types';
 import {
     parseSkillAdvanceKey,
     SKILL_CATALOG,
@@ -55,7 +55,12 @@ export interface SheetWfrpBlock {
     /** Fate left in the pool */
     fateLeft: number;
     sin: number;
-    corruption: { points: number; threshold: number; mutations: Mutation[] };
+    corruption: {
+        points: number;
+        threshold: number;
+        mutations: Mutation[];
+        soulLost?: MutationKind;
+    };
 }
 
 export const wfrpSheetBlock = (input: SheetBlockInput): SystemSlot =>
@@ -133,6 +138,7 @@ function buildBlock({
             points: c.corruption?.points ?? 0,
             threshold: corruptionThreshold(c),
             mutations: c.corruption?.mutations ?? [],
+            ...(c.corruption?.soulLost && { soulLost: c.corruption.soulLost }),
         },
     };
 }

@@ -1,3 +1,4 @@
+import { editionOf } from '../edition';
 import { ACTION_SLOT } from '../slots';
 import { wfrpState } from '../state';
 import { armourSl } from './armour';
@@ -21,34 +22,52 @@ import type {
     RuleSystemTestedMagic,
 } from '@/lib/utils/rules/systems/types';
 
-const withoutMiscast = (details: SystemSlot): SystemSlot => {
+const withMiscast = (
+    details: SystemSlot,
+    miscast: 'minor' | null
+): SystemSlot => {
     const slot = ACTION_SLOT.read(details);
 
     return slot?.cast
         ? ACTION_SLOT.write(
-              { ...slot, cast: { ...slot.cast, miscast: null } },
+              { ...slot, cast: { ...slot.cast, miscast } },
               details
           )
         : details;
 };
 
+const lowered = (miscast: string, step: boolean): 'minor' | null =>
+    step && miscast === 'major' ? 'minor' : null;
+
 export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
     ingredients: 'avertMiscast',
-    avertMiscast: (cast, who) =>
-        cast.miscast && cast.miscast !== 'wrath'
-            ? {
-                  ...cast,
-                  miscast: null,
-                  details: withoutMiscast(cast.details),
-                  lines: [
-                      ...cast.lines,
-                      textRef('wfrpMagic.log.ingredientAverts', who),
-                  ],
-              }
-            : cast,
+    avertMiscast: (cast, who) => {
+        if (!cast.miscast || cast.miscast === 'wrath') return cast;
+
+        const step = ACTION_SLOT.read(cast.details)?.cast?.stepAvert === true;
+
+        const next = lowered(cast.miscast, step);
+
+        return {
+            ...cast,
+            miscast: next,
+            details: withMiscast(cast.details, next),
+            lines: [
+                ...cast.lines,
+                textRef(
+                    next
+                        ? 'wfrpMagic.log.ingredientLowers'
+                        : 'wfrpMagic.log.ingredientAverts',
+                    who
+                ),
+            ],
+        };
+    },
     castTest: wfrpCastTest,
     castPreview: (caster, kind, rules) => {
         const prayer = isPrayerKind(kind);
+
+        const edition = editionOf(rules);
 
         return {
             target: prayer
@@ -56,7 +75,7 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
                 : castTargetOf(caster, rules),
             channelTarget: channelTargetOf(caster, rules),
             channelled: prayer ? 0 : (wfrpState(caster).channelledSl ?? 0),
-            armourSl: prayer ? 0 : armourSl(caster),
+            armourSl: prayer ? 0 : armourSl(caster, edition),
         };
     },
     channel: wfrpChannel,

@@ -299,10 +299,11 @@ describe('canon5e career costs', () => {
 
         await setCareer(gate('active', true), { careerId: 'k1' });
 
-        expect(db.character.update).toHaveBeenCalledWith({
-            where: { id: 'c1' },
-            data: { characteristics: { spentArchived: 100 } },
-        });
+        expect(planCareerSet).toHaveBeenCalledWith(
+            expect.anything(),
+            'k1',
+            100
+        );
 
         vi.clearAllMocks();
         lockWith({ career: { careerId: 'old', tier: 1, ticks: [] } });
@@ -318,10 +319,11 @@ describe('canon5e career costs', () => {
 
         await setCareer(gate('active', true), { careerId: 'k1' });
 
-        expect(db.character.update).toHaveBeenCalledWith({
-            where: { id: 'c1' },
-            data: { characteristics: { spentArchived: 200 } },
-        });
+        expect(planCareerSet).toHaveBeenCalledWith(
+            expect.anything(),
+            'k1',
+            200
+        );
     });
 
     it('409 when XP is short; force and a first career are free', async () => {

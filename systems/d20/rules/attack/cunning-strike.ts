@@ -213,6 +213,7 @@ export function applyCunningStrikeEffects(
                 timedKey: `cunning:${effect}@${attackerId}`,
                 round: flow.ctx.round,
                 rules: flow.ctx.rules,
+                rng: flow.ctx.rng,
             }
         );
 

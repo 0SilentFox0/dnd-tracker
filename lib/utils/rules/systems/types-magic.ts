@@ -30,6 +30,8 @@ export interface CastTestResult {
     success: boolean;
     margin: number;
     overcastSteps: number;
+    /** Flat damage the overcast adds; when set, `overcastSteps` no longer raises the cast level or adds dice */
+    overcastDamage?: number;
     miscast: string | null;
     details: SystemSlot;
     lines: LogLine[];
@@ -133,8 +135,14 @@ export interface RuleSystemSustain {
             spellName: string;
             rounds: number;
             round?: number;
+            /** Casting number of the held spell (tested magic) */
+            cn?: number;
         }
     ): SustainResult;
+    /** What the participant holds, for a system that lets others end it; `cn` only where the system tracks one */
+    info(
+        p: BattleParticipant
+    ): { castId: string; spellName: string; cn?: number } | undefined;
     /** Ends the held cast with everything bound to it */
     drop(
         ps: BattleParticipant[],

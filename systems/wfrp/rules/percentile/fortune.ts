@@ -1,5 +1,6 @@
 import type { HitSpot } from '../combat/constants';
 import { fateLeftOf } from '../combat/fate';
+import type { BlessingDimension } from '../magic/constants';
 import { wfrpState } from '../state';
 import type { ForcedResult } from './resolve';
 
@@ -8,30 +9,59 @@ import type { BattleParticipant } from '@/types/battle';
 
 export type FortuneKind = 'reroll' | 'sl' | 'notFail';
 
+/** Fortune spent on a character-sheet test (`sl` is shown as Advantage) */
+export const SHEET_FORTUNE_KINDS = ['advantage', 'reroll', 'notFail'] as const;
+
+export type SheetFortuneKind = (typeof SHEET_FORTUNE_KINDS)[number];
+
 export interface FortuneInput {
-    kind: FortuneKind;
+    /** `none` spends nothing: it only carries the cast choices (`critBonus`, `blessing`) */
+    kind: FortuneKind | 'none';
     manualReroll?: number;
     /** Canon5e reroll count, 1..9 (p133) */
     rerolls?: number;
     /** `notFail` only: choose a Critical and, with it, the hit location (p133) */
     critical?: boolean;
     location?: HitSpot;
+    /** Casts only: the Critical Casting bonus (p235) */
+    critBonus?: CritBonus;
+    /** Blessing casts only: the overcast dimension (p217) */
+    blessing?: BlessingDimension;
 }
 
-const KINDS: readonly unknown[] = ['reroll', 'sl', 'notFail'];
+export type CritBonus = 'criticalDamage' | 'totalPower' | 'unstoppableForce';
+
+const CRIT_BONUSES: readonly unknown[] = [
+    'criticalDamage',
+    'totalPower',
+    'unstoppableForce',
+];
+
+const BLESSING_DIMENSIONS: readonly unknown[] = [
+    'rangeYards',
+    'targets',
+    'durationRounds',
+];
+
+const KINDS: readonly unknown[] = ['reroll', 'sl', 'notFail', 'none'];
 
 export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
     if (typeof raw !== 'object' || raw === null) return undefined;
 
-    const { kind, manualReroll, rerolls, critical, location } = raw as Record<
-        string,
-        unknown
-    >;
+    const {
+        kind,
+        manualReroll,
+        rerolls,
+        critical,
+        location,
+        critBonus,
+        blessing,
+    } = raw as Record<string, unknown>;
 
     if (!KINDS.includes(kind)) return undefined;
 
     return {
-        kind: kind as FortuneKind,
+        kind: kind as FortuneInput['kind'],
         ...(typeof manualReroll === 'number' && { manualReroll }),
         ...(typeof rerolls === 'number' &&
             Number.isInteger(rerolls) &&
@@ -40,6 +70,12 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         ...(critical === true && { critical }),
         ...(typeof location === 'string' && {
             location: location as HitSpot,
+        }),
+        ...(CRIT_BONUSES.includes(critBonus) && {
+            critBonus: critBonus as CritBonus,
+        }),
+        ...(BLESSING_DIMENSIONS.includes(blessing) && {
+            blessing: blessing as BlessingDimension,
         }),
     };
 });

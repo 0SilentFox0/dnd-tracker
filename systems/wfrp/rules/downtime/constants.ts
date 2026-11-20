@@ -31,3 +31,6 @@ export const CANON_INCOME_DICE_PER_LEVEL: Record<StatusTier, number> = {
     gold: 0,
 };
 export const CANON_INCOME_DIE = 10;
+
+/** One coin of the Status tier for a hero who skipped Income (p199) */
+export const HARDLY_WORKING_COINS = 1;

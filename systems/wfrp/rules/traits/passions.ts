@@ -3,7 +3,8 @@ import { conditionLevel } from '../conditions/levels';
 import { editionOf } from '../edition';
 import { wfrpState, withWfrpState } from '../state';
 import type { PassionKind } from '../trait-kinds';
-import { isFrenzied } from './frenzy';
+import { isAfraid } from './fear';
+import { isFrenzied, nearestFoes } from './frenzy';
 import { selfTest, willTarget } from './psych-test';
 import { psychologyOf, traitEffects } from './read';
 
@@ -51,16 +52,29 @@ const wordsOf = (s: string): string[] =>
 
 const norm = (s: string) => wordsOf(s).join(' ');
 
-/** A group names a race or creature type, singular or plural, matched by whole words (never the display name) */
+const GROUP_EXACT = '=';
+
+/** Group key matching exactly the normalised race or creature type (`=Goblin`); plain strings keep the legacy whole-word match */
+export const groupKey = (label: string): string =>
+    `${GROUP_EXACT}${wordsOf(label).join(' ')}`;
+
+export const groupLabel = (group: string): string =>
+    group.startsWith(GROUP_EXACT) ? group.slice(1) : group;
+
+/** A group names a race or creature type, singular or plural (never the display name): `=key` is an exact match, a plain name matches whole words */
 export function inGroup(p: BattleParticipant, group: string): boolean {
-    const g = wordsOf(group);
+    const exact = group.startsWith(GROUP_EXACT);
+
+    const g = wordsOf(exact ? group.slice(1) : group);
 
     return (
         g.length > 0 &&
         [p.abilities.race, p.abilities.creatureType].some((x) => {
             const w = x ? wordsOf(x) : [];
 
-            return w.some((_, i) => g.every((gw, j) => w[i + j] === gw));
+            return exact
+                ? w.length === g.length && g.every((gw, j) => w[j] === gw)
+                : w.some((_, i) => g.every((gw, j) => w[i + j] === gw));
         })
     );
 }
@@ -149,7 +163,91 @@ export function wfrpFrenzyRoundStart(
     return { participants, messages };
 }
 
-/** Own turn start: an ended Frenzy is paid for, a Frenzy-trait holder tries to enter one with a Willpower test (p184) */
+/** The nearest foe a Frenzied fighter must charge, as a log line for the GM (p184) */
+const chargeLine = (
+    ps: BattleParticipant[],
+    me: BattleParticipant,
+    map?: BattleMapConfig | null
+): LogLine[] => {
+    const foe = nearestFoes(ps, me, map)[0];
+
+    return foe
+        ? [
+              textRef('battleWfrp.log.frenzyCharge', {
+                  name: me.basicInfo.name,
+                  foe: foe.basicInfo.name,
+              }),
+          ]
+        : [];
+};
+
+/** A Willpower test to enter a Frenzy (p184): one try per turn, blocked by Stunned, a calm field or being down */
+export function tryEnterFrenzy(
+    ps: BattleParticipant[],
+    id: string,
+    ctx: {
+        round: number;
+        rng: Rng;
+        rules?: Ruleset;
+        map?: BattleMapConfig | null;
+        presetRoll?: number;
+    }
+): SystemConditionResult | null {
+    const me = ps.find((p) => p.basicInfo.id === id);
+
+    if (
+        !me ||
+        !extendedOf(ctx.rules) ||
+        wfrpState(me).frenzy ||
+        wfrpState(me).frenzyTried === ctx.round ||
+        !inPlay(me) ||
+        conditionLevel(me, 'stunned') > 0 ||
+        !ps.some((o) => inPlay(o) && isHostile(ctx.map, me, o))
+    )
+        return null;
+
+    const { t, target, passed } = selfTest(
+        me,
+        editionOf(ctx.rules),
+        ctx.rng,
+        willTarget(me),
+        ctx.presetRoll
+    );
+
+    const args = { name: me.basicInfo.name, roll: t.roll, target };
+
+    if (!passed)
+        return {
+            participants: ps.map((p) =>
+                p === me ? withWfrpState(p, { frenzyTried: ctx.round }) : p
+            ),
+            messages: [textRef('battleWfrp.log.frenzyFail', args)],
+        };
+
+    const entered = ps.map((p) =>
+        p === me
+            ? withWfrpState(p, {
+                  frenzy: true,
+                  frenzyTried: ctx.round,
+                  fear: undefined,
+              })
+            : p
+    );
+
+    return {
+        participants: entered,
+        messages: [
+            textRef('battleWfrp.log.frenzyStart', args),
+            ...chargeLine(
+                entered,
+                entered.find((p) => p.basicInfo.id === id)!,
+                ctx.map
+            ),
+        ],
+    };
+}
+
+/** Own turn start: an ended Frenzy is paid for, a running one reminds whom to charge, a Frenzy-trait holder tries to enter one (p184) */
 export function wfrpFrenzyTurnStart(
     ps: BattleParticipant[],
     id: string,
@@ -167,42 +265,15 @@ export function wfrpFrenzyTurnStart(
     if (!me || !extendedOf(ctx.rules)) return none;
 
     if (wfrpState(me).frenzy) {
-        if (!frenzyEnds(ps, me, ctx)) return none;
+        if (!frenzyEnds(ps, me, ctx))
+            return { ...none, messages: chargeLine(ps, me, ctx.map) };
 
         return endFrenzy(ps, id, ctx);
     }
 
-    if (
-        !inPlay(me) ||
-        !passionsOf(me).some((x) => x.passion === 'frenzy') ||
-        conditionLevel(me, 'stunned') > 0 ||
-        !ps.some((o) => inPlay(o) && isHostile(ctx.map, me, o))
-    )
-        return none;
+    if (!passionsOf(me).some((x) => x.passion === 'frenzy')) return none;
 
-    const edition = editionOf(ctx.rules);
-
-    const { t, target, passed } = selfTest(
-        me,
-        edition,
-        ctx.rng,
-        willTarget(me)
-    );
-
-    if (!passed) return none;
-
-    return {
-        participants: ps.map((p) =>
-            p === me ? withWfrpState(p, { frenzy: true, fear: undefined }) : p
-        ),
-        messages: [
-            textRef('battleWfrp.log.frenzyStart', {
-                name: me.basicInfo.name,
-                roll: t.roll,
-                target,
-            }),
-        ],
-    };
+    return tryEnterFrenzy(ps, id, ctx) ?? none;
 }
 
 /** Meeting a hated or disliked group: one Psychology test per group and encounter (p183-184) */
@@ -270,7 +341,7 @@ export function wfrpPassionsJoin(
                         passion: dynamicTextRef(
                             `battleWfrp.passion.${passion}`
                         ),
-                        group,
+                        group: groupLabel(group),
                         source: source.basicInfo.name,
                         roll: t.roll,
                         target,
@@ -286,11 +357,16 @@ export function wfrpPassionsJoin(
                               ...wfrpState(p).psychologyTested,
                               [key]: 1,
                           },
-                          ...(!passed &&
-                              passion === 'hatred' && {
+                          ...(!passed && {
                                   compelled: {
                                       ...wfrpState(p).compelled,
-                                      [key]: { group, round: ctx.round },
+                                      [key]: {
+                                          group,
+                                          round: ctx.round,
+                                          ...(passion === 'animosity' && {
+                                              kind: 'animosity' as const,
+                                          }),
+                                      },
                                   },
                               }),
                       })
@@ -350,7 +426,8 @@ export function wfrpPassionsRoundStart(
                 continue;
             }
 
-            if (ctx.round < entry.round + 2) continue;
+            if (entry.kind === 'animosity' || ctx.round < entry.round + 2)
+                continue;
 
             const current = participants.find((o) => o.basicInfo.id === id)!;
 
@@ -370,7 +447,7 @@ export function wfrpPassionsRoundStart(
                     {
                         name: p.basicInfo.name,
                         passion: dynamicTextRef('battleWfrp.passion.hatred'),
-                        group: entry.group,
+                        group: groupLabel(entry.group),
                         roll: t.roll,
                         target,
                         sl: t.sl,
@@ -390,3 +467,82 @@ export function wfrpPassionsRoundStart(
 
     return { participants, messages };
 }
+
+const isAnimosity = (e: { kind?: string }) => e.kind === 'animosity';
+
+/** Unresolved Animosity (p183): a Fear or Terror felt, a Frenzy, or an empty field outweighs it */
+export function animosityDue(
+    ps: BattleParticipant[],
+    p: BattleParticipant,
+    map?: BattleMapConfig | null
+): { key: string; group: string }[] {
+    if (!inPlay(p) || isFrenzied(p) || isAfraid(p)) return [];
+
+    return Object.entries(wfrpState(p).compelled ?? {}).flatMap(([key, e]) =>
+        isAnimosity(e) && compelTargets(ps, p, e.group, map).length > 0
+            ? [{ key, group: e.group }]
+            : []
+    );
+}
+
+const without = (
+    p: BattleParticipant,
+    drop: (key: string, e: { group: string; kind?: string }) => boolean
+): BattleParticipant => {
+    const left = Object.fromEntries(
+        Object.entries(wfrpState(p).compelled ?? {}).filter(
+            ([k, e]) => !drop(k, e)
+        )
+    );
+
+    return withWfrpState(p, {
+        compelled: Object.keys(left).length ? left : undefined,
+    });
+};
+
+/** Insulting, provoking or attacking the disliked group spends the urge: the fighter stands them for a while (p183) */
+export const ventAnimosity = (
+    p: BattleParticipant,
+    group?: string
+): BattleParticipant =>
+    without(p, (_, e) => isAnimosity(e) && (!group || e.group === group));
+
+/** A strike at a member of the disliked group vents the Animosity */
+export function ventOnAttack(
+    ps: BattleParticipant[],
+    attackerId: string,
+    defender: BattleParticipant
+): BattleParticipant[] {
+    const attacker = ps.find((p) => p.basicInfo.id === attackerId);
+
+    if (!attacker) return ps;
+
+    const hit = Object.values(wfrpState(attacker).compelled ?? {}).filter(
+        (e) => isAnimosity(e) && inGroup(defender, e.group)
+    );
+
+    return hit.length
+        ? ps.map((p) =>
+              p === attacker
+                  ? without(
+                        p,
+                        (_, e) =>
+                            isAnimosity(e) &&
+                            hit.some((h) => h.group === e.group)
+                    )
+                  : p
+          )
+        : ps;
+}
+
+/** GM override: drops a failed Hatred or Animosity test without the urge being acted on */
+export const releasePassion = (
+    p: BattleParticipant,
+    key: string
+): BattleParticipant => without(p, (k) => k === key);
+
+/** Fellowship tests against the disliked group are at Disadvantage (p183) */
+export const animosityToward = (
+    actor: BattleParticipant,
+    target: BattleParticipant
+): boolean => groupsOf(actor, 'animosity').some((g) => inGroup(target, g));

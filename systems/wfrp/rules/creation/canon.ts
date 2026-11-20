@@ -1,9 +1,17 @@
-import { skillListed } from '../advancement/career';
+import { skillListed, trappingTickKey } from '../advancement/career';
 import {
     CHARACTERISTIC_KEYS,
     type CharacteristicKey,
 } from '../characteristics/keys';
+import type { CoinAmount } from '../downtime/types';
 import type { SpeciesProfile } from './profile';
+import {
+    beginningTrappings,
+    type StartingItem,
+    startingWealthOf,
+} from './trappings';
+
+import type { Rng } from '@/lib/utils/common/rng';
 
 /** Book p38-40: +6 / +3 over the career's level-1 characteristics for a rolled / rearranged set, 0 for free */
 export const DISTRIBUTION_CAP = { rolled: 6, rearranged: 3, free: 0 } as const;
@@ -18,7 +26,14 @@ export const LANGUAGE_PURCHASES = 6;
 /** Free point range per characteristic under canon5e (p38) */
 export const CANON_FREE_POINT_MAX = 16;
 
+/** Trappings of the second level a kept career roll grants (p36): rolled 2, chosen 1, free 0 */
+export const BONUS_TRAPPINGS = { rolled: 2, choice: 1, free: 0 } as const;
+
 export type CareerTier1 = {
+    class?: string | null;
+    status?: string;
+    /** Trappings of Career Level 2 */
+    nextTrappings?: string[];
     characteristics: string[];
     skills: string[];
     talents: string[];
@@ -32,11 +47,13 @@ export type CanonPicks = {
     speciesSkills?: string[];
     careerSkills?: Record<string, number>;
     careerTalent?: string;
+    careerTrappings?: string[];
 };
 
 export type CanonCtx = {
     step: number;
     tier1: Record<string, CareerTier1>;
+    rng?: Rng;
 };
 
 export type CanonPlan = {
@@ -44,6 +61,9 @@ export type CanonPlan = {
     skillAdvances: Record<string, number>;
     careerTalent?: string;
     trappings: string[];
+    items: StartingItem[];
+    wealth: CoinAmount;
+    ticks: string[];
     fate: number;
     fortune?: number;
 };
@@ -159,6 +179,17 @@ export function planCanon(
     )
         errors.push('TALENT_CAREER');
 
+    const bonusTrappings = picks.careerTrappings ?? [];
+
+    const nextTrappings = tier1.nextTrappings ?? [];
+
+    if (
+        bonusTrappings.length > BONUS_TRAPPINGS[input.careerMode] ||
+        new Set(bonusTrappings).size !== bonusTrappings.length ||
+        bonusTrappings.some((t) => !nextTrappings.includes(t))
+    )
+        errors.push('TRAPPINGS_BONUS');
+
     const skillAdvances: Record<string, number> = {};
 
     for (const lang of profile.languages ?? [])
@@ -175,12 +206,23 @@ export function planCanon(
 
     const fortuneBase = profile.fortune ?? profile.fate;
 
+    const rng = ctx.rng ?? Math.random;
+
+    const items = [
+        ...beginningTrappings(tier1.class, rng),
+        ...tier1.trappings.map((name) => ({ name, quantity: 1 })),
+        ...bonusTrappings.map((name) => ({ name, quantity: 1 })),
+    ];
+
     return {
         bonus,
         skillAdvances,
+        items,
+        wealth: startingWealthOf(tier1.status, rng),
+        ticks: bonusTrappings.map(trappingTickKey),
         careerTalent:
             talent && tier1.talents.includes(talent) ? talent : undefined,
-        trappings: tier1.trappings,
+        trappings: items.map((i) => i.name),
         fate: profile.fate + fateBonus,
         ...((profile.fortune !== undefined || speciesBonus) && {
             fortune: fortuneBase + speciesBonus,

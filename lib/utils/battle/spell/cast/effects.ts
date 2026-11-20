@@ -380,7 +380,9 @@ function distanceDamage(
         participants: flow.ps,
         extra: state.actionModifiers[casterIdOf(state)],
         addAbilityMod: state.spell.definition.addAbilityMod,
-        damageBonus: state.spell.definition.damageBonus,
+        damageBonus:
+            (state.spell.definition.damageBonus ?? 0) +
+                state.overcastDamage || undefined,
     }).damage;
 }
 

@@ -35,6 +35,8 @@ export interface EditionProfile {
     psychologyModel: 'broken' | 'extended';
     /** `legacy`: one endeavour per hero, Challenging tests, income by SL, rest wound recovery by days; `canon5e`: up to 3 endeavours, Income at Average (+2 SL) paid in dice by Status and halved on failure, Heal = IB + SL, a downtime period restores all Wounds (p170, p190, p196, p199) */
     downtimeModel: 'legacy' | 'canon5e';
+    /** `legacy`: overcast steps from SL over CN, Major miscast on 99/00; `canon5e`: overcast table capped at IB + WPB, Critical Casting bonuses, armour repels the winds on every location, Major only under a Malignant Influence, ingredients lower a miscast one step, Sin/Wrath (p217-222, p235-238) */
+    magicModel: 'legacy' | 'canon5e';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -56,6 +58,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         fumbleModel: 'none',
         psychologyModel: 'broken',
         downtimeModel: 'legacy',
+        magicModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -75,5 +78,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         fumbleModel: 'drop',
         psychologyModel: 'extended',
         downtimeModel: 'canon5e',
+        magicModel: 'canon5e',
     },
 };

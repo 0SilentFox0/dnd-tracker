@@ -63,7 +63,12 @@ export function validateAttackPreview(
         damageRolls: (body.damageRolls ?? []) as number[],
     };
 
-    const checked = validateAttackRequest(ctx, request, ctx.meta.rules);
+    const checked = validateAttackRequest(
+        ctx,
+        request,
+        ctx.meta.rules,
+        ctx.meta.map
+    );
 
     assertAmmo(checked.attacker, checked.attack);
 

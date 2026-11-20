@@ -1,9 +1,15 @@
 import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { ActGateBlock, ActGateScope } from '@/lib/utils/rules/systems/types';
+import type {
+    ActGateBlock,
+    ActGateScope,
+} from '@/lib/utils/rules/systems/types';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
-type GateCtx = Omit<ActGateScope, 'rules'> & { meta: { rules: Ruleset } };
+type GateCtx = Omit<ActGateScope, 'rules'> & {
+    meta: { rules: Ruleset; map?: BattleMapConfig | null };
+};
 
 function firstBlock(
     ctx: GateCtx,
@@ -15,6 +21,7 @@ function firstBlock(
         participants: ctx.participants,
         scene: ctx.scene,
         rules: ctx.meta.rules,
+        map: ctx.meta.map,
     };
 
     for (const gate of ruleSystemOf(ctx.meta.rules).combat.turn?.actGates ??

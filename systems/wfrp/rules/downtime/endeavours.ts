@@ -1,6 +1,7 @@
 import { bonus, skillTarget } from '../characteristics/derive';
 import type { Characteristics } from '../characteristics/keys';
 import { EDITION_PROFILES, type EditionProfile } from '../edition/profiles';
+import { parseSkillAdvanceKey } from '../skills/catalog';
 import {
     CANON_INCOME_DIFFICULTY,
     ENDEAVOUR_DIFFICULTY,
@@ -21,6 +22,7 @@ import type {
     TrainingCredit,
 } from './types';
 
+import { rollDice } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 
 export type EndeavourCtx = {
@@ -29,6 +31,8 @@ export type EndeavourCtx = {
     rng: Rng;
     presetRoll?: number;
     edition?: EditionProfile;
+    /** The career's Earning Skill, used by canon Income instead of the picked skill (p199) */
+    earningSkill?: string;
 };
 
 export type EndeavourOutcome = {
@@ -36,11 +40,18 @@ export type EndeavourOutcome = {
     coins?: CoinAmount;
     training?: TrainingCredit;
     tend?: { patientId: string; heal: number; days: number };
+    /** Wounds a fumbled Heal inflicts on the patient (floor applied by the planner) */
+    tendFumble?: { patientId: string; wounds: number };
 };
 
-const skillOf = (e: Endeavour): { key: string; spec?: string } | null => {
+const skillOf = (
+    e: Endeavour,
+    earning?: string
+): { key: string; spec?: string } | null => {
     switch (e.kind) {
         case 'earn':
+            if (earning) return parseSkillAdvanceKey(earning);
+
             return e.params.skill === 'trade'
                 ? { key: 'trade', spec: e.params.spec }
                 : { key: 'charm' };
@@ -55,9 +66,10 @@ const skillOf = (e: Endeavour): { key: string; spec?: string } | null => {
 
 export function validateEndeavour(
     e: Endeavour,
-    c: Characteristics
+    c: Characteristics,
+    earningSkill?: string
 ): 'SKILL_UNTRAINED' | null {
-    const skill = skillOf(e);
+    const skill = skillOf(e, earningSkill);
 
     if (!skill) return null;
 
@@ -70,15 +82,15 @@ export function resolveEndeavour(
     e: Endeavour,
     ctx: EndeavourCtx
 ): EndeavourOutcome {
-    const skill = skillOf(e);
+    const model = ctx.edition ?? EDITION_PROFILES.legacy;
+
+    const canon = model.downtimeModel === 'canon5e';
+
+    const skill = skillOf(e, canon ? ctx.earningSkill : undefined);
 
     const t = skill && skillTarget(ctx.characteristics, skill.key, skill.spec);
 
     if (!skill || !t) return {};
-
-    const model = ctx.edition ?? EDITION_PROFILES.legacy;
-
-    const canon = model.downtimeModel === 'canon5e';
 
     const { test, passed } = rollDowntimeTest(
         t.target,
@@ -90,8 +102,18 @@ export function resolveEndeavour(
                     ? CANON_INCOME_DIFFICULTY
                     : ENDEAVOUR_DIFFICULTY,
             slModel: model.slModel,
+            doubles: canon && e.kind === 'tend',
         }
     );
+
+    if (canon && e.kind === 'tend' && test.outcome === 'fumble')
+        return {
+            test,
+            tendFumble: {
+                patientId: e.params.patientId,
+                wounds: rollDice('1d10', ctx.rng),
+            },
+        };
 
     if (canon && e.kind === 'earn') {
         const coins = rollIncome(parseStatus(ctx.status), passed, ctx.rng);

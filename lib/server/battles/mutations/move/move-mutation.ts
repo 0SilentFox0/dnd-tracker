@@ -42,7 +42,9 @@ import {
 } from '@/lib/utils/battle/store';
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
 import { assertCanAct } from '@/lib/utils/battle/turn';
+import { runTurnHooks } from '@/lib/utils/battle/turn/hooks';
 import { rngOf } from '@/lib/utils/common/rng';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 import type {
@@ -144,20 +146,36 @@ function walkMove(
             (mover.battleData.movementUsed ?? 0) + cost
         );
 
-        const hazard = isActive(moved)
+        const path = pathFrom(search, mover, data.to) ?? [];
+
+        const ended = runTurnHooks(
+            ruleSystemOf(rules).combat.turn?.onMoveEnd ?? [],
+            {
+                participants: replaceParticipant(participants, moved),
+                round: ctx.scene.round,
+                rng: rngOf(ctx),
+                rules,
+                map,
+                mover: moved,
+                start: mover.battleData.position ?? null,
+                path,
+                cost,
+            }
+        );
+
+        const landed = findParticipant(ended.participants, moved.basicInfo.id) ?? moved;
+
+        const hazard = isActive(landed)
             ? hazardOnMove(map, participants, mover, data.to, cost, rules)
             : null;
 
         return finishMove(ctx, {
-            participants: replaceParticipant(participants, moved),
-            moved,
+            participants: ended.participants,
+            moved: landed,
             hazard,
-            messages: [],
+            messages: ended.messages,
             events: [],
-            trail: {
-                from: mover.battleData.position,
-                path: pathFrom(search, mover, data.to) ?? [],
-            },
+            trail: { from: mover.battleData.position, path },
         });
     }
 
@@ -351,10 +369,27 @@ function returnToStart(
         },
     };
 
+    const ended = runTurnHooks(
+        ruleSystemOf(ctx.meta.rules).combat.turn?.onMoveEnd ?? [],
+        {
+            participants: replaceParticipant(participants, moved),
+            round: ctx.scene.round,
+            rng: rngOf(ctx),
+            rules: ctx.meta.rules,
+            map: ctx.meta.map,
+            mover: moved,
+            start: mover.battleData.position ?? null,
+            path: [],
+            cost: 0,
+        }
+    );
+
     return {
-        participants: replaceParticipant(participants, moved),
+        participants: ended.participants,
         pending: ctx.pending,
-        events: [],
+        events: ended.messages.length
+            ? [systemEvent(ctx.scene.round, lineText(ended.messages, '; '))]
+            : [],
     };
 }
 

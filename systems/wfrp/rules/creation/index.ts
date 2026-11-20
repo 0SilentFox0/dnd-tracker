@@ -1,4 +1,5 @@
 export {
+    BONUS_TRAPPINGS,
     CANON_FREE_POINT_MAX,
     type CanonCtx,
     type CanonPicks,
@@ -11,3 +12,9 @@ export type { CreationCtx, CreationPicks, PlanDraftResult } from './plan';
 export { planDraft } from './plan';
 export { isUsableProfile, type SpeciesProfile, STAT_FLOOR } from './profile';
 export { type CreationRolls, rollCreation } from './roll';
+export {
+    beginningTrappings,
+    EVERYONE_TRAPPINGS,
+    type StartingItem,
+    startingWealth,
+} from './trappings';

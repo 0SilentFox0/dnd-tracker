@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { engagedFoes } from '../../rules/combat/engagement';
+import { editionOf } from '../../rules/edition';
 import { wfrpState, withWfrpState } from '../../rules/state';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -71,6 +73,16 @@ export function conditionTestMutation(
         (wfrpState(actor).conditionTests ?? []).includes(body.condition)
     )
         throw unavailable();
+
+    if (
+        body.condition === 'broken' &&
+        editionOf(ctx.meta.rules).momentumModel === 'participant' &&
+        engagedFoes(actor, ctx.participants, ctx.meta.map).length > 0
+    )
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.CONDITION_TEST_ENGAGED
+        );
 
     const round = ctx.scene.round;
 

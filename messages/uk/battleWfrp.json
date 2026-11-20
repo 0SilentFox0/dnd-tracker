@@ -42,7 +42,7 @@
     },
     "deafened": {
       "label": "Оглушений звуком",
-      "description": "Не чує"
+      "description": "Не розуміє мову; знімає тест Витривалості"
     },
     "unconscious": {
       "label": "Непритомний",
@@ -85,6 +85,14 @@
     "passionFail": "{name}: {passion} ({group}) щодо {source} — тест {roll} / {target}, РУ {sl}: провал, поклик бере гору",
     "passionCalm": "{name}: {passion} ({group}) — повторний тест {roll} / {target}, РУ {sl}: заспокоївся",
     "passionRage": "{name}: {passion} ({group}) — повторний тест {roll} / {target}, РУ {sl}: досі в люті",
+    "frenzyFail": "{name} не вдається впасти в Шал — тест Сили волі {roll} / {target}",
+    "frenzyCharge": "{name} у Шалі: має йти до найближчого ворога й атакувати його ({foe})",
+    "animosityVent": "{name} ображає й провокує {group}, поклик вичерпано",
+    "passionRelease": "ДМ знімає з {name} {passion} ({group})",
+    "intimidateImmune": "{name} має імунітет до залякування від {source} (Ненависть)",
+    "intimidateWin": "{name} залякує {target} — Intimidate {roll} / {own}, РУ {sl} проти РУ Cool {foeSl}: Страх {rating}",
+    "intimidateLose": "{name} не вдається залякати {target} — РУ {sl} проти РУ Cool {foeSl}",
+    "intimidateNoEffect": "{target} зараз не можна налякати",
     "frenzyStart": "{name} впадає в Шал — тест Сили волі {roll} / {target}",
     "frenzyEnd": "{name}: Шал минає, боєць стає Втомленим",
     "critDeath": "☠️ {target} гине на місці: {text}",
@@ -110,7 +118,10 @@
     "fortuneRerolls": "{name} витрачає Удачу: перекидань {rolls}",
     "fumbleDrop": "{name} схибив і випустив зброю; наступна Дія піде на підняття",
     "fumbleOops": "{name} схибив (oops {roll}): {text}",
-    "fumbleMisfire": "{name}: осічка ({roll}): {text}"
+    "fumbleMisfire": "{name}: осічка ({roll}): {text}",
+    "fumbleWounds": "{name} отримує {wounds} Ран від фамблу",
+    "fumbleNote": "{name}: {note}",
+    "targetSurrounded": "{name} в оточенні: шляху відступу немає"
   },
   "passion": {
     "frenzy": "Шал",
@@ -177,6 +188,13 @@
       "spend": "Витратити Долю — промах",
       "accept": "Прийняти удар",
       "waiting": "Очікуємо рішення щодо Долі"
+    },
+    "psychology": {
+      "title": "Психологія",
+      "frenzy": "Впасти в Шал (тест Сили волі)",
+      "vent": "Образити / спровокувати {group}",
+      "release": "Зняти {passion} ({group})",
+      "intimidate": "Залякати {name} (дія, проти Cool)"
     },
     "momentum": {
       "title": "Momentum",

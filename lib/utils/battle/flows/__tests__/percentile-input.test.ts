@@ -72,13 +72,15 @@ describe('combat.attackTarget', () => {
         expect(
             ruleSystemOf(WFRP_RULES).combat.attackTarget?.(
                 archer(),
-                attack(AttackType.MELEE)
+                attack(AttackType.MELEE),
+                WFRP_RULES
             )?.target
         ).toBe(41);
         expect(
             ruleSystemOf(WFRP_RULES).combat.attackTarget?.(
                 archer(),
-                attack(AttackType.RANGED)
+                attack(AttackType.RANGED),
+                WFRP_RULES
             )?.target
         ).toBe(52);
     });

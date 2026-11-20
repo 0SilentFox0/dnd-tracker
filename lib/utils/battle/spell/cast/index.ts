@@ -224,8 +224,17 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
               })
             : rolled;
 
+    const overcastDice = test?.overcastDamage === undefined;
+
     const overcastSteps =
-        test && spellMagic?.overcast === 'dice' ? test.overcastSteps : 0;
+        test && overcastDice && spellMagic?.overcast === 'dice'
+            ? test.overcastSteps
+            : 0;
+
+    const overcastDamage =
+        test && spellMagic?.overcast === 'dice'
+            ? (test.overcastDamage ?? 0)
+            : 0;
 
     const castLevel =
         overcastSteps > 0 ? spell.level + overcastSteps : chosenLevel;
@@ -307,12 +316,13 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             participants: flow.ps,
             extra: actionModifiers[casterId],
             addAbilityMod: def.addAbilityMod,
-            damageBonus: def.damageBonus,
+            damageBonus: (def.damageBonus ?? 0) + overcastDamage || undefined,
         }),
         saveDc:
             params.grant?.dc ??
             spellSaveDc(params.rules, readyCaster, params.grant?.dcAbility),
         attackBonus: params.grant?.attackBonus,
+        overcastDamage,
         battleId,
         actionModifiers,
         rng,
@@ -381,6 +391,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             spellName: spell.name,
             rounds: rounds || DEFAULT_CONCENTRATION_ROUNDS,
             round: currentRound,
+            cn: spellMagic?.cn,
         });
 
         flow.ps = begun.participants;

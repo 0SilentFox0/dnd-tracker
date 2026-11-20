@@ -12,6 +12,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { CONDITION_LIMITS } from '@/lib/constants/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
+import { useMalignantToggle } from '@/systems/wfrp/hooks/useMalignantToggle';
 import { WFRP_CONDITIONS } from '@/systems/wfrp/rules/conditions';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -55,6 +56,10 @@ function DialogBody({
 
     const tCondition = (key: string, field: 'label' | 'description') =>
         text(dynamicTextRef(`battleWfrp.conditions.${key}.${field}`));
+
+    const tMagic = useTranslations('wfrpMagic.ui.malignant');
+
+    const malignant = useMalignantToggle(participant);
 
     const [selected, setSelected] = useState(WFRP_CONDITIONS.catalog[0].key);
 
@@ -174,6 +179,21 @@ function DialogBody({
                     </div>
                 ))}
             </div>
+
+            {malignant.available && (
+                <div className="pb-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        aria-pressed={malignant.on}
+                        disabled={malignant.isPending}
+                        onClick={malignant.toggle}
+                    >
+                        {tMagic(malignant.on ? 'off' : 'on')}
+                    </Button>
+                </div>
+            )}
 
             <form
                 id={FORM_ID}

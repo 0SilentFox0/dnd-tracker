@@ -8,6 +8,7 @@ export const noSustain: RuleSystemSustain = {
     holds: () => false,
     holding: (p) => !!p.battleData.pendingCast,
     begin: (ps) => ({ participants: ps, messages: [] }),
+    info: () => undefined,
     drop: (ps) => ({ participants: ps, messages: [] }),
     tag: (_before, after) => after,
     anchorLive: () => true,

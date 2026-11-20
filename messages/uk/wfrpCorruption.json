@@ -13,6 +13,7 @@
     "move": "Рух {amount}",
     "maxWounds": "Макс. Wounds {amount}"
   },
+  "soulLost": "{kind, select, physical {Тіло} other {Розум}} персонажа {name} втрачено через Скверну",
   "chip": {
     "label": "Порча",
     "short": "Пор."

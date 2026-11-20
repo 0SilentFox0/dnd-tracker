@@ -54,7 +54,6 @@ describe('catalog values', () => {
             'fatigued',
             'surprised',
             'blinded',
-            'deafened',
             'unconscious',
         ] as const)
             expect(R[k].endTest).toBeNull();

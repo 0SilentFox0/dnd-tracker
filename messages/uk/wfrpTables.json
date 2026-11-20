@@ -32,6 +32,7 @@
   "amount": "Кількість",
   "condition": "Стан",
   "rounds": "Раунди",
+  "roundsFormula": "Формула раундів (напр. 1d10 - TB; замінює раунди)",
   "levels": "Рівні",
   "marker": "Маркер",
   "markers": {

@@ -1,4 +1,4 @@
-import { describe, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { bookExample, CANON, LEGACY } from './book-example';
 
@@ -7,10 +7,16 @@ import {
     type Characteristics,
     DEFAULT_CHARACTERISTICS,
 } from '@/systems/wfrp/rules/characteristics/keys';
+import {
+    burdenOfPower,
+    effectiveStatus,
+    regainStanding,
+} from '@/systems/wfrp/rules/downtime/career-duty';
 import { CANON_ENDEAVOURS_MAX } from '@/systems/wfrp/rules/downtime/constants';
 import { resolveEndeavour } from '@/systems/wfrp/rules/downtime/endeavours';
 import {
     healEndeavourWounds,
+    healFumbleWounds,
     rollDailyRecovery,
 } from '@/systems/wfrp/rules/downtime/heal';
 import {
@@ -238,4 +244,247 @@ describe('canon recovery and Heal', () => {
             );
         }
     );
+});
+
+const career = (tier: 1 | 2 | 3 | 4, standingLoss?: number) => ({
+    state: {
+        careerId: 'c',
+        tier,
+        ticks: [],
+        ...(standingLoss ? { standingLoss } : {}),
+    },
+    statuses: ['Brass 1', 'Silver 1', 'Gold 1', 'Gold 3'],
+    earningSkill: 'stealth',
+});
+
+const lowFel = (): Characteristics => ({
+    ...DEFAULT_CHARACTERISTICS,
+    base: { ...DEFAULT_CHARACTERISTICS.base, ag: 60, fel: 10 },
+});
+
+describe('canon Income uses the career Earning Skill', () => {
+    bookExample(
+        199,
+        'the Income test rolls the Earning Skill of the career, not Charm',
+        () => {
+            const c = lowFel();
+
+            const common = {
+                characteristics: c,
+                status: 'Brass 1',
+                rng,
+                presetRoll: 40,
+                edition: CANON,
+            };
+
+            expect(resolveEndeavour(charm, common).test?.outcome).toBe(
+                'failure'
+            );
+            expect(
+                resolveEndeavour(charm, { ...common, earningSkill: 'stealth' })
+                    .test?.outcome
+            ).toBe('success');
+        }
+    );
+});
+
+describe('canon Heal fumble', () => {
+    const tend: DowntimeState = {
+        ailments: [],
+        endeavour: { kind: 'tend', params: { patientId: 'p' } },
+    };
+
+    bookExample(
+        170,
+        'a fumbled Heal inflicts 1d10 Wounds but never takes the patient below 1',
+        () => {
+            expect(healFumbleWounds(10, 12)).toBe(10);
+            expect(healFumbleWounds(10, 4)).toBe(3);
+            expect(healFumbleWounds(10, 1)).toBe(0);
+        }
+    );
+
+    bookExample(
+        170,
+        'a fumbled Heal test (failed double) hurts the patient',
+        () => {
+            const high = () => 0.99;
+
+            const plan = (maxHp: number) =>
+                planPeriod({
+                    heroes: [
+                        hero('h', tend, {}, { heal: 5 }),
+                        hero('p', undefined, { maxHp }),
+                    ],
+                    days: 1,
+                    rules: {
+                        tables: {},
+                        edition: { preset: 'canon5e' },
+                    } as unknown as PeriodInput['rules'],
+                    rng: high,
+                    periodId: 'p1',
+                    now: '2026-11-20',
+                    presets: { h: { endeavour: 99 }, p: { event: 5 } },
+                });
+
+            const [healer, patient] = plan(12);
+
+            expect(healer.summary.endeavour?.test?.outcome).toBe('fumble');
+            expect(healer.summary.endeavour?.fumbleWounds).toBe(10);
+            expect(patient.resources.hp).toBeLessThan(12);
+
+            expect(plan(1)[1].resources.hp).toBeUndefined();
+        }
+    );
+});
+
+describe('canon daily recovery in the period', () => {
+    bookExample(
+        170,
+        'wounds lost during the period come back through the daily Endurance tests',
+        () => {
+            const d: DowntimeState = {
+                ailments: [
+                    { id: 'a', kind: 'festering', daysLeft: 3, label: 'f' },
+                ],
+                endeavour: { kind: 'rest', params: {} },
+            };
+
+            const [r] = run([hero('a', d)], {
+                a: { event: 5, ailments: [99] },
+            });
+
+            expect(r.summary.ailments[0].wounds).toBeGreaterThan(0);
+            expect(r.summary.recovered).toBeGreaterThan(0);
+        }
+    );
+});
+
+describe('canon Hardly Working and Burdens of Power', () => {
+    const noIncome = (over: Partial<PeriodHero>) =>
+        run([hero('a', undefined, over)], { a: { event: 5 } })[0];
+
+    bookExample(
+        199,
+        'skipping Income leaves a single coin of the Status tier',
+        () => {
+            const silver = noIncome({ status: 'Silver 3' });
+
+            expect(silver.coins).toEqual({ coin: 'sp', amount: 1 });
+            expect(silver.summary.hardlyWorking).toBe(true);
+            expect(noIncome({ status: 'Gold 2' }).coins).toEqual({
+                coin: 'gp',
+                amount: 1,
+            });
+        }
+    );
+
+    bookExample(199, 'taking Income is not Hardly Working', () => {
+        const [r] = run(
+            [
+                hero(
+                    'a',
+                    { ailments: [], endeavour: charm },
+                    { status: 'Brass 1' }
+                ),
+            ],
+            { a: noEvent }
+        );
+
+        expect(r.summary.hardlyWorking).toBeUndefined();
+    });
+
+    bookExample(
+        196,
+        'a failed Earning Test at the top level costs one Standing',
+        () => {
+            const r = noIncome({ status: 'Gold 3', career: career(4) });
+
+            expect(r.summary.burden?.lost).toBe('standing');
+            expect(r.characteristics.career?.standingLoss).toBe(1);
+        }
+    );
+
+    bookExample(
+        196,
+        'a passed Earning Test at the top level loses nothing and earns nothing',
+        () => {
+            const r = planPeriod({
+                heroes: [
+                    hero('a', undefined, {
+                        status: 'Gold 3',
+                        career: career(4),
+                    }),
+                ],
+                days: 7,
+                rules: {
+                    tables: {},
+                    edition: { preset: 'canon5e' },
+                } as unknown as PeriodInput['rules'],
+                rng: () => 0.05,
+                periodId: 'p1',
+                now: '2026-11-20',
+                presets: { a: { event: 5 } },
+            })[0];
+
+            expect(r.summary.burden?.lost).toBeUndefined();
+            expect(r.characteristics.career?.standingLoss).toBeUndefined();
+        }
+    );
+
+    bookExample(
+        196,
+        'Standing falling to 0 drops a Career Level for free',
+        () => {
+            const { state, result } = burdenOfPower(
+                { ...career(4), statuses: ['x', 'x', 'x', 'Gold 1'] },
+                lowFel(),
+                () => 0.99
+            );
+
+            expect(result.lost).toBe('tier');
+            expect(state.tier).toBe(3);
+        }
+    );
+
+    bookExample(196, 'each Income Endeavour regains one lost Standing', () => {
+        expect(regainStanding(career(4, 2).state).standingLoss).toBe(1);
+        expect(regainStanding(career(4, 1).state).standingLoss).toBeUndefined();
+        expect(effectiveStatus('Gold 3', 1)).toEqual({
+            tier: 'gold',
+            level: 2,
+        });
+
+        const [r] = run(
+            [
+                hero(
+                    'a',
+                    { ailments: [], endeavour: charm },
+                    {
+                        status: 'Gold 3',
+                        career: career(4, 2),
+                    }
+                ),
+            ],
+            { a: noEvent }
+        );
+
+        expect(r.characteristics.career?.standingLoss).toBe(1);
+        expect(r.summary.burden).toBeUndefined();
+    });
+
+    it('the period snapshot remembers the career so the period can be undone', () => {
+        const r = noIncome({ status: 'Gold 3', career: career(4) });
+
+        const snapshot = r.characteristics.downtime?.lastPeriod;
+
+        expect(snapshot?.before.career?.tier).toBe(4);
+        expect(snapshot?.after.career).toMatchObject({
+            tier: 4,
+            standingLoss: 1,
+        });
+        expect(snapshot?.after.career?.careerId).toBe(
+            snapshot?.before.career?.careerId
+        );
+    });
 });

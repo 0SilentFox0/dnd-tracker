@@ -13,15 +13,19 @@ import {
     CAREER_ADVANCE_XP,
     careerChangeCost,
     planCareerAdvance,
+    planCareerRevert,
     planCareerSet,
+    planTrappingTick,
 } from '@/systems/wfrp/rules/advancement';
 import type { Characteristics } from '@/systems/wfrp/rules/characteristics/keys';
 import { readCharacteristics } from '@/systems/wfrp/rules/characteristics/keys';
 import { editionOf } from '@/systems/wfrp/rules/edition';
+import { toCareerData } from '@/systems/wfrp/server/careers/row';
 import { parseSpeciesProfile } from '@/systems/wfrp/server/profile-refs';
 import type {
     CareerAdvanceInput,
     CareerSetInput,
+    CareerTrappingInput,
 } from '@/systems/wfrp/server/progression-schemas';
 
 export type CareerResult = { characteristics: Characteristics };
@@ -115,12 +119,7 @@ export async function setCareer(
         if (cost > 0 && availableXp(locked.experience, current) < cost)
             throw new ContentError(API_ERRORS.ADVANCE_INSUFFICIENT_XP, 409);
 
-        const switched = advancement.planCareerSet(current, career.id);
-
-        const next =
-            cost > 0
-                ? { ...switched, spentArchived: switched.spentArchived + cost }
-                : switched;
+        const next = advancement.planCareerSet(current, career.id, cost);
 
         await tx.character.update({
             where: { id: character.id },
@@ -216,6 +215,102 @@ export async function advanceCareer(
                 },
             },
         ]);
+
+        return { characteristics: plan.next };
+    });
+}
+
+export async function revertCareer(gate: CharacterGate): Promise<CareerResult> {
+    const { access, character } = gate;
+
+    advancementOf(gate);
+
+    return prisma.$transaction(async (tx) => {
+        const locked = (await lockCharacters(tx, [character.id])).get(
+            character.id
+        );
+
+        if (!locked)
+            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        const plan = planCareerRevert(readCharacteristics(locked));
+
+        if (!plan.ok)
+            throw new ContentError(
+                plan.error === 'STALE'
+                    ? API_ERRORS.ADVANCE_LEDGER_STALE
+                    : API_ERRORS.ADVANCE_LEDGER_EMPTY,
+                409
+            );
+
+        await tx.character.update({
+            where: { id: character.id },
+            data: { characteristics: characteristicsJson(plan.next) },
+        });
+
+        await writeCharacterLog(tx, [
+            {
+                campaignId: character.campaignId,
+                characterId: character.id,
+                actorUserId: access.userId,
+                kind: CharacterLogKind.CAREER_SET,
+                data: {
+                    careerId: plan.next.career?.careerId,
+                    revert: true,
+                },
+            },
+        ]);
+
+        return { characteristics: plan.next };
+    });
+}
+
+const TRAPPING_ERRORS = {
+    NO_CAREER: API_ERRORS.CAREER_NO_CAREER,
+    MAX_TIER: API_ERRORS.CAREER_MAX_TIER,
+    NOT_LISTED: API_ERRORS.CAREER_NOT_FOUND,
+    ALREADY: API_ERRORS.CAREER_SAME,
+} as const;
+
+export async function tickTrapping(
+    gate: CharacterGate,
+    input: CareerTrappingInput
+): Promise<CareerResult> {
+    const { character } = gate;
+
+    advancementOf(gate);
+
+    return prisma.$transaction(async (tx) => {
+        const locked = (await lockCharacters(tx, [character.id])).get(
+            character.id
+        );
+
+        if (!locked)
+            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        const current = readCharacteristics(locked);
+
+        const row = current.career
+            ? await tx.career.findFirst({
+                  where: {
+                      id: current.career.careerId,
+                      campaignId: character.campaignId,
+                  },
+              })
+            : null;
+
+        const plan = planTrappingTick(
+            current,
+            row ? toCareerData(row).tiers : [],
+            input.name
+        );
+
+        if (!plan.ok) throw new ContentError(TRAPPING_ERRORS[plan.error], 409);
+
+        await tx.character.update({
+            where: { id: character.id },
+            data: { characteristics: characteristicsJson(plan.next) },
+        });
 
         return { characteristics: plan.next };
     });

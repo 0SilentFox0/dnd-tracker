@@ -15,7 +15,7 @@ const TENS = 10;
 export function wfrpInitiative(
     p: BattleParticipant,
     ctx: {
-        rules: Pick<Ruleset, 'initiative'> & { edition?: unknown };
+        rules: Pick<Ruleset, 'initiative'> & Partial<Pick<Ruleset, 'edition'>>;
         rng: Rng;
         roll?: boolean;
     }

@@ -13,6 +13,7 @@
     "move": "Move {amount}",
     "maxWounds": "Max Wounds {amount}"
   },
+  "soulLost": "{name}'s {kind, select, physical {body} other {mind}} is lost to Corruption",
   "chip": {
     "label": "Corruption",
     "short": "Cor"

@@ -9,6 +9,7 @@ import {
     withMomentum,
 } from '../../rules/combat/momentum';
 import { participantChars } from '../../rules/combat/participant';
+import { conditionLevel } from '../../rules/conditions/levels';
 import { selfSlMod, selfTestMod } from '../../rules/conditions/test-mod';
 import { editionOf } from '../../rules/edition';
 import { resolvePercentileTest } from '../../rules/percentile/resolve';
@@ -127,6 +128,9 @@ export function momentumMutation(
         !isActive(ally)
     )
         throw reject(API_ERRORS.LEADERSHIP_ALLY_INVALID, 'invalid_target');
+
+    if (conditionLevel(ally, 'deafened') > 0)
+        throw reject(API_ERRORS.LEADERSHIP_ALLY_DEAF, 'invalid_target');
 
     const skill = skillTarget(participantChars(actor), 'leadership');
 

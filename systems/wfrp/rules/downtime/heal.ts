@@ -40,3 +40,7 @@ export function rollDailyRecovery(i: {
 /** A successful Heal test recovers IB + SL Wounds (p170) */
 export const healEndeavourWounds = (ib: number, sl: number): number =>
     ib + Math.max(0, sl);
+
+/** A fumbled Heal inflicts 1d10 Wounds but never takes the patient below 1 Wound (p170) */
+export const healFumbleWounds = (rolled: number, current: number): number =>
+    Math.max(0, Math.min(rolled, current - 1));

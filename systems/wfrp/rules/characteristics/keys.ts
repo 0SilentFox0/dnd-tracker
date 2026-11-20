@@ -33,10 +33,23 @@ export type LedgerEntry = {
 
 export const LEDGER_MAX = 200;
 
-export type CareerState = {
+export type CareerSnapshot = {
     careerId: string;
     tier: 1 | 2 | 3 | 4;
     ticks: string[];
+    /** Standing lost to Burdens of Power, regained one per Income Endeavour (p196) */
+    standingLoss?: number;
+};
+
+/** Undo record of the last XP-charged career change (`from` absent = no career before) */
+export type CareerChange = {
+    from?: CareerSnapshot;
+    cost: number;
+    ledgerTop: string | null;
+};
+
+export type CareerState = CareerSnapshot & {
+    lastChange?: CareerChange;
 };
 
 export const CAREER_TIERS = [1, 2, 3, 4] as const;
@@ -138,7 +151,27 @@ function readTalents(raw: unknown) {
 const isTier = (v: unknown): v is CareerState['tier'] =>
     (CAREER_TIERS as readonly unknown[]).includes(v);
 
-function readCareer(raw: unknown): CareerState | undefined {
+const readTicks = (ticks: unknown): string[] | undefined =>
+    Array.isArray(ticks) &&
+    ticks.length <= LEDGER_MAX &&
+    ticks.every(
+        (t) => typeof t === 'string' && t.length >= 1 && t.length <= 100
+    ) &&
+    new Set(ticks).size === ticks.length
+        ? [...ticks]
+        : undefined;
+
+const readStandingLoss = (raw: unknown): { standingLoss?: number } | null => {
+    if (raw === undefined) return {};
+
+    return Number.isInteger(raw) &&
+        (raw as number) >= 1 &&
+        (raw as number) <= 20
+        ? { standingLoss: raw as number }
+        : null;
+};
+
+function readSnapshot(raw: unknown): CareerSnapshot | undefined {
     if (
         !isRecord(raw) ||
         typeof raw.careerId !== 'string' ||
@@ -148,19 +181,44 @@ function readCareer(raw: unknown): CareerState | undefined {
     )
         return undefined;
 
-    const ticks = raw.ticks;
+    const ticks = readTicks(raw.ticks);
+
+    const loss = readStandingLoss(raw.standingLoss);
+
+    if (!ticks || !loss) return undefined;
+
+    return { careerId: raw.careerId, tier: raw.tier, ticks, ...loss };
+}
+
+function readChange(raw: unknown): CareerChange | undefined {
+    if (!isRecord(raw)) return undefined;
+
+    const from = raw.from === undefined ? undefined : readSnapshot(raw.from);
 
     if (
-        !Array.isArray(ticks) ||
-        ticks.length > LEDGER_MAX ||
-        !ticks.every(
-            (t) => typeof t === 'string' && t.length >= 1 && t.length <= 100
-        ) ||
-        new Set(ticks).size !== ticks.length
+        (raw.from !== undefined && !from) ||
+        !Number.isInteger(raw.cost) ||
+        (raw.cost as number) < 0 ||
+        !(raw.ledgerTop === null || typeof raw.ledgerTop === 'string')
     )
         return undefined;
 
-    return { careerId: raw.careerId, tier: raw.tier, ticks: [...ticks] };
+    return {
+        ...(from ? { from } : {}),
+        cost: raw.cost as number,
+        ledgerTop: raw.ledgerTop,
+    };
+}
+
+function readCareer(raw: unknown): CareerState | undefined {
+    const snapshot = readSnapshot(raw);
+
+    if (!snapshot || !isRecord(raw)) return undefined;
+
+    const change =
+        raw.lastChange === undefined ? undefined : readChange(raw.lastChange);
+
+    return { ...snapshot, ...(change ? { lastChange: change } : {}) };
 }
 
 const LEDGER_KINDS: readonly unknown[] = ['characteristic', 'skill', 'talent'];

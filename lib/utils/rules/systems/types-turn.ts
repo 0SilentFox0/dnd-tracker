@@ -27,6 +27,15 @@ export interface TurnStartCtx extends TurnSubjectCtx {
     applyDamage: ApplyDamageConsequences;
 }
 
+export interface MoveEndCtx extends TurnHookCtx {
+    /** The mover after the move (already in `participants`) */
+    mover: BattleParticipant;
+    start: GridPoint | null;
+    path: GridPoint[];
+    /** Cells of movement spent by this move */
+    cost: number;
+}
+
 export interface TurnJoinCtx extends TurnHookCtx {
     newcomerIds?: readonly string[];
 }
@@ -62,6 +71,7 @@ export interface ActGateScope {
     participants: BattleParticipant[];
     scene: Pick<BattleSceneState, 'turnIndex' | 'sceneState'>;
     rules: Ruleset;
+    map?: BattleMapConfig | null;
 }
 
 export interface ActGateBlock {
@@ -122,6 +132,8 @@ export interface RuleSystemTurn {
     onTurnEnd?: readonly TurnHook<TurnSubjectCtx>[];
     /** A new round begins, after the round-start abilities; messages go to the round log */
     onRoundStart?: readonly TurnHook<TurnHookCtx>[];
+    /** A walk ends in a base without core actions (`actions.enabled` off); throwing a `BattleRuleError` rejects the move */
+    onMoveEnd?: readonly TurnHook<MoveEndCtx>[];
     /** Participants enter the fight (start, reveal, summon, late join) */
     onJoin?: readonly TurnHook<TurnJoinCtx>[];
 }

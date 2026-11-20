@@ -111,7 +111,7 @@ export const WFRP_CONDITION_REGISTRY: Record<
         },
         endTest: null,
     },
-    deafened: { leveled: false, markers: [], endTest: null },
+    deafened: { leveled, markers: [], endTest: { skill: 'endurance' } },
     unconscious: {
         leveled: false,
         markers: [EffectMarker.SKIP_ACTION, EffectMarker.IMMOBILIZED],

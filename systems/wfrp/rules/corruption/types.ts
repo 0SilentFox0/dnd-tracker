@@ -24,6 +24,10 @@ export type GrantSummary = {
     total: number;
     threshold: number;
     pointsCapped?: true;
+    /** canon5e: Corruption Points lost to the mutation (p188) */
+    pointsLost?: number;
+    /** canon5e: the character fell to Chaos, mutation count passed its limit (p188) */
+    soulLost?: MutationKind;
     test?: TestOutcome;
     mutation?: {
         kind: MutationKind;
@@ -48,6 +52,8 @@ export type CorruptionState = {
     points: number;
     mutations: Mutation[];
     last?: GrantSnapshot;
+    /** canon5e: the character fell to Chaos (p188) */
+    soulLost?: MutationKind;
 };
 
 export const EMPTY_CORRUPTION: CorruptionState = { points: 0, mutations: [] };

@@ -1,12 +1,20 @@
 import { bonus, skillTarget } from '../characteristics/derive';
-import type { Characteristics } from '../characteristics/keys';
+import type { CareerState, Characteristics } from '../characteristics/keys';
 import { editionOf } from '../edition/read';
 import { tickAilments } from './ailments';
+import {
+    burdenOfPower,
+    effectiveStatus,
+    hardlyWorkingCoins,
+    type PeriodCareer,
+    regainStanding,
+    statusText,
+} from './career-duty';
 import { CANON_ENDEAVOURS_MAX, REST_HEAL_MULTIPLIER } from './constants';
 import type { EndeavourOutcome } from './endeavours';
 import { resolveEndeavour, validateEndeavour } from './endeavours';
 import { rollEvent } from './event';
-import { healWounds } from './heal';
+import { healFumbleWounds, healWounds, rollDailyRecovery } from './heal';
 import type {
     Ailment,
     CoinAmount,
@@ -28,6 +36,7 @@ export type PeriodHero = {
     characteristics: Characteristics;
     maxHp: number;
     status?: string | null;
+    career?: PeriodCareer;
 };
 
 export type PeriodPresets = {
@@ -98,16 +107,28 @@ function runEndeavour(
             result: {},
         };
 
-    if (validateEndeavour(e, h.characteristics))
+    const edition = editionOf(input.rules);
+
+    const canonIncome = edition.downtimeModel === 'canon5e';
+
+    const earningSkill = canonIncome ? h.career?.earningSkill : undefined;
+
+    if (validateEndeavour(e, h.characteristics, earningSkill))
         return { summary: { kind: e.kind }, result: {} };
 
     const result = resolveEndeavour(e, {
         characteristics: h.characteristics,
-        status: h.status,
+        status:
+            canonIncome && h.career
+                ? statusText(
+                      effectiveStatus(h.status, h.career.state.standingLoss)
+                  )
+                : h.status,
+        earningSkill,
         rng: input.rng,
         // a DM preset roll applies to the first endeavour slot only
         presetRoll: slot === 0 ? input.presets?.[h.id]?.endeavour : undefined,
-        edition: editionOf(input.rules),
+        edition,
     });
 
     return {
@@ -117,9 +138,64 @@ function runEndeavour(
             ...(result.coins ? { coins: result.coins } : {}),
             ...(result.training ? { discount: result.training.discount } : {}),
             ...(e.kind === 'tend' ? { patientId: e.params.patientId } : {}),
+            ...(result.tendFumble
+                ? { fumbleWounds: result.tendFumble.wounds }
+                : {}),
         },
         result,
     };
+}
+
+const markOf = ({ careerId, tier, ticks, standingLoss }: CareerState) => ({
+    careerId,
+    tier,
+    ticks,
+    ...(standingLoss ? { standingLoss } : {}),
+});
+
+type Duty = {
+    career?: CareerState;
+    coins?: CoinAmount;
+    hardlyWorking?: boolean;
+    burden?: PeriodSummary['burden'];
+};
+
+/** Income regains Standing; skipping it is Hardly Working, plus Burdens of Power at the top level (p196, p199) */
+function careerDuty(
+    h: PeriodHero,
+    earned: number,
+    input: PeriodInput,
+    slModel: ReturnType<typeof editionOf>['slModel']
+): Duty {
+    if (!h.career && !h.status) return {};
+
+    if (earned > 0 && h.career) {
+        let state = h.career.state;
+
+        for (let i = 0; i < earned; i++) state = regainStanding(state);
+
+        return state === h.career.state ? {} : { career: state };
+    }
+
+    if (earned > 0) return {};
+
+    const status = effectiveStatus(h.status, h.career?.state.standingLoss);
+
+    const duty: Duty = {
+        coins: hardlyWorkingCoins(status),
+        hardlyWorking: true,
+    };
+
+    if (!h.career || h.career.state.tier !== 4) return duty;
+
+    const burden = burdenOfPower(
+        h.career,
+        h.characteristics,
+        input.rng,
+        slModel
+    );
+
+    return { ...duty, career: burden.state, burden: burden.result };
 }
 
 function reduceNearest(ailments: Ailment[], days: number): Ailment[] {
@@ -153,6 +229,8 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
 
     const tendBonus = new Map<string, { heal: number; days: number }>();
 
+    const tendFumbles = new Map<string, number>();
+
     for (const h of heroes) {
         if (h.resources.dead || currentHp(h.resources, h.maxHp) === 0) continue;
 
@@ -165,6 +243,14 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
         outcomes.set(h.id, list);
 
         for (const { result } of list) {
+            const fumble = result.tendFumble;
+
+            if (fumble)
+                tendFumbles.set(
+                    fumble.patientId,
+                    (tendFumbles.get(fumble.patientId) ?? 0) + fumble.wounds
+                );
+
             const tend = result.tend;
 
             if (!tend) continue;
@@ -185,10 +271,27 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
             ailments: [],
         };
 
+        const incapacitated = currentHp(h.resources, h.maxHp) === 0;
+
+        const duty: Duty =
+            canon && !h.resources.dead && !incapacitated
+                ? careerDuty(
+                      h,
+                      (outcomes.get(h.id) ?? []).filter(
+                          (o) => o.summary?.kind === 'earn' && o.summary.test
+                      ).length,
+                      input,
+                      edition.slModel
+                  )
+                : {};
+
         const before = {
             ...(h.resources.hp !== undefined ? { hp: h.resources.hp } : {}),
             ailments: prev.ailments,
             ...(prev.training ? { training: prev.training } : {}),
+            ...(duty.career && h.career
+                ? { career: markOf(h.career.state) }
+                : {}),
         };
 
         const finish = (
@@ -203,7 +306,7 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
                     .findLast(Boolean) ?? prev.training;
 
             const coins = canon
-                ? sumCoins(outcomes.get(h.id) ?? [])
+                ? (sumCoins(outcomes.get(h.id) ?? []) ?? duty.coins)
                 : summary.endeavour?.coins;
 
             const snapshot: PeriodSnapshot = {
@@ -215,6 +318,20 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
                     ...(resources.hp !== undefined ? { hp: resources.hp } : {}),
                     ailmentIds: ailments.map((a) => a.id),
                     ...(training ? { training } : {}),
+                    ...(duty.career
+                        ? {
+                              career: {
+                                  careerId: duty.career.careerId,
+                                  tier: duty.career.tier,
+                                  ...(duty.career.standingLoss
+                                      ? {
+                                            standingLoss:
+                                                duty.career.standingLoss,
+                                        }
+                                      : {}),
+                              },
+                          }
+                        : {}),
                 },
                 ...(coins ? { coins } : {}),
                 summary,
@@ -230,7 +347,11 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
             return {
                 id: h.id,
                 resources,
-                characteristics: { ...h.characteristics, downtime },
+                characteristics: {
+                    ...h.characteristics,
+                    downtime,
+                    ...(duty.career ? { career: duty.career } : {}),
+                },
                 ...(coins ? { coins } : {}),
                 summary,
             };
@@ -245,8 +366,6 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
 
         const presets = input.presets?.[h.id];
 
-        const incapacitated = currentHp(h.resources, h.maxHp) === 0;
-
         const outcome = outcomes.get(h.id);
 
         const first = outcome?.[0];
@@ -258,6 +377,8 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
         const rest =
             h.characteristics.downtime?.endeavour?.kind === 'rest' &&
             !incapacitated;
+
+        const restful = endeavoursOf(h, canon).some((e) => e.kind === 'rest');
 
         const healed = canon
             ? h.maxHp
@@ -286,11 +407,38 @@ export function planPeriod(input: PeriodInput): PlannedHero[] {
 
         const event = rollEvent(input.rules, input.rng, presets?.event);
 
-        const hp = Math.max(0, healed - ticked.wounds - (event.wounds ?? 0));
+        const lossHp = Math.max(
+            0,
+            healed - ticked.wounds - (event.wounds ?? 0)
+        );
+
+        const fumbled = tendFumbles.get(h.id) ?? 0;
+
+        const afterFumble = fumbled
+            ? lossHp - healFumbleWounds(fumbled, lossHp)
+            : lossHp;
+
+        let hp = afterFumble;
+
+        if (canon && hp < h.maxHp)
+            for (let day = 0; day < days; day++)
+                hp = Math.min(
+                    h.maxHp,
+                    hp +
+                        rollDailyRecovery({
+                            endurance,
+                            tb: bonus(h.characteristics, 't'),
+                            rested: restful,
+                            rng: input.rng,
+                        }).healed
+                );
 
         const summary: PeriodSummary = {
             ...(incapacitated ? { skipped: 'incapacitated' as const } : {}),
             healed: healed - current,
+            ...(hp > afterFumble ? { recovered: hp - afterFumble } : {}),
+            ...(duty.hardlyWorking ? { hardlyWorking: true } : {}),
+            ...(duty.burden ? { burden: duty.burden } : {}),
             ...(first?.summary ? { endeavour: first.summary } : {}),
             ...(canon && outcome
                 ? {

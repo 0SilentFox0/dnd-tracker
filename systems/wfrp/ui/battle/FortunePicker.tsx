@@ -130,7 +130,7 @@ export function FortunePicker({
                             {tf('critical')}
                         </ToggleButton>
                     </ToggleRow>
-                    {notFail.critical && (
+                    {notFail.critical && notFail.withLocation && (
                         <ToggleRow label={tf('location')} className="">
                             {SPOTS.map((loc) => (
                                 <ToggleButton

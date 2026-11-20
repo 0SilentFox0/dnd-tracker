@@ -69,7 +69,13 @@ describe('planDraft canon5e', () => {
         if (!r.ok) throw new Error(r.errors.join());
 
         expect(r.experience).toBe(0);
-        expect(r.trappings).toEqual(['Rope', 'Lantern']);
+        expect(r.trappings).toEqual([
+            'Clothing',
+            'Dagger',
+            'Pouch',
+            'Rope',
+            'Lantern',
+        ]);
     });
 
     it('stores purchases as points (step 5), species and career together', () => {

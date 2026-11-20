@@ -6,8 +6,19 @@
     "castCritical": "{name} читає «{spell}»: {roll} / {target} — критичний успіх (СН {cn})",
     "channelSuccess": "{name} збирає силу: {roll} / {target}, РУ {sl}, накопичено {banked}",
     "channelFail": "{name} не вдається зібрати силу: {roll} / {target}",
+    "channelCritical": "{name} каналізує з дублем: +{bonus} РУ, у пулі {banked}",
+    "channelLost": "{name} втрачає {lost} РУ пулу, лишилось {left}",
+    "channelKept": "{name} утримує пул у {left} РУ",
     "wrath": "{name} викликає гнів богів! {effect}",
-    "ingredientAverts": "{name} палить інгредієнт, і збій магії «{spell}» згасає"
+    "ingredientAverts": "{name} палить інгредієнт, і збій магії «{spell}» згасає",
+    "ingredientLowers": "{name} палить інгредієнт, і збій магії «{spell}» слабшає до малого",
+    "dispelSuccess": "{name} розвіює {spell} ({caster}): SL {sl}, закляття не діє",
+    "dispelFail": "{name} не вдається розвіяти {spell} ({caster}): {roll}, SL {sl}",
+    "dispelUnstoppable": "{spell} ({caster}) — Нестримна сила, його не можна розвіяти",
+    "dispelProgress": "{name} розплітає {spell}: {roll}, SL {sl}, {progress}/{cn}",
+    "dispelEnded": "{name} припиняє {spell}: {roll}, SL {sl}, {progress}/{cn}",
+    "malignantOn": "{name} опиняється під Зловісним впливом",
+    "malignantOff": "Зловісний вплив над {name} зникає"
   },
   "miscast": {
     "minor": {
@@ -37,7 +48,29 @@
       "line": "СН {cn} · ціль {target} · Скерування +{channelled} · броня −{armour}",
       "rolled": "Кидок прийнято: {roll}",
       "rolledReroll": "Кидки прийнято: {roll} і {second}",
-      "rolledAuto": "Кидок зробить сервер"
+      "rolledAuto": "Кидок зробить сервер",
+      "critBonus": "Бонус критичного закляття",
+      "critBonuses": {
+        "criticalDamage": "Критична шкода",
+        "totalPower": "Повна сила",
+        "unstoppableForce": "Нестримна сила"
+      },
+      "blessing": "Overcast благословення",
+      "blessings": {
+        "rangeYards": "Дальність",
+        "targets": "Цілі",
+        "durationRounds": "Тривалість"
+      }
+    },
+    "dispel": {
+      "title": "Розсіяти",
+      "reactive": "Розсіяти {spell} від {caster}",
+      "persistent": "Розплести {spell} від {caster}",
+      "pending": "Кидок..."
+    },
+    "malignant": {
+      "on": "Зловісний вплив",
+      "off": "Зняти Зловісний вплив"
     },
     "channel": {
       "tile": "Скерування",

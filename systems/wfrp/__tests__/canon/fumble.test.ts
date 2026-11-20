@@ -3,13 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { bookExample } from './book-example';
 
 import '@/lib/server/systems/registry';
-import { AttackType, CombatStatus, EffectMarker } from '@/lib/constants/battle';
+import { AttackType, EffectMarker } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { critWoundsOf } from '@/systems/wfrp/rules/combat/critical';
+import { fumbleModelOf } from '@/systems/wfrp/rules/combat/fumble';
 import { resolveWfrpAttack } from '@/systems/wfrp/rules/combat/resolve-attack';
+import { EDITION_PROFILES } from '@/systems/wfrp/rules/edition/profiles';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
 import { DEFAULT_TABLES } from '@/systems/wfrp/rules/tables/defaults';
@@ -30,11 +32,17 @@ const plain = (slot: 'oops' | 'misfire') =>
 
 const withOops = rulesOf('canon5e', { oops: plain('oops') });
 
-const weapon = (type: AttackType, group?: string): BattleAttack =>
+const weapon = (
+    type: AttackType,
+    group?: string,
+    damageBonus = 0
+): BattleAttack =>
     ({
         id: 'w',
         name: 'w',
         type,
+        damageDice: '',
+        damageBonus,
         system: ATTACK_SLOT.write({
             qualities: [],
             flaws: [],
@@ -71,9 +79,11 @@ const run = (
         group,
         oops = 50,
         defender = 5,
+        damageBonus,
     }: {
         type?: AttackType;
         group?: string;
+        damageBonus?: number;
         oops?: number;
         defender?: number;
     } = {}
@@ -92,7 +102,7 @@ const run = (
     const r = resolveWfrpAttack({
         attacker,
         target,
-        attack: weapon(type, group),
+        attack: weapon(type, group, damageBonus),
         participants: [attacker, target],
         rules,
         rng: () => rolls.shift() ?? 0.5,
@@ -226,7 +236,10 @@ describe('canon: fumble (p165)', () => {
     });
 
     bookExample(165, 'a 99 on a bow is a normal fumble, not a misfire', () => {
-        const out = run(canon, 99, { type: AttackType.RANGED, group: 'bow' });
+        const out = run(canon, 99, {
+            type: AttackType.RANGED,
+            group: 'bow',
+        });
 
         expect(out.markers).toContain(EffectMarker.SKIP_ACTION);
         expect(out.hp).toBe(20);
@@ -237,6 +250,58 @@ describe('canon: fumble (p165)', () => {
 
         expect(out.markers).toEqual([]);
         expect(out.hp).toBe(20);
+    });
+});
+
+const textOf = (lines: unknown[]) => JSON.stringify(lines);
+
+describe('canon: fumble log and explosion damage (p165)', () => {
+    bookExample(
+        165,
+        'misfire explosion deals a profile weapon Damage bonus',
+        () => {
+            const out = run(canon, 100, {
+                type: AttackType.RANGED,
+                group: 'blackpowder',
+                oops: 95,
+                damageBonus: 7,
+            });
+
+            expect(out.hp).toBe(20 - 7);
+        }
+    );
+
+    it('the shooter wounds are logged', () => {
+        const out = run(withOops, 88, { oops: 10 });
+
+        expect(textOf(out.r.lines)).toContain('battleWfrp.log.fumbleWounds');
+    });
+
+    it('act-last and weapon-damage results are logged as notes', () => {
+        const out = run(withOops, 88, { oops: 30 });
+
+        expect(textOf(out.r.lines)).toContain('battleWfrp.log.fumbleNote');
+    });
+});
+
+describe('canon: fumble model (p165)', () => {
+    it('canon5e defaults to dropping the weapon', () => {
+        expect(EDITION_PROFILES.canon5e.fumbleModel).toBe('drop');
+    });
+
+    it('an Oops table in the rules switches drop to the table', () => {
+        const edition = EDITION_PROFILES.canon5e;
+
+        expect(fumbleModelOf(edition, canon)).toBe('drop');
+        expect(fumbleModelOf(edition, withOops)).toBe('oops');
+        expect(fumbleModelOf({ fumbleModel: 'oops' }, canon)).toBe('oops');
+    });
+
+    it('with the table, an Oops roll is applied instead of the drop', () => {
+        const out = run(withOops, 88, { oops: 10 });
+
+        expect(out.hp).toBe(19);
+        expect(out.markers).toEqual([]);
     });
 });
 

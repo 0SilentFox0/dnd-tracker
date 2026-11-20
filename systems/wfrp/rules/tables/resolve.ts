@@ -18,9 +18,10 @@ export function rollSlot(
     rules: Pick<Ruleset, 'tables'>,
     slot: TableSlot,
     rng: Rng,
-    preset?: number
+    preset?: number,
+    offset = 0
 ): { index: number; row: ResolvedRow; roll: number } {
-    return rollTable(resolveTable(rules, slot), rng, preset);
+    return rollTable(resolveTable(rules, slot), rng, preset, offset);
 }
 
 export const rowText = (row: ResolvedRow): LogLine =>

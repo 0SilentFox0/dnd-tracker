@@ -32,6 +32,17 @@ export function CorruptionBlock() {
                         </span>
                     )}
                 </p>
+                {c.soulLost && (
+                    <p
+                        role="status"
+                        className="rounded border border-hud-danger px-2 py-1 text-sm text-hud-danger"
+                    >
+                        {t('soulLost', {
+                            name: sheet.identity.name,
+                            kind: c.soulLost,
+                        })}
+                    </p>
+                )}
                 {c.mutations.length === 0 ? (
                     <p className="text-sm text-hud-muted">{t('noMutations')}</p>
                 ) : (
@@ -56,6 +67,7 @@ export function CorruptionBlock() {
                     <GrantCorruptionDialog
                         campaignId={campaignId}
                         characterId={characterId}
+                        name={sheet.identity.name}
                     />
                 )}
             </div>

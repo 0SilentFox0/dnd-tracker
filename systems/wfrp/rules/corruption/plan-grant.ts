@@ -1,10 +1,13 @@
-import { skillTarget, value } from '../characteristics/derive';
+import { bonus, skillTarget, value } from '../characteristics/derive';
 import type { Characteristics } from '../characteristics/keys';
+import { editionOf } from '../edition';
 import { DIFFICULTY_SL, resolvePercentileTest } from '../percentile';
 import { rollSlot, rowText } from '../tables/resolve';
 import {
+    CANON_BODY_MAX_ROLL,
     CORRUPTION_TEST_DIFFICULTY,
     CORRUPTION_TEST_SKILL,
+    type CorruptionSpecies,
     MUTATIONS_MAX,
     PHYSICAL_MAX_ROLL,
     POINTS_MAX,
@@ -27,13 +30,14 @@ export type GrantPresets = { test?: number; type?: number; row?: number };
 
 export type GrantInput = {
     characteristics: Characteristics;
-    rules: Pick<Ruleset, 'tables'>;
+    rules: Pick<Ruleset, 'tables'> & { edition?: unknown };
     points: number;
     reason: string;
     rng: Rng;
     id: string;
     at: string;
     presets?: GrantPresets;
+    species?: CorruptionSpecies;
 };
 
 export function planGrant({
@@ -45,12 +49,17 @@ export function planGrant({
     id,
     at,
     presets = {},
+    species = 'human',
 }: GrantInput): { state: CorruptionState; summary: GrantSummary } {
     const prev = c.corruption ?? EMPTY_CORRUPTION;
 
     const raw = prev.points + points;
 
     const total = Math.min(POINTS_MAX, raw);
+
+    const canon = editionOf(rules).magicModel === 'canon5e';
+
+    let finalPoints = total;
 
     const threshold = corruptionThreshold(c);
 
@@ -90,8 +99,12 @@ export function planGrant({
         else if (!passed) {
             const typeRoll = presets.type ?? rollDie(100, rng);
 
+            const bodyMax = canon
+                ? CANON_BODY_MAX_ROLL[species]
+                : PHYSICAL_MAX_ROLL;
+
             const kind: MutationKind =
-                typeRoll <= PHYSICAL_MAX_ROLL ? 'physical' : 'mental';
+                typeRoll <= bodyMax ? 'physical' : 'mental';
 
             const { row, roll } = rollSlot(
                 rules,
@@ -104,27 +117,56 @@ export function planGrant({
                 .filter(isMutationEffect)
                 .map((e) => ({ ...e }));
 
-            mutation = { id, at, kind, roll, text: rowText(row), effects };
+            const created: Mutation = {
+                id,
+                at,
+                kind,
+                roll,
+                text: rowText(row),
+                effects,
+            };
+
+            mutation = created;
 
             summary.mutation = {
                 kind,
                 typeRoll,
                 roll,
-                text: mutation.text,
+                text: created.text,
                 effects,
             };
+
+            if (canon) {
+                const lost = Math.min(total, bonus(c, 'wp'));
+
+                finalPoints = total - lost;
+
+                summary.pointsLost = lost;
+
+                const count = (k: MutationKind) =>
+                    [...prev.mutations, created].filter((m) => m.kind === k)
+                        .length;
+
+                if (count('physical') > bonus(c, 't'))
+                    summary.soulLost = 'physical';
+                else if (count('mental') > bonus(c, 'wp'))
+                    summary.soulLost = 'mental';
+            }
         }
     }
 
     const state: CorruptionState = {
-        points: total,
+        points: finalPoints,
         mutations: mutation ? [...prev.mutations, mutation] : prev.mutations,
+        ...((summary.soulLost ?? prev.soulLost) && {
+            soulLost: summary.soulLost ?? prev.soulLost,
+        }),
         last: {
             id,
             at,
             reason,
             before: { points: prev.points },
-            after: { points: total, ...(mutation && { mutationId: id }) },
+            after: { points: finalPoints, ...(mutation && { mutationId: id }) },
             summary,
         },
     };

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isRoundsFormula } from '../combat/rounds-formula';
+
 import {
     CHARACTERISTIC_KEYS,
     type CharacteristicKey,
@@ -53,7 +55,13 @@ export type TableEffect =
     | { type: 'damage'; amount: number }
     | { type: 'wounds'; amount: number }
     | { type: 'condition'; key: WfrpConditionKey; levels: number }
-    | { type: 'marker'; key: (typeof MARKER_KEYS)[number]; rounds?: number }
+    | {
+          type: 'marker';
+          key: (typeof MARKER_KEYS)[number];
+          rounds?: number;
+          /** Dice with an optional `± TB`, rolled with the row; wins over `rounds` */
+          roundsFormula?: string;
+      }
     | { type: 'fumble'; kind: FumbleKind }
     | { type: 'death' }
     | { type: 'characteristic'; key: CharacteristicKey; amount: number }
@@ -83,6 +91,11 @@ const EffectSchema = z.discriminatedUnion('type', [
         type: z.literal('marker'),
         key: z.enum(MARKER_KEYS),
         rounds: z.number().int().min(1).max(20).optional(),
+        roundsFormula: z
+            .string()
+            .max(20)
+            .refine(isRoundsFormula, 'roundsFormula')
+            .optional(),
     }),
     z.strictObject({ type: z.literal('fumble'), kind: z.enum(FUMBLE_KINDS) }),
     z.strictObject({ type: z.literal('death') }),

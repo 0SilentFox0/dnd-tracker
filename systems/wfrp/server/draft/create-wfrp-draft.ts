@@ -87,9 +87,20 @@ export async function createWfrpDraft(
                   step: edition.advanceStep,
                   tier1: Object.fromEntries(
                       careers.flatMap((c) => {
-                          const tier = toCareerData(c).tiers[0];
+                          const tiers = toCareerData(c).tiers;
 
-                          return tier ? [[c.id, tier]] : [];
+                          return tiers[0]
+                              ? [
+                                    [
+                                        c.id,
+                                        {
+                                            ...tiers[0],
+                                            class: c.class,
+                                            nextTrappings: tiers[1]?.trappings,
+                                        },
+                                    ],
+                                ]
+                              : [];
                       })
                   ),
               }
@@ -155,7 +166,14 @@ export async function createWfrpDraft(
             data: {
                 characterId: created.id,
                 ...EMPTY_INVENTORY,
-                items: plan.trappings.map((name) => ({ name, quantity: 1 })),
+                ...(plan.wealth && {
+                    gold: plan.wealth.coin === 'gp' ? plan.wealth.amount : 0,
+                    silver: plan.wealth.coin === 'sp' ? plan.wealth.amount : 0,
+                    copper: plan.wealth.coin === 'cp' ? plan.wealth.amount : 0,
+                }),
+                items: plan.items.length
+                    ? plan.items
+                    : plan.trappings.map((name) => ({ name, quantity: 1 })),
             },
         });
 

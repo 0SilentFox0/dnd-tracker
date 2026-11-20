@@ -16,9 +16,11 @@ import {
 export function GrantCorruptionDialog({
     campaignId,
     characterId,
+    name,
 }: {
     campaignId: string;
     characterId: string;
+    name?: string;
 }) {
     const t = useTranslations('wfrpCorruption.grant');
 
@@ -81,7 +83,7 @@ export function GrantCorruptionDialog({
                 undone: t('undone'),
                 undoConfirm: t('undoConfirm'),
             }}
-            result={result && <GrantSummaryView summary={result.summary} />}
+            result={result && <GrantSummaryView summary={result.summary} name={name} />}
             submit={{ onClick: submit, disabled: grant.isPending }}
             undo={{
                 pending: undo.isPending,

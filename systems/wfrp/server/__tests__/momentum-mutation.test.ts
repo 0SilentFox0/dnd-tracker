@@ -5,6 +5,7 @@ import { momentumMutation } from '../battle/momentum-mutation';
 
 import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
 import {
     context,
     participant,
@@ -13,6 +14,7 @@ import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { bookExample } from '@/systems/wfrp/__tests__/canon/book-example';
 import { extractWfrpAttacks } from '@/systems/wfrp/rules/combat/extract-attacks';
 import { hasMomentum } from '@/systems/wfrp/rules/combat/momentum';
+import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
@@ -177,6 +179,28 @@ describe('canon: Leadership hand-off (p169)', () => {
 
         expect(find(out, 'hero').actionFlags.hasUsedAction).toBe(false);
         expect(hasMomentum(find(out, 'hero'))).toBe(false);
+    });
+
+    bookExample(186, 'a Deafened ally cannot understand the Leadership call', () => {
+        const c = ctxOf(heroOf({}));
+
+        const deaf = applyWfrpConditionTo(find({ participants: c.participants }, 'ally'), {
+            key: 'deafened',
+            round: 1,
+            sourceName: textRef('battleWfrp.log.removed', { target: 'x', condition: 'y' }),
+        }).participant;
+
+        expect(() =>
+            momentumMutation(
+                {
+                    ...c,
+                    participants: c.participants.map((p) =>
+                        p.basicInfo.id === 'ally' ? deaf : p
+                    ),
+                },
+                lead(10)
+            )
+        ).toThrow('errors.leadershipAllyDeaf');
     });
 
     it('rejects an enemy or the hero as the ally', () => {

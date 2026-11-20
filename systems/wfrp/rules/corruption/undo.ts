@@ -29,6 +29,8 @@ export function planCorruptionUndo(
             mutations: mutationId
                 ? state.mutations.slice(0, -1)
                 : state.mutations,
+            ...(state.soulLost &&
+                !last.summary.soulLost && { soulLost: state.soulLost }),
         },
     };
 }

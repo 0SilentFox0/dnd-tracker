@@ -28,6 +28,8 @@ export interface SystemConditionApply {
     concealed?: true;
     /** Lets a system pick its edition-dependent effects */
     rules?: Ruleset;
+    /** Dice the application may roll (a test the condition triggers) */
+    rng?: Rng;
 }
 
 export interface SystemConditionResult {

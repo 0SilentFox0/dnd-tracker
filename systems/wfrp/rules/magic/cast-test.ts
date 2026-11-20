@@ -1,4 +1,4 @@
-import { skillTarget, value } from '../characteristics/derive';
+import { bonus, skillTarget, value } from '../characteristics/derive';
 import { fateSpendsOn } from '../combat/fate';
 import { participantChars } from '../combat/participant';
 import { selfSlMod, selfTestMod } from '../conditions/test-mod';
@@ -10,6 +10,7 @@ import {
 import { resolveModeSources } from '../percentile/advantage';
 import {
     applyFortune,
+    type CritBonus,
     forcedOf,
     FORTUNE_INPUT,
     spentFor,
@@ -19,13 +20,17 @@ import { wfrpState, withWfrpState } from '../state';
 import { armourSl } from './armour';
 import {
     CAST_SKILL,
+    CRIT_BONUS_DEFAULT,
     MAJOR_MISCAST_ROLLS,
     MAX_OVERCAST_STEPS,
     NO_OVERCAST_KINDS,
     OVERCAST_SL_STEP,
+    OVERCAST_TABLE,
+    type OvercastRow,
     PRAY_SKILL,
     PRAYER_KINDS,
 } from './constants';
+import { prayerOvercast, prayerSteps } from './prayer-overcast';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -60,6 +65,10 @@ export function prayTargetOf(
     );
 }
 
+export function overcastRowOf(budget: number): OvercastRow | undefined {
+    return OVERCAST_TABLE.filter((r) => r.sl <= budget).at(-1);
+}
+
 export const isPrayerKind = (kind: SpellMagicKind | undefined): boolean =>
     kind !== undefined && PRAYER_KINDS.has(kind);
 
@@ -74,9 +83,18 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const channelled = prayer ? 0 : (wfrpState(caster).channelledSl ?? 0);
 
-    const armour = prayer ? 0 : armourSl(caster);
+    const edition = editionOf(ctx.rules);
 
-    const cn = magic.kind === 'blessing' ? 0 : magic.cn;
+    const canon = edition.magicModel === 'canon5e';
+
+    const armour = prayer ? 0 : armourSl(caster, edition);
+
+    const petty = magic.kind === 'petty';
+
+    const cn =
+        magic.kind === 'blessing' || (canon && (petty || prayer))
+            ? 0
+            : magic.cn;
 
     const fortuneInput = FORTUNE_INPUT.read(ctx.system);
 
@@ -93,8 +111,27 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         (edge && !reverse ? 1 : 0) +
         modeOf.slMod;
 
-    const passes = (t: PercentileTestResult) =>
-        (t.outcome === 'success' || t.outcome === 'critical') && t.sl >= cn;
+    const forcedByFate = fortuneInput?.kind === 'notFail';
+
+    const bareOf = (t: PercentileTestResult) =>
+        canon && channelled > 0 && !forcedByFate
+            ? resolvePercentileTest({
+                  target,
+                  slModifier: slModifier - channelled,
+                  mode: modeOf.mode,
+                  doubles: true,
+                  slModel: edition.slModel,
+                  rng,
+                  presetRoll: t.rawRoll,
+              })
+            : t;
+
+    // Channelled SL counts towards the test, but a fumble stays a fumble (p235)
+    const testPassed = (t: PercentileTestResult) =>
+        bareOf(t).outcome !== 'fumble' &&
+        (t.outcome === 'success' || t.outcome === 'critical');
+
+    const passes = (t: PercentileTestResult) => testPassed(t) && t.sl >= cn;
 
     const { result: test, fortune } = applyFortune(
         (preset) =>
@@ -116,35 +153,77 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const success = passes(test);
 
-    const critical = success && test.outcome === 'critical';
+    const bare = bareOf(test);
+
+    const fumbled = canon
+        ? bare.outcome === 'fumble'
+        : test.outcome === 'fumble';
+
+    // Critical Casting needs a passed test only: SL below CN still fails the spell (p235)
+    const critical = canon
+        ? testPassed(test) && test.outcome === 'critical' && !petty
+        : success && test.outcome === 'critical';
 
     const sin = wfrpState(caster).sin ?? 0;
 
-    const wrath = test.doubles && sin > 0 && test.roll % 10 <= sin;
+    const wrath = canon
+        ? fumbled || (sin > 0 && test.roll % 10 <= sin)
+        : test.doubles && sin > 0 && test.roll % 10 <= sin;
+
+    const malignant = wfrpState(caster).malignant === true;
+
+    const canonMiscast =
+        fumbled || critical ? (malignant ? 'major' : 'minor') : null;
+
+    const legacyMiscast = MAJOR_MISCAST_ROLLS.has(test.roll)
+        ? 'major'
+        : test.doubles
+          ? 'minor'
+          : null;
 
     const miscast = prayer
         ? wrath
             ? 'wrath'
             : null
-        : MAJOR_MISCAST_ROLLS.has(test.roll)
-          ? 'major'
-          : test.doubles
-            ? 'minor'
-            : null;
+        : canon
+          ? canonMiscast
+          : legacyMiscast;
 
-    const overcastSteps =
-        success && magic.overcast !== null && !NO_OVERCAST_KINDS.has(magic.kind)
-            ? Math.min(
+    const critBonus: CritBonus | undefined = canon && critical
+        ? (fortuneInput?.critBonus ?? CRIT_BONUS_DEFAULT)
+        : undefined;
+
+    const overcastAllowed = canon
+        ? success &&
+          (prayer ||
+              (magic.overcast !== null && !NO_OVERCAST_KINDS.has(magic.kind)))
+        : success &&
+          magic.overcast !== null &&
+          !NO_OVERCAST_KINDS.has(magic.kind);
+
+    const overcastBudget = Math.min(
+        bonus(participantChars(caster), 'int') +
+            bonus(participantChars(caster), 'wp'),
+        Math.max(0, test.sl - cn) +
+            (critBonus === 'totalPower' ? Math.floor(test.roll / 10) : 0)
+    );
+
+    const overcastSteps = !overcastAllowed
+        ? 0
+        : canon && prayer
+          ? prayerSteps(test.sl)
+          : canon
+            ? (overcastRowOf(overcastBudget)?.damage ?? 0)
+            : Math.min(
                   MAX_OVERCAST_STEPS,
                   Math.max(0, Math.floor((test.sl - cn) / OVERCAST_SL_STEP))
-              )
-            : 0;
+              );
 
     const outcome = success
         ? critical
             ? 'critical'
             : 'success'
-        : test.outcome === 'fumble'
+        : fumbled
           ? 'fumble'
           : 'failure';
 
@@ -159,7 +238,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const lines = [
         textRef(
-            critical
+            critical && success
                 ? 'wfrpMagic.log.castCritical'
                 : success
                   ? 'wfrpMagic.log.castSuccess'
@@ -194,13 +273,22 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const markCast = editionOf(ctx.rules).momentumModel === 'participant';
 
+    const remember = canon && success;
+
     const casterUpdate =
-        spendFortune || dropChannelled || markCast
+        spendFortune || dropChannelled || markCast || remember
             ? (p: BattleParticipant) =>
                   withWfrpState(p, {
                       ...(fortune && spentFor(p, fortune.kind, fortune.spent)),
                       ...(dropChannelled && { channelledSl: undefined }),
                       ...(markCast && { lastHand: 'cast' as const }),
+                      ...(remember && {
+                          lastCast: {
+                              spell: spell.name,
+                              sl: test.sl,
+                              ...(critBonus && { critBonus }),
+                          },
+                      }),
                   })
             : undefined;
 
@@ -208,6 +296,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         success,
         margin: test.sl,
         overcastSteps,
+        ...(canon && { overcastDamage: prayer ? 0 : overcastSteps }),
         miscast,
         details: ACTION_SLOT.write({
             cast: {
@@ -221,6 +310,17 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                 outcome,
                 overcastSteps,
                 miscast,
+                ...(critBonus && { critBonus }),
+                ...(canon &&
+                    prayer &&
+                    overcastSteps > 0 && {
+                        prayerOvercast: prayerOvercast(
+                            magic.kind,
+                            overcastSteps,
+                            fortuneInput?.blessing
+                        ),
+                    }),
+                ...(canon && { stepAvert: true as const }),
                 ...(fortune && { fortune }),
             },
         }),

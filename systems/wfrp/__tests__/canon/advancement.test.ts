@@ -9,11 +9,17 @@ import {
     CAREER_ADVANCE_XP,
     careerChangeCost,
     planCareerAdvance,
+    planCareerRevert,
+    planCareerSet,
     planPurchase,
+    planTrappingTick,
     talentCost,
 } from '@/systems/wfrp/rules/advancement';
 import { AdvancementRulesSchema } from '@/systems/wfrp/rules/advancement/schema';
-import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
+import {
+    DEFAULT_CHARACTERISTICS,
+    readCharacteristics,
+} from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES_PRESET } from '@/systems/wfrp/rules/rules-preset';
 
 const PACKS = ['grim-d100', 'grim-d100-empty'] as const;
@@ -212,4 +218,138 @@ describe('canon: shipped tables match p191', () => {
 
 it('legacy keeps one point per purchase', () => {
     expect(advanceCost('characteristic', 0, RULES, 1)).toBe(125);
+});
+
+describe('canon: career write-off is reversible', () => {
+    const hero = {
+        ...DEFAULT_CHARACTERISTICS,
+        career: { careerId: 'a', tier: 1 as const, ticks: ['skill:x'] },
+    };
+
+    it('changing career records the charge and the revert restores career, ticks and XP', () => {
+        const set = planCareerSet(hero, 'b', 200);
+
+        expect(set.spentArchived).toBe(200);
+        expect(set.career?.lastChange?.cost).toBe(200);
+
+        const back = planCareerRevert(set);
+
+        expect(back.ok && back.next.career).toEqual(hero.career);
+        expect(back.ok && back.next.spentArchived).toBe(0);
+    });
+
+    it('the undo record and the lost Standing survive a storage round trip', () => {
+        const set = planCareerSet(
+            { ...hero, career: { ...hero.career, standingLoss: 2 } },
+            'b',
+            100
+        );
+
+        const stored = {
+            ...set,
+            career: { ...set.career!, standingLoss: 1 },
+        };
+
+        expect(readCharacteristics({ characteristics: stored }).career).toEqual(
+            stored.career
+        );
+    });
+
+    it('a free change or an advance without charge leaves nothing to revert', () => {
+        expect(planCareerRevert(planCareerSet(hero, 'b')).ok).toBe(false);
+    });
+
+    it('Advance Career is reversible too and a later purchase makes the revert stale', () => {
+        const full = {
+            ...hero,
+            career: {
+                ...hero.career,
+                ticks: Array.from({ length: 10 }, (_, i) => `t${i}`),
+            },
+        };
+
+        const up = planCareerAdvance(full, RULES, {
+            force: false,
+            charge: { cost: CAREER_ADVANCE_XP, available: 500 },
+        });
+
+        if (!up.ok) throw new Error(up.error);
+
+        expect(up.next.career?.tier).toBe(2);
+
+        const back = planCareerRevert(up.next);
+
+        expect(back.ok && back.next.career?.tier).toBe(1);
+        expect(back.ok && back.next.spentArchived).toBe(0);
+
+        const bought = {
+            ...up.next,
+            ledger: [
+                ...up.next.ledger,
+                {
+                    id: 'l1',
+                    at: 'x',
+                    kind: 'skill' as const,
+                    key: 'k',
+                    from: 0,
+                    to: 5,
+                    cost: 10,
+                },
+            ],
+        };
+
+        expect(planCareerRevert(bought)).toEqual({ ok: false, error: 'STALE' });
+    });
+});
+
+describe('canon: tick per trapping (p191)', () => {
+    const tiers = [
+        {
+            name: 'L1',
+            characteristics: [],
+            skills: [],
+            talents: [],
+            trappings: ['Dagger'],
+        },
+        {
+            name: 'L2',
+            characteristics: [],
+            skills: [],
+            talents: [],
+            trappings: ['Leather Jerkin'],
+        },
+    ];
+
+    const hero = {
+        ...DEFAULT_CHARACTERISTICS,
+        career: { careerId: 'a', tier: 1 as const, ticks: [] },
+    };
+
+    bookExample(
+        191,
+        'a trapping of the next career level ticks one box',
+        () => {
+            const r = planTrappingTick(hero, tiers, 'leather jerkin');
+
+            expect(r.ok && r.next.career?.ticks).toEqual([
+                'trapping:leather jerkin',
+            ]);
+        }
+    );
+
+    it('only next-level trappings count, and each ticks once', () => {
+        expect(planTrappingTick(hero, tiers, 'Dagger')).toEqual({
+            ok: false,
+            error: 'NOT_LISTED',
+        });
+
+        const once = planTrappingTick(hero, tiers, 'Leather Jerkin');
+
+        if (!once.ok) throw new Error(once.error);
+
+        expect(planTrappingTick(once.next, tiers, 'Leather Jerkin')).toEqual({
+            ok: false,
+            error: 'ALREADY',
+        });
+    });
 });

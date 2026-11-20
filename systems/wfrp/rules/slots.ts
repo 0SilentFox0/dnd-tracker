@@ -116,6 +116,16 @@ export interface WfrpParticipantState {
     /** Hand of the last weapon attack this turn, or `cast` after a spell (p167) */
     lastHand?: WfrpHand | 'cast';
     channelledSl?: number;
+    /** Channelled this turn, so the pool needs no upkeep test (canon5e, p236) */
+    channelledNow?: true;
+    /** SL lost to a channelling mishap: the next miscast roll gets +10 per SL (canon5e, p236) */
+    miscastSl?: number;
+    /** The spell cast last, until the caster's next turn: the target of a reactive Dispel (canon5e, p237) */
+    lastCast?: LastCast;
+    /** Persistent Dispel in progress: SL gathered against the held spell (canon5e, p237) */
+    dispelProgress?: { targetId: string; castId: string; progress: number };
+    /** Round of the last reactive Dispel attempt: one per round (canon5e, p237) */
+    dispelRound?: number;
     /** Movement chosen this turn, canon5e (p163); a Charge limits attacks to melee */
     moveMode?: WfrpMoveMode;
     /** Critical Wounds taken this battle, canon5e (p172) */
@@ -123,19 +133,30 @@ export interface WfrpParticipantState {
     /** Rounds left before a critically wounded, unconscious fighter dies (p172) */
     dyingRounds?: number;
     sin?: number;
+    /** Under a Malignant Influence: a Minor miscast becomes Major, canon5e (p237) */
+    malignant?: true;
     conditionTests?: string[];
     psychologyTested?: Partial<Record<string, number>>;
     /** Unresolved Fear by source id, canon5e (p183): SL gathered so far toward `rating`, `round` of the last roll */
     fear?: Record<string, FearEntry>;
     /** In a Frenzy, canon5e (p184) */
     frenzy?: true;
-    /** Hatred the fighter failed to master, canon5e (p184): must attack the group; `round` is when it took hold */
+    /** Round of the last Willpower test to enter a Frenzy: one try per turn */
+    frenzyTried?: number;
+    /** Hatred (must attack the group) or Animosity (`kind`: must insult or attack it) the fighter failed to master, canon5e (p183-184); `round` is when it took hold */
     compelled?: Record<string, CompelEntry>;
+}
+
+export interface LastCast {
+    spell: string;
+    sl: number;
+    critBonus?: 'criticalDamage' | 'totalPower' | 'unstoppableForce';
 }
 
 export interface CompelEntry {
     group: string;
     round: number;
+    kind?: 'animosity';
 }
 
 export interface FearEntry {
@@ -188,7 +209,18 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                       isRecord(e) &&
                       typeof e.group === 'string' &&
                       finite(e.round)
-                          ? [[k, { group: e.group, round: e.round }]]
+                          ? [
+                                [
+                                    k,
+                                    {
+                                        group: e.group,
+                                        round: e.round,
+                                        ...(e.kind === 'animosity' && {
+                                            kind: 'animosity' as const,
+                                        }),
+                                    },
+                                ],
+                            ]
                           : []
                   )
               )
@@ -206,18 +238,48 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                 raw.lastHand === 'off' ||
                 raw.lastHand === 'cast') && { lastHand: raw.lastHand }),
             ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
+            ...(raw.channelledNow === true && {
+                channelledNow: true as const,
+            }),
+            ...(finite(raw.miscastSl) && { miscastSl: raw.miscastSl }),
+            ...(isRecord(raw.lastCast) &&
+                typeof raw.lastCast.spell === 'string' &&
+                finite(raw.lastCast.sl) && {
+                    lastCast: {
+                        spell: raw.lastCast.spell,
+                        sl: raw.lastCast.sl,
+                        ...((raw.lastCast.critBonus === 'criticalDamage' ||
+                            raw.lastCast.critBonus === 'totalPower' ||
+                            raw.lastCast.critBonus === 'unstoppableForce') && {
+                            critBonus: raw.lastCast.critBonus,
+                        }),
+                    },
+                }),
+            ...(isRecord(raw.dispelProgress) &&
+                typeof raw.dispelProgress.targetId === 'string' &&
+                typeof raw.dispelProgress.castId === 'string' &&
+                finite(raw.dispelProgress.progress) && {
+                    dispelProgress: {
+                        targetId: raw.dispelProgress.targetId,
+                        castId: raw.dispelProgress.castId,
+                        progress: raw.dispelProgress.progress,
+                    },
+                }),
+            ...(finite(raw.dispelRound) && { dispelRound: raw.dispelRound }),
             ...((raw.moveMode === 'run' ||
                 raw.moveMode === 'sprint' ||
                 raw.moveMode === 'charge') && { moveMode: raw.moveMode }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),
             ...(finite(raw.dyingRounds) && { dyingRounds: raw.dyingRounds }),
             ...(finite(raw.sin) && { sin: raw.sin }),
+            ...(raw.malignant === true && { malignant: true as const }),
             ...(Array.isArray(raw.conditionTests) && {
                 conditionTests: raw.conditionTests.filter(
                     (k): k is string => typeof k === 'string'
                 ),
             }),
             ...(raw.frenzy === true && { frenzy: true as const }),
+            ...(finite(raw.frenzyTried) && { frenzyTried: raw.frenzyTried }),
             ...(fear && Object.keys(fear).length > 0 && { fear }),
             ...(compelled &&
                 Object.keys(compelled).length > 0 && { compelled }),

@@ -15,7 +15,9 @@ export {
     type CareerTierDef,
     inCareer,
     planCareerAdvance,
+    planCareerRevert,
     planCareerSet,
+    planTrappingTick,
     tickKey,
 } from './career';
 export { advanceCost, advanceTarget, talentCost } from './cost';

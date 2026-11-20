@@ -6,8 +6,19 @@
     "castCritical": "{name} casts {spell}: {roll} / {target} — critical success (CN {cn})",
     "channelSuccess": "{name} channels: {roll} / {target}, SL {sl}, banked {banked}",
     "channelFail": "{name} fails to channel: {roll} / {target}",
+    "channelCritical": "{name} channels with a double: +{bonus} SL, banked {banked}",
+    "channelLost": "{name} loses {lost} SL of the pool, {left} left",
+    "channelKept": "{name} holds the pool of {left} SL",
     "wrath": "{name} stirs divine wrath! {effect}",
-    "ingredientAverts": "{name} burns an ingredient and the miscast of {spell} fizzles out"
+    "ingredientAverts": "{name} burns an ingredient and the miscast of {spell} fizzles out",
+    "ingredientLowers": "{name} burns an ingredient and the miscast of {spell} is weakened to a minor one",
+    "dispelSuccess": "{name} dispels {spell} of {caster}: SL {sl}, the spell has no effect",
+    "dispelFail": "{name} fails to dispel {spell} of {caster}: {roll}, SL {sl}",
+    "dispelUnstoppable": "{spell} of {caster} is an Unstoppable Force and cannot be dispelled",
+    "dispelProgress": "{name} unravels {spell}: {roll}, SL {sl}, {progress}/{cn}",
+    "dispelEnded": "{name} ends {spell}: {roll}, SL {sl}, {progress}/{cn}",
+    "malignantOn": "{name} falls under a Malignant Influence",
+    "malignantOff": "The Malignant Influence over {name} lifts"
   },
   "miscast": {
     "minor": {
@@ -37,7 +48,29 @@
       "line": "CN {cn} · target {target} · channelling +{channelled} · armour −{armour}",
       "rolled": "Roll set: {roll}",
       "rolledReroll": "Rolls set: {roll} and {second}",
-      "rolledAuto": "The server will roll"
+      "rolledAuto": "The server will roll",
+      "critBonus": "Critical Casting bonus",
+      "critBonuses": {
+        "criticalDamage": "Critical damage",
+        "totalPower": "Total power",
+        "unstoppableForce": "Unstoppable force"
+      },
+      "blessing": "Blessing overcast",
+      "blessings": {
+        "rangeYards": "Range",
+        "targets": "Targets",
+        "durationRounds": "Duration"
+      }
+    },
+    "dispel": {
+      "title": "Dispel",
+      "reactive": "Dispel {spell} of {caster}",
+      "persistent": "Unravel {spell} of {caster}",
+      "pending": "Rolling..."
+    },
+    "malignant": {
+      "on": "Malignant Influence",
+      "off": "Lift Malignant Influence"
     },
     "channel": {
       "tile": "Channelling",

@@ -17,6 +17,7 @@ import type {
     CorruptionUndoResult,
 } from '@/systems/wfrp/rules/corruption/api-types';
 import { planGrant } from '@/systems/wfrp/rules/corruption/plan-grant';
+import { corruptionSpeciesOf } from '@/systems/wfrp/rules/corruption/species';
 import { planCorruptionUndo } from '@/systems/wfrp/rules/corruption/undo';
 import type {
     CorruptionGrantInput,
@@ -95,12 +96,20 @@ export async function grantCorruption(
     return withLockedCharacter(gate, async (tx, locked) => {
         const grantId = randomUUID();
 
+        const race = character.raceId
+            ? await tx.race.findUnique({
+                  where: { id: character.raceId },
+                  select: { slug: true, name: true },
+              })
+            : null;
+
         const { state, summary } = corruption.planGrant({
             characteristics: readCharacteristics(locked),
             rules: access.campaign.rules,
             points: input.points,
             reason: input.reason,
             rng: Math.random,
+            species: corruptionSpeciesOf(race ?? { name: character.race }),
             id: grantId,
             at: new Date().toISOString(),
         });
@@ -120,6 +129,7 @@ export async function grantCorruption(
                     total: summary.total,
                     threshold: summary.threshold,
                     mutation: !!summary.mutation,
+                    ...(summary.soulLost && { soulLost: summary.soulLost }),
                     summary,
                 },
             },

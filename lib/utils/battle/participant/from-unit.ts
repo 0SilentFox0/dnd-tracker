@@ -257,7 +257,7 @@ function unitAbilities(
         ...systemSlotOf(
             traits
                 ? traits.fields
-                : ruleSystemOf(rules).combat.participantFields?.(unit)
+                : ruleSystemOf(rules).combat.participantFields?.(unit, undefined, rules)
         ),
         ...(statblock.creatureType && { creatureType: statblock.creatureType }),
         ...(monster && unit.cr != null && { cr: unit.cr }),

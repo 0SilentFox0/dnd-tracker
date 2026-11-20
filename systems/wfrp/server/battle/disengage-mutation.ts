@@ -14,6 +14,7 @@ import {
 import { participantChars } from '../../rules/combat/participant';
 import { parryTargetOf } from '../../rules/combat/resolve-attack';
 import {
+    movementSlMod,
     selfModes,
     selfSlMod,
     selfTestMod,
@@ -170,7 +171,10 @@ export function disengageMutation(
 
     const own = resolvePercentileTest({
         target: base + selfTestMod(actor, 'test', edition),
-        slModifier: selfSlMod(actor, edition) + mode.slMod,
+        slModifier:
+            selfSlMod(actor, edition) +
+            movementSlMod(actor, edition) +
+            mode.slMod,
         slModel: edition.slModel,
         mode: mode.mode,
         rng,

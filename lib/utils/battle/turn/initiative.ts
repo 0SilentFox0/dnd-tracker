@@ -4,7 +4,9 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { BattleParticipant } from '@/types/battle';
 
-export type InitiativeRules = Pick<Ruleset, 'initiative' | 'system'>;
+/** `edition` is optional: a module section some rule systems read for their initiative */
+export type InitiativeRules = Pick<Ruleset, 'initiative' | 'system'> &
+    Partial<Pick<Ruleset, 'edition'>>;
 
 export interface InitiativeRoll {
     rules: InitiativeRules;

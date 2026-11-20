@@ -55,6 +55,7 @@ export interface SpellCastState {
     power: SpellPower;
     saveDc: number | undefined;
     attackBonus?: number;
+    overcastDamage: number;
     battleId: string;
     actionModifiers: Record<string, StaticEffect[]>;
     rng: () => number;

@@ -51,7 +51,9 @@ export function runProjectiles(
             participants: flow.ps,
             extra: state.actionModifiers[caster.basicInfo.id],
             addAbilityMod: spell.definition.addAbilityMod,
-            damageBonus: spell.definition.damageBonus,
+            damageBonus:
+                (spell.definition.damageBonus ?? 0) + state.overcastDamage ||
+                undefined,
         });
         state.attackRolls =
             shots.indexOf(id) === index ? saved.attackRolls : [];

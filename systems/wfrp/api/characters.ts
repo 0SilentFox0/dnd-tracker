@@ -62,3 +62,24 @@ export const advanceCharacterCareer = (
         systemPath.character(characterId, 'career.advance'),
         { force }
     );
+
+export const revertCharacterCareer = (
+    campaignId: string,
+    characterId: string
+) =>
+    campaignPost<CareerResult>(
+        campaignId,
+        systemPath.character(characterId, 'career.revert'),
+        {}
+    );
+
+export const tickCharacterTrapping = (
+    campaignId: string,
+    characterId: string,
+    name: string
+) =>
+    campaignPost<CareerResult>(
+        campaignId,
+        systemPath.character(characterId, 'career.trapping'),
+        { name }
+    );

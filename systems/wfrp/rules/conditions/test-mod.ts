@@ -9,6 +9,8 @@ type Model = Pick<EditionProfile, 'conditionModel'>;
 
 const SURPRISED_MELEE_SL = 2;
 
+const ENTANGLED_MOVEMENT_SL = -1;
+
 const SIGHT_SKILLS: ReadonlySet<string> = new Set(['climb', 'ride']);
 
 const levelsOf = (p: BattleParticipant | undefined) =>
@@ -55,6 +57,15 @@ export function selfSlMod(
 
     return worst > 0 ? -worst : 0;
 }
+
+/** Entangled: -1 SL on actions that involve movement, e.g. Disengage and Sprint (p186); other tests are untouched */
+export const movementSlMod = (
+    p: BattleParticipant | undefined,
+    edition: Model
+): number =>
+    isSl(edition) && levelsOf(p).some((c) => c.key === 'entangled')
+        ? ENTANGLED_MOVEMENT_SL
+        : 0;
 
 /** Blinded: Disadvantage to attacks and to tests that lean on sight, e.g. Climb or Ride (p185) */
 export function selfModes(

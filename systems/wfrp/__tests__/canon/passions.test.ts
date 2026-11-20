@@ -124,7 +124,10 @@ describe('canon5e Frenzy (p184, p358)', () => {
             rules: RULES,
         });
 
-        expect(r.participants).toBe(ps);
+        expect(isFrenzied(find(r.participants, 'h'))).toBe(false);
+        expect(r.messages[0]).toMatchObject({
+            message: 'battleWfrp.log.frenzyFail',
+        });
     });
 
     bookExample(184, 'a Frenzy needs an enemy to fight', () => {

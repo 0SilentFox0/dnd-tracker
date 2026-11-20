@@ -295,7 +295,7 @@ describe('grim arsenal and magic end to end', () => {
 
         const details = percentile(out);
 
-        expect(details).toMatchObject({ outcome: 'success', overcastSteps: 1 });
+        expect(details).toMatchObject({ outcome: 'success', overcastSteps: 2 });
         expect(details?.armourSl).toBe(0);
         expect(
             part({ ...ctx, participants: out.participants }, 'u0').combatStats

@@ -1,6 +1,11 @@
 import { advanceOperation } from './advance';
 import { advanceUndoOperation } from './advance-undo';
-import { careerAdvanceOperation, careerSetOperation } from './career';
+import {
+    careerAdvanceOperation,
+    careerRevertOperation,
+    careerSetOperation,
+    careerTrappingOperation,
+} from './career';
 import { corruptionGrantOperation } from './corruption';
 import { corruptionUndoOperation } from './corruption-undo';
 import { downtimeSetOperation } from './downtime';
@@ -26,6 +31,7 @@ import {
     advanceSchema,
     careerAdvanceSchema,
     careerSetSchema,
+    careerTrappingSchema,
 } from '@/systems/wfrp/server/progression-schemas';
 
 export const WFRP_OPERATIONS: Record<string, SystemOperation> = {
@@ -44,6 +50,14 @@ export const WFRP_OPERATIONS: Record<string, SystemOperation> = {
     'career.advance': {
         operation: asSystemOperation(careerAdvanceOperation),
         input: withCharacterId(careerAdvanceSchema),
+    },
+    'career.revert': {
+        operation: asSystemOperation(careerRevertOperation),
+        input: characterIdSchema,
+    },
+    'career.trapping': {
+        operation: asSystemOperation(careerTrappingOperation),
+        input: withCharacterId(careerTrappingSchema),
     },
     'corruption.grant': {
         operation: asSystemOperation(corruptionGrantOperation),

@@ -7,6 +7,7 @@ import type {
     CastableSpell,
     CastSpellParams,
 } from '@/lib/utils/battle/types/spell-process';
+import { RulesetSchema } from '@/lib/utils/rules/schema';
 import type {
     SpellDefinition,
     SpellMagic,
@@ -377,5 +378,24 @@ describe('ingredients avert a miscast', () => {
                     m.message === 'wfrpMagic.log.ingredientAverts'
             )
         ).toBe(false);
+    });
+});
+
+describe('canon5e overcast adds flat damage through the core hook', () => {
+    const canon = RulesetSchema.parse({
+        ...WFRP_RULES,
+        edition: { preset: 'canon5e' },
+    });
+
+    const lost = (overcast: SpellMagic['overcast']) =>
+        hpLost(
+            run(spellOf(magicOf({ overcast })), {
+                rules: canon,
+                castTest: { roll: 12 },
+            })
+        );
+
+    it('+N Damage from the table, no extra dice or cast level', () => {
+        expect(lost('dice') - lost(null)).toBe(2);
     });
 });

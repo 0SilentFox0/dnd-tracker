@@ -160,7 +160,8 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
             isDM,
         },
         data,
-        input.rules
+        input.rules,
+        input.map
     );
 
     const { attacker, attack, chosenTargets, targetIds } = request;

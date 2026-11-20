@@ -4,11 +4,12 @@ import type { Rng } from '@/lib/utils/common/rng';
 export function rollTable<T extends { max: number }>(
     rows: readonly T[],
     rng: Rng,
-    preset?: number
+    preset?: number,
+    offset = 0
 ): { index: number; row: T; roll: number } {
     const roll = preset ?? rollDie(100, rng);
 
-    const found = rows.findIndex((row) => roll <= row.max);
+    const found = rows.findIndex((row) => roll + offset <= row.max);
 
     const index = found === -1 ? rows.length - 1 : found;
 
