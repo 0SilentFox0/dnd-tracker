@@ -44,12 +44,11 @@ describe('grim-d100 catalog', () => {
     });
 
     it('has no coverage warnings', () => {
+        // talents land before the careers wave (C2) that references them; drop the feats clause then
         const pending =
-            /^spells: (kind "chaos"|list "(Pact|Grave) Rites") has no spell$|^artifacts: weapon group "(engineering|explosives)" has no item$/;
+            /^spells: (kind "chaos"|list "(Pact|Grave) Rites") has no spell$|^artifacts: weapon group "(engineering|explosives)" has no item$|^feats ".*": unused$/;
 
-        expect(grimCoverage(data).filter((w) => !pending.test(w))).toEqual(
-            []
-        );
+        expect(grimCoverage(data).filter((w) => !pending.test(w))).toEqual([]);
     });
 
     it('units have unique names, a creature type and a level', () => {
@@ -108,8 +107,7 @@ describe('grim-d100 catalog', () => {
 
         const info = grimInfo(data).join('\n');
 
-        for (const name of known)
-            expect(info, name).not.toContain(`"${name}"`);
+        for (const name of known) expect(info, name).not.toContain(`"${name}"`);
     });
 
     it('every row has a unique valid slug and profiles point at race slugs', () => {
