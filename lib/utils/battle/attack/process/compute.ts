@@ -492,6 +492,7 @@ function mitigateHit(
             location: location ?? '',
             attackRoll: totalAttackValue,
             attack: params.attack,
+            system: params.attackRoll.system,
             rng: params.rng ?? Math.random,
         },
     }).mitigated;

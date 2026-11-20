@@ -97,6 +97,7 @@ export function wfrpAttackFromProfile(
         reach?: NonNullable<WfrpSlot['reach']>;
         canon?: true;
         twoHanded?: true;
+        sizeBaked?: true;
     }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
@@ -149,6 +150,7 @@ export function wfrpAttackFromProfile(
             ...(extra?.hand && { hand: extra.hand }),
             ...(extra?.reach && { reach: extra.reach }),
             ...(extra?.twoHanded && { twoHanded: true as const }),
+            ...(extra?.sizeBaked && { sizeBaked: true as const }),
         }),
         noLevelDice: true,
         ...(ammoCapacity !== undefined && {

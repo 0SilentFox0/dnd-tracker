@@ -9,6 +9,23 @@ export const MOMENTUM_SL_BONUS = 1;
 /** SL penalty of an attack with the off hand (p167) */
 export const OFFHAND_SL_PENALTY = 2;
 
+/** Melee SL when the target is outnumbered or surrounded; they do not add up (p166) */
+export const OUTNUMBERED_SL = 1;
+
+export const SURROUNDED_SL = 2;
+
+export const HIGH_GROUND_SL = 1;
+
+/** Attacker in mud, water or difficult terrain (p166) */
+export const TERRAIN_SL = -1;
+
+/** Enclosed space with a weapon of Average / greater reach (p166) */
+export const ENCLOSED_SL = -1;
+
+export const ENCLOSED_LONG_SL = -2;
+
+export const CALLED_SHOT_SL = -2;
+
 export const MIN_DAMAGE = 1;
 
 export const LOCATIONS = ['head', 'arm', 'body', 'leg'] as const;

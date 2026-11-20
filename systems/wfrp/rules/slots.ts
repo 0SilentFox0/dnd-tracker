@@ -31,6 +31,8 @@ export interface WfrpAttackSlot {
     twoHanded?: true;
     /** Weapon reach, canon gear only (p300) */
     reach?: WeaponReach;
+    /** A creature-trait attack whose Damage already includes the size bonus (p360) */
+    sizeBaked?: true;
 }
 
 // Legacy rows stored `hand: true` (main) and `offHand: true` (off)
@@ -61,6 +63,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
             }),
         ...(raw.twoHanded === true && { twoHanded: true as const }),
         ...(raw.noSb === true && { noSb: true }),
+        ...(raw.sizeBaked === true && { sizeBaked: true as const }),
         ...(raw.magical === true && { magical: true as const }),
         ...(handOf(raw) && { hand: handOf(raw) }),
     };

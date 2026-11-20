@@ -4,6 +4,7 @@ import {
     againstMod,
     againstSl,
     cannotDefend,
+    isHelpless,
     selfModes,
     selfSlMod,
     selfTestMod,
@@ -36,18 +37,16 @@ import {
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
 import { isAfraid, isAfraidOf } from '../traits/fear';
-import {
-    hatesTarget,
-    HATRED_SL_BONUS,
-    isPsychImmune,
-} from '../traits/passions';
+import { isPsychImmune } from '../traits/passions';
 import { coolTarget, isSuccess } from '../traits/psych-test';
 import { sizeHitMod } from '../traits/size';
 import {
-    MOMENTUM_SL_BONUS,
-    OFFHAND_SL_PENALTY,
-    OUTNUMBERING_BONUS,
-} from './constants';
+    type AttackModCtx,
+    meleeAttackMods,
+    rangedAttackMods,
+    sumAttackMods,
+} from './attack-mods';
+import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { canonDefence } from './defence';
@@ -489,6 +488,17 @@ const surroundedNote = (ctx: ResolveAttackCtx) =>
           ]
         : [];
 
+const helplessNote = (ctx: ResolveAttackCtx) =>
+    editionOf(ctx.rules).combatModsModel === 'canon5e' &&
+    attackKindOf(ctx.attack.type) === AttackType.MELEE &&
+    isHelpless(ctx.target)
+        ? [
+              textRef('battleWfrp.log.targetHelpless', {
+                  name: ctx.target.basicInfo.name,
+              }),
+          ]
+        : [];
+
 function withBlackpowder(
     ctx: ResolveAttackCtx,
     edition: EditionProfile,
@@ -539,7 +549,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const resolved = withFumble(ctx, {
         ...core,
-        lines: [...core.lines, ...surroundedNote(ctx)],
+        lines: [...core.lines, ...surroundedNote(ctx), ...helplessNote(ctx)],
     });
 
     const hand = ATTACK_SLOT.read(ctx.attack.system)?.hand;
@@ -580,18 +590,11 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fortuneInput = FORTUNE_INPUT.read(ctx.system);
 
+    const canonMods = edition.combatModsModel === 'canon5e';
+
     const forced = forcedOf(fortuneInput);
 
     const split = edition.hitLocationModel === 'side';
-
-    const pickedLocation =
-        forced?.outcome === 'critical' ? fortuneInput?.location : undefined;
-
-    const chosenLocation =
-        pickedLocation && !split ? asLocation(pickedLocation) : pickedLocation;
-
-    const locationOf = () =>
-        chosenLocation ? { location: chosenLocation } : {};
 
     const fumbled = (roll: number) =>
         !forced && fumbleFrom !== undefined && roll >= fumbleFrom;
@@ -606,23 +609,44 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fortuneEdge = fortuneInput?.kind === 'sl';
 
-    const offHandPenalty =
-        edition.momentumModel === 'participant' &&
-        ATTACK_SLOT.read(attack.system)?.hand === 'off'
-            ? OFFHAND_SL_PENALTY
-            : 0;
+    const modCtx: AttackModCtx = {
+        attacker,
+        target,
+        attack,
+        participants,
+        map: ctx.map,
+        edition,
+        input: fortuneInput,
+        sources: { talent: talentSl, quality: attackSl.penalty },
+    };
 
-    const hatred =
-        edition.psychologyModel === 'extended' && hatesTarget(attacker, target)
-            ? HATRED_SL_BONUS
-            : 0;
+    const mods = (
+        attackKindOf(attack.type) === AttackType.RANGED
+            ? rangedAttackMods
+            : meleeAttackMods
+    )(modCtx);
 
-    const slBonus =
-        (fortuneEdge && !reverse ? 1 : 0) +
-        talentSl +
-        hatred -
-        offHandPenalty +
-        attackSl.penalty;
+    const slBonus = (fortuneEdge && !reverse ? 1 : 0) + sumAttackMods(mods);
+
+    const free =
+        !!ctx.offTurn || wfrpState(attacker).momentumAttack === true;
+
+    const calledShot = canonMods ? fortuneInput?.calledShot : undefined;
+
+    const pickedLocation =
+        calledShot ??
+        (forced?.outcome === 'critical' ? fortuneInput?.location : undefined);
+
+    const chosenLocation =
+        pickedLocation && !split ? asLocation(pickedLocation) : pickedLocation;
+
+    const locationOf = () =>
+        chosenLocation ? { location: chosenLocation } : {};
+
+    const detailsExtra: Partial<PercentileAttackDetails> = {
+        ...(mods.length > 0 && { mods }),
+        ...(free && { free: true as const }),
+    };
 
     const fortuneAdvantage = fortuneEdge && reverse ? 1 : 0;
 
@@ -705,7 +729,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                     attackerTargetOf(attacker, attack, edition, use?.target) +
                     againstMod(target, 'ranged', edition) +
                     toHit +
-                    sizeHitMod(attacker, target),
+                    (canonMods ? 0 : sizeHitMod(attacker, target)),
                 slModifier:
                     Math.min(DIFFICULTY_SL.challenging, use?.slCap ?? 0) +
                     slBonus +
@@ -734,6 +758,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                         test.sl + (isHit ? attackSl.onSuccess : 0),
                         {
                             ...locationOf(),
+                            ...detailsExtra,
                             ...(dangerous(test.roll, passed) && {
                                 fumble: true as const,
                             }),
@@ -780,11 +805,15 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const meleeAgainst = againstSl(target, 'melee', edition);
 
+    const helpless = canonMods && isHelpless(target);
+
     const spent = personal ? hasMomentum(attacker) : held.attacker;
 
     const canon = gear === 'canon';
 
-    const defence = canon ? canonDefence(target, attack, edition) : undefined;
+    const defence = canon
+        ? canonDefence(target, attack, edition, attacker)
+        : undefined;
 
     const unopposed =
         canon &&
@@ -801,10 +830,12 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 attackerTargetOf(attacker, attack, edition, use?.target) +
                 toHit +
                 againstMod(target, 'melee', edition) +
-                sizeHitMod(attacker, target) +
-                (isOutnumbering(attacker, target, participants, ctx.map)
-                    ? OUTNUMBERING_BONUS
-                    : 0),
+                (canonMods
+                    ? 0
+                    : sizeHitMod(attacker, target) +
+                      (isOutnumbering(attacker, target, participants, ctx.map)
+                          ? OUTNUMBERING_BONUS
+                          : 0)),
             defenderTargets: [
                 {
                     kind: 'parry',
@@ -822,8 +853,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             attackerSlMod:
                 (spent && !personal ? MOMENTUM_SL_BONUS : 0) +
                 slBonus +
-                selfSlMod(attacker, edition) +
-                meleeAgainst.sl,
+                selfSlMod(attacker, edition),
             defenderSlMod:
                 (held.defender && !personal ? MOMENTUM_SL_BONUS : 0) +
                 selfSlMod(target, edition),
@@ -846,9 +876,9 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             edition,
             attackerForced: forced,
             defenderDoubles: edition.woundModel === 'critical',
-            defenderHelpless: cannotDefend(target, edition),
+            defenderHelpless: cannotDefend(target, edition) || helpless,
             rng,
-            presetRolls,
+            presetRolls: helpless ? { ...presetRolls, attacker: 1 } : presetRolls,
         });
 
         const hit = result.isHit && !fumbled(result.attacker.roll);
@@ -858,6 +888,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
             result.netSl,
             {
                 ...locationOf(),
+                ...detailsExtra,
                 ...(dangerous(
                     result.attacker.roll,
                     isSuccess(result.attacker.outcome)

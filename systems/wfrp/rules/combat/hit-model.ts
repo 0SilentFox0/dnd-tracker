@@ -7,6 +7,7 @@ import {
     SIZE_HIT_PER_STEP,
 } from '../traits/constants';
 import { sizeStep } from '../traits/read';
+import { canonSizeDamage } from '../traits/size';
 import {
     BALANCE_REF_AP,
     BALANCE_REF_INCOMING,
@@ -19,6 +20,8 @@ import { LOCATION_WEIGHTS } from './location';
 import { participantChars, participantStats } from './participant';
 import { momentumWinChance, winChance, winChanceFor } from './win-chance';
 
+import { AttackType } from '@/lib/constants/battle';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { diceAverage } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { RuleSystemHitModel } from '@/lib/utils/rules/systems/types';
@@ -33,23 +36,31 @@ const MAX_DURABILITY = 10;
 const sizeSteps = (p: BattleParticipant) =>
     sizeStep(participantStats(p)?.size) - sizeStep(AVERAGE_SIZE);
 
-function bestHitAverage(p: BattleParticipant): number {
+function bestHitAverage(p: BattleParticipant, canon: boolean): number {
     const sb = participantStats(p)?.sb ?? 0;
 
-    return (p.battleData.attacks ?? []).reduce(
-        (best, a) =>
-            Math.max(
-                best,
-                diceAverage(a.damageDice || '0') +
-                    (a.damageBonus ?? 0) +
-                    (ATTACK_SLOT.read(a.system)?.noSb ? 0 : sb)
-            ),
-        0
-    );
+    return (p.battleData.attacks ?? []).reduce((best, a) => {
+        const slot = ATTACK_SLOT.read(a.system);
+
+        return Math.max(
+            best,
+            diceAverage(a.damageDice || '0') +
+                (a.damageBonus ?? 0) +
+                (slot?.noSb ? 0 : sb) +
+                (canon
+                    ? canonSizeDamage(p, sb, {
+                          ranged: attackKindOf(a.type) === AttackType.RANGED,
+                          free: false,
+                          baked: slot?.sizeBaked === true,
+                      })
+                    : 0)
+        );
+    }, 0);
 }
 
 const hitModelOf = (
-    chance: RuleSystemHitModel['winChance']
+    chance: RuleSystemHitModel['winChance'],
+    canon = false
 ): RuleSystemHitModel => ({
     offense: (p) => value(participantChars(p), 'ws'),
     saves: (p) => p.abilities.modifiers,
@@ -61,15 +72,17 @@ const hitModelOf = (
                 value(c, 'ws'),
                 skillTarget(c, 'dodge')?.target ?? value(c, 'ag')
             ) -
-            SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p))
+            (canon ? 0 : SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p)))
         );
     },
     winChance: chance,
     damage: (p) =>
         Math.max(
             MIN_DAMAGE,
-            bestHitAverage(p) *
-                (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p))) -
+            bestHitAverage(p, canon) *
+                (canon
+                    ? 1
+                    : 1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p))) -
                 BALANCE_REF_TB -
                 BALANCE_REF_AP
         ),
@@ -111,7 +124,8 @@ const canonModel = hitModelOf(
     canonProfile.advantageModel === 'reverse' &&
         canonProfile.momentumModel === 'participant'
         ? momentumWinChance(canonProfile)
-        : winChanceFor(canonProfile)
+        : winChanceFor(canonProfile),
+    canonProfile.combatModsModel === 'canon5e'
 );
 
 export const wfrpHitModelFor = (

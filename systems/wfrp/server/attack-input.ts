@@ -22,6 +22,14 @@ const Body = z.object({
                 blessing: z
                     .enum(['rangeYards', 'targets', 'durationRounds'])
                     .optional(),
+                calledShot: z.enum(ACCEPTED_SPOTS).optional(),
+                situational: z
+                    .object({
+                        highGround: z.enum(['attacker', 'defender']).optional(),
+                        enclosed: z.literal(true).optional(),
+                        badFooting: z.literal(true).optional(),
+                    })
+                    .optional(),
             }),
         })
         .optional(),
@@ -32,13 +40,23 @@ export const WfrpFortuneInputSchema = Body.transform(
     ({ system, secondRoll }): SystemSlot | undefined => {
         if (!system) return undefined;
 
-        const { kind, rerolls, critical, location, critBonus, blessing } =
-            system.data;
+        const {
+            kind,
+            rerolls,
+            critical,
+            location,
+            critBonus,
+            blessing,
+            calledShot,
+            situational,
+        } = system.data;
 
         return FORTUNE_INPUT.write({
             kind,
             ...(critBonus && { critBonus }),
             ...(blessing && { blessing }),
+            ...(calledShot && { calledShot }),
+            ...(situational && { situational }),
             ...(kind === 'reroll' &&
                 secondRoll !== undefined && { manualReroll: secondRoll }),
             ...(kind === 'reroll' && rerolls && { rerolls }),

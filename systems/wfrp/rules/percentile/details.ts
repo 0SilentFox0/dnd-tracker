@@ -1,3 +1,4 @@
+import type { AttackModKey } from '../combat/attack-mods';
 import type { DefenseKind, HitSpot } from '../combat/constants';
 
 export interface PercentileAttackDetails {
@@ -17,6 +18,10 @@ export interface PercentileAttackDetails {
     opposed?: boolean;
     /** Cancelled by the defender's Fate (How Did That Miss) */
     negated?: true;
+    /** Non-zero SL modifiers of the attack test, by source (p165-167) */
+    mods?: { key: AttackModKey; sl: number }[];
+    /** A Free or extra attack: no size damage bonus (p360) */
+    free?: true;
     fortune?: {
         kind: 'reroll' | 'sl' | 'advantage' | 'notFail';
         firstRoll?: number;

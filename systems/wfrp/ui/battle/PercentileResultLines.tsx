@@ -14,6 +14,8 @@ export function PercentileResultLines({
 
     const tf = useTranslations('battleWfrp.ui.fortune');
 
+    const tm = useTranslations('battleWfrp.mods');
+
     return (
         <div className="mt-1 space-y-0.5 text-sm text-hud-soft">
             <div>{t('roll', { roll: p.roll, target: p.target })}</div>
@@ -22,6 +24,11 @@ export function PercentileResultLines({
                     ? t('sl', { sl: p.sl, defSl: p.defender.sl, net: p.netSl })
                     : t('net', { net: p.netSl })}
             </div>
+            {p.mods?.map((m) => (
+                <div key={m.key}>
+                    {tm(m.key, { sl: m.sl > 0 ? `+${m.sl}` : m.sl })}
+                </div>
+            ))}
             {hit && (
                 <div>
                     {t('location', { location: t(`locations.${p.location}`) })}

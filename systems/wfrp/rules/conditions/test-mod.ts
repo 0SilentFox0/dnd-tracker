@@ -3,11 +3,16 @@ import type { ModeSources } from '../percentile/advantage';
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY } from './catalog';
 import { conditionLevel } from './levels';
 
+import { CombatStatus } from '@/lib/constants/battle';
 import type { BattleParticipant } from '@/types/battle';
 
 type Model = Pick<EditionProfile, 'conditionModel'>;
 
 const SURPRISED_MELEE_SL = 2;
+
+const ENTANGLED_MELEE_SL = 1;
+
+const PRONE_ATTACKER_SL = -1;
 
 const ENTANGLED_MOVEMENT_SL = -1;
 
@@ -108,7 +113,7 @@ export const cannotDefend = (
     edition: Model
 ): boolean => isSl(edition) && levelsOf(p).some((c) => c.key === 'surprised');
 
-/** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187); ranged attacks are unaffected */
+/** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187, the p166 table says +1: the condition text wins); ranged attacks are unaffected */
 export function againstSl(
     target: BattleParticipant,
     attackKind: 'melee' | 'ranged',
@@ -124,3 +129,27 @@ export function againstSl(
         sl: keys.includes('surprised') ? SURPRISED_MELEE_SL : 0,
     };
 }
+
+/** An Entangled target is easier to hit in melee: +1 SL in the Combat modifiers table (p166), not part of the condition text */
+export const entangledTargetSl = (
+    target: BattleParticipant,
+    edition: Model
+): number =>
+    isSl(edition) && levelsOf(target).some((c) => c.key === 'entangled')
+        ? ENTANGLED_MELEE_SL
+        : 0;
+
+/** A Prone attacker takes -1 SL on melee attacks (p166) */
+export const proneAttackerSl = (
+    p: BattleParticipant | undefined,
+    edition: Model
+): number =>
+    isSl(edition) && levelsOf(p).some((c) => c.key === 'prone')
+        ? PRONE_ATTACKER_SL
+        : 0;
+
+/** An unconscious or otherwise Helpless fighter (p167); one that merely cannot defend is `cannotDefend` */
+export const isHelpless = (p: BattleParticipant | undefined): boolean =>
+    !!p &&
+    (p.combatStats.status === CombatStatus.UNCONSCIOUS ||
+        levelsOf(p).some((c) => c.key === 'unconscious'));

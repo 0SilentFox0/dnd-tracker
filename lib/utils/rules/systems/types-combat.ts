@@ -112,6 +112,8 @@ export interface MitigateCtx {
     crit: boolean;
     attackRoll?: number;
     attack: BattleAttack;
+    /** The system slot the attack roll left behind, for details only the system's own resolver knows */
+    system?: SystemSlot;
     rng: Rng;
     rules: Ruleset;
 }

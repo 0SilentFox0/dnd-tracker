@@ -101,7 +101,10 @@ export function wfrpUnitBuild(
                         `${row.id}-trait-${ability.key}-${index}`,
                         ability.name,
                         attackProfile(effect),
-                        effect.magical ? { magical: true } : undefined
+                        {
+                            sizeBaked: true,
+                            ...(effect.magical && { magical: true as const }),
+                        }
                     )
                 );
                 break;

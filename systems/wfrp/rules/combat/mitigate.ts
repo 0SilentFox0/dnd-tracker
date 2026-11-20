@@ -7,9 +7,9 @@ import {
     qualityInflicts,
     qualityStunsOnHead,
 } from '../equipment/quality-effects';
-import { ATTACK_SLOT } from '../slots';
+import { ACTION_SLOT, ATTACK_SLOT } from '../slots';
 import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
-import { sizeDamageBonus, wardRoll } from '../traits/size';
+import { canonSizeDamage, sizeDamageBonus, wardRoll } from '../traits/size';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
@@ -103,11 +103,18 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const appliedSb = slot?.noSb ? 0 : sb;
 
-    const size = sizeDamageBonus(
-        attacker,
-        target,
-        ctx.weapon + appliedSb + margin
-    );
+    const size =
+        edition.combatModsModel === 'canon5e'
+            ? canonSizeDamage(attacker, sb, {
+                  ranged: attackKindOf(ctx.attack.type) === AttackType.RANGED,
+                  free: ACTION_SLOT.read(ctx.system)?.attack?.free === true,
+                  baked: slot?.sizeBaked === true,
+              })
+            : sizeDamageBonus(
+                  attacker,
+                  target,
+                  ctx.weapon + appliedSb + margin
+              );
 
     const frenzyBonus =
         isFrenzied(attacker) &&

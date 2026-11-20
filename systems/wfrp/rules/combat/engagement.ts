@@ -1,3 +1,5 @@
+import { EDITION_PROFILES, type EditionProfile } from '../edition';
+import { outnumberWeight } from '../traits/size';
 import { SURROUNDED_FOES } from './constants';
 
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
@@ -8,12 +10,13 @@ import type { BattleMapConfig } from '@/types/battle-grid';
 
 type MapCfg = BattleMapConfig | null | undefined;
 
-// Positions are required: without a map nobody counts as outnumbering.
+// Positions are required: without a map nobody counts as outnumbering. Both sides are weighed by size (p360).
 export function isOutnumbering(
     attacker: BattleParticipant,
     target: BattleParticipant,
     participants: BattleParticipant[],
-    map: MapCfg
+    map: MapCfg,
+    edition: Pick<EditionProfile, 'combatModsModel'> = EDITION_PROFILES.legacy
 ): boolean {
     if (
         !isHostile(map, attacker, target) ||
@@ -21,10 +24,19 @@ export function isOutnumbering(
     )
         return false;
 
-    return (
-        engagedFoes(target, participants, map).length >=
-        2 * engagedFoes(attacker, participants, map).length
+    const defenders = engagedFoes(attacker, participants, map).map((p) =>
+        outnumberWeight(p, edition)
     );
+
+    // A larger creature counts as several only against opponents that are as big (p360: two ogres vs a human are 2:1, four Large vs a Monstrous 2:1)
+    const cap = Math.max(1, ...defenders);
+
+    const attackers = engagedFoes(target, participants, map).reduce(
+        (sum, p) => sum + Math.min(outnumberWeight(p, edition), cap),
+        0
+    );
+
+    return attackers >= 2 * defenders.reduce((sum, w) => sum + w, 0);
 }
 
 export const engagedFoes = (

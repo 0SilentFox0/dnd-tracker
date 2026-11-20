@@ -1,4 +1,4 @@
-import type { HitSpot } from '../combat/constants';
+import { ACCEPTED_SPOTS, type HitSpot } from '../combat/constants';
 import { fateLeftOf } from '../combat/fate';
 import type { BlessingDimension } from '../magic/constants';
 import { wfrpState } from '../state';
@@ -27,6 +27,17 @@ export interface FortuneInput {
     critBonus?: CritBonus;
     /** Blessing casts only: the overcast dimension (p217) */
     blessing?: BlessingDimension;
+    /** Attacks only: the chosen Hit Location, -2 SL (p167) */
+    calledShot?: HitSpot;
+    /** Attacks only: situational Combat modifiers set by hand */
+    situational?: Situational;
+}
+
+/** Circumstances the map cannot tell: height, a tight space, mud or water (p166) */
+export interface Situational {
+    highGround?: 'attacker' | 'defender';
+    enclosed?: true;
+    badFooting?: true;
 }
 
 export type CritBonus = 'criticalDamage' | 'totalPower' | 'unstoppableForce';
@@ -43,6 +54,22 @@ const BLESSING_DIMENSIONS: readonly unknown[] = [
     'durationRounds',
 ];
 
+function readSituational(raw: unknown): Situational | undefined {
+    if (typeof raw !== 'object' || raw === null) return undefined;
+
+    const { highGround, enclosed, badFooting } = raw as Record<string, unknown>;
+
+    const out: Situational = {
+        ...((highGround === 'attacker' || highGround === 'defender') && {
+            highGround,
+        }),
+        ...(enclosed === true && { enclosed }),
+        ...(badFooting === true && { badFooting }),
+    };
+
+    return Object.keys(out).length ? out : undefined;
+}
+
 const KINDS: readonly unknown[] = ['reroll', 'sl', 'notFail', 'none'];
 
 export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
@@ -56,6 +83,8 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         location,
         critBonus,
         blessing,
+        calledShot,
+        situational,
     } = raw as Record<string, unknown>;
 
     if (!KINDS.includes(kind)) return undefined;
@@ -76,6 +105,12 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
         }),
         ...(BLESSING_DIMENSIONS.includes(blessing) && {
             blessing: blessing as BlessingDimension,
+        }),
+        ...(ACCEPTED_SPOTS.includes(calledShot as HitSpot) && {
+            calledShot: calledShot as HitSpot,
+        }),
+        ...(readSituational(situational) && {
+            situational: readSituational(situational),
         }),
     };
 });

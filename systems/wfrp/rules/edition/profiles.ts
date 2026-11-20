@@ -39,6 +39,8 @@ export interface EditionProfile {
     magicModel: 'legacy' | 'canon5e';
     /** `canon`: worn armour is 1 Enc lighter, coins weigh 1 Enc per 200, overburdened characters lose Movement and Agility (p299) */
     gearModel: 'legacy' | 'canon';
+    /** `legacy`: outnumbering is +10% to hit and size shifts the hit chance and damage by step difference; `canon5e`: combat modifiers are SL from one list, size acts through absolute damage, parry and ranged SL, Tiny and Little count as Small (p165-167, p360) */
+    combatModsModel: 'legacy' | 'canon5e';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -62,6 +64,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         downtimeModel: 'legacy',
         magicModel: 'legacy',
         gearModel: 'legacy',
+        combatModsModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -83,5 +86,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         downtimeModel: 'canon5e',
         magicModel: 'canon5e',
         gearModel: 'canon',
+        combatModsModel: 'canon5e',
     },
 };
