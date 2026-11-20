@@ -37,6 +37,7 @@ import type {
     Ailment,
     DowntimeState,
 } from '@/systems/wfrp/rules/downtime/types';
+import { editionOf } from '@/systems/wfrp/rules/edition';
 import { toCareerData } from '@/systems/wfrp/server/careers/row';
 import type {
     DowntimePeriodInput,
@@ -157,17 +158,30 @@ export async function setDowntime(
         API_ERRORS.DOWNTIME_IN_BATTLE
     );
 
-    const { endeavour } = input;
+    const canon = editionOf(access.campaign.rules).downtimeModel === 'canon5e';
+
+    if (input.endeavours && !canon)
+        throw new ContentError(API_ERRORS.DOWNTIME_UNSUPPORTED, 409);
+
+    const list = input.endeavours ?? (input.endeavour ? [input.endeavour] : []);
+
+    const endeavour = list[0];
+
+    const patientIds = [
+        ...new Set(
+            list.flatMap((e) => (e.kind === 'tend' ? e.params.patientId : []))
+        ),
+    ];
 
     if (
-        endeavour?.kind === 'tend' &&
+        patientIds.length &&
         (await prisma.character.count({
             where: {
-                id: endeavour.params.patientId,
+                id: { in: patientIds },
                 campaignId,
                 status: CharacterStatus.ACTIVE,
             },
-        })) !== 1
+        })) !== patientIds.length
     )
         throw new ContentError(API_ERRORS.REST_CHARACTERS_INVALID, 400);
 
@@ -181,14 +195,14 @@ export async function setDowntime(
 
         const characteristics = readCharacteristics(locked);
 
-        if (endeavour && downtime.validateEndeavour(endeavour, characteristics))
+        if (list.some((e) => downtime.validateEndeavour(e, characteristics)))
             throw new ContentError(API_ERRORS.SKILL_UNTRAINED, 409);
 
         const prev: DowntimeState = characteristics.downtime ?? {
             ailments: [],
         };
 
-        const { endeavour: _old, ...rest } = prev;
+        const { endeavour: _old, endeavours: _oldList, ...rest } = prev;
 
         const ailments: Ailment[] = input.ailments
             ? input.ailments.map((a) => ({ ...a, id: a.id ?? randomUUID() }))
@@ -197,6 +211,7 @@ export async function setDowntime(
         const next: DowntimeState = {
             ...rest,
             ...(endeavour ? { endeavour } : {}),
+            ...(canon && list.length ? { endeavours: list } : {}),
             ailments,
         };
 
@@ -460,6 +475,7 @@ function restoredHeroes(checked: Checked) {
 
         const downtime: DowntimeState = {
             ...(d.endeavour ? { endeavour: d.endeavour } : {}),
+            ...(d.endeavours ? { endeavours: d.endeavours } : {}),
             ailments: before.ailments,
             ...(before.training ? { training: before.training } : {}),
         };

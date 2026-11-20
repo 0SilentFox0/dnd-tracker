@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { CareerCanonPanel } from './CanonPanels';
 import { ModeTabs, OptionCard } from './OptionCard';
 import type { WfrpDraftFormState } from './types';
 
@@ -97,6 +98,7 @@ export function CareerStep({ form }: { form: WfrpDraftFormState }) {
                     triggerClassName="min-h-11 w-full"
                 />
             )}
+            {form.canon && careerId && <CareerCanonPanel canon={form.canon} />}
         </div>
     );
 }

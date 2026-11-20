@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { CANON_ENDEAVOURS_MAX } from '@/systems/wfrp/rules/downtime/constants';
 import { AILMENTS_MAX } from '@/systems/wfrp/rules/downtime/types';
 import {
     AilmentInputSchema,
@@ -10,6 +11,7 @@ const characterIds = z.array(z.string().min(1).max(64)).min(1).max(50);
 
 export const downtimeSetSchema = z.object({
     endeavour: EndeavourSchema.nullable(),
+    endeavours: z.array(EndeavourSchema).max(CANON_ENDEAVOURS_MAX).optional(),
     ailments: z.array(AilmentInputSchema).max(AILMENTS_MAX).optional(),
 });
 

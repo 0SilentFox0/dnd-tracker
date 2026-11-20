@@ -12,7 +12,7 @@ import { logScope, systemScope } from '../system-scope';
 
 import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
 
-const LIMIT_KB = 110;
+const LIMIT_KB = 111;
 
 // per-system budgets live in the system meta (i18n.budgetKb); limits keep ~0.5 KB headroom over the measured uk gzip
 const ROOT_LIMIT_KB = 20;

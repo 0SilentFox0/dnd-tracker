@@ -109,3 +109,25 @@ describe('isUsableProfile / parseProfile', () => {
         expect(parseProfile(null).careerTable).toEqual([]);
     });
 });
+
+describe('SpeciesProfileSchema canon fields', () => {
+    it('stays valid without skillPicks and languages', () => {
+        expect(parse({}).data).not.toHaveProperty('skillPicks');
+    });
+
+    it('accepts skill picks and languages', () => {
+        const r = parse({
+            skillPicks: { count: 2, options: ['athletics', 'lore:herbs'] },
+            languages: ['language:trade-cant'],
+        });
+
+        expect(r.success).toBe(true);
+    });
+
+    it.each([
+        ['count above options', { count: 3, options: ['a', 'b'] }],
+        ['bad key', { count: 1, options: ['Bad Key'] }],
+    ])('rejects skill picks: %s', (_n, skillPicks) => {
+        expect(parse({ skillPicks }).success).toBe(false);
+    });
+});

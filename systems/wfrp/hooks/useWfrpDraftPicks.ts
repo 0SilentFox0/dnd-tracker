@@ -5,13 +5,14 @@ import {
     STAT_COUNT,
     type StatsMode,
 } from './draft-form-helpers';
+import { useWfrpCanonPicks } from './useWfrpCanonPicks';
 
 import type {
     CreationPicks,
     CreationRolls,
 } from '@/systems/wfrp/rules/creation';
 
-export function useWfrpDraftPicks() {
+export function useWfrpDraftPicks({ canon = false } = {}) {
     const [speciesId, setSpeciesId] = useState<string>();
 
     const [careerMode, setCareerModeState] = useState<CareerMode>('rolled');
@@ -34,6 +35,8 @@ export function useWfrpDraftPicks() {
 
     const [rolledTalents, setRolledTalents] = useState<string[]>([]);
 
+    const canonPicks = useWfrpCanonPicks(careerId);
+
     const picks = useMemo<CreationPicks>(
         () => ({
             career: { mode: careerMode, careerId: careerId ?? '' },
@@ -44,8 +47,11 @@ export function useWfrpDraftPicks() {
                       ? { mode: 'rearranged', rolls: statRolls, arranged }
                       : { mode: 'rolled', rolls: statRolls },
             talents: rolledTalents,
+            ...(canon && { canon: canonPicks.picks }),
         }),
         [
+            canon,
+            canonPicks.picks,
             careerMode,
             careerId,
             statsMode,
@@ -55,6 +61,8 @@ export function useWfrpDraftPicks() {
             rolledTalents,
         ]
     );
+
+    const canonReset = canonPicks.reset;
 
     const selectSpecies = useCallback(
         (raceId: string) => {
@@ -66,8 +74,9 @@ export function useWfrpDraftPicks() {
             setStatRolls([]);
             setArranged([]);
             setRolledTalents([]);
+            canonReset();
         },
-        [speciesId]
+        [speciesId, canonReset]
     );
 
     const setCareerMode = useCallback(
@@ -124,5 +133,6 @@ export function useWfrpDraftPicks() {
             setPoint,
         },
         talents: { rolled: rolledTalents, set: setRolledTalents },
+        canon: canonPicks,
     };
 }

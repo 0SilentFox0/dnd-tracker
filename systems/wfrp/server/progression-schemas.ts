@@ -9,6 +9,7 @@ export type AdvanceInput = z.infer<typeof advanceSchema>;
 
 export const careerSetSchema = z.object({
     careerId: z.string().min(1).max(60),
+    force: z.boolean().optional(),
 });
 
 export const careerAdvanceSchema = z.object({ force: z.boolean().optional() });

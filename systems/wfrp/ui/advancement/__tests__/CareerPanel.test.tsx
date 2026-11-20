@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
     setCareer: vi.fn(),
     advanceCareer: vi.fn(),
     confirm: vi.fn(),
+    rules: { edition: undefined as unknown },
 }));
 
 const tier = (name: string, over = {}) => ({
@@ -31,14 +32,21 @@ vi.mock('@/systems/wfrp/hooks/careers', () => ({
                 id: 'car',
                 name: 'Воїн',
                 icon: null,
-                class: null,
+                class: 'W',
                 tiers: [tier('Новобранець'), tier('B'), tier('C'), tier('D')],
             },
+            { id: 'same', name: 'Same', icon: null, class: 'W', tiers: [] },
+            { id: 'other', name: 'Other', icon: null, class: 'R', tiers: [] },
         ],
     }),
 }));
 vi.mock('@/lib/hooks/campaigns', () => ({
-    useCampaignRules: () => ({ data: defaultRulesFor({ key: 'wfrp' }) }),
+    useCampaignRules: () => ({
+        data: {
+            ...defaultRulesFor({ key: 'wfrp' }),
+            edition: mocks.rules.edition,
+        },
+    }),
 }));
 vi.mock('@/lib/hooks/feats', () => ({
     useFeats: () => ({ data: [{ id: 'f1', name: 'Меткий' }] }),
@@ -96,6 +104,7 @@ const mount = (
     );
 
 afterEach(() => {
+    mocks.rules.edition = undefined;
     cleanup();
     vi.clearAllMocks();
 });
@@ -203,4 +212,31 @@ describe('CareerPanel', () => {
         );
         expect(mocks.confirm).toHaveBeenCalledTimes(1);
     });
+
+    it.each([
+        ['same', '100'],
+        ['other', '200'],
+    ])(
+        'canon5e: the replace confirmation shows the change cost for %s',
+        async (id, cost) => {
+            mocks.rules.edition = { preset: 'canon5e' };
+            mocks.confirm.mockResolvedValue(false);
+
+            mount({ careerId: 'car', tier: 1, ticks: [] }, true);
+            fireEvent.change(screen.getByLabelText("Оберіть кар'єру"), {
+                target: { value: id },
+            });
+            fireEvent.click(screen.getByRole('button', { name: 'Призначити' }));
+
+            await waitFor(() =>
+                expect(mocks.confirm).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        description: expect.stringContaining(
+                            `Зміна кар'єри коштує ${cost} XP.`
+                        ),
+                    })
+                )
+            );
+        }
+    );
 });

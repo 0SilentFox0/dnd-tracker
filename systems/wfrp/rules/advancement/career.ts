@@ -18,10 +18,34 @@ export type CareerCtx = { state: CareerState; tiers: CareerTierDef[] };
 
 export type CareerAdvanceResult =
     | { ok: true; next: Characteristics }
-    | { ok: false; error: 'NO_CAREER' | 'MAX_TIER' | 'TICKS_MISSING' };
+    | {
+          ok: false;
+          error: 'NO_CAREER' | 'MAX_TIER' | 'TICKS_MISSING' | 'INSUFFICIENT_XP';
+      };
+
+/** XP price of Advance Career / Change Career (canon5e); undefined = free */
+export type CareerCharge = { cost: number; available: number };
+
+export const CAREER_ADVANCE_XP = 100;
+
+export const CAREER_CHANGE_SAME_CLASS_XP = 100;
+
+export const CAREER_CHANGE_OTHER_CLASS_XP = 200;
+
+export const careerChangeCost = (
+    fromClass: string | null | undefined,
+    toClass: string | null | undefined
+): number =>
+    fromClass && toClass && fromClass === toClass
+        ? CAREER_CHANGE_SAME_CLASS_XP
+        : CAREER_CHANGE_OTHER_CLASS_XP;
 
 export const tickKey = (kind: LedgerEntry['kind'], key: string) =>
     `${kind}:${key}`;
+
+/** A skill key matches a career list entry exactly or by its group prefix (`lore:x` ~ `lore`) */
+export const skillListed = (list: string[], key: string) =>
+    list.includes(key) || list.includes(key.split(':')[0]);
 
 const listed = (
     tier: CareerTierDef,
@@ -35,10 +59,7 @@ const listed = (
               ? tier.skills
               : tier.talents;
 
-    return (
-        list.includes(key) ||
-        (kind === 'skill' && list.includes(key.split(':')[0]))
-    );
+    return kind === 'skill' ? skillListed(list, key) : list.includes(key);
 };
 
 // WFRP 4e: the current tier and all earlier tiers of the career are in-career
@@ -57,7 +78,7 @@ export const planCareerSet = (
 export function planCareerAdvance(
     c: Characteristics,
     rules: AdvancementRules,
-    opts: { force: boolean }
+    opts: { force: boolean; charge?: CareerCharge }
 ): CareerAdvanceResult {
     const career = c.career;
 
@@ -71,10 +92,16 @@ export function planCareerAdvance(
     )
         return { ok: false, error: 'TICKS_MISSING' };
 
+    const charge = opts.force ? undefined : opts.charge;
+
+    if (charge && charge.available < charge.cost)
+        return { ok: false, error: 'INSUFFICIENT_XP' };
+
     return {
         ok: true,
         next: {
             ...c,
+            spentArchived: c.spentArchived + (charge?.cost ?? 0),
             career: {
                 ...career,
                 tier: (career.tier + 1) as CareerState['tier'],

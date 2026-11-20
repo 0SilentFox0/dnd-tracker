@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { SpeciesCanonPanel } from './CanonPanels';
 import { OptionCard } from './OptionCard';
 import type { WfrpDraftFormState } from './types';
 
@@ -82,6 +83,7 @@ export function SpeciesStep({ form }: { form: WfrpDraftFormState }) {
                     );
                 })}
             </div>
+            {form.canon && selected && <SpeciesCanonPanel canon={form.canon} />}
         </div>
     );
 }

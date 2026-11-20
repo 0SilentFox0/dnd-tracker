@@ -7,11 +7,23 @@ import { listPackKeys, readPack, TEMPLATES_DIR } from '../lib/pack';
 import { validatePack } from '../lib/validate';
 
 import { mergeRules, RulesetSchema } from '@/lib/utils/rules/schema';
-import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import {
+    WFRP_RULES,
+    WFRP_RULES_PRESET,
+} from '@/systems/wfrp/rules/rules-preset';
 
 const rulesOf = (key: string) => readPack(key).rules;
 
 const roundTrip = (value: unknown) => JSON.parse(JSON.stringify(value));
+
+const canonOver = <T extends { advancement: object }>(rules: T) => ({
+    ...roundTrip(rules),
+    edition: { preset: 'canon5e' },
+    advancement: {
+        ...roundTrip(rules.advancement),
+        ...roundTrip(WFRP_RULES_PRESET.advancement),
+    },
+});
 
 describe('rules.json of the packs', () => {
     it.each(listPackKeys())(
@@ -31,10 +43,7 @@ describe('rules.json of the packs', () => {
     });
 
     it('grim-d100-empty carries the code default WFRP_RULES', () => {
-        expect(rulesOf('grim-d100-empty')).toEqual({
-            ...roundTrip(WFRP_RULES),
-            edition: { preset: 'canon5e' },
-        });
+        expect(rulesOf('grim-d100-empty')).toEqual(canonOver(WFRP_RULES));
     });
 
     it('grim-d100 equals the old patch merged over WFRP_RULES', () => {
@@ -49,10 +58,14 @@ describe('rules.json of the packs', () => {
 
         if (!merged.ok) throw new Error('old patch invalid');
 
-        expect(rulesOf('grim-d100')).toEqual({
-            ...roundTrip(merged.rules),
-            edition: { preset: 'canon5e' },
-        });
+        const expected = canonOver(merged.rules);
+
+        expected.advancement.career = {
+            ...expected.advancement.career,
+            ticksRequired: [10, 12, 14],
+        };
+
+        expect(rulesOf('grim-d100')).toEqual(expected);
     });
 
     it('the shells have no kinds, only the English locale and no errors', () => {

@@ -50,6 +50,7 @@ export function useWfrpDraftSubmit({
                 career: picks.career,
                 stats: picks.stats,
                 talents: picks.talents,
+                ...(picks.canon && { canon: picks.canon }),
             };
 
             return createWfrpDraft(campaignId, body);

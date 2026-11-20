@@ -15,7 +15,13 @@ import { errorResponse } from '@/lib/utils/api/api-response';
 import { parseBody } from '@/lib/utils/api/parse-body';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { isUsableProfile, planDraft } from '@/systems/wfrp/rules/creation';
+import {
+    type CanonCtx,
+    isUsableProfile,
+    planDraft,
+} from '@/systems/wfrp/rules/creation';
+import { editionOf } from '@/systems/wfrp/rules/edition';
+import { toCareerData } from '@/systems/wfrp/server/careers/row';
 import { parseProfile } from '@/systems/wfrp/server/schemas';
 
 type Campaign = CampaignAccessResult['campaign'];
@@ -64,7 +70,7 @@ export async function createWfrpDraft(
     if (!race) return errorResponse(API_ERRORS.RACE_NOT_FOUND, 404);
 
     const [careers, feats] = await Promise.all([
-        prisma.career.findMany({ where: { campaignId }, select: { id: true } }),
+        prisma.career.findMany({ where: { campaignId } }),
         prisma.feat.findMany({ where: { campaignId }, select: { id: true } }),
     ]);
 
@@ -73,13 +79,35 @@ export async function createWfrpDraft(
     if (!isUsableProfile(profile))
         return errorResponse(API_ERRORS.SPECIES_PROFILE_NOT_READY, 422);
 
+    const edition = editionOf(campaign.rules);
+
+    const canon: CanonCtx | undefined =
+        edition.creationMode === 'canon5e'
+            ? {
+                  step: edition.advanceStep,
+                  tier1: Object.fromEntries(
+                      careers.flatMap((c) => {
+                          const tier = toCareerData(c).tiers[0];
+
+                          return tier ? [[c.id, tier]] : [];
+                      })
+                  ),
+              }
+            : undefined;
+
     const plan = planDraft(
-        { career: data.career, stats: data.stats, talents: data.talents },
+        {
+            career: data.career,
+            stats: data.stats,
+            talents: data.talents,
+            canon: data.canon,
+        },
         {
             profile,
             rules: campaign.rules.advancement,
             careerIds: new Set(careers.map((c) => c.id)),
             featIds: new Set(feats.map((f) => f.id)),
+            canon,
         }
     );
 
@@ -124,7 +152,11 @@ export async function createWfrpDraft(
         });
 
         await tx.characterInventory.create({
-            data: { characterId: created.id, ...EMPTY_INVENTORY },
+            data: {
+                characterId: created.id,
+                ...EMPTY_INVENTORY,
+                items: plan.trappings.map((name) => ({ name, quantity: 1 })),
+            },
         });
 
         return created;
