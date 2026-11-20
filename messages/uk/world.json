@@ -233,6 +233,7 @@
     "heroesMax": "Забагато героїв (максимум {maximum})",
     "heroesUnique": "Герої не мають повторюватися",
     "noteEmpty": "Нотатка порожня",
+    "descriptionMax": "Опис: до {maximum} символів",
     "noteMax": "Нотатка — до {maximum} символів"
   },
   "vertex": {

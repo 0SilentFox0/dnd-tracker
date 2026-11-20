@@ -20,6 +20,23 @@ export const WORLD_MARKER_DESCRIPTION_MAX = 600;
 export const MAX_TRAVEL_HEROES = 20;
 export const TRAVEL_LOG_LIMIT = 50;
 export const MAX_WORLD_MAPS = 200;
+export const WORLD_SESSION_NAME_MAX = WORLD_NAME_MAX;
+export const WORLD_SESSION_DESCRIPTION_MAX = 600;
+export const MAX_WORLD_SESSIONS = 200;
+export const MAX_WORLD_ENEMY_PINS = 200;
+export const TRAIL_ENTRY_LIMIT = 500;
+export const HERO_DRAG_THRESHOLD_PX = 6;
+export const WORLD_NO_SESSION_COLOR = '#8a8a8a';
+export const WORLD_SESSION_COLORS: readonly string[] = [
+    '#d3b060',
+    '#c0504d',
+    '#4f81bd',
+    '#9bbb59',
+    '#8064a2',
+    '#4bacc6',
+    '#f79646',
+    '#d96fa0',
+];
 export const MAX_MARKERS_PER_MAP = 300;
 export const POLYGON_MAX_VERTICES = 200;
 export const WORLD_MAX_ZOOM = 8;

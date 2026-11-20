@@ -233,7 +233,8 @@
     "heroesMax": "Too many heroes (maximum {maximum})",
     "heroesUnique": "Heroes must not repeat",
     "noteEmpty": "The note is empty",
-    "noteMax": "Note: up to {maximum} characters"
+    "noteMax": "Note: up to {maximum} characters",
+    "descriptionMax": "Description: up to {maximum} characters"
   },
   "vertex": {
     "vertex": "Vertex {index}",

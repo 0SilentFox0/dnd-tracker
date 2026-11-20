@@ -42,6 +42,7 @@ export interface WorldMapDetail {
     markers: WorldMarker[];
     heroes?: WorldHero[];
     notes?: WorldNote[];
+    enemies?: WorldEnemyPin[];
 }
 
 export type CreateWorldMapData = {
@@ -190,3 +191,55 @@ export type CreateWorldNoteData = {
     visibility: 'public' | 'private';
     characterId?: string;
 };
+
+export interface WorldSession {
+    id: string;
+    name: string;
+    description: string | null;
+    color: string;
+    startedAt: string;
+    endedAt: string | null;
+    active: boolean;
+}
+
+export interface TrailEntry {
+    id: string;
+    sessionId: string | null;
+    kind: TravelKind;
+    heroes: { id: string; name: string }[];
+    from: MapPoint | null;
+    to: MapPoint;
+    at: string;
+}
+
+export interface WorldTrailData {
+    sessions: WorldSession[];
+    entries: TrailEntry[];
+}
+
+export interface WorldEnemyPin {
+    id: string;
+    mapId: string;
+    name: string;
+    icon: string | null;
+    color: string | null;
+    dmNote: string | null;
+    x: number;
+    y: number;
+}
+
+export type CreateEnemyData = {
+    name: string;
+    x: number;
+    y: number;
+    icon?: string;
+    color?: string;
+    dmNote?: string;
+};
+export type UpdateEnemyData = Partial<CreateEnemyData>;
+export type CreateSessionData = {
+    name: string;
+    description?: string;
+    color?: string;
+};
+export type UpdateSessionData = Partial<CreateSessionData> & { end?: true };
