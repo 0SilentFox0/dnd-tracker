@@ -114,3 +114,11 @@ export const passionOp = (body: {
     action: 'passion',
     body,
 });
+
+export const aimOp = (body: {
+    participantId: string;
+    targetId: string;
+}): SystemOpBody => ({
+    action: 'aim',
+    body,
+});

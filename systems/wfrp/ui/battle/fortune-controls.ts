@@ -8,6 +8,7 @@ import {
 const choicesOf = (input: FortuneInput | undefined) => ({
     ...(input?.critBonus && { critBonus: input.critBonus }),
     ...(input?.blessing && { blessing: input.blessing }),
+    ...(input?.mods && { mods: input.mods }),
 });
 
 export type FortuneChoice = 'reroll' | 'sl' | 'notFail' | null;

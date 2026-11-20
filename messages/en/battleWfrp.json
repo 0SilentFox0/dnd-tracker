@@ -107,6 +107,11 @@
     "diedOfWounds": "☠️ {name} succumbs to their critical wounds",
     "fateHowDidThatMiss": "{name} spends Fate: How Did That Miss? — the attack by {attacker} has no effect",
     "fateNotToday": "{name} spends Fate: Not Today! — leaves the fight alive",
+    "outOfRange": "{name}: {target} is beyond Extreme range, no shot",
+    "attackMod": "{mod}: {sl} SL",
+    "attackModFlat": "{mod}",
+    "aimed": "{name} takes aim at {target}: +1 SL on the next shot",
+    "helplessKill": "{name} finishes the helpless {target}",
     "momentumSecondAttack": "{name} spends Momentum on an attack with the second weapon",
     "leadershipTransfer": "{name} spends Momentum: Leadership (SL {sl}), {ally} gains Momentum",
     "disengageMomentum": "{name} spends Momentum and moves out of melee without penalty",
@@ -200,6 +205,18 @@
       "release": "Release from {passion} ({group})",
       "intimidate": "Intimidate {name} (action, vs Cool)"
     },
+    "attackMods": {
+      "title": "Situation",
+      "off": "Off",
+      "calledShot": "Called shot (−2 SL)",
+      "highGround": "High ground",
+      "highAttacker": "Attacker above",
+      "highDefender": "Defender above",
+      "situation": "Terrain",
+      "cover": "Target in cover",
+      "enclosed": "Cramped space",
+      "helplessRoll": "Helpless target: chosen roll"
+    },
     "momentum": {
       "title": "Momentum",
       "secondAttack": "Second attack",
@@ -208,6 +225,7 @@
       "run": "Run (double Movement)",
       "sprint": "Sprint (action, Athletics)",
       "charge": "Charge",
+      "aim": "Aim (action)",
       "leadership": "Pass Momentum",
       "ally": "Ally",
       "reason": {
@@ -218,6 +236,30 @@
         "weapons": "Two melee weapons required"
       }
     }
+  },
+  "attackMod": {
+    "range": {
+      "pointBlank": "Point Blank",
+      "short": "Short range",
+      "long": "Long range",
+      "extreme": "Extreme range"
+    },
+    "cover": "Target in cover",
+    "prone": "Target prone",
+    "surprised": "Target surprised",
+    "aim": "Aimed",
+    "moved": "Shooter moved",
+    "shootingIntoMelee": "Target engaged in melee: Disadvantage, the GM may redirect a stray hit",
+    "calledShot": "Called shot",
+    "highGround": "High ground",
+    "difficult": "Attacker in difficult terrain",
+    "proneSelf": "Attacker prone",
+    "entangled": "Target entangled",
+    "enclosed": "Cramped space",
+    "helpless": "Helpless target",
+    "size": "Size",
+    "surrounded": "Surrounded",
+    "outnumbered": "Outnumbering"
   },
   "crit": {
     "head": {

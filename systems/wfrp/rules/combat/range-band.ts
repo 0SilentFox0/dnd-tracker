@@ -1,0 +1,85 @@
+import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
+import { bothOnMap,cellsOf } from '@/lib/utils/battle/grid/occupancy';
+import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
+
+export type RangeBand = 'pointBlank' | 'short' | 'medium' | 'long' | 'extreme';
+
+export const RANGE_BAND_SL: Record<RangeBand, number> = {
+    pointBlank: 2,
+    short: 1,
+    medium: 0,
+    long: -1,
+    extreme: -2,
+};
+
+const POINT_BLANK_YD = 4;
+
+const FEET_PER_YARD = 3;
+
+/** Null = beyond Extreme: the shot cannot be made (p165, p302) */
+export function rangeBandOf(
+    distanceYd: number,
+    rangeYd: number
+): RangeBand | null {
+    if (distanceYd <= POINT_BLANK_YD) return 'pointBlank';
+
+    if (distanceYd <= rangeYd / 2) return 'short';
+
+    if (distanceYd <= rangeYd) return 'medium';
+
+    if (distanceYd <= rangeYd * 2) return 'long';
+
+    return distanceYd <= rangeYd * 3 ? 'extreme' : null;
+}
+
+/** The weapon's Range in yards from the attack's first range number (feet) */
+export function weaponRangeYd(range: string | undefined): number | null {
+    const first = range?.match(/\d+/)?.[0];
+
+    return first ? Number(first) / FEET_PER_YARD : null;
+}
+
+/** Thrown weapons: Range is Strength Bonus times a multiplier (Rock SB x3) */
+export const sbRangeFt = (sb: number, multiplier: number): number =>
+    Math.max(1, sb) * multiplier * FEET_PER_YARD;
+
+export function rangeContext(
+    ctx: Pick<
+        ResolveAttackCtx,
+        'attacker' | 'target' | 'attack' | 'map' | 'rules'
+    >
+): { distanceYd: number; rangeYd: number; band: RangeBand | null } | null {
+    const { attacker, target, attack, map, rules } = ctx;
+
+    const rangeYd = weaponRangeYd(attack.range);
+
+    if (rangeYd === null || !bothOnMap(map, attacker, target)) return null;
+
+    const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
+
+    const distanceYd = (cells * cellFeetOf(rules)) / FEET_PER_YARD;
+
+    return { distanceYd, rangeYd, band: rangeBandOf(distanceYd, rangeYd) };
+}
+
+export interface RangedOppositionCtx {
+    band: RangeBand | null;
+    /** The shooter is Engaged with the target (a Pistol at arm's length) */
+    engaged: boolean;
+    helpless: boolean;
+    targets: { dodge: number; parry: number };
+}
+
+/** Who resists a ranged attack; empty = an unopposed test (p165-166) */
+export function rangedOpposition(
+    c: RangedOppositionCtx
+): { kind: 'dodge' | 'parry'; target: number }[] {
+    if (c.helpless) return [];
+
+    if (c.engaged) return [{ kind: 'parry', target: c.targets.parry }];
+
+    return c.band === 'pointBlank'
+        ? [{ kind: 'dodge', target: c.targets.dodge }]
+        : [];
+}

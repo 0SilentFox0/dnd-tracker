@@ -31,6 +31,8 @@ export function MomentumPanel({ hero }: HeroPanelProps) {
 
     const [charging, setCharging] = useState(false);
 
+    const [aiming, setAiming] = useState(false);
+
     const [ally, setAlly] = useState('');
 
     const [source, setSource] = useState<(typeof SOURCES)[number]>('server');
@@ -145,6 +147,34 @@ export function MomentumPanel({ hero }: HeroPanelProps) {
                                 onClick={() => {
                                     setCharging(false);
                                     panel.charge(f.id);
+                                }}
+                            >
+                                {f.name}
+                            </HudButton>
+                        ))}
+                </>
+            )}
+            {panel.canAim && panel.aimTargets.length > 0 && (
+                <>
+                    <HudButton
+                        type="button"
+                        disabled={panel.isPending}
+                        aria-expanded={aiming}
+                        className={btn}
+                        onClick={() => setAiming(!aiming)}
+                    >
+                        {t('aim')}
+                    </HudButton>
+                    {aiming &&
+                        panel.aimTargets.map((f) => (
+                            <HudButton
+                                key={f.id}
+                                type="button"
+                                disabled={panel.isPending}
+                                className={btn}
+                                onClick={() => {
+                                    setAiming(false);
+                                    panel.aim(f.id);
                                 }}
                             >
                                 {f.name}

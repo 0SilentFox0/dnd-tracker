@@ -32,6 +32,7 @@ export const WFRP_SECTIONS: SectionsContribution = {
             mechanic: true,
             items: itemsFromShape(EditionRulesSchema.shape as never, {
                 preset: 'legacy',
+                helplessKills: false,
             }),
         },
         tables: {

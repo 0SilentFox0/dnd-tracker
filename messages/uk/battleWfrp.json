@@ -107,6 +107,11 @@
     "diedOfWounds": "☠️ {name} гине від критичних ран",
     "fateHowDidThatMiss": "{name} витрачає Долю: «Як він схибив?» — атака {attacker} не має ефекту",
     "fateNotToday": "{name} витрачає Долю: «Не сьогодні!» — виходить із сутички живим",
+    "outOfRange": "{name}: {target} поза межею Extreme, пострілу немає",
+    "attackMod": "{mod}: {sl} SL",
+    "attackModFlat": "{mod}",
+    "aimed": "{name} цілиться в {target}: +1 SL до наступного пострілу",
+    "helplessKill": "{name} добиває безпорадного {target}",
     "momentumSecondAttack": "{name} витрачає Momentum на атаку другою зброєю",
     "leadershipTransfer": "{name} витрачає Momentum: Лідерство (РУ {sl}), {ally} отримує Momentum",
     "disengageMomentum": "{name} витрачає Momentum і виходить із ближнього бою без штрафу",
@@ -200,6 +205,18 @@
       "release": "Зняти {passion} ({group})",
       "intimidate": "Залякати {name} (дія, проти Cool)"
     },
+    "attackMods": {
+      "title": "Обставини",
+      "off": "Ні",
+      "calledShot": "Прицільний удар (−2 SL)",
+      "highGround": "Висота",
+      "highAttacker": "Атакуючий вище",
+      "highDefender": "Захисник вище",
+      "situation": "Місцевість",
+      "cover": "Ціль в укритті",
+      "enclosed": "Тісний простір",
+      "helplessRoll": "Безпорадна ціль: обраний кидок"
+    },
     "momentum": {
       "title": "Momentum",
       "secondAttack": "Друга атака",
@@ -208,6 +225,7 @@
       "run": "Біг (подвійний рух)",
       "sprint": "Спринт (дія, Атлетика)",
       "charge": "Розбіг",
+      "aim": "Цілитися (дія)",
       "leadership": "Передати Momentum",
       "ally": "Союзник",
       "reason": {
@@ -218,6 +236,30 @@
         "weapons": "Потрібні дві зброї ближнього бою"
       }
     }
+  },
+  "attackMod": {
+    "range": {
+      "pointBlank": "Впритул",
+      "short": "Близька дистанція",
+      "long": "Далека дистанція",
+      "extreme": "Гранична дистанція"
+    },
+    "cover": "Ціль в укритті",
+    "prone": "Ціль лежить",
+    "surprised": "Ціль заскочена зненацька",
+    "aim": "Прицілювання",
+    "moved": "Стрілець рухався",
+    "shootingIntoMelee": "Ціль у ближньому бою: Disadvantage, ДМ може перенаправити шальне влучання",
+    "calledShot": "Прицільний удар",
+    "highGround": "Висота",
+    "difficult": "Атакуючий у важкому рельєфі",
+    "proneSelf": "Атакуючий лежить",
+    "entangled": "Ціль заплутана",
+    "enclosed": "Тісний простір",
+    "helpless": "Безпорадна ціль",
+    "size": "Розмір",
+    "surrounded": "В оточенні",
+    "outnumbered": "Чисельна перевага"
   },
   "crit": {
     "head": {

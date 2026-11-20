@@ -7,6 +7,8 @@ export type WeaponProfile = {
     group?: WfrpWeaponStats['group'];
     cells?: number;
     rangeFt?: number;
+    /** Thrown weapons: Range is SB times this (Rock SB x3), counted when the fighter is built */
+    rangeSb?: number;
     damageFlat: number;
     addSb: boolean;
     qualities: QualityRef[];

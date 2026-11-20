@@ -4,7 +4,7 @@ import { withMomentum } from '../combat/momentum';
 import { yardsToFeet } from '../combat/movement';
 import { participantChars } from '../combat/participant';
 import { editionOf } from '../edition';
-import { wfrpState } from '../state';
+import { wfrpState, withWfrpState } from '../state';
 import { frenzyMoveAllowed, isFrenzied } from '../traits/frenzy';
 import { isBiggerThan } from '../traits/size';
 
@@ -21,7 +21,7 @@ import type {
 } from '@/lib/utils/rules/systems/types';
 
 /** A Frenzied fighter only closes in on its nearest foe (p184); engaged fighters cannot leave melee without Disengage (p163); a Charge earns Momentum from the distance actually moved (p163) */
-export function wfrpOnMoveEnd(ctx: MoveEndCtx): TurnHookResult {
+function moveEndChecks(ctx: MoveEndCtx): TurnHookResult {
     const { mover, start, map, participants, cost, rules } = ctx;
 
     const edition = editionOf(rules);
@@ -87,5 +87,25 @@ export function wfrpOnMoveEnd(ctx: MoveEndCtx): TurnHookResult {
                 yards: Math.round(feet / yardsToFeet(1)),
             }),
         ],
+    };
+}
+
+/** Moving loses the Aim bonus (p165) */
+export function wfrpOnMoveEnd(ctx: MoveEndCtx): TurnHookResult {
+    const out = moveEndChecks(ctx);
+
+    if (
+        editionOf(ctx.rules).actionsModel !== 'canon' ||
+        !wfrpState(ctx.mover).aim
+    )
+        return out;
+
+    return {
+        ...out,
+        participants: out.participants.map((p) =>
+            p.basicInfo.id === ctx.mover.basicInfo.id
+                ? withWfrpState(p, { aim: undefined })
+                : p
+        ),
     };
 }

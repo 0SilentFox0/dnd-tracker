@@ -12,6 +12,7 @@ import {
     type WfrpAttackSlot as WfrpSlot,
     type WfrpHand,
 } from '../slots';
+import { sbRangeFt } from './range-band';
 
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 import { AttackType } from '@/lib/constants/battle';
@@ -29,6 +30,8 @@ const BLAST_TARGETS_PER_RADIUS_CELL = 4;
 const GUNPOWDER_GROUPS = ['blackpowder', 'engineering', 'explosives'];
 
 const YARDS_PER_CELL = 2;
+
+const EXTREME_RANGE_FACTOR = 3;
 
 /** Blackpowder, Engineering and Explosives weapons all have Blackpowder and Damaging (p303) */
 function withGunpowder(
@@ -98,6 +101,8 @@ export function wfrpAttackFromProfile(
         reach?: NonNullable<WfrpSlot['reach']>;
         canon?: true;
         twoHanded?: true;
+        /** Strength Bonus of the wielder, for `rangeSb` thrown weapons */
+        sb?: number;
     }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
@@ -124,6 +129,17 @@ export function wfrpAttackFromProfile(
 
     const reload = valueOf(profile.flaws, 'reload');
 
+    const rangeFt =
+        canon && profile.rangeSb !== undefined && extra?.sb !== undefined
+            ? sbRangeFt(extra.sb, profile.rangeSb)
+            : profile.rangeFt;
+
+    // Extreme band reaches 3x Range (p302): the reach check needs the far number
+    const range =
+        canon && rangeFt !== undefined
+            ? `${rangeFt}/${rangeFt * EXTREME_RANGE_FACTOR} ft`
+            : `${rangeFt} ft`;
+
     return {
         id,
         name,
@@ -134,7 +150,7 @@ export function wfrpAttackFromProfile(
         damageDice: '',
         damageBonus: profile.damageFlat,
         damageType: 'physical',
-        ...(ranged && { range: `${profile.rangeFt} ft` }),
+        ...(ranged && { range }),
         ...(blast &&
             blastRadius && {
                 targetType: 'aoe' as const,
