@@ -12,6 +12,7 @@ import {
     type WfrpAttackSlot as WfrpSlot,
     type WfrpHand,
 } from '../slots';
+import type { BreathKind } from '../trait-kinds';
 import { sbRangeFt } from './range-band';
 
 import { ArtifactSlot } from '@/lib/constants/artifacts';
@@ -103,6 +104,7 @@ export function wfrpAttackFromProfile(
         twoHanded?: true;
         /** Strength Bonus of the wielder, for `rangeSb` thrown weapons */
         sb?: number;
+        breath?: BreathKind;
     }
 ): ExtractedAttack {
     const ranged = profile.range === 'ranged';
@@ -164,6 +166,7 @@ export function wfrpAttackFromProfile(
             ...(!profile.addSb && { noSb: true }),
             ...(extra?.magical && { magical: true as const }),
             ...(extra?.free && { free: true as const }),
+            ...(extra?.breath && { breath: extra.breath }),
             ...(extra?.hand && { hand: extra.hand }),
             ...(extra?.reach && { reach: extra.reach }),
             ...(extra?.twoHanded && { twoHanded: true as const }),

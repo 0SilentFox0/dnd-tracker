@@ -35,6 +35,7 @@ import {
 } from '../percentile/fortune';
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
 import { wfrpState, withWfrpState } from '../state';
+import { BREATH_DEFAULT_BS } from '../traits/constants';
 import { isAfraid, isAfraidOf } from '../traits/fear';
 import {
     hatesTarget,
@@ -528,7 +529,7 @@ function withBlackpowder(
 
     if (
         !qualityBlackpowder(refs, edition.gearModel) ||
-        isPsychImmune(ctx.participants, target.basicInfo.id)
+        isPsychImmune(ctx.participants, target.basicInfo.id, ctx.rules)
     )
         return r;
 
@@ -735,8 +736,48 @@ function withMeleeLedger(
     };
 }
 
+function breathOf(ctx: ResolveAttackCtx) {
+    return editionOf(ctx.rules).traitModel === 'canon'
+        ? ATTACK_SLOT.read(ctx.attack.system)?.breath
+        : undefined;
+}
+
+/** One attacker roll serves every target of a breath volley (p358) */
+function withBreathRoll(ctx: ResolveAttackCtx): ResolvedAttack {
+    const shared = wfrpState(ctx.attacker).breathRoll;
+
+    const targetId = ctx.target.basicInfo.id;
+
+    const attackId = ctx.attack.id ?? ctx.attack.name;
+
+    const reuse =
+        shared && shared.attackId === attackId && !shared.seen.includes(targetId)
+            ? shared
+            : undefined;
+
+    const r = resolveAttackCore(
+        reuse ? { ...ctx, manualRoll: reuse.roll } : ctx
+    );
+
+    const roll = reuse?.roll ?? ACTION_SLOT.read(r.attackRoll.system)?.attack?.roll;
+
+    if (roll === undefined) return r;
+
+    return {
+        ...r,
+        attackerUpdate: (p) =>
+            withWfrpState(r.attackerUpdate?.(p) ?? p, {
+                breathRoll: {
+                    attackId,
+                    roll,
+                    seen: [...(reuse?.seen ?? []), targetId],
+                },
+            }),
+    };
+}
+
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
-    const core = resolveAttackCore(ctx);
+    const core = breathOf(ctx) ? withBreathRoll(ctx) : resolveAttackCore(ctx);
 
     const resolved = withMeleeLedger(
         ctx,
@@ -962,6 +1003,12 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                 calledShot: calledLocation,
             });
 
+        const rangedGroupTarget =
+            use?.target ??
+            (breathOf(ctx) && value(participantChars(attacker), 'bs') <= 0
+                ? BREATH_DEFAULT_BS
+                : undefined);
+
         const rangedDefence = skillTarget(participantChars(target), 'dodge');
 
         const opposition =
@@ -970,6 +1017,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
                       band: range.band,
                       engaged: isAdjacentOnMap(ctx.map, attacker, target),
                       helpless: false,
+                      dodgeAlways: !!breathOf(ctx),
                       targets: {
                           dodge:
                               (rangedDefence?.target ??
@@ -991,7 +1039,7 @@ function resolveAttackCore(ctx: ResolveAttackCtx): ResolvedAttack {
         });
 
         const rangedTarget =
-            attackerTargetOf(attacker, attack, edition, use?.target) +
+            attackerTargetOf(attacker, attack, edition, rangedGroupTarget) +
             againstMod(target, 'ranged', edition) +
             toHit +
             sizeHit;

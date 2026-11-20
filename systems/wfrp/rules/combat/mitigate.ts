@@ -8,14 +8,22 @@ import {
     qualityStunsOnHead,
 } from '../equipment/quality-effects';
 import { ATTACK_SLOT } from '../slots';
+import { breathDamage } from '../traits/breath';
+import { BREATH_CONDITION } from '../traits/constants';
 import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
+import { withFireWounds } from '../traits/regeneration';
 import { sizeDamageBonus, sizeMeleeDamage, wardRoll } from '../traits/size';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
 import { asLocation, sideOf } from './location';
 import { chargeSb } from './mounted';
-import { apAt, participantStats, withArmourWear } from './participant';
+import {
+    apAt,
+    nonMetalApAt,
+    participantStats,
+    withArmourWear,
+} from './participant';
 import { canonWeaponUse } from './weapon-use';
 import { wornWeaponDamage } from './weapon-wear';
 
@@ -76,11 +84,18 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const sb = chargeSb(attacker, participantStats(attacker)?.sb ?? 0);
 
-    const ap = apAt(participantStats(target), location);
-
     const slot = ATTACK_SLOT.read(ctx.attack.system);
 
     const edition = editionOf(ctx.rules);
+
+    const breath = edition.traitModel === 'canon' ? slot?.breath : undefined;
+
+    if (breath === 'smoke') return { amount: 0, steps: [], totalLabel };
+
+    const ap =
+        breath === 'electricity'
+            ? nonMetalApAt(participantStats(target), location)
+            : apAt(participantStats(target), location);
 
     const gear = edition.gearModel;
 
@@ -122,9 +137,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const base = computeWfrpDamage({
         weapon:
-            gear === 'canon'
-                ? wornWeaponDamage(ctx.weapon, attacker, ctx.attack)
-                : ctx.weapon,
+            breath
+                ? breathDamage(breath, {
+                      sb: participantStats(attacker)?.sb ?? 0,
+                      tb: participantStats(attacker)?.tb ?? 0,
+                  })
+                : gear === 'canon'
+                  ? wornWeaponDamage(ctx.weapon, attacker, ctx.attack)
+                  : ctx.weapon,
         sb: appliedSb,
         netSl: margin,
         size,
@@ -170,7 +190,15 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (crit?.bonusDamage) steps.push(step('crit', crit.bonusDamage));
 
+    const hit = base.total > 0;
+
+    const breathCondition =
+        breath && hit && breath in BREATH_CONDITION
+            ? [BREATH_CONDITION[breath as keyof typeof BREATH_CONDITION]]
+            : [];
+
     const conditions: WfrpConditionKey[] = [
+        ...breathCondition,
         ...qualityInflicts(refs, gear, location),
         ...(location === 'head' &&
         qualityStunsOnHead(refs, gear) &&
@@ -179,7 +207,8 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             : []),
     ];
 
-    const wear = effect.armourWear ?? 0;
+    const wear =
+        (effect.armourWear ?? 0) + (breath === 'acid' && hit ? 1 : 0);
 
     if (!crit && !conditions.length && !wear)
         return { amount: base.total, steps, totalLabel };
@@ -210,6 +239,12 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
                 message = applied.messages[0] ?? message;
             }
+
+            if (breath === 'fire' && hit)
+                participant = withFireWounds(
+                    participant,
+                    base.total + (crit?.bonusDamage ?? 0)
+                );
 
             if (crit) {
                 const applied = applyWfrpCrit(

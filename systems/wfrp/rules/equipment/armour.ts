@@ -1,4 +1,5 @@
 import { type HitLocation, LOCATIONS } from '../combat/constants';
+import { METAL_ARMOUR_KINDS } from '../traits/constants';
 import { AP_CAP, ARMOUR_SLOTS, MELEE_SLOT, SHIELD_SLOTS } from './constants';
 import { readStats } from './guard';
 import { hasQuality, qualityValue } from './qualities';
@@ -17,6 +18,8 @@ export function armourAp(
 ): {
     ap: Record<HitLocation, number>;
     armourOnly: Record<HitLocation, number>;
+    /** AP of mail and plate per location; absent without any */
+    metalAp?: Record<HitLocation, number>;
     flexible: boolean;
     shield: number;
 } {
@@ -26,6 +29,8 @@ export function armourAp(
     >;
 
     const armourOnly = { ...ap };
+
+    const metal = { ...ap };
 
     let layers = 0;
 
@@ -53,6 +58,9 @@ export function armourAp(
             for (const l of LOCATIONS) {
                 ap[l] += stats.locations[l];
                 armourOnly[l] += stats.locations[l];
+
+                if (METAL_ARMOUR_KINDS.includes(stats.kind))
+                    metal[l] += stats.locations[l];
             }
             layers += 1;
 
@@ -81,5 +89,13 @@ export function armourAp(
         armourOnly[l] = Math.min(armourOnly[l], AP_CAP);
     }
 
-    return { ap, armourOnly, flexible: layers > 0 && allFlexible, shield };
+    const hasMetal = LOCATIONS.some((l) => metal[l] > 0);
+
+    return {
+        ap,
+        armourOnly,
+        ...(hasMetal && { metalAp: metal }),
+        flexible: layers > 0 && allFlexible,
+        shield,
+    };
 }

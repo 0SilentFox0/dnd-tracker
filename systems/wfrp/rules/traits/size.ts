@@ -2,6 +2,7 @@ import { participantStats } from '../combat/participant';
 import { ATTACK_SLOT } from '../slots';
 import { wfrpState } from '../state';
 import { SIZE_DAMAGE_PER_STEP, SIZE_HIT_PER_STEP } from './constants';
+import { isSwarm } from './creature';
 import { type CanonSize, canonSizeOf, canonSizeStep, sizeStep } from './read';
 
 import { AttackType } from '@/lib/constants/battle';
@@ -39,11 +40,14 @@ export function wardRoll(
     return { roll, saved: roll >= ward };
 }
 
-const canonStepOf = (p: BattleParticipant) =>
-    canonSizeStep(participantStats(p)?.size);
+/** A Swarm ignores the rules for Size (p357) */
+const sizeOf = (p: BattleParticipant) =>
+    isSwarm(p) ? undefined : participantStats(p)?.size;
+
+const canonStepOf = (p: BattleParticipant) => canonSizeStep(sizeOf(p));
 
 export const canonSizeOfParticipant = (p: BattleParticipant): CanonSize =>
-    canonSizeOf(participantStats(p)?.size);
+    canonSizeOf(sizeOf(p));
 
 const MELEE_DAMAGE_SB_FACTOR: Record<CanonSize, number> = {
     small: 0,

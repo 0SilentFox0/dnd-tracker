@@ -39,6 +39,11 @@ export const BREATH_KINDS = [
     'smoke',
 ] as const;
 
+export type BreathKind = (typeof BREATH_KINDS)[number];
+
+export const isBreath = (v: unknown): v is BreathKind =>
+    (BREATH_KINDS as readonly unknown[]).includes(v);
+
 export const TALENT_KINDS = [
     'ambidextrous',
     'dualWielder',

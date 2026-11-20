@@ -2,7 +2,6 @@ import {
     BREATH_DEFAULT_RANGE_FT,
     NIGHT_VISION_FT,
     RANGED_DEFAULT_RANGE_FT,
-    REGENERATE_DICE,
 } from './constants';
 
 import type { Effect } from '@/lib/utils/abilities/schema';
@@ -14,6 +13,8 @@ import type {
 } from '@/lib/utils/abilities/templates/types';
 import type { WfrpEffect } from '@/systems/wfrp/rules/ability-effects';
 import {
+    BREATH_KINDS,
+    CREATURE_TRAITS,
     PASSION_GROUP_MAX,
     PSYCHOLOGY_KINDS,
     TRAIT_SIZES,
@@ -69,6 +70,12 @@ const note = (id: string): Recipe => ({
     }),
 });
 
+const creature = (
+    id: string,
+    kind: (typeof CREATURE_TRAITS)[number]
+): Recipe =>
+    passive(id, [], () => [trait({ kind: 'wfrpCreature', trait: kind })]);
+
 const groupOf = (name: string): string =>
     (/\(([^)]+)\)/.exec(name)?.[1] ?? name).trim().slice(0, PASSION_GROUP_MAX);
 
@@ -105,6 +112,11 @@ const attack = (
             ...((id === 'breath' || id === 'ranged') && {
                 rangeFt: Number(v.rangeFt),
             }),
+            ...(id === 'breath' &&
+                v.breath &&
+                v.breath !== 'none' && {
+                    breath: v.breath as (typeof BREATH_KINDS)[number],
+                }),
             ...(v.magical === 'yes' && { magical: true as const }),
         }),
     ]);
@@ -145,26 +157,14 @@ export const TRAIT_RECIPES: readonly Recipe[] = [
     passion('frenzy'),
     passion('hatred'),
     passion('animosity'),
-    {
-        id: 'regenerate',
-        category: 'traits',
-        scopes: ['ability'],
-        textKey: 'wfrpTraits.recipes.regenerate',
-        params: [],
-        build: (_v, ctx) => ({
-            ability: {
-                name: ctx.name,
-                trigger: { event: 'turnStart' },
-                effects: [
-                    { kind: 'heal', amount: REGENERATE_DICE, target: 'self' },
-                ],
-            },
-        }),
-    },
+    passive('regenerate', [], () => [trait({ kind: 'wfrpRegenerate' })]),
     attack('bite'),
     attack('claw'),
     attack('weapon'),
-    attack('breath', [num('rangeFt', BREATH_DEFAULT_RANGE_FT, 5, 600)]),
+    attack('breath', [
+        num('rangeFt', BREATH_DEFAULT_RANGE_FT, 5, 600),
+        select('breath', 'none', ['none', ...BREATH_KINDS]),
+    ]),
     attack('ranged', [num('rangeFt', RANGED_DEFAULT_RANGE_FT, 5, 600)]),
     passive('nightVision', [], () => [
         {
@@ -174,8 +174,9 @@ export const TRAIT_RECIPES: readonly Recipe[] = [
             range: NIGHT_VISION_FT,
         },
     ]),
-    note('undead'),
+    creature('undead', 'undead'),
     note('hardy'),
-    note('flier'),
-    note('swarm'),
+    creature('flier', 'fly'),
+    creature('swarm', 'swarm'),
+    creature('painless', 'painless'),
 ];

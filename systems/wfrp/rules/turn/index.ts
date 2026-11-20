@@ -9,13 +9,10 @@ import {
     wfrpPassionsRoundStart,
 } from '../traits/passions';
 import { wfrpFearRound, wfrpPsychology } from '../traits/psychology';
+import { wfrpRegenerate, wfrpSwarmRoundEnd } from './creature-hooks';
 import { wfrpEngagementAge } from './engagement-age';
 import { wfrpOnMoveEnd } from './move-end';
 import { wfrpPsychologyGate } from './psychology-gate';
-import {
-    wfrpRegenerate,
-    wfrpSwarmRoundEnd,
-} from './reserved-hooks';
 import { wfrpRoundOrder } from './round-order';
 import { wfrpOnSkippedTurn } from './skipped-turn';
 
@@ -33,13 +30,13 @@ export const WFRP_TURN: RuleSystemTurn = {
     onMoveEnd: [wfrpOnMoveEnd],
     onTurnEnd: [
         wfrpEndTurnState,
-        wfrpSwarmRoundEnd,
         (ctx) =>
             editionOf(ctx.rules).magicModel === 'canon5e'
                 ? channelUpkeep(ctx.participants, ctx.id, ctx)
                 : { participants: ctx.participants, messages: [] },
     ],
     onRoundStart: [
+        wfrpSwarmRoundEnd,
         wfrpEngagementAge,
         wfrpRoundOrder,
         (ctx) => wfrpFearRound(ctx.participants, ctx),

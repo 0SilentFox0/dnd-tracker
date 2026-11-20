@@ -432,11 +432,13 @@ describe('validatePack: wfrp units', () => {
         event = 'passive'
     ) => ({ id, name, trigger: { event }, effects: [effect] });
 
-    const regenerate = (event: string) =>
+    const regenerate = (event: string, legacy = false) =>
         ab(
             'regenerate',
             'Regenerate',
-            { kind: 'heal', amount: '1d10', target: 'self' },
+            legacy
+                ? { kind: 'heal', amount: '1d10', target: 'self' }
+                : { kind: 'wfrpRegenerate' },
             event
         );
 
@@ -514,8 +516,8 @@ describe('validatePack: wfrp units', () => {
             ['abilities[2] "Terror 1": unknown trait id "terror"'],
         ],
         [
-            'a passive regenerate',
-            (r) => r.abilities.push(regenerate('passive')),
+            'a turnStart heal regenerate',
+            (r) => r.abilities.push(regenerate('turnStart', true)),
             [
                 'abilities[2] "Regenerate": is not the output of the "regenerate" trait recipe',
             ],
@@ -615,7 +617,7 @@ describe('validatePack: wfrp units', () => {
         ],
         [
             'Regenerate on level 1',
-            (r) => r.abilities.push(regenerate('turnStart')),
+            (r) => r.abilities.push(regenerate('passive')),
             ['Regenerate is not allowed for level 1'],
         ],
         [

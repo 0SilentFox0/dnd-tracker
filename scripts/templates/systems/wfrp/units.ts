@@ -275,6 +275,7 @@ function recipeValues(id: string, e: RawEffect): RecipeValues {
         case 'breath':
         case 'ranged':
             return {
+                ...(id === 'breath' && { breath: String(e.breath ?? 'none') }),
                 damage: Number(e.damage),
                 rangeFt: rangeFtOf(
                     e,

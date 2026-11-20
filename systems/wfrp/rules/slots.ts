@@ -9,6 +9,7 @@ import type {
     PercentileAttackDetails,
     PercentileCastDetails,
 } from './percentile/details';
+import { type BreathKind, isBreath } from './trait-kinds';
 
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defineSlot } from '@/lib/utils/rules/systems/slot';
@@ -33,6 +34,8 @@ export interface WfrpAttackSlot {
     reach?: WeaponReach;
     /** Trait attack made as a free attack: no Size damage bonus (p360) */
     free?: true;
+    /** Breath type of a creature's breath attack (p358) */
+    breath?: BreathKind;
 }
 
 // Legacy rows stored `hand: true` (main) and `offHand: true` (off)
@@ -64,6 +67,7 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
         ...(raw.twoHanded === true && { twoHanded: true as const }),
         ...(raw.noSb === true && { noSb: true }),
         ...(raw.free === true && { free: true as const }),
+        ...(isBreath(raw.breath) && { breath: raw.breath }),
         ...(raw.magical === true && { magical: true as const }),
         ...(handOf(raw) && { hand: handOf(raw) }),
     };
@@ -156,8 +160,10 @@ export interface WfrpParticipantState {
     engagedWith?: Record<string, number>;
     /** Locked in a grapple, `holder` marks the one holding */
     grapple?: { with: string; holder: boolean };
-    /** Wounds from burning, counted per round until extinguished */
+    /** Wounds from fire; a regenerating creature cannot heal them (p358) */
     fireWounds?: number;
+    /** Breath: the attacker's one roll shared by every target of the volley (p358) */
+    breathRoll?: { attackId: string; roll: number; seen: string[] };
     /** Wear taken by each weapon, keyed by attack id */
     weaponWear?: Record<string, number>;
     /** Oops: act last in the next round; the round-start hook moves the fighter to the end and clears it */
@@ -357,6 +363,18 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                     },
                 }),
             ...(finite(raw.fireWounds) && { fireWounds: raw.fireWounds }),
+            ...(isRecord(raw.breathRoll) &&
+                finite(raw.breathRoll.roll) &&
+                typeof raw.breathRoll.attackId === 'string' &&
+                Array.isArray(raw.breathRoll.seen) && {
+                    breathRoll: {
+                        roll: raw.breathRoll.roll,
+                        attackId: raw.breathRoll.attackId,
+                        seen: raw.breathRoll.seen.filter(
+                            (id): id is string => typeof id === 'string'
+                        ),
+                    },
+                }),
             ...(weaponWear && { weaponWear }),
             ...(raw.actLastNext === true && { actLastNext: true as const }),
             ...((raw.oopsPenalty === 'next' || raw.oopsPenalty === 'now') && {
