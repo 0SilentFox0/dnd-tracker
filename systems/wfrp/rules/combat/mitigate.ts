@@ -14,8 +14,10 @@ import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
 import { asLocation, sideOf } from './location';
+import { chargeSb } from './mounted';
 import { apAt, participantStats, withArmourWear } from './participant';
 import { canonWeaponUse } from './weapon-use';
+import { wornWeaponDamage } from './weapon-wear';
 
 import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -72,7 +74,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         };
     }
 
-    const sb = participantStats(attacker)?.sb ?? 0;
+    const sb = chargeSb(attacker, participantStats(attacker)?.sb ?? 0);
 
     const ap = apAt(participantStats(target), location);
 
@@ -119,7 +121,10 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             : 0;
 
     const base = computeWfrpDamage({
-        weapon: ctx.weapon,
+        weapon:
+            gear === 'canon'
+                ? wornWeaponDamage(ctx.weapon, attacker, ctx.attack)
+                : ctx.weapon,
         sb: appliedSb,
         netSl: margin,
         size,

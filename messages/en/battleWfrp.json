@@ -130,6 +130,8 @@
     "fumbleMisfire": "{name}: misfire ({roll}): {text}",
     "fumbleWounds": "{name} takes {wounds} Wounds from the fumble",
     "fumbleNote": "{name}: {note}",
+    "fumbleAlly": "{name} strikes {ally} by mistake (units die {sl} SL, resolve the hit by hand)",
+    "fumbleAllyNone": "{name} has no ally in reach and hits themselves in the face",
     "targetSurrounded": "{name} is surrounded: no route of escape"
   },
   "passion": {

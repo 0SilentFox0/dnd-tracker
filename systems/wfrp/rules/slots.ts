@@ -160,6 +160,10 @@ export interface WfrpParticipantState {
     fireWounds?: number;
     /** Wear taken by each weapon, keyed by attack id */
     weaponWear?: Record<string, number>;
+    /** Oops: act last in the next round; the round-start hook moves the fighter to the end and clears it */
+    actLastNext?: true;
+    /** Oops -1 SL on every test: `next` until the next round begins, then `now` for that whole round */
+    oopsPenalty?: 'next' | 'now';
     /** Riding a mount, by participant id */
     mounted?: { mountId: string };
     /** Critical Wounds taken this battle, canon5e (p172) */
@@ -354,6 +358,10 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                 }),
             ...(finite(raw.fireWounds) && { fireWounds: raw.fireWounds }),
             ...(weaponWear && { weaponWear }),
+            ...(raw.actLastNext === true && { actLastNext: true as const }),
+            ...((raw.oopsPenalty === 'next' || raw.oopsPenalty === 'now') && {
+                oopsPenalty: raw.oopsPenalty,
+            }),
             ...(isRecord(raw.mounted) &&
                 typeof raw.mounted.mountId === 'string' && {
                     mounted: { mountId: raw.mounted.mountId },

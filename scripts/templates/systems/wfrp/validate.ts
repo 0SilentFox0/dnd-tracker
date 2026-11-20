@@ -237,12 +237,14 @@ export const GRIM_TABLE_SLOTS = [
     'critArm',
     'critBody',
     'critLeg',
+    'oops',
+    'misfire',
     'miscastMinor',
     'miscastMajor',
     'wrath',
 ] as const;
 
-export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 20];
+export const GRIM_TABLE_ROWS: readonly [number, number] = [2, 20];
 
 export const TABLE_TEXT_MAX = 120;
 

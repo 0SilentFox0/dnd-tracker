@@ -130,6 +130,8 @@
     "fumbleMisfire": "{name}: осічка ({roll}): {text}",
     "fumbleWounds": "{name} отримує {wounds} Ран від фамблу",
     "fumbleNote": "{name}: {note}",
+    "fumbleAlly": "{name} помилково б'є {ally} (кубик одиниць: {sl} SL, влучання розв'язати вручну)",
+    "fumbleAllyNone": "{name} не має союзника поруч і б'є сам себе по обличчю",
     "targetSurrounded": "{name} в оточенні: шляху відступу немає"
   },
   "passion": {

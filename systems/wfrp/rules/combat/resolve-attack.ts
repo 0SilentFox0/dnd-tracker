@@ -433,6 +433,11 @@ function withFumble(ctx: ResolveAttackCtx, r: ResolvedAttack): ResolvedAttack {
             }),
             rules: ctx.rules,
             rng: ctx.rng,
+            scene: {
+                attack: ctx.attack,
+                participants: ctx.participants,
+                map: ctx.map,
+            },
         });
 
     if (!fumble) return r;

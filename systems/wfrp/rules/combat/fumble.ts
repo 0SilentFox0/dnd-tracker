@@ -1,20 +1,27 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { EditionProfile } from '../edition';
+import type { QualityRef } from '../equipment/qualities';
 import type { PercentileAttackDetails } from '../percentile/details';
+import { withWfrpState } from '../state';
 import { rollSlot, rowText } from '../tables/resolve';
 import type { TableEffect, TableSlot } from '../tables/schema';
 import { applyWfrpCrit } from './crit-effect';
 import type { CritResult } from './crit-table';
 import { computeWfrpDamage } from './damage';
 import { apAt, participantStats } from './participant';
+import { canonWeaponUse } from './weapon-use';
+import { attackWearKey, wearWeapon } from './weapon-wear';
 
 import { EffectMarker } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
+import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { rollDie } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 const MISFIRE_GROUPS = ['blackpowder', 'engineering', 'explosives'];
@@ -26,7 +33,15 @@ const SL_PENALTY_ROUNDS = 2;
 type FumbleEdition = Pick<
     EditionProfile,
     'fumbleModel' | 'woundModel' | 'conditionModel'
->;
+> &
+    Partial<Pick<EditionProfile, 'gearModel'>>;
+
+/** What a fumble may touch beyond the fumbler: the weapon that slipped and the fighters around */
+export interface FumbleScene {
+    attack?: BattleAttack;
+    participants?: BattleParticipant[];
+    map?: BattleMapConfig | null;
+}
 
 export interface FumbleOutcome {
     update: (p: BattleParticipant) => BattleParticipant;
@@ -87,7 +102,13 @@ const timed = (
 function applyEffect(
     p: BattleParticipant,
     e: TableEffect,
-    ctx: { edition: FumbleEdition; rng: Rng; text: LogLine }
+    ctx: {
+        edition: FumbleEdition;
+        rng: Rng;
+        text: LogLine;
+        /** Oops only: the damaged weapon, canon gear */
+        wear?: { key: string; qualities?: QualityRef[] };
+    }
 ): BattleParticipant {
     if (e.type === 'condition')
         return applyWfrpConditionTo(p, {
@@ -109,6 +130,15 @@ function applyEffect(
         return timed(p, 'loseMove', 1, [
             { type: EffectMarker.IMMOBILIZED, value: 1 },
         ]);
+
+    if (e.kind === 'slPenalty' && ctx.edition.conditionModel === 'sl')
+        return withWfrpState(p, { oopsPenalty: 'next' });
+
+    if (e.kind === 'actLast' && ctx.edition.conditionModel === 'sl')
+        return withWfrpState(p, { actLastNext: true });
+
+    if (e.kind === 'weaponDamage' && ctx.wear)
+        return wearWeapon(p, ctx.wear.key, ctx.wear.qualities);
 
     if (e.kind === 'slPenalty')
         return timed(
@@ -141,18 +171,77 @@ function applyEffect(
 
 const NOTE_KINDS = ['actLast', 'weaponDamage'];
 
+const wearOf = (
+    attacker: BattleParticipant,
+    edition: FumbleEdition,
+    scene: FumbleScene
+) =>
+    edition.gearModel === 'canon' && scene.attack
+        ? {
+              key: attackWearKey(scene.attack),
+              qualities: canonWeaponUse(attacker, scene.attack).refs.qualities,
+          }
+        : undefined;
+
+/** Oops 10: a random ally takes the hit, else the fumbler stuns themself; the hit itself is left to the DM */
+function allyHit(
+    attacker: BattleParticipant,
+    details: PercentileAttackDetails,
+    scene: FumbleScene,
+    rng: Rng
+): { line: LogLine; stunSelf: boolean } {
+    const allies = (scene.participants ?? []).filter(
+        (p) =>
+            p.basicInfo.id !== attacker.basicInfo.id &&
+            isActive(p) &&
+            !isHostile(scene.map, attacker, p)
+    );
+
+    const ally = allies[Math.floor(rng() * allies.length)];
+
+    return ally
+        ? {
+              stunSelf: false,
+              line: textRef('battleWfrp.log.fumbleAlly', {
+                  name: attacker.basicInfo.name,
+                  ally: ally.basicInfo.name,
+                  sl: details.roll % 10,
+              }),
+          }
+        : {
+              stunSelf: true,
+              line: textRef('battleWfrp.log.fumbleAllyNone', {
+                  name: attacker.basicInfo.name,
+              }),
+          };
+}
+
 function tableOutcome(
     slot: TableSlot,
     key: 'fumbleOops' | 'fumbleMisfire',
-    attacker: BattleParticipant,
-    rules: Pick<Ruleset, 'tables'>,
-    edition: FumbleEdition,
-    rng: Rng,
-    blast?: BlastWeapon
+    input: {
+        details: PercentileAttackDetails;
+        attacker: BattleParticipant;
+        rules: Pick<Ruleset, 'tables'>;
+        edition: FumbleEdition;
+        rng: Rng;
+        blast?: BlastWeapon;
+        scene: FumbleScene;
+    }
 ): FumbleOutcome {
+    const { details, attacker, rules, edition, rng, blast, scene } = input;
+
     const { row, roll } = rollSlot(rules, slot, rng);
 
     const text = rowText(row);
+
+    const wear = key === 'fumbleOops' ? wearOf(attacker, edition, scene) : undefined;
+
+    const ally = row.effects.some(
+        (e) => e.type === 'fumble' && e.kind === 'hitAlly'
+    )
+        ? allyHit(attacker, details, scene, rng)
+        : undefined;
 
     const exploded =
         blast &&
@@ -162,10 +251,17 @@ function tableOutcome(
 
     return {
         update: (p) =>
-            row.effects.reduce(
-                (acc, e) => applyEffect(acc, e, { edition, rng, text }),
-                p
-            ),
+            ally?.stunSelf
+                ? applyEffect(
+                      p,
+                      { type: 'condition', key: 'stunned', levels: 1 },
+                      { edition, rng, text }
+                  )
+                : row.effects.reduce(
+                      (acc, e) =>
+                          applyEffect(acc, e, { edition, rng, text, wear }),
+                      p
+                  ),
         wounds: exploded
             ? blastWounds(attacker, blast)
             : row.effects.reduce(
@@ -178,6 +274,7 @@ function tableOutcome(
                 roll,
                 text,
             }),
+            ...(ally ? [ally.line] : []),
             ...row.effects.flatMap((e) =>
                 e.type === 'fumble' && NOTE_KINDS.includes(e.kind)
                     ? [
@@ -203,33 +300,36 @@ export function fumbleOutcome(input: {
     rules: Pick<Ruleset, 'tables'>;
     rng: Rng;
     blast?: BlastWeapon;
+    scene?: FumbleScene;
 }): FumbleOutcome | undefined {
     const { details, attacker, group, edition, rules, rng, blast } = input;
+
+    const scene = input.scene ?? {};
 
     const model = fumbleModelOf(edition, rules);
 
     if (model === 'none' || !details.fumble) return undefined;
 
     if (group && MISFIRE_GROUPS.includes(group) && details.roll >= MISFIRE_FROM)
-        return tableOutcome(
-            'misfire',
-            'fumbleMisfire',
+        return tableOutcome('misfire', 'fumbleMisfire', {
+            details,
             attacker,
             rules,
             edition,
             rng,
-            blast
-        );
+            blast,
+            scene,
+        });
 
     if (model === 'oops')
-        return tableOutcome(
-            'oops',
-            'fumbleOops',
+        return tableOutcome('oops', 'fumbleOops', {
+            details,
             attacker,
             rules,
             edition,
-            rng
-        );
+            rng,
+            scene,
+        });
 
     return {
         update: (p) =>

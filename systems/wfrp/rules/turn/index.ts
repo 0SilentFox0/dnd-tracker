@@ -14,9 +14,9 @@ import { wfrpPsychologyGate } from './psychology-gate';
 import {
     wfrpEngagementExpiry,
     wfrpRegenerate,
-    wfrpRoundOrder,
     wfrpSwarmRoundEnd,
 } from './reserved-hooks';
+import { wfrpRoundOrder } from './round-order';
 import { wfrpOnSkippedTurn } from './skipped-turn';
 
 import type { RuleSystemTurn } from '@/lib/utils/rules/systems/types';

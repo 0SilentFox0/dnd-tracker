@@ -10,8 +10,6 @@ const unchanged = (ctx: { participants: TurnHookCtx['participants'] }) => ({
     messages: [],
 });
 
-export const wfrpRoundOrder: TurnHook<TurnHookCtx> = unchanged;
-
 export const wfrpSwarmRoundEnd: TurnHook<TurnSubjectCtx> = unchanged;
 
 export const wfrpRegenerate: TurnHook<TurnStartCtx> = unchanged;

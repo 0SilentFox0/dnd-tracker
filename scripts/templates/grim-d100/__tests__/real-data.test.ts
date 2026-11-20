@@ -92,8 +92,14 @@ describe('grim-d100 catalog', () => {
         }
 
         expect(Object.keys(data.rules?.tables ?? {}).sort()).toEqual([
+            'critArm',
+            'critBody',
+            'critHead',
+            'critLeg',
             'miscastMajor',
             'miscastMinor',
+            'misfire',
+            'oops',
             'wrath',
         ]);
     });
