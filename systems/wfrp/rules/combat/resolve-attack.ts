@@ -81,7 +81,7 @@ import { rangeContext, rangedOpposition } from './range-band';
 import { canTrapBlade, TRAP_BLADE_COST, trapBladeResult } from './trap-blade';
 import { canonWeaponUse, type WeaponUse } from './weapon-use';
 
-import { AttackType, CombatStatus } from '@/lib/constants/battle';
+import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
