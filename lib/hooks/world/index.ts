@@ -1,5 +1,6 @@
 export { worldKeys } from './keys';
 export type { WorldEditorCtx } from './types';
+export { useCommittedName } from './useCommittedName';
 export { type HeroDragHandlers, useHeroDrag } from './useHeroDrag';
 export { useHeroEyes } from './useHeroEyes';
 export { type HeroSelection, useHeroSelection } from './useHeroSelection';

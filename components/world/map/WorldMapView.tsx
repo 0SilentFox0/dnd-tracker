@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 
+import { WorldEnemies } from './WorldEnemies';
 import { WorldFog } from './WorldFog';
 import { WorldHeroes } from './WorldHeroes';
 import { WorldPins } from './WorldPins';
@@ -35,6 +36,7 @@ import type {
     MapPoint,
     Polygon,
     RevealShape,
+    WorldEnemyPin,
     WorldHero,
     WorldMapDetail,
 } from '@/types/world';
@@ -60,10 +62,13 @@ export interface WorldMapViewProps {
         onMarkerDoubleClick?(id: string): void;
         onMarkerDrag?(id: string, p: MapPoint): void;
         onHeroClick?(id: string): void;
+        onEnemyClick?(id: string): void;
+        onEnemyDrag?(id: string, p: MapPoint): void;
         onVertexChange?(markerId: string, polygon: Polygon): void;
     };
     fog?: { shapes: RevealShape[]; radius: number };
     heroes?: WorldHero[];
+    enemies?: WorldEnemyPin[];
     dragHeroes?: {
         onDrop(ids: string[], to: MapPoint): void;
         selected: string[];
@@ -160,6 +165,7 @@ export function WorldMapView({
     handlers = {},
     fog,
     heroes,
+    enemies,
     dragHeroes,
     trails,
     focus,
@@ -478,6 +484,15 @@ export function WorldMapView({
                                     }}
                                     handlers={handlers}
                                 />
+                                {enemies ? (
+                                    <WorldEnemies
+                                        enemies={enemies}
+                                        zoom={zoom}
+                                        selectedId={selectedId}
+                                        toPoint={insideMapAt}
+                                        handlers={handlers}
+                                    />
+                                ) : null}
                             </div>
                             {trails ? (
                                 <WorldTrails {...trails} zoom={zoom} />

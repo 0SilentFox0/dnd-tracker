@@ -41,6 +41,7 @@ export const MAX_MARKERS_PER_MAP = 300;
 export const POLYGON_MAX_VERTICES = 200;
 export const WORLD_MAX_ZOOM = 8;
 export const DEFAULT_ZONE_COLOR = '#d3b060';
+export const DEFAULT_ENEMY_COLOR = '#b91c1c';
 export const REVEAL_RADIUS_RANGE = { min: 0.01, max: 0.2 } as const;
 
 export const WORLD_MARKER_ICON_KEYS = [

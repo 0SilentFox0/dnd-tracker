@@ -10,6 +10,7 @@ const actions = () => ({
     onPoint: vi.fn(),
     onZone: vi.fn(),
     onEntry: vi.fn(),
+    onEnemy: vi.fn(),
 });
 
 const key = (k: string) =>

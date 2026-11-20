@@ -10,6 +10,7 @@ import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { DmMarkerBubble } from '@/components/world/editor/DmMarkerBubble';
+import { EnemyCard } from '@/components/world/editor/EnemyCard';
 import { NewWorldMapDialog } from '@/components/world/editor/maps/NewWorldMapDialog';
 import { WorldMapSettings } from '@/components/world/editor/maps/WorldMapSettings';
 import { ModeSwitch } from '@/components/world/editor/ModeSwitch';
@@ -78,6 +79,7 @@ export function WorldEditorPageClient({
         actions: { openMap, changeEyes },
         handlers,
         card: bubbleCard,
+        enemy,
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
@@ -161,6 +163,16 @@ export function WorldEditorPageClient({
                                             />
                                         ) : null;
 
+                                    const enemyCard =
+                                        enemy.selected && enemy.card ? (
+                                            <EnemyCard
+                                                key={enemy.selected.id}
+                                                enemy={enemy.selected}
+                                                actions={enemy.card.actions}
+                                                embedded={!isDesktop}
+                                            />
+                                        ) : null;
+
                                     const card =
                                         trailBubble &&
                                         trail.selected &&
@@ -169,14 +181,21 @@ export function WorldEditorPageClient({
                                                   point: trail.selected.node,
                                                   content: trailBubble,
                                               }
-                                            : bubble &&
-                                                bubbleCard.point &&
+                                            : enemyCard &&
+                                                enemy.card &&
                                                 isDesktop
                                               ? {
-                                                    point: bubbleCard.point,
-                                                    content: bubble,
+                                                    point: enemy.card.point,
+                                                    content: enemyCard,
                                                 }
-                                              : undefined;
+                                              : bubble &&
+                                                  bubbleCard.point &&
+                                                  isDesktop
+                                                ? {
+                                                      point: bubbleCard.point,
+                                                      content: bubble,
+                                                  }
+                                                : undefined;
 
                                     const panel = marker ? (
                                         <WorldMarkerPanel />
@@ -338,7 +357,13 @@ export function WorldEditorPageClient({
                                                                     onSelect:
                                                                         trail.select,
                                                                 }}
+                                                                enemies={
+                                                                    d.enemies
+                                                                }
                                                                 selectedId={
+                                                                    enemy
+                                                                        .selected
+                                                                        ?.id ??
                                                                     selectedId
                                                                 }
                                                                 edit={{
@@ -555,6 +580,21 @@ export function WorldEditorPageClient({
                                                         title={marker?.name}
                                                     >
                                                         {bubble}
+                                                    </ResponsiveDialog>
+                                                    <ResponsiveDialog
+                                                        hud
+                                                        open={!!enemyCard}
+                                                        onOpenChange={(
+                                                            open
+                                                        ) => {
+                                                            if (!open)
+                                                                enemy.card?.actions.onClose();
+                                                        }}
+                                                        title={
+                                                            enemy.selected?.name
+                                                        }
+                                                    >
+                                                        {enemyCard}
                                                     </ResponsiveDialog>
                                                     <ResponsiveDialog
                                                         hud
