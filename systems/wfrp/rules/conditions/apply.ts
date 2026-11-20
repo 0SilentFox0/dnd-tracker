@@ -1,4 +1,5 @@
 import { loseMomentum } from '../combat/momentum';
+import { editionOf, type EditionProfile } from '../edition';
 import {
     isWfrpConditionKey,
     WFRP_CONDITION_REGISTRY,
@@ -29,7 +30,10 @@ const labelKey = (key: WfrpConditionKey) =>
 
 export function applyWfrpConditionTo(
     p: BattleParticipant,
-    input: SystemConditionApply & { key: WfrpConditionKey }
+    input: SystemConditionApply & {
+        key: WfrpConditionKey;
+        edition?: Pick<EditionProfile, 'conditionModel'>;
+    }
 ): { participant: BattleParticipant; messages: LogLine[] } {
     const { key } = input;
 
@@ -43,6 +47,11 @@ export function applyWfrpConditionTo(
     const def = WFRP_CONDITION_REGISTRY[key];
 
     const effectKey = wfrpConditionEffectKey(key);
+
+    const halvesMove =
+        key === 'stunned' && input.edition?.conditionModel === 'sl';
+
+    const markers = halvesMove ? [] : def.markers;
 
     const levels = def.leveled
         ? Math.min(
@@ -76,9 +85,15 @@ export function applyWfrpConditionTo(
                 permanent: !rounds,
                 stackable: !!def.leveled,
                 source: input.source,
+                ...(halvesMove &&
+                    conditionLevel(p, key) === 0 && {
+                        abilityEffects: [
+                            { kind: 'modifyStat', stat: 'speed', percent: -50 },
+                        ],
+                    }),
                 effects: [
                     { type: wfrpConditionMarker(key), value: levels },
-                    ...def.markers.map((m) => ({
+                    ...markers.map((m) => ({
                         type: m,
                         value: m === EffectMarker.SKIP_ACTION ? 100 : 1,
                     })),
@@ -198,6 +213,7 @@ export function applyWfrpCondition(
     const { participant, messages } = applyWfrpConditionTo(target, {
         ...input,
         key: input.key,
+        edition: editionOf(input.rules),
     });
 
     return {

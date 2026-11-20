@@ -9,10 +9,7 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
 export function isUp(p: BattleParticipant): boolean {
-    return (
-        p.combatStats.status === CombatStatus.ACTIVE &&
-        p.combatStats.currentHp > 0
-    );
+    return p.combatStats.status === CombatStatus.ACTIVE;
 }
 
 export function autoUnconscious(rules?: Ruleset): boolean {

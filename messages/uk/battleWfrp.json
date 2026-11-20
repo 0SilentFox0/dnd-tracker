@@ -58,6 +58,8 @@
       "bleedOut": "{name} стікає кров'ю і помирає",
       "bleeding": "{name}: кровотеча, −{damage} Wounds",
       "ablaze": "{name}: горить, −{damage} Wounds",
+      "poisoned": "{name}: отруєння, −{damage} Wound",
+      "bleedStops": "{name}: одна кровотеча зупиняється",
       "faint": "{name} знепритомнів від крововтрати"
     },
     "endTestSuccess": "{name}: {condition} — тест {roll} / {target}, РУ {sl}: успіх",
@@ -70,6 +72,7 @@
     "fortuneAdvantage": "{name} витрачає Удачу: перевага",
     "fateNotFail": "{name} витрачає Долю: «Я не зазнаю невдачі»",
     "critHit": "🩸 Критична рана для {target} (+{bonus} шкоди): {text}",
+    "counterCrit": "🛡️ Критичне влучання захисника ранить {name}: {text}",
     "critWound": "🩸 Критична рана для {target}: {text}",
     "unconscious": "💤 {name} падає на 0 Ран і втрачає свідомість",
     "psychologyPass": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: стійкість",

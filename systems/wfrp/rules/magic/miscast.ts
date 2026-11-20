@@ -1,4 +1,5 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
+import { editionOf } from '../edition';
 import { rollSlot, rowText } from '../tables/resolve';
 
 import { textRef } from '@/lib/i18n/text-ref';
@@ -65,6 +66,7 @@ export function wfrpMiscast(
             key: e.key,
             levels: e.levels,
             round: ctx.round,
+            edition: editionOf(ctx.rules),
             sourceName: effect,
             concealed: true,
         });

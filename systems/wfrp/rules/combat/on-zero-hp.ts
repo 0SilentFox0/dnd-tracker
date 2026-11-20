@@ -52,7 +52,7 @@ function criticalOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
             next,
             rollCrit(location, ctx.rules, ctx.rng, undefined, excess * 10),
             ctx.round ?? 0,
-            true
+            editionOf(ctx.rules)
         );
 
         next = applied.participant;

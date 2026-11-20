@@ -75,7 +75,8 @@ export interface RuleSystemTestedMagic {
     /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
     castPreview(
         caster: BattleParticipant,
-        kind?: SpellMagicKind
+        kind?: SpellMagicKind,
+        rules?: Ruleset
     ): {
         target: number;
         channelTarget: number;

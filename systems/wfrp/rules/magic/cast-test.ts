@@ -1,6 +1,6 @@
 import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
-import { selfTestMod } from '../conditions/test-mod';
+import { selfSlMod, selfTestMod } from '../conditions/test-mod';
 import { editionOf } from '../edition';
 import {
     type PercentileTestResult,
@@ -27,6 +27,7 @@ import {
 } from './constants';
 
 import { textRef } from '@/lib/i18n/text-ref';
+import type { Ruleset } from '@/lib/utils/rules';
 import type {
     CastTestCtx,
     CastTestResult,
@@ -34,21 +35,28 @@ import type {
 import type { SpellMagicKind } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
 
-export function castTargetOf(caster: BattleParticipant): number {
+export function castTargetOf(
+    caster: BattleParticipant,
+    rules?: Ruleset
+): number {
     const chars = participantChars(caster);
 
     return (
         (skillTarget(chars, CAST_SKILL.key, CAST_SKILL.spec)?.target ??
-            value(chars, 'int')) + selfTestMod(caster, 'test')
+            value(chars, 'int')) +
+        selfTestMod(caster, 'test', editionOf(rules))
     );
 }
 
-export function prayTargetOf(caster: BattleParticipant): number {
+export function prayTargetOf(
+    caster: BattleParticipant,
+    rules?: Ruleset
+): number {
     const chars = participantChars(caster);
 
     return (
         (skillTarget(chars, PRAY_SKILL.key)?.target ?? value(chars, 'fel')) +
-        selfTestMod(caster, 'test')
+        selfTestMod(caster, 'test', editionOf(rules))
     );
 }
 
@@ -60,7 +68,9 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const prayer = isPrayerKind(magic.kind);
 
-    const target = prayer ? prayTargetOf(caster) : castTargetOf(caster);
+    const target = prayer
+        ? prayTargetOf(caster, ctx.rules)
+        : castTargetOf(caster, ctx.rules);
 
     const channelled = prayer ? 0 : (wfrpState(caster).channelledSl ?? 0);
 
@@ -77,7 +87,11 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
     const modeOf = resolveModeSources({ advantage: edge && reverse ? 1 : 0 });
 
     const slModifier =
-        channelled - armour + (edge && !reverse ? 1 : 0) + modeOf.slMod;
+        channelled -
+        armour +
+        selfSlMod(caster, editionOf(ctx.rules)) +
+        (edge && !reverse ? 1 : 0) +
+        modeOf.slMod;
 
     const passes = (t: PercentileTestResult) =>
         (t.outcome === 'success' || t.outcome === 'critical') && t.sl >= cn;

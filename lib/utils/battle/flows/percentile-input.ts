@@ -33,5 +33,5 @@ export function castPreviewOf(
     channelled: number;
     armourSl: number;
 } | null {
-    return ruleSystemOf(rules).magic.tested?.castPreview(caster, kind) ?? null;
+    return ruleSystemOf(rules).magic.tested?.castPreview(caster, kind, rules) ?? null;
 }

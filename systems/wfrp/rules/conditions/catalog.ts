@@ -23,7 +23,9 @@ export interface WfrpConditionDef {
         selfAttack?: number;
         against?: { melee?: number; all?: number };
     };
-    tick?: 'bleeding' | 'ablaze';
+    /** Under the `sl` condition model the level costs SL on every test (the worst level counts, they do not add) */
+    slPenalty?: true;
+    tick?: 'bleeding' | 'ablaze' | 'poisoned';
     endTest:
         | { skill: string }
         | { characteristic: CharacteristicKey }
@@ -48,18 +50,22 @@ export const WFRP_CONDITION_REGISTRY: Record<
     },
     fatigued: {
         leveled,
+        slPenalty: true,
         markers: [],
         testMod: { self: perLevel },
         endTest: null,
     },
     poisoned: {
         leveled,
+        slPenalty: true,
         markers: [],
+        tick: 'poisoned',
         testMod: { self: perLevel },
         endTest: { skill: 'endurance' },
     },
     stunned: {
         leveled,
+        slPenalty: true,
         markers: [EffectMarker.SKIP_ACTION],
         testMod: { self: perLevel },
         endTest: { skill: 'endurance' },
@@ -72,6 +78,7 @@ export const WFRP_CONDITION_REGISTRY: Record<
     },
     broken: {
         leveled,
+        slPenalty: true,
         markers: [],
         testMod: { self: perLevel },
         endTest: { skill: 'cool' },

@@ -58,6 +58,8 @@
       "bleedOut": "{name} bleeds out",
       "bleeding": "{name}: bleeding, −{damage} Wounds",
       "ablaze": "{name}: burning, −{damage} Wounds",
+      "poisoned": "{name}: poisoned, −{damage} Wound",
+      "bleedStops": "{name}: one bleeding stops",
       "faint": "{name} faints from blood loss"
     },
     "endTestSuccess": "{name}: {condition} — test {roll} / {target}, SL {sl}: success",
@@ -70,6 +72,7 @@
     "fortuneAdvantage": "{name} spends Fortune: Advantage",
     "fateNotFail": "{name} spends Fate: I Will Not Fail",
     "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
+    "counterCrit": "🛡️ The defender's critical hit wounds {name}: {text}",
     "critWound": "🩸 Critical wound for {target}: {text}",
     "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious",
     "psychologyPass": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: resisted",

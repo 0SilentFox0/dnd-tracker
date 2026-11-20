@@ -47,12 +47,14 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
               }
             : cast,
     castTest: wfrpCastTest,
-    castPreview: (caster, kind) => {
+    castPreview: (caster, kind, rules) => {
         const prayer = isPrayerKind(kind);
 
         return {
-            target: prayer ? prayTargetOf(caster) : castTargetOf(caster),
-            channelTarget: channelTargetOf(caster),
+            target: prayer
+                ? prayTargetOf(caster, rules)
+                : castTargetOf(caster, rules),
+            channelTarget: channelTargetOf(caster, rules),
             channelled: prayer ? 0 : (wfrpState(caster).channelledSl ?? 0),
             armourSl: prayer ? 0 : armourSl(caster),
         };

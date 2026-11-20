@@ -20,9 +20,9 @@ describe('isUp / isDown', () => {
         expect(isDown(withState(CombatStatus.ACTIVE, 5))).toBe(false);
     });
 
-    it('активний з 0 HP — впав', () => {
-        expect(isUp(withState(CombatStatus.ACTIVE, 0))).toBe(false);
-        expect(isDown(withState(CombatStatus.ACTIVE, 0))).toBe(true);
+    it('активний з 0 HP — на ногах (свідомий, canon-системи)', () => {
+        expect(isUp(withState(CombatStatus.ACTIVE, 0))).toBe(true);
+        expect(isDown(withState(CombatStatus.ACTIVE, 0))).toBe(false);
     });
 
     it.each([CombatStatus.UNCONSCIOUS, CombatStatus.DEAD])(

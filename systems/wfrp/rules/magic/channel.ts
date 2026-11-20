@@ -1,6 +1,6 @@
 import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
-import { selfTestMod } from '../conditions/test-mod';
+import { selfSlMod, selfTestMod } from '../conditions/test-mod';
 import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
 import { wfrpState, withWfrpState } from '../state';
@@ -12,12 +12,15 @@ import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-export function channelTargetOf(p: BattleParticipant): number {
+export function channelTargetOf(
+    p: BattleParticipant,
+    rules?: Ruleset
+): number {
     const chars = participantChars(p);
 
     return (
         (skillTarget(chars, 'channelling')?.target ?? value(chars, 'wp')) +
-        selfTestMod(p, 'test')
+        selfTestMod(p, 'test', editionOf(rules))
     );
 }
 
@@ -29,10 +32,11 @@ export function wfrpChannel(
     lines: LogLine[];
     miscast: 'minor' | 'major' | null;
 } {
-    const target = channelTargetOf(p);
+    const target = channelTargetOf(p, ctx.rules);
 
     const test = resolvePercentileTest({
         target,
+        slModifier: selfSlMod(p, editionOf(ctx.rules)),
         slModel: editionOf(ctx.rules).slModel,
         rng: ctx.rng,
         presetRoll: ctx.presetRoll,

@@ -17,6 +17,10 @@ const at = (
 };
 
 describe('healthState', () => {
+    it('0 HP без свідомості → down', () => {
+        expect(healthState(at(0, 40, 'unconscious'))).toBe('down');
+    });
+
     it.each([
         [40, 'unhurt'],
         [39, 'wounded'],
@@ -25,7 +29,7 @@ describe('healthState', () => {
         [11, 'bloodied'],
         [10, 'dying'],
         [1, 'dying'],
-        [0, 'down'],
+        [0, 'dying'],
     ] as const)('%i/40 → %s', (hp, state) => {
         expect(healthState(at(hp))).toBe(state);
     });

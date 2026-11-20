@@ -1,4 +1,5 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
+import type { EditionProfile } from '../edition';
 import type { CritResult } from './crit-table';
 import { recordCritWound } from './critical';
 
@@ -13,8 +14,10 @@ export function applyWfrpCrit(
     crit: CritResult,
     round: number,
     /** Canon5e counts Critical Wounds and can die from them (p172) */
-    counted = false
+    edition?: Pick<EditionProfile, 'woundModel' | 'conditionModel'>
 ): { participant: BattleParticipant; message: LogLine } {
+    const counted = edition?.woundModel === 'critical';
+
     const message =
         counted && crit.death
             ? textRef('battleWfrp.log.critDeath', {
@@ -39,6 +42,7 @@ export function applyWfrpCrit(
             key,
             levels,
             round,
+            edition,
             sourceName: crit.text,
         }).participant;
 

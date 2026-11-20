@@ -23,7 +23,7 @@ const target = at('t', { x: 6, y: 5 });
 
 const down = (p: BattleParticipant) => ({
     ...p,
-    combatStats: { ...p.combatStats, currentHp: 0 },
+    combatStats: { ...p.combatStats, currentHp: 0, status: 'unconscious' as const },
 });
 
 describe('lineOfFire', () => {

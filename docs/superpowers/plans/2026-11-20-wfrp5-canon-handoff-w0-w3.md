@@ -84,3 +84,19 @@
 - **Відкрита діра UI:** `isUp` лишився `ACTIVE && hp>0` (контракт ядра, тести state/health/line-of-fire), тож свідомий на 0 HP показується «впалим» і не є ціллю в UI (`useAttackTargets`, `spell-pick`, line-of-fire). Потрібне рішення: `isUp(p, rules?)` або маркер «awake at 0».
 - e2e grim (bestiary/arsenal) більше не вимагають status ≠ active на 0 HP.
 - Не зроблено: W3 ч2 (стани, Bleeding M21, крит захисника M20, L/R M35), хвости W2.
+
+## Стан після сесії 5 (2026-11-20): W3 ч2 «стани» (закомічено)
+
+- **isUp:** рішення власника — `isUp = status === ACTIVE` (без перевірки hp). У core при HP ≤ 0 статус і так стає Unconscious/Dead (`statusForHp`), тож свідомий на 0 HP (canon5e, `autoUnconsciousAtZero: false`) лишається ціллю в UI (`useAttackTargets`, `spell-pick`, line-of-fire, hero view); `healthState` показує такого як `dying`.
+- **`conditionModel: 'percent' | 'sl'`** у профілі редакції (canon5e = `sl`). `conditions/test-mod.ts`: `selfTestMod/againstMod(…, edition)` (процентні, під `sl` = 0), `selfSlMod` (−max(level) серед станів із `slPenalty`: fatigued/poisoned/stunned/broken; не сума), `selfModes` (Blinded атакує з Disadvantage), `againstSl` (Prone/Blinded → Advantage, Surprised → +2 SL; лише ближній бій). Прокинуто у `resolve-attack` (ближній/дальній), `cast-test`, `channel`, `end-test`, `sheet-test`; психологія лишена на legacy (немає rules у ctx, W5/W6).
+- **Stunned** під `sl`: без SKIP_ACTION, натомість `modifyStat speed −50%` (лише на першому рівні). Для цього `SystemConditionApply.rules?`, `applyWfrpConditionTo({ edition })`, `applyWfrpCrit(…, edition)` (4-й аргумент замість `counted`), `castPreview(caster, kind, rules?)`.
+- **Тіки (M21–M23):** Poisoned −1 Wound/раунд; Ablaze `1d10 + (рівні−1) − TB − min(AP)` без мінімуму 1; Bleeding: Endurance-тест на 0 HP (замість 10%/рівень), у Unconscious d10 ≤ рівень Bleeding = смерть, 10 знімає один Bleeding; зняття Poisoned/Stunned тестом → Fatigued.
+- **M20 крит захисника:** `resolveOpposed({ defenderDoubles })`; успішний дубль захисника під `critical` → Critical Wound атакуючому (випадкова локація, `withCounterCrit`, раунд 0).
+- Тести: `canon/conditions.test.ts`, `canon/condition-ticks.test.ts`; оновлені state/health/test-mod.
+
+### Не зроблено (наступна сесія)
+1. **M35 L/R локації** (arm/leg → left/right, дисарм основної руки, крит-таблиці за рукою) — не чіпано.
+2. Хвости W2: `notToday`, `howDidThatMiss` (pending-вікно за зразком crit-choice), витрата Momentum (друга атака/Disengage/Leadership), Fortune «зняти стан», UI Critical+локація для notFail, підписи Fortune/Advantage у пікері.
+3. M22 залишки: Stunned > TB → Unconscious, зняття +1 за кожен SL після першого, тест Blinded/Deafened; Surprised «без дії й захисту»; Entangled штрафує лише рух; Broken Cool щораунд.
+4. Дані: відсоткові модифікатори станів у даних пакетів (міграції не потрібно, код читає рівні).
+5. Фінал: `/simplify`, sweep homm/dnd5e (потрібен «так» на prodcopy), `rule-systems.md` + `STATUS.md` (W2+W3), Opus-рев'ю, повний `test:run`, живий прогін.

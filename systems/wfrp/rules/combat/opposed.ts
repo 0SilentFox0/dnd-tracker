@@ -20,6 +20,8 @@ export interface OpposedInput {
     edition?: Pick<EditionProfile, 'slModel' | 'opposedModel'>;
     /** The attacker's result is chosen (Fate): wins by at least +1 SL (p133) */
     attackerForced?: ForcedResult;
+    /** The defender's successful doubles are a Critical Hit too (p165) */
+    defenderDoubles?: boolean;
     rng: Rng;
     presetRolls?: { attacker?: number; defender?: number };
 }
@@ -41,6 +43,7 @@ export function resolveOpposed({
     defenderModes,
     edition,
     attackerForced,
+    defenderDoubles,
     rng,
     presetRolls,
 }: OpposedInput): OpposedResult {
@@ -69,6 +72,7 @@ export function resolveOpposed({
             target: best.target,
             slModifier: defenderSlMod + dMode.slMod,
             mode: dMode.mode,
+            doubles: defenderDoubles,
             slModel: edition?.slModel,
             rng,
             presetRoll: presetRolls?.defender,

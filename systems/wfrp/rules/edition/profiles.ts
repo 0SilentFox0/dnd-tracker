@@ -25,6 +25,8 @@ export interface EditionProfile {
     attackTarget: 'characteristic' | 'skill';
     /** `knockdown`: any hit to 0 Wounds drops and crits; `critical`: only damage beyond 0 gives a Critical Wound (+10 per excess Wound), crits beyond TB threaten death (p171-172) */
     woundModel: 'knockdown' | 'critical';
+    /** `percent`: condition levels shift the test target by 10%; `sl`: the worst penalising level costs that many SL, Stunned halves Move, Prone/Blinded/Surprised give melee attackers Advantage or SL (p184-187) */
+    conditionModel: 'percent' | 'sl';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -41,6 +43,7 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         opposedModel: 'attackerMustSucceed',
         attackTarget: 'characteristic',
         woundModel: 'knockdown',
+        conditionModel: 'percent',
     },
     canon5e: {
         advanceStep: 5,
@@ -55,5 +58,6 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         opposedModel: 'higherSl',
         attackTarget: 'skill',
         woundModel: 'critical',
+        conditionModel: 'sl',
     },
 };

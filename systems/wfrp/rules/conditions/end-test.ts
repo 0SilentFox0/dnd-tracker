@@ -2,10 +2,10 @@ import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
 import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
-import { reduceWfrpCondition } from './apply';
+import { applyWfrpConditionTo, reduceWfrpCondition } from './apply';
 import { isWfrpConditionKey, WFRP_CONDITION_REGISTRY } from './catalog';
 import { conditionLevel } from './levels';
-import { selfTestMod } from './test-mod';
+import { selfSlMod, selfTestMod } from './test-mod';
 
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import type { Rng } from '@/lib/utils/common/rng';
@@ -54,11 +54,14 @@ export function attemptWfrpConditionEnd(
             ? (skillTarget(c, endTest.skill)?.target ?? 0)
             : value(c, endTest.characteristic);
 
-    const target = base + selfTestMod(p, 'test');
+    const edition = editionOf(ctx.rules);
+
+    const target = base + selfTestMod(p, 'test', edition);
 
     const t = resolvePercentileTest({
         target,
-        slModel: editionOf(ctx.rules).slModel,
+        slModifier: selfSlMod(p, edition),
+        slModel: edition.slModel,
         rng: ctx.rng,
         presetRoll: ctx.presetRoll,
     });
@@ -73,8 +76,22 @@ export function attemptWfrpConditionEnd(
         sl: t.sl,
     };
 
-    const participants = success
-        ? replace(reduceWfrpCondition(p, key, 1).participant)
+    const cured = success ? reduceWfrpCondition(p, key, 1) : null;
+
+    const fatigue =
+        cured?.removed &&
+        edition.conditionModel === 'sl' &&
+        (key === 'poisoned' || key === 'stunned')
+            ? applyWfrpConditionTo(cured.participant, {
+                  key: 'fatigued',
+                  round: ctx.round,
+                  sourceName: condition,
+                  edition,
+              })
+            : null;
+
+    const participants = cured
+        ? replace((fatigue ?? cured).participant)
         : ps;
 
     return {

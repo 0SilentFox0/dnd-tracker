@@ -6,7 +6,7 @@ import {
 } from './characteristics/constants';
 import { skillTarget, value } from './characteristics/derive';
 import { readCharacteristics } from './characteristics/keys';
-import { selfTestMod } from './conditions/test-mod';
+import { selfSlMod, selfTestMod } from './conditions/test-mod';
 import {
     DIFFICULTY_KEYS,
     DIFFICULTY_SL,
@@ -93,8 +93,10 @@ export function rollWfrpSheetTest({
     }
 
     const r = resolvePercentileTest({
-        target: target + selfTestMod(participant, 'test'),
-        slModifier: DIFFICULTY_SL[difficulty],
+        target: target + selfTestMod(participant, 'test', editionOf(rules)),
+        slModifier:
+            DIFFICULTY_SL[difficulty] +
+            selfSlMod(participant, editionOf(rules)),
         doubles: false,
         slModel: editionOf(rules).slModel,
         mode: 'normal',

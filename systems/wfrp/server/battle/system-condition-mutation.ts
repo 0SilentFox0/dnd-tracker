@@ -74,6 +74,7 @@ export function systemConditionMutation(
             levels: body.levels,
             rounds: body.rounds,
             round,
+            rules: ctx.meta.rules,
             sourceName: textRef('battleLog.dm.name'),
         });
 

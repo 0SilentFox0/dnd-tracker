@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { wfrpAbilitiesOf } from '../../combat/participant';
 import { wfrpAttackTarget } from '../../combat/resolve-attack';
+import { EDITION_PROFILES } from '../../edition';
 import { applyWfrpConditionTo } from '../apply';
 import type { WfrpConditionKey } from '../catalog';
 import { againstMod, selfTestMod } from '../test-mod';
@@ -26,37 +27,37 @@ const withConds = (
 
 describe('selfTestMod', () => {
     it('sums leveled penalties', () => {
-        expect(selfTestMod(withConds(['fatigued', 2]), 'attack')).toBe(-20);
-        expect(selfTestMod(withConds(['fatigued', 2]), 'test')).toBe(-20);
+        expect(selfTestMod(withConds(['fatigued', 2]), 'attack', EDITION_PROFILES.legacy)).toBe(-20);
+        expect(selfTestMod(withConds(['fatigued', 2]), 'test', EDITION_PROFILES.legacy)).toBe(-20);
         expect(
-            selfTestMod(withConds(['fatigued', 1], ['poisoned', 2]), 'test')
+            selfTestMod(withConds(['fatigued', 1], ['poisoned', 2]), 'test', EDITION_PROFILES.legacy)
         ).toBe(-30);
     });
 
     it('blinded penalizes attacks only', () => {
-        expect(selfTestMod(withConds(['blinded']), 'attack')).toBe(-20);
-        expect(selfTestMod(withConds(['blinded']), 'test')).toBe(0);
+        expect(selfTestMod(withConds(['blinded']), 'attack', EDITION_PROFILES.legacy)).toBe(-20);
+        expect(selfTestMod(withConds(['blinded']), 'test', EDITION_PROFILES.legacy)).toBe(0);
         expect(
-            selfTestMod(withConds(['stunned', 1], ['blinded']), 'attack')
+            selfTestMod(withConds(['stunned', 1], ['blinded']), 'attack', EDITION_PROFILES.legacy)
         ).toBe(-30);
     });
 
     it('empty participant is 0', () => {
-        expect(selfTestMod({} as never, 'attack')).toBe(0);
-        expect(selfTestMod(undefined, 'test')).toBe(0);
+        expect(selfTestMod({} as never, 'attack', EDITION_PROFILES.legacy)).toBe(0);
+        expect(selfTestMod(undefined, 'test', EDITION_PROFILES.legacy)).toBe(0);
     });
 });
 
 describe('againstMod', () => {
     it('prone helps melee only', () => {
-        expect(againstMod(withConds(['prone']), 'melee')).toBe(20);
-        expect(againstMod(withConds(['prone']), 'ranged')).toBe(0);
+        expect(againstMod(withConds(['prone']), 'melee', EDITION_PROFILES.legacy)).toBe(20);
+        expect(againstMod(withConds(['prone']), 'ranged', EDITION_PROFILES.legacy)).toBe(0);
     });
 
     it('surprised helps all, stacks with others', () => {
-        expect(againstMod(withConds(['surprised']), 'melee')).toBe(20);
-        expect(againstMod(withConds(['surprised']), 'ranged')).toBe(20);
-        expect(againstMod(withConds(['blinded'], ['prone']), 'melee')).toBe(40);
+        expect(againstMod(withConds(['surprised']), 'melee', EDITION_PROFILES.legacy)).toBe(20);
+        expect(againstMod(withConds(['surprised']), 'ranged', EDITION_PROFILES.legacy)).toBe(20);
+        expect(againstMod(withConds(['blinded'], ['prone']), 'melee', EDITION_PROFILES.legacy)).toBe(40);
     });
 });
 

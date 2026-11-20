@@ -1,9 +1,13 @@
+import { skillTarget, value } from '../characteristics/derive';
 import { MIN_DAMAGE } from '../combat/constants';
 import { clearDeathTimer, tickDeathTimer } from '../combat/critical';
-import { participantStats } from '../combat/participant';
-import { applyWfrpConditionTo } from './apply';
+import { participantChars, participantStats } from '../combat/participant';
+import { editionOf } from '../edition';
+import { resolvePercentileTest } from '../percentile';
+import { applyWfrpConditionTo, reduceWfrpCondition } from './apply';
 import { BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL } from './catalog';
 import { conditionLevel } from './levels';
+import { selfSlMod } from './test-mod';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -22,6 +26,28 @@ import type {
 } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
+
+const POISON_WOUNDS = 1;
+
+const BLEED_OUT_ROLL = 10;
+
+function endurancePasses(
+    p: BattleParticipant,
+    ctx: { rng: Rng; rules: Ruleset }
+): boolean {
+    const edition = editionOf(ctx.rules);
+
+    const c = participantChars(p);
+
+    const t = resolvePercentileTest({
+        target: skillTarget(c, 'endurance')?.target ?? value(c, 't'),
+        slModifier: selfSlMod(p, edition),
+        slModel: edition.slModel,
+        rng: ctx.rng,
+    });
+
+    return t.outcome === 'success' || t.outcome === 'critical';
+}
 
 export function wfrpConditionsTurnStart(
     ps: BattleParticipant[],
@@ -46,7 +72,7 @@ export function wfrpConditionsTurnStart(
 
     const messages: LogLine[] = [];
 
-    const hurt = (amount: number, key: 'bleeding' | 'ablaze') => {
+    const hurt = (amount: number, key: 'bleeding' | 'ablaze' | 'poisoned') => {
         const before = findParticipant(participants, id);
 
         if (!before || !isActive(before) || amount <= 0) return;
@@ -86,6 +112,10 @@ export function wfrpConditionsTurnStart(
         );
     };
 
+    const edition = editionOf(ctx.rules);
+
+    const canon = edition.conditionModel === 'sl';
+
     const bleeding = conditionLevel(start, 'bleeding');
 
     if (bleeding > 0) {
@@ -95,7 +125,9 @@ export function wfrpConditionsTurnStart(
 
         if (
             isActive(now) &&
-            ctx.rng() < BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding
+            (canon
+                ? now.combatStats.currentHp <= 0 && !endurancePasses(now, ctx)
+                : ctx.rng() < BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding)
         ) {
             const faint = applyWfrpConditionTo(now, {
                 key: 'unconscious',
@@ -116,19 +148,26 @@ export function wfrpConditionsTurnStart(
         }
     }
 
+    const poisoned = conditionLevel(
+        findParticipant(participants, id)!,
+        'poisoned'
+    );
+
+    if (canon && poisoned > 0) hurt(POISON_WOUNDS, 'poisoned');
+
     const ablaze = conditionLevel(findParticipant(participants, id)!, 'ablaze');
 
     if (ablaze > 0) {
         const wfrp = participantStats(findParticipant(participants, id)!);
 
+        const armour = canon
+            ? Math.min(...Object.values(wfrp?.ap ?? { body: 0 }))
+            : (wfrp?.ap.body ?? 0);
+
         hurt(
             Math.max(
-                MIN_DAMAGE,
-                rollDie(10, ctx.rng) +
-                    ablaze -
-                    1 -
-                    (wfrp?.tb ?? 0) -
-                    (wfrp?.ap.body ?? 0)
+                canon ? 0 : MIN_DAMAGE,
+                rollDie(10, ctx.rng) + ablaze - 1 - (wfrp?.tb ?? 0) - armour
             ),
             'ablaze'
         );
@@ -142,7 +181,7 @@ export function wfrpConditionsTurnStart(
 export function wfrpSkippedTurn(
     ps: BattleParticipant[],
     id: string,
-    ctx: { round: number; rng: Rng }
+    ctx: { round: number; rng: Rng; rules?: Ruleset }
 ): SystemConditionResult {
     const p = findParticipant(ps, id);
 
@@ -166,11 +205,27 @@ export function wfrpSkippedTurn(
 
     const bleeding = conditionLevel(p, 'bleeding');
 
-    if (
-        bleeding === 0 ||
-        p.combatStats.currentHp > 0 ||
-        ctx.rng() >= BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding
-    )
+    if (bleeding === 0 || p.combatStats.currentHp > 0)
+        return { participants: ps, messages: [] };
+
+    if (editionOf(ctx.rules).conditionModel === 'sl') {
+        const roll = rollDie(10, ctx.rng);
+
+        if (roll >= BLEED_OUT_ROLL && bleeding < BLEED_OUT_ROLL) {
+            const { participant } = reduceWfrpCondition(p, 'bleeding', 1);
+
+            return {
+                participants: replaceParticipant(ps, participant),
+                messages: [
+                    textRef('battleWfrp.log.tick.bleedStops', {
+                        name: p.basicInfo.name,
+                    }),
+                ],
+            };
+        }
+
+        if (roll > bleeding) return { participants: ps, messages: [] };
+    } else if (ctx.rng() >= BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding)
         return { participants: ps, messages: [] };
 
     const dead: BattleParticipant = {

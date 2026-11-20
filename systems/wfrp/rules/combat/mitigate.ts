@@ -117,7 +117,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         amount: base.total + crit.bonusDamage,
         steps,
         totalLabel,
-        afterHit: (p, round) => applyWfrpCrit(p, crit, round, counted),
+        afterHit: (p, round) => applyWfrpCrit(p, crit, round, editionOf(ctx.rules)),
     };
 }
 

@@ -2,6 +2,7 @@ import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
 import { applyWfrpCondition } from '../conditions/apply';
 import { selfTestMod } from '../conditions/test-mod';
+import { EDITION_PROFILES } from '../edition';
 import { resolvePercentileTest } from '../percentile';
 import { wfrpState, withWfrpState } from '../state';
 import { PSYCHOLOGY_PASS_SL } from './constants';
@@ -127,7 +128,8 @@ export function wfrpPsychology(
                     participants.find(
                         (p) => p.basicInfo.id === tester.basicInfo.id
                     ),
-                    'test'
+                    'test',
+                    EDITION_PROFILES.legacy
                 );
 
             const t = resolvePercentileTest({ target, rng: ctx.rng });

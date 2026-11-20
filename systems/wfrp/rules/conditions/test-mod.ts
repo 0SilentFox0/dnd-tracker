@@ -1,7 +1,13 @@
+import type { EditionProfile } from '../edition';
+import type { ModeSources } from '../percentile/advantage';
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY } from './catalog';
 import { conditionLevel } from './levels';
 
 import type { BattleParticipant } from '@/types/battle';
+
+type Model = Pick<EditionProfile, 'conditionModel'>;
+
+const SURPRISED_MELEE_SL = 2;
 
 const levelsOf = (p: BattleParticipant | undefined) =>
     p?.battleData?.activeEffects
@@ -11,10 +17,16 @@ const levelsOf = (p: BattleParticipant | undefined) =>
           })).filter((c) => c.level > 0)
         : [];
 
+const isSl = (edition: Model) => edition.conditionModel === 'sl';
+
+/** Percent shift of the target (legacy model); zero under the `sl` model, see `selfSlMod` */
 export function selfTestMod(
     p: BattleParticipant | undefined,
-    kind: 'attack' | 'test'
+    kind: 'attack' | 'test',
+    edition: Model
 ): number {
+    if (isSl(edition)) return 0;
+
     return levelsOf(p).reduce((sum, { key, level }) => {
         const mod = WFRP_CONDITION_REGISTRY[key].testMod;
 
@@ -26,10 +38,42 @@ export function selfTestMod(
     }, 0);
 }
 
+/** SL cost of the worst penalising condition (p184-186): different conditions do not add */
+export function selfSlMod(
+    p: BattleParticipant | undefined,
+    edition: Model
+): number {
+    if (!isSl(edition)) return 0;
+
+    const worst = levelsOf(p).reduce(
+        (max, { key, level }) =>
+            WFRP_CONDITION_REGISTRY[key].slPenalty ? Math.max(max, level) : max,
+        0
+    );
+
+    return worst > 0 ? -worst : 0;
+}
+
+/** Blinded attacks with Disadvantage (p185) */
+export function selfModes(
+    p: BattleParticipant | undefined,
+    kind: 'attack' | 'test',
+    edition: Model
+): ModeSources {
+    return isSl(edition) &&
+        kind === 'attack' &&
+        levelsOf(p).some((c) => c.key === 'blinded')
+        ? { disadvantage: 1 }
+        : {};
+}
+
 export function againstMod(
     target: BattleParticipant,
-    attackKind: 'melee' | 'ranged'
+    attackKind: 'melee' | 'ranged',
+    edition: Model
 ): number {
+    if (isSl(edition)) return 0;
+
     return levelsOf(target).reduce((sum, { key }) => {
         const against = WFRP_CONDITION_REGISTRY[key].testMod?.against;
 
@@ -39,4 +83,21 @@ export function againstMod(
             (attackKind === 'melee' ? (against?.melee ?? 0) : 0)
         );
     }, 0);
+}
+
+/** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187); ranged attacks are unaffected */
+export function againstSl(
+    target: BattleParticipant,
+    attackKind: 'melee' | 'ranged',
+    edition: Model
+): { advantage: number; sl: number } {
+    if (!isSl(edition) || attackKind !== 'melee') return { advantage: 0, sl: 0 };
+
+    const keys = levelsOf(target).map((c) => c.key);
+
+    return {
+        advantage:
+            Number(keys.includes('prone')) + Number(keys.includes('blinded')),
+        sl: keys.includes('surprised') ? SURPRISED_MELEE_SL : 0,
+    };
 }

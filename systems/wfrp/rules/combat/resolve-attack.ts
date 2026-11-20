@@ -1,6 +1,12 @@
 import { skillTarget, value } from '../characteristics/derive';
-import { againstMod, selfTestMod } from '../conditions/test-mod';
-import { editionOf, type EditionProfile } from '../edition';
+import {
+    againstMod,
+    againstSl,
+    selfModes,
+    selfSlMod,
+    selfTestMod,
+} from '../conditions/test-mod';
+import { EDITION_PROFILES, editionOf, type EditionProfile } from '../edition';
 import { weaponSkillTarget } from '../edition/attack-skill';
 import { qualityFumbleFrom, qualityToHit } from '../equipment/quality-effects';
 import {
@@ -20,6 +26,8 @@ import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
 import { withWfrpState } from '../state';
 import { sizeHitMod } from '../traits/size';
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
+import { applyWfrpCrit } from './crit-effect';
+import { type CritResult, rollCrit } from './crit-table';
 import { hitLocation } from './location';
 import { percentileLines } from './log';
 import {
@@ -42,6 +50,7 @@ import {
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
+import { rollDie } from '@/lib/utils/common/dice';
 import type {
     ResolveAttackCtx,
     ResolvedAttack,
@@ -77,10 +86,10 @@ const attackBaseTargetOf = (
 const attackerTargetOf = (
     attacker: BattleParticipant,
     attack: BattleAttack,
-    edition?: Pick<EditionProfile, 'attackTarget'>
+    edition?: Pick<EditionProfile, 'attackTarget' | 'conditionModel'>
 ): number =>
     attackBaseTargetOf(attacker, attack, edition) +
-    selfTestMod(attacker, 'attack');
+    selfTestMod(attacker, 'attack', edition ?? EDITION_PROFILES.legacy);
 
 // Best parry target among the defender's melee weapons; bare Weapon Skill without one.
 function parryTargetOf(
@@ -195,6 +204,21 @@ function personalMomentum(
             targetUpdate: (p: BattleParticipant) =>
                 attackerWon ? loseMomentum(p) : withMomentum(p, true),
         }),
+    };
+}
+
+function withCounterCrit(
+    r: ResolvedAttack,
+    crit: CritResult,
+    edition: Pick<EditionProfile, 'woundModel' | 'conditionModel'>,
+    name: string
+): ResolvedAttack {
+    return {
+        ...r,
+        attackerUpdate: (p) =>
+            applyWfrpCrit(r.attackerUpdate?.(p) ?? p, crit, 0, edition)
+                .participant,
+        lines: [...r.lines, textRef('battleWfrp.log.counterCrit', { name, text: crit.text })],
     };
 }
 
@@ -341,17 +365,25 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
     };
 
     if (attackKindOf(attack.type) === AttackType.RANGED) {
-        const rangedMode = resolveModeSources({ advantage: fortuneAdvantage });
+        const blind = selfModes(attacker, 'attack', edition);
+
+        const rangedMode = resolveModeSources({
+            advantage: fortuneAdvantage,
+            disadvantage: blind.disadvantage,
+        });
 
         const rangedOnce = (presetRoll?: number) => {
             const test = resolvePercentileTest({
                 target:
                     attackerTargetOf(attacker, attack, edition) +
-                    againstMod(target, 'ranged') +
+                    againstMod(target, 'ranged', edition) +
                     toHit +
                     sizeHitMod(attacker, target),
                 slModifier:
-                    DIFFICULTY_SL.challenging + slBonus + rangedMode.slMod,
+                    DIFFICULTY_SL.challenging +
+                    slBonus +
+                    selfSlMod(attacker, edition) +
+                    rangedMode.slMod,
                 mode: rangedMode.mode,
                 doubles: true,
                 slModel: edition.slModel,
@@ -396,6 +428,8 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const personal = edition.momentumModel === 'participant';
 
+    const meleeAgainst = againstSl(target, 'melee', edition);
+
     const spent = personal ? hasMomentum(attacker) : held.attacker;
 
     const meleeOnce = (presetRolls: {
@@ -406,7 +440,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             attackerTarget:
                 attackerTargetOf(attacker, attack, edition) +
                 toHit +
-                againstMod(target, 'melee') +
+                againstMod(target, 'melee', edition) +
                 sizeHitMod(attacker, target) +
                 (isOutnumbering(attacker, target, participants, ctx.map)
                     ? OUTNUMBERING_BONUS
@@ -416,16 +450,29 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                     kind: 'parry',
                     target:
                         parryTargetOf(target, edition) +
-                        selfTestMod(target, 'test'),
+                        selfTestMod(target, 'test', edition),
                 },
-                { kind: 'dodge', target: dodge + selfTestMod(target, 'test') },
+                {
+                    kind: 'dodge',
+                    target: dodge + selfTestMod(target, 'test', edition),
+                },
             ],
             attackerSlMod:
-                (spent && !personal ? MOMENTUM_SL_BONUS : 0) + slBonus,
-            defenderSlMod: held.defender && !personal ? MOMENTUM_SL_BONUS : 0,
+                (spent && !personal ? MOMENTUM_SL_BONUS : 0) +
+                slBonus +
+                selfSlMod(attacker, edition) +
+                meleeAgainst.sl,
+            defenderSlMod:
+                (held.defender && !personal ? MOMENTUM_SL_BONUS : 0) +
+                selfSlMod(target, edition),
             ...(personal && {
                 attackerModes: {
-                    advantage: (spent ? 1 : 0) + fortuneAdvantage,
+                    advantage:
+                        (spent ? 1 : 0) +
+                        fortuneAdvantage +
+                        meleeAgainst.advantage,
+                    disadvantage: selfModes(attacker, 'attack', edition)
+                        .disadvantage,
                 },
                 defenderModes: {
                     parry: { advantage: hasMomentum(target) ? 1 : 0 },
@@ -433,6 +480,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             }),
             edition,
             attackerForced: forced,
+            defenderDoubles: edition.woundModel === 'critical',
             rng,
             presetRolls,
         });
@@ -449,10 +497,13 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
             ...(spent && { momentumUsed: true }),
         });
 
-        return {
-            roll: result.attacker.roll,
-            defenderRaw: result.defender.rawRoll,
-            resolved: toResult(
+        const counterCrit =
+            edition.woundModel === 'critical' &&
+            result.defender.outcome === 'critical'
+                ? rollCrit(hitLocation(rollDie(100, rng)), ctx.rules, rng)
+                : undefined;
+
+        const resolved = toResult(
                 ctx,
                 details,
                 result.isHit && !fumbled(result.attacker.roll),
@@ -463,7 +514,19 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 personal
                     ? { parried: result.defender.kind === 'parry' }
                     : undefined
-            ),
+            );
+
+        return {
+            roll: result.attacker.roll,
+            defenderRaw: result.defender.rawRoll,
+            resolved: counterCrit
+                ? withCounterCrit(
+                      resolved,
+                      counterCrit,
+                      edition,
+                      attacker.basicInfo.name
+                  )
+                : resolved,
         };
     };
 
