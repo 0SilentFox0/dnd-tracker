@@ -203,7 +203,9 @@
   "zoom": {
     "in": "Наблизити",
     "out": "Віддалити",
-    "reset": "Скинути масштаб"
+    "reset": "Скинути масштаб",
+    "fullscreen": "Повний екран",
+    "exitFullscreen": "Вийти з повного екрана"
   },
   "heroCluster": "{name} і ще {count}",
   "pinCluster": "{name} і ще {count}",

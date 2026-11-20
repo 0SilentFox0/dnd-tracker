@@ -203,7 +203,9 @@
   "zoom": {
     "in": "Zoom in",
     "out": "Zoom out",
-    "reset": "Reset zoom"
+    "reset": "Reset zoom",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen"
   },
   "heroCluster": "{name} and {count} more",
   "pinCluster": "{name} and {count} more",

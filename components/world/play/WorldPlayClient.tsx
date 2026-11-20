@@ -32,7 +32,7 @@ import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const MAP_HEIGHT =
-    'h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
+    'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
 
 export function WorldPlayClient({
     campaignId,
@@ -122,7 +122,7 @@ export function WorldPlayClient({
                                 marker={marker}
                                 embedded={!isDesktop}
                                 actions={{
-                                    onMore: () => play.details.set(true),
+                                    onMore: play.openDetails,
                                     onOpenMap: play.card.canOpenChild
                                         ? () => play.openChild(marker.id)
                                         : undefined,
@@ -196,7 +196,21 @@ export function WorldPlayClient({
                                         onPick={play.pickPlace}
                                     />
                                     <div
-                                        className={`relative ${MAP_HEIGHT}`}
+                                        className={
+                                            play.fullscreen.full
+                                                ? 'fixed inset-0 z-50 h-dvh bg-black'
+                                                : `relative ${MAP_HEIGHT}`
+                                        }
+                                        role={
+                                            play.fullscreen.full
+                                                ? 'region'
+                                                : undefined
+                                        }
+                                        aria-label={
+                                            play.fullscreen.full
+                                                ? t('zoom.fullscreen')
+                                                : undefined
+                                        }
                                         data-tour="world.map"
                                     >
                                         <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
@@ -227,10 +241,20 @@ export function WorldPlayClient({
                                             fog={props.fog}
                                             layers={play.layers}
                                             focus={play.focus}
+                                            className={
+                                                play.fullscreen.full
+                                                    ? 'rounded-none border-0'
+                                                    : undefined
+                                            }
                                             selectedId={marker?.id}
                                             compact={!isDesktop}
                                             handlers={play.handlers}
                                             slots={{
+                                                fullscreen: {
+                                                    full: play.fullscreen.full,
+                                                    toggle: play.fullscreen
+                                                        .toggle,
+                                                },
                                                 card: pickCard({
                                                     isDesktop,
                                                     trail:

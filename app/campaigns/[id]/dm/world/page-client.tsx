@@ -56,7 +56,7 @@ const FRAME_HEIGHT =
     'lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:flex-col';
 
 const MAP_HEIGHT =
-    'h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-auto lg:min-h-0 lg:flex-1';
+    'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-auto lg:min-h-0 lg:flex-1';
 
 export function WorldEditorPageClient({
     campaignId,
@@ -79,7 +79,8 @@ export function WorldEditorPageClient({
         tools: { eyes, drawing, moveTarget, snap, mode },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: { create: creating, details, tree },
-        actions: { openMap, changeEyes },
+        actions: { openMap, changeEyes, openDetails },
+        view: { focus, fullscreen },
         handlers,
         card: bubbleCard,
         enemy,
@@ -87,6 +88,8 @@ export function WorldEditorPageClient({
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
+
+    const fsSlot = { full: fullscreen.full, toggle: fullscreen.toggle };
 
     const trail = useTrailView(
         useWorldTrail(campaignId, mapId).data,
@@ -176,8 +179,7 @@ export function WorldEditorPageClient({
                                                 key={marker.id}
                                                 marker={marker}
                                                 actions={{
-                                                    onMore: () =>
-                                                        details.set(true),
+                                                    onMore: openDetails,
                                                     onClose: closePanel,
                                                 }}
                                             />
@@ -311,7 +313,23 @@ export function WorldEditorPageClient({
                                                         </aside>
                                                     ) : null}
                                                     <div
-                                                        className={`relative ${MAP_HEIGHT} lg:min-w-0`}
+                                                        className={
+                                                            fullscreen.full
+                                                                ? 'fixed inset-0 z-50 h-dvh bg-black'
+                                                                : `relative ${MAP_HEIGHT} lg:min-w-0`
+                                                        }
+                                                        role={
+                                                            fullscreen.full
+                                                                ? 'region'
+                                                                : undefined
+                                                        }
+                                                        aria-label={
+                                                            fullscreen.full
+                                                                ? t(
+                                                                      'zoom.fullscreen'
+                                                                  )
+                                                                : undefined
+                                                        }
                                                     >
                                                         {eyes.asHeroId ? (
                                                             <QueryState
@@ -343,7 +361,14 @@ export function WorldEditorPageClient({
                                                                             compact={
                                                                                 !isDesktop
                                                                             }
+                                                                            className={
+                                                                                fullscreen.full
+                                                                                    ? 'rounded-none border-0'
+                                                                                    : undefined
+                                                                            }
                                                                             slots={{
+                                                                                fullscreen:
+                                                                                    fsSlot,
                                                                                 hint: (
                                                                                     <p
                                                                                         role="status"
@@ -442,7 +467,17 @@ export function WorldEditorPageClient({
                                                                 handlers={
                                                                     handlers
                                                                 }
+                                                                focus={
+                                                                    focus
+                                                                }
+                                                                className={
+                                                                    fullscreen.full
+                                                                        ? 'rounded-none border-0'
+                                                                        : undefined
+                                                                }
                                                                 slots={{
+                                                                    fullscreen:
+                                                                        fsSlot,
                                                                     hint: (
                                                                         <WorldToolHint
                                                                             tool={

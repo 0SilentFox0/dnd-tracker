@@ -1,4 +1,8 @@
 {
+  "2026-11-20-world-viewport": {
+    "title": "World map: clusters and full screen",
+    "body": "Nearby pins merge into a \"+N\" badge that zooms in on click. Added a full screen mode, removed the side bars around the map, and the marker label is now compact with the details panel on the side."
+  },
   "2026-11-20-wfrp-creation": {
     "title": "Grim d100 (5e): creation by the book",
     "body": "Hero creation follows the 5e steps: no starting XP, +6 (or +3 for a rearranged roll) to career characteristics, Fate and Fortune +1 for accepting the first results, five species skills, eight career skill advances, a tier 1 career talent and trappings. Free-point stats stay within 4–16."
