@@ -102,6 +102,32 @@ describe('SpellMagicFields', () => {
         expect(last().casting?.magic?.cn).toBe(7);
     });
 
+    it('toggles the missile and slBonus flags and drops them when cleared', () => {
+        render(
+            <Harness initial={getDefaultSpellFormData()}>
+                {(p) => <SpellMagicFields {...p} conditions={conditions} />}
+            </Harness>
+        );
+
+        fireEvent.click(
+            screen.getByRole('checkbox', { name: 'wfrpMagic.ui.editor.missile' })
+        );
+        fireEvent.click(
+            screen.getByRole('checkbox', { name: 'wfrpMagic.ui.editor.slBonus' })
+        );
+
+        expect(last().casting?.magic).toMatchObject({
+            missile: true,
+            slBonus: true,
+        });
+
+        fireEvent.click(
+            screen.getByRole('checkbox', { name: 'wfrpMagic.ui.editor.missile' })
+        );
+
+        expect(last().casting?.magic?.missile).toBeUndefined();
+    });
+
     it('magic power tab offers only auto resolution', () => {
         render(
             <Harness initial={getDefaultSpellFormData()}>

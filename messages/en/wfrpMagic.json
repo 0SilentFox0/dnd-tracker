@@ -150,7 +150,15 @@
         "blinded": "Blinded",
         "deafened": "Deafened",
         "unconscious": "Unconscious"
-      }
+      },
+      "ignore": "Damage ignores",
+      "ignoreNone": "Nothing",
+      "ignore_ap": "Armour",
+      "ignore_tbAp": "Toughness and armour",
+      "scale": "Damage or healing adds bonus of",
+      "scaleNone": "None",
+      "missile": "Magic missile (power bonus, hit location from the cast roll)",
+      "slBonus": "Cast SL adds to dice damage"
     }
   }
 }

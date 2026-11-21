@@ -144,7 +144,12 @@
     "skillPicks": "Skills (5e creation)",
     "skillPicksCount": "Picks",
     "skillPicksOptions": "Options (skill keys, comma-separated)",
-    "languages": "Languages (skill keys, comma-separated)"
+    "languages": "Languages (skill keys, comma-separated)",
+    "talentChoices": "Talent choices (pick one per group)",
+    "talentChoicesHint": "Each group offers two to six talents; the character takes one from every group on top of the fixed talents.",
+    "talentChoiceGroup": "Choice {n}",
+    "addTalentChoice": "Add choice group",
+    "removeTalentChoice": "Remove group"
   },
   "canon": {
     "speciesRolled": "I rolled the species on the Species Table and keep the first result",

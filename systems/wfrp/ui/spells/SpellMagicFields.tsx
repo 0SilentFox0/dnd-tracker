@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { HudSection } from '@/components/hud/form';
 import type { SpellMagicFieldsProps } from '@/components/systems/types';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -14,10 +15,13 @@ import {
     withSpellMagic,
 } from '@/lib/utils/spells/model/form';
 import { SPELL_MAGIC_KINDS } from '@/lib/utils/spells/model/schema';
+import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
 
 const OVERCAST_KEYS = ['none', 'dice', 'targets'] as const;
 
 const MAX_ATTRIBUTE_LEVELS = 3;
+
+const IGNORE_KEYS = ['ap', 'tbAp'] as const;
 
 export function SpellMagicFields({
     formData,
@@ -128,6 +132,62 @@ export function SpellMagicFields({
                             noneLabel={te('attributeNone')}
                         />
                     </div>
+                    <div>
+                        <Label htmlFor="magic-ignore">{te('ignore')}</Label>
+                        <SelectField
+                            id="magic-ignore"
+                            value={magic.ignore ?? ''}
+                            onValueChange={(v) =>
+                                set({
+                                    ignore: v
+                                        ? (v as (typeof IGNORE_KEYS)[number])
+                                        : undefined,
+                                })
+                            }
+                            placeholder={te('ignore')}
+                            options={IGNORE_KEYS.map((k) => ({
+                                value: k,
+                                label: te(`ignore_${k}`),
+                            }))}
+                            allowNone
+                            noneLabel={te('ignoreNone')}
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="magic-scale">{te('scale')}</Label>
+                        <SelectField
+                            id="magic-scale"
+                            value={magic.scale ?? ''}
+                            onValueChange={(v) =>
+                                set({ scale: v || undefined })
+                            }
+                            placeholder={te('scale')}
+                            options={CHARACTERISTIC_KEYS.map((k) => ({
+                                value: k,
+                                label: t(`gameTerms.characteristics.${k}.label`),
+                            }))}
+                            allowNone
+                            noneLabel={te('scaleNone')}
+                        />
+                    </div>
+                    <label className="flex min-h-11 items-center gap-2 text-sm">
+                        <Checkbox
+                            checked={magic.missile === true}
+                            onCheckedChange={(c) =>
+                                set({ missile: c === true ? true : undefined })
+                            }
+                        />
+                        {te('missile')}
+                    </label>
+                    <label className="flex min-h-11 items-center gap-2 text-sm">
+                        <Checkbox
+                            checked={magic.slBonus === true}
+                            onCheckedChange={(c) =>
+                                set({ slBonus: c === true ? true : undefined })
+                            }
+                        />
+                        {te('slBonus')}
+                    </label>
                     {magic.attribute && levelCap > 1 && (
                         <div>
                             <Label htmlFor="magic-attribute-levels">

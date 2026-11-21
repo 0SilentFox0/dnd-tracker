@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { type TableRow, TableRowsEditor } from './TableRowsEditor';
+import { TalentChoicesEditor } from './TalentChoicesEditor';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
@@ -267,6 +268,13 @@ export function SpeciesProfileEditor({
                     triggerClassName="min-h-11 w-full"
                 />
             </section>
+            <TalentChoicesEditor
+                groups={profile.talentChoices ?? []}
+                options={featOptions}
+                onChange={(groups) =>
+                    edit({ talentChoices: groups.length ? groups : undefined })
+                }
+            />
             <TableRowsEditor
                 title={t('careerTable')}
                 idLabel={t('career')}

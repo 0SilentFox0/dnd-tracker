@@ -19,6 +19,10 @@ import {
     type QualityRef,
 } from '@/systems/wfrp/rules/equipment';
 
+const STRENGTH_MODES = ['none', 'fixed', 'wielder'] as const;
+
+const DEFAULT_HOLD_STRENGTH = 50;
+
 interface QualityListEditorProps {
     id: string;
     label: string;
@@ -74,18 +78,26 @@ export function QualityListEditor({
         setPick('');
     };
 
-    const setValue = (index: number, next: number | undefined) =>
+    const patchRef = (index: number, patch: Partial<QualityRef>) =>
         onChange(
-            value.map((r, i) =>
-                i === index
-                    ? {
-                          key: r.key,
-                          ...(r.condition && { condition: r.condition }),
-                          ...(next !== undefined && { value: next }),
-                      }
-                    : r
-            )
+            value.map((r, i) => (i === index ? { ...r, ...patch } : r))
         );
+
+    const setValue = (index: number, next: number | undefined) =>
+        patchRef(index, { value: next });
+
+    const strengthMode = (r: QualityRef) =>
+        r.strength === 'wielder' ? 'wielder' : r.strength ? 'fixed' : 'none';
+
+    const setStrengthMode = (index: number, mode: string) =>
+        patchRef(index, {
+            strength:
+                mode === 'wielder'
+                    ? 'wielder'
+                    : mode === 'fixed'
+                      ? DEFAULT_HOLD_STRENGTH
+                      : undefined,
+        });
 
     return (
         <section className="space-y-2" aria-label={label}>
@@ -113,6 +125,11 @@ export function QualityListEditor({
                                                               ...x,
                                                               condition:
                                                                   c as WfrpConditionKey,
+                                                              ...(c !==
+                                                                  'entangled' && {
+                                                                  strength:
+                                                                      undefined,
+                                                              }),
                                                           }
                                                         : x
                                                 )
@@ -123,6 +140,46 @@ export function QualityListEditor({
                                     />
                                 </div>
                             )}
+                            {r.key === 'inflict' &&
+                                r.condition === 'entangled' && (
+                                    <>
+                                        <div className="w-32">
+                                            <SelectField
+                                                id={`${id}-${r.key}-strength-mode`}
+                                                aria-label={t('holdStrength')}
+                                                value={strengthMode(r)}
+                                                onValueChange={(m) =>
+                                                    setStrengthMode(i, m)
+                                                }
+                                                options={STRENGTH_MODES.map(
+                                                    (m) => ({
+                                                        value: m,
+                                                        label: t(
+                                                            `holdStrength_${m}`
+                                                        ),
+                                                    })
+                                                )}
+                                                triggerClassName="min-h-11 w-full"
+                                            />
+                                        </div>
+                                        {typeof r.strength === 'number' && (
+                                            <div className="w-24">
+                                                <NumberField
+                                                    id={`${id}-${r.key}-strength`}
+                                                    label={t('holdStrength')}
+                                                    value={r.strength}
+                                                    min={1}
+                                                    max={100}
+                                                    onChange={(n) =>
+                                                        patchRef(i, {
+                                                            strength: n,
+                                                        })
+                                                    }
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             {QUALITY_REGISTRY[r.key].hasValue && (
                                 <div className="w-24">
                                     <NumberField

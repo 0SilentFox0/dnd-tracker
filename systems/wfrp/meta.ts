@@ -27,8 +27,8 @@ export const WFRP_META = {
         budgetKb: {
             battle: 116.7,
             member: 119.5,
-            // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels and the canon-tech epic (P1-P12) grew the wfrp scopes past their old budgets
-            dm: 124.7,
+            // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels, the canon-tech epic (P1-P12) and the system editor fields grew the wfrp scopes past their old budgets
+            dm: 125.4,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },
