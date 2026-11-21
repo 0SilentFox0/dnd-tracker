@@ -12,7 +12,10 @@ import {
     loseMomentum,
     withMomentum,
 } from '../../rules/combat/momentum';
-import { participantChars } from '../../rules/combat/participant';
+import {
+    armourPenaltyFor,
+    participantChars,
+} from '../../rules/combat/participant';
 import { parryTargetOf } from '../../rules/combat/resolve-attack';
 import {
     movementSlMod,
@@ -153,13 +156,18 @@ export function disengageMutation(
     const chars = participantChars(actor);
 
     const targets = [
-        skillTarget(chars, 'dodge'),
-        skillTarget(chars, 'performance', 'acrobatics'),
-    ].filter((s) => s !== null);
+        { key: 'dodge', skill: skillTarget(chars, 'dodge') },
+        {
+            key: 'performance',
+            skill: skillTarget(chars, 'performance', 'acrobatics'),
+        },
+    ].flatMap((t) => (t.skill ? [{ key: t.key, target: t.skill.target }] : []));
 
     if (targets.length === 0) throw reject(API_ERRORS.DISENGAGE_SKILL_MISSING);
 
-    const base = Math.max(...targets.map((s) => s.target));
+    const chosen = targets.reduce((a, b) => (b.target > a.target ? b : a));
+
+    const base = chosen.target;
 
     const modes = selfModes(actor, 'test', edition);
 
@@ -186,6 +194,7 @@ export function disengageMutation(
         slModifier:
             selfSlMod(actor, edition) +
             movementSlMod(actor, edition) +
+            armourPenaltyFor(actor, chosen.key) +
             mode.slMod,
         slModel: edition.slModel,
         mode: mode.mode,

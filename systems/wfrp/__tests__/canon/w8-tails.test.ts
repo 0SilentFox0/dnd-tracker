@@ -208,7 +208,7 @@ describe('W8 tails: Inflict on a hit location (Bolas)', () => {
     };
 
     bookExample(303, 'the condition lands only on a leg hit', () => {
-        expect(qualityInflicts(refs, 'canon', 'leg')).toEqual(['prone']);
+        expect(qualityInflicts(refs, 'canon', 'leg')).toEqual([{ key: 'prone' }]);
         expect(qualityInflicts(refs, 'canon', 'body')).toEqual([]);
         expect(qualityInflicts(refs, 'canon')).toEqual([]);
     });
@@ -225,7 +225,7 @@ describe('W8 tails: Inflict on a hit location (Bolas)', () => {
             flaws: [],
         };
 
-        expect(qualityInflicts(any, 'canon', 'head')).toEqual(['prone']);
+        expect(qualityInflicts(any, 'canon', 'head')).toEqual([{ key: 'prone' }]);
     });
 
     bookExample(303, 'the item schema accepts location only on Inflict', () => {

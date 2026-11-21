@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 import { skillTarget } from '../../rules/characteristics/derive';
-import { participantChars } from '../../rules/combat/participant';
+import {
+    armourPenaltyFor,
+    participantChars,
+} from '../../rules/combat/participant';
 import {
     selfModes,
     selfSlMod,
@@ -114,7 +117,10 @@ export function intimidateMutation(
 
     const own = resolvePercentileTest({
         target: skill.target + selfTestMod(actor, 'test', edition),
-        slModifier: selfSlMod(actor, edition) + mode.slMod,
+        slModifier:
+            selfSlMod(actor, edition) +
+            armourPenaltyFor(actor, 'intimidate') +
+            mode.slMod,
         slModel: edition.slModel,
         mode: mode.mode,
         rng,

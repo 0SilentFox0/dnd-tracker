@@ -124,6 +124,12 @@ export const participantStats = (
 ): WfrpParticipantStats | undefined =>
     PARTICIPANT_SLOT.read(p.abilities.system)?.stats;
 
+/** SL lost on tests of the skill from worn armour (p306), 0 or negative */
+export const armourPenaltyFor = (
+    p: BattleParticipant,
+    skill: string
+): number => participantStats(p)?.testPenalty?.[skill] ?? 0;
+
 export const apAt = (
     stats: WfrpParticipantStats | undefined,
     location: HitLocation

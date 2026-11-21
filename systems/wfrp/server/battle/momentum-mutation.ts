@@ -9,7 +9,10 @@ import {
     secondAttackBlocker,
     withMomentum,
 } from '../../rules/combat/momentum';
-import { participantChars } from '../../rules/combat/participant';
+import {
+    armourPenaltyFor,
+    participantChars,
+} from '../../rules/combat/participant';
 import { conditionLevel } from '../../rules/conditions/levels';
 import { selfSlMod, selfTestMod } from '../../rules/conditions/test-mod';
 import { editionOf } from '../../rules/edition';
@@ -144,7 +147,8 @@ export function momentumMutation(
 
     const result = resolvePercentileTest({
         target: skill.target + selfTestMod(actor, 'test', edition),
-        slModifier: selfSlMod(actor, edition),
+        slModifier:
+            selfSlMod(actor, edition) + armourPenaltyFor(actor, 'leadership'),
         slModel: edition.slModel,
         mode: 'normal',
         rng: rngOf(ctx),

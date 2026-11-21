@@ -7,6 +7,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { withStats } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';
+import { armourPenaltyFor } from '@/systems/wfrp/rules/combat/participant';
 import { armourAp } from '@/systems/wfrp/rules/equipment/armour';
 import type { QualityKey } from '@/systems/wfrp/rules/equipment/qualities';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
@@ -139,4 +140,15 @@ describe('canon: armour marks (p306)', () => {
             expect(gear.marks?.weakpoints?.head).toBe(0);
         }
     );
+});
+
+describe('canon: armour penalties in combat tests (p306)', () => {
+    bookExample(306, 'a worn-armour penalty is read per skill', () => {
+        const p = withStats(makeParticipant({ id: 'p' }), {
+            testPenalty: { stealth: -2 },
+        });
+
+        expect(armourPenaltyFor(p, 'stealth')).toBe(-2);
+        expect(armourPenaltyFor(p, 'dodge')).toBe(0);
+    });
 });
