@@ -1,5 +1,7 @@
 # WFRP 5e механіки, хвиля A: розмір, модифікатори бою, шкода заклять, overcast
 
+> Статус 2026-11-21: виконано (хвиля A та mechanics-finish 1–2 у `feat/wfrp5-mechanics-finish`).
+
 Гілка `feat/wfrp5-mechanics-finish` (worktree `../dnd-tracker-mech`, від main `ce7120aa8`). Джерело правди про відкрите: [2026-11-20-wfrp5-open-mechanics-after-content-wave.md](2026-11-20-wfrp5-open-mechanics-after-content-wave.md) п. 1, 2, 3, 6. Аудит: `docs/superpowers/research/2026-11-19-wfrp5-canon-audit.md` (A/M13, A/M14, A/M19, C/M-05, C/M-07, C/B-01..03). Канон: `~/Work/wfrp-extract/out/wfrp5/pages/pNNN.md`, лише перефраз + номер сторінки.
 
 Правила виконання (з CLAUDE.md і пам'яті): усе нове за полем профілю редакції (`editionOf(rules)`), легасі незмінне; ядро не називає систему (нові шви — у `RuleSystemCombat` / `RuleSystemTestedMagic`, через `ruleSystemOf`); англ. мінімальні коментарі; тексти через i18n-ключі `uk`+`en`; агенти пишуть тести, але не запускають повний набір — наприкінці хвилі один прогін `test:related` + eslint по папках + `pnpm cycles`, потім повний `test:run` перед мерджем; battle-sweep homm/dnd5e на prodcopy (бо зачіпаємо спільний пайплайн атаки й касту) — лише за «так».
