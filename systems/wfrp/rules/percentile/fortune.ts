@@ -38,6 +38,7 @@ export interface WfrpAttackMods {
     cover?: boolean;
     highGround?: 'attacker' | 'defender';
     enclosed?: boolean;
+    badFooting?: boolean;
     helplessRoll?: number;
     grapple?: boolean;
 }
@@ -86,6 +87,7 @@ function modsOf(raw: unknown): WfrpAttackMods | undefined {
             highGround: m.highGround,
         }),
         ...(m.enclosed === true && { enclosed: true }),
+        ...(m.badFooting === true && { badFooting: true }),
         ...(typeof m.helplessRoll === 'number' &&
             Number.isInteger(m.helplessRoll) &&
             m.helplessRoll >= 1 &&

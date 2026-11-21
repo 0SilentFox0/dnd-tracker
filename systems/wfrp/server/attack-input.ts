@@ -32,6 +32,7 @@ const Body = z.object({
                         cover: z.boolean().optional(),
                         highGround: z.enum(['attacker', 'defender']).optional(),
                         enclosed: z.boolean().optional(),
+                        badFooting: z.boolean().optional(),
                         helplessRoll: roll.optional(),
                         grapple: z.boolean().optional(),
                     })

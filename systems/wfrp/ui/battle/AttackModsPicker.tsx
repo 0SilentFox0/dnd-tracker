@@ -129,6 +129,18 @@ export function AttackModsPicker({
                 )}
                 {kind === 'melee' && (
                     <Toggle
+                        on={!!mods.badFooting}
+                        onClick={() =>
+                            set({
+                                badFooting: mods.badFooting ? undefined : true,
+                            })
+                        }
+                    >
+                        {t('badFooting')}
+                    </Toggle>
+                )}
+                {kind === 'melee' && (
+                    <Toggle
                         on={!!mods.grapple}
                         onClick={() =>
                             set({ grapple: mods.grapple ? undefined : true })
