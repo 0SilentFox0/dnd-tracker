@@ -1901,7 +1901,7 @@
 316. **Hex Caster** — `careers/hex-caster.png`
 
    ```text
-   Digital painting in the spirit of classic fantasy RPG icons, rich colours, dramatic rim light, painterly brushwork, no text, no letters, no watermark. Square game skill icon with a single strong central motif, dark smoky background, soft glow, no frame. Square 1:1, 1024x1024. Central motif: a hooded hedge witch seen from behind with a bundle of thorny twigs and a small glowing hex doll, charcoal cloak with a dull crimson sash. Colour key: neutral gold. Image only: absolutely no text, letters, words, numbers, runes, captions, signs, signatures or watermarks anywhere in the picture.
+   Digital painting in the spirit of classic fantasy RPG icons, rich colours, dramatic rim light, painterly brushwork, no text, no letters, no watermark. Square game skill icon with a single strong central motif, dark smoky background, soft glow, no frame. Square 1:1, 1024x1024. Central motif: a hooded cloaked caster seen from behind with a bundle of thorny twigs and a small glowing hex doll, charcoal cloak with a dull crimson sash. Colour key: neutral gold. Image only: absolutely no text, letters, words, numbers, runes, captions, signs, signatures or watermarks anywhere in the picture.
    ```
 
 ## races (5)
