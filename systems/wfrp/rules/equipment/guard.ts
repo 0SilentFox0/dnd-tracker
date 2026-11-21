@@ -199,6 +199,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 'group',
                 'reach',
                 'range',
+                'rangeSb',
                 'damage',
                 'qualities',
                 'flaws',
@@ -233,6 +234,12 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             return null;
 
         if (
+            raw.rangeSb !== undefined &&
+            (raw.range === undefined || !num(raw.rangeSb, 1, 10, true))
+        )
+            return null;
+
+        if (
             raw.ammoCapacity !== undefined &&
             !num(raw.ammoCapacity, 1, 1000, true)
         )
@@ -245,6 +252,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 reach: raw.reach as (typeof WEAPON_REACHES)[number],
             }),
             ...(raw.range !== undefined && { range: raw.range as number }),
+            ...(raw.rangeSb !== undefined && { rangeSb: raw.rangeSb as number }),
             damage: { addSb: dmg.addSb, flat: dmg.flat },
             qualities,
             flaws,

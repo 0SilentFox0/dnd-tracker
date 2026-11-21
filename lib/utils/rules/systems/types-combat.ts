@@ -378,6 +378,7 @@ export interface RuleSystemCombat {
     attacksOf?(input: {
         rows: EquippedArtifactRow[];
         rules?: Ruleset;
+        characteristics?: unknown;
     }): ExtractedAttack[];
     participantFields?(
         row: { characteristics?: unknown },

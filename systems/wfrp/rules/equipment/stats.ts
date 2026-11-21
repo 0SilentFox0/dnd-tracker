@@ -76,6 +76,7 @@ export const WfrpWeaponStatsSchema = z
         group: z.enum(WEAPON_GROUPS),
         reach: z.enum(WEAPON_REACHES).optional(),
         range: z.number().int().min(1).max(100_000).optional(),
+        rangeSb: z.number().int().min(1).max(10).optional(),
         damage: z.strictObject({
             addSb: z.boolean(),
             flat: z.number().int().min(-100).max(100),
@@ -91,6 +92,10 @@ export const WfrpWeaponStatsSchema = z
     .refine((w) => (w.reach === undefined) !== (w.range === undefined), {
         message: 'weapon needs reach xor range',
         path: ['reach'],
+    })
+    .refine((w) => w.rangeSb === undefined || w.range !== undefined, {
+        message: 'rangeSb needs range',
+        path: ['rangeSb'],
     });
 
 export const WfrpGearStatsSchema = z.strictObject({
@@ -123,6 +128,8 @@ export type WfrpWeaponStats = {
     group: (typeof WEAPON_GROUPS)[number];
     reach?: (typeof WEAPON_REACHES)[number];
     range?: number;
+    /** Thrown: Range is Strength Bonus times this in yards; `range` stays the fallback */
+    rangeSb?: number;
     damage: { addSb: boolean; flat: number };
     qualities: QualityRef[];
     flaws: QualityRef[];

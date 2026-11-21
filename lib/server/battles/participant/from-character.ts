@@ -167,7 +167,11 @@ async function loadCharacterBuildRefs(
                 attuned: attunedRefs(character.inventory),
             },
             ...(attacksOf && {
-                attacksOf: () => attacksOf({ rows: artifactRows, rules }),
+                attacksOf: () => attacksOf({
+                        rows: artifactRows,
+                        rules,
+                        characteristics: character.characteristics,
+                    }),
             }),
         }
     );
