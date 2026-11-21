@@ -7,6 +7,8 @@ export interface SpellPowerSpec {
     bonus?: number;
     missile?: true;
     ignore?: 'ap' | 'tbAp';
+    /** Adds the cast SL to the dice damage */
+    slBonus?: true;
     /** Characteristic whose bonus is added to the listed number */
     scale?: string;
 }
@@ -44,10 +46,10 @@ export const SPELL_POWER: Record<string, SpellPowerSpec> = {
     'Spirit Whirl': missile(8, { ignore: 'tbAp' }),
     'Carrion Cloud': flat(7),
     'Shove Wave': { ignore: 'ap' },
-    'Smiting Ash': { ignore: 'tbAp' },
+    'Smiting Ash': { ignore: 'tbAp', slBonus: true },
     'Spirit Pyre': { ignore: 'tbAp' },
-    'Twin Star Fall': { ignore: 'tbAp' },
-    'Cold Verdict': { ignore: 'tbAp' },
+    'Twin Star Fall': { ignore: 'tbAp', slBonus: true },
+    'Cold Verdict': { ignore: 'tbAp', slBonus: true },
     // template originals without a book source
     'Ember Dart': missile(4),
     'Cinder Cloud': missile(4),
@@ -114,6 +116,9 @@ export function spellPowerIssues(
 
     if (magic.ignore !== spec.ignore)
         issues.push(`casting.magic.ignore must be ${spec.ignore ?? 'absent'}`);
+
+    if (magic.slBonus !== spec.slBonus)
+        issues.push(`casting.magic.slBonus must be ${spec.slBonus ?? 'absent'}`);
 
     if (magic.scale !== spec.scale)
         issues.push(`casting.magic.scale must be ${spec.scale ?? 'absent'}`);

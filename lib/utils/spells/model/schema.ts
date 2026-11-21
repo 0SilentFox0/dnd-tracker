@@ -46,6 +46,8 @@ export const SpellMagicSchema = z.object({
     missile: z.boolean().optional(),
     /** Armour (`ap`) or toughness and armour (`tbAp`) the damage ignores */
     ignore: z.enum(['ap', 'tbAp']).optional(),
+    /** The cast roll's SL is added to the dice damage */
+    slBonus: z.boolean().optional(),
     /** Characteristic whose bonus the flat damage or heal adds */
     scale: z
         .string()

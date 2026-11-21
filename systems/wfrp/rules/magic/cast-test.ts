@@ -360,7 +360,11 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         success,
         margin: test.sl,
         overcastSteps,
-        ...(canon && { overcastDamage: prayer ? 0 : overcastSteps }),
+        ...(canon && { overcastDamage: prayer
+                ? magic.slBonus
+                    ? Math.max(test.sl, 0)
+                    : 0
+                : overcastSteps }),
         ...(spread && { extension: overcastExtension(spread) }),
         miscast,
         details: ACTION_SLOT.write({
