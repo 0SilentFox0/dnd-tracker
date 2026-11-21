@@ -7,6 +7,7 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import type { Rng } from '@/lib/utils/abilities/engine/core/types';
+import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { summonsOf } from '@/lib/utils/battle/participant/reserve';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -77,6 +78,7 @@ export function processStartOfRound(
               rng,
               map,
               rules,
+              applyDamage: applyDamageConsequences,
           })
         : { participants: round.participants, messages: [] };
 

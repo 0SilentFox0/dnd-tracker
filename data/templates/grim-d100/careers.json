@@ -73,7 +73,7 @@
     "tier3_talents": [
       "Fast Talker",
       "Crowd Reader",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Metallurgy)",
       "Memory Palace"
     ],
     "tier3_trappings": [
@@ -93,7 +93,7 @@
       "Quibbler",
       "Masterwork Maker",
       "Spellbinding Speaker",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Metallurgy)"
     ],
     "tier4_trappings": [
       "Scholar's gown"
@@ -190,7 +190,7 @@
     "tier4_talents": [
       "Seasoned Reveller",
       "Court Manners",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Genealogy)",
       "Focused Mind"
     ],
     "tier4_trappings": [
@@ -592,7 +592,7 @@
     "tier2_talents": [
       "Way with Beasts",
       "Gifted Craftsman (Weaver)",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Rocky)",
       "Pack Mule"
     ],
     "tier2_trappings": [
@@ -636,7 +636,7 @@
       "Seasoned Tradesman (Carpenter)",
       "Deft Hands",
       "Crowd Reader",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Folklore)"
     ],
     "tier4_trappings": [
       "Flock tally sticks"
@@ -670,7 +670,7 @@
       "Gifted Craftsman (Cook)",
       "Tough Hide",
       "Inner Compass",
-      "Terrain Strider (Terrain)"
+      "Terrain Strider (Woodland)"
     ],
     "tier1_trappings": [
       "Leather apron",
@@ -735,7 +735,7 @@
       "Court Manners",
       "Lettered",
       "Hardened Against (Poison)",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Medicine)"
     ],
     "tier4_trappings": [
       "Forest-use permit",
@@ -770,7 +770,7 @@
       "Inner Compass",
       "Night Owl",
       "Wildwalker",
-      "Terrain Strider (Terrain)"
+      "Terrain Strider (Tundra)"
     ],
     "tier1_trappings": [
       "Walking staff",
@@ -872,7 +872,7 @@
     "tier1_talents": [
       "Tough Hide",
       "Wildwalker",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Coastal)",
       "Snare Wise"
     ],
     "tier1_trappings": [
@@ -1039,7 +1039,7 @@
       "Inner Compass",
       "Helm Craft",
       "Crowd Reader",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Riverways)"
     ],
     "tier4_trappings": [
       "Ford toll charter",
@@ -1620,7 +1620,7 @@
       "Palm Greaser",
       "Parade-Ground Voice",
       "Gentle Birth",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (History)"
     ],
     "tier4_trappings": [
       "Letters patent",
@@ -1923,7 +1923,7 @@
     "tier4_talents": [
       "Steel Nerves",
       "Respected Rogue",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Science)",
       "Sharp Mind"
     ],
     "tier4_trappings": [
@@ -2219,7 +2219,7 @@
       "Skim the Till",
       "Masterwork Maker",
       "Swift Reload",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Science)"
     ],
     "tier4_trappings": [
       "Surveyor's staff",
@@ -2320,7 +2320,7 @@
     ],
     "tier4_talents": [
       "Keen Sense (Smell)",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (History)",
       "Page Turner",
       "Memory Palace"
     ],
@@ -2402,7 +2402,7 @@
       "Silver Tongue",
       "Fervent Cause (Guild)",
       "Looming Menace",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Politics)"
     ],
     "tier3_trappings": [
       "Wig of grey horsehair",
@@ -2604,7 +2604,7 @@
     "tier3_talents": [
       "Rallying Voice",
       "Hardened Against (Cold)",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Politics)",
       "Stout Heart"
     ],
     "tier3_trappings": [
@@ -2723,7 +2723,7 @@
       "Spellbinding Speaker",
       "Untainted Soul",
       "Hardened Against (Cold)",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Heraldry)"
     ],
     "tier4_trappings": [
       "Prelate's mitre",
@@ -3319,7 +3319,7 @@
     "tier4_talents": [
       "Both-Handed",
       "Masterwork Maker",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (History)",
       "Deep Pockets"
     ],
     "tier4_trappings": [
@@ -3579,7 +3579,7 @@
       "Steadied Weave",
       "Lore Casting (Wilds)",
       "Danger Sense",
-      "Terrain Strider (Terrain)"
+      "Terrain Strider (Wetland)"
     ],
     "tier2_trappings": [
       "Charm pouch",
@@ -3600,7 +3600,7 @@
       "Clean Incantation",
       "Weave Sense",
       "Seasoned Tradesman (Brewer)",
-      "Deep Scholar (Lore)"
+      "Deep Scholar (Spirits)"
     ],
     "tier3_trappings": [
       "Carved rowan staff",
@@ -3652,7 +3652,7 @@
     ],
     "tier1_talents": [
       "Fast Mender",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Rocky)",
       "Oarsman's Back",
       "Stubborn Grit"
     ],
@@ -4185,7 +4185,7 @@
     "tier2_talents": [
       "Looming Menace",
       "Wildwalker",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Rocky)",
       "Cudgel Work"
     ],
     "tier2_trappings": [
@@ -4227,7 +4227,7 @@
     "tier4_talents": [
       "Seasoned Reveller",
       "Parade-Ground Voice",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Politics)",
       "Deep Pockets"
     ],
     "tier4_trappings": [
@@ -4583,7 +4583,7 @@
       "Unbowed Will",
       "Lettered",
       "Road-Worn",
-      "Terrain Strider (Terrain)"
+      "Terrain Strider (Woodland)"
     ],
     "tier2_trappings": [
       "Riding boots",
@@ -4661,7 +4661,7 @@
       "Bolt for It",
       "Easy Talker",
       "Hearty Eater",
-      "Terrain Strider (Terrain)"
+      "Terrain Strider (Desert)"
     ],
     "tier1_trappings": [
       "Tray of trinkets",
@@ -4809,7 +4809,7 @@
     "tier3_talents": [
       "Keen Sighting",
       "Haggler's Instinct",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Wrecks)",
       "Born Swimmer"
     ],
     "tier3_trappings": [
@@ -4964,7 +4964,7 @@
     "tier1_talents": [
       "Line and Net",
       "Easy Talker",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Wetland)",
       "Born Swimmer"
     ],
     "tier1_trappings": [
@@ -5030,7 +5030,7 @@
     "tier4_talents": [
       "Seasoned Tradesman (Carpenter)",
       "Crowd Reader",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Folklore)",
       "Barge Hand"
     ],
     "tier4_trappings": [
@@ -5164,7 +5164,7 @@
     "tier1_earningSkill": "sail",
     "tier1_talents": [
       "Deck Steady",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Coastal)",
       "Oarsman's Back",
       "Born Swimmer"
     ],
@@ -5266,7 +5266,7 @@
     "tier1_talents": [
       "Lawless Earner",
       "Line and Net",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Coastal)",
       "Oarsman's Back"
     ],
     "tier1_trappings": [
@@ -6641,7 +6641,7 @@
     "tier4_talents": [
       "Respected Rogue",
       "Lettered",
-      "Deep Scholar (Lore)",
+      "Deep Scholar (Law)",
       "Plot Weaver"
     ],
     "tier4_trappings": [
@@ -6701,7 +6701,7 @@
     "tier2_talents": [
       "Steady Shooter",
       "Fast Mender",
-      "Terrain Strider (Terrain)",
+      "Terrain Strider (Woodland)",
       "Snare Wise"
     ],
     "tier2_trappings": [

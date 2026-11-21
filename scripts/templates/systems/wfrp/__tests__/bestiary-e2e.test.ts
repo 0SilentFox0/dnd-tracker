@@ -91,8 +91,8 @@ describe('grim bestiary end to end', () => {
         ).toBe(true);
         expect(slotStats(mouths.abilities.system)?.size).toBe('large');
         expect(
-            mouths.battleData.resolvedAbilities.some(
-                (a) => a.trigger.event === 'turnStart'
+            JSON.stringify(mouths.battleData.resolvedAbilities).includes(
+                'wfrpRegenerate'
             )
         ).toBe(true);
         expect(slotStats(drake.abilities.system)).toMatchObject({
@@ -103,9 +103,9 @@ describe('grim bestiary end to end', () => {
             must(drake.battleData.attacks.find((a) => a.name === 'Breath +9'))
         ).toMatchObject({
             type: 'ranged',
-            range: '36/108 ft',
+            range: '75 ft',
             targetType: 'aoe',
-            blastRadius: 2,
+            blastRadius: 3,
         });
         expect(
             ATTACK_SLOT.read(
@@ -166,12 +166,11 @@ describe('grim bestiary end to end', () => {
                 foe.basicInfo.name
             ).toBeLessThan(party[0].combatStats.maxHp);
 
-            // Trait attacks of the bestiary already include the size bonus (p360)
             if (
                 slotStats(foe.abilities.system)?.size === 'large' ||
                 slotStats(foe.abilities.system)?.size === 'enormous'
             )
-                expect(JSON.stringify(out.events)).not.toContain('steps.size');
+                expect(JSON.stringify(out.events)).toContain('steps.size');
 
             ctx = {
                 ...next,
@@ -254,6 +253,8 @@ describe('grim bestiary end to end', () => {
 
         expect(next.scene.turnIndex).toBe(1);
         expect(part(next, 'u0').combatStats.currentHp).toBe(11);
-        expect(JSON.stringify(out.events)).toContain('abilityText.log.heal');
+        expect(JSON.stringify(out.events)).toContain(
+            'battleWfrp.log.regenerates'
+        );
     });
 });

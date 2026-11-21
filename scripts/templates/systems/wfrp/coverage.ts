@@ -35,6 +35,9 @@ import { TRAIT_RECIPES } from '@/systems/wfrp/rules/traits/recipes';
 
 // Canon-only gear qualities the fixed Grim roster does not carry; the roster is locked by the grim-d100 plan
 const GRIM_UNCARRIED = new Set([
+    'repeater',
+    'trapBlade',
+    'unbreakable',
     'penetrating',
     'accurate',
     'blackpowder',
@@ -284,6 +287,7 @@ export function grimCoverage(data: WfrpData): string[] {
 
     for (const p of profiles) {
         (p.talents ?? []).forEach((t) => used.add(nameKey(t)));
+        (p.talentChoices ?? []).flat().forEach((t) => used.add(nameKey(t)));
         (p.randomTalents ?? []).forEach((r) => used.add(nameKey(r.featId)));
     }
 

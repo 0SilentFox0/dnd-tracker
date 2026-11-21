@@ -251,7 +251,11 @@ const TRAIT_FIXTURES = [
         damage: 5,
         rangeFt: 36,
         magical: true,
+        breath: 'fire',
     },
+    { kind: 'wfrpTalent', talent: 'dualWielder' },
+    { kind: 'wfrpCreature', trait: 'swarm', rating: 2 },
+    { kind: 'wfrpRegenerate' },
 ] as const satisfies readonly SystemEffect[];
 
 const MERGED_EFFECTS: Effect[] = [

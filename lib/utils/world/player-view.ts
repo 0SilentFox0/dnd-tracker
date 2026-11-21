@@ -5,6 +5,7 @@ import type {
     HeroPosition,
     LayerRect,
     LayerVisibility,
+    LayerZoneLabels,
     MapPoint,
     RevealShape,
     WorldHero,
@@ -33,6 +34,9 @@ export interface LayerInput {
     imageUrl: string | null;
     rect: LayerRect;
     opacity: number;
+    icon: string | null;
+    zoneOpacity: number | null;
+    zoneLabels: LayerZoneLabels;
 }
 
 export const layerVisibleTo = (
@@ -188,6 +192,9 @@ export function buildWorldView(input: WorldViewInput): WorldView {
         imageUrl: l.imageUrl,
         rect: l.rect,
         opacity: l.opacity,
+        icon: l.icon,
+        zoneOpacity: l.zoneOpacity,
+        zoneLabels: l.zoneLabels,
     }));
 
     const heroes: WorldHero[] = [];

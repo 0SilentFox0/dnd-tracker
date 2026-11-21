@@ -13,6 +13,7 @@
     "channelLost": "{name} loses {lost} SL of the pool, {left} left",
     "channelKept": "{name} holds the pool of {left} SL",
     "wrath": "{name} stirs divine wrath! {effect}",
+    "overcastTrimmed": "{name} declared {declared} SL of overcast but only {available} SL are available: the spread is cut back",
     "ingredientAverts": "{name} burns an ingredient and the miscast of {spell} fizzles out",
     "ingredientLowers": "{name} burns an ingredient and the miscast of {spell} is weakened to a minor one",
     "dispelSuccess": "{name} dispels {spell} of {caster}: SL {sl}, the spell has no effect",
@@ -58,18 +59,17 @@
         "totalPower": "Total power",
         "unstoppableForce": "Unstoppable force"
       },
-      "overcastPlan": "Overcast plan (SL, up to {cap})",
-      "overcastNote": "Empty: all SL go into Damage. SL beyond the roll are lost; targets and reach beyond what the roll buys are dropped.",
-      "overcastDirections": {
+      "overcastTitle": "Overcast (up to {cap} SL beyond CN)",
+      "overcastSpent": "Declared {spent} of {cap} SL; cut after the roll if the SL fall short",
+      "overcastDim": {
         "damage": "Damage",
         "targets": "Targets",
         "range": "Range",
         "aoe": "Area",
         "duration": "Duration"
       },
-      "overcastSpend": "SL {spent} / {cap}",
-      "overcastMore": "More {direction}",
-      "overcastLess": "Less {direction}",
+      "overcastMore": "More {dim}",
+      "overcastLess": "Less {dim}",
       "blessing": "Blessing overcast",
       "blessings": {
         "rangeYards": "Range",
@@ -102,14 +102,6 @@
       "channelled": "Channelling +{channelled}",
       "armour": "armour −{armour}",
       "overcast": "Overcast ×{steps}",
-      "overcastSpent": "Overcast: {parts}",
-      "overcastParts": {
-        "damage": "+{n} Damage",
-        "targets": "+{n} targets",
-        "range": "range ×{n}",
-        "aoe": "area ×{n}",
-        "duration": "duration ×{n}"
-      },
       "miscast": {
         "minor": "Minor miscast",
         "major": "Major miscast",

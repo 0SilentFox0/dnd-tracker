@@ -76,23 +76,17 @@ describe('wfrpUnitBuild', () => {
         ]);
 
         expect(attacks).toEqual([
-            wfrpAttackFromProfile(
-                'u1-trait-k1-0',
-                'Bite +3',
-                {
-                    range: 'melee',
-                    cells: 1,
-                    damageFlat: 3,
-                    addSb: true,
-                    qualities: [],
-                    flaws: [],
-                    twoHanded: false,
-                },
-                { sizeBaked: true }
-            ),
+            wfrpAttackFromProfile('u1-trait-k1-0', 'Bite +3', {
+                range: 'melee',
+                cells: 1,
+                damageFlat: 3,
+                addSb: true,
+                qualities: [],
+                flaws: [],
+                twoHanded: false,
+            }),
         ]);
         expect(attacks[0]).toMatchObject({ reachCells: 1, damageBonus: 3 });
-        expect(ATTACK_SLOT.read(attacks[0].system)?.sizeBaked).toBe(true);
     });
 
     it('builds a ranged Blast profile from Breath', () => {
@@ -101,20 +95,15 @@ describe('wfrpUnitBuild', () => {
         ]);
 
         expect(attacks[0]).toEqual(
-            wfrpAttackFromProfile(
-                attacks[0].id,
-                attacks[0].name,
-                {
-                    range: 'ranged',
-                    rangeFt: 36,
-                    damageFlat: 5,
-                    addSb: false,
-                    qualities: [{ key: 'blast', value: 2 }],
-                    flaws: [],
-                    twoHanded: false,
-                },
-                { sizeBaked: true }
-            )
+            wfrpAttackFromProfile(attacks[0].id, attacks[0].name, {
+                range: 'ranged',
+                rangeFt: 36,
+                damageFlat: 5,
+                addSb: false,
+                qualities: [{ key: 'blast', value: 2 }],
+                flaws: [],
+                twoHanded: false,
+            })
         );
         expect(
             wfrpUnitBuild(row, [

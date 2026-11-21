@@ -27,6 +27,8 @@ const marker = (o: Partial<WorldMarker>): WorldMarker => ({
     sortOrder: 0,
     childMapId: null,
     layerId: null,
+    labelMode: null,
+    fillOpacity: null,
     ...o,
 });
 

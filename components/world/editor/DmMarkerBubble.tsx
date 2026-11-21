@@ -7,7 +7,7 @@ import { FolderOpen, FolderPlus, PenLine, Trash2 } from 'lucide-react';
 import { MarkerLayerField } from './layers/MarkerLayerField';
 import { MarkerIconGrid } from './maps/MapFieldParts';
 import { NewWorldMapDialog } from './maps/NewWorldMapDialog';
-import { MarkerColorField } from './MarkerColorField';
+import { MarkerStyleFields } from './MarkerStyleFields';
 import { MoveMapMenu } from './MoveMapMenu';
 import { useEditorMarkerFields } from './use-editor-fields';
 import { useWorldEditorContext } from './WorldEditorContext';
@@ -25,7 +25,11 @@ import {
     WORLD_MARKER_DESCRIPTION_MAX,
     WORLD_NAME_MAX,
 } from '@/lib/constants/world';
-import { useIsMobile } from '@/lib/hooks/common';
+import {
+    DESKTOP_QUERY,
+    useIsMobile,
+    useMediaQuery,
+} from '@/lib/hooks/common';
 import type { WorldMarker } from '@/types/world';
 
 interface DmMarkerBubbleProps {
@@ -34,7 +38,7 @@ interface DmMarkerBubbleProps {
 }
 
 export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
-    const { campaignId, maps, editor } = useWorldEditorContext();
+    const { campaignId, maps, editor, detail } = useWorldEditorContext();
 
     const t = useTranslations('world');
 
@@ -44,14 +48,33 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
 
     const sheet = useIsMobile();
 
+    const onMap = useMediaQuery(DESKTOP_QUERY);
+
     const m = useEditorMarkerFields(marker);
+
+    const layer = detail?.layers?.find((l) => l.id === marker.layerId);
+
+    const shown = { ...marker, icon: marker.icon ?? layer?.icon ?? null };
 
     const child = marker.childMapId
         ? maps.find((x) => x.id === marker.childMapId)
         : undefined;
 
+    if (onMap)
+        return (
+            <MarkerBubble
+                marker={shown}
+                actions={{
+                    ...actions,
+                    onOpenMap: marker.childMapId
+                        ? () => m.openMap(marker.childMapId)
+                        : undefined,
+                }}
+            />
+        );
+
     return (
-        <MarkerBubble marker={marker} actions={actions} embedded={sheet}>
+        <MarkerBubble marker={shown} actions={actions} embedded={sheet}>
             <div className="min-w-0 flex-1 space-y-2">
                 <Input
                     aria-label={t('name')}
@@ -81,18 +104,8 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                         onPick={(icon) => void m.save({ icon })}
                     />
                 ) : null}
-                <div className="flex items-center gap-2 text-xs">
-                    <MarkerColorField
-                        label={t(
-                            marker.kind === 'zone'
-                                ? 'editor.zoneColor'
-                                : 'editor.pointColor'
-                        )}
-                        color={m.colorValue}
-                        isCustom={m.isCustomColor}
-                        onPick={m.pickColor}
-                        onReset={m.resetColor}
-                    />
+                <div className="text-xs">
+                    <MarkerStyleFields marker={marker} layer={layer} form={m} />
                 </div>
                 <MarkerLayerField
                     value={marker.layerId}

@@ -87,6 +87,9 @@ const row = (over: Record<string, unknown> = {}) => ({
     imgW: 1,
     imgH: 1,
     opacity: 1,
+    icon: null,
+    zoneOpacity: null,
+    zoneLabels: null,
     heroes: [],
     map: { campaignId: 'c1' },
     ...over,
@@ -166,6 +169,55 @@ describe('layerCreateHandler', () => {
 
         expect(res.status).toBe(404);
         expect(m.db.worldLayer.create).not.toHaveBeenCalled();
+    });
+});
+
+describe('layerPatchHandler style', () => {
+    const patch = (body: unknown) =>
+        layerPatchHandler(json(body, 'PATCH'), 'c1', 'l1');
+
+    beforeEach(() => {
+        m.db.worldLayer.update.mockResolvedValue(
+            row({ icon: 'castle', zoneOpacity: 0.4, zoneLabels: 'hidden' })
+        );
+    });
+
+    it('sets icon, zoneOpacity and zoneLabels', async () => {
+        const res = await patch({
+            icon: 'castle',
+            zoneOpacity: 0.4,
+            zoneLabels: 'hidden',
+        });
+
+        expect(res.status).toBe(200);
+        expect(m.db.worldLayer.update.mock.calls[0][0].data).toMatchObject({
+            icon: 'castle',
+            zoneOpacity: 0.4,
+            zoneLabels: 'hidden',
+        });
+        expect(await res.json()).toMatchObject({
+            icon: 'castle',
+            zoneOpacity: 0.4,
+            zoneLabels: 'hidden',
+        });
+    });
+
+    it('resets with null', async () => {
+        await patch({ icon: null, zoneOpacity: null });
+
+        expect(m.db.worldLayer.update.mock.calls[0][0].data).toMatchObject({
+            icon: null,
+            zoneOpacity: null,
+        });
+    });
+
+    it.each([0.05, 1.2])('rejects zoneOpacity %s', async (zoneOpacity) => {
+        expect((await patch({ zoneOpacity })).status).toBe(400);
+        expect(m.db.worldLayer.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unknown icon key', async () => {
+        expect((await patch({ icon: 'nope' })).status).toBe(400);
     });
 });
 

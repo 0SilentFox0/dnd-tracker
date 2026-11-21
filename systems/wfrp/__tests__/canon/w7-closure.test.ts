@@ -33,7 +33,7 @@ const spell = {
     name: 'Bolt',
     level: 1,
     groupId: null,
-    definition: { targeting: { kind: 'enemy' }, effects: [] },
+    definition: {},
 } as unknown as CastTestCtx['spell'];
 
 const run = (
@@ -46,7 +46,13 @@ const run = (
     wfrpCastTest({
         caster: caster(over),
         spell,
-        magic: { cn: 2, kind: 'arcane', overcast: 'dice', ...magic },
+        magic: {
+            cn: 2,
+            kind: 'arcane',
+            overcast: 'dice',
+            missile: true,
+            ...magic,
+        },
         rules,
         rng: mulberry32(1),
         presetRoll,
@@ -56,18 +62,14 @@ const run = (
 const castOf = (r: ReturnType<typeof run>) => ACTION_SLOT.read(r.details)?.cast;
 
 describe('W7 closure: channelled SL', () => {
-    bookExample(
-        236,
-        'channelled SL rescues an ordinary failed roll',
-        () => {
-            const bare = run(canon, 56);
+    bookExample(236, 'channelled SL rescues an ordinary failed roll', () => {
+        const bare = run(canon, 56);
 
-            const banked = run(canon, 56, {}, { channelledSl: 3 });
+        const banked = run(canon, 56, {}, { channelledSl: 3 });
 
-            expect(bare.success).toBe(false);
-            expect(banked.success).toBe(true);
-        }
-    );
+        expect(bare.success).toBe(false);
+        expect(banked.success).toBe(true);
+    });
 
     bookExample(235, 'channelled SL never prevents a fumble', () => {
         const r = run(canon, 55, {}, { channelledSl: 9 });
@@ -92,20 +94,24 @@ describe('W7 closure: overcast damage', () => {
         expect(r.overcastSteps).toBeGreaterThan(0);
     });
 
-    bookExample(217, 'a Blessing adds no damage and records the chosen dimension', () => {
-        const r = run(
-            canon,
-            12,
-            { kind: 'blessing', overcast: null },
-            {},
-            FORTUNE_INPUT.write({ kind: 'none', blessing: 'targets' })
-        );
+    bookExample(
+        217,
+        'a Blessing adds no damage and records the chosen dimension',
+        () => {
+            const r = run(
+                canon,
+                12,
+                { kind: 'blessing', overcast: null },
+                {},
+                FORTUNE_INPUT.write({ kind: 'none', blessing: 'targets' })
+            );
 
-        expect(r.overcastDamage).toBe(0);
-        expect(castOf(r)?.prayerOvercast?.bonus).toEqual({
-            targets: castOf(r)?.prayerOvercast?.steps,
-        });
-    });
+            expect(r.overcastDamage).toBe(0);
+            expect(castOf(r)?.prayerOvercast?.bonus).toEqual({
+                targets: castOf(r)?.prayerOvercast?.steps,
+            });
+        }
+    );
 });
 
 describe('W7 closure: Critical Casting bonus without a spend', () => {
@@ -165,7 +171,11 @@ describe('W7 closure: Condition while channelling', () => {
         return () => values[Math.min(i++, values.length - 1)];
     };
 
-    const apply = (rules: Ruleset, held: number | undefined, rng: () => number) => {
+    const apply = (
+        rules: Ruleset,
+        held: number | undefined,
+        rng: () => number
+    ) => {
         const p = withWfrpState(caster({ skillAdvances: {} }), {
             channelledSl: held,
         });
@@ -179,11 +189,15 @@ describe('W7 closure: Condition while channelling', () => {
         });
     };
 
-    bookExample(236, 'a new Condition on a channelling caster triggers the Cool test', () => {
-        const out = apply(canon, 5, seq(0.95));
+    bookExample(
+        236,
+        'a new Condition on a channelling caster triggers the Cool test',
+        () => {
+            const out = apply(canon, 5, seq(0.95));
 
-        expect(JSON.stringify(out.messages)).toContain('channelLost');
-    });
+            expect(JSON.stringify(out.messages)).toContain('channelLost');
+        }
+    );
 
     it('does nothing without channelled SL', () => {
         const out = apply(canon, undefined, seq(0.95));

@@ -4,7 +4,7 @@ import { wfrpBurden } from './burden';
 
 import type { RuleSystemEquipment } from '@/lib/utils/rules/systems/types';
 
-export { armourAp, parseWfrpStats } from './armour';
+export { armourAp, armourTestPenalties, parseWfrpStats } from './armour';
 export { applyBurden, wfrpBurden } from './burden';
 export {
     type CarriedArtifact,
@@ -37,9 +37,15 @@ export const WFRP_EQUIPMENT: RuleSystemEquipment = {
     armourAp: (equipped, rules) => {
         const canon = !rules || editionOf(rules).gearModel === 'canon';
 
-        const gear = armourAp(equipped, { singleShield: !!rules && canon });
+        const { metalAp, ...gear } = armourAp(equipped, {
+            singleShield: !!rules && canon,
+        });
 
-        return rules && !canon ? { ...gear, shield: 0 } : gear;
+        const traits = !rules || editionOf(rules).traitModel === 'canon';
+
+        const kept = traits && metalAp ? { ...gear, metalAp } : gear;
+
+        return rules && !canon ? { ...kept, shield: 0 } : kept;
     },
     burden: wfrpBurden,
 };

@@ -268,7 +268,7 @@ describe('grim arsenal and magic end to end', () => {
             captain.battleData.attacks.find((a) => a.name === 'Crossbow +7')
         );
 
-        expect(bow).toMatchObject({ type: 'ranged', range: '180/540 ft' });
+        expect(bow).toMatchObject({ type: 'ranged', range: '180 ft' });
         expect(ATTACK_SLOT.read(bow.system)?.noSb).toBeUndefined();
 
         const hero = armed(heroes()[0]);

@@ -40,3 +40,33 @@ describe('WFRP_MODULE_SERVER.battle', () => {
         ).rejects.toThrow('errors.battleChannelUnsupported');
     });
 });
+
+describe('WFRP_MODULE_SERVER.battle version envelope', () => {
+    it('every action schema accepts a body carrying expectedVersion', async () => {
+        const { WFRP_MODULE_SERVER } = await import('../../server');
+
+        const { withoutVersion } = await import(
+            '@/lib/utils/battle/pipeline/run-battle-mutation'
+        );
+
+        const ops = Object.entries(WFRP_MODULE_SERVER.battle ?? {});
+
+        expect(ops.length).toBeGreaterThan(10);
+
+        for (const [name, op] of ops) {
+            const { schema } = await op.load({
+                attack: vi.fn(),
+                spell: vi.fn(),
+                legendary: vi.fn(),
+            });
+
+            const res = schema.safeParse(withoutVersion({ expectedVersion: 3 }));
+
+            const unknownKeys = res.success
+                ? []
+                : res.error.issues.filter((i) => i.code === 'unrecognized_keys');
+
+            expect(unknownKeys, name).toEqual([]);
+        }
+    });
+});

@@ -1,243 +1,285 @@
-import { describe, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { bookExample, CANON, LEGACY } from './book-example';
-import {
-    attackDetails,
-    bow,
-    canonRules,
-    fighter,
-    legacyRules,
-    sword,
-} from './combat-fixtures';
 
-import { isOutnumbering } from '@/systems/wfrp/rules/combat/engagement';
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import { BattleRuleError } from '@/lib/utils/battle/store';
+import { RulesetSchema } from '@/lib/utils/rules/schema';
+import { withStats } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import { canonDefence } from '@/systems/wfrp/rules/combat/defence';
 import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';
-import { ACTION_SLOT } from '@/systems/wfrp/rules/slots';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
 import type { TraitSize } from '@/systems/wfrp/rules/trait-kinds';
+import { canonSizeOf } from '@/systems/wfrp/rules/traits/read';
 import {
-    canonSizeStep,
-    outnumberWeight,
-    sizeParrySl,
+    isBiggerThan,
+    parryVsBiggerSl,
+    sizeMeleeDamage,
+    sizeOpposedStrength,
     sizeRangedSl,
 } from '@/systems/wfrp/rules/traits/size';
-import type { BattleAttack } from '@/types/battle';
+import { wfrpOnMoveEnd } from '@/systems/wfrp/rules/turn/move-end';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
-const ring = (
-    count: number,
+const canon = RulesetSchema.parse({
+    ...WFRP_RULES,
+    edition: { preset: 'canon5e' },
+});
+
+const unit = (
+    id: string,
     size: TraitSize | undefined,
-    side: 'ally' | 'enemy'
-) =>
-    Array.from({ length: count }, (_, i) =>
-        fighter(`${side}${i}`, {
-            side,
-            size,
-            at: [
-                { x: 4, y: 5 },
-                { x: 6, y: 5 },
-                { x: 5, y: 4 },
-                { x: 5, y: 6 },
-            ][i],
-        })
+    stats: { sb?: number; tb?: number; ap?: number } = {},
+    x = 0,
+    side: 'ally' | 'enemy' = ParticipantSide.ALLY
+): BattleParticipant => {
+    const p = makeParticipant({ id, hp: 20, maxHp: 20 });
+
+    const ap = stats.ap ?? 0;
+
+    return withStats(
+        {
+            ...p,
+            basicInfo: { ...p.basicInfo, side },
+            battleData: { ...p.battleData, position: { x, y: 0 } },
+        },
+        {
+            sb: stats.sb ?? 0,
+            tb: stats.tb ?? 0,
+            ap: { head: ap, arm: ap, body: ap, leg: ap },
+            ...(size && { size }),
+        }
     );
-
-const outnumbers = (
-    attackers: ReturnType<typeof ring>,
-    target: ReturnType<typeof fighter>
-) =>
-    isOutnumbering(attackers[0], target, [...attackers, target], null, CANON);
-
-const hit = (
-    size: TraitSize | undefined,
-    attack: BattleAttack,
-    sys?: ReturnType<typeof ACTION_SLOT.write>
-) => {
-    const a = fighter('a', { size, sb: 4 });
-
-    const t = fighter('t', { side: 'enemy', tb: 0 });
-
-    return mitigateWfrpDamage({
-        attacker: a,
-        target: t,
-        weapon: 4,
-        amount: 4,
-        margin: 0,
-        location: 'body',
-        crit: false,
-        attack,
-        system: sys,
-        rng: () => 0.5,
-        rules: canonRules,
-    });
 };
 
-const total = (r: ReturnType<typeof hit>) => r.amount;
+const attackOf = (
+    type: AttackType = AttackType.MELEE,
+    free = false
+): BattleAttack =>
+    ({
+        id: 'w',
+        name: 'w',
+        type,
+        attackBonus: 0,
+        damageDice: '',
+        damageType: 'physical',
+        system: ATTACK_SLOT.write({
+            qualities: [],
+            flaws: [],
+            ...(free && { free: true as const }),
+        }),
+    }) as unknown as BattleAttack;
 
-describe('canon: size outnumbering (p360)', () => {
-    const large = fighter('big', {
-        side: 'enemy',
-        size: 'large',
-        at: { x: 5, y: 5 },
+const damage = (
+    attacker: BattleParticipant,
+    target: BattleParticipant,
+    attack = attackOf(),
+    rules = canon
+) =>
+    mitigateWfrpDamage({
+        attacker,
+        target,
+        weapon: 4,
+        amount: 5,
+        margin: 2,
+        location: 'body',
+        crit: false,
+        rng: () => 0.5,
+        rules,
+        attack,
     });
 
+const sizeStep = (r: ReturnType<typeof damage>) =>
+    r.steps.find((s) => s.key === 'size')?.value;
+
+const victim = unit('t', 'average', { tb: 3, ap: 1 }, 1, ParticipantSide.ENEMY);
+
+describe('canon: Size damage in melee (p360)', () => {
     bookExample(
         360,
-        'four Average outnumber one Large 2:1, three do not',
+        'Large adds SB: weapon 4 + SB 5 + SL 2 + size 5 - TB 3 - AP 1 = 12',
         () => {
-            const four = ring(4, undefined, 'ally');
+            const r = damage(unit('a', 'large', { sb: 5 }), victim);
 
-            expect(outnumbers(four, large)).toBe(true);
-            expect(outnumbers(four.slice(0, 3), large)).toBe(false);
+            expect(sizeStep(r)).toBe(5);
+            expect(r.amount).toBe(12);
         }
     );
 
-    bookExample(
-        360,
-        'two Large ogres outnumber one human 2:1, not 4:1',
-        () => {
-            const human = fighter('h', { side: 'enemy', at: { x: 5, y: 5 } });
+    bookExample(360, 'Enormous adds SB, Monstrous twice SB', () => {
+        expect(sizeStep(damage(unit('a', 'enormous', { sb: 5 }), victim))).toBe(
+            5
+        );
+        expect(
+            sizeStep(damage(unit('a', 'monstrous', { sb: 8 }), victim))
+        ).toBe(16);
+    });
 
-            const ogres = ring(2, 'large', 'ally');
+    bookExample(360, 'Small and Average add nothing', () => {
+        expect(
+            sizeStep(damage(unit('a', 'average', { sb: 5 }), victim))
+        ).toBeUndefined();
+        expect(
+            sizeStep(damage(unit('a', 'small', { sb: 5 }), victim))
+        ).toBeUndefined();
+    });
 
-            expect(outnumbers(ogres, human)).toBe(true);
-            expect(outnumbers(ogres.slice(0, 1), human)).toBe(false);
-        }
-    );
-
-    bookExample(360, 'four Large outnumber one Monstrous', () => {
-        const dragon = fighter('d', {
-            side: 'enemy',
-            size: 'monstrous',
-            at: { x: 5, y: 5 },
+    bookExample(360, 'a second (Momentum) attack gets no Size bonus', () => {
+        const a = withWfrpState(unit('a', 'large', { sb: 5 }), {
+            momentumAttack: true,
         });
 
-        const four = ring(4, 'large', 'ally');
-
-        expect(outnumbers(four, dragon)).toBe(true);
-        expect(outnumbers(four.slice(0, 3), dragon)).toBe(false);
+        expect(sizeStep(damage(a, victim))).toBeUndefined();
     });
 
-    bookExample(360, 'the legacy model weighs every creature as 1', () => {
-        const three = ring(3, undefined, 'ally');
+    bookExample(360, 'ranged and trait free attacks get no Size bonus', () => {
+        const big = unit('a', 'large', { sb: 5 });
 
         expect(
-            isOutnumbering(three[0], large, [...three, large], null, LEGACY)
-        ).toBe(true);
+            sizeStep(damage(big, victim, attackOf(AttackType.RANGED)))
+        ).toBeUndefined();
+        expect(
+            sizeStep(damage(big, victim, attackOf(AttackType.MELEE, true)))
+        ).toBeUndefined();
+        expect(sizeMeleeDamage(big, attackOf(), 5)).toBe(5);
+    });
+
+    it('legacy keeps the multiplier model', () => {
+        const r = damage(
+            unit('a', 'large', { sb: 5 }),
+            victim,
+            attackOf(),
+            WFRP_RULES
+        );
+
+        expect(sizeStep(r)).toBeGreaterThan(0);
+        expect(LEGACY.sizeModel).toBe('legacy');
     });
 });
 
-describe('canon: size damage (p360)', () => {
-    bookExample(
-        360,
-        'Large adds SB, Enormous SB, Monstrous 2xSB to melee damage',
-        () => {
-            const melee = sword();
-
-            expect(total(hit(undefined, melee))).toBe(8);
-            expect(total(hit('large', melee))).toBe(12);
-            expect(total(hit('enormous', melee))).toBe(12);
-            expect(total(hit('monstrous', melee))).toBe(16);
-        }
-    );
-
-    bookExample(
-        360,
-        'no size bonus on ranged, free attacks or baked-in profiles',
-        () => {
-            expect(total(hit('large', bow()))).toBe(8);
-            expect(total(hit('large', sword({ sizeBaked: true })))).toBe(8);
-
-            const free = ACTION_SLOT.write({
-                attack: {
-                    roll: 10,
-                    target: 40,
-                    sl: 0,
-                    netSl: 0,
-                    location: 'body',
-                    doubles: false,
-                    free: true,
-                },
-            });
-
-            expect(total(hit('large', sword(), free))).toBe(8);
-        }
-    );
-
-    bookExample(360, 'the legacy model keeps the per-step bonus', () => {
-        const a = fighter('a', { size: 'large', sb: 4 });
-
-        const t = fighter('t', { side: 'enemy' });
-
-        const r = mitigateWfrpDamage({
-            attacker: a,
-            target: t,
-            weapon: 4,
-            amount: 4,
-            margin: 0,
-            location: 'body',
-            crit: false,
-            attack: sword(),
-            rng: () => 0.5,
-            rules: legacyRules,
-        });
-
-        expect(r.amount).toBe(16);
-    });
-});
-
-describe('canon: size and defence (p360, p166)', () => {
-    bookExample(360, 'parry against a larger foe -2 SL, dodge unaffected', () => {
-        const human = fighter('h');
-
-        const ogre = fighter('o', { size: 'large' });
-
-        expect(sizeParrySl(human, ogre, CANON)).toBe(-2);
-        expect(sizeParrySl(ogre, human, CANON)).toBe(0);
-        expect(sizeParrySl(human, ogre, LEGACY)).toBe(0);
-    });
-
+describe('canon: Size and shooting, parrying (p166, p360)', () => {
     bookExample(
         166,
-        'shooting a larger target +1 SL, Monstrous +2, smaller -1',
+        'shooting a bigger target gives +1 SL, Monstrous +2, a smaller one -1',
         () => {
-            const shooter = fighter('s');
+            const shooter = unit('s', 'average');
 
-            expect(sizeRangedSl(shooter, fighter('t', { size: 'large' }))).toBe(
-                1
-            );
-            expect(
-                sizeRangedSl(shooter, fighter('t', { size: 'monstrous' }))
-            ).toBe(2);
-            expect(
-                sizeRangedSl(fighter('s', { size: 'large' }), fighter('t'))
-            ).toBe(-1);
-            expect(sizeRangedSl(shooter, fighter('t'))).toBe(0);
+            expect(sizeRangedSl(shooter, unit('t', 'large'))).toBe(1);
+            expect(sizeRangedSl(shooter, unit('t', 'enormous'))).toBe(1);
+            expect(sizeRangedSl(shooter, unit('t', 'monstrous'))).toBe(2);
+            expect(sizeRangedSl(shooter, unit('t', 'small'))).toBe(-1);
+            expect(sizeRangedSl(shooter, unit('t', 'average'))).toBe(0);
         }
     );
 
-    bookExample(166, 'size gives a ranged attack SL, melee none', () => {
-        const a = fighter('a');
+    bookExample(
+        360,
+        'parrying a bigger attacker costs 2 SL, Dodge is free',
+        () => {
+            const human = unit('h', 'average');
 
-        const big = fighter('t', { side: 'enemy', size: 'large' });
+            const ogre = unit('o', 'large');
 
-        const plain = fighter('t', { side: 'enemy' });
+            expect(parryVsBiggerSl(human, ogre)).toBe(-2);
+            expect(parryVsBiggerSl(ogre, human)).toBe(0);
 
-        const ranged = (t: typeof big) =>
-            attackDetails(a, t, bow()).details?.netSl ?? 0;
+            const defence = canonDefence(human, attackOf(), CANON, ogre);
 
-        const melee = (t: typeof big) =>
-            attackDetails(a, t, sword()).details?.netSl ?? 0;
+            expect(
+                defence.sl.parry -
+                    canonDefence(human, attackOf(), CANON).sl.parry
+            ).toBe(-2);
+            expect(defence.sl.dodge).toBe(0);
+        }
+    );
 
-        expect(ranged(big)).toBe(ranged(plain) + 1);
-        expect(attackDetails(a, big, bow()).details?.mods).toEqual([
-            { key: 'sizeRanged', sl: 1 },
-        ]);
-        expect(melee(big)).toBe(melee(plain));
+    bookExample(
+        360,
+        'Opposed Strength: two steps win outright, one step needs a Critical',
+        () => {
+            expect(
+                sizeOpposedStrength(unit('a', 'large'), unit('b', 'small'))
+            ).toBe('auto');
+            expect(
+                sizeOpposedStrength(unit('a', 'large'), unit('b', 'average'))
+            ).toBe('critOnly');
+            expect(
+                sizeOpposedStrength(unit('a', 'large'), unit('b', 'large'))
+            ).toBe('normal');
+        }
+    );
+});
+
+describe('canon: Tiny and Little read as Small', () => {
+    it('maps the legacy sizes onto Small', () => {
+        expect(canonSizeOf('tiny')).toBe('small');
+        expect(canonSizeOf('little')).toBe('small');
+        expect(canonSizeOf(undefined)).toBe('average');
     });
 
-    bookExample(360, 'Little counts as Small under canon5e', () => {
-        expect(canonSizeStep(fighter('l', { size: 'little' }))).toBe(
-            canonSizeStep(fighter('s', { size: 'small' }))
+    it('treats a Little target like a Small one for shooting', () => {
+        expect(sizeRangedSl(unit('s', 'average'), unit('t', 'little'))).toBe(
+            -1
         );
-        expect(outnumberWeight(fighter('l', { size: 'tiny' }), CANON)).toBe(1);
+    });
+});
+
+describe('canon: bigger fighters ignore smaller foes when leaving melee (p360)', () => {
+    const map: BattleMapConfig = {
+        cols: 30,
+        rows: 5,
+        background: null,
+        opacity: 0.3,
+    };
+
+    const run = (moverSize: TraitSize, foeSize: TraitSize) => {
+        const mover = unit('m', moverSize, {}, 3);
+
+        const foe = withWfrpState(
+            unit('f', foeSize, {}, 1, ParticipantSide.ENEMY),
+            { engagedWith: { m: 2 } }
+        );
+
+        return () =>
+            wfrpOnMoveEnd({
+                mover,
+                start: { x: 0, y: 0 },
+                path: [{ x: 3, y: 0 }],
+                cost: 3,
+                participants: [mover, foe],
+                round: 1,
+                rng: () => 0.5,
+                rules: canon,
+                map,
+            });
+    };
+
+    bookExample(
+        360,
+        'a Large mover leaves an Average foe without Disengage',
+        () => {
+            expect(run('large', 'average')).not.toThrow();
+        }
+    );
+
+    bookExample(
+        360,
+        'an Average mover still needs Disengage against a Large foe',
+        () => {
+            expect(run('average', 'large')).toThrow(BattleRuleError);
+        }
+    );
+
+    it('isBiggerThan compares canon sizes', () => {
+        expect(isBiggerThan(unit('a', 'large'), unit('b', 'average'))).toBe(
+            true
+        );
+        expect(isBiggerThan(unit('a', 'little'), unit('b', 'small'))).toBe(
+            false
+        );
     });
 });

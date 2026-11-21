@@ -7,11 +7,20 @@ import { useCommittedName } from './useCommittedName';
 import type { useWorldEditor } from './useWorldEditor';
 import { useWorldMapUpload } from './useWorldMapUpload';
 
-import { DEFAULT_ZONE_COLOR, WORLD_LAYER_OPACITY } from '@/lib/constants/world';
+import {
+    DEFAULT_ZONE_COLOR,
+    WORLD_LAYER_OPACITY,
+    WORLD_ZONE_OPACITY_MIN,
+    ZONE_FILL_DEFAULT,
+} from '@/lib/constants/world';
 import { useDebouncedCommit, useNotify } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { initialLayerRect } from '@/lib/utils/world/layer-rect';
-import type { LayerVisibility, WorldLayer } from '@/types/world';
+import type {
+    LayerVisibility,
+    LayerZoneLabels,
+    WorldLayer,
+} from '@/types/world';
 
 interface Options {
     campaignId: string;
@@ -50,6 +59,17 @@ export function useLayerForm({
     const opacityCommit = useDebouncedCommit((value: number) =>
         save({ opacity: value })
     );
+
+    const [zoneOpacity, setZoneOpacity] = useState(layer.zoneOpacity);
+
+    const zoneOpacityCommit = useDebouncedCommit((value: number | null) =>
+        save({ zoneOpacity: value })
+    );
+
+    const changeZoneOpacity = (value: number | null) => {
+        setZoneOpacity(value);
+        zoneOpacityCommit.schedule(value);
+    };
 
     const pickColor = (c: string | null) => {
         setColor(c);
@@ -119,6 +139,15 @@ export function useLayerForm({
         opacity,
         changeOpacity,
         opacityRange: WORLD_LAYER_OPACITY,
+        zoneOpacity: {
+            value: zoneOpacity ?? ZONE_FILL_DEFAULT,
+            isCustom: zoneOpacity !== null,
+            min: WORLD_ZONE_OPACITY_MIN,
+            change: changeZoneOpacity,
+            reset: () => changeZoneOpacity(null),
+        },
+        setIcon: (icon: string | null) => save({ icon }),
+        setZoneLabels: (zoneLabels: LayerZoneLabels) => save({ zoneLabels }),
         setVisibility: (visibility: LayerVisibility) => save({ visibility }),
         heroIds,
         toggleHero,

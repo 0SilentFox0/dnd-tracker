@@ -12,6 +12,16 @@ vi.mock('@/systems/wfrp/hooks/useMalignantToggle', () => ({
     }),
 }));
 
+vi.mock('@/systems/wfrp/hooks/useMountedSwitch', () => ({
+    useMountedSwitch: () => ({
+        available: false,
+        mountId: '',
+        mounts: [],
+        isPending: false,
+        set: vi.fn(),
+    }),
+}));
+
 import { SystemConditionsDialog } from '../SystemConditionsDialog';
 
 import { render } from '@/lib/i18n/test/render-uk';

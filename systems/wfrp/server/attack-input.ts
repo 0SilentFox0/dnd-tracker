@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
 import { ACCEPTED_SPOTS } from '../rules/combat/constants';
-import { FORTUNE_INPUT } from '../rules/percentile/fortune';
+import {
+    FORTUNE_INPUT,
+    OVERCAST_DIMENSIONS,
+    type OvercastDimension,
+} from '../rules/percentile/fortune';
 
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 
@@ -22,22 +26,28 @@ const Body = z.object({
                 blessing: z
                     .enum(['rangeYards', 'targets', 'durationRounds'])
                     .optional(),
-                overcast: z
-                    .object({
-                        damage: z.number().int().min(0).max(30).optional(),
-                        targets: z.number().int().min(0).max(30).optional(),
-                        range: z.number().int().min(0).max(30).optional(),
-                        aoe: z.number().int().min(0).max(30).optional(),
-                        duration: z.number().int().min(0).max(30).optional(),
+                mods: z
+                    .strictObject({
+                        calledShot: z.enum(ACCEPTED_SPOTS).optional(),
+                        cover: z.boolean().optional(),
+                        highGround: z.enum(['attacker', 'defender']).optional(),
+                        enclosed: z.boolean().optional(),
+                        helplessRoll: roll.optional(),
+                        grapple: z.boolean().optional(),
                     })
                     .optional(),
-                calledShot: z.enum(ACCEPTED_SPOTS).optional(),
-                situational: z
-                    .object({
-                        highGround: z.enum(['attacker', 'defender']).optional(),
-                        enclosed: z.literal(true).optional(),
-                        badFooting: z.literal(true).optional(),
-                    })
+                overcast: z
+                    .strictObject(
+                        Object.fromEntries(
+                            OVERCAST_DIMENSIONS.map((d) => [
+                                d,
+                                z.number().int().min(1).max(20).optional(),
+                            ])
+                        ) as Record<
+                            OvercastDimension,
+                            z.ZodOptional<z.ZodNumber>
+                        >
+                    )
                     .optional(),
             }),
         })
@@ -56,18 +66,16 @@ export const WfrpFortuneInputSchema = Body.transform(
             location,
             critBonus,
             blessing,
+            mods,
             overcast,
-            calledShot,
-            situational,
         } = system.data;
 
         return FORTUNE_INPUT.write({
             kind,
             ...(critBonus && { critBonus }),
             ...(blessing && { blessing }),
+            ...(mods && { mods }),
             ...(overcast && { overcast }),
-            ...(calledShot && { calledShot }),
-            ...(situational && { situational }),
             ...(kind === 'reroll' &&
                 secondRoll !== undefined && { manualReroll: secondRoll }),
             ...(kind === 'reroll' && rerolls && { rerolls }),

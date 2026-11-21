@@ -25,7 +25,6 @@ export function MarkerColorField({
     return (
         <>
             <ColorSwatch color={color} label={label} onChange={onPick} />
-            {label}
             {isCustom ? (
                 <Button
                     type="button"

@@ -4,6 +4,7 @@ import { type HitLocation, LOCATIONS } from '../combat/constants';
 import {
     AP_MAX_PER_LAYER,
     ARMOUR_KINDS,
+    ARMOUR_PENALTY_MAX,
     GEAR_CATEGORIES,
     QUALITY_VALUE_MAX,
     WEAPON_GROUPS,
@@ -41,11 +42,21 @@ const ap = z.number().int().min(0).max(AP_MAX_PER_LAYER);
 
 const qualities = z.array(QualityRefSchema).max(20);
 
+const penalties = z
+    .array(
+        z.strictObject({
+            skill: z.string().min(1).max(40),
+            sl: z.number().int().min(1).max(ARMOUR_PENALTY_MAX),
+        })
+    )
+    .max(8);
+
 export const WfrpArmourStatsSchema = z.strictObject({
     type: z.literal('armour'),
     locations: z.strictObject({ head: ap, arm: ap, body: ap, leg: ap }),
     kind: z.enum(ARMOUR_KINDS),
     qualities,
+    penalty: penalties.optional(),
     weight,
     price,
 });
@@ -63,6 +74,7 @@ export const WfrpWeaponStatsSchema = z
         qualities,
         flaws: qualities,
         twoHanded: z.boolean(),
+        bladed: z.boolean().optional(),
         ammoCapacity: z.number().int().min(1).max(1000).optional(),
         weight,
         price,
@@ -91,6 +103,8 @@ export type WfrpArmourStats = {
     locations: Record<HitLocation, number>;
     kind: (typeof ARMOUR_KINDS)[number];
     qualities: QualityRef[];
+    /** SL lost on tests of the skill while the armour is worn */
+    penalty?: { skill: string; sl: number }[];
     weight: number;
     price: number;
 };
@@ -104,6 +118,8 @@ export type WfrpWeaponStats = {
     qualities: QualityRef[];
     flaws: QualityRef[];
     twoHanded: boolean;
+    /** Blade weapon: a Trap Blade defender can catch it (p305) */
+    bladed?: boolean;
     ammoCapacity?: number;
     weight: number;
     price: number;

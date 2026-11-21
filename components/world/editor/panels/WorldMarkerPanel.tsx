@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { MapPinned, PenLine } from 'lucide-react';
+import { MapPinned, PenLine, Trash2 } from 'lucide-react';
 
 import { MarkerLayerField } from '../layers/MarkerLayerField';
 import { MarkerIconGrid } from '../maps/MapFieldParts';
 import { NewWorldMapDialog } from '../maps/NewWorldMapDialog';
 import { markerIcon } from '../marker-icon-options';
-import { MarkerColorField } from '../MarkerColorField';
+import { MarkerStyleFields } from '../MarkerStyleFields';
+import { MoveMapMenu } from '../MoveMapMenu';
 import { useEditorMarkerFields } from '../use-editor-fields';
 import { useWorldEditorContext } from '../WorldEditorContext';
 import { DmMarkerNotes } from './DmMarkerNotes';
@@ -36,7 +37,7 @@ export function WorldMarkerPanel() {
 }
 
 function MarkerForm({ marker }: { marker: WorldMarker }) {
-    const { detail } = useWorldEditorContext();
+    const { campaignId, detail, maps, editor } = useWorldEditorContext();
 
     const t = useTranslations('world');
 
@@ -46,7 +47,16 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
     const m = useEditorMarkerFields(marker);
 
-    const HeaderIcon = markerIcon(marker);
+    const layer = detail?.layers?.find((l) => l.id === marker.layerId);
+
+    const HeaderIcon = markerIcon({
+        ...marker,
+        icon: marker.icon ?? layer?.icon ?? null,
+    });
+
+    const child = marker.childMapId
+        ? maps.find((x) => x.id === marker.childMapId)
+        : undefined;
 
     const sheet = !useMediaQuery(DESKTOP_QUERY);
 
@@ -85,34 +95,20 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                         />
                     </label>
                     {marker.kind === 'point' ? (
-                        <>
-                            <MarkerIconGrid
-                                aria-label={t('editor.icon')}
-                                value={marker.icon}
-                                cellClassName="h-11"
-                                onPick={(icon) => void m.save({ icon })}
-                            />
-                            <div className="flex items-center gap-3 text-sm">
-                                <MarkerColorField
-                                    label={t('editor.pointColor')}
-                                    color={m.colorValue}
-                                    isCustom={m.isCustomColor}
-                                    onPick={m.pickColor}
-                                    onReset={m.resetColor}
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex items-center gap-3 text-sm">
-                            <MarkerColorField
-                                label={t('editor.zoneColor')}
-                                color={m.colorValue}
-                                isCustom={m.isCustomColor}
-                                onPick={m.pickColor}
-                                onReset={m.resetColor}
-                            />
-                        </div>
-                    )}
+                        <MarkerIconGrid
+                            aria-label={t('editor.icon')}
+                            value={marker.icon}
+                            cellClassName="h-11"
+                            onPick={(icon) => void m.save({ icon })}
+                        />
+                    ) : null}
+                    <div className="text-sm">
+                        <MarkerStyleFields
+                            marker={marker}
+                            layer={layer}
+                            form={m}
+                        />
+                    </div>
                     {marker.kind === 'zone' ? (
                         <Button
                             type="button"
@@ -168,15 +164,41 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
             ) : null}
             <HudSection title={t('editor.childMap')}>
                 {marker.childMapId ? (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => m.openMap(marker.childMapId)}
-                        className="w-full gap-2"
-                    >
-                        <MapPinned className="size-4" />
-                        {t('editor.openChild')}
-                    </Button>
+                    <div className="space-y-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => m.openMap(marker.childMapId)}
+                            className="w-full gap-2"
+                        >
+                            <MapPinned className="size-4" />
+                            {t('editor.openChild')}
+                        </Button>
+                        {child ? (
+                            <>
+                                <MoveMapMenu
+                                    campaignId={campaignId}
+                                    map={child}
+                                    maps={maps}
+                                    onMove={(parentMarkerId) =>
+                                        void editor.map.move.mutateOk({
+                                            id: child.id,
+                                            parentMarkerId,
+                                        })
+                                    }
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => void m.removeMap(child)}
+                                    className="w-full gap-2 text-destructive"
+                                >
+                                    <Trash2 className="size-4" />
+                                    {t('editor.deleteMap')}
+                                </Button>
+                            </>
+                        ) : null}
+                    </div>
                 ) : (
                     <Button
                         type="button"

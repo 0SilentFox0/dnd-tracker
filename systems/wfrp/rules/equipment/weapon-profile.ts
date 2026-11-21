@@ -7,18 +7,21 @@ export type WeaponProfile = {
     group?: WfrpWeaponStats['group'];
     cells?: number;
     rangeFt?: number;
+    /** Thrown weapons: Range is SB times this (Rock SB x3), counted when the fighter is built */
+    rangeSb?: number;
     damageFlat: number;
     addSb: boolean;
     qualities: QualityRef[];
     flaws: QualityRef[];
     ammoCapacity?: number;
     twoHanded: boolean;
+    bladed?: true;
 };
 
 // Matches wfrp `distance` (2 yd per cell); the registry cannot be imported from here without a cycle
 export const WFRP_CELL_FEET = 6;
 
-// verify against 5e book
+// legacy only; canon engage range is canonEngageCells (p166)
 const REACH_FEET: Record<NonNullable<WfrpWeaponStats['reach']>, number> = {
     personal: 3,
     'very-short': 3,
@@ -61,6 +64,7 @@ export function weaponProfile(stats: unknown): WeaponProfile | null {
         qualities: s.qualities,
         flaws: s.flaws,
         twoHanded: s.twoHanded,
+        ...(s.bladed && { bladed: true as const }),
         ...(s.ammoCapacity !== undefined && { ammoCapacity: s.ammoCapacity }),
     };
 

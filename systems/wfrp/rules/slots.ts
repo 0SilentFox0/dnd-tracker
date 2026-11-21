@@ -9,6 +9,7 @@ import type {
     PercentileAttackDetails,
     PercentileCastDetails,
 } from './percentile/details';
+import { type BreathKind, isBreath } from './trait-kinds';
 
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defineSlot } from '@/lib/utils/rules/systems/slot';
@@ -31,8 +32,12 @@ export interface WfrpAttackSlot {
     twoHanded?: true;
     /** Weapon reach, canon gear only (p300) */
     reach?: WeaponReach;
-    /** A creature-trait attack whose Damage already includes the size bonus (p360) */
-    sizeBaked?: true;
+    /** Blade weapon, canon gear only: Trap Blade can catch it (p305) */
+    bladed?: true;
+    /** Trait attack made as a free attack: no Size damage bonus (p360) */
+    free?: true;
+    /** Breath type of a creature's breath attack (p358) */
+    breath?: BreathKind;
 }
 
 // Legacy rows stored `hand: true` (main) and `offHand: true` (off)
@@ -62,8 +67,10 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
                 reach: raw.reach as WeaponReach,
             }),
         ...(raw.twoHanded === true && { twoHanded: true as const }),
+        ...(raw.bladed === true && { bladed: true as const }),
         ...(raw.noSb === true && { noSb: true }),
-        ...(raw.sizeBaked === true && { sizeBaked: true as const }),
+        ...(raw.free === true && { free: true as const }),
+        ...(isBreath(raw.breath) && { breath: raw.breath }),
         ...(raw.magical === true && { magical: true as const }),
         ...(handOf(raw) && { hand: handOf(raw) }),
     };
@@ -117,7 +124,7 @@ export const SCENE_SLOT = defineSlot<SceneMomentum>('wfrp', (raw) => {
     ) as SceneMomentum;
 });
 
-export type WfrpMoveMode = 'run' | 'sprint' | 'charge';
+export type WfrpMoveMode = 'run' | 'sprint' | 'charge' | 'flee';
 
 export interface WfrpParticipantState {
     fortune?: number;
@@ -144,10 +151,32 @@ export interface WfrpParticipantState {
     dispelProgress?: { targetId: string; castId: string; progress: number };
     /** Round of the last reactive Dispel attempt: one per round (canon5e, p237) */
     dispelRound?: number;
-    /** Aiming at `targetId`: +1 SL on the next ranged attack at it, lost by moving or defending (canon5e, p167); `movementUsed` is the turn's movement when aimed */
-    aim?: { targetId: string; movementUsed: number };
     /** Movement chosen this turn, canon5e (p163); a Charge limits attacks to melee */
     moveMode?: WfrpMoveMode;
+    /** Aimed at this target; the next attack gains the Aim bonus (canon actionsModel) */
+    aim?: { targetId: string };
+    /** Round of the last Action taken, for end-of-turn expiry of stances and aiming */
+    actLastRound?: number;
+    /** Defensive stance: the skill the fighter parries or dodges with until its next turn */
+    defensive?: { skill: string };
+    /** Attack journal: round-starts an engagement with each foe still lasts, keyed by foe id (canon actionsModel) */
+    engagedWith?: Record<string, number>;
+    /** Locked in a grapple, `holder` marks the one holding */
+    grapple?: { with: string; holder: boolean };
+    /** Wounds from fire; a regenerating creature cannot heal them (p358) */
+    fireWounds?: number;
+    /** Breath: the attacker's one roll shared by every target of the volley (p358) */
+    breathRoll?: { attackId: string; roll: number; seen: string[] };
+    /** Wear taken by each weapon, keyed by attack id */
+    weaponWear?: Record<string, number>;
+    /** Oops: act last in the next round; the round-start hook moves the fighter to the end and clears it */
+    actLastNext?: true;
+    /** Oops: initiative slot the fighter returns to once its act-last round has passed */
+    actLastSlot?: number;
+    /** Oops -1 SL on every test: `next` until the next round begins, then `now` for that whole round */
+    oopsPenalty?: 'next' | 'now';
+    /** Riding a mount (DM switch): its id and Strength Bonus, which a mounted Charge uses (p168) */
+    mounted?: { mountId: string; sb?: number };
     /** Critical Wounds taken this battle, canon5e (p172) */
     critWounds?: number;
     /** Rounds left before a critically wounded, unconscious fighter dies (p172) */
@@ -224,6 +253,17 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                   )
               )
             : undefined;
+
+        const numbers = (v: unknown): Record<string, number> | undefined =>
+            isRecord(v)
+                ? (Object.fromEntries(
+                      Object.entries(v).filter(([, n]) => finite(n))
+                  ) as Record<string, number>)
+                : undefined;
+
+        const engagedWith = numbers(raw.engagedWith);
+
+        const weaponWear = numbers(raw.weaponWear);
 
         const compelled = isRecord(raw.compelled)
             ? Object.fromEntries(
@@ -307,13 +347,50 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
             ...(finite(raw.dispelRound) && { dispelRound: raw.dispelRound }),
             ...((raw.moveMode === 'run' ||
                 raw.moveMode === 'sprint' ||
-                raw.moveMode === 'charge') && { moveMode: raw.moveMode }),
+                raw.moveMode === 'charge' ||
+                raw.moveMode === 'flee') && { moveMode: raw.moveMode }),
             ...(isRecord(raw.aim) &&
-                typeof raw.aim.targetId === 'string' &&
-                finite(raw.aim.movementUsed) && {
-                    aim: {
-                        targetId: raw.aim.targetId,
-                        movementUsed: raw.aim.movementUsed,
+                typeof raw.aim.targetId === 'string' && {
+                    aim: { targetId: raw.aim.targetId },
+                }),
+            ...(finite(raw.actLastRound) && { actLastRound: raw.actLastRound }),
+            ...(isRecord(raw.defensive) &&
+                typeof raw.defensive.skill === 'string' && {
+                    defensive: { skill: raw.defensive.skill },
+                }),
+            ...(engagedWith && { engagedWith }),
+            ...(isRecord(raw.grapple) &&
+                typeof raw.grapple.with === 'string' &&
+                typeof raw.grapple.holder === 'boolean' && {
+                    grapple: {
+                        with: raw.grapple.with,
+                        holder: raw.grapple.holder,
+                    },
+                }),
+            ...(finite(raw.fireWounds) && { fireWounds: raw.fireWounds }),
+            ...(isRecord(raw.breathRoll) &&
+                finite(raw.breathRoll.roll) &&
+                typeof raw.breathRoll.attackId === 'string' &&
+                Array.isArray(raw.breathRoll.seen) && {
+                    breathRoll: {
+                        roll: raw.breathRoll.roll,
+                        attackId: raw.breathRoll.attackId,
+                        seen: raw.breathRoll.seen.filter(
+                            (id): id is string => typeof id === 'string'
+                        ),
+                    },
+                }),
+            ...(weaponWear && { weaponWear }),
+            ...(raw.actLastNext === true && { actLastNext: true as const }),
+            ...(finite(raw.actLastSlot) && { actLastSlot: raw.actLastSlot }),
+            ...((raw.oopsPenalty === 'next' || raw.oopsPenalty === 'now') && {
+                oopsPenalty: raw.oopsPenalty,
+            }),
+            ...(isRecord(raw.mounted) &&
+                typeof raw.mounted.mountId === 'string' && {
+                    mounted: {
+                        mountId: raw.mounted.mountId,
+                        ...(finite(raw.mounted.sb) && { sb: raw.mounted.sb }),
                     },
                 }),
             ...(finite(raw.critWounds) && { critWounds: raw.critWounds }),

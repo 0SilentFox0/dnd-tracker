@@ -33,7 +33,7 @@ import {
 } from '@/lib/utils/battle/modes/engine';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import { findEffectMarker } from '@/lib/utils/battle/participant/state';
-import { widenTargeting } from '@/lib/utils/battle/spell/extension';
+import { TOUCH_FEET } from '@/lib/utils/battle/spell/attack-type';
 import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import { REJECT } from '@/lib/utils/battle/store/reject';
@@ -242,7 +242,7 @@ export interface SpellMapContext {
     targetCell?: GridPoint;
     castLevel?: number;
     upcastTargets?: number;
-    /** Reach beyond the spell's own numbers (overcast): range, template size and extra targets */
+    /** Declared overcast extension: wider range, area and target count */
     extension?: CastExtension;
 }
 
@@ -367,7 +367,7 @@ function resolveSkillRadius(
     };
 }
 
-export function outOfRange(
+function outOfRange(
     caster: BattleParticipant,
     picked: BattleParticipant[],
     range: number | undefined,
@@ -623,7 +623,28 @@ const upcastExtra = (
               spell.level,
               mapCtx.castLevel
           )
-        : 0) + (mapCtx?.extension?.targets ?? 0);
+        : 0) + (mapCtx?.extension?.extraTargets ?? 0);
+
+function stretched(
+    targeting: SpellTargetingDef,
+    ext: CastExtension | undefined
+): SpellTargetingDef {
+    if (!ext) return targeting;
+
+    const rangeMul = ext.rangeMul ?? 1;
+
+    const withRange =
+        rangeMul > 1 &&
+        'range' in targeting &&
+        targeting.range !== undefined &&
+        targeting.range > TOUCH_FEET
+            ? { ...targeting, range: targeting.range * rangeMul }
+            : targeting;
+
+    return withRange.kind === 'template' && (ext.areaMul ?? 1) > 1
+        ? { ...withRange, size: withRange.size * (ext.areaMul ?? 1) }
+        : withRange;
+}
 
 const HOSTILE_KINDS = new Set(['enemy', 'area', 'template', 'allEnemies']);
 
@@ -666,7 +687,7 @@ export function resolveSpellTargets(
 ): SpellTargetResolution {
     const extra = upcastExtra(caster, spell, mapCtx);
 
-    const reached = widenTargeting(targeting, mapCtx?.extension);
+    const reached = stretched(targeting, mapCtx?.extension);
 
     const widened =
         extra > 0 && (reached.kind === 'area' || reached.kind === 'template')
@@ -694,58 +715,4 @@ export function resolveSpellTargets(
         );
 
     return { ...res, targetIds };
-}
-
-/** What an overcast shortfall leaves of a resolved cast: targets beyond the actual range or count drop, an area re-resolves at its actual size */
-export function trimToExtension(
-    ps: BattleParticipant[],
-    caster: BattleParticipant,
-    spell: SpellRef,
-    targeting: SpellTargetingDef,
-    chosenIds: string[],
-    resolved: Extract<SpellTargetResolution, { ok: true }>,
-    mapCtx: SpellMapContext
-): Extract<SpellTargetResolution, { ok: true }> {
-    const empty = { ok: true as const, targetIds: [] as string[] };
-
-    if (targeting.kind === 'template') {
-        const again = resolveSpellTargets(
-            ps,
-            caster,
-            spell,
-            targeting,
-            chosenIds,
-            mapCtx
-        );
-
-        return again.ok ? again : empty;
-    }
-
-    const reach = widenTargeting(targeting, mapCtx.extension);
-
-    const inReach = resolved.targetIds.filter((id) => {
-        const p = findParticipant(ps, id);
-
-        return (
-            !p ||
-            !('range' in reach) ||
-            !mapCtx.map ||
-            !outOfRange(caster, [p], reach.range, mapCtx.rules)
-        );
-    });
-
-    for (let n = inReach.length; n > 0; n--) {
-        const again = resolveSpellTargets(
-            ps,
-            caster,
-            spell,
-            targeting,
-            inReach.slice(0, n),
-            mapCtx
-        );
-
-        if (again.ok) return again;
-    }
-
-    return resolved.targetIds.length === 0 ? resolved : empty;
 }

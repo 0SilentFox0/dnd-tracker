@@ -5,12 +5,32 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WorldMapView } from '../WorldMapView';
 
 import { render } from '@/components/ui/__tests__/uk-intl';
-import type { WorldMapDetail, WorldMarker } from '@/types/world';
+import { NO_LAYER_KEY } from '@/lib/constants/world';
+import type {
+    WorldMapDetail,
+    WorldMarker,
+    WorldViewLayer,
+} from '@/types/world';
 
 vi.unmock('next-intl');
 
 vi.mock('next/image', () => ({
-    default: (p: { alt: string }) => <img alt={p.alt} />,
+    default: (p: {
+        alt: string;
+        src: string;
+        sizes?: string;
+        srcSet?: string;
+        className?: string;
+    }) => (
+        <img
+            alt={p.alt}
+            src={p.src}
+            sizes={p.sizes}
+            srcSet={p.srcSet}
+            className={p.className}
+            aria-hidden={p.alt === '' ? true : undefined}
+        />
+    ),
 }));
 
 const marker = (o: Partial<WorldMarker>): WorldMarker => ({
@@ -28,6 +48,8 @@ const marker = (o: Partial<WorldMarker>): WorldMarker => ({
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    labelMode: null,
+    fillOpacity: null,
     layerId: null,
     ...o,
 });
@@ -873,5 +895,270 @@ describe('WorldMapView card slot', () => {
 
         expect(screen.queryByRole('button', { name: 'Town' })).toBeNull();
         expect(screen.getByRole('button', { name: 'Port' })).toBeTruthy();
+    });
+
+    it('a marker inherits the icon and colour of its layer and keeps its own', () => {
+        const layer: WorldViewLayer = {
+            id: 'l1',
+            name: 'Cities',
+            color: '#00aa00',
+            imageUrl: null,
+            rect: { x: 0, y: 0, w: 1, h: 1 },
+            opacity: 1,
+            icon: 'castle',
+            zoneOpacity: null,
+            zoneLabels: 'auto',
+        };
+
+        render(
+            <WorldMapView
+                detail={detail([
+                    marker({
+                        id: 'p',
+                        name: 'Town',
+                        layerId: 'l1',
+                        x: 0.2,
+                        y: 0.2,
+                    }),
+                    marker({
+                        id: 'q',
+                        name: 'Port',
+                        layerId: 'l1',
+                        x: 0.8,
+                        y: 0.8,
+                        icon: 'city',
+                        color: '#aa0000',
+                    }),
+                ])}
+                layers={{ items: [layer], hidden: new Set() }}
+            />
+        );
+
+        const seal = (name: string) =>
+            screen
+                .getByRole('button', { name })
+                .querySelector<HTMLElement>('.atlas-seal');
+
+        expect(seal('Town')?.style.background).toContain('#00aa00');
+        expect(
+            seal('Town')?.querySelector('svg')?.getAttribute('class')
+        ).toContain('castle');
+        expect(seal('Port')?.style.background).toContain('#aa0000');
+        expect(
+            seal('Port')?.querySelector('svg')?.getAttribute('class')
+        ).not.toContain('castle');
+    });
+
+    it('hides unlayered markers through NO_LAYER_KEY', () => {
+        render(
+            <WorldMapView
+                detail={detail([
+                    marker({ id: 'p', name: 'Town', layerId: 'l1' }),
+                    marker({ id: 'q', name: 'Port' }),
+                ])}
+                layers={{
+                    items: [
+                        {
+                            id: 'l1',
+                            name: 'Roads',
+                            color: null,
+                            imageUrl: null,
+                            rect: { x: 0, y: 0, w: 1, h: 1 },
+                            opacity: 1,
+                            icon: null,
+                            zoneOpacity: null,
+                            zoneLabels: 'auto',
+                        },
+                    ],
+                    hidden: new Set([NO_LAYER_KEY]),
+                }}
+            />
+        );
+
+        expect(screen.queryByRole('button', { name: 'Port' })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Town' })).toBeTruthy();
+    });
+
+    it('renders the blurred backdrop with the same image URL and sizes as the map', () => {
+        const { container } = render(<WorldMapView detail={detail([])} />);
+
+        const backdrop = container.querySelector('.atlas-backdrop');
+
+        const main = screen.getByAltText('World');
+
+        expect(backdrop).not.toBeNull();
+        expect(backdrop?.getAttribute('aria-hidden')).toBe('true');
+        expect(backdrop?.getAttribute('src')).toBe(main.getAttribute('src'));
+        expect(backdrop?.getAttribute('srcset')).toBe(
+            main.getAttribute('srcset')
+        );
+        expect(backdrop?.getAttribute('sizes')).toBe(
+            main.getAttribute('sizes')
+        );
+    });
+
+    it('shows the fullscreen button only when slots.fullscreen is given and calls toggle', () => {
+        const toggle = vi.fn();
+
+        const { rerender } = render(<WorldMapView detail={detail([])} />);
+
+        expect(
+            screen.queryByRole('button', { name: 'Повний екран' })
+        ).toBeNull();
+
+        rerender(
+            <WorldMapView
+                detail={detail([])}
+                slots={{ fullscreen: { full: false, toggle } }}
+            />
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Повний екран' }));
+
+        expect(toggle).toHaveBeenCalledTimes(1);
+    });
+
+    it('the fullscreen button label follows the state', () => {
+        render(
+            <WorldMapView
+                detail={detail([])}
+                slots={{ fullscreen: { full: true, toggle: vi.fn() } }}
+            />
+        );
+
+        const btn = screen.getByRole('button', {
+            name: 'Вийти з повного екрана',
+        });
+
+        expect(btn.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('clusters close pins and a cluster click zooms the view', () => {
+        const { container } = render(
+            <WorldMapView
+                detail={detail([
+                    marker({ id: 'a', name: 'Alpha', x: 0.5, y: 0.5 }),
+                    marker({ id: 'b', name: 'Beta', x: 0.501, y: 0.5 }),
+                ])}
+            />
+        );
+
+        const layer = container.querySelector(
+            '.atlas-top-layer'
+        ) as HTMLElement;
+
+        const before = layer.style.transform;
+
+        fireEvent.click(screen.getByRole('button', { name: /ще 1/ }));
+
+        expect(layer.style.transform).not.toBe(before);
+    });
+
+    it('does not cluster pins with the point tool', () => {
+        render(
+            <WorldMapView
+                detail={detail([
+                    marker({ id: 'a', name: 'Alpha', x: 0.5, y: 0.5 }),
+                    marker({ id: 'b', name: 'Beta', x: 0.501, y: 0.5 }),
+                ])}
+                edit={{ tool: 'point' }}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Beta' })).toBeTruthy();
+    });
+
+    it('a focus with zoom 1 pans without zooming', () => {
+        const { container, rerender } = render(
+            <WorldMapView detail={detail([])} />
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Наблизити' }));
+
+        const layer = container.querySelector(
+            '.atlas-top-layer'
+        ) as HTMLElement;
+
+        const parse = (t: string) => {
+            const m =
+                /translate\((-?[\d.]+)px, (-?[\d.]+)px\) scale\(([\d.]+)\)/.exec(
+                    t
+                );
+
+            return {
+                x: Number(m?.[1]),
+                y: Number(m?.[2]),
+                scale: Number(m?.[3]),
+            };
+        };
+
+        const before = parse(layer.style.transform);
+
+        expect(before.scale).toBeGreaterThan(1);
+
+        rerender(
+            <WorldMapView
+                detail={detail([])}
+                focus={{ point: { x: 0.9, y: 0.9 }, seq: 1, zoom: 1 }}
+            />
+        );
+
+        const after = parse(layer.style.transform);
+
+        expect(after.scale).toBe(before.scale);
+        expect([after.x, after.y]).not.toEqual([before.x, before.y]);
+    });
+
+    it('rescales the offset when the box width changes', () => {
+        const observers: ((e: unknown[]) => void)[] = [];
+
+        vi.stubGlobal(
+            'ResizeObserver',
+            class {
+                constructor(cb: (e: unknown[]) => void) {
+                    observers.push(cb);
+                }
+                observe() {}
+                disconnect() {}
+                unobserve() {}
+            }
+        );
+
+        const { container } = render(
+            <WorldMapView
+                detail={detail([])}
+                focus={{ point: { x: 0.5, y: 0.5 }, seq: 1 }}
+            />
+        );
+
+        const layer = container.querySelector(
+            '.atlas-top-layer'
+        ) as HTMLElement;
+
+        expect(layer.style.transform).toBe(
+            'translate(-800px, -600px) scale(3)'
+        );
+
+        vi.spyOn(
+            HTMLElement.prototype,
+            'getBoundingClientRect'
+        ).mockReturnValue({
+            left: 0,
+            top: 0,
+            width: 400,
+            height: 300,
+            right: 400,
+            bottom: 300,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+        });
+
+        act(() => observers.forEach((cb) => cb([{}])));
+
+        expect(layer.style.transform).toBe(
+            'translate(-400px, -300px) scale(3)'
+        );
     });
 });

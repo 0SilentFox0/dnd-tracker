@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Skull } from 'lucide-react';
 
-import { sealStyle } from './WorldPins';
+import { sealStyle } from './seal-style';
 
 import { HudButton } from '@/components/hud';
 import { MARKER_ICON } from '@/components/world/marker-icons';

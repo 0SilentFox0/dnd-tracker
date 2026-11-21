@@ -7,20 +7,31 @@ import {
     qualityInflicts,
     qualityStunsOnHead,
 } from '../equipment/quality-effects';
-import { ACTION_SLOT, ATTACK_SLOT } from '../slots';
+import { ATTACK_SLOT } from '../slots';
+import { breathDamage } from '../traits/breath';
+import { BREATH_CONDITION } from '../traits/constants';
 import { FRENZY_DAMAGE_BONUS, isFrenzied } from '../traits/frenzy';
-import { canonSizeDamage, sizeDamageBonus, wardRoll } from '../traits/size';
+import { withFireWounds } from '../traits/regeneration';
+import { sizeDamageBonus, sizeMeleeDamage, wardRoll } from '../traits/size';
+import { helplessKillsOf, isHelpless } from './attack-mods/helpless';
 import { applyWfrpCrit } from './crit-effect';
 import { type CritResult, rollCrit } from './crit-table';
 import { computeWfrpDamage } from './damage';
 import { asLocation, sideOf } from './location';
-import { apAt, participantStats, withArmourWear } from './participant';
+import { chargeSb } from './mounted';
+import {
+    apAt,
+    nonMetalApAt,
+    participantStats,
+    withArmourWear,
+} from './participant';
+import { pointBlankBetween } from './range-band';
 import { canonWeaponUse } from './weapon-use';
+import { isBrokenWeapon, wornWeaponDamage } from './weapon-wear';
 
 import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import type { Rng } from '@/lib/utils/common/rng';
 import type {
     DamageCtx,
     DamageResult,
@@ -28,10 +39,9 @@ import type {
     MitigateResult,
     MitigateStep,
 } from '@/lib/utils/rules/systems/types';
-import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-export const step = (key: string, value: number): MitigateStep => ({
+const step = (key: string, value: number): MitigateStep => ({
     key,
     value,
     label: dynamicTextRef(
@@ -45,51 +55,63 @@ export const step = (key: string, value: number): MitigateStep => ({
 const critRank = (c: CritResult) =>
     c.death ? Infinity : Number(c.id.split('.')[1]);
 
-export const totalLabel = textRef('battleWfrp.damage.total');
-
-export function wardedHit(
-    target: BattleParticipant,
-    rng: Rng
-): MitigateResult | null {
-    const ward = wardRoll(target, rng);
-
-    if (!ward?.saved) return null;
-
-    return {
-        amount: 0,
-        steps: [
-            {
-                key: 'ward',
-                value: 0,
-                label: textRef('battleWfrp.damage.steps.ward', {
-                    roll: ward.roll,
-                    ward: participantStats(target)?.ward ?? 0,
-                }),
-                side: 'target',
-            },
-        ],
-        totalLabel,
-    };
-}
+const totalLabel = textRef('battleWfrp.damage.total');
 
 export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     const { attacker, target } = ctx;
 
     const location = asLocation(ctx.location);
 
-    if (ctx.amount <= 0) return { amount: 0, steps: [], totalLabel };
+    const edition = editionOf(ctx.rules);
 
-    const warded = wardedHit(target, ctx.rng);
+    const slain =
+        edition.gearModel === 'canon' &&
+        helplessKillsOf(ctx.rules) &&
+        isHelpless(target) &&
+        target.combatStats.currentHp > 0 &&
+        (attackKindOf(ctx.attack.type) === AttackType.MELEE ||
+            pointBlankBetween(attacker, target, ctx.rules));
 
-    if (warded) return warded;
+    if (ctx.amount <= 0 && !slain) return { amount: 0, steps: [], totalLabel };
 
-    const sb = participantStats(attacker)?.sb ?? 0;
+    if (edition.gearModel === 'canon' && isBrokenWeapon(attacker, ctx.attack))
+        return { amount: 0, steps: [], totalLabel };
 
-    const ap = apAt(participantStats(target), location);
+    const ward = wardRoll(target, ctx.rng);
+
+    if (ward?.saved) {
+        return {
+            amount: 0,
+            steps: [
+                {
+                    key: 'ward',
+                    value: 0,
+                    label: textRef('battleWfrp.damage.steps.ward', {
+                        roll: ward.roll,
+                        ward: participantStats(target)?.ward ?? 0,
+                    }),
+                    side: 'target',
+                },
+            ],
+            totalLabel,
+        };
+    }
+
+    const ownSb = participantStats(attacker)?.sb ?? 0;
+
+    const sb =
+        edition.actionsModel === 'canon' ? chargeSb(attacker, ownSb) : ownSb;
 
     const slot = ATTACK_SLOT.read(ctx.attack.system);
 
-    const edition = editionOf(ctx.rules);
+    const breath = edition.traitModel === 'canon' ? slot?.breath : undefined;
+
+    if (breath === 'smoke') return { amount: 0, steps: [], totalLabel };
+
+    const ap =
+        breath === 'electricity'
+            ? nonMetalApAt(participantStats(target), location)
+            : apAt(participantStats(target), location);
 
     const gear = edition.gearModel;
 
@@ -115,12 +137,8 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     const appliedSb = slot?.noSb ? 0 : sb;
 
     const size =
-        edition.combatModsModel === 'canon5e'
-            ? canonSizeDamage(attacker, sb, {
-                  ranged: attackKindOf(ctx.attack.type) === AttackType.RANGED,
-                  free: ACTION_SLOT.read(ctx.system)?.attack?.free === true,
-                  baked: slot?.sizeBaked === true,
-              })
+        edition.sizeModel === 'canon'
+            ? sizeMeleeDamage(attacker, ctx.attack, sb, ctx.offTurn)
             : sizeDamageBonus(
                   attacker,
                   target,
@@ -134,7 +152,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             : 0;
 
     const base = computeWfrpDamage({
-        weapon: ctx.weapon,
+        weapon: breath
+            ? breathDamage(breath, {
+                  sb: participantStats(attacker)?.sb ?? 0,
+                  tb: participantStats(attacker)?.tb ?? 0,
+              })
+            : gear === 'canon'
+              ? wornWeaponDamage(ctx.weapon, attacker, ctx.attack)
+              : ctx.weapon,
         sb: appliedSb,
         netSl: margin,
         size,
@@ -171,6 +196,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     const lower = (a: CritResult, b: CritResult) =>
         critRank(b) < critRank(a) ? b : a;
 
+    if (slain && base.total < target.combatStats.currentHp) {
+        steps.push(
+            step('helplessKill', target.combatStats.currentHp - base.total)
+        );
+
+        base.total = target.combatStats.currentHp;
+    }
+
     const crit =
         ctx.crit && (counted || target.combatStats.currentHp > 0)
             ? effect.minDamage === 0 && gear === 'canon'
@@ -180,7 +213,15 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (crit?.bonusDamage) steps.push(step('crit', crit.bonusDamage));
 
+    const hit = base.total > 0;
+
+    const breathCondition =
+        breath && hit && breath in BREATH_CONDITION
+            ? [BREATH_CONDITION[breath as keyof typeof BREATH_CONDITION]]
+            : [];
+
     const conditions: WfrpConditionKey[] = [
+        ...breathCondition,
         ...qualityInflicts(refs, gear, location),
         ...(location === 'head' &&
         qualityStunsOnHead(refs, gear) &&
@@ -189,7 +230,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             : []),
     ];
 
-    const wear = effect.armourWear ?? 0;
+    const wear = (effect.armourWear ?? 0) + (breath === 'acid' && hit ? 1 : 0);
 
     if (!crit && !conditions.length && !wear)
         return { amount: base.total, steps, totalLabel };
@@ -220,6 +261,12 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
                 message = applied.messages[0] ?? message;
             }
+
+            if (breath === 'fire' && hit)
+                participant = withFireWounds(
+                    participant,
+                    base.total + (crit?.bonusDamage ?? 0)
+                );
 
             if (crit) {
                 const applied = applyWfrpCrit(

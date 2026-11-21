@@ -31,15 +31,15 @@ const IMPLEMENTED = [
     'unbalanced',
     'bulky',
     'lightweight',
+    'trapBlade',
+    'unbreakable',
+    'repeater',
+    'practical',
 ];
 
 const STORED_ONLY = [
     'distract',
     'spread',
-    'trapBlade',
-    'unbreakable',
-    'repeater',
-    'practical',
 ];
 
 describe('QUALITY_REGISTRY', () => {

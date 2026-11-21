@@ -117,7 +117,7 @@ export function HeroCluster({
                     onDoubleClick={(e) => e.stopPropagation()}
                 >
                     {avatar}
-                    <span aria-hidden className="atlas-hero-badge">
+                    <span aria-hidden className="atlas-count-badge">
                         +{rest.length}
                     </span>
                 </HudButton>

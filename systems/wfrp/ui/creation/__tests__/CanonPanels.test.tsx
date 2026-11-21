@@ -28,6 +28,7 @@ const makeCanon = (over: Partial<Canon> = {}): Canon => ({
         picked: [],
         toggle: vi.fn(),
     },
+    speciesTalents: { groups: [], picked: [], set: vi.fn(), names: (id) => id },
     careerSkills: {
         options: ['athletics', 'cool'],
         counts: {},
@@ -51,6 +52,21 @@ describe('canon creation panels', () => {
         expect(canon.setSpeciesRolled).toHaveBeenCalledWith(true);
         fireEvent.click(screen.getAllByRole('radio')[0]);
         expect(canon.speciesSkills.toggle).toHaveBeenCalledWith('athletics', 2);
+    });
+
+    it('species panel picks one talent per pair', () => {
+        const canon = makeCanon({
+            speciesTalents: {
+                groups: [['a', 'b']],
+                picked: ['a'],
+                set: vi.fn(),
+                names: (id) => `T-${id}`,
+            },
+        });
+
+        render(<SpeciesCanonPanel canon={canon} />);
+        fireEvent.click(screen.getByRole('radio', { name: 'T-b' }));
+        expect(canon.speciesTalents.set).toHaveBeenCalledWith(0, 'b');
     });
 
     it('career panel steps a skill up to the per-skill cap', () => {

@@ -19,7 +19,7 @@ const marker = {
 };
 
 describe('MarkerBubble', () => {
-    it('shows name, description and the base actions', () => {
+    it('desktop label shows the name and icon actions without the description', () => {
         const onMore = vi.fn();
 
         const onClose = vi.fn();
@@ -27,17 +27,17 @@ describe('MarkerBubble', () => {
         render(<MarkerBubble marker={marker} actions={{ onMore, onClose }} />);
 
         expect(screen.getByText('Таверна')).toBeTruthy();
-        expect(screen.getByText('Тепле місце')).toBeTruthy();
-        expect(screen.queryByText('Відкрити карту')).toBeNull();
+        expect(screen.queryByText('Тепле місце')).toBeNull();
+        expect(screen.queryByLabelText('Відкрити карту')).toBeNull();
 
-        fireEvent.click(screen.getByText('Докладніше'));
+        fireEvent.click(screen.getByLabelText('Докладніше'));
         fireEvent.click(screen.getByLabelText('Закрити'));
 
         expect(onMore).toHaveBeenCalled();
         expect(onClose).toHaveBeenCalled();
     });
 
-    it('offers Open map only when onOpenMap is given', () => {
+    it('Open is an icon button only with onOpenMap', () => {
         const onOpenMap = vi.fn();
 
         render(
@@ -46,7 +46,7 @@ describe('MarkerBubble', () => {
                 actions={{ onMore: vi.fn(), onClose: vi.fn(), onOpenMap }}
             />
         );
-        fireEvent.click(screen.getByText('Відкрити карту'));
+        fireEvent.click(screen.getByLabelText('Відкрити карту'));
 
         expect(onOpenMap).toHaveBeenCalled();
     });

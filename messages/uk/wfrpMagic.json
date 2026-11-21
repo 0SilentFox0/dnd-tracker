@@ -13,6 +13,7 @@
     "channelLost": "{name} втрачає {lost} РУ пулу, лишилось {left}",
     "channelKept": "{name} утримує пул у {left} РУ",
     "wrath": "{name} викликає гнів богів! {effect}",
+    "overcastTrimmed": "{name} оголосив {declared} SL overcast, але доступно лише {available} SL: розподіл урізано",
     "ingredientAverts": "{name} палить інгредієнт, і збій магії «{spell}» згасає",
     "ingredientLowers": "{name} палить інгредієнт, і збій магії «{spell}» слабшає до малого",
     "dispelSuccess": "{name} розвіює {spell} ({caster}): SL {sl}, закляття не діє",
@@ -58,18 +59,17 @@
         "totalPower": "Повна сила",
         "unstoppableForce": "Нестримна сила"
       },
-      "overcastPlan": "План оверкасту (РУ, до {cap})",
-      "overcastNote": "Порожньо: усі РУ йдуть у шкоду. РУ понад результат кидка втрачаються; цілі й дальність, яких кидок не купив, відкидаються.",
-      "overcastDirections": {
+      "overcastTitle": "Overcast (до {cap} SL понад CN)",
+      "overcastSpent": "Оголошено {spent} з {cap} SL; після кидка урізається, якщо SL не вистачить",
+      "overcastDim": {
         "damage": "Шкода",
         "targets": "Цілі",
         "range": "Дальність",
-        "aoe": "Зона",
+        "aoe": "Площа",
         "duration": "Тривалість"
       },
-      "overcastSpend": "РУ {spent} / {cap}",
-      "overcastMore": "Більше: {direction}",
-      "overcastLess": "Менше: {direction}",
+      "overcastMore": "Більше: {dim}",
+      "overcastLess": "Менше: {dim}",
       "blessing": "Overcast благословення",
       "blessings": {
         "rangeYards": "Дальність",
@@ -102,14 +102,6 @@
       "channelled": "Накопичено +{channelled} РУ",
       "armour": "броня −{armour}",
       "overcast": "Оверкаст ×{steps}",
-      "overcastSpent": "Оверкаст: {parts}",
-      "overcastParts": {
-        "damage": "+{n} шкоди",
-        "targets": "+{n} цілей",
-        "range": "дальність ×{n}",
-        "aoe": "зона ×{n}",
-        "duration": "тривалість ×{n}"
-      },
       "miscast": {
         "minor": "Малий збій магії",
         "major": "Великий збій магії",

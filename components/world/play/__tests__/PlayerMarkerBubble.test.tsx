@@ -17,7 +17,7 @@ const marker = {
 } as WorldMarker;
 
 describe('PlayerMarkerBubble', () => {
-    it('shows name and description and wires the actions', () => {
+    it('shows the name and wires the actions', () => {
         const actions = {
             onMore: vi.fn(),
             onOpenMap: vi.fn(),
@@ -27,7 +27,6 @@ describe('PlayerMarkerBubble', () => {
         render(<PlayerMarkerBubble marker={marker} actions={actions} />);
 
         expect(screen.getByText('Town')).toBeTruthy();
-        expect(screen.getByText('Old market town')).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: /more|Докладніше/ }));
         fireEvent.click(

@@ -107,12 +107,34 @@
     "diedOfWounds": "☠️ {name} гине від критичних ран",
     "fateHowDidThatMiss": "{name} витрачає Долю: «Як він схибив?» — атака {attacker} не має ефекту",
     "fateNotToday": "{name} витрачає Долю: «Не сьогодні!» — виходить із сутички живим",
+    "trapBladeDrop": "Клинок упіймано",
+    "trapBladeCaught": "{name} ловить {weapon} бійця {attacker}: зброю вириває з рук, вона падає",
+    "trapBladeBroken": "{name} ловить {weapon} бійця {attacker} і ламає її",
+    "outOfRange": "{name}: {target} поза межею Extreme, пострілу немає",
+    "swarmBite": "{swarm} обліплює {target}: {damage} рана",
+    "regenerates": "{name} регенерує {amount} ран",
+    "regenCrit": "{name} загоює критичну рану",
+    "attackMod": "{mod}: {sl} SL",
+    "attackModFlat": "{mod}",
+    "aimed": "{name} цілиться в {target}: +1 SL до наступного пострілу",
+    "defensiveParry": "{name} переходить до оборони: +2 SL до Parry до наступного ходу",
+    "defensiveDodge": "{name} переходить до оборони: +2 SL до Dodge до наступного ходу",
+    "defensiveMagick": "{name} переходить до оборони: +2 SL до Language (Magick) проти розсіювання до наступного ходу",
+    "fled": "{name} тікає від {foes} ворог(ів) без Disengage: Broken, вороги отримують Momentum і можуть вдарити",
+    "grappled": "{name} хапає {target}: обидва в захваті, {target} Entangled",
+    "grappleLost": "{name} більше не тримає: захват закінчився",
+    "grappleFailed": "{name} не здолав {target} у захваті",
+    "grappleFree": "{name} вириває з захвату {target} (SL {sl})",
+    "grappleEntangle": "{name} міцніше стискає {target} (SL {sl})",
+    "grappleDamage": "{name} ламає {target} у захваті (SL {sl}): {damage} ран",
+    "mounted": "{name} тепер верхи на {mount}",
+    "dismounted": "{name} зіскакує з коня",
+    "helplessKill": "{name} добиває безпорадного {target}",
     "momentumSecondAttack": "{name} витрачає Momentum на атаку другою зброєю",
     "leadershipTransfer": "{name} витрачає Momentum: Лідерство (РУ {sl}), {ally} отримує Momentum",
     "disengageMomentum": "{name} витрачає Momentum і виходить із ближнього бою без штрафу",
     "disengageSuccess": "{name} виходить із ближнього бою (РУ {sl} проти {foeSl})",
     "disengageFailed": "{name} не вдається вийти з бою (РУ {sl} проти {foeSl}), вороги отримують Momentum",
-    "aim": "{name} цілиться в {target}",
     "runDeclared": "{name} біжить: рух цього ходу подвоєно",
     "sprintResult": "{name} робить спринт (РУ {sl}): додатково {yards} ярдів руху",
     "sprintFailed": "{name} не вдається спринт (РУ {sl})",
@@ -126,8 +148,9 @@
     "fumbleMisfire": "{name}: осічка ({roll}): {text}",
     "fumbleWounds": "{name} отримує {wounds} Ран від фамблу",
     "fumbleNote": "{name}: {note}",
-    "targetSurrounded": "{name} в оточенні: шляху відступу немає",
-    "targetHelpless": "{name} безпорадний: нападник обирає кидок і влучає"
+    "fumbleAlly": "{name} помилково б'є {ally} (кубик одиниць: {sl} SL, влучання розв'язати вручну)",
+    "fumbleAllyNone": "{name} не має союзника поруч і б'є сам себе по обличчю",
+    "targetSurrounded": "{name} в оточенні: шляху відступу немає"
   },
   "passion": {
     "frenzy": "Шал",
@@ -193,7 +216,12 @@
       "body": "Атака {attacker} влучила в {name}. Витратити Долю, щоб атака не мала ефекту?",
       "spend": "Витратити Долю — промах",
       "accept": "Прийняти удар",
-      "waiting": "Очікуємо рішення щодо Долі"
+      "waiting": "Очікуємо рішення щодо Долі",
+      "trapBlade": {
+        "body": "{name} отримав Критичний успіх, парируючи клинок {attacker}. Зловити клинок замість поранення?",
+        "spend": "Зловити клинок",
+        "accept": "Завдати критичного удару"
+      }
     },
     "psychology": {
       "title": "Психологія",
@@ -202,15 +230,45 @@
       "release": "Зняти {passion} ({group})",
       "intimidate": "Залякати {name} (дія, проти Cool)"
     },
+    "attackMods": {
+      "title": "Обставини",
+      "off": "Ні",
+      "calledShot": "Прицільний удар (−2 SL)",
+      "highGround": "Висота",
+      "highAttacker": "Атакуючий вище",
+      "highDefender": "Захисник вище",
+      "situation": "Місцевість",
+      "cover": "Ціль в укритті",
+      "enclosed": "Тісний простір",
+      "helplessRoll": "Безпорадна ціль: обраний кидок",
+      "grapple": "Захват"
+    },
+    "mounted": {
+      "label": "Скакун",
+      "none": "Пішки"
+    },
     "momentum": {
       "title": "Momentum",
       "secondAttack": "Друга атака",
       "disengage": "Відступити (дія, тест)",
       "disengageFree": "Відступити (витратити Momentum)",
-      "aim": "Прицілитись (дія)",
       "run": "Біг (подвійний рух)",
       "sprint": "Спринт (дія, Атлетика)",
       "charge": "Розбіг",
+      "aim": "Цілитися (дія)",
+      "defensive": "Оборона (дія)",
+      "defensiveSkill": {
+        "parry": "Парирування +2 SL",
+        "dodge": "Ухилення +2 SL",
+        "magick": "Мова (Магія) +2 SL"
+      },
+      "flee": "Тікати (без Disengage)",
+      "grapple": "Захват (дія, Сила)",
+      "grappleChoice": {
+        "damage": "Завдати ран",
+        "entangle": "Стиснути міцніше",
+        "free": "Вирватися"
+      },
       "leadership": "Передати Momentum",
       "ally": "Союзник",
       "reason": {
@@ -220,17 +278,35 @@
         "cast": "Після закляття другої атаки немає",
         "weapons": "Потрібні дві зброї ближнього бою"
       }
-    },
-    "situational": {
-      "title": "Модифікатори майстра",
-      "calledShot": "Цілений удар",
-      "noCalledShot": "Без цілення",
-      "flags": "Обставини",
-      "attackerHigh": "Атакуючий вище",
-      "defenderHigh": "Захисник вище",
-      "enclosed": "Тісний простір",
-      "badFooting": "Бруд або вода"
     }
+  },
+  "attackMod": {
+    "range": {
+      "pointBlank": "Впритул",
+      "short": "Близька дистанція",
+      "long": "Далека дистанція",
+      "extreme": "Гранична дистанція"
+    },
+    "cover": "Ціль в укритті",
+    "prone": "Ціль лежить",
+    "surprised": "Ціль заскочена зненацька",
+    "aim": "Прицілювання",
+    "moved": "Стрілець рухався",
+    "shootingIntoMelee": "Ціль у ближньому бою: Disadvantage, ДМ може перенаправити шальне влучання",
+    "calledShot": "Прицільний удар",
+    "highGround": "Висота",
+    "difficult": "Атакуючий у важкому рельєфі",
+    "proneSelf": "Атакуючий лежить",
+    "entangled": "Ціль заплутана",
+    "enclosed": "Тісний простір",
+    "helpless": "Безпорадна ціль",
+    "size": "Розмір",
+    "swarm": "Ціль - Рій",
+    "flierShooter": "Стрілець у польоті",
+    "surrounded": "В оточенні",
+    "outnumbered": "Чисельна перевага",
+    "cavalry": "Кавалерійська зброя з сідла",
+    "mountedFoe": "Ворог на більшому коні"
   },
   "crit": {
     "head": {
@@ -269,9 +345,6 @@
   "damage": {
     "steps": {
       "weapon": "Зброя",
-      "spell": "Шкода закляття",
-      "wpb": "Бонус Сили Волі",
-      "overcast": "Оверкаст",
       "sb": "Бонус Сили",
       "netSl": "Чистий РУ",
       "tb": "Бонус Витривалості",
@@ -280,7 +353,12 @@
       "size": "Розмір",
       "minimum": "Мінімальна шкода",
       "frenzy": "Шал",
-      "crit": "Критична рана"
+      "helplessKill": "Безпорадний",
+      "crit": "Критична рана",
+      "spell": "Шкода закляття",
+      "wpb": "Бонус Сили Волі",
+      "spellScale": "Бонус закляття",
+      "overcast": "Посилення"
     },
     "total": "Усього шкоди"
   },
@@ -303,29 +381,5 @@
       "1": "Зброя не стріляє; потрібне перезаряджання",
       "2": "Зброя вибухає й ранить вашу основну руку"
     }
-  },
-  "mods": {
-    "sizeRanged": "Розмір цілі: {sl} SL",
-    "outnumbered": "Ціль у меншості: {sl} SL",
-    "surrounded": "Ціль в оточенні: {sl} SL",
-    "offHand": "Зброя в слабшій руці: {sl} SL",
-    "hatred": "Ненависть: {sl} SL",
-    "highGround": "Вигідна висота: {sl} SL",
-    "defenderHighGround": "Захисник на висоті: {sl} SL",
-    "terrain": "Бруд, вода або складний рельєф: {sl} SL",
-    "enclosed": "Тісний простір: {sl} SL",
-    "attackerProne": "Нападник лежить (Prone): {sl} SL",
-    "targetEntangled": "Ціль зв'язана (Entangled): {sl} SL",
-    "targetSurprised": "Ціль заскочена (Surprised): {sl} SL",
-    "calledShot": "Приціл у локацію: {sl} SL",
-    "talent": "Таланти: {sl} SL",
-    "quality": "Якості й вади зброї: {sl} SL",
-    "range": "Дальність: {sl} SL",
-    "cover": "Ціль в укритті: {sl} SL",
-    "targetProneRanged": "Ціль лежить (Prone): {sl} SL",
-    "aim": "Приціл: {sl} SL",
-    "moved": "Рух перед пострілом: {sl} SL",
-    "weather": "Погода й видимість: {sl} SL",
-    "intoMelee": "Стрільба в ближній бій: Disadvantage"
   }
 }

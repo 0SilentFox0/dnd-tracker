@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { bookExample } from './book-example';
 
 import '@/lib/server/systems/registry';
-import { AttackType, EffectMarker } from '@/lib/constants/battle';
+import { AttackType, EffectMarker, ParticipantSide } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
@@ -14,6 +14,7 @@ import { resolveWfrpAttack } from '@/systems/wfrp/rules/combat/resolve-attack';
 import { EDITION_PROFILES } from '@/systems/wfrp/rules/edition/profiles';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { DEFAULT_TABLES } from '@/systems/wfrp/rules/tables/defaults';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -51,8 +52,11 @@ const weapon = (
         }),
     }) as unknown as BattleAttack;
 
-const fighter = (id: string): BattleParticipant => {
-    const base = makeParticipant({ id, hp: 20, maxHp: 20 });
+const fighter = (
+    id: string,
+    side: ParticipantSide = ParticipantSide.ALLY
+): BattleParticipant => {
+    const base = makeParticipant({ id, hp: 20, maxHp: 20, side });
 
     return {
         ...base,
@@ -95,7 +99,7 @@ const run = (
 ) => {
     const attacker = fighter('a');
 
-    const target = fighter('t');
+    const target = fighter('t', ParticipantSide.ENEMY);
 
     const rolls = [
         ...(type === AttackType.RANGED ? [] : [fraction(defender)]),
@@ -181,16 +185,7 @@ describe('canon: fumble (p165)', () => {
     bookExample(165, 'oops 5-6: -1 SL on the next Action', () => {
         const { after } = run(withOops, 88, { oops: 50 });
 
-        expect(
-            after.battleData.activeEffects.some((e) =>
-                e.abilityEffects?.some(
-                    (a) =>
-                        a.kind === 'modifyStat' &&
-                        a.stat === 'attackBonus' &&
-                        a.flat === -1
-                )
-            )
-        ).toBe(true);
+        expect(wfrpState(after).oopsPenalty).toBe('next');
     });
 
     bookExample(165, 'oops 7: lose the next Move', () => {

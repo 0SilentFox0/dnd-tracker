@@ -99,8 +99,8 @@ describe('equipmentIssues', () => {
         ],
         [
             'unimplemented quality',
-            withStats(rows[0], { qualities: [{ key: 'trapBlade' }] }),
-            'trapBlade',
+            withStats(rows[0], { qualities: [{ key: 'distract', value: 1 }] }),
+            'distract',
         ],
         [
             'bow without twoHanded',
@@ -204,10 +204,10 @@ describe('firearm and explosive groups', () => {
         expect(equipmentIssues(ranged('explosives', 720, 12))).toEqual([]);
     });
 
-    it('still rejects entangling and out-of-band engineering prices', () => {
+    it('still rejects out-of-band entangling and engineering rows', () => {
         expect(
             equipmentIssues(ranged('entangling', 72, 0)).join('\n')
-        ).toContain('group "entangling" is not used by Grim items');
+        ).toContain('is outside 6–30 ft for entangling');
         expect(
             equipmentIssues(ranged('engineering', 30000, 10)).join('\n')
         ).toContain('is outside 960–24000 p for engineering');

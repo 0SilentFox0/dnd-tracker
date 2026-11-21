@@ -8,7 +8,6 @@ import {
     scaleAdditionalDamage,
 } from '../../damage/balance-multiplier';
 import { applyHeroDmDamageMultiplier } from '../../damage/hero-dm-multiplier';
-import { mitigatedSteps } from '../../damage/mitigated-steps';
 import { applyObstacle, obstacleStep } from '../../damage/obstacle';
 import { multiplierRow, ruleRow, stepRow, totalRow } from '../../damage/rows';
 import { applyWeaponFlat } from '../../damage/weapon-flat';
@@ -40,7 +39,6 @@ import {
 } from '@/lib/utils/common/dice';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { MitigateResult } from '@/lib/utils/rules/systems/types';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { DamageRow, DamageStep } from '@/types/battle-actions';
@@ -58,7 +56,6 @@ export interface ComputeHitDamageParams {
         margin?: number;
         location?: string;
         totalAttackValue?: number;
-        system?: SystemSlot;
     };
     rules: Ruleset;
     damageMultiplier?: number;
@@ -495,14 +492,26 @@ function mitigateHit(
             location: location ?? '',
             attackRoll: totalAttackValue,
             attack: params.attack,
-            system: params.attackRoll.system,
             rng: params.rng ?? Math.random,
+            ...(params.offTurn && { offTurn: true }),
         },
     }).mitigated;
 
     if (!result) return null;
 
-    const steps = mitigatedSteps(result.steps);
+    let running = 0;
+
+    const steps = result.steps.map<DamageStep>((s) => {
+        running += s.value;
+
+        return {
+            label: s.label,
+            side: s.side,
+            kind: 'flat',
+            value: s.value,
+            after: running,
+        };
+    });
 
     const rows = [
         ...result.steps.map((s) =>

@@ -56,7 +56,7 @@ const FRAME_HEIGHT =
     'lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:flex-col';
 
 const MAP_HEIGHT =
-    'h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-auto lg:min-h-0 lg:flex-1';
+    'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-auto lg:min-h-0 lg:flex-1';
 
 export function WorldEditorPageClient({
     campaignId,
@@ -79,7 +79,8 @@ export function WorldEditorPageClient({
         tools: { eyes, drawing, moveTarget, snap, mode },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: { create: creating, details, tree },
-        actions: { openMap, changeEyes },
+        actions: { openMap, changeEyes, openDetails },
+        view: { focus, fullscreen },
         handlers,
         card: bubbleCard,
         enemy,
@@ -87,6 +88,8 @@ export function WorldEditorPageClient({
     } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
     const { tool, setTool } = drawing;
+
+    const fsSlot = { full: fullscreen.full, toggle: fullscreen.toggle };
 
     const trail = useTrailView(
         useWorldTrail(campaignId, mapId).data,
@@ -176,8 +179,7 @@ export function WorldEditorPageClient({
                                                 key={marker.id}
                                                 marker={marker}
                                                 actions={{
-                                                    onMore: () =>
-                                                        details.set(true),
+                                                    onMore: openDetails,
                                                     onClose: closePanel,
                                                 }}
                                             />
@@ -301,17 +303,33 @@ export function WorldEditorPageClient({
                                                 </div>
                                                 <div className="flex min-h-0 flex-col gap-2 lg:flex-1 lg:flex-row">
                                                     {isDesktop && treeShown ? (
-                                                        <aside className="hud-surface w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
+                                                        <aside className="hud-surface relative w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
                                                             {mapTree}
                                                         </aside>
                                                     ) : null}
                                                     {isDesktop && layersShown ? (
-                                                        <aside className="hud-surface w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
+                                                        <aside className="hud-surface relative w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
                                                             {layersPanel}
                                                         </aside>
                                                     ) : null}
                                                     <div
-                                                        className={`relative ${MAP_HEIGHT} lg:min-w-0`}
+                                                        className={
+                                                            fullscreen.full
+                                                                ? 'fixed inset-0 z-50 h-dvh bg-black'
+                                                                : `relative ${MAP_HEIGHT} lg:min-w-0`
+                                                        }
+                                                        role={
+                                                            fullscreen.full
+                                                                ? 'region'
+                                                                : undefined
+                                                        }
+                                                        aria-label={
+                                                            fullscreen.full
+                                                                ? t(
+                                                                      'zoom.fullscreen'
+                                                                  )
+                                                                : undefined
+                                                        }
                                                     >
                                                         {eyes.asHeroId ? (
                                                             <QueryState
@@ -343,7 +361,14 @@ export function WorldEditorPageClient({
                                                                             compact={
                                                                                 !isDesktop
                                                                             }
+                                                                            className={
+                                                                                fullscreen.full
+                                                                                    ? 'rounded-none border-0'
+                                                                                    : undefined
+                                                                            }
                                                                             slots={{
+                                                                                fullscreen:
+                                                                                    fsSlot,
                                                                                 hint: (
                                                                                     <p
                                                                                         role="status"
@@ -442,7 +467,17 @@ export function WorldEditorPageClient({
                                                                 handlers={
                                                                     handlers
                                                                 }
+                                                                focus={
+                                                                    focus
+                                                                }
+                                                                className={
+                                                                    fullscreen.full
+                                                                        ? 'rounded-none border-0'
+                                                                        : undefined
+                                                                }
                                                                 slots={{
+                                                                    fullscreen:
+                                                                        fsSlot,
                                                                     hint: (
                                                                         <WorldToolHint
                                                                             tool={
@@ -496,6 +531,11 @@ export function WorldEditorPageClient({
                                                                             .layers
                                                                             .toggle
                                                                     }
+                                                                    showUnlayered={
+                                                                        eyes
+                                                                            .layers
+                                                                            .showUnlayered
+                                                                    }
                                                                 />
                                                             </div>
                                                         ) : (
@@ -513,6 +553,9 @@ export function WorldEditorPageClient({
                                                                         layers
                                                                             .visibility
                                                                             .toggle
+                                                                    }
+                                                                    showUnlayered={
+                                                                        layers.showUnlayered
                                                                     }
                                                                 />
                                                                 <TrailLegend
@@ -567,7 +610,7 @@ export function WorldEditorPageClient({
                                                     </div>
                                                     {isDesktop &&
                                                     detailsOpen ? (
-                                                        <aside className="hud-surface rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <aside className="hud-surface relative rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
                                                             <div className="mb-2 flex justify-end">
                                                                 <Button
                                                                     size="sm"
@@ -586,7 +629,7 @@ export function WorldEditorPageClient({
                                                     ) : null}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
-                                                        <div className="flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <div className="relative flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
                                                             <TravelPanel
                                                                 campaignId={
                                                                     campaignId

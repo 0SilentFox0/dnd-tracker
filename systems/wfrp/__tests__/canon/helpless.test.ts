@@ -1,90 +1,238 @@
 import { describe, expect } from 'vitest';
 
-import { bookExample } from './book-example';
+import { bookExample, CANON } from './book-example';
+
 import {
-    attackDetails,
-    bow,
-    fighter,
-    legacyRules,
-    sword,
-} from './combat-fixtures';
-
-import { CombatStatus } from '@/lib/constants/battle';
+    AttackType,
+    CombatStatus,
+    ParticipantSide,
+} from '@/lib/constants/battle';
+import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import { RulesetSchema } from '@/lib/utils/rules/schema';
+import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
+import { attackOf, slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
+import { isHelpless } from '@/systems/wfrp/rules/combat/attack-mods/helpless';
+import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';
+import { resolveWfrpAttack } from '@/systems/wfrp/rules/combat/resolve-attack';
 import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
-import { EDITION_PROFILES } from '@/systems/wfrp/rules/edition/profiles';
-import type { BattleParticipant } from '@/types/battle';
+import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
-const me = () => fighter('a', { at: { x: 4, y: 5 } });
+const rulesOf = (helplessKills?: boolean) =>
+    RulesetSchema.parse({
+        ...WFRP_RULES,
+        edition: {
+            preset: 'canon5e',
+            ...(helplessKills !== undefined && { helplessKills }),
+        },
+    });
 
-const foe = () => fighter('t', { side: 'enemy', at: { x: 5, y: 5 } });
+const map: BattleMapConfig = {
+    cols: 100,
+    rows: 5,
+    background: null,
+    opacity: 0.3,
+};
 
-const downed = (p: BattleParticipant): BattleParticipant => ({
-    ...p,
-    combatStats: { ...p.combatStats, status: CombatStatus.UNCONSCIOUS },
-});
+const unit = (
+    id: string,
+    x: number,
+    side: 'ally' | 'enemy' = ParticipantSide.ALLY
+): BattleParticipant => {
+    const p = makeParticipant({ id, hp: 20, maxHp: 20 });
 
-const MISS = 99;
+    return {
+        ...p,
+        basicInfo: { ...p.basicInfo, side },
+        battleData: { ...p.battleData, position: { x, y: 0 } },
+        abilities: {
+            ...p.abilities,
+            system: slotOf({
+                ...DEFAULT_CHARACTERISTICS,
+                base: { ...DEFAULT_CHARACTERISTICS.base, ws: 45, bs: 45 },
+            }),
+        },
+    };
+};
 
-describe('canon: Helpless targets (p167)', () => {
-    bookExample(
-        167,
-        'melee against an unconscious target hits automatically, attacker picks the roll',
-        () => {
-            const open = attackDetails(me(), foe(), sword(), {
-                manualRoll: MISS,
-            });
+const sleeper = (x: number) =>
+    applyWfrpConditionTo(unit('t', x, ParticipantSide.ENEMY), {
+        key: 'unconscious',
+        round: 0,
+        edition: CANON,
+        sourceName: 'test',
+    }).participant;
 
-            expect(open.result.isHit).toBe(false);
+const attackWith = (type: AttackType, range?: string): BattleAttack =>
+    ({
+        id: 'w',
+        name: 'w',
+        type,
+        ...(range && { range }),
+        attackBonus: 0,
+        damageDice: '',
+        damageType: 'physical',
+        system: ATTACK_SLOT.write({ qualities: [], flaws: [] }),
+    }) as unknown as BattleAttack;
 
-            const helpless = attackDetails(me(), downed(foe()), sword(), {
-                manualRoll: MISS,
-            });
+const run = (
+    target: BattleParticipant,
+    attack: BattleAttack,
+    mods: { helplessRoll?: number; calledShot?: 'leftArm' } = {},
+    rules = rulesOf()
+) => {
+    const a = unit('a', 0);
 
-            expect(helpless.result.isHit).toBe(true);
-            expect(helpless.details?.roll).toBe(1);
-            expect(helpless.details?.defender?.sl).toBe(0);
-        }
-    );
+    const ctx: ResolveAttackCtx = {
+        attacker: a,
+        target,
+        attack,
+        participants: [a, target],
+        rules,
+        rng: () => 0.5,
+        map,
+        system: FORTUNE_INPUT.write({ kind: 'none', mods }),
+    };
 
-    bookExample(167, 'the Unconscious condition makes a target Helpless', () => {
-        const t = applyWfrpConditionTo(foe(), {
-            key: 'unconscious',
-            round: 0,
-            edition: EDITION_PROFILES.canon5e,
-            sourceName: 'test',
-        }).participant;
+    return resolveWfrpAttack(ctx);
+};
 
+describe('canon: helpless targets (p166)', () => {
+    bookExample(166, 'unconscious and asleep fighters are helpless', () => {
+        expect(isHelpless(sleeper(1))).toBe(true);
+        expect(isHelpless(unit('x', 1))).toBe(false);
         expect(
-            attackDetails(me(), t, sword(), { manualRoll: MISS }).result.isHit
+            isHelpless({
+                ...unit('x', 1),
+                combatStats: {
+                    ...unit('x', 1).combatStats,
+                    status: CombatStatus.UNCONSCIOUS,
+                },
+            })
         ).toBe(true);
     });
 
-    bookExample(187, 'a Surprised target cannot defend but the attacker still rolls', () => {
-        const t = applyWfrpConditionTo(foe(), {
-            key: 'surprised',
-            round: 0,
-            edition: EDITION_PROFILES.canon5e,
-            sourceName: 'test',
-        }).participant;
+    bookExample(
+        166,
+        'a melee attack on a helpless target hits with the chosen roll 01',
+        () => {
+            const r = run(sleeper(1), attackWith(AttackType.MELEE), {
+                helplessRoll: 1,
+            });
 
-        expect(
-            attackDetails(me(), t, sword(), { manualRoll: MISS }).result.isHit
-        ).toBe(false);
+            expect(r.isHit).toBe(true);
+            expect(attackOf(r.attackRoll)?.sl).toBe(4);
+            expect(attackOf(r.attackRoll)?.defender).toBeUndefined();
+        }
+    );
+
+    bookExample(166, 'the default chosen roll is 01', () => {
+        const r = run(sleeper(1), attackWith(AttackType.MELEE));
+
+        expect(r.isHit).toBe(true);
+        expect(attackOf(r.attackRoll)?.roll).toBe(1);
     });
 
-    bookExample(167, 'a ranged attack is rolled normally beyond Point Blank', () => {
+    bookExample(
+        166,
+        'a doubles roll is a Critical Hit and the attacker names the location',
+        () => {
+            const r = run(sleeper(1), attackWith(AttackType.MELEE), {
+                helplessRoll: 33,
+                calledShot: 'leftArm',
+            });
+
+            expect(r.isHit).toBe(true);
+            expect(r.attackRoll.isCritical).toBe(true);
+            expect(attackOf(r.attackRoll)?.location).toBe('leftArm');
+        }
+    );
+
+    bookExample(
+        166,
+        'a Point Blank ranged attack on a helpless target hits',
+        () => {
+            const r = run(
+                sleeper(2),
+                attackWith(AttackType.RANGED, '150/450 ft')
+            );
+
+            expect(r.isHit).toBe(true);
+            expect(attackOf(r.attackRoll)?.mods?.[0]?.key).toBe('helpless');
+        }
+    );
+
+    bookExample(166, 'a ranged attack from afar is a normal test', () => {
+        const r = run(sleeper(10), attackWith(AttackType.RANGED, '150/450 ft'));
+
         expect(
-            attackDetails(me(), downed(foe()), bow(), { manualRoll: MISS })
-                .result.isHit
-        ).toBe(false);
+            attackOf(r.attackRoll)?.mods?.some((m) => m.key === 'helpless')
+        ).toBeFalsy();
     });
 
-    bookExample(167, 'the legacy edition rolls against an unconscious target', () => {
+    const mitigate = (
+        target: BattleParticipant,
+        rules = rulesOf(true),
+        type: AttackType = AttackType.MELEE
+    ) =>
+        mitigateWfrpDamage({
+            attacker: unit('a', 0),
+            target,
+            weapon: 0,
+            amount: 0,
+            margin: 0,
+            location: 'body',
+            crit: false,
+            attack: attackWith(type, '150/450 ft'),
+            rng: () => 0.5,
+            rules,
+        });
+
+    bookExample(
+        166,
+        'with helplessKills the hit deals lethal damage through the normal path',
+        () => {
+            const target = sleeper(1);
+
+            const r = run(
+                target,
+                attackWith(AttackType.MELEE),
+                {},
+                rulesOf(true)
+            );
+
+            expect(
+                (r.targetUpdate?.(target) ?? target).combatStats.status
+            ).not.toBe(CombatStatus.DEAD);
+            expect(mitigate(target).amount).toBe(target.combatStats.currentHp);
+        }
+    );
+
+    bookExample(
+        166,
+        'the helpless kill needs Point Blank for a ranged attack',
+        () => {
+            expect(
+                mitigate(sleeper(1), rulesOf(true), AttackType.RANGED).amount
+            ).toBeGreaterThan(0);
+            expect(
+                mitigate(sleeper(30), rulesOf(true), AttackType.RANGED).amount
+            ).toBe(0);
+        }
+    );
+
+    bookExample(166, 'without the rule the target is only hit', () => {
+        const target = sleeper(1);
+
+        const r = run(target, attackWith(AttackType.MELEE));
+
         expect(
-            attackDetails(me(), downed(foe()), sword(), {
-                manualRoll: MISS,
-                rules: legacyRules,
-            }).result.isHit
-        ).toBe(false);
+            (r.targetUpdate?.(target) ?? target).combatStats.status
+        ).not.toBe(CombatStatus.DEAD);
+        expect(mitigate(target, rulesOf()).amount).toBe(0);
     });
 });

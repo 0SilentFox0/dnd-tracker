@@ -3,6 +3,7 @@ import { conditionLevel } from '../conditions/levels';
 import { editionOf } from '../edition';
 import { wfrpState, withWfrpState } from '../state';
 import type { PassionKind } from '../trait-kinds';
+import { isSwarm } from './creature';
 import { isAfraid } from './fear';
 import { isFrenzied, nearestFoes } from './frenzy';
 import { selfTest, willTarget } from './psych-test';
@@ -90,12 +91,25 @@ export const hatesTarget = (
     target: BattleParticipant
 ): boolean => groupsOf(attacker, 'hatred').some((g) => inGroup(target, g));
 
-export const isPsychImmune = (ps: BattleParticipant[], id: string): boolean =>
-    findFlags(ps, id, 'conditionImmunity').some(
-        (f) =>
-            f.conditions === 'all' ||
-            (f.conditions as string[]).includes('fear')
-    );
+/** `rules` lets the canon trait model apply: a Swarm ignores psychology (p357) */
+export function isPsychImmune(
+    ps: BattleParticipant[],
+    id: string,
+    rules?: Ruleset
+): boolean {
+    if (
+        findFlags(ps, id, 'conditionImmunity').some(
+            (f) =>
+                f.conditions === 'all' ||
+                (f.conditions as string[]).includes('fear')
+        )
+    )
+        return true;
+
+    const p = ps.find((o) => o.basicInfo.id === id);
+
+    return !!p && editionOf(rules).traitModel === 'canon' && isSwarm(p);
+}
 
 const extendedOf = (rules?: Ruleset) =>
     editionOf(rules).psychologyModel === 'extended';
@@ -302,7 +316,7 @@ export function wfrpPassionsJoin(
     for (const tester of ps) {
         const id = tester.basicInfo.id;
 
-        if (!inPlay(tester) || isFrenzied(tester) || isPsychImmune(ps, id))
+        if (!inPlay(tester) || isFrenzied(tester) || isPsychImmune(ps, id, ctx.rules))
             continue;
 
         for (const { passion, group } of passionsOf(tester)) {

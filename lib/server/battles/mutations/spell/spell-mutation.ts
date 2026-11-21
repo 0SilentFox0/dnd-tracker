@@ -24,7 +24,6 @@ import {
 } from '@/lib/server/battles/mutations/spell/cast-preflight';
 import { openCastReactionIfAny } from '@/lib/server/battles/mutations/spell/cast-reaction';
 import {
-    plannedReach,
     prepareCastDice,
     resolveCastTargets,
 } from '@/lib/server/battles/mutations/spell/cast-targets';
@@ -145,8 +144,6 @@ export function createSpellMutation(
                 API_ERRORS.BATTLE_TIME_ONLY_DURATION_CAST
             );
 
-        const reach = plannedReach(ctx, caster, spell, source, system);
-
         const resolution = resolveCastTargets(
             ctx,
             data,
@@ -155,7 +152,7 @@ export function createSpellMutation(
             spell,
             source,
             castLevel,
-            reach
+            system
         );
 
         const picks = await resolvePicks(
@@ -188,7 +185,6 @@ export function createSpellMutation(
             ingredients,
             castLevel,
             resolution,
-            ...(reach && { reach }),
             expected,
             diceRolls,
             saves: splitSaveRolls(ctx, order, data.saveRolls),

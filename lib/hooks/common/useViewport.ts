@@ -118,6 +118,11 @@ export function useViewport({
         setView((v) => focusAt(v, nx, ny, zoom, w, h, bounds.current));
     }, [containerRef]);
 
+    const rescale = useCallback(
+        (k: number) => setView((v) => ({ ...v, x: v.x * k, y: v.y * k })),
+        []
+    );
+
     return {
         zoom: view.zoom,
         offset: { x: view.x, y: view.y },
@@ -127,5 +132,6 @@ export function useViewport({
         reset,
         zoomBy,
         focusOn,
+        rescale,
     };
 }

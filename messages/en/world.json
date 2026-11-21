@@ -203,9 +203,13 @@
   "zoom": {
     "in": "Zoom in",
     "out": "Zoom out",
-    "reset": "Reset zoom"
+    "reset": "Reset zoom",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen"
   },
   "heroCluster": "{name} and {count} more",
+  "pinCluster": "{name} and {count} more",
+  "pinClusterList": "Places here",
   "mapLink": "World map",
   "errors": {
     "chooseImage": "Choose an image",
@@ -331,6 +335,11 @@
       "sw": "Resize from bottom-left corner",
       "se": "Resize from bottom-right corner"
     },
+    "sections": {
+      "appearance": "Appearance",
+      "access": "Access",
+      "image": "Image"
+    },
     "title": "Layers",
     "toggle": "Layers",
     "empty": "No layers yet. A layer groups markers and can carry an overlay image.",
@@ -367,6 +376,30 @@
     "deleteWithMarkers": "Delete with markers",
     "deleteEmptyDescription": "The layer has no markers.",
     "markerLayer": "Layer",
-    "noLayer": "No layer"
+    "noLayer": "No layer",
+    "icon": "Layer icon",
+    "iconNone": "No icon",
+    "zoneOpacity": "Zone opacity",
+    "zoneOpacityReset": "Default",
+    "zoneLabels": {
+      "label": "Zone labels",
+      "auto": "Labels: auto",
+      "hidden": "Labels: hidden"
+    }
+  },
+  "marker": {
+    "style": {
+      "inherit": "Inherit from layer",
+      "inherited": "inherited from layer",
+      "labelMode": {
+        "label": "Zone label",
+        "inherit": "Inherit",
+        "auto": "Auto",
+        "hidden": "Hidden",
+        "always": "Always"
+      },
+      "opacity": "Zone opacity",
+      "opacityReset": "Inherit"
+    }
   }
 }

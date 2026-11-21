@@ -16,6 +16,8 @@ const update = vi.fn();
 
 const remove = vi.fn();
 
+const removeMap = vi.fn();
+
 const marker = (over: Partial<WorldMarker>): WorldMarker => ({
     id: 'k1',
     mapId: 'm1',
@@ -32,6 +34,8 @@ const marker = (over: Partial<WorldMarker>): WorldMarker => ({
     sortOrder: 0,
     childMapId: null,
     layerId: null,
+    labelMode: null,
+    fillOpacity: null,
     ...over,
 });
 
@@ -39,7 +43,10 @@ const renderPanel = (m: WorldMarker) => {
     const ctx = {
         campaignId: 'c1',
         detail: { map: { id: 'm1' }, markers: [m] },
-        maps: [],
+        maps: [
+            { id: 'm1', name: 'Світ', parentMapId: null },
+            { id: 'm2', name: 'Печера', parentMapId: 'm1' },
+        ],
         selectedId: m.id,
         select: vi.fn(),
         openMap: vi.fn(),
@@ -52,7 +59,11 @@ const renderPanel = (m: WorldMarker) => {
                 update: { mutateOk: update },
                 remove: { mutateOk: remove },
             },
-            map: { create: { isPending: false } },
+            map: {
+                create: { isPending: false },
+                move: { mutateOk: vi.fn() },
+                remove: { mutateOk: removeMap },
+            },
         },
     } as unknown as WorldEditorCtx;
 
@@ -80,7 +91,29 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
+vi.mock('@/components/world/editor/MoveMapMenu', () => ({
+    MoveMapMenu: ({ map }: { map: { id: string } }) => (
+        <span>move-menu:{map.id}</span>
+    ),
+}));
+
 describe('WorldMarkerPanel', () => {
+    it('child map section offers move and delete', async () => {
+        removeMap.mockResolvedValue(true);
+
+        renderPanel(marker({ childMapId: 'm2' }));
+
+        expect(screen.getByText('move-menu:m2')).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Видалити карту' }));
+        await screen.findByText(/Маркери й картинка карти будуть видалені/);
+        fireEvent.click(
+            screen.getAllByRole('button', { name: 'Видалити' }).at(-1)!
+        );
+
+        await waitFor(() => expect(removeMap).toHaveBeenCalledWith('m2'));
+    });
+
     it('saves the name on blur', () => {
         renderPanel(marker({}));
 
@@ -115,7 +148,7 @@ describe('WorldMarkerPanel', () => {
     it('warns about nested maps and does not delete without confirmation', async () => {
         renderPanel(marker({ childMapId: 'm2' }));
 
-        fireEvent.click(screen.getByRole('button', { name: /Видалити/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Видалити' }));
 
         expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
 

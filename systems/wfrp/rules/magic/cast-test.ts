@@ -1,4 +1,4 @@
-import { skillTarget, value } from '../characteristics/derive';
+import { bonus, skillTarget, value } from '../characteristics/derive';
 import { fateSpendsOn } from '../combat/fate';
 import { participantChars } from '../combat/participant';
 import { selfSlMod, selfTestMod } from '../conditions/test-mod';
@@ -29,22 +29,28 @@ import {
     PRAYER_KINDS,
 } from './constants';
 import {
-    blessingExtension,
-    overcastCap,
-    overcastDirections,
-    spendOvercast,
+    allowedOvercast,
+    overcastDamage,
+    overcastExtension,
+    overcastTotal,
+    overcastValue,
+    trimOvercast,
 } from './overcast';
 import { prayerOvercast, prayerSteps } from './prayer-overcast';
 
 import { textRef } from '@/lib/i18n/text-ref';
-import { NO_EXTENSION } from '@/lib/utils/battle/spell/extension';
 import type { Ruleset } from '@/lib/utils/rules';
 import type {
+    CastExtension,
     CastTestCtx,
     CastTestResult,
 } from '@/lib/utils/rules/systems/types';
-import type { SpellMagicKind } from '@/lib/utils/spells/model/schema';
+import type {
+    SpellMagic,
+    SpellMagicKind,
+} from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export function castTargetOf(
     caster: BattleParticipant,
@@ -68,6 +74,28 @@ export function prayTargetOf(
         (skillTarget(chars, PRAY_SKILL.key)?.target ?? value(chars, 'fel')) +
         selfTestMod(caster, 'test', editionOf(rules))
     );
+}
+
+export function wfrpDeclaredExtension(ctx: {
+    system?: Parameters<typeof FORTUNE_INPUT.read>[0];
+    magic: SpellMagic;
+    rules: Ruleset;
+}): CastExtension | undefined {
+    const { magic } = ctx;
+
+    if (
+        editionOf(ctx.rules).magicModel !== 'canon5e' ||
+        NO_OVERCAST_KINDS.has(magic.kind)
+    )
+        return undefined;
+
+    const declared = FORTUNE_INPUT.read(ctx.system)?.overcast;
+
+    return declared
+        ? overcastExtension(
+              allowedOvercast(declared, !!magic.missile)
+          )
+        : undefined;
 }
 
 export const isPrayerKind = (kind: SpellMagicKind | undefined): boolean =>
@@ -196,45 +224,42 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             : undefined;
 
     const overcastAllowed = canon
-        ? success && !petty
+        ? success &&
+          (prayer || !NO_OVERCAST_KINDS.has(magic.kind))
         : success &&
           magic.overcast !== null &&
           !NO_OVERCAST_KINDS.has(magic.kind);
 
     const overcastBudget = Math.min(
-        overcastCap(caster),
+        bonus(participantChars(caster), 'int') +
+            bonus(participantChars(caster), 'wp'),
         Math.max(0, test.sl - cn) +
             (critBonus === 'totalPower' ? Math.floor(test.roll / 10) : 0)
     );
 
-    const spend =
+    const declared =
         canon && !prayer && overcastAllowed
-            ? spendOvercast(
-                  overcastBudget,
-                  fortuneInput?.overcast,
-                  overcastDirections(
-                      magic,
-                      ctx.spell.definition.targeting,
-                      ctx.spell.definition.effects
-                  )
+            ? allowedOvercast(
+                  fortuneInput?.overcast ?? {},
+                  !!magic.missile
               )
-            : undefined;
+            : {};
 
-    const prayed =
-        canon && prayer && overcastAllowed
-            ? prayerOvercast(
-                  magic.kind,
-                  prayerSteps(test.sl),
-                  fortuneInput?.blessing
-              )
-            : undefined;
+    const declaredSl = overcastTotal(declared);
+
+    const spread =
+        declaredSl > 0 ? trimOvercast(declared, overcastBudget) : undefined;
 
     const overcastSteps = !overcastAllowed
         ? 0
-        : prayed
-          ? prayed.steps
-          : spend
-            ? Object.values(spend.spent).reduce((a, b) => a + b, 0)
+        : canon && prayer
+          ? prayerSteps(test.sl)
+          : canon
+            ? spread
+                ? overcastDamage(spread)
+                : magic.missile
+                  ? overcastValue('damage', overcastBudget)
+                  : 0
             : Math.min(
                   MAX_OVERCAST_STEPS,
                   Math.max(0, Math.floor((test.sl - cn) / OVERCAST_SL_STEP))
@@ -288,6 +313,15 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             )
         );
 
+    if (spread && declaredSl > overcastBudget)
+        lines.push(
+            textRef('wfrpMagic.log.overcastTrimmed', {
+                name: caster.basicInfo.name,
+                declared: declaredSl,
+                available: overcastBudget,
+            })
+        );
+
     const spendFortune = Boolean(fortune);
 
     const dropChannelled = channelled > 0;
@@ -296,46 +330,42 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const remember = canon && success;
 
-    const dropAim = canon && wfrpState(caster).aim !== undefined;
-
     const casterUpdate =
-        spendFortune || dropChannelled || markCast || remember || dropAim
-            ? (p: BattleParticipant) =>
-                  withWfrpState(p, {
-                      ...(dropAim && { aim: undefined }),
+        spendFortune || dropChannelled || markCast || remember || canon
+            ? (
+                  p: BattleParticipant,
+                  final?: { targets: readonly GridPoint[] }
+              ) => {
+                  const landed = final?.targets ?? ctx.targets;
+
+                  return withWfrpState(p, {
                       ...(fortune && spentFor(p, fortune.kind, fortune.spent)),
                       ...(dropChannelled && { channelledSl: undefined }),
+                      ...(canon && { aim: undefined }),
                       ...(markCast && { lastHand: 'cast' as const }),
                       ...(remember && {
                           lastCast: {
                               spell: spell.name,
                               sl: test.sl,
                               ...(ctx.at && { at: ctx.at }),
-                              ...(ctx.targets?.length && {
-                                  targets: [...ctx.targets],
-                              }),
+                              ...(landed?.length && { targets: [...landed] }),
                               ...(critBonus && { critBonus }),
                           },
                       }),
-                  })
+                  });
+              }
             : undefined;
 
     return {
         success,
         margin: test.sl,
         overcastSteps,
-        ...(canon && { overcastDamage: spend?.damage ?? 0 }),
-        ...(canon &&
-            overcastAllowed && {
-                extension:
-                    spend?.extension ??
-                    (prayed ? blessingExtension(prayed) : NO_EXTENSION),
-            }),
+        ...(canon && { overcastDamage: prayer ? 0 : overcastSteps }),
+        ...(spread && { extension: overcastExtension(spread) }),
         miscast,
         details: ACTION_SLOT.write({
             cast: {
                 roll: test.roll,
-                ...(test.rawRoll !== test.roll && { rawRoll: test.rawRoll }),
                 target: test.target,
                 sl: test.sl,
                 cn,
@@ -346,10 +376,14 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
                 overcastSteps,
                 miscast,
                 ...(critBonus && { critBonus }),
-                ...(prayed && prayed.steps > 0 && { prayerOvercast: prayed }),
-                ...(spend &&
-                    Object.keys(spend.spent).length > 0 && {
-                        overcast: spend.spent,
+                ...(canon &&
+                    prayer &&
+                    overcastSteps > 0 && {
+                        prayerOvercast: prayerOvercast(
+                            magic.kind,
+                            overcastSteps,
+                            fortuneInput?.blessing
+                        ),
                     }),
                 ...(canon && { stepAvert: true as const }),
                 ...(fortune && { fortune }),

@@ -3,7 +3,6 @@ import type { Status, StatusTier } from './status';
 
 import type { Coin } from '@/lib/constants/inventory';
 
-// verify against 5e book
 export const MAX_DAYS = 30;
 export const REST_HEAL_MULTIPLIER = 2;
 export const TEND_HEAL_PER_SL = 1;

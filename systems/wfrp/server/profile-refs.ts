@@ -4,10 +4,17 @@ import { SpeciesProfileSchema } from '@/systems/wfrp/server/schemas';
 export type ProfileRefIds = { careers: string[]; feats: string[] };
 
 export const profileRefIds = (
-    p: Pick<SpeciesProfile, 'careerTable' | 'talents' | 'randomTalents'>
+    p: Pick<
+        SpeciesProfile,
+        'careerTable' | 'talents' | 'randomTalents' | 'talentChoices'
+    >
 ): ProfileRefIds => ({
     careers: p.careerTable.map((r) => r.careerId),
-    feats: [...p.talents, ...p.randomTalents.map((r) => r.featId)],
+    feats: [
+        ...p.talents,
+        ...(p.talentChoices ?? []).flat(),
+        ...p.randomTalents.map((r) => r.featId),
+    ],
 });
 
 export function parseSpeciesProfile(raw: unknown): SpeciesProfile | null {

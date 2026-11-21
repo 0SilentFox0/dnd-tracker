@@ -74,14 +74,10 @@ export interface ResolveAttackCtx {
     crit?: CritPicker;
     /** Server-rolled strike outside the actor's turn (retaliation, opportunity, readied, legendary) */
     offTurn?: { noun: TextRef };
-    /** The line of fire is blocked by an obstacle (cover) */
-    obstacle?: boolean;
 }
 
 export interface ResolvedAttack {
     isHit: boolean;
-    /** The resolver already priced the obstacle into the test, so the pipeline does not halve the damage */
-    obstacleInTest?: true;
     /** margin, location and system carry the test details */
     attackRoll: AttackRollResult;
     /** Written to actionDetails.targetAC (0 when there is no defence value) */
@@ -116,10 +112,10 @@ export interface MitigateCtx {
     crit: boolean;
     attackRoll?: number;
     attack: BattleAttack;
-    /** The system slot the attack roll left behind, for details only the system's own resolver knows */
-    system?: SystemSlot;
     rng: Rng;
     rules: Ruleset;
+    /** A free strike outside the actor's turn */
+    offTurn?: boolean;
 }
 
 export interface MitigateResult {
@@ -414,8 +410,6 @@ export interface RuleSystemCombat {
     onRevived?(p: BattleParticipant): BattleParticipant;
     /** Stays down above 0 HP (healing, DM HP edits and status settling never raise it) */
     keepsDown?(p: BattleParticipant): boolean;
-    /** An Unconscious participant that can still be chosen as an attack target (a Helpless body); absent means never */
-    attackableDown?(p: BattleParticipant, rules: Ruleset): boolean;
     /** A downed participant still in the fight (d20: dying, not stable); its side has not lost yet */
     holdsOn?(p: BattleParticipant): boolean;
     turn?: RuleSystemTurn;
@@ -431,8 +425,7 @@ export interface RuleSystemCombat {
     initiative(
         p: BattleParticipant,
         ctx: {
-            rules: Pick<Ruleset, 'initiative'> &
-                Partial<Pick<Ruleset, 'edition'>>;
+            rules: Pick<Ruleset, 'initiative'> & Partial<Pick<Ruleset, 'edition'>>;
             rng: Rng;
             roll?: boolean;
         }

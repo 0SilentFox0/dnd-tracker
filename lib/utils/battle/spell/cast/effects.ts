@@ -14,12 +14,15 @@ import {
 } from '@/lib/utils/battle/common/action-flow';
 import { applyBalanceDamageMultiplier } from '@/lib/utils/battle/damage/balance-multiplier';
 import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
-import { mitigatedSteps } from '@/lib/utils/battle/damage/mitigated-steps';
 import { bothOnMap, cellsOf, footprintDistance } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { dealsNoDamage } from '@/lib/utils/battle/participant/state';
 import { applyResistance, immunityNote } from '@/lib/utils/battle/resistance';
 import { outcomeFor } from '@/lib/utils/battle/spell/cast/outcome';
+import {
+    applySoakAfterHit,
+    soakSpellHit,
+} from '@/lib/utils/battle/spell/cast/soak';
 import {
     isDamageEffect,
     NO_TARGET_KINDS,
@@ -261,9 +264,7 @@ function dealSpellDamage(
               Math.floor((raw * share) / 100)
           ).damage;
 
-    const missile = !lethal && !!state.tested?.spellMagic.missile;
-
-    if (planned <= 0 && !missile) return;
+    if (planned <= 0) return;
 
     if (dealsNoDamage(getP(flow, casterIdOf(state)))) {
         flow.messages.push(
@@ -277,7 +278,6 @@ function dealSpellDamage(
     }
 
     if (
-        planned > 0 &&
         effect.delayIfBeyond &&
         scheduleHit(
             state,
@@ -289,44 +289,25 @@ function dealSpellDamage(
     )
         return;
 
-    const hit =
-        missile && state.tested
-            ? state.tested.magic.spellHit?.({
-                  caster: getP(flow, casterIdOf(state)),
-                  target,
-                  magic: state.tested.spellMagic,
-                  amount: planned,
-                  overcastDamage: state.overcastDamage,
-                  cast: state.tested.cast,
-                  rules: flow.ctx.rules,
-                  rng: state.rng,
-              })
-            : null;
-
-    if (!hit && planned <= 0) return;
-
-    const damaged = hit?.amount ?? planned;
+    const soak = lethal ? undefined : soakSpellHit(state, id, planned);
 
     const resisted = lethal
         ? { finalDamage: planned, steps: [], immunityApplied: false }
-        : applyResistance(target, damaged, effect.damageType ?? 'magic', {
-              participants: flow.ps,
-              fromSpell: true,
-              school: spell.groupId,
-              extra: state.actionModifiers[id],
-              rules: flow.ctx.rules,
-          });
+        : applyResistance(
+              target,
+              soak?.amount ?? planned,
+              effect.damageType ?? 'magic',
+              {
+                  participants: flow.ps,
+                  fromSpell: true,
+                  school: spell.groupId,
+                  extra: state.actionModifiers[id],
+                  rules: flow.ctx.rules,
+              }
+          );
 
     put(flow, applyRawDamage(target, resisted.finalDamage));
     state.dealt += resisted.finalDamage;
-
-    if (hit?.afterHit) {
-        const applied = hit.afterHit(getP(flow, id), flow.ctx.round);
-
-        put(flow, applied.participant);
-        flow.messages.push(applied.message);
-    }
-
     applyFlowDamage(
         flow,
         target,
@@ -335,10 +316,11 @@ function dealSpellDamage(
         undefined,
         effect.damageType ?? 'magic'
     );
+    applySoakAfterHit(state, id, soak);
     absorbSpellDamage(state, id, resisted.finalDamage);
     state.damageSteps[id] = [
         ...(state.damageSteps[id] ?? []),
-        ...(hit ? mitigatedSteps(hit.steps) : []),
+        ...(soak?.steps ?? []),
         ...resisted.steps,
     ];
 

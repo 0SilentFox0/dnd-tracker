@@ -7,7 +7,7 @@ import { markerRef, WriteArgs, WriteResult } from './writers-maps';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { DEFAULT_ZONE_COLOR, MAX_MARKERS_PER_MAP } from '@/lib/constants/world';
+import { MAX_MARKERS_PER_MAP } from '@/lib/constants/world';
 import { prisma } from '@/lib/db';
 import {
     createWorldMarkerSchema,
@@ -52,7 +52,9 @@ export async function writeMarkersCreate({
                 polygon: body.polygon ?? undefined,
                 name: body.name,
                 icon: body.icon ?? null,
-                color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+                color: body.color ?? null,
+                labelMode: body.labelMode ?? null,
+                fillOpacity: body.fillOpacity ?? null,
                 sortOrder: (_max.sortOrder ?? -1) + 1,
             },
         });

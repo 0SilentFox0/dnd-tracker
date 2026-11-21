@@ -28,11 +28,12 @@ import { useMediaQuery } from '@/lib/hooks/common';
 import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
 import { useTrailView, useWorldPlay, useWorldTrail } from '@/lib/hooks/world';
+import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
 const MAP_HEIGHT =
-    'h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
+    'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
 
 export function WorldPlayClient({
     campaignId,
@@ -119,10 +120,10 @@ export function WorldPlayClient({
                         marker && !play.details.open ? (
                             <PlayerMarkerBubble
                                 key={marker.id}
-                                marker={marker}
+                                marker={applyLayerStyle([marker], play.layers.items)[0]}
                                 embedded={!isDesktop}
                                 actions={{
-                                    onMore: () => play.details.set(true),
+                                    onMore: play.openDetails,
                                     onOpenMap: play.card.canOpenChild
                                         ? () => play.openChild(marker.id)
                                         : undefined,
@@ -185,18 +186,32 @@ export function WorldPlayClient({
                                 {isDesktop ? (
                                     <aside
                                         data-tour="world.places"
-                                        className="hud-surface overflow-y-auto rounded-md border border-hud-rule p-1 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)]"
+                                        className="hud-surface relative overflow-y-auto rounded-md border border-hud-rule p-1 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)]"
                                     >
                                         {mapTree}
                                     </aside>
                                 ) : null}
                                 <div className="flex min-w-0 flex-col gap-2">
                                     <PlaceSearchBar
-                                        markers={view.markers}
+                                        markers={play.styledMarkers}
                                         onPick={play.pickPlace}
                                     />
                                     <div
-                                        className={`relative ${MAP_HEIGHT}`}
+                                        className={
+                                            play.fullscreen.full
+                                                ? 'fixed inset-0 z-50 h-dvh bg-black'
+                                                : `relative ${MAP_HEIGHT}`
+                                        }
+                                        role={
+                                            play.fullscreen.full
+                                                ? 'region'
+                                                : undefined
+                                        }
+                                        aria-label={
+                                            play.fullscreen.full
+                                                ? t('zoom.fullscreen')
+                                                : undefined
+                                        }
                                         data-tour="world.map"
                                     >
                                         <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
@@ -204,6 +219,9 @@ export function WorldPlayClient({
                                                 layers={play.layers.items}
                                                 hidden={play.layers.hidden}
                                                 onToggle={play.layers.toggle}
+                                                showUnlayered={
+                                                    play.layers.showUnlayered
+                                                }
                                             />
                                             <TrailLegend
                                                 trails={trail.trails}
@@ -227,10 +245,20 @@ export function WorldPlayClient({
                                             fog={props.fog}
                                             layers={play.layers}
                                             focus={play.focus}
+                                            className={
+                                                play.fullscreen.full
+                                                    ? 'rounded-none border-0'
+                                                    : undefined
+                                            }
                                             selectedId={marker?.id}
                                             compact={!isDesktop}
                                             handlers={play.handlers}
                                             slots={{
+                                                fullscreen: {
+                                                    full: play.fullscreen.full,
+                                                    toggle: play.fullscreen
+                                                        .toggle,
+                                                },
                                                 card: pickCard({
                                                     isDesktop,
                                                     trail:
@@ -254,7 +282,7 @@ export function WorldPlayClient({
                                     </div>
                                 </div>
                                 {isDesktop ? (
-                                    <div className="flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
+                                    <div className="relative flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
                                         {marker && play.details.open ? (
                                             notes
                                         ) : (

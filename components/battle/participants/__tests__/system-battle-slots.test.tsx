@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
@@ -67,5 +67,27 @@ describe('battle slots in the participant row and hero panel', () => {
 
         render(<MyHeroPanel hero={me} />, { wrapper });
         expect(screen.getByLabelText('I коло: 2 з 3')).toBeTruthy();
+    });
+});
+
+describe('compact hero panel', () => {
+    it('hides system panels behind a toggle that reveals them', () => {
+        const { wrapper, me } = fakeScene({
+            knownSpells: ['shield'],
+            slots: { '1': { max: 3, current: 2 } },
+        });
+
+        render(<MyHeroPanel hero={me} compact />, { wrapper });
+
+        const slots = () => screen.getByLabelText('I коло: 2 з 3');
+
+        const trigger = screen.getByText('Дії системи').closest('button');
+
+        expect(trigger?.getAttribute('aria-expanded')).toBe('false');
+        expect(slots().closest('[data-state="closed"]')).not.toBeNull();
+
+        fireEvent.click(trigger as HTMLElement);
+        expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+        expect(slots().closest('[data-state="closed"]')).toBeNull();
     });
 });

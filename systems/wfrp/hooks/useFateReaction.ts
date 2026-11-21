@@ -3,11 +3,13 @@
 import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 import { fateReactionOp } from '@/systems/wfrp/api/battle';
+import { TRAP_BLADE_COST } from '@/systems/wfrp/rules/combat/trap-blade';
 
 export interface FateReactionRow {
     key: string;
     holderName: string;
     attackerName: string;
+    trapBlade: boolean;
 }
 
 export function useFateReaction() {
@@ -36,6 +38,7 @@ export function useFateReaction() {
         key: o.key,
         holderName: nameOf(o.holderId),
         attackerName: nameOf(o.actorId),
+        trapBlade: o.cost === TRAP_BLADE_COST,
     }));
 
     return {

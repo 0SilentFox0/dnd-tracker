@@ -101,8 +101,7 @@ export function useAttackWizard(
                 ? Object.fromEntries(
                       attacks.map((a) => [
                           a.id ?? a.name,
-                          attackTarget?.(attacker, a, scene.battle.rules)
-                              ?.target,
+                          attackTarget?.(attacker, a, scene.battle.rules)?.target,
                       ])
                   )
                 : {},
@@ -152,7 +151,6 @@ export function useAttackWizard(
 
     const view = {
         rules: scene.battle.rules,
-        viewerIsDM: scene.viewer.isDM,
         cunning: cunningOffer && {
             options: cunningOffer.options.map((o) => ({
                 ...o,

@@ -1,78 +1,17 @@
 import { participantStats } from '../combat/participant';
-import type { EditionProfile } from '../edition';
-import { TRAIT_SIZES, type TraitSize } from '../trait-kinds';
-import {
-    SIZE_DAMAGE_PER_STEP,
-    SIZE_DAMAGE_SB,
-    SIZE_HIT_PER_STEP,
-    SIZE_OUTNUMBER_WEIGHT,
-    SIZE_PARRY_SL,
-    SIZE_RANGED_SL,
-} from './constants';
-import { sizeStep } from './read';
+import { ATTACK_SLOT } from '../slots';
+import { wfrpState } from '../state';
+import { SIZE_DAMAGE_PER_STEP, SIZE_HIT_PER_STEP } from './constants';
+import { isSwarm } from './creature';
+import { type CanonSize, canonSizeOf, canonSizeStep, sizeStep } from './read';
 
+import { AttackType } from '@/lib/constants/battle';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { rollDie } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const stepOf = (p: BattleParticipant) => sizeStep(participantStats(p)?.size);
-
-type CanonModel = Pick<EditionProfile, 'combatModsModel'>;
-
-const isCanon = (edition: CanonModel) => edition.combatModsModel === 'canon5e';
-
-const SMALL_STEP = sizeStep('small');
-
-/** The book has no Tiny or Little: they count as Small (p360) */
-export const canonSizeStep = (p: BattleParticipant): number =>
-    Math.max(stepOf(p), SMALL_STEP);
-
-const canonSizeOf = (p: BattleParticipant): TraitSize =>
-    TRAIT_SIZES[canonSizeStep(p)];
-
-/** Ranged attack SL from size: larger target +1 (Monstrous +2), smaller -1 (p166) */
-export function sizeRangedSl(
-    attacker: BattleParticipant,
-    target: BattleParticipant
-): number {
-    const diff = canonSizeStep(target) - canonSizeStep(attacker);
-
-    if (diff === 0) return 0;
-
-    if (diff < 0) return SIZE_RANGED_SL.smaller;
-
-    return canonSizeOf(target) === 'monstrous'
-        ? SIZE_RANGED_SL.monstrous
-        : SIZE_RANGED_SL.larger;
-}
-
-/** Absolute bonus of the attacker's own size, not a difference to the target; never for ranged, free or extra attacks, nor for profiles that already include it (p360) */
-export function canonSizeDamage(
-    attacker: BattleParticipant,
-    sb: number,
-    opts: { ranged: boolean; free: boolean; baked: boolean }
-): number {
-    if (opts.ranged || opts.free || opts.baked) return 0;
-
-    return (SIZE_DAMAGE_SB[canonSizeOf(attacker)] ?? 0) * Math.max(0, sb);
-}
-
-/** -2 SL to defend with Melee against a larger creature; dodging is free (p360) */
-export const sizeParrySl = (
-    defender: BattleParticipant,
-    attacker: BattleParticipant,
-    edition: CanonModel
-): number =>
-    isCanon(edition) && canonSizeStep(attacker) > canonSizeStep(defender)
-        ? SIZE_PARRY_SL
-        : 0;
-
-/** How many creatures a fighter counts as when its side is checked for being outnumbered; 1 under the legacy model (p360) */
-export const outnumberWeight = (
-    p: BattleParticipant,
-    edition: CanonModel
-): number =>
-    isCanon(edition) ? (SIZE_OUTNUMBER_WEIGHT[canonSizeOf(p)] ?? 1) : 1;
 
 export const sizeHitMod = (
     attacker: BattleParticipant,
@@ -99,4 +38,91 @@ export function wardRoll(
     const roll = rollDie(10, rng);
 
     return { roll, saved: roll >= ward };
+}
+
+/** A Swarm ignores the rules for Size (p357) */
+const sizeOf = (p: BattleParticipant) =>
+    isSwarm(p) ? undefined : participantStats(p)?.size;
+
+const canonStepOf = (p: BattleParticipant) => canonSizeStep(sizeOf(p));
+
+export const canonSizeOfParticipant = (p: BattleParticipant): CanonSize =>
+    canonSizeOf(sizeOf(p));
+
+const MELEE_DAMAGE_SB_FACTOR: Record<CanonSize, number> = {
+    small: 0,
+    average: 0,
+    large: 1,
+    enormous: 1,
+    monstrous: 2,
+};
+
+export const sizeSbFactor = (p: BattleParticipant): number =>
+    MELEE_DAMAGE_SB_FACTOR[canonSizeOfParticipant(p)];
+
+/** Size adds SB (Monstrous 2xSB) to melee damage; not to ranged, free or extra attacks (p360) */
+export function sizeMeleeDamage(
+    attacker: BattleParticipant,
+    attack: BattleAttack,
+    sb: number,
+    offTurn = false
+): number {
+    if (attackKindOf(attack.type) === AttackType.RANGED || offTurn) return 0;
+
+    if (
+        ATTACK_SLOT.read(attack.system)?.free ||
+        wfrpState(attacker).momentumAttack
+    )
+        return 0;
+
+    return Math.max(0, sb) * sizeSbFactor(attacker);
+}
+
+/** Ranged: a bigger target is +1 SL (Monstrous +2), a smaller one -1 (p166) */
+export function sizeRangedSl(
+    attacker: BattleParticipant,
+    target: BattleParticipant
+): number {
+    const a = canonStepOf(attacker);
+
+    const t = canonStepOf(target);
+
+    if (t < a) return -1;
+
+    if (t === a) return 0;
+
+    return canonSizeOfParticipant(target) === 'monstrous' ? 2 : 1;
+}
+
+/** Parrying a bigger attacker with a Melee skill costs 2 SL; Dodge is free (p360) */
+export const parryVsBiggerSl = (
+    defender: BattleParticipant,
+    attacker: BattleParticipant
+): number => (canonStepOf(attacker) > canonStepOf(defender) ? -2 : 0);
+
+const OUTNUMBER_WEIGHT: Record<CanonSize, 1 | 2 | 3 | 4> = {
+    small: 1,
+    average: 1,
+    large: 2,
+    enormous: 3,
+    monstrous: 4,
+};
+
+export const outnumberWeight = (p: BattleParticipant): 1 | 2 | 3 | 4 =>
+    OUTNUMBER_WEIGHT[canonSizeOfParticipant(p)];
+
+/** A bigger mover shrugs off engagement by smaller foes (p360) */
+export const isBiggerThan = (
+    a: BattleParticipant,
+    b: BattleParticipant
+): boolean => canonStepOf(a) > canonStepOf(b);
+
+/** Opposed Strength: two or more steps wins outright, one step lets the smaller side win only on a Critical (p360) */
+export function sizeOpposedStrength(
+    a: BattleParticipant,
+    b: BattleParticipant
+): 'auto' | 'critOnly' | 'normal' {
+    const gap = Math.abs(canonStepOf(a) - canonStepOf(b));
+
+    return gap >= 2 ? 'auto' : gap === 1 ? 'critOnly' : 'normal';
 }

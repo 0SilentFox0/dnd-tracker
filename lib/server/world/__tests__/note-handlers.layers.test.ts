@@ -77,6 +77,8 @@ const marker = {
     alwaysVisible: false,
     sortOrder: 0,
     childMapId: null,
+    labelMode: null,
+    fillOpacity: null,
     layerId: 'l1',
 };
 
@@ -89,6 +91,9 @@ const layer = (visibility: string) => ({
     imageUrl: null,
     rect: { x: 0, y: 0, w: 1, h: 1 },
     opacity: 1,
+    icon: null,
+    zoneOpacity: null,
+    zoneLabels: 'auto',
 });
 
 const req = () =>

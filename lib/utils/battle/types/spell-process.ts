@@ -4,7 +4,6 @@ import type { SpellFx } from '@/lib/utils/battle/fx/spells';
 import type { TransformRequest } from '@/lib/utils/battle/transform/types';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import type {
     ComponentFlags,
     SpellIngredient,
@@ -55,8 +54,6 @@ export interface CastSpellParams {
     /** an ingredient was spent on this cast (optional-ingredient systems) */
     ingredientUsed?: boolean;
     castTest?: { roll?: number; serverRoll?: true; system?: SystemSlot };
-    /** Targets that remain once the rolled reach is known (the request was validated against the planned maximum) */
-    retarget?: (extension: CastExtension) => string[];
     dryRun?: boolean;
     /** Name of who cancelled a tested cast after its roll: the cost is paid, nothing lands */
     cancelledBy?: string;
@@ -77,6 +74,4 @@ export interface CastSpellResult {
     spellDice?: string;
     concentration?: { casterId: string; castId: string };
     interruptedIds?: string[];
-    /** The reach the roll bought; set only when it extends the spell */
-    extension?: CastExtension;
 }

@@ -7,7 +7,7 @@ import {
     SIZE_HIT_PER_STEP,
 } from '../traits/constants';
 import { sizeStep } from '../traits/read';
-import { canonSizeDamage } from '../traits/size';
+import { sizeSbFactor } from '../traits/size';
 import {
     BALANCE_REF_AP,
     BALANCE_REF_INCOMING,
@@ -20,8 +20,6 @@ import { LOCATION_WEIGHTS } from './location';
 import { participantChars, participantStats } from './participant';
 import { momentumWinChance, winChance, winChanceFor } from './win-chance';
 
-import { AttackType } from '@/lib/constants/battle';
-import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { diceAverage } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { RuleSystemHitModel } from '@/lib/utils/rules/systems/types';
@@ -33,34 +31,35 @@ const MIN_DURABILITY = 0.25;
 
 const MAX_DURABILITY = 10;
 
+// Canon Hack wears the struck armour by 1 AP per hit: about half an AP of lasting effect over a fight
+const HACK_WEAR_AP = 0.5;
+
+const hasHack = (p: BattleParticipant) =>
+    (p.battleData.attacks ?? []).some((a) =>
+        ATTACK_SLOT.read(a.system)?.qualities.some((q) => q.key === 'hack')
+    );
+
 const sizeSteps = (p: BattleParticipant) =>
     sizeStep(participantStats(p)?.size) - sizeStep(AVERAGE_SIZE);
 
-function bestHitAverage(p: BattleParticipant, canon: boolean): number {
+function bestHitAverage(p: BattleParticipant): number {
     const sb = participantStats(p)?.sb ?? 0;
 
-    return (p.battleData.attacks ?? []).reduce((best, a) => {
-        const slot = ATTACK_SLOT.read(a.system);
-
-        return Math.max(
-            best,
-            diceAverage(a.damageDice || '0') +
-                (a.damageBonus ?? 0) +
-                (slot?.noSb ? 0 : sb) +
-                (canon
-                    ? canonSizeDamage(p, sb, {
-                          ranged: attackKindOf(a.type) === AttackType.RANGED,
-                          free: false,
-                          baked: slot?.sizeBaked === true,
-                      })
-                    : 0)
-        );
-    }, 0);
+    return (p.battleData.attacks ?? []).reduce(
+        (best, a) =>
+            Math.max(
+                best,
+                diceAverage(a.damageDice || '0') +
+                    (a.damageBonus ?? 0) +
+                    (ATTACK_SLOT.read(a.system)?.noSb ? 0 : sb)
+            ),
+        0
+    );
 }
 
 const hitModelOf = (
     chance: RuleSystemHitModel['winChance'],
-    canon = false
+    canonSize = false
 ): RuleSystemHitModel => ({
     offense: (p) => value(participantChars(p), 'ws'),
     saves: (p) => p.abilities.modifiers,
@@ -71,20 +70,20 @@ const hitModelOf = (
             Math.max(
                 value(c, 'ws'),
                 skillTarget(c, 'dodge')?.target ?? value(c, 'ag')
-            ) -
-            (canon ? 0 : SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p)))
+            ) - (canonSize ? 0 : SIZE_HIT_PER_STEP * Math.max(0, sizeSteps(p)))
         );
     },
     winChance: chance,
     damage: (p) =>
         Math.max(
             MIN_DAMAGE,
-            bestHitAverage(p, canon) *
-                (canon
-                    ? 1
-                    : 1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p))) -
+            (canonSize
+                ? bestHitAverage(p) +
+                  sizeSbFactor(p) * (participantStats(p)?.sb ?? 0)
+                : bestHitAverage(p) *
+                  (1 + SIZE_DAMAGE_PER_STEP * Math.max(0, sizeSteps(p)))) -
                 BALANCE_REF_TB -
-                BALANCE_REF_AP
+                (BALANCE_REF_AP - (canonSize && hasHack(p) ? HACK_WEAR_AP : 0))
         ),
     durability: (p) => {
         const w = participantStats(p);
@@ -125,7 +124,7 @@ const canonModel = hitModelOf(
         canonProfile.momentumModel === 'participant'
         ? momentumWinChance(canonProfile)
         : winChanceFor(canonProfile),
-    canonProfile.combatModsModel === 'canon5e'
+    canonProfile.sizeModel === 'canon'
 );
 
 export const wfrpHitModelFor = (

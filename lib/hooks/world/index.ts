@@ -13,10 +13,13 @@ export {
     type WorldTool,
 } from './useMapDrawing';
 export { useMapFields } from './useMapFields';
+export { useMapFocus } from './useMapFocus';
+export { useMapFullscreen } from './useMapFullscreen';
 export { useMarkerBubblePosition } from './useMarkerBubblePosition';
 export { useMarkerFields } from './useMarkerFields';
 export { useMoveTarget } from './useMoveTarget';
 export { useNotesPanel } from './useNotesPanel';
+export { useOpenMarkerDetails } from './useOpenMarkerDetails';
 export { usePinGesture } from './usePinGesture';
 export { useRemoveMap } from './useRemoveMap';
 export { useRemoveMarker } from './useRemoveMarker';

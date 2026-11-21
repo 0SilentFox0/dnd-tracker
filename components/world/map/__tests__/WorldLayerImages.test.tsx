@@ -21,6 +21,9 @@ const layer = (o: Partial<WorldViewLayer>): WorldViewLayer => ({
     imageUrl: 'https://x/sea.webp',
     rect: { x: 0.1, y: 0.2, w: 0.5, h: 0.4 },
     opacity: 0.6,
+    icon: null,
+    zoneOpacity: null,
+    zoneLabels: 'auto',
     ...o,
 });
 

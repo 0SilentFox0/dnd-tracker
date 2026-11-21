@@ -39,8 +39,14 @@ export interface EditionProfile {
     magicModel: 'legacy' | 'canon5e';
     /** `canon`: worn armour is 1 Enc lighter, coins weigh 1 Enc per 200, overburdened characters lose Movement and Agility (p299) */
     gearModel: 'legacy' | 'canon';
-    /** `legacy`: outnumbering is +10% to hit and size shifts the hit chance and damage by step difference; `canon5e`: combat modifiers are SL from one list, size acts through absolute damage, parry and ranged SL, Tiny and Little count as Small (p165-167, p360) */
-    combatModsModel: 'legacy' | 'canon5e';
+    /** `canon`: five sizes (Tiny/Little read as Small); Size adds SB to melee damage, shifts ranged SL and parry SL, weights outnumbering (p166, p360) */
+    sizeModel: 'legacy' | 'canon';
+    /** `canon`: situational attack modifiers are SL collected by `collectAttackMods` instead of percentage bonuses */
+    combatModsModel: 'legacy' | 'canon';
+    /** `canon`: the action economy of the book (aim, defensive stance, grapple, flee) */
+    actionsModel: 'legacy' | 'canon';
+    /** `canon`: creature traits (Swarm, Fly, Painless, Undead, Regenerate, breath types) follow the book */
+    traitModel: 'legacy' | 'canon';
 }
 
 export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
@@ -64,7 +70,10 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         downtimeModel: 'legacy',
         magicModel: 'legacy',
         gearModel: 'legacy',
+        sizeModel: 'legacy',
         combatModsModel: 'legacy',
+        actionsModel: 'legacy',
+        traitModel: 'legacy',
     },
     canon5e: {
         advanceStep: 5,
@@ -86,6 +95,9 @@ export const EDITION_PROFILES: Record<EditionPreset, EditionProfile> = {
         downtimeModel: 'canon5e',
         magicModel: 'canon5e',
         gearModel: 'canon',
-        combatModsModel: 'canon5e',
+        sizeModel: 'canon',
+        combatModsModel: 'canon',
+        actionsModel: 'canon',
+        traitModel: 'canon',
     },
 };

@@ -49,12 +49,11 @@ const run = (p: BattleParticipant) =>
     });
 
 describe('regenerate recipe', () => {
-    it('heals a wounded active creature up to max', () => {
-        const r = run(troll({ hp: 10 }));
-
-        expect(r.participants[0].combatStats.currentHp).toBeGreaterThan(10);
-        expect(r.participants[0].combatStats.currentHp).toBeLessThanOrEqual(20);
-        expect(r.messages.length).toBeGreaterThan(0);
+    it('builds a wfrpRegenerate trait; the wfrp end-turn handler heals, not the generic engine', () => {
+        expect(JSON.stringify(ability)).toContain('wfrpRegenerate');
+        expect(
+            run(troll({ hp: 10 })).participants[0].combatStats.currentHp
+        ).toBe(10);
     });
 
     it.each([

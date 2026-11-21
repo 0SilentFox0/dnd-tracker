@@ -7,6 +7,7 @@ import {
     wfrpDataOf,
 } from './common';
 import { equipmentIssues } from './equipment';
+import { unlistedPowerIssues } from './spell-damage';
 import { FORBIDDEN_CONDITIONS, spellIssues, unitSpellIssues } from './spells';
 import { unitIssues } from './units';
 
@@ -23,6 +24,7 @@ import {
 import { SPEC_RE } from '@/systems/wfrp/rules/characteristics/keys';
 import { skillDef } from '@/systems/wfrp/rules/skills/catalog';
 import type { TableRow } from '@/systems/wfrp/rules/tables/schema';
+import { TALENT_KINDS } from '@/systems/wfrp/rules/trait-kinds';
 import { SpeciesProfileSchema } from '@/systems/wfrp/server/schemas';
 
 const label = (kind: string, index: number, name: unknown) =>
@@ -39,7 +41,12 @@ const PROFILE_KEYS = [
     'careerTable',
 ] as const;
 
-const PROFILE_LISTS = ['talents', 'randomTalents', 'careerTable'] as const;
+const PROFILE_LISTS = [
+    'talents',
+    'talentChoices',
+    'randomTalents',
+    'careerTable',
+] as const;
 
 const FEAT_STATS = ['attackBonus', 'maxHp', 'initiative'];
 
@@ -93,6 +100,13 @@ function validateProfiles(
             talents: (named.talents ?? []).map((t) =>
                 fakeId('feat', names.feats, t)
             ),
+            ...(named.talentChoices && {
+                talentChoices: named.talentChoices.map((group) =>
+                    (Array.isArray(group) ? group : []).map((t) =>
+                        fakeId('feat', names.feats, t)
+                    )
+                ),
+            }),
             randomTalents: (named.randomTalents ?? []).map((r) => ({
                 ...r,
                 featId: fakeId('feat', names.feats, r.featId),
@@ -161,7 +175,9 @@ function validateCareerTiers(data: WfrpData, issues: string[]) {
                     issues.push(
                         `${where}: ${careerTierKey(n, 'earningSkill')} "${earning}" ${issue}`
                     );
-                else if (!(Array.isArray(skills) ? skills : []).includes(earning))
+                else if (
+                    !(Array.isArray(skills) ? skills : []).includes(earning)
+                )
                     issues.push(
                         `${where}: ${careerTierKey(n, 'earningSkill')} "${earning}" is not one of the tier skills`
                     );
@@ -211,10 +227,19 @@ function validateFeatAbilities(data: WfrpData, issues: string[]) {
                 );
 
             for (const effect of Array.isArray(effects) ? effects : []) {
-                const { kind, stat } = (isRecord(effect) ? effect : {}) as {
+                const { kind, stat, talent } = (
+                    isRecord(effect) ? effect : {}
+                ) as {
                     kind?: unknown;
                     stat?: unknown;
+                    talent?: unknown;
                 };
+
+                if (
+                    kind === 'wfrpTalent' &&
+                    (TALENT_KINDS as readonly unknown[]).includes(talent)
+                )
+                    continue;
 
                 if (
                     kind !== 'modifyStat' ||
@@ -222,7 +247,7 @@ function validateFeatAbilities(data: WfrpData, issues: string[]) {
                     !FEAT_STATS.includes(stat)
                 )
                     issues.push(
-                        `${where}: only modifyStat on ${FEAT_STATS.join('/')} acts on a wfrp hero`
+                        `${where}: only modifyStat on ${FEAT_STATS.join('/')} or a wfrpTalent acts on a wfrp hero`
                     );
             }
         });
@@ -230,12 +255,18 @@ function validateFeatAbilities(data: WfrpData, issues: string[]) {
 }
 
 export const GRIM_TABLE_SLOTS = [
+    'critHead',
+    'critArm',
+    'critBody',
+    'critLeg',
+    'oops',
+    'misfire',
     'miscastMinor',
     'miscastMajor',
     'wrath',
 ] as const;
 
-export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 10];
+export const GRIM_TABLE_ROWS: readonly [number, number] = [2, 20];
 
 export const TABLE_TEXT_MAX = 120;
 
@@ -296,7 +327,19 @@ function validateRules(rules: WfrpData['rules'], issues: string[]) {
 
 function validateSpells(data: WfrpData, issues: string[]) {
     data.spells.forEach((row, index) => {
-        for (const issue of spellIssues(row))
+        const effects = Array.isArray(row.spellEffects) ? row.spellEffects : [];
+
+        const first = effects[0];
+
+        const kind =
+            typeof first === 'object' && first !== null && 'kind' in first
+                ? String(first.kind)
+                : null;
+
+        for (const issue of [
+            ...spellIssues(row),
+            ...unlistedPowerIssues(row, kind),
+        ])
             issues.push(`${label('spells', index, row.name)}: ${issue}`);
     });
 }

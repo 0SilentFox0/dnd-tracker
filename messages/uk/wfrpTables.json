@@ -55,6 +55,7 @@
     "slPenalty": "-1 SL наступного раунду",
     "actLast": "Дія останнім наступного раунду",
     "weaponDamage": "Зброя пошкоджена",
-    "legPenalty": "Штраф ноги (Critical Wound)"
+    "legPenalty": "Штраф ноги (Critical Wound)",
+    "hitAlly": "Б'є випадкового союзника"
   }
 }

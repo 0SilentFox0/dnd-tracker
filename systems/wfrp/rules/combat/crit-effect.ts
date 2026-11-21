@@ -1,6 +1,7 @@
 import { bonus } from '../characteristics/derive';
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { EditionProfile } from '../edition';
+import { isPainless } from '../traits/creature';
 import type { CritResult } from './crit-table';
 import { notTodayLine, recordCritWound } from './critical';
 import { sidedMarker, spotOf } from './location';
@@ -12,6 +13,8 @@ import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
 import { PERMANENT_ROUNDS } from '@/lib/utils/battle/conditions/set';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine, TextRef } from '@/types/text';
+
+const AMPUTATION_MARKERS: readonly string[] = ['amputated'];
 
 const SPOT_REF = {
     leftArm: textRef('battleWfrp.ui.fortune.locations.leftArm'),
@@ -25,7 +28,8 @@ export function applyWfrpCrit(
     crit: CritResult,
     round: number,
     /** Canon5e counts Critical Wounds and can die from them (p172) */
-    edition?: Pick<EditionProfile, 'woundModel' | 'conditionModel'>
+    edition?: Pick<EditionProfile, 'woundModel' | 'conditionModel'> &
+        Partial<Pick<EditionProfile, 'traitModel'>>
 ): { participant: BattleParticipant; message: LogLine } {
     const counted = edition?.woundModel === 'critical';
 
@@ -66,7 +70,13 @@ export function applyWfrpCrit(
             sourceName: crit.text,
         }).participant;
 
-    for (const key of crit.markers) {
+    // Painless ignores the penalties of Critical Wounds, bar amputation (p358)
+    const penalties =
+        edition?.traitModel === 'canon' && isPainless(target)
+            ? crit.markers.filter((k) => AMPUTATION_MARKERS.includes(k))
+            : crit.markers;
+
+    for (const key of penalties) {
         const rolled = crit.markerRoundsRolled?.[key];
 
         const timed = rolled

@@ -1,6 +1,4 @@
-import type { WeatherKind } from '@/types/battle-grid';
-
-// All values: verify against 5e book.
+// legacy only; canon uses +1/+2 SL (p166)
 export const OUTNUMBERING_BONUS = 10;
 
 /** Engaged foes that make a character Surrounded: no Disengage (p163) */
@@ -10,51 +8,6 @@ export const MOMENTUM_SL_BONUS = 1;
 
 /** SL penalty of an attack with the off hand (p167) */
 export const OFFHAND_SL_PENALTY = 2;
-
-/** Melee SL when the target is outnumbered or surrounded; they do not add up (p166) */
-export const OUTNUMBERED_SL = 1;
-
-export const SURROUNDED_SL = 2;
-
-export const HIGH_GROUND_SL = 1;
-
-/** Attacker in mud, water or difficult terrain (p166) */
-export const TERRAIN_SL = -1;
-
-/** Enclosed space with a weapon of Average / greater reach (p166) */
-export const ENCLOSED_SL = -1;
-
-export const ENCLOSED_LONG_SL = -2;
-
-export const CALLED_SHOT_SL = -2;
-
-/** Point Blank is 4 yards; the other bands are fractions of the weapon's Medium range (p302) */
-export const POINT_BLANK_YARDS = 4;
-
-export const FEET_PER_YARD = 3;
-
-/** Ranged SL by range band (p166) */
-export const RANGE_BAND_SL = {
-    pointBlank: 2,
-    short: 1,
-    medium: 0,
-    long: -1,
-    extreme: -2,
-} as const;
-
-/** Target in cover or Prone (p166) */
-export const COVER_SL = -1;
-
-export const AIM_SL = 1;
-
-/** The shooter moved before firing (p166) */
-export const MOVED_SL = -1;
-
-/** Ranged SL by map weather; only conditions the book names (p166: fog -1, rain -2), other kinds are 0 */
-export const WEATHER_SL: Partial<Record<WeatherKind, number>> = {
-    fog: -1,
-    rain: -2,
-};
 
 export const MIN_DAMAGE = 1;
 

@@ -26,7 +26,7 @@ export type AdvancementRules = {
     creation: CreationRules;
 };
 
-// verify against 5e book: placeholder price tables
+// legacy only; canon costs live in canon.ts (p191)
 export const DEFAULT_ADVANCEMENT_RULES: AdvancementRules = {
     characteristic: {
         brackets: [
@@ -53,9 +53,7 @@ export const DEFAULT_ADVANCEMENT_RULES: AdvancementRules = {
         max: 30,
     },
     talentCostMultiplier: 1,
-    // verify against 5e book
     career: { ticksRequired: [10, 12, 14], outOfCareerMultiplier: 2 },
-    // verify against 5e book
     creation: {
         careerBonus: { rolled: 50, choice: 25, free: 0 },
         statBonus: { rolled: 50, rearranged: 25, free: 0 },

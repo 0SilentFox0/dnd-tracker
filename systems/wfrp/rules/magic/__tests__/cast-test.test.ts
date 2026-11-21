@@ -23,7 +23,7 @@ const spell = {
     name: 'Bolt',
     level: 1,
     groupId: null,
-    definition: { targeting: { kind: 'enemy' }, effects: [] },
+    definition: {},
 } as unknown as CastTestCtx['spell'];
 
 const run = (

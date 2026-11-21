@@ -18,6 +18,7 @@ import {
 } from '@/systems/wfrp/rules/combat/rounds-formula';
 import { WFRP_CONDITION_REGISTRY } from '@/systems/wfrp/rules/conditions/catalog';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
 import { RowSchema } from '@/systems/wfrp/rules/tables/schema';
 import { conditionTestMutation } from '@/systems/wfrp/server/battle/condition-test-mutation';
 import type { BattleParticipant } from '@/types/battle';
@@ -51,7 +52,10 @@ const foeAt = (x: number): BattleParticipant => {
         controlledBy: 'dm',
     });
 
-    return { ...base, battleData: { ...base.battleData, position: { x, y: 0 } } };
+    return withWfrpState(
+        { ...base, battleData: { ...base.battleData, position: { x, y: 0 } } },
+        { engagedWith: { hero: 2 } }
+    );
 };
 
 const ctxOf = (participants: BattleParticipant[]) => {

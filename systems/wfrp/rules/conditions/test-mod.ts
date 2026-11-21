@@ -1,22 +1,14 @@
 import type { EditionProfile } from '../edition';
 import type { ModeSources } from '../percentile/advantage';
+import { wfrpState } from '../state';
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY } from './catalog';
 import { conditionLevel } from './levels';
 
-import { CombatStatus } from '@/lib/constants/battle';
 import type { BattleParticipant } from '@/types/battle';
 
 type Model = Pick<EditionProfile, 'conditionModel'>;
 
 const SURPRISED_MELEE_SL = 2;
-
-const ENTANGLED_MELEE_SL = 1;
-
-const PRONE_ATTACKER_SL = -1;
-
-const SURPRISED_RANGED_SL = 1;
-
-const PRONE_TARGET_RANGED_SL = -1;
 
 const ENTANGLED_MOVEMENT_SL = -1;
 
@@ -31,6 +23,12 @@ const levelsOf = (p: BattleParticipant | undefined) =>
         : [];
 
 const isSl = (edition: Model) => edition.conditionModel === 'sl';
+
+const OOPS_SL = -1;
+
+/** Oops result 5-6 (p165): -1 SL to every test for the round after the fumble */
+const oopsPenalised = (p: BattleParticipant | undefined) =>
+    !!p && wfrpState(p).oopsPenalty === 'now';
 
 /** Percent shift of the target (legacy model); zero under the `sl` model, see `selfSlMod` */
 export function selfTestMod(
@@ -64,7 +62,7 @@ export function selfSlMod(
         0
     );
 
-    return worst > 0 ? -worst : 0;
+    return (worst > 0 ? -worst : 0) + (oopsPenalised(p) ? OOPS_SL : 0);
 }
 
 /** Entangled: -1 SL on actions that involve movement, e.g. Disengage and Sprint (p186); other tests are untouched */
@@ -83,7 +81,8 @@ export function selfModes(
     edition: Model,
     skill?: string
 ): ModeSources {
-    const sighted = kind === 'attack' || (!!skill && SIGHT_SKILLS.has(skill));
+    const sighted =
+        kind === 'attack' || (!!skill && SIGHT_SKILLS.has(skill));
 
     return isSl(edition) &&
         sighted &&
@@ -116,14 +115,13 @@ export const cannotDefend = (
     edition: Model
 ): boolean => isSl(edition) && levelsOf(p).some((c) => c.key === 'surprised');
 
-/** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187, the p166 table says +1: the condition text wins); ranged attacks are unaffected */
+/** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187); ranged attacks are unaffected */
 export function againstSl(
     target: BattleParticipant,
     attackKind: 'melee' | 'ranged',
     edition: Model
 ): { advantage: number; sl: number } {
-    if (!isSl(edition) || attackKind !== 'melee')
-        return { advantage: 0, sl: 0 };
+    if (!isSl(edition) || attackKind !== 'melee') return { advantage: 0, sl: 0 };
 
     const keys = levelsOf(target).map((c) => c.key);
 
@@ -133,45 +131,3 @@ export function againstSl(
         sl: keys.includes('surprised') ? SURPRISED_MELEE_SL : 0,
     };
 }
-
-/** An Entangled target is easier to hit in melee: +1 SL in the Combat modifiers table (p166), not part of the condition text */
-export const entangledTargetSl = (
-    target: BattleParticipant,
-    edition: Model
-): number =>
-    isSl(edition) && levelsOf(target).some((c) => c.key === 'entangled')
-        ? ENTANGLED_MELEE_SL
-        : 0;
-
-/** A Prone attacker takes -1 SL on melee attacks (p166) */
-export const proneAttackerSl = (
-    p: BattleParticipant | undefined,
-    edition: Model
-): number =>
-    isSl(edition) && levelsOf(p).some((c) => c.key === 'prone')
-        ? PRONE_ATTACKER_SL
-        : 0;
-
-/** An unconscious or otherwise Helpless fighter (p167); one that merely cannot defend is `cannotDefend` */
-export const isHelpless = (p: BattleParticipant | undefined): boolean =>
-    !!p &&
-    (p.combatStats.status === CombatStatus.UNCONSCIOUS ||
-        levelsOf(p).some((c) => c.key === 'unconscious'));
-
-/** A Surprised target is easier to shoot: +1 SL (p166) */
-export const surprisedRangedSl = (
-    target: BattleParticipant,
-    edition: Model
-): number =>
-    isSl(edition) && levelsOf(target).some((c) => c.key === 'surprised')
-        ? SURPRISED_RANGED_SL
-        : 0;
-
-/** A Prone target is harder to shoot: -1 SL, the same line as cover (p166) */
-export const proneTargetRangedSl = (
-    target: BattleParticipant,
-    edition: Model
-): number =>
-    isSl(edition) && levelsOf(target).some((c) => c.key === 'prone')
-        ? PRONE_TARGET_RANGED_SL
-        : 0;

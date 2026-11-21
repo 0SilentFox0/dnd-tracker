@@ -90,7 +90,6 @@ describe('canon: Fortune rerolls count (p133)', () => {
                 kind: 'attack',
                 actor: hero(2, 2),
                 targetCount: 1,
-                isDM: false,
             } as const;
 
             expect(() =>
@@ -106,7 +105,6 @@ describe('canon: Fortune rerolls count (p133)', () => {
             kind: 'attack',
             actor: hero(1, 0),
             targetCount: 1,
-            isDM: false,
         } as const;
 
         expect(() => assertWfrpInput(input('notFail'), ctx)).not.toThrow();

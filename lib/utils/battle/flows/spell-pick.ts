@@ -22,7 +22,6 @@ import {
 import { isUp } from '@/lib/utils/battle/participant/state';
 import { inputDiceOf } from '@/lib/utils/battle/spell/cast/state';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
-import { widenTargeting } from '@/lib/utils/battle/spell/extension';
 import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import {
     type AimScene,
@@ -36,7 +35,6 @@ import {
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -94,31 +92,17 @@ function choiceOf(effects: NonNullable<BookSpell['spellEffects']>): SpellPick['c
     return undefined;
 }
 
-/** The picker's reach fields of a pick rebuilt with an overcast extension; everything else stays as picked */
-export const withReach = (pick: SpellPick, wider: SpellPick): SpellPick => ({
-    ...pick,
-    maxTargets: wider.maxTargets,
-    template: wider.template,
-    range: wider.range,
-    skillRadius: wider.skillRadius,
-    chain: wider.chain,
-});
-
 export function buildSpellPick(
     order: BattleParticipant[],
     caster: BattleParticipant | null,
     s: BookSpell,
     rules: Pick<Ruleset, 'system'>,
     map: BattleMapConfig | null = null,
-    opts: {
-        castLevel?: number;
-        castTest?: boolean;
-        extension?: CastExtension;
-    } = {}
+    opts: { castLevel?: number; castTest?: boolean } = {}
 ): SpellPick {
     const def = spellDefinition(s);
 
-    const targeting = widenTargeting(def.targeting, opts.extension);
+    const { targeting } = def;
 
     const onMap = !!map && !!caster && isOnMap(caster);
 
@@ -127,7 +111,7 @@ export function buildSpellPick(
             ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s))
             : { mode: 'single' as const, maxTargets: 1 };
 
-    const upcast =
+    const extra =
         caster &&
         casterPicksSlot(caster, rules) &&
         opts.castLevel !== undefined &&
@@ -135,8 +119,6 @@ export function buildSpellPick(
             ? s.upcastTargets *
               ruleSystemOf(rules).magic.upcast.steps(s.level, opts.castLevel)
             : 0;
-
-    const extra = upcast + (opts.extension?.targets ?? 0);
 
     const skill =
         base.mode === 'single' && extra > 0

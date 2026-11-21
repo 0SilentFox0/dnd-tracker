@@ -67,7 +67,7 @@
     },
     "regenerate": {
       "label": "Regenerate",
-      "hint": "Heals 1d10 Wounds at the start of its turn.",
+      "hint": "Regains Wounds at the start of its turn (1d10; at 0 Wounds only on 8+). Wounds from fire do not regenerate.",
       "defaultName": "Regenerate"
     },
     "bite": {
@@ -122,12 +122,22 @@
       "params": {
         "damage": "Damage bonus",
         "rangeFt": "Range, ft",
-        "magical": "Magical attack"
+        "magical": "Magical attack",
+        "breath": "Breath type"
       },
       "options": {
         "magical": {
           "no": "No",
           "yes": "Yes"
+        },
+        "breath": {
+          "none": "Plain (fixed damage)",
+          "acid": "Acid",
+          "cold": "Cold",
+          "electricity": "Electricity",
+          "fire": "Fire",
+          "poison": "Poison",
+          "smoke": "Smoke"
         }
       }
     },
@@ -154,7 +164,7 @@
     },
     "undead": {
       "label": "Undead",
-      "hint": "Narrative trait.",
+      "hint": "Counts as undead for effects that only work on the undead.",
       "defaultName": "Undead"
     },
     "hardy": {
@@ -164,13 +174,18 @@
     },
     "flier": {
       "label": "Flier",
-      "hint": "Narrative trait.",
+      "hint": "Flies: ranged attacks against it count one range band further, and its own ranged attacks suffer -2 SL.",
       "defaultName": "Flier"
     },
     "swarm": {
       "label": "Swarm",
-      "hint": "Narrative trait.",
+      "hint": "Engaged enemies lose 1 Wound at the end of each round, ranged attacks against it get +4 SL, ignores Size and psychology.",
       "defaultName": "Swarm"
+    },
+    "painless": {
+      "label": "Painless",
+      "hint": "Ignores the penalties of Critical Wounds except amputation; conditions still apply.",
+      "defaultName": "Painless"
     }
   }
 }

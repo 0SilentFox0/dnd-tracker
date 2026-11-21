@@ -104,6 +104,7 @@
     },
     "edition": {
       "preset": "Edition preset",
+      "helplessKills": "A hit on a helpless target kills it",
       "options": {
         "legacy": "Legacy (pre-5e values)",
         "canon5e": "5e canon"

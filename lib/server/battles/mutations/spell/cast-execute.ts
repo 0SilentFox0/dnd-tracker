@@ -1,6 +1,5 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
-import { castMapContext } from '@/lib/server/battles/mutations/spell/cast-targets';
 import type { CastPlan } from '@/lib/server/battles/mutations/spell/cast-types';
 import {
     findParticipant,
@@ -23,13 +22,11 @@ import {
     flatEffects,
     isDamageEffect,
 } from '@/lib/utils/battle/spell/cast/state';
-import { extendSpell } from '@/lib/utils/battle/spell/extension';
 import {
     spendIngredients,
     spentSummary,
 } from '@/lib/utils/battle/spell/ingredients';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
-import { trimToExtension } from '@/lib/utils/battle/spell/spell-targeting';
 import {
     spellTerrainEffects,
     spellZoneHazard,
@@ -39,7 +36,6 @@ import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { applyTransforms } from '@/lib/utils/battle/transform/apply-transforms';
 import { sanitizeLogEntry } from '@/lib/utils/battle/view';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 
 const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
@@ -79,32 +75,6 @@ export async function executeCast(
 
     const { legendaryAbility, free, grant } = source;
 
-    let landed = resolution;
-
-    const retarget = plan.reach
-        ? (extension: CastExtension) => {
-              landed = trimToExtension(
-                  order,
-                  caster,
-                  spell,
-                  spell.definition.targeting,
-                  data.targetIds,
-                  resolution,
-                  {
-                      ...castMapContext(
-                          ctx,
-                          data,
-                          spell.definition,
-                          plan.castLevel
-                      ),
-                      extension,
-                  }
-              );
-
-              return landed.targetIds;
-          }
-        : undefined;
-
     const result = castSpell({
         caster,
         spell,
@@ -130,7 +100,6 @@ export async function executeCast(
         ...(resolution.centre && { aim: resolution.centre }),
         rules: ctx.meta.rules,
         ...(data.preview && { dryRun: true }),
-        ...(retarget && { retarget }),
         ...(plan.ingredients && { ingredientUsed: true }),
         ...(plan.cancelledBy !== undefined && {
             cancelledBy: plan.cancelledBy,
@@ -208,7 +177,7 @@ export async function executeCast(
         };
     }
 
-    return finalizeCast(plan, result, rng, landed);
+    return finalizeCast(plan, result, rng);
 }
 
 function fizzleResult(
@@ -274,12 +243,9 @@ export function spendLegendaryCast(
 async function finalizeCast(
     plan: CastPlan,
     result: ReturnType<typeof castSpell>,
-    rng: Rng,
-    resolution: CastPlan['resolution']
+    rng: Rng
 ): Promise<MutationResult> {
-    const { ctx, caster, deps } = plan;
-
-    const spell = extendSpell(plan.spell, result.extension);
+    const { ctx, spell, caster, resolution, deps } = plan;
 
     const { legendaryAbility, grant } = plan.source;
 

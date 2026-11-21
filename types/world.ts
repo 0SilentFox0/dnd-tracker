@@ -1,3 +1,5 @@
+export type ZoneLabelMode = 'auto' | 'hidden' | 'always';
+export type LayerZoneLabels = 'auto' | 'hidden';
 export type LayerVisibility = 'dm' | 'all' | 'heroes';
 export interface LayerRect {
     x: number;
@@ -17,16 +19,30 @@ export interface WorldLayer {
     imageUrl: string | null;
     rect: LayerRect;
     opacity: number;
+    icon: string | null;
+    zoneOpacity: number | null;
+    zoneLabels: LayerZoneLabels;
 }
 
 export type WorldViewLayer = Pick<
     WorldLayer,
-    'id' | 'name' | 'color' | 'imageUrl' | 'rect' | 'opacity'
+    | 'id'
+    | 'name'
+    | 'color'
+    | 'imageUrl'
+    | 'rect'
+    | 'opacity'
+    | 'icon'
+    | 'zoneOpacity'
+    | 'zoneLabels'
 >;
 export type CreateWorldLayerData = {
     mapId: string;
     name: string;
     color?: string;
+    icon?: string;
+    zoneOpacity?: number;
+    zoneLabels?: LayerZoneLabels;
 };
 export type UpdateWorldLayerData = Partial<
     Pick<
@@ -38,12 +54,21 @@ export type UpdateWorldLayerData = Partial<
         | 'rect'
         | 'opacity'
         | 'sortOrder'
+        | 'icon'
+        | 'zoneOpacity'
+        | 'zoneLabels'
     >
 >;
 export type DeleteWorldLayerMode = 'ungroup' | 'delete';
 
 export type MarkerKind = 'point' | 'zone';
 export type MapPoint = { x: number; y: number };
+
+export interface MapFocus {
+    point: MapPoint;
+    seq: number;
+    zoom?: number;
+}
 export type Polygon = [number, number][];
 
 export interface WorldMapSummary {
@@ -80,6 +105,8 @@ export interface WorldMarker {
     sortOrder: number;
     childMapId: string | null;
     layerId: string | null;
+    labelMode: ZoneLabelMode | null;
+    fillOpacity: number | null;
 }
 
 export interface WorldMapDetail {
@@ -122,6 +149,8 @@ export type CreateWorldMarkerData = {
     color?: string;
     description?: string;
     layerId?: string | null;
+    labelMode?: ZoneLabelMode;
+    fillOpacity?: number;
 };
 export type UpdateWorldMarkerData = Partial<
     Pick<
@@ -137,6 +166,8 @@ export type UpdateWorldMarkerData = Partial<
         | 'alwaysVisible'
         | 'sortOrder'
         | 'layerId'
+        | 'labelMode'
+        | 'fillOpacity'
     >
 >;
 export type WorldUploadRequest = {

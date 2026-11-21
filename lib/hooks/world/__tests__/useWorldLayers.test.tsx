@@ -10,6 +10,7 @@ import { useWorldLayers } from '../useWorldLayers';
 
 import { ApiError } from '@/lib/api/client';
 import { deleteWorldLayer, setWorldLayerHeroes } from '@/lib/api/world';
+import { NO_LAYER_KEY } from '@/lib/constants/world';
 import { useOptionalNotify } from '@/lib/hooks/common/useNotify';
 
 vi.mock('@/lib/api/world', () => ({
@@ -88,6 +89,41 @@ describe('useLayerVisibility', () => {
         act(() => result.current.toggle('a'));
 
         expect(result.current.isShown('a')).toBe(true);
+    });
+
+    it('hides and shows unlayered markers through NO_LAYER_KEY and keeps the key when layers change', () => {
+        const { result, rerender } = renderHook(
+            ({ ids }) => useLayerVisibility(ids),
+            { initialProps: { ids: ['a'] } }
+        );
+
+        act(() => result.current.toggle(NO_LAYER_KEY));
+
+        expect(result.current.isShown(null)).toBe(false);
+        expect(result.current.isShown('a')).toBe(true);
+
+        rerender({ ids: ['a', 'b'] });
+        rerender({ ids: ['b'] });
+
+        expect(result.current.hidden.has(NO_LAYER_KEY)).toBe(true);
+
+        act(() => result.current.toggle(NO_LAYER_KEY));
+
+        expect(result.current.isShown(null)).toBe(true);
+    });
+
+    it('shows unlayered markers when there are no layers', () => {
+        const { result, rerender } = renderHook(
+            ({ ids }) => useLayerVisibility(ids),
+            { initialProps: { ids: ['a'] } }
+        );
+
+        act(() => result.current.toggle(NO_LAYER_KEY));
+
+        rerender({ ids: [] });
+
+        expect(result.current.hidden.size).toBe(0);
+        expect(result.current.isShown(null)).toBe(true);
     });
 
     it('remove explains a 409 conflict, not the generic text', async () => {

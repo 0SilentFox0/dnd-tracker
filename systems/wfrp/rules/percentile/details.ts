@@ -1,4 +1,3 @@
-import type { AttackModKey } from '../combat/attack-mods';
 import type { DefenseKind, HitSpot } from '../combat/constants';
 
 export interface PercentileAttackDetails {
@@ -10,6 +9,8 @@ export interface PercentileAttackDetails {
     doubles: boolean;
     /** A failed test that rolled a double (p165) or hit Dangerous (p305) */
     fumble?: true;
+    /** Situational SL that shaped the test, canon combat modifiers */
+    mods?: { key: string; sl: number }[];
     defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
     momentumUsed?: boolean;
     /** Personal Momentum acted as Advantage on the test (canon5e, p168) */
@@ -18,10 +19,6 @@ export interface PercentileAttackDetails {
     opposed?: boolean;
     /** Cancelled by the defender's Fate (How Did That Miss) */
     negated?: true;
-    /** Non-zero SL modifiers of the attack test, by source (p165-167) */
-    mods?: { key: AttackModKey; sl: number }[];
-    /** A Free or extra attack: no size damage bonus (p360) */
-    free?: true;
     fortune?: {
         kind: 'reroll' | 'sl' | 'advantage' | 'notFail';
         firstRoll?: number;
@@ -32,8 +29,6 @@ export interface PercentileAttackDetails {
 
 export interface PercentileCastDetails {
     roll: number;
-    /** Present only when advantage flipped the roll; the hit location of a spell reads this */
-    rawRoll?: number;
     target: number;
     sl: number;
     cn: number;
@@ -42,10 +37,6 @@ export interface PercentileCastDetails {
     doubles: boolean;
     outcome: 'critical' | 'success' | 'failure' | 'fumble';
     overcastSteps: number;
-    /** SL spent per overcast direction, canon5e (p236) */
-    overcast?: Partial<
-        Record<'damage' | 'targets' | 'range' | 'aoe' | 'duration', number>
-    >;
     miscast: 'minor' | 'major' | 'wrath' | null;
     /** Critical Casting bonus picked by the caster, canon5e (p235) */
     critBonus?: 'criticalDamage' | 'totalPower' | 'unstoppableForce';

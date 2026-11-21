@@ -253,6 +253,26 @@ export function readScenePreview(
     );
 }
 
+/** The version envelope is read by the runner; strict action schemas must not see it. */
+export function withoutVersion(raw: unknown): unknown {
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
+        return raw;
+
+    const { expectedVersion: _version, ...rest } = raw as Record<
+        string,
+        unknown
+    >;
+
+    return rest;
+}
+
+/** Schemas that declare expectedVersion see it; strict ones that do not get the body without it. */
+function parseBody<TBody>(schema: ZodType<TBody>, raw: unknown) {
+    const direct = schema.safeParse(raw);
+
+    return direct.success ? direct : schema.safeParse(withoutVersion(raw));
+}
+
 /** Shared guard/mutation/save pipeline. Errors escape the transaction boundary. */
 export async function runGuardedBattleOperationCore<TBody>(
     userId: string,
@@ -289,7 +309,7 @@ export async function runGuardedBattleOperationCore<TBody>(
         throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
     const parsed = options.schema
-        ? options.schema.safeParse(raw)
+        ? parseBody(options.schema, raw)
         : { success: true as const, data: undefined as TBody };
 
     if (!parsed.success)

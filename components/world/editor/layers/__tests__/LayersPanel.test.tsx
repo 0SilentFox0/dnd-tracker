@@ -38,6 +38,9 @@ const layer = (o: Partial<WorldLayer> = {}): WorldLayer => ({
     imageUrl: null,
     rect: { x: 0, y: 0, w: 1, h: 1 },
     opacity: 1,
+    icon: null,
+    zoneOpacity: null,
+    zoneLabels: 'auto',
     ...o,
 });
 
@@ -155,5 +158,42 @@ describe('LayersPanel', () => {
         await waitFor(() =>
             expect(remove).toHaveBeenCalledWith({ id: 'l1', mode: undefined })
         );
+    });
+
+    it('commits the zone opacity from the slider and resets it to null', async () => {
+        renderPanel([layer({ zoneOpacity: 0.4 })]);
+
+        fireEvent.change(
+            screen.getByRole('slider', { name: 'Прозорість зон' }),
+            {
+                target: { value: '0.3' },
+            }
+        );
+
+        await waitFor(() =>
+            expect(update).toHaveBeenCalledWith({
+                id: 'l1',
+                data: { zoneOpacity: 0.3 },
+            })
+        );
+
+        fireEvent.click(
+            screen.getByRole('button', { name: 'За замовчуванням' })
+        );
+
+        await waitFor(() =>
+            expect(update).toHaveBeenCalledWith({
+                id: 'l1',
+                data: { zoneOpacity: null },
+            })
+        );
+    });
+
+    it('offers the zone opacity reset only for a custom value', () => {
+        renderPanel([layer()]);
+
+        expect(
+            screen.queryByRole('button', { name: 'За замовчуванням' })
+        ).toBeNull();
     });
 });

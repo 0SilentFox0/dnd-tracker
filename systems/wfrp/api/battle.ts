@@ -122,3 +122,34 @@ export const aimOp = (body: {
     action: 'aim',
     body,
 });
+
+export const defensiveOp = (body: {
+    participantId: string;
+    skill: 'parry' | 'dodge' | 'magick';
+}): SystemOpBody => ({
+    action: 'defensive',
+    body,
+});
+
+export const fleeOp = (participantId: string): SystemOpBody => ({
+    action: 'flee',
+    body: { participantId },
+});
+
+export const grappleOp = (body: {
+    participantId: string;
+    choice: 'damage' | 'entangle' | 'free';
+    roll?: number;
+    serverRoll?: boolean;
+}): SystemOpBody => ({
+    action: 'grapple',
+    body,
+});
+
+export const mountedOp = (
+    participantId: string,
+    mountId?: string
+): SystemOpBody => ({
+    action: 'mounted',
+    body: { participantId, ...(mountId && { mountId }) },
+});

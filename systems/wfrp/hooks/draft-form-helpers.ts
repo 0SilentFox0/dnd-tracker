@@ -37,7 +37,10 @@ export const VISIBLE_STEP_ERRORS = new Set([
 ]);
 
 export const STEP_ERRORS: Record<WfrpDraftStepId, (code: string) => boolean> = {
-    species: (c) => c === 'PROFILE_NOT_READY' || c === 'SPECIES_SKILLS',
+    species: (c) =>
+        c === 'PROFILE_NOT_READY' ||
+        c === 'SPECIES_SKILLS' ||
+        c === 'SPECIES_TALENTS',
     career: (c) => c.startsWith('CAREER_') || c === 'SKILL_CAP',
     stats: (c) => c.startsWith('STATS_') || c.startsWith('POINTS_'),
     talents: (c) => c.startsWith('TALENT_') || c === 'FEAT_UNKNOWN',

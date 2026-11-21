@@ -1,9 +1,11 @@
 import { LOCATIONS } from '../combat/constants';
-import { bandsOf, wfrpAttackFromProfile } from '../combat/extract-attacks';
+import { wfrpAttackFromProfile } from '../combat/extract-attacks';
 import { wfrpParticipantFields } from '../combat/participant';
+import { editionOf } from '../edition';
 import { AP_CAP } from '../equipment/constants';
 import type { WeaponProfile } from '../equipment/weapon-profile';
 import { PARTICIPANT_SLOT, type WfrpParticipantSlot } from '../slots';
+import { breathBlastCells, breathRangeFt } from './breath';
 import {
     BREATH_BLAST,
     BREATH_DEFAULT_RANGE_FT,
@@ -21,8 +23,24 @@ import type { ResolvedAbility } from '@/types/abilities';
 
 type AttackEffect = Extract<WfrpEffect, { kind: 'wfrpAttack' }>;
 
-function attackProfile(e: AttackEffect): WeaponProfile {
+function attackProfile(
+    e: AttackEffect,
+    breather?: { sb: number; tb: number }
+): WeaponProfile {
     if (e.attack === 'breath') {
+        if (e.breath && breather)
+            return {
+                range: 'ranged',
+                rangeFt: breathRangeFt(breather.tb),
+                damageFlat: e.damage,
+                addSb: false,
+                qualities: [
+                    { key: 'blast', value: breathBlastCells(breather.sb) },
+                ],
+                flaws: [],
+                twoHanded: false,
+            };
+
         return {
             range: 'ranged',
             rangeFt: e.rangeFt ?? BREATH_DEFAULT_RANGE_FT,
@@ -63,6 +81,8 @@ export function wfrpUnitBuild(
 ): { fields: SystemSlot; attacks: ExtractedAttack[] } {
     const baseSlot = wfrpParticipantFields(row);
 
+    const canonTraits = editionOf(rules).traitModel === 'canon';
+
     const entries = traitEntries(abilities);
 
     if (entries.length === 0) return { fields: baseSlot, attacks: [] };
@@ -102,13 +122,22 @@ export function wfrpUnitBuild(
                     wfrpAttackFromProfile(
                         `${row.id}-trait-${ability.key}-${index}`,
                         ability.name,
-                        attackProfile(effect),
-                        {
-                            sizeBaked: true,
-                            ...(rules &&
-                                bandsOf(rules) && { bands: true as const }),
-                            ...(effect.magical && { magical: true as const }),
-                        }
+                        attackProfile(
+                            effect,
+                            canonTraits ? base.stats : undefined
+                        ),
+                        effect.magical ||
+                            effect.free ||
+                            (canonTraits && effect.breath)
+                            ? {
+                                  ...(effect.magical && { magical: true }),
+                                  ...(effect.free && { free: true }),
+                                  ...(canonTraits &&
+                                      effect.breath && {
+                                          breath: effect.breath,
+                                      }),
+                              }
+                            : undefined
                     )
                 );
                 break;

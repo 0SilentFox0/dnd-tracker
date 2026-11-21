@@ -32,6 +32,8 @@ export interface WfrpParticipantStats {
     shield?: number;
     /** AP worn off by Hack hits per location, canon gear only (p304) */
     armourDamage?: Partial<Record<HitLocation, number>>;
+    /** AP of metal armour (mail, plate) per location; Electricity breath ignores it (p358) */
+    metalAp?: Record<HitLocation, number>;
 }
 
 const NO_ARMOR = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
@@ -43,6 +45,7 @@ export interface WfrpGear {
     ap: Record<HitLocation, number>;
     flexible?: boolean;
     armourOnly?: Record<HitLocation, number>;
+    metalAp?: Record<HitLocation, number>;
     burden?: number;
     shield?: number;
 }
@@ -92,6 +95,7 @@ export function wfrpAbilitiesOf(
                 tb: bonus(rest, 't'),
                 ap: { ...(gear?.ap ?? NO_ARMOR) },
                 ...(gear?.flexible && { flexible: true as const }),
+                ...(gear?.metalAp && { metalAp: { ...gear.metalAp } }),
                 ...castApOf(gear, editionOf(rules).magicModel === 'canon5e'),
                 ...(tier !== 0 && { burden: tier }),
                 ...(gear?.shield && { shield: gear.shield }),
@@ -119,6 +123,12 @@ export const apAt = (
         0,
         (stats?.ap[location] ?? 0) - (stats?.armourDamage?.[location] ?? 0)
     );
+
+export const nonMetalApAt = (
+    stats: WfrpParticipantStats | undefined,
+    location: HitLocation
+): number =>
+    Math.max(0, apAt(stats, location) - (stats?.metalAp?.[location] ?? 0));
 
 export function withArmourWear(
     p: BattleParticipant,

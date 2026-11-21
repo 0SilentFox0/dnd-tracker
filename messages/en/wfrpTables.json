@@ -55,6 +55,7 @@
     "slPenalty": "-1 SL next Round",
     "actLast": "Act last next Round",
     "weaponDamage": "Weapon damaged",
-    "legPenalty": "Leg penalty (Critical Wound)"
+    "legPenalty": "Leg penalty (Critical Wound)",
+    "hitAlly": "Strikes a random ally"
   }
 }

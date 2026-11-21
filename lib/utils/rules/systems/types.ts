@@ -59,12 +59,7 @@ export type SheetTestResult = SheetRollResult & {
 };
 
 export type SystemInputCtx =
-    | {
-          kind: 'attack';
-          actor: BattleParticipant;
-          targetCount: number;
-          isDM: boolean;
-      }
+    | { kind: 'attack'; actor: BattleParticipant; targetCount: number }
     | {
           kind: 'cast';
           actor: BattleParticipant;
@@ -165,6 +160,8 @@ export interface RuleSystemDefinition {
 export interface ArmourGear {
     ap: Record<string, number>;
     armourOnly?: Record<string, number>;
+    /** AP of metal armour per location */
+    metalAp?: Record<string, number>;
     flexible?: boolean;
     /** Overburden tier of the carried load, 0 = none */
     burden?: number;

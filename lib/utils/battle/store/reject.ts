@@ -51,7 +51,6 @@ export const REJECT = {
     rollsRequired: 'battleLog.reject.rollsRequired',
     oneTargetRequired: 'battleLog.reject.oneTargetRequired',
     fortuneNotFree: 'battleLog.reject.fortuneNotFree',
-    dmOnlyModifiers: 'battleLog.reject.dmOnlyModifiers',
     barrierDuration: 'battleLog.reject.barrierDuration',
     mapOccupied: 'battleLog.reject.mapOccupied',
     mapEdgeLimit: 'battleLog.reject.mapEdgeLimit',

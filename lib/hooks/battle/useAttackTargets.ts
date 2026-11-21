@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useModeView } from './modes/useModeView';
 import { useBattleScene } from './useBattleScene';
@@ -8,7 +8,6 @@ import { useBattleScene } from './useBattleScene';
 import { AttackType } from '@/lib/constants/battle';
 import {
     isAirborne,
-    isAttackable,
     isDying,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
@@ -29,13 +28,7 @@ export function useAttackTargets(
 
     const { visible } = useModeView();
 
-    const rules = scene.battle.rules;
-
-    const alive = useCallback(
-        (p: BattleParticipant) =>
-            isUp(p) || isDying(p) || isAttackable(p, rules),
-        [rules]
-    );
+    const alive = (p: BattleParticipant) => isUp(p) || isDying(p);
 
     const map = scene.battle.map;
 
@@ -72,7 +65,9 @@ export function useAttackTargets(
                 .filter((t) => lineOfFire(map, seen, attacker, t).blocked)
                 .map((t) => t.basicInfo.id)
         );
-    }, [step, attacker, attack, map, order, visible, alive]);
+    }, [step, attacker, attack, map, order, visible]);
+
+    const rules = scene.battle.rules;
 
     const unreachable = useMemo(() => {
         const out = new Map<string, LogLine>();

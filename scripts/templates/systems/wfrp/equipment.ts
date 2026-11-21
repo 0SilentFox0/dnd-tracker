@@ -46,6 +46,7 @@ export const GRIM_RANGED_GROUPS = [
     'crossbow',
     'sling',
     'throwing',
+    'entangling',
     'blackpowder',
     'engineering',
     'explosives',
@@ -60,9 +61,9 @@ export const WEAPON_GROUP_BANDS: Record<
     (typeof GRIM_MELEE_GROUPS)[number] | (typeof GRIM_RANGED_GROUPS)[number],
     WeaponBand
 > = {
-    basic: { flat: [1, 5], addSb: true, weight: [0, 2], price: [6, 1440] },
+    basic: { flat: [1, 5], addSb: true, weight: [0, 2], price: [0, 1440] },
     fencing: { flat: [3, 5], addSb: true, weight: [0, 1], price: [240, 1920] },
-    brawling: { flat: [0, 3], addSb: true, weight: [0, 1], price: [6, 240] },
+    brawling: { flat: [0, 3], addSb: true, weight: [0, 1], price: [0, 240] },
     polearm: { flat: [3, 6], addSb: true, weight: [1, 4], price: [36, 1440] },
     twohanded: {
         flat: [5, 7],
@@ -103,7 +104,14 @@ export const WEAPON_GROUP_BANDS: Record<
         addSb: null,
         range: [12, 60],
         weight: [0, 1],
-        price: [6, 360],
+        price: [0, 360],
+    },
+    entangling: {
+        flat: [0, 1],
+        addSb: null,
+        range: [6, 30],
+        weight: [0, 1],
+        price: [60, 240],
     },
     blackpowder: {
         flat: [7, 10],
@@ -137,6 +145,16 @@ export const ARMOUR_KIND_BANDS: Record<
     soft: { ap: [0, 1], weight: [0, 2], price: [12, 1080] },
     mail: { ap: [0, 2], weight: [1, 3], price: [240, 7200] },
     plate: { ap: [0, 3], weight: [1, 6], price: [480, 5400] },
+};
+
+/** Quick armour: one full-body suit per kind (p307), exact numbers instead of per-piece bands */
+export const FULL_SUIT_BANDS: Record<
+    ArmourKind,
+    { ap: Range; weight: Range; price: Range }
+> = {
+    soft: { ap: [1, 1], weight: [0, 0], price: [1920, 1920] },
+    mail: { ap: [3, 3], weight: [4, 4], price: [10560, 10560] },
+    plate: { ap: [5, 5], weight: [10, 10], price: [21120, 21120] },
 };
 
 export const SHIELD_BAND = {
@@ -307,9 +325,15 @@ function armourIssues(
     a: Extract<WfrpItemStats, { type: 'armour' }>,
     issues: string[]
 ) {
-    const where = slot ? ARMOUR_SLOT_LOCATION[slot] : undefined;
+    const locations = Object.values(a.locations);
 
-    if (!where && isGrimSlot(slot))
+    const fullSuit =
+        slot === 'armor' &&
+        locations.every((ap) => ap > 0 && ap === locations[0]);
+
+    const where = slot && !fullSuit ? ARMOUR_SLOT_LOCATION[slot] : undefined;
+
+    if (!where && !fullSuit && isGrimSlot(slot))
         issues.push(
             slot === 'shield'
                 ? 'slot "shield" needs gear with one "shield X" quality'
@@ -329,7 +353,7 @@ function armourIssues(
 
     qualityIssues(a.qualities, 'quality', issues);
 
-    const band = ARMOUR_KIND_BANDS[a.kind];
+    const band = fullSuit ? FULL_SUIT_BANDS[a.kind] : ARMOUR_KIND_BANDS[a.kind];
 
     for (const ap of Object.values(a.locations))
         if (outside(ap, band.ap))

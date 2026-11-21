@@ -23,6 +23,7 @@ import {
     settleCastTest,
 } from '@/lib/utils/battle/spell/cast/cast-test';
 import { applyTo } from '@/lib/utils/battle/spell/cast/effects';
+import { applyCastExtension } from '@/lib/utils/battle/spell/cast/extension';
 import {
     finishSpellAction,
     spendCastCost,
@@ -58,11 +59,6 @@ import {
 } from '@/lib/utils/battle/spell/cast/state';
 import { inlineSummonRequests } from '@/lib/utils/battle/spell/cast/summon-inline';
 import { transformRequests } from '@/lib/utils/battle/spell/cast/transform';
-import {
-    extendSpell,
-    isExtended,
-    scaleEffectRounds,
-} from '@/lib/utils/battle/spell/extension';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
 import type {
@@ -97,7 +93,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         isDMCast = false,
     } = params;
 
-    const castIds = [...new Set(requestedIds)];
+    let targetIds = [...new Set(requestedIds)];
 
     let spell: ChosenSpell = {
         ...source,
@@ -164,7 +160,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         ...(params.castLevel !== undefined && { castLevel: chosenLevel }),
     };
 
-    const targetsBefore = castIds.flatMap(
+    const targetsBefore = targetIds.flatMap(
         (id) => findParticipant(before, id) ?? []
     );
 
@@ -172,7 +168,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         type: 'spellCast',
         phase: 'before',
         actorId: casterId,
-        targetIds: castIds,
+        targetIds,
         ...baseInfo,
     });
 
@@ -241,22 +237,34 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
               })
             : rolled;
 
-    const reach = test?.success ? test.extension : undefined;
+    const extended = applyCastExtension(
+        spell,
+        targetIds,
+        spellMagic
+            ? percentile?.declaredExtension?.({
+                  system: params.castTest?.system,
+                  magic: spellMagic,
+                  rules: params.rules,
+              })
+            : undefined,
+        test?.extension,
+        {
+            caster: readyCaster,
+            participants: flow.ps,
+            rules: params.rules,
+            aim: params.aim,
+        }
+    );
 
-    const landed = reach ? (params.retarget?.(reach) ?? castIds) : castIds;
+    spell = extended.spell;
+    def = spell.definition;
+    targetIds = extended.targetIds;
 
-    const targetIds = reach ? landed : castIds;
-
-    const dropped = castIds.length - targetIds.length;
-
-    if (isExtended(reach)) {
-        spell = extendSpell(spell, reach);
-        def = spell.definition;
-    }
-
-    const sourceEffects = isExtended(reach)
-        ? scaleEffectRounds(source.definition.effects, reach)
-        : source.definition.effects;
+    const finalTargets = extended.dropped
+        ? targetIds.flatMap(
+              (id) => findParticipant(flow.ps, id)?.battleData.position ?? []
+          )
+        : undefined;
 
     const overcastDice = test?.overcastDamage === undefined;
 
@@ -351,12 +359,16 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             extra: actionModifiers[casterId],
             addAbilityMod: def.addAbilityMod,
             damageBonus: (def.damageBonus ?? 0) + overcastDamage || undefined,
+            spell: source,
+            overcastDamage,
         }),
         saveDc:
             params.grant?.dc ??
             spellSaveDc(params.rules, readyCaster, params.grant?.dcAbility),
         attackBonus: params.grant?.attackBonus,
         overcastDamage,
+        castDetails: test?.details,
+        finalTargets,
         battleId,
         actionModifiers,
         rng,
@@ -374,22 +386,12 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         dealt: 0,
     };
 
-    if (test) flow.messages.push(...test.lines);
-
-    if (dropped > 0)
-        flow.messages.push(
-            textRef('battleLog.spellFx.beyondOvercast', {
-                spell: spell.name,
-                count: dropped,
-            })
-        );
+    if (test) flow.messages.push(...test.lines, ...extended.messages);
 
     const settle =
         percentile && spellMagic && test
             ? { magic: percentile, spellMagic, cast: test }
             : undefined;
-
-    if (settle) state.tested = settle;
 
     if (settle && !settle.cast.success) {
         spendCastCost(state, cost);
@@ -401,7 +403,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             allParticipants,
             battleId,
             round: currentRound,
-            sourceEffects,
+            sourceEffects: source.definition.effects,
             details: settle.cast.details,
             fizzled: true,
         });
@@ -417,7 +419,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             allParticipants,
             battleId,
             round: currentRound,
-            sourceEffects,
+            sourceEffects: source.definition.effects,
             details: settle.cast.details,
             fizzled: true,
             cancelledBy: params.cancelledBy,
@@ -517,7 +519,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     applyHitRiders({
         flow,
-        effects: sourceEffects,
+        effects: source.definition.effects,
         casterId,
         targetIds,
         ability: state.ability,
@@ -531,7 +533,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     applyAnchoredZones({
         flow,
-        effects: sourceEffects,
+        effects: source.definition.effects,
         casterId,
         targetIds,
         ability: state.ability,
@@ -543,7 +545,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     applyBursts({
         flow,
-        effects: sourceEffects,
+        effects: source.definition.effects,
         casterId,
         centreId: targetIds[0],
         spell,
@@ -554,7 +556,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         ),
     });
 
-    const summonMove = moveSummonOf(sourceEffects);
+    const summonMove = moveSummonOf(source.definition.effects);
 
     if (summonMove?.kind === 'moveSummon' && !params.dryRun)
         moveSummon({
@@ -565,7 +567,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             aim: params.aim,
         });
 
-    if (hasMoveSelf(sourceEffects) && targetIds[0]) {
+    if (hasMoveSelf(source.definition.effects) && targetIds[0]) {
         const moved = moveAdjacent(
             flow.ctx.map,
             flow.ps,
@@ -578,7 +580,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         if (moved.message) flow.messages.push(moved.message);
     }
 
-    if (hasTeleportSelf(sourceEffects) && !params.dryRun) {
+    if (hasTeleportSelf(source.definition.effects) && !params.dryRun) {
         const teleported = teleportTo(
             flow.ctx.map,
             flow.ps,
@@ -610,7 +612,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     applyGrantCasts({
         flow,
-        effects: sourceEffects,
+        effects: source.definition.effects,
         casterId,
         targetIds,
         spell,
@@ -621,7 +623,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     applyGrantSpells({
         flow,
-        effects: sourceEffects,
+        effects: source.definition.effects,
         casterId,
         spell,
         picked: params.pickedSpell,
@@ -632,7 +634,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     state.summons.push(
         ...inlineSummonRequests({
-            effects: sourceEffects,
+            effects: source.definition.effects,
             caster: readyCaster,
             rules: flow.ctx.rules,
             spell,
@@ -646,13 +648,13 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     );
 
     state.summons.push(
-        ...phantomRequests(state, sourceEffects, castId)
+        ...phantomRequests(state, source.definition.effects, castId)
     );
 
     state.transforms.push(
         ...transformRequests(
             state,
-            sourceEffects,
+            source.definition.effects,
             currentRound,
             castId,
             tag,
@@ -672,15 +674,14 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         allParticipants,
         battleId,
         round: currentRound,
-        sourceEffects,
+        sourceEffects: source.definition.effects,
         ...(test && { details: test.details }),
     });
 
-    const interruptedIds = interruptedTargets(state, sourceEffects);
+    const interruptedIds = interruptedTargets(state, source.definition.effects);
 
     return {
         ...result,
-        ...(isExtended(reach) && { extension: reach }),
         ...(tag && { concentration: tag }),
         ...(interruptedIds.length > 0 && { interruptedIds }),
     };

@@ -87,7 +87,12 @@ describe('rules.json of the packs', () => {
 
         if (!merged.ok) throw new Error('old patch invalid');
 
-        const expected = canonOver(merged.rules);
+        const expected = JSON.parse(
+            JSON.stringify(canonOver(merged.rules))
+                .replace('Aethyric shock', 'Eldritch shock')
+                .replace('aethyric vermin', 'spectral vermin')
+                .replace('Aethyric feedback', 'Magical feedback')
+        );
 
         expected.advancement.career = {
             ...expected.advancement.career,

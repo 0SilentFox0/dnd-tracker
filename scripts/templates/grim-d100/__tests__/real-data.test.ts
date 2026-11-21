@@ -44,9 +44,9 @@ describe('grim-d100 catalog', () => {
     });
 
     it('has no coverage warnings', () => {
-        // Death Vower keeps the canon flat status; talents not referenced by any career or species stay valid (substitutions made in the careers wave)
+        // no bestiary unit takes Painless yet; Death Vower keeps the canon flat status; talents not referenced by any career or species stay valid (substitutions made in the careers wave)
         const pending =
-            /^feats ".*": unused$|^careers ".*": not in any species careerTable$|^careers "Death Vower": tier statuses do not rise$/;
+            /^feats ".*": unused$|^careers ".*": not in any species careerTable$|^careers "Death Vower": tier statuses do not rise$|^units: trait "painless" is used by no unit$/;
 
         expect(grimCoverage(data).filter((w) => !pending.test(w))).toEqual([]);
     });
@@ -92,8 +92,14 @@ describe('grim-d100 catalog', () => {
         }
 
         expect(Object.keys(data.rules?.tables ?? {}).sort()).toEqual([
+            'critArm',
+            'critBody',
+            'critHead',
+            'critLeg',
             'miscastMajor',
             'miscastMinor',
+            'misfire',
+            'oops',
             'wrath',
         ]);
     });
@@ -137,12 +143,14 @@ describe('grim-d100 catalog', () => {
         expect(data.raceProfiles).toHaveLength(data.races.length);
     });
 
-    it('feat abilities are passive modifyStat on stats that act on a wfrp hero', () => {
+    it('feat abilities are passive wfrpTalent or modifyStat on stats that act on a wfrp hero', () => {
         for (const feat of data.feats)
             for (const ability of abilitiesOf(feat)) {
                 expect(ability.trigger.event).toBe('passive');
 
                 for (const effect of ability.effects) {
+                    if (effect.kind === 'wfrpTalent') continue;
+
                     expect(effect.kind).toBe('modifyStat');
                     expect(MECHANICAL_STATS).toContain(effect.stat);
                 }

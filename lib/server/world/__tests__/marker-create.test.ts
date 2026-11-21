@@ -93,6 +93,63 @@ describe('updateWorldMarkerHandler layerId', () => {
     });
 });
 
+describe('updateWorldMarkerHandler style', () => {
+    const patch = (body: unknown) =>
+        updateWorldMarkerHandler(
+            new Request('http://localhost/x', {
+                method: 'PATCH',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+            }),
+            'c1',
+            'k1'
+        );
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        m.updateOutside.mockResolvedValue({});
+    });
+
+    it('passes labelMode and fillOpacity', async () => {
+        await patch({ labelMode: 'always', fillOpacity: 0.3 });
+
+        expect(m.updateOutside.mock.calls[0][0].data).toMatchObject({
+            labelMode: 'always',
+            fillOpacity: 0.3,
+        });
+    });
+
+    it('null resets labelMode, icon and color', async () => {
+        await patch({ labelMode: null, icon: null, color: null });
+
+        expect(m.updateOutside.mock.calls[0][0].data).toMatchObject({
+            labelMode: null,
+            icon: null,
+            color: null,
+        });
+    });
+
+    it('rejects an unknown labelMode', async () => {
+        expect((await patch({ labelMode: 'x' })).status).toBe(400);
+    });
+
+    it('null resets fillOpacity', async () => {
+        await patch({ fillOpacity: null });
+
+        expect(m.updateOutside.mock.calls[0][0].data).toMatchObject({
+            fillOpacity: null,
+        });
+    });
+
+    it.each([0.05, 1.2])('rejects fillOpacity %s', async (fillOpacity) => {
+        expect((await patch({ fillOpacity })).status).toBe(400);
+    });
+
+    it('rejects an unknown icon key', async () => {
+        expect((await patch({ icon: 'not-an-icon' })).status).toBe(400);
+    });
+});
+
 describe('createWorldMarkerHandler', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -148,6 +205,30 @@ describe('createWorldMarkerHandler', () => {
         expect(m.tx.worldMarker.create.mock.calls[0][0].data.layerId).toBe(
             'l1'
         );
+    });
+
+    it('stores a zone without color as null and keeps style fields', async () => {
+        const poly = [
+            [0.1, 0.1],
+            [0.4, 0.1],
+            [0.3, 0.4],
+        ];
+
+        await createWorldMarkerHandler(
+            req({
+                kind: 'zone',
+                polygon: poly,
+                labelMode: 'hidden',
+                fillOpacity: 0.5,
+            }),
+            'c1'
+        );
+
+        expect(m.tx.worldMarker.create.mock.calls[0][0].data).toMatchObject({
+            color: null,
+            labelMode: 'hidden',
+            fillOpacity: 0.5,
+        });
     });
 
     it('answers 404 for a layer of another map', async () => {

@@ -1,4 +1,5 @@
 import { descriptionIssues, type Row } from './common';
+import { spellPowerIssues } from './spell-damage';
 import { unitTraits } from './units';
 
 import { isRecord } from '@/lib/utils/common/is-record';
@@ -90,6 +91,7 @@ export const SPELL_KEYS: readonly string[] = [
     'casting',
     'targeting',
     'dice',
+    'damageBonus',
     'upcastDice',
     'spellEffects',
     'ingredients',
@@ -140,11 +142,7 @@ export function spellMagicOf(row: Row): { cn: number; kind: string } | null {
 
 const SPELL_ROLL = { spellRoll: 100 };
 
-function effectIssues(
-    effects: unknown[],
-    issues: string[],
-    missile: boolean
-): string | null {
+function effectIssues(effects: unknown[], issues: string[]): string | null {
     if (effects.length > 1) issues.push('a spell may have at most one effect');
 
     let kind: string | null = null;
@@ -162,17 +160,10 @@ function effectIssues(
 
         kind ??= k;
 
-        const amount = (e as Record<string, unknown>).amount;
-
-        if (missile && k === 'dealDamage') {
-            if (
-                !(Number.isInteger(amount) && (amount as number) >= 0) &&
-                !(typeof amount === 'string' && /^\d+d\d+$/.test(amount))
-            )
-                issues.push(
-                    'missile damage amount must be a whole number or dice'
-                );
-        } else if (JSON.stringify(amount) !== JSON.stringify(SPELL_ROLL))
+        if (
+            JSON.stringify((e as Record<string, unknown>).amount) !==
+            JSON.stringify(SPELL_ROLL)
+        )
             issues.push(`${k} amount must be { spellRoll: 100 }`);
 
         if (
@@ -351,14 +342,7 @@ export function spellIssues(row: Row): string[] {
 
     const effects = Array.isArray(row.spellEffects) ? row.spellEffects : [];
 
-    const missile = !!magic && isRecord(magic.missile);
-
-    const effect = effectIssues(effects, issues, missile);
-
-    if (missile) {
-        if (effect !== 'dealDamage')
-            issues.push('missile needs a dealDamage effect');
-    }
+    const effect = effectIssues(effects, issues);
 
     const dice = typeof row.dice === 'number' ? row.dice : 0;
 
@@ -366,6 +350,8 @@ export function spellIssues(row: Row): string[] {
         magic && isRecord(magic.attribute) ? magic.attribute : null;
 
     const manual = row.executionMode === 'manual';
+
+    const flat = row.damageBonus !== undefined;
 
     if (
         row.executionMode !== undefined &&
@@ -381,17 +367,21 @@ export function spellIssues(row: Row): string[] {
         issues.push('concentration must be a boolean on a native spell');
 
     if (manual) {
-        if (effects.length > 0 || attribute || dice !== 0)
+        if (effects.length > 0 || attribute || dice !== 0 || flat)
             issues.push(
-                'manual spells carry no effect, attribute or dice (the table resolves them)'
+                'manual spells carry no effect, attribute, dice or damageBonus (the table resolves them)'
             );
     } else {
-        if (missile ? dice !== 0 : effects.length > 0 !== dice >= 1)
+        if (effects.length > 0 !== (dice >= 1 || flat))
             issues.push(
-                missile
-                    ? 'a missile spell carries no dice'
-                    : 'dice must be ≥ 1 exactly when the spell has an effect'
+                'a spell with an effect needs dice ≥ 1 or a damageBonus, and one without needs neither'
             );
+
+        if (dice >= 1 && flat)
+            issues.push('dice and damageBonus are alternatives');
+
+        if (flat && !Number.isInteger(row.damageBonus))
+            issues.push('damageBonus must be an integer');
 
         if (effects.length === 0 && !attribute)
             issues.push('spell has neither an effect nor an attribute');
@@ -417,16 +407,16 @@ export function spellIssues(row: Row): string[] {
     const upcast = row.upcastDice;
 
     if (magic?.overcast === 'dice') {
-        if (missile ? upcast !== undefined : upcast !== 1 || dice < 1)
+        if (upcast !== 1 || (dice < 1 && !flat))
             issues.push(
-                missile
-                    ? 'a missile spell carries no upcastDice'
-                    : 'overcast "dice" needs upcastDice 1 and dice ≥ 1'
+                'overcast "dice" needs upcastDice 1 and dice ≥ 1 or a damageBonus'
             );
     } else if (upcast !== undefined)
         issues.push('upcastDice needs overcast "dice"');
 
     ingredientIssues(row, kind, issues);
+
+    issues.push(...spellPowerIssues(row, manual ? null : effect));
 
     issues.push(...descriptionIssues(row));
 

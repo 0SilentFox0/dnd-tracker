@@ -1,293 +1,316 @@
 import { describe, expect, it } from 'vitest';
 
 import { bookExample } from './book-example';
-import { canonRules, fighter, legacyRules } from './combat-fixtures';
 
-import { castSpell } from '@/lib/utils/battle/spell';
-import type {
-    CastableSpell,
-    CastSpellParams,
-} from '@/lib/utils/battle/types/spell-process';
-import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    SpellDefinition,
-    SpellMagic,
-} from '@/lib/utils/spells/model/schema';
-import { withStats } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
-import { caster as wfrpCaster } from '@/systems/wfrp/rules/magic/__tests__/fixtures';
-import { OVERCAST_TABLE } from '@/systems/wfrp/rules/magic/constants';
+import spells from '@/data/templates/grim-d100/spells.json';
+import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import { mulberry32 } from '@/lib/utils/common/rng';
+import { type Ruleset, RulesetSchema } from '@/lib/utils/rules/schema';
+import type { SpellPowerSource } from '@/lib/utils/rules/systems/types';
+import type { SpellMagic } from '@/lib/utils/spells/model/schema';
+import { unlistedPowerIssues } from '@/scripts/templates/systems/wfrp/spell-damage';
+import { spellIssues } from '@/scripts/templates/systems/wfrp/spells';
+import {
+    type Characteristics,
+    DEFAULT_CHARACTERISTICS,
+} from '@/systems/wfrp/rules/characteristics/keys';
+import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
+import { caster } from '@/systems/wfrp/rules/magic/__tests__/fixtures';
+import { wfrpCastTest } from '@/systems/wfrp/rules/magic/cast-test';
+import { WFRP_MAGIC } from '@/systems/wfrp/rules/magic/index';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleMapConfig } from '@/types/battle-grid';
 
-const map: BattleMapConfig = {
-    cols: 40,
-    rows: 10,
-    background: null,
-    opacity: 0.3,
-};
+const rulesOf = (preset: 'legacy' | 'canon5e'): Ruleset =>
+    RulesetSchema.parse({ ...WFRP_RULES, edition: { preset } });
 
-const at = (p: BattleParticipant, x: number): BattleParticipant => ({
-    ...p,
-    battleData: { ...p.battleData, position: { x, y: 5 } },
-});
+const canon = rulesOf('canon5e');
+
+const legacy = rulesOf('legacy');
 
 const spellOf = (
     magic: Partial<SpellMagic>,
-    amount: number | string
-): CastableSpell => ({
-    id: 'sp',
+    damageBonus?: number,
+    kind = 'dealDamage'
+): SpellPowerSource => ({
     name: 'Bolt',
-    level: 1,
-    groupId: null,
     definition: {
-        dice: 0,
-        cost: 'action',
-        targeting: { kind: 'enemy' },
-        resolution: { kind: 'auto' },
-        effects: [{ kind: 'dealDamage', amount, damageType: 'fire' }],
-        raceModifiers: [],
+        ...(damageBonus !== undefined && { damageBonus }),
         casting: {
-            magic: { cn: 2, kind: 'arcane', overcast: null, ...magic },
+            magic: { cn: 4, kind: 'arcane', overcast: 'dice', ...magic },
         },
-    } as SpellDefinition,
+        effects: [{ kind }],
+    },
 });
 
-const foe = (tb: number, ap: Partial<Record<string, number>> = {}) =>
-    at(
-        withStats(
-            {
-                ...fighter('f', { side: 'enemy' }),
-                combatStats: {
-                    ...fighter('f').combatStats,
-                    currentHp: 200,
-                    maxHp: 200,
-                },
-            },
-            { tb, ap: { head: 0, arm: 0, body: 0, leg: 0, ...ap } }
-        ),
-        3
-    );
-
-const cast = (
-    spell: CastableSpell,
+const target = (
     over: {
-        rules?: Ruleset;
-        roll: number;
-        target: BattleParticipant;
-        caster?: BattleParticipant;
-        input?: ReturnType<typeof FORTUNE_INPUT.write>;
-        rng?: () => number;
-    }
-) => {
-    const caster = at(over.caster ?? wfrpCaster({ base: { int: 80 } }), 0);
-
-    const params: CastSpellParams = {
-        rules: over.rules ?? canonRules,
-        caster,
-        spell,
-        targetIds: ['f'],
-        allParticipants: [caster, over.target],
-        currentRound: 1,
-        battleId: 'b',
-        diceRolls: [],
-        rng: over.rng ?? (() => 0.4),
-        map,
-        castTest: {
-            roll: over.roll,
-            ...(over.input && { system: over.input }),
-        },
+        t?: number;
+        ap?: Partial<Record<'head' | 'arm' | 'body' | 'leg', number>>;
+        ward?: number;
+    } = {}
+): BattleParticipant => {
+    const characteristics: Characteristics = {
+        ...DEFAULT_CHARACTERISTICS,
+        base: { ...DEFAULT_CHARACTERISTICS.base, t: over.t ?? 30 },
     };
 
-    return castSpell(params);
+    const p = makeParticipant({ id: 't', hp: 30, maxHp: 30 });
+
+    return {
+        ...p,
+        abilities: {
+            ...p.abilities,
+            ...wfrpAbilitiesOf(characteristics, {
+                ap: { head: 0, arm: 0, body: 0, leg: 0, ...over.ap },
+            } as Parameters<typeof wfrpAbilitiesOf>[1]),
+        },
+    };
 };
 
-const hpLost = (r: ReturnType<typeof castSpell>) =>
-    200 -
-    (r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'f')?.combatStats
-        .currentHp ?? 0);
+const castDetails = (roll: number, critBonus?: 'criticalDamage') =>
+    wfrpCastTest({
+        caster: caster(),
+        spell: {
+            id: 's',
+            name: 'Bolt',
+            level: 1,
+            groupId: null,
+            definition: {},
+        } as never,
+        magic: { cn: 2, kind: 'arcane', overcast: 'dice' },
+        rules: canon,
+        rng: mulberry32(1),
+        presetRoll: roll,
+        ...(critBonus && {
+            system: FORTUNE_INPUT.write({ kind: 'sl', critBonus }),
+        }),
+    }).details;
 
-describe('canon5e spell damage (magic missile)', () => {
+const power = (spell: SpellPowerSource, overcastDamage = 0, rules = canon) =>
+    WFRP_MAGIC.spellPower?.({ caster: caster(), spell, overcastDamage, rules });
+
+const soak = (
+    spell: SpellPowerSource,
+    amount: number,
+    victim: BattleParticipant,
+    roll?: number,
+    critBonus?: 'criticalDamage'
+) =>
+    WFRP_MAGIC.soakSpellDamage?.({
+        caster: caster(),
+        target: victim,
+        amount,
+        spell,
+        castDetails:
+            roll === undefined ? undefined : castDetails(roll, critBonus),
+        rules: canon,
+        rng: mulberry32(7),
+    });
+
+const stepOf = (r: ReturnType<typeof soak>, key: string) =>
+    r?.steps.find((s) => s.key === key)?.value;
+
+describe('spell damage (magic missile)', () => {
     bookExample(
-        243,
-        'Bolt +4, WPB 4 vs TB 3 and 1 AP on the struck location: 4 Wounds',
+        235,
+        'Damage +4 and WPB 4 against TB 3 and Body AP 2 deals 3; overcast +2 makes it 5',
         () => {
-            const r = cast(spellOf({ missile: { wpb: true } }, 4), {
-                roll: 32,
-                target: foe(3, { arm: 1, leftArm: 1 }),
-            });
+            const spell = spellOf({ missile: true }, 4);
 
-            expect(hpLost(r)).toBe(4);
+            const hit = target({ t: 30, ap: { body: 2 } });
+
+            const flat = power(spell);
+
+            expect(flat?.damage).toBe(8);
+            expect(soak(spell, flat!.damage, hit, 54)?.amount).toBe(3);
+
+            const over = power(spell, 2);
+
+            expect(over?.damage).toBe(10);
+            expect(soak(spell, over!.damage, hit, 54)?.amount).toBe(5);
         }
     );
 
-    bookExample(240, 'Dart +0, WPB 2 vs TB 4: minimum 1 Wound (p164)', () => {
-        const r = cast(spellOf({ missile: { wpb: true } }, 0), {
-            roll: 32,
-            target: foe(4),
-            caster: wfrpCaster({ base: { int: 80, wp: 20 } }),
-        });
+    bookExample(
+        164,
+        'the reversed cast roll picks the location whose AP applies',
+        () => {
+            const spell = spellOf({ missile: true }, 4);
 
-        expect(hpLost(r)).toBe(1);
-    });
+            const hit = target({ t: 30, ap: { body: 2, leg: 1 } });
 
-    bookExample(240, 'touch drain ignores AP', () => {
-        const target = foe(1, { arm: 3, leftArm: 3 });
+            const r = soak(spell, 8, hit, 54);
 
-        const spell = (ignore?: ('ap' | 'tb')[]) =>
-            spellOf({ missile: { wpb: true, ...(ignore && { ignore }) } }, 0);
+            expect(stepOf(r, 'ap')).toBe(-2);
 
-        expect(hpLost(cast(spell(), { roll: 32, target }))).toBe(1);
-        expect(hpLost(cast(spell(['ap']), { roll: 32, target }))).toBe(3);
-    });
+            const leg = soak(spell, 8, hit, 98);
 
-    bookExample(227, 'prayer burst 1d10 ignores TB and AP', () => {
-        const r = cast(
-            spellOf(
-                {
-                    kind: 'miracle',
-                    missile: { wpb: false, ignore: ['tb', 'ap'] },
-                },
-                '1d10'
-            ),
-            {
-                roll: 12,
-                target: foe(3, { arm: 2, body: 2, leftArm: 2 }),
-            }
-        );
+            expect(stepOf(leg, 'ap')).toBe(-1);
+            expect(leg?.amount).toBe(4);
+        }
+    );
 
-        expect(hpLost(r)).toBe(5);
+    bookExample(
+        235,
+        'a spell that is not a magic missile strikes the Body whatever the roll',
+        () => {
+            const spell = spellOf({}, 7);
+
+            const hit = target({ t: 30, ap: { body: 2, leg: 0 } });
+
+            expect(soak(spell, 7, hit, 98)?.amount).toBe(2);
+            expect(power(spell)?.damage).toBe(7);
+        }
+    );
+
+    bookExample(164, 'damage never drops below 1', () => {
+        const spell = spellOf({ missile: true }, 0);
+
+        const tough = target({ t: 60, ap: { body: 5 } });
+
+        expect(soak(spell, 5, tough, 54)?.amount).toBe(1);
     });
 
     bookExample(
         235,
-        'location comes from the reversed casting roll (32 becomes 23: arm)',
+        'a spell that ignores TB and AP deals its full amount',
         () => {
-            const target = foe(3, { arm: 5, leftArm: 5, body: 0 });
+            const spell = spellOf({ missile: true, ignore: 'tbAp' }, 9);
 
-            const spell = spellOf({ missile: { wpb: true } }, 4);
+            const tough = target({ t: 60, ap: { body: 5 } });
 
-            expect(hpLost(cast(spell, { roll: 32, target }))).toBe(1);
-            expect(hpLost(cast(spell, { roll: 54, target }))).toBe(5);
+            expect(soak(spell, 13, tough, 54)?.amount).toBe(13);
         }
     );
+
+    bookExample(235, 'ignoring armour still leaves Toughness', () => {
+        const spell = spellOf({ missile: true, ignore: 'ap' }, 4);
+
+        const hit = target({ t: 30, ap: { body: 2 } });
+
+        expect(soak(spell, 8, hit, 54)?.amount).toBe(5);
+    });
 
     bookExample(
         235,
-        'Critical Casting: Critical Damage adds a Critical Wound to the struck location',
+        'Critical Damage adds a Critical Wound to the struck location',
         () => {
-            const spell = spellOf({ missile: { wpb: true } }, 4);
+            const spell = spellOf({ missile: true }, 4);
 
-            const target = foe(3);
+            const hit = target({ t: 30, ap: { body: 2 } });
 
-            const plain = cast(spell, {
-                roll: 22,
-                target,
-                input: FORTUNE_INPUT.write({
-                    kind: 'sl',
-                    critBonus: 'totalPower',
-                }),
-            });
+            expect(soak(spell, 8, hit, 54)?.afterHit).toBeUndefined();
 
-            const crit = cast(spell, {
-                roll: 22,
-                target,
-                input: FORTUNE_INPUT.write({
-                    kind: 'sl',
-                    critBonus: 'criticalDamage',
-                }),
-            });
+            const crit = soak(spell, 8, hit, 22, 'criticalDamage');
 
-            const wounds = (r: ReturnType<typeof castSpell>) =>
-                r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'f')!
-                    .battleData.activeEffects.length;
-
-            expect(wounds(plain)).toBe(0);
-            expect(wounds(crit)).toBeGreaterThan(0);
+            expect(crit?.afterHit).toBeTypeOf('function');
         }
     );
 
-    bookExample(
-        236,
-        'overcast +2 Damage adds to a magic missile, not doubled by spell power',
-        () => {
-            const target = foe(3);
+    it('a flat heal scales with the listed characteristic bonus and has no dice', () => {
+        const heal = spellOf({ scale: 'int', overcast: null }, 0, 'heal');
 
-            const plain = cast(spellOf({ missile: { wpb: true } }, 4), {
-                roll: 54,
-                target,
-            });
+        expect(power(heal)).toMatchObject({ heal: 4, damage: 4 });
+        expect(power(spellOf({ overcast: null }, 1, 'heal'))?.heal).toBe(1);
+    });
 
-            const over = cast(
-                spellOf({ overcast: 'dice', missile: { wpb: true } }, 4),
-                { roll: 54, target }
-            );
-
-            const row = OVERCAST_TABLE.find((r) => r.sl === 2)!.damage;
-
-            expect(hpLost(over) - hpLost(plain)).toBe(row);
-        }
-    );
-
-    it('a prayer adds perSl Wounds per SL of the test', () => {
-        const spell = (perSl?: number) =>
-            spellOf(
-                {
-                    kind: 'miracle',
-                    missile: { wpb: false, ...(perSl && { perSl }) },
-                },
-                0
-            );
-
-        const target = foe(0);
-
-        const base = hpLost(cast(spell(), { roll: 12, target }));
-
-        expect(base).toBe(1);
-        expect(hpLost(cast(spell(1), { roll: 12, target }))).toBeGreaterThan(
-            base
+    it('the scaling bonus adds to a missile (Damage = TB)', () => {
+        expect(power(spellOf({ missile: true, scale: 't' }, 0))?.damage).toBe(
+            7
         );
     });
 
-    it('legacy edition keeps the declared amount untouched', () => {
-        const r = cast(spellOf({ missile: { wpb: true } }, 4), {
-            rules: legacyRules,
-            roll: 32,
-            target: foe(3, { arm: 1 }),
-        });
+    it('a dice spell (no damageBonus) keeps the dice model but is still soaked', () => {
+        const spell = spellOf({ ignore: 'tbAp' });
 
-        expect(hpLost(r)).toBe(4);
+        expect(power(spell)).toBeUndefined();
+        expect(soak(spell, 6, target({ t: 60, ap: { body: 5 } }))?.amount).toBe(
+            6
+        );
     });
 
-    it('a spell without missile data is not touched by the seam', () => {
-        const r = cast(spellOf({}, 4), {
-            roll: 32,
-            target: foe(3, { arm: 1 }),
-        });
+    it('legacy magic keeps the dice and the generic resistance path', () => {
+        const spell = spellOf({ missile: true }, 4);
 
-        expect(hpLost(r)).toBe(4);
+        expect(power(spell, 0, legacy)).toBeUndefined();
+        expect(
+            WFRP_MAGIC.soakSpellDamage?.({
+                caster: caster(),
+                target: target(),
+                amount: 8,
+                spell,
+                rules: legacy,
+                rng: mulberry32(1),
+            })
+        ).toBeUndefined();
     });
 });
 
-describe('SpellMagic.missile schema', () => {
-    it('defaults wpb to true and rejects out-of-range perSl', async () => {
-        const { SpellMagicSchema } = await import(
-            '@/lib/utils/spells/model/schema'
-        );
+describe('grim spells: listed power', () => {
+    const rows = spells as Array<Record<string, unknown>>;
 
-        const ok = SpellMagicSchema.parse({
-            cn: 1,
-            kind: 'arcane',
-            missile: {},
+    it('every row passes the spell checks', () => {
+        for (const row of rows)
+            expect(spellIssues(row), String(row.name)).toEqual([]);
+    });
+
+    it('a native damage spell with a bonus carries no dice and a native heal either', () => {
+        const flat = rows.filter((r) => r.damageBonus !== undefined);
+
+        expect(flat.length).toBeGreaterThan(20);
+
+        for (const row of flat) {
+            expect(row.dice, String(row.name)).toBe(0);
+            expect(row.executionMode, String(row.name)).toBeUndefined();
+        }
+    });
+
+    it('the book missiles are native with their listed Damage', () => {
+        const byName = new Map(rows.map((r) => [String(r.name), r]));
+
+        const bolt = byName.get('Lance Bolt') as {
+            damageBonus: number;
+            casting: { magic: SpellMagic };
+        };
+
+        expect(bolt.damageBonus).toBe(4);
+        expect(bolt.casting.magic.missile).toBe(true);
+        expect(byName.get('Soul Draw')?.executionMode).toBeUndefined();
+    });
+
+    it('a manual row that lists a Damage is rejected', () => {
+        const bolt = rows.find((r) => r.name === 'Lance Bolt')!;
+
+        const issues = spellIssues({
+            ...bolt,
+            executionMode: 'manual',
+            dice: 0,
+            damageBonus: undefined,
+            spellEffects: [],
         });
 
-        expect(ok.missile?.wpb).toBe(true);
+        expect(issues.join('\n')).toContain('must be native');
+    });
+
+    it('a native damage spell outside the table is rejected', () => {
+        const bolt = rows.find((r) => r.name === 'Lance Bolt')!;
+
         expect(
-            SpellMagicSchema.safeParse({
-                cn: 1,
-                kind: 'arcane',
-                missile: { perSl: 9 },
-            }).success
-        ).toBe(false);
+            unlistedPowerIssues({ ...bolt, name: 'Mystery Bolt' }, 'dealDamage')
+        ).toHaveLength(1);
+        expect(unlistedPowerIssues(bolt, 'dealDamage')).toEqual([]);
+    });
+
+    it('every native damage or heal row is listed', () => {
+        for (const row of rows) {
+            const effects = row.spellEffects as Array<{ kind: string }>;
+
+            expect(
+                unlistedPowerIssues(row, effects[0]?.kind ?? null),
+                String(row.name)
+            ).toEqual([]);
+        }
     });
 });

@@ -18,7 +18,6 @@ import {
     buildSpellPick,
     casterUsesUniversalSlot,
     castPreviewOf,
-    castReachOf,
     costBlocked,
     grantLabel as grantLabelOf,
     initialSpellFlow,
@@ -31,10 +30,8 @@ import {
     spellSlotsLeft,
     spellSourceModel,
     spellWidening,
-    withReach,
 } from '@/lib/utils/battle/flows';
 import { slotLevels } from '@/lib/utils/battle/view';
-import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import {
     groupSpellsByLevel,
     levelsWithSpells,
@@ -110,16 +107,11 @@ export function useSpellBook(
 
     const build = (
         s: BookSpell,
-        opts: {
-            castLevel?: number;
-            test?: boolean;
-            extension?: CastExtension;
-        } = {}
+        opts: { castLevel?: number; test?: boolean } = {}
     ) =>
         buildSpellPick(order, caster, s, scene.battle.rules, map, {
             castLevel: opts.castLevel,
             castTest: magic && !costFree && opts.test !== false,
-            extension: opts.extension,
         });
 
     if (flow.step === 'book' && special && spells[0]) {
@@ -133,25 +125,6 @@ export function useSpellBook(
         });
     }
 
-    const reach =
-        caster && selected && flow.pick?.castTest
-            ? castReachOf(caster, scene.battle.rules, selected, flow.castSystem)
-            : undefined;
-
-    const reachedFlow =
-        flow.pick && selected && reach
-            ? {
-                  ...flow,
-                  pick: withReach(
-                      flow.pick,
-                      build(selected, {
-                          castLevel: flow.pick.castLevel,
-                          extension: reach,
-                      })
-                  ),
-              }
-            : flow;
-
     const {
         targets,
         onMap,
@@ -162,7 +135,7 @@ export function useSpellBook(
         mapTargeting,
         chain,
         state,
-    } = useSpellBookTargets(caster, reachedFlow, dispatch);
+    } = useSpellBookTargets(caster, flow, dispatch);
 
     const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 

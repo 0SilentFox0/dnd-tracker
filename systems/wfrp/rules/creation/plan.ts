@@ -160,6 +160,7 @@ export function planDraft(
 
     const featIds = [
         ...profile.talents,
+        ...(canon?.speciesTalents ?? []),
         ...picks.talents,
         ...(canon?.careerTalent ? [canon.careerTalent] : []),
     ];

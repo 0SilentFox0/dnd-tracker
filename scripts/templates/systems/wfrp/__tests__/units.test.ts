@@ -36,8 +36,8 @@ describe('unitWounds', () => {
                 { ...all40, t: 20 },
                 { size: 'little', notes: new Set(['swarm']) }
             )
-        ).toBe(20);
-        expect(unitWounds(all40, { size: 'tiny', notes: new Set() })).toBe(8);
+        ).toBe(10);
+        expect(unitWounds(all40, { size: 'tiny', notes: new Set() })).toBe(1);
         expect(unitWounds(all40, { size: 'small', notes: new Set() })).toBe(8);
         expect(unitWounds(all40, { size: 'monstrous', notes: new Set() })).toBe(
             128

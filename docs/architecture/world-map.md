@@ -38,9 +38,11 @@
 
 `diveOrigin` (`lib/utils/world/dive.ts`) бере точку маркера, з якого йде вхід; `useWorldDive` запускає провал (CSS, `WORLD_DIVE_MS`/`WORLD_REVEAL_MS`), коли нова карта вже завантажена. Без origin (вихід, маркер у тумані, інша гілка) — лише fade. За `prefers-reduced-motion` — без провалу й fade. Origin наближений, якщо карта вписана з полями.
 
-## Кластери героїв
+## Кластери героїв і пінів
 
 `clusterHeroes` (`lib/utils/world/hero-clusters.ts`) групує героїв, що стоять ближче за `HERO_CLUSTER_PX` (24 px) у піксельному просторі; `HeroCluster` показує бейдж «+N» і поповер зі списком. При зумі кластери розходяться.
+
+Піни маркерів кластеризує `clusterByPixel` (`lib/utils/world/cluster.ts`, жадібно в порядку входу): поріг `PIN_CLUSTER_PX` 28 px, у компактному режимі `PIN_CLUSTER_PX_COMPACT` 36 px (`lib/constants/world.ts`). Вхід сортується `byPinRank` (`pin-tier.ts`: castle < city < portal < dungeon < landmark < battle < без іконки < village < camp), тож першим і представником кластера стає найважливіший пін. Винятки, що ніколи не кластеризуються: вибраний, потягнутий, а також усе, коли `screen.cluster === false` (ДМ в інструменті `point`) або немає `screen.box` (режим `entry`/без виміру). `PinCluster` (`components/world/map/PinCluster.tsx`) малює печатку представника з бейджем «+N»: якщо `clusterZoom` повертає зум, що розводить найближчу пару (мінімум ×1.5, запас 1.15), клік наближає до `clusterCenter` через `onClusterZoom`; на `WORLD_MAX_ZOOM` чи при дублікатах (`null`) клік відкриває поповер зі списком, рядок якого вибирає пін (`onMarkerClick`).
 
 ## Нотатки
 
@@ -74,6 +76,18 @@
 - **Клієнт:** `WorldLayerImages` лежить між базовою картинкою й зонами, під `WorldFog` (туман обрізає картинку); `LayerImageRect` редагує прямокутник (drag + кути, коміт з debounce, `lib/utils/world/layer-rect.ts`). Escape під час drag піна скасовує жест (`usePinGesture`). `useLayerVisibility` — локальний перемикач показу (`hidden` ховає картинку й маркери шару), спільний для редактора ДМ, гравця (`useWorldPlay.layers`) і режиму «Очима героя» (`useHeroEyes.layers`); `LayerLegend` показується, лише якщо шари є. Панель ДМ — `components/world/editor/layers/` (`LayersPanel`), активний шар → `layerId` нових маркерів, вибір шару в картці маркера.
 - **Граблі:** шар без картинки теж віддається гравцеві (для чипа легенди); вхід у вкладену карту з маркера прихованого шару не розкриває координату (тест у `view-handlers`); `entryCount` сесій віддається лише ДМ-відповіді `GET sessions` (гравцеві `WorldTrailSession` без `description`/`active`/`entryCount`); `pickCard` (`lib/utils/world/pick-card.ts`) обирає картку слід > маркер лише на десктопі.
 
+## Вьюпорт (2026-11-20, якість A)
+
+- **Підкладка:** `WorldMapView` малює розмиту `atlas-backdrop` з тим самим URL, що й карта (без другого запиту `/_next/image`), тож порожніх смуг над/під вписаною картинкою немає.
+- **Повний екран:** `useMapFullscreen` (`lib/hooks/world/`) тримає `full` і ставить `overflow: hidden` на `<html>`; хост (обгортка карти в `WorldPlayClient` і `dm/world/page-client.tsx`) просто змінює клас на `fixed inset-0 z-50 h-dvh` без ремонту, кнопка лежить у блоці зуму (`slots.fullscreen`; у «Показі» її немає). При зміні `box` `WorldMapView` викликає `rescale(box.width / prev)`, і переглянута ділянка зберігається (бічна панель, повний екран).
+- **Esc:** `escapeStep` (`lib/utils/world/escape-step.ts`) — по кроку на натискання: `details` → `drawing` → `fullscreen` → `selection`. Слухач у capture-фазі в `useWorldEditorPage`/`useWorldPlay` робить `preventDefault`; крок `drawing` лишається за `useMapDrawing`.
+- **Компактна мітка + панель:** бульбашка маркера показує назву й іконки без опису; «Докладніше» (`openDetails`) відкриває праву колонку, на десктопі виходить з повного екрана й центрує маркер (`focusPoint(anchor, 1)`). «Перемістити карту»/«Видалити карту» ДМ перенесено в панель.
+
+**Граблі вьюпорту:**
+- Не ставити `role=dialog` на обгортку повного екрана (хост має `role=region`): слухачі Esc і `useMapDrawing` ігнорують події всередині `[role=dialog]`, драбина зламається.
+- Не перемонтовувати карту при вході/виході з повного екрана (змінювати лише клас обгортки), інакше губляться зум, офсет і вибір.
+- `sizes` підкладки має дорівнювати `sizes` карти, інакше Next запитає інший варіант і з'явиться другий запит.
+
 ## Розкладка
 
 `components/world/`: `map/` (`WorldMapView`, піни, зони, туман, герої, `ZoneVertexHandles`), `nav/` (`MapTree`, `MarkerBubble`, `PlaceSearchBar`, `MarkerPickerDialog`, `bubble-button.ts`), `editor/` (панелі, `ModeSwitch`, `DmMarkerBubble`, `MoveMapMenu`), `play/` (клієнт гравця), `notes/`, `travel/`. Хуки в `lib/hooks/world/` (`useWorldEditorPage`, `useWorldPlay`, `useMapDrawing`, `useMarkerBubblePosition`, `useMoveTarget`, …), чиста логіка в `lib/utils/world/`, сервер у `lib/server/world/` (`lock.ts` — блокування по карті).
@@ -87,3 +101,17 @@
 - `P2003` на вставці запису журналу = сесію видалено між читанням і записом; повторювати з `null`, не 500.
 - Моки Prisma в API-тестах світу потребують `worldEnemyPin` (деталі карти читають ворогів) і `worldSession.findFirst` (штамп сесії).
 - Частковий унікальний індекс сесій Prisma не знає: після `migrate dev` перевірити, що він не потрапив у drop.
+
+## Стиль шарів (2026-11-20, якість B)
+
+- **Спадкування:** маркер → шар → системне значення за замовчуванням (колір, іконка, прозорість зони, режим підпису). `applyLayerStyle` (`lib/utils/world/marker-style.ts`) виконується один раз у `WorldMapView`; `WorldPins`/`WorldZones` читають ті самі поля маркера й нічого не знають про шари. Поза мапою (бульбашка маркера, пошук місць, шапка панелі) шарова іконка підставляється на місці виклику (`useWorldPlay.styledMarkers`, `DmMarkerBubble`, `WorldMarkerPanel`).
+- **Кольори зон:** нові зони більше не пишуть `DEFAULT_ZONE_COLOR` (зберігається `null`); ефективний колір = `applyLayerStyle` + запасний колір у `WorldZones`. Наявні зони зберігають `#d3b060` і не успадковують колір шару, доки ДМ не натисне «Успадкувати від шару». Необов'язковий backfill (не застосовано): `UPDATE world_markers SET color=NULL WHERE kind='zone' AND lower(color)='#d3b060'`.
+- **`labelMode`:** `auto` (за замовчуванням, `null`), `always` (завжди, ігнорує зіткнення), `hidden` (ніколи, навіть при hover). Шар із `zoneLabels: 'hidden'` ховає підписи зон без власного режиму. Для маркера без шару опцій «Успадкувати» немає; кнопка «Успадкувати іконку» з'являється лише коли в шару є іконка.
+- **Псевдорядок «Без шару»:** `NO_LAYER_KEY` у `useLayerVisibility` живе лише коли існує хоч один шар (інакше легенди немає, і фільтр не можна було б зняти); текст — `world.layers.noLayer`.
+- **Приватність:** `WorldViewLayer` віддає гравцеві лише видимі шари без `visibility`/героїв; нові поля стилю (`color`, `icon`, `zoneOpacity`, `zoneLabels`) безпечні для гравця.
+- **Граблі:**
+  - `sr-only` інпут (абсолютний) без позиціонованого предка прив'язується до viewport і скролить сторінку; причина — `FileButton`, тепер обгортка `relative`. Нові приховані інпути теж потребують позиціонованого предка.
+  - Бюджети розміру scope підняті (wfrp battle 114 → 114.5, d20 battle 111.5 → 112), бо простір імен `world` входить у core-namespaces. Пропозиція: винести DM-only `worldEditor`.
+  - Політика тестів: написані, але не запускались повним прогоном (один прогін на хвилю).
+  - Міграція `20261223000000_world_style` застосована лише до `prodcopy_layers`; на prod піде з деплоєм.
+  - Жива перевірка — `prodcopy_layers`/`meauvil-test` через `next start :3010`, не розгорнутий stage.

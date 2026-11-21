@@ -11,16 +11,7 @@ import type { SystemInputCtx } from '@/lib/utils/rules/systems/types';
 export function assertWfrpInput(system: SystemSlot, ctx: SystemInputCtx): void {
     const input = FORTUNE_INPUT.read(system);
 
-    if (!input) return;
-
-    if (
-        ctx.kind === 'attack' &&
-        !ctx.isDM &&
-        (input.calledShot || input.situational)
-    )
-        throw ruleErrorOf('action_rejected', REJECT.dmOnlyModifiers);
-
-    if (input.kind === 'none') return;
+    if (!input || input.kind === 'none') return;
 
     const { actor } = ctx;
 
