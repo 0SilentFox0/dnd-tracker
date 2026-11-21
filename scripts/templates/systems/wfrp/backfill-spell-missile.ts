@@ -8,7 +8,7 @@
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/templates/systems/wfrp/backfill-spell-missile.ts --revert <file> [--force] [--allow-remote]
  */
 import { Prisma } from '@prisma/client';
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import oldRows from './backfill-spell-missile-old.json';
@@ -28,7 +28,14 @@ import {
 import '@/lib/utils/rules/systems/registry';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { PRESETS } from '@/lib/utils/rules/systems/catalog';
-import { activeBattleCampaigns } from '@/scripts/db/lib/backfill-ext-db';
+import {
+    extSnapshotFileName,
+    writeSnapshotAtomically,
+} from '@/scripts/db/lib/backfill-ext-common';
+import {
+    activeBattleCampaigns,
+    EXT_TX_OPTIONS,
+} from '@/scripts/db/lib/backfill-ext-db';
 import type { RawDb } from '@/scripts/db/lib/raw-db';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
@@ -63,13 +70,6 @@ async function writeColumns(
     );
 
     return rows.length === 1;
-}
-
-function writeAtomically(file: string, snapshot: SpellSnapshot) {
-    const temporary = `${file}.tmp-${process.pid}`;
-
-    writeFileSync(temporary, JSON.stringify(snapshot, null, 2));
-    renameSync(temporary, file);
 }
 
 async function revert(
@@ -224,7 +224,7 @@ async function main() {
 
         const file = join(
             snapshotDir,
-            `spell-missile-${host}-${database}-${now.toISOString().replace(/:/g, '-')}.json`
+            extSnapshotFileName('spell-missile', host, database, now)
         );
 
         const rows: SpellSnapshotRow[] = targetsToWrite.map((p) => ({
@@ -241,7 +241,7 @@ async function main() {
         }));
 
         mkdirSync(snapshotDir, { recursive: true });
-        writeAtomically(file, {
+        writeSnapshotAtomically(file, {
             version: 1,
             kind: 'spell-missile',
             createdAt: now.toISOString(),
@@ -256,7 +256,7 @@ async function main() {
                     if (!(await writeColumns(tx, r.id, r.before, r.after)))
                         throw new Error(`${r.id}: row changed since it was read`);
             },
-            { timeout: 120_000, maxWait: 20_000 }
+            EXT_TX_OPTIONS
         );
 
         console.log(`written ${rows.length} · snapshot: ${file}`);

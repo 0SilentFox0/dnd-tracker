@@ -142,7 +142,7 @@ export function parseExtArgs(
     return args;
 }
 
-export function writeSnapshotAtomically(file: string, snapshot: ExtSnapshot) {
+export function writeSnapshotAtomically(file: string, snapshot: object) {
     const temporary = `${file}.tmp-${process.pid}`;
 
     writeFileSync(temporary, JSON.stringify(snapshot, null, 2));
