@@ -67,11 +67,7 @@ describe('planSpellMissile', () => {
     });
 
     it('marks an already migrated row current', () => {
-        const [plan] = planSpellMissile(
-            [spell({ ...newCols })],
-            targets,
-            olds
-        );
+        const [plan] = planSpellMissile([spell({ ...newCols })], targets, olds);
 
         expect(plan.action).toBe('current');
     });
@@ -85,6 +81,31 @@ describe('planSpellMissile', () => {
         expect(
             planSpellMissile([{ ...row, ...newCols }], targets, olds)[0].action
         ).toBe('current');
+    });
+
+    it('accepts any listed old variant and stays idempotent', () => {
+        const variant: SpellColumns = {
+            ...oldCols,
+            casting: { magic: { cn: 7, kind: 'arcane', overcast: 'dice' } },
+        };
+
+        const multi = { 'Ember Dart': [oldCols, variant] };
+
+        const row = spell({ ...variant });
+
+        const [plan] = planSpellMissile([row], targets, multi);
+
+        expect(plan.action).toBe('write');
+        expect(
+            planSpellMissile([spell({ ...newCols })], targets, multi)[0].action
+        ).toBe('current');
+        expect(
+            planSpellMissile(
+                [spell({ casting: { magic: { cn: 9 } } as never })],
+                targets,
+                multi
+            )[0].action
+        ).toBe('divergent');
     });
 
     it('ignores spells outside SPELL_POWER or without a template target', () => {

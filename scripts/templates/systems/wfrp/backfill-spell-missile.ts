@@ -10,6 +10,7 @@
 import { Prisma } from '@prisma/client';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import oldRows from './backfill-spell-missile-old.json';
 import {
@@ -41,7 +42,9 @@ import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
 const WFRP_BASE = 'wfrp';
 
-const TEMPLATE = 'data/templates/grim-d100/spells.json';
+const TEMPLATE = fileURLToPath(
+    new URL('../../../../data/templates/grim-d100/spells.json', import.meta.url)
+);
 
 function flag(argv: readonly string[], name: string): string | undefined {
     const i = argv.indexOf(name);
@@ -81,9 +84,7 @@ async function revert(
     let restored = 0;
 
     for (const r of snapshot.rows) {
-        const [current] = await db.$queryRaw<
-            (SpellColumns & { id: string })[]
-        >(
+        const [current] = await db.$queryRaw<(SpellColumns & { id: string })[]>(
             Prisma.sql`SELECT id, dice, "damageBonus", "executionMode", casting, targeting, "spellEffects" FROM spells WHERE id = ${r.id}`
         );
 
@@ -102,7 +103,9 @@ async function revert(
         if (await writeColumns(db, r.id, current, r.before)) restored++;
     }
 
-    console.log(`${where} · REVERT · restored ${restored}/${snapshot.rows.length}`);
+    console.log(
+        `${where} · REVERT · restored ${restored}/${snapshot.rows.length}`
+    );
 }
 
 async function main() {
@@ -188,7 +191,7 @@ async function main() {
         const plans = planSpellMissile(
             spells as DbSpell[],
             targets,
-            oldRows as unknown as Record<string, SpellColumns>
+            oldRows as unknown as Record<string, SpellColumns | SpellColumns[]>
         );
 
         const active = await activeBattleCampaigns(db);
@@ -199,7 +202,8 @@ async function main() {
             `${where} · ${apply ? 'APPLY' : 'DRY RUN'} · wfrp campaigns ${ids.length} · listed spell rows ${plans.length}`
         );
 
-        for (const p of plans) if (p.action !== 'current') console.log(formatSpellPlan(p));
+        for (const p of plans)
+            if (p.action !== 'current') console.log(formatSpellPlan(p));
 
         console.log(
             `summary: write ${summary.write} (active-battle campaigns ${summary.activeBattle}) · current ${summary.current} · divergent ${summary.divergent}`
@@ -250,14 +254,11 @@ async function main() {
             rows,
         });
 
-        await db.$transaction(
-            async (tx) => {
-                for (const r of rows)
-                    if (!(await writeColumns(tx, r.id, r.before, r.after)))
-                        throw new Error(`${r.id}: row changed since it was read`);
-            },
-            EXT_TX_OPTIONS
-        );
+        await db.$transaction(async (tx) => {
+            for (const r of rows)
+                if (!(await writeColumns(tx, r.id, r.before, r.after)))
+                    throw new Error(`${r.id}: row changed since it was read`);
+        }, EXT_TX_OPTIONS);
 
         console.log(`written ${rows.length} · snapshot: ${file}`);
     } finally {

@@ -330,6 +330,19 @@ describe('canon5e prayer overcast and armour', () => {
         }
     );
 
+    it('slBonus on an arcane non-dice spell adds no overcast damage', () => {
+        const r = run(
+            canon,
+            12,
+            { overcast: null, slBonus: true, missile: true },
+            {
+                base: { int: 60 },
+            }
+        );
+
+        expect(r.overcastDamage).toBe(0);
+    });
+
     bookExample(
         218,
         'a Blessing overcasts per +2 SL; legacy never does',

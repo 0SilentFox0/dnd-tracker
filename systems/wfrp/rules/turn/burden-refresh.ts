@@ -1,5 +1,6 @@
-import { value } from '../characteristics/derive';
+import { moveOf, value } from '../characteristics/derive';
 import { applyBurden, asBurdenTier, tierAfterSpend } from '../equipment/burden';
+import { burdenedMove } from '../equipment/encumbrance';
 import { PARTICIPANT_SLOT } from '../slots';
 
 import {
@@ -38,6 +39,10 @@ export const wfrpBurdenRefresh: TurnHook<TurnStartCtx> = (ctx) => {
     return {
         participants: replaceParticipant(ctx.participants, {
             ...p,
+            combatStats: {
+                ...p.combatStats,
+                speed: burdenedMove(moveOf(characteristics), tier) * 2 * 3,
+            },
             abilities: {
                 ...p.abilities,
                 system: PARTICIPANT_SLOT.write(

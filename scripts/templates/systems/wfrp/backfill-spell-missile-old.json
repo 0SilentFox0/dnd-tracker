@@ -1,29 +1,56 @@
 {
-  "Spark Flick": {
-    "dice": 1,
-    "damageBonus": null,
-    "casting": {
-      "magic": {
-        "cn": 0,
-        "kind": "petty",
-        "overcast": null
-      }
+  "Spark Flick": [
+    {
+      "dice": 1,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 0,
+          "kind": "petty",
+          "overcast": null
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 30
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
     },
-    "executionMode": "native",
-    "targeting": {
-      "kind": "enemy",
-      "range": 30
-    },
-    "spellEffects": [
-      {
-        "kind": "dealDamage",
-        "amount": {
-          "spellRoll": 100
-        },
-        "damageType": "magic"
-      }
-    ]
-  },
+    {
+      "dice": 1,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 1,
+          "kind": "petty",
+          "overcast": null
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 30
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
+    }
+  ],
   "Soothing Touch": {
     "dice": 1,
     "damageBonus": null,
@@ -299,35 +326,66 @@
       }
     ]
   },
-  "Hearthfire Smite": {
-    "dice": 2,
-    "damageBonus": null,
-    "casting": {
-      "magic": {
-        "cn": 0,
-        "kind": "miracle",
-        "overcast": null,
-        "attribute": {
-          "condition": "ablaze",
-          "levels": 1
+  "Hearthfire Smite": [
+    {
+      "dice": 2,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 0,
+          "kind": "miracle",
+          "overcast": null,
+          "attribute": {
+            "condition": "ablaze",
+            "levels": 1
+          }
         }
-      }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 60
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
     },
-    "executionMode": "native",
-    "targeting": {
-      "kind": "enemy",
-      "range": 60
-    },
-    "spellEffects": [
-      {
-        "kind": "dealDamage",
-        "amount": {
-          "spellRoll": 100
-        },
-        "damageType": "magic"
-      }
-    ]
-  },
+    {
+      "dice": 2,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 7,
+          "kind": "miracle",
+          "overcast": null,
+          "attribute": {
+            "condition": "ablaze",
+            "levels": 1
+          }
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 60
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
+    }
+  ],
   "Leech Touch": {
     "dice": 1,
     "damageBonus": null,

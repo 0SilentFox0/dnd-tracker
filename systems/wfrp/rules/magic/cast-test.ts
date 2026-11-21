@@ -92,9 +92,7 @@ export function wfrpDeclaredExtension(ctx: {
     const declared = FORTUNE_INPUT.read(ctx.system)?.overcast;
 
     return declared
-        ? overcastExtension(
-              allowedOvercast(declared, !!magic.missile)
-          )
+        ? overcastExtension(allowedOvercast(declared, !!magic.missile))
         : undefined;
 }
 
@@ -224,8 +222,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             : undefined;
 
     const overcastAllowed = canon
-        ? success &&
-          (prayer || !NO_OVERCAST_KINDS.has(magic.kind))
+        ? success && (prayer || !NO_OVERCAST_KINDS.has(magic.kind))
         : success &&
           magic.overcast !== null &&
           !NO_OVERCAST_KINDS.has(magic.kind);
@@ -239,10 +236,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const declared =
         canon && !prayer && overcastAllowed
-            ? allowedOvercast(
-                  fortuneInput?.overcast ?? {},
-                  !!magic.missile
-              )
+            ? allowedOvercast(fortuneInput?.overcast ?? {}, !!magic.missile)
             : {};
 
     const declaredSl = overcastTotal(declared);
@@ -360,11 +354,15 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         success,
         margin: test.sl,
         overcastSteps,
-        ...(canon && { overcastDamage: prayer
+        ...(canon && {
+            overcastDamage: prayer
                 ? magic.slBonus
                     ? Math.max(test.sl, 0)
                     : 0
-                : overcastSteps }),
+                : magic.slBonus && magic.overcast !== 'dice'
+                  ? 0
+                  : overcastSteps,
+        }),
         ...(spread && { extension: overcastExtension(spread) }),
         miscast,
         details: ACTION_SLOT.write({

@@ -47,13 +47,18 @@ export interface SpellPlanSummary {
 const DEFAULT_TARGETING = { kind: 'enemy' };
 
 /** Template row as the importer stores it: absent columns take their database defaults */
-export function normalizeTemplateRow(row: Record<string, unknown>): SpellColumns {
+export function normalizeTemplateRow(
+    row: Record<string, unknown>
+): SpellColumns {
     return {
         dice: typeof row.dice === 'number' ? row.dice : 0,
-        damageBonus: typeof row.damageBonus === 'number' ? row.damageBonus : null,
+        damageBonus:
+            typeof row.damageBonus === 'number' ? row.damageBonus : null,
         casting: row.casting ?? null,
         executionMode:
-            typeof row.executionMode === 'string' ? row.executionMode : 'native',
+            typeof row.executionMode === 'string'
+                ? row.executionMode
+                : 'native',
         targeting: row.targeting ?? DEFAULT_TARGETING,
         spellEffects: row.spellEffects ?? [],
     };
@@ -80,13 +85,13 @@ export const differingColumns = (
 };
 
 /**
- * A listed spell is rewritten only when it still equals the pre-power template row (`olds`, by name);
+ * A listed spell is rewritten only when it still equals the pre-power template row (any variant listed in `olds` for its name);
  * a spell absent from `olds` had no column change, so it is either current or divergent.
  */
 export function planSpellMissile(
     rows: readonly DbSpell[],
     targets: Readonly<Record<string, SpellColumns>>,
-    olds: Readonly<Record<string, SpellColumns>>
+    olds: Readonly<Record<string, SpellColumns | readonly SpellColumns[]>>
 ): SpellPlan[] {
     const plans: SpellPlan[] = [];
 
@@ -104,10 +109,19 @@ export function planSpellMissile(
             continue;
         }
 
-        const old = Object.hasOwn(olds, row.name) ? olds[row.name] : undefined;
+        const known = Object.hasOwn(olds, row.name)
+            ? olds[row.name]
+            : undefined;
 
-        if (old && differingColumns(row, old).length === 0)
-            plans.push({ row, action: 'write', after: target, differs: toTarget });
+        const variants = known ? [known].flat() : [];
+
+        if (variants.some((old) => differingColumns(row, old).length === 0))
+            plans.push({
+                row,
+                action: 'write',
+                after: target,
+                differs: toTarget,
+            });
         else plans.push({ row, action: 'divergent', differs: toTarget });
     }
 

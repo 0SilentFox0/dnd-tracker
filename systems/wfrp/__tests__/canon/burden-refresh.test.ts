@@ -102,4 +102,22 @@ describe('burden refresh after consumables are spent (p299)', () => {
         expect(slot.stats.ag).toBe(40);
         expect(value(slot.characteristics, 'ag')).toBe(40);
     });
+
+    it('recomputes the walking speed with the new tier', () => {
+        const out = wfrpBurdenRefresh({
+            participants: [
+                {
+                    ...hero(2),
+                    combatStats: { ...hero(2).combatStats, speed: 0 },
+                },
+            ],
+            id: 'h',
+            round: 1,
+            rng: () => 0.5,
+            rules: {} as never,
+            applyDamage: undefined as never,
+        });
+
+        expect(out.participants[0].combatStats.speed).toBe(4 * 2 * 3);
+    });
 });
