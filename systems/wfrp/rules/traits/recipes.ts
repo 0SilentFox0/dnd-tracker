@@ -176,7 +176,10 @@ export const TRAIT_RECIPES: readonly Recipe[] = [
     ]),
     creature('undead', 'undead'),
     note('hardy'),
-    creature('flier', 'fly'),
+    passive('flier', [], () => [
+        trait({ kind: 'wfrpCreature', trait: 'fly' }),
+        { kind: 'flag', flag: 'ignoreDifficultTerrain' },
+    ]),
     creature('swarm', 'swarm'),
     creature('painless', 'painless'),
 ];

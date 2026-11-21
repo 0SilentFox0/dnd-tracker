@@ -8,6 +8,7 @@ import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
+import { TRAIT_RECIPES } from '@/systems/wfrp/rules/traits/recipes';
 
 const canon = RulesetSchema.parse({
     ...WFRP_RULES,
@@ -37,4 +38,21 @@ describe('canon: Undead as a spell target tag (p223)', () => {
         );
         expect(matchesTargetFilter(foe([]), filter, level)).toBe(false);
     });
+});
+
+describe('canon: Fly ignores terrain (p358)', () => {
+    bookExample(
+        358,
+        'the Flier recipe carries the difficult-terrain flag',
+        () => {
+            const recipe = TRAIT_RECIPES.find((r) => r.id === 'flier');
+
+            const built = recipe?.build({}, { name: 'Flier' } as never);
+
+            const effects = JSON.stringify(built);
+
+            expect(effects).toContain('"trait":"fly"');
+            expect(effects).toContain('"flag":"ignoreDifficultTerrain"');
+        }
+    );
 });
