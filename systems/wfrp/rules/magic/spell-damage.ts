@@ -11,6 +11,7 @@ import {
 } from '../combat/participant';
 import { editionOf } from '../edition';
 import { ACTION_SLOT } from '../slots';
+import { withFireWounds } from '../traits/regeneration';
 import { wardRoll } from '../traits/size';
 
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -98,6 +99,10 @@ const step = (key: string, value: number): MitigateStep => ({
 
 const totalLabel = textRef('battleWfrp.damage.total');
 
+const isFireSpell = (spell: SpellPowerSource, magic: SpellMagic): boolean =>
+    magic.attribute?.condition === 'ablaze' ||
+    spell.definition.effects.some((e) => e.damageType === 'fire');
+
 function ignoredOf(magic: SpellMagic | undefined) {
     return {
         tb: magic?.ignore === 'tbAp',
@@ -179,13 +184,22 @@ export const wfrpSoakSpellDamage: NonNullable<
 
     const edition = editionOf(c.rules);
 
+    const amount = base.total + (crit?.bonusDamage ?? 0);
+
+    const fire = amount > 0 && isFireSpell(c.spell, magic);
+
     return {
-        amount: base.total + (crit?.bonusDamage ?? 0),
+        amount,
         steps,
         totalLabel,
-        ...(crit && {
-            afterHit: (p: BattleParticipant, round: number) =>
-                applyWfrpCrit(p, crit, round, edition),
+        ...((crit || fire) && {
+            afterHit: (p: BattleParticipant, round: number) => {
+                const burned = fire ? withFireWounds(p, amount) : p;
+
+                return crit
+                    ? applyWfrpCrit(burned, crit, round, edition)
+                    : { participant: burned, message: '' };
+            },
         }),
     };
 };

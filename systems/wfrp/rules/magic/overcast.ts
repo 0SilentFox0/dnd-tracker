@@ -11,7 +11,7 @@ interface OvercastTier {
     value: number;
 }
 
-/** Canon5e overcast table (p236): one column per direction, a tier costs the SL spent in that direction */
+/** Canon5e overcast table (p236): one column per direction, a tier needs that many SL spent in that direction */
 export const OVERCAST_COLUMNS: Record<
     OvercastDimension,
     readonly OvercastTier[]
@@ -26,23 +26,22 @@ export const OVERCAST_COLUMNS: Record<
         { sl: 18, value: 7 },
     ],
     targets: [
-        { sl: 2, value: 1 },
-        { sl: 8, value: 2 },
-        { sl: 18, value: 3 },
-    ],
-    range: [
-        { sl: 2, value: 2 },
-        { sl: 8, value: 3 },
-        { sl: 18, value: 4 },
-    ],
-    // the SL 8 cell is unreadable in the extracted page: no tier there
-    aoe: [
+        { sl: 1, value: 1 },
         { sl: 5, value: 2 },
         { sl: 18, value: 3 },
     ],
-    duration: [
+    range: [
+        { sl: 1, value: 2 },
+        { sl: 5, value: 3 },
+        { sl: 18, value: 4 },
+    ],
+    aoe: [
         { sl: 3, value: 2 },
-        { sl: 13, value: 3 },
+        { sl: 18, value: 3 },
+    ],
+    duration: [
+        { sl: 2, value: 2 },
+        { sl: 8, value: 3 },
     ],
 };
 

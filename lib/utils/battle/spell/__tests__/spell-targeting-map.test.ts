@@ -346,6 +346,25 @@ describe('resolveSpellTargets на карті', () => {
             ])
         ).toEqual({ ok: true, targetIds: ['e1', 'u'] });
     });
+
+    it('overcast extraTargets widens an area pick cap', () => {
+        const area: SpellTargeting = {
+            kind: 'area',
+            side: 'enemy',
+            maxTargets: 1,
+        };
+
+        const ctx = { rules: DEFAULT_RULES, map };
+
+        expect(resolve(area, ['e1', 'e2'], ctx).ok).toBe(false);
+
+        expect(
+            resolve(area, ['e1', 'e2'], {
+                ...ctx,
+                extension: { extraTargets: 1 },
+            })
+        ).toEqual({ ok: true, targetIds: ['e1', 'e2'] });
+    });
 });
 
 describe('заклинання, розширене вмінням, на карті — радіус', () => {

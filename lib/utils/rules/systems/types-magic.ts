@@ -239,7 +239,7 @@ export interface SpellPowerSource {
     definition: {
         damageBonus?: number;
         casting?: { magic?: SpellMagic };
-        effects: readonly { kind: string }[];
+        effects: readonly { kind: string; damageType?: string }[];
     };
 }
 
