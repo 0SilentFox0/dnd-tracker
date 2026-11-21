@@ -20,7 +20,9 @@ export const QualityRefSchema: z.ZodType<QualityRef> = z
         value: z.number().int().min(1).max(QUALITY_VALUE_MAX).optional(),
         condition: z.enum(WFRP_CONDITION_KEYS).optional(),
         location: z.enum(LOCATIONS).optional(),
-        strength: z.number().int().min(1).max(100).optional(),
+        strength: z
+            .union([z.number().int().min(1).max(100), z.literal('wielder')])
+            .optional(),
     })
     .refine(
         (r) => QUALITY_REGISTRY[r.key].hasValue === (r.value !== undefined),

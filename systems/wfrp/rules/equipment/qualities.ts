@@ -84,8 +84,8 @@ export type QualityRef = {
     condition?: WfrpConditionKey;
     /** Inflict only: the condition lands only on a hit to this location (Bolas: legs) */
     location?: HitLocation;
-    /** Inflict (Entangled) only: Strength the hold is broken against (p305) */
-    strength?: number;
+    /** Inflict (Entangled) only: Strength the hold is broken against (p305); 'wielder' = the attacker's own Strength (Garrote) */
+    strength?: number | 'wielder';
 };
 
 export const qualityValue = (

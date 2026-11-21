@@ -1,3 +1,4 @@
+import { value } from '../characteristics/derive';
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { WfrpConditionKey } from '../conditions/catalog';
 import { editionOf } from '../edition';
@@ -23,6 +24,7 @@ import {
     apAt,
     markedApAt,
     nonMetalApAt,
+    participantChars,
     participantStats,
     withArmourWear,
 } from './participant';
@@ -259,7 +261,12 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     const conditions: { key: WfrpConditionKey; strength?: number }[] = [
         ...breathCondition.map((key) => ({ key })),
-        ...qualityInflicts(refs, gear, location),
+        ...qualityInflicts(
+            refs,
+            gear,
+            location,
+            value(participantChars(attacker), 's')
+        ),
         ...(location === 'head' &&
         qualityStunsOnHead(refs, gear) &&
         base.total >= (participantStats(target)?.tb ?? 0)

@@ -74,7 +74,7 @@ export function qualityList(v: unknown): QualityRef[] | null {
             r.strength !== undefined &&
             (key !== 'inflict' ||
                 r.condition !== 'entangled' ||
-                !num(r.strength, 1, 100, true))
+                (r.strength !== 'wielder' && !num(r.strength, 1, 100, true)))
         )
             return null;
 
@@ -83,7 +83,9 @@ export function qualityList(v: unknown): QualityRef[] | null {
             ...(r.value !== undefined && { value: r.value as number }),
             ...(r.condition !== undefined && { condition: r.condition }),
             ...(r.location !== undefined && { location: r.location }),
-            ...(r.strength !== undefined && { strength: r.strength as number }),
+            ...(r.strength !== undefined && {
+                strength: r.strength as number | 'wielder',
+            }),
         });
     }
 

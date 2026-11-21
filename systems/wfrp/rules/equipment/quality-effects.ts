@@ -159,7 +159,8 @@ export interface QualityInflict {
 export function qualityInflicts(
     p: Refs,
     gear: GearModel,
-    location?: HitLocation
+    location?: HitLocation,
+    wielderStrength?: number
 ): QualityInflict[] {
     if (gear !== 'canon') return [];
 
@@ -177,7 +178,10 @@ export function qualityInflicts(
                       {
                           key: condition,
                           ...(r.strength !== undefined && {
-                              strength: r.strength,
+                              strength:
+                                  r.strength === 'wielder'
+                                      ? wielderStrength
+                                      : r.strength,
                           }),
                       },
                   ]

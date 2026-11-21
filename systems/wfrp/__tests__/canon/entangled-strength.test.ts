@@ -48,6 +48,24 @@ describe('canon: Entangled strength (p186, p305)', () => {
         ).toEqual([{ key: 'entangled', strength: 50 }]);
     });
 
+    bookExample(301, 'Garrote entangles by the wielder Strength', () => {
+        const garrote = {
+            qualities: [
+                {
+                    key: 'inflict' as const,
+                    value: 1,
+                    condition: 'entangled' as const,
+                    strength: 'wielder' as const,
+                },
+            ],
+            flaws: [],
+        };
+
+        expect(qualityInflicts(garrote, 'canon', undefined, 42)).toEqual([
+            { key: 'entangled', strength: 42 },
+        ]);
+    });
+
     bookExample(
         186,
         'the strength is kept while Entangled and dropped when free',
