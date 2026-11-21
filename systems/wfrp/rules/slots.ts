@@ -151,6 +151,8 @@ export interface WfrpParticipantState {
     dispelProgress?: { targetId: string; castId: string; progress: number };
     /** Round of the last reactive Dispel attempt: one per round (canon5e, p237) */
     dispelRound?: number;
+    /** Strength of the Entangled hold, to be beaten by an Opposed Strength Test (p186) */
+    entangledStrength?: number;
     /** Movement chosen this turn, canon5e (p163); a Charge limits attacks to melee */
     moveMode?: WfrpMoveMode;
     /** Aimed at this target; the next attack gains the Aim bonus (canon actionsModel) */
@@ -345,6 +347,9 @@ export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
                     },
                 }),
             ...(finite(raw.dispelRound) && { dispelRound: raw.dispelRound }),
+            ...(finite(raw.entangledStrength) && {
+                entangledStrength: raw.entangledStrength,
+            }),
             ...((raw.moveMode === 'run' ||
                 raw.moveMode === 'sprint' ||
                 raw.moveMode === 'charge' ||

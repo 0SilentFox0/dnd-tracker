@@ -2,6 +2,7 @@ import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
 import { editionOf } from '../edition';
 import { resolvePercentileTest } from '../percentile';
+import { wfrpState } from '../state';
 import { applyWfrpConditionTo, reduceWfrpCondition } from './apply';
 import { isWfrpConditionKey, WFRP_CONDITION_REGISTRY } from './catalog';
 import { conditionLevel } from './levels';
@@ -66,20 +67,35 @@ export function attemptWfrpConditionEnd(
         presetRoll: ctx.presetRoll,
     });
 
-    const success = t.outcome === 'success' || t.outcome === 'critical';
+    const hold = key === 'entangled' ? wfrpState(p).entangledStrength : undefined;
+
+    const held =
+        hold === undefined
+            ? undefined
+            : resolvePercentileTest({
+                  target: hold,
+                  slModel: edition.slModel,
+                  rng: ctx.rng,
+              });
+
+    const net = held ? t.sl - held.sl : t.sl;
+
+    const success = held
+        ? net > 0 || (net === 0 && target > hold!)
+        : t.outcome === 'success' || t.outcome === 'critical';
 
     const params = {
         name: p.basicInfo.name,
         condition,
         roll: t.roll,
         target,
-        sl: t.sl,
+        sl: net,
     };
 
     const canon = edition.conditionModel === 'sl';
 
     const cured = success
-        ? reduceWfrpCondition(p, key, canon && key !== 'bleeding' ? 1 + Math.max(0, t.sl - 1) : 1)
+        ? reduceWfrpCondition(p, key, canon && key !== 'bleeding' ? 1 + Math.max(0, net - 1) : 1)
         : null;
 
     const fatigue =

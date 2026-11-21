@@ -20,6 +20,7 @@ export const QualityRefSchema: z.ZodType<QualityRef> = z
         value: z.number().int().min(1).max(QUALITY_VALUE_MAX).optional(),
         condition: z.enum(WFRP_CONDITION_KEYS).optional(),
         location: z.enum(LOCATIONS).optional(),
+        strength: z.number().int().min(1).max(100).optional(),
     })
     .refine(
         (r) => QUALITY_REGISTRY[r.key].hasValue === (r.value !== undefined),
@@ -29,6 +30,12 @@ export const QualityRefSchema: z.ZodType<QualityRef> = z
         message: 'condition only on inflict',
         path: ['condition'],
     })
+    .refine(
+        (r) =>
+            r.strength === undefined ||
+            (r.key === 'inflict' && r.condition === 'entangled'),
+        { message: 'strength only on inflict entangled', path: ['strength'] }
+    )
     .refine((r) => r.location === undefined || r.key === 'inflict', {
         message: 'location only on inflict',
         path: ['location'],

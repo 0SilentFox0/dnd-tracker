@@ -257,13 +257,13 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             ? [BREATH_CONDITION[breath as keyof typeof BREATH_CONDITION]]
             : [];
 
-    const conditions: WfrpConditionKey[] = [
-        ...breathCondition,
+    const conditions: { key: WfrpConditionKey; strength?: number }[] = [
+        ...breathCondition.map((key) => ({ key })),
         ...qualityInflicts(refs, gear, location),
         ...(location === 'head' &&
         qualityStunsOnHead(refs, gear) &&
         base.total >= (participantStats(target)?.tb ?? 0)
-            ? (['stunned'] as const)
+            ? [{ key: 'stunned' as const }]
             : []),
     ];
 
@@ -286,9 +286,10 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
                   })
                 : undefined;
 
-            for (const key of conditions) {
+            for (const { key, strength } of conditions) {
                 const applied = applyWfrpConditionTo(participant, {
                     key,
+                    ...(strength !== undefined && { strength }),
                     round,
                     edition,
                     sourceName: attacker.basicInfo.name,
