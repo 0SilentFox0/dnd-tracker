@@ -5,6 +5,7 @@ import {
 } from '../characteristics/keys';
 import { foldCorruption } from '../corruption/fold';
 import { editionOf } from '../edition/read';
+import type { ArmourMark } from '../equipment/armour';
 import { applyBurden, asBurdenTier } from '../equipment/burden';
 import { burdenedMove, type BurdenTier } from '../equipment/encumbrance';
 import { PARTICIPANT_SLOT } from '../slots';
@@ -36,6 +37,8 @@ export interface WfrpParticipantStats {
     armourDamage?: Partial<Record<HitLocation, number>>;
     /** AP of metal armour (mail, plate) per location; Electricity breath ignores it (p358) */
     metalAp?: Record<HitLocation, number>;
+    /** AP of the armour pieces with a book mark per location (canon gear, p306) */
+    marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
 }
 
 const NO_ARMOR = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
@@ -48,6 +51,7 @@ export interface WfrpGear {
     flexible?: boolean;
     armourOnly?: Record<HitLocation, number>;
     metalAp?: Record<HitLocation, number>;
+    marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
     burden?: number;
     shield?: number;
     testPenalty?: Record<string, number>;
@@ -99,6 +103,7 @@ export function wfrpAbilitiesOf(
                 ap: { ...(gear?.ap ?? NO_ARMOR) },
                 ...(gear?.flexible && { flexible: true as const }),
                 ...(gear?.metalAp && { metalAp: { ...gear.metalAp } }),
+                ...(gear?.marks && { marks: gear.marks }),
                 ...castApOf(gear, editionOf(rules).magicModel === 'canon5e'),
                 ...(tier !== 0 && { burden: tier }),
                 ...(gear?.shield && { shield: gear.shield }),
@@ -133,6 +138,14 @@ export const nonMetalApAt = (
     location: HitLocation
 ): number =>
     Math.max(0, apAt(stats, location) - (stats?.metalAp?.[location] ?? 0));
+
+/** AP of the armour pieces carrying a book mark at the location, less any worn off */
+export const markedApAt = (
+    stats: WfrpParticipantStats | undefined,
+    mark: ArmourMark,
+    location: HitLocation
+): number =>
+    Math.min(apAt(stats, location), stats?.marks?.[mark]?.[location] ?? 0);
 
 export function withArmourWear(
     p: BattleParticipant,

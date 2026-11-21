@@ -23,6 +23,7 @@ interface QualityListEditorProps {
     id: string;
     label: string;
     kind: 'quality' | 'flaw';
+    also?: readonly QualityKey[];
     value: QualityRef[];
     onChange: (value: QualityRef[]) => void;
 }
@@ -31,6 +32,7 @@ export function QualityListEditor({
     id,
     label,
     kind,
+    also,
     value,
     onChange,
 }: QualityListEditorProps) {
@@ -49,7 +51,7 @@ export function QualityListEditor({
 
     const options = QUALITY_KEYS.filter(
         (k) =>
-            QUALITY_REGISTRY[k].kind === kind &&
+            (QUALITY_REGISTRY[k].kind === kind || also?.includes(k)) &&
             QUALITY_REGISTRY[k].canon !== false &&
             !value.some((r) => r.key === k)
     ).map((k) => ({ value: k, label: tq(k) }));

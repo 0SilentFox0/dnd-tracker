@@ -37,7 +37,7 @@ export const WFRP_EQUIPMENT: RuleSystemEquipment = {
     armourAp: (equipped, rules) => {
         const canon = !rules || editionOf(rules).gearModel === 'canon';
 
-        const { metalAp, ...gear } = armourAp(equipped, {
+        const { metalAp, marks, ...gear } = armourAp(equipped, {
             singleShield: !!rules && canon,
         });
 
@@ -47,10 +47,12 @@ export const WFRP_EQUIPMENT: RuleSystemEquipment = {
 
         const penalty = armourTestPenalties(equipped);
 
+        const withMarks = canon && marks ? { ...kept, marks } : kept;
+
         const withPenalty =
             canon && Object.keys(penalty).length
-                ? { ...kept, testPenalty: penalty }
-                : kept;
+                ? { ...withMarks, testPenalty: penalty }
+                : withMarks;
 
         return rules && !canon ? { ...withPenalty, shield: 0 } : withPenalty;
     },

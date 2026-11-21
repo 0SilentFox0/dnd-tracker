@@ -1,7 +1,7 @@
 import { applyWfrpConditionTo } from '../conditions/apply';
 import type { WfrpConditionKey } from '../conditions/catalog';
 import { editionOf } from '../edition';
-import { QUALITY_REGISTRY } from '../equipment/qualities';
+import { hasQuality, QUALITY_REGISTRY } from '../equipment/qualities';
 import {
     qualityEffects,
     qualityInflicts,
@@ -21,6 +21,7 @@ import { asLocation, sideOf } from './location';
 import { chargeSb } from './mounted';
 import {
     apAt,
+    markedApAt,
     nonMetalApAt,
     participantStats,
     withArmourWear,
@@ -51,6 +52,19 @@ const step = (key: string, value: number): MitigateStep => ({
     ),
     side: key === 'tb' || key === 'ap' ? 'target' : 'attacker',
 });
+
+/** Impenetrable (p306): a Critical Hit rolled on 11, 33, 55, 77 or 99 is ignored */
+const isOddDouble = (roll: number | undefined): boolean =>
+    roll !== undefined &&
+    roll > 0 &&
+    roll < 100 &&
+    roll % 11 === 0 &&
+    (roll / 11) % 2 === 1;
+
+/** Partial (p306): an even Hit Location number (the reversed roll) ignores the piece's AP */
+const partialIgnored = (roll: number | undefined): boolean =>
+    roll !== undefined &&
+    (roll % 100 === 0 ? 0 : (roll % 10) * 10 + Math.floor(roll / 10)) % 2 === 0;
 
 const critRank = (c: CritResult) =>
     c.death ? Infinity : Number(c.id.split('.')[1]);
@@ -108,17 +122,33 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (breath === 'smoke') return { amount: 0, steps: [], totalLabel };
 
-    const ap =
-        breath === 'electricity'
-            ? nonMetalApAt(participantStats(target), location)
-            : apAt(participantStats(target), location);
-
     const gear = edition.gearModel;
 
     const refs =
         gear === 'canon'
             ? canonWeaponUse(attacker, ctx.attack).refs
             : { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] };
+
+    const stats = participantStats(target);
+
+    const ignoredAp =
+        gear === 'canon'
+            ? Math.max(
+                  ctx.crit && hasQuality(refs.qualities, 'impale')
+                      ? markedApAt(stats, 'weakpoints', location)
+                      : 0,
+                  partialIgnored(ctx.attackRoll)
+                      ? markedApAt(stats, 'partial', location)
+                      : 0
+              )
+            : 0;
+
+    const ap = Math.max(
+        0,
+        (breath === 'electricity'
+            ? nonMetalApAt(stats, location)
+            : apAt(stats, location)) - ignoredAp
+    );
 
     const { effect, steps: qualitySteps } = qualityEffects(
         refs,
@@ -204,8 +234,15 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         base.total = target.combatStats.currentHp;
     }
 
+    const impenetrable =
+        gear === 'canon' &&
+        isOddDouble(ctx.attackRoll) &&
+        markedApAt(stats, 'impenetrable', location) > 0;
+
     const crit =
-        ctx.crit && (counted || target.combatStats.currentHp > 0)
+        ctx.crit &&
+        !impenetrable &&
+        (counted || target.combatStats.currentHp > 0)
             ? effect.minDamage === 0 && gear === 'canon'
                 ? lower(rollOnce(), rollOnce())
                 : rollOnce()

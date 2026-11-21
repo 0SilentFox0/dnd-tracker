@@ -56,9 +56,21 @@ export const QUALITY_REGISTRY = {
     bulky: f(),
     lightweight: q(),
     practical: q(),
+    impenetrable: q(),
+    partial: f(),
+    weakpoints: f(),
 } as const satisfies Record<string, Entry>;
 
 export type QualityKey = keyof typeof QUALITY_REGISTRY;
+
+/** Armour carries its qualities and flaws in one list (p306) */
+export const ARMOUR_QUALITY_KEYS: readonly QualityKey[] = [
+    'flexible',
+    'practical',
+    'impenetrable',
+    'partial',
+    'weakpoints',
+];
 
 export const QUALITY_KEYS = Object.keys(QUALITY_REGISTRY) as [
     QualityKey,

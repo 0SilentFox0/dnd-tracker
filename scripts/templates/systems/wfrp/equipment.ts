@@ -239,13 +239,13 @@ const fmt = ([min, max]: Range) => `${min}–${max}`;
 
 function qualityIssues(
     list: QualityRef[],
-    kind: 'quality' | 'flaw',
+    kind: 'quality' | 'flaw' | 'any',
     issues: string[]
 ) {
     for (const { key } of list) {
         const entry = QUALITY_REGISTRY[key];
 
-        if (entry.kind !== kind)
+        if (kind !== 'any' && entry.kind !== kind)
             issues.push(`"${key}" is a ${entry.kind}, not a ${kind}`);
         else if (!entry.implemented)
             issues.push(`${kind} "${key}" is not implemented`);
@@ -351,7 +351,7 @@ function armourIssues(
             issues.push(`slot "${slot}" needs AP above 0`);
     }
 
-    qualityIssues(a.qualities, 'quality', issues);
+    qualityIssues(a.qualities, 'any', issues);
 
     const band = fullSuit ? FULL_SUIT_BANDS[a.kind] : ARMOUR_KIND_BANDS[a.kind];
 

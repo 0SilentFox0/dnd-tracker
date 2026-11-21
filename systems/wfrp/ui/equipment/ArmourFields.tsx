@@ -8,7 +8,11 @@ import { QualityListEditor } from './QualityListEditor';
 import { FormField } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';
 import { LOCATIONS } from '@/systems/wfrp/rules/combat/constants';
-import { AP_MAX_PER_LAYER, ARMOUR_KINDS } from '@/systems/wfrp/rules/equipment';
+import {
+    AP_MAX_PER_LAYER,
+    ARMOUR_KINDS,
+    ARMOUR_QUALITY_KEYS,
+} from '@/systems/wfrp/rules/equipment';
 import type { WfrpArmourStats } from '@/systems/wfrp/rules/equipment/stats';
 
 interface ArmourFieldsProps {
@@ -63,6 +67,7 @@ export function ArmourFields({ value, onChange }: ArmourFieldsProps) {
                 id="wfrp-armour-q"
                 label={t('qualities')}
                 kind="quality"
+                also={ARMOUR_QUALITY_KEYS}
                 value={value.qualities}
                 onChange={(qualities) => onChange({ ...value, qualities })}
             />

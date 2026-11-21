@@ -5,6 +5,10 @@ import { readStats } from './guard';
 import { hasQuality, qualityValue } from './qualities';
 import type { WfrpItemStats } from './stats';
 
+export const ARMOUR_MARKS = ['impenetrable', 'partial', 'weakpoints'] as const;
+
+export type ArmourMark = (typeof ARMOUR_MARKS)[number];
+
 const SHIELD_LOCATIONS: readonly HitLocation[] = ['head', 'arm', 'body'];
 
 type EquippedStatsRow = { slot: string; systemStats: unknown };
@@ -22,15 +26,22 @@ export function armourAp(
     metalAp?: Record<HitLocation, number>;
     flexible: boolean;
     shield: number;
+    /** Per mark (impenetrable, partial, weakpoints), the AP of the marked pieces per location */
+    marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
 } {
-    const ap = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
-        HitLocation,
-        number
-    >;
+    const ap0 = () =>
+        Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
+            HitLocation,
+            number
+        >;
+
+    const ap = ap0();
 
     const armourOnly = { ...ap };
 
     const metal = { ...ap };
+
+    const marks: Partial<Record<ArmourMark, Record<HitLocation, number>>> = {};
 
     let layers = 0;
 
@@ -62,6 +73,14 @@ export function armourAp(
                 if (METAL_ARMOUR_KINDS.includes(stats.kind))
                     metal[l] += stats.locations[l];
             }
+            for (const mark of ARMOUR_MARKS) {
+                if (!hasQuality(stats.qualities, mark)) continue;
+
+                const at = (marks[mark] ??= { ...ap0() });
+
+                for (const l of LOCATIONS) at[l] += stats.locations[l];
+            }
+
             layers += 1;
 
             if (!hasQuality(stats.qualities, 'flexible')) allFlexible = false;
@@ -97,6 +116,7 @@ export function armourAp(
         ...(hasMetal && { metalAp: metal }),
         flexible: layers > 0 && allFlexible,
         shield,
+        ...(Object.keys(marks).length > 0 && { marks }),
     };
 }
 

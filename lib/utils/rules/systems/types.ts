@@ -163,6 +163,8 @@ export interface ArmourGear {
     /** AP of metal armour per location */
     metalAp?: Record<string, number>;
     flexible?: boolean;
+    /** AP of the worn pieces that carry a system-defined mark, per mark and location */
+    marks?: Record<string, Record<string, number>>;
     /** Overburden tier of the carried load, 0 = none */
     burden?: number;
     /** Shield rating carried, 0 = none */
