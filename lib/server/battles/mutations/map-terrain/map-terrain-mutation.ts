@@ -24,7 +24,7 @@ export type MapTerrainBody = z.infer<typeof mapTerrainSchema>;
 const REJECTED = REJECT.mapOccupied;
 
 const isSpellCell = (c: TerrainCell | undefined) =>
-    Boolean(c && (c.zoneId || c.obscured));
+    Boolean(c && (c.zoneId || c.obscured || c.blocksSight));
 
 function parseKey(key: string) {
     const [x, y] = key.split(':').map(Number);
@@ -106,6 +106,7 @@ export function mapTerrainMutation(
             ...value,
             ...(old?.zoneId && { zoneId: old.zoneId }),
             ...(old?.obscured && { obscured: true as const }),
+            ...(old?.blocksSight && { blocksSight: true as const }),
         });
     }
 

@@ -91,12 +91,12 @@ export const ZoneTriggerSchema = z.object({
 
 export type ZoneTrigger = z.infer<typeof ZoneTriggerSchema>;
 
-export const ZONE_TERRAIN = ['difficult', 'obscured'] as const;
+export const ZONE_TERRAIN = ['difficult', 'obscured', 'blocksSight'] as const;
 
 export const SpellZoneSchema = z.object({
     rounds: z.number().int().min(1).max(ZONE_MAX_ROUNDS),
     label: z.string().max(60).optional(),
-    terrain: z.array(z.enum(ZONE_TERRAIN)).min(1).max(2).optional(),
+    terrain: z.array(z.enum(ZONE_TERRAIN)).min(1).max(3).optional(),
     side: z.enum(['enemies', 'all']).optional(),
     onEnter: ZoneTriggerSchema.optional(),
     onTurnStart: ZoneTriggerSchema.optional(),

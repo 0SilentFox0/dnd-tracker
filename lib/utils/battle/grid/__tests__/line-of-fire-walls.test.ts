@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { lineOfFire } from '../line-of-fire';
-import { wallsAllowSight } from '../sight';
+import { sightedTargets, wallsAllowSight } from '../sight';
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
@@ -47,5 +47,24 @@ describe('wallsAllowSight', () => {
         expect(wallsAllowSight(walled, shooter, target)).toBe(false);
         expect(wallsAllowSight(barred, shooter, target)).toBe(true);
         expect(wallsAllowSight(testMap(), shooter, target)).toBe(true);
+    });
+});
+
+describe('blocksSight zone', () => {
+    const smoke = (key: string) =>
+        testMap(10, 10, {
+            terrain: { [key]: { kind: 'hazard', blocksSight: true } },
+        });
+
+    it('cuts sight through the zone but not to a target standing in it', () => {
+        expect(wallsAllowSight(smoke('3:5'), shooter, target)).toBe(false);
+        expect(wallsAllowSight(smoke('6:5'), shooter, target)).toBe(true);
+        expect(wallsAllowSight(smoke('3:2'), shooter, target)).toBe(true);
+    });
+
+    it('sightedTargets drops targets behind the zone', () => {
+        expect(
+            sightedTargets(smoke('3:5'), [shooter, target], shooter, ['t'])
+        ).toEqual([]);
     });
 });

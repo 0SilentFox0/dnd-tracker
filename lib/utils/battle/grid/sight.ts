@@ -2,6 +2,10 @@ import { cellsConnected, wallsOf } from './edges';
 import { cellsOf, isOnMap } from './occupancy';
 
 import { modeSightedTargets } from '@/lib/utils/battle/modes/engine';
+import {
+    sightBlockingCells,
+    zonesAllowSight,
+} from '@/lib/utils/battle/vision/shadowcast';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
@@ -10,11 +14,17 @@ export function wallsAllowSight(
     viewer: BattleParticipant,
     target: BattleParticipant
 ): boolean {
-    if (!map || !wallsOf(map).size) return true;
+    if (!map) return true;
 
     if (!isOnMap(viewer) || !isOnMap(target)) return true;
 
-    return cellsConnected(map, 'sight', cellsOf(viewer), cellsOf(target));
+    const from = cellsOf(viewer);
+
+    const to = cellsOf(target);
+
+    if (!zonesAllowSight(map, from, to)) return false;
+
+    return !wallsOf(map).size || cellsConnected(map, 'sight', from, to);
 }
 
 export function wallsAllowAim(
@@ -35,7 +45,8 @@ export function sightedTargets(
 ): string[] {
     const sighted = modeSightedTargets(map, ps, caster, ids);
 
-    if (!map || !wallsOf(map).size) return sighted;
+    if (!map || (!wallsOf(map).size && !sightBlockingCells(map).size))
+        return sighted;
 
     const byId = new Map(ps.map((p) => [p.basicInfo.id, p]));
 

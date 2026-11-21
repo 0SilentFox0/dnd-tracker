@@ -188,7 +188,7 @@ export function removeSpellZones(
 }
 
 const terrainId = (c: TerrainCell) =>
-    `${c.kind}|${c.label ?? ''}|${c.untilRound ?? ''}|${c.damage ? JSON.stringify(c.damage) : ''}|${c.difficult ? 1 : 0}${c.obscured ? 1 : 0}|${c.zoneId ?? ''}`;
+    `${c.kind}|${c.label ?? ''}|${c.untilRound ?? ''}|${c.damage ? JSON.stringify(c.damage) : ''}|${c.difficult ? 1 : 0}${c.obscured ? 1 : 0}${c.blocksSight ? 1 : 0}|${c.zoneId ?? ''}`;
 
 export function diffTerrain(
     before: BattleMapConfig['terrain'],
