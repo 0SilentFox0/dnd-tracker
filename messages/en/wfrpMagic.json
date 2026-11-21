@@ -158,7 +158,8 @@
       "scale": "Damage or healing adds bonus of",
       "scaleNone": "None",
       "missile": "Magic missile (power bonus, hit location from the cast roll)",
-      "slBonus": "Cast SL adds to dice damage"
+      "slBonus": "Cast SL adds to dice damage",
+      "targetTag_undead": "Targets only the Undead"
     }
   }
 }

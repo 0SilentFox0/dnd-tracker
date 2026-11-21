@@ -23,6 +23,8 @@ const MAX_ATTRIBUTE_LEVELS = 3;
 
 const IGNORE_KEYS = ['ap', 'tbAp'] as const;
 
+const TARGET_TAGS = ['undead'] as const;
+
 export function SpellMagicFields({
     formData,
     setFormData,
@@ -52,6 +54,34 @@ export function SpellMagicFields({
     );
 
     const levelCap = Math.min(condition?.maxLevel ?? 1, MAX_ATTRIBUTE_LEVELS);
+
+    const targeting = formData.targeting;
+
+    const filterable =
+        targeting.kind === 'ally' ||
+        targeting.kind === 'enemy' ||
+        targeting.kind === 'area' ||
+        targeting.kind === 'template';
+
+    const tags = (filterable && targeting.filter?.tags) || [];
+
+    const toggleTag = (tag: string, on: boolean) => {
+        if (!filterable) return;
+
+        const next = on ? [...tags, tag] : tags.filter((x) => x !== tag);
+
+        const { tags: _old, ...rest } = targeting.filter ?? {};
+
+        const filter = next.length ? { ...rest, tags: next } : rest;
+
+        setFormData({
+            ...formData,
+            targeting: {
+                ...targeting,
+                filter: Object.keys(filter).length ? filter : undefined,
+            },
+        });
+    };
 
     return (
         <div className="col-span-2">
@@ -188,6 +218,21 @@ export function SpellMagicFields({
                         />
                         {te('slBonus')}
                     </label>
+                    {filterable &&
+                        TARGET_TAGS.map((tag) => (
+                            <label
+                                key={tag}
+                                className="flex min-h-11 items-center gap-2 text-sm"
+                            >
+                                <Checkbox
+                                    checked={tags.includes(tag)}
+                                    onCheckedChange={(c) =>
+                                        toggleTag(tag, c === true)
+                                    }
+                                />
+                                {te(`targetTag_${tag}`)}
+                            </label>
+                        ))}
                     {magic.attribute && levelCap > 1 && (
                         <div>
                             <Label htmlFor="magic-attribute-levels">

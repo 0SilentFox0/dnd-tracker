@@ -128,6 +128,30 @@ describe('SpellMagicFields', () => {
         expect(last().casting?.magic?.missile).toBeUndefined();
     });
 
+    it('toggles the Undead target tag in the targeting filter and drops an empty filter', () => {
+        render(
+            <Harness initial={getDefaultSpellFormData()}>
+                {(p) => <SpellMagicFields {...p} conditions={conditions} />}
+            </Harness>
+        );
+
+        const box = () =>
+            screen.getByRole('checkbox', {
+                name: 'wfrpMagic.ui.editor.targetTag_undead',
+            });
+
+        fireEvent.click(box());
+
+        expect(last().targeting).toMatchObject({
+            filter: { tags: ['undead'] },
+        });
+
+        fireEvent.click(box());
+
+        expect(last().targeting).not.toHaveProperty('filter.tags');
+        expect(last().targeting.kind).toBe('enemy');
+    });
+
     it('magic power tab offers only auto resolution', () => {
         render(
             <Harness initial={getDefaultSpellFormData()}>
