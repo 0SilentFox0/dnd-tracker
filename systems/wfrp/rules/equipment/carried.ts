@@ -10,6 +10,7 @@ export type CarriedArtifact = {
 };
 
 export type CarriedSpecial = {
+    id?: string;
     artifactId?: string | null;
     systemStats?: unknown;
     quantity: number;

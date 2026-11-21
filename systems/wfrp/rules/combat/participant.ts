@@ -14,6 +14,7 @@ import { LOCATIONS } from './constants';
 
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { BurdenLoad } from '@/lib/utils/rules/systems/types';
 import type { TraitSize } from '@/systems/wfrp/rules/trait-kinds';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -29,6 +30,8 @@ export interface WfrpParticipantStats {
     size?: TraitSize;
     ward?: number;
     burden?: Exclude<BurdenTier, 0>;
+    /** Load that spent consumables lighten, with the unburdened Agility to re-apply the penalty from */
+    load?: BurdenLoad & { ag: { base: number; advances: number } };
     /** Shield rating (AP) carried; canon gear grants +1 SL on Dodge and Melee defence (p306) */
     shield?: number;
     /** SL lost per skill from worn armour (p299) */
@@ -53,6 +56,7 @@ export interface WfrpGear {
     metalAp?: Record<HitLocation, number>;
     marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
     burden?: number;
+    load?: BurdenLoad;
     shield?: number;
     testPenalty?: Record<string, number>;
 }
@@ -106,6 +110,15 @@ export function wfrpAbilitiesOf(
                 ...(gear?.marks && { marks: gear.marks }),
                 ...castApOf(gear, editionOf(rules).magicModel === 'canon5e'),
                 ...(tier !== 0 && { burden: tier }),
+                ...(gear?.load && {
+                    load: {
+                        ...gear.load,
+                        ag: {
+                            base: folded.base.ag,
+                            advances: folded.advances.ag,
+                        },
+                    },
+                }),
                 ...(gear?.shield && { shield: gear.shield }),
                 ...(gear?.testPenalty && { testPenalty: { ...gear.testPenalty } }),
             },

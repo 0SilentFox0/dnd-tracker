@@ -9,6 +9,7 @@ import {
     wfrpPassionsRoundStart,
 } from '../traits/passions';
 import { wfrpFearRound, wfrpPsychology } from '../traits/psychology';
+import { wfrpBurdenRefresh } from './burden-refresh';
 import { wfrpRegenerate, wfrpSwarmRoundEnd } from './creature-hooks';
 import { wfrpEngagementAge } from './engagement-age';
 import { wfrpOnMoveEnd } from './move-end';
@@ -24,6 +25,7 @@ export const WFRP_TURN: RuleSystemTurn = {
         (ctx) => wfrpConditionsTurnStart(ctx.participants, ctx.id, ctx),
         (ctx) => wfrpFrenzyTurnStart(ctx.participants, ctx.id, ctx),
         wfrpRegenerate,
+        wfrpBurdenRefresh,
     ],
     actGates: [wfrpPsychologyGate],
     onSkippedTurn: [wfrpOnSkippedTurn],

@@ -558,7 +558,7 @@ export function equipmentGearOf(
 
     const inv = character.inventory;
 
-    const burden = equipment.burden({
+    const input = {
         rows: artifactRows.map(({ row, slot, carried }) => ({
             id: row.id,
             slot,
@@ -571,6 +571,7 @@ export function equipmentGearOf(
             return row
                 ? [
                       {
+                          id: i.id,
                           artifactId: i.artifactId,
                           systemStats: row.systemStats,
                           quantity: i.quantity,
@@ -581,9 +582,17 @@ export function equipmentGearOf(
         coins: (inv?.gold ?? 0) + (inv?.silver ?? 0) + (inv?.copper ?? 0),
         characteristics: character.characteristics,
         rules,
-    });
+    };
 
-    return burden > 0 ? { ...gear, burden } : gear;
+    const burden = equipment.burden(input);
+
+    const load = equipment.burdenLoad?.(input);
+
+    return {
+        ...gear,
+        ...(burden > 0 && { burden }),
+        ...(load && { load }),
+    };
 }
 
 function ingredientStockOf(character: CharacterFromPrisma, rules: Ruleset) {

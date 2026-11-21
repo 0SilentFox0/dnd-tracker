@@ -1,6 +1,6 @@
 import { editionOf } from '../edition';
 import { armourAp, armourTestPenalties } from './armour';
-import { wfrpBurden } from './burden';
+import { wfrpBurden, wfrpBurdenLoad } from './burden';
 
 import type { RuleSystemEquipment } from '@/lib/utils/rules/systems/types';
 
@@ -57,4 +57,5 @@ export const WFRP_EQUIPMENT: RuleSystemEquipment = {
         return rules && !canon ? { ...withPenalty, shield: 0 } : withPenalty;
     },
     burden: wfrpBurden,
+    burdenLoad: wfrpBurdenLoad,
 };
