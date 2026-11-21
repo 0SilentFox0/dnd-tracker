@@ -1,0 +1,1099 @@
+{
+  "Spark Flick": [
+    {
+      "dice": 1,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 0,
+          "kind": "petty",
+          "overcast": null
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 30
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
+    },
+    {
+      "dice": 1,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 1,
+          "kind": "petty",
+          "overcast": null
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 30
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
+    }
+  ],
+  "Soothing Touch": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "petty",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Ember Dart": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 4,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "ablaze",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Cinder Cloud": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 8,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 10,
+      "side": "enemy",
+      "maxTargets": 4,
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Pyre Lance": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 11,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "ablaze",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Shade Bolt": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 4,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Hollow Scream": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 12,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "deafened",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 15,
+      "side": "enemy",
+      "maxTargets": 6,
+      "range": 30
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Mending Moss": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 3,
+        "kind": "hedge",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Sour Blood": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 5,
+        "kind": "witchcraft",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "poisoned",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 30
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Crow-Knot Curse": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 10,
+        "kind": "witchcraft",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "bleeding",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Hearth Mending": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "blessing",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 10
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Hearthfire Smite": [
+    {
+      "dice": 2,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 0,
+          "kind": "miracle",
+          "overcast": null,
+          "attribute": {
+            "condition": "ablaze",
+            "levels": 1
+          }
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 60
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
+    },
+    {
+      "dice": 2,
+      "damageBonus": null,
+      "casting": {
+        "magic": {
+          "cn": 7,
+          "kind": "miracle",
+          "overcast": null,
+          "attribute": {
+            "condition": "ablaze",
+            "levels": 1
+          }
+        }
+      },
+      "executionMode": "native",
+      "targeting": {
+        "kind": "enemy",
+        "range": 60
+      },
+      "spellEffects": [
+        {
+          "kind": "dealDamage",
+          "amount": {
+            "spellRoll": 100
+          },
+          "damageType": "magic"
+        }
+      ]
+    }
+  ],
+  "Leech Touch": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "petty",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Burst Orb": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 4,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 10,
+      "side": "enemy",
+      "maxTargets": 4,
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Lance Bolt": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 4,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Elemental Exhale": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 6,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 3,
+      "range": 75
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Arcing Strike": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 6,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 3,
+      "range": 90,
+      "chain": true
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Shove Wave": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 6,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 4,
+      "range": 10
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Carrion Cloud": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 8,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "blinded",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 10,
+      "side": "enemy",
+      "maxTargets": 4,
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Gilded Javelin": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 10,
+        "kind": "arcane",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Spirit Whirl": {
+    "dice": 0,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 10,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "manual",
+    "spellEffects": [],
+    "targeting": {
+      "kind": "enemy"
+    }
+  },
+  "Soul Draw": {
+    "dice": 0,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 6,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "manual",
+    "spellEffects": [],
+    "targeting": {
+      "kind": "enemy"
+    }
+  },
+  "Vital Siphon": {
+    "dice": 0,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 8,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "manual",
+    "spellEffects": [],
+    "targeting": {
+      "kind": "enemy"
+    }
+  },
+  "Sear Seal": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 2,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Furnace Burst": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 12,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "ablaze",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 15,
+      "side": "enemy",
+      "maxTargets": 5,
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Falling Star": {
+    "dice": 4,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 18,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "ablaze",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 20,
+      "side": "enemy",
+      "maxTargets": 6,
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Forked Arc": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 12,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "blinded",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 3,
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Soil Vigour": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 6,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 4,
+      "range": 15
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Mending Surge": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 6,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Mending Gleam": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 8,
+        "kind": "arcane",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 15
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Ore Wrench": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 12,
+        "kind": "arcane",
+        "overcast": "dice",
+        "attribute": {
+          "condition": "stunned",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 10,
+      "side": "enemy",
+      "maxTargets": 5,
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Pale Mending": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 4,
+        "kind": "witchcraft",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Rotten Stream": {
+    "dice": 2,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 9,
+        "kind": "chaos",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 4,
+      "range": 30
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Howling Skull": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 8,
+        "kind": "chaos",
+        "overcast": "dice"
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Smiting Ash": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "miracle",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 6,
+      "range": 10,
+      "filter": {
+        "creatureTypes": [
+          "Restless Dead"
+        ]
+      }
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Gentle Hands": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "miracle",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  "Spirit Pyre": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "miracle",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 6,
+      "range": 10
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Twin Star Fall": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "miracle",
+        "overcast": null,
+        "attribute": {
+          "condition": "ablaze",
+          "levels": 1
+        }
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 6,
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  },
+  "Cold Verdict": {
+    "dice": 1,
+    "damageBonus": null,
+    "casting": {
+      "magic": {
+        "cn": 0,
+        "kind": "miracle",
+        "overcast": null
+      }
+    },
+    "executionMode": "native",
+    "targeting": {
+      "kind": "enemy",
+      "range": 90
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "magic"
+      }
+    ]
+  }
+}

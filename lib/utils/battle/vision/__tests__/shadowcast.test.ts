@@ -106,3 +106,19 @@ describe('grid line of sight', () => {
         ).toBe(true);
     });
 });
+
+describe('blocksSight zone', () => {
+    it('hides cells behind the zone but not the zone cell itself', () => {
+        const visible = visibleFrom(
+            map({
+                terrain: { '4:4': { kind: 'hazard', blocksSight: true } },
+            }),
+            { x: 2, y: 4 },
+            5
+        );
+
+        expect(visible.has('4:4')).toBe(true);
+        expect(visible.has('6:4')).toBe(false);
+        expect(visible.has('6:2')).toBe(true);
+    });
+});

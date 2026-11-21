@@ -46,6 +46,8 @@ export const SpellMagicSchema = z.object({
     missile: z.boolean().optional(),
     /** Armour (`ap`) or toughness and armour (`tbAp`) the damage ignores */
     ignore: z.enum(['ap', 'tbAp']).optional(),
+    /** The cast roll's SL is added to the dice damage */
+    slBonus: z.boolean().optional(),
     /** Characteristic whose bonus the flat damage or heal adds */
     scale: z
         .string()
@@ -89,12 +91,12 @@ export const ZoneTriggerSchema = z.object({
 
 export type ZoneTrigger = z.infer<typeof ZoneTriggerSchema>;
 
-export const ZONE_TERRAIN = ['difficult', 'obscured'] as const;
+export const ZONE_TERRAIN = ['difficult', 'obscured', 'blocksSight'] as const;
 
 export const SpellZoneSchema = z.object({
     rounds: z.number().int().min(1).max(ZONE_MAX_ROUNDS),
     label: z.string().max(60).optional(),
-    terrain: z.array(z.enum(ZONE_TERRAIN)).min(1).max(2).optional(),
+    terrain: z.array(z.enum(ZONE_TERRAIN)).min(1).max(3).optional(),
     side: z.enum(['enemies', 'all']).optional(),
     onEnter: ZoneTriggerSchema.optional(),
     onTurnStart: ZoneTriggerSchema.optional(),
@@ -108,6 +110,12 @@ export const SpellTargetFilterSchema = z.object({
         .array(z.string().trim().min(1).max(40))
         .min(1)
         .max(10)
+        .optional(),
+    /** Rule-system target tags, any of which must hold (e.g. a creature trait) */
+    tags: z
+        .array(z.string().trim().min(1).max(40))
+        .min(1)
+        .max(5)
         .optional(),
     maxCr: z.number().min(0).max(30).optional(),
     maxCrPerLevel: z.number().min(0).max(5).optional(),

@@ -62,16 +62,23 @@ describe('canon5e overcast by direction', () => {
     bookExample(236, 'each direction reads its own column of the table', () => {
         expect(overcastValue('damage', 4)).toBe(3);
         expect(overcastValue('damage', 5)).toBe(4);
-        expect(overcastValue('range', 2)).toBe(2);
-        expect(overcastValue('duration', 3)).toBe(2);
-        expect(overcastValue('aoe', 5)).toBe(2);
-        expect(overcastValue('targets', 2)).toBe(1);
-        expect(overcastValue('targets', 1)).toBe(0);
-        expect(overcastValue('range', 1)).toBe(1);
+        expect(overcastValue('range', 1)).toBe(2);
+        expect(overcastValue('range', 5)).toBe(3);
+        expect(overcastValue('range', 18)).toBe(4);
+        expect(overcastValue('duration', 1)).toBe(1);
+        expect(overcastValue('duration', 5)).toBe(2);
+        expect(overcastValue('duration', 8)).toBe(3);
+        expect(overcastValue('aoe', 2)).toBe(1);
+        expect(overcastValue('aoe', 3)).toBe(2);
+        expect(overcastValue('aoe', 18)).toBe(3);
+        expect(overcastValue('targets', 1)).toBe(1);
+        expect(overcastValue('targets', 5)).toBe(2);
+        expect(overcastValue('targets', 18)).toBe(3);
+        expect(overcastValue('targets', 0)).toBe(0);
     });
 
     bookExample(236, 'SL are spent per direction, not pooled', () => {
-        const spread = { damage: 1, targets: 2 };
+        const spread = { damage: 1, targets: 1 };
 
         expect(overcastDamage(spread)).toBe(1);
         expect(overcastExtension(spread)).toMatchObject({
@@ -80,9 +87,9 @@ describe('canon5e overcast by direction', () => {
             durationMul: 1,
             areaMul: 1,
         });
-        expect(overcastExtension({ range: 2 }).rangeMul).toBe(2);
-        expect(overcastExtension({ duration: 3 }).durationMul).toBe(2);
-        expect(overcastExtension({ aoe: 5 }).areaMul).toBe(2);
+        expect(overcastExtension({ range: 1 }).rangeMul).toBe(2);
+        expect(overcastExtension({ duration: 2 }).durationMul).toBe(2);
+        expect(overcastExtension({ aoe: 3 }).areaMul).toBe(2);
     });
 
     bookExample(

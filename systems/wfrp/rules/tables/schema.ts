@@ -49,6 +49,7 @@ export const FUMBLE_KINDS = [
     'weaponDamage',
     'legPenalty',
     'hitAlly',
+    'noFire',
 ] as const;
 
 export type FumbleKind = (typeof FUMBLE_KINDS)[number];

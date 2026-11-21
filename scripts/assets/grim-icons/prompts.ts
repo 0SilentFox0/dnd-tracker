@@ -19,7 +19,7 @@ export type GrimSubjects = {
 };
 
 export type GrimPromptRow = {
-    recordId: string;
+    recordId: `${WfrpRowKind}:${string}`;
     kind: WfrpRowKind;
     name: string;
     file: string;

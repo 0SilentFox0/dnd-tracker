@@ -240,6 +240,7 @@
       "situation": "Terrain",
       "cover": "Target in cover",
       "enclosed": "Cramped space",
+      "badFooting": "Mud or water",
       "helplessRoll": "Helpless target: chosen roll",
       "grapple": "Grapple"
     },
@@ -292,6 +293,7 @@
     "surprised": "Target surprised",
     "aim": "Aimed",
     "moved": "Shooter moved",
+    "weather": "Weather",
     "shootingIntoMelee": "Target engaged in melee: Disadvantage, the GM may redirect a stray hit",
     "calledShot": "Called shot",
     "highGround": "High ground",

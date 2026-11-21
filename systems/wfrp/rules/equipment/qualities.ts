@@ -56,9 +56,20 @@ export const QUALITY_REGISTRY = {
     bulky: f(),
     lightweight: q(),
     practical: q(),
+    impenetrable: q(),
+    partial: f(),
+    weakpoints: f(),
 } as const satisfies Record<string, Entry>;
 
 export type QualityKey = keyof typeof QUALITY_REGISTRY;
+
+export const ARMOUR_QUALITY_KEYS: readonly QualityKey[] = [
+    'flexible',
+    'practical',
+    'impenetrable',
+    'partial',
+    'weakpoints',
+];
 
 export const QUALITY_KEYS = Object.keys(QUALITY_REGISTRY) as [
     QualityKey,
@@ -72,6 +83,8 @@ export type QualityRef = {
     condition?: WfrpConditionKey;
     /** Inflict only: the condition lands only on a hit to this location (Bolas: legs) */
     location?: HitLocation;
+    /** Inflict (Entangled) only: Strength the hold is broken against (p305); 'wielder' = the attacker's own Strength (Garrote) */
+    strength?: number | 'wielder';
 };
 
 export const qualityValue = (

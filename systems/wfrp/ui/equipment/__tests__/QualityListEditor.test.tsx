@@ -128,4 +128,38 @@ describe('QualityListEditor', () => {
         fireEvent.click(screen.getAllByRole('button', { name: /Прибрати/ })[0]);
         expect(onChange).toHaveBeenLastCalledWith([{ key: valued, value: 2 }]);
     });
+
+    it('sets the wielder strength on Inflict Entangled and keeps the location on edits', () => {
+        const onChange = vi.fn();
+
+        render(
+            <QualityListEditor
+                id="q"
+                label="Властивості"
+                kind="quality"
+                also={['inflict']}
+                value={[
+                    {
+                        key: 'inflict',
+                        value: 1,
+                        condition: 'entangled',
+                        location: 'leg',
+                    },
+                ]}
+                onChange={onChange}
+            />
+        );
+        fireEvent.change(screen.getByLabelText('Сила утримання'), {
+            target: { value: 'wielder' },
+        });
+        expect(onChange).toHaveBeenLastCalledWith([
+            {
+                key: 'inflict',
+                value: 1,
+                condition: 'entangled',
+                location: 'leg',
+                strength: 'wielder',
+            },
+        ]);
+    });
 });

@@ -15,6 +15,7 @@ import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/ke
 import { hasMomentum } from '@/systems/wfrp/rules/combat/momentum';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { withWfrpState } from '@/systems/wfrp/rules/state';
+import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -80,6 +81,25 @@ describe('canon: leaving melee needs Disengage (p163)', () => {
         expect(() => move([heroAt(5), foeAt(6)], 3)).toThrow(
             'errors.disengageRequired'
         );
+    });
+
+    bookExample(357, 'a Swarm ignores the Engaged rules when it moves', () => {
+        const hero = heroAt(5);
+
+        const swarm: BattleParticipant = {
+            ...hero,
+            battleData: {
+                ...hero.battleData,
+                resolvedAbilities: [
+                    trait([{ kind: 'wfrpCreature', trait: 'swarm' }]),
+                ],
+            },
+        };
+
+        expect(heroOf(move([swarm, foeAt(6)], 3)).battleData.position).toEqual({
+            x: 3,
+            y: 0,
+        });
     });
 
     bookExample(163, 'moving while staying Engaged is allowed', () => {

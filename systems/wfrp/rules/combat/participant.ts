@@ -5,6 +5,7 @@ import {
 } from '../characteristics/keys';
 import { foldCorruption } from '../corruption/fold';
 import { editionOf } from '../edition/read';
+import type { ArmourMark } from '../equipment/armour';
 import { applyBurden, asBurdenTier } from '../equipment/burden';
 import { burdenedMove, type BurdenTier } from '../equipment/encumbrance';
 import { PARTICIPANT_SLOT } from '../slots';
@@ -13,6 +14,7 @@ import { LOCATIONS } from './constants';
 
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { BurdenLoad } from '@/lib/utils/rules/systems/types';
 import type { TraitSize } from '@/systems/wfrp/rules/trait-kinds';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -28,12 +30,18 @@ export interface WfrpParticipantStats {
     size?: TraitSize;
     ward?: number;
     burden?: Exclude<BurdenTier, 0>;
+    /** Load that spent consumables lighten, with the unburdened Agility to re-apply the penalty from */
+    load?: BurdenLoad & { ag: { base: number; advances: number } };
     /** Shield rating (AP) carried; canon gear grants +1 SL on Dodge and Melee defence (p306) */
     shield?: number;
+    /** SL lost per skill from worn armour (p299) */
+    testPenalty?: Record<string, number>;
     /** AP worn off by Hack hits per location, canon gear only (p304) */
     armourDamage?: Partial<Record<HitLocation, number>>;
     /** AP of metal armour (mail, plate) per location; Electricity breath ignores it (p358) */
     metalAp?: Record<HitLocation, number>;
+    /** AP of the armour pieces with a book mark per location (canon gear, p306) */
+    marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
 }
 
 const NO_ARMOR = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
@@ -46,8 +54,11 @@ export interface WfrpGear {
     flexible?: boolean;
     armourOnly?: Record<HitLocation, number>;
     metalAp?: Record<HitLocation, number>;
+    marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
     burden?: number;
+    load?: BurdenLoad;
     shield?: number;
+    testPenalty?: Record<string, number>;
 }
 
 function castApOf(
@@ -96,9 +107,20 @@ export function wfrpAbilitiesOf(
                 ap: { ...(gear?.ap ?? NO_ARMOR) },
                 ...(gear?.flexible && { flexible: true as const }),
                 ...(gear?.metalAp && { metalAp: { ...gear.metalAp } }),
+                ...(gear?.marks && { marks: gear.marks }),
                 ...castApOf(gear, editionOf(rules).magicModel === 'canon5e'),
                 ...(tier !== 0 && { burden: tier }),
+                ...(gear?.load && {
+                    load: {
+                        ...gear.load,
+                        ag: {
+                            base: folded.base.ag,
+                            advances: folded.advances.ag,
+                        },
+                    },
+                }),
                 ...(gear?.shield && { shield: gear.shield }),
+                ...(gear?.testPenalty && { testPenalty: { ...gear.testPenalty } }),
             },
         }),
     };
@@ -115,6 +137,12 @@ export const participantStats = (
 ): WfrpParticipantStats | undefined =>
     PARTICIPANT_SLOT.read(p.abilities.system)?.stats;
 
+/** SL lost on tests of the skill from worn armour (p306), 0 or negative */
+export const armourPenaltyFor = (
+    p: BattleParticipant,
+    skill: string
+): number => participantStats(p)?.testPenalty?.[skill] ?? 0;
+
 export const apAt = (
     stats: WfrpParticipantStats | undefined,
     location: HitLocation
@@ -129,6 +157,14 @@ export const nonMetalApAt = (
     location: HitLocation
 ): number =>
     Math.max(0, apAt(stats, location) - (stats?.metalAp?.[location] ?? 0));
+
+/** AP of the armour pieces carrying a book mark at the location, less any worn off */
+export const markedApAt = (
+    stats: WfrpParticipantStats | undefined,
+    mark: ArmourMark,
+    location: HitLocation
+): number =>
+    Math.min(apAt(stats, location), stats?.marks?.[mark]?.[location] ?? 0);
 
 export function withArmourWear(
     p: BattleParticipant,

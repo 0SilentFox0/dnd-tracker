@@ -8,6 +8,7 @@ import {
     applyWfrpConditionTo,
     reduceWfrpCondition,
 } from '../../rules/conditions/apply';
+import { conditionLevel } from '../../rules/conditions/levels';
 import { selfModes, selfSlMod, selfTestMod } from '../../rules/conditions/test-mod';
 import { editionOf } from '../../rules/edition';
 import { resolvePercentileTest } from '../../rules/percentile';
@@ -32,7 +33,6 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import { rollDie } from '@/lib/utils/common/dice';
 import { type Rng, rngOf } from '@/lib/utils/common/rng';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -59,7 +59,7 @@ function strengthContest(
     edition: ReturnType<typeof editionOf>,
     rng: Rng,
     presetRoll?: number
-): { won: boolean; sl: number } {
+): { won: boolean; sl: number; rawRoll: number } {
     const roll = (p: BattleParticipant, preset?: number) => {
         const modes = resolveModeSources(selfModes(p, 'test', edition));
 
@@ -90,12 +90,14 @@ function strengthContest(
             : (own.outcome === 'success' || own.outcome === 'critical') &&
               own.sl > other.sl;
 
-    if (size === 'auto') return { won: bigger, sl: net };
+    const rawRoll = own.rawRoll;
+
+    if (size === 'auto') return { won: bigger, sl: net, rawRoll };
 
     if (size === 'critOnly' && !bigger)
-        return { won: own.outcome === 'critical' && higher, sl: net };
+        return { won: own.outcome === 'critical' && higher, sl: net, rawRoll };
 
-    return { won: higher, sl: net };
+    return { won: higher, sl: net, rawRoll };
 }
 
 /** The action of a grappler on its turn: Opposed Strength, then wound the foe, tighten the hold or break free (p167) */
@@ -151,9 +153,20 @@ export function grappleMutation(
         return applyChanges(ctx, actor, [used], textRef('battleWfrp.log.grappleFailed', params));
 
     if (body.choice === 'free') {
-        const freed = released(reduceWfrpCondition(used, 'entangled', 'all').participant);
+        const loosened = reduceWfrpCondition(
+            used,
+            'entangled',
+            1 + Math.max(contest.sl - 1, 0)
+        ).participant;
 
-        return applyChanges(ctx, actor, [freed, released(foe)], textRef('battleWfrp.log.grappleFree', params));
+        const clear = conditionLevel(loosened, 'entangled') === 0;
+
+        return applyChanges(
+            ctx,
+            actor,
+            clear ? [released(loosened), released(foe)] : [loosened],
+            textRef('battleWfrp.log.grappleFree', params)
+        );
     }
 
     if (body.choice === 'entangle') {
@@ -176,7 +189,7 @@ export function grappleMutation(
     );
 
     const location = hitLocation(
-        rollDie(100, rng),
+        contest.rawRoll,
         edition.hitLocationModel === 'side'
     );
 

@@ -4,6 +4,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import {
     ammoStatus,
+    emptyAmmo,
     initAmmo,
     spendAmmo,
     tickReload,
@@ -101,5 +102,21 @@ describe('tickReload', () => {
         const p = archer({ ammo: { bow: 1 } });
 
         expect(tickReload(p)).toBe(p);
+    });
+});
+
+describe('emptyAmmo', () => {
+    it('empties the weapon and arms its reload once', () => {
+        const once = emptyAmmo(archer({ ammo: { bow: 2 } }), bow);
+
+        expect(once.battleData.ammo?.bow).toBe(0);
+        expect(ammoStatus(once, bow)).toBe('reloading');
+        expect(emptyAmmo(once, bow).battleData.reload?.bow).toBe(2);
+    });
+
+    it('leaves a weapon without ammo untouched', () => {
+        const p = archer({ ammo: { bow: 2 } });
+
+        expect(emptyAmmo(p, sword)).toBe(p);
     });
 });

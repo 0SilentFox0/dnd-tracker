@@ -42,7 +42,7 @@ export function qualityList(v: unknown): QualityRef[] | null {
     for (const r of v) {
         if (
             !isRecord(r) ||
-            !onlyKeys(r, ['key', 'value', 'condition', 'location']) ||
+            !onlyKeys(r, ['key', 'value', 'condition', 'location', 'strength']) ||
             typeof r.key !== 'string' ||
             !Object.hasOwn(QUALITY_REGISTRY, r.key)
         )
@@ -70,11 +70,22 @@ export function qualityList(v: unknown): QualityRef[] | null {
         )
             return null;
 
+        if (
+            r.strength !== undefined &&
+            (key !== 'inflict' ||
+                r.condition !== 'entangled' ||
+                (r.strength !== 'wielder' && !num(r.strength, 1, 100, true)))
+        )
+            return null;
+
         out.push({
             key,
             ...(r.value !== undefined && { value: r.value as number }),
             ...(r.condition !== undefined && { condition: r.condition }),
             ...(r.location !== undefined && { location: r.location }),
+            ...(r.strength !== undefined && {
+                strength: r.strength as number | 'wielder',
+            }),
         });
     }
 
@@ -188,6 +199,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 'group',
                 'reach',
                 'range',
+                'rangeSb',
                 'damage',
                 'qualities',
                 'flaws',
@@ -222,6 +234,12 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             return null;
 
         if (
+            raw.rangeSb !== undefined &&
+            (raw.range === undefined || !num(raw.rangeSb, 1, 10, true))
+        )
+            return null;
+
+        if (
             raw.ammoCapacity !== undefined &&
             !num(raw.ammoCapacity, 1, 1000, true)
         )
@@ -234,6 +252,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 reach: raw.reach as (typeof WEAPON_REACHES)[number],
             }),
             ...(raw.range !== undefined && { range: raw.range as number }),
+            ...(raw.rangeSb !== undefined && { rangeSb: raw.rangeSb as number }),
             damage: { addSb: dmg.addSb, flat: dmg.flat },
             qualities,
             flaws,

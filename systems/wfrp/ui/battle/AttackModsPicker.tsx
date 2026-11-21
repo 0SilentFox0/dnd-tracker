@@ -56,6 +56,8 @@ function Toggle({
     );
 }
 
+const MELEE_FLAGS = ['enclosed', 'badFooting', 'grapple'] as const;
+
 export function AttackModsPicker({
     mods,
     set,
@@ -117,26 +119,18 @@ export function AttackModsPicker({
                         {t('cover')}
                     </Toggle>
                 )}
-                {kind === 'melee' && (
-                    <Toggle
-                        on={!!mods.enclosed}
-                        onClick={() =>
-                            set({ enclosed: mods.enclosed ? undefined : true })
-                        }
-                    >
-                        {t('enclosed')}
-                    </Toggle>
-                )}
-                {kind === 'melee' && (
-                    <Toggle
-                        on={!!mods.grapple}
-                        onClick={() =>
-                            set({ grapple: mods.grapple ? undefined : true })
-                        }
-                    >
-                        {t('grapple')}
-                    </Toggle>
-                )}
+                {kind === 'melee' &&
+                    MELEE_FLAGS.map((flag) => (
+                        <Toggle
+                            key={flag}
+                            on={!!mods[flag]}
+                            onClick={() =>
+                                set({ [flag]: mods[flag] ? undefined : true })
+                            }
+                        >
+                            {t(flag)}
+                        </Toggle>
+                    ))}
             </Row>
             {helpless && (
                 <div className="mt-1 flex items-center gap-2 text-sm text-hud-soft">

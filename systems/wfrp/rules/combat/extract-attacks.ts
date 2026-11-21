@@ -1,3 +1,6 @@
+import { bonus } from '../characteristics/derive';
+import { readCharacteristics } from '../characteristics/keys';
+import { foldCorruption } from '../corruption/fold';
 import { editionOf } from '../edition';
 import { footGroupOf } from '../edition/group-use';
 import { readStats } from '../equipment/guard';
@@ -78,13 +81,19 @@ function unarmedAttack(): ExtractedAttack[] {
 export function extractWfrpAttacks({
     rows,
     rules,
+    characteristics,
 }: {
     rows: EquippedArtifactRow[];
     rules?: Ruleset;
+    characteristics?: unknown;
 }): ExtractedAttack[] {
     const canon = rules ? editionOf(rules).gearModel === 'canon' : false;
 
     const seen = new Set<string>();
+
+    const sb = characteristics
+        ? bonus(foldCorruption(readCharacteristics({ characteristics })), 's')
+        : undefined;
 
     const attacks = rows.flatMap(({ row, slot, carried }) => {
         if (carried || !(isWeaponSlot(slot) || slot === ArtifactSlot.SHIELD))
@@ -109,6 +118,7 @@ export function extractWfrpAttacks({
             wfrpAttackFromProfile(id, row.name, profile, {
                 hand: slot === ArtifactSlot.SHIELD ? 'off' : 'main',
                 ...(reach && { reach }),
+                ...(sb !== undefined && { sb }),
                 ...(canon && {
                     canon: true as const,
                     ...(profile.twoHanded && { twoHanded: true as const }),

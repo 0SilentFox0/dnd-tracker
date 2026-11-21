@@ -151,24 +151,40 @@ export const qualityUnbreakable = (p: Refs, gear: GearModel): boolean =>
 export const qualityBlackpowder = (p: Refs, gear: GearModel): boolean =>
     gear === 'canon' && active(p, gear).has('blackpowder');
 
+export interface QualityInflict {
+    key: WfrpConditionKey;
+    strength?: number;
+}
+
 export function qualityInflicts(
     p: Refs,
     gear: GearModel,
-    location?: HitLocation
-): WfrpConditionKey[] {
+    location?: HitLocation,
+    wielderStrength?: number
+): QualityInflict[] {
     if (gear !== 'canon') return [];
 
     const set = active(p, gear);
 
     return [
-        ...(set.has('entangle') ? (['entangled'] as const) : []),
+        ...(set.has('entangle') ? [{ key: 'entangled' as const }] : []),
         ...p.qualities.flatMap((r) => {
             const { condition } = r;
 
             return r.key === 'inflict' &&
                 condition &&
                 (!r.location || r.location === location)
-                ? [condition]
+                ? [
+                      {
+                          key: condition,
+                          ...(r.strength !== undefined && {
+                              strength:
+                                  r.strength === 'wielder'
+                                      ? wielderStrength
+                                      : r.strength,
+                          }),
+                      },
+                  ]
                 : [];
         }),
     ];

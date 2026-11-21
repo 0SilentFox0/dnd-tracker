@@ -205,6 +205,7 @@ export interface TerrainCell {
     damage?: TerrainDamage;
     difficult?: true;
     obscured?: true;
+    blocksSight?: true;
     zoneId?: string;
 }
 

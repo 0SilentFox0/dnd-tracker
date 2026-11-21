@@ -20,6 +20,7 @@ import {
 import { resolveWfrpAttack } from '@/systems/wfrp/rules/combat/resolve-attack';
 import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
 import type { WfrpConditionKey } from '@/systems/wfrp/rules/conditions/catalog';
+import { againstSl } from '@/systems/wfrp/rules/conditions/test-mod';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
@@ -508,5 +509,104 @@ describe('legacy: no canon attack modifiers', () => {
         );
 
         expect(attackOf(r.attackRoll)?.mods).toBeUndefined();
+    });
+});
+
+describe('canon: owner decisions on attack modifiers', () => {
+    const target = unit('t', 10, ParticipantSide.ENEMY);
+
+    const weatherMap = (weather: BattleMapConfig['weather']) => ({
+        ...baseMap(),
+        weather,
+    });
+
+    const weatherSl = (weather: BattleMapConfig['weather']) =>
+        slOf(
+            modsOf(
+                ctxOf(unit('a', 0), target, bow(), {
+                    map: weatherMap(weather),
+                }),
+                'ranged'
+            ),
+            'weather'
+        );
+
+    it('weather costs only what the book states: fog -1, rain -2', () => {
+        expect(weatherSl('fog')).toBe(-1);
+        expect(weatherSl('rain')).toBe(-2);
+        expect(weatherSl('snow')).toBeUndefined();
+        expect(weatherSl('storm')).toBeUndefined();
+        expect(weatherSl('blizzard')).toBeUndefined();
+        expect(weatherSl('embers')).toBeUndefined();
+        expect(weatherSl(null)).toBeUndefined();
+    });
+
+    it('weather does not touch melee attacks', () => {
+        const foe = unit('f', 1, ParticipantSide.ENEMY);
+
+        expect(
+            slOf(
+                modsOf(
+                    ctxOf(unit('a', 0), foe, sword(), {
+                        map: weatherMap('rain'),
+                    }),
+                    'melee'
+                ),
+                'weather'
+            )
+        ).toBeUndefined();
+    });
+
+    it('cover and a prone target are one -1 SL, cover first', () => {
+        const prone = withCondition(target, 'prone');
+
+        const c = ctxOf(unit('a', 0), prone, bow());
+
+        const both = modsOf(c, 'ranged', { cover: true });
+
+        expect(slOf(both, 'cover')).toBe(-1);
+        expect(slOf(both, 'prone')).toBeUndefined();
+        expect(slOf(modsOf(c, 'ranged'), 'prone')).toBe(-1);
+        expect(slOf(modsOf(c, 'ranged'), 'cover')).toBeUndefined();
+    });
+
+    it('a manual bad footing flag is -1 SL in melee, once with difficult ground', () => {
+        const foe = unit('f', 1, ParticipantSide.ENEMY);
+
+        const a = unit('a', 0);
+
+        const flagged = modsOf(ctxOf(a, foe, sword()), 'melee', {
+            badFooting: true,
+        });
+
+        expect(slOf(flagged, 'difficult')).toBe(-1);
+
+        const muddy = modsOf(
+            ctxOf(a, foe, sword(), {
+                map: baseMap({
+                    [cellKey({ x: 0, y: 0 })]: { kind: 'difficult' },
+                }),
+            }),
+            'melee',
+            { badFooting: true }
+        );
+
+        expect(muddy.mods.filter((m) => m.key === 'difficult')).toHaveLength(1);
+        expect(
+            slOf(modsOf(ctxOf(a, foe, sword()), 'melee'), 'difficult')
+        ).toBeUndefined();
+        expect(
+            slOf(
+                modsOf(ctxOf(a, foe, bow()), 'ranged', { badFooting: true }),
+                'difficult'
+            )
+        ).toBeUndefined();
+    });
+
+    bookExample(166, 'a Surprised target gives melee attackers +1 SL', () => {
+        const surprised = withCondition(target, 'surprised');
+
+        expect(againstSl(surprised, 'melee', CANON).sl).toBe(1);
+        expect(againstSl(surprised, 'ranged', CANON).sl).toBe(0);
     });
 });

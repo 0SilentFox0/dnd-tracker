@@ -4,7 +4,7 @@ import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const MAX_RADIUS = 40;
 
-function gridRay(from: GridPoint, to: GridPoint): GridPoint[] {
+export function gridRay(from: GridPoint, to: GridPoint): GridPoint[] {
     const dx = Math.abs(to.x - from.x);
 
     const dy = Math.abs(to.y - from.y);
@@ -74,16 +74,32 @@ export function visibleFrom(
     radius: number,
     tileBlocksSight: ReadonlySet<string> = new Set()
 ): Set<string> {
+    return visibleFromWith(map, source, radius, opaqueCells(map, tileBlocksSight));
+}
+
+function opaqueCells(
+    map: BattleMapConfig,
+    tileBlocksSight: ReadonlySet<string>
+): Set<string> {
+    const opaque = new Set(tileBlocksSight);
+
+    for (const [key, terrain] of Object.entries(map.terrain ?? {}))
+        if (terrain.obscured || terrain.blocksSight) opaque.add(key);
+
+    return opaque;
+}
+
+function visibleFromWith(
+    map: BattleMapConfig,
+    source: GridPoint,
+    radius: number,
+    opaque: ReadonlySet<string>
+): Set<string> {
     const visible = new Set<string>();
 
     if (!inBounds(map, source)) return visible;
 
     const boundedRadius = Math.max(0, Math.min(MAX_RADIUS, Math.floor(radius)));
-
-    const opaque = new Set(tileBlocksSight);
-
-    for (const [key, terrain] of Object.entries(map.terrain ?? {}))
-        if (terrain.obscured) opaque.add(key);
 
     for (
         let y = Math.max(0, source.y - boundedRadius);
@@ -122,9 +138,43 @@ export function visibleFromMany(
 ): Set<string> {
     const visible = new Set<string>();
 
+    const opaque = opaqueCells(map, tileBlocksSight);
+
     for (const source of sources)
-        for (const cell of visibleFrom(map, source, radius, tileBlocksSight))
+        for (const cell of visibleFromWith(map, source, radius, opaque))
             visible.add(cell);
 
     return visible;
+}
+
+const EMPTY_KEYS: ReadonlySet<string> = new Set();
+
+export function sightBlockingCells(
+    map: Pick<BattleMapConfig, 'terrain'>
+): ReadonlySet<string> {
+    const keys = Object.keys(map.terrain ?? {}).filter(
+        (k) => map.terrain?.[k].blocksSight
+    );
+
+    return keys.length ? new Set(keys) : EMPTY_KEYS;
+}
+
+export function zonesAllowSight(
+    map: Pick<BattleMapConfig, 'terrain'>,
+    from: readonly GridPoint[],
+    to: readonly GridPoint[],
+    blocking: ReadonlySet<string> = sightBlockingCells(map)
+): boolean {
+    if (!blocking.size) return true;
+
+    return from.some((a) =>
+        to.some((b) => {
+            const line = gridRay(a, b);
+
+            for (let i = 1; i < line.length - 1; i++)
+                if (blocking.has(cellKey(line[i]))) return false;
+
+            return true;
+        })
+    );
 }

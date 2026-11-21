@@ -157,16 +157,29 @@ export interface RuleSystemDefinition {
     inventory: boolean;
 }
 
+export interface BurdenLoad {
+    carried: number;
+    limit: number;
+    /** Load freed per spent unit, by inventory item id */
+    perUse: Record<string, number>;
+}
+
 export interface ArmourGear {
     ap: Record<string, number>;
     armourOnly?: Record<string, number>;
     /** AP of metal armour per location */
     metalAp?: Record<string, number>;
     flexible?: boolean;
+    /** AP of the worn pieces that carry a system-defined mark, per mark and location */
+    marks?: Record<string, Record<string, number>>;
     /** Overburden tier of the carried load, 0 = none */
     burden?: number;
+    /** Carried load a battle can lighten by spending consumables */
+    load?: BurdenLoad;
     /** Shield rating carried, 0 = none */
     shield?: number;
+    /** SL lost per skill key from worn armour, negative values */
+    testPenalty?: Record<string, number>;
 }
 
 export interface UnitBuild {
@@ -200,6 +213,24 @@ export interface RuleSystemCurrency {
     labelKeys: Record<Coin, string>;
 }
 
+export interface BurdenInput {
+    rows: {
+        id?: string;
+        slot: string;
+        systemStats: unknown;
+        carried?: true;
+    }[];
+    specials: {
+        id?: string;
+        artifactId?: string;
+        systemStats: unknown;
+        quantity: number;
+    }[];
+    coins: number;
+    characteristics: unknown;
+    rules: Ruleset;
+}
+
 export interface RuleSystemEquipment {
     /** `rules` lets a system drop gear data the edition does not use */
     armourAp(
@@ -207,22 +238,9 @@ export interface RuleSystemEquipment {
         rules?: Ruleset
     ): ArmourGear;
     /** Overburden tier from everything the character carries, 0 = none */
-    burden?(input: {
-        rows: {
-            id?: string;
-            slot: string;
-            systemStats: unknown;
-            carried?: true;
-        }[];
-        specials: {
-            artifactId?: string;
-            systemStats: unknown;
-            quantity: number;
-        }[];
-        coins: number;
-        characteristics: unknown;
-        rules: Ruleset;
-    }): number;
+    burden?(input: BurdenInput): number;
+    /** Same input; the load that spent consumables lighten in battle, absent when nothing can */
+    burdenLoad?(input: BurdenInput): BurdenLoad | undefined;
 }
 
 export type * from './types-actions';

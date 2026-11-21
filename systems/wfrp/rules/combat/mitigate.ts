@@ -1,12 +1,14 @@
+import { value } from '../characteristics/derive';
 import { applyWfrpConditionTo } from '../conditions/apply';
-import type { WfrpConditionKey } from '../conditions/catalog';
 import { editionOf } from '../edition';
-import { QUALITY_REGISTRY } from '../equipment/qualities';
+import { hasQuality, QUALITY_REGISTRY } from '../equipment/qualities';
 import {
     qualityEffects,
+    type QualityInflict,
     qualityInflicts,
     qualityStunsOnHead,
 } from '../equipment/quality-effects';
+import { reverseRoll } from '../percentile';
 import { ATTACK_SLOT } from '../slots';
 import { breathDamage } from '../traits/breath';
 import { BREATH_CONDITION } from '../traits/constants';
@@ -21,7 +23,9 @@ import { asLocation, sideOf } from './location';
 import { chargeSb } from './mounted';
 import {
     apAt,
+    markedApAt,
     nonMetalApAt,
+    participantChars,
     participantStats,
     withArmourWear,
 } from './participant';
@@ -51,6 +55,18 @@ const step = (key: string, value: number): MitigateStep => ({
     ),
     side: key === 'tb' || key === 'ap' ? 'target' : 'attacker',
 });
+
+/** Impenetrable (p306) */
+const isOddDouble = (roll: number | undefined): boolean =>
+    roll !== undefined &&
+    roll > 0 &&
+    roll < 100 &&
+    roll % 11 === 0 &&
+    (roll / 11) % 2 === 1;
+
+/** Partial (p306) */
+const partialIgnored = (roll: number | undefined): boolean =>
+    roll !== undefined && reverseRoll(roll === 0 ? 100 : roll) % 2 === 0;
 
 const critRank = (c: CritResult) =>
     c.death ? Infinity : Number(c.id.split('.')[1]);
@@ -108,17 +124,33 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
     if (breath === 'smoke') return { amount: 0, steps: [], totalLabel };
 
-    const ap =
-        breath === 'electricity'
-            ? nonMetalApAt(participantStats(target), location)
-            : apAt(participantStats(target), location);
-
     const gear = edition.gearModel;
 
     const refs =
         gear === 'canon'
             ? canonWeaponUse(attacker, ctx.attack).refs
             : { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] };
+
+    const stats = participantStats(target);
+
+    const ignoredAp =
+        gear === 'canon'
+            ? Math.max(
+                  ctx.crit && hasQuality(refs.qualities, 'impale')
+                      ? markedApAt(stats, 'weakpoints', location)
+                      : 0,
+                  partialIgnored(ctx.attackRoll)
+                      ? markedApAt(stats, 'partial', location)
+                      : 0
+              )
+            : 0;
+
+    const ap = Math.max(
+        0,
+        (breath === 'electricity'
+            ? nonMetalApAt(stats, location)
+            : apAt(stats, location)) - ignoredAp
+    );
 
     const { effect, steps: qualitySteps } = qualityEffects(
         refs,
@@ -163,7 +195,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         sb: appliedSb,
         netSl: margin,
         size,
-        tb: participantStats(target)?.tb ?? 0,
+        tb: stats?.tb ?? 0,
         ap,
         extra: [
             ...qualitySteps,
@@ -190,7 +222,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             undefined,
             0,
             sideOf(ctx.location),
-            participantStats(target)?.tb ?? 0
+            stats?.tb ?? 0
         );
 
     const lower = (a: CritResult, b: CritResult) =>
@@ -204,8 +236,15 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         base.total = target.combatStats.currentHp;
     }
 
+    const impenetrable =
+        gear === 'canon' &&
+        isOddDouble(ctx.attackRoll) &&
+        markedApAt(stats, 'impenetrable', location) > 0;
+
     const crit =
-        ctx.crit && (counted || target.combatStats.currentHp > 0)
+        ctx.crit &&
+        !impenetrable &&
+        (counted || target.combatStats.currentHp > 0)
             ? effect.minDamage === 0 && gear === 'canon'
                 ? lower(rollOnce(), rollOnce())
                 : rollOnce()
@@ -220,13 +259,18 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             ? [BREATH_CONDITION[breath as keyof typeof BREATH_CONDITION]]
             : [];
 
-    const conditions: WfrpConditionKey[] = [
-        ...breathCondition,
-        ...qualityInflicts(refs, gear, location),
+    const conditions: QualityInflict[] = [
+        ...breathCondition.map((key) => ({ key })),
+        ...qualityInflicts(
+            refs,
+            gear,
+            location,
+            value(participantChars(attacker), 's')
+        ),
         ...(location === 'head' &&
         qualityStunsOnHead(refs, gear) &&
-        base.total >= (participantStats(target)?.tb ?? 0)
-            ? (['stunned'] as const)
+        base.total >= (stats?.tb ?? 0)
+            ? [{ key: 'stunned' as const }]
             : []),
     ];
 
@@ -249,9 +293,10 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
                   })
                 : undefined;
 
-            for (const key of conditions) {
+            for (const { key, strength } of conditions) {
                 const applied = applyWfrpConditionTo(participant, {
                     key,
+                    ...(strength !== undefined && { strength }),
                     round,
                     edition,
                     sourceName: attacker.basicInfo.name,

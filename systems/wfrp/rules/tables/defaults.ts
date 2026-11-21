@@ -198,14 +198,14 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
         },
         {
             max: 100,
-            effects: [{ type: 'condition', key: 'stunned', levels: 1 }],
+            effects: [{ type: 'fumble', kind: 'hitAlly' }],
             textKey: 'battleWfrp.fumble.oops.7',
         },
     ],
     misfire: [
         {
             max: 80,
-            effects: [{ type: 'fumble', kind: 'loseAction' }],
+            effects: [{ type: 'fumble', kind: 'noFire' }],
             textKey: 'battleWfrp.fumble.misfire.1',
         },
         {

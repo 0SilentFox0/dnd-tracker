@@ -311,6 +311,39 @@ describe('canon5e prayer overcast and armour', () => {
     const fel = { base: { fel: 60 } };
 
     bookExample(
+        223,
+        'a miracle with slBonus adds its SL to the damage, without it nothing',
+        () => {
+            const miracle = {
+                kind: 'miracle' as const,
+                cn: 0,
+                overcast: null,
+            };
+
+            const plain = run(canon, 12, miracle, fel);
+
+            const scaled = run(canon, 12, { ...miracle, slBonus: true }, fel);
+
+            expect(scaled.margin).toBeGreaterThan(0);
+            expect(plain.overcastDamage).toBe(0);
+            expect(scaled.overcastDamage).toBe(scaled.margin);
+        }
+    );
+
+    it('slBonus on an arcane non-dice spell adds no overcast damage', () => {
+        const r = run(
+            canon,
+            12,
+            { overcast: null, slBonus: true, missile: true },
+            {
+                base: { int: 60 },
+            }
+        );
+
+        expect(r.overcastDamage).toBe(0);
+    });
+
+    bookExample(
         218,
         'a Blessing overcasts per +2 SL; legacy never does',
         () => {

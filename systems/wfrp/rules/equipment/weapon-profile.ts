@@ -73,6 +73,7 @@ export function weaponProfile(stats: unknown): WeaponProfile | null {
             range: 'ranged',
             cells: cellsOf(s.range),
             rangeFt: s.range,
+            ...(s.rangeSb !== undefined && { rangeSb: s.rangeSb }),
             ...common,
         };
 

@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { HudSection } from '@/components/hud/form';
 import type { SpellMagicFieldsProps } from '@/components/systems/types';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -14,10 +15,15 @@ import {
     withSpellMagic,
 } from '@/lib/utils/spells/model/form';
 import { SPELL_MAGIC_KINDS } from '@/lib/utils/spells/model/schema';
+import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
 
 const OVERCAST_KEYS = ['none', 'dice', 'targets'] as const;
 
 const MAX_ATTRIBUTE_LEVELS = 3;
+
+const IGNORE_KEYS = ['ap', 'tbAp'] as const;
+
+const TARGET_TAGS = ['undead'] as const;
 
 export function SpellMagicFields({
     formData,
@@ -48,6 +54,34 @@ export function SpellMagicFields({
     );
 
     const levelCap = Math.min(condition?.maxLevel ?? 1, MAX_ATTRIBUTE_LEVELS);
+
+    const targeting = formData.targeting;
+
+    const filterable =
+        targeting.kind === 'ally' ||
+        targeting.kind === 'enemy' ||
+        targeting.kind === 'area' ||
+        targeting.kind === 'template';
+
+    const tags = (filterable && targeting.filter?.tags) || [];
+
+    const toggleTag = (tag: string, on: boolean) => {
+        if (!filterable) return;
+
+        const next = on ? [...tags, tag] : tags.filter((x) => x !== tag);
+
+        const { tags: _old, ...rest } = targeting.filter ?? {};
+
+        const filter = next.length ? { ...rest, tags: next } : rest;
+
+        setFormData({
+            ...formData,
+            targeting: {
+                ...targeting,
+                filter: Object.keys(filter).length ? filter : undefined,
+            },
+        });
+    };
 
     return (
         <div className="col-span-2">
@@ -128,6 +162,77 @@ export function SpellMagicFields({
                             noneLabel={te('attributeNone')}
                         />
                     </div>
+                    <div>
+                        <Label htmlFor="magic-ignore">{te('ignore')}</Label>
+                        <SelectField
+                            id="magic-ignore"
+                            value={magic.ignore ?? ''}
+                            onValueChange={(v) =>
+                                set({
+                                    ignore: v
+                                        ? (v as (typeof IGNORE_KEYS)[number])
+                                        : undefined,
+                                })
+                            }
+                            placeholder={te('ignore')}
+                            options={IGNORE_KEYS.map((k) => ({
+                                value: k,
+                                label: te(`ignore_${k}`),
+                            }))}
+                            allowNone
+                            noneLabel={te('ignoreNone')}
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="magic-scale">{te('scale')}</Label>
+                        <SelectField
+                            id="magic-scale"
+                            value={magic.scale ?? ''}
+                            onValueChange={(v) =>
+                                set({ scale: v || undefined })
+                            }
+                            placeholder={te('scale')}
+                            options={CHARACTERISTIC_KEYS.map((k) => ({
+                                value: k,
+                                label: t(`gameTerms.characteristics.${k}.label`),
+                            }))}
+                            allowNone
+                            noneLabel={te('scaleNone')}
+                        />
+                    </div>
+                    <label className="flex min-h-11 items-center gap-2 text-sm">
+                        <Checkbox
+                            checked={magic.missile === true}
+                            onCheckedChange={(c) =>
+                                set({ missile: c === true ? true : undefined })
+                            }
+                        />
+                        {te('missile')}
+                    </label>
+                    <label className="flex min-h-11 items-center gap-2 text-sm">
+                        <Checkbox
+                            checked={magic.slBonus === true}
+                            onCheckedChange={(c) =>
+                                set({ slBonus: c === true ? true : undefined })
+                            }
+                        />
+                        {te('slBonus')}
+                    </label>
+                    {filterable &&
+                        TARGET_TAGS.map((tag) => (
+                            <label
+                                key={tag}
+                                className="flex min-h-11 items-center gap-2 text-sm"
+                            >
+                                <Checkbox
+                                    checked={tags.includes(tag)}
+                                    onCheckedChange={(c) =>
+                                        toggleTag(tag, c === true)
+                                    }
+                                />
+                                {te(`targetTag_${tag}`)}
+                            </label>
+                        ))}
                     {magic.attribute && levelCap > 1 && (
                         <div>
                             <Label htmlFor="magic-attribute-levels">

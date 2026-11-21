@@ -95,6 +95,9 @@ export function spellZoneHazard({
             difficult: true as const,
         }),
         ...(zone.terrain?.includes('obscured') && { obscured: true as const }),
+        ...(zone.terrain?.includes('blocksSight') && {
+            blocksSight: true as const,
+        }),
         ...(spellDamage &&
             !hasTriggers && {
                 damage: {

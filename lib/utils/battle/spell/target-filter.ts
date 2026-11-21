@@ -13,7 +13,7 @@ export function matchesTargetFilter(
 ): boolean {
     if (!filter) return true;
 
-    const { creatureTypes, maxCr, maxCrPerLevel, movement } = filter;
+    const { creatureTypes, tags, maxCr, maxCrPerLevel, movement } = filter;
 
     const type = p.abilities.creatureType;
 
@@ -22,6 +22,12 @@ export function matchesTargetFilter(
         (!type || !creatureTypes.some((t) => norm(t) === norm(type)))
     )
         return false;
+
+    if (tags) {
+        const has = rules && ruleSystemOf(rules).magic.targetHasTag;
+
+        if (!has || !tags.some((t) => has(p, t))) return false;
+    }
 
     if (maxCr !== undefined || maxCrPerLevel !== undefined) {
         const cr = p.abilities.cr;

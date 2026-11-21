@@ -44,6 +44,9 @@
     "reload": "Перезарядка",
     "bulky": "Громіздкий",
     "lightweight": "Легкий",
+    "impenetrable": "Непробивна",
+    "partial": "Часткова",
+    "weakpoints": "Слабкі місця",
     "practical": "Практичний"
   },
   "money": {

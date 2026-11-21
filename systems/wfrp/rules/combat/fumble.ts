@@ -16,6 +16,7 @@ import { EffectMarker } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
+import { emptyAmmo } from '@/lib/utils/battle/ammo';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { rollDie } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
@@ -108,6 +109,7 @@ function applyEffect(
         text: LogLine;
         /** Oops only: the damaged weapon, canon gear */
         wear?: { key: string; qualities?: QualityRef[] };
+        attack?: BattleAttack;
     }
 ): BattleParticipant {
     if (e.type === 'condition')
@@ -136,6 +138,8 @@ function applyEffect(
 
     if (e.kind === 'actLast' && ctx.edition.conditionModel === 'sl')
         return withWfrpState(p, { actLastNext: true });
+
+    if (e.kind === 'noFire') return ctx.attack ? emptyAmmo(p, ctx.attack) : p;
 
     if (e.kind === 'weaponDamage' && ctx.wear)
         return wearWeapon(p, ctx.wear.key, ctx.wear.qualities);
@@ -238,11 +242,16 @@ function tableOutcome(
     const wear =
         key === 'fumbleOops' ? wearOf(attacker, edition, scene) : undefined;
 
+    const hitsAlly = row.effects.some(
+        (e) => e.type === 'fumble' && e.kind === 'hitAlly'
+    );
+
     const ally =
-        edition.gearModel === 'canon' &&
-        row.effects.some((e) => e.type === 'fumble' && e.kind === 'hitAlly')
+        hitsAlly && edition.gearModel === 'canon'
             ? allyHit(attacker, details, scene, rng)
             : undefined;
+
+    const stunSelf = ally ? ally.stunSelf : hitsAlly;
 
     const exploded =
         blast &&
@@ -252,7 +261,7 @@ function tableOutcome(
 
     return {
         update: (p) =>
-            ally?.stunSelf
+            stunSelf
                 ? applyEffect(
                       p,
                       { type: 'condition', key: 'stunned', levels: 1 },
@@ -260,7 +269,13 @@ function tableOutcome(
                   )
                 : row.effects.reduce(
                       (acc, e) =>
-                          applyEffect(acc, e, { edition, rng, text, wear }),
+                          applyEffect(acc, e, {
+                              edition,
+                              rng,
+                              text,
+                              wear,
+                              attack: scene.attack,
+                          }),
                       p
                   ),
         wounds: exploded

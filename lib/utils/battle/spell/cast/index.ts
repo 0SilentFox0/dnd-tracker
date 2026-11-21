@@ -274,7 +274,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             : 0;
 
     const overcastDamage =
-        test && spellMagic?.overcast === 'dice'
+        test && (spellMagic?.overcast === 'dice' || spellMagic?.slBonus)
             ? (test.overcastDamage ?? 0)
             : 0;
 

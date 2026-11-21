@@ -8,6 +8,12 @@ import { lineOfFire } from '@/lib/utils/battle/grid/line-of-fire';
 
 const CALLED_SHOT_SL = -2;
 
+/** Ranged SL by map weather, only what the book states (p166: fog -1, rain -2) */
+export const WEATHER_SL: Partial<Record<string, number>> = {
+    fog: -1,
+    rain: -2,
+};
+
 export const calledShotMod = (spot: string | undefined): AttackMod[] =>
     spot ? [{ key: 'calledShot', sl: CALLED_SHOT_SL }] : [];
 
@@ -26,11 +32,16 @@ export const rangedMods: AttackModSource = ({ ctx, edition, kind, input }) => {
             sl: RANGE_BAND_SL[range.band],
         });
 
-    if (input?.cover || lineOfFire(map, participants, attacker, target).blocked)
-        mods.push({ key: 'cover', sl: -1 });
+    const covered =
+        input?.cover || lineOfFire(map, participants, attacker, target).blocked;
 
-    if (conditionLevel(target, 'prone') > 0)
+    if (covered) mods.push({ key: 'cover', sl: -1 });
+    else if (conditionLevel(target, 'prone') > 0)
         mods.push({ key: 'prone', sl: -1 });
+
+    const weather = map?.weather ? (WEATHER_SL[map.weather] ?? 0) : 0;
+
+    if (weather !== 0) mods.push({ key: 'weather', sl: weather });
 
     if (conditionLevel(target, 'surprised') > 0)
         mods.push({ key: 'surprised', sl: 1 });
@@ -49,9 +60,7 @@ export const rangedMods: AttackModSource = ({ ctx, edition, kind, input }) => {
         participants,
         map,
         edition.actionsModel === 'canon'
-    ).filter(
-        (f) => f.basicInfo.id !== attacker.basicInfo.id
-    );
+    ).filter((f) => f.basicInfo.id !== attacker.basicInfo.id);
 
     if (others.length > 0)
         mods.push({ key: 'shootingIntoMelee', sl: 0, disadvantage: 1 });

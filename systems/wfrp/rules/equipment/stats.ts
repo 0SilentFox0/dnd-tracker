@@ -20,6 +20,9 @@ export const QualityRefSchema: z.ZodType<QualityRef> = z
         value: z.number().int().min(1).max(QUALITY_VALUE_MAX).optional(),
         condition: z.enum(WFRP_CONDITION_KEYS).optional(),
         location: z.enum(LOCATIONS).optional(),
+        strength: z
+            .union([z.number().int().min(1).max(100), z.literal('wielder')])
+            .optional(),
     })
     .refine(
         (r) => QUALITY_REGISTRY[r.key].hasValue === (r.value !== undefined),
@@ -29,6 +32,12 @@ export const QualityRefSchema: z.ZodType<QualityRef> = z
         message: 'condition only on inflict',
         path: ['condition'],
     })
+    .refine(
+        (r) =>
+            r.strength === undefined ||
+            (r.key === 'inflict' && r.condition === 'entangled'),
+        { message: 'strength only on inflict entangled', path: ['strength'] }
+    )
     .refine((r) => r.location === undefined || r.key === 'inflict', {
         message: 'location only on inflict',
         path: ['location'],
@@ -67,6 +76,7 @@ export const WfrpWeaponStatsSchema = z
         group: z.enum(WEAPON_GROUPS),
         reach: z.enum(WEAPON_REACHES).optional(),
         range: z.number().int().min(1).max(100_000).optional(),
+        rangeSb: z.number().int().min(1).max(10).optional(),
         damage: z.strictObject({
             addSb: z.boolean(),
             flat: z.number().int().min(-100).max(100),
@@ -82,6 +92,10 @@ export const WfrpWeaponStatsSchema = z
     .refine((w) => (w.reach === undefined) !== (w.range === undefined), {
         message: 'weapon needs reach xor range',
         path: ['reach'],
+    })
+    .refine((w) => w.rangeSb === undefined || w.range !== undefined, {
+        message: 'rangeSb needs range',
+        path: ['rangeSb'],
     });
 
 export const WfrpGearStatsSchema = z.strictObject({
@@ -114,6 +128,8 @@ export type WfrpWeaponStats = {
     group: (typeof WEAPON_GROUPS)[number];
     reach?: (typeof WEAPON_REACHES)[number];
     range?: number;
+    /** Thrown: Range is Strength Bonus times this in yards; `range` stays the fallback */
+    rangeSb?: number;
     damage: { addSb: boolean; flat: number };
     qualities: QualityRef[];
     flaws: QualityRef[];

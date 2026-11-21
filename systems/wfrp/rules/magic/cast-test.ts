@@ -92,14 +92,25 @@ export function wfrpDeclaredExtension(ctx: {
     const declared = FORTUNE_INPUT.read(ctx.system)?.overcast;
 
     return declared
-        ? overcastExtension(
-              allowedOvercast(declared, !!magic.missile)
-          )
+        ? overcastExtension(allowedOvercast(declared, !!magic.missile))
         : undefined;
 }
 
 export const isPrayerKind = (kind: SpellMagicKind | undefined): boolean =>
     kind !== undefined && PRAYER_KINDS.has(kind);
+
+function canonOvercastDamage(
+    prayer: boolean,
+    magic: CastTestCtx['magic'],
+    sl: number,
+    overcastSteps: number
+): number {
+    if (prayer) return magic.slBonus ? Math.max(sl, 0) : 0;
+
+    if (magic.slBonus && magic.overcast !== 'dice') return 0;
+
+    return overcastSteps;
+}
 
 export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
     const { caster, spell, magic, rng, presetRoll } = ctx;
@@ -224,8 +235,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             : undefined;
 
     const overcastAllowed = canon
-        ? success &&
-          (prayer || !NO_OVERCAST_KINDS.has(magic.kind))
+        ? success && (prayer || !NO_OVERCAST_KINDS.has(magic.kind))
         : success &&
           magic.overcast !== null &&
           !NO_OVERCAST_KINDS.has(magic.kind);
@@ -239,10 +249,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const declared =
         canon && !prayer && overcastAllowed
-            ? allowedOvercast(
-                  fortuneInput?.overcast ?? {},
-                  !!magic.missile
-              )
+            ? allowedOvercast(fortuneInput?.overcast ?? {}, !!magic.missile)
             : {};
 
     const declaredSl = overcastTotal(declared);
@@ -360,7 +367,14 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         success,
         margin: test.sl,
         overcastSteps,
-        ...(canon && { overcastDamage: prayer ? 0 : overcastSteps }),
+        ...(canon && {
+            overcastDamage: canonOvercastDamage(
+                prayer,
+                magic,
+                test.sl,
+                overcastSteps
+            ),
+        }),
         ...(spread && { extension: overcastExtension(spread) }),
         miscast,
         details: ACTION_SLOT.write({

@@ -17,6 +17,9 @@ const BATTLE_KEY =
 // demo tour steps name `data-tour="battle.*"` anchors, not translation keys
 const TOUR_ANCHORS = 'lib/onboarding/demo-tours.ts';
 
+// reached via the ability condition registry -> grid/edges (relative import the walker cannot see); returns text refs, no namespace load
+const HEALTH_VIEW = 'lib/utils/battle/view/health.ts';
+
 // reviewed: pages outside the battle segments reach only these battle files (dice roller, FX runtime and preview, query keys); the battle namespaces are not loaded there
 const ALLOWED_BATTLE_CODE = [
     'components/dice/',
@@ -24,6 +27,7 @@ const ALLOWED_BATTLE_CODE = [
     'components/fx/preview/',
     'components/fx/animations/',
     'lib/hooks/battles/keys.ts',
+    'lib/utils/battle/view/health.ts',
 ];
 
 function outsideBattleGraph(): Map<string, string> {
@@ -59,6 +63,7 @@ describe('battle namespaces stay inside the battle segments', () => {
                 return (
                     !file.startsWith('lib/i18n/') &&
                     file !== TOUR_ANCHORS &&
+                    file !== HEALTH_VIEW &&
                     BATTLE_KEY.test(source)
                 );
             })

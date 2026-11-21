@@ -2,6 +2,7 @@ import { isOutOfFight } from '../combat/critical';
 import { loseMomentum } from '../combat/momentum';
 import { participantStats } from '../combat/participant';
 import { editionOf, type EditionProfile } from '../edition';
+import { wfrpState, withWfrpState } from '../state';
 import {
     isWfrpConditionKey,
     WFRP_CONDITION_REGISTRY,
@@ -75,9 +76,19 @@ export function applyWfrpConditionTo(
 
     let next = p;
 
+    if (key === 'entangled' && conditionLevel(p, key) === 0)
+        next = withWfrpState(next, { entangledStrength: input.strength });
+    else if (key === 'entangled' && input.strength !== undefined)
+        next = withWfrpState(next, {
+            entangledStrength: Math.max(
+                wfrpState(p).entangledStrength ?? 0,
+                input.strength
+            ),
+        });
+
     if (!def.leveled || conditionLevel(p, key) < def.leveled.max) {
         next = upsertLabeled(
-            p,
+            next,
             {
                 timedKey: effectKey,
                 name: effectKey,
@@ -230,6 +241,9 @@ function reduceOnce(
     }
 
     const removed = conditionLevel(next, key) === 0;
+
+    if (removed && key === 'entangled' && wfrpState(next).entangledStrength)
+        next = withWfrpState(next, { entangledStrength: undefined });
 
     if (
         removed &&

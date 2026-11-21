@@ -11,6 +11,7 @@ import {
     yardsToFeet,
 } from '../../rules/combat/movement';
 import {
+    armourPenaltyFor,
     participantChars,
     participantStats,
 } from '../../rules/combat/participant';
@@ -170,6 +171,7 @@ export function movementMutation(
             slModifier:
                 selfSlMod(actor, edition) +
                 movementSlMod(actor, edition) +
+                armourPenaltyFor(actor, 'athletics') +
                 mode.slMod +
                 DIFFICULTY_SL.average,
             slModel: edition.slModel,

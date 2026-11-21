@@ -44,6 +44,9 @@
     "reload": "Reload",
     "bulky": "Bulky",
     "lightweight": "Lightweight",
+    "impenetrable": "Impenetrable",
+    "partial": "Partial",
+    "weakpoints": "Weakpoints",
     "practical": "Practical"
   },
   "money": {

@@ -40,7 +40,7 @@ export const meleeMods: AttackModSource = ({ ctx, kind, input }) => {
 
     const at = attacker.battleData.position;
 
-    if (map && at && difficultSet(map).has(cellKey(at)))
+    if (input?.badFooting || (map && at && difficultSet(map).has(cellKey(at))))
         mods.push({ key: 'difficult', sl: -1 });
 
     if (conditionLevel(attacker, 'prone') > 0)

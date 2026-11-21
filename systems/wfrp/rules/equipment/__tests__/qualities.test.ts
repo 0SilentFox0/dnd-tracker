@@ -35,6 +35,9 @@ const IMPLEMENTED = [
     'unbreakable',
     'repeater',
     'practical',
+    'impenetrable',
+    'partial',
+    'weakpoints',
 ];
 
 const STORED_ONLY = [

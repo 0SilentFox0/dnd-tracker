@@ -270,3 +270,29 @@ describe('canon p301: unarmed fallback', () => {
         expect(extractWfrpAttacks({ rows: [] })).toEqual([]);
     });
 });
+
+describe('canon p518: Thrown Rock range', () => {
+    const rockRange = (s: number) =>
+        extractWfrpAttacks({
+            rows: [
+                {
+                    row: {
+                        id: 'rock',
+                        name: 'Thrown Rock',
+                        systemStats: artifact('thrown-rock').systemStats,
+                    },
+                    slot: 'range_weapon',
+                } as never,
+            ],
+            rules: { edition: { preset: 'canon5e' } } as never,
+            characteristics: {
+                base: { s, t: 30 },
+                advances: {},
+            },
+        }).find((a) => a.id === 'rock')?.range;
+
+    bookExample(518, 'Rock Range is SB x 3 yards', () => {
+        expect(rockRange(30)).toBe('27/81 ft');
+        expect(rockRange(40)).toBe('36/108 ft');
+    });
+});

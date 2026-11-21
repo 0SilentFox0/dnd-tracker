@@ -217,6 +217,7 @@ export const battleMapObject = z.object({
                     label: z.string().max(60).optional(),
                     difficult: z.literal(true).optional(),
                     obscured: z.literal(true).optional(),
+                    blocksSight: z.literal(true).optional(),
                     zoneId: z.string().max(SPELL_ID_MAX).optional(),
                     untilRound: z.number().int().min(1).optional(),
                     damage: z

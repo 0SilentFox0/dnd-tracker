@@ -26,6 +26,8 @@ export interface SystemConditionApply {
     source?: ActiveEffect['source'];
     sourceName: LogLine;
     concealed?: true;
+    /** Strength of a hold the condition must be beaten against, when its source has one */
+    strength?: number;
     /** Lets a system pick its edition-dependent effects */
     rules?: Ruleset;
     /** Dice the application may roll (a test the condition triggers) */
