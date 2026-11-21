@@ -111,6 +111,12 @@ export const SpellTargetFilterSchema = z.object({
         .min(1)
         .max(10)
         .optional(),
+    /** Rule-system target tags, any of which must hold (e.g. a creature trait) */
+    tags: z
+        .array(z.string().trim().min(1).max(40))
+        .min(1)
+        .max(5)
+        .optional(),
     maxCr: z.number().min(0).max(30).optional(),
     maxCrPerLevel: z.number().min(0).max(5).optional(),
     movement: z.literal('fly').optional(),

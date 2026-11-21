@@ -308,6 +308,8 @@ export interface RuleSystemMagic {
         overcastDamage: number;
         rules: Ruleset;
     }): { heal: number; damage: number; breakdown: DamageRow[] } | undefined;
+    /** Whether the target carries a system-defined tag named by a spell's target filter */
+    targetHasTag?(target: BattleParticipant, tag: string): boolean;
     /** Per-target soak of a spell's damage; undefined = the generic resistance path alone */
     soakSpellDamage?(ctx: {
         caster: BattleParticipant;

@@ -1,6 +1,7 @@
 import { editionOf } from '../edition';
 import { ACTION_SLOT } from '../slots';
 import { wfrpState } from '../state';
+import { isUndead } from '../traits/creature';
 import { armourSl } from './armour';
 import { wfrpLoreAttribute } from './attribute';
 import { channelBadge } from './badge';
@@ -95,4 +96,5 @@ export const WFRP_MAGIC: RuleSystemMagic = {
     tested: WFRP_TESTED_MAGIC,
     spellPower: wfrpSpellPower,
     soakSpellDamage: wfrpSoakSpellDamage,
+    targetHasTag: (target, tag) => tag === 'undead' && isUndead(target),
 };
