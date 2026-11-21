@@ -204,3 +204,36 @@ describe('canon: Outnumbered and Surrounded are SL on the attack test (p166)', (
         }
     );
 });
+
+describe('canon: outnumbering cap is the heaviest defender (owner decision)', () => {
+    bookExample(
+        360,
+        'Large attackers count in full against a side holding a Large fighter',
+        () => {
+            const human = at('h', ParticipantSide.ENEMY, 'average', 0, 0);
+
+            const ogre = at('o', ParticipantSide.ENEMY, 'large', 2, 0);
+
+            const attackers = ring(4, 'large', ParticipantSide.ALLY);
+
+            expect(
+                isOutnumbering(
+                    attackers[0],
+                    human,
+                    [...attackers, human, ogre],
+                    null,
+                    true
+                )
+            ).toBe(true);
+            expect(
+                isOutnumbering(
+                    attackers[0],
+                    human,
+                    [...attackers.slice(0, 2), human, ogre],
+                    null,
+                    true
+                )
+            ).toBe(false);
+        }
+    );
+});

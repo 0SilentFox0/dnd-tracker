@@ -17,7 +17,7 @@ const sum = (
     weight: (p: BattleParticipant) => number
 ) => ps.reduce((n, p) => n + weight(p), 0);
 
-// Positions are required: without a map nobody counts as outnumbering. `weighted` (canon size): bigger fighters count for more, capped at the target's weight (p166, p360).
+// Positions are required: without a map nobody counts as outnumbering. `weighted` (canon size): bigger fighters count for more, capped at the heaviest defender's weight (p166, p360).
 export function isOutnumbering(
     attacker: BattleParticipant,
     target: BattleParticipant,
@@ -32,13 +32,28 @@ export function isOutnumbering(
     )
         return false;
 
-    const attackers = foesOnAttack(target, attacker, participants, map, journal);
+    const attackers = foesOnAttack(
+        target,
+        attacker,
+        participants,
+        map,
+        journal
+    );
 
-    const defenders = foesOnAttack(attacker, target, participants, map, journal);
+    const defenders = foesOnAttack(
+        attacker,
+        target,
+        participants,
+        map,
+        journal
+    );
 
     if (!weighted) return attackers.length >= 2 * defenders.length;
 
-    const cap = outnumberWeight(target);
+    const cap = Math.max(
+        outnumberWeight(target),
+        ...defenders.map(outnumberWeight)
+    );
 
     return (
         sum(attackers, (a) => Math.min(outnumberWeight(a), cap)) >=
