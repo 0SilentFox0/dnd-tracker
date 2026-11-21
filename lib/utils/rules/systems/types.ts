@@ -167,6 +167,8 @@ export interface ArmourGear {
     burden?: number;
     /** Shield rating carried, 0 = none */
     shield?: number;
+    /** SL lost per skill key from worn armour, negative values */
+    testPenalty?: Record<string, number>;
 }
 
 export interface UnitBuild {

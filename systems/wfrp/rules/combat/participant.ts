@@ -30,6 +30,8 @@ export interface WfrpParticipantStats {
     burden?: Exclude<BurdenTier, 0>;
     /** Shield rating (AP) carried; canon gear grants +1 SL on Dodge and Melee defence (p306) */
     shield?: number;
+    /** SL lost per skill from worn armour (p299) */
+    testPenalty?: Record<string, number>;
     /** AP worn off by Hack hits per location, canon gear only (p304) */
     armourDamage?: Partial<Record<HitLocation, number>>;
     /** AP of metal armour (mail, plate) per location; Electricity breath ignores it (p358) */
@@ -48,6 +50,7 @@ export interface WfrpGear {
     metalAp?: Record<HitLocation, number>;
     burden?: number;
     shield?: number;
+    testPenalty?: Record<string, number>;
 }
 
 function castApOf(
@@ -99,6 +102,7 @@ export function wfrpAbilitiesOf(
                 ...castApOf(gear, editionOf(rules).magicModel === 'canon5e'),
                 ...(tier !== 0 && { burden: tier }),
                 ...(gear?.shield && { shield: gear.shield }),
+                ...(gear?.testPenalty && { testPenalty: { ...gear.testPenalty } }),
             },
         }),
     };

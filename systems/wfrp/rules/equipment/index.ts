@@ -1,5 +1,5 @@
 import { editionOf } from '../edition';
-import { armourAp } from './armour';
+import { armourAp, armourTestPenalties } from './armour';
 import { wfrpBurden } from './burden';
 
 import type { RuleSystemEquipment } from '@/lib/utils/rules/systems/types';
@@ -45,7 +45,14 @@ export const WFRP_EQUIPMENT: RuleSystemEquipment = {
 
         const kept = traits && metalAp ? { ...gear, metalAp } : gear;
 
-        return rules && !canon ? { ...kept, shield: 0 } : kept;
+        const penalty = armourTestPenalties(equipped);
+
+        const withPenalty =
+            canon && Object.keys(penalty).length
+                ? { ...kept, testPenalty: penalty }
+                : kept;
+
+        return rules && !canon ? { ...withPenalty, shield: 0 } : withPenalty;
     },
     burden: wfrpBurden,
 };

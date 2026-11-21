@@ -6,6 +6,7 @@ import {
 } from './characteristics/constants';
 import { skillTarget, value } from './characteristics/derive';
 import { readCharacteristics } from './characteristics/keys';
+import { participantStats } from './combat/participant';
 import { fateLeftOf, fateSpendsOn } from './combat/fate';
 import { selfModes, selfSlMod, selfTestMod } from './conditions/test-mod';
 import { resolveModeSources } from './percentile/advantage';
@@ -155,7 +156,13 @@ export function rollWfrpSheetTest({
         DIFFICULTY_SL[difficulty] +
         selfSlMod(participant, edition) +
         (edge && !reverse ? 1 : 0) +
-        modeOf.slMod;
+        modeOf.slMod +
+        ('skill' in body
+            ? (participant.abilities
+                  ? (participantStats(participant)?.testPenalty?.[body.skill] ??
+                    0)
+                  : 0)
+            : 0);
 
     const { result: r, fortune } = applyFortune(
         (preset) =>

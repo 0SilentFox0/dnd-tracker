@@ -11,6 +11,7 @@ import { ContentError } from '@/lib/utils/api/content-error';
 import { mulberry32 } from '@/lib/utils/common/rng';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SheetTestInput } from '@/lib/utils/rules/systems/types';
+import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { withWfrpState } from '@/systems/wfrp/rules/state';
 import type { SheetPercentileRollResult } from '@/types/characters';
 
@@ -265,5 +266,38 @@ describe('rollWfrpSheetTest: Fortune and Fate', () => {
 
     it('a plain test leaves the resources alone', () => {
         expect(rollWfrpSheetTest(input(body)).resourcesAfter).toBeUndefined();
+    });
+
+    it('worn armour penalises the skill test it lists', () => {
+        const p = makeParticipant({ id: 'a' });
+
+        const wearing = {
+            ...p,
+            abilities: {
+                ...p.abilities,
+                ...wfrpAbilitiesOf(
+                    {
+                        base: {},
+                        advances: {},
+                        skillAdvances: {},
+                    } as never,
+                    {
+                        ap: { head: 0, arm: 0, body: 2, leg: 0 },
+                        testPenalty: { dodge: -1 },
+                    }
+                ),
+            },
+        };
+
+        const dodge = { kind: 'test', skill: 'dodge' };
+
+        const sl = (participant: typeof p) =>
+            (
+                rollWfrpSheetTest(
+                    input(dodge, { participant })
+                ) as SheetPercentileRollResult
+            ).sl;
+
+        expect(sl(wearing)).toBe(sl(p) - 1);
     });
 });
