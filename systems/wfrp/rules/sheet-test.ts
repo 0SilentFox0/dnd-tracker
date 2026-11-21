@@ -6,8 +6,8 @@ import {
 } from './characteristics/constants';
 import { skillTarget, value } from './characteristics/derive';
 import { readCharacteristics } from './characteristics/keys';
-import { participantStats } from './combat/participant';
 import { fateLeftOf, fateSpendsOn } from './combat/fate';
+import { participantStats } from './combat/participant';
 import { selfModes, selfSlMod, selfTestMod } from './conditions/test-mod';
 import { resolveModeSources } from './percentile/advantage';
 import {

@@ -5,6 +5,7 @@ import { yardsToFeet } from '../combat/movement';
 import { participantChars } from '../combat/participant';
 import { editionOf } from '../edition';
 import { wfrpState, withWfrpState } from '../state';
+import { isSwarm } from '../traits/creature';
 import { frenzyMoveAllowed, isFrenzied } from '../traits/frenzy';
 import { isBiggerThan } from '../traits/size';
 
@@ -20,7 +21,7 @@ import type {
     TurnHookResult,
 } from '@/lib/utils/rules/systems/types';
 
-/** A Frenzied fighter only closes in on its nearest foe (p184); engaged fighters cannot leave melee without Disengage (p163); a Charge earns Momentum from the distance actually moved (p163) */
+/** A Frenzied fighter only closes in on its nearest foe (p184); engaged fighters cannot leave melee without Disengage (p163), a Swarm excepted (p357); a Charge earns Momentum from the distance actually moved (p163) */
 function moveEndChecks(ctx: MoveEndCtx): TurnHookResult {
     const { mover, start, map, participants, cost, rules } = ctx;
 
@@ -50,7 +51,9 @@ function moveEndChecks(ctx: MoveEndCtx): TurnHookResult {
     const journal = engagementJournal(rules);
 
     const foes = (
-        before ? engagedFoes(before, participants, map, journal) : []
+        before && !(edition.traitModel === 'canon' && isSwarm(mover))
+            ? engagedFoes(before, participants, map, journal)
+            : []
     ).filter(
         (f) => edition.sizeModel !== 'canon' || !isBiggerThan(mover, f)
     );

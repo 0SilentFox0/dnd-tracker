@@ -192,6 +192,26 @@ describe('canon: Grapple action, Opposed Strength (p167)', () => {
         expect(wfrpState(find(out, 'foe')).grapple).toBeUndefined();
     });
 
+    bookExample(167, 'breaking free removes one Entangled plus one per SL beyond the first and keeps the hold while some remain', () => {
+        const [actor, foe] = duel();
+
+        const tied = applyWfrpConditionTo(actor, {
+            key: 'entangled',
+            levels: 6,
+            round: 0,
+            sourceName: 'test',
+        }).participant;
+
+        const out = grappleMutation(ctxOf([tied, foe]), {
+            participantId: 'hero',
+            choice: 'free',
+            roll: 10,
+        });
+
+        expect(conditionLevel(find(out, 'hero'), 'entangled')).toBe(2);
+        expect(wfrpState(find(out, 'hero')).grapple).toBeDefined();
+    });
+
     bookExample(360, 'a foe two sizes larger wins the contest outright', () => {
         const out = grappleMutation(
             ctxOf(duel({}, { size: 'enormous' })),
