@@ -9,12 +9,14 @@ import {
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
-export function wallsAllowSight(
-    map: BattleMapConfig | null | undefined,
+function allowSight(
+    map: BattleMapConfig,
+    walls: ReadonlySet<string>,
+    blocking: ReadonlySet<string>,
     viewer: BattleParticipant,
     target: BattleParticipant
 ): boolean {
-    if (!map) return true;
+    if (!walls.size && !blocking.size) return true;
 
     if (!isOnMap(viewer) || !isOnMap(target)) return true;
 
@@ -22,9 +24,25 @@ export function wallsAllowSight(
 
     const to = cellsOf(target);
 
-    if (!zonesAllowSight(map, from, to)) return false;
+    if (!zonesAllowSight(map, from, to, blocking)) return false;
 
-    return !wallsOf(map).size || cellsConnected(map, 'sight', from, to);
+    return !walls.size || cellsConnected(map, 'sight', from, to);
+}
+
+export function wallsAllowSight(
+    map: BattleMapConfig | null | undefined,
+    viewer: BattleParticipant,
+    target: BattleParticipant
+): boolean {
+    if (!map) return true;
+
+    return allowSight(
+        map,
+        wallsOf(map),
+        sightBlockingCells(map),
+        viewer,
+        target
+    );
 }
 
 export function wallsAllowAim(
@@ -45,14 +63,19 @@ export function sightedTargets(
 ): string[] {
     const sighted = modeSightedTargets(map, ps, caster, ids);
 
-    if (!map || (!wallsOf(map).size && !sightBlockingCells(map).size))
-        return sighted;
+    if (!map) return sighted;
+
+    const walls = wallsOf(map);
+
+    const blocking = sightBlockingCells(map);
+
+    if (!walls.size && !blocking.size) return sighted;
 
     const byId = new Map(ps.map((p) => [p.basicInfo.id, p]));
 
     return sighted.filter((id) => {
         const p = byId.get(id);
 
-        return !p || wallsAllowSight(map, caster, p);
+        return !p || allowSight(map, walls, blocking, caster, p);
     });
 }

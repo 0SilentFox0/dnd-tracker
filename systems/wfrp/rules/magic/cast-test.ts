@@ -99,6 +99,19 @@ export function wfrpDeclaredExtension(ctx: {
 export const isPrayerKind = (kind: SpellMagicKind | undefined): boolean =>
     kind !== undefined && PRAYER_KINDS.has(kind);
 
+function canonOvercastDamage(
+    prayer: boolean,
+    magic: CastTestCtx['magic'],
+    sl: number,
+    overcastSteps: number
+): number {
+    if (prayer) return magic.slBonus ? Math.max(sl, 0) : 0;
+
+    if (magic.slBonus && magic.overcast !== 'dice') return 0;
+
+    return overcastSteps;
+}
+
 export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
     const { caster, spell, magic, rng, presetRoll } = ctx;
 
@@ -355,13 +368,12 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
         margin: test.sl,
         overcastSteps,
         ...(canon && {
-            overcastDamage: prayer
-                ? magic.slBonus
-                    ? Math.max(test.sl, 0)
-                    : 0
-                : magic.slBonus && magic.overcast !== 'dice'
-                  ? 0
-                  : overcastSteps,
+            overcastDamage: canonOvercastDamage(
+                prayer,
+                magic,
+                test.sl,
+                overcastSteps
+            ),
         }),
         ...(spread && { extension: overcastExtension(spread) }),
         miscast,

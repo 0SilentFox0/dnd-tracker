@@ -1,13 +1,14 @@
 import { value } from '../characteristics/derive';
 import { applyWfrpConditionTo } from '../conditions/apply';
-import type { WfrpConditionKey } from '../conditions/catalog';
 import { editionOf } from '../edition';
 import { hasQuality, QUALITY_REGISTRY } from '../equipment/qualities';
 import {
     qualityEffects,
+    type QualityInflict,
     qualityInflicts,
     qualityStunsOnHead,
 } from '../equipment/quality-effects';
+import { reverseRoll } from '../percentile';
 import { ATTACK_SLOT } from '../slots';
 import { breathDamage } from '../traits/breath';
 import { BREATH_CONDITION } from '../traits/constants';
@@ -55,7 +56,7 @@ const step = (key: string, value: number): MitigateStep => ({
     side: key === 'tb' || key === 'ap' ? 'target' : 'attacker',
 });
 
-/** Impenetrable (p306): a Critical Hit rolled on 11, 33, 55, 77 or 99 is ignored */
+/** Impenetrable (p306) */
 const isOddDouble = (roll: number | undefined): boolean =>
     roll !== undefined &&
     roll > 0 &&
@@ -63,10 +64,9 @@ const isOddDouble = (roll: number | undefined): boolean =>
     roll % 11 === 0 &&
     (roll / 11) % 2 === 1;
 
-/** Partial (p306): an even Hit Location number (the reversed roll) ignores the piece's AP */
+/** Partial (p306) */
 const partialIgnored = (roll: number | undefined): boolean =>
-    roll !== undefined &&
-    (roll % 100 === 0 ? 0 : (roll % 10) * 10 + Math.floor(roll / 10)) % 2 === 0;
+    roll !== undefined && reverseRoll(roll === 0 ? 100 : roll) % 2 === 0;
 
 const critRank = (c: CritResult) =>
     c.death ? Infinity : Number(c.id.split('.')[1]);
@@ -195,7 +195,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         sb: appliedSb,
         netSl: margin,
         size,
-        tb: participantStats(target)?.tb ?? 0,
+        tb: stats?.tb ?? 0,
         ap,
         extra: [
             ...qualitySteps,
@@ -222,7 +222,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             undefined,
             0,
             sideOf(ctx.location),
-            participantStats(target)?.tb ?? 0
+            stats?.tb ?? 0
         );
 
     const lower = (a: CritResult, b: CritResult) =>
@@ -259,7 +259,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
             ? [BREATH_CONDITION[breath as keyof typeof BREATH_CONDITION]]
             : [];
 
-    const conditions: { key: WfrpConditionKey; strength?: number }[] = [
+    const conditions: QualityInflict[] = [
         ...breathCondition.map((key) => ({ key })),
         ...qualityInflicts(
             refs,
@@ -269,7 +269,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         ),
         ...(location === 'head' &&
         qualityStunsOnHead(refs, gear) &&
-        base.total >= (participantStats(target)?.tb ?? 0)
+        base.total >= (stats?.tb ?? 0)
             ? [{ key: 'stunned' as const }]
             : []),
     ];

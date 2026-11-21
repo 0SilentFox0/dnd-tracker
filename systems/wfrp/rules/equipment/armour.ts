@@ -11,6 +11,12 @@ export type ArmourMark = (typeof ARMOUR_MARKS)[number];
 
 const SHIELD_LOCATIONS: readonly HitLocation[] = ['head', 'arm', 'body'];
 
+const zeroAp = (): Record<HitLocation, number> =>
+    Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
+        HitLocation,
+        number
+    >;
+
 type EquippedStatsRow = { slot: string; systemStats: unknown };
 
 export const parseWfrpStats = (raw: unknown): WfrpItemStats | null =>
@@ -29,13 +35,7 @@ export function armourAp(
     /** Per mark (impenetrable, partial, weakpoints), the AP of the marked pieces per location */
     marks?: Partial<Record<ArmourMark, Record<HitLocation, number>>>;
 } {
-    const ap0 = () =>
-        Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<
-            HitLocation,
-            number
-        >;
-
-    const ap = ap0();
+    const ap = zeroAp();
 
     const armourOnly = { ...ap };
 
@@ -76,7 +76,7 @@ export function armourAp(
             for (const mark of ARMOUR_MARKS) {
                 if (!hasQuality(stats.qualities, mark)) continue;
 
-                const at = (marks[mark] ??= { ...ap0() });
+                const at = (marks[mark] ??= zeroAp());
 
                 for (const l of LOCATIONS) at[l] += stats.locations[l];
             }

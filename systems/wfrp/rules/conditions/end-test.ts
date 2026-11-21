@@ -69,20 +69,21 @@ export function attemptWfrpConditionEnd(
 
     const hold = key === 'entangled' ? wfrpState(p).entangledStrength : undefined;
 
-    const held =
-        hold === undefined
-            ? undefined
-            : resolvePercentileTest({
-                  target: hold,
-                  slModel: edition.slModel,
-                  rng: ctx.rng,
-              });
+    let net = t.sl;
 
-    const net = held ? t.sl - held.sl : t.sl;
+    let success = t.outcome === 'success' || t.outcome === 'critical';
 
-    const success = held
-        ? net > 0 || (net === 0 && target > hold!)
-        : t.outcome === 'success' || t.outcome === 'critical';
+    if (hold !== undefined) {
+        const held = resolvePercentileTest({
+            target: hold,
+            slModel: edition.slModel,
+            rng: ctx.rng,
+        });
+
+        net = t.sl - held.sl;
+
+        success = net > 0 || (net === 0 && target > hold);
+    }
 
     const params = {
         name: p.basicInfo.name,

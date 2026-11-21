@@ -17,7 +17,6 @@ export function ammoStatus(
         : 'ok';
 }
 
-/** A misfire: the weapon is empty and, when it has a Reload, must be reloaded */
 export function emptyAmmo(
     p: BattleParticipant,
     attack: BattleAttack

@@ -74,16 +74,32 @@ export function visibleFrom(
     radius: number,
     tileBlocksSight: ReadonlySet<string> = new Set()
 ): Set<string> {
+    return visibleFromWith(map, source, radius, opaqueCells(map, tileBlocksSight));
+}
+
+function opaqueCells(
+    map: BattleMapConfig,
+    tileBlocksSight: ReadonlySet<string>
+): Set<string> {
+    const opaque = new Set(tileBlocksSight);
+
+    for (const [key, terrain] of Object.entries(map.terrain ?? {}))
+        if (terrain.obscured || terrain.blocksSight) opaque.add(key);
+
+    return opaque;
+}
+
+function visibleFromWith(
+    map: BattleMapConfig,
+    source: GridPoint,
+    radius: number,
+    opaque: ReadonlySet<string>
+): Set<string> {
     const visible = new Set<string>();
 
     if (!inBounds(map, source)) return visible;
 
     const boundedRadius = Math.max(0, Math.min(MAX_RADIUS, Math.floor(radius)));
-
-    const opaque = new Set(tileBlocksSight);
-
-    for (const [key, terrain] of Object.entries(map.terrain ?? {}))
-        if (terrain.obscured || terrain.blocksSight) opaque.add(key);
 
     for (
         let y = Math.max(0, source.y - boundedRadius);
@@ -122,8 +138,10 @@ export function visibleFromMany(
 ): Set<string> {
     const visible = new Set<string>();
 
+    const opaque = opaqueCells(map, tileBlocksSight);
+
     for (const source of sources)
-        for (const cell of visibleFrom(map, source, radius, tileBlocksSight))
+        for (const cell of visibleFromWith(map, source, radius, opaque))
             visible.add(cell);
 
     return visible;
@@ -141,23 +159,22 @@ export function sightBlockingCells(
     return keys.length ? new Set(keys) : EMPTY_KEYS;
 }
 
-/** True when some cell pair has a line that crosses no sight-blocking zone cell (end cells excluded). */
 export function zonesAllowSight(
     map: Pick<BattleMapConfig, 'terrain'>,
     from: readonly GridPoint[],
-    to: readonly GridPoint[]
+    to: readonly GridPoint[],
+    blocking: ReadonlySet<string> = sightBlockingCells(map)
 ): boolean {
-    const blocking = sightBlockingCells(map);
-
     if (!blocking.size) return true;
 
     return from.some((a) =>
         to.some((b) => {
             const line = gridRay(a, b);
 
-            return line
-                .slice(1, -1)
-                .every((c) => !blocking.has(cellKey(c)));
+            for (let i = 1; i < line.length - 1; i++)
+                if (blocking.has(cellKey(line[i]))) return false;
+
+            return true;
         })
     );
 }
