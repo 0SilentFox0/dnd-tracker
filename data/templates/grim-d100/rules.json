@@ -1530,7 +1530,7 @@
         "effects": [
           {
             "type": "fumble",
-            "kind": "loseAction"
+            "kind": "noFire"
           }
         ]
       },

@@ -220,7 +220,7 @@ describe('canon: fumble (p165)', () => {
                 oops: 10,
             });
 
-            expect(out.markers).toContain(EffectMarker.SKIP_ACTION);
+            expect(out.markers).not.toContain(EffectMarker.SKIP_ACTION);
             expect(out.hp).toBe(20);
         }
     );
