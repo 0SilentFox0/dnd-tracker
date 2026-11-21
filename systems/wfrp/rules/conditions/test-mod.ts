@@ -8,7 +8,7 @@ import type { BattleParticipant } from '@/types/battle';
 
 type Model = Pick<EditionProfile, 'conditionModel'>;
 
-const SURPRISED_MELEE_SL = 2;
+const SURPRISED_MELEE_SL = 1;
 
 const ENTANGLED_MOVEMENT_SL = -1;
 
@@ -115,7 +115,7 @@ export const cannotDefend = (
     edition: Model
 ): boolean => isSl(edition) && levelsOf(p).some((c) => c.key === 'surprised');
 
-/** Prone and Blinded give melee attackers Advantage, Surprised +2 SL (p185-187); ranged attacks are unaffected */
+/** Prone and Blinded give melee attackers Advantage, Surprised +1 SL (p166 table; p187 text says +2, aligned to the table); ranged attacks are unaffected */
 export function againstSl(
     target: BattleParticipant,
     attackKind: 'melee' | 'ranged',

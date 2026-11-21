@@ -84,8 +84,8 @@ describe('canon5e conditions', () => {
         });
     });
 
-    bookExample(187, 'Surprised gives melee attackers +2 SL', () => {
-        expect(againstSl(withConds(['surprised']), 'melee', CANON).sl).toBe(2);
+    bookExample(166, 'Surprised gives melee attackers +1 SL', () => {
+        expect(againstSl(withConds(['surprised']), 'melee', CANON).sl).toBe(1);
     });
 
     bookExample(186, 'Stunned halves Move and does not skip the action', () => {

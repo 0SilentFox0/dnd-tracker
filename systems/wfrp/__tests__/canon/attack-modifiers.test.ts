@@ -603,10 +603,10 @@ describe('canon: owner decisions on attack modifiers', () => {
         ).toBeUndefined();
     });
 
-    bookExample(187, 'a Surprised target gives melee attackers +2 SL', () => {
+    bookExample(166, 'a Surprised target gives melee attackers +1 SL', () => {
         const surprised = withCondition(target, 'surprised');
 
-        expect(againstSl(surprised, 'melee', CANON).sl).toBe(2);
+        expect(againstSl(surprised, 'melee', CANON).sl).toBe(1);
         expect(againstSl(surprised, 'ranged', CANON).sl).toBe(0);
     });
 });
