@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Map as MapIcon } from 'lucide-react';
 
@@ -7,12 +8,14 @@ import {
     TemplateTiles,
 } from '@/components/campaigns/templates/TemplateTiles';
 import { EmptyState, ErrorState } from '@/components/common/states';
+import { type GameShellNavItem } from '@/components/hud';
 import {
     HudCard,
     HudPage,
     HudPageHeader,
     HudPanel,
 } from '@/components/hud/page';
+import { GameShell } from '@/components/layout/GameShell';
 import { Button } from '@/components/ui/button';
 import { getAuthUser } from '@/lib/auth';
 import {
@@ -30,7 +33,34 @@ import { systemKeyOf } from '@/lib/utils/rules/systems';
 export default async function CampaignsPage() {
     const user = await getAuthUser();
 
-    const t = await getTranslator(await getRequestLocale(), 'campaigns');
+    const locale = await getRequestLocale();
+
+    const t = await getTranslator(locale, 'campaigns');
+
+    const tCommon = await getTranslator(locale, 'common');
+
+    const shellEnabled = process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true';
+
+    const navItems: GameShellNavItem[] = [
+        {
+            id: 'campaigns',
+            label: tCommon('gameNavigation.campaigns'),
+            href: '/campaigns',
+        },
+    ];
+
+    const renderPage = (content: ReactNode) =>
+        shellEnabled ? (
+            <GameShell
+                items={navItems}
+                activeId="campaigns"
+                title={tCommon('gameNavigation.campaigns')}
+            >
+                {content}
+            </GameShell>
+        ) : (
+            content
+        );
 
     const userId = user.id;
 
@@ -133,7 +163,7 @@ export default async function CampaignsPage() {
             prismaError?.code === 'P1001' ||
             prismaError?.message?.includes("Can't reach database")
         ) {
-            return (
+            return renderPage(
                 <HudPage>
                     <HudPanel className="space-y-3">
                         <h2 className="hud-sc text-xl text-hud-ink">
@@ -161,7 +191,7 @@ export default async function CampaignsPage() {
         throw error;
     }
 
-    return (
+    return renderPage(
         <HudPage>
             <HudPageHeader
                 title={t('page.title')}

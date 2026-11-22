@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { CreditsText } from '@/components/campaigns/templates/CreditsText';
 import { SaveAsTemplateDialog } from '@/components/campaigns/templates/SaveAsTemplateDialog';
 import { SourceSyncDialog } from '@/components/campaigns/templates/SourceSyncDialog';
+import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import { FormAlert } from '@/components/common/states';
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
@@ -142,6 +143,29 @@ export function CampaignSettingsDialog({
             >
                 <HudSection title={t('settings.campaign')}>
                     <div className="space-y-4">
+                <div className="space-y-2">
+                    <ImageUpload
+                        value={fields.coverImage ?? ''}
+                        onChange={(value) => set('coverImage', value || null)}
+                        label={t('settings.coverImage')}
+                        fallbackText={fields.name}
+                        maxSide={1600}
+                    />
+                    <p className="text-xs text-hud-muted">
+                        {t('settings.coverImageHint')}
+                    </p>
+                    {fields.coverImage && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => set('coverImage', null)}
+                            disabled={isSaving}
+                        >
+                            {t('settings.useDefaultCover')}
+                        </Button>
+                    )}
+                </div>
                         <LabeledInput
                             id="campaign-name"
                             label={t('settings.name')}

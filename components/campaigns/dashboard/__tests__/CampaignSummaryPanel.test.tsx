@@ -6,9 +6,6 @@ import { CampaignSummaryPanel } from '../CampaignSummaryPanel';
 
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 
-vi.mock('@/components/campaigns/settings/CampaignSettingsButton', () => ({
-    CampaignSettingsButton: () => null,
-}));
 vi.mock('@/components/campaigns/settings/InviteCodeDisplay', () => ({
     InviteCodeDisplay: ({ inviteCode }: { inviteCode: string }) => (
         <span>{inviteCode}</span>
@@ -18,6 +15,7 @@ vi.mock('@/components/campaigns/settings/InviteCodeDisplay', () => ({
 const campaign = {
     name: 'C',
     description: null,
+    coverImage: null,
     maxLevel: 10,
     allowPlayerEdit: false,
     critChoiceByDm: false,
@@ -26,15 +24,11 @@ const campaign = {
     status: 'active',
 } as const;
 
-const meta = { createdFromId: null, isTemplate: false, credits: null };
-
 const render = (isDM: boolean, inviteCode: string | null) =>
     renderWithIntl(
         <CampaignSummaryPanel
-            campaignId="c1"
             campaign={{ ...campaign, inviteCode }}
             isDM={isDM}
-            meta={meta}
         />,
         { locale: 'uk', namespaces: ['common', 'dashboard'] }
     );

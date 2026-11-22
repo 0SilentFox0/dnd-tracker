@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Crown, ShieldOff, X } from 'lucide-react';
 
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { CampaignRole } from '@/lib/constants/campaigns';
@@ -74,18 +75,31 @@ export function CampaignMembersList({
             {members.map((member) => (
                 <div
                     key={member.id}
-                    className="flex items-center justify-between gap-2 border-b border-hud-raised p-2 last:border-b-0"
+                    className="flex min-w-0 items-center gap-2 border-b border-hud-raised py-2 last:border-b-0"
                 >
-                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="min-w-0 break-words text-hud-bone">
+                    <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-hud-gold/50 bg-hud-raised font-[var(--font-hud-book)] text-sm text-hud-ink">
+                        {member.user.avatar ? (
+                            <OptimizedImage
+                                src={member.user.avatar}
+                                alt=""
+                                width={72}
+                                height={72}
+                                className="size-full object-cover"
+                                fallback={member.user.displayName
+                                    .slice(0, 1)
+                                    .toLocaleUpperCase()}
+                            />
+                        ) : (
+                            member.user.displayName.slice(0, 1).toLocaleUpperCase()
+                        )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-hud-ink">
                             {member.user.displayName}
-                        </span>
+                        </p>
                         <HudPill
-                            tone={
-                                member.role === CampaignRole.DM
-                                    ? 'gold'
-                                    : 'bone'
-                            }
+                            tone={member.role === CampaignRole.DM ? 'gold' : 'bone'}
+                            className="mt-1"
                         >
                             {member.role === CampaignRole.DM
                                 ? t('roles.dm')

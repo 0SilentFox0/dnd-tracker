@@ -111,12 +111,35 @@
     "watchShow": "Показ",
     "palette": {
       "label": "Кольорова тема",
-      "names": { "tavern": "Таверна", "midnight": "Опівніч", "forest": "Ліс", "parchment": "Пергамент", "amethyst": "Аметист", "frost": "Крига" },
-      "errors": { "load": "Не вдалося завантажити тему", "save": "Не вдалося зберегти тему" }
+      "names": {
+        "tavern": "Таверна",
+        "midnight": "Опівніч",
+        "forest": "Ліс",
+        "parchment": "Пергамент",
+        "amethyst": "Аметист",
+        "frost": "Крига"
+      },
+      "errors": {
+        "load": "Не вдалося завантажити тему",
+        "save": "Не вдалося зберегти тему"
+      }
     },
     "watchShowAria": "Дивитися показ",
     "joinBattle": "До бою",
     "joinBattleAria": "Приєднатися до бою"
+  },
+  "gameNavigation": {
+    "label": "Розділи гри",
+    "openMenu": "Відкрити меню розділів",
+    "breadcrumb": "Поточний екран",
+    "campaigns": "Кампанії",
+    "campaign": "Кампанія",
+    "dashboard": "Дашборд",
+    "battle": "Бій",
+    "world": "Мапа світу",
+    "character": "Персонаж",
+    "scenario": "Сценарій",
+    "show": "Показ"
   },
   "breadcrumbs": {
     "label": "Навігація",

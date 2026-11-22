@@ -7,7 +7,7 @@
 | Шар | Теки | Приклади |
 |---|---|---|
 | L0 `ui` | `components/ui` | `Button`, `ResponsiveDialog`, `FullscreenOverlay`, `action-bar`, `portal-class` |
-| L1 `hud` | `components/hud` | `HudPage`, `HudForm`, `fonts`, `metal` |
+| L1 `hud` | `components/hud` | `HudPage`, `HudForm`, `shell/GameShell`, `fonts`, `metal` |
 | L2 `common` | `components/common` | `ImageUpload`, `states/*`, `SearchInput`, `IconUrlField` |
 | L2.5 `fx` | `components/fx` | `BattleFxLayer`, `animations/*`, `auras/*` (без імпорту `battle`/`spells`; слот модуля приходить пропсом `fx`) |
 | L3 домени | `components/<домен>`, `components/systems` (шов: `registry`, `types`, `compose`) | `battle`, `characters`, `units`, `dice`, `show/world`, `scenario/page`, `ai/settings` |
@@ -41,6 +41,8 @@
 ## Де що лежить
 
 - Компонент — у теці свого домену; віджет двох доменів — у теці власника даних. `common` без доменних типів і компонентів.
+- `components/hud/shell` містить презентаційну оболонку й навігаційне меню; маршрут, доступ і перекладені пункти передає композиція в `components/layout` або сторінка. Shell повторно використовує `DropdownMenu` із шару `ui` і не визначає доступ до доменних розділів.
+- Огляд кампанії лишається серверною композицією `app/campaigns/[id]/page.tsx`; дані й рольові віджети — `components/campaigns/dashboard`. Hero з обкладинкою (`Campaign.coverImage`, редагується в налаштуваннях, локальний дефолт) містить назву, метадані, код запрошення, налаштування в куті й основні переходи. Сітка ДМ: загін (+ посилання на персонажів) і «Підготовка»/«Остання сесія»; мапа світу, швидкі дії (`DM_QUICK_SECTION_KEYS`, 2 в ряд) і учасники; бібліотеки. `DM_HOSTED_SECTION_KEYS` — розділи, що вже мають місце в hero/швидких діях/загоні, тому `DashboardGroups` (`hostsDmBlocks`) їх не дублює; без хостингу (гравець, демо, шаблон) показує одну панель плиток. Пошуку розділів немає. Моделі квестів немає — блок квестів не рендериться; «Остання сесія» читає `WorldSession`.
 - Хук даних/мутацій — `lib/hooks/<domain>`. Презентаційний хук (i18n, Canvas, реєстр) може жити поряд із компонентом, якщо його читачі в тій самій теці (`useBackgroundFacts`, `use-badge-labels`, `use-system-battle-ui`).
 - `page.tsx` — сервер і `PrefetchedQuery`; `*-client.tsx` — композиція без внутрішніх компонентів (орієнтир ≤ ~150 рядків; виняток — `dm/world/page-client.tsx`, одна композиція хука).
 - Системний d20-UI живе в `systems/d20/ui`, а не в core; нейтральні імена в контрактах слотів (`monsterStats`, `armorStats`).

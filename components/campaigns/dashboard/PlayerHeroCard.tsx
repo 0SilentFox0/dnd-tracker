@@ -29,11 +29,16 @@ export function PlayerHeroCard({
 
     if (!hero) {
         return (
-            <HudPanel>
-                <p className="text-hud-ink">{t('none')}</p>
-                <Button asChild className="mt-3">
-                    <Link href={`${base}/character`}>{t('create')}</Link>
-                </Button>
+            <HudPanel
+                className="border-hud-gold/45 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+                data-tour="dashboard.hero"
+            >
+                <div className="rounded-lg border border-dashed border-hud-rule bg-hud-page/35 p-4 sm:p-5">
+                    <p className="text-hud-ink">{t('none')}</p>
+                    <Button asChild className="mt-3 min-h-11 w-full sm:w-auto">
+                        <Link href={`${base}/character`}>{t('create')}</Link>
+                    </Button>
+                </div>
             </HudPanel>
         );
     }
@@ -42,7 +47,7 @@ export function PlayerHeroCard({
 
     const initial = (
         <span
-            className="flex size-[72px] shrink-0 items-center justify-center rounded-full bg-hud-rule text-2xl text-hud-ink"
+            className="flex size-[88px] shrink-0 items-center justify-center rounded-full bg-hud-rule text-2xl text-hud-ink"
             aria-hidden
         >
             {hero.name.trim().charAt(0).toUpperCase()}
@@ -50,22 +55,27 @@ export function PlayerHeroCard({
     );
 
     return (
-        <HudPanel>
-            <div className="flex min-w-0 gap-3">
+        <HudPanel
+            className="border-hud-gold/50 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+            data-tour="dashboard.hero"
+        >
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
                 {hero.avatar ? (
                     <OptimizedImage
                         src={hero.avatar}
                         alt={hero.name}
-                        width={72}
-                        height={72}
-                        className="size-[72px] shrink-0 rounded-full object-cover"
+                        width={88}
+                        height={88}
+                        className="size-[88px] shrink-0 rounded-full border-2 border-hud-gold object-cover shadow-[0_0_0_4px_var(--color-hud-page)]"
                         fallback={initial}
                     />
                 ) : (
-                    initial
+                    <span className="rounded-full border-2 border-hud-gold shadow-[0_0_0_4px_var(--color-hud-page)]">
+                        {initial}
+                    </span>
                 )}
                 <div className="min-w-0 flex-1">
-                    <h2 className="hud-sc truncate text-lg text-hud-ink">
+                    <h2 className="hud-sc break-words text-xl text-hud-ink sm:text-2xl">
                         {hero.name}
                     </h2>
                     <p className="truncate text-sm text-hud-muted">
@@ -95,23 +105,27 @@ export function PlayerHeroCard({
                 )}
             </div>
             {pending && hero.reviewNote && (
-                <p className="mt-1 text-sm break-words text-hud-muted">
+                <p className="mt-3 rounded-lg border border-hud-rule bg-hud-page/35 p-3 text-sm break-words text-hud-muted">
                     {hero.reviewNote}
                 </p>
             )}
             {activeBattle && (
-                <div className="mt-3 flex items-center gap-3">
+                <div className="mt-4 flex flex-col gap-3 rounded-lg border border-hud-gold/35 bg-hud-page/35 p-3 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
                         <HeroHp hp={activeBattle.hp} />
                     </div>
-                    <Button asChild>
+                    <Button asChild className="min-h-11 w-full sm:w-auto">
                         <Link href={`${base}/battles/${activeBattle.battleId}`}>
                             {t('toBattle')}
                         </Link>
                     </Button>
                 </div>
             )}
-            <Button asChild variant="outline" className="mt-3">
+            <Button
+                asChild
+                variant="outline"
+                className="mt-3 min-h-11 w-full sm:w-auto"
+            >
                 <Link href={`${base}/character`}>{t('open')}</Link>
             </Button>
         </HudPanel>

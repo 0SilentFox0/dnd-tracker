@@ -1,0 +1,73 @@
+.campaign-dashboard {
+    --dashboard-line: color-mix(in srgb, var(--hud-gold) 25%, transparent);
+    max-width: 1400px;
+    padding: 24px 18px;
+    font-size: 15px;
+}
+.campaign-dashboard > * + * { margin-top: 18px; }
+.campaign-dashboard .dashboard-panel {
+    border-color: var(--dashboard-line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--palette-card) 96%, transparent);
+    padding: 18px;
+}
+.campaign-dashboard .dashboard-panel h2 {
+    font-size: 16px;
+    line-height: 1.3;
+    letter-spacing: .04em;
+}
+.campaign-dashboard .dashboard-hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    min-height: 230px;
+    padding: 26px;
+    overflow: hidden;
+    border: 1px solid var(--dashboard-line);
+    border-radius: 20px;
+    color: var(--palette-art-ink);
+}
+.dashboard-hero-art { position: absolute; inset: 0; z-index: -1; }
+.dashboard-hero-art::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--palette-art-shadow) 96%, transparent), color-mix(in srgb, var(--palette-art-shadow) 70%, transparent) 45%, color-mix(in srgb, var(--palette-art-shadow) 20%, transparent));
+}
+.dashboard-hero-settings { position: absolute; top: 16px; right: 16px; z-index: 2; }
+.dashboard-hero-settings > button { width: 40px; height: 40px; }
+.dashboard-hero-heading { padding-right: 48px; }
+.dashboard-kicker { font: 700 12px var(--font-hud-sc), serif; letter-spacing: .14em; }
+.dashboard-hero h1 { margin-top: 10px; font: 700 clamp(26px, 3.2vw, 40px)/1.15 var(--font-hud-book), serif; overflow-wrap: anywhere; }
+.dashboard-description { margin-top: 8px; max-width: 760px; line-height: 1.5; }
+.dashboard-summary {
+    font-size: 13px;
+    --color-hud-muted: var(--palette-art-ink);
+    --color-hud-bone: var(--palette-art-ink);
+    --color-hud-ink: var(--palette-art-ink);
+    --color-hud-line: color-mix(in srgb, var(--palette-art-ink) 45%, transparent);
+    --color-hud-page: var(--palette-art-shadow);
+    --color-hud-field: color-mix(in srgb, var(--palette-art-ink) 14%, transparent);
+}
+.dashboard-summary > div > span { font-size: 13px; padding: 4px 10px; }
+.dashboard-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.dashboard-hero-actions > a { min-height: 44px; padding-inline: 18px; }
+.dashboard-hero-actions > a, .dashboard-hero-settings > button {
+    border-color: color-mix(in srgb, var(--palette-art-ink) 30%, transparent);
+    background: color-mix(in srgb, var(--palette-art-shadow) 80%, transparent);
+    color: var(--palette-art-ink);
+    border-radius: 10px;
+}
+.dashboard-hero-actions > .dashboard-primary {
+    border-color: var(--hud-gold);
+    background: color-mix(in srgb, var(--hud-gold) 25%, var(--palette-art-shadow));
+}
+@media (max-width: 639px) {
+    .campaign-dashboard { padding: 14px 12px; }
+    .campaign-dashboard .dashboard-hero { padding: 20px 16px; gap: 12px; }
+    .campaign-dashboard .dashboard-panel { padding: 16px; }
+    .dashboard-hero-settings { top: 12px; right: 12px; }
+}

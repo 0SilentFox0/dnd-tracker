@@ -57,7 +57,15 @@ export async function sourceUpdateState(
 export async function readDmDashboard(
     campaignId: string
 ): Promise<DmDashboardData> {
-    const [pendingDrafts, scenarioPages, battles, update] = await Promise.all([
+    const [
+        pendingDrafts,
+        scenarioPages,
+        battles,
+        update,
+        party,
+        worldMap,
+        session,
+    ] = await Promise.all([
         prisma.character.count({
             where: { campaignId, status: CharacterStatus.PENDING },
         }),
@@ -78,6 +86,48 @@ export async function readDmDashboard(
             select: { id: true, name: true, status: true },
         }),
         sourceUpdateState(campaignId),
+        prisma.character.findMany({
+            where: {
+                campaignId,
+                type: CharacterType.PLAYER,
+                status: CharacterStatus.ACTIVE,
+            },
+            orderBy: [{ level: 'desc' }, { name: 'asc' }],
+            select: {
+                id: true,
+                name: true,
+                level: true,
+                race: true,
+                class: true,
+                avatar: true,
+                armorClass: true,
+                speed: true,
+            },
+        }),
+        prisma.worldMap.findFirst({
+            where: { campaignId, parentMarkerId: null },
+            orderBy: { createdAt: 'asc' },
+            select: { id: true, name: true, imageUrl: true },
+        }),
+        prisma.worldSession.findFirst({
+            where: { campaignId },
+            orderBy: { startedAt: 'desc' },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                startedAt: true,
+                endedAt: true,
+                logs: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 3,
+                    select: {
+                        toMarker: { select: { name: true } },
+                        map: { select: { name: true } },
+                    },
+                },
+            },
+        }),
     ]);
 
     const activeFirst = [...battles].sort(
@@ -93,6 +143,20 @@ export async function readDmDashboard(
         sourceUpdate: update?.hasUpdates
             ? { sourceVersion: update.sourceVersion }
             : null,
+        latestSession: session
+            ? {
+                  id: session.id,
+                  name: session.name,
+                  description: session.description,
+                  startedAt: session.startedAt.toISOString(),
+                  endedAt: session.endedAt?.toISOString() ?? null,
+                  locations: session.logs.map(
+                      (log) => log.toMarker?.name ?? log.map.name
+                  ),
+              }
+            : null,
+        party,
+        worldMap,
     };
 }
 

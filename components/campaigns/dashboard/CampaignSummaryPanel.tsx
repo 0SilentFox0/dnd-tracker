@@ -2,79 +2,61 @@
 
 import { useTranslations } from 'next-intl';
 
-import { CampaignSettingsButton } from '@/components/campaigns/settings/CampaignSettingsButton';
 import { InviteCodeDisplay } from '@/components/campaigns/settings/InviteCodeDisplay';
-import { HudSection } from '@/components/hud/form';
-import { HudPanel } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { CampaignStatus } from '@/lib/constants/campaigns';
-import type { CampaignSettings, CampaignSettingsMeta } from '@/types/campaigns';
-
-const LABEL = 'text-sm text-hud-muted';
+import type { CampaignSettings } from '@/types/campaigns';
 
 type CampaignSummary = CampaignSettings & { inviteCode: string | null };
 
 export function CampaignSummaryPanel({
-    campaignId,
     campaign,
     isDM,
-    meta,
+    memberCount,
 }: {
-    campaignId: string;
     campaign: CampaignSummary;
     isDM: boolean;
-    meta: CampaignSettingsMeta;
+    memberCount?: string | null;
 }) {
     const t = useTranslations('dashboard.summary');
 
     return (
-        <HudPanel data-tour="dashboard.summary">
-            <HudSection
-                title={t('title')}
-                action={
-                    isDM ? (
-                        <CampaignSettingsButton
-                            campaignId={campaignId}
-                            campaign={{
-                                name: campaign.name,
-                                description: campaign.description || null,
-                                maxLevel: campaign.maxLevel,
-                                allowPlayerEdit: campaign.allowPlayerEdit,
-                                critChoiceByDm: campaign.critChoiceByDm,
-                                acquaintancesEnabled:
-                                    campaign.acquaintancesEnabled,
-                                mapLibraryEnabled: campaign.mapLibraryEnabled,
-                                status: campaign.status,
-                            }}
-                            meta={meta}
-                        />
-                    ) : undefined
-                }
-            >
-                <div className="space-y-3">
-                    <div>
-                        <p className={LABEL}>{t('maxLevel')}</p>
-                        <p className="text-lg font-semibold text-hud-ink">
-                            {campaign.maxLevel}
-                        </p>
-                    </div>
-                    {isDM && campaign.inviteCode && !meta.isTemplate && (
-                        <div id="invite" className="scroll-mt-20">
-                            <p className={`${LABEL} mb-2`}>{t('inviteCode')}</p>
-                            <InviteCodeDisplay
-                                inviteCode={campaign.inviteCode}
-                            />
-                        </div>
-                    )}
-                    <div>
-                        <p className={LABEL}>{t('status')}</p>
-                        <span className="inline-block rounded-full px-2 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
-                            {campaign.status === CampaignStatus.ACTIVE
-                                ? t('active')
-                                : t('archived')}
+        <div
+            data-tour="dashboard.summary"
+            className="dashboard-summary relative z-10 flex flex-wrap items-center gap-2"
+        >
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <HudPill
+                    tone={
+                        campaign.status === CampaignStatus.ACTIVE
+                            ? 'gold'
+                            : 'muted'
+                    }
+                >
+                    {t('status')} ·{' '}
+                    {campaign.status === CampaignStatus.ACTIVE
+                        ? t('active')
+                        : t('archived')}
+                </HudPill>
+                <HudPill tone="bone">
+                    {t('maxLevel')} · {campaign.maxLevel}
+                </HudPill>
+                {memberCount && <HudPill tone="muted">{memberCount}</HudPill>}
+                {isDM && campaign.inviteCode && (
+                    <div
+                        id="invite"
+                        className="flex min-w-0 max-w-full scroll-mt-20 items-center gap-1.5 rounded-full border border-hud-rule bg-hud-page/80 px-2.5 py-0 text-xs text-hud-ink sm:gap-2 sm:px-3 sm:text-sm"
+                    >
+                        <span className="hidden shrink-0 text-hud-muted sm:inline">
+                            {t('inviteCode')}
                         </span>
+                        <InviteCodeDisplay
+                            inviteCode={campaign.inviteCode}
+                            compact
+                        />
                     </div>
-                </div>
-            </HudSection>
-        </HudPanel>
+                )}
+            </div>
+        </div>
     );
 }

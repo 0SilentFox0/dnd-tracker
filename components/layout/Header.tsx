@@ -6,13 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Menu } from 'lucide-react';
 
-import { UserAvatar } from '@/components/auth/UserAvatar';
-import { JoinBattleButton } from '@/components/campaigns/JoinBattleButton';
-import { WatchShowButton } from '@/components/campaigns/WatchShowButton';
 import { HUD_SURFACE } from '@/components/hud';
-import { AbbreviationsInfoDialog } from '@/components/layout/AbbreviationsInfoDialog';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-import { WhatsNewButton } from '@/components/onboarding/WhatsNewButton';
+import { HeaderActions } from '@/components/layout/HeaderActions';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -23,7 +19,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
-import { useSessionUser } from '@/lib/hooks/auth';
 import {
     useCampaignRules,
     useCampaignSystemSelection,
@@ -42,10 +37,6 @@ export function Header() {
     const tCommon = useTranslator('common');
 
     const pathname = usePathname();
-
-    const sessionUser = useSessionUser();
-
-    const email = sessionUser?.email ?? null;
 
     const isTemplate = useIsTemplateCampaign(
         pathname?.includes('/dm/')
@@ -165,24 +156,7 @@ export function Header() {
                     </div>
 
                     <div className="flex min-w-0 items-center gap-0.5 sm:gap-2">
-                        <JoinBattleButton />
-                        <WatchShowButton />
-                        {email && <WhatsNewButton />}
-                        <AbbreviationsInfoDialog />
-                        <Button
-                            asChild
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
-                        >
-                            <Link href="/profile">
-                                <UserAvatar
-                                    user={sessionUser}
-                                    className="size-7"
-                                />
-                                <span className="sr-only">{t('profile')}</span>
-                            </Link>
-                        </Button>
+                        <HeaderActions />
                     </div>
                 </div>
                 <div className={`${width} pb-2`}>

@@ -38,6 +38,7 @@ model Campaign {
   sourceSync           CampaignSourceSync?
   name                 String
   description          String?
+  coverImage           String?
   inviteCode           String                @unique
   dmUserId             String
   maxLevel             Int                   @default(20)

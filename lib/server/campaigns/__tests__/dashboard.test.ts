@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({
-    character: { count: vi.fn(), findFirst: vi.fn() },
+    character: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn() },
     scenarioPage: { findMany: vi.fn() },
     battleScene: { findMany: vi.fn() },
     battleParticipant: { findFirst: vi.fn() },
-    worldMap: { count: vi.fn() },
+    worldMap: { count: vi.fn(), findFirst: vi.fn() },
+    worldSession: { findFirst: vi.fn() },
     campaign: { findUnique: vi.fn() },
 }));
 
@@ -33,8 +34,11 @@ function selectsOf(): object[] {
 beforeEach(() => {
     vi.clearAllMocks();
     db.character.count.mockResolvedValue(2);
+    db.character.findMany.mockResolvedValue([]);
     db.scenarioPage.findMany.mockResolvedValue([{ id: 'p1', title: 'Акт 1' }]);
     db.battleScene.findMany.mockResolvedValue([]);
+    db.worldMap.findFirst.mockResolvedValue(null);
+    db.worldSession.findFirst.mockResolvedValue(null);
     db.campaign.findUnique.mockResolvedValue({ createdFromId: null });
 });
 
@@ -51,6 +55,9 @@ describe('readDmDashboard', () => {
             scenarioPages: [{ id: 'p1', title: 'Акт 1' }],
             battles: [{ id: 'b1', name: 'Бій', status: 'prepared' }],
             sourceUpdate: null,
+            latestSession: null,
+            party: [],
+            worldMap: null,
         });
 
         const arg = db.battleScene.findMany.mock.calls[0][0];
@@ -70,6 +77,82 @@ describe('readDmDashboard', () => {
         const res = await readDmDashboard('c1');
 
         expect(res.battles.map((b) => b.id)).toEqual(['a1', 'p1', 'p2']);
+    });
+
+    it('returns the active player roster and root map for the dashboard', async () => {
+        db.character.findMany.mockResolvedValue([
+            {
+                id: 'h1',
+                name: 'Ліра',
+                level: 5,
+                race: 'Ельфійка',
+                class: 'Чарівниця',
+                avatar: null,
+                armorClass: 15,
+                speed: 30,
+            },
+        ]);
+        db.worldMap.findFirst.mockResolvedValue({
+            id: 'm1',
+            name: 'Briarwood',
+            imageUrl: 'https://example.com/map.webp',
+        });
+
+        const res = await readDmDashboard('c1');
+
+        expect(res.party).toHaveLength(1);
+        expect(res.worldMap).toEqual({
+            id: 'm1',
+            name: 'Briarwood',
+            imageUrl: 'https://example.com/map.webp',
+        });
+        expect(db.character.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    campaignId: 'c1',
+                    type: 'player',
+                    status: 'active',
+                },
+                select: expect.objectContaining({ id: true, name: true }),
+            })
+        );
+        expect(db.worldMap.findFirst).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { campaignId: 'c1', parentMarkerId: null },
+                select: { id: true, name: true, imageUrl: true },
+            })
+        );
+    });
+
+    it('returns the latest saved world session with real locations', async () => {
+        db.worldSession.findFirst.mockResolvedValue({
+            id: 's1',
+            name: 'Session 4',
+            description: 'The party reached the old bridge.',
+            startedAt: new Date('2026-11-21T18:00:00.000Z'),
+            endedAt: null,
+            logs: [
+                { toMarker: { name: 'Old bridge' }, map: { name: 'Northwood' } },
+                { toMarker: null, map: { name: 'Northwood' } },
+            ],
+        });
+
+        const res = await readDmDashboard('c1');
+
+        expect(res.latestSession).toEqual({
+            id: 's1',
+            name: 'Session 4',
+            description: 'The party reached the old bridge.',
+            startedAt: '2026-11-21T18:00:00.000Z',
+            endedAt: null,
+            locations: ['Old bridge', 'Northwood'],
+        });
+        expect(db.worldSession.findFirst).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { campaignId: 'c1' },
+                orderBy: { startedAt: 'desc' },
+            })
+        );
     });
 
     it('select без важких полів', async () => {
