@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({
     character: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn() },
-    scenarioPage: { findMany: vi.fn(), findFirst: vi.fn() },
+    scenarioPage: { findMany: vi.fn() },
+    $queryRaw: vi.fn(),
     battleScene: { findMany: vi.fn() },
     battleParticipant: { findFirst: vi.fn() },
     worldMap: { count: vi.fn(), findFirst: vi.fn() },
@@ -49,9 +50,11 @@ const FORBIDDEN = ['participants', 'map', 'snapshot', 'skills', 'abilities'];
 
 function selectsOf(): object[] {
     return Object.values(db).flatMap((m) =>
-        Object.values(m).flatMap((fn) =>
-            fn.mock.calls.map((c) => c[0]?.select).filter(Boolean)
-        )
+        typeof m === 'function'
+            ? []
+            : Object.values(m).flatMap((fn) =>
+                  fn.mock.calls.map((c) => c[0]?.select).filter(Boolean)
+              )
     );
 }
 
@@ -62,7 +65,7 @@ beforeEach(() => {
     db.scenarioPage.findMany.mockResolvedValue([{ id: 'p1', title: 'Акт 1' }]);
     db.battleScene.findMany.mockResolvedValue([]);
     db.worldMap.findFirst.mockResolvedValue(null);
-    db.scenarioPage.findFirst.mockResolvedValue(null);
+    db.$queryRaw.mockResolvedValue([]);
     for (const model of COUNT_MODELS) db[model].count.mockResolvedValue(0);
     db.campaign.findUnique.mockResolvedValue({ createdFromId: null });
 });
@@ -150,13 +153,19 @@ describe('readDmDashboard', () => {
         );
     });
 
-    it('returns the last scene that moved to played, with real library counts', async () => {
-        db.scenarioPage.findFirst.mockResolvedValue({
-            id: 's1',
-            title: 'The old bridge',
-            subtitle: 'Dusk',
-            playedAt: new Date('2026-11-21T18:00:00.000Z'),
-        });
+    it('returns the last scene with its last played and next chapter, plus library counts', async () => {
+        db.$queryRaw.mockResolvedValue([
+            {
+                id: 's1',
+                title: 'The old bridge',
+                subtitle: 'Dusk',
+                status: 'ready',
+                playedAt: null,
+                sectionIds: ['a', 'b', 'c'],
+                titles: ['Arrival', 'Toll', 'Crossing'],
+                playedIds: ['a', 'b'],
+            },
+        ]);
         db.unit.count.mockResolvedValue(152);
 
         const res = await readDmDashboard('c1');
@@ -165,17 +174,38 @@ describe('readDmDashboard', () => {
             id: 's1',
             title: 'The old bridge',
             subtitle: 'Dusk',
-            playedAt: '2026-11-21T18:00:00.000Z',
+            playedAt: null,
+            lastChapter: { id: 'b', title: 'Toll' },
+            nextChapter: { id: 'c', title: 'Crossing' },
         });
         expect(res.libraryCounts.units).toBe(152);
         expect(db.unit.count).toHaveBeenCalledWith({
             where: { campaignId: 'c1' },
         });
-        expect(db.scenarioPage.findFirst).toHaveBeenCalledWith(
-            expect.objectContaining({
-                where: { campaignId: 'c1', kind: 'scene', status: 'played' },
-            })
-        );
+    });
+
+    it('a fully played scene has no next chapter', async () => {
+        db.$queryRaw.mockResolvedValue([
+            {
+                id: 's1',
+                title: 'Done',
+                subtitle: null,
+                status: 'played',
+                playedAt: new Date('2026-11-21T18:00:00.000Z'),
+                sectionIds: ['a', 'b'],
+                titles: ['One', 'Two'],
+                playedIds: ['a', 'b'],
+            },
+        ]);
+
+        const res = await readDmDashboard('c1');
+
+        expect(res.latestSession?.nextChapter).toBeNull();
+        expect(res.latestSession?.lastChapter).toEqual({
+            id: 'b',
+            title: 'Two',
+        });
+        expect(res.latestSession?.playedAt).toBe('2026-11-21T18:00:00.000Z');
     });
 
     it('select без важких полів', async () => {

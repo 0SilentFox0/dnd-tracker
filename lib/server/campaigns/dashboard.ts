@@ -54,6 +54,61 @@ export async function sourceUpdateState(
     };
 }
 
+type SceneRow = {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    status: string;
+    playedAt: Date | null;
+    sectionIds: string[];
+    titles: string[];
+    playedIds: string[];
+};
+
+// section ids/titles/flags are extracted in SQL so the large scene content never leaves the DB
+async function readLastScene(
+    campaignId: string
+): Promise<DmDashboardData['latestSession']> {
+    const [row] = await prisma.$queryRaw<SceneRow[]>`
+        SELECT p.id, p.title, p.subtitle, p.status, p."playedAt",
+            COALESCE(jsonb_path_query_array(p.content, '$.sections[*].id'), '[]'::jsonb) AS "sectionIds",
+            COALESCE(jsonb_path_query_array(p.content, '$.sections[*].title'), '[]'::jsonb) AS titles,
+            COALESCE(jsonb_path_query_array(p.content, '$.sections[*] ? (@.played == true).id'), '[]'::jsonb) AS "playedIds"
+        FROM scenario_pages p
+        WHERE p."campaignId" = ${campaignId}
+            AND p.kind = 'scene'
+            AND (p.status = 'played' OR jsonb_path_exists(p.content, '$.sections[*] ? (@.played == true)'))
+        ORDER BY COALESCE(p."playedAt", p."updatedAt") DESC
+        LIMIT 1`;
+
+    if (!row) return null;
+
+    const played = new Set(row.playedIds);
+
+    const chapters = row.sectionIds.map((id, index) => ({
+        id,
+        title: row.titles[index] ?? '',
+    }));
+
+    const lastIndex = chapters.findLastIndex((chapter) =>
+        played.has(chapter.id)
+    );
+
+    const next =
+        chapters.find(
+            (chapter, index) => index > lastIndex && !played.has(chapter.id)
+        ) ?? chapters.find((chapter) => !played.has(chapter.id));
+
+    return {
+        id: row.id,
+        title: row.title,
+        subtitle: row.subtitle,
+        playedAt: row.playedAt?.toISOString() ?? null,
+        lastChapter: lastIndex >= 0 ? chapters[lastIndex] : null,
+        nextChapter: next ?? null,
+    };
+}
+
 const COUNT_ENTRIES = [
     ['maps', (where: Where) => prisma.battleMap.count({ where })],
     ['units', (where: Where) => prisma.unit.count({ where })],
@@ -142,11 +197,7 @@ export async function readDmDashboard(
             orderBy: { createdAt: 'asc' },
             select: { id: true, name: true, imageUrl: true },
         }),
-        prisma.scenarioPage.findFirst({
-            where: { campaignId, kind: 'scene', status: 'played' },
-            orderBy: { playedAt: { sort: 'desc', nulls: 'last' } },
-            select: { id: true, title: true, subtitle: true, playedAt: true },
-        }),
+        readLastScene(campaignId),
         readLibraryCounts(campaignId),
     ]);
 
@@ -163,14 +214,7 @@ export async function readDmDashboard(
         sourceUpdate: update?.hasUpdates
             ? { sourceVersion: update.sourceVersion }
             : null,
-        latestSession: playedScene
-            ? {
-                  id: playedScene.id,
-                  title: playedScene.title,
-                  subtitle: playedScene.subtitle,
-                  playedAt: playedScene.playedAt?.toISOString() ?? null,
-              }
-            : null,
+        latestSession: playedScene,
         libraryCounts,
         party,
         worldMap,

@@ -35,11 +35,24 @@ export function CampaignRecentSession({
             {session ? (
                 <div className="space-y-1.5">
                     <h3 className="break-words font-semibold text-hud-ink">
-                        {session.title}
+                        <Link
+                            href={`${base}/${session.id}`}
+                            className="underline-offset-4 hover:underline"
+                        >
+                            {session.title}
+                        </Link>
                     </h3>
                     {session.subtitle && (
-                        <p className="line-clamp-3 text-sm leading-relaxed text-hud-bone">
+                        <p className="line-clamp-2 text-sm leading-relaxed text-hud-bone">
                             {session.subtitle}
+                        </p>
+                    )}
+                    {session.lastChapter && (
+                        <p className="text-sm text-hud-bone">
+                            <span className="text-hud-muted">
+                                {t('recentSession.lastChapter')}:{' '}
+                            </span>
+                            {session.lastChapter.title}
                         </p>
                     )}
                     {date && session.playedAt && (
@@ -57,14 +70,28 @@ export function CampaignRecentSession({
                     {t('recentSession.empty')}
                 </p>
             )}
-            <Link
-                href={session ? `${base}/${session.id}` : base}
-                className="mt-3 inline-flex min-h-8 items-center text-sm font-medium text-hud-gold underline-offset-4 hover:underline"
-            >
-                {session
-                    ? t('recentSession.open')
-                    : t('recentSession.openScenario')}
-            </Link>
+            {session?.nextChapter && (
+                <Link
+                    href={`${base}/${session.id}#sec-${session.nextChapter.id}`}
+                    className="mt-3 flex min-h-10 items-center justify-between gap-2 rounded-lg bg-hud-page/45 px-3 text-sm text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)] transition-colors hover:bg-hud-raised"
+                >
+                    <span className="min-w-0 truncate">
+                        <span className="text-hud-muted">
+                            {t('recentSession.nextChapter')}:{' '}
+                        </span>
+                        {session.nextChapter.title}
+                    </span>
+                    <span aria-hidden>→</span>
+                </Link>
+            )}
+            {!session && (
+                <Link
+                    href={base}
+                    className="mt-3 inline-flex min-h-8 items-center text-sm font-medium text-hud-gold underline-offset-4 hover:underline"
+                >
+                    {t('recentSession.openScenario')}
+                </Link>
+            )}
         </HudPanel>
     );
 }

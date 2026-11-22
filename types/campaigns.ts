@@ -162,6 +162,8 @@ export interface DmDashboardData {
         title: string;
         subtitle: string | null;
         playedAt: string | null;
+        lastChapter: { id: string; title: string } | null;
+        nextChapter: { id: string; title: string } | null;
     } | null;
     libraryCounts: Record<string, number>;
     party: {

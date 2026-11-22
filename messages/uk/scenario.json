@@ -185,7 +185,9 @@
     "refreshSummary": "Оновити конспект сцени",
     "showScreen": "Екран показу ↗",
     "toIndex": "До змісту",
-    "versions": "Версії"
+    "versions": "Версії",
+    "markScenePlayed": "Позначити сцену зіграною",
+    "scenePlayed": "✓ Сцену зіграно — повернути"
   },
   "pageKinds": {
     "hero": "Герой",

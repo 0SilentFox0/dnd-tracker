@@ -80,4 +80,35 @@ describe('scenario writes to compendium-bound pages', () => {
         await run('meta', { patch: { title: 'New' } });
         expect(h.dirty).toHaveBeenCalledOnce();
     });
+
+    it('moving a page to played stamps playedAt, leaving it clears it', async () => {
+        h.prisma.compendiumEntry.count.mockResolvedValue(0);
+        h.prisma.scenarioPage.findFirst.mockResolvedValue({
+            ...page,
+            status: 'ready',
+        });
+        await run('meta', { patch: { status: 'played' } });
+
+        expect(
+            h.prisma.scenarioPage.update.mock.calls[0][0].data.playedAt
+        ).toBeInstanceOf(Date);
+
+        h.prisma.scenarioPage.update.mockClear();
+        h.prisma.scenarioPage.findFirst.mockResolvedValue({
+            ...page,
+            status: 'played',
+        });
+        await run('meta', { patch: { status: 'ready' } });
+
+        expect(
+            h.prisma.scenarioPage.update.mock.calls[0][0].data.playedAt
+        ).toBeNull();
+
+        h.prisma.scenarioPage.update.mockClear();
+        await run('meta', { patch: { title: 'Only title' } });
+
+        expect(
+            h.prisma.scenarioPage.update.mock.calls[0][0].data
+        ).not.toHaveProperty('playedAt');
+    });
 });

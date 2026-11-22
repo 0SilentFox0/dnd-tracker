@@ -61,11 +61,11 @@ export default async function CampaignDetailPage({
 
     const locale = await getRequestLocale();
 
-    const t = await getTranslator(locale, 'dashboard');
-
-    const tCommon = await getTranslator(locale, 'common');
-
-    const tGameTerms = await getTranslator(locale, 'gameTerms');
+    const [t, tCommon, tGameTerms] = await Promise.all([
+        getTranslator(locale, 'dashboard'),
+        getTranslator(locale, 'common'),
+        getTranslator(locale, 'gameTerms'),
+    ]);
 
     const {
         campaign,
@@ -193,6 +193,18 @@ export default async function CampaignDetailPage({
         )
         .map((section) => section.key);
 
+    const settings = {
+        name: campaign.name,
+        description: campaign.description,
+        coverImage: campaign.coverImage,
+        maxLevel: campaign.maxLevel,
+        allowPlayerEdit: campaign.allowPlayerEdit,
+        critChoiceByDm: campaign.critChoiceByDm,
+        acquaintancesEnabled: campaign.acquaintancesEnabled,
+        mapLibraryEnabled: campaign.mapLibraryEnabled,
+        status: campaign.status,
+    };
+
     const hasDmParty = (dm?.party.length ?? 0) > 0;
 
     const page = (
@@ -211,19 +223,7 @@ export default async function CampaignDetailPage({
                 {isDM && <div className="dashboard-hero-settings">
                                 <CampaignSettingsButton
                                     campaignId={id}
-                                    campaign={{
-                                        name: campaign.name,
-                                        description: campaign.description,
-                                        coverImage: campaign.coverImage,
-                                        maxLevel: campaign.maxLevel,
-                                        allowPlayerEdit: campaign.allowPlayerEdit,
-                                        critChoiceByDm: campaign.critChoiceByDm,
-                                        acquaintancesEnabled:
-                                            campaign.acquaintancesEnabled,
-                                        mapLibraryEnabled:
-                                            campaign.mapLibraryEnabled,
-                                        status: campaign.status,
-                                    }}
+                                    campaign={settings}
                                     meta={{
                                         createdFromId:
                                             campaign.createdFromId ?? null,
@@ -240,15 +240,7 @@ export default async function CampaignDetailPage({
                 </div>
                 <CampaignSummaryPanel
                     campaign={{
-                        name: campaign.name,
-                        description: campaign.description,
-                        coverImage: campaign.coverImage,
-                        maxLevel: campaign.maxLevel,
-                        allowPlayerEdit: campaign.allowPlayerEdit,
-                        critChoiceByDm: campaign.critChoiceByDm,
-                        acquaintancesEnabled: campaign.acquaintancesEnabled,
-                        mapLibraryEnabled: campaign.mapLibraryEnabled,
-                        status: campaign.status,
+                        ...settings,
                         inviteCode:
                             isDM && !isTemplate ? campaign.inviteCode : null,
                     }}
@@ -339,7 +331,7 @@ export default async function CampaignDetailPage({
 
                 {isDM && !isTemplate && dm && (
                     <aside className="relative min-w-0 lg:col-span-4">
-                        <div className="flex flex-col gap-4 lg:absolute lg:inset-0 [&>*]:min-h-0 [&>*]:flex-1">
+                        <div className="flex flex-col gap-4 lg:absolute lg:inset-0 [&>*]:min-h-0 [&>*]:flex-1 [&>*]:overflow-y-auto">
                         <DmPrepPanel campaignId={id} data={dm} />
                         <CampaignRecentSession
                             campaignId={id}

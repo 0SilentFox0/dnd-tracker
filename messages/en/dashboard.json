@@ -166,8 +166,9 @@
   "recentSession": {
     "title": "Last played scene",
     "empty": "No scenes played yet. Mark a scene as “Played” in the scenario.",
-    "open": "Open scene",
-    "openScenario": "Open scenario"
+    "openScenario": "Open scenario",
+    "lastChapter": "Last played chapter",
+    "nextChapter": "Next chapter"
   },
   "party": {
     "title": "Party",

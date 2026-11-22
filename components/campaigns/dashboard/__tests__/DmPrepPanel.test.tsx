@@ -68,7 +68,6 @@ describe('DmPrepPanel', () => {
                     sourceUpdate: null,
                     latestSession: null,
                     libraryCounts: {},
-    libraryCounts: {},
                     party: [],
                     worldMap: null,
                 }}

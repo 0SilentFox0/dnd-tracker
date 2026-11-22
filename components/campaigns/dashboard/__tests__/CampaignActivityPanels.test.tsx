@@ -17,6 +17,8 @@ describe('campaign activity panels', () => {
                     title: 'The old bridge',
                     subtitle: 'The party crossed at dusk.',
                     playedAt: '2026-11-21T18:00:00.000Z',
+                    lastChapter: { id: 'a', title: 'Arrival' },
+                    nextChapter: { id: 'b', title: 'Toll' },
                 }}
             />,
             { locale: 'uk', namespaces: ['common', 'dashboard'] }
@@ -26,9 +28,13 @@ describe('campaign activity panels', () => {
         expect(screen.getByText('The party crossed at dusk.')).toBeTruthy();
         expect(
             screen
-                .getByRole('link', { name: 'dashboard.recentSession.open' })
+                .getByRole('link', { name: 'The old bridge' })
                 .getAttribute('href')
         ).toBe('/campaigns/c1/dm/scenario/s1');
+        expect(screen.getByText('Arrival')).toBeTruthy();
+        expect(
+            screen.getByRole('link', { name: /Toll/ }).getAttribute('href')
+        ).toBe('/campaigns/c1/dm/scenario/s1#sec-b');
     });
 
     it('offers the scenario when nothing has been played', async () => {
