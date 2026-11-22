@@ -192,7 +192,7 @@ export default async function CampaignsPage() {
     }
 
     return renderPage(
-        <HudPage>
+        <HudPage className="hud-wide">
             <HudPageHeader
                 title={t('page.title')}
                 actions={

@@ -40,7 +40,7 @@ export function DmPrepPanel({
                     />
                 )}
                 {hasPrep ? (
-                    <ul className="max-h-36 space-y-1.5 overflow-y-auto lg:max-h-none lg:min-h-0 lg:flex-1">
+                    <ul className="max-h-36 space-y-1.5 overflow-y-auto">
                         {data.pendingDrafts > 0 && (
                             <li>
                                 <Link href={`${base}/dm/characters`} className={ROW}>

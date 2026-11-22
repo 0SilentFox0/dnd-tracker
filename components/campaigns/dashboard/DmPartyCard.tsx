@@ -48,7 +48,7 @@ export function DmPartyCard({
                     </div>
                 }
             >
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-3">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-3 min-[1800px]:grid-cols-[repeat(auto-fill,minmax(21rem,1fr))]">
                     {party.map((hero) => {
                         const initial = hero.name.trim().charAt(0).toUpperCase();
 

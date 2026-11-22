@@ -43,8 +43,8 @@ export function HudGameShell({
 
     return (
         <>
-            <header className="hud-surface sticky top-0 z-50 border-b border-hud-rule bg-hud-page/80 backdrop-blur-xl">
-                <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-2 px-3 sm:gap-3 sm:px-4">
+            <header className="game-shell-header hud-surface sticky top-0 z-50 border-b border-hud-rule bg-hud-page/80 backdrop-blur-xl">
+                <div className="game-shell-inner mx-auto flex h-14 max-w-[1400px] items-center gap-2 px-3 sm:gap-3 sm:px-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button

@@ -139,3 +139,19 @@
 .hud-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 9999px; background: var(--hud-gold, #c9b37a); border: 2px solid var(--palette-primary-foreground, #2a1d05); box-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
 .hud-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 9999px; background: var(--hud-gold, #c9b37a); border: 2px solid var(--palette-primary-foreground, #2a1d05); }
 .hud-range:focus-visible { outline: 2px solid var(--color-hud-gold-bright, #ffe08a); outline-offset: 2px; border-radius: 9999px; }
+
+/* wide monitors: widen the game shell, then scale it up (layout stays that of a 1800px screen) */
+@media (min-width: 1800px) {
+    .game-shell-inner,
+    .hud-page.hud-wide { max-width: 1680px; }
+}
+@media (min-width: 2400px) {
+    .game-shell-header,
+    .hud-page.hud-wide { zoom: 1.2; }
+    .game-shell-inner,
+    .hud-page.hud-wide { max-width: 1800px; }
+}
+@media (min-width: 3200px) {
+    .game-shell-header,
+    .hud-page.hud-wide { zoom: 1.6; }
+}

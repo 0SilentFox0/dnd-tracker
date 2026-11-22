@@ -208,7 +208,7 @@ export default async function CampaignDetailPage({
     const hasDmParty = (dm?.party.length ?? 0) > 0;
 
     const page = (
-        <HudPage className="campaign-dashboard">
+        <HudPage className="campaign-dashboard hud-wide">
             <HudPanel as="div" className="dashboard-hero" data-tour="dashboard.header">
                 <div className="dashboard-hero-art" aria-hidden="true">
                     <OptimizedImage
@@ -330,8 +330,8 @@ export default async function CampaignDetailPage({
                 </div>
 
                 {isDM && !isTemplate && dm && (
-                    <aside className="relative min-w-0 lg:col-span-4">
-                        <div className="flex flex-col gap-4 lg:absolute lg:inset-0 [&>*]:min-h-0 [&>*]:flex-1 [&>*]:overflow-y-auto">
+                    <aside className="min-w-0 lg:col-span-4">
+                        <div className="flex h-full flex-col gap-4 [&>*:first-child]:flex-1">
                         <DmPrepPanel campaignId={id} data={dm} />
                         <CampaignRecentSession
                             campaignId={id}
