@@ -922,6 +922,7 @@ model ScenarioPage {
   title       String
   subtitle    String?
   status      String                @default("draft")
+  playedAt    DateTime?
   sortOrder   Int                   @default(0)
   characterId String?
   content     Json                  @default("{\"legend\":[],\"sections\":[]}")

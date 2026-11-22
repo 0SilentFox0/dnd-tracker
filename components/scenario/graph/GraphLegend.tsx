@@ -22,7 +22,7 @@ export function GraphLegend({ showSequence }: { showSequence: boolean }) {
             role="group"
         >
             <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                {(['draft', 'ready', 'personal'] as const).map((s) => (
+                {(['draft', 'ready', 'played', 'personal'] as const).map((s) => (
                     <span key={s} className={item}>
                         <span
                             className="h-3.5 w-1 rounded-sm"

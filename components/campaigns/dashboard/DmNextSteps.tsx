@@ -26,7 +26,7 @@ export function DmNextSteps({
             <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
                 {t('nextSteps.title')}
             </h2>
-            <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2">
+            <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">
                 {sections.map(({ key, href, icon: Icon }) => (
                     <Button
                         asChild
@@ -36,7 +36,7 @@ export function DmNextSteps({
                     >
                         <Link href={href(campaignId)}>
                             <Icon aria-hidden className="size-4 shrink-0" />
-                            <span className="truncate">
+                            <span className="line-clamp-2 text-left">
                                 {t(`sections.${key}.title`)}
                             </span>
                         </Link>
@@ -52,7 +52,7 @@ export function DmNextSteps({
                         aria-label={t('page.compendium.link')}
                     >
                         <Database aria-hidden className="size-4 shrink-0" />
-                        <span className="truncate">
+                        <span className="line-clamp-2 text-left">
                             {t('page.compendium.action')}
                         </span>
                     </Link>

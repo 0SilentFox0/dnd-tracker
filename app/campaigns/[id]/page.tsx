@@ -415,6 +415,7 @@ export default async function CampaignDetailPage({
                         context={context}
                         hiddenKeys={hiddenKeys}
                         hostsDmBlocks={isDM && !isTemplate && !!dm}
+                        libraryCounts={dm?.libraryCounts}
                     />
                 </div>
             </div>

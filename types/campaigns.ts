@@ -159,12 +159,11 @@ export interface DmDashboardData {
     sourceUpdate: { sourceVersion: number } | null;
     latestSession: {
         id: string;
-        name: string;
-        description: string | null;
-        startedAt: string;
-        endedAt: string | null;
-        locations: string[];
+        title: string;
+        subtitle: string | null;
+        playedAt: string | null;
     } | null;
+    libraryCounts: Record<string, number>;
     party: {
         id: string;
         name: string;

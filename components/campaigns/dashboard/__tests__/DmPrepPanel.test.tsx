@@ -14,6 +14,7 @@ const empty: DmDashboardData = {
     battles: [],
     sourceUpdate: null,
     latestSession: null,
+    libraryCounts: {},
     party: [],
     worldMap: null,
 };
@@ -66,6 +67,8 @@ describe('DmPrepPanel', () => {
                     ],
                     sourceUpdate: null,
                     latestSession: null,
+                    libraryCounts: {},
+    libraryCounts: {},
                     party: [],
                     worldMap: null,
                 }}

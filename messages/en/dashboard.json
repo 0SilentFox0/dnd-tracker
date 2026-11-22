@@ -164,11 +164,10 @@
     "pending": "Awaiting approval: {count}"
   },
   "recentSession": {
-    "title": "Latest session",
-    "empty": "No sessions yet. Start a session on the world map.",
-    "openWorld": "World log",
-    "active": "In progress",
-    "ended": "Ended"
+    "title": "Last played scene",
+    "empty": "No scenes played yet. Mark a scene as “Played” in the scenario.",
+    "open": "Open scene",
+    "openScenario": "Open scenario"
   },
   "party": {
     "title": "Party",

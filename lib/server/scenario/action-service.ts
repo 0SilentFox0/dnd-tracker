@@ -426,6 +426,12 @@ async function saveContent(
     );
 }
 
+function playedAtChange(from: string, to: string | undefined) {
+    if (to === undefined || to === from) return {};
+
+    return { playedAt: to === 'played' ? new Date() : null };
+}
+
 const PAGE_HANDLERS: Record<string, PageHandler> = {
     meta: async ({ actor, input, page, id, result }) => {
         const body = parseInput(updateScenarioMetaSchema, input.patch);
@@ -439,6 +445,7 @@ const PAGE_HANDLERS: Record<string, PageHandler> = {
                     where: { id: page.id },
                     data: {
                         ...body,
+                        ...playedAtChange(page.status, body.status),
                         ...contentWrite(
                             body.title ?? page.title,
                             readContentStrict(page.content)

@@ -195,7 +195,8 @@
   "pageStatuses": {
     "draft": "In progress",
     "personal": "Personal",
-    "ready": "Ready"
+    "ready": "Ready",
+    "played": "Played"
   },
   "play": {
     "battleDone": "Battle finished",

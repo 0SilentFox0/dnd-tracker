@@ -32,7 +32,8 @@
     "personal": "Personal",
     "sequence": "Story order",
     "missing": "Deleted",
-    "secret": "Secret link"
+    "secret": "Secret link",
+    "played": "Played"
   },
   "limits": {
     "overLimit": "The graph is large and may be slow. Narrow it with filters.",

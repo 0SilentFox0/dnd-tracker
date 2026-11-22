@@ -8,32 +8,42 @@ import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 afterEach(cleanup);
 
 describe('campaign activity panels', () => {
-    it('renders only stored session details and links to the world log', async () => {
+    it('shows the last played scene with its played date and a scene link', async () => {
         await renderWithIntl(
             <CampaignRecentSession
                 campaignId="c1"
                 session={{
                     id: 's1',
-                    name: 'Session 4',
-                    description: 'The party reached the old bridge.',
-                    startedAt: '2026-11-21T18:00:00.000Z',
-                    endedAt: null,
-                    locations: ['Old bridge'],
+                    title: 'The old bridge',
+                    subtitle: 'The party crossed at dusk.',
+                    playedAt: '2026-11-21T18:00:00.000Z',
                 }}
             />,
             { locale: 'uk', namespaces: ['common', 'dashboard'] }
         );
 
-        expect(screen.getByText('Session 4')).toBeTruthy();
-        expect(screen.getByText('The party reached the old bridge.')).toBeTruthy();
-        expect(screen.getByText('Old bridge')).toBeTruthy();
-        expect(screen.getByText('dashboard.recentSession.active')).toBeTruthy();
+        expect(screen.getByText('The old bridge')).toBeTruthy();
+        expect(screen.getByText('The party crossed at dusk.')).toBeTruthy();
+        expect(
+            screen
+                .getByRole('link', { name: 'dashboard.recentSession.open' })
+                .getAttribute('href')
+        ).toBe('/campaigns/c1/dm/scenario/s1');
+    });
+
+    it('offers the scenario when nothing has been played', async () => {
+        await renderWithIntl(
+            <CampaignRecentSession campaignId="c1" session={null} />,
+            { locale: 'uk', namespaces: ['common', 'dashboard'] }
+        );
+
+        expect(screen.getByText('dashboard.recentSession.empty')).toBeTruthy();
         expect(
             screen
                 .getByRole('link', {
-                    name: 'dashboard.recentSession.openWorld',
+                    name: 'dashboard.recentSession.openScenario',
                 })
                 .getAttribute('href')
-        ).toBe('/campaigns/c1/dm/world');
+        ).toBe('/campaigns/c1/dm/scenario');
     });
 });

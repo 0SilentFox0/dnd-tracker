@@ -195,7 +195,8 @@
   "pageStatuses": {
     "draft": "У роботі",
     "personal": "Особиста",
-    "ready": "Готова"
+    "ready": "Готова",
+    "played": "Зіграно"
   },
   "play": {
     "battleDone": "Бій завершено",

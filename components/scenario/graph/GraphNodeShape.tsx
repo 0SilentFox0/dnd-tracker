@@ -16,6 +16,7 @@ import type { PositionedNode } from '@/lib/utils/scenario/graph/layout';
 export const GRAPH_STATUS_COLOR = {
     draft: 'var(--color-hud-gold-bright)',
     ready: 'var(--color-hud-good)',
+    played: 'var(--color-hud-good-dim)',
     personal: 'var(--color-chart-2)',
 } as const;
 

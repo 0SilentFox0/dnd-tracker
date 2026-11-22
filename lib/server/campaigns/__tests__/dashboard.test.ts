@@ -2,13 +2,37 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({
     character: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn() },
-    scenarioPage: { findMany: vi.fn() },
+    scenarioPage: { findMany: vi.fn(), findFirst: vi.fn() },
     battleScene: { findMany: vi.fn() },
     battleParticipant: { findFirst: vi.fn() },
     worldMap: { count: vi.fn(), findFirst: vi.fn() },
-    worldSession: { findFirst: vi.fn() },
+    battleMap: { count: vi.fn() },
+    unit: { count: vi.fn() },
+    spell: { count: vi.fn() },
+    artifact: { count: vi.fn() },
+    skill: { count: vi.fn() },
+    race: { count: vi.fn() },
+    gameClass: { count: vi.fn() },
+    background: { count: vi.fn() },
+    feat: { count: vi.fn() },
+    career: { count: vi.fn() },
+    spellGroup: { count: vi.fn() },
     campaign: { findUnique: vi.fn() },
 }));
+
+const COUNT_MODELS = [
+    'battleMap',
+    'unit',
+    'spell',
+    'artifact',
+    'skill',
+    'race',
+    'gameClass',
+    'background',
+    'feat',
+    'career',
+    'spellGroup',
+] as const;
 
 const latestPublishedVersion = vi.hoisted(() => vi.fn());
 
@@ -38,7 +62,8 @@ beforeEach(() => {
     db.scenarioPage.findMany.mockResolvedValue([{ id: 'p1', title: 'Акт 1' }]);
     db.battleScene.findMany.mockResolvedValue([]);
     db.worldMap.findFirst.mockResolvedValue(null);
-    db.worldSession.findFirst.mockResolvedValue(null);
+    db.scenarioPage.findFirst.mockResolvedValue(null);
+    for (const model of COUNT_MODELS) db[model].count.mockResolvedValue(0);
     db.campaign.findUnique.mockResolvedValue({ createdFromId: null });
 });
 
@@ -56,6 +81,7 @@ describe('readDmDashboard', () => {
             battles: [{ id: 'b1', name: 'Бій', status: 'prepared' }],
             sourceUpdate: null,
             latestSession: null,
+            libraryCounts: expect.objectContaining({ units: 0, maps: 0 }),
             party: [],
             worldMap: null,
         });
@@ -124,33 +150,30 @@ describe('readDmDashboard', () => {
         );
     });
 
-    it('returns the latest saved world session with real locations', async () => {
-        db.worldSession.findFirst.mockResolvedValue({
+    it('returns the last scene that moved to played, with real library counts', async () => {
+        db.scenarioPage.findFirst.mockResolvedValue({
             id: 's1',
-            name: 'Session 4',
-            description: 'The party reached the old bridge.',
-            startedAt: new Date('2026-11-21T18:00:00.000Z'),
-            endedAt: null,
-            logs: [
-                { toMarker: { name: 'Old bridge' }, map: { name: 'Northwood' } },
-                { toMarker: null, map: { name: 'Northwood' } },
-            ],
+            title: 'The old bridge',
+            subtitle: 'Dusk',
+            playedAt: new Date('2026-11-21T18:00:00.000Z'),
         });
+        db.unit.count.mockResolvedValue(152);
 
         const res = await readDmDashboard('c1');
 
         expect(res.latestSession).toEqual({
             id: 's1',
-            name: 'Session 4',
-            description: 'The party reached the old bridge.',
-            startedAt: '2026-11-21T18:00:00.000Z',
-            endedAt: null,
-            locations: ['Old bridge', 'Northwood'],
+            title: 'The old bridge',
+            subtitle: 'Dusk',
+            playedAt: '2026-11-21T18:00:00.000Z',
         });
-        expect(db.worldSession.findFirst).toHaveBeenCalledWith(
+        expect(res.libraryCounts.units).toBe(152);
+        expect(db.unit.count).toHaveBeenCalledWith({
+            where: { campaignId: 'c1' },
+        });
+        expect(db.scenarioPage.findFirst).toHaveBeenCalledWith(
             expect.objectContaining({
-                where: { campaignId: 'c1' },
-                orderBy: { startedAt: 'desc' },
+                where: { campaignId: 'c1', kind: 'scene', status: 'played' },
             })
         );
     });

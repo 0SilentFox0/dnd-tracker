@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import { NewPill } from '@/components/common/entity/NewPill';
-import { HudPanel, HudTile } from '@/components/hud/page';
+import { HudPanel, HudPill, HudTile } from '@/components/hud/page';
 import {
     type DashboardContext,
     type DashboardSection,
@@ -31,6 +31,7 @@ export function DashboardGroups({
     context = DEFAULT_DASHBOARD_CONTEXT,
     hiddenKeys,
     hostsDmBlocks = false,
+    libraryCounts,
 }: {
     campaignId: string;
     isDM: boolean;
@@ -39,6 +40,7 @@ export function DashboardGroups({
     context?: DashboardContext;
     hiddenKeys?: string[];
     hostsDmBlocks?: boolean;
+    libraryCounts?: Record<string, number>;
 }) {
     const t = useTranslator('dashboard');
 
@@ -80,7 +82,9 @@ export function DashboardGroups({
                 title={t(`sections.${s.key}.title`)}
                 subtitle={subtitle}
                 badge={
-                    isPlayer &&
+                    libraryCounts?.[s.key] !== undefined ? (
+                        <HudPill tone="muted">{libraryCounts[s.key]}</HudPill>
+                    ) : isPlayer &&
                     hasUnread(
                         notifications,
                         NOTIFICATION_TILE_TYPES[s.key] ?? []

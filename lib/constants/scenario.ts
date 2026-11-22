@@ -1,6 +1,6 @@
 // types/scenario.ts derives its unions from these arrays, so this file must not import from it (import/no-cycle)
 export const PAGE_KINDS = ['scene', 'hero', 'note'] as const;
-export const PAGE_STATUSES = ['draft', 'ready', 'personal'] as const;
+export const PAGE_STATUSES = ['draft', 'ready', 'played', 'personal'] as const;
 export const CALLOUT_KINDS = [
     'choice',
     'shadow',

@@ -54,6 +54,34 @@ export async function sourceUpdateState(
     };
 }
 
+const COUNT_ENTRIES = [
+    ['maps', (where: Where) => prisma.battleMap.count({ where })],
+    ['units', (where: Where) => prisma.unit.count({ where })],
+    ['spells', (where: Where) => prisma.spell.count({ where })],
+    ['artifacts', (where: Where) => prisma.artifact.count({ where })],
+    ['skills', (where: Where) => prisma.skill.count({ where })],
+    ['races', (where: Where) => prisma.race.count({ where })],
+    ['classes', (where: Where) => prisma.gameClass.count({ where })],
+    ['backgrounds', (where: Where) => prisma.background.count({ where })],
+    ['feats', (where: Where) => prisma.feat.count({ where })],
+    ['careers', (where: Where) => prisma.career.count({ where })],
+    ['spell-groups', (where: Where) => prisma.spellGroup.count({ where })],
+] as const;
+
+type Where = { campaignId: string };
+
+async function readLibraryCounts(
+    campaignId: string
+): Promise<Record<string, number>> {
+    const counts = await Promise.all(
+        COUNT_ENTRIES.map(([, count]) => count({ campaignId }))
+    );
+
+    return Object.fromEntries(
+        COUNT_ENTRIES.map(([key], index) => [key, counts[index]])
+    );
+}
+
 export async function readDmDashboard(
     campaignId: string
 ): Promise<DmDashboardData> {
@@ -64,13 +92,18 @@ export async function readDmDashboard(
         update,
         party,
         worldMap,
-        session,
+        playedScene,
+        libraryCounts,
     ] = await Promise.all([
         prisma.character.count({
             where: { campaignId, status: CharacterStatus.PENDING },
         }),
         prisma.scenarioPage.findMany({
-            where: { campaignId },
+            where: {
+                campaignId,
+                kind: 'scene',
+                status: { in: ['draft', 'ready'] },
+            },
             orderBy: { updatedAt: 'desc' },
             take: 3,
             select: { id: true, title: true },
@@ -109,25 +142,12 @@ export async function readDmDashboard(
             orderBy: { createdAt: 'asc' },
             select: { id: true, name: true, imageUrl: true },
         }),
-        prisma.worldSession.findFirst({
-            where: { campaignId },
-            orderBy: { startedAt: 'desc' },
-            select: {
-                id: true,
-                name: true,
-                description: true,
-                startedAt: true,
-                endedAt: true,
-                logs: {
-                    orderBy: { createdAt: 'desc' },
-                    take: 3,
-                    select: {
-                        toMarker: { select: { name: true } },
-                        map: { select: { name: true } },
-                    },
-                },
-            },
+        prisma.scenarioPage.findFirst({
+            where: { campaignId, kind: 'scene', status: 'played' },
+            orderBy: { playedAt: { sort: 'desc', nulls: 'last' } },
+            select: { id: true, title: true, subtitle: true, playedAt: true },
         }),
+        readLibraryCounts(campaignId),
     ]);
 
     const activeFirst = [...battles].sort(
@@ -143,18 +163,15 @@ export async function readDmDashboard(
         sourceUpdate: update?.hasUpdates
             ? { sourceVersion: update.sourceVersion }
             : null,
-        latestSession: session
+        latestSession: playedScene
             ? {
-                  id: session.id,
-                  name: session.name,
-                  description: session.description,
-                  startedAt: session.startedAt.toISOString(),
-                  endedAt: session.endedAt?.toISOString() ?? null,
-                  locations: session.logs.map(
-                      (log) => log.toMarker?.name ?? log.map.name
-                  ),
+                  id: playedScene.id,
+                  title: playedScene.title,
+                  subtitle: playedScene.subtitle,
+                  playedAt: playedScene.playedAt?.toISOString() ?? null,
               }
             : null,
+        libraryCounts,
         party,
         worldMap,
     };
