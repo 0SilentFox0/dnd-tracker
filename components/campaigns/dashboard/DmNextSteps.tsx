@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import { DM_DASHBOARD_SECTIONS } from '@/lib/constants/campaign-dashboard';
 import { useTranslator } from '@/lib/i18n/use-translator';
 
+const TILE =
+    'h-full min-h-20 flex-col justify-center gap-1.5 whitespace-normal px-2 py-3';
+
 export function DmNextSteps({
     campaignId,
     sectionKeys,
@@ -32,11 +35,11 @@ export function DmNextSteps({
                         asChild
                         key={key}
                         variant="outline"
-                        className="h-full min-h-11 justify-start"
+                        className={TILE}
                     >
                         <Link href={href(campaignId)}>
-                            <Icon aria-hidden className="size-4 shrink-0" />
-                            <span className="line-clamp-2 text-left">
+                            <Icon aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                            <span className="line-clamp-2 text-center text-xs leading-tight">
                                 {t(`sections.${key}.title`)}
                             </span>
                         </Link>
@@ -45,14 +48,14 @@ export function DmNextSteps({
                 <Button
                     asChild
                     variant="outline"
-                    className="h-full min-h-11 justify-start"
+                    className={TILE}
                 >
                     <Link
                         href={`/campaigns/${campaignId}/dm/compendium`}
                         aria-label={t('page.compendium.link')}
                     >
-                        <Database aria-hidden className="size-4 shrink-0" />
-                        <span className="line-clamp-2 text-left">
+                        <Database aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                        <span className="line-clamp-2 text-center text-xs leading-tight">
                             {t('page.compendium.action')}
                         </span>
                     </Link>
