@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "My Campaigns",
-    "new": "+ New Campaign",
+    "new": "New Campaign",
     "templates": "My templates",
     "dbError": {
       "title": "Database connection error",
@@ -17,7 +17,9 @@
     "empty": {
       "title": "You have no campaigns yet",
       "action": "Create your first campaign"
-    }
+    },
+    "archived": "Archived",
+    "active": "Active"
   },
   "demo": {
     "title": "Example Demo",
@@ -26,7 +28,8 @@
   "card": {
     "level": "Level: up to {level}",
     "players": "Players: {count}",
-    "inviteCode": "Invite code:"
+    "inviteCode": "Invite code:",
+    "continue": "Continue"
   },
   "roles": {
     "dm": "DM",
@@ -67,6 +70,9 @@
     "title": "Campaign settings",
     "description": "Update the campaign's main parameters",
     "campaign": "Campaign",
+    "coverImage": "Campaign cover",
+    "coverImageHint": "The default image is used when no cover is set.",
+    "useDefaultCover": "Use default image",
     "name": "Name",
     "descriptionLabel": "Description",
     "rules": "Rules",

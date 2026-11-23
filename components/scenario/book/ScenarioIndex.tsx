@@ -37,7 +37,11 @@ function IndexRow({
                 </Link>
                 {page.subtitle && <span className="d">{page.subtitle}</span>}
             </span>
-            <span className={page.status === 'ready' ? 'st ok' : 'st'}>
+            <span className={page.status === 'played'
+                    ? 'st played'
+                    : page.status === 'ready'
+                      ? 'st ok'
+                      : 'st'}>
                 {t(`pageStatuses.${page.status}`)}
             </span>
             {onMove && (

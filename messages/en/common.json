@@ -111,12 +111,36 @@
     "watchShow": "Show",
     "palette": {
       "label": "Color theme",
-      "names": { "tavern": "Tavern", "midnight": "Midnight", "forest": "Forest", "parchment": "Parchment", "amethyst": "Amethyst", "frost": "Frost" },
-      "errors": { "load": "Couldn't load the theme", "save": "Couldn't save the theme" }
+      "names": {
+        "tavern": "Tavern",
+        "midnight": "Midnight",
+        "forest": "Forest",
+        "parchment": "Parchment",
+        "amethyst": "Amethyst",
+        "frost": "Frost"
+      },
+      "errors": {
+        "load": "Couldn't load the theme",
+        "save": "Couldn't save the theme"
+      }
     },
     "watchShowAria": "Watch the show",
     "joinBattle": "Join battle",
     "joinBattleAria": "Join the battle"
+  },
+  "gameNavigation": {
+    "label": "Game sections",
+    "openMenu": "Open sections menu",
+    "breadcrumb": "Current screen",
+    "campaigns": "Campaigns",
+    "campaign": "Campaign",
+    "dashboard": "Dashboard",
+    "battle": "Battle",
+    "world": "World map",
+    "character": "Character",
+    "scenario": "Scenario",
+    "show": "Show",
+    "journal": "Journal"
   },
   "breadcrumbs": {
     "label": "Breadcrumb",

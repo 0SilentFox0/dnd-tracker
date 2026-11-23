@@ -242,6 +242,7 @@ export interface SystemDrafts {
 /** A content kind a module owns: its CRUD resource, an export mapper and the schemas it adds to the OpenAPI components */
 export interface ContentKindServer {
     resource: AnyContentResource;
+    count?(campaignId: string): Promise<number>;
     toImportRecord?(row: never): ImportRecord;
     sharedSchemas?: readonly (readonly [ZodType, string])[];
 }

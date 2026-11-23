@@ -41,6 +41,7 @@ interface WorldPinsProps {
         box: { width: number; height: number };
         compact?: boolean;
         cluster?: boolean;
+        touchTargets?: boolean;
     };
     labels?: { hoveredId?: string | null; fogless?: boolean };
     selectedId?: string | null;
@@ -88,7 +89,11 @@ export function WorldPins({
 
     const clusters = screen?.cluster === false ? null : screen?.box;
 
-    const threshold = compact ? PIN_CLUSTER_PX_COMPACT : PIN_CLUSTER_PX;
+    const threshold = screen?.touchTargets
+        ? 44
+        : compact
+          ? PIN_CLUSTER_PX_COMPACT
+          : PIN_CLUSTER_PX;
 
     const grouped = new Map<string, PixelCluster<WorldMarker>>();
 
@@ -194,12 +199,15 @@ export function WorldPins({
                             zoom={zoom}
                             nextZoom={
                                 clusters
-                                    ? clusterZoom(group.items.map(markerAnchor), {
-                                          zoom,
-                                          box: clusters,
-                                          threshold,
-                                          maxZoom: WORLD_MAX_ZOOM,
-                                      })
+                                    ? clusterZoom(
+                                          group.items.map(markerAnchor),
+                                          {
+                                              zoom,
+                                              box: clusters,
+                                              threshold,
+                                              maxZoom: WORLD_MAX_ZOOM,
+                                          }
+                                      )
                                     : null
                             }
                             actions={{

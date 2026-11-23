@@ -8,6 +8,7 @@ export interface Campaign {
     id: string;
     name: string;
     description?: string;
+    coverImage?: string | null;
     inviteCode?: string;
     dmUserId: string;
     maxLevel: number;
@@ -77,6 +78,7 @@ export interface CampaignMember {
 export interface CampaignSettings {
     name: string;
     description: string | null;
+    coverImage: string | null;
     maxLevel: number;
     allowPlayerEdit: boolean;
     critChoiceByDm: boolean;
@@ -155,6 +157,26 @@ export interface DmDashboardData {
     scenarioPages: { id: string; title: string }[];
     battles: { id: string; name: string; status: BattleStatus }[];
     sourceUpdate: { sourceVersion: number } | null;
+    latestSession: {
+        id: string;
+        title: string;
+        subtitle: string | null;
+        playedAt: string | null;
+        lastChapter: { id: string; title: string } | null;
+        nextChapter: { id: string; title: string } | null;
+    } | null;
+    libraryCounts: Record<string, number>;
+    party: {
+        id: string;
+        name: string;
+        level: number;
+        race: string;
+        class: string;
+        avatar: string | null;
+        armorClass: number;
+        speed: number;
+    }[];
+    worldMap: { id: string; name: string; imageUrl: string } | null;
 }
 
 export interface DashboardHero {

@@ -136,6 +136,7 @@ html.dark .scenario-book:not([data-theme]) {
 .scenario-book .sb-index-row .d { display: block; font-family: var(--font-scenario-sans), sans-serif; font-size: 15.5px; color: var(--ink-soft); margin-top: 2px; }
 .scenario-book .sb-index-row .st { font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; white-space: nowrap; color: var(--ink-soft); }
 .scenario-book .sb-index-row .st.ok { color: var(--gold); font-weight: 700; }
+.scenario-book .sb-index-row .st.played { color: var(--hud-bad); font-weight: 700; }
 .scenario-book .sb-index-row .mv { display: inline-flex; gap: 2px; color: var(--ink-soft); }
 .scenario-book .sb-index-row .mv button { background: none; border: 0; padding: 4px; cursor: pointer; color: inherit; }
 .scenario-book .sb-index .arc { font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; color: var(--ink-soft); margin: 22px 0 4px; }

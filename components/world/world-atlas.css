@@ -242,3 +242,800 @@
   background: #b91c1c;
   border: 1px solid var(--atlas-paper);
 }
+
+.world-game-page {
+  max-width: none;
+}
+
+.world-glass {
+  border: 1px solid var(--color-hud-rule);
+  background: color-mix(in srgb, var(--color-hud-panel) 84%, transparent);
+  color: var(--color-hud-ink);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 14px 38px rgb(0 0 0 / 24%);
+}
+
+.world-journey {
+  position: absolute;
+  z-index: 12;
+  inset-inline-start: .9rem;
+  top: 50%;
+  width: clamp(13rem, 18vw, 18rem);
+  transform: translateY(-50%);
+  padding: .5rem;
+  border-radius: 16px;
+}
+
+.world-journey-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .35rem;
+  padding: 0 .125rem .4rem;
+}
+
+.world-journey-heading {
+  margin-inline-start: .35rem;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .055em;
+  color: var(--color-hud-ink);
+}
+
+.world-journey-sections {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: .2rem;
+}
+
+.world-journey-rows {
+  display: flex;
+  min-width: 0;
+  max-height: min(23rem, 47dvh);
+  flex-direction: column;
+  gap: .25rem;
+  overflow: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hud-rule) transparent;
+}
+
+.world-journey-result {
+  display: flex;
+  min-width: 0;
+  flex: none;
+  align-items: center;
+  border: 1px solid var(--color-hud-rule);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-hud-field) 85%, transparent);
+}
+
+.world-journey-result:hover,
+.world-journey-result:focus-within,
+.world-journey-result[data-current] {
+  border-color: var(--color-hud-gold);
+}
+
+.world-journey-result[data-current] {
+  background: color-mix(in srgb, var(--color-hud-gold) 16%, var(--color-hud-field));
+}
+
+.world-journey-place {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .5rem;
+  border-radius: 9px;
+  padding: .25rem .45rem;
+  text-align: start;
+  font-size: .875rem;
+  line-height: 1.2;
+}
+
+.world-journey-place > :last-child {
+  display: grid;
+  gap: .1rem;
+}
+
+.world-journey-glyph,
+.world-journey-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--color-hud-muted);
+}
+
+.world-journey-glyph {
+  width: 1.65rem;
+  height: 1.65rem;
+  background: var(--color-hud-raised);
+}
+
+.world-journey-glyph svg,
+.world-journey-icon svg,
+.world-zoom-controls svg {
+  display: block;
+}
+
+.world-journey-icon {
+  width: 2.15rem;
+  min-height: 2.15rem;
+}
+
+.world-journey-mobile-places {
+  display: none;
+}
+
+.world-journey-enter {
+  min-height: 44px;
+  border-inline-start: 1px solid var(--color-hud-rule);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.world-journey-icon:hover,
+.world-journey-icon:focus-visible,
+.world-journey-result[data-current] .world-journey-glyph {
+  background: var(--color-hud-raised);
+  color: var(--color-hud-gold);
+}
+
+.world-journey-empty {
+  padding: .55rem;
+}
+
+.world-journey-search button {
+  min-height: 40px;
+}
+
+.world-scene-heading {
+  position: absolute;
+  z-index: 11;
+  top: .65rem;
+  left: 50%;
+  max-width: calc(100% - 1.25rem);
+  transform: translateX(-50%);
+  border-radius: 10px;
+  padding: .38rem .7rem;
+  color: var(--color-hud-ink);
+}
+
+.world-scene-heading [aria-current="page"] {
+  color: var(--color-hud-gold);
+}
+
+.world-game-page .world-map-filter-legend {
+  top: 3.8rem;
+  max-width: min(23rem, calc(100% - 4rem));
+}
+
+.world-filter-trigger:hover {
+  background: var(--color-hud-field);
+  color: var(--color-hud-gold);
+}
+
+.world-map-filter-sheet {
+  display: grid;
+  gap: .5rem;
+}
+
+.world-map-filter-sheet nav {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.world-map-filter-sheet nav button {
+  width: fit-content;
+  max-width: 100%;
+  height: auto;
+  min-height: 44px;
+  padding-block: .375rem;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.world-map-filter-sheet nav button [aria-hidden] {
+  flex-shrink: 0;
+}
+
+.world-game-toolbar {
+  position: relative;
+  z-index: 2;
+  padding: .375rem .65rem .45rem;
+  background: var(--color-hud-page);
+}
+
+.world-game-toolbar [data-slot="world-toolbar"] {
+  margin-inline: auto;
+  max-width: 100rem;
+  border-radius: 12px;
+  background: var(--color-hud-panel);
+}
+
+.world-game-toolbar [role="group"] > button,
+.world-game-toolbar [data-slot="toolbar-extras"] button {
+  align-items: center;
+  border-radius: 9px;
+}
+
+.world-game-toolbar [data-slot="toolbar-extras"] button {
+  min-height: 40px;
+  line-height: 1.2;
+}
+
+.world-game-toolbar [role="group"] > button:not([aria-pressed="true"]) {
+  background: var(--color-hud-field);
+  color: var(--color-hud-ink);
+}
+
+.world-game-toolbar [data-slot="toolbar-extras"] {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.world-editor-sections {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: .125rem;
+  min-width: 14rem;
+  padding: .125rem;
+  border: 1px solid var(--color-hud-rule);
+  border-radius: 10px;
+  background: var(--color-hud-field);
+}
+
+.world-editor-sections [data-slot="world-mode-switch"] {
+  display: grid;
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+  gap: inherit;
+}
+
+.world-game-toolbar .world-editor-sections button {
+  justify-content: center;
+  border-color: transparent;
+  border-radius: 7px;
+  padding-inline: .25rem;
+  font-size: .75rem;
+}
+
+.world-game-toolbar .world-editor-sections button[aria-pressed="false"] {
+  background: transparent;
+}
+
+.world-game-toolbar .world-editor-sections button:hover,
+.world-game-toolbar .world-editor-sections button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-hud-gold) 13%, var(--color-hud-field));
+  color: var(--color-hud-ink);
+}
+
+.world-game-toolbar .world-editor-sections button[aria-pressed="true"] {
+  border-color: var(--color-hud-gold);
+}
+
+.world-game-toolbar [data-slot="world-hero-eyes"] {
+  width: 9.5rem;
+  max-width: 100%;
+  margin-inline-start: auto;
+  background: var(--color-hud-field);
+}
+
+.world-game-toolbar [data-slot="world-hero-eyes"]:has([role="combobox"]:focus-visible) {
+  outline: 2px solid var(--color-hud-gold);
+  outline-offset: 2px;
+}
+
+html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigger"][role="combobox"] {
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+.world-zoom-controls {
+  gap: .125rem;
+  border-radius: 12px;
+  padding: .2rem;
+}
+
+.atlas-map[data-world-game] .atlas-zoom {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-hud-ink);
+}
+
+.atlas-map[data-world-game] .atlas-zoom:hover,
+.atlas-map[data-world-game] .atlas-zoom:focus-visible {
+  background: var(--color-hud-raised);
+  color: var(--color-hud-gold);
+}
+
+.atlas-map[data-world-game] [data-tour="world.bubble"] {
+  border-radius: 12px;
+  background: var(--color-hud-panel);
+  backdrop-filter: blur(14px);
+}
+
+.world-map-legend {
+  position: absolute;
+  z-index: 11;
+  inset-inline-end: 4.25rem;
+  bottom: .75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .75rem;
+  border-radius: 10px;
+  padding: .4rem .65rem;
+  font-size: .75rem;
+  color: var(--color-hud-muted);
+}
+
+.world-map-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.world-map-symbol {
+  display: inline-block;
+  flex: none;
+  width: .55rem;
+  height: .55rem;
+  transform: rotate(45deg);
+  border: 1px solid var(--color-hud-gold);
+  background: var(--color-hud-field);
+}
+
+.world-map-symbol-party {
+  background: var(--color-hud-gold);
+  box-shadow: 0 0 6px var(--color-hud-gold);
+}
+
+.world-map-symbol-fog {
+  transform: none;
+  border: 1px dashed var(--color-hud-muted);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.atlas-map[data-world-game] .atlas-pin {
+  display: inline-flex;
+  gap: .45rem;
+  min-width: 24px;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+.atlas-map[data-world-game] .atlas-seal {
+  width: 13px;
+  height: 13px;
+  transform: rotate(45deg);
+  border: 1px solid var(--color-hud-gold);
+  border-radius: 2px;
+  background: var(--color-hud-field);
+}
+
+.atlas-map[data-world-game] .atlas-seal > svg {
+  transform: rotate(-45deg);
+  width: 9px;
+  height: 9px;
+  color: var(--color-hud-ink);
+}
+
+.atlas-map[data-world-game] .atlas-pin[data-selected="true"] .atlas-seal {
+  background: var(--color-hud-gold);
+  box-shadow: 0 0 9px var(--color-hud-gold);
+}
+
+.atlas-map[data-world-game] .atlas-label,
+.atlas-party-label {
+  border: 1px solid var(--color-hud-rule);
+  border-radius: 8px;
+  background: var(--color-hud-panel);
+  color: var(--color-hud-ink);
+  padding: .25rem .45rem;
+  box-shadow: 0 3px 14px rgb(0 0 0 / 25%);
+  font-size: .75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  -webkit-text-stroke: 0;
+}
+
+.atlas-map[data-world-game] .atlas-hero > :first-child {
+  max-width: 30px;
+  max-height: 30px;
+}
+
+.atlas-map[data-world-game] .atlas-hero[data-party] {
+  z-index: 2;
+  overflow: visible;
+  border: 2px solid var(--color-hud-gold);
+  background: var(--color-hud-panel);
+  box-shadow: 0 0 13px var(--color-hud-gold);
+}
+
+.atlas-party-label {
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  transform: translateX(-50%);
+  border-color: var(--color-hud-gold);
+  white-space: nowrap;
+}
+
+.atlas-map[data-world-game] .atlas-zoom {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (width < 64rem) {
+  .world-journey {
+    inset: auto .5rem .5rem;
+    width: auto;
+    transform: none;
+    padding: .25rem;
+  }
+
+  .world-journey-header {
+    padding: 0;
+  }
+
+  .world-journey-heading,
+  .world-journey-inline {
+    display: none;
+  }
+
+  .world-journey-sections {
+    width: 100%;
+  }
+
+  .world-journey-sections .world-journey-icon {
+    width: auto;
+    min-width: 0;
+    min-height: 48px;
+    flex: 1;
+    align-content: center;
+    gap: .2rem;
+    padding: .15rem;
+  }
+
+  .world-journey-sections .world-journey-icon::after {
+    content: attr(title);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .65rem;
+    line-height: 1.15;
+  }
+
+  .world-journey-sections .world-journey-mobile-places {
+    display: inline-grid;
+  }
+
+  .world-journey-sheet .world-journey-rows {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .world-journey-sheet .world-journey-enter {
+    width: 44px;
+    min-height: 44px;
+  }
+
+  .world-scene-heading button,
+  .world-game-toolbar [data-slot="toolbar-extras"] button {
+    min-height: 44px;
+  }
+
+  .world-game-toolbar {
+    padding-inline: .375rem;
+  }
+
+  .world-game-toolbar [data-slot="world-tools"] {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .world-editor-sections {
+    flex: 1 1 14rem;
+  }
+
+  .world-game-toolbar [data-slot="world-hero-eyes"] {
+    width: 8.625rem;
+    height: auto;
+  }
+
+  html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigger"][role="combobox"] {
+    min-height: 44px;
+  }
+
+  .atlas-map[data-world-game] .atlas-pin {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .atlas-map[data-world-game] .atlas-hero {
+    width: 44px;
+    height: 44px;
+  }
+
+  .world-map-legend {
+    bottom: 4.5rem;
+    inset-inline: auto .5rem;
+    max-width: calc(100% - 1rem);
+  }
+}
+
+html:has(.world-game-page) {
+  overflow: hidden;
+}
+
+body:has(.world-game-page) {
+  min-height: 100dvh;
+}
+
+.page-transition:has(.world-game-page) {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  height: 100dvh;
+  overflow: clip;
+  animation: none;
+}
+
+.page-transition:has(.world-game-page) .game-shell-header {
+  flex: none;
+}
+
+.world-game-page {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 0;
+}
+
+.world-game-page > * {
+  margin-block: 0;
+}
+
+.world-game-play-grid,
+.world-game-editor-body,
+.world-game-viewport {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+}
+
+.world-game-play-grid,
+.world-game-play-column,
+.world-game-editor-frame,
+.world-game-editor-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.world-game-play-column {
+  gap: 0;
+}
+
+.world-game-play-column > :not(.world-game-viewport) {
+  flex: none;
+}
+
+.world-game-side-panel {
+  --world-panel-entry-x: 8px;
+  position: absolute;
+  z-index: 21;
+  top: .5rem;
+  width: min(19rem, calc(100% - 1rem));
+  max-height: calc(100% - 5rem);
+  overflow: auto;
+  border-radius: 12px;
+}
+
+.world-game-tree {
+  --world-panel-entry-x: -8px;
+  inset-inline-start: .5rem;
+  width: min(13rem, calc(100% - 1rem));
+}
+
+.world-game-layers {
+  --world-panel-entry-x: -8px;
+  inset-inline-start: .5rem;
+  width: min(22rem, calc(100% - 1rem));
+}
+
+.world-game-tree + .world-game-layers {
+  inset-inline-start: 14rem;
+}
+
+.world-game-details,
+.world-game-travel {
+  inset-inline-end: .5rem;
+}
+
+.world-game-page .world-map-legend {
+  pointer-events: none;
+}
+
+@media (width < 64rem) {
+  .world-game-tree-dialog [role="treeitem"],
+  .world-game-viewport [role="tab"] {
+    min-height: 44px;
+  }
+
+  .world-game-travel {
+    max-height: calc(100% - 8rem);
+  }
+}
+
+@media (height < 36rem) {
+  .atlas-map[data-world-game] [data-tour="world.zoom"] {
+    flex-direction: row;
+  }
+}
+
+@media (height < 36rem) and (width >= 64rem) {
+  .world-map-legend {
+    inset-inline-end: 13rem;
+  }
+}
+
+.atlas-map[data-world-game],
+.atlas-map[data-world-game] .atlas-sheet {
+  overflow: clip;
+}
+
+.atlas-map[data-world-game] .atlas-pin:focus-visible .atlas-label {
+  opacity: 1;
+}
+
+
+@keyframes world-sidebar-open {
+  from { opacity: 0; transform: translateX(var(--world-panel-entry-x)); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes world-surface-open {
+  from { opacity: 0; transform: translateY(6px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes world-surface-close {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(4px) scale(.99); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .world-game-side-panel {
+    animation: world-sidebar-open 230ms cubic-bezier(.2,.75,.25,1) both;
+  }
+
+  html:has(.world-game-page) [data-slot="dialog-content"][data-state="open"] {
+    animation: world-surface-open 240ms cubic-bezier(.2,.75,.25,1) both;
+  }
+
+  html:has(.world-game-page) [data-slot="dialog-content"][data-state="closed"] {
+    animation: world-surface-close 155ms ease-in both;
+  }
+
+  html:has(.world-game-page) [data-slot="sheet"][data-state="open"] > :not([data-slot="sheet-handle"]),
+  .atlas-map[data-world-game] [data-testid="world-map-card"] {
+    animation: world-surface-open 190ms cubic-bezier(.2,.75,.25,1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.world-game-page) :is([data-slot="dialog-content"], [data-slot="dialog-overlay"], [data-slot="sheet"]) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+.world-layer-manager {
+  display: grid;
+  gap: .75rem;
+}
+
+.world-layer-list {
+  display: grid;
+  max-height: 10.5rem;
+  gap: .2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+}
+
+.world-layer-select {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid var(--color-hud-rule);
+  border-radius: 8px;
+  background: var(--color-hud-field);
+  padding: .35rem .55rem;
+  font-size: .875rem;
+}
+
+.world-layer-select:hover,
+.world-layer-select:focus-visible,
+.world-layer-select[aria-pressed="true"] {
+  border-color: var(--color-hud-gold);
+}
+
+.world-layer-select[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-hud-gold) 13%, var(--color-hud-field));
+}
+
+.world-layer-color {
+  width: .7rem;
+  height: .7rem;
+  flex: none;
+  border: 1px solid var(--color-hud-rule);
+  border-radius: 50%;
+}
+
+.world-layer-settings {
+  border-top: 1px solid var(--color-hud-rule);
+  padding-top: .75rem;
+}
+
+.world-layer-settings [data-slot="tabs-list"] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: visible;
+  padding: .25rem;
+}
+
+.world-layer-settings [role="tab"] {
+  min-width: 0;
+  padding-inline: .35rem;
+  font-size: .75rem;
+}
+
+.world-layer-tab {
+  display: grid;
+  gap: .65rem;
+  padding-inline: .25rem;
+}
+
+.world-layer-tab [data-slot="world-field-row"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-slot="sheet"] .world-layer-manager .world-layer-title {
+  display: none;
+}
+
+[data-slot="sheet"] .world-layer-manager > :first-child {
+  justify-content: flex-end;
+}
+
+@media (width < 64rem) {
+  .world-layer-select,
+  .world-layer-settings [role="tab"] {
+    min-height: 44px;
+  }
+}

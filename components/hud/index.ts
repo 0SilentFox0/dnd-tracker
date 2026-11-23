@@ -8,5 +8,6 @@ export {
     metalClass,
     spellLevelMetal,
 } from './metal';
+export * from './shell';
 export { HUD_SURFACE } from './surface';
 export { WaitingNotice } from './WaitingNotice';

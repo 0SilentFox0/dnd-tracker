@@ -185,7 +185,9 @@
     "refreshSummary": "Refresh scene summary",
     "showScreen": "Show screen ↗",
     "toIndex": "To the contents",
-    "versions": "Versions"
+    "versions": "Versions",
+    "markScenePlayed": "Mark scene as played",
+    "scenePlayed": "✓ Scene played — undo"
   },
   "pageKinds": {
     "hero": "Hero",
@@ -195,7 +197,8 @@
   "pageStatuses": {
     "draft": "In progress",
     "personal": "Personal",
-    "ready": "Ready"
+    "ready": "Ready",
+    "played": "Played"
   },
   "play": {
     "battleDone": "Battle finished",

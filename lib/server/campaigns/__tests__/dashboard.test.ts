@@ -1,13 +1,39 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({
-    character: { count: vi.fn(), findFirst: vi.fn() },
+    character: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn() },
     scenarioPage: { findMany: vi.fn() },
+    $queryRaw: vi.fn(),
     battleScene: { findMany: vi.fn() },
     battleParticipant: { findFirst: vi.fn() },
-    worldMap: { count: vi.fn() },
+    worldMap: { count: vi.fn(), findFirst: vi.fn() },
+    battleMap: { count: vi.fn() },
+    unit: { count: vi.fn() },
+    spell: { count: vi.fn() },
+    artifact: { count: vi.fn() },
+    skill: { count: vi.fn() },
+    race: { count: vi.fn() },
+    gameClass: { count: vi.fn() },
+    background: { count: vi.fn() },
+    feat: { count: vi.fn() },
+    career: { count: vi.fn() },
+    spellGroup: { count: vi.fn() },
     campaign: { findUnique: vi.fn() },
 }));
+
+const COUNT_MODELS = [
+    'battleMap',
+    'unit',
+    'spell',
+    'artifact',
+    'skill',
+    'race',
+    'gameClass',
+    'background',
+    'feat',
+    'career',
+    'spellGroup',
+] as const;
 
 const latestPublishedVersion = vi.hoisted(() => vi.fn());
 
@@ -24,17 +50,23 @@ const FORBIDDEN = ['participants', 'map', 'snapshot', 'skills', 'abilities'];
 
 function selectsOf(): object[] {
     return Object.values(db).flatMap((m) =>
-        Object.values(m).flatMap((fn) =>
-            fn.mock.calls.map((c) => c[0]?.select).filter(Boolean)
-        )
+        typeof m === 'function'
+            ? []
+            : Object.values(m).flatMap((fn) =>
+                  fn.mock.calls.map((c) => c[0]?.select).filter(Boolean)
+              )
     );
 }
 
 beforeEach(() => {
     vi.clearAllMocks();
     db.character.count.mockResolvedValue(2);
+    db.character.findMany.mockResolvedValue([]);
     db.scenarioPage.findMany.mockResolvedValue([{ id: 'p1', title: 'Акт 1' }]);
     db.battleScene.findMany.mockResolvedValue([]);
+    db.worldMap.findFirst.mockResolvedValue(null);
+    db.$queryRaw.mockResolvedValue([]);
+    for (const model of COUNT_MODELS) db[model].count.mockResolvedValue(0);
     db.campaign.findUnique.mockResolvedValue({ createdFromId: null });
 });
 
@@ -51,6 +83,10 @@ describe('readDmDashboard', () => {
             scenarioPages: [{ id: 'p1', title: 'Акт 1' }],
             battles: [{ id: 'b1', name: 'Бій', status: 'prepared' }],
             sourceUpdate: null,
+            latestSession: null,
+            libraryCounts: expect.objectContaining({ units: 0, maps: 0 }),
+            party: [],
+            worldMap: null,
         });
 
         const arg = db.battleScene.findMany.mock.calls[0][0];
@@ -70,6 +106,106 @@ describe('readDmDashboard', () => {
         const res = await readDmDashboard('c1');
 
         expect(res.battles.map((b) => b.id)).toEqual(['a1', 'p1', 'p2']);
+    });
+
+    it('returns the active player roster and root map for the dashboard', async () => {
+        db.character.findMany.mockResolvedValue([
+            {
+                id: 'h1',
+                name: 'Ліра',
+                level: 5,
+                race: 'Ельфійка',
+                class: 'Чарівниця',
+                avatar: null,
+                armorClass: 15,
+                speed: 30,
+            },
+        ]);
+        db.worldMap.findFirst.mockResolvedValue({
+            id: 'm1',
+            name: 'Briarwood',
+            imageUrl: 'https://example.com/map.webp',
+        });
+
+        const res = await readDmDashboard('c1');
+
+        expect(res.party).toHaveLength(1);
+        expect(res.worldMap).toEqual({
+            id: 'm1',
+            name: 'Briarwood',
+            imageUrl: 'https://example.com/map.webp',
+        });
+        expect(db.character.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    campaignId: 'c1',
+                    type: 'player',
+                    status: 'active',
+                },
+                select: expect.objectContaining({ id: true, name: true }),
+            })
+        );
+        expect(db.worldMap.findFirst).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { campaignId: 'c1', parentMarkerId: null },
+                select: { id: true, name: true, imageUrl: true },
+            })
+        );
+    });
+
+    it('returns the last scene with its last played and next chapter, plus library counts', async () => {
+        db.$queryRaw.mockResolvedValue([
+            {
+                id: 's1',
+                title: 'The old bridge',
+                subtitle: 'Dusk',
+                status: 'ready',
+                playedAt: null,
+                sectionIds: ['a', 'b', 'c'],
+                titles: ['Arrival', 'Toll', 'Crossing'],
+                playedIds: ['a', 'b'],
+            },
+        ]);
+        db.unit.count.mockResolvedValue(152);
+
+        const res = await readDmDashboard('c1');
+
+        expect(res.latestSession).toEqual({
+            id: 's1',
+            title: 'The old bridge',
+            subtitle: 'Dusk',
+            playedAt: null,
+            lastChapter: { id: 'b', title: 'Toll' },
+            nextChapter: { id: 'c', title: 'Crossing' },
+        });
+        expect(res.libraryCounts.units).toBe(152);
+        expect(db.unit.count).toHaveBeenCalledWith({
+            where: { campaignId: 'c1' },
+        });
+    });
+
+    it('a fully played scene has no next chapter', async () => {
+        db.$queryRaw.mockResolvedValue([
+            {
+                id: 's1',
+                title: 'Done',
+                subtitle: null,
+                status: 'played',
+                playedAt: new Date('2026-11-21T18:00:00.000Z'),
+                sectionIds: ['a', 'b'],
+                titles: ['One', 'Two'],
+                playedIds: ['a', 'b'],
+            },
+        ]);
+
+        const res = await readDmDashboard('c1');
+
+        expect(res.latestSession?.nextChapter).toBeNull();
+        expect(res.latestSession?.lastChapter).toEqual({
+            id: 'b',
+            title: 'Two',
+        });
+        expect(res.latestSession?.playedAt).toBe('2026-11-21T18:00:00.000Z');
     });
 
     it('select без важких полів', async () => {

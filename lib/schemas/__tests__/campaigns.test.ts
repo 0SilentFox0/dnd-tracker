@@ -73,3 +73,28 @@ describe('critChoiceByDm', () => {
         ).toBe(true);
     });
 });
+
+describe('campaign cover image', () => {
+    it('accepts a URL, uploaded image data, and clearing the cover', () => {
+        expect(
+            updateCampaignSchema.parse({
+                coverImage: 'https://example.com/cover.webp',
+            }).coverImage
+        ).toBe('https://example.com/cover.webp');
+        expect(
+            updateCampaignSchema.parse({
+                coverImage: 'data:image/webp;base64,AAAA',
+            }).coverImage
+        ).toBe('data:image/webp;base64,AAAA');
+        expect(updateCampaignSchema.parse({ coverImage: null }).coverImage).toBe(
+            null
+        );
+    });
+
+    it('limits uploaded cover data size', () => {
+        expect(
+            updateCampaignSchema.safeParse({ coverImage: 'x'.repeat(5_500_001) })
+                .success
+        ).toBe(false);
+    });
+});

@@ -71,6 +71,28 @@ describe('ResponsiveDialog', () => {
         expect(screen.getByText('Додати вміння')).toBeInTheDocument();
     });
 
+    it('moves focus into the mobile sheet when autoFocusSheet is enabled', async () => {
+        mockMatchMedia(true);
+
+        const onOpenChange = vi.fn();
+
+        render(
+            <ResponsiveDialog
+                {...base}
+                onOpenChange={onOpenChange}
+                autoFocusSheet
+            >
+                <Button>Toggle layer</Button>
+            </ResponsiveDialog>
+        );
+
+        const control = screen.getByRole('button', { name: 'Toggle layer' });
+
+        await waitFor(() => expect(control).toHaveFocus());
+        fireEvent.keyDown(control, { key: 'Escape' });
+        expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
     it.each([false, true])(
         'dismissible=false не закривається Escape (mobile=%s)',
         (mobile) => {

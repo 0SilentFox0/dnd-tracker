@@ -420,10 +420,31 @@ async function saveContent(
             input as Parameters<typeof transformScenarioContent>[2]
         );
 
-    return result(
-        await saveScenarioContent(actor, page.id, next, page.version),
-        id
-    );
+    const saved = await saveScenarioContent(actor, page.id, next, page.version);
+
+    if (operation === 'section.patch')
+        await markPlayedWhenComplete(page.id, next as ScenarioContent);
+
+    return result(saved, id);
+}
+
+async function markPlayedWhenComplete(
+    pageId: string,
+    content: ScenarioContent
+) {
+    if (!content.sections.length || !content.sections.every((s) => s.played))
+        return;
+
+    await prisma.scenarioPage.updateMany({
+        where: { id: pageId, kind: 'scene', status: { not: 'played' } },
+        data: { status: 'played', playedAt: new Date() },
+    });
+}
+
+function playedAtChange(from: string, to: string | undefined) {
+    if (to === undefined || to === from) return {};
+
+    return { playedAt: to === 'played' ? new Date() : null };
 }
 
 const PAGE_HANDLERS: Record<string, PageHandler> = {
@@ -433,16 +454,29 @@ const PAGE_HANDLERS: Record<string, PageHandler> = {
         await characterOk(actor, body.characterId);
         await markIfCompendiumBound(actor.campaignId, page.id);
 
+        const completesScene =
+            page.kind === 'scene' &&
+            body.status === 'played' &&
+            page.status !== 'played';
+
+        const stored = readContentStrict(page.content);
+
+        const content = completesScene
+            ? {
+                  ...stored,
+                  sections: stored.sections.map((s) => ({ ...s, played: true })),
+              }
+            : stored;
+
         return result(
             toSummary(
                 await prisma.scenarioPage.update({
                     where: { id: page.id },
                     data: {
                         ...body,
-                        ...contentWrite(
-                            body.title ?? page.title,
-                            readContentStrict(page.content)
-                        ),
+                        ...playedAtChange(page.status, body.status),
+                        ...(completesScene && { version: { increment: 1 } }),
+                        ...contentWrite(body.title ?? page.title, content),
                     },
                     select: SUMMARY_SELECT,
                 })

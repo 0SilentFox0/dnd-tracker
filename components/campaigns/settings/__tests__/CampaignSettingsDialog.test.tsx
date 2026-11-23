@@ -26,6 +26,7 @@ Object.assign(Element.prototype, {
 const campaign: CampaignSettings = {
     name: 'Зоря',
     description: null,
+    coverImage: null,
     maxLevel: 20,
     allowPlayerEdit: true,
     critChoiceByDm: false,
@@ -144,6 +145,26 @@ describe('CampaignSettingsDialog: оновлення з шаблону', () => {
 
         expect(body).not.toHaveProperty('createdFromId');
         expect(body).not.toHaveProperty('isTemplate');
+    });
+
+    it('зберігає налаштовану обкладинку кампанії', async () => {
+        renderDialog();
+        fireEvent.change(
+            screen.getByLabelText('campaigns.settings.coverImage'),
+            { target: { value: 'https://example.com/cover.webp' } }
+        );
+        fireEvent.click(
+            screen.getByRole('button', { name: 'common.actions.save' })
+        );
+
+        await waitFor(() =>
+            expect(updateCampaign).toHaveBeenCalledWith(
+                'c1',
+                expect.objectContaining({
+                    coverImage: 'https://example.com/cover.webp',
+                })
+            )
+        );
     });
 });
 

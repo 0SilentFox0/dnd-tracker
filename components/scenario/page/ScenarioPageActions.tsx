@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, Loader2, MessageSquare, RefreshCw } from 'lucide-react';
 
+import { ScenePlayedToggle } from './ScenePlayedToggle';
+
 import { AiProposalBadge } from '@/components/ai';
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
@@ -50,6 +52,12 @@ export function ScenarioPageActions({
                     >
                         {t('edit')}
                     </HudButton>
+                    {page.kind === 'scene' && (
+                        <ScenePlayedToggle
+                            campaignId={campaignId}
+                            page={page}
+                        />
+                    )}
                     <Link
                         className="toggle sb-hide-sm"
                         href={`/campaigns/${campaignId}/show`}

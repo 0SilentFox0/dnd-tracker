@@ -8,6 +8,7 @@ import { loadSkillEntries } from './participant/skill-entries';
 import { SKILLTREES_OPERATIONS } from './operations';
 import { resetProgress } from './progress-store';
 
+import { prisma } from '@/lib/db';
 import type { SystemServer } from '@/lib/server/systems/types';
 import { defineAddon } from '@/lib/utils/rules/systems/compose';
 
@@ -17,7 +18,10 @@ export const SKILLTREES_MODULE_SERVER = defineAddon<SystemServer>(() => ({
     content: SKILLTREES_CONTENT,
     contentKinds: {
         'main-skills': { resource: mainSkillsResource },
-        skills: { resource: skillsResource },
+        skills: {
+            resource: skillsResource,
+            count: (campaignId) => prisma.skill.count({ where: { campaignId } }),
+        },
     },
     routes: {
         character: {

@@ -9,6 +9,7 @@ export interface Viewport {
 export interface ZoomBounds {
     min: number;
     max: number;
+    crop?: { x: number; y: number };
 }
 
 export const INITIAL_VIEWPORT: Viewport = { zoom: 1, x: 0, y: 0 };
@@ -16,8 +17,17 @@ export const INITIAL_VIEWPORT: Viewport = { zoom: 1, x: 0, y: 0 };
 const clampZoom = (z: number, { min, max }: ZoomBounds): number =>
     clamp(z, min, max);
 
-export function clampOffset(o: number, zoom: number, size: number): number {
-    return clamp(o, -(zoom - 1) * size, 0);
+export function clampOffset(
+    o: number,
+    zoom: number,
+    size: number,
+    crop?: number
+): number {
+    if (crop === undefined) return clamp(o, -(zoom - 1) * size, 0);
+
+    const lower = (1 - zoom) * size - crop;
+
+    return lower > crop ? (lower + crop) / 2 : clamp(o, lower, crop);
 }
 
 export function zoomAt(
@@ -37,8 +47,8 @@ export function zoomAt(
 
     return {
         zoom: next,
-        x: clampOffset(px - cx * next, next, w),
-        y: clampOffset(py - cy * next, next, h),
+        x: clampOffset(px - cx * next, next, w, bounds.crop?.x),
+        y: clampOffset(py - cy * next, next, h, bounds.crop?.y),
     };
 }
 
@@ -55,7 +65,7 @@ export function focusAt(
 
     return {
         zoom: next,
-        x: clampOffset(w / 2 - nx * w * next, next, w),
-        y: clampOffset(h / 2 - ny * h * next, next, h),
+        x: clampOffset(w / 2 - nx * w * next, next, w, bounds.crop?.x),
+        y: clampOffset(h / 2 - ny * h * next, next, h, bounds.crop?.y),
     };
 }

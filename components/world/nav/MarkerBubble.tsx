@@ -52,7 +52,10 @@ export function MarkerBubble({
                 className="flex w-52 max-w-full items-center gap-1 rounded-lg border border-hud-rule bg-black/90 p-1.5 text-sm text-hud-ink shadow-lg"
             >
                 <Icon className="ml-1 size-4 shrink-0 text-hud-gold-bright" />
-                <p className="min-w-0 flex-1 truncate font-medium" title={marker.name}>
+                <p
+                    className="min-w-0 flex-1 truncate font-medium"
+                    title={marker.name}
+                >
                     {marker.name}
                 </p>
                 <HudIconButton
@@ -88,10 +91,14 @@ export function MarkerBubble({
             </div>
         );
 
+    const summary = !embedded || !!children || !!marker.description;
+
+    const mobileAction = embedded ? 'min-h-11 text-sm' : undefined;
+
     return (
         <div
-            role="dialog"
-            aria-label={marker.name}
+            role={embedded ? undefined : 'dialog'}
+            aria-label={embedded ? undefined : marker.name}
             onKeyDown={(e) => {
                 if (e.key !== 'Escape') return;
 
@@ -106,40 +113,56 @@ export function MarkerBubble({
                     : 'w-64 max-w-full rounded-lg border border-hud-rule bg-black/90 p-3 shadow-lg'
             )}
         >
-            <div className="flex items-start gap-2">
-                {children ?? (
-                    <>
-                        <Icon className="mt-0.5 size-4 shrink-0 text-hud-gold-bright" />
-                        <div className="min-w-0 flex-1">
-                            {embedded ? null : (
-                                <p className="font-medium break-words">
-                                    {marker.name}
-                                </p>
-                            )}
-                            {marker.description ? (
-                                <p className="mt-1 line-clamp-4 text-xs break-words text-hud-muted">
-                                    {marker.description}
-                                </p>
-                            ) : null}
-                        </div>
-                    </>
+            {summary && (
+                <div className="flex items-start gap-2">
+                    {children ?? (
+                        <>
+                            <Icon className="mt-0.5 size-4 shrink-0 text-hud-gold-bright" />
+                            <div className="min-w-0 flex-1">
+                                {embedded ? null : (
+                                    <p className="font-medium break-words">
+                                        {marker.name}
+                                    </p>
+                                )}
+                                {marker.description ? (
+                                    <p className="mt-1 line-clamp-4 text-xs break-words text-hud-muted">
+                                        {marker.description}
+                                    </p>
+                                ) : null}
+                            </div>
+                        </>
+                    )}
+                    {embedded ? null : (
+                        <HudIconButton
+                            size="sm"
+                            tone="muted"
+                            aria-label={t('close')}
+                            className="-mt-1 -mr-1 shrink-0"
+                            onClick={actions.onClose}
+                        >
+                            <X className="size-4" />
+                        </HudIconButton>
+                    )}
+                </div>
+            )}
+            <div
+                className={cn(
+                    summary && 'mt-2',
+                    embedded
+                        ? actions.onOpenMap
+                            ? 'grid grid-cols-2 gap-2'
+                            : 'grid'
+                        : BUBBLE_ACTIONS
                 )}
-                {embedded ? null : (
-                    <HudIconButton
-                        size="sm"
-                        tone="muted"
-                        aria-label={t('close')}
-                        className="-mt-1 -mr-1 shrink-0"
-                        onClick={actions.onClose}
-                    >
-                        <X className="size-4" />
-                    </HudIconButton>
-                )}
-            </div>
-            <div className={cn('mt-2', BUBBLE_ACTIONS)}>
+            >
                 <HudButton
                     data-tour="world.more"
-                    className={bubbleButton()}
+                    className={bubbleButton(
+                        false,
+                        embedded
+                            ? 'min-h-11 border-hud-gold bg-hud-gold text-sm text-primary-foreground hover:bg-hud-gold-strong'
+                            : undefined
+                    )}
                     onClick={actions.onMore}
                 >
                     <PanelRight className="size-3.5 shrink-0" aria-hidden />
@@ -147,7 +170,7 @@ export function MarkerBubble({
                 </HudButton>
                 {actions.onOpenMap ? (
                     <HudButton
-                        className={bubbleButton()}
+                        className={bubbleButton(false, mobileAction)}
                         onClick={actions.onOpenMap}
                     >
                         <FolderOpen className="size-3.5 shrink-0" aria-hidden />

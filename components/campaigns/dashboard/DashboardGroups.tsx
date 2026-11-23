@@ -1,34 +1,27 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
 import { NewPill } from '@/components/common/entity/NewPill';
-import { SearchInput } from '@/components/common/fields/SearchInput';
-import { SearchEmptyState } from '@/components/common/states/SearchEmptyState';
-import { HudTile } from '@/components/hud/page';
+import { HudPanel, HudPill, HudTile } from '@/components/hud/page';
 import {
-    COMPACT_GROUPS,
     type DashboardContext,
-    type DashboardGroupKey,
     type DashboardSection,
     DEFAULT_DASHBOARD_CONTEXT,
     DEMO_DASHBOARD_SECTIONS,
+    DM_HOSTED_SECTION_KEYS,
     dmDashboardSectionsFor,
     PLAYER_DASHBOARD_SECTIONS,
 } from '@/lib/constants/campaign-dashboard';
 import { NOTIFICATION_TILE_TYPES } from '@/lib/constants/notifications';
-import { useSearch } from '@/lib/hooks/common';
 import { useNotifications } from '@/lib/hooks/notifications';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { hasUnread } from '@/lib/utils/notifications/select';
 
-const GROUP_ORDER: DashboardGroupKey[] = ['game', 'heroes', 'libraries'];
-
 const GRID = 'grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3';
 
-const COMPACT_GRID =
-    'grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-2';
+const libraryGrid = (count: number) =>
+    `grid grid-cols-1 gap-2 sm:grid-cols-2 ${count % 4 === 0 || count % 3 !== 0 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`;
 
 export function DashboardGroups({
     campaignId,
@@ -37,6 +30,8 @@ export function DashboardGroups({
     pendingDrafts,
     context = DEFAULT_DASHBOARD_CONTEXT,
     hiddenKeys,
+    hostsDmBlocks = false,
+    libraryCounts,
 }: {
     campaignId: string;
     isDM: boolean;
@@ -44,10 +39,10 @@ export function DashboardGroups({
     pendingDrafts: number;
     context?: DashboardContext;
     hiddenKeys?: string[];
+    hostsDmBlocks?: boolean;
+    libraryCounts?: Record<string, number>;
 }) {
     const t = useTranslator('dashboard');
-
-    const router = useRouter();
 
     const isPlayer = !isDM && !isDemo;
 
@@ -66,19 +61,7 @@ export function DashboardGroups({
         [sections, hiddenKeys]
     );
 
-    const fieldsOf = useCallback(
-        (s: DashboardSection) => [
-            t(`sections.${s.key}.title`),
-            ...t(`sections.${s.key}.keywords`)
-                .split(',')
-                .map((k) => k.trim()),
-        ],
-        [t]
-    );
-
-    const { query, items, isActive } = useSearch(base, fieldsOf, 0);
-
-    const tile = (s: DashboardSection, compact = false) => {
+    const tile = (s: DashboardSection) => {
         const Icon = s.icon;
 
         const sectionSubtitle = t(`sections.${s.key}.subtitle`);
@@ -98,9 +81,10 @@ export function DashboardGroups({
                 icon={<Icon className="size-5" />}
                 title={t(`sections.${s.key}.title`)}
                 subtitle={subtitle}
-                compact={compact}
                 badge={
-                    isPlayer &&
+                    libraryCounts?.[s.key] !== undefined ? (
+                        <HudPill tone="muted">{libraryCounts[s.key]}</HudPill>
+                    ) : isPlayer &&
                     hasUnread(
                         notifications,
                         NOTIFICATION_TILE_TYPES[s.key] ?? []
@@ -112,63 +96,47 @@ export function DashboardGroups({
         );
     };
 
-    const onSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const isLibrary = (s: DashboardSection) =>
+        s.group === 'libraries' || (hostsDmBlocks && s.key === 'info');
 
-        if (isActive && items[0]) router.push(items[0].href(campaignId));
-    };
+    const hosted = hostsDmBlocks ? DM_HOSTED_SECTION_KEYS : [];
 
-    let content;
+    const libraryItems = isPlayer ? [] : base.filter(isLibrary);
 
-    if (isActive) {
-        content = items.length ? (
-            <div className={GRID}>{items.map((s) => tile(s))}</div>
-        ) : (
-            <SearchEmptyState
-                query={query.value}
-                onClear={() => query.set('')}
-            />
-        );
-    } else if (!isDM && !isDemo) {
-        content = <div className={GRID}>{base.map((s) => tile(s))}</div>;
-    } else {
-        content = (
-            <div className="space-y-4">
-                {GROUP_ORDER.map((g) => {
-                    const compact = COMPACT_GROUPS.has(g);
-
-                    return (
-                        <section
-                            key={g}
-                            className="space-y-2"
-                            data-tour={`dashboard.group-${g}`}
-                        >
-                            <h2 className="hud-sc text-sm text-hud-muted">
-                                {t(`groups.${g}`)}
-                            </h2>
-                            <div className={compact ? COMPACT_GRID : GRID}>
-                                {base
-                                    .filter((s) => s.group === g)
-                                    .map((s) => tile(s, compact))}
-                            </div>
-                        </section>
-                    );
-                })}
-            </div>
-        );
-    }
+    const mainItems = base.filter(
+        (s) => !isLibrary(s) && !hosted.includes(s.key)
+    );
 
     return (
         <div className="space-y-4">
-            <form onSubmit={onSubmit} data-tour="dashboard.search">
-                <SearchInput
-                    value={query.value}
-                    onChange={query.set}
-                    label={t('search.label')}
-                    placeholder={t('search.placeholder')}
-                />
-            </form>
-            <div>{content}</div>
+            {mainItems.length > 0 && (
+                <HudPanel
+                    as="div"
+                    className="space-y-3"
+                    data-tour="dashboard.sections"
+                >
+                    {isPlayer && (
+                        <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                            {t('groups.player')}
+                        </h2>
+                    )}
+                    <div className={GRID}>{mainItems.map(tile)}</div>
+                </HudPanel>
+            )}
+            {libraryItems.length > 0 && (
+                <HudPanel
+                    as="div"
+                    className="space-y-3"
+                    data-tour="dashboard.group-libraries"
+                >
+                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                        {t('groups.libraries')}
+                    </h2>
+                    <div className={libraryGrid(libraryItems.length)}>
+                        {libraryItems.map(tile)}
+                    </div>
+                </HudPanel>
+            )}
         </div>
     );
 }

@@ -8,9 +8,13 @@ import { Button } from '@/components/ui/button';
 
 interface InviteCodeDisplayProps {
     inviteCode: string;
+    compact?: boolean;
 }
 
-export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
+export function InviteCodeDisplay({
+    inviteCode,
+    compact = false,
+}: InviteCodeDisplayProps) {
     const t = useTranslations('campaigns');
 
     const [copied, setCopied] = useState(false);
@@ -26,21 +30,28 @@ export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
     };
 
     return (
-        <div className="flex items-center gap-2">
-            <code className="rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink">
+        <div className="flex min-w-0 items-center gap-1">
+            <code
+                className={
+                    compact
+                        ? 'max-w-full truncate rounded bg-hud-field px-1.5 py-0.5 font-mono text-xs font-semibold text-hud-ink sm:text-sm'
+                        : 'rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink'
+                }
+            >
                 {inviteCode}
             </code>
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleCopy}
-                className="h-8 w-8"
+                className={'size-10 shrink-0'}
                 title={t('settings.copyCode')}
+                aria-label={t('settings.copyCode')}
             >
                 {copied ? (
-                    <Check className="h-4 w-4 text-hud-gold" />
+                    <Check className={compact ? 'size-3.5 text-hud-gold' : 'h-4 w-4 text-hud-gold'} />
                 ) : (
-                    <Copy className="h-4 w-4" />
+                    <Copy className={compact ? 'size-3.5' : 'h-4 w-4'} />
                 )}
             </Button>
         </div>

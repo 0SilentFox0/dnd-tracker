@@ -17,7 +17,12 @@ export function ModeSwitch({
     const t = useTranslations('world.mode');
 
     return (
-        <div role="group" aria-label={t('label')} className="flex gap-1">
+        <div
+            data-slot="world-mode-switch"
+            role="group"
+            aria-label={t('label')}
+            className="flex gap-1"
+        >
             {MODES.map((m) => (
                 <HudToggleChip
                     key={m}

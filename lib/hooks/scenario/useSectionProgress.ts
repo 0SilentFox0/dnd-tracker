@@ -25,21 +25,29 @@ export function useSectionProgress(campaignId: string, pageId: string) {
             patch: ScenarioSectionPatch;
         }) => patchScenarioSection(campaignId, pageId, sectionId, patch),
         errorText: t('sectionUpdateFailed'),
-        onSuccess: ({ version, section }) =>
-            queryClient.setQueryData<ScenarioPage>(
-                key,
-                (old) =>
-                    old && {
-                        ...old,
-                        version,
-                        content: {
-                            ...old.content,
-                            sections: old.content.sections.map((s) =>
-                                s.id === section.id ? section : s
-                            ),
-                        },
-                    }
-            ),
+        onSuccess: ({ version, section }) => {
+            queryClient.setQueryData<ScenarioPage>(key, (old) => {
+                if (!old) return old;
+
+                const sections = old.content.sections.map((s) =>
+                    s.id === section.id ? section : s
+                );
+
+                // mirrors the server rule: a scene with every section played becomes played
+                const completes =
+                    old.kind === 'scene' && sections.every((s) => s.played);
+
+                return {
+                    ...old,
+                    version,
+                    ...(completes && { status: 'played' as const }),
+                    content: { ...old.content, sections },
+                };
+            });
+            void queryClient.invalidateQueries({
+                queryKey: scenarioKeys.list(campaignId),
+            });
+        },
         onError: () => void queryClient.invalidateQueries({ queryKey: key }),
     });
 

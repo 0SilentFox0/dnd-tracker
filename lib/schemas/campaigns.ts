@@ -42,6 +42,7 @@ export const createCampaignSchema = z
 export const updateCampaignSchema = z.object({
     name: z.string().min(1).max(100).optional(),
     description: z.string().optional().nullable(),
+    coverImage: z.string().max(5_500_000).nullable().optional(),
     maxLevel: z.number().min(1).max(30).optional(),
     allowPlayerEdit: z.boolean().optional(),
     critChoiceByDm: z.boolean().optional(),

@@ -58,6 +58,8 @@ function storageImagePatterns() {
 }
 
 const nextConfig: NextConfig = {
+    // separate output lets a production build run beside `next dev`
+    distDir: process.env.NEXT_DIST_DIR || '.next',
     // CSS goes into the HTML instead of render-blocking requests (mobile LCP on the landing)
     experimental: { inlineCss: true },
     async headers() {

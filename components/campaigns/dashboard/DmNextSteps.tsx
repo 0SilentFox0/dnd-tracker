@@ -1,120 +1,66 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { ScrollText } from 'lucide-react';
+import { Database } from 'lucide-react';
 
-import { SourceUpdateTile } from '@/components/campaigns/dashboard/SourceUpdateTile';
-import { HudSection } from '@/components/hud/form';
-import { HudPanel, HudPill } from '@/components/hud/page';
+import { HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import type { DmDashboardData } from '@/types/campaigns';
+import { DM_DASHBOARD_SECTIONS } from '@/lib/constants/campaign-dashboard';
+import { useTranslator } from '@/lib/i18n/use-translator';
 
-const ROW =
-    'flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm text-hud-ink hover:bg-white/5';
+const TILE =
+    'h-full min-h-20 flex-col justify-center gap-1.5 whitespace-normal px-2 py-3';
 
 export function DmNextSteps({
     campaignId,
-    data,
+    sectionKeys,
 }: {
     campaignId: string;
-    data: DmDashboardData;
+    sectionKeys: string[];
 }) {
-    const t = useTranslations('dashboard');
+    const t = useTranslator('dashboard');
 
-    const base = `/campaigns/${campaignId}`;
-
-    const hasPrep =
-        data.pendingDrafts > 0 ||
-        data.scenarioPages.length > 0 ||
-        data.battles.length > 0;
+    const sections = sectionKeys.flatMap((key) =>
+        DM_DASHBOARD_SECTIONS.filter((section) => section.key === key)
+    );
 
     return (
-        <HudPanel className="shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]">
-            <HudSection title={t('nextSteps.title')}>
-                {data.sourceUpdate && (
-                    <SourceUpdateTile
-                        campaignId={campaignId}
-                        version={data.sourceUpdate.sourceVersion}
-                    />
-                )}
-                {hasPrep && (
-                    <div className="mb-3">
-                        <h3 className="hud-sc mb-1 text-xs text-hud-muted">
-                            {t('nextSteps.prep')}
-                        </h3>
-                        <ul>
-                            {data.pendingDrafts > 0 && (
-                                <li>
-                                    <Link
-                                        href={`${base}/dm/characters`}
-                                        className={ROW}
-                                    >
-                                        <span className="truncate">
-                                            {t('nextSteps.pending', {
-                                                count: data.pendingDrafts,
-                                            })}
-                                        </span>
-                                    </Link>
-                                </li>
-                            )}
-                            {data.scenarioPages.map((p) => (
-                                <li key={p.id}>
-                                    <Link
-                                        href={`${base}/dm/scenario/${p.id}`}
-                                        className={ROW}
-                                    >
-                                        <ScrollText
-                                            className="size-4 shrink-0 text-hud-gold"
-                                            aria-hidden
-                                        />
-                                        <span className="min-w-0 truncate">
-                                            {p.title}
-                                        </span>
-                                    </Link>
-                                </li>
-                            ))}
-                            {data.battles.map((b) => (
-                                <li key={b.id}>
-                                    <Link
-                                        href={`${base}/battles/${b.id}`}
-                                        className={ROW}
-                                    >
-                                        <span className="min-w-0 flex-1 truncate">
-                                            {b.name}
-                                        </span>
-                                        <HudPill tone="accent">
-                                            {t(`battleStatus.${b.status}`)}
-                                        </HudPill>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                <div>
-                    <h3 className="hud-sc mb-1 text-xs text-hud-muted">
-                        {t('nextSteps.session')}
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                        <Button asChild variant="outline">
-                            <Link href={`${base}/dm/show`}>
-                                {t('nextSteps.show')}
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={`${base}/dm/world`}>
-                                {t('nextSteps.world')}
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={`${base}/dm/music`}>
-                                {t('nextSteps.music')}
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-            </HudSection>
+        <HudPanel className="flex flex-col" data-tour="dashboard.dm-next-steps">
+            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
+                {t('nextSteps.title')}
+            </h2>
+            <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">
+                {sections.map(({ key, href, icon: Icon }) => (
+                    <Button
+                        asChild
+                        key={key}
+                        variant="outline"
+                        className={TILE}
+                    >
+                        <Link href={href(campaignId)}>
+                            <Icon aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                            <span className="line-clamp-2 text-center text-xs leading-tight">
+                                {t(`sections.${key}.title`)}
+                            </span>
+                        </Link>
+                    </Button>
+                ))}
+                <Button
+                    asChild
+                    variant="outline"
+                    className={TILE}
+                >
+                    <Link
+                        href={`/campaigns/${campaignId}/dm/compendium`}
+                        aria-label={t('page.compendium.link')}
+                    >
+                        <Database aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                        <span className="line-clamp-2 text-center text-xs leading-tight">
+                            {t('page.compendium.action')}
+                        </span>
+                    </Link>
+                </Button>
+            </div>
         </HudPanel>
     );
 }

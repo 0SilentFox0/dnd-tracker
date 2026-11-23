@@ -54,6 +54,7 @@ export interface ResponsiveDialogProps {
     dismissible?: boolean;
     className?: string;
     hud?: boolean;
+    autoFocusSheet?: boolean;
     role?: 'dialog' | 'alertdialog';
     children?: ReactNode;
 }
@@ -68,6 +69,7 @@ export function ResponsiveDialog({
     dismissible = true,
     className,
     hud = false,
+    autoFocusSheet = false,
     role = 'dialog',
     children,
 }: ResponsiveDialogProps) {
@@ -119,6 +121,7 @@ export function ResponsiveDialog({
                 open={open}
                 onOpenChange={handleOpenChange}
                 dismissible={dismissible}
+                autoFocus={autoFocusSheet}
             >
                 <Drawer.Portal>
                     {/* the closing overlay and sheet stay mounted for the exit animation; let taps through to the page */}

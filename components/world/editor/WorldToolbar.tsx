@@ -140,9 +140,13 @@ export function WorldToolbar({
 
     return (
         <TooltipProvider delayDuration={300}>
-            <div className="rounded-md border border-hud-rule bg-hud-page/97">
+            <div
+                data-slot="world-toolbar"
+                className="rounded-md border border-hud-rule bg-hud-page/97"
+            >
                 <div className="flex flex-col lg:flex-row lg:items-center">
                     <div
+                        data-slot="world-tools"
                         role="group"
                         aria-label={t('group')}
                         className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto p-1 lg:min-w-0 lg:flex-1"

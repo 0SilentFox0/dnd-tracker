@@ -168,5 +168,22 @@ export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
     })),
 ];
 
-export const COMPACT_GROUPS: ReadonlySet<DashboardGroupKey> =
-    new Set<DashboardGroupKey>(['libraries']);
+/** Sections the DM dashboard shows inside hero, squad or quick-actions blocks. */
+export const DM_HOSTED_SECTION_KEYS: readonly string[] = [
+    'scenario',
+    'battles',
+    'characters',
+    'show',
+    'music',
+    'graph',
+    'acquaintances',
+    'ai',
+];
+
+export const DM_QUICK_SECTION_KEYS: readonly string[] = [
+    'show',
+    'music',
+    'graph',
+    'acquaintances',
+    'ai',
+];

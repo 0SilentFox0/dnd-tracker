@@ -60,6 +60,13 @@ const MAX_SIZES_ZOOM = 2;
 
 const FOCUS_ZOOM = 3;
 
+const KEY_PAN = {
+    ArrowLeft: [56, 0],
+    ArrowRight: [-56, 0],
+    ArrowUp: [0, 56],
+    ArrowDown: [0, -56],
+} as const;
+
 export interface WorldMapViewProps {
     detail: WorldMapDetail;
     selectedId?: string | null;
@@ -98,6 +105,7 @@ export interface WorldMapViewProps {
     focus?: MapFocus;
     slots?: {
         overlay?: ReactNode;
+        gameStyle?: 'party' | 'own';
         card?: { point: MapPoint; content: ReactNode };
         hint?: ReactNode;
         fullscreen?: { full: boolean; toggle(): void };
@@ -116,11 +124,13 @@ const CARD_FALLBACK_SIZE = { width: 208, height: 64 };
 function CardSlot({
     card,
     box,
+    crop,
     zoom,
     offset,
 }: {
     card: { point: MapPoint; content: ReactNode };
     box: { width: number; height: number };
+    crop?: { x: number; y: number };
     zoom: number;
     offset: { x: number; y: number };
 }) {
@@ -129,6 +139,7 @@ function CardSlot({
     const pos = useMarkerBubblePosition({
         point: card.point,
         box,
+        crop,
         zoom,
         offset,
         size: size.width > 0 ? size : CARD_FALLBACK_SIZE,
@@ -200,13 +211,22 @@ export function WorldMapView({
 
     const { tool = 'select', draft, snap } = edit ?? {};
 
-    const { overlay, card, hint, fullscreen } = slots ?? {};
+    const { overlay, card, hint, fullscreen, gameStyle } = slots ?? {};
 
     const t = useTranslations('world.zoom');
 
     const { ref: outerRef, size } = useElementSize<HTMLDivElement>();
 
-    const box = fitBox(size, map.width / map.height);
+    const box = fitBox(size, map.width / map.height, !!gameStyle);
+
+    const crop = gameStyle
+        ? { x: Math.max(0, -box.left), y: Math.max(0, -box.top) }
+        : undefined;
+
+    const minZoom =
+        gameStyle && box.width > 0 && size.height > 0
+            ? Math.min(1, size.width / box.width, size.height / box.height)
+            : 1;
 
     const {
         zoom,
@@ -216,9 +236,10 @@ export function WorldMapView({
         bind,
         reset,
         zoomBy,
+        panBy,
         focusOn,
         rescale,
-    } = useViewport({ maxZoom: WORLD_MAX_ZOOM });
+    } = useViewport({ minZoom, maxZoom: WORLD_MAX_ZOOM, crop });
 
     const [dragging, setDragging] = useState<{
         id: string;
@@ -237,11 +258,27 @@ export function WorldMapView({
 
         if (!r) return null;
 
+        const clip = gameStyle
+            ? outerRef.current?.getBoundingClientRect()
+            : null;
+
+        const left = clip ? Math.max(clip.left, r.left + offset.x) : r.left;
+
+        const right = clip
+            ? Math.min(clip.right, r.left + offset.x + r.width * zoom)
+            : r.right;
+
+        const top = clip ? Math.max(clip.top, r.top + offset.y) : r.top;
+
+        const bottom = clip
+            ? Math.min(clip.bottom, r.top + offset.y + r.height * zoom)
+            : r.bottom;
+
         const inside =
-            clientX >= r.left &&
-            clientX <= r.right &&
-            clientY >= r.top &&
-            clientY <= r.bottom;
+            clientX >= left &&
+            clientX <= right &&
+            clientY >= top &&
+            clientY <= bottom;
 
         return inside ? pointAt(clientX, clientY) : null;
     };
@@ -317,9 +354,9 @@ export function WorldMapView({
         lastWidth.current = box.width;
 
         // keep the viewed area when the sheet resizes (side panel, fullscreen)
-        if (prev > 0 && box.width > 0 && box.width !== prev)
+        if (prev > 0 && box.width > 0 && (box.width !== prev || gameStyle))
             rescale(box.width / prev);
-    }, [box.width, rescale]);
+    }, [box.width, crop?.x, crop?.y, gameStyle, rescale]);
 
     const sizes = `${Math.round(box.width * Math.min(zoom, MAX_SIZES_ZOOM))}px`;
 
@@ -342,7 +379,8 @@ export function WorldMapView({
             return;
         }
 
-        if (wasDragged()) return;
+        if (wasDragged() || (gameStyle && !insideMapAt(e.clientX, e.clientY)))
+            return;
 
         const zoneId = zoneIdAt(e.target, tool);
 
@@ -358,9 +396,57 @@ export function WorldMapView({
     return (
         <div
             data-tool={tool}
+            data-world-game={gameStyle}
             data-still={still}
+            role={gameStyle ? 'region' : undefined}
+            aria-label={gameStyle ? map.name : undefined}
+            tabIndex={gameStyle ? 0 : undefined}
+            onFocusCapture={(e) => {
+                if (
+                    !gameStyle ||
+                    !(e.target instanceof HTMLElement) ||
+                    !e.target.matches(
+                        '.atlas-pin:focus-visible, .atlas-hero:focus-visible'
+                    )
+                )
+                    return;
+
+                const marker = e.target.getBoundingClientRect();
+
+                const stage = e.currentTarget.getBoundingClientRect();
+
+                if (
+                    marker.left >= stage.left &&
+                    marker.right <= stage.right &&
+                    marker.top >= stage.top &&
+                    marker.bottom <= stage.bottom
+                )
+                    return;
+
+                const point = pointAt(
+                    marker.left + marker.width / 2,
+                    marker.top + marker.height / 2
+                );
+
+                focusOn(point.x, point.y, zoom);
+            }}
+            onKeyDown={(e) => {
+                if (
+                    !gameStyle ||
+                    e.target !== e.currentTarget ||
+                    !Object.hasOwn(KEY_PAN, e.key)
+                )
+                    return;
+
+                e.preventDefault();
+
+                const [dx, dy] = KEY_PAN[e.key as keyof typeof KEY_PAN];
+
+                panBy(dx, dy);
+            }}
             className={cn(
-                'atlas-map relative h-full min-h-[16rem] w-full overflow-hidden rounded-xl border border-hud-rule',
+                'atlas-map relative h-full w-full overflow-hidden rounded-xl border border-hud-rule',
+                gameStyle ? 'min-h-0' : 'min-h-[16rem]',
                 className
             )}
             onPointerMove={(e) => {
@@ -427,6 +513,9 @@ export function WorldMapView({
                     onPointerCancel={bind.onPointerCancel}
                     onPointerLeave={() => setHoveredZone(null)}
                     onDoubleClick={(e) => {
+                        if (gameStyle && !insideMapAt(e.clientX, e.clientY))
+                            return;
+
                         const zoneId = zoneIdAt(e.target, tool);
 
                         if (zoneId) handlers.onMarkerDoubleClick?.(zoneId);
@@ -515,6 +604,7 @@ export function WorldMapView({
                             shapes={fog.shapes}
                             radius={fog.radius}
                             box={box}
+                            crop={crop}
                             zoom={zoom}
                             offset={offset}
                             still={still}
@@ -561,6 +651,7 @@ export function WorldMapView({
                                             height: box.height,
                                         },
                                         compact,
+                                        touchTargets: !!gameStyle && compact,
                                         cluster:
                                             tool !== 'point' &&
                                             tool !== 'entry',
@@ -605,6 +696,8 @@ export function WorldMapView({
                             {heroes?.length ? (
                                 <WorldHeroes
                                     heroes={heroes}
+                                    party={gameStyle}
+                                    touchTargets={!!gameStyle && compact}
                                     zoom={zoom}
                                     box={box}
                                     onHeroClick={handlers.onHeroClick}
@@ -625,6 +718,7 @@ export function WorldMapView({
                         <CardSlot
                             card={card}
                             box={box}
+                            crop={crop}
                             zoom={zoom}
                             offset={offset}
                         />
@@ -636,7 +730,12 @@ export function WorldMapView({
             ) : null}
             <div
                 data-tour="world.zoom"
-                className="absolute right-2 bottom-14 z-10 flex flex-col gap-1 max-lg:opacity-60 max-lg:focus-within:opacity-100 max-lg:active:opacity-100 lg:bottom-2"
+                className={cn(
+                    'absolute right-2 z-10 flex flex-col gap-1',
+                    gameStyle
+                        ? 'world-zoom-controls world-glass bottom-28 lg:bottom-3'
+                        : 'bottom-14 max-lg:opacity-60 max-lg:focus-within:opacity-100 max-lg:active:opacity-100 lg:bottom-2'
+                )}
             >
                 <Button
                     type="button"
@@ -644,6 +743,8 @@ export function WorldMapView({
                     variant="ghost"
                     className="atlas-zoom"
                     aria-label={t('in')}
+                    title={t('in')}
+                    disabled={!!gameStyle && zoom >= WORLD_MAX_ZOOM}
                     onClick={() => zoomBy(ZOOM_STEP)}
                 >
                     <Plus className="size-4" />
@@ -654,6 +755,8 @@ export function WorldMapView({
                     variant="ghost"
                     className="atlas-zoom"
                     aria-label={t('out')}
+                    title={t('out')}
+                    disabled={!!gameStyle && zoom <= minZoom}
                     onClick={() => zoomBy(1 / ZOOM_STEP)}
                 >
                     <Minus className="size-4" />
@@ -664,6 +767,7 @@ export function WorldMapView({
                     variant="ghost"
                     className="atlas-zoom"
                     aria-label={t('reset')}
+                    title={t('reset')}
                     onClick={reset}
                 >
                     <RotateCcw className="size-4" />
@@ -675,6 +779,9 @@ export function WorldMapView({
                         variant="ghost"
                         className="atlas-zoom"
                         aria-label={t(
+                            fullscreen.full ? 'exitFullscreen' : 'fullscreen'
+                        )}
+                        title={t(
                             fullscreen.full ? 'exitFullscreen' : 'fullscreen'
                         )}
                         aria-pressed={fullscreen.full}

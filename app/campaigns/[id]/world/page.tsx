@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { GameWorldShell } from './game-world-shell';
 import { WorldPageClient } from './page-client';
 
 import { ErrorState } from '@/components/common/states';
@@ -36,13 +37,21 @@ export default async function WorldPage({
     searchParams,
 }: {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{ map?: string }>;
+    searchParams: Promise<{ map?: string; marker?: string }>;
 }) {
-    const [{ id }, { map }] = await Promise.all([params, searchParams]);
+    const [{ id }, { map, marker }] = await Promise.all([params, searchParams]);
 
-    const { campaign, isDM } = await requireCampaignMember(id);
+    const { campaign, isDM, userId } = await requireCampaignMember(id);
 
-    if (isDM) redirect(`/campaigns/${id}/dm/world`);
+    if (isDM) {
+        const query = new URLSearchParams();
+
+        if (map) query.set('map', map);
+
+        if (marker) query.set('marker', marker);
+
+        redirect(`/campaigns/${id}/dm/world${query.size ? `?${query}` : ''}`);
+    }
 
     // a map the player may not open falls back to their current one
     const first = map ? await readView(id, map) : null;
@@ -51,12 +60,14 @@ export default async function WorldPage({
 
     if (failed)
         return (
-            <ErrorState
-                error={(await getTranslator(await getRequestLocale(), 'world'))(
-                    'play.loadFailed'
-                )}
-                className="m-4"
-            />
+            <GameWorldShell campaign={campaign} viewer={{ isDM, userId }}>
+                <ErrorState
+                    error={(await getTranslator(await getRequestLocale(), 'world'))(
+                        'play.loadFailed'
+                    )}
+                    className="m-4"
+                />
+            </GameWorldShell>
         );
 
     const client = (
@@ -64,14 +75,21 @@ export default async function WorldPage({
             campaignId={id}
             campaignName={campaign.name}
             mapId={view?.map.id ?? null}
+            markerId={
+                view?.markers?.some((item) => item.id === marker)
+                    ? marker
+                    : undefined
+            }
         />
     );
 
-    if (!view) return client;
-
     return (
-        <PrefetchedQuery queryKey={worldKeys.view(id, view.map.id)} data={view}>
-            {client}
-        </PrefetchedQuery>
+        <GameWorldShell campaign={campaign} viewer={{ isDM, userId }}>
+            {view ? (
+                <PrefetchedQuery queryKey={worldKeys.view(id, view.map.id)} data={view}>
+                    {client}
+                </PrefetchedQuery>
+            ) : client}
+        </GameWorldShell>
     );
 }

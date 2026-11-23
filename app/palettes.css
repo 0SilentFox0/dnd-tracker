@@ -1,5 +1,7 @@
 /* Account palettes share one token surface. Battle participants and school hues remain semantic. */
 html[data-palette] {
+  --palette-art-ink: #efe5d2;
+  --palette-art-shadow: #110e0b;
   --palette-panel: color-mix(in srgb, var(--palette-card) 82%, transparent);
   --background: var(--palette-background);
   --foreground: var(--palette-foreground);

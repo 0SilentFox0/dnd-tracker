@@ -35,13 +35,30 @@ export function useScenarioPageActions(campaignId: string) {
     const mergeIntoPageCache = (summary: ScenarioPageSummary) =>
         queryClient.setQueryData<ScenarioPage>(
             scenarioKeys.page(campaignId, summary.id),
-            (old) =>
-                old && {
+            (old) => {
+                if (!old) return old;
+
+                // mirrors the server rule: a scene marked played has all its sections played
+                const completes =
+                    old.kind === 'scene' &&
+                    summary.status === 'played' &&
+                    old.status !== 'played';
+
+                return {
                     ...old,
                     ...summary,
-                    content: old.content,
-                    version: old.version,
-                }
+                    content: completes
+                        ? {
+                              ...old.content,
+                              sections: old.content.sections.map((s) => ({
+                                  ...s,
+                                  played: true,
+                              })),
+                          }
+                        : old.content,
+                    version: completes ? summary.version : old.version,
+                };
+            }
         );
 
     const create = useCrudMutation({

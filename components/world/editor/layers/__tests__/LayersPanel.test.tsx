@@ -46,7 +46,8 @@ const layer = (o: Partial<WorldLayer> = {}): WorldLayer => ({
 
 const renderPanel = (
     layers: WorldLayer[],
-    markers: Partial<WorldMarker>[] = []
+    markers: Partial<WorldMarker>[] = [],
+    gameStyle = false
 ) => {
     const ctx = {
         campaignId: 'c1',
@@ -76,6 +77,7 @@ const renderPanel = (
                 onActive={onActive}
                 heroes={[{ id: 'h1', name: 'Арвен' }]}
                 imageEdit={{ layerId: null, set: vi.fn() }}
+                gameStyle={gameStyle}
             />
         </WorldEditorContext.Provider>
     );
@@ -96,6 +98,34 @@ afterEach(() => {
 });
 
 describe('LayersPanel', () => {
+    it('edits one layer at a time and keeps the other fields available in tabs', () => {
+        renderPanel(
+            [
+                layer({ id: 'a', name: 'Море' }),
+                layer({ id: 'b', name: 'Гори', visibility: 'heroes' }),
+            ],
+            [],
+            true
+        );
+
+        expect(screen.getByRole('textbox', { name: 'Назва шару' })).toHaveValue(
+            'Море'
+        );
+        expect(
+            screen.queryByRole('combobox', { name: 'Видимий для' })
+        ).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Гори' }));
+        fireEvent.keyDown(screen.getByRole('tab', { name: 'Доступ' }), {
+            key: 'Enter',
+        });
+
+        expect(screen.getByRole('textbox', { name: 'Назва шару' })).toHaveValue(
+            'Гори'
+        );
+        expect(screen.getByRole('checkbox', { name: 'Арвен' })).toBeVisible();
+    });
+
     it('creates a layer without a map id', () => {
         renderPanel([]);
 

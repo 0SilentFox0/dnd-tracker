@@ -134,3 +134,23 @@ describe('useWorldPlay fullscreen', () => {
         expect(result.current.focus).toBeUndefined();
     });
 });
+
+describe('quest marker links', () => {
+    it('focuses an accessible marker once and lets the player dismiss it', () => {
+        const { result, rerender } = renderHook(() =>
+            useWorldPlay('c1', 'm1', 'k1')
+        );
+
+        expect(result.current.selectedMarker?.id).toBe('k1');
+        expect(result.current.focus?.point).toEqual({ x: 0.2, y: 0.3 });
+        act(() => result.current.select(null));
+        rerender();
+        expect(result.current.selectedMarker).toBeNull();
+    });
+    it('ignores a marker absent from the authorized view', () => {
+        const { result } = renderHook(() => useWorldPlay('c1', 'm1', 'secret'));
+
+        expect(result.current.selectedMarker).toBeNull();
+        expect(result.current.focus).toBeUndefined();
+    });
+});

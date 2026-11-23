@@ -1,4 +1,8 @@
 {
+  "2026-11-22-world-map-hud": {
+    "title": "World map HUD",
+    "body": "The world map fills the screen. Where next lists accessible places, diamonds mark locations and the map highlights your party. On phones, open the destinations list from the bottom bar."
+  },
   "2026-11-20-world-layer-style": {
     "title": "Map layers: style, zone opacity and labels",
     "body": "A layer now carries its own look: an icon, a colour, zone opacity and whether zone labels show. Markers inherit it and can override any of it, a zone label can be forced hidden or always shown, and the legend can toggle markers that have no layer."
@@ -376,5 +380,9 @@
   "2026-11-20-wfrp-psychology": {
     "title": "Grim d100 (5e): Fear, Terror, Frenzy and Hatred",
     "body": "Fear is an extended Cool test: each roll adds or takes away SL from a running total up to the Fear rating, meanwhile no Momentum and the source attacks with Advantage. Terror breaks by rating. Frenzy gives an extra melee attack and +1 damage, Hatred gives +1 SL against its group, Animosity forces a Psychology test."
+  },
+  "2026-11-22-quests": {
+    "title": "Quest journal",
+    "body": "DMs create quests and objectives and reveal them to the party. Track your quests and visit their map locations."
   }
 }

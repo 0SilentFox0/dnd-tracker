@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import CampaignsPage from '../page';
 
 import { TemplateTiles } from '@/components/campaigns/templates/TemplateTiles';
+import { CampaignStatus } from '@/lib/constants/campaigns';
 
 const findMany = vi.fn();
 
@@ -59,7 +60,11 @@ describe('campaign owner template tiles', () => {
             .mockResolvedValueOnce([]);
         findFirst.mockResolvedValue(null);
 
-        expect(tileProps(await CampaignsPage())?.templates).toEqual([
+        expect(
+            tileProps(
+                await CampaignsPage({ searchParams: Promise.resolve({}) })
+            )?.templates
+        ).toEqual([
             expect.objectContaining({ id: 'canonical' }),
             expect.objectContaining({ id: 'private' }),
         ]);
@@ -82,7 +87,7 @@ describe('campaign owner template tiles', () => {
             maxLevel: 5,
         });
 
-        const tree = await CampaignsPage();
+        const tree = await CampaignsPage({ searchParams: Promise.resolve({}) });
 
         const links: Array<{ href?: string; children?: ReactNode }> = [];
 
@@ -107,5 +112,18 @@ describe('campaign owner template tiles', () => {
         expect(links).toContainEqual(
             expect.objectContaining({ href: '/campaigns/demo-1' })
         );
+    });
+    it('lists the signed-in member’s archived campaigns when requested', async () => {
+        findMany.mockReset().mockResolvedValue([]);
+        findFirst.mockResolvedValue(null);
+
+        await CampaignsPage({
+            searchParams: Promise.resolve({ archived: 'true' }),
+        });
+
+        expect(findMany.mock.calls[1][0].where).toMatchObject({
+            status: CampaignStatus.ARCHIVED,
+            members: { some: { userId: 'owner' } },
+        });
     });
 });
