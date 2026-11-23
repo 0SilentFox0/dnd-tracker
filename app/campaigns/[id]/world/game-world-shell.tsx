@@ -17,11 +17,7 @@ interface Props {
 }
 
 export function GameWorldShell(props: Props) {
-    return process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true' ? (
-        <CampaignWorldShell {...props} />
-    ) : (
-        props.children
-    );
+    return <CampaignWorldShell {...props} />;
 }
 
 async function CampaignWorldShell({ campaign, viewer, children }: Props) {

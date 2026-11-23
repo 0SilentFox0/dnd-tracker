@@ -44,8 +44,6 @@ export default async function CampaignsPage({
 
     const tCommon = await getTranslator(locale, 'common');
 
-    const shellEnabled = process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true';
-
     const navItems: GameShellNavItem[] = [
         {
             id: 'campaigns',
@@ -54,18 +52,15 @@ export default async function CampaignsPage({
         },
     ];
 
-    const renderPage = (content: ReactNode) =>
-        shellEnabled ? (
-            <GameShell
-                items={navItems}
-                activeId="campaigns"
-                title={tCommon('gameNavigation.campaigns')}
-            >
-                {content}
-            </GameShell>
-        ) : (
-            content
-        );
+    const renderPage = (content: ReactNode) => (
+        <GameShell
+            items={navItems}
+            activeId="campaigns"
+            title={tCommon('gameNavigation.campaigns')}
+        >
+            {content}
+        </GameShell>
+    );
 
     const userId = user.id;
 

@@ -1,8 +1,7 @@
 export function shouldUseGameShell(
-    pathname: string | null | undefined,
-    enabled: boolean
+    pathname: string | null | undefined
 ): boolean {
-    if (!enabled || !pathname) return false;
+    if (!pathname) return false;
 
     const normalized = pathname.replace(/\/$/, '');
 

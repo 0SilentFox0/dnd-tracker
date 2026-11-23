@@ -4,32 +4,25 @@ import { shouldUseGameShell } from '../game-shell-route';
 
 describe('shouldUseGameShell', () => {
     it('enables the shell for the campaign list, dashboard, journal and both world views', () => {
-        expect(shouldUseGameShell('/campaigns', true)).toBe(true);
-        expect(shouldUseGameShell('/campaigns/campaign-1', true)).toBe(true);
-        expect(shouldUseGameShell('/campaigns/campaign-1/', true)).toBe(true);
-        expect(shouldUseGameShell('/campaigns/campaign-1/journal', true)).toBe(
+        expect(shouldUseGameShell('/campaigns')).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1')).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1/')).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1/journal')).toBe(
             true
         );
-        expect(shouldUseGameShell('/campaigns/campaign-1/world', true)).toBe(
+        expect(shouldUseGameShell('/campaigns/campaign-1/world')).toBe(
             true
         );
         expect(
-            shouldUseGameShell('/campaigns/campaign-1/dm/world/', true)
+            shouldUseGameShell('/campaigns/campaign-1/dm/world/')
         ).toBe(true);
         expect(
-            shouldUseGameShell('/campaigns/campaign-1/character', true)
+            shouldUseGameShell('/campaigns/campaign-1/character')
         ).toBe(false);
         expect(
-            shouldUseGameShell('/campaigns/campaign-1/battles/battle-1', true)
+            shouldUseGameShell('/campaigns/campaign-1/battles/battle-1')
         ).toBe(false);
-        expect(shouldUseGameShell('/campaigns/new', true)).toBe(false);
-    });
-
-    it('keeps the existing header when the temporary flag is off', () => {
-        expect(shouldUseGameShell('/campaigns', false)).toBe(false);
-        expect(shouldUseGameShell('/campaigns/campaign-1', false)).toBe(false);
-        expect(
-            shouldUseGameShell('/campaigns/campaign-1/dm/world', false)
-        ).toBe(false);
+        expect(shouldUseGameShell('/campaigns/new')).toBe(false);
+        expect(shouldUseGameShell(null)).toBe(false);
     });
 });

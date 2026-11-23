@@ -388,7 +388,7 @@ export default async function CampaignDetailPage({
         </HudPage>
     );
 
-    return process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true' ? (
+    return (
         <GameShell
             items={navItems}
             activeId="overview"
@@ -397,7 +397,5 @@ export default async function CampaignDetailPage({
         >
             {page}
         </GameShell>
-    ) : (
-        page
     );
 }

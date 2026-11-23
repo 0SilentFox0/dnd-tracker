@@ -44,8 +44,6 @@ export default async function JournalPage({
         </PrefetchedQuery>
     );
 
-    if (process.env.NEXT_PUBLIC_GAME_UI_SHELL !== 'true') return content;
-
     const { campaign, isDM, isDemo, userId } = access;
 
     const rules = parseRules(campaign.rules);

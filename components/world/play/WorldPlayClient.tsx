@@ -39,7 +39,7 @@ import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
-const GAME_STYLE = process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true';
+const GAME_STYLE = true;
 
 const MAP_HEIGHT =
     'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';

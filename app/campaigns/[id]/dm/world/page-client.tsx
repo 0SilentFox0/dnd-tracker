@@ -61,7 +61,7 @@ const ENTRY_COMPASS = {
     transform: 'translate(-50%, -50%)',
 } as const;
 
-const GAME_STYLE = process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true';
+const GAME_STYLE = true;
 
 const FRAME_HEIGHT =
     'lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:flex-col';

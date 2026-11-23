@@ -17,10 +17,7 @@ export function HeaderGate() {
     const pathname = usePathname();
 
     if (
-        shouldUseGameShell(
-            pathname,
-            process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true'
-        )
+        shouldUseGameShell(pathname)
     ) {
         return null;
     }
