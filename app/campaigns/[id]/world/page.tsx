@@ -37,13 +37,21 @@ export default async function WorldPage({
     searchParams,
 }: {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{ map?: string }>;
+    searchParams: Promise<{ map?: string; marker?: string }>;
 }) {
-    const [{ id }, { map }] = await Promise.all([params, searchParams]);
+    const [{ id }, { map, marker }] = await Promise.all([params, searchParams]);
 
     const { campaign, isDM, userId } = await requireCampaignMember(id);
 
-    if (isDM) redirect(`/campaigns/${id}/dm/world`);
+    if (isDM) {
+        const query = new URLSearchParams();
+
+        if (map) query.set('map', map);
+
+        if (marker) query.set('marker', marker);
+
+        redirect(`/campaigns/${id}/dm/world${query.size ? `?${query}` : ''}`);
+    }
 
     // a map the player may not open falls back to their current one
     const first = map ? await readView(id, map) : null;
@@ -67,6 +75,11 @@ export default async function WorldPage({
             campaignId={id}
             campaignName={campaign.name}
             mapId={view?.map.id ?? null}
+            markerId={
+                view?.markers?.some((item) => item.id === marker)
+                    ? marker
+                    : undefined
+            }
         />
     );
 

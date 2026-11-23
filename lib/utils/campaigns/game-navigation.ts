@@ -6,7 +6,8 @@ type Section =
     | 'world'
     | 'character'
     | 'scenario'
-    | 'show';
+    | 'show'
+    | 'journal';
 
 export function campaignGameNavigation({
     id,
@@ -92,6 +93,12 @@ export function campaignGameNavigation({
             }
         );
     }
+
+    navItems.push({
+        id: 'journal',
+        label: label('journal'),
+        href: `/campaigns/${id}/journal`,
+    });
 
     return navItems;
 }

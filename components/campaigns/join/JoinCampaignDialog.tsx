@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, KeyRound } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,7 +67,13 @@ export function JoinCampaignDialog() {
 
     return (
         <>
-            <Button onClick={() => handleOpenChange(true)} variant="outline">
+            <Button
+                onClick={() => handleOpenChange(true)}
+                variant="outline"
+                size="lg"
+                className="border-hud-gold/35 bg-hud-panel text-hud-ink hover:border-hud-gold"
+            >
+                <KeyRound aria-hidden />
                 {t('join.trigger')}
             </Button>
             <ResponsiveDialog

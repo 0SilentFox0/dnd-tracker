@@ -3,10 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { shouldUseGameShell } from '../game-shell-route';
 
 describe('shouldUseGameShell', () => {
-    it('enables the shell for the campaign list, dashboard and both world views', () => {
+    it('enables the shell for the campaign list, dashboard, journal and both world views', () => {
         expect(shouldUseGameShell('/campaigns', true)).toBe(true);
         expect(shouldUseGameShell('/campaigns/campaign-1', true)).toBe(true);
         expect(shouldUseGameShell('/campaigns/campaign-1/', true)).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1/journal', true)).toBe(
+            true
+        );
         expect(shouldUseGameShell('/campaigns/campaign-1/world', true)).toBe(
             true
         );

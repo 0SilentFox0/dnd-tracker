@@ -13,13 +13,22 @@ import { escapeStep } from '@/lib/utils/world/escape-step';
 import { markerAnchor } from '@/lib/utils/world/geometry';
 import { isTyping } from '@/lib/utils/world/is-typing';
 import { applyLayerStyle } from '@/lib/utils/world/marker-style';
-import type { WorldHero, WorldMarker, WorldViewLayer } from '@/types/world';
+import type {
+    MapFocus,
+    WorldHero,
+    WorldMarker,
+    WorldViewLayer,
+} from '@/types/world';
 
 const NO_LAYERS: WorldViewLayer[] = [];
 
 const NO_MARKERS: WorldMarker[] = [];
 
-export function useWorldPlay(campaignId: string, mapId: string | null) {
+export function useWorldPlay(
+    campaignId: string,
+    mapId: string | null,
+    markerId?: string
+) {
     const router = useRouter();
 
     const pathname = usePathname();
@@ -32,9 +41,15 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
 
     const { hidden, toggle } = useLayerVisibility(layerIds);
 
-    const [selectedId, select] = useState<string | null>(null);
+    const [selectedId, select] = useState<string | null>(markerId ?? null);
 
     const { focus, focusPoint } = useMapFocus();
+
+    const linkedFocus = useMemo<MapFocus | undefined>(() => {
+        const marker = view.data?.markers.find((item) => item.id === markerId);
+
+        return marker ? { point: markerAnchor(marker), seq: 0 } : undefined;
+    }, [view.data?.markers, markerId]);
 
     const focusHero = useCallback(
         (hero: WorldHero) => focusPoint({ x: hero.x, y: hero.y }),
@@ -162,7 +177,7 @@ export function useWorldPlay(campaignId: string, mapId: string | null) {
         openDetails,
         fullscreen,
         tree: { open: treeOpen, set: setTreeOpen },
-        focus,
+        focus: focus ?? linkedFocus,
         focusHero,
         openMap,
         myHeroes: view.data?.heroes.filter((h) => h.own) ?? [],

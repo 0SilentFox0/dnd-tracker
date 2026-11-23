@@ -1,7 +1,9 @@
 import 'server-only';
+import '@/lib/server/systems/registry';
 import { BattleStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
+import { systemContentKinds } from '@/lib/server/systems/lookup';
 import { latestPublishedVersion } from '@/lib/server/templates/publish';
 import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type { DmDashboardData, PlayerDashboardData } from '@/types/campaigns';
@@ -114,7 +116,6 @@ const COUNT_ENTRIES = [
     ['units', (where: Where) => prisma.unit.count({ where })],
     ['spells', (where: Where) => prisma.spell.count({ where })],
     ['artifacts', (where: Where) => prisma.artifact.count({ where })],
-    ['skills', (where: Where) => prisma.skill.count({ where })],
     ['races', (where: Where) => prisma.race.count({ where })],
     ['classes', (where: Where) => prisma.gameClass.count({ where })],
     ['backgrounds', (where: Where) => prisma.background.count({ where })],
@@ -128,13 +129,18 @@ type Where = { campaignId: string };
 async function readLibraryCounts(
     campaignId: string
 ): Promise<Record<string, number>> {
-    const counts = await Promise.all(
-        COUNT_ENTRIES.map(([, count]) => count({ campaignId }))
-    );
+    const counts = await Promise.all([
+        ...COUNT_ENTRIES.map(
+            async ([key, count]) => [key, await count({ campaignId })] as const
+        ),
+        ...Object.entries(systemContentKinds()).flatMap(([key, { count }]) =>
+            count
+                ? [count(campaignId).then((value) => [key, value] as const)]
+                : []
+        ),
+    ]);
 
-    return Object.fromEntries(
-        COUNT_ENTRIES.map(([key], index) => [key, counts[index]])
-    );
+    return Object.fromEntries(counts);
 }
 
 export async function readDmDashboard(
@@ -190,6 +196,7 @@ export async function readDmDashboard(
                 avatar: true,
                 armorClass: true,
                 speed: true,
+                characteristics: true,
             },
         }),
         prisma.worldMap.findFirst({
@@ -216,7 +223,12 @@ export async function readDmDashboard(
             : null,
         latestSession: playedScene,
         libraryCounts,
-        party,
+        party: party.map((row) => {
+            const { characteristics: _characteristics, ...hero } =
+                withStoredColumns(row);
+
+            return hero;
+        }),
         worldMap,
     };
 }

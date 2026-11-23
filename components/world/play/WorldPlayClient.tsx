@@ -48,12 +48,14 @@ export function WorldPlayClient({
     campaignId,
     campaignName,
     mapId,
+    markerId,
 }: {
     campaignId: string;
     campaignName: string;
     mapId: string | null;
+    markerId?: string;
 }) {
-    const play = useWorldPlay(campaignId, mapId);
+    const play = useWorldPlay(campaignId, mapId, markerId);
 
     const [journalOpen, setJournalOpen] = useState(false);
 

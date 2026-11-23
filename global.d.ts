@@ -37,6 +37,7 @@ import type landing from './messages/uk/landing.json';
 import type maps from './messages/uk/maps.json';
 import type music from './messages/uk/music.json';
 import type onboarding from './messages/uk/onboarding.json';
+import type quests from './messages/uk/quests.json';
 import type races from './messages/uk/races.json';
 import type rest from './messages/uk/rest.json';
 import type rules from './messages/uk/rules.json';
@@ -67,6 +68,7 @@ declare module 'next-intl' {
             demoTours: typeof demoTours;
             whatsNew: typeof whatsNew;
             help: typeof help;
+            quests: typeof quests;
             races: typeof races;
             skills: typeof skills;
             classes: typeof classes;

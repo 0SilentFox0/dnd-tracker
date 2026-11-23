@@ -17,13 +17,11 @@ import { CreditsText } from '@/components/campaigns/templates/CreditsText';
 import { PublishTemplateButton } from '@/components/campaigns/templates/PublishTemplateButton';
 import { SourceSyncButton } from '@/components/campaigns/templates/SourceSyncButton';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
-import {
-    HudPage,
-    HudPanel,
-} from '@/components/hud/page';
+import { HudPage, HudPanel } from '@/components/hud/page';
 import { GameShell } from '@/components/layout/GameShell';
 import { DemoTourMenu } from '@/components/onboarding/DemoTourMenu';
 import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { ActiveQuests } from '@/components/quests/ActiveQuests';
 import { SystemGate } from '@/components/systems/SystemGate';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,9 +29,7 @@ import {
     DM_QUICK_SECTION_KEYS,
     dmDashboardSectionsFor,
 } from '@/lib/constants/campaign-dashboard';
-import {
-    CampaignKind,
-} from '@/lib/constants/campaigns';
+import { CampaignKind } from '@/lib/constants/campaigns';
 import { onboardingKeys } from '@/lib/hooks/onboarding';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
@@ -146,7 +142,11 @@ export default async function CampaignDetailPage({
 
     const page = (
         <HudPage className="campaign-dashboard hud-wide">
-            <HudPanel as="div" className="dashboard-hero" data-tour="dashboard.header">
+            <HudPanel
+                as="div"
+                className="dashboard-hero"
+                data-tour="dashboard.header"
+            >
                 <div className="dashboard-hero-art" aria-hidden="true">
                     <OptimizedImage
                         src={campaign.coverImage || DEFAULT_CAMPAIGN_COVER}
@@ -154,26 +154,44 @@ export default async function CampaignDetailPage({
                         width={1800}
                         height={620}
                         className="size-full object-cover"
-                        fallback={<OptimizedImage src={DEFAULT_CAMPAIGN_COVER} alt="" width={1800} height={620} className="size-full object-cover" />}
+                        fallback={
+                            <OptimizedImage
+                                src={DEFAULT_CAMPAIGN_COVER}
+                                alt=""
+                                width={1800}
+                                height={620}
+                                className="size-full object-cover"
+                            />
+                        }
                     />
                 </div>
-                {isDM && <div className="dashboard-hero-settings">
-                                <CampaignSettingsButton
-                                    campaignId={id}
-                                    campaign={settings}
-                                    meta={{
-                                        createdFromId:
-                                            campaign.createdFromId ?? null,
-                                        isTemplate,
-                                        credits: campaign.credits ?? null,
-                                    }}
-                                />
-                </div>}
+                {isDM && (
+                    <div className="dashboard-hero-settings">
+                        <CampaignSettingsButton
+                            campaignId={id}
+                            campaign={settings}
+                            meta={{
+                                createdFromId: campaign.createdFromId ?? null,
+                                isTemplate,
+                                credits: campaign.credits ?? null,
+                            }}
+                        />
+                    </div>
+                )}
                 <div className="dashboard-hero-heading">
-                    <p className="dashboard-kicker">{t('summary.title')} · {tGameTerms(`ruleSystem.${rules.system.key}`)}</p>
+                    <p className="dashboard-kicker">
+                        {t('summary.title')} ·{' '}
+                        {tGameTerms(`ruleSystem.${rules.system.key}`)}
+                    </p>
                     <h1>{campaign.name}</h1>
-                    {campaign.description && <p className="dashboard-description">{campaign.description}</p>}
-                    {isDemo && <span className="text-sm">{t('page.demoDmRole')}</span>}
+                    {campaign.description && (
+                        <p className="dashboard-description">
+                            {campaign.description}
+                        </p>
+                    )}
+                    {isDemo && (
+                        <span className="text-sm">{t('page.demoDmRole')}</span>
+                    )}
                 </div>
                 <CampaignSummaryPanel
                     campaign={{
@@ -193,7 +211,16 @@ export default async function CampaignDetailPage({
                 {heroItems.length > 0 && (
                     <div className="dashboard-hero-actions">
                         {heroItems.map((item, index) => (
-                            <Button asChild key={item.id} variant="outline" className={index === 0 ? 'dashboard-primary' : undefined}>
+                            <Button
+                                asChild
+                                key={item.id}
+                                variant="outline"
+                                className={
+                                    index === 0
+                                        ? 'dashboard-primary'
+                                        : undefined
+                                }
+                            >
                                 <Link href={item.href}>{item.label}</Link>
                             </Button>
                         ))}
@@ -269,11 +296,12 @@ export default async function CampaignDetailPage({
                 {isDM && !isTemplate && dm && (
                     <aside className="min-w-0 lg:col-span-4">
                         <div className="flex h-full flex-col gap-4 [&>*:first-child]:flex-1">
-                        <DmPrepPanel campaignId={id} data={dm} />
-                        <CampaignRecentSession
-                            campaignId={id}
-                            session={dm.latestSession}
-                        />
+                            <ActiveQuests campaignId={id} isDM={isDM} />
+                            <DmPrepPanel campaignId={id} data={dm} />
+                            <CampaignRecentSession
+                                campaignId={id}
+                                session={dm.latestSession}
+                            />
                         </div>
                     </aside>
                 )}

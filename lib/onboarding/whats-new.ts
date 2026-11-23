@@ -8,6 +8,7 @@ const GAME_WORLD_HUD = '2026-11-22-world-map-hud';
 
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
     { id: GAME_WORLD_HUD, date: '2026-11-22', audience: 'all' },
+    { id: '2026-11-22-quests', date: '2026-11-22', audience: 'all' },
     { id: '2026-11-20-world-layer-style', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-viewport', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-layers', date: '2026-11-20', audience: 'all' },

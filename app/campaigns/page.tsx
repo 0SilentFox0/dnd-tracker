@@ -1,20 +1,16 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Map as MapIcon } from 'lucide-react';
+import { Archive, Compass, Map as MapIcon, Plus } from 'lucide-react';
 
 import { JoinCampaignDialog } from '@/components/campaigns/join/JoinCampaignDialog';
 import {
     type TemplateTile,
     TemplateTiles,
 } from '@/components/campaigns/templates/TemplateTiles';
+import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { EmptyState, ErrorState } from '@/components/common/states';
 import { type GameShellNavItem } from '@/components/hud';
-import {
-    HudCard,
-    HudPage,
-    HudPageHeader,
-    HudPanel,
-} from '@/components/hud/page';
+import { HudCard, HudPage, HudPanel } from '@/components/hud/page';
 import { GameShell } from '@/components/layout/GameShell';
 import { Button } from '@/components/ui/button';
 import { getAuthUser } from '@/lib/auth';
@@ -30,7 +26,16 @@ import { visibleTemplates } from '@/lib/server/templates/list-templates';
 import { safeParseRules } from '@/lib/utils/rules/schema';
 import { systemKeyOf } from '@/lib/utils/rules/systems';
 
-export default async function CampaignsPage() {
+const COVER_CARD =
+    'relative overflow-hidden !p-0 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-hud-gold/45 after:transition-colors hover:after:border-hud-gold focus-visible:after:border-hud-gold data-[tone=active]:after:border-hud-gold/75';
+
+export default async function CampaignsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ archived?: string }>;
+}) {
+    const archived = (await searchParams).archived === 'true';
+
     const user = await getAuthUser();
 
     const locale = await getRequestLocale();
@@ -64,6 +69,27 @@ export default async function CampaignsPage() {
 
     const userId = user.id;
 
+    const cover = (src?: string | null) => (
+        <div className="relative h-[120px] overflow-hidden after:absolute after:inset-0 after:bg-linear-to-b after:from-transparent after:from-30% after:to-hud-panel">
+            <OptimizedImage
+                src={src || '/example-demo/maps/grove.jpg'}
+                alt=""
+                width={700}
+                height={280}
+                className="size-full object-cover"
+                fallback={
+                    <OptimizedImage
+                        src="/example-demo/maps/grove.jpg"
+                        alt=""
+                        width={700}
+                        height={280}
+                        className="size-full object-cover"
+                    />
+                }
+            />
+        </div>
+    );
+
     type CampaignWithMembers = Awaited<
         ReturnType<
             typeof prisma.campaign.findMany<{
@@ -88,6 +114,7 @@ export default async function CampaignsPage() {
         name: string;
         description: string | null;
         maxLevel: number;
+        coverImage: string | null;
     } | null = null;
 
     try {
@@ -111,7 +138,13 @@ export default async function CampaignsPage() {
 
         const demoQuery = prisma.campaign.findFirst({
             where: { kind: CampaignKind.DEMO, status: CampaignStatus.ACTIVE },
-            select: { id: true, name: true, description: true, maxLevel: true },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                maxLevel: true,
+                coverImage: true,
+            },
         });
 
         const campaignsQuery = prisma.campaign.findMany({
@@ -121,7 +154,9 @@ export default async function CampaignsPage() {
                         userId: userId,
                     },
                 },
-                status: CampaignStatus.ACTIVE,
+                status: archived
+                    ? CampaignStatus.ARCHIVED
+                    : CampaignStatus.ACTIVE,
                 kind: CampaignKind.CAMPAIGN,
             },
             include: {
@@ -193,38 +228,76 @@ export default async function CampaignsPage() {
 
     return renderPage(
         <HudPage className="hud-wide">
-            <HudPageHeader
-                title={t('page.title')}
-                actions={
-                    <>
-                        <JoinCampaignDialog />
-                        <Button className="whitespace-nowrap" asChild>
-                            <Link href="/campaigns/new">{t('page.new')}</Link>
-                        </Button>
-                    </>
-                }
-            />
+            <header className="mb-5 flex flex-col gap-4 border-b border-hud-gold/25 pt-1 pb-4 sm:mb-6 sm:pb-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-hud-gold/40 bg-hud-panel text-hud-gold sm:size-12">
+                        <Compass aria-hidden className="size-5 sm:size-6" />
+                    </span>
+                    <h1 className="hud-sc text-3xl leading-tight text-hud-ink sm:text-4xl">
+                        {t('page.title')}
+                    </h1>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="lg"
+                        className="text-hud-bone hover:bg-hud-panel"
+                        asChild
+                    >
+                        <Link
+                            href={
+                                archived
+                                    ? '/campaigns'
+                                    : '/campaigns?archived=true'
+                            }
+                        >
+                            <Archive aria-hidden />
+                            {t(archived ? 'page.active' : 'page.archived')}
+                        </Link>
+                    </Button>
+                    <JoinCampaignDialog />
+                    <Button
+                        size="lg"
+                        className="flex-1 border border-hud-gold/60 shadow-[0_0_18px_var(--color-hud-glow)] sm:flex-none"
+                        asChild
+                    >
+                        <Link href="/campaigns/new">
+                            <Plus aria-hidden />
+                            {t('page.new')}
+                        </Link>
+                    </Button>
+                </div>
+            </header>
 
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {demoCampaign && (
-                    <HudCard asChild tone="active" className="space-y-2">
-                        <Link href={`/campaigns/${demoCampaign.id}`}>
-                            <h2 className="hud-sc text-lg text-hud-ink">
-                                {t('demo.title')}
-                            </h2>
-                            <p className="text-sm text-hud-muted">
-                                {t('demo.description')}
-                            </p>
-                            {demoCampaign.description && (
-                                <p className="text-sm text-hud-bone">
-                                    {demoCampaign.description}
+                    <HudCard asChild tone="active" className={COVER_CARD}>
+                        <Link
+                            href={`/campaigns/${demoCampaign.id}`}
+                            className="flex h-full flex-col"
+                        >
+                            {cover(demoCampaign.coverImage)}
+                            <div className="relative -mt-5 flex flex-1 flex-col gap-2 p-4">
+                                <h2 className="hud-sc text-lg text-hud-ink">
+                                    {t('demo.title')}
+                                </h2>
+                                <p className="text-sm text-hud-muted">
+                                    {t('demo.description')}
                                 </p>
-                            )}
-                            <p className="text-sm text-hud-muted">
-                                {t('card.level', {
-                                    level: demoCampaign.maxLevel,
-                                })}
-                            </p>
+                                {demoCampaign.description && (
+                                    <p className="text-sm text-hud-bone">
+                                        {demoCampaign.description}
+                                    </p>
+                                )}
+                                <p className="text-sm text-hud-muted">
+                                    {t('card.level', {
+                                        level: demoCampaign.maxLevel,
+                                    })}
+                                </p>
+                                <span className="mt-auto flex min-h-10 items-center justify-center rounded border border-hud-line px-4 text-sm font-medium text-hud-ink">
+                                    {t('card.continue')}
+                                </span>
+                            </div>
                         </Link>
                     </HudCard>
                 )}
@@ -239,52 +312,68 @@ export default async function CampaignsPage() {
                         <HudCard
                             key={campaign.id}
                             asChild
-                            className="space-y-2"
+                            className={COVER_CARD}
                         >
-                            <Link href={`/campaigns/${campaign.id}`}>
-                                <div className="flex items-start justify-between gap-2">
-                                    <h2 className="hud-sc text-lg text-hud-ink">
-                                        {campaign.name}
-                                    </h2>
-                                    {isDM && (
-                                        <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[var(--palette-primary-foreground,#2a1d05)]">
-                                            {t('roles.dm')}
-                                        </span>
-                                    )}
-                                </div>
-                                {campaign.description && (
-                                    <p className="text-sm text-hud-muted">
-                                        {campaign.description}
-                                    </p>
-                                )}
-                                <div className="space-y-1 text-sm text-hud-muted">
-                                    <p>
-                                        {t('card.level', {
-                                            level: campaign.maxLevel,
-                                        })}
-                                    </p>
-                                    <p>
-                                        {t('card.players', {
-                                            count: campaign.members.filter(
-                                                (m) =>
-                                                    m.role ===
-                                                    CampaignRole.PLAYER
-                                            ).length,
-                                        })}
-                                    </p>
-                                    {isDM && (
-                                        <p>
-                                            {t('card.inviteCode')}{' '}
-                                            <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">
-                                                {campaign.inviteCode}
-                                            </code>
+                            <Link
+                                href={`/campaigns/${campaign.id}`}
+                                className="flex h-full flex-col"
+                            >
+                                {cover(campaign.coverImage)}
+                                <div className="relative -mt-5 flex flex-1 flex-col gap-3 p-4">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <h2 className="hud-sc text-lg text-hud-ink">
+                                            {campaign.name}
+                                        </h2>
+                                        {isDM && (
+                                            <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[var(--palette-primary-foreground,#2a1d05)]">
+                                                {t('roles.dm')}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {campaign.description && (
+                                        <p className="text-sm text-hud-muted">
+                                            {campaign.description}
                                         </p>
                                     )}
+                                    <div className="space-y-1 text-sm text-hud-muted">
+                                        <p>
+                                            {t('card.level', {
+                                                level: campaign.maxLevel,
+                                            })}
+                                        </p>
+                                        <p>
+                                            {t('card.players', {
+                                                count: campaign.members.filter(
+                                                    (m) =>
+                                                        m.role ===
+                                                        CampaignRole.PLAYER
+                                                ).length,
+                                            })}
+                                        </p>
+                                        {isDM && (
+                                            <p>
+                                                {t('card.inviteCode')}{' '}
+                                                <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">
+                                                    {campaign.inviteCode}
+                                                </code>
+                                            </p>
+                                        )}
+                                    </div>
+                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded border border-hud-gold bg-hud-field px-4 text-sm font-medium text-hud-gold">
+                                        {t('card.continue')}
+                                    </span>
                                 </div>
                             </Link>
                         </HudCard>
                     );
                 })}
+                <Link
+                    href="/campaigns/new"
+                    className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-hud-gold hover:border-hud-gold"
+                >
+                    <Plus className="size-6" aria-hidden />
+                    {t('page.new')}
+                </Link>
             </div>
 
             {templates.length > 0 && (
