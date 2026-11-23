@@ -139,7 +139,8 @@
     "world": "World map",
     "character": "Character",
     "scenario": "Scenario",
-    "show": "Show"
+    "show": "Show",
+    "journal": "Journal"
   },
   "breadcrumbs": {
     "label": "Breadcrumb",

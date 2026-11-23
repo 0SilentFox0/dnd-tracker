@@ -39,12 +39,14 @@ export function WorldPlayClient({
     campaignId,
     campaignName,
     mapId,
+    markerId,
 }: {
     campaignId: string;
     campaignName: string;
     mapId: string | null;
+    markerId?: string;
 }) {
-    const play = useWorldPlay(campaignId, mapId);
+    const play = useWorldPlay(campaignId, mapId, markerId);
 
     const t = useTranslations('world');
 
@@ -120,7 +122,12 @@ export function WorldPlayClient({
                         marker && !play.details.open ? (
                             <PlayerMarkerBubble
                                 key={marker.id}
-                                marker={applyLayerStyle([marker], play.layers.items)[0]}
+                                marker={
+                                    applyLayerStyle(
+                                        [marker],
+                                        play.layers.items
+                                    )[0]
+                                }
                                 embedded={!isDesktop}
                                 actions={{
                                     onMore: play.openDetails,

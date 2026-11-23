@@ -17,14 +17,11 @@ import { CreditsText } from '@/components/campaigns/templates/CreditsText';
 import { PublishTemplateButton } from '@/components/campaigns/templates/PublishTemplateButton';
 import { SourceSyncButton } from '@/components/campaigns/templates/SourceSyncButton';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
-import { type GameShellNavItem } from '@/components/hud';
-import {
-    HudPage,
-    HudPanel,
-} from '@/components/hud/page';
+import { HudPage, HudPanel } from '@/components/hud/page';
 import { GameShell } from '@/components/layout/GameShell';
 import { DemoTourMenu } from '@/components/onboarding/DemoTourMenu';
 import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { ActiveQuests } from '@/components/quests/ActiveQuests';
 import { SystemGate } from '@/components/systems/SystemGate';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,11 +29,7 @@ import {
     DM_QUICK_SECTION_KEYS,
     dmDashboardSectionsFor,
 } from '@/lib/constants/campaign-dashboard';
-import {
-    CampaignKind,
-    dmSectionHref,
-    dmSectionsFor,
-} from '@/lib/constants/campaigns';
+import { CampaignKind } from '@/lib/constants/campaigns';
 import { onboardingKeys } from '@/lib/hooks/onboarding';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
@@ -46,6 +39,7 @@ import {
     readDmDashboard,
     readPlayerDashboard,
 } from '@/lib/server/campaigns/dashboard';
+import { campaignGameNavigation } from '@/lib/server/campaigns/game-navigation';
 import { readCampaignOnboarding } from '@/lib/server/onboarding/campaign';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { parseRules } from '@/lib/utils/rules/schema';
@@ -107,75 +101,7 @@ export default async function CampaignDetailPage({
         system: rules.system,
     };
 
-    const navItems: GameShellNavItem[] = [
-        {
-            id: 'overview',
-            label: tCommon('gameNavigation.dashboard'),
-            href: `/campaigns/${id}`,
-        },
-    ];
-
-    if (isDM) {
-        const visibleSections = dmSectionsFor(context);
-
-        for (const item of [
-            { id: 'battle', path: 'battles' },
-            { id: 'world' },
-            { id: 'character', path: 'characters' },
-            { id: 'scenario', path: 'scenario' },
-            { id: 'show', path: 'show' },
-        ] as const) {
-            if (item.id === 'world') {
-                navItems.push({
-                    id: item.id,
-                    label: tCommon('gameNavigation.world'),
-                    href: `/campaigns/${id}/dm/world`,
-                });
-                continue;
-            }
-
-            const section = visibleSections.find(
-                (candidate) => candidate.path === item.path
-            );
-
-            if (section) {
-                navItems.push({
-                    id: item.id,
-                    label: tCommon(`gameNavigation.${item.id}`),
-                    href: dmSectionHref(id, section),
-                });
-            }
-        }
-    } else {
-        if (player?.activeBattle) {
-            navItems.push({
-                id: 'battle',
-                label: tCommon('gameNavigation.battle'),
-                href: `/campaigns/${id}/battles/${player.activeBattle.battleId}`,
-            });
-        }
-
-        if (player?.hasWorld) {
-            navItems.push({
-                id: 'world',
-                label: tCommon('gameNavigation.world'),
-                href: `/campaigns/${id}/world`,
-            });
-        }
-
-        navItems.push(
-            {
-                id: 'character',
-                label: tCommon('gameNavigation.character'),
-                href: `/campaigns/${id}/character`,
-            },
-            {
-                id: 'show',
-                label: tCommon('gameNavigation.show'),
-                href: `/campaigns/${id}/show`,
-            }
-        );
-    }
+    const navItems = campaignGameNavigation(id, isDM, context, player, tCommon);
 
     const heroItems = navItems.filter(
         (item) =>
@@ -209,7 +135,11 @@ export default async function CampaignDetailPage({
 
     const page = (
         <HudPage className="campaign-dashboard hud-wide">
-            <HudPanel as="div" className="dashboard-hero" data-tour="dashboard.header">
+            <HudPanel
+                as="div"
+                className="dashboard-hero"
+                data-tour="dashboard.header"
+            >
                 <div className="dashboard-hero-art" aria-hidden="true">
                     <OptimizedImage
                         src={campaign.coverImage || DEFAULT_CAMPAIGN_COVER}
@@ -217,26 +147,44 @@ export default async function CampaignDetailPage({
                         width={1800}
                         height={620}
                         className="size-full object-cover"
-                        fallback={<OptimizedImage src={DEFAULT_CAMPAIGN_COVER} alt="" width={1800} height={620} className="size-full object-cover" />}
+                        fallback={
+                            <OptimizedImage
+                                src={DEFAULT_CAMPAIGN_COVER}
+                                alt=""
+                                width={1800}
+                                height={620}
+                                className="size-full object-cover"
+                            />
+                        }
                     />
                 </div>
-                {isDM && <div className="dashboard-hero-settings">
-                                <CampaignSettingsButton
-                                    campaignId={id}
-                                    campaign={settings}
-                                    meta={{
-                                        createdFromId:
-                                            campaign.createdFromId ?? null,
-                                        isTemplate,
-                                        credits: campaign.credits ?? null,
-                                    }}
-                                />
-                </div>}
+                {isDM && (
+                    <div className="dashboard-hero-settings">
+                        <CampaignSettingsButton
+                            campaignId={id}
+                            campaign={settings}
+                            meta={{
+                                createdFromId: campaign.createdFromId ?? null,
+                                isTemplate,
+                                credits: campaign.credits ?? null,
+                            }}
+                        />
+                    </div>
+                )}
                 <div className="dashboard-hero-heading">
-                    <p className="dashboard-kicker">{t('summary.title')} · {tGameTerms(`ruleSystem.${rules.system.key}`)}</p>
+                    <p className="dashboard-kicker">
+                        {t('summary.title')} ·{' '}
+                        {tGameTerms(`ruleSystem.${rules.system.key}`)}
+                    </p>
                     <h1>{campaign.name}</h1>
-                    {campaign.description && <p className="dashboard-description">{campaign.description}</p>}
-                    {isDemo && <span className="text-sm">{t('page.demoDmRole')}</span>}
+                    {campaign.description && (
+                        <p className="dashboard-description">
+                            {campaign.description}
+                        </p>
+                    )}
+                    {isDemo && (
+                        <span className="text-sm">{t('page.demoDmRole')}</span>
+                    )}
                 </div>
                 <CampaignSummaryPanel
                     campaign={{
@@ -256,7 +204,16 @@ export default async function CampaignDetailPage({
                 {heroItems.length > 0 && (
                     <div className="dashboard-hero-actions">
                         {heroItems.map((item, index) => (
-                            <Button asChild key={item.id} variant="outline" className={index === 0 ? 'dashboard-primary' : undefined}>
+                            <Button
+                                asChild
+                                key={item.id}
+                                variant="outline"
+                                className={
+                                    index === 0
+                                        ? 'dashboard-primary'
+                                        : undefined
+                                }
+                            >
                                 <Link href={item.href}>{item.label}</Link>
                             </Button>
                         ))}
@@ -332,11 +289,12 @@ export default async function CampaignDetailPage({
                 {isDM && !isTemplate && dm && (
                     <aside className="min-w-0 lg:col-span-4">
                         <div className="flex h-full flex-col gap-4 [&>*:first-child]:flex-1">
-                        <DmPrepPanel campaignId={id} data={dm} />
-                        <CampaignRecentSession
-                            campaignId={id}
-                            session={dm.latestSession}
-                        />
+                            <ActiveQuests campaignId={id} isDM={isDM} />
+                            <DmPrepPanel campaignId={id} data={dm} />
+                            <CampaignRecentSession
+                                campaignId={id}
+                                session={dm.latestSession}
+                            />
                         </div>
                     </aside>
                 )}

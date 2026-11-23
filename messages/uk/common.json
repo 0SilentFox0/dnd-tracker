@@ -139,7 +139,8 @@
     "world": "Мапа світу",
     "character": "Персонаж",
     "scenario": "Сценарій",
-    "show": "Показ"
+    "show": "Показ",
+    "journal": "Журнал"
   },
   "breadcrumbs": {
     "label": "Навігація",

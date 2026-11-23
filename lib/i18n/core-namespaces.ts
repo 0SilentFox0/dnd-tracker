@@ -55,6 +55,7 @@ const SITE_NAMESPACES = [
     'demoTours',
     'whatsNew',
     'help',
+    'quests',
     'ai',
     'assistant',
     'compendiumReport',

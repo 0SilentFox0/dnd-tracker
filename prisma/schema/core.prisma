@@ -9,6 +9,7 @@ datasource db {
 }
 
 model User {
+  questTracking QuestTracking[]
   id                  String               @id
   email               String               @unique
   displayName         String
@@ -33,6 +34,7 @@ model User {
 }
 
 model Campaign {
+  quests Quest[]
   id                   String                @id @default(cuid())
   contentVersion       Int                   @default(0)
   sourceSync           CampaignSourceSync?
@@ -1215,6 +1217,7 @@ model WorldMap {
 }
 
 model WorldMarker {
+  quests Quest[]
   id            String           @id @default(cuid())
   mapId         String
   kind          String
@@ -1804,3 +1807,45 @@ model CareerBase {
 }
 
 // END GENERATED BASE MODELS
+
+model Quest {
+  id String @id @default(cuid())
+  campaignId String
+  title String
+  description String @default("")
+  kind String @default("main")
+  status String @default("active")
+  visible Boolean @default(false)
+  notes String @default("")
+  reward String @default("")
+  markerId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  marker WorldMarker? @relation(fields: [markerId], references: [id], onDelete: SetNull)
+  objectives QuestObjective[]
+  tracking QuestTracking[]
+  @@index([campaignId, visible, status])
+  @@index([markerId])
+  @@map("quests")
+}
+model QuestObjective {
+  id String @id @default(cuid())
+  questId String
+  title String
+  completed Boolean @default(false)
+  visible Boolean @default(false)
+  sortOrder Int @default(0)
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+  @@index([questId, sortOrder])
+  @@map("quest_objectives")
+}
+model QuestTracking {
+  questId String
+  userId String
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([questId, userId])
+  @@index([userId])
+  @@map("quest_tracking")
+}
