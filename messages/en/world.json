@@ -1,5 +1,6 @@
 {
   "journey": {
+    "filters": "Layers and trails",
     "title": "Where next",
     "empty": "No destinations on this map yet.",
     "legend": "Map legend",

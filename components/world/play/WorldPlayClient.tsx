@@ -22,6 +22,7 @@ import { PlaceSearchBar } from '@/components/world/nav/PlaceSearchBar';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
 import { WorldCrumbs } from '@/components/world/nav/WorldCrumbs';
+import { WorldFilterLegend } from '@/components/world/nav/WorldFilterLegend';
 import {
     WorldJourneyHud,
     WorldMapLegend,
@@ -249,22 +250,32 @@ export function WorldPlayClient({
                                         }
                                         data-tour="world.map"
                                     >
-                                        <div className="world-map-filter-legend absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
-                                            <LayerLegend
-                                                layers={play.layers.items}
-                                                hidden={play.layers.hidden}
-                                                onToggle={play.layers.toggle}
-                                                showUnlayered={
-                                                    play.layers.showUnlayered
+                                        {(play.layers.items.length > 0 ||
+                                            trail.trails.length > 0) && (
+                                            <WorldFilterLegend
+                                                compact={
+                                                    GAME_STYLE && !isDesktop
                                                 }
-                                            />
-                                            <TrailLegend
-                                                trails={trail.trails}
-                                                sessions={trail.sessions}
-                                                visible={trail.visible}
-                                                onToggle={trail.toggle}
-                                            />
-                                        </div>
+                                            >
+                                                <LayerLegend
+                                                    layers={play.layers.items}
+                                                    hidden={play.layers.hidden}
+                                                    onToggle={
+                                                        play.layers.toggle
+                                                    }
+                                                    showUnlayered={
+                                                        play.layers
+                                                            .showUnlayered
+                                                    }
+                                                />
+                                                <TrailLegend
+                                                    trails={trail.trails}
+                                                    sessions={trail.sessions}
+                                                    visible={trail.visible}
+                                                    onToggle={trail.toggle}
+                                                />
+                                            </WorldFilterLegend>
+                                        )}
                                         {GAME_STYLE && (
                                             <>
                                                 <WorldSceneHeading>

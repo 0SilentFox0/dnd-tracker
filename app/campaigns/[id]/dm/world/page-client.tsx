@@ -31,6 +31,7 @@ import { MapTree } from '@/components/world/nav/MapTree';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
 import { WorldCrumbs } from '@/components/world/nav/WorldCrumbs';
+import { WorldFilterLegend } from '@/components/world/nav/WorldFilterLegend';
 import {
     WorldJourneyHud,
     WorldMapLegend,
@@ -107,6 +108,17 @@ export function WorldEditorPageClient({
         useWorldTrail(campaignId, mapId).data,
         detail.data ? detail.data.map.width / detail.data.map.height : 1
     );
+
+    const legendLayers = eyes.asHeroId
+        ? eyes.layers
+        : {
+              items: layers.items,
+              hidden: layers.visibility.hidden,
+              toggle: layers.visibility.toggle,
+              showUnlayered: layers.showUnlayered,
+          };
+
+    const showTrailLegend = !eyes.asHeroId && trail.trails.length > 0;
 
     const sessions = useWorldSessions(campaignId);
 
@@ -283,43 +295,60 @@ export function WorldEditorPageClient({
                                                             details.set(true);
                                                         }}
                                                     >
-                                                        <HudToggleChip
-                                                            tall
-                                                            active={treeShown}
-                                                            onClick={() =>
-                                                                tree.set(
-                                                                    !treeShown
-                                                                )
+                                                        <div
+                                                            className={
+                                                                GAME_STYLE
+                                                                    ? 'world-editor-sections'
+                                                                    : 'contents'
                                                             }
                                                         >
-                                                            {t('tree.toggle')}
-                                                        </HudToggleChip>
-                                                        {mode.value ===
-                                                            'build' &&
-                                                        !eyes.asHeroId ? (
                                                             <HudToggleChip
                                                                 tall
                                                                 active={
-                                                                    layers.panel
-                                                                        .open
+                                                                    treeShown
                                                                 }
                                                                 onClick={() =>
-                                                                    layers.panel.set(
-                                                                        !layers
-                                                                            .panel
-                                                                            .open
+                                                                    tree.set(
+                                                                        !treeShown
                                                                     )
                                                                 }
                                                             >
                                                                 {t(
-                                                                    'layers.toggle'
+                                                                    'tree.toggle'
                                                                 )}
                                                             </HudToggleChip>
-                                                        ) : null}
-                                                        <ModeSwitch
-                                                            value={mode.value}
-                                                            onChange={mode.set}
-                                                        />
+                                                            {mode.value ===
+                                                                'build' &&
+                                                            !eyes.asHeroId ? (
+                                                                <HudToggleChip
+                                                                    tall
+                                                                    active={
+                                                                        layers
+                                                                            .panel
+                                                                            .open
+                                                                    }
+                                                                    onClick={() =>
+                                                                        layers.panel.set(
+                                                                            !layers
+                                                                                .panel
+                                                                                .open
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        'layers.toggle'
+                                                                    )}
+                                                                </HudToggleChip>
+                                                            ) : null}
+                                                            <ModeSwitch
+                                                                value={
+                                                                    mode.value
+                                                                }
+                                                                onChange={
+                                                                    mode.set
+                                                                }
+                                                            />
+                                                        </div>
                                                         <HeroEyesSelect
                                                             heroes={
                                                                 roster.heroes
@@ -637,66 +666,46 @@ export function WorldEditorPageClient({
                                                                 }}
                                                             />
                                                         )}
-                                                        {eyes.asHeroId ? (
-                                                            <div className="world-map-filter-legend absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                                        {(legendLayers.items
+                                                            .length > 0 ||
+                                                            showTrailLegend) && (
+                                                            <WorldFilterLegend
+                                                                compact={
+                                                                    GAME_STYLE &&
+                                                                    !isDesktop
+                                                                }
+                                                            >
                                                                 <LayerLegend
                                                                     layers={
-                                                                        eyes
-                                                                            .layers
-                                                                            .items
+                                                                        legendLayers.items
                                                                     }
                                                                     hidden={
-                                                                        eyes
-                                                                            .layers
-                                                                            .hidden
+                                                                        legendLayers.hidden
                                                                     }
                                                                     onToggle={
-                                                                        eyes
-                                                                            .layers
-                                                                            .toggle
+                                                                        legendLayers.toggle
                                                                     }
                                                                     showUnlayered={
-                                                                        eyes
-                                                                            .layers
-                                                                            .showUnlayered
+                                                                        legendLayers.showUnlayered
                                                                     }
                                                                 />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="world-map-filter-legend absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
-                                                                <LayerLegend
-                                                                    layers={
-                                                                        layers.items
-                                                                    }
-                                                                    hidden={
-                                                                        layers
-                                                                            .visibility
-                                                                            .hidden
-                                                                    }
-                                                                    onToggle={
-                                                                        layers
-                                                                            .visibility
-                                                                            .toggle
-                                                                    }
-                                                                    showUnlayered={
-                                                                        layers.showUnlayered
-                                                                    }
-                                                                />
-                                                                <TrailLegend
-                                                                    trails={
-                                                                        trail.trails
-                                                                    }
-                                                                    sessions={
-                                                                        trail.sessions
-                                                                    }
-                                                                    visible={
-                                                                        trail.visible
-                                                                    }
-                                                                    onToggle={
-                                                                        trail.toggle
-                                                                    }
-                                                                />
-                                                            </div>
+                                                                {showTrailLegend && (
+                                                                    <TrailLegend
+                                                                        trails={
+                                                                            trail.trails
+                                                                        }
+                                                                        sessions={
+                                                                            trail.sessions
+                                                                        }
+                                                                        visible={
+                                                                            trail.visible
+                                                                        }
+                                                                        onToggle={
+                                                                            trail.toggle
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </WorldFilterLegend>
                                                         )}
                                                         {GAME_STYLE &&
                                                             !eyes.asHeroId && (

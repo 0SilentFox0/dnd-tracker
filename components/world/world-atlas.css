@@ -414,6 +414,35 @@
   max-width: min(23rem, calc(100% - 4rem));
 }
 
+.world-filter-trigger:hover {
+  background: var(--color-hud-field);
+  color: var(--color-hud-gold);
+}
+
+.world-map-filter-sheet {
+  display: grid;
+  gap: .5rem;
+}
+
+.world-map-filter-sheet nav {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.world-map-filter-sheet nav button {
+  width: fit-content;
+  max-width: 100%;
+  height: auto;
+  min-height: 44px;
+  padding-block: .375rem;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.world-map-filter-sheet nav button [aria-hidden] {
+  flex-shrink: 0;
+}
+
 .world-game-toolbar {
   position: relative;
   z-index: 2;
@@ -449,16 +478,66 @@
   overflow: visible;
 }
 
+.world-editor-sections {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: .125rem;
+  min-width: 14rem;
+  padding: .125rem;
+  border: 1px solid var(--color-hud-rule);
+  border-radius: 10px;
+  background: var(--color-hud-field);
+}
+
+.world-editor-sections [data-slot="world-mode-switch"] {
+  display: grid;
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+  gap: inherit;
+}
+
+.world-game-toolbar .world-editor-sections button {
+  justify-content: center;
+  border-color: transparent;
+  border-radius: 7px;
+  padding-inline: .25rem;
+  font-size: .75rem;
+}
+
+.world-game-toolbar .world-editor-sections button[aria-pressed="false"] {
+  background: transparent;
+}
+
+.world-game-toolbar .world-editor-sections button:hover,
+.world-game-toolbar .world-editor-sections button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-hud-gold) 13%, var(--color-hud-field));
+  color: var(--color-hud-ink);
+}
+
+.world-game-toolbar .world-editor-sections button[aria-pressed="true"] {
+  border-color: var(--color-hud-gold);
+}
+
 .world-game-toolbar [data-slot="world-hero-eyes"] {
-  width: auto;
-  max-width: min(11rem, 100%);
+  width: 9.5rem;
+  max-width: 100%;
   margin-inline-start: auto;
   background: var(--color-hud-field);
 }
 
-.world-game-toolbar [data-slot="world-hero-eyes"] [role="combobox"] {
+.world-game-toolbar [data-slot="world-hero-eyes"]:has([role="combobox"]:focus-visible) {
+  outline: 2px solid var(--color-hud-gold);
+  outline-offset: 2px;
+}
+
+html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigger"][role="combobox"] {
   width: 100%;
   min-height: 40px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
 }
 
 .world-zoom-controls {
@@ -672,11 +751,16 @@
     overflow: visible;
   }
 
+  .world-editor-sections {
+    flex: 1 1 14rem;
+  }
+
   .world-game-toolbar [data-slot="world-hero-eyes"] {
+    width: 8.625rem;
     height: auto;
   }
 
-  .world-game-toolbar [data-slot="world-hero-eyes"] [role="combobox"] {
+  html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigger"][role="combobox"] {
     min-height: 44px;
   }
 
