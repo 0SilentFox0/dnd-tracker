@@ -29,6 +29,7 @@ export function HeaderPillLink({
         return (
             <span
                 aria-disabled
+                data-slot="header-pill-link"
                 data-tour={dataTour}
                 className={`${PILL} opacity-70`}
             >
@@ -39,6 +40,7 @@ export function HeaderPillLink({
     return (
         <Link
             href={href}
+            data-slot="header-pill-link"
             data-tour={dataTour}
             className={`${PILL} hover:brightness-110`}
         >

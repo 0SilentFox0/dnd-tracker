@@ -140,6 +140,31 @@
 .hud-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 9999px; background: var(--hud-gold, #c9b37a); border: 2px solid var(--palette-primary-foreground, #2a1d05); }
 .hud-range:focus-visible { outline: 2px solid var(--color-hud-gold-bright, #ffe08a); outline-offset: 2px; border-radius: 9999px; }
 
+.game-shell-mobile-actions [data-slot="header-pill-link"] {
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  padding-inline: 0;
+  border-radius: .55rem;
+}
+
+html:is([data-palette="parchment"], [data-palette="frost"]) .game-shell-mobile-actions [data-slot="header-pill-link"] {
+  border-color: var(--color-hud-rule);
+  background: var(--color-hud-field);
+  color: var(--color-hud-gold);
+}
+
+html:is([data-palette="parchment"], [data-palette="frost"]) .game-shell-mobile-actions a[data-slot="header-pill-link"]:is(:hover, :active) {
+  border-color: var(--color-hud-gold);
+  background: color-mix(in srgb, var(--color-hud-gold) 12%, var(--color-hud-field));
+  filter: none;
+}
+
+.game-shell-mobile-actions a[data-slot="header-pill-link"]:focus-visible {
+  outline: 2px solid var(--color-hud-gold);
+  outline-offset: 2px;
+}
+
 /* wide monitors: widen the game shell, then scale it up (layout stays that of a 1800px screen) */
 @media (min-width: 1800px) {
     .game-shell-inner,

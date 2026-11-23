@@ -27,7 +27,16 @@ export function GameShell({
             activeId={activeId}
             title={title}
             breadcrumbRootLabel={breadcrumbRootLabel}
-            actions={<><div className="hidden items-center gap-2 sm:flex"><HeaderActions /></div><div className="flex items-center sm:hidden"><HeaderActions mode="primary" /></div></>}
+            actions={
+                <>
+                    <div className="hidden items-center gap-2 sm:flex">
+                        <HeaderActions />
+                    </div>
+                    <div className="game-shell-mobile-actions flex items-center gap-1.5 sm:hidden">
+                        <HeaderActions mode="primary" />
+                    </div>
+                </>
+            }
             menuActions={<HeaderActions mode="secondary" />}
         >
             {children}
