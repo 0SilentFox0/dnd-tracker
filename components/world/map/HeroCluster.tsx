@@ -17,6 +17,7 @@ import type { HeroClusterGroup } from '@/lib/utils/world/hero-clusters';
 interface HeroClusterProps {
     cluster: HeroClusterGroup;
     zoom: number;
+    party?: boolean;
     onHeroClick?(id: string): void;
     drag?: HeroDragHandlers;
 }
@@ -24,6 +25,7 @@ interface HeroClusterProps {
 export function HeroCluster({
     cluster,
     zoom,
+    party,
     onHeroClick,
     drag,
 }: HeroClusterProps) {
@@ -63,11 +65,26 @@ export function HeroCluster({
         />
     );
 
+    const partyStatus = party ? t('journey.partyHere') : undefined;
+
+    const partyLabel = partyStatus ? (
+        <span className="atlas-party-label">
+            <span
+                aria-hidden
+                className="world-map-symbol world-map-symbol-party"
+            />
+            {partyStatus}
+        </span>
+    ) : null;
+
     if (rest.length === 0) {
         return (
             <HudButton
                 type="button"
-                aria-label={top.name}
+                aria-label={
+                    partyStatus ? `${top.name} · ${partyStatus}` : top.name
+                }
+                data-party={party || undefined}
                 data-own={top.own}
                 className={cn(
                     'atlas-hero absolute',
@@ -80,9 +97,13 @@ export function HeroCluster({
 
                     if (!drag?.onPointerUp(e)) onHeroClick?.(top.id);
                 }}
+                onClick={(e) => {
+                    if (e.detail === 0) onHeroClick?.(top.id);
+                }}
                 onDoubleClick={(e) => e.stopPropagation()}
             >
                 {avatar}
+                {partyLabel}
             </HudButton>
         );
     }
@@ -92,10 +113,16 @@ export function HeroCluster({
             <PopoverTrigger asChild>
                 <HudButton
                     type="button"
-                    aria-label={t('heroCluster', {
-                        name: top.name,
-                        count: rest.length,
-                    })}
+                    aria-label={[
+                        t('heroCluster', {
+                            name: top.name,
+                            count: rest.length,
+                        }),
+                        partyStatus,
+                    ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    data-party={party || undefined}
                     data-own={top.own}
                     data-cluster={cluster.heroes.length}
                     className={cn(
@@ -117,6 +144,7 @@ export function HeroCluster({
                     onDoubleClick={(e) => e.stopPropagation()}
                 >
                     {avatar}
+                    {partyLabel}
                     <span aria-hidden className="atlas-count-badge">
                         +{rest.length}
                     </span>

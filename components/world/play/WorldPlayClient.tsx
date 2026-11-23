@@ -1,10 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Map as MapIcon } from 'lucide-react';
+import { BookOpen, Map as MapIcon } from 'lucide-react';
 
 import { EmptyState, QueryState } from '@/components/common/states';
-import { HudToggleChip } from '@/components/hud';
+import { HudButton, HudToggleChip } from '@/components/hud';
 import {
     HudChipTabs,
     HudPage,
@@ -21,6 +22,11 @@ import { PlaceSearchBar } from '@/components/world/nav/PlaceSearchBar';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
 import { WorldCrumbs } from '@/components/world/nav/WorldCrumbs';
+import {
+    WorldJourneyHud,
+    WorldMapLegend,
+    WorldSceneHeading,
+} from '@/components/world/nav/WorldJourneyHud';
 import { WorldNotesPanel } from '@/components/world/notes/WorldNotesPanel';
 import { PlayerMarkerBubble } from '@/components/world/play/PlayerMarkerBubble';
 import { TravelLog } from '@/components/world/travel/TravelLog';
@@ -31,6 +37,8 @@ import { useTrailView, useWorldPlay, useWorldTrail } from '@/lib/hooks/world';
 import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
+
+const GAME_STYLE = process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true';
 
 const MAP_HEIGHT =
     'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
@@ -45,6 +53,8 @@ export function WorldPlayClient({
     mapId: string | null;
 }) {
     const play = useWorldPlay(campaignId, mapId);
+
+    const [journalOpen, setJournalOpen] = useState(false);
 
     const t = useTranslations('world');
 
@@ -73,7 +83,7 @@ export function WorldPlayClient({
     }
 
     return (
-        <HudPage>
+        <HudPage className={GAME_STYLE ? 'world-game-page' : undefined}>
             <OnboardingHint id="player.world" />
             <QueryState query={play.view}>
                 {(view) => {
@@ -120,7 +130,12 @@ export function WorldPlayClient({
                         marker && !play.details.open ? (
                             <PlayerMarkerBubble
                                 key={marker.id}
-                                marker={applyLayerStyle([marker], play.layers.items)[0]}
+                                marker={
+                                    applyLayerStyle(
+                                        [marker],
+                                        play.layers.items
+                                    )[0]
+                                }
                                 embedded={!isDesktop}
                                 actions={{
                                     onMore: play.openDetails,
@@ -150,26 +165,30 @@ export function WorldPlayClient({
                         />
                     ) : null;
 
+                    const crumbs = (
+                        <span data-tour="world.crumbs">
+                            <WorldCrumbs
+                                maps={view.maps}
+                                mapId={view.map.id}
+                                onOpen={play.openMap}
+                            />
+                        </span>
+                    );
+
                     return (
                         <>
-                            <HudPageHeader
-                                title={t('title')}
-                                subtitle={
-                                    <span data-tour="world.crumbs">
-                                        <WorldCrumbs
-                                            maps={view.maps}
-                                            mapId={view.map.id}
-                                            onOpen={play.openMap}
-                                        />
-                                    </span>
-                                }
-                                actions={
-                                    <span className="hidden text-sm text-hud-muted md:inline">
-                                        {campaignName}
-                                    </span>
-                                }
-                            />
-                            {isDesktop ? null : (
+                            {!GAME_STYLE && (
+                                <HudPageHeader
+                                    title={t('title')}
+                                    subtitle={crumbs}
+                                    actions={
+                                        <span className="hidden text-sm text-hud-muted md:inline">
+                                            {campaignName}
+                                        </span>
+                                    }
+                                />
+                            )}
+                            {isDesktop || GAME_STYLE ? null : (
                                 <div className="flex gap-2">
                                     <HudToggleChip
                                         tall
@@ -182,8 +201,14 @@ export function WorldPlayClient({
                                     </HudToggleChip>
                                 </div>
                             )}
-                            <div className="grid gap-3 lg:grid-cols-[11rem_minmax(0,1fr)_20rem]">
-                                {isDesktop ? (
+                            <div
+                                className={
+                                    GAME_STYLE
+                                        ? 'world-game-play-grid'
+                                        : 'grid gap-3 lg:grid-cols-[11rem_minmax(0,1fr)_20rem]'
+                                }
+                            >
+                                {isDesktop && !GAME_STYLE ? (
                                     <aside
                                         data-tour="world.places"
                                         className="hud-surface relative overflow-y-auto rounded-md border border-hud-rule p-1 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)]"
@@ -191,16 +216,26 @@ export function WorldPlayClient({
                                         {mapTree}
                                     </aside>
                                 ) : null}
-                                <div className="flex min-w-0 flex-col gap-2">
-                                    <PlaceSearchBar
-                                        markers={play.styledMarkers}
-                                        onPick={play.pickPlace}
-                                    />
+                                <div
+                                    className={
+                                        GAME_STYLE
+                                            ? 'world-game-play-column flex min-w-0 flex-col'
+                                            : 'flex min-w-0 flex-col gap-2'
+                                    }
+                                >
+                                    {!GAME_STYLE && (
+                                        <PlaceSearchBar
+                                            markers={play.styledMarkers}
+                                            onPick={play.pickPlace}
+                                        />
+                                    )}
                                     <div
                                         className={
                                             play.fullscreen.full
                                                 ? 'fixed inset-0 z-50 h-dvh bg-black'
-                                                : `relative ${MAP_HEIGHT}`
+                                                : GAME_STYLE
+                                                  ? 'world-game-viewport relative'
+                                                  : `relative ${MAP_HEIGHT}`
                                         }
                                         role={
                                             play.fullscreen.full
@@ -214,7 +249,7 @@ export function WorldPlayClient({
                                         }
                                         data-tour="world.map"
                                     >
-                                        <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
+                                        <div className="world-map-filter-legend absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
                                             <LayerLegend
                                                 layers={play.layers.items}
                                                 hidden={play.layers.hidden}
@@ -230,6 +265,54 @@ export function WorldPlayClient({
                                                 onToggle={trail.toggle}
                                             />
                                         </div>
+                                        {GAME_STYLE && (
+                                            <>
+                                                <WorldSceneHeading>
+                                                    {crumbs}
+                                                </WorldSceneHeading>
+                                                <WorldJourneyHud
+                                                    places={{
+                                                        markers:
+                                                            play.styledMarkers,
+                                                        maps: view.maps,
+                                                        hidden: play.layers
+                                                            .hidden,
+                                                        selectedId: marker?.id,
+                                                    }}
+                                                    actions={{
+                                                        pickMarker:
+                                                            play.pickPlace,
+                                                        openMap: play.openMap,
+                                                        openTree: () =>
+                                                            play.tree.set(true),
+                                                    }}
+                                                    sections={
+                                                        <HudButton
+                                                            className="world-journey-icon"
+                                                            aria-label={t(
+                                                                'play.journal'
+                                                            )}
+                                                            title={t(
+                                                                'play.journal'
+                                                            )}
+                                                            onClick={() =>
+                                                                setJournalOpen(
+                                                                    true
+                                                                )
+                                                            }
+                                                        >
+                                                            <BookOpen
+                                                                aria-hidden
+                                                                className="size-4 shrink-0"
+                                                            />
+                                                        </HudButton>
+                                                    }
+                                                />
+                                                <WorldMapLegend
+                                                    fog={view.fog}
+                                                />
+                                            </>
+                                        )}
                                         <WorldMapView
                                             key={view.map.id}
                                             detail={props.detail}
@@ -246,6 +329,7 @@ export function WorldPlayClient({
                                             layers={play.layers}
                                             focus={play.focus}
                                             className={
+                                                GAME_STYLE ||
                                                 play.fullscreen.full
                                                     ? 'rounded-none border-0'
                                                     : undefined
@@ -254,6 +338,9 @@ export function WorldPlayClient({
                                             compact={!isDesktop}
                                             handlers={play.handlers}
                                             slots={{
+                                                gameStyle: GAME_STYLE
+                                                    ? 'own'
+                                                    : undefined,
                                                 fullscreen: {
                                                     full: play.fullscreen.full,
                                                     toggle: play.fullscreen
@@ -281,7 +368,21 @@ export function WorldPlayClient({
                                         />
                                     </div>
                                 </div>
-                                {isDesktop ? (
+                                {GAME_STYLE ? (
+                                    isDesktop && marker && play.details.open ? (
+                                        <aside className="world-glass world-game-side-panel world-game-details p-3">
+                                            <HudButton
+                                                className="min-h-11"
+                                                onClick={() =>
+                                                    play.details.set(false)
+                                                }
+                                            >
+                                                {t('editor.closePanel')}
+                                            </HudButton>
+                                            {notes}
+                                        </aside>
+                                    ) : null
+                                ) : isDesktop ? (
                                     <div className="relative flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
                                         {marker && play.details.open ? (
                                             notes
@@ -304,6 +405,36 @@ export function WorldPlayClient({
                                     </Disclosure>
                                 )}
                             </div>
+                            {GAME_STYLE && (
+                                <ResponsiveDialog
+                                    hud
+                                    open={journalOpen}
+                                    onOpenChange={setJournalOpen}
+                                    title={t('play.journal')}
+                                >
+                                    <div className="flex flex-col gap-3">
+                                        {journal}
+                                    </div>
+                                </ResponsiveDialog>
+                            )}
+                            {(GAME_STYLE || !isDesktop) && (
+                                <ResponsiveDialog
+                                    hud
+                                    open={play.tree.open}
+                                    onOpenChange={play.tree.set}
+                                    title={t('tree.label')}
+                                >
+                                    <div
+                                        className={
+                                            GAME_STYLE
+                                                ? 'world-game-tree-dialog'
+                                                : undefined
+                                        }
+                                    >
+                                        {mapTree}
+                                    </div>
+                                </ResponsiveDialog>
+                            )}
                             {isDesktop ? null : (
                                 <>
                                     <ResponsiveDialog
@@ -336,14 +467,6 @@ export function WorldPlayClient({
                                         title={marker?.name ?? ''}
                                     >
                                         {notes}
-                                    </ResponsiveDialog>
-                                    <ResponsiveDialog
-                                        hud
-                                        open={play.tree.open}
-                                        onOpenChange={play.tree.set}
-                                        title={t('tree.label')}
-                                    >
-                                        {mapTree}
                                     </ResponsiveDialog>
                                 </>
                             )}

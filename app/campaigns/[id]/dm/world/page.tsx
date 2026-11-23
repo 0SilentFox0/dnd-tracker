@@ -1,5 +1,6 @@
 import { WorldEditorPageClient } from './page-client';
 
+import { GameWorldShell } from '@/app/campaigns/[id]/world/game-world-shell';
 import { prisma } from '@/lib/db';
 import { worldKeys } from '@/lib/hooks/world';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
@@ -20,7 +21,7 @@ export default async function DMWorldPage({
 }) {
     const [{ id }, { map, marker }] = await Promise.all([params, searchParams]);
 
-    const { campaign } = await requireCampaignDM(id);
+    const { campaign, userId } = await requireCampaignDM(id);
 
     const maps = await readOkJson<WorldMapSummary[]>(
         await listWorldMapsHandler(id)
@@ -52,20 +53,17 @@ export default async function DMWorldPage({
         />
     );
 
-    if (!maps) return client;
-
     return (
-        <PrefetchedQuery queryKey={worldKeys.maps(id)} data={maps}>
-            {mapId && detail ? (
-                <PrefetchedQuery
-                    queryKey={worldKeys.map(id, mapId)}
-                    data={detail}
-                >
-                    {client}
+        <GameWorldShell campaign={campaign} viewer={{ isDM: true, userId }}>
+            {maps ? (
+                <PrefetchedQuery queryKey={worldKeys.maps(id)} data={maps}>
+                    {mapId && detail ? (
+                        <PrefetchedQuery queryKey={worldKeys.map(id, mapId)} data={detail}>
+                            {client}
+                        </PrefetchedQuery>
+                    ) : client}
                 </PrefetchedQuery>
-            ) : (
-                client
-            )}
-        </PrefetchedQuery>
+            ) : client}
+        </GameWorldShell>
     );
 }

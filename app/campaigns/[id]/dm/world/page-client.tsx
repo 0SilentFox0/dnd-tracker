@@ -1,10 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Map as MapIcon } from 'lucide-react';
+import { Map as MapIcon, Route } from 'lucide-react';
 
 import { EmptyState, QueryState } from '@/components/common/states';
-import { HudToggleChip } from '@/components/hud';
+import { HudButton, HudToggleChip } from '@/components/hud';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,12 @@ import { LayerLegend } from '@/components/world/nav/LayerLegend';
 import { MapTree } from '@/components/world/nav/MapTree';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
+import { WorldCrumbs } from '@/components/world/nav/WorldCrumbs';
+import {
+    WorldJourneyHud,
+    WorldMapLegend,
+    WorldSceneHeading,
+} from '@/components/world/nav/WorldJourneyHud';
 import { SessionsPanel } from '@/components/world/travel/SessionsPanel';
 import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
@@ -43,6 +50,7 @@ import {
     useWorldTrail,
     useWorldTravel,
 } from '@/lib/hooks/world';
+import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 
@@ -51,6 +59,8 @@ const ENTRY_COMPASS = {
     aspectRatio: '1',
     transform: 'translate(-50%, -50%)',
 } as const;
+
+const GAME_STYLE = process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true';
 
 const FRAME_HEIGHT =
     'lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:flex-col';
@@ -73,13 +83,15 @@ export function WorldEditorPageClient({
 
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
+    const [travelPanelOpen, setTravelPanelOpen] = useState(false);
+
     const {
         ctx,
         data: { maps, detail, roster },
         tools: { eyes, drawing, moveTarget, snap, mode },
         selected: { id: selectedId, select, close: closePanel },
         dialogs: { create: creating, details, tree },
-        actions: { openMap, changeEyes, openDetails },
+        actions: { openMap, changeEyes, openDetails, focusMarker },
         view: { focus, fullscreen },
         handlers,
         card: bubbleCard,
@@ -126,11 +138,15 @@ export function WorldEditorPageClient({
         </>
     );
 
-    const treeShown = isDesktop ? (tree.open ?? true) : tree.open === true;
+    const treeShown = isDesktop
+        ? (tree.open ?? !GAME_STYLE)
+        : tree.open === true;
 
     const mapTree = (
         <MapTree
-            maps={maps.data ?? []}
+            maps={
+                eyes.asHeroId ? (eyes.view.data?.maps ?? []) : (maps.data ?? [])
+            }
             activeId={mapId}
             onOpen={(id) => {
                 openMap(id);
@@ -148,12 +164,13 @@ export function WorldEditorPageClient({
             onActive={layers.active.set}
             heroes={roster.heroes}
             imageEdit={layers.imageEdit}
+            gameStyle={GAME_STYLE}
         />
     );
 
     return (
         <WorldEditorContext.Provider value={ctx}>
-            <HudPage>
+            <HudPage className={GAME_STYLE ? 'world-game-page' : undefined}>
                 <OnboardingHint id="dm.world" />
                 <QueryState query={maps} empty={emptyView}>
                     {() =>
@@ -224,22 +241,36 @@ export function WorldEditorPageClient({
 
                                     return (
                                         <>
-                                            <HudPageHeader
-                                                title={t('title')}
-                                                subtitle={
-                                                    <WorldBreadcrumbs
-                                                        mapId={d.map.id}
-                                                    />
+                                            {!GAME_STYLE && (
+                                                <HudPageHeader
+                                                    title={t('title')}
+                                                    subtitle={
+                                                        <WorldBreadcrumbs
+                                                            mapId={d.map.id}
+                                                        />
+                                                    }
+                                                    actions={
+                                                        <span className="hidden text-sm text-hud-muted md:inline">
+                                                            {campaignName}
+                                                        </span>
+                                                    }
+                                                    className="max-md:p-2 max-md:[&_h1]:sr-only"
+                                                />
+                                            )}
+                                            <div
+                                                className={
+                                                    GAME_STYLE
+                                                        ? 'world-game-editor-frame'
+                                                        : FRAME_HEIGHT
                                                 }
-                                                actions={
-                                                    <span className="hidden text-sm text-hud-muted md:inline">
-                                                        {campaignName}
-                                                    </span>
-                                                }
-                                                className="max-md:p-2 max-md:[&_h1]:sr-only"
-                                            />
-                                            <div className={FRAME_HEIGHT}>
-                                                <div className="mb-2 shrink-0">
+                                            >
+                                                <div
+                                                    className={
+                                                        GAME_STYLE
+                                                            ? 'world-game-toolbar shrink-0'
+                                                            : 'mb-2 shrink-0'
+                                                    }
+                                                >
                                                     <WorldToolbar
                                                         drawing={drawing}
                                                         mode={mode.value}
@@ -263,7 +294,8 @@ export function WorldEditorPageClient({
                                                         >
                                                             {t('tree.toggle')}
                                                         </HudToggleChip>
-                                                        {mode.value === 'build' &&
+                                                        {mode.value ===
+                                                            'build' &&
                                                         !eyes.asHeroId ? (
                                                             <HudToggleChip
                                                                 tall
@@ -301,14 +333,33 @@ export function WorldEditorPageClient({
                                                         />
                                                     </WorldToolbar>
                                                 </div>
-                                                <div className="flex min-h-0 flex-col gap-2 lg:flex-1 lg:flex-row">
+                                                <div
+                                                    className={
+                                                        GAME_STYLE
+                                                            ? 'world-game-editor-body'
+                                                            : 'flex min-h-0 flex-col gap-2 lg:flex-1 lg:flex-row'
+                                                    }
+                                                >
                                                     {isDesktop && treeShown ? (
-                                                        <aside className="hud-surface relative w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1">
+                                                        <aside
+                                                            className={
+                                                                GAME_STYLE
+                                                                    ? 'world-glass world-game-side-panel world-game-tree p-2'
+                                                                    : 'hud-surface relative w-52 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-1'
+                                                            }
+                                                        >
                                                             {mapTree}
                                                         </aside>
                                                     ) : null}
-                                                    {isDesktop && layersShown ? (
-                                                        <aside className="hud-surface relative w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2">
+                                                    {isDesktop &&
+                                                    layersShown ? (
+                                                        <aside
+                                                            className={
+                                                                GAME_STYLE
+                                                                    ? 'world-glass world-game-side-panel world-game-layers p-2'
+                                                                    : 'hud-surface relative w-64 shrink-0 overflow-y-auto rounded-md border border-hud-rule p-2'
+                                                            }
+                                                        >
                                                             {layersPanel}
                                                         </aside>
                                                     ) : null}
@@ -316,7 +367,9 @@ export function WorldEditorPageClient({
                                                         className={
                                                             fullscreen.full
                                                                 ? 'fixed inset-0 z-50 h-dvh bg-black'
-                                                                : `relative ${MAP_HEIGHT} lg:min-w-0`
+                                                                : GAME_STYLE
+                                                                  ? 'world-game-viewport relative'
+                                                                  : `relative ${MAP_HEIGHT} lg:min-w-0`
                                                         }
                                                         role={
                                                             fullscreen.full
@@ -331,6 +384,28 @@ export function WorldEditorPageClient({
                                                                 : undefined
                                                         }
                                                     >
+                                                        {GAME_STYLE && (
+                                                            <WorldSceneHeading>
+                                                                <WorldCrumbs
+                                                                    maps={
+                                                                        eyes.asHeroId
+                                                                            ? (eyes
+                                                                                  .view
+                                                                                  .data
+                                                                                  ?.maps ??
+                                                                              [])
+                                                                            : (maps.data ??
+                                                                              [])
+                                                                    }
+                                                                    mapId={
+                                                                        d.map.id
+                                                                    }
+                                                                    onOpen={
+                                                                        openMap
+                                                                    }
+                                                                />
+                                                            </WorldSceneHeading>
+                                                        )}
                                                         {eyes.asHeroId ? (
                                                             <QueryState
                                                                 query={
@@ -344,43 +419,89 @@ export function WorldEditorPageClient({
                                                                         );
 
                                                                     return (
-                                                                        <WorldMapView
-                                                                            key={`${v.map.id}:${eyes.asHeroId}`}
-                                                                            detail={
-                                                                                p.detail
-                                                                            }
-                                                                            heroes={
-                                                                                p.heroes
-                                                                            }
-                                                                            fog={
-                                                                                p.fog
-                                                                            }
-                                                                            layers={
-                                                                                eyes.layers
-                                                                            }
-                                                                            compact={
-                                                                                !isDesktop
-                                                                            }
-                                                                            className={
-                                                                                fullscreen.full
-                                                                                    ? 'rounded-none border-0'
-                                                                                    : undefined
-                                                                            }
-                                                                            slots={{
-                                                                                fullscreen:
-                                                                                    fsSlot,
-                                                                                hint: (
-                                                                                    <p
-                                                                                        role="status"
-                                                                                        className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
-                                                                                    >
-                                                                                        {t(
-                                                                                            'eyes.player'
-                                                                                        )}
-                                                                                    </p>
-                                                                                ),
-                                                                            }}
-                                                                        />
+                                                                        <>
+                                                                            {GAME_STYLE && (
+                                                                                <>
+                                                                                    <WorldJourneyHud
+                                                                                        places={{
+                                                                                            markers:
+                                                                                                applyLayerStyle(
+                                                                                                    v.markers,
+                                                                                                    eyes
+                                                                                                        .layers
+                                                                                                        .items
+                                                                                                ),
+                                                                                            maps: v.maps,
+                                                                                            hidden: eyes
+                                                                                                .layers
+                                                                                                .hidden,
+                                                                                        }}
+                                                                                        actions={{
+                                                                                            pickMarker:
+                                                                                                focusMarker,
+                                                                                            openMap,
+                                                                                            openTree:
+                                                                                                () => {
+                                                                                                    fullscreen.exit();
+                                                                                                    tree.set(
+                                                                                                        true
+                                                                                                    );
+                                                                                                },
+                                                                                        }}
+                                                                                    />
+                                                                                    <WorldMapLegend
+                                                                                        fog={
+                                                                                            v.fog
+                                                                                        }
+                                                                                    />
+                                                                                </>
+                                                                            )}
+                                                                            <WorldMapView
+                                                                                key={`${v.map.id}:${eyes.asHeroId}`}
+                                                                                detail={
+                                                                                    p.detail
+                                                                                }
+                                                                                heroes={
+                                                                                    p.heroes
+                                                                                }
+                                                                                fog={
+                                                                                    p.fog
+                                                                                }
+                                                                                focus={
+                                                                                    focus
+                                                                                }
+                                                                                layers={
+                                                                                    eyes.layers
+                                                                                }
+                                                                                compact={
+                                                                                    !isDesktop
+                                                                                }
+                                                                                className={
+                                                                                    GAME_STYLE ||
+                                                                                    fullscreen.full
+                                                                                        ? 'rounded-none border-0'
+                                                                                        : undefined
+                                                                                }
+                                                                                slots={{
+                                                                                    gameStyle:
+                                                                                        GAME_STYLE
+                                                                                            ? 'own'
+                                                                                            : undefined,
+                                                                                    fullscreen:
+                                                                                        fsSlot,
+                                                                                    hint: (
+                                                                                        <p
+                                                                                            role="status"
+                                                                                            className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
+                                                                                        >
+                                                                                            {t(
+                                                                                                'eyes.player'
+                                                                                            )}
+                                                                                        </p>
+                                                                                    ),
+                                                                                }}
+                                                                            />
+                                                                        </>
                                                                     );
                                                                 }}
                                                             </QueryState>
@@ -467,15 +588,18 @@ export function WorldEditorPageClient({
                                                                 handlers={
                                                                     handlers
                                                                 }
-                                                                focus={
-                                                                    focus
-                                                                }
+                                                                focus={focus}
                                                                 className={
+                                                                    GAME_STYLE ||
                                                                     fullscreen.full
                                                                         ? 'rounded-none border-0'
                                                                         : undefined
                                                                 }
                                                                 slots={{
+                                                                    gameStyle:
+                                                                        GAME_STYLE
+                                                                            ? 'party'
+                                                                            : undefined,
                                                                     fullscreen:
                                                                         fsSlot,
                                                                     hint: (
@@ -514,7 +638,7 @@ export function WorldEditorPageClient({
                                                             />
                                                         )}
                                                         {eyes.asHeroId ? (
-                                                            <div className="absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
+                                                            <div className="world-map-filter-legend absolute top-2 left-2 z-10 max-w-[calc(100%-4rem)]">
                                                                 <LayerLegend
                                                                     layers={
                                                                         eyes
@@ -539,7 +663,7 @@ export function WorldEditorPageClient({
                                                                 />
                                                             </div>
                                                         ) : (
-                                                            <div className="absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
+                                                            <div className="world-map-filter-legend absolute top-2 left-2 z-10 flex max-w-[calc(100%-4rem)] flex-col items-start gap-1">
                                                                 <LayerLegend
                                                                     layers={
                                                                         layers.items
@@ -574,6 +698,89 @@ export function WorldEditorPageClient({
                                                                 />
                                                             </div>
                                                         )}
+                                                        {GAME_STYLE &&
+                                                            !eyes.asHeroId && (
+                                                                <>
+                                                                    {(tool ===
+                                                                        'select' ||
+                                                                        tool ===
+                                                                            'move') && (
+                                                                        <WorldJourneyHud
+                                                                            places={{
+                                                                                markers:
+                                                                                    applyLayerStyle(
+                                                                                        d.markers,
+                                                                                        layers.items
+                                                                                    ),
+                                                                                maps:
+                                                                                    maps.data ??
+                                                                                    [],
+                                                                                hidden: layers
+                                                                                    .visibility
+                                                                                    .hidden,
+                                                                                selectedId,
+                                                                            }}
+                                                                            sections={
+                                                                                !isDesktop &&
+                                                                                tool ===
+                                                                                    'move' ? (
+                                                                                    <HudButton
+                                                                                        className="world-journey-icon"
+                                                                                        aria-label={t(
+                                                                                            'travel.kinds.travel'
+                                                                                        )}
+                                                                                        title={t(
+                                                                                            'travel.kinds.travel'
+                                                                                        )}
+                                                                                        onClick={() =>
+                                                                                            setTravelPanelOpen(
+                                                                                                (
+                                                                                                    open
+                                                                                                ) =>
+                                                                                                    !open
+                                                                                            )
+                                                                                        }
+                                                                                        aria-expanded={
+                                                                                            travelPanelOpen
+                                                                                        }
+                                                                                    >
+                                                                                        <Route
+                                                                                            aria-hidden
+                                                                                            className="size-4"
+                                                                                        />
+                                                                                    </HudButton>
+                                                                                ) : null
+                                                                            }
+                                                                            actions={{
+                                                                                pickMarker:
+                                                                                    (
+                                                                                        id
+                                                                                    ) => {
+                                                                                        handlers.onMarkerClick(
+                                                                                            id
+                                                                                        );
+                                                                                        focusMarker(
+                                                                                            id
+                                                                                        );
+                                                                                    },
+                                                                                openMap,
+                                                                                openTree:
+                                                                                    () => {
+                                                                                        fullscreen.exit();
+                                                                                        tree.set(
+                                                                                            true
+                                                                                        );
+                                                                                    },
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    <WorldMapLegend
+                                                                        fog={
+                                                                            false
+                                                                        }
+                                                                    />
+                                                                </>
+                                                            )}
                                                         {tool === 'zone' &&
                                                         drawing.draft.length >
                                                             0 ? (
@@ -610,7 +817,13 @@ export function WorldEditorPageClient({
                                                     </div>
                                                     {isDesktop &&
                                                     detailsOpen ? (
-                                                        <aside className="hud-surface relative rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <aside
+                                                            className={
+                                                                GAME_STYLE
+                                                                    ? 'world-glass world-game-side-panel world-game-details p-3'
+                                                                    : 'hud-surface relative rounded-md border border-hud-rule p-3 lg:w-80 lg:shrink-0 lg:overflow-y-auto'
+                                                            }
+                                                        >
                                                             <div className="mb-2 flex justify-end">
                                                                 <Button
                                                                     size="sm"
@@ -629,7 +842,33 @@ export function WorldEditorPageClient({
                                                     ) : null}
                                                     {tool === 'move' &&
                                                     !eyes.asHeroId ? (
-                                                        <div className="relative flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+                                                        <div
+                                                            hidden={
+                                                                GAME_STYLE &&
+                                                                !isDesktop &&
+                                                                !travelPanelOpen
+                                                            }
+                                                            className={
+                                                                GAME_STYLE
+                                                                    ? 'world-glass world-game-side-panel world-game-travel p-2'
+                                                                    : 'relative flex flex-col gap-2 lg:w-80 lg:shrink-0 lg:overflow-y-auto'
+                                                            }
+                                                        >
+                                                            {GAME_STYLE &&
+                                                                !isDesktop && (
+                                                                    <HudButton
+                                                                        className="min-h-11"
+                                                                        onClick={() =>
+                                                                            setTravelPanelOpen(
+                                                                                false
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {t(
+                                                                            'editor.closePanel'
+                                                                        )}
+                                                                    </HudButton>
+                                                                )}
                                                             <TravelPanel
                                                                 campaignId={
                                                                     campaignId
@@ -772,7 +1011,15 @@ export function WorldEditorPageClient({
                                                         onOpenChange={tree.set}
                                                         title={t('tree.label')}
                                                     >
-                                                        {mapTree}
+                                                        <div
+                                                            className={
+                                                                GAME_STYLE
+                                                                    ? 'world-game-tree-dialog'
+                                                                    : undefined
+                                                            }
+                                                        >
+                                                            {mapTree}
+                                                        </div>
                                                     </ResponsiveDialog>
                                                 </>
                                             )}

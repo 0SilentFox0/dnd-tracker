@@ -15,6 +15,8 @@ export interface HeroDragConfig {
 
 interface WorldHeroesProps {
     heroes: WorldHero[];
+    party?: 'party' | 'own';
+    touchTargets?: boolean;
     zoom: number;
     box: { width: number; height: number };
     onHeroClick?(id: string): void;
@@ -29,6 +31,8 @@ const NO_DRAG: HeroDragConfig = {
 
 export function WorldHeroes({
     heroes,
+    party,
+    touchTargets,
     zoom,
     box,
     onHeroClick,
@@ -37,7 +41,7 @@ export function WorldHeroes({
     const clusters = clusterHeroes(
         heroes,
         (h) => ({ x: h.x * box.width * zoom, y: h.y * box.height * zoom }),
-        HERO_CLUSTER_PX
+        touchTargets ? 44 : HERO_CLUSTER_PX
     );
 
     const cfg = drag ?? NO_DRAG;
@@ -87,6 +91,10 @@ export function WorldHeroes({
                 <HeroCluster
                     key={c.key}
                     cluster={c}
+                    party={
+                        party === 'party' ||
+                        (party === 'own' && c.heroes.some((hero) => hero.own))
+                    }
                     zoom={zoom}
                     onHeroClick={onHeroClick}
                     drag={drag ? bind(c.heroes.map((h) => h.id)) : undefined}

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { GameWorldShell } from './game-world-shell';
 import { WorldPageClient } from './page-client';
 
 import { ErrorState } from '@/components/common/states';
@@ -40,7 +41,7 @@ export default async function WorldPage({
 }) {
     const [{ id }, { map }] = await Promise.all([params, searchParams]);
 
-    const { campaign, isDM } = await requireCampaignMember(id);
+    const { campaign, isDM, userId } = await requireCampaignMember(id);
 
     if (isDM) redirect(`/campaigns/${id}/dm/world`);
 
@@ -51,12 +52,14 @@ export default async function WorldPage({
 
     if (failed)
         return (
-            <ErrorState
-                error={(await getTranslator(await getRequestLocale(), 'world'))(
-                    'play.loadFailed'
-                )}
-                className="m-4"
-            />
+            <GameWorldShell campaign={campaign} viewer={{ isDM, userId }}>
+                <ErrorState
+                    error={(await getTranslator(await getRequestLocale(), 'world'))(
+                        'play.loadFailed'
+                    )}
+                    className="m-4"
+                />
+            </GameWorldShell>
         );
 
     const client = (
@@ -67,11 +70,13 @@ export default async function WorldPage({
         />
     );
 
-    if (!view) return client;
-
     return (
-        <PrefetchedQuery queryKey={worldKeys.view(id, view.map.id)} data={view}>
-            {client}
-        </PrefetchedQuery>
+        <GameWorldShell campaign={campaign} viewer={{ isDM, userId }}>
+            {view ? (
+                <PrefetchedQuery queryKey={worldKeys.view(id, view.map.id)} data={view}>
+                    {client}
+                </PrefetchedQuery>
+            ) : client}
+        </GameWorldShell>
     );
 }

@@ -111,9 +111,13 @@ export const markerAnchor = (
 
 export function fitBox(
     container: { width: number; height: number },
-    aspect: number
+    aspect: number,
+    cover = false
 ): Box {
-    const width = Math.min(container.width, container.height * aspect);
+    const width = (cover ? Math.max : Math.min)(
+        container.width,
+        container.height * aspect
+    );
 
     const height = width / aspect;
 

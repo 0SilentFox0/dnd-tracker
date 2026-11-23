@@ -8,7 +8,7 @@ export const bubbleButton = (danger = false, className?: string) =>
         BASE,
         danger
             ? 'border-hud-danger/50 text-hud-danger hover:bg-hud-danger/15'
-            : 'border-hud-rule bg-[rgba(46,36,26,.95)] text-hud-ink hover:bg-[rgba(70,54,38,.98)]',
+            : 'border-hud-rule bg-hud-field text-hud-ink hover:bg-hud-raised',
         className
     );
 

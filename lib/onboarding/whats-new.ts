@@ -4,13 +4,20 @@ import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 /** Newest entries shown in the UI and bundled into the root chunk; older ones stay in the catalog as history. */
 export const WHATS_NEW_BUNDLED = 15;
 
+const GAME_WORLD_HUD = '2026-11-22-world-map-hud';
+
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
+    { id: GAME_WORLD_HUD, date: '2026-11-22', audience: 'all' },
     { id: '2026-11-20-world-layer-style', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-viewport', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-layers', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-trail', date: '2026-11-20', audience: 'all' },
     { id: '2026-11-20-world-map-ux', date: '2026-11-20', audience: 'all' },
-    { id: '2026-11-19-counterspell-window', date: '2026-11-19', audience: 'all' },
+    {
+        id: '2026-11-19-counterspell-window',
+        date: '2026-11-19',
+        audience: 'all',
+    },
     { id: '2026-11-19-copy-maps', date: '2026-11-19', audience: 'dm' },
     { id: '2026-11-copy-content', date: '2026-11-19', audience: 'dm' },
     {
@@ -204,7 +211,8 @@ export const WHATS_NEW: WhatsNewEntry[] = mergeWhatsNew(
     (SYSTEM_META as readonly SystemMeta[]).flatMap((m) => m.whatsNew ?? [])
 );
 
-export const WHATS_NEW_SHOWN: WhatsNewEntry[] = WHATS_NEW.slice(
-    0,
-    WHATS_NEW_BUNDLED
-);
+export const WHATS_NEW_SHOWN: WhatsNewEntry[] = WHATS_NEW.filter(
+    (entry) =>
+        entry.id !== GAME_WORLD_HUD ||
+        process.env.NEXT_PUBLIC_GAME_UI_SHELL === 'true'
+).slice(0, WHATS_NEW_BUNDLED);

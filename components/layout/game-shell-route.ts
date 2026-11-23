@@ -8,6 +8,7 @@ export function shouldUseGameShell(
 
     return (
         normalized === '/campaigns' ||
+        /^\/campaigns\/[^/]+\/(?:dm\/)?world$/.test(normalized) ||
         (/^\/campaigns\/[^/]+$/.test(normalized) &&
             normalized !== '/campaigns/new')
     );

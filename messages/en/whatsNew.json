@@ -1,4 +1,8 @@
 {
+  "2026-11-22-world-map-hud": {
+    "title": "World map HUD",
+    "body": "The world map fills the screen. Where next lists accessible places, diamonds mark locations and the map highlights your party. On phones, open the destinations list from the bottom bar."
+  },
   "2026-11-20-world-layer-style": {
     "title": "Map layers: style, zone opacity and labels",
     "body": "A layer now carries its own look: an icon, a colour, zone opacity and whether zone labels show. Markers inherit it and can override any of it, a zone label can be forced hidden or always shown, and the legend can toggle markers that have no layer."

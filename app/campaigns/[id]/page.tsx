@@ -17,7 +17,6 @@ import { CreditsText } from '@/components/campaigns/templates/CreditsText';
 import { PublishTemplateButton } from '@/components/campaigns/templates/PublishTemplateButton';
 import { SourceSyncButton } from '@/components/campaigns/templates/SourceSyncButton';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
-import { type GameShellNavItem } from '@/components/hud';
 import {
     HudPage,
     HudPanel,
@@ -34,8 +33,6 @@ import {
 } from '@/lib/constants/campaign-dashboard';
 import {
     CampaignKind,
-    dmSectionHref,
-    dmSectionsFor,
 } from '@/lib/constants/campaigns';
 import { onboardingKeys } from '@/lib/hooks/onboarding';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
@@ -47,6 +44,7 @@ import {
     readPlayerDashboard,
 } from '@/lib/server/campaigns/dashboard';
 import { readCampaignOnboarding } from '@/lib/server/onboarding/campaign';
+import { campaignGameNavigation } from '@/lib/utils/campaigns/game-navigation';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { parseRules } from '@/lib/utils/rules/schema';
 
@@ -107,75 +105,14 @@ export default async function CampaignDetailPage({
         system: rules.system,
     };
 
-    const navItems: GameShellNavItem[] = [
-        {
-            id: 'overview',
-            label: tCommon('gameNavigation.dashboard'),
-            href: `/campaigns/${id}`,
-        },
-    ];
-
-    if (isDM) {
-        const visibleSections = dmSectionsFor(context);
-
-        for (const item of [
-            { id: 'battle', path: 'battles' },
-            { id: 'world' },
-            { id: 'character', path: 'characters' },
-            { id: 'scenario', path: 'scenario' },
-            { id: 'show', path: 'show' },
-        ] as const) {
-            if (item.id === 'world') {
-                navItems.push({
-                    id: item.id,
-                    label: tCommon('gameNavigation.world'),
-                    href: `/campaigns/${id}/dm/world`,
-                });
-                continue;
-            }
-
-            const section = visibleSections.find(
-                (candidate) => candidate.path === item.path
-            );
-
-            if (section) {
-                navItems.push({
-                    id: item.id,
-                    label: tCommon(`gameNavigation.${item.id}`),
-                    href: dmSectionHref(id, section),
-                });
-            }
-        }
-    } else {
-        if (player?.activeBattle) {
-            navItems.push({
-                id: 'battle',
-                label: tCommon('gameNavigation.battle'),
-                href: `/campaigns/${id}/battles/${player.activeBattle.battleId}`,
-            });
-        }
-
-        if (player?.hasWorld) {
-            navItems.push({
-                id: 'world',
-                label: tCommon('gameNavigation.world'),
-                href: `/campaigns/${id}/world`,
-            });
-        }
-
-        navItems.push(
-            {
-                id: 'character',
-                label: tCommon('gameNavigation.character'),
-                href: `/campaigns/${id}/character`,
-            },
-            {
-                id: 'show',
-                label: tCommon('gameNavigation.show'),
-                href: `/campaigns/${id}/show`,
-            }
-        );
-    }
+    const navItems = campaignGameNavigation({
+        id,
+        isDM,
+        context,
+        activeBattleId: player?.activeBattle?.battleId,
+        hasWorld: !!player?.hasWorld,
+        label: (section) => tCommon(`gameNavigation.${section}`),
+    });
 
     const heroItems = navItems.filter(
         (item) =>

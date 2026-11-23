@@ -340,6 +340,12 @@ export function useWorldEditorPage({
         [setTool]
     );
 
+    const focusMarker = (id: string) => {
+        const marker = markers.find((item) => item.id === id);
+
+        if (marker) focusPoint(markerAnchor(marker));
+    };
+
     const openMap = useCallback(
         (
             id: string | null,
@@ -517,7 +523,7 @@ export function useWorldEditorPage({
             details: { open: detailsOpen, set: setDetailsOpen },
             tree: { open: treeOpen, set: setTreeOpen },
         },
-        actions: { openMap, changeEyes, openDetails },
+        actions: { openMap, changeEyes, openDetails, focusMarker },
         view: { focus, fullscreen },
         handlers,
         card,

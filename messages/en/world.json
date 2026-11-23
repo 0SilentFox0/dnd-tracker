@@ -1,4 +1,13 @@
 {
+  "journey": {
+    "title": "Where next",
+    "empty": "No destinations on this map yet.",
+    "legend": "Map legend",
+    "party": "Party",
+    "partyHere": "Party is here",
+    "known": "Known place",
+    "unexplored": "Unexplored"
+  },
   "title": "World map",
   "name": "Name",
   "mapKind": {

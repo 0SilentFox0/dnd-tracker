@@ -6,6 +6,7 @@ const GAP = 14;
 interface Args {
     point: MapPoint;
     box: { width: number; height: number };
+    crop?: { x: number; y: number };
     zoom: number;
     offset: { x: number; y: number };
     size: { width: number; height: number };
@@ -20,6 +21,7 @@ export interface BubblePosition {
 export function markerBubblePosition({
     point,
     box,
+    crop = { x: 0, y: 0 },
     zoom,
     offset,
     size,
@@ -30,18 +32,18 @@ export function markerBubblePosition({
 
     const above = ay - size.height - GAP;
 
-    const placement = above >= 0 ? 'above' : 'below';
+    const placement = above >= crop.y ? 'above' : 'below';
 
     return {
         left: clamp(
             ax - size.width / 2,
-            0,
-            Math.max(0, box.width - size.width)
+            crop.x,
+            Math.max(crop.x, box.width - crop.x - size.width)
         ),
         top: clamp(
             placement === 'above' ? above : ay + GAP,
-            0,
-            Math.max(0, box.height - size.height)
+            crop.y,
+            Math.max(crop.y, box.height - crop.y - size.height)
         ),
         placement,
     };
