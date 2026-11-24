@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 
 import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
-import { HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton } from '@/components/hud';
 import { actionIcon } from '@/components/hud/icons/battle';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
@@ -34,7 +34,7 @@ export function DockNextTurn() {
             data-tour="battle.next-turn"
             disabled={pending}
             onClick={() => actions.nextTurn.mutate({})}
-            className="hud-sc pointer-events-auto order-last mb-3 flex h-11 min-w-36 items-center justify-center gap-2 rounded-xl border border-white/25 bg-black/70 px-4 text-[15px] tracking-[.08em] text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
+            className={`${HUD_GLASS} hud-sc pointer-events-auto order-last flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-[15px] tracking-[.08em] text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70`}
         >
             {pending ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden />

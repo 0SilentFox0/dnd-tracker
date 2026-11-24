@@ -13,7 +13,7 @@ export function DockDiamond({
         <span
             data-state={spent ? 'spent' : 'ready'}
             className={cn(
-                'flex min-w-10 flex-col items-center gap-1 text-[11px] leading-none',
+                'flex min-w-12 flex-col items-center gap-1.5 text-[11px] leading-none',
                 spent ? 'text-[var(--hud-muted)]' : 'text-[var(--ink)]'
             )}
         >

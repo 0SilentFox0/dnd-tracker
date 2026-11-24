@@ -70,6 +70,13 @@ describe('ActionDock', () => {
         expect(base.on.end).toHaveBeenCalled();
     });
 
+    it('uses the shared glass surface and a square action button', () => {
+        const { container } = render(<ActionDock {...base} />);
+
+        expect(container.querySelector('.hud-glass')).not.toBeNull();
+        expect(container.innerHTML).not.toContain('clip-path');
+    });
+
     it('countdown keeps its content and hides the action bar', () => {
         render(
             <ActionDock {...base} phase="countdown">

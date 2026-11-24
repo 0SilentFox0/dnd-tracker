@@ -16,7 +16,7 @@ export function MoveBar({ used, max }: { used: number; max: number }) {
             aria-valuemin={0}
             aria-valuemax={max}
             aria-valuenow={left}
-            className="flex min-w-16 flex-col gap-1 text-[11px] text-[var(--ink)]"
+            className="flex w-full min-w-16 flex-col gap-1 text-[11px] text-[var(--ink)]"
         >
             <span className="flex items-center gap-1">
                 <Icon className="size-3.5 text-[var(--gold)]" aria-hidden />

@@ -26,7 +26,14 @@ export function MapCameraControls({
     const t = useTranslations('battle.map.camera');
 
     return (
-        <div className="absolute right-2 bottom-2 z-30 flex flex-col rounded-md border border-white/20 bg-black/75 shadow-lg">
+        <div
+            className={cn(
+                'absolute right-2 z-30 flex flex-col rounded-md border border-white/20 bg-black/75 shadow-lg',
+                phone
+                    ? 'bottom-2'
+                    : 'bottom-[calc(var(--hud-dock-h,0px)+1.25rem)]'
+            )}
+        >
             <Button
                 type="button"
                 size="icon"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
@@ -122,11 +122,30 @@ export function DesktopBattleLayout({
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
 
-    const bindDock = useCallback(
-        (el: HTMLDivElement | null) =>
-            setSlots((prev) => (prev.dock === el ? prev : { dock: el })),
-        []
-    );
+    const stageRef = useRef<HTMLDivElement>(null);
+
+    const bindDock = useCallback((el: HTMLDivElement | null) => {
+        setSlots((prev) => (prev.dock === el ? prev : { dock: el }));
+
+        if (!el) return;
+
+        const ro =
+            typeof ResizeObserver === 'undefined'
+                ? null
+                : new ResizeObserver(() =>
+                      stageRef.current?.style.setProperty(
+                          '--hud-dock-h',
+                          `${el.offsetHeight}px`
+                      )
+                  );
+
+        ro?.observe(el);
+
+        return () => {
+            ro?.disconnect();
+            setSlots((prev) => (prev.dock === el ? { dock: null } : prev));
+        };
+    }, []);
 
     const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
@@ -134,7 +153,7 @@ export function DesktopBattleLayout({
         <SceneSlotsContext value={slots}>
             <MapStripSlotContext value={resultSlot}>
                 <div className="scene-full relative flex flex-col overflow-hidden">
-                    <div className="relative min-h-0 flex-1">
+                    <div ref={stageRef} className="relative min-h-0 flex-1">
                         {battle.map && viewMode === 'map' ? (
                             <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
@@ -174,11 +193,11 @@ export function DesktopBattleLayout({
                         <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center *:pointer-events-auto">
                             <DrawerRail active={active} onToggle={toggle} />
                         </div>
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center *:pointer-events-auto">
+                        <div className="pointer-events-none absolute right-3 bottom-3 z-20 flex w-[min(370px,calc(100%-24px))] flex-col items-stretch gap-2">
                             <div ref={setResultSlot} />
                             <div
                                 ref={bindDock}
-                                className="flex w-full flex-col items-center px-[324px]"
+                                className="pointer-events-none flex flex-col items-stretch gap-2 *:pointer-events-auto"
                             />
                         </div>
                     </div>

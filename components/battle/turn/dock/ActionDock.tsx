@@ -7,7 +7,7 @@ import { ActionsPopover } from './ActionsPopover';
 import { DockDiamond } from './DockDiamond';
 import { MoveBar } from './MoveBar';
 
-import { HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton } from '@/components/hud';
 import { actionIcon } from '@/components/hud/icons/battle';
 import { cn } from '@/lib/utils';
 import type { TurnFlowState } from '@/lib/utils/battle/flows';
@@ -54,13 +54,13 @@ export function ActionDock({
             onClick={on.actions}
             data-tour={panel?.open ? undefined : 'battle.turn-controls'}
             className={cn(
-                'hud-sc flex h-12 min-w-28 items-center justify-center gap-2 rounded-xl border px-4 text-[17px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
+                'hud-sc flex size-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border text-[13px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                 exhausted
                     ? 'border-white/25 bg-black/55 text-[var(--ink)]'
                     : 'border-[var(--gold)] bg-[var(--gold)] text-[#2a1d05]'
             )}
         >
-            <Icon className="size-5" aria-hidden />
+            <Icon className="size-6" aria-hidden />
             {t('actions')}
         </HudButton>
     );
@@ -68,31 +68,41 @@ export function ActionDock({
     return (
         <div
             data-slot="action-dock"
-            className="pointer-events-auto flex max-w-full flex-col items-center gap-2 pb-3"
+            className="pointer-events-auto flex w-full flex-col items-stretch gap-2"
         >
             {children}
             {phase === 'acting' && (
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl border border-white/20 bg-black/70 px-4 py-2">
-                    <DockDiamond
-                        label={t('action')}
-                        spent={status.actionUsed}
-                        spentLabel={spentLabel}
-                    />
-                    {economy.bonusAction && (
-                        <DockDiamond
-                            label={t('bonus')}
-                            spent={!status.bonusAvailable}
-                            spentLabel={spentLabel}
-                        />
+                <div
+                    className={cn(
+                        HUD_GLASS,
+                        'flex items-center gap-3 rounded-2xl px-3 py-2'
                     )}
-                    {economy.reaction && status.reactionAvailable !== null && (
-                        <DockDiamond
-                            label={t('reaction')}
-                            spent={!status.reactionAvailable}
-                            spentLabel={spentLabel}
-                        />
-                    )}
-                    {move && <MoveBar {...move} />}
+                >
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <div className="flex items-start justify-around gap-1">
+                            <DockDiamond
+                                label={t('action')}
+                                spent={status.actionUsed}
+                                spentLabel={spentLabel}
+                            />
+                            {economy.bonusAction && (
+                                <DockDiamond
+                                    label={t('bonus')}
+                                    spent={!status.bonusAvailable}
+                                    spentLabel={spentLabel}
+                                />
+                            )}
+                            {economy.reaction &&
+                                status.reactionAvailable !== null && (
+                                    <DockDiamond
+                                        label={t('reaction')}
+                                        spent={!status.reactionAvailable}
+                                        spentLabel={spentLabel}
+                                    />
+                                )}
+                        </div>
+                        {move && <MoveBar {...move} />}
+                    </div>
                     {panel ? (
                         <ActionsPopover
                             open={panel.open}
@@ -108,7 +118,7 @@ export function ActionDock({
                         <HudButton
                             type="button"
                             onClick={on.end}
-                            className="hud-sc h-12 min-w-28 rounded-xl border border-[var(--gold)] px-4 text-[15px] tracking-[.08em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
+                            className="hud-sc min-h-10 max-w-24 shrink-0 rounded-xl border border-[var(--gold)] px-2 text-[13px] leading-tight tracking-[.06em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
                         >
                             {t('endTurn')}
                         </HudButton>
