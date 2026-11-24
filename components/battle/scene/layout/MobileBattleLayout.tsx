@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import { Ellipsis } from 'lucide-react';
 
 import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
 import { BattleOverBanner } from '../banners/BattleOverBanner';
@@ -28,6 +29,7 @@ import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrac
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
+import { HUD_GLASS, HudButton } from '@/components/hud';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     MAP_TAB,
@@ -78,6 +80,8 @@ export function MobileBattleLayout({
 
     const [mapBusy, setMapBusy] = useState(false);
 
+    const [menuOpen, setMenuOpen] = useState(false);
+
     const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
@@ -121,8 +125,12 @@ export function MobileBattleLayout({
                         )}
                         <BattleTopBar />
                         <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
-                            <InitiativeTrack />
-                            <div className="rounded-xl bg-black/60 backdrop-blur-sm">
+                            <div
+                                className={`${HUD_GLASS} mr-12 rounded-xl`}
+                            >
+                                <InitiativeTrack />
+                            </div>
+                            <div className={`${HUD_GLASS} rounded-xl`}>
                                 <LastActionTicker
                                     onOpenLog={() => log.show()}
                                 />
@@ -137,8 +145,28 @@ export function MobileBattleLayout({
                         </InNoticeStack>
                         <TokenBubble mapBusy={mapBusy} />
                         <AudioDock placement="strip" collapseOn={turnKey} />
-                        <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center *:pointer-events-auto">
-                            <DrawerRail active={active} onToggle={toggle} />
+                        <div className="absolute top-1 right-2 z-30 flex flex-col items-end gap-1">
+                            <HudButton
+                                type="button"
+                                aria-label={td('more')}
+                                title={td('more')}
+                                aria-expanded={menuOpen}
+                                onClick={() => setMenuOpen((v) => !v)}
+                                className={`${HUD_GLASS} flex size-10 items-center justify-center rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
+                            >
+                                <Ellipsis className="size-5" aria-hidden />
+                            </HudButton>
+                            {menuOpen && (
+                                <div className={`${HUD_GLASS} rounded-xl py-2 pl-2`}>
+                                    <DrawerRail
+                                        active={active}
+                                        onToggle={(key) => {
+                                            setMenuOpen(false);
+                                            toggle(key);
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div
                             ref={setResultSlot}
@@ -146,11 +174,11 @@ export function MobileBattleLayout({
                         />
                     </div>
                     {/* safe zone: the map ends above it, so tokens never sit under the dock */}
-                    <div className="relative z-20 flex shrink-0 flex-col items-center gap-2 px-2 pt-2">
-                        {hero && <HeroCluster hero={hero} />}
+                    <div className="relative z-20 flex shrink-0 items-end gap-2 px-2 pt-2 pb-1">
+                        {hero && <HeroCluster hero={hero} phone />}
                         <div
                             ref={bindDock}
-                            className="flex w-full flex-col items-center"
+                            className="flex min-w-0 flex-1 flex-col items-end"
                         />
                     </div>
                     <TurnDock />

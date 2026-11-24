@@ -13,7 +13,7 @@ export function DockDiamond({
         <span
             data-state={spent ? 'spent' : 'ready'}
             className={cn(
-                'flex min-w-12 flex-col items-center gap-1.5 text-[11px] leading-none',
+                'flex min-w-12 flex-col max-md:min-w-0 items-center gap-1.5 text-[11px] leading-none',
                 spent ? 'text-[var(--hud-muted)]' : 'text-[var(--ink)]'
             )}
         >
@@ -26,8 +26,12 @@ export function DockDiamond({
                         : 'border-[var(--gold)] bg-[var(--gold)]'
                 )}
             />
-            <span className="hud-sc tracking-[.06em]">{label}</span>
-            {spent && <span className="font-sans italic">{spentLabel}</span>}
+            <span className="hud-sc tracking-[.06em] max-md:sr-only">
+                {label}
+            </span>
+            {spent && <span className="font-sans italic max-md:sr-only">
+                    {spentLabel}
+                </span>}
         </span>
     );
 }

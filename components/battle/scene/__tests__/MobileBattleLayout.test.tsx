@@ -59,6 +59,8 @@ vi.stubGlobal(
     }
 );
 
+const openMenu = () => fireEvent.click(screen.getByLabelText('Меню'));
+
 const MAP = { cols: 8, rows: 4, background: null, opacity: 0.3 };
 
 afterEach(() => {
@@ -84,6 +86,7 @@ describe('MobileBattleLayout', () => {
 
         expect(mounts.n).toBe(1);
 
+        openMenu();
         fireEvent.click(screen.getByLabelText('Інструменти'));
         fireEvent.click(screen.getByRole('button', { name: /Вороги/ }));
         expect(screen.getByTestId('list-enemy')).toBeTruthy();
@@ -91,7 +94,9 @@ describe('MobileBattleLayout', () => {
         fireEvent.click(screen.getByRole('button', { name: /Карта/ }));
         expect(screen.getByTestId('map')).toBeTruthy();
 
+        openMenu();
         fireEvent.click(screen.getByLabelText('Журнал'));
+        openMenu();
         fireEvent.click(screen.getByLabelText('Інструменти'));
 
         expect(mounts.n).toBe(1);
@@ -102,6 +107,8 @@ describe('MobileBattleLayout', () => {
 
         render(<MobileBattleLayout />, { wrapper: dm.wrapper });
 
+        openMenu();
+
         expect(screen.getByRole('button', { name: 'Дії ведучого' })).toBeTruthy();
         expect((await screen.findByTestId('dm-panel')).dataset.open).toBe('n');
 
@@ -110,6 +117,8 @@ describe('MobileBattleLayout', () => {
         const player = fakeScene({ isDM: false, map: MAP });
 
         render(<MobileBattleLayout />, { wrapper: player.wrapper });
+
+        openMenu();
 
         expect(screen.queryByRole('button', { name: 'Дії ведучого' })).toBeNull();
         expect(screen.queryByTestId('dm-panel')).toBeNull();
@@ -123,9 +132,36 @@ describe('MobileBattleLayout', () => {
         expect(screen.queryByTestId('map')).toBeNull();
         expect(screen.getByTestId('list-enemy')).toBeTruthy();
 
+        openMenu();
         fireEvent.click(screen.getByLabelText('Інструменти'));
         fireEvent.click(screen.getByRole('button', { name: /Союзники/ }));
 
         expect(screen.getByTestId('list-ally')).toBeTruthy();
+    });
+
+    it('tools, log and DM live behind one menu button, not a permanent rail', () => {
+        const { wrapper } = fakeScene({ isDM: true, map: MAP });
+
+        render(<MobileBattleLayout />, { wrapper });
+
+        expect(screen.queryByLabelText('Інструменти')).toBeNull();
+        expect(screen.queryByLabelText('Журнал')).toBeNull();
+
+        openMenu();
+
+        expect(screen.getByLabelText('Інструменти')).toBeTruthy();
+        expect(screen.getByLabelText('Журнал')).toBeTruthy();
+    });
+
+    it('readOnly shows no HUD dock and no DM items', () => {
+        const { wrapper } = fakeScene({ playerView: true, isMyTurn: true, map: MAP });
+
+        const { container } = render(<MobileBattleLayout />, { wrapper });
+
+        openMenu();
+
+        expect(screen.queryByRole('button', { name: 'Дії ведучого' })).toBeNull();
+        expect(screen.queryByTestId('dm-panel')).toBeNull();
+        expect(container.querySelector('[data-slot="action-dock"]')).toBeNull();
     });
 });

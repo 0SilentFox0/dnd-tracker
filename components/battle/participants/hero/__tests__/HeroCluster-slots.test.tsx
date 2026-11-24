@@ -71,3 +71,34 @@ describe('HeroCluster spell slots', () => {
         ).not.toBeNull();
     });
 });
+
+describe('HeroCluster phone', () => {
+    const setupPhone = () => {
+        const scene = fakeScene({
+            slots: { '1': { current: 2, max: 4 } },
+            knownSpells: ['shield'],
+        });
+
+        const { container } = render(
+            <TooltipProvider>
+                <HeroCluster hero={scene.me} phone />
+            </TooltipProvider>,
+            { wrapper: scene.wrapper }
+        );
+
+        return container;
+    };
+
+    it('portrait is 52px and slots open from the avatar toggle', () => {
+        const container = setupPhone();
+
+        const portrait = container.querySelector<HTMLElement>('[style*="width"]');
+
+        expect(portrait?.style.width).toBe('52px');
+        expect(slotButtons()).toHaveLength(0);
+
+        fireEvent.click(screen.getByRole('button', { name: /Показати стани/ }));
+
+        expect(slotButtons().length).toBeGreaterThan(0);
+    });
+});

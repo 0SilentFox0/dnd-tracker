@@ -55,7 +55,7 @@ export function ActionDock({
             onClick={on.actions}
             data-tour={panel?.open ? undefined : 'battle.turn-controls'}
             className={cn(
-                'hud-sc flex size-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border text-[13px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
+                'hud-sc flex size-16 shrink-0 max-md:h-[58px] max-md:w-14 flex-col items-center justify-center gap-0.5 rounded-xl border text-[13px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                 exhausted
                     ? 'border-white/25 bg-black/55 text-[var(--ink)]'
                     : 'border-[var(--gold)] bg-[var(--gold)] text-[#2a1d05]'
@@ -76,7 +76,7 @@ export function ActionDock({
                 <div
                     className={cn(
                         HUD_GLASS,
-                        'flex items-center gap-3 rounded-2xl px-3 py-2'
+                        'flex items-center gap-3 rounded-2xl px-3 py-2 max-md:gap-2 max-md:px-2'
                     )}
                 >
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -120,7 +120,7 @@ export function ActionDock({
                         <HudButton
                             type="button"
                             onClick={on.end}
-                            className="hud-sc min-h-10 max-w-24 shrink-0 rounded-xl border border-[var(--gold)] px-2 text-[13px] leading-tight tracking-[.06em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
+                            className="hud-sc min-h-10 max-w-24 shrink-0 max-md:max-w-16 max-md:px-1 rounded-xl border border-[var(--gold)] px-2 text-[13px] leading-tight tracking-[.06em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
                         >
                             {t('endTurn')}
                         </HudButton>
