@@ -384,5 +384,9 @@
   "2026-11-22-quests": {
     "title": "Quest journal",
     "body": "DMs create quests and objectives and reveal them to the party. Track your quests and visit their map locations."
+  },
+  "2026-11-24-character-sheet": {
+    "title": "New character sheet",
+    "body": "The character sheet has a new layout: a pinned hero panel on the left, HP, stats and skills on top, tabs below. On a phone the skills are a separate tab. The DM can apply damage, healing and temporary HP right from the HP block."
   }
 }

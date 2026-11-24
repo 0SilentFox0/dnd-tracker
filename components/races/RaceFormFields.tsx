@@ -213,7 +213,7 @@ export function RaceFormFields({
                 value={tab}
                 onValueChange={setTab}
                 keepMounted
-                contentClassName="px-0"
+                styles={{ content: 'px-0' }}
             />
         </div>
     );

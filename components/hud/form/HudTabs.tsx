@@ -19,8 +19,11 @@ interface HudTabsProps<T extends string> {
     onValueChange: (id: T) => void;
     header?: ReactNode;
     keepMounted?: boolean;
-    contentClassName?: string;
-    triggerClassName?: string;
+    styles?: {
+        content?: string;
+        trigger?: string;
+        variant?: 'default' | 'sheet';
+    };
 }
 
 export function HudTabs<T extends string>({
@@ -29,14 +32,20 @@ export function HudTabs<T extends string>({
     onValueChange,
     header,
     keepMounted = false,
-    contentClassName,
-    triggerClassName,
+    styles = {},
 }: HudTabsProps<T>) {
     const t = useTranslations('common');
 
     return (
         <Tabs value={value} onValueChange={(v) => onValueChange(v as T)}>
-            <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-hud-rule bg-hud-page/[.97]">
+            <div
+                className={cn(
+                    'sticky z-20 border-b border-hud-rule bg-hud-page/[.97]',
+                    styles.variant === 'sheet'
+                        ? 'top-14 lg:top-16'
+                        : 'top-[env(safe-area-inset-top,0px)]'
+                )}
+            >
                 {header}
                 <TabsList className="hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1.5 md:flex-wrap md:overflow-x-visible">
                     {tabs.map((tab) => (
@@ -44,8 +53,11 @@ export function HudTabs<T extends string>({
                             key={tab.id}
                             value={tab.id}
                             className={cn(
-                                'profile-tab hud-sc h-10 min-w-fit flex-1 shrink-0 rounded-md px-2.5 text-[13px] text-hud-muted data-[state=active]:shadow-none',
-                                triggerClassName
+                                'profile-tab hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[13px] text-hud-muted data-[state=active]:shadow-none',
+                                styles.variant === 'sheet'
+                                    ? 'min-h-10 rounded-lg border border-hud-rule data-[state=active]:border-hud-gold'
+                                    : 'rounded-md',
+                                styles.trigger
                             )}
                         >
                             {tab.label}
@@ -69,7 +81,7 @@ export function HudTabs<T extends string>({
                     className={cn(
                         'mt-0 px-4 py-3',
                         keepMounted && 'data-[state=inactive]:hidden',
-                        contentClassName
+                        styles.content
                     )}
                 >
                     {tab.content}

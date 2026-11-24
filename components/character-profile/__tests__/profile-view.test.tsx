@@ -107,7 +107,7 @@ describe('CharacterProfile — перегляд', () => {
             <CharacterProfile campaignId="c" characterId="ch" canEdit={false} />
         );
         expect(
-            screen.getByRole('tab', { name: 'characterProfile.tabs.path' })
+            screen.getByRole('tab', { name: 'characterProfile.tabs.traits' })
         ).toBeTruthy();
         expect(
             screen.queryByRole('tab', { name: 'characterProfile.tabs.skills' })
@@ -132,7 +132,7 @@ describe('CharacterProfile — перегляд', () => {
         );
 
         expect(
-            screen.getByRole('tab', { name: 'characterProfile.tabs.path' })
+            screen.getByRole('tab', { name: 'characterProfile.tabs.traits' })
         ).toBeTruthy();
     });
 

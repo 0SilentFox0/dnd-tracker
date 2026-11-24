@@ -11,7 +11,8 @@
     "story": "Story",
     "log": "Log",
     "things": "Gear",
-    "path": "Path"
+    "path": "Path",
+    "traits": "Traits & languages"
   },
   "hero": {
     "level": "Lv {level}",

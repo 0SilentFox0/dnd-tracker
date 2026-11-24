@@ -6,6 +6,7 @@ import { type HudTab, HudTabs } from '@/components/hud/form';
 
 export type ProfileTabId =
     | 'basic'
+    | 'stats'
     | 'combat'
     | 'skills'
     | 'choices'
@@ -23,11 +24,13 @@ export function ProfileTabs({
     value,
     onValueChange,
     header,
+    variant,
 }: {
     tabs: ProfileTab[];
     value: ProfileTabId;
     onValueChange: (id: ProfileTabId) => void;
     header?: ReactNode;
+    variant?: 'default' | 'sheet';
 }) {
     return (
         <HudTabs
@@ -35,6 +38,7 @@ export function ProfileTabs({
             value={value}
             onValueChange={onValueChange}
             header={header}
+            styles={{ variant }}
         />
     );
 }

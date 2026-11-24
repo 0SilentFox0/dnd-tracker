@@ -59,7 +59,7 @@ export function HudForm<T extends string>({
                     tabs={tabs}
                     value={active}
                     onValueChange={setActive}
-                    triggerClassName={triggerClassName}
+                    styles={{ trigger: triggerClassName }}
                     keepMounted
                 />
             ) : (

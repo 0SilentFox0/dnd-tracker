@@ -279,7 +279,7 @@ export function LayerRow({
             <HudTabs
                 value={section}
                 onValueChange={setSection}
-                contentClassName="world-layer-tab"
+                styles={{ content: 'world-layer-tab' }}
                 tabs={[
                     {
                         id: 'appearance',
