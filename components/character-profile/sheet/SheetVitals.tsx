@@ -25,10 +25,10 @@ const FORM_ID = 'sheet-vitals-form';
 type Hp = { current: number; max: number; temp: number };
 
 const BTN =
-    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-3 text-[15px] font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50';
+    'motion-press inline-flex min-h-11 fit:min-h-9 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-3 text-[15px] font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50';
 
 const LABEL =
-    'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-[17px]';
+    'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-[17px] fit:text-[15px]';
 
 export function SheetVitals() {
     const { campaignId, sheet } = useProfile();
@@ -54,7 +54,7 @@ export function SheetVitals() {
         : t(keys.total, { total: sheet.hp.total });
 
     return (
-        <div className="motion-rise col-span-full flex flex-col gap-2.5 border-b border-hud-rule p-4 lg:col-span-1 lg:border-b-0 lg:px-5">
+        <div className="motion-rise col-span-full flex flex-col gap-2.5 border-b border-hud-rule p-4 lg:col-span-1 lg:border-b-0 lg:px-5 fit:gap-1 fit:px-4 fit:py-2">
             <div className="flex items-center justify-between gap-2">
                 <h2 className={LABEL}>
                     <Heart aria-hidden className="size-5 text-hud-danger" />
@@ -109,7 +109,7 @@ function HpReadout({
     const ratio = (n: number) => (hp.max > 0 ? n / hp.max : 0);
 
     return (
-        <div className="relative h-[42px]">
+        <div className="relative h-[42px] fit:h-9">
             <div
                 role="progressbar"
                 aria-label={summary}
@@ -146,7 +146,7 @@ function HpReadout({
                 className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-white [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
             >
                 <span
-                    className="motion-flash inline-block text-[27px] leading-none"
+                    className="motion-flash inline-block text-[27px] leading-none fit:text-[24px]"
                     data-flash={flash ?? undefined}
                 >
                     {shown}
@@ -188,7 +188,7 @@ function HpControls({ hp }: { hp: Hp }) {
                 min={1}
                 value={amount}
                 onChange={setAmount}
-                className="hud-num h-11 w-16 rounded-[4px] text-center text-xl"
+                className="hud-num h-11 w-16 rounded-[4px] text-center text-xl fit:h-9"
             />
             <HudButton
                 type="button"

@@ -94,7 +94,7 @@ export function AbilityCard({
     );
 
     const saveClass =
-        'flex min-h-11 w-full items-center justify-center gap-2 border-t border-hud-rule text-sm text-hud-muted';
+        'flex min-h-11 w-full items-center justify-center gap-2 border-t border-hud-rule text-sm text-hud-muted fit:min-h-9';
 
     return (
         <div
@@ -119,10 +119,10 @@ export function AbilityCard({
                     })
                 }
                 title={t('roll')}
-                className="motion-press grid min-h-11 justify-items-center gap-1 px-1 pt-3.5 pb-3 hover:bg-hud-raised"
+                className="motion-press grid min-h-11 justify-items-center gap-1 px-1 pt-3.5 pb-3 hover:bg-hud-raised fit:grid-cols-[auto_auto] fit:justify-center fit:gap-x-2 fit:gap-y-0 fit:pt-1.5 fit:pb-1.5"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
-                <small className="hud-title flex max-w-full items-center gap-1.5 text-base text-hud-text lg:text-xl">
+                <small className="hud-title flex max-w-full items-center gap-1.5 text-base text-hud-text lg:text-xl fit:col-span-full fit:text-base">
                     {Icon && (
                         <Icon
                             aria-hidden
@@ -134,7 +134,7 @@ export function AbilityCard({
                         {tg(`abilities.${a.key}.short`)}
                     </span>
                 </small>
-                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-[42px]">
+                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-[42px] fit:text-[30px]">
                     <Signed value={a.mod} />
                 </span>
                 <span className="hud-num rounded-[4px] border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">

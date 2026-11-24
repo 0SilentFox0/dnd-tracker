@@ -15,7 +15,7 @@ export function SheetTopBar({ actions }: { actions?: ReactNode }) {
     const tb = useTranslations('common.breadcrumbs');
 
     return (
-        <div className="flex min-h-12 items-center justify-between gap-3 border-b border-hud-rule px-4">
+        <div className="flex min-h-12 items-center justify-between gap-3 border-b border-hud-rule px-4 fit:min-h-10">
             <nav
                 aria-label={tb('label')}
                 className="flex min-w-0 items-center gap-2 text-[15px] text-hud-muted"

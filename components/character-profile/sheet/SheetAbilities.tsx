@@ -17,7 +17,7 @@ export function SheetAbilities() {
 
     return (
         <div
-            className="px-4 pb-4 empty:hidden fit:pb-2"
+            className="px-4 pb-4 empty:hidden fit:pt-0 fit:pb-1.5"
             data-testid="sheet-abilities"
         >
             <Ui.StatsTab section="top" {...roll} />

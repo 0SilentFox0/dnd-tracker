@@ -111,10 +111,11 @@
 @media (min-width: 1920px) { .sheet-root { --sheet-zoom: 1.25; max-width: 80rem; } }
 @media (min-width: 2560px) { .sheet-root { --sheet-zoom: 1.5; } }
 @media (min-width: 3200px) { .sheet-root { --sheet-zoom: 1.75; } }
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) and (min-height: 800px) {
   .sheet-shell:has(.sheet-fit) { padding-bottom: 0; }
-  .sheet-fit { display: flex; flex-direction: column; overflow-y: auto; height: calc((100dvh - 57px) / var(--sheet-zoom)); }
-  .sheet-fit [data-sheet-tabs] { display: flex; flex: 1 1 0; flex-direction: column; min-height: 22rem; }
+  .sheet-fit { position: relative; contain: paint; display: flex; flex-direction: column; overflow: hidden; height: calc((100dvh - 57px) / var(--sheet-zoom)); }
+  .sheet-fit > * { flex-shrink: 0; }
+  .sheet-fit > [data-sheet-tabs] { display: flex; flex: 1 1 0; flex-direction: column; min-height: 0; }
   .sheet-fit [data-sheet-strip] { position: static; flex-shrink: 0; }
-  .sheet-fit [data-sheet-panels] { flex: 1 1 0; min-height: 16rem; overflow-y: auto; overscroll-behavior: contain; }
+  .sheet-fit [data-sheet-panels] { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 }

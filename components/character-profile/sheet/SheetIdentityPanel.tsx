@@ -70,10 +70,10 @@ export function SheetIdentityPanel({
         <>
             <header
                 ref={ref}
-                className="motion-rise grid grid-cols-[104px_minmax(0,1fr)] gap-x-4 gap-y-5 px-4 pt-4 pb-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-x-8 fit:grid-cols-[132px_minmax(0,1fr)] fit:gap-x-6 fit:gap-y-2 fit:py-3"
+                className="motion-rise grid grid-cols-[104px_minmax(0,1fr)] gap-x-4 gap-y-5 px-4 pt-4 pb-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-x-8 fit:grid-cols-[104px_minmax(0,1fr)] fit:gap-x-5 fit:gap-y-1 fit:py-2"
                 style={stagger(0)}
             >
-                <div className="relative h-44 bg-[linear-gradient(90deg,rgba(0,0,0,.22),transparent_18%,transparent_82%,rgba(0,0,0,.22)),linear-gradient(var(--color-hud-gold-strong),color-mix(in_srgb,var(--color-hud-gold-strong)_55%,var(--color-hud-surface)))] p-[9px] pb-0 [clip-path:polygon(0_0,100%_0,100%_100%,50%_90%,0_100%)] lg:h-[340px] lg:p-5 lg:pb-0 fit:h-[172px] fit:p-3 fit:pb-0">
+                <div className="relative h-44 bg-[linear-gradient(90deg,rgba(0,0,0,.22),transparent_18%,transparent_82%,rgba(0,0,0,.22)),linear-gradient(var(--color-hud-gold-strong),color-mix(in_srgb,var(--color-hud-gold-strong)_55%,var(--color-hud-surface)))] p-[9px] pb-0 [clip-path:polygon(0_0,100%_0,100%_100%,50%_90%,0_100%)] lg:h-[340px] lg:p-5 lg:pb-0 fit:h-[136px] fit:p-2 fit:pb-0">
                     <div className="relative rounded-[4px] bg-hud-surface p-[3px] shadow-[0_0_0_1px_var(--color-hud-line),0_18px_40px_-14px_rgba(0,0,0,.8)] lg:p-2">
                         <HeroPortrait
                             src={id.avatar}
@@ -90,10 +90,10 @@ export function SheetIdentityPanel({
                         className="absolute bottom-[11%] left-1/2 hidden size-8 -translate-x-1/2 text-(--palette-primary-foreground,#2a1d05) opacity-70 lg:block fit:hidden"
                     />
                 </div>
-                <div className="contents lg:flex lg:flex-col lg:justify-between lg:gap-4 lg:pt-5 fit:gap-2 fit:pt-0">
+                <div className="contents lg:flex lg:flex-col lg:justify-between lg:gap-4 lg:pt-5 fit:gap-1.5 fit:pt-0">
                     <div className="contents lg:flex lg:flex-wrap lg:items-end lg:justify-between lg:gap-x-6 lg:gap-y-4">
-                        <div className="grid min-w-0 content-center gap-1.5 self-center lg:max-w-[40em] lg:self-auto">
-                            <p className="hud-title flex flex-wrap text-sm text-hud-muted lg:text-[19px] fit:text-[16px]">
+                        <div className="grid min-w-0 content-center gap-1.5 self-center lg:max-w-[40em] lg:self-auto fit:gap-0.5">
+                            <p className="hud-title flex flex-wrap text-sm text-hud-muted lg:text-[19px] fit:text-[15px]">
                                 {who.map((part, i) => (
                                     <span key={i} className="whitespace-nowrap">
                                         {i > 0 && (
@@ -114,7 +114,7 @@ export function SheetIdentityPanel({
                                     </span>
                                 ))}
                             </p>
-                            <h1 className="hud-title text-[28px] leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(44px,5vw,64px)] lg:leading-[.95] fit:text-[clamp(30px,3vw,44px)]">
+                            <h1 className="hud-title text-[28px] leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(44px,5vw,64px)] lg:leading-[.95] fit:text-[clamp(26px,2.4vw,34px)]">
                                 {id.name}
                             </h1>
                             {lead && (
@@ -146,7 +146,7 @@ export function SheetIdentityPanel({
                 </div>
             </header>
             <div
-                className="motion-rise flex flex-col gap-4 px-4 empty:hidden"
+                className="motion-rise flex flex-col gap-4 px-4 empty:hidden fit:flex-row fit:flex-wrap fit:items-center fit:gap-x-6 fit:gap-y-1 fit:py-1"
                 style={stagger(1)}
             >
                 {xp && (
