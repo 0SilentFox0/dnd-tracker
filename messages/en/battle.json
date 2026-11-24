@@ -62,7 +62,13 @@
     "collapseAll": "Collapse all",
     "round": "Round {round}",
     "loading": "Loading…",
-    "showEarlier": "Show earlier"
+    "showEarlier": "Show earlier",
+    "filters": "Log filter",
+    "filter": {
+      "all": "All",
+      "battle": "Battle",
+      "system": "System"
+    }
   },
   "page": {
     "loading": "Loading battle…",
@@ -149,7 +155,8 @@
       "minimapShow": "Show minimap",
       "minimapHide": "Collapse minimap",
       "follow": "Follow the turn",
-      "followHint": "Automatically move the camera to the active participant at the start of their turn"
+      "followHint": "Automatically move the camera to the active participant at the start of their turn",
+      "zoomLevel": "Zoom level"
     },
     "backgroundLabel": "Map background",
     "defaultBackground": "Default background",
@@ -450,6 +457,16 @@
     "view": "View",
     "display": "Display",
     "sound": "Sound and music",
-    "dmSection": "DM"
+    "dmSection": "DM",
+    "collapse": "Collapse",
+    "mode": "Tools mode",
+    "modePlay": "Play",
+    "modeEdit": "Edit map",
+    "grid": "Grid",
+    "gridShape": "Grid shape",
+    "gridSquare": "Square",
+    "gridHex": "Hex",
+    "gridHexSoon": "Hex grid is coming soon",
+    "dmPanel": "DM panel"
   }
 }

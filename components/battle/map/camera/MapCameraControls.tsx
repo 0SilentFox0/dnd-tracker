@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { LocateFixed, Minus, Plus } from 'lucide-react';
 
+import { HUD_GLASS } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +11,7 @@ interface Props {
     onZoomIn(): void;
     onZoomOut(): void;
     onRecenter(): void;
+    zoom: number;
     canRecenter: boolean;
     userMoved: boolean;
     phone: boolean;
@@ -19,6 +21,7 @@ export function MapCameraControls({
     onZoomIn,
     onZoomOut,
     onRecenter,
+    zoom,
     canRecenter,
     userMoved,
     phone,
@@ -28,7 +31,8 @@ export function MapCameraControls({
     return (
         <div
             className={cn(
-                'absolute right-2 z-30 flex flex-col rounded-md border border-white/20 bg-black/75 shadow-lg',
+                HUD_GLASS,
+                'absolute right-3 z-30 flex items-center rounded-xl',
                 phone
                     ? 'bottom-2'
                     : 'bottom-[calc(var(--hud-dock-h,0px)+1.25rem)]'
@@ -38,21 +42,28 @@ export function MapCameraControls({
                 type="button"
                 size="icon"
                 variant="ghost"
-                aria-label={t('zoomIn')}
-                onClick={onZoomIn}
-                className={cn(phone && 'size-11')}
-            >
-                <Plus />
-            </Button>
-            <Button
-                type="button"
-                size="icon"
-                variant="ghost"
                 aria-label={t('zoomOut')}
                 onClick={onZoomOut}
                 className={cn(phone && 'size-11')}
             >
                 <Minus />
+            </Button>
+            <span
+                role="status"
+                aria-label={t('zoomLevel')}
+                className="min-w-12 px-1 text-center text-[13px] text-[var(--ink)] tabular-nums"
+            >
+                {Math.round(zoom * 100)}%
+            </span>
+            <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={t('zoomIn')}
+                onClick={onZoomIn}
+                className={cn(phone && 'size-11')}
+            >
+                <Plus />
             </Button>
             {canRecenter && (
                 <Button

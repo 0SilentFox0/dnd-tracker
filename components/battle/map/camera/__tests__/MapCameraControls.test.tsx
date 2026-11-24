@@ -21,6 +21,7 @@ describe('MapCameraControls', () => {
                 onZoomIn={onZoomIn}
                 onZoomOut={onZoomOut}
                 onRecenter={onRecenter}
+                zoom={1.25}
                 canRecenter={false}
                 userMoved={false}
                 phone={false}
@@ -32,5 +33,6 @@ describe('MapCameraControls', () => {
         expect(onZoomIn).toHaveBeenCalledOnce();
         expect(onZoomOut).toHaveBeenCalledOnce();
         expect(queryByRole('button', { name: 'До себе' })).toBeNull();
+        expect(getByRole('status').textContent).toBe('125%');
     });
 });

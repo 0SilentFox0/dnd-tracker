@@ -211,6 +211,7 @@ export function DesktopBattleLayout({
                     )}
                     <BattleDrawer
                         drawer="log"
+                        side="left"
                         open={log.open}
                         onOpenChange={(o) => !o && log.close()}
                         title={t('log')}
@@ -233,6 +234,7 @@ export function DesktopBattleLayout({
                         onComplete={onComplete}
                         view={{ mode: viewMode, set: setViewMode }}
                         onToolsSlot={setToolsSlot}
+                        onOpenDrawer={toggle}
                     />
                 </div>
             </MapStripSlotContext>

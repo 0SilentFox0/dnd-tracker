@@ -11,6 +11,7 @@ export * from './health';
 export * from './hero';
 export * from './initiative-arc';
 export * from './knowledge';
+export * from './log-channel';
 export * from './log-entry';
 export * from './my-turn-key';
 export * from './personal-effects';

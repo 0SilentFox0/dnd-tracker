@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Sparkles } from 'lucide-react';
 
 import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
 import { BattleDrawer } from './BattleDrawer';
+import { GridShapePicker } from './GridShapePicker';
+import type { DrawerKey } from './rail-items';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { HudButton, HudIconButton } from '@/components/hud';
@@ -29,6 +32,7 @@ export interface ToolsProps {
     view?: { mode: BattleViewMode; set: (mode: BattleViewMode) => void };
     tabs?: { value: MobileBattleTab; set: (tab: MobileBattleTab) => void };
     onToolsSlot?: (el: HTMLDivElement | null) => void;
+    onOpenDrawer?: (key: DrawerKey) => void;
     // phone keeps the player on the stage (`player: false`): the sheet unmounts on close and would stop the video
     audio?: { sound?: boolean; player?: boolean };
 }
@@ -38,6 +42,7 @@ export function ToolsContent({
     view,
     tabs,
     onToolsSlot,
+    onOpenDrawer,
     audio,
 }: ToolsProps) {
     const withSound = audio?.sound ?? true;
@@ -55,9 +60,13 @@ export function ToolsContent({
     const {
         battle,
         viewer: { isDM, readOnly },
-        roster: { allies, enemies },
+        roster: { allies, enemies, reserve },
         actions,
     } = useBattleScene();
+
+    const [mode, setMode] = useState<'play' | 'edit'>('edit');
+
+    const [gridOpen, setGridOpen] = useState(false);
 
     const confirm = useConfirm();
 
@@ -141,10 +150,47 @@ export function ToolsContent({
                 </section>
             )}
             {onToolsSlot && battle.map && (
-                <div
-                    ref={onToolsSlot}
-                    className="relative flex min-w-0 flex-col"
-                />
+                <section className="flex flex-col gap-2">
+                    {isDM && !readOnly && (
+                        <>
+                            <HudChipTabs
+                                ariaLabel={td('mode')}
+                                items={[
+                                    {
+                                        key: 'play',
+                                        label: td('modePlay'),
+                                        active: mode === 'play',
+                                        onSelect: () => setMode('play'),
+                                    },
+                                    {
+                                        key: 'edit',
+                                        label: td('modeEdit'),
+                                        active: mode === 'edit',
+                                        onSelect: () => setMode('edit'),
+                                    },
+                                ]}
+                            />
+                            {mode === 'edit' && (
+                                <>
+                                    <HudButton
+                                        type="button"
+                                        aria-expanded={gridOpen}
+                                        onClick={() => setGridOpen((o) => !o)}
+                                        className="h-10 rounded-xl border border-white/20 text-sm text-[var(--ink)]"
+                                    >
+                                        {td('grid')}
+                                    </HudButton>
+                                    {gridOpen && <GridShapePicker />}
+                                </>
+                            )}
+                        </>
+                    )}
+                    <div
+                        ref={onToolsSlot}
+                        hidden={mode === 'play'}
+                        className="relative flex min-w-0 flex-col [&>div>div:first-child]:grid [&>div>div:first-child]:grid-cols-3"
+                    />
+                </section>
             )}
             <section className="flex flex-col gap-2">
                 <h3 className={SECTION}>{td('display')}</h3>
@@ -197,6 +243,28 @@ export function ToolsContent({
                     </HudButton>
                 </section>
             )}
+            {onOpenDrawer && (dmControls || reserve.length > 0) && (
+                <div className="flex gap-2">
+                    {isDM && !readOnly && (
+                        <HudButton
+                            type="button"
+                            onClick={() => onOpenDrawer('dm')}
+                            className="hud-sc h-10 flex-1 rounded-xl border border-white/20 text-sm"
+                        >
+                            {td('dmPanel')}
+                        </HudButton>
+                    )}
+                    {battle.map && reserve.length > 0 && (
+                        <HudButton
+                            type="button"
+                            onClick={() => onOpenDrawer('reserve')}
+                            className="hud-sc h-10 flex-1 rounded-xl border border-white/20 text-sm"
+                        >
+                            {td('reserve')}
+                        </HudButton>
+                    )}
+                </div>
+            )}
             <Link
                 href={`/campaigns/${battle.campaignId}`}
                 className="hud-sc flex h-10 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
@@ -220,7 +288,6 @@ export function ToolsDrawer({
             open={open}
             onOpenChange={onOpenChange}
             title={t('tools')}
-            keepOnOutside
             keepMounted
         >
             <ToolsContent {...props} />

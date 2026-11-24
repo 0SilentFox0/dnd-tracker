@@ -319,6 +319,7 @@ export function BattleMap({
                     onZoomIn={() => camera.zoomBy(ZOOM_STEP)}
                     onZoomOut={() => camera.zoomBy(1 / ZOOM_STEP)}
                     onRecenter={camera.recenter}
+                    zoom={zoom}
                     canRecenter={
                         cameraMode ? !!selfTarget || !!cameraTarget : zoom > 1
                     }

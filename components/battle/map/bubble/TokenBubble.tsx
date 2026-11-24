@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { HeroStatesPanel } from '@/components/battle/participants/hero/HeroStatesPanel';
 import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
-import { HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton } from '@/components/hud';
 import {
     Popover,
     PopoverAnchor,
@@ -18,6 +18,7 @@ import {
     useTokenAnchor,
 } from '@/lib/hooks/battle';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
+import { cn } from '@/lib/utils';
 import { isFallen } from '@/lib/utils/battle/grid';
 import { NO_EFFECTS } from '@/lib/utils/battle/view';
 
@@ -142,7 +143,10 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
                     if (onSelectedToken(e.target, selectedId))
                         e.preventDefault();
                 }}
-                className="max-h-[min(70dvh,640px)] w-[min(380px,92vw)] overflow-y-auto border-white/20 bg-black/85 p-4"
+                className={cn(
+                    HUD_GLASS,
+                    'max-h-[min(70dvh,640px)] w-[min(380px,92vw)] overflow-y-auto rounded-xl p-4'
+                )}
             >
                 {!anchor.inView && (
                     <div className="mb-3 flex items-center justify-between gap-2 text-sm text-hud-muted">

@@ -55,6 +55,9 @@ export function DrawerRail({
             {keys.map((key) => {
                 const Icon = ICON[key];
 
+                const labelled =
+                    active !== key && (key === 'log' || key === 'tools');
+
                 return (
                     <HudButton
                         key={key}
@@ -65,13 +68,16 @@ export function DrawerRail({
                         aria-pressed={active === key}
                         onClick={() => onToggle(key)}
                         className={cn(
-                            'flex size-11 items-center justify-center rounded-xl border bg-black/70 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
+                            'flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border bg-black/70 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                             active === key
                                 ? 'border-[var(--gold)] text-[var(--gold)]'
                                 : 'border-white/25 text-[var(--ink)]'
                         )}
                     >
                         <Icon className="size-5" aria-hidden />
+                        {labelled && (
+                            <span className="pr-2 text-xs">{t(key)}</span>
+                        )}
                     </HudButton>
                 );
             })}
