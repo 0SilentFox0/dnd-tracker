@@ -24,3 +24,13 @@ Worktree `/Users/silentfox/Work/dnd-tracker-ch6`, гілка `feat/game-ui-ch6` 
 2. Перед довгим ланцюгом: оцінка вартості і нагадування про `/usage`.
 3. Живий прогін: збірка `NODE_OPTIONS=--max-old-space-size=10240 pnpm exec next build --experimental-build-mode compile`, `RATE_LIMIT_ALLOW_MEMORY=1 pnpm exec next start -p 3100` (БД `ch6_battle`), користувач логіниться сам, прогін віддавати Sonnet-субагентові; порівнювати зі скрінами прототипу (відкривається статично на `http://127.0.0.1:4174/docs/superpowers/prototypes/2026-11-21-game-style-ui-ch0.html`, вкладка «Бій»).
 4. Відкриті пункти Ч6, що лишилися: T7 (анімації, чекає дизайн-базу Ч5), «до токена» (`revealToken`), офсети верстки, credits-сторінка до релізу (CC BY), нотатки у `docs/STATUS.md`.
+
+## Баги живого прогону T9 (повний звіт: `.superpowers/sdd/2026-11-24-game-ui-ch6-battle/t9-report.md`) — закрити в Ч6b
+1. БЛОКЕР desktop: обгортка дока (`div.flex.w-full.flex-col.items-center.px-[324px]`, `pointer-events:auto`, 1440×109) перехоплює кліки по аватару героя, тоглу «Показати стани» й зуму −/+; клікабельні лише «Дія» і «Наступний хід». Фікс: `pointer-events-none` на обгортці, `auto` лише на інтерактивних дітях.
+2. Палітри `parchment`/`frost`: текст `HeroCluster` (імʼя, HP, AC), кнопки зуму, підпис ініціативи — темне на темному, контраст ≈1.3–2.2. `tavern` ок.
+3. Phone 390: ряд інструментів мапи (`div.z-20.flex.flex-col…`, Розставити/Туман/…/Фон) зверху перекриває RoundBadge і ініціативу; за спекою має бути в шторці «Інструменти».
+4. Esc не закрив бульбашку/DM-шторку в автоматизації (перевірити вручну); верхній правий Select «Перегляд як гравець» лишає док і DM-рейку — справжній перемикач в «Інструментах» працює правильно.
+5. Maze «Лабіринт»: API 500 `rules.validation.unknownSystem` (старі `battle_scenes.rules` без `system`) — імовірно дані до backfill, не UI Ч6.
+6. Дрібне: клік по токену відкриває бульбашку при відкритих «Інструментах»; рейка перекриває колонку AC у списку без мапи.
+7. Не перевірено: прицілювання заклять, `MyTurnControls` vs шторки, fallen-токен, «до токена», резерв, PREPARED, ticker, reduced-motion, wfrp/d6pool, maze, консольні помилки; phone перевірявся в iframe 390 px.
+8. Середовище: сервер :3100 тричі падав; піднімати `RATE_LIMIT_ALLOW_MEMORY=1 pnpm exec next start -p 3100` з worktree ch6 (без цього next-turn дає 503). Зараз працює.
