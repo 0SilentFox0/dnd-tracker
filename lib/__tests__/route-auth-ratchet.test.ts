@@ -80,6 +80,7 @@ const PUBLIC_ROUTES = new Set([
     'app/api/openapi.json/route.ts',
     'app/api/csp-report/route.ts',
     'app/api/cron/assistant-cleanup/route.ts',
+    'app/api/ops/collect/route.ts',
 ]);
 
 const SECRET_GUARD = /CRON_SECRET|HEALTH_SECRET/;

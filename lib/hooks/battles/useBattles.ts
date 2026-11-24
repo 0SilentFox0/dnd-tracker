@@ -13,17 +13,11 @@ import {
     getBattle,
     updateBattle,
 } from '@/lib/api/battles';
-import { BattleStatus } from '@/lib/constants/battle';
+import { POLLED_BATTLE_STATUSES } from '@/lib/constants/battle';
 import { acceptFullBattle } from '@/lib/utils/battle/client/apply-delta';
 import type { BattleScene } from '@/types/api';
 
 export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
-
-// prepared too: otherwise players without Pusher will not see the battle start.
-const POLLED_BATTLE_STATUSES: ReadonlySet<BattleStatus> = new Set([
-    BattleStatus.PREPARED,
-    BattleStatus.ACTIVE,
-]);
 
 export function useBattle(
     campaignId: string,
@@ -50,7 +44,7 @@ export function useBattle(
 
             const data = query.state.data as BattleScene | undefined;
 
-            if (data && POLLED_BATTLE_STATUSES.has(data.status))
+            if (data && POLLED_BATTLE_STATUSES.includes(data.status))
                 return BATTLE_ACTIVE_REFETCH_INTERVAL_MS;
 
             return false;
