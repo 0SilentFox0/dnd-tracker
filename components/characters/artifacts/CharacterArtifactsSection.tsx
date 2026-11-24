@@ -86,7 +86,7 @@ export function CharacterArtifactsSection({
     };
 
     return (
-        <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-lg border border-amber-900/50 bg-[#2a2520] shadow-xl">
+        <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel shadow-sm">
             <div className="absolute inset-0">
                 <div className="absolute inset-0 bg-gradient-to-b from-stone-900/30 to-stone-950/50" />
             </div>

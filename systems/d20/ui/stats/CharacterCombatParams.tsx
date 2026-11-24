@@ -45,7 +45,7 @@ export function CharacterCombatParams({
     const { armorClass, initiative, speed, minTargets, maxTargets } = data;
 
     return (
-        <div className="grid w-full grid-cols-3 items-end gap-2 sm:grid-cols-4">
+        <div className="grid w-full grid-cols-2 items-end gap-x-4 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
             {classArmor === undefined ? (
                 <LabeledInput
                     id="armorClass"
@@ -61,7 +61,7 @@ export function CharacterCombatParams({
                     className="w-full"
                 />
             ) : (
-                <div className="col-span-3 space-y-1 sm:col-span-4">
+                <div className="col-span-full space-y-1">
                     <span className="text-xs leading-tight text-hud-muted">
                         {t('armorClass')}
                     </span>

@@ -7,6 +7,7 @@ import { useProfile } from '../ProfileContext';
 
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import { CharacterHpPreview } from '@/components/characters/stats/CharacterHpPreview';
+import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
@@ -27,6 +28,8 @@ export function BasicEditTab({
     const { form, options } = editor;
 
     const t = useTranslations('characterProfile.basic');
+
+    const tc = useTranslations('common.tabs');
 
     const { campaignId, sheet } = useProfile();
 
@@ -72,39 +75,43 @@ export function BasicEditTab({
     };
 
     return (
-        <div className="space-y-6">
-            <CharacterBasicInfo
-                basicInfo={form.basicInfo}
-                campaignMembers={options.members}
-                races={options.races}
-                hide={{
-                    progression: ui.hideProgression,
-                    lineage: !def.lineage,
-                    class: !statColumnsOf(def).has('classes'),
-                    alignment: !def.identity.alignments,
-                    archetype: !statColumnsOf(def).has('archetype'),
-                }}
-                classMode={classUi ? classMode : undefined}
-            />
-            {classMode.enabled && !classUi && !ui.hideProgression && (
+        <div className="space-y-5">
+            <HudSection panel title={tc('basic')}>
+                <CharacterBasicInfo
+                    basicInfo={form.basicInfo}
+                    campaignMembers={options.members}
+                    races={options.races}
+                    hide={{
+                        progression: ui.hideProgression,
+                        lineage: !def.lineage,
+                        class: !statColumnsOf(def).has('classes'),
+                        alignment: !def.identity.alignments,
+                        archetype: !statColumnsOf(def).has('archetype'),
+                    }}
+                    classMode={classUi ? classMode : undefined}
+                />
+                {classMode.enabled && !classUi && !ui.hideProgression && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConverting(true)}
+                    >
+                        {t('toClasses')}
+                    </Button>
+                )}
+            </HudSection>
+            <CharacterHpPreview hp={hp} />
+            <div className="flex justify-end border-t border-hud-line pt-4">
                 <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setConverting(true)}
+                    variant="destructive"
+                    className="h-11 px-6"
+                    onClick={() => void remove()}
                 >
-                    {t('toClasses')}
+                    {t('delete')}
                 </Button>
-            )}
-            <CharacterHpPreview hp={hp} />
-            <Button
-                type="button"
-                variant="destructive"
-                className="h-11 w-full"
-                onClick={() => void remove()}
-            >
-                {t('delete')}
-            </Button>
+            </div>
         </div>
     );
 }

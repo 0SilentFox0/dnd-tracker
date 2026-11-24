@@ -22,13 +22,13 @@ export function CharacterSkillsSection({
     } = skillsGroup;
 
     return (
-        <div className="w-full">
-            <HudSection title={t('savingThrows')}>
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+        <div className="w-full space-y-5">
+            <HudSection panel title={t('savingThrows')}>
+                <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
                     {DND_SAVING_THROWS.map((ability) => (
                         <label
                             key={ability}
-                            className="flex h-11 cursor-pointer items-center space-x-2"
+                            className="flex h-11 cursor-pointer items-center gap-3 border-b border-hud-line/60"
                         >
                             <Checkbox
                                 checked={savingThrows[ability] || false}
@@ -45,12 +45,12 @@ export function CharacterSkillsSection({
                 </div>
             </HudSection>
 
-            <HudSection title={t('skills')}>
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            <HudSection panel title={t('skills')}>
+                <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
                     {DND_SKILLS.map((skill) => (
                         <label
                             key={skill}
-                            className="flex h-11 cursor-pointer items-center space-x-2"
+                            className="flex h-11 cursor-pointer items-center gap-3 border-b border-hud-line/60"
                         >
                             <Checkbox
                                 checked={skills[skill] || false}

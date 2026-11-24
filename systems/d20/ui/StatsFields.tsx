@@ -18,18 +18,22 @@ export function StatsFields({
 
     if (mode === 'edit') {
         return (
-            <>
-                <CharacterAbilityScores
-                    abilityScores={abilityScores}
-                    withPrimary
-                />
-                <CharacterCombatParams
-                    campaignId={campaignId}
-                    combatStats={combatStats}
-                    classArmor={classArmor}
-                    extraFields={extraFields}
-                />
-            </>
+            <div className="space-y-5">
+                <HudSection panel title={t('form.sections.abilityScores')}>
+                    <CharacterAbilityScores
+                        abilityScores={abilityScores}
+                        withPrimary
+                    />
+                </HudSection>
+                <HudSection panel title={t('form.sections.combatParams')}>
+                    <CharacterCombatParams
+                        campaignId={campaignId}
+                        combatStats={combatStats}
+                        classArmor={classArmor}
+                        extraFields={extraFields}
+                    />
+                </HudSection>
+            </div>
         );
     }
 

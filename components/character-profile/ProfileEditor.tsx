@@ -24,6 +24,7 @@ import { SystemFormFields } from '@/components/characters/stats/SystemFormFields
 import { CharacterChoicesPanel } from '@/components/choices/character/CharacterChoicesPanel';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
+import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
@@ -290,47 +291,60 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                           content: Ui.MagicTab ? (
                                               <Ui.MagicTab />
                                           ) : (
-                                              <div className="space-y-4">
-                                                  <div className="space-y-2">
-                                                      <Label htmlFor="spellcastingAbility">
-                                                          {t(
-                                                              'editor.spellAbility'
-                                                          )}
-                                                      </Label>
-                                                      <SelectField
-                                                          id="spellcastingAbility"
-                                                          value={
-                                                              spellcasting.data
-                                                                  .spellcastingAbility ??
-                                                              ''
-                                                          }
-                                                          onValueChange={(v) =>
-                                                              spellcasting.set(
-                                                                  'spellcastingAbility',
-                                                                  toSpellcastingAbility(
-                                                                      v
+                                              <div className="space-y-5">
+                                                  <HudSection
+                                                      panel
+                                                      title={t(
+                                                          'editor.spellAbility'
+                                                      )}
+                                                  >
+                                                      <div className="space-y-2">
+                                                          <Label
+                                                              htmlFor="spellcastingAbility"
+                                                              className="sr-only"
+                                                          >
+                                                              {t(
+                                                                  'editor.spellAbility'
+                                                              )}
+                                                          </Label>
+                                                          <SelectField
+                                                              id="spellcastingAbility"
+                                                              value={
+                                                                  spellcasting
+                                                                      .data
+                                                                      .spellcastingAbility ??
+                                                                  ''
+                                                              }
+                                                              onValueChange={(
+                                                                  v
+                                                              ) =>
+                                                                  spellcasting.set(
+                                                                      'spellcastingAbility',
+                                                                      toSpellcastingAbility(
+                                                                          v
+                                                                      )
                                                                   )
-                                                              )
-                                                          }
-                                                          options={SPELLCASTING_ABILITIES.map(
-                                                              (key) => ({
-                                                                  value: key,
-                                                                  label: tg(
-                                                                      `abilities.${key}.label`
-                                                                  ),
-                                                              })
-                                                          )}
-                                                          allowNone
-                                                          noneLabel={t(
-                                                              'editor.none'
-                                                          )}
-                                                      />
-                                                      <p className="text-xs text-muted-foreground">
-                                                          {t(
-                                                              'editor.spellAbilityHint'
-                                                          )}
-                                                      </p>
-                                                  </div>
+                                                              }
+                                                              options={SPELLCASTING_ABILITIES.map(
+                                                                  (key) => ({
+                                                                      value: key,
+                                                                      label: tg(
+                                                                          `abilities.${key}.label`
+                                                                      ),
+                                                                  })
+                                                              )}
+                                                              allowNone
+                                                              noneLabel={t(
+                                                                  'editor.none'
+                                                              )}
+                                                          />
+                                                          <p className="text-xs text-muted-foreground">
+                                                              {t(
+                                                                  'editor.spellAbilityHint'
+                                                              )}
+                                                          </p>
+                                                      </div>
+                                                  </HudSection>
                                                   <MagicTab />
                                               </div>
                                           ),
@@ -343,30 +357,39 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                           id: 'items' as const,
                                           label: t('tabs.things'),
                                           content: (
-                                              <div className="space-y-4">
-                                                  <CharacterArtifactsSection
-                                                      campaignId={campaignId}
-                                                      characterId={characterId}
-                                                      equipped={equipped}
-                                                      artifacts={artifacts.map(
-                                                          (a) => ({
-                                                              id: a.id,
-                                                              name: a.name,
-                                                              slot:
-                                                                  a.slot ??
-                                                                  'item',
-                                                              icon:
-                                                                  a.icon ??
-                                                                  null,
-                                                              modifiers:
-                                                                  a.modifiers,
-                                                          })
-                                                      )}
-                                                      holders={holders}
-                                                      onEquippedChange={
-                                                          setEquipped
-                                                      }
-                                                  />
+                                              <div className="space-y-5">
+                                                  <HudSection
+                                                      panel
+                                                      title={t('tabs.things')}
+                                                  >
+                                                      <CharacterArtifactsSection
+                                                          campaignId={
+                                                              campaignId
+                                                          }
+                                                          characterId={
+                                                              characterId
+                                                          }
+                                                          equipped={equipped}
+                                                          artifacts={artifacts.map(
+                                                              (a) => ({
+                                                                  id: a.id,
+                                                                  name: a.name,
+                                                                  slot:
+                                                                      a.slot ??
+                                                                      'item',
+                                                                  icon:
+                                                                      a.icon ??
+                                                                      null,
+                                                                  modifiers:
+                                                                      a.modifiers,
+                                                              })
+                                                          )}
+                                                          holders={holders}
+                                                          onEquippedChange={
+                                                              setEquipped
+                                                          }
+                                                      />
+                                                  </HudSection>
                                                   {Ui.sheet?.itemSections?.map(
                                                       (Section, i) => (
                                                           <Section
@@ -404,27 +427,29 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                             },
                         ]}
                     />
-                    <ActionBar className="bg-hud-page/95 px-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onDone}
-                        >
-                            {tca('cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            form="profile-edit"
-                            disabled={
-                                form.status.isLoading ||
-                                editor.options.membersLoading
-                            }
-                        >
-                            {form.status.isLoading
-                                ? t('editor.saving')
-                                : tca('save')}
-                        </Button>
-                    </ActionBar>
+                    <div className="px-4">
+                        <ActionBar className="justify-end sm:sticky sm:bottom-0 sm:z-10 sm:border-t sm:border-hud-line sm:bg-hud-page/95 sm:py-3">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={onDone}
+                            >
+                                {tca('cancel')}
+                            </Button>
+                            <Button
+                                type="submit"
+                                form="profile-edit"
+                                disabled={
+                                    form.status.isLoading ||
+                                    editor.options.membersLoading
+                                }
+                            >
+                                {form.status.isLoading
+                                    ? t('editor.saving')
+                                    : tca('save')}
+                            </Button>
+                        </ActionBar>
+                    </div>
                 </div>
             </div>
         </form>

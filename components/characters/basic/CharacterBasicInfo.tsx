@@ -78,7 +78,7 @@ export function CharacterBasicInfo({
     } = data;
 
     return (
-        <div className="grid w-full grid-cols-2 gap-4">
+        <div className="grid w-full grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
             <LabeledInput
                 id="name"
                 label={t('name')}
@@ -231,7 +231,7 @@ export function CharacterBasicInfo({
             )}
 
             {!classMode && !hideProgression && (
-                <div className="col-span-2 grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2 sm:col-span-2">
                     <LabeledInput
                         id="level"
                         label={t('level')}
@@ -249,7 +249,7 @@ export function CharacterBasicInfo({
                 </div>
             )}
             {!isPlayerView && (
-                <div className="w-full min-w-0 md:col-span-2">
+                <div className="w-full min-w-0 sm:col-span-2">
                     <ImageUpload
                         label={t('avatar')}
                         value={avatar || ''}
