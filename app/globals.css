@@ -4,7 +4,6 @@
 @import "./motion.css";
 
 @custom-variant dark (&:is(.dark *));
-@custom-variant fit (@media (min-width: 1024px) and (min-height: 800px));
 
 @theme static {
   --container-page: 72rem;

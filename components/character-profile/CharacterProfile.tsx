@@ -34,7 +34,6 @@ export function ProfileShell({ children }: { children: ReactNode }) {
         <div
             className={cn(
                 HUD_SURFACE,
-                'sheet-shell',
                 'pb-[calc(env(safe-area-inset-bottom,0px)+3rem)]'
             )}
         >

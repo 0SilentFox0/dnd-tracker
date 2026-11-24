@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 
 const CELL =
-    'motion-rise grid min-w-0 content-start gap-2.5 border-l border-hud-rule p-3.5 max-lg:nth-2:border-l-0 lg:px-5 lg:py-4 fit:gap-1 fit:px-4 fit:py-2';
+    'motion-rise grid min-w-0 content-start gap-2.5 border-l border-hud-rule p-3.5 max-lg:nth-2:border-l-0 lg:px-5 lg:py-4';
 
 function Counted({
     value,
@@ -41,11 +41,8 @@ function KeyStat({
             className={CELL}
             style={{ '--i': index } as CSSProperties}
         >
-            <span className="hud-title flex items-center gap-1.5 text-base text-hud-muted max-lg:flex-col max-lg:items-start lg:gap-2 lg:text-[17px] fit:text-[15px]">
-                <Icon
-                    aria-hidden
-                    className="size-5 shrink-0 lg:size-[22px] fit:size-4"
-                />
+            <span className="hud-title flex items-center gap-1.5 text-base text-hud-muted max-lg:flex-col max-lg:items-start lg:gap-2 lg:text-[17px]">
+                <Icon aria-hidden className="size-5 shrink-0 lg:size-[22px]" />
                 <span className="truncate">{short}</span>
             </span>
             {children}
@@ -55,7 +52,7 @@ function KeyStat({
 
 function Value({ children }: { children: ReactNode }) {
     return (
-        <b className="hud-num text-[44px] leading-none text-hud-ink lg:text-[56px] fit:text-[36px]">
+        <b className="hud-num text-[44px] leading-none text-hud-ink lg:text-[56px]">
             {children}
         </b>
     );
@@ -100,7 +97,7 @@ export function HeroStats() {
     return (
         <>
             <KeyStat icon={Shield} label="AC" short="AC" index={1}>
-                <span className="relative grid h-[68px] w-[60px] place-items-center max-lg:h-[54px] max-lg:w-12 fit:h-[46px] fit:w-[41px]">
+                <span className="relative grid h-[68px] w-[60px] place-items-center max-lg:h-[54px] max-lg:w-12">
                     <svg
                         viewBox="0 0 60 68"
                         aria-hidden
@@ -109,7 +106,7 @@ export function HeroStats() {
                     >
                         <path d="M30 2 56 11v20c0 17.5-11 30-26 35C15 61 4 48.5 4 31V11z" />
                     </svg>
-                    <b className="hud-num relative -mt-1.5 text-[30px] leading-none text-hud-ink lg:text-[36px] fit:text-[24px]">
+                    <b className="hud-num relative -mt-1.5 text-[30px] leading-none text-hud-ink lg:text-[36px]">
                         <Counted value={sheet.armorClass.total} />
                     </b>
                 </span>
@@ -137,7 +134,7 @@ export function HeroStats() {
                     </small>
                 </Value>
             </KeyStat>
-            <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-1.5 border-t border-hud-rule px-3.5 py-2.5 text-sm text-hud-muted lg:flex lg:flex-wrap lg:gap-x-9 lg:px-5 lg:text-[15px] fit:gap-x-7 fit:py-1.5 fit:text-[13px]">
+            <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-1.5 border-t border-hud-rule px-3.5 py-2.5 text-sm text-hud-muted lg:flex lg:flex-wrap lg:gap-x-9 lg:px-5 lg:text-[15px]">
                 <FooterStat accent label={t('proficiency')}>
                     <Counted value={sheet.proficiency} format={signed} />
                 </FooterStat>

@@ -42,8 +42,8 @@
     "sin": "Sin",
     "hitDice": "Hit dice",
     "passivePerception": "Passive perception",
-    "xp": "XP {value} / {next}",
-    "xpMax": "XP {value}",
+    "xp": "XP {value, number} / {next, number}",
+    "xpMax": "XP {value, number} · Max level",
     "vitals": {
       "hp": "HP",
       "damage": "− Damage",

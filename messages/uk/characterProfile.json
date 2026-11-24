@@ -42,8 +42,8 @@
     "sin": "Гріх",
     "hitDice": "Кістки ХП",
     "passivePerception": "Пасивна уважність",
-    "xp": "Досвід {value} / {next}",
-    "xpMax": "Досвід {value}",
+    "xp": "Досвід {value, number} / {next, number}",
+    "xpMax": "Досвід {value, number} · Максимальний рівень",
     "vitals": {
       "hp": "HP",
       "damage": "− Шкода",

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode, Ref } from 'react';
+import { type ReactNode, type Ref, useRef } from 'react';
 
 import {
     type ProfileTab,
@@ -12,6 +12,8 @@ import { SheetHud } from './SheetHud';
 import { CompactHero, SheetIdentityPanel } from './SheetIdentityPanel';
 import { SheetRollProvider } from './SheetRollProvider';
 import { SheetTopBar } from './SheetTopBar';
+
+import { useCssVarHeight } from '@/lib/hooks/common';
 
 interface SheetLayoutProps {
     heroRef: Ref<HTMLElement>;
@@ -41,9 +43,13 @@ export function SheetLayout({
 
     const hasStory = tabs.items.some((x) => x.id === 'story');
 
+    const root = useRef<HTMLDivElement>(null);
+
+    useCssVarHeight(root, '--shell-header-h', 'header.sticky');
+
     return (
         <SheetRollProvider>
-            <div className="sheet-root sheet-fit mx-auto flex w-full flex-col">
+            <div ref={root} className="sheet-root mx-auto flex w-full flex-col">
                 <SheetTopBar actions={identity.actions} />
                 <SheetIdentityPanel
                     ref={heroRef}

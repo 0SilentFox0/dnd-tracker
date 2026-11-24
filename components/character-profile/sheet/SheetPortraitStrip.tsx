@@ -8,7 +8,7 @@ export function SheetLevelPlate({ level }: { level: number }) {
     const t = useTranslations('characterProfile.hero');
 
     return (
-        <div className="pointer-events-none absolute -bottom-[13px] left-1/2 flex h-[26px] -translate-x-1/2 items-baseline gap-1.5 rounded-sm bg-hud-surface px-2 whitespace-nowrap text-hud-ink shadow-[0_0_0_1px_var(--color-hud-line),0_6px_14px_-4px_rgba(0,0,0,.7)] lg:-bottom-[18px] lg:h-9 lg:px-3.5">
+        <div className="pointer-events-none absolute -bottom-[13px] left-1/2 z-10 flex h-[26px] -translate-x-1/2 items-baseline gap-1.5 rounded-sm bg-hud-surface px-2 whitespace-nowrap text-hud-ink shadow-[0_0_0_1px_var(--color-hud-line),0_6px_14px_-4px_rgba(0,0,0,.7)] lg:-bottom-[18px] lg:h-9 lg:px-3.5">
             <b className="hud-num text-base leading-[26px] lg:text-[22px] lg:leading-9">
                 {level}
             </b>
@@ -61,9 +61,19 @@ export function SheetXpBar({
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={Math.round(progress.ratio * 100)}
-                className="relative h-1.5 overflow-hidden rounded-full bg-(--sheet-track)"
+                aria-valuetext={note ? `${value} · ${note}` : value}
+                className="relative h-2.5 overflow-hidden rounded-full bg-(--sheet-track)"
             >
                 <ScaleFill ratio={progress.ratio} className="bg-hud-muted" />
+            </div>
+            <div
+                aria-hidden
+                className="flex justify-between text-xs text-hud-muted tabular-nums"
+            >
+                <span>{`${t('levelLabel')} ${level}`}</span>
+                {progress.next !== null && (
+                    <span>{`${t('levelLabel')} ${level + 1}`}</span>
+                )}
             </div>
         </div>
     );
