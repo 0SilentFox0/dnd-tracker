@@ -175,4 +175,22 @@ describe('SheetIdentityPanel', () => {
 
         expect(screen.getByText('Ready to level up')).toBeInTheDocument();
     });
+
+    it('lead shows a biography excerpt and the link opens the story tab', async () => {
+        const onHistory = vi.fn();
+
+        await inProfile(
+            withSheet({
+                system: 'dnd5e',
+                story: { ...sheetFixture.story, biography: '**Last** heir.' },
+            }),
+            <SheetIdentityPanel onHistory={onHistory} />
+        );
+
+        expect(screen.getByText(/Last heir\./)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Story' }));
+
+        expect(onHistory).toHaveBeenCalledTimes(1);
+    });
 });

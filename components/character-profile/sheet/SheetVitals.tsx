@@ -2,14 +2,13 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Shield } from 'lucide-react';
+import { Heart, Minus, Plus, Shield } from 'lucide-react';
 
 import { Breakdown } from '../combat/Breakdown';
 import { useProfile } from '../ProfileContext';
 import { ScaleFill } from './SheetBar';
 
 import { HudButton } from '@/components/hud';
-import { HudPanel } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -18,17 +17,17 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useEditResources } from '@/lib/hooks/characters';
 import { useCountUp, useGhostValue } from '@/lib/hooks/common';
 import { useCampaignSystem } from '@/lib/hooks/systems';
-import { cn } from '@/lib/utils';
 import { applyHpChange } from '@/lib/utils/characters/hp';
 
 const FORM_ID = 'sheet-vitals-form';
 
 type Hp = { current: number; max: number; temp: number };
 
-const STEP =
-    'motion-press grid size-10 shrink-0 cursor-pointer place-items-center rounded-[10px] border border-hud-rule bg-transparent text-lg text-hud-ink hover:bg-hud-raised focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50';
+const BTN =
+    'motion-press inline-flex min-h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-2 text-[15px] font-medium text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50 lg:max-w-[150px]';
 
-const NUM = 'text-5xl leading-none font-bold tabular-nums lg:text-[56px]';
+const LABEL =
+    'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-[17px]';
 
 export function SheetVitals() {
     const { campaignId, sheet } = useProfile();
@@ -54,13 +53,14 @@ export function SheetVitals() {
         : t(keys.total, { total: sheet.hp.total });
 
     return (
-        <HudPanel className="motion-rise flex flex-col gap-4 p-5 backdrop-blur-sm sm:p-5">
+        <div className="motion-rise col-span-full flex flex-col gap-2.5 border-b border-hud-rule p-4 lg:col-span-1 lg:border-b-0 lg:px-5">
             <div className="flex items-center justify-between gap-2">
-                <h2 className="text-xs font-medium tracking-[.08em] text-hud-muted uppercase">
+                <h2 className={LABEL}>
+                    <Heart aria-hidden className="size-5 text-hud-danger" />
                     {Ui.hideProgression ? t('wounds') : tv('hp')}
                 </h2>
                 {!!hp?.temp && (
-                    <span className="text-sm text-hud-muted">
+                    <span className="text-[15px] text-hud-muted">
                         {tv('tempBadge', { temp: hp.temp })}
                     </span>
                 )}
@@ -78,14 +78,14 @@ export function SheetVitals() {
                     aria-label={summary}
                     aria-expanded={open}
                     onClick={() => setOpen((v) => !v)}
-                    className={cn('min-h-10 text-left text-hud-ink', NUM)}
+                    className="hud-num min-h-11 text-left text-[46px] leading-none text-hud-ink"
                 >
                     {sheet.hp.total}
                 </HudButton>
             )}
             {sheet.viewer.isDM && hp && <HpControls hp={hp} />}
             {open && <Breakdown lines={sheet.hp.lines} />}
-        </HudPanel>
+        </div>
     );
 }
 
@@ -107,51 +107,53 @@ function HpReadout({
     const ratio = (n: number) => (hp.max > 0 ? n / hp.max : 0);
 
     return (
-        <>
-            <HudButton
-                type="button"
-                aria-label={summary}
-                aria-expanded={open}
-                onClick={onToggle}
-                className="flex min-h-10 items-baseline gap-2 text-left text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
-            >
-                <span
-                    className={cn('motion-flash inline-block', NUM)}
-                    data-flash={flash ?? undefined}
-                >
-                    {shown}
-                </span>
-                <span className="text-[22px] font-medium text-hud-muted tabular-nums">
-                    / {hp.max}
-                </span>
-            </HudButton>
+        <div className="relative h-[42px]">
             <div
                 role="progressbar"
                 aria-label={summary}
                 aria-valuemin={0}
                 aria-valuemax={hp.max}
                 aria-valuenow={hp.current}
-                className="relative h-2.5 overflow-hidden rounded-full bg-(--sheet-hp-track)"
+                className="absolute inset-0 overflow-hidden rounded-[4px] bg-(--sheet-hp-track) p-[3px] shadow-[0_0_0_1px_var(--color-hud-line)]"
             >
-                <ScaleFill
-                    ratio={ratio(ghost)}
-                    className="bg-(--sheet-hp-ghost)"
-                />
-                <ScaleFill
-                    ratio={ratio(hp.current)}
-                    className="bg-(--sheet-hp)"
-                />
-                {hp.temp > 0 && (
-                    <div
-                        aria-hidden
-                        className="absolute inset-y-0 right-0 rounded-full bg-[repeating-linear-gradient(135deg,var(--sheet-hp-temp)_0_3px,transparent_3px_6px)] shadow-[inset_0_0_0_1px_var(--sheet-hp-temp)]"
-                        style={{
-                            width: `${Math.min(100, ratio(hp.temp) * 100)}%`,
-                        }}
+                <div className="relative size-full overflow-hidden rounded-[2px]">
+                    <ScaleFill
+                        ratio={ratio(ghost)}
+                        className="bg-(--sheet-hp-ghost)"
                     />
-                )}
+                    <ScaleFill
+                        ratio={ratio(hp.current)}
+                        className="bg-(--sheet-hp)"
+                    />
+                    {hp.temp > 0 && (
+                        <div
+                            aria-hidden
+                            className="absolute inset-y-0 right-0 bg-[repeating-linear-gradient(135deg,var(--sheet-hp-temp)_0_3px,transparent_3px_6px)] shadow-[inset_0_0_0_1px_var(--sheet-hp-temp)]"
+                            style={{
+                                width: `${Math.min(100, ratio(hp.temp) * 100)}%`,
+                            }}
+                        />
+                    )}
+                </div>
             </div>
-        </>
+            <HudButton
+                type="button"
+                aria-label={summary}
+                aria-expanded={open}
+                onClick={onToggle}
+                className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-hud-ink [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
+            >
+                <span
+                    className="motion-flash inline-block text-[27px] leading-none"
+                    data-flash={flash ?? undefined}
+                >
+                    {shown}
+                </span>
+                <span className="pt-1.5 text-lg leading-none opacity-80">
+                    / {hp.max}
+                </span>
+            </HudButton>
+        </div>
     );
 }
 
@@ -180,35 +182,37 @@ function HpControls({ hp }: { hp: Hp }) {
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-2">
-            <HudButton
-                type="button"
-                aria-label={tv('damage')}
-                disabled={edit.isPending || !valid}
-                className={STEP}
-                onClick={() => change('damage')}
-            >
-                −
-            </HudButton>
+        <div className="flex flex-wrap items-center gap-1.5">
             <NumberInput
                 aria-label={tv('amount')}
                 min={1}
                 value={amount}
                 onChange={setAmount}
-                className="h-10 w-16 text-center text-[17px] font-bold"
+                className="hud-num h-11 w-16 rounded-[4px] text-center text-xl"
             />
+            <HudButton
+                type="button"
+                aria-label={tv('damage')}
+                disabled={edit.isPending || !valid}
+                className={BTN}
+                onClick={() => change('damage')}
+            >
+                <Minus aria-hidden className="size-4 text-hud-danger" />
+                {tv('damage')}
+            </HudButton>
             <HudButton
                 type="button"
                 aria-label={tv('heal')}
                 disabled={edit.isPending || !valid}
-                className={STEP}
+                className={BTN}
                 onClick={() => change('heal')}
             >
-                +
+                <Plus aria-hidden className="size-4" />
+                {tv('heal')}
             </HudButton>
             <HudButton
                 type="button"
-                className="motion-press ml-auto inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-[10px] px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
+                className="motion-press inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-[4px] px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none lg:ml-auto"
                 onClick={() => setTempOpen(true)}
             >
                 <Shield aria-hidden className="size-4" />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { ArrowUp } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
 
@@ -16,18 +17,21 @@ export function LevelUpBadge({
     if (free === 0) return null;
 
     return (
-        <div className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-hud-gold/40 bg-hud-gold/10 py-2 pr-2 pl-3.5">
-            <div className="min-w-0">
-                <b className="block text-[15px] text-hud-ink">LVL UP +{free}</b>
-                <span className="text-sm text-hud-muted">
+        <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0 text-left lg:text-right">
+                <b className="hud-num block text-lg leading-tight text-hud-ink">
+                    +{free}
+                </b>
+                <span className="text-sm leading-tight text-hud-muted">
                     {t('freePoints', { free })}
                 </span>
             </div>
             <HudButton
                 type="button"
                 onClick={onOpen}
-                className="motion-pulse motion-press min-h-10 shrink-0 rounded-[10px] bg-hud-gold-strong px-4 text-[15px] font-bold text-(--palette-primary-foreground,#2a1d05) focus-visible:ring-2 focus-visible:ring-hud-ink focus-visible:outline-none"
+                className="motion-pulse motion-press hud-title inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[4px] bg-hud-gold-strong px-4 text-xl text-(--palette-primary-foreground,#2a1d05) focus-visible:ring-2 focus-visible:ring-hud-ink focus-visible:outline-none"
             >
+                <ArrowUp aria-hidden className="size-5" />
                 {t('distribute')}
             </HudButton>
         </div>

@@ -8,13 +8,13 @@ export function SheetLevelPlate({ level }: { level: number }) {
     const t = useTranslations('characterProfile.hero');
 
     return (
-        <div className="pointer-events-none absolute bottom-2 left-2 flex h-8 items-baseline gap-1.5 rounded-lg bg-black/80 px-2.5 text-white lg:bottom-3 lg:left-3 lg:h-10 lg:px-3">
-            <span className="text-xs leading-8 tracking-[.08em] text-white/75 uppercase max-lg:sr-only lg:leading-10">
-                {t('levelLabel')}
-            </span>
-            <b className="text-lg leading-8 lg:text-[22px] lg:leading-10">
+        <div className="pointer-events-none absolute -bottom-[13px] left-1/2 flex h-[26px] -translate-x-1/2 items-baseline gap-1.5 rounded-sm bg-hud-surface px-2 whitespace-nowrap text-hud-ink shadow-[0_0_0_1px_var(--color-hud-line),0_6px_14px_-4px_rgba(0,0,0,.7)] lg:-bottom-[18px] lg:h-9 lg:px-3.5">
+            <b className="hud-num text-base leading-[26px] lg:text-[22px] lg:leading-9">
                 {level}
             </b>
+            <span className="hud-title text-xs text-hud-muted lg:text-[15px]">
+                {t('levelLabel')}
+            </span>
         </div>
     );
 }

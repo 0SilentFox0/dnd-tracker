@@ -22,7 +22,7 @@ export function HeroStats() {
     const yd = tg('distanceUnit.yd');
 
     return (
-        <div className="flex flex-wrap gap-2 lg:col-span-2">
+        <div className="col-span-full flex flex-wrap gap-2 p-4">
             <HudStatChip
                 size="lg"
                 label={t('wounds')}

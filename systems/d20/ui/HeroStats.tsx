@@ -9,8 +9,8 @@ import { useCountUp } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 
-const CARD =
-    'motion-rise rounded-xl border border-hud-rule bg-hud-panel backdrop-blur-sm';
+const CELL =
+    'motion-rise grid min-w-0 content-start gap-2.5 border-l border-hud-rule p-3.5 max-lg:nth-2:border-l-0 lg:px-5 lg:py-4';
 
 function Counted({
     value,
@@ -26,29 +26,39 @@ function KeyStat({
     icon: Icon,
     short,
     label,
+    index,
     children,
 }: {
     icon: LucideIcon;
     short: string;
     label: string;
+    index: number;
     children: ReactNode;
 }) {
     return (
-        <div aria-label={label} className="grid min-w-0 gap-1.5">
-            <span className="flex items-center gap-1.5 text-hud-muted">
-                <Icon aria-hidden className="size-4 shrink-0" />
-                <span className="truncate text-xs font-medium tracking-[.08em] uppercase">
-                    {short}
-                </span>
+        <div
+            aria-label={label}
+            className={CELL}
+            style={{ '--i': index } as CSSProperties}
+        >
+            <span className="hud-title flex items-center gap-1.5 text-base text-hud-muted max-lg:flex-col max-lg:items-start lg:gap-2 lg:text-[17px]">
+                <Icon aria-hidden className="size-5 shrink-0 lg:size-[22px]" />
+                <span className="truncate">{short}</span>
             </span>
-            <b className="text-[32px] leading-none font-bold text-hud-ink tabular-nums lg:text-[40px]">
-                {children}
-            </b>
+            {children}
         </div>
     );
 }
 
-function StripStat({
+function Value({ children }: { children: ReactNode }) {
+    return (
+        <b className="hud-num text-[34px] leading-none text-hud-ink lg:text-[46px]">
+            {children}
+        </b>
+    );
+}
+
+function FooterStat({
     label,
     accent,
     children,
@@ -58,20 +68,20 @@ function StripStat({
     children: ReactNode;
 }) {
     return (
-        <div
+        <span
             aria-label={label}
-            className="flex min-w-0 items-baseline justify-between gap-2 px-4 py-3"
+            className="inline-flex min-w-0 items-baseline justify-between gap-2 max-lg:w-full"
         >
-            <span className="truncate text-sm text-hud-muted">{label}</span>
+            <span className="truncate">{label}</span>
             <b
                 className={cn(
-                    'text-xl font-bold tabular-nums',
+                    'hud-num text-[17px]',
                     accent ? 'text-hud-gold' : 'text-hud-ink'
                 )}
             >
                 {children}
             </b>
-        </div>
+        </span>
     );
 }
 
@@ -82,56 +92,67 @@ export function HeroStats() {
 
     const tc = useTranslations('gameTerms.stats');
 
+    const unit = useTranslations('gameTerms.distanceUnit');
+
     return (
         <>
-            <div
-                className={cn(
-                    CARD,
-                    'grid grid-cols-3 content-center gap-2 p-5'
-                )}
-                style={{ '--i': 1 } as CSSProperties}
+            <KeyStat icon={Shield} label="AC" short="AC" index={1}>
+                <span className="relative grid h-[68px] w-[60px] place-items-center max-lg:h-[54px] max-lg:w-12">
+                    <svg
+                        viewBox="0 0 60 68"
+                        aria-hidden
+                        className="absolute inset-0 size-full fill-hud-field stroke-hud-line drop-shadow-[0_3px_6px_rgba(0,0,0,.35)]"
+                        strokeWidth={1.5}
+                    >
+                        <path d="M30 2 56 11v20c0 17.5-11 30-26 35C15 61 4 48.5 4 31V11z" />
+                    </svg>
+                    <b className="hud-num relative -mt-1.5 text-[26px] leading-none text-hud-ink lg:text-[32px]">
+                        <Counted value={sheet.armorClass.total} />
+                    </b>
+                </span>
+            </KeyStat>
+            <KeyStat
+                icon={Zap}
+                label={tc('initiative')}
+                short={t('short.initiative')}
+                index={2}
             >
-                <KeyStat icon={Shield} label="AC" short="AC">
-                    <Counted value={sheet.armorClass.total} />
-                </KeyStat>
-                <KeyStat
-                    icon={Zap}
-                    label={tc('initiative')}
-                    short={t('short.initiative')}
-                >
+                <Value>
                     <Counted value={sheet.initiative} />
-                </KeyStat>
-                <KeyStat
-                    icon={Footprints}
-                    label={tc('speed')}
-                    short={t('short.speed')}
-                >
-                    <Counted value={sheet.speed} />
-                </KeyStat>
-            </div>
-            <div
-                className={cn(
-                    CARD,
-                    'grid grid-cols-2 lg:col-span-2 lg:flex lg:divide-x lg:divide-hud-rule [&>*]:lg:flex-1'
-                )}
-                style={{ '--i': 2 } as CSSProperties}
+                </Value>
+            </KeyStat>
+            <KeyStat
+                icon={Footprints}
+                label={tc('speed')}
+                short={t('short.speed')}
+                index={3}
             >
-                <StripStat label={t('toHit')}>
+                <Value>
+                    <Counted value={sheet.speed} />
+                    <small className="ml-1 text-lg font-normal text-hud-muted">
+                        {unit('ft')}
+                    </small>
+                </Value>
+            </KeyStat>
+            <div className="col-span-full grid grid-cols-2 gap-x-4 gap-y-1.5 border-t border-hud-rule px-3.5 py-2.5 text-sm text-hud-muted lg:flex lg:flex-wrap lg:gap-x-9 lg:px-5 lg:text-[15px]">
+                <FooterStat accent label={t('proficiency')}>
+                    <Counted value={sheet.proficiency} format={signed} />
+                </FooterStat>
+                <FooterStat label={t('toHit')}>
                     {sheet.bestToHit === null ? (
                         '—'
                     ) : (
                         <Counted value={sheet.bestToHit} format={signed} />
                     )}
-                </StripStat>
-                <StripStat accent label={t('proficiency')}>
-                    <Counted value={sheet.proficiency} format={signed} />
-                </StripStat>
-                <StripStat label={t('passivePerception')}>
-                    <Counted value={sheet.passives.perception} />
-                </StripStat>
+                </FooterStat>
                 {sheet.hitDice !== null && (
-                    <StripStat label={t('hitDice')}>{sheet.hitDice}</StripStat>
+                    <FooterStat label={t('hitDice')}>
+                        {sheet.hitDice}
+                    </FooterStat>
                 )}
+                <FooterStat label={t('passivePerception')}>
+                    <Counted value={sheet.passives.perception} />
+                </FooterStat>
             </div>
         </>
     );

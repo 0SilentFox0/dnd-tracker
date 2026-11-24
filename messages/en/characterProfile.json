@@ -44,7 +44,6 @@
     "passivePerception": "Passive perception",
     "xp": "XP {value} / {next}",
     "xpMax": "XP {value}",
-    "background": "Background: {name}",
     "vitals": {
       "hp": "HP",
       "damage": "− Damage",
@@ -56,8 +55,7 @@
     },
     "levelLabel": "Level",
     "xpToNext": "{left} to next level",
-    "xpReady": "Ready to level up",
-    "dmActions": "DM actions"
+    "xpReady": "Ready to level up"
   },
   "combat": {
     "roll": "Roll",

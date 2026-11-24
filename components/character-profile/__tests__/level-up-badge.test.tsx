@@ -17,7 +17,7 @@ describe('LevelUpBadge', () => {
 
         render(<LevelUpBadge free={2} onOpen={onOpen} />);
 
-        expect(screen.getByText('LVL UP +2')).toBeTruthy();
+        expect(screen.getByText('+2')).toBeTruthy();
 
         fireEvent.click(
             screen.getByRole('button', {

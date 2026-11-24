@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Pencil } from 'lucide-react';
 
 import { LevelUpBadge } from '../level-up/LevelUpBadge';
 import { PendingChoicesBadge } from '../level-up/PendingChoicesBadge';
@@ -43,6 +44,7 @@ export function SheetDmActions({ onEdit }: { onEdit: () => void }) {
                 className="min-h-10"
                 onClick={onEdit}
             >
+                <Pencil aria-hidden className="size-4" />
                 {tc('edit')}
             </Button>
             <DmRestActions />

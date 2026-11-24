@@ -44,7 +44,6 @@
     "passivePerception": "Пасивна уважність",
     "xp": "Досвід {value} / {next}",
     "xpMax": "Досвід {value}",
-    "background": "Передісторія: {name}",
     "vitals": {
       "hp": "HP",
       "damage": "− Шкода",
@@ -56,8 +55,7 @@
     },
     "levelLabel": "Рівень",
     "xpToNext": "{left} до рівня",
-    "xpReady": "Готовий до рівня",
-    "dmActions": "Дії майстра"
+    "xpReady": "Готовий до рівня"
   },
   "combat": {
     "roll": "Кинути",
