@@ -73,6 +73,18 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
         };
     }, [anchor]);
 
+    useEffect(() => {
+        if (!open) return;
+
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') select(null);
+        };
+
+        document.addEventListener('keydown', onKey);
+
+        return () => document.removeEventListener('keydown', onKey);
+    }, [open, select]);
+
     // a repeat click on the open token closes it; capture beats the map's own click handler
     useEffect(() => {
         if (!open || !selectedId || !anchor || attackReady) return;

@@ -162,7 +162,7 @@ export function DesktopBattleLayout({
                                 </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
-                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto px-6 pt-28 pb-40">
+                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto pr-[72px] pb-40 pl-6 pt-28">
                                 <BattleColumns />
                             </main>
                         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Minus } from 'lucide-react';
 
@@ -75,6 +75,18 @@ function FloatingPanel({
 }) {
     const t = useTranslations('battle.drawers');
 
+    useEffect(() => {
+        if (!open) return;
+
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && !e.defaultPrevented) onOpenChange(false);
+        };
+
+        document.addEventListener('keydown', onKey);
+
+        return () => document.removeEventListener('keydown', onKey);
+    }, [open, onOpenChange]);
+
     if (!open && !keepMounted) return null;
 
     return (
@@ -83,9 +95,6 @@ function FloatingPanel({
             data-drawer={drawer}
             aria-label={typeof title === 'string' ? title : undefined}
             hidden={!open}
-            onKeyDown={(e) => {
-                if (e.key === 'Escape') onOpenChange(false);
-            }}
             className={cn(
                 HUD_GLASS,
                 'absolute top-20 bottom-28 z-40 flex w-[min(260px,calc(100vw-96px))] flex-col rounded-xl',
