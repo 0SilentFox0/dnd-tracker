@@ -29,9 +29,8 @@ export interface ToolsProps {
     view?: { mode: BattleViewMode; set: (mode: BattleViewMode) => void };
     tabs?: { value: MobileBattleTab; set: (tab: MobileBattleTab) => void };
     onToolsSlot?: (el: HTMLDivElement | null) => void;
-    withSound?: boolean;
-    // phone keeps the player on the stage: the sheet unmounts on close and would stop the video
-    withPlayer?: boolean;
+    // phone keeps the player on the stage (`player: false`): the sheet unmounts on close and would stop the video
+    audio?: { sound?: boolean; player?: boolean };
 }
 
 export function ToolsContent({
@@ -39,9 +38,12 @@ export function ToolsContent({
     view,
     tabs,
     onToolsSlot,
-    withSound = true,
-    withPlayer = true,
+    audio,
 }: ToolsProps) {
+    const withSound = audio?.sound ?? true;
+
+    const withPlayer = audio?.player ?? true;
+
     const t = useTranslations('battle.topBar');
 
     const ts = useTranslations('battle.scene');

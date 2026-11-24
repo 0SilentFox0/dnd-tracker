@@ -14,8 +14,7 @@ const base = {
     status: { actionUsed: false, bonusAvailable: true, reactionAvailable: true },
     economy: { bonusAction: true, reaction: true },
     phase: 'acting' as const,
-    onActions: vi.fn(),
-    onEnd: vi.fn(),
+    on: { actions: vi.fn(), end: vi.fn() },
 };
 
 const diamonds = (c: HTMLElement) =>
@@ -68,7 +67,7 @@ describe('ActionDock', () => {
 
         fireEvent.click(screen.getByText('Кінець ходу'));
 
-        expect(base.onEnd).toHaveBeenCalled();
+        expect(base.on.end).toHaveBeenCalled();
     });
 
     it('countdown keeps its content and hides the action bar', () => {

@@ -188,7 +188,7 @@ export function MobileBattleLayout({
                         onOpenChange={onOpenChange('tools')}
                         onComplete={onComplete}
                         tabs={{ value: tab, set: setTab }}
-                        withPlayer={false}
+                        audio={{ player: false }}
                     />
                 </div>
             </MapStripSlotContext>

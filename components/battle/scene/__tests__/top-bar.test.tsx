@@ -30,7 +30,7 @@ describe('ToolsContent: перемикач анімацій', () => {
     it('«Зменшити рух» у системі: кнопка вимкнена з підказкою', () => {
         fx.motionAllowed = false;
 
-        render(<ToolsContent withSound={false} />, { wrapper: fakeScene().wrapper });
+        render(<ToolsContent audio={{ sound: false }} />, { wrapper: fakeScene().wrapper });
 
         const toggle = screen.getByRole('button', {
             name: /Анімації дій/,
@@ -43,7 +43,7 @@ describe('ToolsContent: перемикач анімацій', () => {
     it('рух дозволено: кнопка активна без підказки', () => {
         fx.motionAllowed = true;
 
-        render(<ToolsContent withSound={false} />, { wrapper: fakeScene().wrapper });
+        render(<ToolsContent audio={{ sound: false }} />, { wrapper: fakeScene().wrapper });
 
         const toggle = screen.getByRole('button', {
             name: /Анімації дій/,
@@ -99,7 +99,7 @@ describe('ToolsContent: вигляд гравця', () => {
     };
 
     it('ДМ бачить перемикач, aria-pressed слідує за станом, перемикач лишається ввімкненим', () => {
-        render(<ToolsContent withSound={false} />, { wrapper: stateful(true) });
+        render(<ToolsContent audio={{ sound: false }} />, { wrapper: stateful(true) });
 
         const btn = () =>
             screen.getByRole('button', {
@@ -123,7 +123,7 @@ describe('ToolsContent: вигляд гравця', () => {
     it('прапорець у sessionStorage переживає повторне монтування', () => {
         window.sessionStorage.setItem('player-view:b-top', 'on');
 
-        render(<ToolsContent withSound={false} />, { wrapper: stateful(true) });
+        render(<ToolsContent audio={{ sound: false }} />, { wrapper: stateful(true) });
 
         expect(
             screen
@@ -133,7 +133,7 @@ describe('ToolsContent: вигляд гравця', () => {
     });
 
     it('гравець не бачить перемикача', () => {
-        render(<ToolsContent withSound={false} />, { wrapper: stateful(false) });
+        render(<ToolsContent audio={{ sound: false }} />, { wrapper: stateful(false) });
 
         expect(screen.queryByRole('button', { name: /гравця/i })).toBeNull();
     });

@@ -281,8 +281,10 @@ export function MyTurnControls({
                           : undefined
                   }
                   phase={phase}
-                  onActions={() => setActionsOpen(true)}
-                  onEnd={() => void turn.actions.endTurn()}
+                  on={{
+                      actions: () => setActionsOpen(true),
+                      end: () => void turn.actions.endTurn(),
+                  }}
                   panel={{
                       open: actionsOpen,
                       onOpenChange: setActionsOpen,

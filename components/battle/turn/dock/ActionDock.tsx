@@ -23,8 +23,7 @@ export function ActionDock({
     economy,
     move,
     phase,
-    onActions,
-    onEnd,
+    on,
     panel,
     children,
 }: {
@@ -32,8 +31,7 @@ export function ActionDock({
     economy: { bonusAction: boolean; reaction: boolean };
     move?: { used: number; max: number };
     phase: TurnFlowState['phase'];
-    onActions(): void;
-    onEnd(): void;
+    on: { actions(): void; end(): void };
     panel?: {
         open: boolean;
         onOpenChange(open: boolean): void;
@@ -53,7 +51,7 @@ export function ActionDock({
     const actionsButton = (
         <HudButton
             type="button"
-            onClick={onActions}
+            onClick={on.actions}
             data-tour="battle.turn-controls"
             className={cn(
                 'hud-sc flex h-12 min-w-28 items-center justify-center gap-2 rounded-xl border px-4 text-[17px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
@@ -109,7 +107,7 @@ export function ActionDock({
                     {exhausted && (
                         <HudButton
                             type="button"
-                            onClick={onEnd}
+                            onClick={on.end}
                             className="hud-sc h-12 min-w-28 rounded-xl border border-[var(--gold)] px-4 text-[15px] tracking-[.08em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
                         >
                             {t('endTurn')}
