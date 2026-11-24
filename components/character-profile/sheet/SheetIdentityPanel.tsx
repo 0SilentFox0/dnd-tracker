@@ -8,7 +8,6 @@ import { useProfile } from '../ProfileContext';
 import { ArcaneRecoveryPanel } from '../rest/ArcaneRecoveryPanel';
 import { HitDicePanel } from '../rest/HitDicePanel';
 import { RestBadges } from '../rest/RestBadges';
-import { stagger } from './SheetBar';
 import { SheetLevelPlate, SheetXpBar } from './SheetPortraitStrip';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
@@ -16,6 +15,7 @@ import { HudPill } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { signed } from '@/lib/utils/common/format';
+import { stagger } from '@/lib/utils/common/motion';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 const CHIP =

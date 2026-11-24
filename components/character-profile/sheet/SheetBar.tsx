@@ -1,10 +1,9 @@
 'use client';
 
-import { type CSSProperties, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils';
-
-const clamp = (n: number) => Math.min(1, Math.max(0, n));
+import { clamp } from '@/lib/utils/common/clamp';
 
 export function ScaleFill({
     ratio,
@@ -28,9 +27,7 @@ export function ScaleFill({
                 'motion-bar absolute inset-0 rounded-[inherit]',
                 className
             )}
-            style={{ transform: `scaleX(${on ? clamp(ratio) : 0})` }}
+            style={{ transform: `scaleX(${on ? clamp(ratio, 0, 1) : 0})` }}
         />
     );
 }
-
-export const stagger = (i: number) => ({ '--i': i }) as CSSProperties;
