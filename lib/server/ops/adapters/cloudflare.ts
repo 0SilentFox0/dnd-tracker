@@ -1,6 +1,7 @@
 import type { ProviderAdapter } from './types';
 
 import 'server-only';
+import { fetchWithTimeout } from '@/lib/server/ops/fetch-with-timeout';
 
 const ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql';
 
@@ -50,23 +51,26 @@ export const cloudflareAdapter: ProviderAdapter = {
         dayStart.setUTCHours(0, 0, 0, 0);
 
         try {
-            const response = await fetch(ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                    authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    query: QUERY,
-                    variables: {
-                        account,
-                        script,
-                        from: dayStart.toISOString(),
-                        to: now.toISOString(),
+            const response = await fetchWithTimeout(
+                ENDPOINT,
+                {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${token}`,
                     },
-                }),
-                signal: AbortSignal.timeout(TIMEOUT_MS),
-            });
+                    body: JSON.stringify({
+                        query: QUERY,
+                        variables: {
+                            account,
+                            script,
+                            from: dayStart.toISOString(),
+                            to: now.toISOString(),
+                        },
+                    }),
+                },
+                TIMEOUT_MS
+            );
 
             if (!response.ok) return 'unavailable';
 

@@ -1,6 +1,8 @@
-export type ProviderReading = { metric: string; value: number };
+import type { ProviderName } from '@/lib/ops/metrics-catalog';
+
+type ProviderReading = { metric: string; value: number };
 
 export type ProviderAdapter = {
-    name: string;
+    name: ProviderName;
     collect(): Promise<ProviderReading[] | 'unavailable'>;
 };

@@ -1,6 +1,5 @@
+import { MINUTE_MS } from '@/lib/constants/time';
 import { LATENCY_BOUNDS, LATENCY_INF } from '@/lib/ops/metrics-catalog';
-
-const MINUTE_MS = 60_000;
 
 export function bucketStart(date: Date): Date {
     return new Date(Math.floor(date.getTime() / MINUTE_MS) * MINUTE_MS);

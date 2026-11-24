@@ -118,8 +118,8 @@ export async function runBattleMutation<TBody>(
 
         const raw: unknown = await req.json().catch(() => undefined);
 
-        const expectedVersion =
-            battleVersionBodySchema.safeParse(raw).data?.expectedVersion;
+        const expectedVersion = battleVersionBodySchema.safeParse(raw).data
+            ?.expectedVersion;
 
         const write = {
             logLocale: await (deps.logLocale ?? getRequestLocale)(),

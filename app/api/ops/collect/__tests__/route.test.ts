@@ -11,7 +11,7 @@ const { collectDbGauges, evaluateAlerts, flushMetrics, gauge, rollupAndPrune } =
 
 vi.mock('@/lib/server/ops/collect-db', () => ({ collectDbGauges }));
 vi.mock('@/lib/server/ops/evaluate', () => ({ evaluateAlerts }));
-vi.mock('@/lib/server/ops/metrics', () => ({ flushMetrics, gauge }));
+vi.mock('@/lib/ops/metrics', () => ({ flushMetrics, gauge }));
 vi.mock('@/lib/server/ops/rollup', () => ({ rollupAndPrune }));
 vi.mock('@/lib/server/ops/adapters', () => ({
     PROVIDER_ADAPTERS: [

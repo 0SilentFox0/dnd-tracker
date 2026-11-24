@@ -23,14 +23,10 @@ const TIMEOUT_MS = 5000;
 
 async function probe(url: string, init: RequestInit, doFetch: Fetcher): Promise<boolean> {
     for (let i = 0; i < ATTEMPTS; i++) {
-        try {
-            const res = await doFetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
+        const res = await doFetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) }).catch(() => null);
 
-            if (res.ok) {
-                return true;
-            }
-        } catch {
-            // retry
+        if (res?.ok) {
+            return true;
         }
     }
 
@@ -67,16 +63,14 @@ export async function runCheck(env: Env, doFetch: Fetcher = fetch): Promise<void
 
     const hasDownFlag = (await env.STATE.get('down')) !== null;
 
-    const input = { collectOk, healthOk, hasDownFlag };
-
-    const decision = decide(input);
+    const decision = decide({ collectOk, healthOk, hasDownFlag });
 
     if (decision === 'down') {
         await env.STATE.put('down', String(Date.now()), { expirationTtl: DOWN_TTL_SECONDS });
-        await notify(env, messageFor('down', input), doFetch);
+        await notify(env, messageFor('down', { collectOk, healthOk }), doFetch);
     } else if (decision === 'recovered') {
         await env.STATE.delete('down');
-        await notify(env, messageFor('recovered', input), doFetch);
+        await notify(env, messageFor('recovered', { collectOk, healthOk }), doFetch);
     }
 }
 

@@ -1,6 +1,5 @@
+import { DAY_MS, HOUR_MS } from '@/lib/constants/time';
 import { prisma } from '@/lib/db';
-
-const HOUR_MS = 3_600_000;
 
 const MINUTE_RETENTION_HOURS = 48;
 
@@ -37,17 +36,17 @@ export async function rollupAndPrune(
         now.getTime() - MINUTE_RETENTION_HOURS * HOUR_MS
     );
 
-    const longCutoff = new Date(
-        now.getTime() - HOURLY_RETENTION_DAYS * 24 * HOUR_MS
-    );
+    const longCutoff = new Date(now.getTime() - HOURLY_RETENTION_DAYS * DAY_MS);
 
-    await prisma.opsMetricBucket.deleteMany({
-        where: { bucket: { lt: minuteCutoff } },
-    });
-    await prisma.opsMetricHourly.deleteMany({
-        where: { bucket: { lt: longCutoff } },
-    });
-    await prisma.opsAlertEvent.deleteMany({
-        where: { at: { lt: longCutoff } },
-    });
+    await Promise.all([
+        prisma.opsMetricBucket.deleteMany({
+            where: { bucket: { lt: minuteCutoff } },
+        }),
+        prisma.opsMetricHourly.deleteMany({
+            where: { bucket: { lt: longCutoff } },
+        }),
+        prisma.opsAlertEvent.deleteMany({
+            where: { at: { lt: longCutoff } },
+        }),
+    ]);
 }

@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import {
     canonicalLabels,
-    isKnownMetric,
+    type MetricDef,
     metricDef,
     type MetricKey,
 } from '@/lib/ops/metrics-catalog';
@@ -30,13 +30,11 @@ let buffer = new Map<string, Entry>();
 let lastFlushAt = Date.now();
 
 function record(
+    bucket: Date,
     metric: string,
     labels: string,
-    value: number,
-    now: Date
+    value: number
 ): void {
-    const bucket = bucketStart(now);
-
     const id = `${bucket.getTime()}\u0000${metric}\u0000${labels}`;
 
     const entry = buffer.get(id);
@@ -57,14 +55,14 @@ function record(
     }
 }
 
-function accepts(key: string): boolean {
-    if (isKnownMetric(key)) return true;
+function lookup(key: string): MetricDef | null {
+    const def = metricDef(key);
 
     // Typos fail loudly outside production; production drops silently.
-    if (process.env.NODE_ENV !== 'production')
+    if (!def && process.env.NODE_ENV !== 'production')
         throw new Error(`Unknown metric: ${key}`);
 
-    return false;
+    return def;
 }
 
 function maybeFlush(): void {
@@ -82,35 +80,33 @@ function maybeFlush(): void {
 }
 
 export function incr(key: MetricKey, by = 1, labels?: Labels): void {
-    if (!accepts(key)) return;
+    if (!lookup(key)) return;
 
-    record(key, canonicalLabels(labels, key), by, new Date());
+    record(bucketStart(new Date()), key, canonicalLabels(labels, key), by);
     maybeFlush();
 }
 
 export function gauge(key: MetricKey, value: number, labels?: Labels): void {
-    if (!accepts(key)) return;
+    if (!lookup(key)) return;
 
-    record(key, canonicalLabels(labels, key), value, new Date());
+    record(bucketStart(new Date()), key, canonicalLabels(labels, key), value);
     maybeFlush();
 }
 
 export function observe(key: MetricKey, ms: number, labels?: Labels): void {
-    if (!accepts(key)) return;
+    if (lookup(key)?.kind !== 'timing') return;
 
-    if (metricDef(key)?.kind !== 'timing') return;
-
-    const now = new Date();
+    const bucket = bucketStart(new Date());
 
     const base = canonicalLabels(labels, key);
 
-    record(`${key}:count`, base, 1, now);
-    record(`${key}:sum`, base, ms, now);
+    record(bucket, `${key}:count`, base, 1);
+    record(bucket, `${key}:sum`, base, ms);
     record(
+        bucket,
         `${key}:le`,
         canonicalLabels({ ...labels, le: latencyBucket(ms) }, undefined),
-        1,
-        now
+        1
     );
     maybeFlush();
 }

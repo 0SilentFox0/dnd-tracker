@@ -1,6 +1,6 @@
-const MAX_POINTS = 60;
+import { HOUR_MS } from '@/lib/constants/time';
 
-const HOUR_MS = 3_600_000;
+const MAX_POINTS = 60;
 
 /** `t` is epoch ms; least-squares slope over the last points, null when flat or falling. */
 export function forecastHoursToLimit(

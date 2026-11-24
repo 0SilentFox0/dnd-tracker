@@ -1,3 +1,4 @@
+import { MINUTE_MS } from '@/lib/constants/time';
 import type { AlertRule } from '@/lib/ops/alert-rules';
 
 export type AlertStatus = 'ok' | 'warn' | 'crit';
@@ -14,8 +15,6 @@ export interface AlertStateRow {
 }
 
 const RANK: Record<AlertStatus, number> = { ok: 0, warn: 1, crit: 2 };
-
-const MINUTE_MS = 60_000;
 
 function breached(rule: AlertRule, value: number, threshold?: number): boolean {
     if (threshold === undefined) return false;

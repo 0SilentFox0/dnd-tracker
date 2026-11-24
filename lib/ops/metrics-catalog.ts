@@ -1,9 +1,5 @@
 export const LATENCY_BOUNDS = [50, 100, 200, 400, 800, 1600, 3200] as const;
 export const LATENCY_INF = 'inf';
-export const LATENCY_LE_VALUES: readonly string[] = [
-    ...LATENCY_BOUNDS.map(String),
-    LATENCY_INF,
-];
 
 export const PROVIDER_NAMES = [
     'cloudflare',

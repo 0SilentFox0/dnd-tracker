@@ -1,3 +1,6 @@
+import { Prisma } from '@prisma/client';
+
+import { DAY_MS, MINUTE_MS } from '@/lib/constants/time';
 import { prisma } from '@/lib/db';
 import {
     ALERT_RULES,
@@ -14,10 +17,6 @@ import {
     nextAlertState,
 } from '@/lib/utils/ops/alert-state';
 import { quantileFromBuckets } from '@/lib/utils/ops/latency';
-
-const MINUTE_MS = 60_000;
-
-const DAY_MS = 86_400_000;
 
 const DEFAULT_FANOUT = 6;
 
@@ -72,11 +71,11 @@ function expiryDays(now: Date): number | null {
     return days.length ? Math.min(...days) : null;
 }
 
-function fanout(): number {
+const FANOUT = (() => {
     const parsed = Number(process.env.OPS_PUSHER_FANOUT);
 
     return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_FANOUT;
-}
+})();
 
 export async function readRuleValue(
     rule: AlertRule,
@@ -103,7 +102,7 @@ export async function readRuleValue(
 
     if (value === null) return { value: null };
 
-    if (rule.fanout) value *= fanout();
+    if (rule.fanout) value *= FANOUT;
 
     if (rule.per) {
         const divisor = await aggregate(
@@ -131,80 +130,89 @@ const asStatus = (s: string | null): AlertStatus | null =>
 export async function evaluateAlerts(
     now: Date = new Date()
 ): Promise<{ evaluated: number; notified: number }> {
-    const rows = await prisma.opsAlertState.findMany();
+    const [rows, readings] = await Promise.all([
+        prisma.opsAlertState.findMany(),
+        Promise.all(ALERT_RULES.map((rule) => readRuleValue(rule, now))),
+    ]);
 
     const prevByRule = new Map(rows.map((r) => [r.rule, r]));
 
-    let notified = 0;
-
-    for (const rule of ALERT_RULES) {
+    const steps = ALERT_RULES.map((rule, i) => {
         const row = prevByRule.get(rule.id);
 
-        const prev: AlertStateRow | null = row
-            ? {
-                  status: asStatus(row.status) ?? 'ok',
-                  since: row.since,
-                  breachSince: row.breachSince,
-                  lastValue: row.lastValue,
-                  lastNotifiedAt: row.lastNotifiedAt,
-                  lastNotifiedStatus: asStatus(row.lastNotifiedStatus),
-                  silencedUntil: row.silencedUntil,
-              }
-            : null;
+        let prev: AlertStateRow | null = null;
 
-        const { value, limit } = await readRuleValue(rule, now);
+        if (row) {
+            const { rule: _rule, updatedAt: _updatedAt, ...fields } = row;
 
-        const { state, transition, notify } = nextAlertState(
+            prev = {
+                ...fields,
+                status: asStatus(row.status) ?? 'ok',
+                lastNotifiedStatus: asStatus(row.lastNotifiedStatus),
+            };
+        }
+
+        const { value, limit } = readings[i];
+
+        return {
+            rule,
             prev,
             value,
-            rule,
-            now
-        );
+            limit,
+            ...nextAlertState(prev, value, rule, now),
+        };
+    });
 
-        let delivered = false;
+    const delivered = await Promise.all(
+        steps.map(async ({ rule, value, limit, state, transition, notify }) => {
+            if (!notify || transition === 'none') return false;
 
-        if (notify && transition !== 'none') {
             const result = await sendAlert(
                 buildAlertMessage(transition, rule, value, state.status, limit)
             );
 
-            delivered = result.telegram === 'ok' || result.email === 'ok';
+            return result.telegram === 'ok' || result.email === 'ok';
+        })
+    );
 
-            if (delivered) {
-                state.lastNotifiedAt = now;
-                state.lastNotifiedStatus = state.status;
-                notified += 1;
-            }
+    const writes = steps.flatMap(({ rule, prev, value, state }, i) => {
+        if (delivered[i]) {
+            state.lastNotifiedAt = now;
+            state.lastNotifiedStatus = state.status;
         }
 
-        const data = {
-            status: state.status,
-            since: state.since,
-            breachSince: state.breachSince,
-            lastValue: state.lastValue,
-            lastNotifiedAt: state.lastNotifiedAt,
-            lastNotifiedStatus: state.lastNotifiedStatus,
-        };
+        const { silencedUntil: _silenced, ...data } = state;
 
-        await prisma.opsAlertState.upsert({
-            where: { rule: rule.id },
-            create: { rule: rule.id, silencedUntil: null, ...data },
-            update: data,
-        });
+        const ops: Prisma.PrismaPromise<unknown>[] = [
+            prisma.opsAlertState.upsert({
+                where: { rule: rule.id },
+                create: { rule: rule.id, silencedUntil: null, ...data },
+                update: data,
+            }),
+        ];
 
         if ((prev?.status ?? 'ok') !== state.status) {
-            await prisma.opsAlertEvent.create({
-                data: {
-                    rule: rule.id,
-                    from: prev?.status ?? 'ok',
-                    to: state.status,
-                    value,
-                    at: now,
-                    notified: delivered,
-                },
-            });
+            ops.push(
+                prisma.opsAlertEvent.create({
+                    data: {
+                        rule: rule.id,
+                        from: prev?.status ?? 'ok',
+                        to: state.status,
+                        value,
+                        at: now,
+                        notified: delivered[i],
+                    },
+                })
+            );
         }
-    }
 
-    return { evaluated: ALERT_RULES.length, notified };
+        return ops;
+    });
+
+    await prisma.$transaction(writes);
+
+    return {
+        evaluated: ALERT_RULES.length,
+        notified: delivered.filter(Boolean).length,
+    };
 }

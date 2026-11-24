@@ -1,6 +1,6 @@
 import { POLLED_BATTLE_STATUSES } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
-import { gauge } from '@/lib/server/ops/metrics';
+import { gauge } from '@/lib/ops/metrics';
 
 interface ActivityRow {
     state: string | null;

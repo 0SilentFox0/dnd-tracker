@@ -13,6 +13,7 @@ const { aggregate, groupBy, findMany, upsert, create, sendAlert } = vi.hoisted(
 
 vi.mock('@/lib/db', () => ({
     prisma: {
+        $transaction: (ops: unknown[]) => Promise.all(ops),
         opsMetricBucket: { aggregate, groupBy },
         opsAlertState: { findMany, upsert },
         opsAlertEvent: { create },

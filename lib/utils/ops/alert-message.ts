@@ -1,12 +1,10 @@
 import type { AlertRule } from '@/lib/ops/alert-rules';
-
-export type AlertSeverity = 'warn' | 'crit' | 'ok';
-export type AlertTransition = 'up' | 'down' | 'resolved' | 'renotify';
+import type { AlertStatus, AlertTransition } from '@/lib/utils/ops/alert-state';
 
 export type AlertMessage = {
     title: string;
     body: string;
-    severity: AlertSeverity;
+    severity: AlertStatus;
 };
 
 function formatValue(value: number | null): string {
@@ -16,10 +14,10 @@ function formatValue(value: number | null): string {
 }
 
 export function buildAlertMessage(
-    transition: AlertTransition,
+    transition: Exclude<AlertTransition, 'none'>,
     rule: AlertRule,
     value: number | null,
-    status: AlertSeverity,
+    status: AlertStatus,
     limit?: number
 ): AlertMessage {
     const label =

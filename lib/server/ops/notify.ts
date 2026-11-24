@@ -1,11 +1,7 @@
 import 'server-only';
+import { fetchWithTimeout } from '@/lib/server/ops/fetch-with-timeout';
 import { logger } from '@/lib/utils/common/logger';
-
-export type AlertPayload = {
-    title: string;
-    body: string;
-    severity: 'warn' | 'crit' | 'ok';
-};
+import { type AlertMessage } from '@/lib/utils/ops/alert-message';
 
 export type ChannelResult = 'ok' | 'fail' | 'off';
 
@@ -13,46 +9,49 @@ export type NotifyResult = { telegram: ChannelResult; email: ChannelResult };
 
 const TIMEOUT_MS = 5000;
 
-async function post(url: string, init: RequestInit): Promise<boolean> {
-    const response = await fetch(url, {
-        ...init,
-        method: 'POST',
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
+async function deliver(
+    channel: string,
+    url: string,
+    init: RequestInit
+): Promise<ChannelResult> {
+    try {
+        const response = await fetchWithTimeout(
+            url,
+            { ...init, method: 'POST' },
+            TIMEOUT_MS
+        );
 
-    return response.ok;
+        if (response.ok) return 'ok';
+
+        logger.warn(`ops notify: ${channel} rejected the message`);
+    } catch {
+        logger.warn(`ops notify: ${channel} request failed`);
+    }
+
+    return 'fail';
 }
 
-async function sendTelegram(msg: AlertPayload): Promise<ChannelResult> {
+async function sendTelegram(msg: AlertMessage): Promise<ChannelResult> {
     const token = process.env.OPS_TELEGRAM_BOT_TOKEN;
 
     const chatId = process.env.OPS_TELEGRAM_CHAT_ID;
 
     if (!token || !chatId) return 'off';
 
-    try {
-        const ok = await post(
-            `https://api.telegram.org/bot${token}/sendMessage`,
-            {
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: `${msg.title}\n${msg.body}`,
-                }),
-            }
-        );
-
-        if (!ok) logger.warn('ops notify: telegram rejected the message');
-
-        return ok ? 'ok' : 'fail';
-    } catch {
-        logger.warn('ops notify: telegram request failed');
-
-        return 'fail';
-    }
+    return deliver(
+        'telegram',
+        `https://api.telegram.org/bot${token}/sendMessage`,
+        {
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: `${msg.title}\n${msg.body}`,
+            }),
+        }
+    );
 }
 
-async function sendEmail(msg: AlertPayload): Promise<ChannelResult> {
+async function sendEmail(msg: AlertMessage): Promise<ChannelResult> {
     const apiKey = process.env.RESEND_API_KEY;
 
     const to = process.env.OPS_ALERT_EMAIL;
@@ -61,31 +60,21 @@ async function sendEmail(msg: AlertPayload): Promise<ChannelResult> {
 
     if (!apiKey || !to || !from) return 'off';
 
-    try {
-        const ok = await post('https://api.resend.com/emails', {
-            headers: {
-                'content-type': 'application/json',
-                authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                from,
-                to: [to],
-                subject: msg.title,
-                text: msg.body,
-            }),
-        });
-
-        if (!ok) logger.warn('ops notify: email provider rejected the message');
-
-        return ok ? 'ok' : 'fail';
-    } catch {
-        logger.warn('ops notify: email request failed');
-
-        return 'fail';
-    }
+    return deliver('email', 'https://api.resend.com/emails', {
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            from,
+            to: [to],
+            subject: msg.title,
+            text: msg.body,
+        }),
+    });
 }
 
-export async function sendAlert(msg: AlertPayload): Promise<NotifyResult> {
+export async function sendAlert(msg: AlertMessage): Promise<NotifyResult> {
     const [telegram, email] = await Promise.all([
         sendTelegram(msg),
         sendEmail(msg),

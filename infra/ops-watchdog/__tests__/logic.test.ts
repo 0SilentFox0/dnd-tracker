@@ -21,7 +21,7 @@ describe('decide', () => {
 
 describe('messageFor', () => {
     it('is Latin-only and states which probe failed', () => {
-        const text = messageFor('down', { collectOk: false, healthOk: true, hasDownFlag: false });
+        const text = messageFor('down', { collectOk: false, healthOk: true });
 
         expect(text).toContain('collect=fail');
         expect(text).toContain('health=ok');
