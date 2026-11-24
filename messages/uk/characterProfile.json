@@ -79,7 +79,16 @@
     "passiveChip": "{skill} (пасивне)",
     "languages": "Мови: {list}",
     "proficiencies": "Володіння: {list}",
-    "untrained": "Навичка не розвинена: тест неможливий"
+    "untrained": "Навичка не розвинена: тест неможливий",
+    "proficient": "Володіння",
+    "expertise": "Експертиза",
+    "primary": "Основна",
+    "passives": "Пасивні",
+    "langsProfs": "Мови й володіння",
+    "score": "значення {n}",
+    "saveProficient": "володіння рятунком",
+    "state": "Стан",
+    "exhaustionLevel": "Виснаження"
   },
   "magic": {
     "saveDC": "СЛ заклинань",

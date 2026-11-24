@@ -11,8 +11,17 @@ export function RollDialogBody({ result }: RollDialogBodyProps) {
 
     if (result?.kind !== 'check') return null;
 
+    const accent = result.autoFail
+        ? undefined
+        : result.roll === 20
+          ? { tone: 'crit' as const, label: t('sheetRoll.nat20') }
+          : result.roll === 1
+            ? { tone: 'fumble' as const, label: t('sheetRoll.nat1') }
+            : undefined;
+
     return (
         <RollResultView
+            accent={accent}
             total={result.autoFail ? '✕' : result.total}
             detail={
                 result.autoFail

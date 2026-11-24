@@ -74,7 +74,9 @@
       "notFail": "I Will Not Fail",
       "used": "Fortune spent",
       "usedNotFail": "Fate spent"
-    }
+    },
+    "nat20": "Natural 20",
+    "nat1": "Natural 1"
   },
   "hitDice": {
     "aria": "Hit dice",

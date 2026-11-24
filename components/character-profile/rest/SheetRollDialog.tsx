@@ -12,6 +12,7 @@ import { type SheetRollRequest, systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useSheetRoll } from '@/lib/hooks/characters';
+import { prefersReducedMotion } from '@/lib/hooks/common';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cryptoRandom } from '@/lib/utils/common/dice';
 import type {
@@ -21,6 +22,8 @@ import type {
 } from '@/types/characters';
 
 export type { SheetRollRequest };
+
+const DICE_WAIT_MS = 1200;
 
 function rollBody(
     subject: SheetRollBody,
@@ -62,7 +65,13 @@ export function SheetRollDialog({
 
     const [error, setError] = useState<string | null>(null);
 
+    const [rolling, setRolling] = useState(false);
+
+    const run = useRef(0);
+
     const close = () => {
+        run.current++;
+        setRolling(false);
         setResult(null);
         setError(null);
         setUseInspiration(false);
@@ -81,17 +90,32 @@ export function SheetRollDialog({
                 rollBody(request.subject, difficulty, useInspiration, extra)
             );
 
-            setResult(r);
             setUseInspiration(false);
             setExtra({});
 
-            if (r.kind === 'check')
-                void stage.current?.play({
-                    seed: Math.floor(cryptoRandom() * 2 ** 31),
-                    groups: [
-                        r.rolls.map((value) => ({ sides: 20 as const, value })),
-                    ],
-                });
+            if (r.kind === 'check' && !prefersReducedMotion()) {
+                const mine = ++run.current;
+
+                setRolling(true);
+                await Promise.race([
+                    stage.current?.play({
+                        seed: Math.floor(cryptoRandom() * 2 ** 31),
+                        groups: [
+                            r.rolls.map((value) => ({
+                                sides: 20 as const,
+                                value,
+                            })),
+                        ],
+                    }),
+                    new Promise((resolve) => setTimeout(resolve, DICE_WAIT_MS)),
+                ]);
+
+                if (mine !== run.current) return;
+
+                setRolling(false);
+            }
+
+            setResult(r);
         } catch (e) {
             setError(e instanceof Error ? e.message : t('errors.rollFailed'));
         }
@@ -106,7 +130,7 @@ export function SheetRollDialog({
             footer={
                 <Button
                     type="button"
-                    disabled={roll.isPending}
+                    disabled={roll.isPending || rolling}
                     onClick={() => void throwDice()}
                 >
                     {t('sheetRoll.roll')}

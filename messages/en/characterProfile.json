@@ -79,7 +79,16 @@
     "passiveChip": "{skill} (passive)",
     "languages": "Languages: {list}",
     "proficiencies": "Proficiencies: {list}",
-    "untrained": "Untrained skill: the test is not possible"
+    "untrained": "Untrained skill: the test is not possible",
+    "proficient": "Proficient",
+    "expertise": "Expertise",
+    "primary": "Primary",
+    "passives": "Passives",
+    "langsProfs": "Languages & proficiencies",
+    "score": "score {n}",
+    "saveProficient": "proficient saving throw",
+    "state": "State",
+    "exhaustionLevel": "Exhaustion"
   },
   "magic": {
     "saveDC": "Spell save DC",

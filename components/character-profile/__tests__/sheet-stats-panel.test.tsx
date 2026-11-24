@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { sheetFixture, withSheet } from './sheet-fixture';
 
@@ -17,6 +17,7 @@ vi.mock('@/components/character-profile/rest/SheetRollDialog', () => ({
 
 import { ProfileContext } from '@/components/character-profile/ProfileContext';
 import { SheetStatsPanel } from '@/components/character-profile/sheet/SheetStatsPanel';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import type { CharacterSheet } from '@/types/characters';
 
@@ -50,6 +51,7 @@ const mount = (sheet: CharacterSheet) =>
     );
 
 describe('SheetStatsPanel', () => {
+    beforeEach(() => mockMatchMedia(false));
     afterEach(cleanup);
 
     it('renders abilities and skills via the system slot', () => {
@@ -65,7 +67,9 @@ describe('SheetStatsPanel', () => {
         mount(withRest({ isDM: false, isOwner: true }));
 
         fireEvent.click(
-            screen.getByText('characterProfile.combat.saveShort +6')
+            screen.getByRole('button', {
+                name: /characterProfile\.combat\.saveShort/,
+            })
         );
 
         expect(screen.getByTestId('roll-dialog').textContent).toContain(

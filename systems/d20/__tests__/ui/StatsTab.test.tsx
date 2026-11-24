@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProfileProvider } from '@/components/character-profile/ProfileContext';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { StatsTab } from '@/systems/d20/ui/StatsTab';
 import type { CharacterSheet } from '@/types/characters';
 
@@ -65,15 +66,18 @@ const renderTab = (
 };
 
 describe('d20 StatsTab', () => {
+    beforeEach(() => mockMatchMedia(false));
     afterEach(cleanup);
 
     it('top section shows scores, signed modifiers and primary marker', () => {
         renderTab({ section: 'top' });
 
-        expect(screen.getByText('16')).toBeInTheDocument();
+        expect(document.body.textContent).toContain('"n":16');
         expect(screen.getByText('+3')).toBeInTheDocument();
-        expect(screen.getByText('8')).toBeInTheDocument();
-        expect(document.body.textContent).toContain('★');
+        expect(document.body.textContent).toContain('"n":8');
+        expect(
+            screen.getByText('characterProfile.combat.primary')
+        ).toBeInTheDocument();
         expect(document.body.textContent).toContain('primaryHint');
         expect(screen.queryByText(/saves/)).toBeNull();
     });
@@ -83,12 +87,10 @@ describe('d20 StatsTab', () => {
 
         expect(
             screen
-                .getByText('characterProfile.combat.saveShort +5')
-                .closest('div')
+                .getAllByText('characterProfile.combat.saveShort')[0]
+                .closest('.motion-rise')
         ).toHaveClass('border-hud-gold');
-        expect(
-            screen.getByText('characterProfile.combat.saveShort +1')
-        ).toBeInTheDocument();
+        expect(screen.getByText('+1')).toBeInTheDocument();
     });
 
     it('top section hides the primary hint without a primary ability', () => {
@@ -109,7 +111,7 @@ describe('d20 StatsTab', () => {
         expect(items[0].querySelectorAll('i.bg-hud-gold')).toHaveLength(1);
         expect(items[1].querySelectorAll('i.bg-hud-gold')).toHaveLength(0);
         expect(document.body.textContent).toContain(
-            'characterProfile.combat.passiveChip'
+            'characterProfile.combat.passives'
         );
         expect(document.body.textContent).toContain('11');
     });
@@ -118,18 +120,14 @@ describe('d20 StatsTab', () => {
         renderTab();
 
         for (const v of ['11', '9', '10'])
-            expect(screen.getByText(v).tagName).toBe('B');
+            expect(screen.getByText(v).tagName).toBe('DD');
     });
 
-    it('top section styles proficient saves as gold pills and others as muted', () => {
+    it('top section tints proficient save bonuses gold', () => {
         renderTab({ section: 'top' });
 
-        expect(
-            screen.getByText('characterProfile.combat.saveShort +5')
-        ).toHaveClass('text-hud-gold');
-        expect(
-            screen.getByText('characterProfile.combat.saveShort +1')
-        ).toHaveClass('text-hud-gold');
+        expect(screen.getByText('+5')).toHaveClass('text-hud-gold');
+        expect(screen.getByText('+1')).toHaveClass('text-hud-gold');
     });
 
     it('rolls a save from the ability tile', () => {
@@ -182,6 +180,36 @@ describe('d20 StatsTab', () => {
 
         expect(document.body.textContent).toContain('Common, Elvish');
         expect(document.body.textContent).toContain('Lute');
-        expect(document.body.textContent).toContain(' · ');
+    });
+});
+
+describe('d20 StatsTab accessibility', () => {
+    beforeEach(() => mockMatchMedia(false));
+    afterEach(cleanup);
+
+    it('spells out proficiency and expertise for screen readers', () => {
+        renderTab({}, {
+            ...sheet,
+            skills: [
+                { key: 'athletics', proficient: true, bonus: 5 },
+                {
+                    key: 'stealth',
+                    proficient: true,
+                    expertise: true,
+                    bonus: 9,
+                },
+                { key: 'arcana', proficient: false, bonus: 0 },
+            ],
+        } as never);
+
+        const items = screen.getAllByRole('listitem');
+
+        expect(items[0]).toHaveTextContent(
+            'characterProfile.combat.proficient'
+        );
+        expect(items[1]).toHaveTextContent('characterProfile.combat.expertise');
+        expect(items[2]).not.toHaveTextContent(
+            'characterProfile.combat.proficient'
+        );
     });
 });

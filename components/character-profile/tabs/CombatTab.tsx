@@ -1,21 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Crosshair, Swords } from 'lucide-react';
 
-import { Breakdown } from '../combat/Breakdown';
+import { AttackRow } from '../combat/AttackRow';
 import { CombatRow } from '../combat/CombatRow';
 import { useProfile } from '../ProfileContext';
 
 import { EmptyState } from '@/components/common/states';
-import { HudButton } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
+import { HudSheetHeading } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
-import { AttackType } from '@/lib/constants/battle';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useCampaignSystem } from '@/lib/hooks/systems';
-import { signed } from '@/lib/utils/common/format';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 export function CombatTab() {
@@ -24,6 +20,8 @@ export function CombatTab() {
     const t = useTranslations('characterProfile.combat');
 
     const tg = useTranslations('gameTerms');
+
+    const tr = useTranslations('rest.badges');
 
     const { data: rules } = useCampaignRules(campaignId);
 
@@ -36,70 +34,29 @@ export function CombatTab() {
 
     const armorStats = statColumnsOf(system).has('armorClass');
 
-    const [openAttack, setOpenAttack] = useState<string | null>(null);
-
     return (
         <>
             {system.attacks && (
-                <HudSection title={t('attacks')}>
+                <HudSection
+                    header={<HudSheetHeading>{t('attacks')}</HudSheetHeading>}
+                    className="motion-rise [--i:0]"
+                >
                     {sheet.attacks.length === 0 ? (
                         <EmptyState
                             title={t('noAttacks')}
                             className="border-hud-rule py-6 text-hud-muted"
                         />
                     ) : (
-                        sheet.attacks.map((a) => (
-                            <div
-                                key={a.id}
-                                className="mb-1.5 rounded-[10px] border border-hud-line bg-hud-field px-2.5 py-2"
-                            >
-                                <HudButton
-                                    type="button"
-                                    aria-expanded={openAttack === a.id}
-                                    onClick={() =>
-                                        setOpenAttack((v) =>
-                                            v === a.id ? null : a.id
-                                        )
-                                    }
-                                    className="flex min-h-10 w-full flex-wrap items-center justify-between gap-x-2 text-left"
-                                >
-                                    <span className="flex min-w-0 items-center gap-1.5 truncate">
-                                        {a.kind === AttackType.RANGED ? (
-                                            <Crosshair className="size-4 shrink-0" />
-                                        ) : (
-                                            <Swords className="size-4 shrink-0" />
-                                        )}
-                                        {a.name}
-                                    </span>
-                                    <span className="shrink-0 text-sm whitespace-nowrap text-hud-muted">
-                                        <b className="text-lg text-hud-ink">
-                                            {signed(a.toHit.total)}
-                                        </b>{' '}
-                                        {t('hitShort')} ·{' '}
-                                        <b className="text-lg text-hud-ink">
-                                            ≈{a.avgDamage.total}
-                                        </b>{' '}
-                                        {t('damage')}
-                                    </span>
-                                </HudButton>
-                                {openAttack === a.id && (
-                                    <>
-                                        <p className="mt-2 text-[11px] text-hud-gold uppercase">
-                                            {t('toHit')}
-                                        </p>
-                                        <Breakdown lines={a.toHit.lines} />
-                                        <p className="mt-2 text-[11px] text-hud-gold uppercase">
-                                            {t('avgDamage')}
-                                        </p>
-                                        <Breakdown lines={a.avgDamage.lines} />
-                                    </>
-                                )}
-                            </div>
+                        sheet.attacks.map((a, i) => (
+                            <AttackRow key={a.id} attack={a} index={i} />
                         ))
                     )}
                 </HudSection>
             )}
-            <HudSection title={t('defense')}>
+            <HudSection
+                header={<HudSheetHeading>{t('defense')}</HudSheetHeading>}
+                className="motion-rise [--i:1]"
+            >
                 {armorStats && (
                     <>
                         <CombatRow
@@ -138,6 +95,20 @@ export function CombatTab() {
                     />
                 )}
             </HudSection>
+            {sheet.rest && (
+                <HudSection
+                    header={<HudSheetHeading>{t('state')}</HudSheetHeading>}
+                    className="motion-rise [--i:2]"
+                >
+                    <CombatRow
+                        label={t('exhaustionLevel')}
+                        value={`${sheet.rest.exhaustion} / 6`}
+                    />
+                    {sheet.rest.dead && (
+                        <CombatRow label={tr('dead')} value={'\u2020'} />
+                    )}
+                </HudSection>
+            )}
         </>
     );
 }

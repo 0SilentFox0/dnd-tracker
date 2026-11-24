@@ -66,4 +66,18 @@ describe('d20 RollDialogBody', () => {
         expect(container.textContent).toContain('rest.sheetRoll.autoFail');
         expect(container.textContent).not.toContain('"rolls"');
     });
+
+    it('accents a natural 20 and a natural 1 with a text label', () => {
+        expect(body(check({ roll: 20 })).container.textContent).toContain(
+            'rest.sheetRoll.nat20'
+        );
+        cleanup();
+        expect(body(check({ roll: 1 })).container.textContent).toContain(
+            'rest.sheetRoll.nat1'
+        );
+        cleanup();
+        expect(body(check({ roll: 14 })).container.textContent).not.toMatch(
+            /nat20|nat1/
+        );
+    });
 });
