@@ -31,14 +31,14 @@ function StatButton({
             aria-pressed={pressed}
             onClick={onClick}
             className={cn(
-                'motion-press flex min-h-11 min-w-20 flex-col items-center justify-center rounded-lg border px-3 text-center hover:bg-hud-raised',
+                'motion-press flex min-h-11 min-w-20 flex-col items-center justify-center rounded-[4px] border px-3 text-center hover:bg-hud-raised',
                 pressed ? 'border-hud-gold' : 'border-hud-line'
             )}
         >
             <span className="text-xs tracking-[.08em] text-hud-muted uppercase">
                 {label}
             </span>
-            <b className="hud-sc text-xl leading-tight text-hud-ink tabular-nums">
+            <b className="hud-num text-xl leading-tight text-hud-ink tabular-nums">
                 {value}
             </b>
         </HudButton>
@@ -69,11 +69,11 @@ export function AttackRow({
     return (
         <div
             style={stagger(index)}
-            className="motion-rise mb-2 rounded-xl border border-hud-line bg-hud-field px-3 py-2.5"
+            className="motion-rise border-b border-hud-rule py-2.5 first:pt-0 last:border-b-0 last:pb-0"
         >
             <div className="flex flex-wrap items-center gap-3">
                 <Icon aria-hidden className="size-5 shrink-0 text-hud-gold" />
-                <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-hud-ink">
+                <span className="min-w-0 flex-1 truncate text-base font-medium text-hud-ink">
                     {a.name}
                 </span>
                 <StatButton

@@ -43,7 +43,7 @@ export function ClassSection({
     const subclass = chosenSubclass?.name;
 
     return (
-        <section className="mb-3">
+        <section className="mb-3 rounded-[4px] border border-hud-line bg-hud-panel px-5 py-3 shadow-sm max-sm:px-4">
             <Disclosure
                 open={open}
                 headingLevel={3}

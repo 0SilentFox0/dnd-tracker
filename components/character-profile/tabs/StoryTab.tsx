@@ -24,7 +24,7 @@ export function StoryTab() {
                 {sheet.viewer.isOwner && <PlayerNotes />}
             </div>
             <div className="lg:order-1">
-                <HudSection title={t('biography')}>
+                <HudSection panel title={t('biography')}>
                     {sheet.story.biography ? (
                         <BiographyText text={sheet.story.biography} />
                     ) : (

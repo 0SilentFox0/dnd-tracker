@@ -6,6 +6,7 @@ import { Pencil } from 'lucide-react';
 
 import { useProfile } from '../ProfileContext';
 
+import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { NOTES_MAX } from '@/lib/constants/characters';
@@ -29,31 +30,34 @@ export function PlayerNotes() {
     };
 
     return (
-        <section className="mt-6">
-            <div className="mb-1.5 flex items-center justify-between">
-                <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
-                    {t('title')}
-                </h2>
-                {draft === null && (
+        <HudSection
+            panel
+            className="mt-6"
+            title={t('title')}
+            action={
+                draft === null && (
                     <Button
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="size-8"
+                        className="size-10"
                         aria-label={t('edit')}
                         onClick={() => setDraft(notes ?? '')}
                     >
                         <Pencil className="size-4" />
                     </Button>
-                )}
-            </div>
+                )
+            }
+        >
             {draft === null ? (
                 notes ? (
                     <p className="text-sm leading-relaxed whitespace-pre-wrap text-hud-bone">
                         {notes}
                     </p>
                 ) : (
-                    <p className="text-sm text-hud-muted">{t('empty')}</p>
+                    <p className="py-2 text-center text-sm text-hud-muted">
+                        {t('empty')}
+                    </p>
                 )
             ) : (
                 <div className="flex flex-col gap-2">
@@ -86,6 +90,6 @@ export function PlayerNotes() {
                     </div>
                 </div>
             )}
-        </section>
+        </HudSection>
     );
 }

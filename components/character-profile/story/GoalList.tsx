@@ -6,6 +6,7 @@ import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useProfile } from '../ProfileContext';
 
 import { HudButton } from '@/components/hud';
+import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -104,10 +105,7 @@ export function GoalList() {
     };
 
     return (
-        <section>
-            <h2 className="hud-sc mb-1.5 text-[13px] tracking-[.06em] text-hud-gold">
-                {t('title')}
-            </h2>
+        <HudSection panel title={t('title')}>
             {goals.length === 0 && (
                 <p className="text-sm text-hud-muted">{t('empty')}</p>
             )}
@@ -115,7 +113,7 @@ export function GoalList() {
                 {goals.map((g) => (
                     <li
                         key={g.id}
-                        className="flex items-start gap-2 border-b border-hud-raised py-2.5 text-sm last:border-b-0"
+                        className="flex min-h-11 items-start gap-2 border-b border-hud-rule py-2.5 text-sm last:border-b-0"
                     >
                         <HudButton
                             type="button"
@@ -292,6 +290,6 @@ export function GoalList() {
                     </Button>
                 )
             )}
-        </section>
+        </HudSection>
     );
 }

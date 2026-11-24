@@ -28,7 +28,7 @@ export function FeatsBlock() {
         return null;
 
     return (
-        <HudSection title={t('title')}>
+        <HudSection panel title={t('title')}>
             <ul className="space-y-2 text-sm">
                 {choices.feats.map((f) => (
                     <li

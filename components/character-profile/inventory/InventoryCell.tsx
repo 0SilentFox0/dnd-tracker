@@ -62,14 +62,14 @@ export function InventoryCell({
             onDrop={dnd?.onDrop}
             onClick={onClick}
             className={cn(
-                'relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-md text-hud-muted transition',
+                'relative flex aspect-square min-h-11 items-center justify-center overflow-hidden rounded-[4px] text-hud-muted transition',
                 thing
                     ? cn(
-                          'border-2 bg-hud-field shadow-[inset_0_2px_6px_rgba(0,0,0,0.7),inset_0_0_0_1px_rgba(255,255,255,0.04)]',
+                          'border-2 bg-hud-field shadow-sm',
                           ARTIFACT_RARITY_COLOR[thing.rarity ?? ''] ??
                               'border-hud-line'
                       )
-                    : 'border border-dashed border-hud-rule bg-black/30 shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]',
+                    : 'border border-dashed border-hud-rule bg-hud-field/60',
                 state.selected && 'ring-2 ring-hud-gold-strong',
                 state.drop === 'accept' &&
                     'border-hud-gold-strong bg-hud-gold-strong/15',

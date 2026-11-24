@@ -50,6 +50,7 @@ export function TokenList() {
 
     return (
         <HudSection
+            panel
             title={t('title')}
             action={
                 isDM && (

@@ -46,9 +46,9 @@ export function CharacterLogTab() {
     const entries = log.data?.pages.flatMap((p) => p.entries) ?? [];
 
     return (
-        <HudSection title={t('title')}>
+        <HudSection panel title={t('title')}>
             {entries.length === 0 && (
-                <p className="text-sm text-hud-muted">
+                <p className="py-2 text-center text-sm text-hud-muted">
                     {log.isPending ? t('loading') : t('empty')}
                 </p>
             )}
@@ -56,7 +56,7 @@ export function CharacterLogTab() {
                 {entries.map((e) => (
                     <li
                         key={e.id}
-                        className="border-b border-hud-raised py-1.5 text-xs break-words text-hud-muted"
+                        className="border-b border-hud-rule py-2.5 text-[13px] break-words text-hud-muted last:border-b-0"
                     >
                         {format.dateTime(new Date(e.createdAt), LOG_DATE)} ·{' '}
                         {e.actor?.displayName ?? t('system')} ·{' '}

@@ -60,7 +60,7 @@ export function BackgroundSection({
     } = background;
 
     return (
-        <section className="mb-3 space-y-2 text-sm">
+        <section className="mb-3 space-y-2 rounded-[4px] border border-hud-line bg-hud-panel px-5 py-3 text-sm shadow-sm max-sm:px-4">
             <div className="flex flex-wrap items-baseline gap-2">
                 <EntityIcon src={icon} name={name} className="size-6 text-xs" />
                 <h3 className="hud-sc inline">{t('title', { name })}</h3>

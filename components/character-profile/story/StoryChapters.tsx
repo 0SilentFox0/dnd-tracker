@@ -19,7 +19,7 @@ export function StoryChapters({
     if (!chapters.length) return null;
 
     return (
-        <HudSection title={t('chapters')}>
+        <HudSection panel title={t('chapters')}>
             <ScenarioBook variant="inline">
                 {chapters.map((c) => (
                     <section key={c.id} className="!mt-6 first:!mt-0">

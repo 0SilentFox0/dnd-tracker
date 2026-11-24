@@ -38,6 +38,7 @@ export function CombatTab() {
         <>
             {system.attacks && (
                 <HudSection
+                    panel
                     header={<HudSheetHeading>{t('attacks')}</HudSheetHeading>}
                     className="motion-rise [--i:0]"
                 >
@@ -54,6 +55,7 @@ export function CombatTab() {
                 </HudSection>
             )}
             <HudSection
+                panel
                 header={<HudSheetHeading>{t('defense')}</HudSheetHeading>}
                 className="motion-rise [--i:1]"
             >
@@ -97,6 +99,7 @@ export function CombatTab() {
             </HudSection>
             {sheet.rest && (
                 <HudSection
+                    panel
                     header={<HudSheetHeading>{t('state')}</HudSheetHeading>}
                     className="motion-rise [--i:2]"
                 >

@@ -28,8 +28,8 @@ export function PurseBar({
     const t = useTranslations('inventory');
 
     return (
-        <div className="flex items-center justify-between gap-2 rounded-md border border-hud-rule bg-hud-field px-3 py-1.5 shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]">
-            <span className="text-sm text-hud-ink">
+        <div className="flex min-h-12 items-center justify-between gap-2 rounded-[4px] border border-hud-line bg-hud-panel px-4 py-1.5 shadow-sm">
+            <span className="hud-num text-base text-hud-ink">
                 {COINS.map((c) => (
                     <span key={c} className="mr-3 whitespace-nowrap last:mr-0">
                         {purse[c]}{' '}
@@ -49,7 +49,7 @@ export function PurseBar({
                                 aria-label={t(`purse.${b.mode}`)}
                                 title={t(`purse.${b.mode}`)}
                                 onClick={() => onMode(b.mode)}
-                                className="rounded border border-hud-line text-hud-ink hover:border-hud-gold-strong"
+                                className="rounded-[4px] border border-hud-line text-hud-ink hover:border-hud-gold-strong"
                             >
                                 {b.sign}
                             </HudIconButton>

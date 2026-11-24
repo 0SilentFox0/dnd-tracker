@@ -84,7 +84,7 @@ export function InventoryTab({ inBattle = false }: { inBattle?: boolean }) {
     return (
         <div className="space-y-4">
             <div className="gap-4 lg:grid lg:grid-cols-[auto_1fr]">
-                <div className="space-y-3">
+                <div className="space-y-3 self-start rounded-[4px] border border-hud-line bg-hud-panel p-4 shadow-sm sm:px-5">
                     {sheet.items.attunement && (
                         <p className="text-xs text-hud-muted">
                             {t('attunement', {
@@ -130,7 +130,7 @@ export function InventoryTab({ inBattle = false }: { inBattle?: boolean }) {
                     )}
                 </div>
                 {desktop && (
-                    <HudPanel className="sticky top-4 self-start">
+                    <HudPanel className="sticky top-4 self-start rounded-[4px] border-hud-line px-5 py-4 shadow-sm">
                         <ItemDetails inv={inv} on={on} />
                     </HudPanel>
                 )}
