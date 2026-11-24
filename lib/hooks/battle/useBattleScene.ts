@@ -76,6 +76,13 @@ export function useBattleSceneValue(
 
     const clearAttackIntent = useCallback(() => setAttackIntent(null), []);
 
+    const [spellBookIntent, setSpellBookIntent] = useState<number | null>(null);
+
+    const clearSpellBookIntent = useCallback(
+        () => setSpellBookIntent(null),
+        []
+    );
+
     const [mapAim, setMapAim] = useState<MapAim | null>(null);
 
     const [mapPick, setMapPick] = useState<MapPick | null>(null);
@@ -170,8 +177,16 @@ export function useBattleSceneValue(
         [battle, userId, dmControlledId, playerViewOn]
     );
 
-    if (playerViewOn && (attackIntent || mapAim || mapPick || attackReadyId)) {
+    if (
+        playerViewOn &&
+        (attackIntent ||
+            spellBookIntent !== null ||
+            mapAim ||
+            mapPick ||
+            attackReadyId)
+    ) {
         setAttackIntent(null);
+        setSpellBookIntent(null);
         setMapAim(null);
         setMapPick(null);
         setAttackReady(null);
@@ -262,6 +277,9 @@ export function useBattleSceneValue(
             attack: attackIntent,
             requestAttack: setAttackIntent,
             clearAttack: clearAttackIntent,
+            spellBook: spellBookIntent,
+            requestSpellBook: setSpellBookIntent,
+            clearSpellBook: clearSpellBookIntent,
             mapAim,
             setMapAim,
             mapPick,

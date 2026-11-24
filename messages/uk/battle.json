@@ -274,6 +274,12 @@
     "turnIn": "хід через {count}",
     "cooldown": "перезарядка: {duration}",
     "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація",
+    "slots": {
+      "title": "Слоти заклять",
+      "label": "Рівень {level}, {current} з {max}",
+      "pactLabel": "Пактовий слот, рівень {level}, {current} з {max}",
+      "recommended": "Рекомендовані закляття"
+    },
     "states": {
       "title": "Стани героя",
       "none": "Без станів",

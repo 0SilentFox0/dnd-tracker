@@ -34,6 +34,7 @@ export {
     useBattleSceneDataValue,
     useBattleSceneValue,
 } from './useBattleScene';
+export { useBattleSpellLibrary } from './useBattleSpellLibrary';
 export { useBattleTitle } from './useBattleTitle';
 export { type BattleViewMode, useBattleViewMode } from './useBattleViewMode';
 export {

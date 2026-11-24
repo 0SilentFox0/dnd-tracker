@@ -93,6 +93,8 @@ export function MyTurnControls({
         attack: attackIntent,
         clearAttack: clearAttackIntent,
         setAttackReady,
+        spellBook: spellBookIntent,
+        clearSpellBook,
     } = intents;
 
     const turn = usePlayerTurn(hero, useBonusSpells(hero));
@@ -167,6 +169,16 @@ export function MyTurnControls({
 
         return () => setAttackReady(null);
     }, [attackReady, heroId, setAttackReady]);
+
+    const { open: openBook } = book.actions;
+
+    useEffect(() => {
+        if (spellBookIntent === null) return;
+
+        if (phase === 'acting') openBook(spellBookIntent);
+
+        clearSpellBook();
+    }, [spellBookIntent, phase, openBook, clearSpellBook]);
 
     useEffect(() => {
         if (attackIntent === null) return;

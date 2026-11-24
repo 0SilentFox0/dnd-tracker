@@ -285,6 +285,9 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         intents: {
             attack: null,
             requestAttack: vi.fn(),
+            spellBook: null,
+            requestSpellBook: vi.fn(),
+            clearSpellBook: vi.fn(),
             clearAttack: vi.fn(),
             mapAim: opts.mapAim ?? null,
             setMapAim: vi.fn(),

@@ -274,6 +274,12 @@
     "turnIn": "turn in {count}",
     "cooldown": "recharge: {duration}",
     "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration",
+    "slots": {
+      "title": "Spell slots",
+      "label": "Level {level}, {current} of {max}",
+      "pactLabel": "Pact slot, level {level}, {current} of {max}",
+      "recommended": "Recommended spells"
+    },
     "states": {
       "title": "Hero states",
       "none": "No states",

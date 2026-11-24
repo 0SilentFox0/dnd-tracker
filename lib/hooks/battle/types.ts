@@ -29,6 +29,9 @@ export interface BattleSceneIntents {
     attack: AttackIntent | null;
     requestAttack(intent: AttackIntent): void;
     clearAttack(): void;
+    spellBook: number | null;
+    requestSpellBook(level: number): void;
+    clearSpellBook(): void;
     mapAim: MapAim | null;
     setMapAim(aim: MapAim | null): void;
     mapPick: MapPick | null;

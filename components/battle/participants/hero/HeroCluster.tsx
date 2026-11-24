@@ -1,10 +1,12 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronUp } from 'lucide-react';
 
 import { HeroStatesPanel } from './HeroStatesPanel';
+import { RecommendedSpells } from './RecommendedSpells';
+import { SpellSlotRow } from './SpellSlotRow';
 
 import {
     HealthBar,
@@ -15,11 +17,11 @@ import {
 import { ReactionSpellButton } from '@/components/battle/turn/ReactionSpellButton';
 import { ReadiedAttackButton } from '@/components/battle/turn/ReadiedAttackButton';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
-import { HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton } from '@/components/hud';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleRules, useBattleSceneData } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
-import { NO_EFFECTS } from '@/lib/utils/battle/view';
+import { heroSlotViews, NO_EFFECTS } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
 export const HeroCluster = memo(function HeroCluster({
@@ -33,18 +35,28 @@ export const HeroCluster = memo(function HeroCluster({
 
     const [open, setOpen] = useState(false);
 
-    const { battle, effects } = useBattleSceneData();
+    const [level, setLevel] = useState<number | null>(null);
+
+    const { battle, effects, viewer } = useBattleSceneData();
 
     const { hpTerm } = useBattleRules();
 
     const { HeroStats, badges } = useSystemBattleUi();
+
+    const slots = useMemo(
+        () => (viewer.readOnly ? [] : heroSlotViews(hero)),
+        [viewer.readOnly, hero]
+    );
 
     const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 
     return (
         <div
             data-tour="battle.hero"
-            className="pointer-events-auto flex w-[min(300px,70vw)] flex-col gap-2 rounded-2xl border border-white/20 bg-black/70 p-3"
+            className={cn(
+                HUD_GLASS,
+                'pointer-events-auto flex w-[min(300px,70vw)] flex-col gap-2 rounded-2xl p-3'
+            )}
         >
             {open && (
                 <div id="hero-cluster-states">
@@ -56,7 +68,7 @@ export const HeroCluster = memo(function HeroCluster({
                 </div>
             )}
             <div className="flex items-center gap-3">
-                <ZoomablePortrait participant={hero} fx="main" size={56} me />
+                <ZoomablePortrait participant={hero} fx="main" size={62} me />
                 <div className="min-w-0 flex-1">
                     <div className="hud-sc flex items-baseline justify-between gap-2 text-[17px] font-bold text-[var(--ink)]">
                         <span className="flex min-w-0 items-baseline gap-2">
@@ -102,6 +114,23 @@ export const HeroCluster = memo(function HeroCluster({
                     />
                 </HudButton>
             </div>
+            {slots.length > 0 && (
+                <div
+                    className={cn(
+                        'flex flex-col gap-2',
+                        !open && 'max-md:hidden'
+                    )}
+                >
+                    <SpellSlotRow
+                        slots={slots}
+                        selected={level}
+                        onSelect={(l) =>
+                            setLevel((cur) => (cur === l ? null : l))
+                        }
+                    />
+                    <RecommendedSpells hero={hero} level={level} />
+                </div>
+            )}
             {hero.battleData.pendingCast && (
                 <p className="text-sm">
                     {tHero('pendingCast', {

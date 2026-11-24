@@ -82,6 +82,8 @@ vi.mock('@/lib/hooks/battle', () => ({
         intents: {
             attack: null,
             clearAttack: vi.fn(),
+            spellBook: null,
+            clearSpellBook: vi.fn(),
             mapAim: null,
             mapPick: null,
             setAttackReady: vi.fn(),

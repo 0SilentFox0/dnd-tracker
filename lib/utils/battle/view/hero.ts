@@ -1,4 +1,5 @@
 import { ParticipantSide } from '@/lib/constants/battle';
+import { spellLevelRoman } from '@/lib/constants/spells';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
     isAirborne,
@@ -82,6 +83,40 @@ export function pactSlot(
     return pact
         ? { level: pact.level ?? 1, max: pact.max, current: pact.current }
         : null;
+}
+
+export type SlotView = {
+    level: number;
+    roman: string;
+    current: number;
+    max: number;
+    pact?: boolean;
+};
+
+export function heroSlotViews(p: BattleParticipant): SlotView[] {
+    const views: SlotView[] = slotLevels(p).map(({ level, current, max }) => ({
+        level,
+        roman: spellLevelRoman(level),
+        current,
+        max,
+    }));
+
+    const pact = pactSlot(p);
+
+    if (!pact && !views.some((v) => v.max > 0)) return [];
+
+    return pact
+        ? [
+              ...views,
+              {
+                  level: pact.level,
+                  roman: spellLevelRoman(pact.level),
+                  current: pact.current,
+                  max: pact.max,
+                  pact: true,
+              },
+          ]
+        : views;
 }
 
 export function canCastBonusSpell(
