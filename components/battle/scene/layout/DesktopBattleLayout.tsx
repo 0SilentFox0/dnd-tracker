@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
 import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
@@ -9,32 +8,25 @@ import { BattleOverBanner } from '../banners/BattleOverBanner';
 import { ConnectionBanner } from '../banners/ConnectionBanner';
 import { LastActionTicker } from '../banners/LastActionTicker';
 import { BattleTopBar } from './BattleTopBar';
+import {
+    EMPTY_SCENE_SLOTS,
+    type SceneSlotName,
+    type SceneSlots,
+    SceneSlotsContext,
+} from './SceneSlots';
 
 import { SideDot } from '@/components/battle/hud';
-import { BattleLog } from '@/components/battle/log/BattleLog';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
 import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
-import { MyHeroPanel } from '@/components/battle/participants/MyHeroPanel';
-import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
-import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
-import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
-import { HudButton } from '@/components/hud';
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
     useBattleViewMode,
-    useSelectedParticipant,
     useTrackReorder,
 } from '@/lib/hooks/battle';
-import { myTurnKey } from '@/lib/utils/battle/view';
-
-const DmPanel = dynamic(
-    () => import('@/components/battle/dm/DmPanel').then((m) => m.DmPanel),
-    { ssr: false }
-);
 
 const H3 = ({
     side,
@@ -88,11 +80,6 @@ export function DesktopBattleLayout({
         battle,
         battleId,
         awaiting,
-        roster: { hero },
-        turn: { isMyTurn },
-        viewer: { isDM, readOnly },
-        select,
-        log,
         intents,
     } = useBattleScene();
 
@@ -104,12 +91,17 @@ export function DesktopBattleLayout({
 
     const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
-    const selected = useSelectedParticipant();
+    const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
+
+    const bindSlot = (name: SceneSlotName) => (el: HTMLDivElement | null) =>
+        setSlots((prev) => (prev[name] === el ? prev : { ...prev, [name]: el }));
 
     return (
-        <div className="below-header flex flex-col overflow-hidden">
+        <SceneSlotsContext value={slots}>
+        <div className="scene-full flex flex-col overflow-hidden">
             <ConnectionBanner />
             <BattleTopBar onComplete={onComplete} />
+            <div ref={bindSlot('top')} />
             {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
             {awaiting && <AwaitingDmBanner />}
             <div className="flex h-20 items-center border-y border-white/[.08]">
@@ -120,26 +112,7 @@ export function DesktopBattleLayout({
                     <LastActionTicker />
                 </div>
             </div>
-            <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">
-                <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
-                    {hero && <MyHeroPanel hero={hero} />}
-                    {isMyTurn && hero && (
-                        <MyTurnControls
-                            key={myTurnKey(hero, battle.currentRound)}
-                            hero={hero}
-                        />
-                    )}
-                    {!isMyTurn &&
-                        !isDM &&
-                        !readOnly &&
-                        battle.status === BattleStatus.ACTIVE && (
-                            <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm text-[var(--hud-muted)] italic">
-                                {t('actionsWait')}
-                            </div>
-                        )}
-                    {isDM && <DmPanel />}
-                    {battle.map && viewMode === 'map' && <ReserveGroup />}
-                </aside>
+            <div className="relative flex min-h-0 flex-1 flex-col">
                 {battle.map ? (
                     <main className="flex min-h-0 flex-col">
                         <div
@@ -185,31 +158,16 @@ export function DesktopBattleLayout({
                         <BattleColumns />
                     </main>
                 )}
-                <aside
-                    data-tour="battle.log"
-                    className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4"
-                >
-                    <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
-                        {selected ? t('participant') : t('log')}
-                        {selected && (
-                            <HudButton
-                                type="button"
-                                onClick={() => select(null)}
-                                className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]"
-                            >
-                                {t('backToLog')}
-                            </HudButton>
-                        )}
-                    </h3>
-                    {selected ? (
-                        <div className="pt-3">
-                            <ParticipantDetails participant={selected} />
-                        </div>
-                    ) : (
-                        <BattleLog key={log.focus ?? 'latest'} />
-                    )}
-                </aside>
+                <div
+                    ref={bindSlot('rail')}
+                    className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center gap-2 *:pointer-events-auto"
+                />
+                <div
+                    ref={bindSlot('dock')}
+                    className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center *:pointer-events-auto"
+                />
             </div>
         </div>
+        </SceneSlotsContext>
     );
 }

@@ -2,6 +2,8 @@
 
 import { type ComponentType, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 import { BattleToast } from './banners/BattleToast';
 import { CornerStack } from './layout/CornerStack';
@@ -124,6 +126,8 @@ const onFieldCount = (participants: BattlePreparationParticipant[]) =>
     );
 
 export function BattleScreen() {
+    const tTop = useTranslations('battle.topBar');
+
     const {
         battle,
         viewer: { isDM, readOnly },
@@ -177,7 +181,7 @@ export function BattleScreen() {
             {battle.status === BattleStatus.PREPARED ? (
                 <div
                     className={cn(
-                        'battle-hud below-header overflow-y-auto',
+                        'battle-hud scene-full overflow-y-auto',
                         hudFontClassName
                     )}
                 >
@@ -202,6 +206,12 @@ export function BattleScreen() {
                         canStart={onFieldCount(battle.participants) > 0}
                     />
                     <BattlePlayerViewToggle className="fixed top-3 right-3 z-50" />
+                    <Link
+                        href={`/campaigns/${battle.campaignId}`}
+                        className="hud-sc fixed top-3 left-3 z-50 text-sm text-hud-soft hover:text-[var(--gold)]"
+                    >
+                        {tTop('toCampaign')}
+                    </Link>
                     <CornerStack>
                         <AudioDock placement="corner" />
                     </CornerStack>

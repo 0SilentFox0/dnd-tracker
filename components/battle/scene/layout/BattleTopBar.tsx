@@ -1,128 +1,48 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Loader2, Sparkles } from 'lucide-react';
 
-import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
+import { BattleTempControls } from './BattleTempControls';
 
-import { HudButton, HudIconButton } from '@/components/hud';
-import { BattleStatus } from '@/lib/constants/battle';
-import { useBattleScene, useFxEnabled, useTurnTimer } from '@/lib/hooks/battle';
-import { useConfirm } from '@/lib/hooks/common';
+import { useBattleScene, useTurnTimer } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
-export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
+export function RoundBadge({ className }: { className?: string }) {
     const t = useTranslations('battle.topBar');
 
     const {
-        battle,
-        viewer: { isDM },
-        turn: { isMyTurn },
+        battle: { currentRound },
         connection,
-        actions,
     } = useBattleScene();
 
+    return (
+        <span
+            data-tour="battle.topbar"
+            className={cn(
+                'hud-sc flex items-center gap-2 text-sm text-hud-soft',
+                className
+            )}
+        >
+            {t('round', { round: currentRound })}
+            <i
+                className={cn(
+                    'size-1.5 rounded-full',
+                    connection === 'connected'
+                        ? 'bg-[#9fb98a]'
+                        : 'animate-[hud-pulse_1.2s_infinite] bg-[#f0b44c]'
+                )}
+            />
+        </span>
+    );
+}
+
+export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
     useTurnTimer();
 
-    const confirm = useConfirm();
-
-    const {
-        enabled: fxOn,
-        motionAllowed,
-        setEnabled: setFxOn,
-    } = useFxEnabled();
-
-    const fxHint = motionAllowed ? undefined : t('fxDisabledHint');
-
-    const reset = async () => {
-        if (
-            await confirm({
-                title: t('resetTitle'),
-                description: t('resetDescription'),
-                confirmLabel: t('reset'),
-            })
-        ) {
-            actions.reset.mutate({});
-        }
-    };
-
-    const nextPending = actions.nextTurn.isPending;
-
     return (
-        <header
-            data-tour="battle.topbar"
-            className="flex h-12 items-center gap-3 px-4"
-        >
-            <span className="hud-sc truncate text-[15px] tracking-[.08em]">
-                {battle.name}
-            </span>
-            {isMyTurn && battle.status === BattleStatus.ACTIVE && (
-                <span className="hud-sc hidden h-8 items-center border-y border-[var(--enemy)] bg-[var(--enemy)]/20 px-4 text-[15px] tracking-[.12em] lg:flex">
-                    {t('yourTurn')}
-                </span>
-            )}
-            <HudIconButton
-                type="button"
-                disabled={!motionAllowed}
-                title={fxHint}
-                onClick={() => setFxOn(!fxOn)}
-                aria-label={fxOn ? t('fxOn') : t('fxOff')}
-                aria-pressed={fxOn}
-                className={cn(
-                    'ml-auto hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
-                    fxOn ? 'text-[var(--gold)]' : 'text-hud-muted'
-                )}
-            >
-                <Sparkles className="size-4" />
-            </HudIconButton>
-            <BattlePlayerViewToggle />
-            <span className="hud-sc flex items-center gap-2 text-sm text-hud-soft">
-                {t('round', { round: battle.currentRound })}
-                <i
-                    className={cn(
-                        'size-1.5 rounded-full',
-                        connection === 'connected'
-                            ? 'bg-[#9fb98a]'
-                            : 'animate-[hud-pulse_1.2s_infinite] bg-[#f0b44c]'
-                    )}
-                />
-            </span>
-            {isDM && battle.status !== BattleStatus.PREPARED && (
-                <span className="hidden gap-2 lg:flex">
-                    {onComplete && battle.status === BattleStatus.ACTIVE && (
-                        <HudButton
-                            type="button"
-                            onClick={onComplete}
-                            className="hud-sc h-8 w-32 border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10"
-                        >
-                            {t('complete')}
-                        </HudButton>
-                    )}
-                    <HudButton
-                        type="button"
-                        data-tour="battle.reset"
-                        onClick={() => void reset()}
-                        className="hud-sc h-8 w-28 border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10"
-                    >
-                        {t('reset')}
-                    </HudButton>
-                    {battle.status === BattleStatus.ACTIVE && (
-                        <HudButton
-                            type="button"
-                            data-tour="battle.next-turn"
-                            disabled={nextPending}
-                            onClick={() => actions.nextTurn.mutate({})}
-                            className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-[#fffaf0] disabled:opacity-70"
-                        >
-                            {nextPending ? (
-                                <Loader2 className="size-4 animate-spin" />
-                            ) : (
-                                t('nextTurn')
-                            )}
-                        </HudButton>
-                    )}
-                </span>
-            )}
-        </header>
+        <div className="flex h-12 items-center gap-3 px-4">
+            <RoundBadge />
+            <BattleTempControls onComplete={onComplete} />
+        </div>
     );
 }

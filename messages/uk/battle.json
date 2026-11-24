@@ -105,6 +105,7 @@
     "playerViewOff": "Вигляд гравця: вимк.",
     "playerViewHero": "Бачить",
     "round": "Раунд {round}",
+    "toCampaign": "До кампанії",
     "complete": "Завершити",
     "nextTurn": "Наступний хід"
   },

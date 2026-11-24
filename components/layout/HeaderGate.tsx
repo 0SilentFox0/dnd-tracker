@@ -2,7 +2,10 @@
 
 import { usePathname } from 'next/navigation';
 
-import { shouldUseGameShell } from '@/components/layout/game-shell-route';
+import {
+    isFullBleedRoute,
+    shouldUseGameShell,
+} from '@/components/layout/game-shell-route';
 import { Header } from '@/components/layout/Header';
 import { LANDING_PATHS } from '@/lib/constants/site';
 
@@ -18,6 +21,7 @@ export function HeaderGate() {
 
     if (
         shouldUseGameShell(pathname) ||
+        isFullBleedRoute(pathname) ||
         (pathname && LANDING_PATHS.includes(pathname)) ||
         AUTH_SCREENS.some((p) => pathname?.startsWith(p))
     )
