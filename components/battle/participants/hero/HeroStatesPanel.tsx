@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { EffectLine } from '@/components/battle/hud';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import { useFormatDuration } from '@/lib/i18n/use-duration';
 import type { DisplayEffect } from '@/lib/utils/battle/view';
 import {
     abilityCharges,
@@ -22,6 +23,10 @@ export function HeroStatesPanel({
     round: number;
 }) {
     const t = useTranslations('battle.hero.states');
+
+    const tHero = useTranslations('battle.hero');
+
+    const formatDuration = useFormatDuration();
 
     const { heroPanels, ConditionTestPanel } = useSystemBattleUi();
 
@@ -47,6 +52,8 @@ export function HeroStatesPanel({
                         <span key={c.key}>
                             {c.name}
                             {c.limit !== null && ` ${c.left}/${c.limit}`}
+                            {c.cooldownLeft > 0 &&
+                                ` · ${tHero('cooldown', { duration: formatDuration(c.cooldownLeft) })}`}
                         </span>
                     ))}
                     {pools.map((p) => (

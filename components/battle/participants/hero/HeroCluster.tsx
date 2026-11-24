@@ -12,7 +12,11 @@ import {
     TurnTimerBar,
     ZoomablePortrait,
 } from '@/components/battle/hud';
+import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import { ReactionSpellButton } from '@/components/battle/turn/ReactionSpellButton';
+import { ReadiedAttackButton } from '@/components/battle/turn/ReadiedAttackButton';
 import { HudButton } from '@/components/hud';
+import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleRules, useBattleSceneData } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { NO_EFFECTS } from '@/lib/utils/battle/view';
@@ -25,11 +29,15 @@ export const HeroCluster = memo(function HeroCluster({
 }) {
     const t = useTranslations('battle.hero.states');
 
+    const tHero = useTranslations('battle.hero');
+
     const [open, setOpen] = useState(false);
 
     const { battle, effects } = useBattleSceneData();
 
     const { hpTerm } = useBattleRules();
+
+    const { HeroStats, badges } = useSystemBattleUi();
 
     const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 
@@ -51,7 +59,12 @@ export const HeroCluster = memo(function HeroCluster({
                 <ZoomablePortrait participant={hero} fx="main" size={56} me />
                 <div className="min-w-0 flex-1">
                     <div className="hud-sc flex items-baseline justify-between gap-2 text-[17px] font-bold text-[var(--ink)]">
-                        <span className="truncate">{hero.basicInfo.name}</span>
+                        <span className="flex min-w-0 items-baseline gap-2">
+                            <span className="truncate">{hero.basicInfo.name}</span>
+                            {badges?.map((Badge, i) => (
+                                <Badge key={i} participant={hero} place="hero" />
+                            ))}
+                        </span>
                         <span className="shrink-0 font-sans text-sm font-normal whitespace-nowrap">
                             <HpFigure
                                 participant={hero}
@@ -60,6 +73,11 @@ export const HeroCluster = memo(function HeroCluster({
                         </span>
                     </div>
                     <HealthBar participant={hero} exact className="h-1.5" />
+                    {HeroStats && (
+                        <div className="mt-1 text-sm text-hud-text">
+                            <HeroStats hero={hero} compact={false} />
+                        </div>
+                    )}
                 </div>
                 <HudButton
                     type="button"
@@ -75,6 +93,18 @@ export const HeroCluster = memo(function HeroCluster({
                     />
                 </HudButton>
             </div>
+            {hero.battleData.pendingCast && (
+                <p className="text-sm">
+                    {tHero('pendingCast', {
+                        spell: hero.battleData.pendingCast.spellName,
+                        rounds: hero.battleData.pendingCast.remainingRounds,
+                    })}
+                </p>
+            )}
+            <ReadiedAttackButton participant={hero} />
+            {battle.status === BattleStatus.ACTIVE && (
+                <ReactionSpellButton participant={hero} />
+            )}
             <TurnTimerBar />
         </div>
     );
