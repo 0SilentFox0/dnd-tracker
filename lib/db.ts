@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+import { capacity, type CapacityEnv } from '@/lib/config/capacity';
 import { contentLayer } from '@/lib/db/content-layer';
 import { createScopedDatabase } from '@/lib/server/content/write-context';
 
@@ -7,17 +8,9 @@ const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
 
-const VERCEL_CONNECTION_LIMIT = 5;
-
-const DEV_CONNECTION_LIMIT = 10;
-
-type PoolEnv = Partial<
-    Pick<NodeJS.ProcessEnv, 'VERCEL' | 'NODE_ENV' | 'PRISMA_CONNECTION_LIMIT'>
->;
-
 export function withSafePoolLimits(
     databaseUrl?: string,
-    env: PoolEnv = process.env
+    env: CapacityEnv = process.env
 ) {
     if (!databaseUrl) {
         return databaseUrl;
@@ -37,21 +30,26 @@ export function withSafePoolLimits(
             return databaseUrl;
         }
 
+        const cap = capacity(env);
+
         const override = Number.parseInt(env.PRISMA_CONNECTION_LIMIT ?? '', 10);
 
         const limit =
             override > 0
                 ? override
                 : isDev
-                  ? DEV_CONNECTION_LIMIT
-                  : VERCEL_CONNECTION_LIMIT;
+                  ? cap.dbConnectionLimitDev
+                  : cap.dbConnectionLimit;
 
         if (!parsed.searchParams.has('connection_limit')) {
             parsed.searchParams.set('connection_limit', String(limit));
         }
 
         if (!parsed.searchParams.has('pool_timeout')) {
-            parsed.searchParams.set('pool_timeout', isDev ? '20' : '10');
+            parsed.searchParams.set(
+                'pool_timeout',
+                String(isDev ? cap.dbPoolTimeoutSecDev : cap.dbPoolTimeoutSec)
+            );
         }
 
         return parsed.toString();

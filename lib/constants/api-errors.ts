@@ -119,6 +119,7 @@ export const API_ERRORS = {
     INVALID_JSON: 'errors.invalidJson',
     TOO_MANY_REQUESTS: 'errors.tooManyRequests',
     RATE_LIMIT_UNAVAILABLE: 'errors.rateLimitUnavailable',
+    SERVER_BUSY: 'errors.serverBusy',
     ABILITY_TOO_MANY_TARGETS: 'errors.abilityTooManyTargets',
     ABILITY_TARGET_REQUIRED: 'errors.abilityTargetRequired',
     ABILITY_TARGET_INVALID: 'errors.abilityTargetInvalid',

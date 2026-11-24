@@ -13,7 +13,7 @@ vi.mock('next/cache', () => ({
         return fn;
     },
 }));
-vi.mock('@/lib/db', () => ({ prisma: { spell: { findMany: vi.fn() } } }));
+vi.mock('@/lib/db', () => ({ prisma: { spell: { findMany: vi.fn() }, campaign: { findUnique: vi.fn().mockResolvedValue({ contentVersion: 1 }) } } }));
 
 import { getCachedInterruptSpells } from '@/lib/cache/reference-data';
 import { cacheTags } from '@/lib/cache/tags';

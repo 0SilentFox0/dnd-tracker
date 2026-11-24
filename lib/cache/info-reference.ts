@@ -1,8 +1,8 @@
-import { unstable_cache } from 'next/cache';
 import type { Prisma } from '@prisma/client';
 
 import { REFERENCE_REVALIDATE_SECONDS } from '@/lib/cache/reference-data';
 import { cacheTags } from '@/lib/cache/tags';
+import { versionedCache } from '@/lib/cache/versioned';
 import { prisma } from '@/lib/db';
 import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import { abilitySummary } from '@/lib/utils/abilities/summary';
@@ -112,7 +112,8 @@ export function getCachedInfoReference(
         cacheTags.spells(campaignId),
     ];
 
-    return unstable_cache(
+    return versionedCache(
+        campaignId,
         () => loadInfoReference(campaignId),
         ['info-reference-v6', campaignId],
         { tags, revalidate: REFERENCE_REVALIDATE_SECONDS }

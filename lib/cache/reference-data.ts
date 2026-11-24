@@ -1,7 +1,7 @@
-import { unstable_cache } from 'next/cache';
 import type { Prisma } from '@prisma/client';
 
 import { cacheTags } from '@/lib/cache/tags';
+import { type CacheOptions, versionedCache } from '@/lib/cache/versioned';
 import { prisma } from '@/lib/db';
 import { currentContentWrite } from '@/lib/server/content/write-context';
 import type { InterruptSpell } from '@/lib/utils/battle/counter/types';
@@ -10,15 +10,21 @@ import { readSpellDefinition } from '@/lib/utils/spells/model/read';
 import { toUnit } from '@/lib/utils/units/to-unit';
 
 // A guarded write must use the transaction snapshot, never a previously cached reference.
-const referenceCache: typeof unstable_cache = (callback, keyParts, options) =>
+const referenceCache = <T>(
+    campaignId: string,
+    callback: () => Promise<T>,
+    keyParts: string[],
+    options: CacheOptions
+): (() => Promise<T>) =>
     currentContentWrite()
         ? callback
-        : unstable_cache(callback, keyParts, options);
+        : versionedCache(campaignId, callback, keyParts, options);
 
 export const REFERENCE_REVALIDATE_SECONDS = 300;
 
 export async function getCachedSpells(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.spell.findMany({
                 where: { campaignId },
@@ -40,6 +46,7 @@ const UNIT_LIST_ORDER: Prisma.UnitOrderByWithRelationInput[] = [
 
 export async function getCachedUnits(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.unit
                 .findMany({ where: { campaignId }, orderBy: UNIT_LIST_ORDER })
@@ -54,6 +61,7 @@ export async function getCachedUnits(campaignId: string) {
 
 export async function getCachedRaces(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.race.findMany({
                 omit: { abilities: true },
@@ -70,6 +78,7 @@ export async function getCachedRaces(campaignId: string) {
 
 export async function getCachedClasses(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.gameClass.findMany({
                 where: { campaignId },
@@ -85,6 +94,7 @@ export async function getCachedClasses(campaignId: string) {
 
 export async function getCachedFeats(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.feat.findMany({
                 where: { campaignId },
@@ -100,6 +110,7 @@ export async function getCachedFeats(campaignId: string) {
 
 export async function getCachedMainSkills(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.mainSkill.findMany({
                 where: { campaignId },
@@ -115,6 +126,7 @@ export async function getCachedMainSkills(campaignId: string) {
 
 export async function getCachedSummonPool(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () => {
             const [units, races] = await Promise.all([
                 prisma.unit.findMany({
@@ -147,6 +159,7 @@ export async function getCachedInterruptSpells(
     campaignId: string
 ): Promise<InterruptSpell[]> {
     return referenceCache(
+        campaignId,
         async () => {
             const rows = await prisma.spell.findMany({
                 where: {
@@ -178,6 +191,7 @@ export async function getCachedInterruptSpells(
 
 export async function getCachedBackgrounds(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.background.findMany({
                 where: { campaignId },
@@ -193,6 +207,7 @@ export async function getCachedBackgrounds(campaignId: string) {
 
 export async function getCachedCareers(campaignId: string) {
     return referenceCache(
+        campaignId,
         async () =>
             prisma.career.findMany({
                 where: { campaignId },
