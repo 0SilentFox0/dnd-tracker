@@ -17,3 +17,18 @@
 @media (prefers-reduced-motion: reduce) {
   .battle-hud *, .battle-hud *::before, .battle-hud *::after { animation: none !important; transition: none !important; }
 }
+
+.hud-glass {
+  border: 1px solid var(--hud-line);
+  border-radius: 12px;
+  background: var(--palette-panel);
+  color: var(--hud-bone);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html[data-palette="parchment"] .hud-glass, html[data-palette="frost"] .hud-glass {
+  background: color-mix(in srgb, var(--palette-card) 92%, transparent);
+  color: var(--hud-ink);
+  box-shadow: 0 10px 30px rgba(74, 61, 42, 0.25);
+}
