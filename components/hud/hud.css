@@ -12,6 +12,9 @@
 
 .hud-sc { font-family: var(--font-hud-sc), serif; letter-spacing: 0.04em; }
 .hud-book { font-family: var(--font-hud-book), serif; }
+.hud-title { font-family: var(--font-title), Georgia, serif; font-weight: 700; }
+.hud-body { font-family: var(--font-body), Georgia, serif; }
+.hud-num { font-family: var(--font-num), "Arial Narrow", sans-serif; font-weight: 500; font-variant-numeric: lining-nums tabular-nums; }
 .metal-iron { --m1: #5d5f63; --m2: #8a8d92; --mt: #eeeeee; }
 .metal-bronze { --m1: #6e3f1c; --m2: #b07842; --mt: #fbe3c6; }
 .metal-silver { --m1: #6d7177; --m2: #c9ced6; --mt: #1d2026; }

@@ -19,12 +19,20 @@
 @font-face { font-family: "Alegreya"; src: url("/fonts/Alegreya-Variable.woff2") format("woff2"); font-weight: 400 900; font-style: normal; font-display: swap; }
 @font-face { font-family: "Alegreya"; src: url("/fonts/Alegreya-Italic-Variable.woff2") format("woff2"); font-weight: 400 900; font-style: italic; font-display: swap; }
 
+@font-face { font-family: "Cormorant SC"; src: url("/fonts/CormorantSC-Bold-latin.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Cormorant SC"; src: url("/fonts/CormorantSC-Bold-cyrillic.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Oswald"; src: url("/fonts/Oswald-Medium-latin.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Oswald"; src: url("/fonts/Oswald-Medium-cyrillic.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+
 .font-geist { --font-geist-sans: "Geist", ui-sans-serif, system-ui, sans-serif; }
 
 .font-hud {
   --font-hud-sc: "Alegreya SC", Georgia, serif;
   --font-hud-sans: "Alegreya Sans", system-ui, sans-serif;
   --font-hud-book: "EB Garamond", Georgia, serif;
+  --font-title: "Cormorant SC", Georgia, serif;
+  --font-body: "Alegreya", Georgia, serif;
+  --font-num: "Oswald", "Arial Narrow", sans-serif;
 }
 
 .font-scenario {
