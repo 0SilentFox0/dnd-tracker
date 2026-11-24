@@ -18,8 +18,11 @@ import {
 import { SideDot } from '@/components/battle/hud';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
 import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
+import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
+import { DockWaiting } from '@/components/battle/turn/dock/DockWaiting';
+import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
@@ -27,6 +30,7 @@ import {
     useBattleViewMode,
     useTrackReorder,
 } from '@/lib/hooks/battle';
+import { myTurnKey, showDock } from '@/lib/utils/battle/view';
 
 const H3 = ({
     side,
@@ -81,6 +85,9 @@ export function DesktopBattleLayout({
         battleId,
         awaiting,
         intents,
+        roster: { hero },
+        turn: { current, isMyTurn },
+        viewer: { readOnly },
     } = useBattleScene();
 
     const onReorder = useTrackReorder();
@@ -158,6 +165,25 @@ export function DesktopBattleLayout({
                         <BattleColumns />
                     </main>
                 )}
+                {hero && (
+                    <div className="pointer-events-none absolute bottom-3 left-3 z-20">
+                        <HeroCluster hero={hero} />
+                    </div>
+                )}
+                {hero &&
+                    showDock(hero, readOnly) &&
+                    battle.status === BattleStatus.ACTIVE &&
+                    (isMyTurn ? (
+                        <MyTurnControls
+                            key={myTurnKey(hero, battle.currentRound)}
+                            hero={hero}
+                            dock
+                        />
+                    ) : (
+                        current && (
+                            <DockWaiting name={current.basicInfo.name} />
+                        )
+                    ))}
                 <div
                     ref={bindSlot('rail')}
                     className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center gap-2 *:pointer-events-auto"

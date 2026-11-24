@@ -276,7 +276,13 @@
     "acting": "ходить",
     "turnIn": "хід через {count}",
     "cooldown": "перезарядка: {duration}",
-    "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація"
+    "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація",
+    "states": {
+      "title": "Стани героя",
+      "none": "Без станів",
+      "expand": "Показати стани",
+      "collapse": "Сховати стани"
+    }
   },
   "participant": {
     "deathSaves": "Кидки смерті",
@@ -405,5 +411,17 @@
       "hit": "{name} вражає {target}: -{damage}",
       "turn": "Хід: {name}"
     }
+  },
+  "dock": {
+    "actions": "Дія",
+    "action": "Дія",
+    "bonus": "Бонус",
+    "reaction": "Реакція",
+    "spent": "використано",
+    "endTurn": "Кінець ходу",
+    "waiting": "Хід: {name}",
+    "move": "Рух",
+    "moveLeft": "{left}/{max}",
+    "panelTitle": "Дії"
   }
 }

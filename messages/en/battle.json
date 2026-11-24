@@ -276,7 +276,13 @@
     "acting": "acting",
     "turnIn": "turn in {count}",
     "cooldown": "recharge: {duration}",
-    "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration"
+    "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration",
+    "states": {
+      "title": "Hero states",
+      "none": "No states",
+      "expand": "Show states",
+      "collapse": "Hide states"
+    }
   },
   "participant": {
     "deathSaves": "Death saves",
@@ -405,5 +411,17 @@
       "hit": "{name} hits {target}: -{damage}",
       "turn": "Turn: {name}"
     }
+  },
+  "dock": {
+    "actions": "Act",
+    "action": "Action",
+    "bonus": "Bonus",
+    "reaction": "Reaction",
+    "spent": "used",
+    "endTurn": "End turn",
+    "waiting": "Turn: {name}",
+    "move": "Move",
+    "moveLeft": "{left}/{max}",
+    "panelTitle": "Actions"
   }
 }

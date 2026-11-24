@@ -2,36 +2,29 @@
 
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import {
-    Backpack,
-    BookOpen,
-    Hourglass,
-    ListChecks,
-    Sparkle,
-    Sparkles,
-    Swords,
-    Undo2,
-    Zap,
-} from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
+import { actionIcon,type ActionIconKey } from '@/components/hud/icons/battle';
 import type { usePlayerTurn } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 type Turn = ReturnType<typeof usePlayerTurn>;
 
 const Tile = ({
-    icon: Icon,
+    icon,
     label,
     used,
     primary,
     onClick,
 }: {
-    icon: typeof Swords;
+    icon: ActionIconKey;
     label: ReactNode;
     used?: boolean;
     primary?: boolean;
     onClick?: () => void;
-}) => (
+}) => {
+    const Icon = actionIcon[icon];
+
+    return (
     <HudButton
         type="button"
         disabled={used}
@@ -39,21 +32,22 @@ const Tile = ({
         className={cn(
             'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40',
             primary
-                ? 'border-[var(--enemy)] bg-[var(--enemy)]/25'
+                ? 'border-[var(--gold)] bg-[var(--gold)]/20'
                 : 'border-white/25 bg-black/55'
         )}
     >
         <Icon
             className={cn(
                 'size-7 shrink-0',
-                primary ? 'text-[var(--bone)]' : 'text-[var(--gold)]'
+                'text-[var(--gold)]'
             )}
         />
         <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">
             {label}
         </span>
     </HudButton>
-);
+    );
+};
 
 export function ActionGrid({
     turn,
@@ -96,7 +90,7 @@ export function ActionGrid({
                 className="grid grid-cols-2 gap-2 pt-3"
             >
                 <Tile
-                    icon={Swords}
+                    icon="attack"
                     label={t('attack')}
                     used={
                         (turn.status.actionUsed && !turn.status.attackLeft) ||
@@ -108,7 +102,7 @@ export function ActionGrid({
                 />
                 {available.magicTile !== false && (
                     <Tile
-                        icon={BookOpen}
+                        icon="magic"
                         label={t('magic')}
                         used={
                             (turn.status.actionUsed &&
@@ -122,7 +116,7 @@ export function ActionGrid({
                 )}
                 {available.channel && channelLabel && (
                     <Tile
-                        icon={Sparkle}
+                        icon="channel"
                         label={channelLabel}
                         used={
                             turn.status.actionUsed ||
@@ -134,7 +128,7 @@ export function ActionGrid({
                 )}
                 {available.ability && (
                     <Tile
-                        icon={Zap}
+                        icon="ability"
                         label={t('ability')}
                         used={
                             turn.status.actionUsed ||
@@ -146,7 +140,7 @@ export function ActionGrid({
                 )}
                 {available.bonusTile !== false && (
                     <Tile
-                        icon={Sparkles}
+                        icon="bonus"
                         label={t('bonus')}
                         used={
                             !turn.status.bonusAvailable ||
@@ -159,7 +153,7 @@ export function ActionGrid({
                 )}
                 {available.core && (
                     <Tile
-                        icon={ListChecks}
+                        icon="core"
                         label={t('core')}
                         used={turn.status.skipped || pending}
                         onClick={actions.core}
@@ -167,7 +161,7 @@ export function ActionGrid({
                 )}
                 {available.gear && (
                     <Tile
-                        icon={Backpack}
+                        icon="gear"
                         label={t('gear')}
                         used={
                             !turn.status.bonusAvailable ||
@@ -179,14 +173,14 @@ export function ActionGrid({
                 )}
                 {turn.strikeAndReturn.available && (
                     <Tile
-                        icon={Undo2}
+                        icon="strikeAndReturn"
                         label={t('strikeAndReturn')}
                         used={pending}
                         onClick={turn.strikeAndReturn.run}
                     />
                 )}
                 {turn.gateResult && gateLabel && (
-                    <Tile icon={Hourglass} label={gateLabel} used />
+                    <Tile icon="gate" label={gateLabel} used />
                 )}
             </div>
             {turn.phase !== 'countdown' && (

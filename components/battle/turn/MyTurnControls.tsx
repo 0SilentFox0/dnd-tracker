@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
+import { ActionDock } from './dock/ActionDock';
 import { ActionGrid } from './ActionGrid';
 import { TurnCountdown } from './TurnCountdown';
 
 import { modeUiOf } from '@/components/battle/modes';
 import { MapStripRow } from '@/components/battle/scene/layout/MapStrip';
+import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
 import { ParticipantSourceType } from '@/lib/constants/battle';
@@ -29,6 +32,10 @@ import {
     turnAllowsAttack,
 } from '@/lib/utils/battle/flows';
 import { usableAbilities } from '@/lib/utils/battle/view';
+import {
+    movementOf,
+    reactionAvailable,
+} from '@/lib/utils/battle/view/dock-status';
 import type { BattleParticipant } from '@/types/battle';
 
 const AttackWizard = dynamic(
@@ -69,13 +76,15 @@ const BonusActionPicker = dynamic(
     { ssr: false }
 );
 
-/** strip: the phone map tab shows one row instead of the action panel while the wizards stay mounted (spell aiming lives in them). */
+/** dock: desktop portals the action dock into the scene slot, the wizards stay owned here. strip: the phone map tab shows one row instead of the action panel while the wizards stay mounted (spell aiming lives in them). */
 export function MyTurnControls({
     hero,
     strip,
+    dock,
 }: {
     hero: BattleParticipant;
     strip?: { onExpand: () => void };
+    dock?: boolean;
 }) {
     const t = useTranslations('battle.turnControls');
 
@@ -110,6 +119,10 @@ export function MyTurnControls({
     const [coreOpen, setCoreOpen] = useState(false);
 
     const [gearOpen, setGearOpen] = useState(false);
+
+    const [actionsOpen, setActionsOpen] = useState(false);
+
+    const dockSlot = useSceneSlot('dock');
 
     const bonusAbilities = usableAbilities(
         hero,
@@ -190,58 +203,104 @@ export function MyTurnControls({
         clearAttackIntent,
     ]);
 
+    const run = (open: () => void) => {
+        setActionsOpen(false);
+
+        open();
+    };
+
+    const grid = (
+        <ActionGrid
+            turn={turn}
+            channelLabel={systemUi.ChannelLabel && <systemUi.ChannelLabel />}
+            gateLabel={
+                systemUi.turnStart && (
+                    <systemUi.turnStart.Label outcome={turn.gateResult} />
+                )
+            }
+            pending={anyPending}
+            available={{
+                channel: !!systemUi.ChannelDialog && tested && hasMagic,
+                magic: hasMagic,
+                magicTile: spells,
+                bonus:
+                    bonusAbilities.length > 0 ||
+                    canOffHandAttack(hero, battle.rules),
+                bonusTile: actionEconomy.bonusAction,
+                ability: actionAbilities.length > 0,
+                core: coreActionsOn(battle.rules),
+                gear: hasGear,
+            }}
+            actions={{
+                channel: () => run(() => setChannelOpen(true)),
+                attack: () => run(() => attack.actions.open()),
+                magic: () => run(() => book.actions.open()),
+                bonus: () => run(() => setBonusOpen(true)),
+                ability: () => run(() => setAbilityOpen(true)),
+                core: () => run(() => setCoreOpen(true)),
+                gear: () => run(() => setGearOpen(true)),
+            }}
+        />
+    );
+
+    const gatePanel = turn.phase === 'gate' && systemUi.turnStart && (
+        <systemUi.turnStart.Panel hero={hero} gate={turn.gate} />
+    );
+
+    const zonePicker = turn.phase === 'acting' && zone && (
+        <div className="pt-3">
+            <AuraZonePicker step={zone} />
+        </div>
+    );
+
+    const modeControls = turn.phase === 'acting' && ui?.TurnControls && (
+        <ui.TurnControls hero={hero} />
+    );
+
+    const countdown = turn.phase === 'countdown' && (
+        <TurnCountdown
+            seconds={COUNTDOWN_SECONDS}
+            onElapsed={() => void turn.actions.endTurn()}
+            onStay={turn.actions.stay}
+        />
+    );
+
     const full = (
         <>
-            {turn.phase === 'gate' && systemUi.turnStart && (
-                <systemUi.turnStart.Panel hero={hero} gate={turn.gate} />
-            )}
-            {turn.phase === 'acting' && zone && (
-                <div className="pt-3">
-                    <AuraZonePicker step={zone} />
-                </div>
-            )}
-            {(turn.phase === 'acting' || turn.phase === 'countdown') && (
-                <ActionGrid
-                    turn={turn}
-                    channelLabel={
-                        systemUi.ChannelLabel && <systemUi.ChannelLabel />
-                    }
-                    gateLabel={
-                        systemUi.turnStart && (
-                            <systemUi.turnStart.Label
-                                outcome={turn.gateResult}
-                            />
-                        )
-                    }
-                    pending={anyPending}
-                    available={{
-                        channel: !!systemUi.ChannelDialog && tested && hasMagic,
-                        magic: hasMagic,
-                        magicTile: spells,
-                        bonus:
-                            bonusAbilities.length > 0 ||
-                            canOffHandAttack(hero, battle.rules),
-                        bonusTile: actionEconomy.bonusAction,
-                        ability: actionAbilities.length > 0,
-                        core: coreActionsOn(battle.rules),
-                        gear: hasGear,
-                    }}
-                    actions={{
-                        channel: () => setChannelOpen(true),
-                        attack: () => attack.actions.open(),
-                        magic: () => book.actions.open(),
-                        bonus: () => setBonusOpen(true),
-                        ability: () => setAbilityOpen(true),
-                        core: () => setCoreOpen(true),
-                        gear: () => setGearOpen(true),
-                    }}
-                />
-            )}
-            {turn.phase === 'acting' && ui?.TurnControls && (
-                <ui.TurnControls hero={hero} />
-            )}
+            {gatePanel}
+            {zonePicker}
+            {(turn.phase === 'acting' || turn.phase === 'countdown') && grid}
+            {modeControls}
         </>
     );
+
+    const dockView = dockSlot
+        ? createPortal(
+              <ActionDock
+                  status={{
+                      actionUsed: actionUsed && !attackLeft,
+                      bonusAvailable: turn.status.bonusAvailable,
+                      reactionAvailable: reactionAvailable(hero),
+                  }}
+                  economy={actionEconomy}
+                  move={battle.map ? movementOf(hero) : undefined}
+                  phase={phase}
+                  onActions={() => setActionsOpen(true)}
+                  onEnd={() => void turn.actions.endTurn()}
+                  panel={{
+                      open: actionsOpen,
+                      onOpenChange: setActionsOpen,
+                      content: grid,
+                  }}
+              >
+                  {gatePanel}
+                  {zonePicker}
+                  {modeControls}
+                  {countdown}
+              </ActionDock>,
+              dockSlot
+          )
+        : null;
 
     const stripRow = strip && phase !== 'countdown' && !mapAim && !mapPick && (
         <MapStripRow onExpand={strip.onExpand}>
@@ -257,14 +316,8 @@ export function MyTurnControls({
 
     return (
         <>
-            {strip ? stripRow : full}
-            {turn.phase === 'countdown' && (
-                <TurnCountdown
-                    seconds={COUNTDOWN_SECONDS}
-                    onElapsed={() => void turn.actions.endTurn()}
-                    onStay={turn.actions.stay}
-                />
-            )}
+            {dock ? dockView : strip ? stripRow : full}
+            {!dock && countdown}
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />
             {tested && systemUi.ChannelDialog && (
