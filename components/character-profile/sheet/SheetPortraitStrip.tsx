@@ -32,6 +32,11 @@ export function SheetXpBar({
 
     const progress = xpProgress(xp, level);
 
+    const fill =
+        progress.next === null
+            ? 1
+            : Math.min(1, progress.current / progress.next);
+
     const value =
         progress.next === null
             ? t('xpMax', { value: progress.current })
@@ -60,17 +65,17 @@ export function SheetXpBar({
                 aria-label={value}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-valuenow={Math.round(progress.ratio * 100)}
+                aria-valuenow={Math.round(fill * 100)}
                 aria-valuetext={note ? `${value} · ${note}` : value}
                 className="relative h-2.5 overflow-hidden rounded-full bg-(--sheet-track)"
             >
-                <ScaleFill ratio={progress.ratio} className="bg-hud-muted" />
+                <ScaleFill ratio={fill} className="bg-hud-gold" />
             </div>
             <div
                 aria-hidden
                 className="flex justify-between text-xs text-hud-muted tabular-nums"
             >
-                <span>{`${t('levelLabel')} ${level}`}</span>
+                <span>0</span>
                 {progress.next !== null && (
                     <span>{`${t('levelLabel')} ${level + 1}`}</span>
                 )}

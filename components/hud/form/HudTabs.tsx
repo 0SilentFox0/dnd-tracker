@@ -60,10 +60,10 @@ export function HudTabs<T extends string>({
         <Tabs value={value} onValueChange={(v) => onValueChange(v as T)}>
             <div
                 className={cn(
-                    'sticky z-20 bg-hud-page/[.97]',
+                    'sticky z-20',
                     sheet
                         ? 'top-[calc(var(--shell-header-h,57px)/var(--sheet-zoom,1))] px-4 py-2'
-                        : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule'
+                        : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule bg-hud-page/[.97]'
                 )}
             >
                 {header}

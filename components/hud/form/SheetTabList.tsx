@@ -55,7 +55,7 @@ export function SheetTabList({
             <TabsList
                 ref={list}
                 onScroll={syncEdge}
-                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-[4px] border border-hud-line bg-hud-panel p-[3px] shadow-sm"
+                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-[4px] border border-hud-line bg-hud-panel/70 p-[3px] shadow-sm backdrop-blur-md"
             >
                 {tabs.map((tab) => (
                     <TabsTrigger
