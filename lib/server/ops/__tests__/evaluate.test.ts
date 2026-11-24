@@ -26,7 +26,13 @@ import { ALERT_RULES } from '@/lib/ops/alert-rules';
 
 const now = new Date('2026-03-10T12:00:00Z');
 
-const rule = (id: string) => ALERT_RULES.find((r) => r.id === id)!;
+const rule = (id: string) => {
+    const found = ALERT_RULES.find((r) => r.id === id);
+
+    if (!found) throw new Error(`Unknown rule: ${id}`);
+
+    return found;
+};
 
 beforeEach(() => {
     vi.clearAllMocks();
