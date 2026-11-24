@@ -2,8 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 
-import { BattleTempControls } from './BattleTempControls';
-
 import { useBattleScene, useTurnTimer } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
@@ -36,13 +34,16 @@ export function RoundBadge({ className }: { className?: string }) {
     );
 }
 
-export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
+export function BattleTopBar({ inline = false }: { inline?: boolean }) {
     useTurnTimer();
 
     return (
-        <div className="flex h-12 items-center gap-3 px-4">
-            <RoundBadge />
-            <BattleTempControls onComplete={onComplete} />
-        </div>
+        <RoundBadge
+            className={
+                inline
+                    ? 'h-12 px-4'
+                    : 'pointer-events-none absolute top-3 left-3 z-20 rounded-xl bg-black/55 px-3 py-1.5'
+            }
+        />
     );
 }

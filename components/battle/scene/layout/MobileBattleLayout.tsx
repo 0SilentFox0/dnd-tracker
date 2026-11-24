@@ -10,6 +10,7 @@ import { BattleOverBanner } from '../banners/BattleOverBanner';
 import { ConnectionBanner } from '../banners/ConnectionBanner';
 import { LastActionTicker } from '../banners/LastActionTicker';
 import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
+import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
 import { MapStripRow, MapStripSlotContext } from './MapStrip';
 
@@ -23,6 +24,7 @@ import { ParticipantList } from '@/components/battle/participants/ParticipantLis
 import { ReserveSheetButton } from '@/components/battle/participants/ReservePanel';
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
 import { HUD_SURFACE, HudButton } from '@/components/hud';
+import { actionIcon } from '@/components/hud/icons/battle';
 import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
@@ -49,8 +51,14 @@ const DmPanel = dynamic(
     { ssr: false }
 );
 
-export function MobileBattleLayout() {
+export function MobileBattleLayout({
+    onComplete,
+}: {
+    onComplete?: () => void;
+}) {
     const t = useTranslations('battle.scene');
+
+    const td = useTranslations('battle.drawers');
 
     const ts = useTranslations('battle.sides');
 
@@ -82,6 +90,10 @@ export function MobileBattleLayout() {
     const [slot, setSlot] = useState<HTMLDivElement | null>(null);
 
     const [dmOpen, setDmOpen] = useState(false);
+
+    const [toolsOpen, setToolsOpen] = useState(false);
+
+    const ToolsIcon = actionIcon.railTools;
 
     const { show: showLog, close: closeLog } = log;
 
@@ -130,7 +142,7 @@ export function MobileBattleLayout() {
                 <ConnectionBanner />
                 {!mapTab && (
                     <>
-                        <BattleTopBar />
+                        <BattleTopBar inline />
                         <InitiativeTrack />
                         <LastActionTicker onOpenLog={openLatestLog} />
                         {completed ? (
@@ -164,6 +176,15 @@ export function MobileBattleLayout() {
                     </div>
                     {mapTab && <ReserveSheetButton />}
                     {mapTab && <BattlePlayerViewToggle className="shrink-0" />}
+                    <HudButton
+                        type="button"
+                        data-tour="battle.map-tools"
+                        onClick={() => setToolsOpen(true)}
+                        aria-label={td('tools')}
+                        className="flex w-11 items-center justify-center text-[var(--ink)]"
+                    >
+                        <ToolsIcon className="size-5" />
+                    </HudButton>
                     {isDM && battle.status !== BattleStatus.PREPARED && (
                         <HudButton
                             type="button"
@@ -244,6 +265,12 @@ export function MobileBattleLayout() {
                     </div>
                 )}
                 <ActionResultCard />
+                <ToolsDrawer
+                    open={toolsOpen}
+                    onOpenChange={setToolsOpen}
+                    onComplete={onComplete}
+                    withSound={false}
+                />
                 {isDM && (
                     <DmPanel
                         panel={{ open: dmOpen, onOpenChange: setDmOpen }}

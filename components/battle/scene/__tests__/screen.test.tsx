@@ -79,7 +79,9 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        expect(await screen.findByText('Журнал')).toBeTruthy();
+        expect(
+            await screen.findByRole('button', { name: 'Журнал' })
+        ).toBeTruthy();
         expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
         expect(screen.queryByText(/Союзники ·/)).toBeNull();
         expect(screen.queryByText(/Вороги ·/)).toBeNull();
@@ -102,7 +104,7 @@ describe('BattleScreen', () => {
         expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
     });
 
-    it('десктоп, вигляд «Карта»: резерв окремою групою з кнопкою введення; у «Колонках» — лише в списку', async () => {
+    it('десктоп, вигляд «Карта»: резерв у шторці з кнопкою введення; у «Колонках» ще й у списку', async () => {
         media.wide = true;
         window.localStorage.clear();
 
@@ -115,6 +117,10 @@ describe('BattleScreen', () => {
 
         render(<BattleScreen />, { wrapper });
 
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'Резерв' })
+        );
+
         const group = await screen.findByRole('region', { name: 'Резерв' });
 
         expect(group.textContent).toContain('Резерв (1)');
@@ -126,10 +132,9 @@ describe('BattleScreen', () => {
         });
 
         fireEvent.click(screen.getByRole('button', { name: 'Колонки' }));
-        expect(screen.queryByRole('region', { name: 'Резерв' })).toBeNull();
         expect(
             screen.getAllByRole('button', { name: 'Ввести в бій: Біс' })
-        ).toHaveLength(1);
+        ).toHaveLength(2);
     });
 
     it('телефон, вкладка «Карта»: кнопка «Резерв (N)» відкриває список; без резерву кнопки немає', async () => {
@@ -288,7 +293,7 @@ describe('BattleScreen', () => {
         expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
         expect(screen.queryByRole('tab')).toBeNull();
         expect(screen.getByText(/Вороги ·/)).toBeTruthy();
-        expect(screen.getByText('Журнал')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Журнал' })).toBeTruthy();
     });
 
     it('завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі', async () => {

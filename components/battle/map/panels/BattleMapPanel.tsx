@@ -118,6 +118,8 @@ function BattleMapPanelContent({
 
     const inRow = !phone && !!slot;
 
+    const noHost = !phone && slot === undefined;
+
     const palettes =
         weatherTool &&
         motionTool &&
@@ -146,7 +148,7 @@ function BattleMapPanelContent({
                 'z-20 flex flex-col items-start gap-1.5',
                 phone
                     ? 'w-full shrink-0 px-1 pb-1'
-                    : !inRow && 'absolute top-2 left-2'
+                    : noHost && 'absolute top-2 left-2'
             )}
         >
             <div className={cn('flex flex-wrap gap-1.5', phone && 'w-full')}>
@@ -204,12 +206,7 @@ function BattleMapPanelContent({
             {(terrainTool.active ||
                 palettes.some((p) => p.tool.active) ||
                 fogTool?.active) && (
-                <div
-                    className={cn(
-                        'flex flex-col items-start gap-1.5',
-                        inRow && 'absolute inset-x-3 top-full z-30 mt-1'
-                    )}
-                >
+                <div className="flex flex-col items-start gap-1.5">
                     {terrainTool.active && (
                         <MapTerrainToolbar
                             tool={terrainTool}
@@ -227,11 +224,7 @@ function BattleMapPanelContent({
                 </div>
             )}
             {modeTools?.paletteOpen && ui?.EditPalette && (
-                <div
-                    className={cn(
-                        inRow && 'absolute inset-x-3 top-full z-30 mt-1'
-                    )}
-                >
+                <div>
                     <ui.EditPalette tools={modeTools.raw} />
                 </div>
             )}
@@ -322,7 +315,8 @@ function BattleMapPanelContent({
                 look={look}
                 phone={phone}
             />
-            {!phone && (inRow ? tools && createPortal(tools, slot) : tools)}
+            {!phone &&
+                (noHost ? tools : inRow && tools && createPortal(tools, slot))}
             {!phone && fogControls}
         </div>
     );

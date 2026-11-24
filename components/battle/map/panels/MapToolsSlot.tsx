@@ -2,6 +2,9 @@
 
 import { createContext, useContext } from 'react';
 
-export const MapToolsSlotContext = createContext<HTMLElement | null>(null);
+// undefined = no host (tools render over the map); null = host not mounted yet (render nothing)
+export const MapToolsSlotContext = createContext<HTMLElement | null | undefined>(
+    undefined
+);
 
 export const useMapToolsSlot = () => useContext(MapToolsSlotContext);

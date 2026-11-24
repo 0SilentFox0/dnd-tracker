@@ -428,5 +428,16 @@
     "title": "Details: {name}",
     "toToken": "To token",
     "offscreen": "Token is off screen"
+  },
+  "drawers": {
+    "rail": "Battle panels",
+    "log": "Log",
+    "dm": "DM actions",
+    "reserve": "Reserve",
+    "tools": "Tools",
+    "view": "View",
+    "display": "Display",
+    "sound": "Sound and music",
+    "dmSection": "DM"
   }
 }

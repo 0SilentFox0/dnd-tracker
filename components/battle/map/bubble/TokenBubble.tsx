@@ -31,6 +31,7 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
         intents,
         effects,
         roster: { hero },
+        viewer: { isDM },
     } = useBattleScene();
 
     const desktop = useMediaQuery(DESKTOP_QUERY);
@@ -39,7 +40,8 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
         ? battle.initiativeOrder?.find((p) => p.basicInfo.id === selectedId)
         : undefined;
 
-    const fallen = !!participant && isFallen(participant);
+    // DM opens fallen tokens too (revive); players never do
+    const fallen = !!participant && !isDM && isFallen(participant);
 
     const open =
         !!participant &&

@@ -2,14 +2,12 @@
 
 import { createContext, useContext } from 'react';
 
-export type SceneSlotName = 'dock' | 'rail' | 'top';
+export type SceneSlotName = 'dock';
 
 export type SceneSlots = Record<SceneSlotName, HTMLElement | null>;
 
 export const EMPTY_SCENE_SLOTS: SceneSlots = {
     dock: null,
-    rail: null,
-    top: null,
 };
 
 export const SceneSlotsContext = createContext<SceneSlots>(EMPTY_SCENE_SLOTS);
