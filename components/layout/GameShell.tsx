@@ -1,48 +1,13 @@
-'use client';
+import type { ComponentProps } from 'react';
 
-import type { ReactNode } from 'react';
+import { GameShellClient } from '@/components/layout/GameShellClient';
+import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 
-import {
-    type GameShellNavItem,
-    HudGameShell,
-} from '@/components/hud';
-import { HeaderActions } from '@/components/layout/HeaderActions';
-
-export function GameShell({
-    items,
-    activeId,
-    title,
-    breadcrumbRootLabel,
-    fit,
-    children,
-}: {
-    items: GameShellNavItem[];
-    activeId: string;
-    title: string;
-    breadcrumbRootLabel?: string;
-    fit?: boolean;
-    children: ReactNode;
-}) {
+// campaign pages replace the root messages, so the header's "What's new" needs its own namespace
+export function GameShell(props: ComponentProps<typeof GameShellClient>) {
     return (
-        <HudGameShell
-            items={items}
-            activeId={activeId}
-            title={title}
-            breadcrumbRootLabel={breadcrumbRootLabel}
-            fit={fit}
-            actions={
-                <>
-                    <div className="hidden items-center gap-2 sm:flex">
-                        <HeaderActions />
-                    </div>
-                    <div className="game-shell-mobile-actions flex items-center gap-1.5 sm:hidden">
-                        <HeaderActions mode="primary" />
-                    </div>
-                </>
-            }
-            menuActions={<HeaderActions mode="secondary" />}
-        >
-            {children}
-        </HudGameShell>
+        <ExtendLocaleScope namespaces={['whatsNew']}>
+            <GameShellClient {...props} />
+        </ExtendLocaleScope>
     );
 }

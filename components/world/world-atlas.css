@@ -876,6 +876,18 @@ body:has([data-shell-fit]) {
   inset-inline-end: .5rem;
 }
 
+.world-game-editor-body[data-left-panels="tree"] .world-journey {
+  inset-inline-start: 14rem;
+}
+
+.world-game-editor-body[data-left-panels="layers"] .world-journey {
+  inset-inline-start: 23rem;
+}
+
+.world-game-editor-body[data-left-panels="tree-layers"] .world-journey {
+  inset-inline-start: 36.5rem;
+}
+
 .world-game-page .world-map-legend {
   pointer-events: none;
 }

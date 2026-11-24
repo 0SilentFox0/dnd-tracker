@@ -190,6 +190,15 @@ export function WorldEditorPageClient({
                                         !eyes.asHeroId &&
                                         layers.panel.open;
 
+                                    const leftPanels = isDesktop
+                                        ? ([
+                                              treeShown && 'tree',
+                                              layersShown && 'layers',
+                                          ]
+                                              .filter(Boolean)
+                                              .join('-') || undefined)
+                                        : undefined;
+
                                     const bubble =
                                         bubbleCard.open && marker ? (
                                             <DmMarkerBubble
@@ -324,6 +333,9 @@ export function WorldEditorPageClient({
                                                 </div>
                                                 <div
                                                     className='world-game-editor-body'
+                                                    data-left-panels={
+                                                        leftPanels
+                                                    }
                                                 >
                                                     {isDesktop && treeShown ? (
                                                         <aside

@@ -2,7 +2,7 @@ import type { AbstractIntlMessages } from 'next-intl';
 
 import type { Namespace } from './config';
 import { ExtendMessages } from './extend-messages';
-import { loadMessages } from './messages';
+import { loadMessages, trimWhatsNew } from './messages';
 import { getRequestLocale } from './request-locale';
 
 export async function ExtendLocaleScope({
@@ -12,7 +12,9 @@ export async function ExtendLocaleScope({
     namespaces: readonly Namespace[];
     children: React.ReactNode;
 }) {
-    const messages = await loadMessages(await getRequestLocale(), namespaces);
+    const messages = trimWhatsNew(
+        await loadMessages(await getRequestLocale(), namespaces)
+    );
 
     return (
         <ExtendMessages messages={messages as AbstractIntlMessages}>

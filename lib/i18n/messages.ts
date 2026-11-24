@@ -47,7 +47,7 @@ export async function loadMessages(
     return Object.fromEntries(entries);
 }
 
-function trimWhatsNew(messages: Messages): Messages {
+export function trimWhatsNew(messages: Messages): Messages {
     const whatsNew = messages.whatsNew;
 
     if (!isPlainObject(whatsNew)) return messages;
