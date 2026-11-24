@@ -96,7 +96,7 @@
 | `AudioDock`, `SoundboardPanel` у `CornerStack` | Шторка «Інструменти» (звук/музика/саундборд) |
 | `ActionResultCard`, `BattleResultScreen`, `CompleteBattleDialog`, `DmRevivePrompt`, `CounterWindow*`, `AttackWizard`/`SpellBook`/діалоги | Без змін (діалоги/оверлеї поза композицією); `ActionResultCard` над доком |
 | `ParticipantList` (союзники/вороги) | Колонки (без мапи) і вид у «Інструменти» |
-| `PREPARED`: `BattlePreparationView` | Без змін, лише оболонка `GameShell` і змінна висоти |
+| `PREPARED`: `BattlePreparationView` | Без змін, лише повноекранна висота без шапки |
 | Режими мап (maze, motion, зони, туман-тулбар) | Через `modeUiOf`/слоти без змін; їхні тулбари — у шторці «Інструменти»; режимні `TurnControls` (`ui.TurnControls`) рендеряться в `ActionGrid`-контейнері |
 | Права: DM / гравець / резерв-стаб / спостерігач `readOnly` / `playerView` | Док тільки у героя гравця й тільки в активному ході; DM-шторка тільки `isDM && !readOnly`; в `readOnly` лише мапа, ініціатива, ticker, журнал (без контролів) |
 | Системи (`wfrp`, d6pool, d20+модулі) | Слоти `systems/<id>/ui`, `systemUiOf`: `heroPanels`, `HeroStats`, `badges`, `turnStart`, `notices`, `dialogs`; ромби дока від `actionEconomy`; жодних `=== "<id>"` у ядрі |
