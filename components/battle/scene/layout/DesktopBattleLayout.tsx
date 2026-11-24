@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
@@ -13,7 +14,7 @@ import { DrawerRail } from '../drawers/DrawerRail';
 import type { DrawerKey } from '../drawers/rail-items';
 import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
-import { MapStripSlotContext } from './MapStrip';
+import { MapStripSlotContext, useNoticeStack } from './MapStrip';
 import {
     EMPTY_SCENE_SLOTS,
     type SceneSlots,
@@ -94,6 +95,12 @@ function BattleColumns() {
     );
 }
 
+function InNoticeStack({ children }: { children: ReactNode }) {
+    const stack = useNoticeStack();
+
+    return stack ? createPortal(children, stack) : null;
+}
+
 export function DesktopBattleLayout({
     onComplete,
 }: {
@@ -167,33 +174,35 @@ export function DesktopBattleLayout({
     return (
         <SceneSlotsContext value={slots}>
             <MapStripSlotContext value={resultSlot}>
-                <div className="scene-full flex flex-col overflow-hidden">
-                    <ConnectionBanner />
-                    <BattleTopBar inline />
-                    {battle.status === BattleStatus.COMPLETED && (
-                        <BattleOverBanner />
-                    )}
-                    {awaiting && <AwaitingDmBanner />}
-                    <div className="flex h-20 items-center border-y border-white/[.08]">
-                        <div className="min-w-0 flex-1">
-                            <InitiativeTrack onReorder={onReorder} />
-                        </div>
-                        <div className="w-[420px] shrink-0">
-                            <LastActionTicker onOpenLog={() => log.show()} />
-                        </div>
-                    </div>
-                    <div className="relative flex min-h-0 flex-1 flex-col">
+                <div className="scene-full relative flex flex-col overflow-hidden">
+                    <div className="relative min-h-0 flex-1">
                         {battle.map && viewMode === 'map' ? (
-                            <main className="min-h-0 flex-1">
+                            <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
                                     <BattleMapPanel onBusyChange={setMapBusy} />
                                 </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
-                            <main className="grid min-h-0 flex-1 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
+                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto px-6 pt-28 pb-40">
                                 <BattleColumns />
                             </main>
                         )}
+                        <BattleTopBar />
+                        <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-340px))] -translate-x-1/2 flex-col gap-1 *:pointer-events-auto">
+                            <div className="rounded-2xl border border-white/15 bg-black/60 backdrop-blur-sm">
+                                <InitiativeTrack onReorder={onReorder} />
+                            </div>
+                            <div className="rounded-xl bg-black/60 backdrop-blur-sm">
+                                <LastActionTicker onOpenLog={() => log.show()} />
+                            </div>
+                        </div>
+                        <InNoticeStack>
+                            <ConnectionBanner />
+                            {battle.status === BattleStatus.COMPLETED && (
+                                <BattleOverBanner />
+                            )}
+                            {awaiting && <AwaitingDmBanner />}
+                        </InNoticeStack>
                         <TokenBubble mapBusy={mapBusy} />
                         {hero && (
                             <div className="pointer-events-none absolute bottom-3 left-3 z-20">

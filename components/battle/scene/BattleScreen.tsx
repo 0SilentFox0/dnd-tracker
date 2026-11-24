@@ -221,7 +221,7 @@ export function BattleScreen() {
                         data-notice-stack
                         className={cn(
                             'pointer-events-none fixed inset-x-4 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto',
-                            Desktop ? 'top-24' : 'top-14'
+                            Desktop ? 'top-[116px]' : 'top-14'
                         )}
                     >
                         <BattleToast />

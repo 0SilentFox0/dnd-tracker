@@ -41,14 +41,14 @@ export const InitiativeTrack = memo(function InitiativeTrack({
         <div
             ref={track}
             data-tour="battle.initiative"
-            className="relative flex h-[72px] items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none]"
+            className="relative flex h-14 items-center gap-1.5 overflow-x-auto px-3 [scrollbar-width:none]"
         >
             {queue.map((e, i) =>
                 e.kind === 'round' ? (
                     <span
                         key="round"
                         data-flip="round"
-                        className="relative mx-0.5 h-12 w-px shrink-0 bg-white/30"
+                        className="relative mx-0.5 h-9 w-px shrink-0 bg-white/30"
                     >
                         <span className="hud-sc absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full text-[11px] text-[var(--hud-muted)]">
                             {roman(e.round)}
@@ -73,7 +73,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                 e.current && 'animate-[hud-turn_.6s_ease-out]'
                             )}
                             participant={e.participant}
-                            size={e.current ? 52 : 36}
+                            size={e.current ? 44 : 32}
                             current={e.current}
                             me={
                                 !e.current &&
