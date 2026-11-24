@@ -59,13 +59,11 @@
 .motion-indicator {
   position: absolute;
   left: 0;
+  right: 0;
   bottom: 0;
   height: 3px;
-  width: 1px;
   transform-origin: left center;
   background: var(--hud-gold);
-  transition: transform var(--motion-slow) var(--ease-spring);
-  will-change: transform;
 }
 
 .motion-bar {
@@ -100,8 +98,7 @@
   }
   .motion-flash[data-flash] { animation: none; }
   .motion-press,
-  .motion-lift,
-  .motion-indicator { transition: none; }
+  .motion-lift { transition: none; }
   .motion-press:active { transform: none; }
   .motion-lift:hover { transform: none; }
 }

@@ -3,10 +3,8 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSlidingIndicator } from '@/lib/hooks/common';
+import { useIndicatorFlip } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-
-const EDGE_PAD = 24;
 
 interface SheetTabItem {
     id: string;
@@ -28,9 +26,11 @@ export function SheetTabList({
 }) {
     const list = useRef<HTMLDivElement>(null);
 
-    const box = useSlidingIndicator(list, value);
+    const indicator = useRef<HTMLSpanElement>(null);
 
-    const [animated, setAnimated] = useState(false);
+    const activeTab = useRef<HTMLButtonElement>(null);
+
+    useIndicatorFlip(indicator, activeTab, value);
 
     const [atEnd, setAtEnd] = useState(false);
 
@@ -41,31 +41,14 @@ export function SheetTabList({
     };
 
     useEffect(() => {
-        if (!box) return;
-
-        const frame = requestAnimationFrame(() => setAnimated(true));
-
-        return () => cancelAnimationFrame(frame);
-    }, [box]);
-
-    useEffect(() => {
-        const el = list.current;
-
-        if (!el || !box) return;
-
-        if (box.left < el.scrollLeft + EDGE_PAD)
-            el.scrollTo?.({ left: box.left - EDGE_PAD, behavior: 'smooth' });
-        else if (
-            box.left + box.width >
-            el.scrollLeft + el.clientWidth - EDGE_PAD
-        )
-            el.scrollTo?.({
-                left: box.left + box.width - el.clientWidth + EDGE_PAD,
-                behavior: 'smooth',
-            });
+        activeTab.current?.scrollIntoView?.({
+            inline: 'nearest',
+            block: 'nearest',
+            behavior: 'smooth',
+        });
 
         syncEdge();
-    }, [box]);
+    }, [value]);
 
     return (
         <div className="relative">
@@ -79,8 +62,9 @@ export function SheetTabList({
                         key={tab.id}
                         value={tab.id}
                         data-tab={tab.id}
+                        ref={tab.id === value ? activeTab : undefined}
                         className={cn(
-                            'motion-press min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-[3px] px-3 text-[15px] font-medium text-hud-text hover:bg-hud-raised hover:text-hud-ink data-[state=active]:bg-hud-raised! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[0_1px_2px_rgba(0,0,0,.35),inset_0_1px_0_rgba(255,255,255,.06)] [&_svg]:size-5 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-gold',
+                            'motion-press relative min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-[3px] px-3 text-[15px] font-medium text-hud-text hover:bg-hud-raised hover:text-hud-ink data-[state=active]:bg-hud-raised! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[0_1px_2px_rgba(0,0,0,.35),inset_0_1px_0_rgba(255,255,255,.06)] [&_svg]:size-5 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-gold',
                             trigger
                         )}
                     >
@@ -93,21 +77,16 @@ export function SheetTabList({
                                 className="inline-block h-1.5 w-1.5 rounded-full bg-hud-danger"
                             />
                         )}
+                        {tab.id === value && (
+                            <span
+                                ref={indicator}
+                                aria-hidden
+                                data-testid="tab-indicator"
+                                className="motion-indicator"
+                            />
+                        )}
                     </TabsTrigger>
                 ))}
-                <span
-                    aria-hidden
-                    data-testid="tab-indicator"
-                    className="motion-indicator"
-                    style={{
-                        bottom: 3,
-                        opacity: box ? 1 : 0,
-                        transform: box
-                            ? `translateX(${box.left}px) scaleX(${box.width})`
-                            : undefined,
-                        transition: animated ? undefined : 'none',
-                    }}
-                />
             </TabsList>
             {!atEnd && (
                 <span

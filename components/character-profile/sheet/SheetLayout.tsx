@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, type Ref, useRef } from 'react';
+import { type ReactNode, type Ref, useEffect, useRef } from 'react';
 
 import {
     type ProfileTab,
@@ -12,8 +12,6 @@ import { SheetHud } from './SheetHud';
 import { CompactHero, SheetIdentityPanel } from './SheetIdentityPanel';
 import { SheetRollProvider } from './SheetRollProvider';
 import { SheetTopBar } from './SheetTopBar';
-
-import { useCssVarHeight } from '@/lib/hooks/common';
 
 interface SheetLayoutProps {
     heroRef: Ref<HTMLElement>;
@@ -45,7 +43,30 @@ export function SheetLayout({
 
     const root = useRef<HTMLDivElement>(null);
 
-    useCssVarHeight(root, '--shell-header-h', 'header.sticky');
+    useEffect(() => {
+        const host = root.current;
+
+        const header = document.querySelector<HTMLElement>('header.sticky');
+
+        if (!host || !header) return;
+
+        const sync = () =>
+            host.style.setProperty(
+                '--shell-header-h',
+                `${header.getBoundingClientRect().height}px`
+            );
+
+        sync();
+
+        const observer = new ResizeObserver(sync);
+
+        observer.observe(header);
+
+        return () => {
+            observer.disconnect();
+            host.style.removeProperty('--shell-header-h');
+        };
+    }, []);
 
     return (
         <SheetRollProvider>

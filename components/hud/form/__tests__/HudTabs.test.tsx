@@ -96,9 +96,7 @@ describe('HudTabs', () => {
         );
         expect(active.getAttribute('data-tab')).toBe('a');
         expect(active.querySelector('[data-testid="icon-a"]')).not.toBeNull();
-        expect(screen.getByTestId('tab-indicator').className).toContain(
-            'motion-indicator'
-        );
+        expect(screen.getByTestId('tab-indicator').parentElement).toBe(active);
     });
 
     it('sheet variant: tablist semantics with a roving tabindex', () => {
