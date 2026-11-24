@@ -325,7 +325,22 @@
     "core": "Actions",
     "gear": "Inventory",
     "strikeAndReturn": "Return",
-    "endTurn": "End turn"
+    "endTurn": "End turn",
+    "popoverTitle": "Turn actions · {name} · round {round}",
+    "groupAction": "Action",
+    "groupBonus": "Bonus action",
+    "statusAvailable": "available",
+    "statusSpent": "used",
+    "sub": {
+      "attack": "Weapon strike",
+      "magic": "Cast a spell",
+      "channel": "Channel",
+      "ability": "Special ability",
+      "bonus": "Quick action",
+      "core": "Standard actions",
+      "gear": "Swap items",
+      "strikeAndReturn": "Strike and step back"
+    }
   },
   "turnControls": {
     "reactionSpell": "Reaction spell"

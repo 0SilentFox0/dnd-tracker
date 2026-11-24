@@ -11,6 +11,7 @@ export {
 } from './use-counter-window';
 export { useAbilityMapAim } from './useAbilityMapAim';
 export { useAbilityPicker } from './useAbilityPicker';
+export { useActionHotkeys } from './useActionHotkeys';
 export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
 export { useAddParticipantForm } from './useAddParticipantForm';
 export { useAttackWizard } from './useAttackWizard';

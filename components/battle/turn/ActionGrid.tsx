@@ -5,19 +5,23 @@ import { useTranslations } from 'next-intl';
 
 import { HudButton } from '@/components/hud';
 import { actionIcon, type ActionIconKey } from '@/components/hud/icons/battle';
-import type { usePlayerTurn } from '@/lib/hooks/battle';
+import { useActionHotkeys, type usePlayerTurn } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 type Turn = ReturnType<typeof usePlayerTurn>;
 
 const Tile = ({
     icon,
     label,
+    sub,
+    hotkey,
     used,
     primary,
     onClick,
 }: {
     icon: ActionIconKey;
     label: ReactNode;
+    sub?: string;
+    hotkey?: number;
     used?: boolean;
     primary?: boolean;
     onClick?: () => void;
@@ -39,12 +43,57 @@ const Tile = ({
             <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[var(--gold)]/40 bg-black/30">
                 <Icon className="size-10 text-[var(--gold)]" />
             </span>
-            <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">
-                {label}
+            <span className="min-w-0 flex-1">
+                <span className="hud-sc block text-[17px] leading-5 [overflow-wrap:anywhere]">
+                    {label}
+                </span>
+                {sub && (
+                    <span
+                        aria-hidden
+                        className="block truncate text-xs text-hud-soft"
+                    >
+                        {sub}
+                    </span>
+                )}
             </span>
+            {hotkey !== undefined && (
+                <kbd
+                    aria-hidden
+                    className="shrink-0 rounded border border-white/25 px-1.5 text-xs text-hud-soft"
+                >
+                    {hotkey}
+                </kbd>
+            )}
         </HudButton>
     );
 };
+
+type TileSpec = {
+    id: string;
+    group: 'action' | 'bonus';
+    icon: ActionIconKey;
+    label: ReactNode;
+    used: boolean;
+    primary?: boolean;
+    run?: () => void;
+};
+
+const GroupHeader = ({
+    title,
+    status,
+    spent,
+}: {
+    title: string;
+    status: string;
+    spent: boolean;
+}) => (
+    <div className="hud-sc mt-3 mb-1.5 flex items-center justify-between text-[13px] tracking-[.08em] text-hud-soft first:mt-0">
+        <span>{title}</span>
+        <span className={spent ? undefined : 'text-[var(--gold)]'}>
+            {status}
+        </span>
+    </div>
+);
 
 export function ActionGrid({
     turn,
@@ -53,8 +102,10 @@ export function ActionGrid({
     actions,
     channelLabel,
     gateLabel,
+    hotkeys,
 }: {
     turn: Turn;
+    hotkeys?: { enabled: boolean; close(): void };
     channelLabel?: ReactNode;
     gateLabel?: ReactNode;
     pending: boolean;
@@ -80,105 +131,196 @@ export function ActionGrid({
 }) {
     const t = useTranslations('battle.actions');
 
+    const { status } = turn;
+
+    const tiles: TileSpec[] = [
+        {
+            id: 'attack',
+            group: 'action',
+            icon: 'attack',
+            label: t('attack'),
+            used:
+                (status.actionUsed && !status.attackLeft) ||
+                status.skipped ||
+                pending,
+            primary: true,
+            run: actions.attack,
+        },
+        ...(available.magicTile !== false
+            ? [
+                  {
+                      id: 'magic',
+                      group: 'action' as const,
+                      icon: 'magic' as const,
+                      label: t('magic'),
+                      used:
+                          (status.actionUsed && !status.bonusSpellReady) ||
+                          status.skipped ||
+                          !available.magic ||
+                          pending,
+                      run: actions.magic,
+                  },
+              ]
+            : []),
+        ...(available.channel && channelLabel
+            ? [
+                  {
+                      id: 'channel',
+                      group: 'action' as const,
+                      icon: 'channel' as const,
+                      label: channelLabel,
+                      used: status.actionUsed || status.skipped || pending,
+                      run: actions.channel,
+                  },
+              ]
+            : []),
+        ...(available.ability
+            ? [
+                  {
+                      id: 'ability',
+                      group: 'action' as const,
+                      icon: 'ability' as const,
+                      label: t('ability'),
+                      used: status.actionUsed || status.skipped || pending,
+                      run: actions.ability,
+                  },
+              ]
+            : []),
+        ...(available.core
+            ? [
+                  {
+                      id: 'core',
+                      group: 'action' as const,
+                      icon: 'core' as const,
+                      label: t('core'),
+                      used: status.skipped || pending,
+                      run: actions.core,
+                  },
+              ]
+            : []),
+        ...(turn.gateResult && gateLabel
+            ? [
+                  {
+                      id: 'gate',
+                      group: 'action' as const,
+                      icon: 'gate' as const,
+                      label: gateLabel,
+                      used: true,
+                  },
+              ]
+            : []),
+        ...(available.bonusTile !== false
+            ? [
+                  {
+                      id: 'bonus',
+                      group: 'bonus' as const,
+                      icon: 'bonus' as const,
+                      label: t('bonus'),
+                      used:
+                          !status.bonusAvailable ||
+                          status.skipped ||
+                          !available.bonus ||
+                          pending,
+                      run: actions.bonus,
+                  },
+              ]
+            : []),
+        ...(available.gear
+            ? [
+                  {
+                      id: 'gear',
+                      group: 'bonus' as const,
+                      icon: 'gear' as const,
+                      label: t('gear'),
+                      used:
+                          !status.bonusAvailable || status.skipped || pending,
+                      run: actions.gear,
+                  },
+              ]
+            : []),
+        ...(turn.strikeAndReturn.available
+            ? [
+                  {
+                      id: 'strikeAndReturn',
+                      group: 'bonus' as const,
+                      icon: 'strikeAndReturn' as const,
+                      label: t('strikeAndReturn'),
+                      used: pending,
+                      run: turn.strikeAndReturn.run,
+                  },
+              ]
+            : []),
+    ];
+
+    const keyed = tiles.filter((tile) => tile.run);
+
+    useActionHotkeys({
+        enabled: hotkeys?.enabled ?? false,
+        close: hotkeys?.close ?? (() => undefined),
+        items: keyed.map((tile) => ({
+            key: tile.id,
+            run: () => tile.run?.(),
+            disabled: tile.used,
+        })),
+    });
+
+    const groups = [
+        {
+            id: 'action' as const,
+            title: t('groupAction'),
+            spent: status.actionUsed && !status.attackLeft,
+        },
+        {
+            id: 'bonus' as const,
+            title: t('groupBonus'),
+            spent: !status.bonusAvailable,
+        },
+    ].filter((g) => tiles.some((tile) => tile.group === g.id));
+
     return (
         <>
-            <div
-                data-tour="battle.turn-controls"
-                className="grid grid-cols-2 gap-2 pt-3"
-            >
-                <Tile
-                    icon="attack"
-                    label={t('attack')}
-                    used={
-                        (turn.status.actionUsed && !turn.status.attackLeft) ||
-                        turn.status.skipped ||
-                        pending
-                    }
-                    primary
-                    onClick={actions.attack}
-                />
-                {available.magicTile !== false && (
-                    <Tile
-                        icon="magic"
-                        label={t('magic')}
-                        used={
-                            (turn.status.actionUsed &&
-                                !turn.status.bonusSpellReady) ||
-                            turn.status.skipped ||
-                            !available.magic ||
-                            pending
-                        }
-                        onClick={actions.magic}
-                    />
-                )}
-                {available.channel && channelLabel && (
-                    <Tile
-                        icon="channel"
-                        label={channelLabel}
-                        used={
-                            turn.status.actionUsed ||
-                            turn.status.skipped ||
-                            pending
-                        }
-                        onClick={actions.channel}
-                    />
-                )}
-                {available.ability && (
-                    <Tile
-                        icon="ability"
-                        label={t('ability')}
-                        used={
-                            turn.status.actionUsed ||
-                            turn.status.skipped ||
-                            pending
-                        }
-                        onClick={actions.ability}
-                    />
-                )}
-                {available.bonusTile !== false && (
-                    <Tile
-                        icon="bonus"
-                        label={t('bonus')}
-                        used={
-                            !turn.status.bonusAvailable ||
-                            turn.status.skipped ||
-                            !available.bonus ||
-                            pending
-                        }
-                        onClick={actions.bonus}
-                    />
-                )}
-                {available.core && (
-                    <Tile
-                        icon="core"
-                        label={t('core')}
-                        used={turn.status.skipped || pending}
-                        onClick={actions.core}
-                    />
-                )}
-                {available.gear && (
-                    <Tile
-                        icon="gear"
-                        label={t('gear')}
-                        used={
-                            !turn.status.bonusAvailable ||
-                            turn.status.skipped ||
-                            pending
-                        }
-                        onClick={actions.gear}
-                    />
-                )}
-                {turn.strikeAndReturn.available && (
-                    <Tile
-                        icon="strikeAndReturn"
-                        label={t('strikeAndReturn')}
-                        used={pending}
-                        onClick={turn.strikeAndReturn.run}
-                    />
-                )}
-                {turn.gateResult && gateLabel && (
-                    <Tile icon="gate" label={gateLabel} used />
-                )}
+            <div data-tour="battle.turn-controls" className="pt-3">
+                {groups.map((g) => (
+                    <div key={g.id}>
+                        <GroupHeader
+                            title={g.title}
+                            spent={g.spent}
+                            status={
+                                g.spent
+                                    ? t('statusSpent')
+                                    : t('statusAvailable')
+                            }
+                        />
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            {tiles
+                                .filter((tile) => tile.group === g.id)
+                                .map((tile) => {
+                                    const index = keyed.indexOf(tile);
+
+                                    return (
+                                        <Tile
+                                            key={tile.id}
+                                            icon={tile.icon}
+                                            label={tile.label}
+                                            sub={
+                                                tile.id === 'gate'
+                                                    ? undefined
+                                                    : t(`sub.${tile.id}`)
+                                            }
+                                            hotkey={
+                                                index >= 0 && index < 9
+                                                    ? index + 1
+                                                    : undefined
+                                            }
+                                            used={tile.used}
+                                            primary={tile.primary}
+                                            onClick={tile.run}
+                                        />
+                                    );
+                                })}
+                        </div>
+                    </div>
+                ))}
             </div>
             {turn.phase !== 'countdown' && (
                 <HudButton

@@ -35,6 +35,7 @@ export function ActionDock({
     panel?: {
         open: boolean;
         onOpenChange(open: boolean): void;
+        title?: string;
         content: ReactNode;
     };
     children?: ReactNode;
@@ -108,6 +109,7 @@ export function ActionDock({
                             open={panel.open}
                             onOpenChange={panel.onOpenChange}
                             anchor={actionsButton}
+                            title={panel.title}
                         >
                             {panel.content}
                         </ActionsPopover>

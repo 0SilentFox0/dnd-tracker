@@ -15,11 +15,13 @@ export function ActionsPopover({
     open,
     onOpenChange,
     anchor,
+    title,
     children,
 }: {
     open: boolean;
     onOpenChange(open: boolean): void;
     anchor: ReactNode;
+    title?: string;
     children: ReactNode;
 }) {
     const t = useTranslations('battle.dock');
@@ -33,7 +35,7 @@ export function ActionsPopover({
                 <ResponsiveDialog
                     open={open}
                     onOpenChange={onOpenChange}
-                    title={t('panelTitle')}
+                    title={title ?? t('panelTitle')}
                     hud
                 >
                     {children}
@@ -48,9 +50,14 @@ export function ActionsPopover({
                 side="top"
                 align="center"
                 sideOffset={10}
-                aria-label={t('panelTitle')}
+                aria-label={title ?? t('panelTitle')}
                 className="w-[min(420px,92vw)] border-white/20 bg-black/80 p-3"
             >
+                {title && (
+                    <div className="hud-sc text-[15px] tracking-[.08em] text-[var(--gold)]">
+                        {title}
+                    </div>
+                )}
                 {children}
             </PopoverContent>
         </Popover>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 
 import { ActionDock } from './dock/ActionDock';
 import { ActionGrid } from './ActionGrid';
@@ -82,6 +83,8 @@ export function MyTurnControls({
     hero: BattleParticipant;
     dock?: boolean;
 }) {
+    const t = useTranslations('battle.actions');
+
     const { anyPending, battle, intents } = useBattleScene();
 
     const { actionEconomy, tested, spells } = useBattleRules();
@@ -211,6 +214,11 @@ export function MyTurnControls({
                 )
             }
             pending={anyPending}
+            hotkeys={{
+                enabled:
+                    actionsOpen && !intents.mapAim && !intents.mapPick,
+                close: () => setActionsOpen(false),
+            }}
             available={{
                 channel: !!systemUi.ChannelDialog && tested && hasMagic,
                 magic: hasMagic,
@@ -288,6 +296,10 @@ export function MyTurnControls({
                   panel={{
                       open: actionsOpen,
                       onOpenChange: setActionsOpen,
+                      title: t('popoverTitle', {
+                          name: hero.basicInfo.name,
+                          round,
+                      }),
                       content: grid,
                   }}
               >
