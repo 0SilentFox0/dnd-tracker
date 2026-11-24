@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react';
+
+import { CampaignGameShell } from '@/app/campaigns/[id]/campaign-game-shell';
 import { CharacterProfile } from '@/components/character-profile';
 import { NoCharacterState } from '@/components/characters/player-draft/NoCharacterState';
 import { CharacterType } from '@/lib/constants/characters';
@@ -24,7 +27,19 @@ export default async function CharacterPage({
 }) {
     const [{ id }, { tab }] = await Promise.all([params, searchParams]);
 
-    const { userId, isDM, campaign } = await requireCampaignMember(id);
+    const access = await requireCampaignMember(id);
+
+    const { userId, isDM, campaign } = access;
+
+    const shell = (content: ReactNode) => (
+        <CampaignGameShell
+            campaign={campaign}
+            viewer={access}
+            active="character"
+        >
+            {content}
+        </CampaignGameShell>
+    );
 
     const character = await prisma.character.findFirst({
         where: {
@@ -37,7 +52,7 @@ export default async function CharacterPage({
     });
 
     if (!character) {
-        return <NoCharacterState campaignId={id} canCreate={!isDM} />;
+        return shell(<NoCharacterState campaignId={id} canCreate={!isDM} />);
     }
 
     const rules = parseRules(campaign.rules);
@@ -77,9 +92,13 @@ export default async function CharacterPage({
 
     const namespaces = systemScope(await systemOfCampaign(id), 'character');
 
-    return namespaces.length ? (
-        <ExtendLocaleScope namespaces={namespaces}>{profile}</ExtendLocaleScope>
-    ) : (
-        profile
+    return shell(
+        namespaces.length ? (
+            <ExtendLocaleScope namespaces={namespaces}>
+                {profile}
+            </ExtendLocaleScope>
+        ) : (
+            profile
+        )
     );
 }

@@ -40,24 +40,27 @@ import CharacterPage from '../page';
 
 const DEFAULT_RULES = defaultRulesFor({ key: 'homm' });
 
-const render = () =>
-    CharacterPage({
+type Rendered = ReactElement<{
+    queryKey: unknown;
+    data: unknown;
+    children: ReactElement<{
+        queryKey: unknown;
+        data: unknown;
+        children: ReactElement<{
+            characterId: string;
+            initialTab?: string;
+        }>;
+    }>;
+}>;
+
+const render = async () => {
+    const shell = (await CharacterPage({
         params: Promise.resolve({ id: 'c1' }),
         searchParams: Promise.resolve({ tab: 'magic' }),
-    }) as Promise<
-        ReactElement<{
-            queryKey: unknown;
-            data: unknown;
-            children: ReactElement<{
-                queryKey: unknown;
-                data: unknown;
-                children: ReactElement<{
-                    characterId: string;
-                    initialTab?: string;
-                }>;
-            }>;
-        }>
-    >;
+    })) as ReactElement<{ children: ReactElement }>;
+
+    return shell.props.children as Rendered;
+};
 
 describe('CharacterPage (server)', () => {
     beforeEach(() => {

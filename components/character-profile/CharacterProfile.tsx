@@ -166,7 +166,7 @@ export function ProfileShell({ children }: { children: ReactNode }) {
         <div
             className={cn(
                 HUD_SURFACE,
-                'mx-auto min-h-dvh max-w-3xl bg-[radial-gradient(120%_60%_at_50%_0%,var(--palette-secondary,#2a221a),var(--palette-background,#110e0b)_70%)] pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] lg:max-w-5xl'
+                'pb-[calc(env(safe-area-inset-bottom,0px)+3rem)]'
             )}
         >
             {children}

@@ -7,17 +7,31 @@ describe('shouldUseGameShell', () => {
         expect(shouldUseGameShell('/campaigns')).toBe(true);
         expect(shouldUseGameShell('/campaigns/campaign-1')).toBe(true);
         expect(shouldUseGameShell('/campaigns/campaign-1/')).toBe(true);
-        expect(shouldUseGameShell('/campaigns/campaign-1/journal')).toBe(
+        expect(shouldUseGameShell('/campaigns/campaign-1/journal')).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1/world')).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1/dm/world/')).toBe(
             true
         );
-        expect(shouldUseGameShell('/campaigns/campaign-1/world')).toBe(
+        expect(shouldUseGameShell('/campaigns/campaign-1/character')).toBe(
             true
         );
         expect(
-            shouldUseGameShell('/campaigns/campaign-1/dm/world/')
+            shouldUseGameShell('/campaigns/campaign-1/dm/characters/ch-1')
         ).toBe(true);
+        expect(shouldUseGameShell('/campaigns/campaign-1/character/new')).toBe(
+            false
+        );
+        expect(shouldUseGameShell('/campaigns/campaign-1/character/edit')).toBe(
+            false
+        );
         expect(
-            shouldUseGameShell('/campaigns/campaign-1/character')
+            shouldUseGameShell('/campaigns/campaign-1/character/draft')
+        ).toBe(false);
+        expect(shouldUseGameShell('/campaigns/campaign-1/dm/characters')).toBe(
+            false
+        );
+        expect(
+            shouldUseGameShell('/campaigns/campaign-1/dm/characters/new')
         ).toBe(false);
         expect(
             shouldUseGameShell('/campaigns/campaign-1/battles/battle-1')

@@ -47,10 +47,12 @@ describe('DmCharacterPage (server)', () => {
 
         readCharacterSheet.mockResolvedValue(NextResponse.json(sheet));
 
-        const el = (await DmCharacterPage({
-            params: Promise.resolve({ id: 'c1', characterId: 'ch9' }),
-            searchParams: Promise.resolve({}),
-        })) as ReactElement<{
+        const el = (
+            (await DmCharacterPage({
+                params: Promise.resolve({ id: 'c1', characterId: 'ch9' }),
+                searchParams: Promise.resolve({}),
+            })) as ReactElement<{ children: ReactElement }>
+        ).props.children as ReactElement<{
             queryKey: unknown;
             data: unknown;
             children: ReactElement<{
@@ -80,10 +82,15 @@ describe('DmCharacterPage (server)', () => {
         readCharacterSheet.mockResolvedValue(NextResponse.json({}));
         wfrp.is = true;
 
-        const el = (await DmCharacterPage({
-            params: Promise.resolve({ id: 'c1', characterId: 'ch9' }),
-            searchParams: Promise.resolve({}),
-        })) as ReactElement<{ namespaces: string[]; children: ReactElement }>;
+        const el = (
+            (await DmCharacterPage({
+                params: Promise.resolve({ id: 'c1', characterId: 'ch9' }),
+                searchParams: Promise.resolve({}),
+            })) as ReactElement<{ children: ReactElement }>
+        ).props.children as ReactElement<{
+            namespaces: string[];
+            children: ReactElement;
+        }>;
 
         expect(el.props.namespaces).toEqual(['wfrpDowntime', 'wfrpCorruption']);
         expect(el.props.children.type).toBe(PrefetchedQuery);

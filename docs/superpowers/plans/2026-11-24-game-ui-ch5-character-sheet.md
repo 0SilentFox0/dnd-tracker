@@ -15,14 +15,14 @@
 ## Т2. Чиста логіка й дані (1 виконавець)
 - `lib/utils/characters/hp.ts`: `applyHpChange({hp,max,temp}, {kind:'damage'|'heal'|'temp', amount}) → {hp,tempHp}` (шкода спершу тимчасові; лікування ≤ max; не нижче 0). Тести в `__tests__`.
 - `lib/utils/characters/xp.ts`: `xpProgress(experience, level) → {current,next|null,ratio}` на `lib/constants/experience`. Тести.
-- `read-sheet` + `types/characters.ts`: `identity.xp?` (additive). Тест у `lib/server/characters/core/__tests__`.
+- (скасовано) `identity.xp` дублював `sheet.rest.xp`; T2 виконано: `hp.ts`, `xp.ts` + тести.
 
 ## Т3. Ліва колонка (1 виконавець)
-- `components/character-profile/sheet/SheetIdentityPanel.tsx` (+ рамка з кутовими дужками на `HeroPortrait`); слот `sheet.identityExtras` у `components/systems/types.ts` (необовʼязковий), d20/inspiration підключають натхнення; sticky на lg; на phone стає компактною шапкою (`CompactHero` розширюється).
+- `components/character-profile/sheet/SheetIdentityPanel.tsx` (+ рамка з кутовими дужками на `HeroPortrait`); XP з `sheet.rest.xp`, натхнення з `sheet.rest.inspiration` (слота не додаємо); sticky на lg; на phone стає компактною шапкою (`CompactHero` розширюється).
 - Переносить `ProfileHero` (ідентичність, бейджі, дії ДМ, `RestBadges`, `HitDicePanel`, `ArcaneRecoveryPanel`); `ProfileHero` видалити, тест `profile-hero.en.test` перенести.
 
 ## Т4. Блок HP і плитки (1 виконавець)
-- `sheet/SheetVitals.tsx`: числа, смуга, «− Шкода»/«+ Лікування»/«Тимчасові» у `ResponsiveDialog` або inline-полі; `useEditResources`; тільки читання без права; `Breakdown` за кліком.
+- `sheet/SheetVitals.tsx`: числа, смуга, «− Шкода»/«+ Лікування»/«Тимчасові» у `ResponsiveDialog` або inline-полі; `useEditResources`; кнопки лише ДМ (`/resources` dmOnly), інші бачать читання; `Breakdown` за кліком.
 - Плитки: `Ui.HeroStats` (d20 `HeroStats.tsx`) на `HudTile`; додати кістки ХП (`sheet.hitDice`) і пасивну уважність; wfrp/інші системи не ламати.
 
 ## Т5. Характеристики й навички (1 виконавець)

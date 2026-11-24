@@ -1,3 +1,4 @@
+import { CampaignGameShell } from '@/app/campaigns/[id]/campaign-game-shell';
 import { CharacterProfile } from '@/components/character-profile';
 import { campaignKeys } from '@/lib/hooks/campaigns';
 import { characterKeys } from '@/lib/hooks/characters';
@@ -23,7 +24,9 @@ export default async function DmCharacterPage({
         searchParams,
     ]);
 
-    const { isDemo, campaign, userId } = await requireCampaignDMOrDemo(id);
+    const access = await requireCampaignDMOrDemo(id);
+
+    const { isDemo, campaign, userId } = access;
 
     const rules = await loadRules(id);
 
@@ -63,9 +66,19 @@ export default async function DmCharacterPage({
 
     const namespaces = systemScope(await systemOfCampaign(id), 'dmCharacter');
 
-    return namespaces.length ? (
-        <ExtendLocaleScope namespaces={namespaces}>{profile}</ExtendLocaleScope>
-    ) : (
-        profile
+    return (
+        <CampaignGameShell
+            campaign={campaign}
+            viewer={access}
+            active="character"
+        >
+            {namespaces.length ? (
+                <ExtendLocaleScope namespaces={namespaces}>
+                    {profile}
+                </ExtendLocaleScope>
+            ) : (
+                profile
+            )}
+        </CampaignGameShell>
     );
 }

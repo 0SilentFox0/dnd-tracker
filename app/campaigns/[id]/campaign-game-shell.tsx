@@ -10,7 +10,7 @@ import {
     campaignSectionContext,
 } from '@/lib/utils/campaigns/game-navigation';
 
-type Section = 'world' | 'journal';
+type Section = 'world' | 'journal' | 'character';
 
 export async function CampaignGameShell({
     campaign,
