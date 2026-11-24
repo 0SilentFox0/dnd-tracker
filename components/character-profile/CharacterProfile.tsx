@@ -1,3 +1,5 @@
+'use client';
+
 import { type ReactNode, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
