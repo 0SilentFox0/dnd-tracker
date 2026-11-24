@@ -56,6 +56,7 @@ function input(
             ...character,
         },
         raceIcon: null,
+        raceColor: null,
         immunities: [],
         artifacts: [],
         spells: [],

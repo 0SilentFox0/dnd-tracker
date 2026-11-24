@@ -209,6 +209,7 @@ export async function buildSheetFor(
         chapters,
         character,
         raceIcon: race?.icon ?? null,
+        raceColor: race?.color ?? null,
         immunities: getCharacterImmunities(character),
         artifacts,
         attunement: itemsOn

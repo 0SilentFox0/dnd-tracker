@@ -1,8 +1,7 @@
 'use client';
 
-import { type ReactNode, type Ref } from 'react';
+import { type CSSProperties, type ReactNode, type Ref } from 'react';
 import { useTranslations } from 'next-intl';
-import { Castle } from 'lucide-react';
 
 import { HeroPortrait } from '../hero/HeroPortrait';
 import { useProfile } from '../ProfileContext';
@@ -11,12 +10,29 @@ import { HitDicePanel } from '../rest/HitDicePanel';
 import { RestBadges } from '../rest/RestBadges';
 import { SheetLevelPlate, SheetXpBar } from './SheetPortraitStrip';
 
+import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
+import {
+    contrastTextColor,
+    normalizeHexColor,
+} from '@/lib/theme/contrast-text-color';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
+
+const HEX = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
+
+export const bannerPalette = (color: string | null) => {
+    if (!color || !HEX.test(color.trim())) {
+        return { base: 'var(--color-hud-gold-strong)', ink: '#2a1d05' };
+    }
+
+    const base = normalizeHexColor(color);
+
+    return { base, ink: contrastTextColor(base) };
+};
 
 const excerpt = (text: string | null) =>
     text
@@ -66,6 +82,8 @@ export function SheetIdentityPanel({
 
     const lead = excerpt(sheet.story.biography);
 
+    const banner = bannerPalette(id.raceColor);
+
     return (
         <>
             <header
@@ -74,7 +92,16 @@ export function SheetIdentityPanel({
                 style={stagger(0)}
             >
                 <div className="relative h-44 lg:h-[340px]">
-                    <div className="relative h-full bg-[linear-gradient(90deg,rgba(0,0,0,.22),transparent_18%,transparent_82%,rgba(0,0,0,.22)),linear-gradient(var(--color-hud-gold-strong),color-mix(in_srgb,var(--color-hud-gold-strong)_55%,var(--color-hud-surface)))] p-[9px] pb-0 [clip-path:polygon(0_0,100%_0,100%_100%,50%_90%,0_100%)] lg:p-5 lg:pb-0">
+                    <div
+                        data-testid="sheet-banner"
+                        style={
+                            {
+                                '--banner': banner.base,
+                                '--banner-ink': banner.ink,
+                            } as CSSProperties
+                        }
+                        className="relative h-full bg-[linear-gradient(90deg,rgba(0,0,0,.22),transparent_18%,transparent_82%,rgba(0,0,0,.22)),linear-gradient(var(--banner),color-mix(in_srgb,var(--banner)_55%,var(--color-hud-surface)))] p-[9px] pb-0 [clip-path:polygon(0_0,100%_0,100%_100%,50%_90%,0_100%)] lg:p-5 lg:pb-0"
+                    >
                         <div className="relative rounded-[4px] bg-hud-surface p-[3px] shadow-[0_0_0_1px_var(--color-hud-line),0_18px_40px_-14px_rgba(0,0,0,.8)] lg:p-2">
                             <HeroPortrait
                                 src={id.avatar}
@@ -83,9 +110,11 @@ export function SheetIdentityPanel({
                                 className="aspect-[4/5] rounded-[2px] border-0"
                             />
                         </div>
-                        <Castle
-                            aria-hidden
-                            className="absolute bottom-[11%] left-1/2 hidden size-8 -translate-x-1/2 text-(--palette-primary-foreground,#2a1d05) opacity-70 lg:block"
+                        <EntityIcon
+                            src={id.raceIcon}
+                            name={id.race}
+                            size={32}
+                            className="absolute bottom-[11%] left-1/2 hidden size-8 -translate-x-1/2 rounded-none bg-transparent text-[color:var(--banner-ink)] opacity-70 lg:flex"
                         />
                     </div>
                     {!Ui.hideProgression && (

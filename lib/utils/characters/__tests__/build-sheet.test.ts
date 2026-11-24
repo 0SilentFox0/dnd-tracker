@@ -90,6 +90,7 @@ function lira(
             ...over,
         },
         raceIcon: null,
+        raceColor: null,
         immunities: [],
         artifacts: [
             {

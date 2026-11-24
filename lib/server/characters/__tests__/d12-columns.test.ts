@@ -329,6 +329,7 @@ describe('D12 sheet', () => {
                 goals: [],
             } as never,
             raceIcon: null,
+            raceColor: null,
             immunities: [],
             artifacts: [],
             spells: [],

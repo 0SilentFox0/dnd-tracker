@@ -82,6 +82,7 @@ export interface SheetInput {
         }[];
     };
     raceIcon: string | null;
+    raceColor: string | null;
     immunities: string[];
     artifacts: SheetArtifact[];
     spells: BookSpell[];
@@ -195,6 +196,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
             race: c.race,
             ...(showSubrace && c.subrace && { subrace: c.subrace }),
             raceIcon: input.raceIcon,
+            raceColor: input.raceColor,
             alignment: c.alignment,
         },
         abilities: blocks.abilities,

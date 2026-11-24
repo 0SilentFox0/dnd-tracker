@@ -294,6 +294,7 @@ export interface CharacterSheet {
         race: string;
         subrace?: string | null;
         raceIcon: string | null;
+        raceColor: string | null;
         alignment: string | null;
     };
     abilities: SheetAbility[];

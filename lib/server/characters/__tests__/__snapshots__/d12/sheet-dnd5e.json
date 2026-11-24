@@ -19,6 +19,7 @@
     "subclass": null,
     "race": "Людина",
     "raceIcon": null,
+    "raceColor": null,
     "alignment": null
   },
   "abilities": [

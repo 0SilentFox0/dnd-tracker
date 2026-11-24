@@ -19,6 +19,7 @@ export const sheetFixture: CharacterSheet = {
         subclass: null,
         race: 'Ельф',
         raceIcon: null,
+        raceColor: null,
         alignment: null,
     },
     abilities: [

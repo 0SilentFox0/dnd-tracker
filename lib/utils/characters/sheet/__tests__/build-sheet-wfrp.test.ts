@@ -56,6 +56,7 @@ function input(
             resources,
         },
         raceIcon: null,
+        raceColor: null,
         immunities: [],
         artifacts: [],
         spells: [],

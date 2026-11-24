@@ -180,6 +180,7 @@ const sheetFor = async (rules: Ruleset, stored: typeof hero = hero) => {
             goals: [],
         } as never,
         raceIcon: null,
+        raceColor: null,
         immunities: [],
         artifacts: [],
         spells: participant.spellcasting.knownSpells.map((id) => ({

@@ -205,6 +205,7 @@ describe('лист персонажа: запити до БД', () => {
                                   id: 'race',
                                   name: 'Ельф',
                                   icon: 'elf.png',
+                                  color: '#336699',
                                   passiveAbility: null,
                                   spellSlotProgression: [],
                                   abilities: [],
