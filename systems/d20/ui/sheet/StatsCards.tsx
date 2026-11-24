@@ -1,6 +1,15 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import {
+    Brain,
+    Drama,
+    Dumbbell,
+    Eye,
+    Heart,
+    type LucideIcon,
+    Wind,
+} from 'lucide-react';
 
 import { RollableCell } from '@/components/character-profile/combat/RollableCell';
 import type { SheetRollRequest } from '@/components/systems/types';
@@ -10,6 +19,15 @@ import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
 import type { SheetAbility, SheetCheck } from '@/types/characters';
+
+const ABILITY_ICONS: Record<string, LucideIcon> = {
+    strength: Dumbbell,
+    dexterity: Wind,
+    constitution: Heart,
+    intelligence: Brain,
+    wisdom: Eye,
+    charisma: Drama,
+};
 
 export interface RollProps {
     canRoll: boolean;
@@ -55,6 +73,8 @@ export function AbilityCard({
 
     const label = tg(`abilities.${a.key}.label`);
 
+    const Icon = ABILITY_ICONS[a.key];
+
     const saveRow = save && (
         <>
             <Mark count={save.proficient ? 1 : 0} />
@@ -85,7 +105,7 @@ export function AbilityCard({
                 <>
                     <span
                         aria-hidden
-                        className="absolute inset-x-3.5 top-0 h-[3px] bg-hud-gold"
+                        className="absolute inset-x-0 top-0 h-[3px] bg-hud-gold"
                     />
                     <span className="sr-only">{t('primary')}</span>
                 </>
@@ -102,8 +122,17 @@ export function AbilityCard({
                 className="motion-press grid min-h-11 justify-items-center gap-1 px-1 pt-3.5 pb-3 hover:bg-hud-raised"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
-                <small className="hud-title text-base text-hud-text sm:text-lg">
-                    {tg(`abilities.${a.key}.short`)}
+                <small className="hud-title flex max-w-full items-center gap-1.5 text-base text-hud-text lg:text-xl">
+                    {Icon && (
+                        <Icon
+                            aria-hidden
+                            className="size-5 shrink-0 text-hud-muted max-sm:hidden"
+                        />
+                    )}
+                    <span className="truncate max-sm:hidden">{label}</span>
+                    <span className="sm:hidden">
+                        {tg(`abilities.${a.key}.short`)}
+                    </span>
                 </small>
                 <span className="hud-num text-4xl leading-none text-hud-ink sm:text-[42px]">
                     <Signed value={a.mod} />

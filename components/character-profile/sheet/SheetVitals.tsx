@@ -17,6 +17,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useEditResources } from '@/lib/hooks/characters';
 import { useCountUp, useGhostValue } from '@/lib/hooks/common';
 import { useCampaignSystem } from '@/lib/hooks/systems';
+import { cn } from '@/lib/utils';
 import { applyHpChange } from '@/lib/utils/characters/hp';
 
 const FORM_ID = 'sheet-vitals-form';
@@ -24,7 +25,7 @@ const FORM_ID = 'sheet-vitals-form';
 type Hp = { current: number; max: number; temp: number };
 
 const BTN =
-    'motion-press inline-flex min-h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-2 text-[15px] font-medium text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50 lg:max-w-[150px]';
+    'motion-press inline-flex min-h-11 min-w-fit flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-hud-line bg-hud-raised px-3 text-[15px] font-medium whitespace-nowrap text-hud-ink hover:border-hud-muted focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none disabled:opacity-50';
 
 const LABEL =
     'hud-title flex items-center gap-2 text-base text-hud-muted lg:text-[17px]';
@@ -60,10 +61,11 @@ export function SheetVitals() {
                     {Ui.hideProgression ? t('wounds') : tv('hp')}
                 </h2>
                 {!!hp?.temp && (
-                    <span className="text-[15px] text-hud-muted">
+                    <span className="ml-auto text-[15px] whitespace-nowrap text-hud-muted">
                         {tv('tempBadge', { temp: hp.temp })}
                     </span>
                 )}
+                {sheet.viewer.isDM && hp && <TempButton hp={hp} />}
             </div>
             {hp ? (
                 <HpReadout
@@ -166,8 +168,6 @@ function HpControls({ hp }: { hp: Hp }) {
 
     const [amount, setAmount] = useState<number | undefined>(1);
 
-    const [tempOpen, setTempOpen] = useState(false);
-
     const valid = !!amount && amount >= 1;
 
     const change = (kind: 'damage' | 'heal') => {
@@ -182,7 +182,7 @@ function HpControls({ hp }: { hp: Hp }) {
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex items-center gap-1.5 max-sm:flex-wrap">
             <NumberInput
                 aria-label={tv('amount')}
                 min={1}
@@ -210,20 +210,35 @@ function HpControls({ hp }: { hp: Hp }) {
                 <Plus aria-hidden className="size-4" />
                 {tv('heal')}
             </HudButton>
+        </div>
+    );
+}
+
+function TempButton({ hp }: { hp: Hp }) {
+    const tv = useTranslations('characterProfile.hero.vitals');
+
+    const [tempOpen, setTempOpen] = useState(false);
+
+    return (
+        <>
             <HudButton
                 type="button"
-                className="motion-press inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-[4px] px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none lg:ml-auto"
+                aria-label={tv('temp')}
+                className={cn(
+                    'motion-press inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-1 rounded-[4px] border border-hud-line px-2 text-[15px] text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none',
+                    !hp.temp && 'ml-auto'
+                )}
                 onClick={() => setTempOpen(true)}
             >
                 <Shield aria-hidden className="size-4" />
-                {tv('temp')}
+                <Plus aria-hidden className="size-4" />
             </HudButton>
             <TempHpDialog
                 hp={hp}
                 open={tempOpen}
                 onClose={() => setTempOpen(false)}
             />
-        </div>
+        </>
     );
 }
 

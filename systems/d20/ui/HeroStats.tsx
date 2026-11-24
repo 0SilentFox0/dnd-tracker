@@ -52,7 +52,7 @@ function KeyStat({
 
 function Value({ children }: { children: ReactNode }) {
     return (
-        <b className="hud-num text-[34px] leading-none text-hud-ink lg:text-[46px]">
+        <b className="hud-num text-[44px] leading-none text-hud-ink lg:text-[56px]">
             {children}
         </b>
     );
@@ -106,7 +106,7 @@ export function HeroStats() {
                     >
                         <path d="M30 2 56 11v20c0 17.5-11 30-26 35C15 61 4 48.5 4 31V11z" />
                     </svg>
-                    <b className="hud-num relative -mt-1.5 text-[26px] leading-none text-hud-ink lg:text-[32px]">
+                    <b className="hud-num relative -mt-1.5 text-[30px] leading-none text-hud-ink lg:text-[36px]">
                         <Counted value={sheet.armorClass.total} />
                     </b>
                 </span>

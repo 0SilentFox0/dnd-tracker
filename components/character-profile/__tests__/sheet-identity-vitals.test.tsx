@@ -95,7 +95,7 @@ describe('SheetVitals', () => {
     it('DM temp opens a dialog and keeps the larger pool', async () => {
         await inProfile(dmSheet(true), <SheetVitals />);
 
-        fireEvent.click(screen.getByText('Temp'));
+        fireEvent.click(screen.getByRole('button', { name: 'Temp' }));
         fireEvent.change(
             await screen.findByLabelText('Amount', {
                 selector: '#vitals-amount',
@@ -129,7 +129,7 @@ describe('SheetVitals', () => {
         expect(screen.getByText('+5 temp')).toBeInTheDocument();
         expect(screen.queryByLabelText('− Damage')).toBeNull();
         expect(screen.queryByLabelText('+ Heal')).toBeNull();
-        expect(screen.queryByText('Temp')).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Temp' })).toBeNull();
     });
 });
 

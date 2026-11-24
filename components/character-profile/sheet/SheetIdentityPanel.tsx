@@ -114,7 +114,7 @@ export function SheetIdentityPanel({
                                     </span>
                                 ))}
                             </p>
-                            <h1 className="hud-title text-[28px] leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(40px,4.4vw,60px)] lg:leading-[.95]">
+                            <h1 className="hud-title text-[28px] leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(44px,5vw,64px)] lg:leading-[.95]">
                                 {id.name}
                             </h1>
                             {lead && (
