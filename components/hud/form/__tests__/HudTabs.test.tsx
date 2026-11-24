@@ -63,24 +63,85 @@ describe('HudTabs', () => {
         );
     });
 
-    it('sheet variant: inactive tabs use the stronger text token, active has the gold underline', () => {
+    it('sheet variant: plain row, bold ink for the active tab and a sliding indicator', () => {
         render(
             <HudTabs
                 value="a"
                 onValueChange={() => undefined}
                 styles={{ variant: 'sheet' }}
                 tabs={[
-                    { id: 'a', label: 'Перший', content: null },
+                    {
+                        id: 'a',
+                        label: 'Перший',
+                        icon: <i data-testid="icon-a" />,
+                        content: null,
+                    },
                     { id: 'b', label: 'Другий', content: null },
                 ]}
             />
         );
 
-        const cls = screen.getByRole('tab', { name: 'Другий' }).className;
+        const inactive = screen.getByRole('tab', { name: 'Другий' });
 
-        expect(cls).toContain('text-hud-text');
-        expect(cls).not.toContain('text-hud-muted');
-        expect(cls).toContain('data-[state=active]:shadow-[inset_0_-2px_0');
+        const active = screen.getByRole('tab', { name: 'Перший' });
+
+        expect(inactive.className).toContain('text-hud-text');
+        expect(inactive.className).not.toContain('text-hud-muted');
+        expect(active.className).toContain('data-[state=active]:font-bold');
+        expect(active.getAttribute('data-tab')).toBe('a');
+        expect(active.querySelector('[data-testid="icon-a"]')).not.toBeNull();
+        expect(screen.getByTestId('tab-indicator').className).toContain(
+            'motion-indicator'
+        );
+    });
+
+    it('sheet variant: tablist semantics with a roving tabindex', () => {
+        render(
+            <HudTabs
+                value="b"
+                onValueChange={() => undefined}
+                styles={{ variant: 'sheet' }}
+                tabs={[
+                    { id: 'a', label: 'Перший', content: null },
+                    { id: 'b', label: 'Другий', content: 'панель Б' },
+                ]}
+            />
+        );
+
+        expect(screen.getByRole('tablist')).toBeTruthy();
+        expect(screen.getByRole('tab', { name: 'Другий' })).toHaveAttribute(
+            'aria-selected',
+            'true'
+        );
+        expect(screen.getByRole('tab', { name: 'Другий' }).tabIndex).toBe(0);
+        expect(screen.getByRole('tab', { name: 'Перший' }).tabIndex).toBe(-1);
+        expect(screen.getByRole('tabpanel')).toHaveTextContent('панель Б');
+    });
+
+    it('sheet variant: the entering panel carries the direction of the move', () => {
+        const Sheet = () => {
+            const [v, setV] = useState<'a' | 'b'>('a');
+
+            return (
+                <HudTabs
+                    value={v}
+                    onValueChange={setV}
+                    styles={{ variant: 'sheet' }}
+                    tabs={[
+                        { id: 'a', label: 'Перший', content: 'А' },
+                        { id: 'b', label: 'Другий', content: 'Б' },
+                    ]}
+                />
+            );
+        };
+
+        render(<Sheet />);
+        fireEvent.mouseDown(screen.getByRole('tab', { name: 'Другий' }));
+
+        expect(screen.getByRole('tabpanel')).toHaveAttribute('data-dir', '1');
+        expect(screen.getByRole('tabpanel').className).toContain(
+            'motion-panel'
+        );
     });
 
     it('unmounts inactive panels by default and switches on click', () => {

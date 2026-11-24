@@ -1,4 +1,15 @@
 import type { ComponentType } from 'react';
+import {
+    Backpack,
+    BookOpen,
+    ChartColumn,
+    Coffee,
+    Languages,
+    ScrollText,
+    Sparkles,
+    Swords,
+    TrendingUp,
+} from 'lucide-react';
 
 import { InventoryTab } from '../inventory/InventoryTab';
 import { CharacterLogTab } from '../rest/CharacterLogTab';
@@ -51,31 +62,60 @@ export function viewTabs(
     t: (key: TabLabelKey) => string
 ): ProfileTab[] {
     const tabs: (ProfileTab | false)[] = [
-        { id: 'stats', label: t('stats'), content: <SheetStatsPanel /> },
-        { id: 'combat', label: t('combat'), content: <CombatTab /> },
-        !!Magic && { id: 'magic', label: t('magic'), content: <Magic /> },
+        {
+            id: 'stats',
+            label: t('stats'),
+            icon: <ChartColumn />,
+            content: <SheetStatsPanel />,
+        },
+        {
+            id: 'combat',
+            label: t('combat'),
+            icon: <Swords />,
+            content: <CombatTab />,
+        },
+        !!Magic && {
+            id: 'magic',
+            label: t('magic'),
+            icon: <Sparkles />,
+            content: <Magic />,
+        },
         withItems && {
             id: 'items',
             label: t('items'),
+            icon: <Backpack />,
             content: <InventoryTab />,
         },
         withPath && {
             id: 'skills',
             label: t('traits'),
+            icon: <Languages />,
             content: <SkillsTab />,
         },
-        { id: 'story', label: t('story'), content: <StoryTab /> },
+        {
+            id: 'story',
+            label: t('story'),
+            icon: <BookOpen />,
+            content: <StoryTab />,
+        },
         !!Advancement && {
             id: 'advancement',
             label: t('advancement'),
+            icon: <TrendingUp />,
             content: <Advancement />,
         },
         !!Downtime && {
             id: 'downtime',
             label: t('downtime'),
+            icon: <Coffee />,
             content: <Downtime />,
         },
-        withLog && { id: 'log', label: t('log'), content: <CharacterLogTab /> },
+        withLog && {
+            id: 'log',
+            label: t('log'),
+            icon: <ScrollText />,
+            content: <CharacterLogTab />,
+        },
     ];
 
     return tabs.filter((x): x is ProfileTab => !!x);

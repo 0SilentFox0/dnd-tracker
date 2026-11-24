@@ -66,6 +66,8 @@ export { SEARCH_DEBOUNCE_MS, type SearchState, useSearch } from './useSearch';
 export { useSetLocale } from './useSetLocale';
 export { useSingleFlight } from './useSingleFlight';
 export { type IndicatorBox, useSlidingIndicator } from './useSlidingIndicator';
+export { useSmoothHeight } from './useSmoothHeight';
+export { swipeTarget, useSwipeTabs } from './useSwipeTabs';
 export { tabDirection, useTabDirection } from './useTabDirection';
 export { useTimeZoneSetting } from './useTimeZoneSetting';
 export { type Toast, useToasts } from './useToasts';
