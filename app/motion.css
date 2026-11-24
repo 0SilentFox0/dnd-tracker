@@ -10,6 +10,7 @@
   --sheet-hp: var(--hud-danger);
   --sheet-hp-ghost: color-mix(in srgb, var(--hud-danger) 38%, transparent);
   --sheet-hp-track: color-mix(in srgb, var(--hud-danger) 14%, transparent);
+  --sheet-track: color-mix(in srgb, var(--hud-ink) 14%, transparent);
   --sheet-hp-temp: color-mix(in srgb, var(--hud-ink) 55%, transparent);
 }
 
@@ -67,7 +68,30 @@
   will-change: transform;
 }
 
+.motion-bar {
+  transform-origin: left center;
+  transition: transform var(--motion-hero) var(--ease-out);
+}
+
+@keyframes motion-ring {
+  0% { opacity: 0.6; transform: scale(1); }
+  50%, 100% { opacity: 0; transform: scale(1.12, 1.4); }
+}
+.motion-pulse { position: relative; }
+.motion-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--hud-gold-strong);
+  opacity: 0;
+  pointer-events: none;
+  animation: motion-ring 2400ms var(--ease-out) 3;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .motion-bar { transition: none; }
+  .motion-pulse::after { animation: none; }
   .motion-rise,
   .motion-panel[data-dir],
   .motion-panel > .motion-rise {

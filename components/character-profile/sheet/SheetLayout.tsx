@@ -47,20 +47,18 @@ export function SheetLayout({
         : 'stats';
 
     return (
-        <div className="mx-auto w-full max-w-6xl lg:flex">
+        <div className="mx-auto flex w-full max-w-6xl flex-col lg:flex-row">
             <SheetIdentityPanel
                 ref={heroRef}
                 badge={identity.badge}
                 actions={identity.actions}
             />
-            <div className="flex min-w-0 flex-1 flex-col">
-                <div className="flex flex-col gap-4 px-4 pt-4 pb-4">
+            <div className="max-lg:contents lg:flex lg:min-w-0 lg:flex-1 lg:flex-col">
+                <div className="order-[-3] grid gap-3 px-4 pt-4 pb-4 lg:grid-cols-[1.2fr_1fr]">
                     <SheetVitals />
-                    <div className="flex flex-wrap gap-2">
-                        <Ui.HeroStats />
-                    </div>
+                    <Ui.HeroStats />
                 </div>
-                {children}
+                <div className="order-[-1] empty:hidden">{children}</div>
                 <ProfileTabs
                     variant="sheet"
                     value={value}

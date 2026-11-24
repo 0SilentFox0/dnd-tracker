@@ -1,53 +1,70 @@
 import { useTranslations } from 'next-intl';
 
+import { ScaleFill } from './SheetBar';
+
 import { xpProgress } from '@/lib/utils/characters/xp';
 
-export function SheetPortraitStrip({
+export function SheetLevelPlate({ level }: { level: number }) {
+    const t = useTranslations('characterProfile.hero');
+
+    return (
+        <div className="pointer-events-none absolute bottom-2 left-2 flex h-8 items-baseline gap-1.5 rounded-lg bg-black/80 px-2.5 text-white lg:bottom-3 lg:left-3 lg:h-10 lg:px-3">
+            <span className="text-xs leading-8 tracking-[.08em] text-white/75 uppercase max-lg:sr-only lg:leading-10">
+                {t('levelLabel')}
+            </span>
+            <b className="text-lg leading-8 lg:text-[22px] lg:leading-10">
+                {level}
+            </b>
+        </div>
+    );
+}
+
+export function SheetXpBar({
     level,
     xp,
+    ready,
 }: {
-    level: number | null;
-    xp: number | null;
+    level: number;
+    xp: number;
+    ready: boolean;
 }) {
     const t = useTranslations('characterProfile.hero');
 
-    const progress =
-        xp !== null && level !== null ? xpProgress(xp, level) : null;
+    const progress = xpProgress(xp, level);
 
-    if (level === null) return null;
-
-    const label = progress
-        ? progress.next === null
+    const value =
+        progress.next === null
             ? t('xpMax', { value: progress.current })
-            : t('xp', { value: progress.current, next: progress.next })
-        : null;
+            : t('xp', { value: progress.current, next: progress.next });
+
+    const note = ready
+        ? t('xpReady')
+        : progress.next !== null
+          ? t('xpToNext', { left: progress.next - progress.current })
+          : null;
 
     return (
-        <div className="pointer-events-none absolute inset-x-1.5 bottom-1.5 flex items-end gap-1.5 rounded-b-lg bg-gradient-to-t from-black/75 to-transparent p-1.5 pt-8">
-            <span className="hud-sc grid size-8 shrink-0 place-items-center rounded-lg bg-hud-gold-strong text-base leading-none text-(--palette-primary-foreground,#2a1d05)">
-                <span className="sr-only">{t('level', { level })}</span>
-                <span aria-hidden>{level}</span>
-            </span>
-            {progress && (
-                <div className="min-w-0 flex-1 pb-0.5">
-                    <p className="mb-1 hidden truncate text-[11px] leading-none text-white tabular-nums lg:block">
-                        {label}
-                    </p>
-                    <div
-                        role="progressbar"
-                        aria-label={label ?? undefined}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.round(progress.ratio * 100)}
-                        className="h-1.5 overflow-hidden rounded-full bg-white/25"
-                    >
-                        <div
-                            className="h-full rounded-full bg-hud-gold-strong"
-                            style={{ width: `${progress.ratio * 100}%` }}
-                        />
-                    </div>
-                </div>
-            )}
+        <div className="grid gap-2">
+            <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[15px] font-bold text-hud-ink tabular-nums">
+                    {value}
+                </span>
+                {note && (
+                    <span className="text-sm text-hud-muted tabular-nums">
+                        {note}
+                    </span>
+                )}
+            </div>
+            <div
+                role="progressbar"
+                aria-label={value}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(progress.ratio * 100)}
+                className="relative h-1.5 overflow-hidden rounded-full bg-(--sheet-track)"
+            >
+                <ScaleFill ratio={progress.ratio} className="bg-hud-muted" />
+            </div>
         </div>
     );
 }

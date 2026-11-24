@@ -22,7 +22,7 @@ export function HeroStats() {
     const yd = tg('distanceUnit.yd');
 
     return (
-        <>
+        <div className="flex flex-wrap gap-2 lg:col-span-2">
             <HudStatChip
                 size="lg"
                 label={t('wounds')}
@@ -61,6 +61,6 @@ export function HeroStats() {
                     value={`${block.corruption.points}/${block.corruption.threshold}`}
                 />
             )}
-        </>
+        </div>
     );
 }

@@ -20,7 +20,9 @@ export function RestBadges() {
         sheet.system
     );
 
-    const Badges = systemUiOf(current.key, current.modules).RestBadges;
+    const Ui = systemUiOf(current.key, current.modules);
+
+    const Badges = Ui.RestBadges;
 
     if (!rest) return null;
 
@@ -31,7 +33,7 @@ export function RestBadges() {
             {system.rest.kinds && rest.shortRestOpen && (
                 <HudPill tone="gold">{t('shortRest')}</HudPill>
             )}
-            {rest.xp && (
+            {rest.xp && Ui.hideProgression && (
                 <span className="text-hud-muted">
                     {t('xp', { value: rest.xp.value })}
                     {rest.xp.next !== null &&

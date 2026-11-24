@@ -27,7 +27,7 @@ export function HeroPortrait({
     const [open, setOpen] = useState(false);
 
     const frame = cn(
-        'relative aspect-[3/4] w-full overflow-hidden rounded-xl border-2 border-hud-gold bg-hud-raised',
+        'relative aspect-square w-full overflow-hidden rounded-2xl border border-hud-rule bg-hud-raised focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none',
         className
     );
 
@@ -59,7 +59,7 @@ export function HeroPortrait({
                     src={toMediaUrl(src)}
                     alt={name}
                     width={640}
-                    height={853}
+                    height={640}
                     className="size-full object-cover"
                 />
             </HudButton>

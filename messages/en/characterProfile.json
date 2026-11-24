@@ -53,7 +53,11 @@
       "tempBadge": "+{temp} temp",
       "amount": "Amount",
       "apply": "Apply"
-    }
+    },
+    "levelLabel": "Level",
+    "xpToNext": "{left} to next level",
+    "xpReady": "Ready to level up",
+    "dmActions": "DM actions"
   },
   "combat": {
     "roll": "Roll",
@@ -167,7 +171,8 @@
     "action": "+ level",
     "freePoints": "Free skill points: {free}",
     "loadingChoices": "Loading choices…",
-    "choices": "Level choices"
+    "choices": "Level choices",
+    "distribute": "Distribute"
   },
   "choices": {
     "pending": "Unchosen choices: {pending}",

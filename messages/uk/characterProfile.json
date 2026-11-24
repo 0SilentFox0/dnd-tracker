@@ -53,7 +53,11 @@
       "tempBadge": "+{temp} тимч.",
       "amount": "Кількість",
       "apply": "Застосувати"
-    }
+    },
+    "levelLabel": "Рівень",
+    "xpToNext": "{left} до наступного рівня",
+    "xpReady": "Готовий до рівня",
+    "dmActions": "Дії майстра"
   },
   "combat": {
     "roll": "Кинути",
@@ -167,7 +171,8 @@
     "action": "+ рівень",
     "freePoints": "Вільні очки навичок: {free}",
     "loadingChoices": "Завантаження виборів…",
-    "choices": "Вибори рівня"
+    "choices": "Вибори рівня",
+    "distribute": "Розподілити"
   },
   "choices": {
     "pending": "Невибрані вибори: {pending}",

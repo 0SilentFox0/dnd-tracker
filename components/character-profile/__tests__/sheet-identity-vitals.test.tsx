@@ -111,10 +111,21 @@ describe('SheetVitals', () => {
         );
     });
 
+    it('hp bar exposes values and a temp overlay', async () => {
+        await inProfile(dmSheet(false), <SheetVitals />);
+
+        const bar = screen.getByRole('progressbar');
+
+        expect(bar).toHaveAttribute('aria-valuenow', '20');
+        expect(bar).toHaveAttribute('aria-valuemax', '30');
+    });
+
     it('non-DM sees numbers but no controls', async () => {
         await inProfile(dmSheet(false), <SheetVitals />);
 
-        expect(screen.getByLabelText('HP 20 / 30', { selector: 'button' })).toBeInTheDocument();
+        expect(
+            screen.getByLabelText('HP 20 / 30', { selector: 'button' })
+        ).toBeInTheDocument();
         expect(screen.getByText('+5 temp')).toBeInTheDocument();
         expect(screen.queryByLabelText('− Damage')).toBeNull();
         expect(screen.queryByLabelText('+ Heal')).toBeNull();
@@ -138,6 +149,8 @@ describe('SheetIdentityPanel', () => {
         const a = await inProfile(withXp, <SheetIdentityPanel />);
 
         expect(screen.getByLabelText('XP 400 / 900')).toBeInTheDocument();
+        expect(screen.getByText('500 to next level')).toBeInTheDocument();
+        expect(screen.getByText('Level')).toBeInTheDocument();
         expect(a.container.textContent).toContain('Inspiration');
         cleanup();
 
@@ -149,5 +162,17 @@ describe('SheetIdentityPanel', () => {
         expect(screen.queryByRole('progressbar')).toBeNull();
         expect(b.container.textContent).not.toContain('Inspiration');
         expect(sheetFixture.rest).toBeNull();
+    });
+
+    it('xp note says ready when a level is available', async () => {
+        await inProfile(
+            withSheet({
+                system: 'dnd5e',
+                rest: rest({ xp: { value: 950, next: 900, levelUp: true } }),
+            }),
+            <SheetIdentityPanel />
+        );
+
+        expect(screen.getByText('Ready to level up')).toBeInTheDocument();
     });
 });

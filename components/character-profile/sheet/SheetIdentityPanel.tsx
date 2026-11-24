@@ -8,16 +8,18 @@ import { useProfile } from '../ProfileContext';
 import { ArcaneRecoveryPanel } from '../rest/ArcaneRecoveryPanel';
 import { HitDicePanel } from '../rest/HitDicePanel';
 import { RestBadges } from '../rest/RestBadges';
-import { SheetPortraitStrip } from './SheetPortraitStrip';
+import { stagger } from './SheetBar';
+import { SheetLevelPlate, SheetXpBar } from './SheetPortraitStrip';
 
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
-import { HudCornerFrame, HudPill } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { signed } from '@/lib/utils/common/format';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
-const CHIP = 'h-auto min-h-6 max-w-full py-0.5 text-xs';
+const CHIP =
+    'h-7 max-w-full rounded-lg border-0 bg-hud-raised px-2.5 text-sm font-normal leading-7 text-hud-ink';
 
 export function SheetIdentityPanel({
     actions,
@@ -45,29 +47,33 @@ export function SheetIdentityPanel({
 
     const background = sheet.choices?.background?.name;
 
+    const showLevel = !Ui.hideProgression;
+
     return (
-        <aside
-            ref={ref}
-            className="flex gap-3 px-4 pt-4 pb-3 lg:sticky lg:top-16 lg:w-72 lg:shrink-0 lg:flex-col lg:gap-4 lg:self-start"
-        >
-            <HudCornerFrame className="w-24 shrink-0 self-start lg:w-full">
-                <HeroPortrait
-                    src={id.avatar}
-                    name={id.name}
-                    canEdit={canEdit}
-                    className="rounded-lg"
-                />
-                <SheetPortraitStrip
-                    level={Ui.hideProgression ? null : id.level}
-                    xp={xp?.value ?? null}
-                />
-            </HudCornerFrame>
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
-                <div className="flex flex-col gap-2">
-                    <h1 className="hud-sc text-2xl leading-8 [overflow-wrap:anywhere] text-hud-ink">
+        <aside className="max-lg:contents lg:sticky lg:top-16 lg:flex lg:w-72 lg:shrink-0 lg:flex-col lg:gap-5 lg:self-start lg:px-4 lg:pt-4 lg:pb-3">
+            <header
+                ref={ref}
+                className="motion-rise order-[-5] flex gap-4 px-4 pt-4 lg:flex-col lg:p-0"
+                style={stagger(0)}
+            >
+                <div className="relative w-20 shrink-0 self-start lg:w-full">
+                    <HeroPortrait
+                        src={id.avatar}
+                        name={id.name}
+                        canEdit={canEdit}
+                    />
+                    {showLevel && <SheetLevelPlate level={id.level} />}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <h1 className="hud-sc text-[22px] leading-tight [overflow-wrap:anywhere] text-hud-ink lg:text-[28px]">
                         {id.name}
                     </h1>
-                    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                    {system.identity.alignments && id.alignment && (
+                        <p className="text-[15px] text-hud-muted">
+                            {id.alignment}
+                        </p>
+                    )}
+                    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
                         {sheet.hitDice === null && !Ui.hideProgression && (
                             <HudPill className={CHIP}>{id.archetype}</HudPill>
                         )}
@@ -84,9 +90,9 @@ export function SheetIdentityPanel({
                                     <OptimizedImage
                                         src={id.raceIcon}
                                         alt=""
-                                        width={14}
-                                        height={14}
-                                        className="size-3.5 shrink-0 rounded-sm"
+                                        width={16}
+                                        height={16}
+                                        className="size-4 shrink-0 rounded-sm"
                                     />
                                 )
                             }
@@ -99,18 +105,35 @@ export function SheetIdentityPanel({
                                 {t('background', { name: background })}
                             </HudPill>
                         )}
-                        {badge}
                     </div>
                 </div>
-                {system.identity.alignments && id.alignment && (
-                    <p className="hud-sc flex items-center gap-2 text-xs tracking-[.1em] text-hud-muted uppercase">
-                        <span aria-hidden className="h-px flex-1 bg-hud-rule" />
-                        {id.alignment}
-                        <span aria-hidden className="h-px flex-1 bg-hud-rule" />
-                    </p>
-                )}
+            </header>
+            {xp && (
+                <div
+                    className="motion-rise order-[-4] px-4 lg:p-0"
+                    style={stagger(1)}
+                >
+                    <SheetXpBar
+                        level={id.level}
+                        xp={xp.value}
+                        ready={xp.levelUp}
+                    />
+                </div>
+            )}
+            <div
+                className="motion-rise order-[-2] flex flex-col gap-4 px-4 empty:hidden lg:p-0"
+                style={stagger(2)}
+            >
+                {badge}
                 {actions && (
-                    <div className="flex flex-wrap gap-2">{actions}</div>
+                    <div className="grid gap-2 border-t border-hud-rule pt-4">
+                        <p className="text-xs font-medium tracking-[.08em] text-hud-muted uppercase">
+                            {t('dmActions')}
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 [&>*]:min-h-10">
+                            {actions}
+                        </div>
+                    </div>
                 )}
                 {sheet.classTable?.map((line) => (
                     <p key={line} className="text-xs text-hud-muted">

@@ -21,7 +21,7 @@ describe('LevelUpBadge', () => {
 
         fireEvent.click(
             screen.getByRole('button', {
-                name: 'characterProfile.levelUp.freePoints {"free":2}',
+                name: 'characterProfile.levelUp.distribute',
             })
         );
 
