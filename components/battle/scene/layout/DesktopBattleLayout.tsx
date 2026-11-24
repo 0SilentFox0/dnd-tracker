@@ -1,7 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
@@ -11,10 +10,9 @@ import { ConnectionBanner } from '../banners/ConnectionBanner';
 import { LastActionTicker } from '../banners/LastActionTicker';
 import { BattleDrawer } from '../drawers/BattleDrawer';
 import { DrawerRail } from '../drawers/DrawerRail';
-import type { DrawerKey } from '../drawers/rail-items';
 import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
-import { MapStripSlotContext, useNoticeStack } from './MapStrip';
+import { InNoticeStack, MapStripSlotContext } from './MapStrip';
 import {
     EMPTY_SCENE_SLOTS,
     type SceneSlots,
@@ -30,16 +28,14 @@ import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
-import { DockNextTurn } from '@/components/battle/turn/dock/DockNextTurn';
-import { DockWaiting } from '@/components/battle/turn/dock/DockWaiting';
-import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
+import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
     useBattleViewMode,
+    useSceneDrawers,
     useTrackReorder,
 } from '@/lib/hooks/battle';
-import { myTurnKey, showDock } from '@/lib/utils/battle/view';
 
 const ActionResultCard = dynamic(
     () =>
@@ -95,12 +91,6 @@ function BattleColumns() {
     );
 }
 
-function InNoticeStack({ children }: { children: ReactNode }) {
-    const stack = useNoticeStack();
-
-    return stack ? createPortal(children, stack) : null;
-}
-
 export function DesktopBattleLayout({
     onComplete,
 }: {
@@ -115,7 +105,6 @@ export function DesktopBattleLayout({
         intents,
         log,
         roster: { hero },
-        turn: { current, isMyTurn },
         viewer: { isDM, readOnly },
     } = useBattleScene();
 
@@ -139,37 +128,7 @@ export function DesktopBattleLayout({
         []
     );
 
-    const [drawer, setDrawer] = useState<Exclude<DrawerKey, 'log'> | null>(
-        null
-    );
-
-    const [seenLogOpen, setSeenLogOpen] = useState(log.open);
-
-    if (log.open !== seenLogOpen) {
-        setSeenLogOpen(log.open);
-
-        if (log.open) setDrawer(null);
-    }
-
-    const active: DrawerKey | null = log.open ? 'log' : drawer;
-
-    const toggle = (key: DrawerKey) => {
-        if (key === 'log') {
-            setDrawer(null);
-
-            if (log.open) log.close();
-            else log.show();
-
-            return;
-        }
-
-        if (log.open) log.close();
-
-        setDrawer((prev) => (prev === key ? null : key));
-    };
-
-    const closeDrawer = (key: Exclude<DrawerKey, 'log'>) => (open: boolean) =>
-        setDrawer((prev) => (open ? key : prev === key ? null : prev));
+    const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
     return (
         <SceneSlotsContext value={slots}>
@@ -209,23 +168,7 @@ export function DesktopBattleLayout({
                                 <HeroCluster hero={hero} />
                             </div>
                         )}
-                        {hero &&
-                            showDock(hero, readOnly) &&
-                            battle.status === BattleStatus.ACTIVE &&
-                            (isMyTurn ? (
-                                <MyTurnControls
-                                    key={myTurnKey(hero, battle.currentRound)}
-                                    hero={hero}
-                                    dock
-                                />
-                            ) : (
-                                current && (
-                                    <DockWaiting
-                                        name={current.basicInfo.name}
-                                    />
-                                )
-                            ))}
-                        <DockNextTurn />
+                        <TurnDock />
                         <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center *:pointer-events-auto">
                             <DrawerRail active={active} onToggle={toggle} />
                         </div>
@@ -242,7 +185,7 @@ export function DesktopBattleLayout({
                         <DmPanel
                             panel={{
                                 open: drawer === 'dm',
-                                onOpenChange: closeDrawer('dm'),
+                                onOpenChange: onOpenChange('dm'),
                             }}
                         />
                     )}
@@ -258,7 +201,7 @@ export function DesktopBattleLayout({
                         <BattleDrawer
                             drawer="reserve"
                             open={drawer === 'reserve'}
-                            onOpenChange={closeDrawer('reserve')}
+                            onOpenChange={onOpenChange('reserve')}
                             title={t('reserve')}
                         >
                             <ReserveGroup />
@@ -266,7 +209,7 @@ export function DesktopBattleLayout({
                     )}
                     <ToolsDrawer
                         open={drawer === 'tools'}
-                        onOpenChange={closeDrawer('tools')}
+                        onOpenChange={onOpenChange('tools')}
                         onComplete={onComplete}
                         view={{ mode: viewMode, set: setViewMode }}
                         onToolsSlot={setToolsSlot}

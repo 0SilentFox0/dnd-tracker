@@ -3,39 +3,38 @@
 import { useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { Settings2 } from 'lucide-react';
 
 import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
 import { BattleOverBanner } from '../banners/BattleOverBanner';
 import { ConnectionBanner } from '../banners/ConnectionBanner';
 import { LastActionTicker } from '../banners/LastActionTicker';
-import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
+import { BattleDrawer } from '../drawers/BattleDrawer';
+import { DrawerRail } from '../drawers/DrawerRail';
 import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
-import { MapStripRow, MapStripSlotContext } from './MapStrip';
+import { InNoticeStack, MapStripSlotContext } from './MapStrip';
+import {
+    EMPTY_SCENE_SLOTS,
+    type SceneSlots,
+    SceneSlotsContext,
+} from './SceneSlots';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleLog } from '@/components/battle/log/BattleLog';
+import { TokenBubble } from '@/components/battle/map/bubble/TokenBubble';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
+import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
-import { MyHeroPanel } from '@/components/battle/participants/MyHeroPanel';
-import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
-import { ReserveSheetButton } from '@/components/battle/participants/ReservePanel';
-import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
-import { HUD_SURFACE, HudButton } from '@/components/hud';
-import { actionIcon } from '@/components/hud/icons/battle';
-import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
-import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
+import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
+import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
+import { BattleStatus } from '@/lib/constants/battle';
 import {
     MAP_TAB,
-    type MobileBattleTab,
     useBattleScene,
     useMobileBattleTabs,
-    useSelectedParticipant,
+    useSceneDrawers,
 } from '@/lib/hooks/battle';
-import { cn } from '@/lib/utils';
 import { myTurnKey } from '@/lib/utils/battle/view';
 
 const ActionResultCard = dynamic(
@@ -56,249 +55,137 @@ export function MobileBattleLayout({
 }: {
     onComplete?: () => void;
 }) {
-    const t = useTranslations('battle.scene');
-
     const td = useTranslations('battle.drawers');
-
-    const ts = useTranslations('battle.sides');
 
     const {
         battle,
         awaiting,
         viewer: { isDM, readOnly },
-        turn: { current, isMyTurn },
-        roster: { hero, allies, enemies },
-        select,
+        turn: { isMyTurn },
+        roster: { hero },
         log,
         intents,
     } = useBattleScene();
 
     const hasMap = !!battle.map;
 
-    const {
-        tab,
-        set: setTab,
-        expand,
-        expandTick,
-    } = useMobileBattleTabs({
+    const { tab, set: setTab } = useMobileBattleTabs({
         hasMap,
         mapAim: !!(intents.mapAim || intents.mapPick),
     });
 
-    const mapTab = tab === MAP_TAB;
+    const mapView = hasMap && tab === MAP_TAB;
 
-    const [slot, setSlot] = useState<HTMLDivElement | null>(null);
+    const [mapBusy, setMapBusy] = useState(false);
 
-    const [dmOpen, setDmOpen] = useState(false);
+    const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
 
-    const [toolsOpen, setToolsOpen] = useState(false);
+    const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
 
-    const ToolsIcon = actionIcon.railTools;
-
-    const { show: showLog, close: closeLog } = log;
-
-    const openLatestLog = useCallback(() => showLog(), [showLog]);
-
-    const selected = useSelectedParticipant();
-
-    const tabBtn = (side: MobileBattleTab, label: string, n?: number) => (
-        <HudButton
-            role="tab"
-            aria-selected={tab === side}
-            type="button"
-            onClick={() => setTab(side)}
-            className={cn(
-                'hud-sc flex flex-1 items-center justify-center gap-2 text-[15px] tracking-[.08em]',
-                tab === side
-                    ? 'text-[var(--ink)] shadow-[inset_0_-2px_0_var(--enemy)]'
-                    : 'text-[var(--hud-muted)]'
-            )}
-        >
-            {label} {n}
-        </HudButton>
+    const bindDock = useCallback(
+        (el: HTMLDivElement | null) =>
+            setSlots((prev) => (prev.dock === el ? prev : { dock: el })),
+        []
     );
 
-    const completed = battle.status === BattleStatus.COMPLETED;
+    const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
     const turnKey =
         hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
-    const waitingFor = (
-        <span className="text-hud-soft italic">
-            {t.rich('waitingFor', {
-                name: current?.basicInfo.name ?? '',
-                b: (chunks) => (
-                    <b className="hud-sc text-[var(--ink)] not-italic">
-                        {chunks}
-                    </b>
-                ),
-            })}
-        </span>
-    );
-
     return (
-        <MapStripSlotContext value={slot}>
-            <div className="below-header flex flex-col overflow-hidden">
-                <ConnectionBanner />
-                {!mapTab && (
-                    <>
-                        <BattleTopBar inline />
-                        <InitiativeTrack />
-                        <LastActionTicker onOpenLog={openLatestLog} />
-                        {completed ? (
-                            <BattleOverBanner />
-                        ) : awaiting ? (
-                            <AwaitingDmBanner />
-                        ) : isMyTurn ? (
-                            <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">
-                                {t('yourTurn')}
-                            </div>
+        <SceneSlotsContext value={slots}>
+            <MapStripSlotContext value={resultSlot}>
+                <div className="scene-full relative flex flex-col overflow-hidden">
+                    <div className="relative min-h-0 flex-1">
+                        {mapView ? (
+                            <main className="absolute inset-0">
+                                <BattleMapPanel
+                                    phone
+                                    onBusyChange={setMapBusy}
+                                />
+                            </main>
                         ) : (
-                            <div className="flex h-8 items-center px-4 text-[15px]">
-                                {waitingFor}
+                            <main
+                                data-participant-scroll
+                                className="absolute inset-0 z-0 overflow-y-auto pt-40"
+                            >
+                                <ParticipantList side={tab} />
+                            </main>
+                        )}
+                        <BattleTopBar />
+                        <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
+                            <div className="rounded-2xl border border-white/15 bg-black/60 backdrop-blur-sm">
+                                <InitiativeTrack />
                             </div>
-                        )}
-                    </>
-                )}
-                <div className="mx-4 flex h-11 border-b border-white/[.18]">
-                    <div role="tablist" className="flex flex-1">
-                        {hasMap && tabBtn(MAP_TAB, t('viewMap'))}
-                        {tabBtn(
-                            ParticipantSide.ALLY,
-                            ts('allies'),
-                            allies.length
-                        )}
-                        {tabBtn(
-                            ParticipantSide.ENEMY,
-                            ts('enemies'),
-                            enemies.length
-                        )}
-                    </div>
-                    {mapTab && <ReserveSheetButton />}
-                    {mapTab && <BattlePlayerViewToggle className="shrink-0" />}
-                    <HudButton
-                        type="button"
-                        data-tour="battle.map-tools"
-                        onClick={() => setToolsOpen(true)}
-                        aria-label={td('tools')}
-                        className="flex w-11 items-center justify-center text-[var(--ink)]"
-                    >
-                        <ToolsIcon className="size-5" />
-                    </HudButton>
-                    {isDM && battle.status !== BattleStatus.PREPARED && (
-                        <HudButton
-                            type="button"
-                            onClick={() => setDmOpen(true)}
-                            aria-label={t('openDmActions')}
-                            className="flex w-11 items-center justify-center text-[var(--gold)]"
-                        >
-                            <Settings2 className="size-5" />
-                        </HudButton>
-                    )}
-                </div>
-                {/* dock is a layer over the map/list: the panel can't exceed the area top and stays mounted on every tab (audio keeps playing) */}
-                <div className="relative flex min-h-0 flex-1 flex-col">
-                    {mapTab ? (
-                        <div className="min-h-0 flex-1">
-                            <BattleMapPanel phone />
+                            <div className="rounded-xl bg-black/60 backdrop-blur-sm">
+                                <LastActionTicker
+                                    onOpenLog={() => log.show()}
+                                />
+                            </div>
                         </div>
-                    ) : (
-                        <div
-                            data-participant-scroll
-                            className="relative z-0 min-h-0 flex-1 overflow-y-auto"
-                        >
-                            <ParticipantList side={tab} />
-                        </div>
-                    )}
-                    <AudioDock
-                        placement="strip"
-                        collapseOn={turnKey}
-                        collapseTick={expandTick}
-                    />
-                    {isDM && !readOnly && (
-                        <SoundboardPanel campaignId={battle.campaignId} />
-                    )}
-                </div>
-                {/* wrapper and MyTurnControls stay in place on every tab: remounting would kill an open wizard and aiming */}
-                {(hero || mapTab) && (
-                    <div
-                        className={cn(
-                            'border-t border-white/[.22] bg-black/70 px-4',
-                            mapTab
-                                ? 'pt-1 pb-[max(8px,env(safe-area-inset-bottom))]'
-                                : 'pt-3 pb-[max(12px,env(safe-area-inset-bottom))]'
-                        )}
-                    >
-                        {mapTab && <div ref={setSlot} data-map-strip-slot />}
-                        {hero && !mapTab && (
-                            <MyHeroPanel hero={hero} compact={isMyTurn} />
-                        )}
-                        {hero && isMyTurn && (
-                            <MyTurnControls
-                                key={turnKey}
-                                hero={hero}
-                                strip={
-                                    mapTab ? { onExpand: expand } : undefined
-                                }
-                            />
-                        )}
-                        {mapTab &&
-                            !(hero && isMyTurn) &&
-                            !intents.mapAim &&
-                            !intents.mapPick && (
-                                <MapStripRow onExpand={expand}>
-                                    {completed ? (
-                                        <span className="hud-sc">
-                                            {t('over')}
-                                        </span>
-                                    ) : awaiting ? (
-                                        <span className="hud-sc">
-                                            {isDM
-                                                ? t('awaitingYouShort')
-                                                : t('awaitingDm')}
-                                        </span>
-                                    ) : (
-                                        waitingFor
-                                    )}
-                                </MapStripRow>
+                        <InNoticeStack>
+                            <ConnectionBanner />
+                            {battle.status === BattleStatus.COMPLETED && (
+                                <BattleOverBanner />
                             )}
+                            {awaiting && <AwaitingDmBanner />}
+                        </InNoticeStack>
+                        <TokenBubble mapBusy={mapBusy} />
+                        <AudioDock placement="strip" collapseOn={turnKey} />
+                        <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center *:pointer-events-auto">
+                            <DrawerRail active={active} onToggle={toggle} />
+                        </div>
+                        <div
+                            ref={setResultSlot}
+                            className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center *:pointer-events-auto"
+                        />
                     </div>
-                )}
-                <ActionResultCard />
-                <ToolsDrawer
-                    open={toolsOpen}
-                    onOpenChange={setToolsOpen}
-                    onComplete={onComplete}
-                    withSound={false}
-                />
-                {isDM && (
-                    <DmPanel
-                        panel={{ open: dmOpen, onOpenChange: setDmOpen }}
+                    {/* safe zone: the map ends above it, so tokens never sit under the dock */}
+                    <div className="relative z-20 flex shrink-0 flex-col items-center gap-2 px-2 pt-2">
+                        {hero && <HeroCluster hero={hero} />}
+                        <div
+                            ref={bindDock}
+                            className="flex w-full flex-col items-center"
+                        />
+                    </div>
+                    <TurnDock />
+                    <ActionResultCard />
+                    {isDM && !readOnly && (
+                        <DmPanel
+                            panel={{
+                                open: drawer === 'dm',
+                                onOpenChange: onOpenChange('dm'),
+                            }}
+                        />
+                    )}
+                    <BattleDrawer
+                        drawer="log"
+                        open={log.open}
+                        onOpenChange={(o) => !o && log.close()}
+                        title={td('log')}
+                    >
+                        <BattleLog key={log.focus ?? 'latest'} />
+                    </BattleDrawer>
+                    {hasMap && (
+                        <BattleDrawer
+                            drawer="reserve"
+                            open={drawer === 'reserve'}
+                            onOpenChange={onOpenChange('reserve')}
+                            title={td('reserve')}
+                        >
+                            <ReserveGroup />
+                        </BattleDrawer>
+                    )}
+                    <ToolsDrawer
+                        open={drawer === 'tools'}
+                        onOpenChange={onOpenChange('tools')}
+                        onComplete={onComplete}
+                        tabs={{ value: tab, set: setTab }}
+                        withPlayer={false}
                     />
-                )}
-                <ResponsiveDialog
-                    open={!!selected}
-                    onOpenChange={(o) => !o && select(null)}
-                    title={t('participant')}
-                    className={cn(
-                        HUD_SURFACE,
-                        'border-white/25 bg-hud-surface'
-                    )}
-                >
-                    {selected && <ParticipantDetails participant={selected} />}
-                </ResponsiveDialog>
-                <ResponsiveDialog
-                    open={log.open}
-                    onOpenChange={(o) => !o && closeLog()}
-                    title={t('log')}
-                    className={cn(
-                        HUD_SURFACE,
-                        'border-white/25 bg-hud-surface'
-                    )}
-                >
-                    <BattleLog key={log.focus ?? 'latest'} />
-                </ResponsiveDialog>
-            </div>
-        </MapStripSlotContext>
+                </div>
+            </MapStripSlotContext>
+        </SceneSlotsContext>
     );
 }

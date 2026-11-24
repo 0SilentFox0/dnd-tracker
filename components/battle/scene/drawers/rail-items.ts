@@ -1,4 +1,6 @@
-export type DrawerKey = 'log' | 'dm' | 'reserve' | 'tools';
+import type { SceneDrawerKey } from '@/lib/hooks/battle';
+
+export type DrawerKey = SceneDrawerKey;
 
 export function railKeys({
     isDM,

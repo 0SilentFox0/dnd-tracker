@@ -3,14 +3,12 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
 
 import { ActionDock } from './dock/ActionDock';
 import { ActionGrid } from './ActionGrid';
 import { TurnCountdown } from './TurnCountdown';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { MapStripRow } from '@/components/battle/scene/layout/MapStrip';
 import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
@@ -76,18 +74,14 @@ const BonusActionPicker = dynamic(
     { ssr: false }
 );
 
-/** dock: desktop portals the action dock into the scene slot, the wizards stay owned here. strip: the phone map tab shows one row instead of the action panel while the wizards stay mounted (spell aiming lives in them). */
+/** dock: portals the action dock into the scene slot; the wizards stay owned here. */
 export function MyTurnControls({
     hero,
-    strip,
     dock,
 }: {
     hero: BattleParticipant;
-    strip?: { onExpand: () => void };
     dock?: boolean;
 }) {
-    const t = useTranslations('battle.turnControls');
-
     const { anyPending, battle, intents } = useBattleScene();
 
     const { actionEconomy, tested, spells } = useBattleRules();
@@ -95,8 +89,6 @@ export function MyTurnControls({
     const {
         attack: attackIntent,
         clearAttack: clearAttackIntent,
-        mapAim,
-        mapPick,
         setAttackReady,
     } = intents;
 
@@ -302,21 +294,9 @@ export function MyTurnControls({
           )
         : null;
 
-    const stripRow = strip && phase !== 'countdown' && !mapAim && !mapPick && (
-        <MapStripRow onExpand={strip.onExpand}>
-            <span className="hud-sc tracking-[.12em]">
-                {phase === 'acting' && zone
-                    ? t('pickAuraZone')
-                    : phase === 'gate'
-                      ? systemUi.turnStart && <systemUi.turnStart.Label />
-                      : t(`strip.${phase}`)}
-            </span>
-        </MapStripRow>
-    );
-
     return (
         <>
-            {dock ? dockView : strip ? stripRow : full}
+            {dock ? dockView : full}
             {!dock && countdown}
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />

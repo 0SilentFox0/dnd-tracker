@@ -34,16 +34,10 @@ export function RoundBadge({ className }: { className?: string }) {
     );
 }
 
-export function BattleTopBar({ inline = false }: { inline?: boolean }) {
+export function BattleTopBar() {
     useTurnTimer();
 
     return (
-        <RoundBadge
-            className={
-                inline
-                    ? 'h-12 px-4'
-                    : 'pointer-events-none absolute top-3 left-3 z-20 rounded-xl bg-black/55 px-3 py-1.5'
-            }
-        />
+        <RoundBadge className="pointer-events-none absolute top-3 left-3 z-20 rounded-xl bg-black/55 px-3 py-1.5" />
     );
 }

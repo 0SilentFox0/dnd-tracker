@@ -11,9 +11,11 @@ import { AudioDock } from '@/components/audio/AudioDock';
 import { HudButton, HudIconButton } from '@/components/hud';
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
 import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
-import { BattleStatus } from '@/lib/constants/battle';
+import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     type BattleViewMode,
+    MAP_TAB,
+    type MobileBattleTab,
     useBattleScene,
     useFxEnabled,
 } from '@/lib/hooks/battle';
@@ -25,25 +27,33 @@ const SECTION = 'hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]';
 export interface ToolsProps {
     onComplete?: () => void;
     view?: { mode: BattleViewMode; set: (mode: BattleViewMode) => void };
+    tabs?: { value: MobileBattleTab; set: (tab: MobileBattleTab) => void };
     onToolsSlot?: (el: HTMLDivElement | null) => void;
     withSound?: boolean;
+    // phone keeps the player on the stage: the sheet unmounts on close and would stop the video
+    withPlayer?: boolean;
 }
 
 export function ToolsContent({
     onComplete,
     view,
+    tabs,
     onToolsSlot,
     withSound = true,
+    withPlayer = true,
 }: ToolsProps) {
     const t = useTranslations('battle.topBar');
 
     const ts = useTranslations('battle.scene');
+
+    const tSides = useTranslations('battle.sides');
 
     const td = useTranslations('battle.drawers');
 
     const {
         battle,
         viewer: { isDM, readOnly },
+        roster: { allies, enemies },
         actions,
     } = useBattleScene();
 
@@ -67,6 +77,8 @@ export function ToolsContent({
         }
     };
 
+    const soundboard = isDM && !readOnly;
+
     const dmControls =
         isDM && !readOnly && battle.status !== BattleStatus.PREPARED;
 
@@ -89,6 +101,38 @@ export function ToolsContent({
                                 label: ts('viewColumns'),
                                 active: view.mode === 'columns',
                                 onSelect: () => view.set('columns'),
+                            },
+                        ]}
+                    />
+                </section>
+            )}
+            {tabs && (
+                <section className="flex flex-col gap-2">
+                    <h3 className={SECTION}>{td('view')}</h3>
+                    <HudChipTabs
+                        ariaLabel={ts('viewMode')}
+                        items={[
+                            ...(battle.map
+                                ? [
+                                      {
+                                          key: MAP_TAB,
+                                          label: ts('viewMap'),
+                                          active: tabs.value === MAP_TAB,
+                                          onSelect: () => tabs.set(MAP_TAB),
+                                      },
+                                  ]
+                                : []),
+                            {
+                                key: ParticipantSide.ALLY,
+                                label: `${tSides('allies')} ${allies.length}`,
+                                active: tabs.value === ParticipantSide.ALLY,
+                                onSelect: () => tabs.set(ParticipantSide.ALLY),
+                            },
+                            {
+                                key: ParticipantSide.ENEMY,
+                                label: `${tSides('enemies')} ${enemies.length}`,
+                                active: tabs.value === ParticipantSide.ENEMY,
+                                onSelect: () => tabs.set(ParticipantSide.ENEMY),
                             },
                         ]}
                     />
@@ -120,11 +164,11 @@ export function ToolsContent({
                     <BattlePlayerViewToggle className="size-10" />
                 </div>
             </section>
-            {withSound && (
+            {withSound && (withPlayer || soundboard) && (
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('sound')}</h3>
-                    <AudioDock placement="corner" />
-                    {isDM && !readOnly && (
+                    {withPlayer && <AudioDock placement="corner" />}
+                    {soundboard && (
                         <SoundboardPanel campaignId={battle.campaignId} />
                     )}
                 </section>

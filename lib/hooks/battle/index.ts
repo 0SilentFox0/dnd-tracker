@@ -101,6 +101,7 @@ export {
     useParticipantFacesValue,
 } from './useParticipantFace';
 export { usePlayerTurn } from './usePlayerTurn';
+export { type SceneDrawerKey, useSceneDrawers } from './useSceneDrawers';
 export { useScrollToCurrent } from './useScrollToCurrent';
 export { useSelectedParticipant } from './useSelectedParticipant';
 export {
