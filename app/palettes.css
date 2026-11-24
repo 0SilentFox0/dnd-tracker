@@ -78,10 +78,12 @@ html[data-palette="frost"] {
 
 html[data-palette="parchment"], html[data-palette="frost"] { --palette-overlay: rgba(236, 240, 238, .28); }
 html[data-palette="tavern"], html[data-palette="midnight"], html[data-palette="forest"], html[data-palette="amethyst"] { --palette-overlay: rgba(0, 0, 0, .72); }
+html[data-palette="parchment"] body::before, html[data-palette="frost"] body::before { background-image: none; }
 
 html[data-palette="parchment"] *, html[data-palette="frost"] * { scrollbar-color: var(--hud-gold-strong) transparent; }
 html[data-palette="parchment"] :where(*)::-webkit-scrollbar-thumb, html[data-palette="frost"] :where(*)::-webkit-scrollbar-thumb { background: var(--hud-gold-strong); }
 html[data-palette] body { color: var(--palette-foreground); background-color: var(--palette-page); }
+html[data-palette] body::after { background-color: var(--palette-overlay); }
 html[data-palette] header.sticky { color: var(--hud-bone); background-color: var(--palette-header); }
 html[data-palette="parchment"] header.sticky, html[data-palette="frost"] header.sticky { color: var(--palette-foreground); }
 html[data-palette] .battle-hud { background-color: var(--palette-page); }

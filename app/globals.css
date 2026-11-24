@@ -381,6 +381,26 @@
   body > .page-transition {
     flex: 1 0 auto;
   }
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+  body::before {
+    background: url("/bg/vey-strait-2k.webp") 62% center / cover no-repeat;
+    z-index: -2;
+  }
+  @media (min-width: 1921px) {
+    body::before {
+      background-image: url("/bg/vey-strait-4k.webp");
+    }
+  }
+  body::after {
+    background-color: rgba(0, 0, 0, 0.72);
+    z-index: -1;
+  }
   main,
   [role="main"],
   .container {
