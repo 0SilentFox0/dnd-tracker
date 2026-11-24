@@ -78,19 +78,16 @@ html[data-palette="frost"] {
 
 html[data-palette="parchment"], html[data-palette="frost"] { --palette-overlay: rgba(236, 240, 238, .28); }
 html[data-palette="tavern"], html[data-palette="midnight"], html[data-palette="forest"], html[data-palette="amethyst"] { --palette-overlay: rgba(0, 0, 0, .72); }
-html[data-palette="parchment"] body::before, html[data-palette="frost"] body::before { background-image: none; }
 
 html[data-palette="parchment"] *, html[data-palette="frost"] * { scrollbar-color: var(--hud-gold-strong) transparent; }
 html[data-palette="parchment"] :where(*)::-webkit-scrollbar-thumb, html[data-palette="frost"] :where(*)::-webkit-scrollbar-thumb { background: var(--hud-gold-strong); }
 html[data-palette] body { color: var(--palette-foreground); background-color: var(--palette-page); }
-html[data-palette] body::after { background-color: var(--palette-overlay); }
 html[data-palette] header.sticky { color: var(--hud-bone); background-color: var(--palette-header); }
 html[data-palette="parchment"] header.sticky, html[data-palette="frost"] header.sticky { color: var(--palette-foreground); }
 html[data-palette] .battle-hud { background-color: var(--palette-page); }
 html[data-palette] .battle-hud { --bone: var(--hud-bone); --ink: var(--hud-ink); --gold: var(--hud-gold); color: var(--hud-bone); }
 html[data-palette="parchment"] .battle-hud, html[data-palette="frost"] .battle-hud { background: linear-gradient(180deg, var(--palette-page), var(--palette-background)); }
 html[data-palette="parchment"] .battle-hud::before, html[data-palette="frost"] .battle-hud::before { background: none; }
-html[data-palette="parchment"]:has(.battle-hud) body::after, html[data-palette="frost"]:has(.battle-hud) body::after { background-color: transparent; }
 html[data-palette="parchment"] .battle-hud aside, html[data-palette="frost"] .battle-hud aside { background-color: color-mix(in srgb, var(--palette-card) 45%, transparent); border-color: color-mix(in srgb, var(--hud-line) 45%, transparent); }
 html[data-palette="parchment"] .slot-box, html[data-palette="frost"] .slot-box { background-color: var(--palette-card); border-color: var(--hud-rule); }
 html[data-palette="parchment"] .slot-box > *, html[data-palette="frost"] .slot-box > * { border-color: var(--hud-rule); }
