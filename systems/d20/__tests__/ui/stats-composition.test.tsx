@@ -106,7 +106,7 @@ describe('d20 CharacterAbilityScores', () => {
 describe('d20 StatsFields', () => {
     afterEach(cleanup);
 
-    it('edit mode renders scores and combat without section titles', () => {
+    it('edit mode renders scores and combat in titled panels', () => {
         render(
             <StatsFields
                 bindings={bindings()}
@@ -116,11 +116,11 @@ describe('d20 StatsFields', () => {
             />
         );
 
-        expect(screen.getByText(/combat/)).toBeInTheDocument();
+        expect(screen.getAllByText(/combat/).length).toBeGreaterThan(0);
         expect(screen.getByText('extra')).toBeInTheDocument();
         expect(
-            screen.queryByText('characters.form.sections.abilityScores')
-        ).toBeNull();
+            screen.getByText('characters.form.sections.abilityScores')
+        ).toBeInTheDocument();
     });
 
     it('create mode wraps both blocks in titled sections', () => {
