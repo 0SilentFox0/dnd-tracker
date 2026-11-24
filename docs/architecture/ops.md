@@ -79,7 +79,7 @@ Worker secrets (`wrangler secret put`): `APP_URL`, `OPS_COLLECT_SECRET`, `HEALTH
 2. Deploy the migration with the next production build from `main` (expand-only, RLS included).
 3. Deploy the worker: create the KV namespace, put its id in `wrangler.toml`, set the secrets, `wrangler deploy` (see the worker README).
 4. Send `POST /api/ops/test-notify` as a platform admin and check both channels.
-5. Rotate the Cloudflare API token by 2026-11-26 (tracked in `lib/ops/expiries.ts`, rule `secrets.expiry`); update `OPS_CLOUDFLARE_API_TOKEN` and, if the worker uses it, its secrets. After rotating, move the date in `expiries.ts`.
+5. Rotate the Cloudflare API token by 2026-12-24 (tracked in `lib/ops/expiries.ts`, rule `secrets.expiry`); update `OPS_CLOUDFLARE_API_TOKEN` and, if the worker uses it, its secrets. After rotating, move the date in `expiries.ts`.
 6. Confirm the values in `lib/ops/limits.ts` against the current provider pricing pages; they are 2026-11-24 estimates and the provider rules alert from them.
 7. Adapters for Supabase, Vercel and Upstash do not exist yet: their limit rules stay silent until readings appear.
 
