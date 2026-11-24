@@ -16,6 +16,7 @@ import {
 } from './SceneSlots';
 
 import { SideDot } from '@/components/battle/hud';
+import { TokenBubble } from '@/components/battle/map/bubble/TokenBubble';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
 import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
 import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
@@ -96,6 +97,8 @@ export function DesktopBattleLayout({
 
     const viewMode = intents.mapAim || intents.mapPick ? 'map' : storedMode;
 
+    const [mapBusy, setMapBusy] = useState(false);
+
     const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
@@ -151,7 +154,7 @@ export function DesktopBattleLayout({
                         {viewMode === 'map' ? (
                             <div className="min-h-0 flex-1 p-1">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
-                                    <BattleMapPanel />
+                                    <BattleMapPanel onBusyChange={setMapBusy} />
                                 </MapToolsSlotContext.Provider>
                             </div>
                         ) : (
@@ -165,6 +168,7 @@ export function DesktopBattleLayout({
                         <BattleColumns />
                     </main>
                 )}
+                <TokenBubble mapBusy={mapBusy} />
                 {hero && (
                     <div className="pointer-events-none absolute bottom-3 left-3 z-20">
                         <HeroCluster hero={hero} />

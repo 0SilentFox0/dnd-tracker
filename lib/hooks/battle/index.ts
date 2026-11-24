@@ -112,6 +112,7 @@ export {
 export { type FxRunner, useSpellFxPlayback } from './useSpellFxPlayback';
 export { useSpellMapTargeting } from './useSpellMapTargeting';
 export { useStrokePaint } from './useStrokePaint';
+export { anchorRect, type TokenAnchor, useTokenAnchor } from './useTokenAnchor';
 export { type GlideFrame, useTokenGlide } from './useTokenGlide';
 export { useTurnCountdown, useTurnTimer } from './useTurnTimer';
 export {

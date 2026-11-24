@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useMemo } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 
@@ -49,20 +49,34 @@ function UpdateMapButton({
     );
 }
 
-export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
+export function BattleMapPanel({
+    phone = false,
+    onBusyChange,
+}: {
+    phone?: boolean;
+    onBusyChange?: (busy: boolean) => void;
+}) {
     const scene = useBattleMapScene(useSystemFx());
 
     if (!scene) return null;
 
-    return <BattleMapPanelContent phone={phone} scene={scene} />;
+    return (
+        <BattleMapPanelContent
+            phone={phone}
+            scene={scene}
+            onBusyChange={onBusyChange}
+        />
+    );
 }
 
 function BattleMapPanelContent({
     phone,
     scene,
+    onBusyChange,
 }: {
     phone: boolean;
     scene: NonNullable<ReturnType<typeof useBattleMapScene>>;
+    onBusyChange?: (busy: boolean) => void;
 }) {
     const t = useTranslations('battle.map.tools');
 
@@ -82,6 +96,19 @@ function BattleMapPanelContent({
     } = scene;
 
     const modeTools = phone ? null : scene.modeTools;
+
+    const busy = !!(
+        placement?.active ||
+        terrainTool?.active ||
+        fogTool?.active ||
+        scene.modeTools?.toolActive
+    );
+
+    useEffect(() => {
+        onBusyChange?.(busy);
+
+        return () => onBusyChange?.(false);
+    }, [busy, onBusyChange]);
 
     const ui = modeUiOf(scene.map);
 

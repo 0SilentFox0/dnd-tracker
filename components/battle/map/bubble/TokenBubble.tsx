@@ -1,0 +1,164 @@
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
+
+import { HeroStatesPanel } from '@/components/battle/participants/hero/HeroStatesPanel';
+import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
+import { HudButton } from '@/components/hud';
+import {
+    Popover,
+    PopoverAnchor,
+    PopoverContent,
+} from '@/components/ui/popover';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { useBattleScene, useTokenAnchor } from '@/lib/hooks/battle';
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
+import { isFallen } from '@/lib/utils/battle/grid';
+import { NO_EFFECTS } from '@/lib/utils/battle/view';
+
+const onSelectedToken = (target: EventTarget | null, id: string) =>
+    target instanceof Element &&
+    !!target.closest(`[data-fx-participant="${id}"][data-fx-anchor="map"]`);
+
+export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
+    const t = useTranslations('battle.bubble');
+
+    const {
+        battle,
+        selectedId,
+        select,
+        intents,
+        effects,
+        roster: { hero },
+    } = useBattleScene();
+
+    const desktop = useMediaQuery(DESKTOP_QUERY);
+
+    const participant = selectedId
+        ? battle.initiativeOrder?.find((p) => p.basicInfo.id === selectedId)
+        : undefined;
+
+    const fallen = !!participant && isFallen(participant);
+
+    const open =
+        !!participant &&
+        !fallen &&
+        !intents.mapAim &&
+        !intents.mapPick &&
+        !mapBusy;
+
+    useEffect(() => {
+        if (fallen) select(null);
+    }, [fallen, select]);
+
+    const anchor = useTokenAnchor(open && desktop ? selectedId : null);
+
+    const virtualRef = useMemo(() => {
+        if (!anchor) return null;
+
+        const { left, top, width, height } = anchor.box;
+
+        return {
+            current: {
+                getBoundingClientRect: () =>
+                    new DOMRect(left, top, width, height),
+            },
+        };
+    }, [anchor]);
+
+    // a repeat click on the open token closes it; capture beats the map's own click handler
+    useEffect(() => {
+        if (!open || !selectedId || !anchor) return;
+
+        const onClick = (e: MouseEvent) => {
+            if (!onSelectedToken(e.target, selectedId)) return;
+
+            e.stopPropagation();
+
+            select(null);
+        };
+
+        document.addEventListener('click', onClick, true);
+
+        return () => document.removeEventListener('click', onClick, true);
+    }, [open, selectedId, anchor, select]);
+
+    if (!open || !participant || !selectedId) return null;
+
+    const isOwnHero = hero?.basicInfo.id === selectedId;
+
+    const body = (
+        <div className="flex flex-col gap-3">
+            <ParticipantDetails participant={participant} />
+            {isOwnHero && (
+                <HeroStatesPanel
+                    hero={participant}
+                    effects={effects.get(selectedId) ?? NO_EFFECTS}
+                    round={battle.currentRound}
+                />
+            )}
+        </div>
+    );
+
+    const title = t('title', { name: participant.basicInfo.name });
+
+    const close = (o: boolean) => {
+        if (!o) select(null);
+    };
+
+    if (desktop && anchor === undefined) return null;
+
+    if (!desktop || !anchor || !virtualRef)
+        return (
+            <ResponsiveDialog
+                open
+                onOpenChange={close}
+                title={title}
+                hud
+                size="sm"
+            >
+                {body}
+            </ResponsiveDialog>
+        );
+
+    return (
+        <Popover open onOpenChange={close}>
+            <PopoverAnchor virtualRef={virtualRef} />
+            <PopoverContent
+                side="right"
+                align="start"
+                sideOffset={anchor.inView ? 10 : 6}
+                collisionPadding={12}
+                aria-label={title}
+                data-token-bubble
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onPointerDownOutside={(e) => {
+                    if (onSelectedToken(e.target, selectedId))
+                        e.preventDefault();
+                }}
+                className="max-h-[min(70dvh,640px)] w-[min(380px,92vw)] overflow-y-auto border-white/20 bg-black/85 p-4"
+            >
+                {!anchor.inView && (
+                    <div className="mb-3 flex items-center justify-between gap-2 text-sm text-hud-muted">
+                        <span>{t('offscreen')}</span>
+                        <HudButton
+                            type="button"
+                            onClick={() =>
+                                anchor.el.scrollIntoView({
+                                    block: 'center',
+                                    inline: 'center',
+                                    behavior: 'smooth',
+                                })
+                            }
+                            className="h-10 shrink-0 rounded-xl border border-white/20 px-3 text-[var(--ink)]"
+                        >
+                            {t('toToken')}
+                        </HudButton>
+                    </div>
+                )}
+                {body}
+            </PopoverContent>
+        </Popover>
+    );
+}

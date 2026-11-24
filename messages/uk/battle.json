@@ -423,5 +423,10 @@
     "move": "Рух",
     "moveLeft": "{left}/{max}",
     "panelTitle": "Дії"
+  },
+  "bubble": {
+    "title": "Деталі: {name}",
+    "toToken": "До токена",
+    "offscreen": "Токен поза екраном"
   }
 }

@@ -423,5 +423,10 @@
     "move": "Move",
     "moveLeft": "{left}/{max}",
     "panelTitle": "Actions"
+  },
+  "bubble": {
+    "title": "Details: {name}",
+    "toToken": "To token",
+    "offscreen": "Token is off screen"
   }
 }
