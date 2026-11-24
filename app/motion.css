@@ -34,11 +34,11 @@
 }
 
 .motion-rise {
-  animation: motion-rise var(--motion-slow) var(--ease-out) both;
+  animation: motion-rise var(--motion-slow) var(--ease-out) backwards;
   animation-delay: calc(var(--i, 0) * var(--motion-stagger));
 }
-.motion-panel[data-dir="1"] { animation: motion-enter-from-end var(--motion-slow) var(--ease-out) both; }
-.motion-panel[data-dir="-1"] { animation: motion-enter-from-start var(--motion-slow) var(--ease-out) both; }
+.motion-panel[data-dir="1"] { animation: motion-enter-from-end var(--motion-slow) var(--ease-out) backwards; }
+.motion-panel[data-dir="-1"] { animation: motion-enter-from-start var(--motion-slow) var(--ease-out) backwards; }
 .motion-panel > .motion-rise { animation-delay: calc(var(--i, 0) * var(--motion-stagger) + 60ms); }
 
 .motion-flash[data-flash="damage"] { animation: motion-flash-damage var(--motion-slow) var(--ease-out); }
@@ -95,7 +95,7 @@
   .motion-rise,
   .motion-panel[data-dir],
   .motion-panel > .motion-rise {
-    animation: motion-fade var(--motion-fast) linear both;
+    animation: motion-fade var(--motion-fast) linear backwards;
     animation-delay: 0ms;
   }
   .motion-flash[data-flash] { animation: none; }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { prefersReducedMotion } from './media-query';
 
@@ -11,16 +11,21 @@ interface CountUpOptions {
 
 const easeOut = (t: number) => 1 - (1 - t) ** 3;
 
-/** Counts 0 → target once on mount, then tweens between later targets; instant under reduced motion. */
+/** Counts 0 → target once on mount (SSR/first paint shows the real value), then tweens between later targets; instant under reduced motion. */
 export function useCountUp(
     target: number,
     { duration = 700, enabled = true }: CountUpOptions = {}
 ): number {
-    const [value, setValue] = useState(() =>
-        !enabled || prefersReducedMotion() ? target : 0
-    );
+    const [value, setValue] = useState(target);
 
-    const shown = useRef(value);
+    const shown = useRef(target);
+
+    useLayoutEffect(() => {
+        if (!enabled || prefersReducedMotion()) return;
+
+        shown.current = 0;
+        setValue(0);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (!enabled || prefersReducedMotion() || shown.current === target) {
