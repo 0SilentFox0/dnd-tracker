@@ -1849,3 +1849,49 @@ model QuestTracking {
   @@index([userId])
   @@map("quest_tracking")
 }
+model OpsMetricBucket {
+  bucket DateTime
+  metric String
+  labels String @default("")
+  n Int
+  sum Float
+  max Float
+  @@id([bucket, metric, labels])
+  @@index([metric, bucket])
+  @@map("ops_metric_buckets")
+}
+model OpsMetricHourly {
+  bucket DateTime
+  metric String
+  labels String @default("")
+  n Int
+  sum Float
+  max Float
+  @@id([bucket, metric, labels])
+  @@index([metric, bucket])
+  @@map("ops_metric_hourly")
+}
+model OpsAlertState {
+  rule String @id
+  status String @default("ok")
+  since DateTime @default(now())
+  breachSince DateTime?
+  lastValue Float?
+  lastNotifiedAt DateTime?
+  lastNotifiedStatus String?
+  silencedUntil DateTime?
+  updatedAt DateTime @updatedAt
+  @@map("ops_alert_state")
+}
+model OpsAlertEvent {
+  id String @id @default(cuid())
+  rule String
+  from String
+  to String
+  value Float?
+  at DateTime @default(now())
+  notified Boolean @default(false)
+  @@index([at])
+  @@index([rule, at])
+  @@map("ops_alert_events")
+}

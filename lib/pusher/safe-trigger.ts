@@ -2,6 +2,7 @@
 
 import type Pusher from 'pusher';
 
+import { incr } from '@/lib/ops/metrics';
 import { logger } from '@/lib/utils/common/logger';
 
 export interface PusherTriggerContext {
@@ -17,8 +18,11 @@ export function safePusherTrigger(
     context?: PusherTriggerContext
 ): Promise<void> {
     return pusherServer.trigger(channel, event, payload).then(
-        () => undefined,
+        () => {
+            incr('pusher.trigger', 1, { result: 'ok' });
+        },
         (err) => {
+            incr('pusher.trigger', 1, { result: 'fail' });
             logger.error(
                 '[pusher] trigger failed',
                 { channel, event, ...context },

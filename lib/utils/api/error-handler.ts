@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { incr } from '@/lib/ops/metrics';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { ContentError } from '@/lib/utils/api/content-error';
 import { logger } from '@/lib/utils/common/logger';
@@ -43,5 +44,29 @@ export function handleApiError(
             return errorResponse(API_ERRORS.FOREIGN_KEY, 400);
     }
 
+    countServerError(error);
+
     return errorResponse(API_ERRORS.INTERNAL, 500);
+}
+
+const UNREACHABLE_CODES = new Set(['P1001', 'P1002', 'P1017']);
+
+function countServerError(error: unknown): void {
+    let code: string | undefined;
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+        code = error.code;
+    else if (error instanceof Prisma.PrismaClientInitializationError)
+        code = error.errorCode;
+
+    if (code === 'P2024') incr('db.pool_timeout');
+    else if (code && UNREACHABLE_CODES.has(code)) incr('db.unreachable');
+
+    incr('api.error5xx', 1, {
+        kind:
+            error instanceof Prisma.PrismaClientKnownRequestError ||
+            error instanceof Prisma.PrismaClientInitializationError
+                ? 'prisma'
+                : 'other',
+    });
 }

@@ -2,6 +2,7 @@ import type { NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { incr } from '@/lib/ops/metrics';
 import { getRedisClient } from '@/lib/redis';
 import { apiErrorJson } from '@/lib/utils/api/translate-error';
 
@@ -115,6 +116,21 @@ function warnNoRedisInProduction() {
 export async function checkRateLimit(
     input: RateLimitInput
 ): Promise<RateLimitResult> {
+    const result = await evaluateRateLimit(input);
+
+    if (!result.allowed && !result.unavailable)
+        incr('ratelimit.denied', 1, {
+            scope: Object.hasOwn(BATTLE_RATE_LIMITS, input.scope)
+                ? input.scope
+                : 'other',
+        });
+
+    return result;
+}
+
+async function evaluateRateLimit(
+    input: RateLimitInput
+): Promise<RateLimitResult> {
     const {
         userId,
         scope,
@@ -139,7 +155,11 @@ export async function checkRateLimit(
         : `${userId}:${scope}`;
 
     const degraded = (): RateLimitResult => {
-        if (failClosesHere(failClosed))
+        const closed = failClosesHere(failClosed);
+
+        incr('ratelimit.degraded', 1, { mode: closed ? 'closed' : 'open' });
+
+        if (closed)
             return {
                 allowed: false,
                 count: limit,
