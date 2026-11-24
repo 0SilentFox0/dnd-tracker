@@ -125,7 +125,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             className="hud-form"
             onSubmit={form.actions.handleSubmit}
         >
-            <div className="mx-auto w-full max-w-6xl">
+            <div className="sheet-root mx-auto w-full">
                 <SheetIdentityPanel
                     badge={
                         Ui.hideProgression ? undefined : (

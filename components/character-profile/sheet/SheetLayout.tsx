@@ -43,7 +43,7 @@ export function SheetLayout({
 
     return (
         <SheetRollProvider>
-            <div className="mx-auto flex w-full max-w-6xl flex-col">
+            <div className="sheet-root sheet-fit mx-auto flex w-full flex-col">
                 <SheetTopBar actions={identity.actions} />
                 <SheetIdentityPanel
                     ref={heroRef}

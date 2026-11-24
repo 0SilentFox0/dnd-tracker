@@ -57,12 +57,17 @@ export function HudTabs<T extends string>({
     const swipe = useSwipeTabs(order, value, (id) => onValueChange(id as T));
 
     return (
-        <Tabs value={value} onValueChange={(v) => onValueChange(v as T)}>
+        <Tabs
+            value={value}
+            onValueChange={(v) => onValueChange(v as T)}
+            data-sheet-tabs={sheet ? '' : undefined}
+        >
             <div
+                data-sheet-strip={sheet ? '' : undefined}
                 className={cn(
                     'sticky z-20 bg-hud-page/[.97]',
                     sheet
-                        ? 'top-[57px] px-4 py-2 lg:top-16'
+                        ? 'top-[calc(57px/var(--sheet-zoom,1))] px-4 py-2 lg:top-[calc(64px/var(--sheet-zoom,1))]'
                         : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule'
                 )}
             >
@@ -98,7 +103,11 @@ export function HudTabs<T extends string>({
                     </TabsList>
                 )}
             </div>
-            <div ref={panels} {...(sheet ? swipe : {})}>
+            <div
+                ref={panels}
+                data-sheet-panels={sheet ? '' : undefined}
+                {...(sheet ? swipe : {})}
+            >
                 {tabs.map((tab) => (
                     <TabsContent
                         key={tab.id}
