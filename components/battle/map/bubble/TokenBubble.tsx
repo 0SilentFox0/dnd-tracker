@@ -12,7 +12,11 @@ import {
     PopoverContent,
 } from '@/components/ui/popover';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { useBattleScene, useTokenAnchor } from '@/lib/hooks/battle';
+import {
+    revealToken,
+    useBattleScene,
+    useTokenAnchor,
+} from '@/lib/hooks/battle';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { isFallen } from '@/lib/utils/battle/grid';
 import { NO_EFFECTS } from '@/lib/utils/battle/view';
@@ -43,16 +47,15 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
     // DM opens fallen tokens too (revive); players never do
     const fallen = !!participant && !isDM && isFallen(participant);
 
-    const open =
-        !!participant &&
-        !fallen &&
-        !intents.mapAim &&
-        !intents.mapPick &&
-        !mapBusy;
+    const blocked = !!intents.mapAim || !!intents.mapPick || mapBusy;
+
+    const open = !!participant && !fallen && !blocked;
 
     useEffect(() => {
-        if (fallen) select(null);
-    }, [fallen, select]);
+        if (fallen || blocked) select(null);
+    }, [fallen, blocked, select]);
+
+    const { attackReady } = intents;
 
     const anchor = useTokenAnchor(open && desktop ? selectedId : null);
 
@@ -71,7 +74,7 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
 
     // a repeat click on the open token closes it; capture beats the map's own click handler
     useEffect(() => {
-        if (!open || !selectedId || !anchor) return;
+        if (!open || !selectedId || !anchor || attackReady) return;
 
         const onClick = (e: MouseEvent) => {
             if (!onSelectedToken(e.target, selectedId)) return;
@@ -84,7 +87,7 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
         document.addEventListener('click', onClick, true);
 
         return () => document.removeEventListener('click', onClick, true);
-    }, [open, selectedId, anchor, select]);
+    }, [open, selectedId, anchor, attackReady, select]);
 
     if (!open || !participant || !selectedId) return null;
 
@@ -146,13 +149,7 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
                         <span>{t('offscreen')}</span>
                         <HudButton
                             type="button"
-                            onClick={() =>
-                                anchor.el.scrollIntoView({
-                                    block: 'center',
-                                    inline: 'center',
-                                    behavior: 'smooth',
-                                })
-                            }
+                            onClick={() => revealToken(selectedId)}
                             className="h-10 shrink-0 rounded-xl border border-white/20 px-3 text-[var(--ink)]"
                         >
                             {t('toToken')}

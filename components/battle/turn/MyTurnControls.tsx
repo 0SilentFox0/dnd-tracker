@@ -29,11 +29,11 @@ import {
     COUNTDOWN_SECONDS,
     turnAllowsAttack,
 } from '@/lib/utils/battle/flows';
-import { usableAbilities } from '@/lib/utils/battle/view';
 import {
     movementOf,
     reactionAvailable,
-} from '@/lib/utils/battle/view/dock-status';
+    usableAbilities,
+} from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
 const AttackWizard = dynamic(

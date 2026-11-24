@@ -52,7 +52,7 @@ export function ActionDock({
         <HudButton
             type="button"
             onClick={on.actions}
-            data-tour="battle.turn-controls"
+            data-tour={panel?.open ? undefined : 'battle.turn-controls'}
             className={cn(
                 'hud-sc flex h-12 min-w-28 items-center justify-center gap-2 rounded-xl border px-4 text-[17px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                 exhausted
@@ -68,11 +68,11 @@ export function ActionDock({
     return (
         <div
             data-slot="action-dock"
-            className="pointer-events-auto flex max-w-full flex-col items-center gap-2 pb-[max(12px,env(safe-area-inset-bottom))]"
+            className="pointer-events-auto flex max-w-full flex-col items-center gap-2 pb-3"
         >
             {children}
             {phase === 'acting' && (
-                <div className="flex items-center gap-4 rounded-2xl border border-white/20 bg-black/70 px-4 py-2">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl border border-white/20 bg-black/70 px-4 py-2">
                     <DockDiamond
                         label={t('action')}
                         spent={status.actionUsed}

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { HudButton } from '@/components/hud';
-import { actionIcon,type ActionIconKey } from '@/components/hud/icons/battle';
+import { actionIcon, type ActionIconKey } from '@/components/hud/icons/battle';
 import type { usePlayerTurn } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 type Turn = ReturnType<typeof usePlayerTurn>;
@@ -25,24 +25,24 @@ const Tile = ({
     const Icon = actionIcon[icon];
 
     return (
-    <HudButton
-        type="button"
-        disabled={used}
-        onClick={onClick}
-        className={cn(
-            'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40',
-            primary
-                ? 'border-[var(--gold)] bg-[var(--gold)]/20'
-                : 'border-white/25 bg-black/55'
-        )}
-    >
-        <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[var(--gold)]/40 bg-black/30">
-            <Icon className="size-10 text-[var(--gold)]" />
-        </span>
-        <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">
-            {label}
-        </span>
-    </HudButton>
+        <HudButton
+            type="button"
+            disabled={used}
+            onClick={onClick}
+            className={cn(
+                'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40',
+                primary
+                    ? 'border-[var(--gold)] bg-[var(--gold)]/20'
+                    : 'border-white/25 bg-black/55'
+            )}
+        >
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[var(--gold)]/40 bg-black/30">
+                <Icon className="size-10 text-[var(--gold)]" />
+            </span>
+            <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">
+                {label}
+            </span>
+        </HudButton>
     );
 };
 

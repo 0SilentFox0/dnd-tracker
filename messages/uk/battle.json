@@ -100,6 +100,8 @@
     "playerViewOff": "Вигляд гравця: вимк.",
     "playerViewHero": "Бачить",
     "round": "Раунд {round}",
+    "connected": "Підключено",
+    "connecting": "Підключення",
     "toCampaign": "До кампанії",
     "complete": "Завершити",
     "nextTurn": "Наступний хід"

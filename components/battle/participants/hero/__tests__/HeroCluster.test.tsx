@@ -27,7 +27,9 @@ const setup = (readied: boolean) => {
         ...scene.me,
         battleData: {
             ...scene.me.battleData,
-            readied: readied ? { kind: 'attack' as const, round: 3 } : undefined,
+            readied: readied
+                ? { kind: 'attack' as const, round: 3 }
+                : undefined,
             pendingCast: readied
                 ? { spellName: 'Fireball', remainingRounds: 2 }
                 : undefined,

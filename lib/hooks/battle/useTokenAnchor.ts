@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 export interface AnchorBox {
     left: number;
@@ -29,12 +29,18 @@ const round = (r: DOMRect): AnchorBox => ({
 });
 
 /** Token rect when it intersects the stage; otherwise a zero-size point clamped to the stage edge. */
-export function anchorRect(el: Element, stage: Element | null): TokenAnchor {
+export function anchorRect(
+    el: Element,
+    stage: Element | AnchorBox | null
+): TokenAnchor {
     const box = round(el.getBoundingClientRect());
 
     if (!stage) return { box, inView: true, el };
 
-    const s = round(stage.getBoundingClientRect());
+    const s =
+        'getBoundingClientRect' in stage
+            ? round(stage.getBoundingClientRect())
+            : stage;
 
     const inView =
         box.left + box.width > s.left &&
@@ -68,10 +74,61 @@ function findTokenEl(id: string): Element | null {
     );
 }
 
+/** The part of the map the user can actually see: the clip, narrowed by a scrolling wrapper (phones, big maps). */
+function visibleStage(el: Element): AnchorBox | null {
+    const clip = el.closest('[data-fx-clip]');
+
+    if (!clip) return null;
+
+    const c = clip.getBoundingClientRect();
+
+    const scroller = clip.parentElement;
+
+    if (
+        !scroller ||
+        (scroller.scrollHeight <= scroller.clientHeight &&
+            scroller.scrollWidth <= scroller.clientWidth)
+    )
+        return round(c);
+
+    const s = scroller.getBoundingClientRect();
+
+    const left = Math.max(c.left, s.left);
+
+    const top = Math.max(c.top, s.top);
+
+    return round(
+        new DOMRect(
+            left,
+            top,
+            Math.max(0, Math.min(c.right, s.right) - left),
+            Math.max(0, Math.min(c.bottom, s.bottom) - top)
+        )
+    );
+}
+
 function measure(id: string): TokenAnchor | null {
     const el = findTokenEl(id);
 
-    return el ? anchorRect(el, el.closest('[data-fx-clip]')) : null;
+    return el ? anchorRect(el, visibleStage(el)) : null;
+}
+
+const REVEAL_EVENT = 'battle:reveal-token';
+
+/** Asks the mounted map to bring a token into view (camera fly or wrapper scroll). */
+export function revealToken(id: string) {
+    window.dispatchEvent(new CustomEvent(REVEAL_EVENT, { detail: id }));
+}
+
+export function useRevealListener(onReveal: (id: string) => void) {
+    useEffect(() => {
+        const handler = (e: Event) =>
+            onReveal((e as CustomEvent<string>).detail);
+
+        window.addEventListener(REVEAL_EVENT, handler);
+
+        return () => window.removeEventListener(REVEAL_EVENT, handler);
+    }, [onReveal]);
 }
 
 const same = (a: TokenAnchor | null, b: TokenAnchor | null) =>

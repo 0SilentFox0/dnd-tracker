@@ -62,7 +62,7 @@ export function MobileBattleLayout({
         awaiting,
         viewer: { isDM, readOnly },
         turn: { isMyTurn },
-        roster: { hero },
+        roster: { hero, reserve },
         log,
         intents,
     } = useBattleScene();
@@ -176,7 +176,7 @@ export function MobileBattleLayout({
                     {hasMap && (
                         <BattleDrawer
                             drawer="reserve"
-                            open={drawer === 'reserve'}
+                            open={drawer === 'reserve' && reserve.length > 0}
                             onOpenChange={onOpenChange('reserve')}
                             title={td('reserve')}
                         >

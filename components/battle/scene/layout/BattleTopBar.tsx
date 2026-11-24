@@ -23,6 +23,13 @@ export function RoundBadge({ className }: { className?: string }) {
         >
             {t('round', { round: currentRound })}
             <i
+                role="img"
+                aria-label={t(
+                    connection === 'connected' ? 'connected' : 'connecting'
+                )}
+                title={t(
+                    connection === 'connected' ? 'connected' : 'connecting'
+                )}
                 className={cn(
                     'size-1.5 rounded-full',
                     connection === 'connected'

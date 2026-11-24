@@ -20,12 +20,17 @@ import './battle-map.css';
 import { modeUiOf } from '@/components/battle/modes';
 import {
     useGridWindow,
+    useRevealListener,
     useScrollToCurrent,
     useStrokePaint,
 } from '@/lib/hooks/battle';
 import { useElementSize } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-import { minimapViewport } from '@/lib/utils/battle/camera';
+import {
+    cellPointPx,
+    followTarget,
+    minimapViewport,
+} from '@/lib/utils/battle/camera';
 import { mapSize } from '@/lib/utils/battle/grid';
 import type {
     BattleMapActions,
@@ -143,6 +148,44 @@ export function BattleMap({
         view?.currentId ?? null,
         scrolls && !cameraMode && (view?.camera?.follow ?? true)
     );
+
+    const { focusPoint } = camera;
+
+    const reveal = useCallback(
+        (id: string) => {
+            if (cameraMode) {
+                const t = followTarget(id, participants);
+
+                if (t)
+                    focusPoint(cellPointPx(t.anchor, t.size, win, pxPerUnit), {
+                        animate: true,
+                    });
+
+                return;
+            }
+
+            const outer = outerRef.current;
+
+            const token = containerRef.current?.querySelector(
+                `[data-fx-participant="${id}"][data-fx-anchor="map"]`
+            );
+
+            if (!outer || !token) return;
+
+            const t = token.getBoundingClientRect();
+
+            const o = outer.getBoundingClientRect();
+
+            outer.scrollBy({
+                left: t.left + t.width / 2 - (o.left + o.width / 2),
+                top: t.top + t.height / 2 - (o.top + o.height / 2),
+                behavior: 'smooth',
+            });
+        },
+        [cameraMode, participants, focusPoint, win, pxPerUnit, outerRef]
+    );
+
+    useRevealListener(reveal);
 
     const gridWindow = useGridWindow({
         svgRef,

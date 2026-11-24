@@ -34,7 +34,7 @@ export function DockNextTurn() {
             data-tour="battle.next-turn"
             disabled={pending}
             onClick={() => actions.nextTurn.mutate({})}
-            className="hud-sc pointer-events-auto mb-3 flex h-11 min-w-36 items-center justify-center gap-2 rounded-xl border border-white/25 bg-black/70 px-4 text-[15px] tracking-[.08em] text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
+            className="hud-sc pointer-events-auto order-last mb-3 flex h-11 min-w-36 items-center justify-center gap-2 rounded-xl border border-white/25 bg-black/70 px-4 text-[15px] tracking-[.08em] text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
         >
             {pending ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden />

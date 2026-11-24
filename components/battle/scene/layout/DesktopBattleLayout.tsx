@@ -104,7 +104,7 @@ export function DesktopBattleLayout({
         awaiting,
         intents,
         log,
-        roster: { hero },
+        roster: { hero, reserve },
         viewer: { isDM, readOnly },
     } = useBattleScene();
 
@@ -152,7 +152,9 @@ export function DesktopBattleLayout({
                                 <InitiativeTrack onReorder={onReorder} />
                             </div>
                             <div className="rounded-xl bg-black/60 backdrop-blur-sm">
-                                <LastActionTicker onOpenLog={() => log.show()} />
+                                <LastActionTicker
+                                    onOpenLog={() => log.show()}
+                                />
                             </div>
                         </div>
                         <InNoticeStack>
@@ -176,7 +178,7 @@ export function DesktopBattleLayout({
                             <div ref={setResultSlot} />
                             <div
                                 ref={bindDock}
-                                className="flex flex-col items-center"
+                                className="flex w-full flex-col items-center px-[324px]"
                             />
                         </div>
                     </div>
@@ -200,7 +202,7 @@ export function DesktopBattleLayout({
                     {battle.map && (
                         <BattleDrawer
                             drawer="reserve"
-                            open={drawer === 'reserve'}
+                            open={drawer === 'reserve' && reserve.length > 0}
                             onOpenChange={onOpenChange('reserve')}
                             title={t('reserve')}
                         >

@@ -1,5 +1,4 @@
 export { BackpackIcon } from './BackpackIcon';
-export { CheckeredFlagIcon } from './CheckeredFlagIcon';
 export { ChecklistIcon } from './ChecklistIcon';
 export { CrossedSwordsIcon } from './CrossedSwordsIcon';
 export { FastForwardIcon } from './FastForwardIcon';
@@ -8,5 +7,4 @@ export { MagicSwirlIcon } from './MagicSwirlIcon';
 export { MuscleUpIcon } from './MuscleUpIcon';
 export { PowerLightningIcon } from './PowerLightningIcon';
 export { RicochetIcon } from './RicochetIcon';
-export { ShieldReflectIcon } from './ShieldReflectIcon';
 export { SpellBookIcon } from './SpellBookIcon';

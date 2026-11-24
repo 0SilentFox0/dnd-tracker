@@ -3,7 +3,11 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 
@@ -39,9 +43,7 @@ export function ActionsPopover({
 
     return (
         <Popover open={open} onOpenChange={onOpenChange}>
-            <PopoverAnchor asChild>
-                <span className="inline-flex">{anchor}</span>
-            </PopoverAnchor>
+            <PopoverTrigger asChild>{anchor}</PopoverTrigger>
             <PopoverContent
                 side="top"
                 align="center"

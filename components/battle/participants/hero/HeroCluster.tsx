@@ -12,9 +12,9 @@ import {
     TurnTimerBar,
     ZoomablePortrait,
 } from '@/components/battle/hud';
-import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { ReactionSpellButton } from '@/components/battle/turn/ReactionSpellButton';
 import { ReadiedAttackButton } from '@/components/battle/turn/ReadiedAttackButton';
+import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HudButton } from '@/components/hud';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleRules, useBattleSceneData } from '@/lib/hooks/battle';
@@ -60,9 +60,15 @@ export const HeroCluster = memo(function HeroCluster({
                 <div className="min-w-0 flex-1">
                     <div className="hud-sc flex items-baseline justify-between gap-2 text-[17px] font-bold text-[var(--ink)]">
                         <span className="flex min-w-0 items-baseline gap-2">
-                            <span className="truncate">{hero.basicInfo.name}</span>
+                            <span className="truncate">
+                                {hero.basicInfo.name}
+                            </span>
                             {badges?.map((Badge, i) => (
-                                <Badge key={i} participant={hero} place="hero" />
+                                <Badge
+                                    key={i}
+                                    participant={hero}
+                                    place="hero"
+                                />
                             ))}
                         </span>
                         <span className="shrink-0 font-sans text-sm font-normal whitespace-nowrap">
@@ -89,7 +95,10 @@ export const HeroCluster = memo(function HeroCluster({
                 >
                     <ChevronUp
                         aria-hidden
-                        className={cn('size-5 transition-transform', open && 'rotate-180')}
+                        className={cn(
+                            'size-5 transition-transform',
+                            open && 'rotate-180'
+                        )}
                     />
                 </HudButton>
             </div>

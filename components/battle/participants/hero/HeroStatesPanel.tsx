@@ -6,11 +6,7 @@ import { EffectLine } from '@/components/battle/hud';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { useFormatDuration } from '@/lib/i18n/use-duration';
 import type { DisplayEffect } from '@/lib/utils/battle/view';
-import {
-    abilityCharges,
-    NO_EFFECTS,
-    poolViews,
-} from '@/lib/utils/battle/view';
+import { abilityCharges, NO_EFFECTS, poolViews } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
 export function HeroStatesPanel({
@@ -63,7 +59,9 @@ export function HeroStatesPanel({
                     ))}
                 </div>
             )}
-            {heroPanels?.map((Panel, i) => <Panel key={i} hero={hero} />)}
+            {heroPanels?.map((Panel, i) => (
+                <Panel key={i} hero={hero} />
+            ))}
             {ConditionTestPanel && <ConditionTestPanel hero={hero} />}
         </section>
     );
