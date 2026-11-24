@@ -387,6 +387,6 @@
   },
   "2026-11-24-game-ui-battle": {
     "title": "Full-screen battle",
-    "body": "The map fills the whole screen with no header. Actions, movement and reaction live in the dock at the bottom, your hero sits bottom-left, and the log, DM panel, reserve and tools open as drawers on the right. Tap a token to see its details in a bubble."
+    "body": "The map fills the whole screen with no header. Actions live in a compact HUD at the bottom right (hotkeys 1-6), your hero with spell slots sits bottom-left, initiative runs as an arc along the top, and the log and tools float as glass panels. Tap a token to see its details in a bubble; on phones the panels fold into a \"•••\" menu."
   }
 }
