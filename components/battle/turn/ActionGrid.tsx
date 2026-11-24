@@ -36,12 +36,9 @@ const Tile = ({
                 : 'border-white/25 bg-black/55'
         )}
     >
-        <Icon
-            className={cn(
-                'size-7 shrink-0',
-                'text-[var(--gold)]'
-            )}
-        />
+        <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[var(--gold)]/40 bg-black/30">
+            <Icon className="size-10 text-[var(--gold)]" />
+        </span>
         <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">
             {label}
         </span>
