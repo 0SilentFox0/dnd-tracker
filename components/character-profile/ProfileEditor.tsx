@@ -146,6 +146,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                         </FormAlert>
                     )}
                     <ProfileTabs
+                        variant="sheet"
                         value={tab}
                         onValueChange={setTab}
                         tabs={[
