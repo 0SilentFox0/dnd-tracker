@@ -39,7 +39,7 @@ export function BackpackGrid({
             aria-label={t('backpack')}
             {...drop}
             className={cn(
-                'grid grid-cols-5 gap-1.5 rounded-[4px] p-1 lg:grid-cols-6',
+                'grid grid-cols-5 gap-1.5 rounded-lg p-1 lg:grid-cols-6',
                 receiving &&
                     'bg-hud-gold-strong/10 ring-1 ring-hud-gold-strong/50'
             )}
