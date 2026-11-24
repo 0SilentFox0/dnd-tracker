@@ -1,0 +1,83 @@
+:root {
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --motion-hero: 480ms;
+  --motion-stagger: 35ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: linear(0, 0.22 6%, 0.62 14%, 0.96 24%, 1.08 32%, 1.09 38%, 1.03 50%, 0.99 62%, 1 78%, 1);
+  --sheet-hp: var(--hud-danger);
+  --sheet-hp-ghost: color-mix(in srgb, var(--hud-danger) 38%, transparent);
+  --sheet-hp-track: color-mix(in srgb, var(--hud-danger) 14%, transparent);
+  --sheet-hp-temp: color-mix(in srgb, var(--hud-ink) 55%, transparent);
+}
+
+@keyframes motion-rise {
+  from { opacity: 0; transform: translateY(10px); }
+}
+@keyframes motion-enter-from-end {
+  from { opacity: 0; transform: translateX(var(--motion-shift, 24px)); }
+}
+@keyframes motion-enter-from-start {
+  from { opacity: 0; transform: translateX(calc(var(--motion-shift, 24px) * -1)); }
+}
+@keyframes motion-flash-damage {
+  30% { transform: scale(1.06); color: var(--sheet-hp); }
+}
+@keyframes motion-flash-heal {
+  30% { transform: translateY(-3px) scale(1.04); color: var(--hud-good); }
+}
+@keyframes motion-fade {
+  from { opacity: 0; }
+}
+
+.motion-rise {
+  animation: motion-rise var(--motion-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--motion-stagger));
+}
+.motion-panel[data-dir="1"] { animation: motion-enter-from-end var(--motion-slow) var(--ease-out) both; }
+.motion-panel[data-dir="-1"] { animation: motion-enter-from-start var(--motion-slow) var(--ease-out) both; }
+.motion-panel > .motion-rise { animation-delay: calc(var(--i, 0) * var(--motion-stagger) + 60ms); }
+
+.motion-flash[data-flash="damage"] { animation: motion-flash-damage var(--motion-slow) var(--ease-out); }
+.motion-flash[data-flash="heal"] { animation: motion-flash-heal var(--motion-slow) var(--ease-out); }
+
+.motion-press {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+.motion-press:active { transform: scale(0.97); }
+
+.motion-lift {
+  transition: transform var(--motion-base) var(--ease-out);
+}
+@media (hover: hover) {
+  .motion-lift:hover { transform: translateY(-2px); }
+}
+
+.motion-indicator {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 1px;
+  transform-origin: left center;
+  background: var(--hud-gold);
+  transition: transform var(--motion-slow) var(--ease-spring);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-rise,
+  .motion-panel[data-dir],
+  .motion-panel > .motion-rise {
+    animation: motion-fade var(--motion-fast) linear both;
+    animation-delay: 0ms;
+  }
+  .motion-flash[data-flash] { animation: none; }
+  .motion-press,
+  .motion-lift,
+  .motion-indicator { transition: none; }
+  .motion-press:active { transform: none; }
+  .motion-lift:hover { transform: none; }
+}

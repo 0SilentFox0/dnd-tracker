@@ -14,6 +14,7 @@ export {
 export { useCheckedIds } from './useCheckedIds';
 export { useCoarsePointer } from './useCoarsePointer';
 export { useConfirm } from './useConfirm';
+export { useCountUp } from './useCountUp';
 export { useCrudMutation } from './useCrudMutation';
 export { useCssVarHeight } from './useCssVarHeight';
 export { useDebouncedCommit } from './useDebouncedCommit';
@@ -31,6 +32,7 @@ export { useExpiry } from './useExpiry';
 export type { UseFileImportReturn } from './useFileImport';
 export { useFileImport } from './useFileImport';
 export { useFlip } from './useFlip';
+export { type GhostFlash, useGhostValue } from './useGhostValue';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
 export { DESKTOP_QUERY, useIsMobile } from './useIsMobile';
@@ -45,11 +47,7 @@ export {
     type PagerControls,
     usePager,
 } from './usePager';
-export {
-    type PinchStep,
-    type PointerBind,
-    usePanPinch,
-} from './usePanPinch';
+export { type PinchStep, type PointerBind, usePanPinch } from './usePanPinch';
 export {
     type PlayerViewScope,
     resetPlayerViews,
@@ -67,6 +65,8 @@ export { useScrollLock } from './useScrollLock';
 export { SEARCH_DEBOUNCE_MS, type SearchState, useSearch } from './useSearch';
 export { useSetLocale } from './useSetLocale';
 export { useSingleFlight } from './useSingleFlight';
+export { type IndicatorBox, useSlidingIndicator } from './useSlidingIndicator';
+export { tabDirection, useTabDirection } from './useTabDirection';
 export { useTimeZoneSetting } from './useTimeZoneSetting';
 export { type Toast, useToasts } from './useToasts';
 export { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
