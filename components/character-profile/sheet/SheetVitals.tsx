@@ -141,7 +141,7 @@ function HpReadout({
                 aria-label={summary}
                 aria-expanded={open}
                 onClick={onToggle}
-                className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-hud-ink [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
+                className="hud-num absolute inset-0 flex items-center gap-1.5 px-4 text-left text-white [text-shadow:0_1px_2px_rgba(0,0,0,.55)] focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
             >
                 <span
                     className="motion-flash inline-block text-[27px] leading-none"

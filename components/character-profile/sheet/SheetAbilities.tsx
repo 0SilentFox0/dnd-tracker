@@ -16,10 +16,7 @@ export function SheetAbilities() {
     const roll = useSheetRoll();
 
     return (
-        <div
-            className="order-[-1] px-4 pb-4 empty:hidden"
-            data-testid="sheet-abilities"
-        >
+        <div className="px-4 pb-4 empty:hidden" data-testid="sheet-abilities">
             <Ui.StatsTab section="top" {...roll} />
         </div>
     );
