@@ -17,6 +17,7 @@ vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
 }));
 
 import { ToolsContent } from '@/components/battle/scene/drawers/ToolsDrawer';
+import { RoundBadge } from '@/components/battle/scene/layout/BattleTopBar';
 import { BattleSceneContext } from '@/lib/hooks/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { usePlayerView } from '@/lib/hooks/common';
@@ -136,5 +137,33 @@ describe('ToolsContent: вигляд гравця', () => {
         render(<ToolsContent audio={{ sound: false }} />, { wrapper: stateful(false) });
 
         expect(screen.queryByRole('button', { name: /гравця/i })).toBeNull();
+    });
+});
+
+describe('RoundBadge', () => {
+    afterEach(cleanup);
+
+    it('DM gets the next-turn button that calls nextTurn', () => {
+        const scene = fakeScene({ isDM: true });
+
+        render(<RoundBadge />, { wrapper: scene.wrapper });
+
+        fireEvent.click(screen.getByRole('button', { name: /Наступний хід/ }));
+
+        expect(scene.value.actions.nextTurn.mutate).toHaveBeenCalledWith({});
+    });
+
+    it('player has no next-turn button', () => {
+        render(<RoundBadge />, { wrapper: fakeScene().wrapper });
+
+        expect(screen.queryByRole('button')).toBeNull();
+    });
+
+    it('read-only DM (player view) has no next-turn button', () => {
+        render(<RoundBadge />, {
+            wrapper: fakeScene({ isDM: true, playerView: true }).wrapper,
+        });
+
+        expect(screen.queryByRole('button')).toBeNull();
     });
 });

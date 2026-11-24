@@ -29,6 +29,7 @@ import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrac
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
+import { HUD_GLASS } from '@/components/hud';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
@@ -167,10 +168,8 @@ export function DesktopBattleLayout({
                         )}
                         <BattleTopBar />
                         <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-340px))] -translate-x-1/2 flex-col gap-1 *:pointer-events-auto">
-                            <div className="rounded-2xl border border-white/15 bg-black/60 backdrop-blur-sm">
-                                <InitiativeTrack onReorder={onReorder} />
-                            </div>
-                            <div className="rounded-xl bg-black/60 backdrop-blur-sm">
+                            <InitiativeTrack onReorder={onReorder} />
+                            <div className={`${HUD_GLASS} rounded-xl`}>
                                 <LastActionTicker
                                     onOpenLog={() => log.show()}
                                 />

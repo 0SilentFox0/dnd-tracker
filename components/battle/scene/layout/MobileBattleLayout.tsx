@@ -121,9 +121,7 @@ export function MobileBattleLayout({
                         )}
                         <BattleTopBar />
                         <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
-                            <div className="rounded-2xl border border-white/15 bg-black/60 backdrop-blur-sm">
-                                <InitiativeTrack />
-                            </div>
+                            <InitiativeTrack />
                             <div className="rounded-xl bg-black/60 backdrop-blur-sm">
                                 <LastActionTicker
                                     onOpenLog={() => log.show()}
