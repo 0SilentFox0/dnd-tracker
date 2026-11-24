@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Crosshair, ImagePlus, Move, Trash2 } from 'lucide-react';
 
-import { FieldRow, FieldSection } from '../FieldRow';
+import { FieldRow } from '../FieldRow';
 import { ICON_OPTIONS } from '../marker-icon-options';
 import { MarkerColorField } from '../MarkerColorField';
 import { LayerDeleteDialog } from './LayerDeleteDialog';
@@ -44,7 +44,6 @@ interface LayerRowProps {
         onActivate(): void;
         editingImage: boolean;
         onToggleImageEdit(): void;
-        gameStyle?: boolean;
     };
 }
 
@@ -247,11 +246,7 @@ export function LayerRow({
         <li
             data-testid={`layer-row-${layer.id}`}
             data-active={state.active}
-            className={
-                state.gameStyle
-                    ? 'world-layer-settings min-w-0 space-y-3'
-                    : 'space-y-3 rounded-md border border-hud-rule p-2'
-            }
+            className="world-layer-settings min-w-0 space-y-3"
         >
             <div className="flex items-center gap-2">
                 <Input
@@ -281,42 +276,28 @@ export function LayerRow({
                 <Crosshair className="size-3.5" aria-hidden />
                 {state.active ? t('deactivate') : t('activate')}
             </HudButton>
-            {state.gameStyle ? (
-                <HudTabs
-                    value={section}
-                    onValueChange={setSection}
-                    contentClassName="world-layer-tab"
-                    tabs={[
-                        {
-                            id: 'appearance',
-                            label: t('sections.appearance'),
-                            content: appearance,
-                        },
-                        {
-                            id: 'access',
-                            label: t('sections.access'),
-                            content: access,
-                        },
-                        {
-                            id: 'image',
-                            label: t('sections.image'),
-                            content: image,
-                        },
-                    ]}
-                />
-            ) : (
-                <>
-                    <FieldSection title={t('sections.appearance')}>
-                        {appearance}
-                    </FieldSection>
-                    <FieldSection title={t('sections.access')}>
-                        {access}
-                    </FieldSection>
-                    <FieldSection title={t('sections.image')}>
-                        {image}
-                    </FieldSection>
-                </>
-            )}
+            <HudTabs
+                value={section}
+                onValueChange={setSection}
+                contentClassName="world-layer-tab"
+                tabs={[
+                    {
+                        id: 'appearance',
+                        label: t('sections.appearance'),
+                        content: appearance,
+                    },
+                    {
+                        id: 'access',
+                        label: t('sections.access'),
+                        content: access,
+                    },
+                    {
+                        id: 'image',
+                        label: t('sections.image'),
+                        content: image,
+                    },
+                ]}
+            />
             <LayerDeleteDialog
                 open={deleting}
                 name={layer.name}

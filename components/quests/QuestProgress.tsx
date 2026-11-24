@@ -2,12 +2,13 @@
 import { useTranslations } from 'next-intl';
 
 import type { QuestView } from '@/types/quests';
+
 export function QuestProgress({ quest }: { quest: QuestView }) {
     const t = useTranslations('quests');
 
-    const known = quest.objectives.filter((o) => !o.hidden);
-
-    const done = known.filter((o) => !o.hidden && o.completed).length;
+    const done = quest.objectives.filter(
+        (o) => !o.hidden && o.completed
+    ).length;
 
     return (
         <div className="space-y-1">

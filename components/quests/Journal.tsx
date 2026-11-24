@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ScrollText, Star } from 'lucide-react';
+import { ScrollText } from 'lucide-react';
 
 import { QuestDetails } from './QuestDetails';
 import { QuestEditor } from './QuestEditor';
-import { QuestProgress } from './QuestProgress';
+import { QuestListItem } from './QuestListItem';
 
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { EmptyState, ErrorState, QueryState } from '@/components/common/states';
@@ -136,47 +136,14 @@ function JournalBook({
                                                 </span>
                                             </h2>
                                             {group.map((q) => (
-                                                <Button
+                                                <QuestListItem
                                                     key={q.id}
-                                                    variant="ghost"
-                                                    aria-pressed={
-                                                        quest?.id === q.id
-                                                    }
-                                                    onClick={() =>
+                                                    quest={q}
+                                                    selected={quest?.id === q.id}
+                                                    onSelect={() =>
                                                         setSelected(q.id)
                                                     }
-                                                    className={`h-auto w-full items-start justify-start rounded-md border p-3 text-left whitespace-normal ${quest?.id === q.id ? 'border-hud-gold bg-hud-field' : 'border-transparent'}`}
-                                                >
-                                                    <ScrollText className="mt-1 size-5 shrink-0 text-hud-gold" />
-                                                    <span className="min-w-0 flex-1 space-y-2">
-                                                        <span className="flex items-start gap-2">
-                                                            <span className="min-w-0 flex-1 break-words text-hud-ink">
-                                                                {q.title}
-                                                            </span>
-                                                            {q.tracked && (
-                                                                <Star
-                                                                    className="size-4 shrink-0 text-hud-gold"
-                                                                    aria-label={t(
-                                                                        'tracked'
-                                                                    )}
-                                                                />
-                                                            )}
-                                                        </span>
-                                                        {q.marker && (
-                                                            <span className="block text-xs text-hud-muted">
-                                                                {q.marker.name}
-                                                            </span>
-                                                        )}
-                                                        <QuestProgress
-                                                            quest={q}
-                                                        />
-                                                        <span className="inline-flex rounded-full border border-hud-line px-2 py-0.5 text-xs text-hud-muted">
-                                                            {t(q.status)}
-                                                            {!q.visible &&
-                                                                ` · ${t('private')}`}
-                                                        </span>
-                                                    </span>
-                                                </Button>
+                                                />
                                             ))}
                                         </section>
                                     )

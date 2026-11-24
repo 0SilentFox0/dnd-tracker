@@ -3,6 +3,7 @@ import { Info } from 'lucide-react';
 
 import '@/components/campaigns/dashboard/dashboard.css';
 import '@/lib/server/systems/registry';
+import { CampaignCover } from '@/components/campaigns/CampaignCover';
 import { CampaignRecentSession } from '@/components/campaigns/dashboard/CampaignRecentSession';
 import { CampaignSummaryPanel } from '@/components/campaigns/dashboard/CampaignSummaryPanel';
 import { CampaignWorldPreview } from '@/components/campaigns/dashboard/CampaignWorldPreview';
@@ -16,7 +17,6 @@ import { CampaignSettingsButton } from '@/components/campaigns/settings/Campaign
 import { CreditsText } from '@/components/campaigns/templates/CreditsText';
 import { PublishTemplateButton } from '@/components/campaigns/templates/PublishTemplateButton';
 import { SourceSyncButton } from '@/components/campaigns/templates/SourceSyncButton';
-import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { HudPage, HudPanel } from '@/components/hud/page';
 import { GameShell } from '@/components/layout/GameShell';
 import { DemoTourMenu } from '@/components/onboarding/DemoTourMenu';
@@ -40,11 +40,11 @@ import {
     readPlayerDashboard,
 } from '@/lib/server/campaigns/dashboard';
 import { readCampaignOnboarding } from '@/lib/server/onboarding/campaign';
-import { campaignGameNavigation } from '@/lib/utils/campaigns/game-navigation';
-import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
+import {
+    campaignGameNavigation,
+    campaignSectionContext,
+} from '@/lib/utils/campaigns/game-navigation';
 import { parseRules } from '@/lib/utils/rules/schema';
-
-const DEFAULT_CAMPAIGN_COVER = '/example-demo/maps/grove.jpg';
 
 export default async function CampaignDetailPage({
     params,
@@ -76,8 +76,6 @@ export default async function CampaignDetailPage({
 
     const rules = parseRules(campaign.rules);
 
-    const hasClasses = classesEnabled(rules);
-
     const [dm, player, onboarding] = await Promise.all([
         isDM && !isTemplate ? readDmDashboard(id).catch(() => null) : null,
         isPlayer ? readPlayerDashboard(id, user.id).catch(() => null) : null,
@@ -94,12 +92,7 @@ export default async function CampaignDetailPage({
         acquaintancesEnabled: campaign.acquaintancesEnabled,
     });
 
-    const context = {
-        isTemplate,
-        classesEnabled: hasClasses,
-        mapLibraryEnabled: campaign.mapLibraryEnabled,
-        system: rules.system,
-    };
+    const context = campaignSectionContext(campaign);
 
     const navItems = campaignGameNavigation({
         id,
@@ -148,21 +141,10 @@ export default async function CampaignDetailPage({
                 data-tour="dashboard.header"
             >
                 <div className="dashboard-hero-art" aria-hidden="true">
-                    <OptimizedImage
-                        src={campaign.coverImage || DEFAULT_CAMPAIGN_COVER}
-                        alt=""
+                    <CampaignCover
+                        src={campaign.coverImage}
                         width={1800}
                         height={620}
-                        className="size-full object-cover"
-                        fallback={
-                            <OptimizedImage
-                                src={DEFAULT_CAMPAIGN_COVER}
-                                alt=""
-                                width={1800}
-                                height={620}
-                                className="size-full object-cover"
-                            />
-                        }
                     />
                 </div>
                 {isDM && (

@@ -20,7 +20,6 @@ interface LayersPanelProps {
     onActive(id: string | null): void;
     heroes: Pick<RosterHero, 'id' | 'name'>[];
     imageEdit: { layerId: string | null; set(id: string | null): void };
-    gameStyle?: boolean;
 }
 
 export function LayersPanel({
@@ -30,7 +29,6 @@ export function LayersPanel({
     onActive,
     heroes,
     imageEdit,
-    gameStyle,
 }: LayersPanelProps) {
     const t = useTranslations('world.layers');
 
@@ -63,7 +61,7 @@ export function LayersPanel({
             state={{
                 active: activeId === layer.id,
                 onActivate: () => {
-                    if (gameStyle) setSelectedId(layer.id);
+                    setSelectedId(layer.id);
 
                     onActive(activeId === layer.id ? null : layer.id);
                 },
@@ -72,7 +70,6 @@ export function LayersPanel({
                     imageEdit.set(
                         imageEdit.layerId === layer.id ? null : layer.id
                     ),
-                gameStyle,
             }}
         />
     );
@@ -80,7 +77,7 @@ export function LayersPanel({
     return (
         <section
             aria-label={t('title')}
-            className={gameStyle ? 'world-layer-manager' : 'space-y-2'}
+            className="world-layer-manager"
         >
             <div className="flex items-center justify-between gap-2">
                 <h3 className="world-layer-title hud-sc text-sm text-hud-ink">
@@ -107,7 +104,7 @@ export function LayersPanel({
             </div>
             {layers.length === 0 ? (
                 <p className="text-xs text-hud-muted">{t('empty')}</p>
-            ) : gameStyle && selected ? (
+            ) : selected ? (
                 <>
                     <ul className="world-layer-list">
                         {layers.map((layer) => (
@@ -142,9 +139,7 @@ export function LayersPanel({
                     </ul>
                     <ul>{editorRow(selected)}</ul>
                 </>
-            ) : (
-                <ul className="space-y-2">{layers.map(editorRow)}</ul>
-            )}
+            ) : null}
         </section>
     );
 }

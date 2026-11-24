@@ -6,6 +6,7 @@ import {
 } from './client';
 
 import type { QuestInput, QuestList } from '@/types/quests';
+
 export const getQuests = (id: string) => campaignGet<QuestList>(id, '/quests');
 export const saveQuest = (id: string, data: QuestInput, questId?: string) =>
     questId

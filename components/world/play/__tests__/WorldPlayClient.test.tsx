@@ -107,6 +107,17 @@ const click = (el: HTMLElement) => {
     fireEvent.pointerUp(el, { pointerId: 1, clientX: 320, clientY: 240 });
 };
 
+const pin = () =>
+    screen
+        .getAllByRole('button', { name: 'Town' })
+        .find((el) => el.classList.contains('atlas-pin')) as HTMLElement;
+
+const openTree = () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Карти' }));
+
+    return screen.findByRole('dialog', { name: 'Карти' });
+};
+
 const renderClient = (mapId: string | null) =>
     renderWithConfirm(
         <QueryClientProvider
@@ -179,13 +190,25 @@ describe('WorldPlayClient', () => {
         expect(
             document.querySelector('[data-tour="world.crumbs"]')
         ).toBeTruthy();
-        expect(
-            screen.getByRole('button', { name: 'Aria', pressed: false })
-        ).toBeTruthy();
 
-        fireEvent.click(screen.getByRole('treeitem', { name: 'Cellar' }));
+        fireEvent.click(
+            within(await openTree()).getByRole('treeitem', { name: 'Cellar' })
+        );
 
         expect(push).toHaveBeenCalledWith('/campaigns/c1/world?map=m2');
+    });
+
+    it('lists my heroes in the journal dialog', async () => {
+        renderClient('m1');
+
+        await screen.findByRole('button', { name: 'Town' });
+        fireEvent.click(screen.getByRole('button', { name: 'Журнал і герої' }));
+
+        const journal = await screen.findByRole('dialog', {
+            name: 'Журнал і герої',
+        });
+
+        expect(within(journal).getByText('Aria')).toBeTruthy();
     });
 
     it('shows no layer legend when the view has no layers', async () => {
@@ -238,10 +261,12 @@ describe('WorldPlayClient', () => {
         });
         renderClient('m1');
 
-        await screen.findByRole('button', { name: 'Town' });
+        await screen.findAllByRole('button', { name: 'Town' });
 
-        expect(screen.getByRole('treeitem', { name: 'World' })).toBeTruthy();
-        expect(screen.queryByRole('treeitem', { name: 'Cellar' })).toBeNull();
+        const tree = within(await openTree());
+
+        expect(tree.getByRole('treeitem', { name: 'World' })).toBeTruthy();
+        expect(tree.queryByRole('treeitem', { name: 'Cellar' })).toBeNull();
     });
 
     it('a selected marker shows its bubble with the description and open-map', async () => {
@@ -289,7 +314,8 @@ describe('WorldPlayClient', () => {
         });
         renderClient('m1');
 
-        click(await screen.findByRole('button', { name: 'Town' }));
+        await screen.findAllByRole('button', { name: 'Town' });
+        click(pin());
 
         await screen.findByRole('dialog', { name: 'Town' });
 
@@ -311,15 +337,16 @@ describe('WorldPlayClient', () => {
 
         await screen.findByRole('button', { name: 'Town' });
 
-        fireEvent.change(screen.getByLabelText('Пошук місць'), {
+        fireEvent.click(screen.getByRole('button', { name: 'Пошук місць' }));
+
+        const search = within(
+            await screen.findByRole('dialog', { name: 'Пошук місць' })
+        );
+
+        fireEvent.change(search.getByLabelText('Пошук місць'), {
             target: { value: 'market' },
         });
-        await waitFor(() =>
-            expect(
-                screen.getAllByRole('button', { name: 'Town' }).length
-            ).toBe(2)
-        );
-        fireEvent.click(screen.getAllByRole('button', { name: 'Town' })[0]);
+        fireEvent.click(await search.findByRole('button', { name: /Town/ }));
 
         expect(await screen.findByRole('dialog', { name: 'Town' })).toBeTruthy();
     });

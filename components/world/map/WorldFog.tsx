@@ -23,6 +23,10 @@ const CLOUD_MAX_PIXELS = 580_000;
 
 const CLOUD_PIXEL_SCALE = 0.72;
 
+const DRIFT_FRAME_MS = 1000 / 30;
+
+const MASK_PAD = 0.2;
+
 const FALLBACK_FOG = 'rgba(54, 40, 26, 0.9)';
 
 interface WorldFogProps {
@@ -35,18 +39,46 @@ interface WorldFogProps {
     still?: boolean;
 }
 
+type At = (x: number, y: number) => [number, number];
+
+function traceShape(
+    ctx: CanvasRenderingContext2D,
+    shape: RevealShape,
+    radius: number,
+    at: At
+): [number, number] {
+    ctx.beginPath();
+
+    if (shape.t === 'p') {
+        const [x, y] = at(shape.x, shape.y);
+
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+
+        return [x, y];
+    }
+
+    const [x1, y1] = at(shape.x1, shape.y1);
+
+    const [x2, y2] = at(shape.x2, shape.y2);
+
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+
+    return [x1, y1];
+}
+
 function carve(
     ctx: CanvasRenderingContext2D,
     shape: RevealShape,
     r: number,
-    at: (x: number, y: number) => [number, number],
+    at: At,
     alpha: number
 ) {
     ctx.globalAlpha = alpha;
 
-    if (shape.t === 'p') {
-        const [cx, cy] = at(shape.x, shape.y);
+    const [cx, cy] = traceShape(ctx, shape, r, at);
 
+    if (shape.t === 'p') {
         const grad = ctx.createRadialGradient(
             cx,
             cy,
@@ -59,25 +91,16 @@ function carve(
         grad.addColorStop(0, 'rgba(0,0,0,1)');
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
 
         return;
     }
-
-    const [x1, y1] = at(shape.x1, shape.y1);
-
-    const [x2, y2] = at(shape.x2, shape.y2);
 
     ctx.lineCap = 'round';
     ctx.lineWidth = 2 * r;
     ctx.strokeStyle = 'rgba(0,0,0,1)';
     ctx.shadowColor = 'rgba(0,0,0,1)';
     ctx.shadowBlur = r * SOFT_EDGE;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
     ctx.stroke();
     ctx.shadowBlur = 0;
 }
@@ -86,33 +109,24 @@ function carveCloudCore(
     ctx: CanvasRenderingContext2D,
     shape: RevealShape,
     radius: number,
-    at: (x: number, y: number) => [number, number],
+    at: At,
     alpha: number
 ) {
     const core = radius * CLOUD_CORE_RADIUS;
 
     ctx.globalAlpha = alpha;
-    ctx.beginPath();
+    traceShape(ctx, shape, core, at);
 
     if (shape.t === 'p') {
-        const [x, y] = at(shape.x, shape.y);
-
         ctx.fillStyle = '#000';
-        ctx.arc(x, y, core, 0, Math.PI * 2);
         ctx.fill();
 
         return;
     }
 
-    const [x1, y1] = at(shape.x1, shape.y1);
-
-    const [x2, y2] = at(shape.x2, shape.y2);
-
     ctx.lineCap = 'round';
     ctx.lineWidth = core * 2;
     ctx.strokeStyle = '#000';
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
     ctx.stroke();
 }
 
@@ -147,6 +161,15 @@ export function WorldFog({
         },
         []
     );
+
+    const view = useRef({ zoom, offset });
+
+    const requestPaint = useRef<(() => void) | null>(null);
+
+    useEffect(() => {
+        view.current = { zoom, offset: { x: offset.x, y: offset.y } };
+        requestPaint.current?.();
+    }, [zoom, offset.x, offset.y]);
 
     const cropX = crop?.x ?? 0;
 
@@ -188,13 +211,6 @@ export function WorldFog({
             getComputedStyle(canvas).getPropertyValue('--atlas-fog').trim() ||
             FALLBACK_FOG;
 
-        const at = (x: number, y: number): [number, number] => [
-            x * box.width * zoom + offset.x - cropX,
-            y * box.height * zoom + offset.y - cropY,
-        ];
-
-        const r = radius * box.width * zoom;
-
         const start = performance.now();
 
         if (still || shapes.length < seen.current) reveal.current = null;
@@ -212,9 +228,9 @@ export function WorldFog({
 
         const motion = cropped ? motionRef.current : null;
 
-        const texture = cropped ? worldCloudTexture() : null;
+        let texture: HTMLCanvasElement | null | undefined;
 
-        const masks = texture
+        const masks = cropped
             ? (masksRef.current ??= {
                   core: document.createElement('canvas'),
                   feathered: document.createElement('canvas'),
@@ -227,32 +243,24 @@ export function WorldFog({
 
         const featherSupported = typeof featherCtx?.filter === 'string';
 
-        const blur = Math.min(54, r * CLOUD_EDGE_FEATHER * sx);
+        const padX = Math.ceil(w * MASK_PAD);
 
-        const gutter = featherSupported ? Math.ceil(blur * 3) : 0;
+        const padY = Math.ceil(h * MASK_PAD);
 
-        if (masks) {
-            for (const bitmap of [masks.core, masks.feathered]) {
-                if (bitmap.width !== w + 2 * gutter)
-                    bitmap.width = w + 2 * gutter;
-
-                if (bitmap.height !== h + 2 * gutter)
-                    bitmap.height = h + 2 * gutter;
-            }
-        }
-
-        const left = offset.x - cropX;
-
-        const top = offset.y - cropY;
-
-        const artWidth = box.width * zoom;
-
-        const artHeight = box.height * zoom;
+        let mask: {
+            progress: number;
+            zoom: number;
+            x: number;
+            y: number;
+            gutter: number;
+        } | null = null;
 
         const drawReveal = (
             target: CanvasRenderingContext2D,
             progress: number,
-            drawShape = carve
+            drawShape: typeof carve,
+            r: number,
+            at: At
         ) => {
             if (r <= 0) return;
 
@@ -266,51 +274,104 @@ export function WorldFog({
             target.globalAlpha = 1;
         };
 
-        let maskProgress = -1;
+        const ensureMask = (
+            progress: number,
+            z: number,
+            o: { x: number; y: number },
+            r: number
+        ) => {
+            if (
+                mask &&
+                mask.progress === progress &&
+                mask.zoom === z &&
+                Math.abs((o.x - mask.x) * sx) <= padX &&
+                Math.abs((o.y - mask.y) * sy) <= padY
+            )
+                return mask;
+
+            if (!masks || !coreCtx || !featherCtx) return null;
+
+            const blur = Math.min(54, r * CLOUD_EDGE_FEATHER * sx);
+
+            const gutter = featherSupported ? Math.ceil(blur * 3) : 0;
+
+            const maskW = w + 2 * (gutter + padX);
+
+            const maskH = h + 2 * (gutter + padY);
+
+            for (const bitmap of [masks.core, masks.feathered]) {
+                if (bitmap.width !== maskW) bitmap.width = maskW;
+
+                if (bitmap.height !== maskH) bitmap.height = maskH;
+            }
+
+            const at: At = (x, y) => [
+                x * box.width * z + o.x - cropX,
+                y * box.height * z + o.y - cropY,
+            ];
+
+            coreCtx.resetTransform();
+            coreCtx.clearRect(0, 0, maskW, maskH);
+            coreCtx.setTransform(sx, 0, 0, sy, gutter + padX, gutter + padY);
+            drawReveal(
+                coreCtx,
+                progress,
+                featherSupported ? carveCloudCore : carve,
+                r,
+                at
+            );
+
+            featherCtx.clearRect(0, 0, maskW, maskH);
+
+            if (featherSupported) featherCtx.filter = `blur(${blur}px)`;
+
+            featherCtx.drawImage(masks.core, 0, 0);
+
+            if (featherSupported) featherCtx.filter = 'none';
+
+            mask = { progress, zoom: z, x: o.x, y: o.y, gutter };
+
+            return mask;
+        };
 
         const paint = (progress: number, now: number) => {
+            const { zoom: z, offset: o } = view.current;
+
+            const r = radius * box.width * z;
+
+            const at: At = (x, y) => [
+                x * box.width * z + o.x - cropX,
+                y * box.height * z + o.y - cropY,
+            ];
+
+            const left = o.x - cropX;
+
+            const top = o.y - cropY;
+
+            const artWidth = box.width * z;
+
+            const artHeight = box.height * z;
+
             ctx.setTransform(sx, 0, 0, sy, 0, 0);
             ctx.globalCompositeOperation = 'source-over';
             ctx.globalAlpha = 1;
             ctx.clearRect(0, 0, paintWidth, paintHeight);
 
-            if (texture && masks && coreCtx && featherCtx) {
-                if (progress !== maskProgress) {
-                    coreCtx.resetTransform();
-                    coreCtx.clearRect(
-                        0,
-                        0,
-                        masks.core.width,
-                        masks.core.height
-                    );
-                    coreCtx.setTransform(sx, 0, 0, sy, gutter, gutter);
-                    drawReveal(
-                        coreCtx,
-                        progress,
-                        featherSupported ? carveCloudCore : carve
-                    );
+            let cloud: HTMLCanvasElement | null = null;
 
-                    featherCtx.clearRect(
-                        0,
-                        0,
-                        masks.feathered.width,
-                        masks.feathered.height
-                    );
+            if (cropped) {
+                if (motion?.render(still ? 0 : now / 1000)) cloud = motion.canvas;
+                else {
+                    if (texture === undefined) texture = worldCloudTexture();
 
-                    if (featherSupported) featherCtx.filter = `blur(${blur}px)`;
-
-                    featherCtx.drawImage(masks.core, 0, 0);
-
-                    if (featherSupported) featherCtx.filter = 'none';
-
-                    maskProgress = progress;
+                    cloud = texture;
                 }
+            }
 
-                const cloud = motion?.render(still ? 0 : now / 1000)
-                    ? motion.canvas
-                    : texture;
+            const current = cloud && masks ? ensureMask(progress, z, o, r) : null;
 
-                const living = cloud !== texture;
+            if (cloud && masks && current) {
+                const living = cloud === motion?.canvas;
 
                 const scale =
                     Math.max(
@@ -364,8 +425,8 @@ export function WorldFog({
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.drawImage(
                     masks.feathered,
-                    gutter,
-                    gutter,
+                    current.gutter + padX - (o.x - current.x) * sx,
+                    current.gutter + padY - (o.y - current.y) * sy,
                     w,
                     h,
                     0,
@@ -383,10 +444,10 @@ export function WorldFog({
             else ctx.fillRect(0, 0, paintWidth, paintHeight);
 
             ctx.globalCompositeOperation = 'destination-out';
-            drawReveal(ctx, progress);
+            drawReveal(ctx, progress, carve, r, at);
         };
 
-        const drift = !still && !!texture && !!coreCtx && !!featherCtx;
+        const drift = !still && cropped && !!coreCtx && !!featherCtx;
 
         const revealAt = (now: number) =>
             revealAnimation
@@ -396,26 +457,80 @@ export function WorldFog({
                   )
                 : 1;
 
-        paint(revealAt(start), start);
-
-        if (revealAt(start) === 1 && !drift) return;
-
         let frame = 0;
 
+        let lastPaint = start;
+
+        let dirty = false;
+
+        let onScreen = true;
+
+        const running = () => onScreen && !document.hidden;
+
         const tick = (now: number) => {
+            frame = 0;
+
             const progress = revealAt(now);
 
-            paint(progress, now);
+            const animating = progress < 1;
+
+            if (animating || dirty || now - lastPaint >= DRIFT_FRAME_MS - 1) {
+                paint(progress, now);
+                lastPaint = now;
+                dirty = false;
+            }
 
             if (progress === 1 && reveal.current === revealAnimation)
                 reveal.current = null;
 
-            if (progress < 1 || drift) frame = requestAnimationFrame(tick);
+            if (animating || drift) schedule();
         };
 
-        frame = requestAnimationFrame(tick);
+        function schedule() {
+            if (!frame && running()) frame = requestAnimationFrame(tick);
+        }
 
-        return () => cancelAnimationFrame(frame);
+        paint(revealAt(start), start);
+
+        requestPaint.current = () => {
+            if (!running()) {
+                dirty = true;
+
+                return;
+            }
+
+            const now = performance.now();
+
+            paint(revealAt(now), now);
+            lastPaint = now;
+        };
+
+        if (revealAt(start) < 1 || drift) schedule();
+
+        const resume = () => {
+            if (!running()) return;
+
+            dirty = true;
+            schedule();
+        };
+
+        const observer =
+            typeof IntersectionObserver === 'undefined'
+                ? null
+                : new IntersectionObserver((entries) => {
+                      onScreen = entries[entries.length - 1]?.isIntersecting ?? true;
+                      resume();
+                  });
+
+        observer?.observe(canvas);
+        document.addEventListener('visibilitychange', resume);
+
+        return () => {
+            requestPaint.current = null;
+            cancelAnimationFrame(frame);
+            observer?.disconnect();
+            document.removeEventListener('visibilitychange', resume);
+        };
     }, [
         shapes,
         radius,
@@ -426,9 +541,6 @@ export function WorldFog({
         paintWidth,
         paintHeight,
         cropped,
-        zoom,
-        offset.x,
-        offset.y,
         still,
     ]);
 

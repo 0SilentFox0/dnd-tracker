@@ -781,24 +781,27 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
   }
 }
 
-html:has(.world-game-page) {
+html:has([data-shell-fit]) {
   overflow: hidden;
 }
 
-body:has(.world-game-page) {
+body:has([data-shell-fit]) {
   min-height: 100dvh;
 }
 
-.page-transition:has(.world-game-page) {
-  display: flex;
-  flex-direction: column;
+.page-transition:has([data-shell-fit]) {
   flex: none;
-  height: 100dvh;
-  overflow: clip;
   animation: none;
 }
 
-.page-transition:has(.world-game-page) .game-shell-header {
+[data-shell-fit] {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: clip;
+}
+
+[data-shell-fit] > .game-shell-header {
   flex: none;
 }
 
@@ -930,22 +933,22 @@ body:has(.world-game-page) {
     animation: world-sidebar-open 230ms cubic-bezier(.2,.75,.25,1) both;
   }
 
-  html:has(.world-game-page) [data-slot="dialog-content"][data-state="open"] {
+  html:has([data-shell-fit]) [data-slot="dialog-content"][data-state="open"] {
     animation: world-surface-open 240ms cubic-bezier(.2,.75,.25,1) both;
   }
 
-  html:has(.world-game-page) [data-slot="dialog-content"][data-state="closed"] {
+  html:has([data-shell-fit]) [data-slot="dialog-content"][data-state="closed"] {
     animation: world-surface-close 155ms ease-in both;
   }
 
-  html:has(.world-game-page) [data-slot="sheet"][data-state="open"] > :not([data-slot="sheet-handle"]),
+  html:has([data-shell-fit]) [data-slot="sheet"][data-state="open"] > :not([data-slot="sheet-handle"]),
   .atlas-map[data-world-game] [data-testid="world-map-card"] {
     animation: world-surface-open 190ms cubic-bezier(.2,.75,.25,1) both;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html:has(.world-game-page) :is([data-slot="dialog-content"], [data-slot="dialog-overlay"], [data-slot="sheet"]) {
+  html:has([data-shell-fit]) :is([data-slot="dialog-content"], [data-slot="dialog-overlay"], [data-slot="sheet"]) {
     animation: none !important;
     transition: none !important;
   }

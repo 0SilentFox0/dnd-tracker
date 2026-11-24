@@ -17,12 +17,7 @@ export function HeaderGate() {
     const pathname = usePathname();
 
     if (
-        shouldUseGameShell(pathname)
-    ) {
-        return null;
-    }
-
-    if (
+        shouldUseGameShell(pathname) ||
         (pathname && LANDING_PATHS.includes(pathname)) ||
         AUTH_SCREENS.some((p) => pathname?.startsWith(p))
     )

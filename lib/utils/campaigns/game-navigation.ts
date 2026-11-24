@@ -1,4 +1,6 @@
-import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
+import { CampaignKind, dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 type Section =
     | 'dashboard'
@@ -8,6 +10,21 @@ type Section =
     | 'scenario'
     | 'show'
     | 'journal';
+
+export function campaignSectionContext(campaign: {
+    kind: string;
+    rules: unknown;
+    mapLibraryEnabled: boolean;
+}): Parameters<typeof dmSectionsFor>[0] {
+    const rules = parseRules(campaign.rules);
+
+    return {
+        isTemplate: campaign.kind === CampaignKind.TEMPLATE,
+        classesEnabled: classesEnabled(rules),
+        mapLibraryEnabled: campaign.mapLibraryEnabled,
+        system: rules.system,
+    };
+}
 
 export function campaignGameNavigation({
     id,

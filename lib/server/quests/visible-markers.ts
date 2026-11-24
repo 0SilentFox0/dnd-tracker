@@ -3,6 +3,7 @@ import { readWorldMapDetail } from '@/lib/server/world/map-store';
 import { activePlayerHeroes } from '@/lib/server/world/travel-store';
 import { readViewerScope } from '@/lib/server/world/view-handlers';
 import { visibleMarkerIds } from '@/lib/utils/world/player-view';
+
 export async function questVisibleMarkers(
     campaignId: string,
     userId: string,

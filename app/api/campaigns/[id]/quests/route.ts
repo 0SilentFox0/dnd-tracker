@@ -2,6 +2,7 @@ import {
     listQuestsHandler,
     saveQuestHandler,
 } from '@/lib/server/quests/handlers';
+
 type Context = { params: Promise<{ id: string }> };
 export async function GET(_req: Request, { params }: Context) {
     return listQuestsHandler((await params).id);

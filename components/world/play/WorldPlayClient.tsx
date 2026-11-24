@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { BookOpen, Map as MapIcon } from 'lucide-react';
 
 import { EmptyState, QueryState } from '@/components/common/states';
-import { HudButton, HudToggleChip } from '@/components/hud';
+import { HudButton } from '@/components/hud';
 import {
     HudChipTabs,
     HudPage,
@@ -13,12 +13,10 @@ import {
     HudPanel,
 } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
-import { Disclosure } from '@/components/ui/disclosure';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { WorldMapView } from '@/components/world/map/WorldMapView';
 import { LayerLegend } from '@/components/world/nav/LayerLegend';
 import { MapTree } from '@/components/world/nav/MapTree';
-import { PlaceSearchBar } from '@/components/world/nav/PlaceSearchBar';
 import { TrailBubble } from '@/components/world/nav/TrailBubble';
 import { TrailLegend } from '@/components/world/nav/TrailLegend';
 import { WorldCrumbs } from '@/components/world/nav/WorldCrumbs';
@@ -38,11 +36,6 @@ import { useTrailView, useWorldPlay, useWorldTrail } from '@/lib/hooks/world';
 import { applyLayerStyle } from '@/lib/utils/world/marker-style';
 import { pickCard } from '@/lib/utils/world/pick-card';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
-
-const GAME_STYLE = true;
-
-const MAP_HEIGHT =
-    'h-[calc(100dvh-var(--app-header-h,89px)-6rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]';
 
 export function WorldPlayClient({
     campaignId,
@@ -86,7 +79,7 @@ export function WorldPlayClient({
     }
 
     return (
-        <HudPage className={GAME_STYLE ? 'world-game-page' : undefined}>
+        <HudPage className="world-game-page">
             <OnboardingHint id="player.world" />
             <QueryState query={play.view}>
                 {(view) => {
@@ -180,65 +173,13 @@ export function WorldPlayClient({
 
                     return (
                         <>
-                            {!GAME_STYLE && (
-                                <HudPageHeader
-                                    title={t('title')}
-                                    subtitle={crumbs}
-                                    actions={
-                                        <span className="hidden text-sm text-hud-muted md:inline">
-                                            {campaignName}
-                                        </span>
-                                    }
-                                />
-                            )}
-                            {isDesktop || GAME_STYLE ? null : (
-                                <div className="flex gap-2">
-                                    <HudToggleChip
-                                        tall
-                                        active={play.tree.open}
-                                        onClick={() =>
-                                            play.tree.set(!play.tree.open)
-                                        }
-                                    >
-                                        {t('tree.toggle')}
-                                    </HudToggleChip>
-                                </div>
-                            )}
-                            <div
-                                className={
-                                    GAME_STYLE
-                                        ? 'world-game-play-grid'
-                                        : 'grid gap-3 lg:grid-cols-[11rem_minmax(0,1fr)_20rem]'
-                                }
-                            >
-                                {isDesktop && !GAME_STYLE ? (
-                                    <aside
-                                        data-tour="world.places"
-                                        className="hud-surface relative overflow-y-auto rounded-md border border-hud-rule p-1 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)]"
-                                    >
-                                        {mapTree}
-                                    </aside>
-                                ) : null}
-                                <div
-                                    className={
-                                        GAME_STYLE
-                                            ? 'world-game-play-column flex min-w-0 flex-col'
-                                            : 'flex min-w-0 flex-col gap-2'
-                                    }
-                                >
-                                    {!GAME_STYLE && (
-                                        <PlaceSearchBar
-                                            markers={play.styledMarkers}
-                                            onPick={play.pickPlace}
-                                        />
-                                    )}
+                            <div className="world-game-play-grid">
+                                <div className="world-game-play-column flex min-w-0 flex-col">
                                     <div
                                         className={
                                             play.fullscreen.full
                                                 ? 'fixed inset-0 z-50 h-dvh bg-black'
-                                                : GAME_STYLE
-                                                  ? 'world-game-viewport relative'
-                                                  : `relative ${MAP_HEIGHT}`
+                                                : 'world-game-viewport relative'
                                         }
                                         role={
                                             play.fullscreen.full
@@ -254,11 +195,7 @@ export function WorldPlayClient({
                                     >
                                         {(play.layers.items.length > 0 ||
                                             trail.trails.length > 0) && (
-                                            <WorldFilterLegend
-                                                compact={
-                                                    GAME_STYLE && !isDesktop
-                                                }
-                                            >
+                                            <WorldFilterLegend compact={!isDesktop}>
                                                 <LayerLegend
                                                     layers={play.layers.items}
                                                     hidden={play.layers.hidden}
@@ -278,7 +215,7 @@ export function WorldPlayClient({
                                                 />
                                             </WorldFilterLegend>
                                         )}
-                                        {GAME_STYLE && (
+                                        {(
                                             <>
                                                 <WorldSceneHeading>
                                                     {crumbs}
@@ -341,19 +278,12 @@ export function WorldPlayClient({
                                             fog={props.fog}
                                             layers={play.layers}
                                             focus={play.focus}
-                                            className={
-                                                GAME_STYLE ||
-                                                play.fullscreen.full
-                                                    ? 'rounded-none border-0'
-                                                    : undefined
-                                            }
+                                            className="rounded-none border-0"
                                             selectedId={marker?.id}
                                             compact={!isDesktop}
                                             handlers={play.handlers}
                                             slots={{
-                                                gameStyle: GAME_STYLE
-                                                    ? 'own'
-                                                    : undefined,
+mode: 'own',
                                                 fullscreen: {
                                                     full: play.fullscreen.full,
                                                     toggle: play.fullscreen
@@ -381,73 +311,40 @@ export function WorldPlayClient({
                                         />
                                     </div>
                                 </div>
-                                {GAME_STYLE ? (
-                                    isDesktop && marker && play.details.open ? (
-                                        <aside className="world-glass world-game-side-panel world-game-details p-3">
-                                            <HudButton
-                                                className="min-h-11"
-                                                onClick={() =>
-                                                    play.details.set(false)
-                                                }
-                                            >
-                                                {t('editor.closePanel')}
-                                            </HudButton>
-                                            {notes}
-                                        </aside>
-                                    ) : null
-                                ) : isDesktop ? (
-                                    <div className="relative flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
-                                        {marker && play.details.open ? (
-                                            notes
-                                        ) : (
-                                            <HudPanel as="div">
-                                                <p className="text-sm text-hud-muted">
-                                                    {t('play.pickMarker')}
-                                                </p>
-                                            </HudPanel>
-                                        )}
-                                        {journal}
-                                    </div>
-                                ) : (
-                                    <Disclosure
-                                        summary={t('play.journal')}
-                                        className="hud-surface rounded-md border border-hud-rule p-2"
-                                        contentClassName="mt-2 flex flex-col gap-3"
-                                    >
-                                        {journal}
-                                    </Disclosure>
-                                )}
+                                {isDesktop && marker && play.details.open ? (
+                                    <aside className="world-glass world-game-side-panel world-game-details p-3">
+                                        <HudButton
+                                            className="min-h-11"
+                                            onClick={() =>
+                                                play.details.set(false)
+                                            }
+                                        >
+                                            {t('editor.closePanel')}
+                                        </HudButton>
+                                        {notes}
+                                    </aside>
+                                ) : null}
                             </div>
-                            {GAME_STYLE && (
-                                <ResponsiveDialog
-                                    hud
-                                    open={journalOpen}
-                                    onOpenChange={setJournalOpen}
-                                    title={t('play.journal')}
-                                >
-                                    <div className="flex flex-col gap-3">
-                                        {journal}
-                                    </div>
-                                </ResponsiveDialog>
-                            )}
-                            {(GAME_STYLE || !isDesktop) && (
-                                <ResponsiveDialog
-                                    hud
-                                    open={play.tree.open}
-                                    onOpenChange={play.tree.set}
-                                    title={t('tree.label')}
-                                >
-                                    <div
-                                        className={
-                                            GAME_STYLE
-                                                ? 'world-game-tree-dialog'
-                                                : undefined
-                                        }
-                                    >
-                                        {mapTree}
-                                    </div>
-                                </ResponsiveDialog>
-                            )}
+                            <ResponsiveDialog
+                                hud
+                                open={journalOpen}
+                                onOpenChange={setJournalOpen}
+                                title={t('play.journal')}
+                            >
+                                <div className="flex flex-col gap-3">
+                                    {journal}
+                                </div>
+                            </ResponsiveDialog>
+                            <ResponsiveDialog
+                                hud
+                                open={play.tree.open}
+                                onOpenChange={play.tree.set}
+                                title={t('tree.label')}
+                            >
+                                <div className="world-game-tree-dialog">
+                                    {mapTree}
+                                </div>
+                            </ResponsiveDialog>
                             {isDesktop ? null : (
                                 <>
                                     <ResponsiveDialog

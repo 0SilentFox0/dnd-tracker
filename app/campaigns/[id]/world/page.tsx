@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 
-import { GameWorldShell } from './game-world-shell';
 import { WorldPageClient } from './page-client';
 
+import { CampaignGameShell } from '@/app/campaigns/[id]/campaign-game-shell';
 import { ErrorState } from '@/components/common/states';
 import { worldKeys } from '@/lib/hooks/world';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
@@ -60,14 +60,14 @@ export default async function WorldPage({
 
     if (failed)
         return (
-            <GameWorldShell campaign={campaign} viewer={{ isDM, userId }}>
+            <CampaignGameShell campaign={campaign} viewer={{ isDM, userId }} active="world" hasWorld>
                 <ErrorState
                     error={(await getTranslator(await getRequestLocale(), 'world'))(
                         'play.loadFailed'
                     )}
                     className="m-4"
                 />
-            </GameWorldShell>
+            </CampaignGameShell>
         );
 
     const client = (
@@ -84,12 +84,12 @@ export default async function WorldPage({
     );
 
     return (
-        <GameWorldShell campaign={campaign} viewer={{ isDM, userId }}>
+        <CampaignGameShell campaign={campaign} viewer={{ isDM, userId }} active="world" hasWorld>
             {view ? (
                 <PrefetchedQuery queryKey={worldKeys.view(id, view.map.id)} data={view}>
                     {client}
                 </PrefetchedQuery>
             ) : client}
-        </GameWorldShell>
+        </CampaignGameShell>
     );
 }

@@ -13,12 +13,14 @@ export function GameShell({
     activeId,
     title,
     breadcrumbRootLabel,
+    fit,
     children,
 }: {
     items: GameShellNavItem[];
     activeId: string;
     title: string;
     breadcrumbRootLabel?: string;
+    fit?: boolean;
     children: ReactNode;
 }) {
     return (
@@ -27,6 +29,7 @@ export function GameShell({
             activeId={activeId}
             title={title}
             breadcrumbRootLabel={breadcrumbRootLabel}
+            fit={fit}
             actions={
                 <>
                     <div className="hidden items-center gap-2 sm:flex">

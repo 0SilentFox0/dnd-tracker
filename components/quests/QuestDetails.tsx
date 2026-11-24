@@ -7,6 +7,7 @@ import { QuestProgress } from './QuestProgress';
 
 import { Button } from '@/components/ui/button';
 import type { QuestView } from '@/types/quests';
+
 export function QuestDetails({
     quest,
     campaignId,

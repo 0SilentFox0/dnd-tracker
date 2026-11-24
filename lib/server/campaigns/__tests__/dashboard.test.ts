@@ -43,6 +43,7 @@ vi.mock('@/lib/server/templates/publish', () => ({ latestPublishedVersion }));
 import {
     readDmDashboard,
     readPlayerDashboard,
+    readPlayerNavState,
     sourceUpdateState,
 } from '@/lib/server/campaigns/dashboard';
 
@@ -95,17 +96,13 @@ describe('readDmDashboard', () => {
         expect(arg.select).toEqual({ id: true, name: true, status: true });
     });
 
-    it('активний бій першим і не більше трьох', async () => {
-        db.battleScene.findMany.mockResolvedValue([
-            { id: 'p1', name: 'a', status: 'prepared' },
-            { id: 'p2', name: 'b', status: 'prepared' },
-            { id: 'p3', name: 'c', status: 'prepared' },
-            { id: 'a1', name: 'd', status: 'active' },
-        ]);
+    it('активний бій першим і не більше трьох (сортування в БД)', async () => {
+        await readDmDashboard('c1');
 
-        const res = await readDmDashboard('c1');
+        const arg = db.battleScene.findMany.mock.calls[0][0];
 
-        expect(res.battles.map((b) => b.id)).toEqual(['a1', 'p1', 'p2']);
+        expect(arg.orderBy).toEqual([{ status: 'asc' }, { createdAt: 'desc' }]);
+        expect(arg.take).toBe(3);
     });
 
     it('returns the active player roster and root map for the dashboard', async () => {
@@ -418,5 +415,32 @@ describe('sourceUpdateState', () => {
         });
 
         expect((await readDmDashboard('c1')).sourceUpdate).toBeNull();
+    });
+});
+
+describe('readPlayerNavState', () => {
+    it('returns the world flag and the active battle id without loading the hero card', async () => {
+        db.worldMap.count.mockResolvedValue(1);
+        db.character.findFirst.mockResolvedValue({ id: 'h1' });
+        db.battleParticipant.findFirst.mockResolvedValue({ battleId: 'b1' });
+
+        expect(await readPlayerNavState('c1', 'u1')).toEqual({
+            hasWorld: true,
+            activeBattleId: 'b1',
+        });
+        expect(db.character.findFirst).toHaveBeenCalledWith(
+            expect.objectContaining({ select: { id: true } })
+        );
+    });
+
+    it('has no battle id for a player without a hero', async () => {
+        db.worldMap.count.mockResolvedValue(0);
+        db.character.findFirst.mockResolvedValue(null);
+
+        expect(await readPlayerNavState('c1', 'u1')).toEqual({
+            hasWorld: false,
+            activeBattleId: undefined,
+        });
+        expect(db.battleParticipant.findFirst).not.toHaveBeenCalled();
     });
 });

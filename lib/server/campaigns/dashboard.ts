@@ -175,8 +175,8 @@ export async function readDmDashboard(
                 ownerUserId: null,
                 status: { in: [BattleStatus.PREPARED, BattleStatus.ACTIVE] },
             },
-            orderBy: { createdAt: 'desc' },
-            take: 6,
+            orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
+            take: 3,
             select: { id: true, name: true, status: true },
         }),
         sourceUpdateState(campaignId),
@@ -208,16 +208,10 @@ export async function readDmDashboard(
         readLibraryCounts(campaignId),
     ]);
 
-    const activeFirst = [...battles].sort(
-        (a, b) =>
-            Number(b.status === BattleStatus.ACTIVE) -
-            Number(a.status === BattleStatus.ACTIVE)
-    );
-
     return {
         pendingDrafts,
         scenarioPages,
-        battles: activeFirst.slice(0, 3) as DmDashboardData['battles'],
+        battles: battles as DmDashboardData['battles'],
         sourceUpdate: update?.hasUpdates
             ? { sourceVersion: update.sourceVersion }
             : null,
@@ -233,13 +227,56 @@ export async function readDmDashboard(
     };
 }
 
+const ROOT_WORLD_MAP = (campaignId: string) => ({
+    campaignId,
+    parentMarkerId: null,
+});
+
+const findActiveParticipant = (campaignId: string, heroId: string) =>
+    prisma.battleParticipant.findFirst({
+        where: {
+            sourceId: heroId,
+            sourceType: ParticipantSourceType.CHARACTER,
+            battle: { campaignId, status: BattleStatus.ACTIVE },
+        },
+        orderBy: { battle: { createdAt: 'desc' } },
+        select: { battleId: true, currentHp: true, maxHp: true, tempHp: true },
+    });
+
+/** Navigation needs only these two facts, not the whole hero card */
+export async function readPlayerNavState(
+    campaignId: string,
+    userId: string
+): Promise<{ hasWorld: boolean; activeBattleId?: string }> {
+    const [hasWorld, hero] = await Promise.all([
+        prisma.worldMap
+            .count({ where: ROOT_WORLD_MAP(campaignId) })
+            .then((n) => n > 0),
+        prisma.character.findFirst({
+            where: {
+                campaignId,
+                controlledBy: userId,
+                type: CharacterType.PLAYER,
+            },
+            orderBy: { createdAt: 'desc' },
+            select: { id: true },
+        }),
+    ]);
+
+    const participant = hero
+        ? await findActiveParticipant(campaignId, hero.id)
+        : null;
+
+    return { hasWorld, activeBattleId: participant?.battleId };
+}
+
 export async function readPlayerDashboard(
     campaignId: string,
     userId: string
 ): Promise<PlayerDashboardData> {
     const [hasWorld, stored] = await Promise.all([
         prisma.worldMap
-            .count({ where: { campaignId, parentMarkerId: null } })
+            .count({ where: ROOT_WORLD_MAP(campaignId) })
             .then((n) => n > 0),
         prisma.character.findFirst({
             where: {
@@ -270,15 +307,7 @@ export async function readPlayerDashboard(
     const { characteristics: _characteristics, ...hero } =
         withStoredColumns(stored);
 
-    const participant = await prisma.battleParticipant.findFirst({
-        where: {
-            sourceId: hero.id,
-            sourceType: ParticipantSourceType.CHARACTER,
-            battle: { campaignId, status: BattleStatus.ACTIVE },
-        },
-        orderBy: { battle: { createdAt: 'desc' } },
-        select: { battleId: true, currentHp: true, maxHp: true, tempHp: true },
-    });
+    const participant = await findActiveParticipant(campaignId, hero.id);
 
     return {
         hero,

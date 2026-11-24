@@ -3,27 +3,28 @@ import { questVisibleMarkers } from '@/lib/server/quests/visible-markers';
 import { objectiveView } from '@/lib/utils/quests/privacy';
 import type { QuestList } from '@/types/quests';
 
+export const questScope = (campaignId: string, isDM: boolean) => ({
+    campaignId,
+    ...(isDM ? {} : { visible: true }),
+});
+
+const QUEST_ORDER = [{ createdAt: 'asc' }, { id: 'asc' }] as const;
+
 export async function readQuests(
     campaignId: string,
     actor: { userId: string; isDM: boolean }
 ): Promise<QuestList> {
     const rows = await prisma.quest.findMany({
-        where: { campaignId, ...(actor.isDM ? {} : { visible: true }) },
+        where: questScope(campaignId, actor.isDM),
         include: {
             objectives: { orderBy: { sortOrder: 'asc' } },
             tracking: {
                 where: { userId: actor.userId },
                 select: { userId: true },
             },
-            marker: {
-                select: {
-                    id: true,
-                    mapId: true,
-                    name: true,
-                },
-            },
+            marker: { select: { id: true, mapId: true, name: true } },
         },
-        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        orderBy: [...QUEST_ORDER],
     });
 
     const visibleMarkers = actor.isDM
@@ -50,11 +51,7 @@ export async function readQuests(
             tracked: row.tracking.length > 0,
             marker:
                 row.marker && (actor.isDM || visibleMarkers?.has(row.marker.id))
-                    ? {
-                          id: row.marker.id,
-                          mapId: row.marker.mapId,
-                          name: row.marker.name,
-                      }
+                    ? row.marker
                     : null,
             objectives: row.objectives.map((o) => objectiveView(o, actor.isDM)),
         })),
@@ -65,17 +62,13 @@ export async function readActiveQuestSummary(
     campaignId: string,
     isDM: boolean
 ) {
-    const where = {
-        campaignId,
-        status: 'active',
-        ...(isDM ? {} : { visible: true }),
-    };
+    const where = { ...questScope(campaignId, isDM), status: 'active' };
 
     const [count, items] = await Promise.all([
         prisma.quest.count({ where }),
         prisma.quest.findMany({
             where,
-            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+            orderBy: [...QUEST_ORDER],
             take: 3,
             select: { id: true, title: true },
         }),

@@ -46,8 +46,7 @@ const layer = (o: Partial<WorldLayer> = {}): WorldLayer => ({
 
 const renderPanel = (
     layers: WorldLayer[],
-    markers: Partial<WorldMarker>[] = [],
-    gameStyle = false
+    markers: Partial<WorldMarker>[] = []
 ) => {
     const ctx = {
         campaignId: 'c1',
@@ -77,7 +76,6 @@ const renderPanel = (
                 onActive={onActive}
                 heroes={[{ id: 'h1', name: 'Арвен' }]}
                 imageEdit={{ layerId: null, set: vi.fn() }}
-                gameStyle={gameStyle}
             />
         </WorldEditorContext.Provider>
     );
@@ -103,9 +101,7 @@ describe('LayersPanel', () => {
             [
                 layer({ id: 'a', name: 'Море' }),
                 layer({ id: 'b', name: 'Гори', visibility: 'heroes' }),
-            ],
-            [],
-            true
+            ]
         );
 
         expect(screen.getByRole('textbox', { name: 'Назва шару' })).toHaveValue(
@@ -135,10 +131,11 @@ describe('LayersPanel', () => {
     });
 
     it('shows the hero picker only for heroes visibility', () => {
-        renderPanel([
-            layer({ id: 'a', visibility: 'dm' }),
-            layer({ id: 'b', visibility: 'heroes' }),
-        ]);
+        renderPanel([layer({ id: 'b', visibility: 'heroes' })]);
+
+        fireEvent.keyDown(screen.getByRole('tab', { name: 'Доступ' }), {
+            key: 'Enter',
+        });
 
         expect(screen.getAllByText('Арвен')).toHaveLength(1);
 

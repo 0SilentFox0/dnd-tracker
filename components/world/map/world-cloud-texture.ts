@@ -228,6 +228,7 @@ export function createWorldCloudMotion() {
         dispose() {
             gl.deleteBuffer(buffer);
             gl.deleteProgram(program);
+            gl.getExtension('WEBGL_lose_context')?.loseContext();
         },
     };
 }

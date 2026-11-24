@@ -4,6 +4,7 @@ import { HudPanel } from '@/components/hud/page';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
 import { readActiveQuestSummary } from '@/lib/server/quests/store';
+
 export async function ActiveQuests({
     campaignId,
     isDM,

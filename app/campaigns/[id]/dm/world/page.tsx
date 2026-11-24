@@ -1,6 +1,6 @@
 import { WorldEditorPageClient } from './page-client';
 
-import { GameWorldShell } from '@/app/campaigns/[id]/world/game-world-shell';
+import { CampaignGameShell } from '@/app/campaigns/[id]/campaign-game-shell';
 import { prisma } from '@/lib/db';
 import { worldKeys } from '@/lib/hooks/world';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
@@ -23,16 +23,17 @@ export default async function DMWorldPage({
 
     const { campaign, userId } = await requireCampaignDM(id);
 
-    const maps = await readOkJson<WorldMapSummary[]>(
-        await listWorldMapsHandler(id)
-    );
-
-    const linked = marker
-        ? await prisma.worldMarker.findFirst({
-              where: { id: marker, map: { campaignId: id } },
-              select: { mapId: true },
-          })
-        : null;
+    const [maps, linked] = await Promise.all([
+        listWorldMapsHandler(id).then((res) =>
+            readOkJson<WorldMapSummary[]>(res)
+        ),
+        marker
+            ? prisma.worldMarker.findFirst({
+                  where: { id: marker, map: { campaignId: id } },
+                  select: { mapId: true },
+              })
+            : null,
+    ]);
 
     const mapId =
         linked?.mapId ??
@@ -54,7 +55,7 @@ export default async function DMWorldPage({
     );
 
     return (
-        <GameWorldShell campaign={campaign} viewer={{ isDM: true, userId }}>
+        <CampaignGameShell campaign={campaign} viewer={{ isDM: true, userId }} active="world" hasWorld>
             {maps ? (
                 <PrefetchedQuery queryKey={worldKeys.maps(id)} data={maps}>
                     {mapId && detail ? (
@@ -64,6 +65,6 @@ export default async function DMWorldPage({
                     ) : client}
                 </PrefetchedQuery>
             ) : client}
-        </GameWorldShell>
+        </CampaignGameShell>
     );
 }

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { questSchema, questTrackingSchema } from '@/lib/schemas/quests';
-import { readQuests } from '@/lib/server/quests/store';
+import { questScope, readQuests } from '@/lib/server/quests/store';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
@@ -94,11 +94,7 @@ async function trackQuestImpl(
     if (data instanceof NextResponse) return data;
 
     const quest = await prisma.quest.findFirst({
-        where: {
-            id: questId,
-            campaignId,
-            ...(access.isDM ? {} : { visible: true }),
-        },
+        where: { id: questId, ...questScope(campaignId, access.isDM) },
         select: { id: true },
     });
 

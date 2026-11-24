@@ -10,6 +10,7 @@ import {
     trackQuest,
 } from '@/lib/api/quests';
 import type { QuestInput } from '@/types/quests';
+
 export function useQuests(campaignId: string) {
     return useQuery({
         queryKey: questKeys.list(campaignId),

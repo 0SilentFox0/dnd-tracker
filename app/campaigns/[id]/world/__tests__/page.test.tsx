@@ -25,6 +25,11 @@ vi.mock('@/lib/server/campaigns/access', () => ({
         isDM: false,
     })),
 }));
+vi.mock('@/app/campaigns/[id]/campaign-game-shell', () => ({
+    CampaignGameShell: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+    ),
+}));
 vi.mock('@/lib/server/world/view-handlers', () => ({ viewHandler: vi.fn() }));
 
 const props = {

@@ -2,12 +2,12 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Archive, Compass, Map as MapIcon, Plus } from 'lucide-react';
 
+import { CampaignCover } from '@/components/campaigns/CampaignCover';
 import { JoinCampaignDialog } from '@/components/campaigns/join/JoinCampaignDialog';
 import {
     type TemplateTile,
     TemplateTiles,
 } from '@/components/campaigns/templates/TemplateTiles';
-import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
 import { EmptyState, ErrorState } from '@/components/common/states';
 import { type GameShellNavItem } from '@/components/hud';
 import { HudCard, HudPage, HudPanel } from '@/components/hud/page';
@@ -36,13 +36,13 @@ export default async function CampaignsPage({
 }) {
     const archived = (await searchParams).archived === 'true';
 
-    const user = await getAuthUser();
-
     const locale = await getRequestLocale();
 
-    const t = await getTranslator(locale, 'campaigns');
-
-    const tCommon = await getTranslator(locale, 'common');
+    const [user, t, tCommon] = await Promise.all([
+        getAuthUser(),
+        getTranslator(locale, 'campaigns'),
+        getTranslator(locale, 'common'),
+    ]);
 
     const navItems: GameShellNavItem[] = [
         {
@@ -66,22 +66,7 @@ export default async function CampaignsPage({
 
     const cover = (src?: string | null) => (
         <div className="relative h-[120px] overflow-hidden after:absolute after:inset-0 after:bg-linear-to-b after:from-transparent after:from-30% after:to-hud-panel">
-            <OptimizedImage
-                src={src || '/example-demo/maps/grove.jpg'}
-                alt=""
-                width={700}
-                height={280}
-                className="size-full object-cover"
-                fallback={
-                    <OptimizedImage
-                        src="/example-demo/maps/grove.jpg"
-                        alt=""
-                        width={700}
-                        height={280}
-                        className="size-full object-cover"
-                    />
-                }
-            />
+            <CampaignCover src={src} width={700} height={280} />
         </div>
     );
 
