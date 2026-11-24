@@ -4,7 +4,7 @@
 
 **Ціль:** замінити три колонки бою на сцену «мапа на весь екран + бульбашка токена + нижній док дій + шторки», з однією моделлю взаємодії на desktop і phone, без зміни доменної поведінки.
 
-**Архітектура:** лише `components/battle/**` (+ маршрут оболонки, CSS-змінна висоти, i18n, whats-new). `MyTurnControls` лишається власником хуків/майстрів і портує презентер дока в слот лейаута; бульбашка = Radix popover з віртуальним якорем над наявним `ParticipantDetails`; шторки = `BattleDrawer` (desktop) / `ResponsiveDialog` (phone).
+**Архітектура:** `components/battle/**` (+ предикат маршруту без шапки, повноекранна висота, набір іконок у `components/hud/icons/battle`, i18n, whats-new). `MyTurnControls` лишається власником хуків/майстрів і портує презентер дока в слот лейаута; бульбашка = Radix popover з віртуальним якорем над наявним `ParticipantDetails`; шторки = `BattleDrawer` (desktop) / `ResponsiveDialog` (phone).
 
 **Спека:** [2026-11-24-game-ui-ch6-battle-design.md](../specs/2026-11-24-game-ui-ch6-battle-design.md) (матриця, ризики, reuse) — читати першою.
 
@@ -30,7 +30,8 @@
 3. Гравець не бачить точного HP ворога/резерву; `readOnly`/`playerView` без контролів (док, DM-шторка) (T2, T3, T4).
 4. Система без бонусної дії/реакції (`actionEconomy` false) без зайвих ромбів; wfrp/d6pool відкривається без падіння слотів (T2).
 5. Бій без мапи: усе доступне, порожньої сцени немає (T1, T6).
-6. Бій у `GameShell`: старий `Header` не рендериться; висота сцени коректна в `PREPARED` і `ACTIVE` (T1).
+6. Бій без шапки: `Header` не рендериться, є вихід «До кампанії», висота `100dvh` коректна в `PREPARED` і `ACTIVE`, `useTurnTimer` працює без `BattleTopBar` (T1).
+7. Іконки: кожна дія/кнопка краю має іконку й `aria-label`; контраст у трьох палітрах (T6a).
 
 ---
 
@@ -38,25 +39,24 @@
 
 **Файли:** розділ «Проблеми поточного UI» спеки; нічого в `components/**`.
 - [ ] Перевірити гейти (Ч5 і дизайн-основа в main); перебазувати `feat/game-ui-ch6` на main.
-- [ ] Користувач логіниться на `http://localhost:3100` (стенд: БД `ch6_battle`; бій `/campaigns/cmuylhk0c0001ia06lg5eommv/battles/cmw3su6pw0001l408ouxdbzrv`, DM-акаунт відомий користувачу). Після rebase перезібрати: `next build --experimental-build-mode compile`, `pnpm exec next start -p 3100` (не `next dev`).
+- [ ] Користувач логіниться на `http://localhost:3100` (стенд: БД `ch6_battle`; потрібен **звичайний** бій без аркадного режиму maze — «Лабіринт» HOMM5 не підходить; субагент підбирає в `ch6_battle` активний бій без `modes`, на крайній випадок створює тестовий зі змішаними расами/героями на обох сторонах, DM-акаунт відомий користувачу). Після rebase перезібрати: `next build --experimental-build-mode compile`, `pnpm exec next start -p 3100` (не `next dev`).
 - [ ] Chrome-розширення (власне вікно): desktop 1440×900, phone 390×844, скріни 0.5–0.6, DOM/текст замість скрінів; ролі DM/гравець, три палітри, відкриті майстри. Реальні проблеми → розділ «Живий огляд» спеки.
 - [ ] Коміт `docs: ch6 live audit of current battle UI`.
 
-### T1. Оболонка і каркас сцени (desktop) — 1 виконавець
+### T1. Повноекранна сцена без шапки — 1 виконавець
 
 **Файли:**
-- Modify: `components/layout/game-shell-route.ts` (+маршрут `/campaigns/[id]/battles/[battleId]`), `components/layout/__tests__/game-shell-route.test.ts`
-- Modify: `app/campaigns/[id]/battles/[battleId]/page.tsx`/`page-client.tsx` (обгортка `GameShell` з `fit`: **прочитати, як це робить сторінка світу/`GameWorldShell`**)
-- Modify: CSS висоти — у бої замінити `.below-header` на змінну висоти оболонки (прочитати правила `[data-shell-fit]` у `app/globals.css`; інші споживачі `.below-header` не ламати)
-- Modify: `components/battle/scene/layout/DesktopBattleLayout.tsx` (прибрати `aside`-и й рядок тулбара; сцена = `relative` контейнер зі слотами; `BattleColumns` лишається для бою без мапи/режиму колонок), `components/battle/scene/BattleScreen.tsx` (PREPARED на нову висоту)
-- Create: `components/battle/scene/layout/SceneSlots.tsx` — `SceneSlotsContext` + `useSceneSlot('dock'|'rail'|'top')` (патерн `MapStripSlotContext`)
+- Modify: `components/layout/game-shell-route.ts` (+`isFullBleedRoute`: `/campaigns/[id]/battles/[battleId]`), `components/layout/HeaderGate.tsx` (не рендерить `Header` на повноекранних маршрутах), `components/layout/__tests__/game-shell-route.test.ts`
+- Modify: CSS: у бої замінити `.below-header` на повноекранний клас (`100dvh`, safe-area); інші споживачі `.below-header` не ламати
+- Modify: `components/battle/scene/layout/DesktopBattleLayout.tsx` (прибрати `aside`-и й рядок тулбара; сцена = `relative` контейнер зі слотами; `BattleColumns` лишається для бою без мапи/режиму колонок), `BattleScreen.tsx` (PREPARED повноекранний, прокручується)
+- Modify: `components/battle/scene/layout/BattleTopBar.tsx` → лишити `RoundBadge` (лівий верхній кут поверх мапи) + `useTurnTimer()`; назва, зʼєднання, FX, player-view, DM-кнопки прибрати (їх приймає T4); `ConnectionBanner` — лише при збої
+- Create: `components/battle/scene/layout/SceneSlots.tsx` — `SceneSlotsContext` + `useSceneSlot('dock'|'rail'|'top')`
 
-**Interfaces:** Produces `SceneSlotsContext`, `useSceneSlot`; `data-tour` якорі `battle.topbar|hero|log|map-tools|reset|next-turn` зберігаються на нових місцях.
+**Interfaces:** Produces `isFullBleedRoute(pathname: string | null | undefined): boolean`, `SceneSlotsContext`, `useSceneSlot`; `data-tour="battle.topbar"` переїжджає на `RoundBadge`.
 
-- [ ] Тест маршруту: `shouldUseGameShell('/campaigns/c1/battles/b1') === true`; `/campaigns/new` без змін.
-- [ ] Каркас: `BattleMapPanel` на всю сцену (рядок інструментів тимчасово лишається, переїде в T4).
-- [ ] Перевірити, що `HeaderGate` не показує `Header` на бою.
-- [ ] `pnpm exec eslint --fix` по touched; коміт `feat(battle): ch6 scene shell and slots`.
+- [ ] Тести: `isFullBleedRoute('/campaigns/c1/battles/b1') === true`; список боїв `/campaigns/c1/battles` і `/campaigns/new` — false; `shouldUseGameShell` без змін.
+- [ ] Каркас: `BattleMapPanel` на весь екран (рядок інструментів тимчасово лишається, переїде в T4); тимчасове посилання виходу, поки немає шторки (T4 його замінює).
+- [ ] eslint по touched; коміт `feat(battle): ch6 fullscreen scene without header`.
 - **Не чіпати:** `MobileBattleLayout` (T6), логіку `BattleMapPanel`.
 
 ### T2. Нижній док і аватар-кластер — 1–2 виконавці
@@ -92,8 +92,10 @@
 
 **Файли:**
 - Create: `components/battle/scene/drawers/{BattleDrawer,DrawerRail,ToolsDrawer}.tsx` (`BattleDrawer`: desktop side-sheet на Radix Dialog non-modal, `Esc`/клік поза; phone — `ResponsiveDialog`; `DrawerRail`: кнопки ≥ 40 px Журнал/DM/Резерв/Інструменти за правами; `ToolsDrawer`: слот інструментів `BattleMapPanel` через `MapToolsSlotContext`, перемикач «Мапа/Колонки» (`useBattleViewMode`), FX, `BattlePlayerViewToggle`, `AudioDock`, `SoundboardPanel` (isDM && !readOnly))
-- Modify: `dm/DmPanel.tsx` (desktop-шторка через наявний `panel`; «Завершити/Скинути/Наступний хід» переїжджають із `BattleTopBar` з тими самими handlers `onComplete`, `confirm`+`actions.reset`, `actions.nextTurn`)
-- Modify: `BattleTopBar.tsx` (лишити назву·раунд·зʼєднання·`useTurnTimer`), `BattleScreen.tsx` (`CornerStack` без звуку/саундборду; `ActionResultCard` над доком), `ReservePanel.tsx` (вміст для шторки)
+- Modify: `dm/DmPanel.tsx` (desktop-шторка швидких дій через наявний `panel`)
+- `ToolsDrawer` додатково: секція DM — «Завершити бій» (`onComplete`) і «Скинути» (`confirm`+`actions.reset`, ті самі handlers, що були в `BattleTopBar`), «До кампанії» (посилання на `/campaigns/[id]`), «Вигляд гравця» і FX
+- Modify: `ActionDock` (T2) отримує швидку кнопку «Наступний хід» для DM (`actions.nextTurn`, pending-стан), у т.ч. коли в DM немає героя
+- Modify: `BattleScreen.tsx` (`CornerStack` без звуку/саундборду; `ActionResultCard` над доком), `ReservePanel.tsx` (вміст для шторки)
 - Test: `components/battle/scene/drawers/__tests__/DrawerRail.test.tsx` (сітка DM/гравець/спостерігач/`playerView`; резерв лише з мапою)
 
 - [ ] Тест сітки прав спершу.
@@ -117,6 +119,20 @@
 - [ ] коміт `feat(battle): ch6 phone parity`.
 - **Не чіпати:** wizards, `BattlePreparationView`.
 
+### T6a. Іконки дій і кнопок краю — 1–2 виконавці (можна паралельно з T4–T6)
+
+**Файли:**
+- Create: `components/hud/icons/battle/*.tsx` (по компоненту на іконку, `{ className?: string }`, `currentColor`, сітка 24, єдина товщина), `components/hud/icons/battle/index.ts`
+- Create: `docs/superpowers/prototypes/2026-11-24-ch6-battle-icons.html` (превʼю сету: 16/24/40 px, `tavern`/`parchment`/`frost`, активний/вимкнений стан)
+- Modify (після погодження превʼю): `ActionGrid.tsx`, `DockDiamond`/`ActionDock`, `DrawerRail`, `ToolsDrawer`, `HeroStatesPanel`
+- Test: `components/hud/icons/battle/__tests__/icons.test.tsx` (кожна іконка рендериться, має `aria-hidden`, приймає `className`)
+
+- [ ] Інвентар: перелік з розділу «Іконки» спеки; для кожної позиції спершу `lucide-react` та наявні ресурси (reuse-пошук); у превʼю позначити «lucide» або «власна» й чому.
+- [ ] Кастомні SVG лише для прогалин; без копіювання чужих іконок/арту.
+- [ ] **Зупинка:** показати превʼю власнику, підключати лише після «так».
+- [ ] Кожна кнопка з іконкою має `aria-label`; іконка не єдиний носій змісту (є підпис або tooltip).
+- [ ] коміт `feat(hud): ch6 battle icon set`, потім `feat(battle): ch6 wire icons`.
+
 ### T7. Анімації (потребує дизайн-основу) — 1 виконавець
 
 **Файли:** `TokenBubble`, `BattleDrawer`, `ActionDock`, `DockDiamond`, `HeroCluster` + хуки/класи руху дизайн-основи; власних токенів немає.
@@ -137,12 +153,12 @@
 
 ## Послідовність
 
-T0 → T1 → T2 → T3 → (T4 ‖ T5) → T6 → T7 → T8 → T9. Найризикованіші: T1 (висота/шапка), T2 і T6 (ремаунт `MyTurnControls`).
+T0 → T1 → T2 → T3 → (T4 ‖ T5 ‖ T6a-превʼю) → T6 → T6a-підключення → T7 → T8 → T9. Найризикованіші: T1 (висота/шапка), T2 і T6 (ремаунт `MyTurnControls`).
 
 ## Оцінка обсягу
 
-≈ 9 задач, 22–30 файлів у `components/battle`, 1 маршрутний файл оболонки, i18n/docs, 8–10 нових тестових файлів. ≈ 7–9 запусків Sonnet + 1 Opus-ревʼю + 1 живий прогін; перед запуском ланцюга нагадати про `/usage`.
+≈ 10 задач, 30–45 файлів (з іконками) у `components/battle`, 1 маршрутний файл оболонки, i18n/docs, 8–10 нових тестових файлів. ≈ 7–9 запусків Sonnet + 1 Opus-ревʼю + 1 живий прогін; перед запуском ланцюга нагадати про `/usage`.
 
 ## Що не робимо в Ч6
 
-Дальність/тип сітки й туман (Ч7); арт (заглушки); зміни правил бою, API, схем, FX-пайплайну; радіальне меню; власна система руху.
+Дальність/тип сітки й туман (Ч7); решта арту (фони, портрети, текстури — заглушки; **іконки входять**); зміни правил бою, API, схем, FX-пайплайну; радіальне меню; власна система руху.
