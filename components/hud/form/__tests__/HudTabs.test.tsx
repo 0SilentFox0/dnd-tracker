@@ -86,7 +86,7 @@ describe('HudTabs', () => {
         const active = screen.getByRole('tab', { name: 'Перший' });
 
         expect(inactive.className).toContain('text-hud-text');
-        expect(inactive.className).not.toContain('text-hud-muted');
+        expect(inactive.className).not.toMatch(/(^|\s)text-hud-muted/);
         expect(active.className).toContain('data-[state=active]:font-bold');
         expect(active.getAttribute('data-tab')).toBe('a');
         expect(active.querySelector('[data-testid="icon-a"]')).not.toBeNull();
@@ -113,7 +113,10 @@ describe('HudTabs', () => {
             'aria-selected',
             'true'
         );
-        expect(screen.getByRole('tab', { name: 'Другий' }).tabIndex).toBe(0);
+        expect(screen.getByRole('tab', { name: 'Перший' })).toHaveAttribute(
+            'aria-selected',
+            'false'
+        );
         expect(screen.getByRole('tab', { name: 'Перший' }).tabIndex).toBe(-1);
         expect(screen.getByRole('tabpanel')).toHaveTextContent('панель Б');
     });

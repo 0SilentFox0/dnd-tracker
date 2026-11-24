@@ -1,5 +1,11 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    within,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { sheetFixture, withSheet } from './sheet-fixture';
@@ -98,6 +104,7 @@ describe('CharacterProfile — перегляд', () => {
     beforeEach(() => {
         h.sheetQuery.data = sheetFixture;
         h.replace.mockClear();
+        mockMatchMedia(false);
     });
 
     afterEach(cleanup);
@@ -265,12 +272,19 @@ describe('CharacterProfile — перегляд', () => {
             />
         );
 
-        const row = screen.getByRole('button', { name: /Довгий лук/ });
+        const row = within(
+            screen.getByText('Довгий лук').parentElement as HTMLElement
+        );
 
-        expect(row).toHaveTextContent('+13');
-        expect(row).toHaveTextContent('≈68');
-        fireEvent.click(row);
+        const hit = row.getByRole('button', { name: /hitShort/ });
+
+        const damage = row.getByRole('button', { name: /combat\.damage/ });
+
+        expect(hit).toHaveTextContent('+13');
+        expect(damage).toHaveTextContent('≈68');
+        fireEvent.click(hit);
         expect(screen.getAllByText('Майстерність').length).toBeGreaterThan(0);
+        fireEvent.click(damage);
         expect(screen.getByText('Рівень + 6d8+1d6')).toBeTruthy();
     });
 

@@ -55,7 +55,7 @@
       "apply": "Застосувати"
     },
     "levelLabel": "Рівень",
-    "xpToNext": "{left} до наступного рівня",
+    "xpToNext": "{left} до рівня",
     "xpReady": "Готовий до рівня",
     "dmActions": "Дії майстра"
   },
