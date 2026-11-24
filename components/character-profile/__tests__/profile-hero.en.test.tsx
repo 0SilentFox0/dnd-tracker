@@ -19,11 +19,13 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),
 }));
 
-import { ProfileHero } from '@/components/character-profile/hero/ProfileHero';
 import { ProfileContext } from '@/components/character-profile/ProfileContext';
+import { SheetIdentityPanel } from '@/components/character-profile/sheet/SheetIdentityPanel';
+import { SheetVitals } from '@/components/character-profile/sheet/SheetVitals';
 import { GoalList } from '@/components/character-profile/story/GoalList';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+import { HeroStats } from '@/systems/d20/ui/HeroStats';
 import type { CharacterSheet } from '@/types/characters';
 
 const inProfile = (sheet: CharacterSheet, ui: ReactElement) =>
@@ -63,7 +65,14 @@ describe('character profile (en)', () => {
             },
         });
 
-        const { container } = await inProfile(sheet, <ProfileHero />);
+        const { container } = await inProfile(
+            sheet,
+            <>
+                <SheetIdentityPanel />
+                <SheetVitals />
+                <HeroStats />
+            </>
+        );
 
         fireEvent.click(screen.getByText('HP 300'));
 
@@ -78,7 +87,7 @@ describe('character profile (en)', () => {
                 system: 'dnd5e',
                 identity: { ...sheetFixture.identity, className: 'Paladin' },
             }),
-            <ProfileHero />
+            <SheetIdentityPanel />
         );
 
         expect(d20.container.textContent).toContain('Paladin');
@@ -89,7 +98,7 @@ describe('character profile (en)', () => {
                 system: 'wfrp',
                 identity: { ...sheetFixture.identity, className: 'Paladin' },
             }),
-            <ProfileHero />
+            <SheetIdentityPanel />
         );
 
         expect(wfrp.container.textContent).not.toContain('Paladin');
@@ -100,7 +109,7 @@ describe('character profile (en)', () => {
 
         const d20 = await inProfile(
             withSheet({ system: 'dnd5e', identity }),
-            <ProfileHero />
+            <SheetIdentityPanel />
         );
 
         expect(d20.container.textContent).toContain('Lawful Good');
@@ -108,7 +117,7 @@ describe('character profile (en)', () => {
 
         const wfrp = await inProfile(
             withSheet({ system: 'wfrp', identity }),
-            <ProfileHero />
+            <SheetIdentityPanel />
         );
 
         expect(wfrp.container.textContent).not.toContain('Lawful Good');

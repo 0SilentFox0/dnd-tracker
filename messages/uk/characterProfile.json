@@ -28,7 +28,9 @@
       "move": "Рух",
       "fate": "Доля",
       "fortune": "Удача",
-      "sin": "Гріх"
+      "sin": "Гріх",
+      "hitDice": "Кістки",
+      "passive": "Пасив"
     },
     "wounds": "Рани",
     "woundsCurrent": "Рани {current} / {max}",
@@ -36,7 +38,20 @@
     "move": "Рух (кроком/бігом)",
     "fate": "Доля",
     "fortune": "Удача",
-    "sin": "Гріх"
+    "sin": "Гріх",
+    "hitDice": "Кістки ХП",
+    "passivePerception": "Пасивна уважність",
+    "xp": "Досвід {value} / {next}",
+    "xpMax": "Досвід {value}",
+    "background": "Передісторія: {name}",
+    "vitals": {
+      "damage": "− Шкода",
+      "heal": "+ Лікування",
+      "temp": "Тимчасові",
+      "tempBadge": "+{temp} тимч.",
+      "amount": "Кількість",
+      "apply": "Застосувати"
+    }
   },
   "combat": {
     "roll": "Кинути",
@@ -53,6 +68,7 @@
     "immunities": "Імунітети",
     "saves": "РЯТІВНІ КИДКИ",
     "saveRoll": "Рятівний кидок: {ability}",
+    "saveShort": "Рятунок",
     "skills": "НАВИЧКИ",
     "passives": "Пасивні: сприйняття {perception} · розслідування {investigation} · проникливість {insight}",
     "languages": "Мови: {list}",

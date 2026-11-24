@@ -28,7 +28,9 @@
       "move": "Move",
       "fate": "Fate",
       "fortune": "Fort",
-      "sin": "Sin"
+      "sin": "Sin",
+      "hitDice": "Dice",
+      "passive": "Pass"
     },
     "wounds": "Wounds",
     "woundsCurrent": "Wounds {current} / {max}",
@@ -36,7 +38,20 @@
     "move": "Move (walk/run)",
     "fate": "Fate",
     "fortune": "Fortune",
-    "sin": "Sin"
+    "sin": "Sin",
+    "hitDice": "Hit dice",
+    "passivePerception": "Passive perception",
+    "xp": "XP {value} / {next}",
+    "xpMax": "XP {value}",
+    "background": "Background: {name}",
+    "vitals": {
+      "damage": "− Damage",
+      "heal": "+ Heal",
+      "temp": "Temp",
+      "tempBadge": "+{temp} temp",
+      "amount": "Amount",
+      "apply": "Apply"
+    }
   },
   "combat": {
     "roll": "Roll",
@@ -53,6 +68,7 @@
     "immunities": "Immunities",
     "saves": "SAVING THROWS",
     "saveRoll": "{ability} saving throw",
+    "saveShort": "Save",
     "skills": "SKILLS",
     "passives": "Passive: perception {perception} · investigation {investigation} · insight {insight}",
     "languages": "Languages: {list}",

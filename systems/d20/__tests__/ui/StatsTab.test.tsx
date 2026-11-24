@@ -78,6 +78,19 @@ describe('d20 StatsTab', () => {
         expect(screen.queryByText(/saves/)).toBeNull();
     });
 
+    it('top section shows the matching save on each tile with proficiency outline', () => {
+        renderTab({ section: 'top' });
+
+        expect(
+            screen
+                .getByText('characterProfile.combat.saveShort +5')
+                .closest('div')
+        ).toHaveClass('border-hud-gold');
+        expect(
+            screen.getByText('characterProfile.combat.saveShort +1')
+        ).toBeInTheDocument();
+    });
+
     it('top section hides the primary hint without a primary ability', () => {
         renderTab({ section: 'top' }, {
             ...sheet,
@@ -92,17 +105,14 @@ describe('d20 StatsTab', () => {
 
         const items = screen.getAllByRole('listitem');
 
-        const text = items.map((li) => li.textContent);
-
-        expect(text.some((x) => x?.includes('● ') && x.includes('×2'))).toBe(
-            true
-        );
-        expect(text.filter((x) => x?.includes('●●')).length).toBe(1);
+        expect(items).toHaveLength(2);
+        expect(items[0].querySelectorAll('i.bg-hud-gold')).toHaveLength(1);
+        expect(items[1].querySelectorAll('i.bg-hud-gold')).toHaveLength(0);
         expect(document.body.textContent).toContain('passives');
     });
 
-    it('rolls a save with its ability subject', () => {
-        const onRoll = renderTab();
+    it('rolls a save from the ability tile', () => {
+        const onRoll = renderTab({ section: 'top' });
 
         fireEvent.click(screen.getAllByRole('button')[0]);
 

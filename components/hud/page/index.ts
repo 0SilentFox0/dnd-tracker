@@ -1,5 +1,6 @@
 export { HudCard } from './HudCard';
 export { HudChipTabs } from './HudChipTabs';
+export { HudCornerFrame } from './HudCornerFrame';
 export { HudPage } from './HudPage';
 export { HudPageHeader } from './HudPageHeader';
 export { HudPanel } from './HudPanel';

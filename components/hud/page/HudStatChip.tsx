@@ -5,6 +5,7 @@ interface HudStatChipProps {
     value: string | number;
     label?: string;
     size?: 'md' | 'lg';
+    className?: string;
 }
 
 export function HudStatChip({
@@ -12,11 +13,15 @@ export function HudStatChip({
     value,
     label,
     size = 'md',
+    className,
 }: HudStatChipProps) {
     return (
         <div
             aria-label={label}
-            className="min-w-0 flex-1 rounded-lg border border-hud-line bg-hud-surface px-1 py-1 text-center"
+            className={cn(
+                'min-w-0 flex-1 rounded-lg border border-hud-line bg-hud-surface px-1 py-1 text-center',
+                className
+            )}
         >
             <b
                 className={cn(

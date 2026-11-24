@@ -10,12 +10,13 @@ import {
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
-import { CompactHero, ProfileHero } from './hero/ProfileHero';
 import { InventoryTab } from './inventory/InventoryTab';
 import { LevelUpBadge } from './level-up/LevelUpBadge';
 import { PendingChoicesBadge } from './level-up/PendingChoicesBadge';
 import { CharacterLogTab } from './rest/CharacterLogTab';
 import { DmRestActions } from './rest/DmRestActions';
+import { CompactHero, SheetIdentityPanel } from './sheet/SheetIdentityPanel';
+import { SheetVitals } from './sheet/SheetVitals';
 import { CombatTab } from './tabs/CombatTab';
 import { MagicTab } from './tabs/MagicTab';
 import {
@@ -270,42 +271,51 @@ function CharacterProfileView({
                                 />
                             ) : (
                                 <>
-                                    <ProfileHero
-                                        ref={hero.ref}
-                                        badge={
-                                            <>
-                                                {!ui.hideProgression && (
-                                                    <LevelUpBadge
-                                                        free={
-                                                            sheet.progression
-                                                                .freePoints
-                                                        }
-                                                        onOpen={() =>
-                                                            setTab('skills')
-                                                        }
-                                                    />
-                                                )}
-                                                <PendingChoicesBadge />
-                                            </>
-                                        }
-                                        actions={
-                                            canEdit && sheet.viewer.isDM ? (
+                                    <div className="lg:flex">
+                                        <SheetIdentityPanel
+                                            ref={hero.ref}
+                                            badge={
                                                 <>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() =>
-                                                            setEditing(true)
-                                                        }
-                                                    >
-                                                        {tc('edit')}
-                                                    </Button>
-                                                    <DmRestActions />
+                                                    {!ui.hideProgression && (
+                                                        <LevelUpBadge
+                                                            free={
+                                                                sheet
+                                                                    .progression
+                                                                    .freePoints
+                                                            }
+                                                            onOpen={() =>
+                                                                setTab('skills')
+                                                            }
+                                                        />
+                                                    )}
+                                                    <PendingChoicesBadge />
                                                 </>
-                                            ) : null
-                                        }
-                                    />
+                                            }
+                                            actions={
+                                                canEdit && sheet.viewer.isDM ? (
+                                                    <>
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() =>
+                                                                setEditing(true)
+                                                            }
+                                                        >
+                                                            {tc('edit')}
+                                                        </Button>
+                                                        <DmRestActions />
+                                                    </>
+                                                ) : null
+                                            }
+                                        />
+                                        <div className="flex min-w-0 flex-1 flex-col gap-3 px-4 pt-4">
+                                            <SheetVitals />
+                                            <div className="flex flex-wrap gap-1.5">
+                                                <ui.HeroStats />
+                                            </div>
+                                        </div>
+                                    </div>
                                     {sheet.viewer.isOwner &&
                                         !sheet.viewer.isDM &&
                                         !sheet.review.pending && (

@@ -7,10 +7,6 @@ import { Crosshair, Swords } from 'lucide-react';
 import { Breakdown } from '../combat/Breakdown';
 import { CombatRow } from '../combat/CombatRow';
 import { useProfile } from '../ProfileContext';
-import {
-    SheetRollDialog,
-    type SheetRollRequest,
-} from '../rest/SheetRollDialog';
 
 import { EmptyState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
@@ -42,19 +38,8 @@ export function CombatTab() {
 
     const [openAttack, setOpenAttack] = useState<string | null>(null);
 
-    const [rollRequest, setRollRequest] = useState<SheetRollRequest | null>(
-        null
-    );
-
-    const canRoll = !!sheet.rest && (sheet.viewer.isOwner || sheet.viewer.isDM);
-
     return (
         <>
-            <Ui.StatsTab
-                section="top"
-                onRoll={setRollRequest}
-                canRoll={canRoll}
-            />
             {system.attacks && (
                 <HudSection title={t('attacks')}>
                     {sheet.attacks.length === 0 ? (
@@ -153,17 +138,6 @@ export function CombatTab() {
                     />
                 )}
             </HudSection>
-            <Ui.StatsTab
-                section="bottom"
-                onRoll={setRollRequest}
-                canRoll={canRoll}
-            />
-            {canRoll && (
-                <SheetRollDialog
-                    request={rollRequest}
-                    onClose={() => setRollRequest(null)}
-                />
-            )}
         </>
     );
 }

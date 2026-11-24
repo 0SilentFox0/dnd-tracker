@@ -4,11 +4,11 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { ProfileHero } from './hero/ProfileHero';
 import {
     type ClassLevelUpProps,
     LevelUpAction,
 } from './level-up/LevelUpAction';
+import { SheetIdentityPanel } from './sheet/SheetIdentityPanel';
 import { BiographyEditor } from './story/BiographyEditor';
 import { GoalList } from './story/GoalList';
 import { BasicEditTab } from './tabs/BasicEditTab';
@@ -124,7 +124,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             className="hud-form"
             onSubmit={form.actions.handleSubmit}
         >
-            <ProfileHero
+            <SheetIdentityPanel
                 actions={
                     Ui.hideProgression ? undefined : (
                         <LevelUpAction

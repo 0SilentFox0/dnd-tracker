@@ -24,9 +24,7 @@ export default async function DmCharacterPage({
         searchParams,
     ]);
 
-    const access = await requireCampaignDMOrDemo(id);
-
-    const { isDemo, campaign, userId } = access;
+    const { isDemo, campaign, userId } = await requireCampaignDMOrDemo(id);
 
     const rules = await loadRules(id);
 
@@ -69,7 +67,7 @@ export default async function DmCharacterPage({
     return (
         <CampaignGameShell
             campaign={campaign}
-            viewer={access}
+            viewer={{ isDM: true, isDemo, userId }}
             active="character"
         >
             {namespaces.length ? (
