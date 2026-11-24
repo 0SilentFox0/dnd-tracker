@@ -2,17 +2,17 @@
   "tabs": {
     "basic": "Basic",
     "combat": "Combat",
-    "stats": "Statistics",
+    "stats": "Skills",
     "choices": "Choices",
     "magic": "Magic",
     "advancement": "Advancement",
     "downtime": "Downtime",
     "items": "Inventory",
     "story": "Story",
-    "log": "Log",
+    "log": "Journal",
     "things": "Gear",
     "path": "Path",
-    "traits": "Traits & languages"
+    "traits": "Traits"
   },
   "hero": {
     "level": "Lv {level}",
@@ -62,7 +62,7 @@
   "combat": {
     "roll": "Roll",
     "abilities": "ABILITIES",
-    "primaryHint": "★ primary ability: all attack rolls and damage use it",
+    "tapToRoll": "tap to roll",
     "attacks": "ATTACKS",
     "noAttacks": "No weapons — no attacks yet",
     "hitShort": "hit",
@@ -86,7 +86,6 @@
     "passives": "Passives",
     "langsProfs": "Languages & proficiencies",
     "score": "score {n}",
-    "saveProficient": "proficient saving throw",
     "state": "State",
     "exhaustionLevel": "Exhaustion"
   },
@@ -95,7 +94,7 @@
     "attack": "Spell attack",
     "pact": "PACT",
     "pactSlots": "Pact slots: {current} of {max}, level {level}",
-    "slots": "SLOTS",
+    "slots": "Spell slots",
     "slotsLeft": "Level {level}: {current} of {count} left",
     "slotsTotal": "Level {level}: {count} {count, plural, one {slot} other {slots}}",
     "fromChoices": "SPELLS FROM CHOICES",

@@ -78,28 +78,18 @@ describe('d20 StatsTab', () => {
         expect(
             screen.getByText('characterProfile.combat.primary')
         ).toBeInTheDocument();
-        expect(document.body.textContent).toContain('primaryHint');
         expect(screen.queryByText(/saves/)).toBeNull();
     });
 
-    it('top section shows the matching save on each tile with proficiency outline', () => {
+    it('top section shows the matching save with a proficiency diamond', () => {
         renderTab({ section: 'top' });
 
-        expect(
-            screen
-                .getAllByText('characterProfile.combat.saveShort')[0]
-                .closest('.motion-rise')
-        ).toHaveClass('border-hud-gold');
+        const save = screen
+            .getAllByText('characterProfile.combat.saveShort')[0]
+            .closest('button');
+
+        expect(save?.querySelector('i.bg-hud-gold')).not.toBeNull();
         expect(screen.getByText('+1')).toBeInTheDocument();
-    });
-
-    it('top section hides the primary hint without a primary ability', () => {
-        renderTab({ section: 'top' }, {
-            ...sheet,
-            primaryAbility: null,
-        } as never);
-
-        expect(document.body.textContent).not.toContain('primaryHint');
     });
 
     it('bottom section marks proficiency and expertise', () => {
@@ -133,11 +123,23 @@ describe('d20 StatsTab', () => {
     it('rolls a save from the ability tile', () => {
         const onRoll = renderTab({ section: 'top' });
 
-        fireEvent.click(screen.getAllByRole('button')[0]);
+        fireEvent.click(screen.getAllByRole('button')[1]);
 
         expect(onRoll).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: { kind: 'save', ability: 'strength' },
+            })
+        );
+    });
+
+    it('rolls an ability check from the tile', () => {
+        const onRoll = renderTab({ section: 'top' });
+
+        fireEvent.click(screen.getAllByRole('button')[0]);
+
+        expect(onRoll).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: { kind: 'check', ability: 'strength' },
             })
         );
     });

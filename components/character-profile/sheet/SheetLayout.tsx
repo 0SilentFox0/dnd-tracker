@@ -8,7 +8,9 @@ import {
     type ProfileTabId,
     ProfileTabs,
 } from '../tabs/ProfileTabs';
+import { SheetAbilities } from './SheetAbilities';
 import { CompactHero, SheetIdentityPanel } from './SheetIdentityPanel';
+import { SheetRollProvider } from './SheetRollProvider';
 import { SheetVitals } from './SheetVitals';
 
 import { systemUiOf } from '@/components/systems';
@@ -47,32 +49,35 @@ export function SheetLayout({
         : 'stats';
 
     return (
-        <div className="mx-auto flex w-full max-w-6xl flex-col lg:flex-row">
-            <SheetIdentityPanel
-                ref={heroRef}
-                badge={identity.badge}
-                actions={identity.actions}
-            />
-            <div className="max-lg:contents lg:flex lg:min-w-0 lg:flex-1 lg:flex-col">
-                <div className="order-[-3] grid gap-3 px-4 pt-4 pb-4 lg:grid-cols-[1.2fr_1fr]">
-                    <SheetVitals />
-                    <Ui.HeroStats />
-                </div>
-                <div className="order-[-1] empty:hidden">{children}</div>
-                <ProfileTabs
-                    variant="sheet"
-                    value={value}
-                    onValueChange={tabs.onChange}
-                    tabs={tabs.items}
-                    header={
-                        scrolledPast ? (
-                            <div className="lg:hidden">
-                                <CompactHero />
-                            </div>
-                        ) : null
-                    }
+        <SheetRollProvider>
+            <div className="mx-auto flex w-full max-w-6xl flex-col lg:flex-row">
+                <SheetIdentityPanel
+                    ref={heroRef}
+                    badge={identity.badge}
+                    actions={identity.actions}
                 />
+                <div className="max-lg:contents lg:flex lg:min-w-0 lg:flex-1 lg:flex-col">
+                    <div className="order-[-3] grid gap-3 px-4 pt-4 pb-4 lg:grid-cols-[1.2fr_1fr]">
+                        <SheetVitals />
+                        <Ui.HeroStats />
+                    </div>
+                    <div className="order-[-1] empty:hidden">{children}</div>
+                    <SheetAbilities />
+                    <ProfileTabs
+                        variant="sheet"
+                        value={value}
+                        onValueChange={tabs.onChange}
+                        tabs={tabs.items}
+                        header={
+                            scrolledPast ? (
+                                <div className="lg:hidden">
+                                    <CompactHero />
+                                </div>
+                            ) : null
+                        }
+                    />
+                </div>
             </div>
-        </div>
+        </SheetRollProvider>
     );
 }

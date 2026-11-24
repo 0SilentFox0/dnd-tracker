@@ -72,7 +72,7 @@ export function SheetTabList({
             <TabsList
                 ref={list}
                 onScroll={syncEdge}
-                className="hud-scroll-x relative flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-0 px-2"
+                className="hud-scroll-x relative flex h-auto w-full justify-start gap-0.5 overflow-x-auto rounded-[4px] border border-hud-line bg-hud-panel p-[3px] shadow-sm"
             >
                 {tabs.map((tab) => (
                     <TabsTrigger
@@ -80,7 +80,7 @@ export function SheetTabList({
                         value={tab.id}
                         data-tab={tab.id}
                         className={cn(
-                            'hud-sc motion-press min-h-11 min-w-fit shrink-0 gap-2 rounded-md px-3 text-[14px] text-hud-text hover:text-hud-ink data-[state=active]:bg-transparent! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-none [&_svg]:size-4 [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-gold',
+                            'motion-press min-h-11 min-w-fit flex-1 shrink-0 gap-2 rounded-[3px] px-3 text-[15px] font-medium text-hud-text hover:bg-hud-raised hover:text-hud-ink data-[state=active]:bg-hud-raised! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-sm [&_svg]:size-[18px] [&_svg]:text-hud-muted data-[state=active]:[&_svg]:text-hud-gold',
                             trigger
                         )}
                     >
@@ -100,6 +100,7 @@ export function SheetTabList({
                     data-testid="tab-indicator"
                     className="motion-indicator"
                     style={{
+                        bottom: 3,
                         opacity: box ? 1 : 0,
                         transform: box
                             ? `translateX(${box.left}px) scaleX(${box.width})`
@@ -111,7 +112,7 @@ export function SheetTabList({
             {!atEnd && (
                 <span
                     aria-hidden
-                    className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-hud-page to-transparent md:hidden"
+                    className="pointer-events-none absolute inset-y-px right-px w-10 bg-gradient-to-l from-hud-page to-transparent md:hidden"
                 />
             )}
         </div>

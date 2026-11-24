@@ -16,6 +16,8 @@ vi.mock('@/components/character-profile/rest/SheetRollDialog', () => ({
 }));
 
 import { ProfileContext } from '@/components/character-profile/ProfileContext';
+import { SheetAbilities } from '@/components/character-profile/sheet/SheetAbilities';
+import { SheetRollProvider } from '@/components/character-profile/sheet/SheetRollProvider';
 import { SheetStatsPanel } from '@/components/character-profile/sheet/SheetStatsPanel';
 import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
@@ -46,7 +48,10 @@ const mount = (sheet: CharacterSheet) =>
                 canEdit: false,
             }}
         >
-            <SheetStatsPanel />
+            <SheetRollProvider>
+                <SheetAbilities />
+                <SheetStatsPanel />
+            </SheetRollProvider>
         </ProfileContext.Provider>
     );
 
@@ -54,13 +59,20 @@ describe('SheetStatsPanel', () => {
     beforeEach(() => mockMatchMedia(false));
     afterEach(cleanup);
 
-    it('renders abilities and skills via the system slot', () => {
+    it('renders abilities and skills via the system slot, abilities in their own row', () => {
         mount(withRest({ isDM: false, isOwner: true }));
 
         expect(
-            screen.getByText('characterProfile.combat.abilities')
+            screen.getByLabelText('characterProfile.combat.abilities')
         ).toBeTruthy();
         expect(screen.getByText('characterProfile.combat.skills')).toBeTruthy();
+        expect(
+            screen
+                .getByTestId('sheet-stats-panel')
+                .querySelector(
+                    '[aria-label="characterProfile.combat.abilities"]'
+                )
+        ).toBeNull();
     });
 
     it('tile click opens the roll dialog for the owner', () => {

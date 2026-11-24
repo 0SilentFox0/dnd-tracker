@@ -23,7 +23,7 @@ export function Mark({ count }: { count: 0 | 1 | 2 }) {
                 <i
                     key={i}
                     className={cn(
-                        'size-2.5 rotate-45 rounded-[2px] border-[1.5px]',
+                        'size-2 rotate-45 rounded-[1px] border-[1.5px]',
                         count
                             ? 'border-hud-gold bg-hud-gold'
                             : 'border-hud-muted'
@@ -53,6 +53,8 @@ export function AbilityCard({
 
     const tg = useTranslations('gameTerms');
 
+    const label = tg(`abilities.${a.key}.label`);
+
     const saveRow = save && (
         <>
             <Mark count={save.proficient ? 1 : 0} />
@@ -62,7 +64,7 @@ export function AbilityCard({
             <span>{t('saveShort')}</span>
             <b
                 className={cn(
-                    'tabular-nums',
+                    'hud-num text-[17px]',
                     save.proficient ? 'text-hud-gold' : 'text-hud-text'
                 )}
             >
@@ -71,52 +73,66 @@ export function AbilityCard({
         </>
     );
 
+    const saveClass =
+        'flex min-h-11 w-full items-center justify-center gap-2 border-t border-hud-rule text-sm text-hud-muted';
+
     return (
         <div
             style={stagger(index)}
-            className={cn(
-                'motion-rise motion-lift relative grid min-w-0 justify-items-center gap-0.5 rounded-xl border bg-hud-panel px-2 pt-4 pb-1 text-center',
-                a.isPrimary || save?.proficient
-                    ? 'border-hud-gold'
-                    : 'border-hud-rule'
-            )}
+            className="motion-rise relative grid min-w-0 content-start bg-hud-panel"
         >
             {a.isPrimary && (
-                <span className="absolute -top-2.5 left-1/2 h-5 -translate-x-1/2 rounded-md border border-hud-line bg-hud-raised px-2 text-xs leading-5 font-bold whitespace-nowrap text-hud-ink">
-                    {t('primary')}
-                </span>
+                <>
+                    <span
+                        aria-hidden
+                        className="absolute inset-x-3.5 top-0 h-[3px] bg-hud-gold"
+                    />
+                    <span className="sr-only">{t('primary')}</span>
+                </>
             )}
-            <small className="hud-sc text-[13px] tracking-[.08em] text-hud-muted uppercase">
-                {tg(`abilities.${a.key}.short`)}
-            </small>
-            <span className="hud-sc text-4xl leading-tight text-hud-ink tabular-nums max-sm:text-3xl">
-                <Signed value={a.mod} />
-            </span>
-            <span className="text-sm text-hud-muted">
-                {t('score', { n: a.score })}
-            </span>
+            <RollableCell
+                canRoll={canRoll}
+                onRoll={() =>
+                    onRoll({
+                        label,
+                        subject: { kind: 'check', ability: a.key },
+                    })
+                }
+                title={t('roll')}
+                className="motion-press grid min-h-11 justify-items-center gap-1 px-1 pt-3.5 pb-3 hover:bg-hud-raised"
+            >
+                {canRoll && <span className="sr-only">{t('roll')}: </span>}
+                <small className="hud-title text-base text-hud-text sm:text-lg">
+                    {tg(`abilities.${a.key}.short`)}
+                </small>
+                <span className="hud-num text-4xl leading-none text-hud-ink sm:text-[42px]">
+                    <Signed value={a.mod} />
+                </span>
+                <span className="hud-num rounded-[4px] border border-hud-line bg-hud-raised px-2.5 text-sm leading-6 text-hud-ink">
+                    {t('score', { n: a.score })}
+                </span>
+            </RollableCell>
             {saveRow &&
                 (canRoll ? (
                     <RollableCell
                         canRoll
                         onRoll={() =>
                             onRoll({
-                                label: t('saveRoll', {
-                                    ability: tg(`abilities.${a.key}.label`),
-                                }),
+                                label: t('saveRoll', { ability: label }),
                                 subject: { kind: 'save', ability: a.key },
                             })
                         }
                         title={t('roll')}
-                        className="motion-press mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border-t border-hud-rule text-sm text-hud-muted hover:bg-hud-raised"
+                        className={cn(
+                            saveClass,
+                            'motion-press hover:bg-hud-raised'
+                        )}
                     >
                         <span className="sr-only">{t('roll')}: </span>
                         {saveRow}
                     </RollableCell>
                 ) : (
-                    <div className="mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 border-t border-hud-rule text-sm text-hud-muted">
-                        {saveRow}
-                    </div>
+                    <div className={saveClass}>{saveRow}</div>
                 ))}
         </div>
     );
@@ -148,7 +164,7 @@ export function SkillRow({
                     })
                 }
                 title={t('roll')}
-                className="motion-press flex min-h-11 w-full items-center gap-2.5 px-2 text-left hover:bg-hud-raised"
+                className="motion-press flex min-h-11 w-full items-center gap-3 px-2 text-left hover:bg-hud-raised"
             >
                 {canRoll && <span className="sr-only">{t('roll')}: </span>}
                 <Mark count={level} />
@@ -170,7 +186,7 @@ export function SkillRow({
                 </span>
                 <span
                     className={cn(
-                        'w-9 text-right text-base tabular-nums',
+                        'hud-num w-9 text-right text-[17px]',
                         level ? 'font-bold text-hud-ink' : 'text-hud-muted'
                     )}
                 >

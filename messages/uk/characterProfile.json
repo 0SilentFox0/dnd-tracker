@@ -2,7 +2,7 @@
   "tabs": {
     "basic": "Основне",
     "combat": "Бій",
-    "stats": "Статистика",
+    "stats": "Навички",
     "choices": "Вибори",
     "magic": "Магія",
     "advancement": "Розвиток",
@@ -12,7 +12,7 @@
     "log": "Журнал",
     "things": "Речі",
     "path": "Шлях",
-    "traits": "Риси й мови"
+    "traits": "Риси"
   },
   "hero": {
     "level": "{level} рів.",
@@ -62,7 +62,7 @@
   "combat": {
     "roll": "Кинути",
     "abilities": "ХАРАКТЕРИСТИКИ",
-    "primaryHint": "★ основна характеристика: від неї влучання і шкода всіх атак",
+    "tapToRoll": "натисніть, щоб кинути",
     "attacks": "АТАКИ",
     "noAttacks": "Немає зброї — атак поки немає",
     "hitShort": "влуч",
@@ -86,7 +86,6 @@
     "passives": "Пасивні",
     "langsProfs": "Мови й володіння",
     "score": "значення {n}",
-    "saveProficient": "володіння рятунком",
     "state": "Стан",
     "exhaustionLevel": "Виснаження"
   },
@@ -95,7 +94,7 @@
     "attack": "Атака закл.",
     "pact": "ПАКТ",
     "pactSlots": "Слоти пакту: {current} з {max}, {level} коло",
-    "slots": "СЛОТИ",
+    "slots": "Слоти заклинань",
     "slotsLeft": "{level} коло: залишилось {current} з {count}",
     "slotsTotal": "{level} коло: {count} {count, plural, one {слот} few {слоти} many {слотів} other {слотів}}",
     "fromChoices": "ЗАКЛИНАННЯ З ВИБОРІВ",

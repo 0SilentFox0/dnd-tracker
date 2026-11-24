@@ -7,10 +7,12 @@ import { BookOpen } from 'lucide-react';
 import { ProfileSpellBook } from '../hero/ProfileSpellBook';
 import { SpellPicksNudge } from '../path';
 import { useProfile } from '../ProfileContext';
+import { SpellSlotColumns } from './SpellSlotColumns';
 
 import { NewPill } from '@/components/common/entity/NewPill';
 import { spellLevelMetal } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
+import { HudSheetHeading } from '@/components/hud/page';
 import { EmptySpellBook } from '@/components/spells/book/SpellBookPages';
 import { Button } from '@/components/ui/button';
 import { spellLevelRoman } from '@/lib/constants/spells';
@@ -41,22 +43,28 @@ export function MagicTab() {
                 <NewPill count={newSpells.size} className="mb-2" />
             )}
             {sheet.magic && (
-                <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-hud-muted">
-                    <span>
-                        {t('saveDC')}{' '}
-                        <b className="text-lg text-hud-ink">
-                            {sheet.magic.saveDC}
-                        </b>
-                    </span>
-                    <span>
-                        {t('attack')}{' '}
-                        <b className="text-lg text-hud-ink">
-                            {signed(sheet.magic.attackBonus)}
-                        </b>
-                    </span>
-                    <span>
-                        {tr(`gameTerms.abilities.${sheet.magic.ability}.label`)}
-                    </span>
+                <div className="mb-5 grid grid-cols-3 divide-x divide-hud-rule overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel shadow-sm">
+                    {[
+                        [String(sheet.magic.saveDC), t('saveDC')],
+                        [signed(sheet.magic.attackBonus), t('attack')],
+                        [
+                            tr(
+                                `gameTerms.abilities.${sheet.magic.ability}.short`
+                            ),
+                            tr(
+                                `gameTerms.abilities.${sheet.magic.ability}.label`
+                            ),
+                        ],
+                    ].map(([value, label]) => (
+                        <div key={label} className="min-w-0 px-3 py-3 sm:px-5">
+                            <b className="hud-num block text-3xl leading-none text-hud-ink sm:text-4xl">
+                                {value}
+                            </b>
+                            <span className="mt-1.5 block truncate text-sm text-hud-muted">
+                                {label}
+                            </span>
+                        </div>
+                    ))}
                 </div>
             )}
             {sheet.pact && (
@@ -78,35 +86,10 @@ export function MagicTab() {
                 </HudSection>
             )}
             {sheet.slots.length > 0 && (
-                <HudSection title={t('slots')}>
-                    <div className="flex flex-wrap gap-1.5">
-                        {sheet.slots.map((s) => (
-                            <span
-                                key={s.level}
-                                aria-label={
-                                    sheet.rest?.persist
-                                        ? t('slotsLeft', {
-                                              level: spellLevelRoman(s.level),
-                                              current: s.current,
-                                              count: s.count,
-                                          })
-                                        : t('slotsTotal', {
-                                              level: spellLevelRoman(s.level),
-                                              count: s.count,
-                                          })
-                                }
-                                className={cn(
-                                    'hud-sc metal-fill rounded-md px-3 py-1.5 text-sm',
-                                    spellLevelMetal(s.level)
-                                )}
-                            >
-                                {spellLevelRoman(s.level)} ·{' '}
-                                {sheet.rest?.persist
-                                    ? `${s.current}/${s.count}`
-                                    : s.count}
-                            </span>
-                        ))}
-                    </div>
+                <HudSection
+                    header={<HudSheetHeading>{t('slots')}</HudSheetHeading>}
+                >
+                    <SpellSlotColumns />
                 </HudSection>
             )}
             {sheet.choices &&

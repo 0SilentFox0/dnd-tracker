@@ -18,7 +18,7 @@ export function HudSheetHeading({
                 className
             )}
         >
-            <h2 className="hud-sc text-lg leading-tight text-hud-ink">
+            <h2 className="hud-title text-2xl leading-tight text-hud-ink max-sm:text-xl">
                 {children}
             </h2>
             {legend && (

@@ -105,6 +105,14 @@ describe('SheetLayout: вкладки', () => {
         expect(screen.queryByTestId('stats-panel')).toBeNull();
     });
 
+    it('ряд характеристик лишається над вкладками після перемикання', () => {
+        ui();
+        fireEvent.mouseDown(
+            screen.getByRole('tab', { name: 'characterProfile.tabs.combat' })
+        );
+        expect(screen.getByTestId('sheet-abilities')).toBeInTheDocument();
+    });
+
     it('?tab=stash відкриває інвентар', () => {
         renderWithConfirm(
             <CharacterProfile

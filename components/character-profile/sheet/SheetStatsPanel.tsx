@@ -1,8 +1,7 @@
 'use client';
 
 import { useProfile } from '../ProfileContext';
-import { SheetRollDialog } from '../rest/SheetRollDialog';
-import { useSheetRollRequest } from './useSheetRoll';
+import { useSheetRoll } from './SheetRollProvider';
 
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
@@ -14,17 +13,11 @@ export function SheetStatsPanel() {
 
     const Ui = systemUiOf(ref.key, ref.modules);
 
-    const { request, setRequest, close, canRoll } = useSheetRollRequest();
+    const roll = useSheetRoll();
 
     return (
         <div data-testid="sheet-stats-panel">
-            <Ui.StatsTab section="top" onRoll={setRequest} canRoll={canRoll} />
-            <Ui.StatsTab
-                section="bottom"
-                onRoll={setRequest}
-                canRoll={canRoll}
-            />
-            {canRoll && <SheetRollDialog request={request} onClose={close} />}
+            <Ui.StatsTab section="bottom" {...roll} />
         </div>
     );
 }

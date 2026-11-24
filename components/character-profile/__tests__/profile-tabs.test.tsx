@@ -86,7 +86,7 @@ describe('таби профілю', () => {
             screen.getByLabelText(
                 'characterProfile.magic.slotsTotal {"level":"I","count":4}'
             )
-        ).toHaveTextContent('I · 4');
+        ).toHaveTextContent('I');
         fireEvent.click(
             screen.getByRole('button', { name: 'characterProfile.magic.book' })
         );

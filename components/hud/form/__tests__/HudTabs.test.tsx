@@ -63,7 +63,7 @@ describe('HudTabs', () => {
         );
     });
 
-    it('sheet variant: plain row, bold ink for the active tab and a sliding indicator', () => {
+    it('sheet variant: outlined strip, raised active cell and a sliding indicator', () => {
         render(
             <HudTabs
                 value="a"
@@ -88,6 +88,12 @@ describe('HudTabs', () => {
         expect(inactive.className).toContain('text-hud-text');
         expect(inactive.className).not.toMatch(/(^|\s)text-hud-muted/);
         expect(active.className).toContain('data-[state=active]:font-bold');
+        expect(active.className).toContain(
+            'data-[state=active]:bg-hud-raised!'
+        );
+        expect(screen.getByRole('tablist').className).toContain(
+            'border-hud-line'
+        );
         expect(active.getAttribute('data-tab')).toBe('a');
         expect(active.querySelector('[data-testid="icon-a"]')).not.toBeNull();
         expect(screen.getByTestId('tab-indicator').className).toContain(

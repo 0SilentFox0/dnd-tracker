@@ -12,6 +12,7 @@ import {
 import { useProfile } from '@/components/character-profile/ProfileContext';
 import { HudSheetHeading } from '@/components/hud/page';
 import type { StatsTabProps } from '@/components/systems/types';
+import { cn } from '@/lib/utils';
 import { stagger } from '@/lib/utils/common/motion';
 
 export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
@@ -25,18 +26,11 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
 
     if (section === 'top') {
         return (
-            <section className="flex flex-col gap-4">
-                <HudSheetHeading
-                    legend={
-                        <>
-                            <Mark count={1} />
-                            {t('saveProficient')}
-                        </>
-                    }
-                >
-                    {t('abilities')}
-                </HudSheetHeading>
-                <div className="grid grid-cols-2 gap-3 pt-1 sm:grid-cols-3 lg:grid-cols-6">
+            <section
+                aria-label={t('abilities')}
+                className="overflow-hidden rounded-[4px] border border-hud-line bg-hud-rule shadow-sm"
+            >
+                <div className="grid grid-cols-3 gap-px lg:grid-cols-6">
                     {sheet.abilities.map((a, i) => (
                         <AbilityCard
                             key={a.key}
@@ -47,9 +41,6 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                         />
                     ))}
                 </div>
-                {sheet.primaryAbility && (
-                    <p className="text-sm text-hud-muted">{t('primaryHint')}</p>
-                )}
             </section>
         );
     }
@@ -69,8 +60,11 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
             : null,
     ].filter(Boolean);
 
+    const panel =
+        'overflow-hidden rounded-[4px] border border-hud-line bg-hud-panel shadow-sm';
+
     return (
-        <div className="mt-8 flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
             <section className="motion-rise flex flex-col gap-3">
                 <HudSheetHeading
                     legend={
@@ -79,32 +73,44 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                             {t('proficient')}
                             <Mark count={2} />
                             {t('expertise')}
+                            {canRoll && (
+                                <span className="ml-3 text-hud-muted max-sm:hidden">
+                                    {t('tapToRoll')}
+                                </span>
+                            )}
                         </>
                     }
                 >
                     {t('skills')}
                 </HudSheetHeading>
-                <ul className="grid gap-x-8 text-[15px] md:grid-cols-2">
-                    {sheet.skills.map((s) => (
-                        <SkillRow key={s.key} skill={s} roll={roll} />
-                    ))}
-                </ul>
+                <div className={cn(panel, 'px-3')}>
+                    <ul className="-mb-px grid gap-x-8 text-[15px] md:grid-cols-2">
+                        {sheet.skills.map((s) => (
+                            <SkillRow key={s.key} skill={s} roll={roll} />
+                        ))}
+                    </ul>
+                </div>
             </section>
             <section
                 style={stagger(2)}
                 className="motion-rise flex flex-col gap-3"
             >
                 <HudSheetHeading>{t('passives')}</HudSheetHeading>
-                <dl className="grid grid-cols-3 gap-3">
+                <dl
+                    className={cn(
+                        panel,
+                        'grid grid-cols-3 divide-x divide-hud-rule py-3'
+                    )}
+                >
                     {passives.map(([key, value]) => (
                         <div
                             key={key}
-                            className="rounded-xl border border-hud-rule bg-hud-panel px-3 py-2"
+                            className="flex min-w-0 flex-col-reverse items-center px-2 text-center"
                         >
-                            <dt className="truncate text-sm text-hud-muted">
+                            <dt className="max-w-full truncate text-sm text-hud-muted">
                                 {tg(`dndSkills.${key}`)}
                             </dt>
-                            <dd className="hud-sc text-2xl text-hud-ink tabular-nums">
+                            <dd className="hud-num text-3xl text-hud-ink">
                                 {value}
                             </dd>
                         </div>
@@ -114,14 +120,21 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
             {notes.length > 0 && (
                 <section
                     style={stagger(3)}
-                    className="motion-rise flex flex-col gap-2"
+                    className="motion-rise flex flex-col gap-3"
                 >
                     <HudSheetHeading>{t('langsProfs')}</HudSheetHeading>
-                    {notes.map((n) => (
-                        <p key={n} className="text-[15px] text-hud-text">
-                            {n}
-                        </p>
-                    ))}
+                    <div
+                        className={cn(
+                            panel,
+                            'divide-y divide-hud-rule px-4 text-[15px] text-hud-text'
+                        )}
+                    >
+                        {notes.map((n) => (
+                            <p key={n} className="py-3">
+                                {n}
+                            </p>
+                        ))}
+                    </div>
                 </section>
             )}
         </div>

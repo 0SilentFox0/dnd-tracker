@@ -60,10 +60,10 @@ export function HudTabs<T extends string>({
         <Tabs value={value} onValueChange={(v) => onValueChange(v as T)}>
             <div
                 className={cn(
-                    'sticky z-20 border-b border-hud-rule bg-hud-page/[.97]',
+                    'sticky z-20 bg-hud-page/[.97]',
                     sheet
-                        ? 'top-[57px] lg:top-16'
-                        : 'top-[env(safe-area-inset-top,0px)]'
+                        ? 'top-[57px] px-4 py-2 lg:top-16'
+                        : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule'
                 )}
             >
                 {header}
