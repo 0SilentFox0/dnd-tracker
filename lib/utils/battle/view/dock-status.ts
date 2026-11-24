@@ -1,17 +1,16 @@
+import { movementBudget } from '@/lib/utils/battle/grid/path';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 
 export const reactionAvailable = (p: BattleParticipant) =>
     !p.actionFlags.hasUsedReaction;
 
-export const movementOf = (p: BattleParticipant) => {
-    const speed = p.combatStats.speed;
+export const movementOf = (p: BattleParticipant, rules: Ruleset) => {
+    const max = movementBudget(p, rules);
 
-    if (!speed) return undefined;
+    if (!max) return undefined;
 
-    return {
-        used: p.battleData.movementUsed ?? 0,
-        max: speed + (p.battleData.extraMovement ?? 0),
-    };
+    return { used: p.battleData.movementUsed ?? 0, max };
 };
 
 export const showDock = (hero: BattleParticipant | null, readOnly: boolean) =>

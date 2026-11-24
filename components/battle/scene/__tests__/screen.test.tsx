@@ -59,6 +59,9 @@ const IMP = {
     battleData: { ...base.battleData, reserved: true },
 };
 
+const openTools = () =>
+    fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
+
 describe('BattleScreen', () => {
     afterEach(cleanup);
 
@@ -149,7 +152,7 @@ describe('BattleScreen', () => {
 
         render(<BattleScreen />, { wrapper });
 
-        fireEvent.click(screen.getByRole('button', { name: 'Резерв (1)' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Резерв' }));
         fireEvent.click(
             await screen.findByRole('button', { name: 'Ввести в бій: Біс' })
         );
@@ -182,20 +185,23 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        expect(
-            screen
-                .getByRole('tab', { name: /Карта/ })
-                .getAttribute('aria-selected')
-        ).toBe('true');
         expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
 
-        fireEvent.click(screen.getByRole('tab', { name: /Вороги/ }));
+        openTools();
+
+        expect(
+            screen
+                .getByRole('button', { name: /Карта/ })
+                .getAttribute('aria-pressed')
+        ).toBe('true');
+
+        fireEvent.click(screen.getByRole('button', { name: /Вороги/ }));
 
         expect(container.querySelector('[data-fx-clip]')).toBeNull();
         expect(
             screen
-                .getByRole('tab', { name: /Вороги/ })
-                .getAttribute('aria-selected')
+                .getByRole('button', { name: /Вороги/ })
+                .getAttribute('aria-pressed')
         ).toBe('true');
     });
 
@@ -226,11 +232,12 @@ describe('BattleScreen', () => {
             wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper,
         });
 
-        fireEvent.click(screen.getByRole('tab', { name: /Вороги/ }));
+        openTools();
+        fireEvent.click(screen.getByRole('button', { name: /Вороги/ }));
         expect(
             screen
-                .getByRole('tab', { name: /Карта/ })
-                .getAttribute('aria-selected')
+                .getByRole('button', { name: /Карта/ })
+                .getAttribute('aria-pressed')
         ).toBe('true');
     });
 
@@ -241,7 +248,9 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        expect(screen.queryByRole('tab', { name: /Карта/ })).toBeNull();
+        openTools();
+
+        expect(screen.queryByRole('button', { name: /Карта/ })).toBeNull();
         expect(container.querySelector('[data-fx-clip]')).toBeNull();
     });
 
@@ -257,29 +266,32 @@ describe('BattleScreen', () => {
         );
 
         expect(html).not.toContain('- 0px)');
-        expect(html).toContain('below-header');
+        expect(html).toContain('scene-full');
     });
 
-    it('телефон, не мій хід: вкладки, «ходить», мій герой, без кнопок дій', () => {
+    it('телефон, не мій хід: вкладки в «Інструментах», «Хід: …», без кнопок дій', () => {
         media.wide = false;
 
         const { wrapper } = fakeScene({ isMyTurn: false });
 
         render(<BattleScreen />, { wrapper });
 
-        expect(screen.getByRole('tab', { name: /Вороги/ })).toBeTruthy();
-        expect(screen.getByText(/ходить/)).toBeTruthy();
+        openTools();
+
+        expect(screen.getByRole('button', { name: /Вороги/ })).toBeTruthy();
+        expect(screen.getByText(/Хід:/)).toBeTruthy();
         expect(screen.queryByRole('button', { name: /Атака/ })).toBeNull();
     });
 
-    it('телефон, мій хід: банер і дії', () => {
+    it('телефон, мій хід: док із діями', () => {
         media.wide = false;
 
         const { wrapper } = fakeScene({ isMyTurn: true });
 
         render(<BattleScreen />, { wrapper });
 
-        expect(screen.getAllByText('Твій хід').length).toBeGreaterThan(0);
+        fireEvent.click(screen.getByRole('button', { name: 'Дія' }));
+
         expect(screen.getByRole('button', { name: /Атака/ })).toBeTruthy();
     });
 

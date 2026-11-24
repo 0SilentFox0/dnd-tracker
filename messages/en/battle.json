@@ -77,20 +77,15 @@
   "scene": {
     "awaitingDm": "Waiting for the DM's decision",
     "awaitingYou": "The battle awaits your decision — reserve",
-    "awaitingYouShort": "The battle awaits your decision",
     "over": "Battle over",
     "offline": "No connection — the state may be out of date",
     "openLog": "log ›",
-    "actionsWait": "Actions become available on your turn",
     "viewMode": "Battle view",
     "viewMap": "Map",
     "viewColumns": "Columns",
     "participant": "Participant",
     "log": "Log",
-    "backToLog": "← log",
-    "yourTurn": "Your turn",
-    "waitingFor": "<b>{name}</b> is acting",
-    "openDmActions": "Open DM quick actions"
+    "yourTurn": "Your turn"
   },
   "topBar": {
     "fxDisabledHint": "Animations are off: “Reduce motion” is enabled in the system",
@@ -331,12 +326,6 @@
     "endTurn": "End turn"
   },
   "turnControls": {
-    "strip": {
-      "waiting": "Your turn",
-      "acting": "Your turn · Actions",
-      "ended": "Your turn"
-    },
-    "pickAuraZone": "Choose the aura zone",
     "reactionSpell": "Reaction spell"
   },
   "readied": {

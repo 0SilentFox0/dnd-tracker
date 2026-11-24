@@ -275,7 +275,11 @@ export function MyTurnControls({
                       reactionAvailable: reactionAvailable(hero),
                   }}
                   economy={actionEconomy}
-                  move={battle.map ? movementOf(hero) : undefined}
+                  move={
+                      battle.map && !ui
+                          ? movementOf(hero, battle.rules)
+                          : undefined
+                  }
                   phase={phase}
                   onActions={() => setActionsOpen(true)}
                   onEnd={() => void turn.actions.endTurn()}

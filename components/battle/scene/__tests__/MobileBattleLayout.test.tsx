@@ -97,13 +97,13 @@ describe('MobileBattleLayout', () => {
         expect(mounts.n).toBe(1);
     });
 
-    it('the DM drawer button exists only for the DM', () => {
+    it('the DM drawer button exists only for the DM', async () => {
         const dm = fakeScene({ isDM: true, map: MAP });
 
         render(<MobileBattleLayout />, { wrapper: dm.wrapper });
 
         expect(screen.getByRole('button', { name: 'Дії ведучого' })).toBeTruthy();
-        expect(screen.getByTestId('dm-panel').dataset.open).toBe('n');
+        expect((await screen.findByTestId('dm-panel')).dataset.open).toBe('n');
 
         cleanup();
 

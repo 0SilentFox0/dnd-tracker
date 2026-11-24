@@ -15,7 +15,11 @@ import { TokenBubble } from '../TokenBubble';
 
 import '@/components/systems/registry';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
+import {
+    CombatStatus,
+    type CombatStatusType,
+    ParticipantSide,
+} from '@/lib/constants/battle';
 import {
     BattleSceneContext,
     BattleSceneDataContext,
@@ -32,7 +36,7 @@ vi.unmock('next-intl');
 const mk = (
     id: string,
     side: ParticipantSide,
-    status: string = CombatStatus.ACTIVE
+    status: CombatStatusType = CombatStatus.ACTIVE
 ) => {
     const b = createMockParticipant();
 
@@ -52,7 +56,7 @@ function setup(
     opts: {
         selectedId?: string | null;
         mapAim?: unknown;
-        enemyStatus?: string;
+        enemyStatus?: CombatStatusType;
         isDM?: boolean;
     } = {}
 ) {

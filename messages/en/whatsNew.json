@@ -384,5 +384,9 @@
   "2026-11-22-quests": {
     "title": "Quest journal",
     "body": "DMs create quests and objectives and reveal them to the party. Track your quests and visit their map locations."
+  },
+  "2026-11-24-game-ui-battle": {
+    "title": "Full-screen battle",
+    "body": "The map fills the whole screen with no header. Actions, movement and reaction live in the dock at the bottom, your hero sits bottom-left, and the log, DM panel, reserve and tools open as drawers on the right. Tap a token to see its details in a bubble."
   }
 }

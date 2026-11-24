@@ -28,7 +28,7 @@ import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrac
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
-import { BattleStatus } from '@/lib/constants/battle';
+import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     MAP_TAB,
     useBattleScene,
@@ -110,7 +110,13 @@ export function MobileBattleLayout({
                                 data-participant-scroll
                                 className="absolute inset-0 z-0 overflow-y-auto pt-40"
                             >
-                                <ParticipantList side={tab} />
+                                <ParticipantList
+                                    side={
+                                        tab === MAP_TAB
+                                            ? ParticipantSide.ALLY
+                                            : tab
+                                    }
+                                />
                             </main>
                         )}
                         <BattleTopBar />

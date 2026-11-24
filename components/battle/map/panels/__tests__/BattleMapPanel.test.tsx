@@ -35,7 +35,7 @@ class RO {
 
 vi.stubGlobal('ResizeObserver', RO);
 
-function panel(isDM: boolean, slot: HTMLElement | null = null) {
+function panel(isDM: boolean, slot?: HTMLElement | null) {
     const scene = fakeScene({
         isDM,
         map: { cols: 10, rows: 5, background: null, opacity: 0.3 },

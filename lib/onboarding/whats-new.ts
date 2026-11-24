@@ -5,6 +5,7 @@ import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 export const WHATS_NEW_BUNDLED = 15;
 
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
+    { id: '2026-11-24-game-ui-battle', date: '2026-11-24', audience: 'all' },
     { id: '2026-11-22-world-map-hud', date: '2026-11-22', audience: 'all' },
     { id: '2026-11-22-quests', date: '2026-11-22', audience: 'all' },
     { id: '2026-11-20-world-layer-style', date: '2026-11-20', audience: 'all' },

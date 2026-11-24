@@ -77,20 +77,15 @@
   "scene": {
     "awaitingDm": "Очікуємо рішення ДМ",
     "awaitingYou": "Бій чекає вашого рішення — резерв",
-    "awaitingYouShort": "Бій чекає вашого рішення",
     "over": "Бій завершено",
     "offline": "Немає зв'язку — стан може бути застарілим",
     "openLog": "журнал ›",
-    "actionsWait": "Дії стануть доступні у твій хід",
     "viewMode": "Вигляд бою",
     "viewMap": "Карта",
     "viewColumns": "Колонки",
     "participant": "Учасник",
     "log": "Журнал",
-    "backToLog": "← журнал",
-    "yourTurn": "Твій хід",
-    "waitingFor": "ходить <b>{name}</b>",
-    "openDmActions": "Відкрити швидкі дії DM"
+    "yourTurn": "Твій хід"
   },
   "topBar": {
     "fxDisabledHint": "Анімації вимкнено: у системі ввімкнено «Зменшити рух»",
@@ -331,12 +326,6 @@
     "endTurn": "Завершити хід"
   },
   "turnControls": {
-    "strip": {
-      "waiting": "Твій хід",
-      "acting": "Твій хід · Дії",
-      "ended": "Твій хід"
-    },
-    "pickAuraZone": "Оберіть зону аури",
     "reactionSpell": "Заклинання реакцією"
   },
   "readied": {

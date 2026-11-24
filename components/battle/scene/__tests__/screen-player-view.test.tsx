@@ -58,6 +58,8 @@ const ALLOWED = [
     /^Анімації дій/,
     /^Вигляд гравця/,
     /^Карта$/,
+    /^(Союзники|Вороги) \d+$/,
+    /^Закрити$/,
     /^Колонки$/,
     /^(Журнал|Інструменти)$/,
     /^(Фрейда|Гоблін|Годрік)$/,
@@ -150,6 +152,8 @@ describe('BattleScreen: player view is view-only', () => {
     it('mobile map tab: the indicator is reachable, nothing else acts', async () => {
         media.wide = false;
         mount({});
+
+        fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
 
         expect(
             await screen.findByRole('button', { name: 'Вигляд гравця: увімк.' })

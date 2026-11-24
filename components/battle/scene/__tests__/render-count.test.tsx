@@ -240,7 +240,10 @@ describe('рендери на атаку', () => {
             </QueryClientProvider>
         );
 
-        expect(screen.getByRole('tab', { name: /Вороги/ })).toBeTruthy();
+        expect(
+            document.querySelector('[data-participant-scroll]')
+        ).not.toBeNull();
+        expect(screen.getByRole('button', { name: 'Інструменти' })).toBeTruthy();
 
         commits.list = 0;
         commits.rows.clear();
