@@ -121,6 +121,8 @@
 
 ### T6a. Іконки дій і кнопок краю — 1–2 виконавці (можна паралельно з T4–T6)
 
+> Два рівні (див. спеку, «Іконки»): **A** — дрібні гліфи (lucide/SVG, `components/hud/icons/battle`), робиться тут; **B** — деталізовані іконки дій ≥ 40 px за референсами `plans/assets/2026-11-24-ch6-icon-refs/`: окрема підзадача **T6b** через пайплайн генерації (`scripts/assets/grim-icons`), стартує лише після рішення власника щодо способу; до того `ActionGrid` показує рівень A як тимчасовий.
+
 **Файли:**
 - Create: `components/hud/icons/battle/*.tsx` (по компоненту на іконку, `{ className?: string }`, `currentColor`, сітка 24, єдина товщина), `components/hud/icons/battle/index.ts`
 - Create: `docs/superpowers/prototypes/2026-11-24-ch6-battle-icons.html` (превʼю сету: 16/24/40 px, `tavern`/`parchment`/`frost`, активний/вимкнений стан)
