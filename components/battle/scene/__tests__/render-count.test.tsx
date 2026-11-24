@@ -243,7 +243,7 @@ describe('рендери на атаку', () => {
         expect(
             document.querySelector('[data-participant-scroll]')
         ).not.toBeNull();
-        expect(screen.getByRole('button', { name: 'Інструменти' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Меню' })).toBeTruthy();
 
         commits.list = 0;
         commits.rows.clear();

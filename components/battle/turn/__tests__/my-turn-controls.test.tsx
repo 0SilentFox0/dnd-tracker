@@ -66,6 +66,7 @@ vi.mock('@/lib/utils/battle/attack/off-hand', () => ({
 }));
 vi.mock('@/lib/utils/battle/view', () => ({ usableAbilities: () => [] }));
 vi.mock('@/lib/hooks/battle', () => ({
+    useActionHotkeys: () => undefined,
     useBattleRules: () => rules.current,
     useBattleScene: () => ({
         anyPending: false,

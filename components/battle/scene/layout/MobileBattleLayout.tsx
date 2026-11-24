@@ -125,9 +125,7 @@ export function MobileBattleLayout({
                         )}
                         <BattleTopBar />
                         <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
-                            <div
-                                className={`${HUD_GLASS} mr-12 rounded-xl`}
-                            >
+                            <div className={`${HUD_GLASS} mr-12 rounded-xl`}>
                                 <InitiativeTrack />
                             </div>
                             <div className={`${HUD_GLASS} rounded-xl`}>
@@ -157,7 +155,9 @@ export function MobileBattleLayout({
                                 <Ellipsis className="size-5" aria-hidden />
                             </HudButton>
                             {menuOpen && (
-                                <div className={`${HUD_GLASS} rounded-xl py-2 pl-2`}>
+                                <div
+                                    className={`${HUD_GLASS} rounded-xl py-2 pl-2`}
+                                >
                                     <DrawerRail
                                         active={active}
                                         onToggle={(key) => {
@@ -210,8 +210,10 @@ export function MobileBattleLayout({
                         </BattleDrawer>
                     )}
                     <ToolsDrawer
-                        open={drawer === 'tools'}
-                        onOpenChange={onOpenChange('tools')}
+                        panel={{
+                            open: drawer === 'tools',
+                            onOpenChange: onOpenChange('tools'),
+                        }}
                         onComplete={onComplete}
                         tabs={{ value: tab, set: setTab }}
                         audio={{ player: false }}

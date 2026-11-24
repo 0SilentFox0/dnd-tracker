@@ -68,6 +68,16 @@ const Tile = ({
     );
 };
 
+type SubKey =
+    | 'attack'
+    | 'magic'
+    | 'channel'
+    | 'ability'
+    | 'bonus'
+    | 'core'
+    | 'gear'
+    | 'strikeAndReturn';
+
 type TileSpec = {
     id: string;
     group: 'action' | 'bonus';
@@ -232,8 +242,7 @@ export function ActionGrid({
                       group: 'bonus' as const,
                       icon: 'gear' as const,
                       label: t('gear'),
-                      used:
-                          !status.bonusAvailable || status.skipped || pending,
+                      used: !status.bonusAvailable || status.skipped || pending,
                       run: actions.gear,
                   },
               ]
@@ -305,7 +314,9 @@ export function ActionGrid({
                                             sub={
                                                 tile.id === 'gate'
                                                     ? undefined
-                                                    : t(`sub.${tile.id}`)
+                                                    : t(
+                                                          `sub.${tile.id as SubKey}`
+                                                      )
                                             }
                                             hotkey={
                                                 index >= 0 && index < 9

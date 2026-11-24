@@ -162,7 +162,7 @@ export function DesktopBattleLayout({
                                 </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
-                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto pr-[72px] pb-40 pl-6 pt-28">
+                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto pt-28 pr-[72px] pb-40 pl-6">
                                 <BattleColumns />
                             </main>
                         )}
@@ -229,8 +229,10 @@ export function DesktopBattleLayout({
                         </BattleDrawer>
                     )}
                     <ToolsDrawer
-                        open={drawer === 'tools'}
-                        onOpenChange={onOpenChange('tools')}
+                        panel={{
+                            open: drawer === 'tools',
+                            onOpenChange: onOpenChange('tools'),
+                        }}
                         onComplete={onComplete}
                         view={{ mode: viewMode, set: setViewMode }}
                         onToolsSlot={setToolsSlot}

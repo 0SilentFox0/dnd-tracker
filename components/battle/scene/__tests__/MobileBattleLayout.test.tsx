@@ -109,7 +109,9 @@ describe('MobileBattleLayout', () => {
 
         openMenu();
 
-        expect(screen.getByRole('button', { name: 'Дії ведучого' })).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: 'Дії ведучого' })
+        ).toBeTruthy();
         expect((await screen.findByTestId('dm-panel')).dataset.open).toBe('n');
 
         cleanup();
@@ -120,7 +122,9 @@ describe('MobileBattleLayout', () => {
 
         openMenu();
 
-        expect(screen.queryByRole('button', { name: 'Дії ведучого' })).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'Дії ведучого' })
+        ).toBeNull();
         expect(screen.queryByTestId('dm-panel')).toBeNull();
     });
 
@@ -154,13 +158,19 @@ describe('MobileBattleLayout', () => {
     });
 
     it('readOnly shows no HUD dock and no DM items', () => {
-        const { wrapper } = fakeScene({ playerView: true, isMyTurn: true, map: MAP });
+        const { wrapper } = fakeScene({
+            playerView: true,
+            isMyTurn: true,
+            map: MAP,
+        });
 
         const { container } = render(<MobileBattleLayout />, { wrapper });
 
         openMenu();
 
-        expect(screen.queryByRole('button', { name: 'Дії ведучого' })).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'Дії ведучого' })
+        ).toBeNull();
         expect(screen.queryByTestId('dm-panel')).toBeNull();
         expect(container.querySelector('[data-slot="action-dock"]')).toBeNull();
     });

@@ -41,9 +41,9 @@ describe('railKeys', () => {
     });
 
     it('reserve button needs a non-empty reserve', () => {
-        expect(
-            railKeys({ ...grid.dm, hasMap: true, reserveCount: 0 })
-        ).toEqual(['log', 'dm', 'tools']);
+        expect(railKeys({ ...grid.dm, hasMap: true, reserveCount: 0 })).toEqual(
+            ['log', 'dm', 'tools']
+        );
     });
 });
 

@@ -48,7 +48,11 @@ describe('ToolsContent', () => {
         const { wrapper } = fakeScene({ isDM: true, map: MAP });
 
         const { container } = render(
-            <ToolsContent onToolsSlot={vi.fn()} onOpenDrawer={vi.fn()} />,
+            <ToolsContent
+                audio={{ sound: false }}
+                onToolsSlot={vi.fn()}
+                onOpenDrawer={vi.fn()}
+            />,
             { wrapper }
         );
 
@@ -67,7 +71,13 @@ describe('ToolsContent', () => {
 
         const { wrapper } = fakeScene({ isDM: true, map: MAP });
 
-        render(<ToolsContent onOpenDrawer={onOpenDrawer} />, { wrapper });
+        render(
+            <ToolsContent
+                audio={{ sound: false }}
+                onOpenDrawer={onOpenDrawer}
+            />,
+            { wrapper }
+        );
 
         expect(screen.queryByText('Світло')).toBeNull();
 

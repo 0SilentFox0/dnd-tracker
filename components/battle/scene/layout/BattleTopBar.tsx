@@ -56,7 +56,10 @@ export function RoundBadge({ className }: { className?: string }) {
                     className="pointer-events-auto flex size-6 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
                 >
                     {pending ? (
-                        <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                        <Loader2
+                            className="size-3.5 animate-spin"
+                            aria-hidden
+                        />
                     ) : (
                         <span aria-hidden>›</span>
                     )}

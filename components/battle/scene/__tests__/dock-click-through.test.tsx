@@ -10,7 +10,11 @@ import { render } from '@/lib/i18n/test/render-uk';
 vi.unmock('next-intl');
 
 const props = {
-    status: { actionUsed: false, bonusAvailable: true, reactionAvailable: true },
+    status: {
+        actionUsed: false,
+        bonusAvailable: true,
+        reactionAvailable: true,
+    },
     economy: { bonusAction: true, reaction: true },
     phase: 'acting' as const,
     on: { actions: vi.fn(), end: vi.fn() },
@@ -40,7 +44,7 @@ describe('dock click-through', () => {
     it('action button fires its handler', () => {
         render(<ActionDock {...props} />);
 
-        fireEvent.click(screen.getByText('Дія'));
+        fireEvent.click(screen.getByRole('button', { name: 'Дія' }));
 
         expect(props.on.actions).toHaveBeenCalled();
     });
@@ -53,13 +57,14 @@ describe('dock click-through', () => {
                 onZoomIn={onZoomIn}
                 onZoomOut={vi.fn()}
                 onRecenter={vi.fn()}
+                zoom={1}
                 canRecenter={false}
                 userMoved={false}
                 phone={false}
             />
         );
 
-        fireEvent.click(container.querySelectorAll('button')[0]);
+        fireEvent.click(screen.getByRole('button', { name: 'Збільшити мапу' }));
 
         expect(onZoomIn).toHaveBeenCalled();
         expect(

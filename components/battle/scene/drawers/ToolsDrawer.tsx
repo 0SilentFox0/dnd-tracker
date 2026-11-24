@@ -276,10 +276,11 @@ export function ToolsContent({
 }
 
 export function ToolsDrawer({
-    open,
-    onOpenChange,
+    panel: { open, onOpenChange },
     ...props
-}: ToolsProps & { open: boolean; onOpenChange: (open: boolean) => void }) {
+}: ToolsProps & {
+    panel: { open: boolean; onOpenChange: (open: boolean) => void };
+}) {
     const t = useTranslations('battle.drawers');
 
     return (

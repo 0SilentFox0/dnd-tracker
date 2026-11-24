@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { renderToString } from 'react-dom/server';
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
@@ -59,8 +59,13 @@ const IMP = {
     battleData: { ...base.battleData, reserved: true },
 };
 
-const openTools = () =>
+const openTools = () => {
+    const menu = screen.queryByRole('button', { name: 'Меню' });
+
+    if (menu) fireEvent.click(menu);
+
     fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
+};
 
 describe('BattleScreen', () => {
     afterEach(cleanup);
@@ -98,7 +103,9 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        fireEvent.click(await screen.findByRole('button', { name: 'Колонки' }));
+        await screen.findByRole('button', { name: 'Журнал' });
+        openTools();
+        fireEvent.click(screen.getByRole('button', { name: 'Колонки' }));
         expect(screen.getByText(/Союзники ·/)).toBeTruthy();
         expect(screen.getByText(/Вороги ·/)).toBeTruthy();
         expect(container.querySelector('[data-fx-clip]')).toBeNull();
@@ -120,13 +127,13 @@ describe('BattleScreen', () => {
 
         render(<BattleScreen />, { wrapper });
 
-        fireEvent.click(
-            await screen.findByRole('button', { name: 'Резерв' })
-        );
+        fireEvent.click(await screen.findByRole('button', { name: 'Резерв' }));
 
-        const group = await screen.findByRole('region', { name: 'Резерв' });
+        const group = (
+            await screen.findAllByRole('region', { name: 'Резерв' })
+        ).find((el) => el.textContent?.includes('Резерв (1)'));
 
-        expect(group.textContent).toContain('Резерв (1)');
+        expect(group?.textContent).toContain('Резерв (1)');
         fireEvent.click(
             screen.getByRole('button', { name: 'Ввести в бій: Біс' })
         );
@@ -134,7 +141,13 @@ describe('BattleScreen', () => {
             participantIds: ['imp'],
         });
 
+        openTools();
         fireEvent.click(screen.getByRole('button', { name: 'Колонки' }));
+        fireEvent.click(
+            within(
+                document.querySelector('[data-drawer-rail]') as HTMLElement
+            ).getByRole('button', { name: 'Резерв' })
+        );
         expect(
             screen.getAllByRole('button', { name: 'Ввести в бій: Біс' })
         ).toHaveLength(2);
@@ -152,6 +165,7 @@ describe('BattleScreen', () => {
 
         render(<BattleScreen />, { wrapper });
 
+        fireEvent.click(screen.getByRole('button', { name: 'Меню' }));
         fireEvent.click(screen.getByRole('button', { name: 'Резерв' }));
         fireEvent.click(
             await screen.findByRole('button', { name: 'Ввести в бій: Біс' })
@@ -164,6 +178,7 @@ describe('BattleScreen', () => {
         render(<BattleScreen />, {
             wrapper: fakeScene({ isMyTurn: false, map: MAP }).wrapper,
         });
+        fireEvent.click(screen.getByRole('button', { name: 'Меню' }));
         expect(screen.queryByRole('button', { name: /Резерв/ })).toBeNull();
     });
 
@@ -342,6 +357,9 @@ describe('BattleScreen', () => {
         });
 
         render(<BattleScreen />, { wrapper });
+
+        await screen.findByRole('button', { name: 'Інструменти' });
+        openTools();
 
         expect(
             await screen.findByRole('button', { name: 'Скинути' })

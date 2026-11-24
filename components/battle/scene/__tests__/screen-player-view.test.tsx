@@ -59,9 +59,9 @@ const ALLOWED = [
     /^Вигляд гравця/,
     /^Карта$/,
     /^(Союзники|Вороги) \d+$/,
-    /^Закрити$/,
+    /^(Закрити|Згорнути)$/,
     /^Колонки$/,
-    /^(Журнал|Інструменти)$/,
+    /^(Журнал|Інструменти|Меню)$/,
     /^(Фрейда|Гоблін|Годрік)$/,
     /^(Фр|Го)/,
     /^ходить /,
@@ -112,6 +112,7 @@ describe('BattleScreen: player view is view-only', () => {
         media.wide = true;
         mount({});
         await screen.findByRole('button', { name: 'Журнал' });
+        fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
 
         const names = buttonNames();
 
@@ -153,6 +154,7 @@ describe('BattleScreen: player view is view-only', () => {
         media.wide = false;
         mount({});
 
+        fireEvent.click(screen.getByRole('button', { name: 'Меню' }));
         fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
 
         expect(

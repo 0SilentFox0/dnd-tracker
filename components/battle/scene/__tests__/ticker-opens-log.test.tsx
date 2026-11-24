@@ -26,9 +26,7 @@ describe('LastActionTicker', () => {
     it('a tap opens the log through the scene', () => {
         const { wrapper, value, openLog, me, gob } = fakeScene({});
 
-        value.battle.battleLog = [
-            action(me.basicInfo.id, gob.basicInfo.id),
-        ];
+        value.battle.battleLog = [action(me.basicInfo.id, gob.basicInfo.id)];
 
         render(<LastActionTicker onOpenLog={() => value.log.show()} />, {
             wrapper,
