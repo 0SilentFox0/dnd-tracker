@@ -42,7 +42,7 @@ export function HudTabs<T extends string>({
                 className={cn(
                     'sticky z-20 border-b border-hud-rule bg-hud-page/[.97]',
                     styles.variant === 'sheet'
-                        ? 'top-14 lg:top-16'
+                        ? 'top-[57px] lg:top-16'
                         : 'top-[env(safe-area-inset-top,0px)]'
                 )}
             >
@@ -53,10 +53,10 @@ export function HudTabs<T extends string>({
                             key={tab.id}
                             value={tab.id}
                             className={cn(
-                                'profile-tab hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[13px] text-hud-muted data-[state=active]:shadow-none',
+                                'profile-tab hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[13px] data-[state=active]:shadow-none',
                                 styles.variant === 'sheet'
-                                    ? 'min-h-10 rounded-lg border border-hud-rule data-[state=active]:border-hud-gold'
-                                    : 'rounded-md',
+                                    ? 'min-h-10 rounded-lg border border-transparent text-hud-text data-[state=active]:border-hud-gold data-[state=active]:bg-transparent! data-[state=active]:font-bold data-[state=active]:text-hud-ink! data-[state=active]:shadow-[inset_0_-2px_0_var(--color-hud-gold)]'
+                                    : 'rounded-md text-hud-muted',
                                 styles.trigger
                             )}
                         >

@@ -63,6 +63,26 @@ describe('HudTabs', () => {
         );
     });
 
+    it('sheet variant: inactive tabs use the stronger text token, active has the gold underline', () => {
+        render(
+            <HudTabs
+                value="a"
+                onValueChange={() => undefined}
+                styles={{ variant: 'sheet' }}
+                tabs={[
+                    { id: 'a', label: 'Перший', content: null },
+                    { id: 'b', label: 'Другий', content: null },
+                ]}
+            />
+        );
+
+        const cls = screen.getByRole('tab', { name: 'Другий' }).className;
+
+        expect(cls).toContain('text-hud-text');
+        expect(cls).not.toContain('text-hud-muted');
+        expect(cls).toContain('data-[state=active]:shadow-[inset_0_-2px_0');
+    });
+
     it('unmounts inactive panels by default and switches on click', () => {
         render(<Harness />);
 

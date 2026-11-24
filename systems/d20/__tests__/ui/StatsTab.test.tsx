@@ -108,7 +108,28 @@ describe('d20 StatsTab', () => {
         expect(items).toHaveLength(2);
         expect(items[0].querySelectorAll('i.bg-hud-gold')).toHaveLength(1);
         expect(items[1].querySelectorAll('i.bg-hud-gold')).toHaveLength(0);
-        expect(document.body.textContent).toContain('passives');
+        expect(document.body.textContent).toContain(
+            'characterProfile.combat.passiveChip'
+        );
+        expect(document.body.textContent).toContain('11');
+    });
+
+    it('bottom section shows three passive chips', () => {
+        renderTab();
+
+        for (const v of ['11', '9', '10'])
+            expect(screen.getByText(v).tagName).toBe('B');
+    });
+
+    it('top section styles proficient saves as gold pills and others as muted', () => {
+        renderTab({ section: 'top' });
+
+        expect(
+            screen.getByText('characterProfile.combat.saveShort +5')
+        ).toHaveClass('text-hud-gold');
+        expect(
+            screen.getByText('characterProfile.combat.saveShort +1')
+        ).toHaveClass('text-hud-gold');
     });
 
     it('rolls a save from the ability tile', () => {

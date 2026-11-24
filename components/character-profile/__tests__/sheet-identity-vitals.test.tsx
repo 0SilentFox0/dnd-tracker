@@ -72,23 +72,52 @@ describe('SheetVitals', () => {
     it('DM damage consumes temp hp first', async () => {
         await inProfile(dmSheet(true), <SheetVitals />);
 
-        fireEvent.click(screen.getByText('− Damage'));
         fireEvent.change(screen.getByLabelText('Amount'), {
             target: { value: '8' },
         });
-        fireEvent.click(screen.getByText('Apply'));
+        fireEvent.click(screen.getByLabelText('− Damage'));
 
         await waitFor(() =>
             expect(mutateOk).toHaveBeenCalledWith({ hp: 17, tempHp: 0 })
         );
     });
 
-    it('non-DM sees numbers but no buttons', async () => {
+    it('DM heal caps at max, default step is 1', async () => {
+        await inProfile(dmSheet(true), <SheetVitals />);
+
+        fireEvent.click(screen.getByLabelText('+ Heal'));
+
+        await waitFor(() =>
+            expect(mutateOk).toHaveBeenCalledWith({ hp: 21, tempHp: 5 })
+        );
+    });
+
+    it('DM temp opens a dialog and keeps the larger pool', async () => {
+        await inProfile(dmSheet(true), <SheetVitals />);
+
+        fireEvent.click(screen.getByText('Temp'));
+        fireEvent.change(
+            await screen.findByLabelText('Amount', {
+                selector: '#vitals-amount',
+            }),
+            {
+                target: { value: '9' },
+            }
+        );
+        fireEvent.click(screen.getByText('Apply'));
+
+        await waitFor(() =>
+            expect(mutateOk).toHaveBeenCalledWith({ hp: 20, tempHp: 9 })
+        );
+    });
+
+    it('non-DM sees numbers but no controls', async () => {
         await inProfile(dmSheet(false), <SheetVitals />);
 
-        expect(screen.getByText(/HP 20 \/ 30/)).toBeInTheDocument();
-        expect(screen.queryByText('− Damage')).toBeNull();
-        expect(screen.queryByText('+ Heal')).toBeNull();
+        expect(screen.getByLabelText('HP 20 / 30', { selector: 'button' })).toBeInTheDocument();
+        expect(screen.getByText('+5 temp')).toBeInTheDocument();
+        expect(screen.queryByLabelText('− Damage')).toBeNull();
+        expect(screen.queryByLabelText('+ Heal')).toBeNull();
         expect(screen.queryByText('Temp')).toBeNull();
     });
 });

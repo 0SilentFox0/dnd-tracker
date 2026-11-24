@@ -9,11 +9,9 @@ import {
     ProfileTabs,
 } from '../tabs/ProfileTabs';
 import { CompactHero, SheetIdentityPanel } from './SheetIdentityPanel';
-import { SheetStatsPanel } from './SheetStatsPanel';
 import { SheetVitals } from './SheetVitals';
 
 import { systemUiOf } from '@/components/systems';
-import { useMediaQuery } from '@/lib/hooks/common';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 
 interface SheetLayoutProps {
@@ -44,15 +42,9 @@ export function SheetLayout({
 
     const Ui = systemUiOf(system.key, system.modules);
 
-    const wide = useMediaQuery('(min-width: 1024px)');
-
-    const items = wide
-        ? tabs.items.filter((x) => x.id !== 'stats')
-        : tabs.items;
-
-    const value = items.some((x) => x.id === tabs.value)
+    const value = tabs.items.some((x) => x.id === tabs.value)
         ? tabs.value
-        : 'combat';
+        : 'stats';
 
     return (
         <div className="mx-auto w-full max-w-6xl lg:flex">
@@ -62,24 +54,25 @@ export function SheetLayout({
                 actions={identity.actions}
             />
             <div className="flex min-w-0 flex-1 flex-col">
-                <div className="flex flex-col gap-3 px-4 pt-4">
+                <div className="flex flex-col gap-4 px-4 pt-4 pb-4">
                     <SheetVitals />
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2">
                         <Ui.HeroStats />
                     </div>
                 </div>
                 {children}
-                {wide && (
-                    <div className="px-4 pt-3">
-                        <SheetStatsPanel />
-                    </div>
-                )}
                 <ProfileTabs
                     variant="sheet"
                     value={value}
                     onValueChange={tabs.onChange}
-                    tabs={items}
-                    header={!wide && scrolledPast ? <CompactHero /> : null}
+                    tabs={tabs.items}
+                    header={
+                        scrolledPast ? (
+                            <div className="lg:hidden">
+                                <CompactHero />
+                            </div>
+                        ) : null
+                    }
                 />
             </div>
         </div>

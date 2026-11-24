@@ -6,7 +6,6 @@ import { sheetFixture } from './sheet-fixture';
 
 const h = vi.hoisted(() => ({
     replace: vi.fn(),
-    wide: false,
     sheetQuery: {
         data: null as unknown,
         isPending: false,
@@ -62,10 +61,6 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     useCharacterSheet: () => h.sheetQuery,
 }));
 
-vi.mock('@/lib/hooks/common', async (orig) => ({
-    ...(await orig<object>()),
-    useMediaQuery: () => h.wide,
-}));
 vi.mock('@/components/character-profile/sheet/SheetStatsPanel', () => ({
     SheetStatsPanel: () => <div data-testid="stats-panel" />,
 }));
@@ -78,37 +73,39 @@ const ui = () =>
         <CharacterProfile campaignId="c" characterId="ch" canEdit={false} />
     );
 
-describe('SheetLayout: панель характеристик', () => {
+describe('SheetLayout: вкладки', () => {
     beforeEach(() => {
         h.sheetQuery.data = sheetFixture;
     });
 
     afterEach(cleanup);
 
-    it('lg: панель одна, над вкладками, вкладки «stats» немає', () => {
-        h.wide = true;
+    it('без ?tab= відкрита перша вкладка «stats» з однією панеллю', () => {
         ui();
-        expect(screen.getAllByTestId('stats-panel')).toHaveLength(1);
         expect(
-            screen.queryByRole('tab', { name: 'characterProfile.tabs.skills' })
-        ).toBeNull();
+            screen.getByRole('tab', { name: 'characterProfile.tabs.stats' })
+        ).toHaveAttribute('data-state', 'active');
+        expect(screen.getAllByTestId('stats-panel')).toHaveLength(1);
     });
 
-    it('phone: перша вкладка «stats» відкривається за кліком, панель одна', () => {
-        h.wide = false;
+    it('«stats» стоїть першою у списку вкладок', () => {
         ui();
-        expect(screen.queryByTestId('stats-panel')).toBeNull();
+
+        const names = screen.getAllByRole('tab').map((x) => x.textContent);
+
+        expect(names[0]).toBe('characterProfile.tabs.stats');
+        expect(names[1]).toBe('characterProfile.tabs.combat');
+    });
+
+    it('перемикання на «combat» прибирає панель характеристик', () => {
+        ui();
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'characterProfile.tabs.skills' })
+            screen.getByRole('tab', { name: 'characterProfile.tabs.combat' })
         );
-        fireEvent.click(
-            screen.getByRole('tab', { name: 'characterProfile.tabs.skills' })
-        );
-        expect(screen.getAllByTestId('stats-panel')).toHaveLength(1);
+        expect(screen.queryByTestId('stats-panel')).toBeNull();
     });
 
     it('?tab=stash відкриває інвентар', () => {
-        h.wide = true;
         renderWithConfirm(
             <CharacterProfile
                 campaignId="c"

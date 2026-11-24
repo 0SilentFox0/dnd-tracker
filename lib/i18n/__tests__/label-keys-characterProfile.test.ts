@@ -12,8 +12,8 @@ import { localSource } from '@/lib/i18n/local-source';
 describe('character profile labels have translations', () => {
     expectLabelKeys('characterProfile', 'tabs', [
         'basic',
+        'stats',
         'combat',
-        'skills',
         'choices',
         'magic',
         'items',

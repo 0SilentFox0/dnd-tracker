@@ -5,5 +5,7 @@ export { HudPage } from './HudPage';
 export { HudPageHeader } from './HudPageHeader';
 export { HudPanel } from './HudPanel';
 export { HudPill } from './HudPill';
+export { HudSectionTitle } from './HudSectionTitle';
 export { HudStatChip } from './HudStatChip';
+export { HudStatTile } from './HudStatTile';
 export { HudTile } from './HudTile';

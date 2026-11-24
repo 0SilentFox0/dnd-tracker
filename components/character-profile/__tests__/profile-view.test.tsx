@@ -112,6 +112,9 @@ describe('CharacterProfile — перегляд', () => {
         expect(
             screen.queryByRole('tab', { name: 'characterProfile.tabs.skills' })
         ).toBeNull();
+        expect(
+            screen.getByRole('tab', { name: 'characterProfile.tabs.stats' })
+        ).toHaveAttribute('data-state', 'active');
 
         cleanup();
         h.sheetQuery.data = {
@@ -143,7 +146,12 @@ describe('CharacterProfile — перегляд', () => {
 
         expect(screen.getByRole('heading', { name: 'Ліра' })).toBeTruthy();
         expect(
-            screen.getByText('characterProfile.hero.hpTotal {"total":300}')
+            screen.getByLabelText(
+                'characterProfile.hero.hpTotal {"total":300}',
+                {
+                    selector: 'button',
+                }
+            )
         ).toBeTruthy();
         expect(screen.getByLabelText('AC')).toHaveTextContent('17');
         expect(
@@ -249,7 +257,12 @@ describe('CharacterProfile — перегляд', () => {
 
     it('атака: влучання і середня шкода, розкладка за тапом', () => {
         renderWithConfirm(
-            <CharacterProfile campaignId="c" characterId="ch" canEdit={false} />
+            <CharacterProfile
+                campaignId="c"
+                characterId="ch"
+                canEdit={false}
+                initialTab="combat"
+            />
         );
 
         const row = screen.getByRole('button', { name: /Довгий лук/ });
@@ -264,7 +277,12 @@ describe('CharacterProfile — перегляд', () => {
     it('без атак — порожній стан і «—» у чипі', () => {
         h.sheetQuery.data = withSheet({ attacks: [], bestToHit: null });
         renderWithConfirm(
-            <CharacterProfile campaignId="c" characterId="ch" canEdit={false} />
+            <CharacterProfile
+                campaignId="c"
+                characterId="ch"
+                canEdit={false}
+                initialTab="combat"
+            />
         );
 
         expect(

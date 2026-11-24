@@ -133,6 +133,14 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
         expect(failures).toEqual([]);
     });
 
+    it('keeps inactive sheet tabs (text-hud-text) at AA contrast on the tab bar', () => {
+        const text = mix(tokens['--hud-bone'], tokens['--hud-muted'], 0.88);
+
+        expect(
+            contrastRatio(text, tokens['--palette-page'])
+        ).toBeGreaterThanOrEqual(4.5);
+    });
+
     it('keeps book text at AA contrast on the page and cover', () => {
         const pairs = [
             ['--book-ink', '--book-page'],

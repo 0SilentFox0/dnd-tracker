@@ -74,7 +74,9 @@ describe('character profile (en)', () => {
             </>
         );
 
-        fireEvent.click(screen.getByText('HP 300'));
+        fireEvent.click(
+            screen.getByLabelText('HP 300', { selector: 'button' })
+        );
 
         expect(screen.getByLabelText('Proficiency')).toBeInTheDocument();
         expect(screen.getByText('Hit dice: 3d10')).toBeInTheDocument();

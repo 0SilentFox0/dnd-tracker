@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { RollableCell } from '@/components/character-profile/combat/RollableCell';
 import { useProfile } from '@/components/character-profile/ProfileContext';
-import { HudSection } from '@/components/hud/form';
+import { HudPill, HudSectionTitle } from '@/components/hud/page';
 import type {
     SheetRollRequest,
     StatsTabProps,
@@ -56,8 +56,9 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
 
     if (section === 'top') {
         return (
-            <HudSection title={t('abilities')}>
-                <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
+            <section className="flex flex-col gap-3">
+                <HudSectionTitle>{t('abilities')}</HudSectionTitle>
+                <div className="grid grid-cols-3 gap-2 lg:grid-cols-6">
                     {sheet.abilities.map((a) => {
                         const save = sheet.saves.find(
                             (s) => s.ability === a.key
@@ -65,28 +66,30 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
 
                         const body = (
                             <>
-                                <small className="block text-[10px] text-hud-muted">
+                                <small className="hud-sc block text-[11px] tracking-[.1em] text-hud-muted uppercase">
                                     {tg(`abilities.${a.key}.short`)}
                                     {a.isPrimary ? ' ★' : ''}
                                 </small>
                                 <span
                                     className={cn(
-                                        'block text-xl leading-6 font-bold tabular-nums',
-                                        a.isPrimary && 'text-hud-gold'
+                                        'hud-sc block text-3xl leading-9 tabular-nums',
+                                        a.isPrimary
+                                            ? 'text-hud-gold'
+                                            : 'text-hud-ink'
                                     )}
                                 >
                                     {signed(a.mod)}
                                 </span>
-                                <b className="block text-xs text-hud-muted">
+                                <b className="mx-auto mt-0.5 grid size-7 place-items-center rounded-full border border-hud-rule text-xs text-hud-muted">
                                     {a.score}
                                 </b>
                                 {save && (
                                     <span
                                         className={cn(
-                                            'mt-0.5 block text-[11px] tabular-nums',
+                                            'mx-auto mt-1.5 block w-fit rounded-full px-2 text-[11px] leading-5 tabular-nums',
                                             save.proficient
-                                                ? 'text-hud-gold'
-                                                : 'text-hud-muted'
+                                                ? 'bg-hud-gold/15 text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]'
+                                                : 'text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-rule)]'
                                         )}
                                     >
                                         {`${t('saveShort')} ${signed(save.bonus)}`}
@@ -99,12 +102,10 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                             <div
                                 key={a.key}
                                 className={cn(
-                                    'min-w-0 rounded-xl border bg-hud-field text-center',
+                                    'min-w-0 rounded-xl border bg-hud-panel/60 text-center backdrop-blur-sm',
                                     a.isPrimary || save?.proficient
                                         ? 'border-hud-gold'
-                                        : 'border-hud-line',
-                                    a.isPrimary &&
-                                        'shadow-[inset_0_0_0_1px_var(--color-hud-gold)]'
+                                        : 'border-hud-rule'
                                 )}
                             >
                                 {save ? (
@@ -121,10 +122,10 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                                             },
                                         },
                                         body,
-                                        'block min-h-[4.5rem] w-full min-w-10 rounded-xl px-1 py-1.5'
+                                        'block min-h-[7rem] w-full min-w-10 rounded-xl px-1 py-2.5'
                                     )
                                 ) : (
-                                    <div className="min-h-[4.5rem] px-1 py-1.5">
+                                    <div className="min-h-[7rem] px-1 py-2.5">
                                         {body}
                                     </div>
                                 )}
@@ -133,22 +134,33 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                     })}
                 </div>
                 {sheet.primaryAbility && (
-                    <p className="mt-1.5 text-xs text-hud-muted">
-                        {t('primaryHint')}
-                    </p>
+                    <p className="text-xs text-hud-muted">{t('primaryHint')}</p>
                 )}
-            </HudSection>
+            </section>
         );
     }
 
+    const passives = [
+        ['perception', sheet.passives.perception],
+        ['investigation', sheet.passives.investigation],
+        ['insight', sheet.passives.insight],
+    ] as const;
+
+    const notes = [
+        sheet.languages.length
+            ? t('languages', { list: sheet.languages.join(', ') })
+            : null,
+        sheet.proficiencies.length
+            ? t('proficiencies', { list: sheet.proficiencies.join(', ') })
+            : null,
+    ].filter(Boolean);
+
     return (
-        <HudSection title={t('skills')}>
-            <ul className="grid gap-1 text-sm sm:grid-cols-2 lg:grid-cols-3">
+        <section className="flex flex-col gap-3">
+            <HudSectionTitle>{t('skills')}</HudSectionTitle>
+            <ul className="grid gap-x-8 text-sm md:grid-cols-2">
                 {sheet.skills.map((s) => (
-                    <li
-                        key={s.key}
-                        className="rounded-xl border border-hud-line bg-hud-field"
-                    >
+                    <li key={s.key} className="border-b border-hud-rule">
                         {rollable(
                             {
                                 label: tg(`dndSkills.${s.key as DndSkill}`),
@@ -170,32 +182,26 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
                                     {signed(s.bonus)}
                                 </span>
                             </>,
-                            'flex min-h-10 w-full items-center gap-2 rounded-xl px-2.5 text-left'
+                            'flex min-h-10 w-full items-center gap-2.5 px-1 text-left'
                         )}
                     </li>
                 ))}
             </ul>
-            <p className="mt-2 text-xs text-hud-muted">
-                {t('passives', sheet.passives)}
-            </p>
-            {(sheet.languages.length > 0 || sheet.proficiencies.length > 0) && (
-                <p className="mt-1 text-xs text-hud-muted">
-                    {[
-                        sheet.languages.length
-                            ? t('languages', {
-                                  list: sheet.languages.join(', '),
-                              })
-                            : null,
-                        sheet.proficiencies.length
-                            ? t('proficiencies', {
-                                  list: sheet.proficiencies.join(', '),
-                              })
-                            : null,
-                    ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                </p>
+            <div className="flex flex-wrap gap-2">
+                {passives.map(([key, value]) => (
+                    <HudPill
+                        key={key}
+                        tone="muted"
+                        className="h-auto py-0.5 text-xs"
+                    >
+                        {t('passiveChip', { skill: tg(`dndSkills.${key}`) })}
+                        <b className="text-hud-ink tabular-nums">{value}</b>
+                    </HudPill>
+                ))}
+            </div>
+            {notes.length > 0 && (
+                <p className="text-xs text-hud-muted">{notes.join(' · ')}</p>
             )}
-        </HudSection>
+        </section>
     );
 }

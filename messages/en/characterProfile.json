@@ -2,7 +2,7 @@
   "tabs": {
     "basic": "Basic",
     "combat": "Combat",
-    "skills": "Skills",
+    "stats": "Statistics",
     "choices": "Choices",
     "magic": "Magic",
     "advancement": "Advancement",
@@ -46,6 +46,7 @@
     "xpMax": "XP {value}",
     "background": "Background: {name}",
     "vitals": {
+      "hp": "HP",
       "damage": "− Damage",
       "heal": "+ Heal",
       "temp": "Temp",
@@ -71,7 +72,7 @@
     "saveRoll": "{ability} saving throw",
     "saveShort": "Save",
     "skills": "SKILLS",
-    "passives": "Passive: perception {perception} · investigation {investigation} · insight {insight}",
+    "passiveChip": "{skill} (passive)",
     "languages": "Languages: {list}",
     "proficiencies": "Proficiencies: {list}",
     "untrained": "Untrained skill: the test is not possible"

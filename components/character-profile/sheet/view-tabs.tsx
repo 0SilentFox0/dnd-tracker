@@ -25,7 +25,7 @@ export const asTab = (v: string | undefined): ProfileTabId => {
 
     return id && (VIEW_TABS as string[]).includes(id)
         ? (id as ProfileTabId)
-        : 'combat';
+        : 'stats';
 };
 
 interface ViewTabsFlags {
@@ -37,7 +37,7 @@ interface ViewTabsFlags {
     withItems: boolean;
 }
 
-type TabLabelKey = Exclude<ProfileTabId, 'stats'> | 'traits';
+type TabLabelKey = Exclude<ProfileTabId, 'skills'> | 'traits';
 
 export function viewTabs(
     {
@@ -51,7 +51,7 @@ export function viewTabs(
     t: (key: TabLabelKey) => string
 ): ProfileTab[] {
     const tabs: (ProfileTab | false)[] = [
-        { id: 'stats', label: t('skills'), content: <SheetStatsPanel /> },
+        { id: 'stats', label: t('stats'), content: <SheetStatsPanel /> },
         { id: 'combat', label: t('combat'), content: <CombatTab /> },
         !!Magic && { id: 'magic', label: t('magic'), content: <Magic /> },
         withItems && {

@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Shield } from 'lucide-react';
 
 import { Breakdown } from '../combat/Breakdown';
 import { useProfile } from '../ProfileContext';
 
 import { HudButton } from '@/components/hud';
+import { HudPanel, HudPill } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -14,14 +16,14 @@ import { NumberInput } from '@/components/ui/number-input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useEditResources } from '@/lib/hooks/characters';
 import { useCampaignSystem } from '@/lib/hooks/systems';
-import { applyHpChange, type HpChange } from '@/lib/utils/characters/hp';
+import { applyHpChange } from '@/lib/utils/characters/hp';
 
 const FORM_ID = 'sheet-vitals-form';
 
-const ACTION =
-    'hud-sc min-h-10 min-w-24 flex-1 cursor-pointer rounded-xl border border-hud-line bg-hud-surface px-3 text-sm text-hud-ink hover:border-hud-gold';
+type Hp = { current: number; max: number; temp: number };
 
-const KINDS = ['damage', 'heal', 'temp'] as const;
+const STEP =
+    'hud-sc size-11 shrink-0 cursor-pointer rounded-xl border border-hud-rule bg-hud-surface/60 text-xl text-hud-ink hover:border-hud-gold disabled:opacity-50';
 
 export function SheetVitals() {
     const { campaignId, sheet } = useProfile();
@@ -36,40 +38,52 @@ export function SheetVitals() {
 
     const [open, setOpen] = useState(false);
 
-    const [kind, setKind] = useState<HpChange['kind'] | null>(null);
-
     const hp = sheet.rest?.hp;
 
     const keys = Ui.hideProgression
         ? ({ current: 'woundsCurrent', total: 'woundsTotal' } as const)
         : ({ current: 'hpCurrent', total: 'hpTotal' } as const);
 
-    const canChange = sheet.viewer.isDM && !!hp;
+    const summary = hp
+        ? t(keys.current, { current: hp.current, max: hp.max })
+        : t(keys.total, { total: sheet.hp.total });
 
     return (
-        <section className="flex flex-col gap-2 rounded-xl border border-hud-line bg-hud-panel p-3">
+        <HudPanel className="flex flex-col gap-3 backdrop-blur-sm">
+            <div className="flex items-center justify-between gap-2">
+                <h2 className="hud-sc text-[13px] tracking-[.12em] text-hud-muted uppercase">
+                    {Ui.hideProgression ? t('wounds') : tv('hp')}
+                </h2>
+                {!!hp?.temp && (
+                    <HudPill tone="accent" className="text-xs">
+                        {tv('tempBadge', { temp: hp.temp })}
+                    </HudPill>
+                )}
+            </div>
             <HudButton
                 type="button"
+                aria-label={summary}
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
-                className="flex min-h-10 flex-wrap items-baseline gap-x-2 text-left text-lg text-hud-ink"
+                className="flex min-h-10 items-baseline gap-2 text-left text-hud-ink"
             >
-                {hp
-                    ? t(keys.current, { current: hp.current, max: hp.max })
-                    : t(keys.total, { total: sheet.hp.total })}
-                {!!hp?.temp && (
-                    <span className="text-sm text-hud-info">
-                        {tv('tempBadge', { temp: hp.temp })}
+                <span className="hud-sc text-4xl leading-none tabular-nums lg:text-5xl">
+                    {hp ? hp.current : sheet.hp.total}
+                </span>
+                {hp && (
+                    <span className="text-xl text-hud-muted tabular-nums">
+                        / {hp.max}
                     </span>
                 )}
             </HudButton>
             {hp && (
                 <div
                     role="progressbar"
+                    aria-label={summary}
                     aria-valuemin={0}
                     aria-valuemax={hp.max}
                     aria-valuenow={hp.current}
-                    className="h-2 overflow-hidden rounded-full bg-hud-field"
+                    className="h-2.5 overflow-hidden rounded-full bg-hud-field"
                 >
                     <div
                         className="h-full rounded-full bg-hud-danger"
@@ -79,39 +93,87 @@ export function SheetVitals() {
                     />
                 </div>
             )}
-            {canChange && (
-                <div className="flex flex-wrap gap-2">
-                    {KINDS.map((k) => (
-                        <HudButton
-                            key={k}
-                            type="button"
-                            className={ACTION}
-                            onClick={() => setKind(k)}
-                        >
-                            {tv(k)}
-                        </HudButton>
-                    ))}
-                </div>
-            )}
+            {sheet.viewer.isDM && hp && <HpControls hp={hp} />}
             {open && <Breakdown lines={sheet.hp.lines} />}
-            {canChange && hp && (
-                <HpChangeDialog
-                    hp={hp}
-                    kind={kind}
-                    onClose={() => setKind(null)}
-                />
-            )}
-        </section>
+        </HudPanel>
     );
 }
 
-function HpChangeDialog({
+function HpControls({ hp }: { hp: Hp }) {
+    const { campaignId, characterId } = useProfile();
+
+    const tv = useTranslations('characterProfile.hero.vitals');
+
+    const edit = useEditResources(campaignId, characterId);
+
+    const [amount, setAmount] = useState<number | undefined>(1);
+
+    const [tempOpen, setTempOpen] = useState(false);
+
+    const valid = !!amount && amount >= 1;
+
+    const change = (kind: 'damage' | 'heal') => {
+        if (!amount || amount < 1) return;
+
+        void edit.mutateOk(
+            applyHpChange(
+                { hp: hp.current, max: hp.max, temp: hp.temp },
+                { kind, amount }
+            )
+        );
+    };
+
+    return (
+        <div className="flex flex-wrap items-center gap-2">
+            <HudButton
+                type="button"
+                aria-label={tv('damage')}
+                disabled={edit.isPending || !valid}
+                className={STEP}
+                onClick={() => change('damage')}
+            >
+                −
+            </HudButton>
+            <NumberInput
+                aria-label={tv('amount')}
+                min={1}
+                value={amount}
+                onChange={setAmount}
+                className="h-11 w-16 text-center text-lg"
+            />
+            <HudButton
+                type="button"
+                aria-label={tv('heal')}
+                disabled={edit.isPending || !valid}
+                className={STEP}
+                onClick={() => change('heal')}
+            >
+                +
+            </HudButton>
+            <HudButton
+                type="button"
+                className="hud-sc ml-auto inline-flex min-h-10 cursor-pointer items-center gap-1.5 px-2 text-sm text-hud-muted hover:text-hud-gold"
+                onClick={() => setTempOpen(true)}
+            >
+                <Shield aria-hidden className="size-4" />
+                {tv('temp')}
+            </HudButton>
+            <TempHpDialog
+                hp={hp}
+                open={tempOpen}
+                onClose={() => setTempOpen(false)}
+            />
+        </div>
+    );
+}
+
+function TempHpDialog({
     hp,
-    kind,
+    open,
     onClose,
 }: {
-    hp: { current: number; max: number; temp: number };
-    kind: HpChange['kind'] | null;
+    hp: Hp;
+    open: boolean;
     onClose: () => void;
 }) {
     const { campaignId, characterId } = useProfile();
@@ -128,13 +190,13 @@ function HpChangeDialog({
     };
 
     const apply = () => {
-        if (!kind || !amount || amount < 1) return;
+        if (!amount || amount < 1) return;
 
         void edit
             .mutateOk(
                 applyHpChange(
                     { hp: hp.current, max: hp.max, temp: hp.temp },
-                    { kind, amount }
+                    { kind: 'temp', amount }
                 )
             )
             .then((ok) => ok && close());
@@ -144,9 +206,9 @@ function HpChangeDialog({
         <ResponsiveDialog
             hud
             size="sm"
-            open={kind !== null}
+            open={open}
             onOpenChange={(o) => !o && close()}
-            title={kind ? tv(kind) : ''}
+            title={tv('temp')}
             footer={
                 <Button
                     type="submit"

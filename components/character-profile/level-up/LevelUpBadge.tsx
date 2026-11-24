@@ -23,7 +23,7 @@ export function LevelUpBadge({
             aria-label={t('freePoints', { free })}
             onClick={onOpen}
             className={cn(
-                'hud-sc metal-fill inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] leading-none',
+                'hud-sc metal-fill relative inline-flex after:absolute after:-inset-3 after:content-[""] shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] leading-none',
                 metalClass('gold')
             )}
         >

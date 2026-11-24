@@ -36,7 +36,7 @@ export function HeroPortrait({
             <div
                 className={cn(
                     frame,
-                    'hud-sc flex h-48 flex-col items-center justify-center gap-1 text-6xl text-hud-gold lg:aspect-[3/4] lg:h-auto'
+                    'hud-sc flex flex-col items-center justify-center gap-1 text-6xl text-hud-gold'
                 )}
             >
                 {name.trim().charAt(0).toUpperCase() || '?'}

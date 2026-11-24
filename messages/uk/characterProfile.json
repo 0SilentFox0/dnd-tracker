@@ -2,7 +2,7 @@
   "tabs": {
     "basic": "Основне",
     "combat": "Бій",
-    "skills": "Вміння",
+    "stats": "Статистика",
     "choices": "Вибори",
     "magic": "Магія",
     "advancement": "Розвиток",
@@ -46,6 +46,7 @@
     "xpMax": "Досвід {value}",
     "background": "Передісторія: {name}",
     "vitals": {
+      "hp": "HP",
       "damage": "− Шкода",
       "heal": "+ Лікування",
       "temp": "Тимчасові",
@@ -71,7 +72,7 @@
     "saveRoll": "Рятівний кидок: {ability}",
     "saveShort": "Рятунок",
     "skills": "НАВИЧКИ",
-    "passives": "Пасивні: сприйняття {perception} · розслідування {investigation} · проникливість {insight}",
+    "passiveChip": "{skill} (пасивне)",
     "languages": "Мови: {list}",
     "proficiencies": "Володіння: {list}",
     "untrained": "Навичка не розвинена: тест неможливий"
