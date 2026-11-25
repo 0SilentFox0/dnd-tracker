@@ -3,7 +3,7 @@ export const hudFontClassName = 'font-hud';
 
 /** Faces needed for the first paint; the rest load on first use. */
 export const HUD_PRELOAD_FONTS = [
-    '/fonts/AlegreyaSC-Medium.woff2',
+    '/fonts/CormorantSC-Bold-cyrillic.woff2',
+    '/fonts/Alegreya-Variable.woff2',
     '/fonts/AlegreyaSC-Bold.woff2',
-    '/fonts/AlegreyaSans-Regular.woff2',
 ];
