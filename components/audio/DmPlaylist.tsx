@@ -280,7 +280,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                                               onClick={() =>
                                                   view.collapsed.toggle(g.name)
                                               }
-                                              className="sticky top-0 z-[1] flex w-full items-center gap-1 bg-black/90 px-1 py-0.5 text-left text-hud-gold hover:text-hud-ink"
+                                              className="sticky top-0 z-[1] flex w-full items-center gap-1 bg-black/90 px-1 py-0.5 text-left text-hud-ink hover:text-hud-ink"
                                           >
                                               {folded ? (
                                                   <ChevronRight className="size-3" />

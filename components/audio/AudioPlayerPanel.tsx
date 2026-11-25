@@ -55,7 +55,7 @@ export function AudioPlayerPanel({
                         className={cn(
                             'flex items-center gap-1 rounded px-1 hover:text-hud-bone',
                             prefs.video.shown
-                                ? 'text-hud-gold'
+                                ? 'text-hud-crimson-fg'
                                 : 'text-hud-muted'
                         )}
                     >
