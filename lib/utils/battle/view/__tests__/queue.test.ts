@@ -67,6 +67,24 @@ describe('turnQueue', () => {
         ]);
     });
 
+    it('ожилий після падіння є і в поточному, і в наступному раунді', () => {
+        const down = [p('a'), p('b'), p('c', { down: true })];
+
+        expect(shape(turnQueue(down, 0, 1))).toEqual(['a*', 'b', '|2', 'a', 'b']);
+
+        const revived = [p('a'), p('b'), p('c')];
+
+        expect(shape(turnQueue(revived, 0, 1))).toEqual([
+            'a*',
+            'b',
+            'c',
+            '|2',
+            'a',
+            'b',
+            'c',
+        ]);
+    });
+
     it('повалений не отримує додаткового ходу', () => {
         expect(
             shape(
