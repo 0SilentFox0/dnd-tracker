@@ -24,12 +24,12 @@ export interface PalettePreview {
 
 export const PALETTE_PREVIEW: Record<PaletteId, PalettePreview> = {
     tavern: {
-        page: '#111013',
-        panel: '#18161a',
-        inset: '#0a090b',
+        page: '#0d0a08',
+        panel: '#1a140f',
+        inset: '#110d0a',
         crimson: '#b3312c',
-        ink: '#ece4d6',
-        muted: '#8b8277',
+        ink: '#efe5d2',
+        muted: '#9b9080',
     },
     parchment: {
         page: '#e9e1d1',

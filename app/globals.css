@@ -7,32 +7,34 @@
 
 @theme static {
   --container-page: 72rem;
-  --color-hud-muted: var(--hud-muted, #8b8277);
-  --color-hud-ink: var(--hud-ink, #ece4d6);
-  --color-hud-bone: var(--hud-bone, #c8beaf);
-  --color-hud-text: var(--hud-text, #c8beaf);
-  --color-hud-faint: var(--hud-faint, #5b554e);
+  --color-hud-muted: var(--hud-muted, #9b9080);
+  --color-hud-ink: var(--hud-ink, #efe5d2);
+  --color-hud-bone: var(--hud-bone, #e6dccb);
+  --color-hud-text: var(--hud-text, #e6dccb);
+  --color-hud-faint: var(--hud-faint, #6b6156);
   --color-hud-line: var(--hud-line, rgba(236, 228, 214, 0.17));
-  --color-hud-field: var(--hud-field, #0a090b);
+  --color-hud-field: var(--hud-field, #110d0a);
   --color-hud-rule: var(--hud-rule, rgba(236, 228, 214, 0.08));
   --color-hud-info: var(--hud-info, #9fc1df);
   --color-hud-danger: var(--hud-danger, #d0705c);
   --color-hud-bad: var(--hud-bad, #ff8a7a);
   --color-hud-good: var(--hud-good, #a8d48f);
   --color-hud-good-dim: var(--hud-good-dim, #7fa86a);
+  --color-hud-accent: var(--hud-accent, #c9b37a);
+  --color-hud-accent-fg: var(--hud-accent-fg, #e6c25a);
   --color-hud-crimson: var(--hud-crimson, #b3312c);
   --color-hud-crimson-2: var(--hud-crimson-2, #7c1e1d);
-  --color-hud-crimson-fg: var(--hud-crimson-fg, #e0604f);
+  --color-hud-crimson-fg: var(--hud-crimson-fg, #e66a58);
   --color-hud-crimson-ink: var(--hud-crimson-ink, #fbefe9);
   --color-hud-hp: var(--hud-hp, #c8382f);
   --color-hud-hp-2: var(--hud-hp-2, #8a211c);
-  --color-hud-panel: var(--palette-panel, #18161a);
-  --color-hud-panel-2: var(--palette-panel-2, #1e1b20);
-  --color-hud-inset: var(--palette-inset, #0a090b);
-  --color-hud-page: var(--palette-page, #111013);
-  --color-hud-surface: var(--palette-panel, #18161a);
-  --color-hud-raised: var(--palette-panel-2, #1e1b20);
-  --color-hud-soft: color-mix(in srgb, var(--hud-muted, #8b8277) 45%, var(--hud-text, #c8beaf));
+  --color-hud-panel: var(--palette-panel, #1a140f);
+  --color-hud-panel-2: var(--palette-panel-2, #2a2218);
+  --color-hud-inset: var(--palette-inset, #110d0a);
+  --color-hud-page: var(--palette-page, #0d0a08);
+  --color-hud-surface: var(--palette-panel, #1a140f);
+  --color-hud-raised: var(--palette-panel-2, #2a2218);
+  --color-hud-soft: color-mix(in srgb, var(--hud-muted, #9b9080) 45%, var(--hud-text, #e6dccb));
   --color-hud-edge: var(--hud-line, rgba(236, 228, 214, 0.17));
   --color-hud-edge-faint: var(--hud-rule, rgba(236, 228, 214, 0.08));
   --flow-when: #6aa4e0;
@@ -74,14 +76,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-xs: 2px;
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 4px;
-  --radius-xl: 6px;
-  --radius-2xl: 6px;
-  --radius-3xl: 6px;
-  --radius-4xl: 6px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
 }
 
 /* Dashboard and library pages can use the extra room on large displays. */
@@ -107,10 +109,10 @@
 }
 
 :root {
-  --radius: 4px;
-  --r: 4px;
+  --radius: 8px;
+  --r: 10px;
   --ease: 140ms ease;
-  --focus: 0 0 0 2px var(--palette-page, #111013), 0 0 0 4px var(--hud-ink, #ece4d6);
+  --focus: 0 0 0 2px var(--palette-page, #0d0a08), 0 0 0 4px var(--hud-ink, #efe5d2);
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -252,7 +254,7 @@
   }
   body {
     @apply text-foreground;
-    background-color: var(--palette-page, #111013);
+    background-color: var(--palette-page, #0d0a08);
     min-height: 100vh;
     position: relative;
     display: flex;
@@ -305,10 +307,10 @@
 /* `thin` is the narrowest standard width, so Chromium/WebKit use ::-webkit-scrollbar (4px); the standard properties serve Firefox only */
 :where(*)::-webkit-scrollbar { width: 4px; height: 4px; }
 :where(*)::-webkit-scrollbar-track { background: transparent; }
-:where(*)::-webkit-scrollbar-thumb { background: var(--hud-muted, #8b8277); border-radius: 2px; }
+:where(*)::-webkit-scrollbar-thumb { background: var(--hud-muted, #9b9080); border-radius: 2px; }
 
 @supports not selector(::-webkit-scrollbar) {
-  * { scrollbar-width: thin; scrollbar-color: var(--hud-muted, #8b8277) transparent; }
+  * { scrollbar-width: thin; scrollbar-color: var(--hud-muted, #9b9080) transparent; }
 }
 
 [data-clickable] :is(a, button, [role="button"]):not([data-card-overlay], .absolute, .fixed) { position: relative; z-index: 1; }

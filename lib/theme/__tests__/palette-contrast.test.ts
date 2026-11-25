@@ -113,6 +113,21 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
         expect(failures).toEqual([]);
     });
 
+    it('keeps accent-fg at AA on page, panel and panel-2', () => {
+        const failures = SURFACES.slice(0, 3).flatMap((surfaceToken) => {
+            const ratio = contrastRatio(
+                tokens['--hud-accent-fg'] ?? tokens['--hud-crimson-fg'],
+                tokens[surfaceToken]
+            );
+
+            return ratio < 4.5
+                ? [`--hud-accent-fg on ${surfaceToken}: ${ratio.toFixed(2)}:1`]
+                : [];
+        });
+
+        expect(failures).toEqual([]);
+    });
+
     it('keeps crimson-fg at AA on page, panel and panel-2', () => {
         const failures = SURFACES.slice(0, 3).flatMap((surfaceToken) => {
             const ratio = contrastRatio(
