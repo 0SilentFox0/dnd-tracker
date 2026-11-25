@@ -225,7 +225,7 @@ export function PathRowCard({
                             src={item.icon ?? progression.icon}
                             name={progression.className}
                             size={32}
-                            className="size-8 bg-hud-field text-sm text-hud-gold"
+                            className="size-8 bg-hud-field text-sm text-hud-muted"
                         />
                         <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold break-words text-hud-ink">

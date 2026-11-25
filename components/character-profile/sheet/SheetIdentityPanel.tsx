@@ -26,7 +26,7 @@ const HEX = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
 
 export const bannerPalette = (color: string | null) => {
     if (!color || !HEX.test(color.trim())) {
-        return { base: 'var(--color-hud-gold-strong)', ink: '#2a1d05' };
+        return { base: 'var(--color-hud-crimson)', ink: 'var(--color-hud-crimson-ink)' };
     }
 
     const base = normalizeHexColor(color);
@@ -136,7 +136,7 @@ export function SheetIdentityPanel({
                                             </span>
                                         )}
                                         {i === 0 ? (
-                                            <b className="text-hud-gold">
+                                            <b className="text-hud-crimson-fg">
                                                 {part}
                                             </b>
                                         ) : (

@@ -36,7 +36,7 @@ export function BiographyEditor({
     return (
         <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-                <span className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                <span className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
                     {t('title')}
                 </span>
                 <Button

@@ -19,7 +19,7 @@ function Inline({ text }: { text: string }) {
             <Fragment key={i}>
                 {parseBold(s.text).map((b, j) =>
                     b.bold ? (
-                        <strong key={j} className="font-semibold text-hud-gold">
+                        <strong key={j} className="font-semibold text-hud-ink">
                             {b.text}
                         </strong>
                     ) : (
@@ -39,7 +39,7 @@ export function BiographyText({ text }: { text: string }) {
                     return (
                         <h3
                             key={i}
-                            className="hud-sc flex items-center gap-3 pt-3 text-[12px] tracking-[.14em] text-hud-gold uppercase after:h-px after:flex-1 after:bg-hud-rule first:pt-0"
+                            className="hud-sc flex items-center gap-3 pt-3 text-[13px] tracking-[.14em] text-hud-ink uppercase after:h-px after:flex-1 after:bg-hud-rule first:pt-0"
                         >
                             {b.text}
                         </h3>
@@ -63,7 +63,7 @@ export function BiographyText({ text }: { text: string }) {
                             {b.items.map((item, j) => (
                                 <li
                                     key={j}
-                                    className="relative pl-5 before:absolute before:top-[.15em] before:left-0 before:text-[10px] before:text-hud-gold before:content-['◆']"
+                                    className="relative pl-5 before:absolute before:top-[.15em] before:left-0 before:text-[10px] before:text-hud-muted before:content-['◆']"
                                 >
                                     <Inline text={item} />
                                 </li>

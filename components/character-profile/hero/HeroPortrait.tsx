@@ -44,7 +44,7 @@ export function HeroPortrait({
             <div
                 className={cn(
                     frame,
-                    'hud-sc flex flex-col items-center justify-center gap-1 text-5xl text-hud-gold'
+                    'hud-sc flex flex-col items-center justify-center gap-1 text-5xl text-hud-muted'
                 )}
             >
                 {initials(name)}

@@ -20,7 +20,7 @@ export function RollResultView({
                     className={cn(
                         'text-xs font-bold tracking-[.08em] uppercase',
                         accent.tone === 'crit'
-                            ? 'text-hud-gold'
+                            ? 'text-hud-crimson-fg'
                             : 'text-hud-danger'
                     )}
                 >

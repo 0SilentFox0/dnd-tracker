@@ -140,7 +140,7 @@ export function MagicTab() {
                 <>
                     <Button
                         type="button"
-                        className="hud-sc mt-4 h-12 w-full gap-2 bg-hud-gold text-[var(--palette-primary-foreground,#2a1d05)] hover:brightness-110"
+                        className="hud-sc mt-4 h-12 w-full gap-2 bg-hud-crimson text-hud-crimson-ink hover:brightness-110"
                         onClick={() => setOpen(true)}
                     >
                         <BookOpen className="size-5" />
