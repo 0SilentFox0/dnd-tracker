@@ -72,6 +72,30 @@ describe('fitMapBox', () => {
     });
 });
 
+describe('fitMapView cover', () => {
+    it('fills both axes of the available box', () => {
+        const v = fitMapView(
+            { width: 1000, height: 600 },
+            { cols: 20, rows: 10 },
+            { cover: 0.25 }
+        );
+
+        expect(v.width).toBe(1200);
+
+        expect(v.height).toBe(600);
+    });
+
+    it('falls back to contain when too much would be cropped', () => {
+        const v = fitMapView(
+            { width: 1000, height: 1000 },
+            { cols: 10, rows: 15 },
+            { cover: 0.25 }
+        );
+
+        expect(v.height).toBe(1000);
+    });
+});
+
 describe('fitMapView', () => {
     const wide = { cols: 20, rows: 12 };
 

@@ -288,6 +288,7 @@ export function fitMapView(
         taller = 1,
         minCell = 0,
         grid = 'square',
+        cover,
     }: {
         rotatable?: boolean;
         bothWays?: boolean;
@@ -295,6 +296,8 @@ export function fitMapView(
         taller?: number;
         minCell?: number;
         grid?: GridKind;
+        /** max cropped share of the box before falling back to contain; omit to disable */
+        cover?: number;
     } = {}
 ): MapView {
     const hex = grid === 'hex';
@@ -315,18 +318,38 @@ export function fitMapView(
 
     const span = gridMetrics(grid).size(shown);
 
-    const box = fillWidth
-        ? {
-              width: avail.width,
-              height: hex
-                  ? (avail.width * span.height) / span.width
-                  : (avail.width * shown.rows) / shown.cols,
-          }
-        : fitMapBox(
-              { width: avail.width, height: avail.height * taller },
-              shown,
-              grid
-          );
+    const ratio = span.width / span.height;
+
+    const contain = () =>
+        fillWidth
+            ? {
+                  width: avail.width,
+                  height: hex
+                      ? (avail.width * span.height) / span.width
+                      : (avail.width * shown.rows) / shown.cols,
+              }
+            : fitMapBox(
+                  { width: avail.width, height: avail.height * taller },
+                  shown,
+                  grid
+              );
+
+    const covered = {
+        width: Math.max(avail.width, avail.height * ratio),
+        height: Math.max(avail.height, avail.width / ratio),
+    };
+
+    const cropped =
+        1 -
+        Math.min(
+            avail.width / (covered.width || 1),
+            avail.height / (covered.height || 1)
+        );
+
+    const box =
+        cover !== undefined && avail.width > 0 && cropped <= cover
+            ? covered
+            : contain();
 
     const grow =
         box.width > 0

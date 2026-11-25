@@ -100,7 +100,7 @@ describe('move mutation', () => {
         );
     });
 
-    it('ДМ рухає свого юніта у його хід без ліміту швидкості; героя — з лімітом; стіни й зайняте діють', () => {
+    it('ДМ рухає свого юніта в межах швидкості, як і героя; стіни й зайняте діють', () => {
         const dm = {
             ...ctx({
                 participants: [
@@ -114,13 +114,16 @@ describe('move mutation', () => {
 
         const out = moveMutation(dm, {
             participantId: 'gob',
-            to: { x: 0, y: 4 },
+            to: { x: 4, y: 4 },
         });
 
         expect(out.participants[0].battleData).toMatchObject({
-            position: { x: 0, y: 4 },
-            movementUsed: 9,
+            position: { x: 4, y: 4 },
+            movementUsed: 5,
         });
+        expect(() =>
+            moveMutation(dm, { participantId: 'gob', to: { x: 0, y: 4 } })
+        ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
         expect(() =>
             moveMutation(dm, { participantId: 'gob', to: { x: 0, y: 0 } })
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
@@ -134,7 +137,7 @@ describe('move mutation', () => {
         };
 
         expect(() =>
-            moveMutation(walled, { participantId: 'gob', to: { x: 0, y: 4 } })
+            moveMutation(walled, { participantId: 'gob', to: { x: 4, y: 4 } })
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
 
         const heroTurn = { ...ctx(), userId: 'dm-user', isDM: true };
@@ -147,7 +150,7 @@ describe('move mutation', () => {
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
     });
 
-    it('ДМ не рухає юніта далі за dmMoveCap клітинок вартості', () => {
+    it('ДМ не рухає юніта далі за його швидкість', () => {
         const wide = { ...map, cols: 100, rows: 1 };
 
         const base = ctx({
@@ -165,15 +168,15 @@ describe('move mutation', () => {
         };
 
         expect(
-            moveMutation(dm, { participantId: 'gob', to: { x: 39, y: 0 } })
+            moveMutation(dm, { participantId: 'gob', to: { x: 93, y: 0 } })
                 .participants[0].battleData.position
-        ).toEqual({ x: 39, y: 0 });
+        ).toEqual({ x: 93, y: 0 });
         expect(() =>
-            moveMutation(dm, { participantId: 'gob', to: { x: 38, y: 0 } })
+            moveMutation(dm, { participantId: 'gob', to: { x: 92, y: 0 } })
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
     });
 
-    it('NPC-герой, привʼязаний до акаунта ДМ, ходить у свій хід за тим самим dmMoveCap, що й юніт ДМ', () => {
+    it('NPC-герой, привʼязаний до акаунта ДМ, ходить у свій хід у межах своєї швидкості', () => {
         const npc = {
             ...hero,
             basicInfo: { ...hero.basicInfo, controlledBy: 'dm-user' },
@@ -191,9 +194,9 @@ describe('move mutation', () => {
         };
 
         expect(
-            moveMutation(dm, { participantId: 'hero', to: { x: 8, y: 0 } })
+            moveMutation(dm, { participantId: 'hero', to: { x: 6, y: 0 } })
                 .participants[0].battleData.position
-        ).toEqual({ x: 8, y: 0 });
+        ).toEqual({ x: 6, y: 0 });
     });
 
     it('учасник без позиції спершу розставляється, потім рухається', () => {
@@ -388,10 +391,10 @@ describe('move mutation', () => {
             });
         });
 
-        it('юніт ДМ без ліміту руху все одно отримує шкоду від небезпеки', () => {
+        it('юніт під контролем ДМ отримує шкоду від небезпеки', () => {
             const dm = {
                 ...withTerrain(
-                    { '0:4': fire },
+                    { '4:4': fire },
                     {
                         participants: [
                             at(goblin, { x: 9, y: 4 }),
@@ -404,7 +407,7 @@ describe('move mutation', () => {
 
             const out = moveMutation(dm, {
                 participantId: 'gob',
-                to: { x: 0, y: 4 },
+                to: { x: 4, y: 4 },
             });
 
             expect(out.participants[0].combatStats.currentHp).toBe(

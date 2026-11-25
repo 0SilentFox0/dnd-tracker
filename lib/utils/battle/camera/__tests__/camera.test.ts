@@ -188,3 +188,18 @@ describe('inComfort', () => {
         expect(inComfort(cam, { x: 321, y: 150 }, frame, 0.2)).toBe(false);
     });
 });
+
+describe('clampCamera with inset (cover fit)', () => {
+    const cover: Frame = {
+        avail: { width: 1200, height: 600 },
+        content: { width: 1200, height: 600 },
+        bounds: { min: 1, max: 3 },
+        inset: { width: 100, height: 0 },
+    };
+
+    it('lets pan reach the cropped edges at zoom 1', () => {
+        expect(clampCamera({ zoom: 1, x: 500, y: 0 }, cover).x).toBe(100);
+
+        expect(clampCamera({ zoom: 1, x: -500, y: 0 }, cover).x).toBe(-100);
+    });
+});

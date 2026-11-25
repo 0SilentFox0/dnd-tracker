@@ -268,13 +268,18 @@ export function BattleMap({
                 'flex h-full w-full',
                 'relative',
                 !cameraMode && (phone || scrolls) && 'overflow-auto',
+                !cameraMode && !phone && !scrolls && 'overflow-hidden',
                 !cameraMode && phone && '[scrollbar-gutter:stable]',
                 cameraMode
                     ? 'items-center justify-center'
                     : scrollsX
                       ? 'justify-start'
                       : 'justify-center',
-                cameraMode ? '' : scrollsY ? 'items-start' : 'items-center',
+                cameraMode
+                    ? ''
+                    : scrollsY
+                      ? 'items-start'
+                      : 'items-center',
                 className
             )}
         >
@@ -285,7 +290,6 @@ export function BattleMap({
                 className={cn(
                     'relative shrink-0 overflow-hidden bg-black select-none',
                     touch,
-                    !phone && 'rounded-xl border border-white/10',
                     // the weapon cursor must beat the inline cursor: pointer on cells and tokens
                     trajectory &&
                         'cursor-(--attack-cursor)! **:cursor-(--attack-cursor)!'

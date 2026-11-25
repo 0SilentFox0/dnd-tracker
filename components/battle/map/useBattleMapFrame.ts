@@ -17,6 +17,8 @@ import type { BattleMapConfig, GridKind } from '@/types/battle-grid';
 
 const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
 
+const DESKTOP_MAX_CROP = 0.25;
+
 export function useBattleMapFrame(
     map: BattleMapConfig,
     avail: { width: number; height: number },
@@ -42,6 +44,7 @@ export function useBattleMapFrame(
                 taller: 1,
                 minCell: MIN_TAP_CELL_PX,
                 grid,
+                cover: phone ? undefined : DESKTOP_MAX_CROP,
             }),
         [avail, win, phone, grid]
     );
@@ -57,16 +60,17 @@ export function useBattleMapFrame(
                       fillWidth: false,
                       taller: 1,
                       grid,
+                      cover: phone ? Infinity : DESKTOP_MAX_CROP,
                   })
                 : fit,
-        [cameraMode, avail, win, fit, grid]
+        [cameraMode, avail, win, fit, phone, grid]
     );
 
     const renderedFit = cameraMode ? fitAll : fit;
 
-    const scrollsX = fit.width > avail.width + 0.5;
+    const scrollsX = phone && fit.width > avail.width + 0.5;
 
-    const scrollsY = fit.height > avail.height + 0.5;
+    const scrollsY = phone && fit.height > avail.height + 0.5;
 
     const scrolls = scrollsX || scrollsY;
 
@@ -84,6 +88,12 @@ export function useBattleMapFrame(
                 avail: { width: fit.width, height: fit.height },
                 content: { width: fit.width, height: fit.height },
                 bounds: FIT_ZOOM_BOUNDS,
+                inset: phone
+                    ? undefined
+                    : {
+                          width: Math.max(0, (fit.width - avail.width) / 2),
+                          height: Math.max(0, (fit.height - avail.height) / 2),
+                      },
             };
 
         const fitCell = fitAll.width / gridCols;
@@ -98,6 +108,7 @@ export function useBattleMapFrame(
         };
     }, [
         cameraMode,
+        phone,
         avail,
         fit.width,
         fit.height,

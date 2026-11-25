@@ -50,7 +50,7 @@ describe('RecommendedSpells', () => {
         expect(requestSpellBook).toHaveBeenCalledWith(1);
     });
 
-    it('shows at most 3 spells of the level, native and stronger first', () => {
+    it('shows at most 5 spells of the level, native and stronger first', () => {
         turn.isMyTurn = true;
 
         const spells = book(
@@ -83,6 +83,20 @@ describe('RecommendedSpells', () => {
                 dice: 2,
             },
             {
+                id: 'f',
+                name: 'F manual',
+                level: 1,
+                executionMode: 'manual',
+                dice: 5,
+            },
+            {
+                id: 'g',
+                name: 'G manual',
+                level: 1,
+                executionMode: 'manual',
+                dice: 1,
+            },
+            {
                 id: 'e',
                 name: 'E other level',
                 level: 2,
@@ -94,7 +108,7 @@ describe('RecommendedSpells', () => {
         render(<RecommendedSpells spells={spells} level={1} />);
 
         expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual(
-            ['C strong', 'D mid', 'B weak']
+            ['C strong', 'D mid', 'B weak', 'A manual', 'F manual']
         );
     });
 

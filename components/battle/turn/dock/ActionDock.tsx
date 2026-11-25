@@ -80,7 +80,7 @@ export function ActionDock({
             {children}
             {phase !== 'acting' && <DockHp />}
             {phase === 'acting' && (
-                <div className="flex items-center gap-3 px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] max-md:gap-2">
+                <div className="flex items-end gap-3 px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] max-md:gap-2">
                     <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                         <div className="flex items-start gap-3">
                             <DockDiamond
@@ -107,7 +107,7 @@ export function ActionDock({
                         {move && <MoveBar {...move} />}
                         <DockHp />
                     </div>
-                    <div className="flex shrink-0 flex-col items-center gap-1.5">
+                    <div className="flex shrink-0 flex-col-reverse items-center gap-1.5">
                         {panel ? (
                             <ActionsPopover
                                 open={panel.open}
@@ -124,7 +124,7 @@ export function ActionDock({
                             <HudButton
                                 type="button"
                                 onClick={on.end}
-                                className="hud-sc min-h-10 rounded-xl border border-[var(--gold)] px-2 text-[12px] leading-tight tracking-[.06em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
+                                className="hud-sc min-h-10 rounded-xl border border-[#ecd78d] px-2 text-[12px] leading-tight tracking-[.06em] text-[#ecd78d] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
                             >
                                 {t('endTurn')}
                             </HudButton>

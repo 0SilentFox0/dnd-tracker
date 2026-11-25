@@ -38,7 +38,7 @@ export function MapCameraControls({
                 HUD_GLASS,
                 'absolute z-50 flex items-center rounded-xl',
                 phone
-                    ? 'right-[calc(0.75rem+var(--hud-side-w,0px))] bottom-2 z-30'
+                    ? 'top-1 right-12 z-20 rounded-lg'
                     : 'top-2 right-[calc(0.75rem+max(var(--hud-side-w,0px),var(--hud-rail-w,0px)+0.5rem))]'
             )}
         >
@@ -48,14 +48,17 @@ export function MapCameraControls({
                 variant="ghost"
                 aria-label={t('zoomOut')}
                 onClick={onZoomOut}
-                className={cn(phone && 'size-11')}
+                className={cn(phone && 'size-8')}
             >
                 <Minus />
             </Button>
             <span
                 role="status"
                 aria-label={t('zoomLevel')}
-                className="min-w-12 px-1 text-center text-[13px] text-[var(--ink)] tabular-nums"
+                className={cn(
+                    'min-w-12 px-1 text-center text-[13px] text-[var(--ink)] tabular-nums',
+                    phone && 'sr-only'
+                )}
             >
                 {Math.round(zoom * 100)}%
             </span>
@@ -65,7 +68,7 @@ export function MapCameraControls({
                 variant="ghost"
                 aria-label={t('zoomIn')}
                 onClick={onZoomIn}
-                className={cn(phone && 'size-11')}
+                className={cn(phone && 'size-8')}
             >
                 <Plus />
             </Button>
@@ -78,7 +81,7 @@ export function MapCameraControls({
                     aria-pressed={userMoved}
                     onClick={onRecenter}
                     className={cn(
-                        phone && 'size-11',
+                        phone && 'size-8',
                         userMoved && 'text-[var(--gold)]'
                     )}
                 >

@@ -676,7 +676,7 @@ describe('deriveMapScene: наведення шаблону', () => {
     });
 });
 
-describe('deriveMapScene: DM без ліміту руху', () => {
+describe('deriveMapScene: ДМ рухає в межах швидкості', () => {
     const dmUnit = at('g', { x: 0, y: 0 }, ParticipantSide.ENEMY);
 
     const unit = {
@@ -689,7 +689,7 @@ describe('deriveMapScene: DM без ліміту руху', () => {
         basicInfo: { ...hero.basicInfo, controlledBy: 'u1' },
     };
 
-    it('юніт ДМ: усі досяжні клітинки поза швидкістю підсвічені; герой — лише в межах швидкості', () => {
+    it('юніт ДМ, як і герой, підсвічує лише клітинки в межах швидкості', () => {
         const dm = deriveMapScene(
             input({
                 participants: [unit],
@@ -706,7 +706,7 @@ describe('deriveMapScene: DM без ліміту руху', () => {
             })
         );
 
-        expect(dm.view.marks?.get('9:4')).toBe(9);
+        expect(dm.view.marks?.get('9:4')).toBeUndefined();
 
         const player = deriveMapScene(
             input({

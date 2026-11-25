@@ -12,7 +12,7 @@ export function MoveBar({ used, max }: { used: number; max: number }) {
             aria-valuemin={0}
             aria-valuemax={max}
             aria-valuenow={left}
-            className="grid w-full min-w-16 grid-cols-[auto_1fr] items-center gap-2 text-[10px] text-[var(--ink)]"
+            className="grid w-full min-w-16 grid-cols-[auto_1fr] items-center gap-2 text-[10px] text-hud-bone"
         >
             <span className="hud-sc font-bold tracking-[.08em] whitespace-nowrap uppercase">
                 {t('moveCells', { left })}

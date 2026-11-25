@@ -139,8 +139,8 @@ export function MobileBattleLayout({
     return (
         <SceneSlotsContext value={slots}>
             <MapStripSlotContext value={resultSlot}>
-                <div className="scene-full relative flex flex-col overflow-hidden">
-                    <div className="relative min-h-0 flex-1">
+                <div className="scene-full relative overflow-hidden">
+                    <div className="absolute inset-0">
                         {mapView ? (
                             <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
@@ -173,9 +173,9 @@ export function MobileBattleLayout({
                             <HudBlock
                                 block="initiative"
                                 edge="top"
-                                className="mr-12 items-stretch"
+                                className="items-center"
                             >
-                                <div className={`${HUD_GLASS} rounded-full`}>
+                                <div className="mx-auto w-fit max-w-full">
                                     <InitiativeTrack />
                                 </div>
                             </HudBlock>
@@ -200,7 +200,7 @@ export function MobileBattleLayout({
                                 aria-expanded={menuShown}
                                 aria-haspopup="true"
                                 onClick={() => setMenuOpen((v) => !v)}
-                                className={`${HUD_GLASS} flex size-10 items-center justify-center rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
+                                className={`${HUD_GLASS} flex size-8 items-center justify-center rounded-lg text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
                             >
                                 <Ellipsis className="size-5" aria-hidden />
                             </HudButton>
@@ -216,13 +216,16 @@ export function MobileBattleLayout({
                         </div>
                         <div
                             ref={setResultSlot}
-                            className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center *:pointer-events-auto"
+                            className="pointer-events-none absolute inset-x-0 bottom-24 z-20 flex flex-col items-center *:pointer-events-auto"
                         />
                     </div>
-                    {/* safe zone: the map ends above it, so tokens never sit under the dock */}
-                    <div className="relative z-20 flex shrink-0 items-end gap-2 px-2 pt-2 pb-1">
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end gap-2 px-2 pt-2 pb-1 *:pointer-events-auto">
                         {hero && (
-                            <HudBlock block="hero" edge="bottom">
+                            <HudBlock
+                                block="hero"
+                                edge="left"
+                                className="items-end gap-1"
+                            >
                                 <HeroCluster hero={hero} phone />
                             </HudBlock>
                         )}

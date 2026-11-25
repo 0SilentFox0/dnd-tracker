@@ -26,7 +26,7 @@ export function RoundBadge({ className }: { className?: string }) {
         <span
             data-tour="battle.topbar"
             className={cn(
-                `${HUD_GLASS} hud-sc flex items-center gap-2 border-l-2 border-l-[var(--gold)] text-sm text-hud-soft`,
+                `${HUD_GLASS} hud-sc flex items-center gap-2 border-l-2 border-l-[var(--gold)] text-sm text-hud-soft max-md:gap-1.5 max-md:text-xs`,
                 className
             )}
         >
@@ -53,7 +53,7 @@ export function RoundBadge({ className }: { className?: string }) {
                     aria-label={t('nextTurn')}
                     title={t('nextTurn')}
                     onClick={() => actions.nextTurn.mutate({})}
-                    className="pointer-events-auto -my-2 -mr-2 flex size-10 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
+                    className="pointer-events-auto -my-2 -mr-2 flex size-10 max-md:-my-1.5 max-md:-mr-1.5 max-md:size-8 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
                 >
                     {pending ? (
                         <Loader2
@@ -73,6 +73,6 @@ export function BattleTopBar() {
     useTurnTimer();
 
     return (
-        <RoundBadge className="pointer-events-none absolute top-3 left-3 z-20 rounded-xl px-3 py-1.5" />
+        <RoundBadge className="pointer-events-none absolute top-3 left-3 z-20 rounded-xl px-3 py-1.5 max-md:top-1 max-md:left-2 max-md:rounded-lg max-md:px-2 max-md:py-0.5" />
     );
 }

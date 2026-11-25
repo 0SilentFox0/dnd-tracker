@@ -10,7 +10,6 @@ import {
 } from '../path';
 
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { makeEffect } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
@@ -152,10 +151,9 @@ describe('moveBudget', () => {
             { ...unit, basicInfo: { ...unit.basicInfo, controlledBy: 'dm' } }
         );
 
-    it('ДМ: min(cols*rows, dmMoveCap)', () => {
-        expect(dm(100, 100)).toBe(MAP_LIMITS.dmMoveCap);
-        expect(MAP_LIMITS.dmMoveCap).toBe(60);
-        expect(dm(5, 5)).toBe(25);
+    it('ДМ: така сама швидкість, як у гравця', () => {
+        expect(dm(100, 100)).toBe(6);
+        expect(dm(5, 5)).toBe(6);
     });
 
     it('гравець — залишок швидкості', () => {

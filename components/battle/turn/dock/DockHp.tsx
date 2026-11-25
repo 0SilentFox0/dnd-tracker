@@ -17,7 +17,7 @@ export function DockHp() {
 
     return (
         <div data-slot="dock-hp" className="flex min-w-0 flex-col gap-1">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--ink)]">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-hud-bone">
                 <Heart
                     aria-hidden
                     className="size-3 fill-current text-[#e0594e]"
