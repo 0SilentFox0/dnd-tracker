@@ -14,12 +14,12 @@ interface ChipItem {
 }
 
 const CHIP =
-    'flex h-8 shrink-0 items-center rounded-[4px] border border-hud-line px-3 text-[13px] text-hud-muted';
+    'flex h-8 shrink-0 items-center rounded-lg border border-hud-line px-3 text-[13px] text-hud-muted';
 
 const CHIP_LG = 'h-11 min-h-11 px-4 text-sm';
 
 const ACTIVE =
-    'bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-crimson)]';
+    'bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-accent)]';
 
 const scrollActiveIntoView = (el: HTMLElement | null) =>
     el?.scrollIntoView?.({ inline: 'center', block: 'nearest' });

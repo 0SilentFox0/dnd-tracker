@@ -6,7 +6,7 @@ const TONE = {
     gold: 'metal-gold metal-fill font-semibold',
     silver: 'metal-silver metal-fill font-semibold',
     bone: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
-    accent: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-crimson)]',
+    accent: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-accent)]',
     muted: 'text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
     fact: 'text-hud-soft shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
 } as const;

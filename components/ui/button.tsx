@@ -8,7 +8,7 @@ const OUTLINE =
     'bg-hud-panel-2 border border-hud-line text-hud-ink shadow-[inset_0_1px_0_var(--hud-hi),var(--hud-sh-btn)] hover:border-hud-muted';
 
 const buttonVariants = cva(
-    "hud-body cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[4px] text-[15px] transition-[transform,box-shadow] active:translate-y-px active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:border-hud-crimson",
+    "hud-body cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-[15px] transition-[transform,box-shadow] active:translate-y-px active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:border-hud-crimson",
     {
         variants: {
             variant: {

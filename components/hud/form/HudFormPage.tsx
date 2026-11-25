@@ -20,7 +20,7 @@ export function HudFormPage({
         <div
             className={cn(
                 HUD_SURFACE,
-                'hud-form hud-form-page mx-auto flex min-h-dvh w-full max-w-3xl flex-col ornate sm:my-4 sm:min-h-0 sm:rounded-[var(--r)] sm:border sm:border-hud-rule sm:bg-hud-panel sm:p-6 sm:shadow-[inset_0_1px_0_var(--hud-hi),var(--hud-sh)]',
+                'hud-form hud-form-page mx-auto flex min-h-dvh w-full max-w-3xl flex-col ornate sm:my-4 sm:min-h-0 sm:rounded-[var(--r)] sm:bg-hud-panel sm:p-6 sm:shadow-[var(--hud-sh)]',
                 className
             )}
         >
