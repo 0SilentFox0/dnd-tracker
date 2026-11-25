@@ -35,7 +35,7 @@ export default async function HelpArticlePage({
             aside={
                 <Link
                     href="/help"
-                    className="text-hud-crimson-fg hover:underline"
+                    className="text-hud-accent-fg hover:underline"
                 >
                     {ui('ui.allHelp')}
                 </Link>

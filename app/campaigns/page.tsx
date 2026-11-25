@@ -339,7 +339,7 @@ export default async function CampaignsPage({
                                             </p>
                                         )}
                                     </div>
-                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded border border-hud-crimson bg-hud-field px-4 text-sm font-medium text-hud-ink">
+                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded border border-hud-accent bg-hud-field px-4 text-sm font-medium text-hud-ink">
                                         {t('card.continue')}
                                     </span>
                                 </div>

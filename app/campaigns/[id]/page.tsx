@@ -262,7 +262,7 @@ export default async function CampaignDetailPage({
                             </p>
                             <Link
                                 href={`/campaigns/${id}/dm/characters`}
-                                className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-crimson-fg underline-offset-4 hover:underline"
+                                className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-accent-fg underline-offset-4 hover:underline"
                             >
                                 {t('party.all')}
                             </Link>

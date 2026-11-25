@@ -89,7 +89,7 @@ export function CampaignRecentSession({
             {!session && (
                 <Link
                     href={base}
-                    className="text-hud-crimson-fg mt-3 inline-flex min-h-8 items-center text-sm font-medium underline-offset-4 hover:underline"
+                    className="text-hud-accent-fg mt-3 inline-flex min-h-8 items-center text-sm font-medium underline-offset-4 hover:underline"
                 >
                     {t('recentSession.openScenario')}
                 </Link>

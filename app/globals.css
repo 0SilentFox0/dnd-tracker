@@ -273,6 +273,25 @@
     mix-blend-mode: var(--grain-mode, overlay);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+  html[data-palette="tavern"] body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 50% 40%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.62) 100%),
+      linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)),
+      url("/bg/vey-strait-2k.webp") 62% center / cover no-repeat;
+  }
+  @media (min-width: 1921px) {
+    html[data-palette="tavern"] body::after {
+      background-image:
+        radial-gradient(120% 90% at 50% 40%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.62) 100%),
+        linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)),
+        url("/bg/vey-strait-4k.webp");
+    }
+  }
   main,
   [role="main"],
   .container {

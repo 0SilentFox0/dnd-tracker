@@ -40,7 +40,7 @@ export function DmPartyCard({
                             })}
                             <Link
                                 href={`/campaigns/${campaignId}/dm/characters`}
-                                className="text-hud-crimson-fg font-medium underline-offset-4 hover:underline"
+                                className="text-hud-accent-fg font-medium underline-offset-4 hover:underline"
                             >
                                 {t('party.all')}
                             </Link>
@@ -87,7 +87,7 @@ export function DmPartyCard({
                                             ) : (
                                                 fallback
                                             )}
-                                            <span className="border-hud-crimson bg-hud-page hud-num text-hud-crimson-fg ring-hud-page absolute -bottom-1 -right-1.5 grid size-6 place-items-center rounded-full border text-xs font-bold ring-2">
+                                            <span className="border-hud-accent bg-hud-page hud-num text-hud-accent-fg ring-hud-page absolute -bottom-1 -right-1.5 grid size-6 place-items-center rounded-full border text-xs font-bold ring-2">
                                                 {hero.level}
                                             </span>
                                         </span>

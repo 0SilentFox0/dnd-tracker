@@ -94,7 +94,7 @@ export function DmPrepPanel({
                         </p>
                         <Link
                             href={`${base}/dm/scenario`}
-                            className="text-hud-crimson-fg mt-2 inline-flex min-h-8 items-center text-sm font-medium underline-offset-4 hover:underline"
+                            className="text-hud-accent-fg mt-2 inline-flex min-h-8 items-center text-sm font-medium underline-offset-4 hover:underline"
                         >
                             {t('prep.create')}
                         </Link>
