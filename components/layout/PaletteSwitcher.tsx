@@ -10,16 +10,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { PALETTE_IDS, PALETTE_SWATCHES } from '@/lib/theme/palettes';
+import { PALETTE_IDS, PALETTE_PREVIEW } from '@/lib/theme/palettes';
 import type { PaletteId } from '@/types/theme';
 
 function Swatch({ id }: { id: PaletteId }) {
     return (
         <span
             aria-hidden
-            className="flex h-5 w-14 shrink-0 overflow-hidden rounded-full border border-hud-line"
+            className="border-hud-line flex h-5 w-14 shrink-0 overflow-hidden rounded-full border"
         >
-            {PALETTE_SWATCHES[id].map((color) => (
+            {(
+                [
+                    PALETTE_PREVIEW[id].page,
+                    PALETTE_PREVIEW[id].crimson,
+                    PALETTE_PREVIEW[id].ink,
+                ] as const
+            ).map((color) => (
                 <span
                     key={color}
                     className="h-full flex-1"
@@ -46,7 +52,7 @@ export function PaletteSwitcher() {
                     size="sm"
                     aria-label={t('label')}
                     title={error ? t(`errors.${error}`) : t('label')}
-                    className="w-[104px] border-hud-line px-2.5"
+                    className="border-hud-line w-[104px] px-2.5"
                 >
                     <SelectValue>
                         <Swatch id={palette} />

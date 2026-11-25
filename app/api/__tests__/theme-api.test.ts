@@ -25,21 +25,21 @@ describe('/api/theme', () => {
     it('requires a session for reading and writing', async () => {
         vi.mocked(getSessionUserId).mockResolvedValue(null);
         expect((await GET()).status).toBe(401);
-        expect((await PUT(put({ palette: 'forest' }))).status).toBe(401);
+        expect((await PUT(put({ palette: 'parchment' }))).status).toBe(401);
         expect(prisma.user.findUnique).not.toHaveBeenCalled();
         expect(prisma.user.updateMany).not.toHaveBeenCalled();
     });
 
     it("reads only the current user's palette and never caches the response", async () => {
         vi.mocked(prisma.user.findUnique).mockResolvedValue({
-            palette: 'frost',
+            palette: 'parchment',
         } as never);
 
         const response = await GET();
 
         expect(await response.json()).toEqual({
             userId: 'user-a',
-            palette: 'frost',
+            palette: 'parchment',
         });
         expect(response.headers.get('cache-control')).toContain('no-store');
         expect(prisma.user.findUnique).toHaveBeenCalledWith({
@@ -58,7 +58,7 @@ describe('/api/theme', () => {
         });
     });
 
-    it.each(['tavern', 'midnight', 'forest', 'parchment', 'amethyst', 'frost'])(
+    it.each(['tavern', 'parchment'])(
         'saves %s only for the session user',
         async (palette) => {
             const response = await PUT(
@@ -77,16 +77,30 @@ describe('/api/theme', () => {
         }
     );
 
-    it.each([{}, { palette: 'unknown' }, { palette: null }])(
-        'rejects invalid input %j',
-        async (body) => {
-            expect((await PUT(put(body))).status).toBe(400);
-            expect(prisma.user.updateMany).not.toHaveBeenCalled();
-        }
-    );
+    it.each([
+        ['midnight', 'tavern'],
+        ['forest', 'tavern'],
+        ['amethyst', 'tavern'],
+        ['frost', 'parchment'],
+    ])('reads legacy %s as %s', async (stored, expected) => {
+        vi.mocked(prisma.user.findUnique).mockResolvedValue({
+            palette: stored,
+        } as never);
+        expect((await (await GET()).json()).palette).toBe(expected);
+    });
+
+    it.each([
+        {},
+        { palette: 'unknown' },
+        { palette: null },
+        { palette: 'midnight' },
+    ])('rejects invalid input %j', async (body) => {
+        expect((await PUT(put(body))).status).toBe(400);
+        expect(prisma.user.updateMany).not.toHaveBeenCalled();
+    });
 
     it('does not report success if the profile no longer exists', async () => {
         vi.mocked(prisma.user.updateMany).mockResolvedValue({ count: 0 });
-        expect((await PUT(put({ palette: 'forest' }))).status).toBe(404);
+        expect((await PUT(put({ palette: 'parchment' }))).status).toBe(404);
     });
 });

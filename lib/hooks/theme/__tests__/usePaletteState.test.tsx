@@ -50,7 +50,7 @@ beforeEach(() => {
     auth.userId = 'a';
     vi.mocked(themeApi.get).mockResolvedValue({
         userId: 'a',
-        palette: 'midnight',
+        palette: 'tavern',
     });
     vi.mocked(themeApi.set).mockImplementation(async (palette) => ({
         userId: 'a',
@@ -63,7 +63,7 @@ describe('usePaletteState', () => {
     it('restores the profile, saves changes and updates document colors immediately', async () => {
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
-        await waitFor(() => expect(result.current.palette).toBe('midnight'));
+        await waitFor(() => expect(result.current.palette).toBe('tavern'));
 
         const save = deferred<PaletteSettings>();
 
@@ -72,17 +72,17 @@ describe('usePaletteState', () => {
         let pending!: Promise<void>;
 
         act(() => {
-            pending = result.current.setPalette('frost');
+            pending = result.current.setPalette('parchment');
         });
-        expect(document.documentElement.dataset.palette).toBe('frost');
+        expect(document.documentElement.dataset.palette).toBe('parchment');
         expect(document.documentElement.classList.contains('dark')).toBe(false);
         expect(result.current.saving).toBe(true);
         await act(async () => {
-            save.resolve({ userId: 'a', palette: 'frost' });
+            save.resolve({ userId: 'a', palette: 'parchment' });
             await pending;
         });
-        expect(themeApi.set).toHaveBeenCalledWith('frost');
-        expect(localStorage.getItem('dnd-palette:a')).toBe('frost');
+        expect(themeApi.set).toHaveBeenCalledWith('parchment');
+        expect(localStorage.getItem('dnd-palette:a')).toBe('parchment');
     });
 
     it('a late profile GET cannot overwrite a newer selection', async () => {
@@ -93,27 +93,27 @@ describe('usePaletteState', () => {
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
         await waitFor(() => expect(result.current.ready).toBe(true));
-        await act(() => result.current.setPalette('forest'));
+        await act(() => result.current.setPalette('tavern'));
         await act(async () => {
-            read.resolve({ userId: 'a', palette: 'midnight' });
+            read.resolve({ userId: 'a', palette: 'tavern' });
         });
-        expect(result.current.palette).toBe('forest');
+        expect(result.current.palette).toBe('tavern');
     });
 
     it('restores the old selection and reports failed writes', async () => {
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
-        await waitFor(() => expect(result.current.palette).toBe('midnight'));
+        await waitFor(() => expect(result.current.palette).toBe('tavern'));
         vi.mocked(themeApi.set).mockRejectedValue(new Error('offline'));
         await act(() => result.current.setPalette('parchment'));
-        expect(result.current.palette).toBe('midnight');
+        expect(result.current.palette).toBe('tavern');
         expect(result.current.error).toBe('save');
         expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
 
     it('isolates cached preferences and discards old account responses', async () => {
-        localStorage.setItem('dnd-palette:a', 'forest');
-        localStorage.setItem('dnd-palette:b', 'amethyst');
+        localStorage.setItem('dnd-palette:a', 'tavern');
+        localStorage.setItem('dnd-palette:b', 'parchment');
 
         const readA = deferred<PaletteSettings>();
 
@@ -125,13 +125,13 @@ describe('usePaletteState', () => {
 
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
-        await waitFor(() => expect(result.current.palette).toBe('forest'));
+        await waitFor(() => expect(result.current.palette).toBe('tavern'));
         act(() => auth.changed?.('SIGNED_IN', { user: { id: 'b' } }));
-        expect(result.current.palette).toBe('amethyst');
+        expect(result.current.palette).toBe('parchment');
         await act(async () => {
-            readA.resolve({ userId: 'a', palette: 'frost' });
+            readA.resolve({ userId: 'a', palette: 'tavern' });
         });
-        expect(result.current.palette).toBe('amethyst');
+        expect(result.current.palette).toBe('parchment');
         await act(async () => {
             readB.resolve({ userId: 'b', palette: 'parchment' });
         });
@@ -148,7 +148,7 @@ describe('usePaletteState', () => {
         });
 
         await waitFor(() =>
-            expect(document.documentElement.dataset.palette).toBe('midnight')
+            expect(document.documentElement.dataset.palette).toBe('tavern')
         );
         rerender({ path: '/' });
         expect(document.documentElement.hasAttribute('data-palette')).toBe(
