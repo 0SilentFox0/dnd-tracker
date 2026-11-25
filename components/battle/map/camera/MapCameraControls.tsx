@@ -36,8 +36,10 @@ export function MapCameraControls({
             hidden={!phone && hidden}
             className={cn(
                 HUD_GLASS,
-                'absolute right-[calc(0.75rem+var(--hud-side-w,0px))] z-30 flex items-center rounded-xl',
-                phone ? 'bottom-2' : 'top-[3.75rem]'
+                'absolute z-50 flex items-center rounded-xl',
+                phone
+                    ? 'right-[calc(0.75rem+var(--hud-side-w,0px))] bottom-2 z-30'
+                    : 'top-2 right-[calc(0.75rem+max(var(--hud-side-w,0px),var(--hud-rail-w,0px)+0.5rem))]'
             )}
         >
             <Button

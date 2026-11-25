@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { DockHp } from './DockHp';
 
 import { useSceneSlot } from '@/components/battle/scene/layout/SceneSlots';
-import { HUD_GLASS } from '@/components/hud';
 
 export function DockWaiting({ name }: { name: string }) {
     const t = useTranslations('battle.dock');
@@ -18,7 +17,7 @@ export function DockWaiting({ name }: { name: string }) {
     return createPortal(
         <div
             role="status"
-            className={`${HUD_GLASS} pointer-events-auto flex flex-col gap-2 rounded-xl px-4 py-2 text-[var(--ink)]`}
+            className="pointer-events-auto flex flex-col gap-2 px-2 py-1 text-[var(--ink)] [text-shadow:0_1px_3px_#000,0_0_2px_#000]"
         >
             <DockHp />
             <span className="hud-sc text-[15px] tracking-[.08em]">

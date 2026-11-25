@@ -17,9 +17,9 @@ export function DockDiamond({
             <span
                 aria-hidden
                 className={cn(
-                    'size-3.5 rotate-45 border',
+                    'size-3.5 rotate-45 border shadow-[0_1px_3px_#000]',
                     spent
-                        ? 'border-transparent bg-[#7d8581]'
+                        ? 'border-black/40 bg-[#7d8581]'
                         : 'border-[#3bd38a] bg-[#167a50]'
                 )}
             />

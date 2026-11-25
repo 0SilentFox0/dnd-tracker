@@ -2,8 +2,9 @@
 
 import { Heart } from 'lucide-react';
 
-import { HealthBar, HpFigure } from '@/components/battle/hud';
+import { HpFigure } from '@/components/battle/hud';
 import { useBattleRules, useBattleScene } from '@/lib/hooks/battle';
+import { hpRatio } from '@/lib/utils/battle/view';
 
 export function DockHp() {
     const {
@@ -23,7 +24,12 @@ export function DockHp() {
                 />
                 <HpFigure participant={hero} wounds={hpTerm === 'wounds'} />
             </div>
-            <HealthBar participant={hero} exact className="h-1.5" />
+            <div className="h-2 overflow-hidden rounded-full bg-black/45 ring-1 ring-black/30">
+                <i
+                    className="block h-full rounded-full bg-[#d2453a] transition-[width] duration-500"
+                    style={{ width: `${hpRatio(hero) * 100}%` }}
+                />
+            </div>
         </div>
     );
 }

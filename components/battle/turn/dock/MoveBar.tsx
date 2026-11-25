@@ -17,7 +17,7 @@ export function MoveBar({ used, max }: { used: number; max: number }) {
             <span className="hud-sc font-bold tracking-[.08em] whitespace-nowrap uppercase">
                 {t('moveCells', { left })}
             </span>
-            <span className="h-1 overflow-hidden rounded-full bg-white/25">
+            <span className="h-1.5 overflow-hidden rounded-full bg-black/45 ring-1 ring-black/30">
                 <span
                     className="block h-full rounded-full bg-[#16a765]"
                     style={{ width: `${max ? (left / max) * 100 : 0}%` }}

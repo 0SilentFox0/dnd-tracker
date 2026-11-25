@@ -9,7 +9,6 @@ export * from './downed-heroes';
 export * from './effect-summary';
 export * from './health';
 export * from './hero';
-export * from './initiative-arc';
 export * from './knowledge';
 export * from './log-channel';
 export * from './log-entry';

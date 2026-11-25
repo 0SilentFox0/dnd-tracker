@@ -12,7 +12,6 @@ type Turn = ReturnType<typeof usePlayerTurn>;
 const Tile = ({
     icon,
     label,
-    sub,
     hotkey,
     used,
     primary,
@@ -20,7 +19,6 @@ const Tile = ({
 }: {
     icon: ActionIconKey;
     label: ReactNode;
-    sub?: string;
     hotkey?: number;
     used?: boolean;
     primary?: boolean;
@@ -47,14 +45,6 @@ const Tile = ({
                 <span className="hud-sc block text-[17px] leading-5 [overflow-wrap:anywhere]">
                     {label}
                 </span>
-                {sub && (
-                    <span
-                        aria-hidden
-                        className="block truncate text-xs text-hud-soft"
-                    >
-                        {sub}
-                    </span>
-                )}
             </span>
             {hotkey !== undefined && (
                 <kbd
@@ -68,16 +58,6 @@ const Tile = ({
     );
 };
 
-type SubKey =
-    | 'attack'
-    | 'magic'
-    | 'channel'
-    | 'ability'
-    | 'bonus'
-    | 'core'
-    | 'gear'
-    | 'strikeAndReturn';
-
 type TileSpec = {
     id: string;
     group: 'action' | 'bonus';
@@ -87,23 +67,6 @@ type TileSpec = {
     primary?: boolean;
     run?: () => void;
 };
-
-const GroupHeader = ({
-    title,
-    status,
-    spent,
-}: {
-    title: string;
-    status: string;
-    spent: boolean;
-}) => (
-    <div className="hud-sc mt-3 mb-1.5 flex items-center justify-between text-[13px] tracking-[.08em] text-hud-soft first:mt-0">
-        <span>{title}</span>
-        <span className={spent ? undefined : 'text-[var(--gold)]'}>
-            {status}
-        </span>
-    </div>
-);
 
 export function ActionGrid({
     turn,
@@ -273,65 +236,30 @@ export function ActionGrid({
         })),
     });
 
-    const groups = [
-        {
-            id: 'action' as const,
-            title: t('groupAction'),
-            spent: status.actionUsed && !status.attackLeft,
-        },
-        {
-            id: 'bonus' as const,
-            title: t('groupBonus'),
-            spent: !status.bonusAvailable,
-        },
-    ].filter((g) => tiles.some((tile) => tile.group === g.id));
-
     return (
         <>
             <div data-tour="battle.turn-controls" className="pt-3">
-                {groups.map((g) => (
-                    <div key={g.id}>
-                        <GroupHeader
-                            title={g.title}
-                            spent={g.spent}
-                            status={
-                                g.spent
-                                    ? t('statusSpent')
-                                    : t('statusAvailable')
-                            }
-                        />
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            {tiles
-                                .filter((tile) => tile.group === g.id)
-                                .map((tile) => {
-                                    const index = keyed.indexOf(tile);
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {tiles.map((tile) => {
+                        const index = keyed.indexOf(tile);
 
-                                    return (
-                                        <Tile
-                                            key={tile.id}
-                                            icon={tile.icon}
-                                            label={tile.label}
-                                            sub={
-                                                tile.id === 'gate'
-                                                    ? undefined
-                                                    : t(
-                                                          `sub.${tile.id as SubKey}`
-                                                      )
-                                            }
-                                            hotkey={
-                                                index >= 0 && index < 9
-                                                    ? index + 1
-                                                    : undefined
-                                            }
-                                            used={tile.used}
-                                            primary={tile.primary}
-                                            onClick={tile.run}
-                                        />
-                                    );
-                                })}
-                        </div>
-                    </div>
-                ))}
+                        return (
+                            <Tile
+                                key={tile.id}
+                                icon={tile.icon}
+                                label={tile.label}
+                                hotkey={
+                                    index >= 0 && index < 9
+                                        ? index + 1
+                                        : undefined
+                                }
+                                used={tile.used}
+                                primary={tile.primary}
+                                onClick={tile.run}
+                            />
+                        );
+                    })}
+                </div>
             </div>
             {turn.phase !== 'countdown' && (
                 <HudButton

@@ -24,7 +24,10 @@ import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleLog } from '@/components/battle/log/BattleLog';
 import { TokenBubble } from '@/components/battle/map/bubble/TokenBubble';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
-import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
+import {
+    MapPreviewSlotContext,
+    MapToolsSlotContext,
+} from '@/components/battle/map/panels/MapToolsSlot';
 import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
@@ -114,6 +117,8 @@ export function MobileBattleLayout({
 
     const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
+    const [previewSlot, setPreviewSlot] = useState<HTMLDivElement | null>(null);
+
     const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
@@ -139,10 +144,14 @@ export function MobileBattleLayout({
                         {mapView ? (
                             <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
-                                    <BattleMapPanel
-                                        phone
-                                        onBusyChange={setMapBusy}
-                                    />
+                                    <MapPreviewSlotContext.Provider
+                                        value={previewSlot}
+                                    >
+                                        <BattleMapPanel
+                                            phone
+                                            onBusyChange={setMapBusy}
+                                        />
+                                    </MapPreviewSlotContext.Provider>
                                 </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
@@ -166,7 +175,7 @@ export function MobileBattleLayout({
                                 edge="top"
                                 className="mr-12 items-stretch"
                             >
-                                <div className={`${HUD_GLASS} rounded-xl`}>
+                                <div className={`${HUD_GLASS} rounded-full`}>
                                     <InitiativeTrack />
                                 </div>
                             </HudBlock>
@@ -265,6 +274,7 @@ export function MobileBattleLayout({
                         onComplete={onComplete}
                         tabs={{ value: tab, set: setTab }}
                         onToolsSlot={setToolsSlot}
+                        onPreviewSlot={setPreviewSlot}
                         audio={{ player: false }}
                     />
                 </div>

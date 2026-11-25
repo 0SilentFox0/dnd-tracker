@@ -7,11 +7,10 @@ vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
-import { arcStyle } from '@/lib/utils/battle/view';
 
 vi.unmock('next-intl');
 
-describe('InitiativeTrack arc', () => {
+describe('InitiativeTrack line', () => {
     afterEach(cleanup);
 
     it('marks only the active participant with data-current', () => {
@@ -25,25 +24,6 @@ describe('InitiativeTrack arc', () => {
 
         expect(current.length).toBe(1);
         expect(current[0].querySelector('[data-fx-participant]')).not.toBeNull();
-    });
-
-    it('scales neighbours by distance from the active one', () => {
-        const scene = fakeScene();
-
-        const { container } = render(<InitiativeTrack />, {
-            wrapper: scene.wrapper,
-        });
-
-        const first = container.querySelector(
-            '[data-current] > span'
-        ) as HTMLElement;
-
-        expect(first.style.transform).toContain(`scale(${arcStyle(0).scale})`);
-
-        const next = first.parentElement?.nextElementSibling
-            ?.firstElementChild as HTMLElement;
-
-        expect(next.style.transform).toContain(`scale(${arcStyle(1).scale})`);
     });
 
     it('centres the active participant instantly on first render', () => {
@@ -72,10 +52,18 @@ describe('InitiativeTrack arc', () => {
         expect(scene.value.select).toHaveBeenCalledWith('me');
     });
 
-    it('shows names for the active slot and neighbours', () => {
+    it('shows the name of the active participant only', () => {
         render(<InitiativeTrack />, { wrapper: fakeScene().wrapper });
 
         expect(screen.getByText('Фрейда')).toBeTruthy();
-        expect(screen.getByText('Гоблін')).toBeTruthy();
+        expect(screen.queryByText('Гоблін')).toBeNull();
+    });
+
+    it('lays portraits in one flat row without transforms', () => {
+        const { container } = render(<InitiativeTrack />, {
+            wrapper: fakeScene().wrapper,
+        });
+
+        expect(container.querySelector('[style*="transform"]')).toBeNull();
     });
 });

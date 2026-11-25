@@ -35,6 +35,11 @@ const MAP_TOOLS_SLOT = cn(
     '[&_button[aria-pressed]]:min-h-11 [&_button[aria-pressed]]:text-sm'
 );
 
+const SOUND_SECTION = cn(
+    'flex flex-col gap-2 [&>div]:w-full',
+    '[&_[data-battle-audio]_section]:w-full [&_[data-battle-audio]_section]:rounded-xl [&_[data-battle-audio]_section]:bg-hud-panel [&_[data-battle-audio]_section]:p-3 [&_[data-battle-audio]_section]:shadow-none'
+);
+
 const NextTurnIcon = actionIcon.nextTurn;
 
 const SECTION = 'hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]';
@@ -44,6 +49,7 @@ export interface ToolsProps {
     view?: { mode: BattleViewMode; set: (mode: BattleViewMode) => void };
     tabs?: { value: MobileBattleTab; set: (tab: MobileBattleTab) => void };
     onToolsSlot?: (el: HTMLDivElement | null) => void;
+    onPreviewSlot?: (el: HTMLDivElement | null) => void;
     onOpenDrawer?: (key: DrawerKey) => void;
     // phone keeps the player on the stage (`player: false`): the sheet unmounts on close and would stop the video
     audio?: { sound?: boolean; player?: boolean };
@@ -54,6 +60,7 @@ export function ToolsContent({
     view,
     tabs,
     onToolsSlot,
+    onPreviewSlot,
     onOpenDrawer,
     audio,
 }: ToolsProps) {
@@ -193,10 +200,7 @@ export function ToolsContent({
                         className="flex flex-col gap-2"
                     >
                         <h3 className={SECTION}>{td('mapTools')}</h3>
-                        <div
-                            ref={onToolsSlot}
-                            className={MAP_TOOLS_SLOT}
-                        />
+                        <div ref={onToolsSlot} className={MAP_TOOLS_SLOT} />
                     </section>
                     {isDM && !readOnly && mode === 'edit' && (
                         <section className="flex flex-col gap-2">
@@ -235,7 +239,7 @@ export function ToolsContent({
                 </div>
             </section>
             {withSound && (withPlayer || soundboard) && (
-                <section className="flex flex-col gap-2">
+                <section className={SOUND_SECTION}>
                     <h3 className={SECTION}>{td('sound')}</h3>
                     {withPlayer && <AudioDock placement="corner" />}
                     {soundboard && (
@@ -265,6 +269,7 @@ export function ToolsContent({
                             {t('nextTurn')}
                         </HudButton>
                     )}
+                    <div ref={onPreviewSlot} className="empty:hidden" />
                     {onComplete && battle.status === BattleStatus.ACTIVE && (
                         <HudButton
                             type="button"

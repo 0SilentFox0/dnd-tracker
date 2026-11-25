@@ -337,24 +337,10 @@
     "ability": "Вміння",
     "bonus": "Бонус",
     "core": "Дії",
-    "gear": "Інвентар",
+    "gear": "Річ",
     "strikeAndReturn": "Повернутися",
     "endTurn": "Завершити хід",
-    "popoverTitle": "Дії ходу · {name} · раунд {round}",
-    "groupAction": "Дія",
-    "groupBonus": "Бонусна дія",
-    "statusAvailable": "доступна",
-    "statusSpent": "витрачена",
-    "sub": {
-      "attack": "Удар зброєю",
-      "magic": "Створити заклинання",
-      "channel": "Канал",
-      "ability": "Особлива здібність",
-      "bonus": "Швидка дія",
-      "core": "Стандартні дії",
-      "gear": "Змінити спорядження",
-      "strikeAndReturn": "Удар і відхід"
-    }
+    "popoverTitle": "Дії ходу · {name} · раунд {round}"
   },
   "turnControls": {
     "reactionSpell": "Заклинання реакцією"

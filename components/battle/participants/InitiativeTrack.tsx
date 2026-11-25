@@ -8,21 +8,7 @@ import { ROMAN_NUMERALS } from '@/lib/constants/spells';
 import { useBattleSceneData, useInitiativeDrag } from '@/lib/hooks/battle';
 import { useFlip, useReducedMotion } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-import { arcStyle, queueKeys } from '@/lib/utils/battle/view';
-
-const roundDividerShift = (
-    queue: { kind: string }[],
-    i: number,
-    current: number
-) => {
-    const [lo, hi] = i > current ? [current, i] : [i, current];
-
-    const dividers = queue
-        .slice(lo, hi)
-        .filter((e) => e.kind === 'round').length;
-
-    return i > current ? dividers : -dividers;
-};
+import { queueKeys } from '@/lib/utils/battle/view';
 
 const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
@@ -83,7 +69,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                 if (e.deltaY && !e.shiftKey)
                     e.currentTarget.scrollLeft += e.deltaY;
             }}
-            className="pointer-events-none relative flex h-[92px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-1 *:pointer-events-auto sm:h-[118px] [scrollbar-width:none] before:w-1/2 before:shrink-0 before:content-[''] after:w-1/2 after:shrink-0 after:content-['']"
+            className="pointer-events-auto relative flex w-full items-center gap-2 overflow-x-auto overflow-y-hidden px-3 py-1.5 [scrollbar-width:none]"
         >
             {queue.map((e, i) => {
                 if (e.kind === 'round')
@@ -99,17 +85,6 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         </span>
                     );
 
-                const d =
-                    currentIndex < 0
-                        ? 0
-                        : i -
-                          currentIndex -
-                          roundDividerShift(queue, i, currentIndex);
-
-                const arc = arcStyle(d);
-
-                const near = Math.abs(d) <= 1;
-
                 return (
                     <HudButton
                         key={keys[i]}
@@ -123,13 +98,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         )}
                         {...dragProps?.(e.participant.basicInfo.id)}
                     >
-                        <span
-                            style={{
-                                transform: `translateY(${arc.y}px) scale(${arc.scale})`,
-                                opacity: arc.opacity,
-                            }}
-                            className="flex flex-col items-center gap-0.5 transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none"
-                        >
+                        <span className="flex flex-col items-center gap-0.5">
                             <Portrait
                                 fx="track"
                                 key={e.current ? 'current' : 'queued'}
@@ -145,13 +114,8 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                 }
                                 extra={e.kind === 'extra'}
                             />
-                            {near && (
-                                <small
-                                    className={cn(
-                                        'hud-sc max-w-14 truncate text-[10px] leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]',
-                                        !e.current && 'max-sm:hidden'
-                                    )}
-                                >
+                            {e.current && (
+                                <small className="hud-sc max-w-20 truncate text-[10px] leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
                                     {e.participant.basicInfo.name}
                                 </small>
                             )}

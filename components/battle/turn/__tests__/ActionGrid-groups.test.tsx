@@ -29,19 +29,25 @@ const props = () => ({
 describe('ActionGrid groups', () => {
     afterEach(cleanup);
 
-    it('shows both groups with availability status', () => {
+    it('shows tiles without group headers or sub-captions', () => {
         render(<ActionGrid turn={turn({})} {...props()} />);
 
-        expect(screen.getByText('Дія')).toBeTruthy();
-        expect(screen.getByText('Бонусна дія')).toBeTruthy();
-        expect(screen.getAllByText('доступна')).toHaveLength(2);
+        expect(screen.queryByText('Бонусна дія')).toBeNull();
+        expect(screen.queryByText('доступна')).toBeNull();
+        expect(screen.queryByText('Удар зброєю')).toBeNull();
+        expect(screen.getByRole('button', { name: /^Бонус$/ })).toBeTruthy();
     });
 
-    it('marks a spent bonus action', () => {
-        render(<ActionGrid turn={turn({ bonusAvailable: false })} {...props()} />);
+    it('disables the bonus tile once the bonus action is spent', () => {
+        render(
+            <ActionGrid turn={turn({ bonusAvailable: false })} {...props()} />
+        );
 
-        expect(screen.getByText('витрачена')).toBeTruthy();
-        expect(screen.getAllByText('доступна')).toHaveLength(1);
+        expect(
+            screen
+                .getByRole('button', { name: /^Бонус$/ })
+                .hasAttribute('disabled')
+        ).toBe(true);
     });
 
     it('numbers tiles in order and keeps tiles 1:1', () => {

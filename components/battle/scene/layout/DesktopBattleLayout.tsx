@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
@@ -23,12 +23,16 @@ import { SideDot } from '@/components/battle/hud';
 import { BattleLog } from '@/components/battle/log/BattleLog';
 import { TokenBubble } from '@/components/battle/map/bubble/TokenBubble';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
-import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
+import {
+    MapPreviewSlotContext,
+    MapToolsSlotContext,
+} from '@/components/battle/map/panels/MapToolsSlot';
 import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
+import { HUD_GLASS } from '@/components/hud';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
@@ -121,6 +125,8 @@ export function DesktopBattleLayout({
 
     const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
+    const [previewSlot, setPreviewSlot] = useState<HTMLDivElement | null>(null);
+
     const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
@@ -130,7 +136,8 @@ export function DesktopBattleLayout({
 
         if (!el) return;
 
-        return () => setSlots((prev) => (prev.dock === el ? { dock: null } : prev));
+        return () =>
+            setSlots((prev) => (prev.dock === el ? { dock: null } : prev));
     }, []);
 
     const rootRef = useRef<HTMLDivElement>(null);
@@ -152,6 +159,24 @@ export function DesktopBattleLayout({
         },
         []
     );
+
+    useEffect(() => {
+        const rail =
+            rootRef.current?.querySelector<HTMLElement>('[data-drawer-rail]');
+
+        if (!rail || typeof ResizeObserver === 'undefined') return;
+
+        const ro = new ResizeObserver(() =>
+            rootRef.current?.style.setProperty(
+                '--hud-rail-w',
+                `${rail.offsetWidth}px`
+            )
+        );
+
+        ro.observe(rail);
+
+        return () => ro.disconnect();
+    }, []);
 
     const bindColumn = useMemo(
         () => observeHeight('--hud-dock-h'),
@@ -179,7 +204,13 @@ export function DesktopBattleLayout({
                         {battle.map && viewMode === 'map' ? (
                             <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
-                                    <BattleMapPanel onBusyChange={setMapBusy} />
+                                    <MapPreviewSlotContext.Provider
+                                        value={previewSlot}
+                                    >
+                                        <BattleMapPanel
+                                            onBusyChange={setMapBusy}
+                                        />
+                                    </MapPreviewSlotContext.Provider>
                                 </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
@@ -194,7 +225,11 @@ export function DesktopBattleLayout({
                             align="center"
                             className="pointer-events-none absolute top-2 left-[calc(50%-var(--hud-side-w,0px)/2)] z-20 w-[min(560px,calc(100%-480px-var(--hud-side-w,0px)))] -translate-x-1/2"
                         >
-                            <InitiativeTrack onReorder={onReorder} />
+                            <div
+                                className={`${HUD_GLASS} pointer-events-auto mx-auto w-fit max-w-full rounded-full`}
+                            >
+                                <InitiativeTrack onReorder={onReorder} />
+                            </div>
                         </HudBlock>
                         <InNoticeStack>
                             <ConnectionBanner />
@@ -273,6 +308,7 @@ export function DesktopBattleLayout({
                         onComplete={onComplete}
                         view={{ mode: viewMode, set: setViewMode }}
                         onToolsSlot={setToolsSlot}
+                        onPreviewSlot={setPreviewSlot}
                         onOpenDrawer={toggle}
                     />
                 </div>

@@ -8,7 +8,7 @@ import { DockDiamond } from './DockDiamond';
 import { DockHp } from './DockHp';
 import { MoveBar } from './MoveBar';
 
-import { HUD_GLASS, HudButton } from '@/components/hud';
+import { HudButton } from '@/components/hud';
 import { actionIcon } from '@/components/hud/icons/battle';
 import { cn } from '@/lib/utils';
 import type { TurnFlowState } from '@/lib/utils/battle/flows';
@@ -78,18 +78,9 @@ export function ActionDock({
             className="pointer-events-auto flex w-full flex-col items-stretch gap-2"
         >
             {children}
-            {phase !== 'acting' && (
-                <div className={cn(HUD_GLASS, 'rounded-2xl px-3 py-2')}>
-                    <DockHp />
-                </div>
-            )}
+            {phase !== 'acting' && <DockHp />}
             {phase === 'acting' && (
-                <div
-                    className={cn(
-                        HUD_GLASS,
-                        'flex items-center gap-3 rounded-2xl px-3 py-2.5 max-md:gap-2 max-md:px-2'
-                    )}
-                >
+                <div className="flex items-center gap-3 px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] max-md:gap-2">
                     <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                         <div className="flex items-start gap-3">
                             <DockDiamond

@@ -5,7 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 import '@/components/systems/registry';
-import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
+import { SceneSlotsContext } from '@/components/battle/scene/layout/SceneSlots';
+import { HeroExtras } from '@/components/battle/turn/dock/HeroExtras';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
@@ -36,16 +37,20 @@ const setup = (readied: boolean) => {
         },
     } as typeof scene.me;
 
+    const dock = document.body.appendChild(document.createElement('div'));
+
     render(
         <TooltipProvider>
-            <HeroCluster hero={hero} />
+            <SceneSlotsContext value={{ dock }}>
+                <HeroExtras hero={hero} />
+            </SceneSlotsContext>
         </TooltipProvider>,
         { wrapper: scene.wrapper }
     );
 };
 
-describe('HeroCluster time-critical controls', () => {
-    it('shows readied attack and pending cast without expanding', () => {
+describe('HeroExtras time-critical controls', () => {
+    it('shows readied attack and pending cast in the dock slot', () => {
         setup(true);
         expect(
             screen.queryByRole('button', { name: /Підготовлена атака/ })
