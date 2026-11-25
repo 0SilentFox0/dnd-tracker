@@ -132,7 +132,7 @@ export function TrackList({
                                     className="h-1 overflow-hidden rounded bg-white/10"
                                 >
                                     <div
-                                        className="h-full bg-hud-gold"
+                                        className="h-full bg-hud-crimson"
                                         style={{
                                             width: `${preview.progress * 100}%`,
                                         }}
