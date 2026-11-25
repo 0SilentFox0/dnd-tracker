@@ -37,9 +37,11 @@ export function parseCssColor(value: string): Rgb | null {
 
     if (parts.length < 3 || parts.some((n) => !Number.isFinite(n))) return null;
 
-    return [parts[0], parts[1], parts[2]].map((n) =>
+    const [r, g, b] = parts.map((n) =>
         Math.min(255, Math.max(0, Math.round(n)))
-    ) as unknown as Rgb;
+    );
+
+    return [r, g, b];
 }
 
 export function readFogPalette(element: Element | null): FogPalette {

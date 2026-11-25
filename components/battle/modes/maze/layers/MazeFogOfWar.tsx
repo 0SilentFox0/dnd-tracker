@@ -1,8 +1,12 @@
 'use client';
 
-import { memo, useEffect, useId, useMemo, useState } from 'react';
+import { memo, useId, useMemo } from 'react';
 
-import { useFogQuality, useHydrated } from '@/lib/hooks/common';
+import {
+    useFogQuality,
+    useHydrated,
+    usePaletteVersion,
+} from '@/lib/hooks/common';
 import { parseCellKey, UNIT } from '@/lib/utils/battle/grid';
 import { MazeView } from '@/lib/utils/battle/modes/maze';
 import { cloudTextureUrl } from '@/lib/utils/canvas/fog/cloud-texture';
@@ -27,20 +31,7 @@ export const MazeFogOfWar = memo(function MazeFogOfWar({ map, view }: Props) {
 
     const hydrated = useHydrated();
 
-    const [paletteVersion, setPaletteVersion] = useState(0);
-
-    useEffect(() => {
-        const observer = new MutationObserver(() =>
-            setPaletteVersion((v) => v + 1)
-        );
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['data-palette'],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const paletteVersion = usePaletteVersion();
 
     const cloud = useMemo(
         () =>

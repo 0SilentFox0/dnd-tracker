@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import {
     type FogQuality,
     useFogCompact,
     useFogQuality,
+    usePaletteVersion,
 } from '@/lib/hooks/common';
 import {
     acquireCloudMotion,
@@ -96,7 +97,7 @@ export function FogSurface({
 
     const quality = forced ?? detected;
 
-    const [paletteVersion, setPaletteVersion] = useState(0);
+    const paletteVersion = usePaletteVersion();
 
     const { cols, rows, cellPx } = grid;
 
@@ -127,19 +128,6 @@ export function FogSurface({
     useEffect(() => {
         visibleRef.current = visible;
     });
-
-    useEffect(() => {
-        const observer = new MutationObserver(() =>
-            setPaletteVersion((v) => v + 1)
-        );
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['data-palette'],
-        });
-
-        return () => observer.disconnect();
-    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;

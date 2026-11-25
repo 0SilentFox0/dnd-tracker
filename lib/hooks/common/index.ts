@@ -46,6 +46,7 @@ export {
     type PagerControls,
     usePager,
 } from './usePager';
+export { usePaletteVersion } from './usePaletteVersion';
 export { type PinchStep, type PointerBind, usePanPinch } from './usePanPinch';
 export {
     type PlayerViewScope,

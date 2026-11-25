@@ -5,7 +5,7 @@ export const CLEAR_EXPLORED = 133;
 
 export const CLEAR_HIDDEN = 31;
 
-export const MASK_PX_PER_CELL = 4;
+const MASK_PX_PER_CELL = 4;
 
 export interface FogMask {
     key: string;
@@ -68,7 +68,7 @@ export function cellLevels(
     return levels;
 }
 
-export function maskKey(levels: Uint8Array, cols: number, rows: number) {
+function maskKey(levels: Uint8Array, cols: number, rows: number) {
     let hash = 2166136261;
 
     for (let i = 0; i < levels.length; i++) {
