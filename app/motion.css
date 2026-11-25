@@ -108,6 +108,9 @@
   .motion-lift { transition: none; }
   .motion-press:active { transform: none; }
   .motion-lift:hover { transform: none; }
+  .page-transition,
+  [data-slot='tabs-content'],
+  .ds-interactive { animation: none !important; transition: none !important; }
 }
 
 /* Character sheet: scoped zoom for large screens */

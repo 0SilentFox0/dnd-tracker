@@ -14,7 +14,7 @@ interface ChipItem {
 }
 
 const CHIP =
-    'flex h-8 shrink-0 items-center rounded-lg border border-hud-line px-3 text-[13px] text-hud-muted';
+    'flex h-8 shrink-0 items-center rounded-lg border border-hud-line px-3 text-[13px] text-hud-muted transition-[background-color,box-shadow,color,border-color] duration-150 hover:border-hud-muted hover:text-hud-ink';
 
 const CHIP_LG = 'h-11 min-h-11 px-4 text-sm';
 
