@@ -255,8 +255,6 @@
     "imageUploadFailed": "Failed to upload the image: {message}"
   },
   "profile": {
-    "title": "Profile",
-    "subtitle": "Your account and avatar",
     "avatar": {
       "change": "Change photo",
       "remove": "Remove photo",

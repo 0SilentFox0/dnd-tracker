@@ -255,8 +255,6 @@
     "imageUploadFailed": "Не вдалося завантажити картинку: {message}"
   },
   "profile": {
-    "title": "Профіль",
-    "subtitle": "Ваш обліковий запис і аватар",
     "avatar": {
       "change": "Змінити фото",
       "remove": "Видалити фото",

@@ -1,4 +1,8 @@
 {
+  "2026-11-25-design-system": {
+    "title": "A new look for the platform",
+    "body": "One look across the whole platform: a new interface style, two themes (Tavern and Parchment), an updated profile with settings, the character sheet and the campaign dashboard."
+  },
   "2026-11-22-world-map-hud": {
     "title": "World map HUD",
     "body": "The world map fills the screen. Where next lists accessible places, diamonds mark locations and the map highlights your party. On phones, open the destinations list from the bottom bar."
