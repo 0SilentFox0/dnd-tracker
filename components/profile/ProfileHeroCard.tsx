@@ -38,7 +38,7 @@ export function ProfileHeroCard({
             value: formatRelativeDays(locale, lastActivity, now),
             label: t('lastActivityLabel'),
         },
-    ].filter((x) => x !== false && x !== null);
+    ].filter((x) => typeof x === 'object' && x !== null);
 
     return (
         <section className="ds-panel ornate space-y-5 p-5 sm:p-6">
