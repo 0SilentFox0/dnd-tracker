@@ -618,6 +618,27 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'planned',
     },
     {
+        route: 'campaigns/[id]/quests',
+        methods: ['GET', 'POST'],
+        task: 0,
+        adapter: 'quest journal, UI only, not assistant-exposed',
+        state: 'planned',
+    },
+    {
+        route: 'campaigns/[id]/quests/[questId]',
+        methods: ['DELETE', 'PUT'],
+        task: 0,
+        adapter: 'quest journal, UI only, not assistant-exposed',
+        state: 'planned',
+    },
+    {
+        route: 'campaigns/[id]/quests/[questId]/tracking',
+        methods: ['PUT'],
+        task: 0,
+        adapter: 'quest journal, UI only, not assistant-exposed',
+        state: 'planned',
+    },
+    {
         route: 'campaigns/[id]/world/discard-upload',
         methods: ['POST'],
         task: 0,
