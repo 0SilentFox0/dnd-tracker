@@ -16,6 +16,13 @@ vi.mock('next/navigation', () => ({
     redirect: (url: string) => redirect(url),
 }));
 vi.mock('@/lib/utils/api/ops-access', () => ({ isOpsAdmin: () => false }));
+vi.mock('@/lib/server/profile/summary', () => ({
+    getProfileSummary: async () => ({
+        campaigns: 0,
+        characters: 0,
+        lastActivity: null,
+    }),
+}));
 vi.mock('../page-client', () => ({ ProfileClient: () => null }));
 
 beforeEach(() => vi.clearAllMocks());
