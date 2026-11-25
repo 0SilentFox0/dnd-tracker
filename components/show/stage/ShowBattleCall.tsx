@@ -23,7 +23,7 @@ export function ShowBattleCall({
             <Link
                 href={`/campaigns/${campaignId}/battles/${battle.id}`}
                 onClick={() => playerView && battleView.set(true)}
-                className="group pointer-events-auto relative flex flex-col items-center gap-1 rounded-xl border-2 border-hud-gold-strong bg-black px-10 py-6 text-hud-bone shadow-2xl"
+                className="group pointer-events-auto relative flex flex-col items-center gap-1 rounded-xl border-2 border-hud-crimson bg-black px-10 py-6 text-hud-bone shadow-2xl"
             >
                 <span
                     aria-hidden

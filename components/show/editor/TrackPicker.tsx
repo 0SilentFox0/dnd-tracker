@@ -27,7 +27,7 @@ function Row({
             onClick={onClick}
             className={cn(
                 'w-full rounded px-2 py-1.5 text-left text-sm text-hud-bone hover:bg-white/10',
-                selected && 'bg-white/10 text-hud-gold'
+                selected && 'bg-hud-panel-2 text-hud-crimson-fg'
             )}
         >
             {children}
