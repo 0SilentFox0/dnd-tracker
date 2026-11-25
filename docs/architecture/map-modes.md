@@ -97,3 +97,9 @@ Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they
 - Живий прогін камери (100×100 і 200×200 по ходах), mobile 375/touch, дві вкладки для follow ДМ, FX і perf перельоту на 200×200 — відкладені до завершення епіку; див. хвости в [STATUS](../STATUS.md).
 
 - **Чанки тайлів (перф):** `CHUNK_SIDE`/`chunkKey` — один джерело в `lib/utils/battle/map-storage/chunk-key.ts`; `patchTileChunks` читає й пише лише зачеплені чанки (`tile-chunk-patch.ts`), знімок версії = попередній `tileLayers` + зачеплені чанки; `TileLayerChunks` вважаються незмінними (на цьому тримається мемоізація `rasterSignature`), `clearTileRasterCache` викликає `TileCanvas` при зміні карти/розмонтуванні. `BattleMap`/`MapStage` складаються з хуків `useBattleMapFrame`/`useBattleMapCamera`/`useMapStageTokens` і шарів `MapTokensLayer`/`MapTransformLayers`.
+
+## Hex-сітка (Ч7c)
+
+- `gridType` карти: `square` (за відсутності) або `hex` (odd-q), задається при створенні в діалозі карти й далі не змінюється. Деталі геометрії, шаблонів і рендера — [battle.md](battle.md#hex-сітка-ч7c-gridtype).
+- Режим оголошує підтримувані сітки полем `grids?: GridKind[]` (`lib/utils/battle/modes/types.ts`); maze = `['square']`, UI не пропонує несумісні режими для hex. Стіни, ґрати, двері й тайли на hex заборонені схемою й серверними перевірками (`EditorSidebar` їх ховає).
+- Імпорт каталогу/UVTT завжди square. Ядро не називає режим; `grids` — єдиний шов.
