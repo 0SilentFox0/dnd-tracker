@@ -23,6 +23,9 @@ export const CAMPAIGN_BASE = [
     'abilities',
 ] as const satisfies readonly Namespace[];
 
+/** uk gzip budget (KB) of the base alone; routes and system packs have their own */
+export const CAMPAIGN_BASE_LIMIT_KB = 16.2;
+
 export const PACKS = {
     campaigns: ['campaigns'],
     dashboard: ['dashboard', 'campaigns'],
@@ -202,3 +205,59 @@ export function routeNamespaces(
         ]),
     ];
 }
+
+/** uk gzip budget (KB) per deepest RouteScope key: base + whatsNew + packs of the whole layout chain */
+export const ROUTE_BUDGETS_KB: Partial<Record<RouteKey, number>> = {
+    '[id]': 28.2,
+    '[id]/acquaintances': 35.8,
+    '[id]/battles': 87.4,
+    '[id]/character': 59.7,
+    '[id]/character/draft': 69.3,
+    '[id]/character/edit': 69.3,
+    '[id]/character/new': 69.3,
+    '[id]/dm/ai': 26.5,
+    '[id]/dm/artifacts': 52.8,
+    '[id]/dm/artifacts/[artifactId]': 70.7,
+    '[id]/dm/artifacts/new': 70.7,
+    '[id]/dm/assistant': 26.5,
+    '[id]/dm/backgrounds': 60.7,
+    '[id]/dm/backgrounds/[backgroundId]': 70.6,
+    '[id]/dm/battles': 59.3,
+    '[id]/dm/characters': 65.5,
+    '[id]/dm/characters/[characterId]': 65.5,
+    '[id]/dm/classes': 60.7,
+    '[id]/dm/classes/[classId]': 70.6,
+    '[id]/dm/compendium': 52.8,
+    '[id]/dm/feats': 52.8,
+    '[id]/dm/feats/[featId]': 70.7,
+    '[id]/dm/graph': 41.8,
+    '[id]/dm/main-skills': 55.4,
+    '[id]/dm/main-skills/[mainSkillId]': 60.7,
+    '[id]/dm/maps': 35.8,
+    '[id]/dm/maps/[mapId]': 71.5,
+    '[id]/dm/music': 35.8,
+    '[id]/dm/print': 70.6,
+    '[id]/dm/races': 70.7,
+    '[id]/dm/races/[raceId]': 70.7,
+    '[id]/dm/rules': 36.1,
+    '[id]/dm/scenario': 46.6,
+    '[id]/dm/show': 35.8,
+    '[id]/dm/skills': 55.4,
+    '[id]/dm/skills/[skillId]': 60.7,
+    '[id]/dm/skills/new': 60.7,
+    '[id]/dm/spell-groups': 52.8,
+    '[id]/dm/spells': 52.8,
+    '[id]/dm/spells/[spellId]': 70.7,
+    '[id]/dm/spells/new': 70.7,
+    '[id]/dm/system': 70.6,
+    '[id]/dm/units': 54.7,
+    '[id]/dm/units/[unitId]': 72.7,
+    '[id]/dm/units/new': 72.7,
+    '[id]/dm/world': 35.8,
+    '[id]/info': 65.2,
+    '[id]/journal': 35.8,
+    '[id]/show': 35.8,
+    '[id]/world': 35.8,
+    'list': 21.3,
+    'new': 21.3,
+};

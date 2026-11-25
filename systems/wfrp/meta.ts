@@ -29,11 +29,9 @@ export const WFRP_META = {
         },
         budgetKb: {
             packs: {
-                // wfrpMagic moved into the battle pack (the HUD reads it)
-                battle: 120.5,
-                characterSheet: 121.2,
-                // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels, the canon-tech epic (P1-P12) the system editor fields, the Ch5 character sheet keys and the Ch6 HUD/hex keys grew the wfrp scopes past their old budgets
-                contentLibrary: 126.6,
+                battle: 8.6,
+                characterSheet: 4.3,
+                contentLibrary: 9.1,
             },
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
