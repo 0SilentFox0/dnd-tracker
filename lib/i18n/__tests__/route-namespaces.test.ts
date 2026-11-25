@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-    campaignPages,
-    routeGraph,
-} from '@/lib/i18n/test/route-namespaces';
+import { campaignPages, routeGraph } from '@/lib/i18n/test/route-namespaces';
 
 describe('routeGraph', () => {
     it('finds the campaign pages', () => {
@@ -35,13 +32,11 @@ describe('routeGraph', () => {
     });
 
     it('follows dynamic imports', () => {
-        const g = routeGraph(
-            'app/campaigns/[id]/battles/[battleId]/page.tsx'
-        );
+        const g = routeGraph('app/campaigns/[id]/battles/[battleId]/page.tsx');
 
-        expect(g.files.has('components/battle/dm/CompleteBattleDialog.tsx')).toBe(
-            true
-        );
+        expect(
+            g.files.has('components/battle/dm/CompleteBattleDialog.tsx')
+        ).toBe(true);
     });
 
     it('chain lists ancestor layouts root-first', () => {

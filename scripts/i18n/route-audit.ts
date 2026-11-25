@@ -83,7 +83,8 @@ async function main() {
     for (const m of SYS) {
         const i = m.i18n ?? {};
 
-        for (const s of ['battle', 'campaign', 'member', 'dm', 'log', 'rules']) add(s, i[s]);
+        for (const s of ['log', 'rules']) add(s, i[s]);
+        for (const [s, l] of Object.entries(i.packs ?? {})) add(s, l as string[]);
         for (const [s, l] of Object.entries(i.pages ?? {})) add(s, l as string[]);
     }
 

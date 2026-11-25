@@ -25,11 +25,22 @@ export type SystemPageScope =
     | 'dmRules'
     | 'draft';
 
+export type PackKey =
+    | 'campaigns'
+    | 'dashboard'
+    | 'rules'
+    | 'characterSheet'
+    | 'abilityDisplay'
+    | 'abilityEditor'
+    | 'contentLibrary'
+    | 'story'
+    | 'battle'
+    | 'ai'
+    | 'units';
+
 export interface SystemI18n {
-    battle?: readonly string[];
-    campaign?: readonly string[];
-    member?: readonly string[];
-    dm?: readonly string[];
+    /** Namespaces the module adds to a core namespace pack; a route loads them when it loads the pack */
+    packs?: Partial<Record<PackKey, readonly string[]>>;
     /** Texts of the module's rules-form sections: loaded on the rules page for every installed module, because the wizard lists sections of modules that are still off */
     rules?: readonly string[];
     /** Scopes with the module's stored battle-log texts: loaded for every installed module so old logs render with the module off */
@@ -38,9 +49,7 @@ export interface SystemI18n {
     legacyKeys?: Readonly<Record<string, string>>;
     pages?: Partial<Record<SystemPageScope, readonly string[]>>;
     budgetKb?: {
-        battle?: number;
-        member?: number;
-        dm?: number;
+        packs?: Partial<Record<PackKey, number>>;
         pages?: Partial<Record<SystemPageScope, number>>;
     };
 }

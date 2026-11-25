@@ -1,18 +1,12 @@
 import type { SystemI18n } from './meta';
 
 export const i18nNamespaces = ({
-    battle,
-    campaign,
-    member,
-    dm,
+    packs,
     rules,
     log,
     pages,
 }: SystemI18n): string[] => [
-    ...(battle ?? []),
-    ...(campaign ?? []),
-    ...(member ?? []),
-    ...(dm ?? []),
+    ...Object.values(packs ?? {}).flat(),
     ...(rules ?? []),
     ...(log ?? []),
     ...Object.values(pages ?? {}).flat(),

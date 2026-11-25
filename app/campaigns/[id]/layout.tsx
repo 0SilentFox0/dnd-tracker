@@ -8,7 +8,7 @@ import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
 import { campaignKeys } from '@/lib/hooks/campaigns';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
-import { systemScope } from '@/lib/i18n/system-scope';
+import { systemPackScope } from '@/lib/i18n/system-scope';
 import { getTranslator } from '@/lib/i18n/translator';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { getCampaignForLayout } from '@/lib/server/campaigns/access';
@@ -54,9 +54,10 @@ export default async function CampaignLayout({
     const scope = campaign ? system : null;
 
     const namespaces = [
-        ...systemScope(scope, 'campaign'),
-        ...systemScope(scope, 'member'),
-        ...(isDM ? systemScope(scope, 'dm') : []),
+        ...new Set([
+            ...systemPackScope(scope, 'characterSheet'),
+            ...(isDM ? systemPackScope(scope, 'contentLibrary') : []),
+        ]),
     ];
 
     return (

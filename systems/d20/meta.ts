@@ -8,7 +8,7 @@ export const D20_META = {
     tokens: ['dnd5e'],
     distance: { unit: 'ft', perCell: 5 },
     i18n: {
-        battle: ['battleD20'],
+        packs: { battle: ['battleD20'] },
         legacyKeys: {
             'battleLog.attack.thorns': 'battleD20.attack.thorns',
             'battleLog.turn.hotTemp': 'battleD20.turn.hotTemp',
@@ -23,7 +23,7 @@ export const D20_META = {
             'abilityText.log.hotTemp': 'battleD20.abilityLog.hotTemp',
             'abilityText.log.maxHpBoost': 'battleD20.abilityLog.maxHpBoost',
         },
-        budgetKb: { battle: 114.1 },
+        budgetKb: { packs: { battle: 114.1 } },
     },
     dmSections: ['classes', 'backgrounds'],
     contentKinds: ['classes', 'backgrounds'],

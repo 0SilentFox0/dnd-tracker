@@ -7,16 +7,19 @@ export const WFRP_META = {
     tokens: ['wfrp'],
     distance: { unit: 'yd', perCell: 2 },
     i18n: {
-        battle: ['battleWfrp'],
-        campaign: ['wfrpMagic', 'wfrpAdvancement'],
-        member: ['wfrpEquipment'],
-        dm: [
-            'wfrpCareers',
-            'wfrpCreation',
-            'wfrpEquipmentEditor',
-            'wfrpTraits',
-            'wfrpTables',
-        ],
+        packs: {
+            battle: ['battleWfrp', 'wfrpMagic'],
+            characterSheet: ['wfrpMagic', 'wfrpAdvancement', 'wfrpEquipment'],
+            contentLibrary: [
+                'wfrpMagic',
+                'wfrpCareers',
+                'wfrpCreation',
+                'wfrpEquipmentEditor',
+                'wfrpTraits',
+                'wfrpTables',
+            ],
+            rules: ['wfrpTables'],
+        },
         pages: {
             character: ['wfrpDowntime', 'wfrpCorruption'],
             draft: ['wfrpCreation'],
@@ -25,10 +28,13 @@ export const WFRP_META = {
             dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
         },
         budgetKb: {
-            battle: 118.2,
-            member: 121.2,
-            // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels, the canon-tech epic (P1-P12) the system editor fields, the Ch5 character sheet keys and the Ch6 HUD/hex keys grew the wfrp scopes past their old budgets
-            dm: 126.6,
+            packs: {
+                // wfrpMagic moved into the battle pack (the HUD reads it)
+                battle: 120.5,
+                characterSheet: 121.2,
+                // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels, the canon-tech epic (P1-P12) the system editor fields, the Ch5 character sheet keys and the Ch6 HUD/hex keys grew the wfrp scopes past their old budgets
+                contentLibrary: 126.6,
+            },
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },

@@ -287,7 +287,7 @@ export function parse(file: string, from?: string): Info {
         for (const m of text.matchAll(/<ExtendLocaleScope\s+namespaces=\{\[([^\]]*)\]\}/g))
             for (const s of m[1].matchAll(/["'](\w+)["']/g)) scope.lit.push(s[1]);
         scope.battle = /BATTLE_NAMESPACES/.test(text);
-        for (const m of text.matchAll(/systemScope\([\s\S]*?,\s*['"](\w+)['"]\s*\)/g)) scope.slots.push(m[1]);
+        for (const m of text.matchAll(/system(?:Pack)?Scope\([\s\S]*?,\s*['"](\w+)['"]\s*\)/g)) scope.slots.push(m[1]);
         scope.rulesForm = /rulesFormScope\(/.test(text);
         scope.log = /logScope\(/.test(text);
     }

@@ -8,7 +8,7 @@ import {
     CAMPAIGN_NAMESPACES,
     ROOT_NAMESPACES,
 } from '../scopes';
-import { logScope, systemScope } from '../system-scope';
+import { logScope, systemPackScope, systemScope } from '../system-scope';
 
 import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
 
@@ -26,20 +26,26 @@ const systemScopes = SYSTEM_META.filter(
 
     const { budgetKb } = meta.i18n as {
         budgetKb?: {
-            battle?: number;
-            member?: number;
-            dm?: number;
+            packs?: {
+                battle?: number;
+                characterSheet?: number;
+                contentLibrary?: number;
+            };
             pages?: Record<string, number>;
         };
     };
 
-    const battle = [...systemScope({ key }, 'battle'), ...logScope({ key })];
+    const battle = [
+        ...systemPackScope({ key }, 'battle'),
+        ...logScope({ key }),
+    ];
+
+    const packs = budgetKb?.packs;
 
     const member = [
         ...BASE,
         ...battle,
-        ...systemScope({ key }, 'campaign'),
-        ...systemScope({ key }, 'member'),
+        ...systemPackScope({ key }, 'characterSheet'),
     ];
 
     const addons = SYSTEM_META.filter(
@@ -56,33 +62,36 @@ const systemScopes = SYSTEM_META.filter(
                 ...BATTLE_NAMESPACES,
                 ...battle,
             ],
-            ...(budgetKb?.battle && { limit: budgetKb.battle }),
+            ...(packs?.battle && { limit: packs.battle }),
         },
         {
             name: `${key} battle + modules`,
             namespaces: [
                 ...CAMPAIGN_NAMESPACES,
                 ...BATTLE_NAMESPACES,
-                ...systemScope({ key, modules: addons }, 'battle'),
+                ...systemPackScope({ key, modules: addons }, 'battle'),
                 ...logScope({ key }),
             ],
-            ...(budgetKb?.battle && { limit: budgetKb.battle }),
+            ...(packs?.battle && { limit: packs.battle }),
         },
-        ...(budgetKb?.member
+        ...(packs?.characterSheet
             ? [
                   {
                       name: `${key} member`,
                       namespaces: member,
-                      limit: budgetKb.member,
+                      limit: packs.characterSheet,
                   },
               ]
             : []),
-        ...(budgetKb?.dm
+        ...(packs?.contentLibrary
             ? [
                   {
                       name: `${key} DM`,
-                      namespaces: [...member, ...systemScope({ key }, 'dm')],
-                      limit: budgetKb.dm,
+                      namespaces: [
+                          ...member,
+                          ...systemPackScope({ key }, 'contentLibrary'),
+                      ],
+                      limit: packs.contentLibrary,
                   },
               ]
             : []),
@@ -141,27 +150,22 @@ describe('message scope size', () => {
 
     it('a d20 campaign gets only the namespaces of its modules', () => {
         for (const slot of [
-            'battle',
-            'campaign',
-            'member',
-            'dm',
             'character',
             'dmCharacters',
             'dmCharacter',
             'dmRules',
             'draft',
         ] as const) {
-            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual(
-                slot === 'battle' ? ['battleD20'] : []
-            );
-            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual(
-                slot === 'campaign'
-                    ? ['inspiration']
-                    : slot === 'battle'
-                      ? ['battleD20']
-                      : []
-            );
+            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual([]);
+            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual([]);
             expect(systemScope(null, slot)).toEqual([]);
         }
+
+        expect(
+            systemPackScope({ key: 'homm', modules: [] }, 'battle')
+        ).toContain('battleD20');
+        expect(systemPackScope({ key: 'dnd5e' }, 'characterSheet')).toEqual([
+            'inspiration',
+        ]);
     });
 });

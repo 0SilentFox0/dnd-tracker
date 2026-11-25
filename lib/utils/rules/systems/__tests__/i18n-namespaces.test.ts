@@ -3,11 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { i18nNamespaces } from '../i18n-namespaces';
 
 describe('i18nNamespaces', () => {
-    it('lists slots and pages namespaces', () => {
+    it('lists packs and pages namespaces', () => {
         expect(
             i18nNamespaces({
-                battle: ['a'],
-                dm: ['b'],
+                packs: { battle: ['a'], contentLibrary: ['b'] },
                 pages: { draft: ['c'], character: ['d'] },
             })
         ).toEqual(['a', 'b', 'c', 'd']);
@@ -15,7 +14,10 @@ describe('i18nNamespaces', () => {
 
     it('ignores budgetKb', () => {
         expect(
-            i18nNamespaces({ member: ['m'], budgetKb: { member: 5 } })
+            i18nNamespaces({
+                packs: { characterSheet: ['m'] },
+                budgetKb: { packs: { characterSheet: 5 } },
+            })
         ).toEqual(['m']);
     });
 });

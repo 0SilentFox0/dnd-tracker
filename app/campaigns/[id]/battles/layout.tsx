@@ -1,7 +1,7 @@
 import { CampaignSystemGate } from '@/components/systems/CampaignSystemGate';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { BATTLE_NAMESPACES } from '@/lib/i18n/scopes';
-import { logScope, systemScope } from '@/lib/i18n/system-scope';
+import { logScope, systemPackScope } from '@/lib/i18n/system-scope';
 import {
     systemOfCampaign,
     systemSelectionOfCampaign,
@@ -20,7 +20,7 @@ export default async function Layout({
 
     const namespaces = [
         ...BATTLE_NAMESPACES,
-        ...systemScope(system, 'battle'),
+        ...systemPackScope(system, 'battle'),
         ...logScope(system),
     ];
 
