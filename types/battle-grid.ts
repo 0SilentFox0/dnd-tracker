@@ -223,12 +223,31 @@ export type BattleMapMark =
     | 'pick'
     | 'picked';
 
+export interface MapReach {
+    search: {
+        cost: Map<string, number>;
+        parent: Map<string, GridPoint>;
+    };
+    steps: Map<string, { anchor: GridPoint }>;
+    moverId: string;
+}
+
+export interface PathPreview {
+    from: GridPoint;
+    path: GridPoint[];
+    cost: number;
+    feet: number;
+    metres: number;
+}
+
 export interface BattleMapView {
     camera?: { follow: boolean; selfId: string | null };
     selectedId?: string | null;
     currentId?: string | null;
     marks?: Map<string, BattleMapMark | number>;
     range?: GridWindow | null;
+    reach?: MapReach | null;
+    pathPreview?: PathPreview | null;
     trajectory?: {
         fromId: string;
         targetId: string;

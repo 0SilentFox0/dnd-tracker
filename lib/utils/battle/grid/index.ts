@@ -16,6 +16,7 @@ export * from './move-route';
 export * from './nearest';
 export * from './occupancy';
 export * from './path';
+export * from './path-preview';
 export * from './placement';
 export * from './push';
 export * from './region-path';

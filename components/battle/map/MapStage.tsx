@@ -6,6 +6,7 @@ import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
+import { MapPathPreview } from './grid/MapPathPreview';
 import { DoorsLayer } from './layers/DoorsLayer';
 import { MapBackground } from './layers/MapBackground';
 import { StrokeLayer, TemplateLayer } from './layers/MapLayers';
@@ -187,6 +188,7 @@ function MapStageImpl({
                     />
                 )}
                 {edges && <EdgeEditor map={map} editing={edges} />}
+                <MapPathPreview preview={view?.pathPreview} />
                 {from && trajectory && (
                     <RangedHint from={from.box} trajectory={trajectory} />
                 )}

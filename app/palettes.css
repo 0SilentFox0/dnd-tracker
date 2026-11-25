@@ -29,7 +29,22 @@ html[data-palette] {
   --sidebar-border: var(--hud-line);
   --sidebar-ring: var(--hud-gold);
   --palette-overlay: rgba(0, 0, 0, .76);
+  --reach-fill: rgba(110, 180, 255, .1);
+  --reach-stroke: rgba(150, 205, 255, .85);
+  --threat-tint: rgba(240, 130, 100, .1);
+  --threat-stroke: rgba(255, 150, 120, .85);
+  --path-label-ink: #f3f6fb;
+  --path-label-halo: #0c1118;
   color-scheme: dark;
+}
+
+html[data-palette="parchment"], html[data-palette="frost"] {
+  --reach-fill: rgba(40, 100, 180, .14);
+  --reach-stroke: #1f5a99;
+  --threat-tint: rgba(170, 60, 30, .12);
+  --threat-stroke: #a8452c;
+  --path-label-ink: #101820;
+  --path-label-halo: #f6f1e4;
 }
 
 html[data-palette="tavern"] {

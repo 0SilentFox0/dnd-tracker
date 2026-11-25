@@ -5,7 +5,7 @@ import { lineOfFire } from './line-of-fire';
 import {
     type CellMark,
     isMoveMark,
-    moveSteps,
+    moveReach,
     moveZoneMarks,
     targetMarks,
 } from './map-view';
@@ -292,10 +292,14 @@ function openMoveZone({
     dmUserId,
     rules,
 }: MoveZoneInput): MoveZone {
-    const steps = moveSteps(map, participants, mover, { dmUserId, rules });
+    const { steps, search } = moveReach(map, participants, mover, {
+        dmUserId,
+        rules,
+    });
 
     return {
         steps,
+        search,
         marks: moveZoneMarks(map, participants, mover, {
             dmUserId,
             rules,
@@ -322,6 +326,7 @@ interface SceneState {
     attacks: BattleParticipant['battleData']['attacks'];
     marks: Map<string, CellMark | number>;
     steps: MoveZone['steps'] | null;
+    search: MoveZone['search'] | null;
 }
 
 const canSee = (p: BattleParticipant, { isDM, viewer }: MapSceneActor) =>
@@ -414,7 +419,11 @@ function buildMarks(
     >,
     aimed: ReturnType<typeof aimView>,
     modeView: ModeView | null | undefined
-): { marks: Map<string, CellMark | number>; steps: SceneState['steps'] } {
+): {
+    marks: Map<string, CellMark | number>;
+    steps: SceneState['steps'];
+    search: SceneState['search'];
+} {
     const { map, rules, participants, actor, aim, pick } = state;
 
     const { current, viewer, canAct, isDM } = actor;
@@ -464,7 +473,11 @@ function buildMarks(
         for (const [key, mark] of pickMarks(participants, pick))
             marks.set(key, mark);
 
-    return { marks, steps: zone?.steps ?? null };
+    return {
+        marks,
+        steps: zone?.steps ?? null,
+        search: zone?.search ?? null,
+    };
 }
 
 function aimClick(s: SceneState, p: GridPoint): MapClick {
@@ -665,9 +678,9 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
         attacks: current?.battleData.attacks ?? [],
     };
 
-    const { marks, steps } = buildMarks(base, aimed, modeView);
+    const { marks, steps, search } = buildMarks(base, aimed, modeView);
 
-    const state: SceneState = { ...base, marks, steps };
+    const state: SceneState = { ...base, marks, steps, search };
 
     const hud: NonNullable<BattleMapView['hud']> = new Map(
         participants.map((p) => [
@@ -683,6 +696,10 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
             currentId: current?.basicInfo.id ?? null,
             marks,
             range,
+            reach:
+                steps && search && current
+                    ? { search, steps, moverId: current.basicInfo.id }
+                    : null,
             trajectory: null,
             hud,
             ...(aimed && { aim: aimed.aim, pulseFrom: aimed.pulseFrom }),

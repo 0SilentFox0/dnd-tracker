@@ -1,4 +1,5 @@
 import { type aimView, deriveTrajectory, type MapScene } from './map-scene';
+import { derivePathPreview } from './path-preview';
 
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -48,6 +49,7 @@ export function composeMapView({
             },
             cell
         ),
+        pathPreview: derivePathPreview(scene.view.reach, current, cell, rules),
         ...(returnId && { returnId }),
         ...(pendingStroke.size > 0 && { pendingStroke }),
         ...rest,

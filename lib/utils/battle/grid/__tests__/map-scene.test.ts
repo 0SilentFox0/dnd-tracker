@@ -87,6 +87,22 @@ function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
     };
 }
 
+describe('deriveMapScene: reach', () => {
+    it('exposes the path search of the current mover', () => {
+        const s = deriveMapScene(input());
+
+        expect(s.view.reach?.moverId).toBe('h');
+        expect(s.view.reach?.search.cost.get('2:0')).toBe(2);
+        expect(s.view.reach?.steps.get('2:0')?.anchor).toEqual({ x: 2, y: 0 });
+    });
+
+    it('has no search when the viewer cannot act', () => {
+        const s = deriveMapScene(input({ actor: { canAct: false } }));
+
+        expect(s.view.reach).toBeNull();
+    });
+});
+
 describe('deriveMapScene: danger', () => {
     const ranged = {
         id: 'r',

@@ -63,3 +63,42 @@ describe('GridMarks line mask', () => {
         );
     });
 });
+
+describe('GridMarks zone look', () => {
+    it('move: low-alpha fill class and a solid thin outline', () => {
+        const { container } = render(renderMarks(new Map([['2:2', 'move']])));
+
+        expect(
+            container.querySelector('[data-zone-fill="move"]')?.getAttribute('class')
+        ).toContain('battle-map-reach-fill');
+
+        const outline = container.querySelector('[data-fx-zone="move"]')!;
+
+        expect(outline.getAttribute('class')).toContain('battle-map-reach-outline');
+        expect(outline.getAttribute('stroke-width')).toBe('1.5');
+        expect(outline.getAttribute('stroke-dasharray')).toBeNull();
+    });
+
+    it('threat: tint class and a dashed outline', () => {
+        const { container } = render(
+            renderMarks(new Map([['3:3', 'move-danger']]))
+        );
+
+        expect(
+            container.querySelector('[data-zone-fill="danger"]')?.getAttribute('class')
+        ).toContain('battle-map-threat-fill');
+
+        const outline = container.querySelector('[data-fx-zone="danger"]')!;
+
+        expect(outline.getAttribute('class')).toContain('battle-map-threat-outline');
+        expect(outline.getAttribute('stroke-dasharray')).toBeTruthy();
+    });
+
+    it('zones carry the fade class that the reduced-motion rule disables', () => {
+        const { container } = render(renderMarks(new Map([['2:2', 'move']])));
+
+        expect(
+            container.querySelector('[data-fx-zone="move"]')?.getAttribute('class')
+        ).toContain('battle-map-zone');
+    });
+});

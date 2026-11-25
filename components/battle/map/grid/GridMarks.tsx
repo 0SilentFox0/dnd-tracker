@@ -6,7 +6,7 @@ import {
     markFill,
     type MarkValue,
     OUT_OF_RANGE_FILL,
-    ZONE,
+    ZONE_CLASS,
 } from './grid-style';
 
 import {
@@ -128,15 +128,15 @@ export const GridMarks = memo(function GridMarks({
                 {zones.move && (
                     <path
                         data-zone-fill="move"
+                        className={`${ZONE_CLASS.move}-fill battle-map-zone`}
                         d={zones.move.fill}
-                        fill={ZONE.move.fill}
                     />
                 )}
                 {zones.danger && (
                     <path
                         data-zone-fill="danger"
+                        className={`${ZONE_CLASS.danger}-fill battle-map-zone`}
                         d={zones.danger.fill}
-                        fill={ZONE.danger.fill}
                     />
                 )}
                 {split.sparse.map(([key, mark]) => (
@@ -171,25 +171,19 @@ export const GridMarks = memo(function GridMarks({
 
                     return (
                         zone && (
-                            <g key={kind}>
-                                <path
-                                    d={zone.outline}
-                                    fill="none"
-                                    stroke={ZONE[kind].glow}
-                                    strokeWidth={4}
-                                    strokeLinejoin="round"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-                                <path
-                                    data-fx-zone={kind}
-                                    d={zone.outline}
-                                    fill="none"
-                                    stroke={ZONE[kind].stroke}
-                                    strokeWidth={1.5}
-                                    strokeLinejoin="round"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-                            </g>
+                            <path
+                                key={kind}
+                                data-fx-zone={kind}
+                                className={`${ZONE_CLASS[kind]}-outline battle-map-zone`}
+                                d={zone.outline}
+                                fill="none"
+                                strokeWidth={1.5}
+                                strokeLinejoin="round"
+                                strokeDasharray={
+                                    kind === 'danger' ? '6 4' : undefined
+                                }
+                                vectorEffect="non-scaling-stroke"
+                            />
                         )
                     );
                 })}

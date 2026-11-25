@@ -673,7 +673,7 @@ describe('BattleMap', () => {
         ).toBe('rgba(230,80,60,.35)');
     });
 
-    it('move zone: bright crisp outlines, no cost numbers; danger is red', () => {
+    it('move zone: thin outline, no cost numbers; danger is dashed', () => {
         const marks = new Map<string, 'move-danger' | number>([
             ['1:0', 2],
             ['2:0', 'move-danger'],
@@ -697,12 +697,14 @@ describe('BattleMap', () => {
             '[data-fx-zone="danger"]'
         ) as SVGElement;
 
-        expect(ok.getAttribute('stroke')).toBe('rgba(140,255,110,.6)');
+        expect(ok.getAttribute('class')).toContain('battle-map-reach-outline');
+        expect(ok.getAttribute('stroke-dasharray')).toBeNull();
         expect(ok.getAttribute('vector-effect')).toBe('non-scaling-stroke');
         expect(Number(ok.getAttribute('stroke-width'))).toBeLessThanOrEqual(
             1.5
         );
-        expect(bad.getAttribute('stroke')).toBe('rgba(255,100,85,.65)');
+        expect(bad.getAttribute('class')).toContain('battle-map-threat-outline');
+        expect(bad.getAttribute('stroke-dasharray')).toBeTruthy();
         expect(
             container.querySelectorAll('[data-fx-zone="move"]')
         ).toHaveLength(1);
@@ -712,13 +714,13 @@ describe('BattleMap', () => {
         expect(
             container
                 .querySelector('[data-zone-fill="move"]')
-                ?.getAttribute('fill')
-        ).toBe('rgba(90,210,80,.07)');
+                ?.getAttribute('class')
+        ).toContain('battle-map-reach-fill');
         expect(
             container
                 .querySelector('[data-zone-fill="danger"]')
-                ?.getAttribute('fill')
-        ).toBe('rgba(225,70,55,.09)');
+                ?.getAttribute('class')
+        ).toContain('battle-map-threat-fill');
     });
 
     it('renders wall, barrier and hazard terrain under the grid', () => {
@@ -822,8 +824,8 @@ describe('BattleMap', () => {
         expect(
             container
                 .querySelector('[data-zone-fill="danger"]')
-                ?.getAttribute('fill')
-        ).toBe('rgba(225,70,55,.09)');
+                ?.getAttribute('class')
+        ).toContain('battle-map-threat-fill');
         expect(titleAt(2, 0)).toBeUndefined();
         expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
     });
