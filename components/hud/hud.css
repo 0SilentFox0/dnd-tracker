@@ -91,22 +91,6 @@ html[data-palette] body,
   --input: var(--hud-line, rgba(236, 228, 214, 0.17));
   --ring: var(--hud-ink, #ece4d6);
 }
-.hud-form [data-slot="input"],
-.hud-page [data-slot="input"],
-.hud-form [data-slot="textarea"],
-.hud-page [data-slot="textarea"],
-.hud-form [data-slot="select-trigger"],
-.hud-page [data-slot="select-trigger"] { background-color: var(--hud-field, #1a140f); color: var(--hud-ink, #efe5d2); }
-.hud-form [data-slot="input"]:focus-visible,
-.hud-page [data-slot="input"]:focus-visible,
-.hud-form [data-slot="textarea"]:focus-visible,
-.hud-page [data-slot="textarea"]:focus-visible,
-.hud-form [data-slot="select-trigger"]:focus-visible,
-.hud-page [data-slot="select-trigger"]:focus-visible { border-color: var(--hud-crimson); }
-.hud-form [data-slot="button"][data-variant="default"],
-.hud-page [data-slot="button"][data-variant="default"] { background: var(--hud-crimson); color: var(--hud-crimson-ink); font-weight: 700; }
-.hud-form [data-slot="button"][data-variant="default"]:disabled,
-.hud-page [data-slot="button"][data-variant="default"]:disabled { filter: grayscale(0.6); opacity: 0.6; }
 .hud-form-page { background: radial-gradient(120% 80% at 50% 0, var(--palette-card, #1d1611), var(--palette-page, #0b0908)); }
 .hud-scroll-x { scrollbar-width: none; }
 .hud-scroll-x::-webkit-scrollbar { display: none; }

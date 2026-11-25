@@ -3,6 +3,7 @@
 import { type ComponentProps, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 type BoundedNumberInputProps = Omit<
     ComponentProps<typeof Input>,
@@ -46,6 +47,7 @@ export function BoundedNumberInput({
     return (
         <Input
             {...props}
+            className={cn('hud-num', props.className)}
             inputMode={inputMode}
             value={draft ?? String(value)}
             onChange={(e) => {

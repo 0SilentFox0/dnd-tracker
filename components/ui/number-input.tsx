@@ -3,6 +3,7 @@
 import { type ComponentProps, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 type NumberInputProps = Omit<
     ComponentProps<typeof Input>,
@@ -43,6 +44,7 @@ export function NumberInput({
     return (
         <Input
             {...props}
+            className={cn('hud-num', props.className)}
             inputMode={inputMode}
             value={text}
             onChange={(e) => {

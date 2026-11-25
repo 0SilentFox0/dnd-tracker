@@ -28,17 +28,22 @@ export function FormField({
     children,
 }: FormFieldProps) {
     return (
-        <div className={cn('space-y-2', className)}>
-            <Label htmlFor={htmlFor} className={labelClassName}>
+        <div className={cn('flex flex-col gap-1.5', className)}>
+            <Label
+                htmlFor={htmlFor}
+                className={cn('mb-0', labelClassName)}
+            >
                 {label}
                 {labelExtra}
-                {required && <span className="ml-1 text-destructive">*</span>}
+                {required && <span className="ml-1 text-hud-crimson-fg">*</span>}
             </Label>
             {children}
             {description && (
-                <p className="text-xs text-muted-foreground">{description}</p>
+                <p className="text-sm text-hud-muted">{description}</p>
             )}
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && <p role="alert" className="text-sm text-hud-crimson-fg">
+                    {error}
+                </p>}
         </div>
     );
 }
@@ -81,6 +86,7 @@ export function LabeledInput({
             <Input
                 id={inputId}
                 required={required}
+                aria-invalid={error ? true : undefined}
                 className={className}
                 {...inputProps}
             />
