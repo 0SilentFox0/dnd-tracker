@@ -22,17 +22,16 @@ describe('квадратна сітка', () => {
     });
 
     it('footprint 2×2 від лівого верхнього якоря', () => {
-        expect(footprint({ x: 1, y: 1 }, 2).map(cellKey).sort()).toEqual([
-            '1:1',
-            '1:2',
-            '2:1',
-            '2:2',
+        expect(
+            footprint({ x: 1, y: 1 }, 2, 'square').map(cellKey).sort()
+        ).toEqual(['1:1', '1:2', '2:1', '2:2']);
+        expect(footprint({ x: 1, y: 1 }, 1, 'square')).toEqual([
+            { x: 1, y: 1 },
         ]);
-        expect(footprint({ x: 1, y: 1 }, 1)).toEqual([{ x: 1, y: 1 }]);
     });
 
     it('відстань між footprint — мінімум по клітинках', () => {
-        const big = footprint({ x: 0, y: 0 }, 2);
+        const big = footprint({ x: 0, y: 0 }, 2, 'square');
 
         expect(footprintDistance(big, [{ x: 2, y: 1 }])).toBe(1);
         expect(footprintDistance(big, [{ x: 4, y: 0 }])).toBe(3);
@@ -54,9 +53,9 @@ describe('cellLine', () => {
     });
 
     it('дробові координати округлюються', () => {
-        expect(cellLine({ x: 0.4, y: 0 }, { x: 2.6, y: 0.2 }).map(cellKey)).toEqual(
-            ['0:0', '1:0', '2:0', '3:0']
-        );
+        expect(
+            cellLine({ x: 0.4, y: 0 }, { x: 2.6, y: 0.2 }).map(cellKey)
+        ).toEqual(['0:0', '1:0', '2:0', '3:0']);
     });
 
     it('та сама клітинка — одна клітинка', () => {
@@ -98,7 +97,7 @@ describe('cellLine', () => {
 
 describe('closestCell', () => {
     it('бере клітинку набору, найближчу до іншого набору; при рівності — першу', () => {
-        const cells = footprint({ x: 4, y: 4 }, 2);
+        const cells = footprint({ x: 4, y: 4 }, 2, 'square');
 
         expect(closestCell(cells, [{ x: 0, y: 0 }])).toEqual({ x: 4, y: 4 });
         expect(closestCell(cells, [{ x: 9, y: 9 }])).toEqual({ x: 5, y: 5 });

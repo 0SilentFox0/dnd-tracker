@@ -20,9 +20,9 @@ function allowSight(
 
     if (!isOnMap(viewer) || !isOnMap(target)) return true;
 
-    const from = cellsOf(viewer);
+    const from = cellsOf(viewer, 'square');
 
-    const to = cellsOf(target);
+    const to = cellsOf(target, 'square');
 
     if (!zonesAllowSight(map, from, to, blocking)) return false;
 
@@ -52,7 +52,7 @@ export function wallsAllowAim(
 ): boolean {
     if (!map || !wallsOf(map).size || !isOnMap(caster)) return true;
 
-    return cellsConnected(map, 'fire', cellsOf(caster), [aim]);
+    return cellsConnected(map, 'fire', cellsOf(caster, 'square'), [aim]);
 }
 
 export function sightedTargets(

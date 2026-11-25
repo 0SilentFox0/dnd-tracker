@@ -15,7 +15,7 @@ describe('gargantuan footprint', () => {
         };
 
         expect(sizeOf(g)).toBe(4);
-        expect(cellsOf(g)).toHaveLength(16);
+        expect(cellsOf(g, 'square')).toHaveLength(16);
         expect(
             sizeOf({ ...g, combatStats: { ...g.combatStats, gridSize: 9 } })
         ).toBe(4);
@@ -30,6 +30,6 @@ describe('gargantuan footprint', () => {
             battleData: { ...p.battleData, position: { x: 0, y: 0 } },
         };
 
-        expect(cellsOf(h)).toHaveLength(9);
+        expect(cellsOf(h, 'square')).toHaveLength(9);
     });
 });

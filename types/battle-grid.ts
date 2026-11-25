@@ -80,7 +80,10 @@ export interface MapMotion {
 
 export type WeatherKind = (typeof WEATHER_KINDS)[number];
 
+export type GridKind = 'square' | 'hex';
+
 export interface BattleMapConfig {
+    gridType?: GridKind;
     cols: number;
     rows: number;
     background: string | null;

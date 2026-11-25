@@ -21,9 +21,9 @@ const distanceTo = (
     size: number,
     foes: BattleParticipant[]
 ): { distance: number; nearest: BattleParticipant[] } => {
-    const cells = footprint(from, size);
+    const cells = footprint(from, size, 'square');
 
-    const ds = foes.map((o) => footprintDistance(cells, cellsOf(o)));
+    const ds = foes.map((o) => footprintDistance(cells, cellsOf(o, 'square')));
 
     const distance = ds.length ? Math.min(...ds) : Infinity;
 

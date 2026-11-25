@@ -52,13 +52,19 @@ export function applyBursts({
                 !isObject(p) &&
                 (p.basicInfo.id === centre.basicInfo.id ||
                     (bothOnMap(map, centre, p) &&
-                        footprintDistance(cellsOf(centre), cellsOf(p)) *
+                        footprintDistance(
+                            cellsOf(centre, 'square'),
+                            cellsOf(p, 'square')
+                        ) *
                             cellFeetOf(rules) <=
                             effect.radiusFeet))
         );
 
         const rolled = String(
-            rollDice(scaled(effect.dice, (effect.upcastDice ?? 0) * upcastSteps), rng)
+            rollDice(
+                scaled(effect.dice, (effect.upcastDice ?? 0) * upcastSteps),
+                rng
+            )
         );
 
         for (const v of victims) {

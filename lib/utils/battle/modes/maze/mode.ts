@@ -30,6 +30,7 @@ const gridOf = (map: BattleMapConfig) => mazeGridOf(map)!;
 
 export const mazeMode: MapModeDefinition<MazeConfig> = {
     key: 'maze',
+    grids: ['square'],
     configOf: (map) => map?.maze ?? null,
     withConfig: (map, maze) => ({ ...map, maze }),
     emptyConfig: () => emptyMaze(),

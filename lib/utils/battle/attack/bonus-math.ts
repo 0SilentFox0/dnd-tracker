@@ -127,8 +127,10 @@ export function rollModeReasonsOf(
         if (!other || !isOnMap(viewer) || !isOnMap(other)) return false;
 
         const feet =
-            footprintDistance(cellsOf(viewer), cellsOf(other)) *
-            cellFeetOf(opts.rules);
+            footprintDistance(
+                cellsOf(viewer, 'square'),
+                cellsOf(other, 'square')
+            ) * cellFeetOf(opts.rules);
 
         return collectModifiers(ps, viewer.basicInfo.id, {
             flag: 'sense',

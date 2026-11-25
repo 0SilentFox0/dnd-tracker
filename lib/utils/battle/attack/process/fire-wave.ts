@@ -39,9 +39,9 @@ export function fireWaveVictims(
             .slice(0, FIRE_WAVE_NO_MAP_VICTIMS)
             .map((p) => p.basicInfo.id);
 
-    const from = cellsOf(attacker);
+    const from = cellsOf(attacker, 'square');
 
-    const vc = closestCell(cellsOf(victim), from);
+    const vc = closestCell(cellsOf(victim, 'square'), from);
 
     const ac = apexOf(from, vc);
 
@@ -53,12 +53,16 @@ export function fireWaveVictims(
     const cells = templateCells(
         map,
         { shape: 'cone', size: sizeFt },
-        cellsOf(victim),
+        cellsOf(victim, 'square'),
         aim,
         rules
     );
 
-    return participantsInCells(ps, cells, apexOf(cellsOf(victim), aim))
+    return participantsInCells(
+        ps,
+        cells,
+        apexOf(cellsOf(victim, 'square'), aim)
+    )
         .filter(isEnemy)
         .map((p) => p.basicInfo.id);
 }

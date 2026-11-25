@@ -119,7 +119,10 @@ export function pickAttack(
 
     const adjacent =
         !!target.battleData.position &&
-        footprintDistance(cellsOf(attacker), cellsOf(target)) <= 1;
+        footprintDistance(
+            cellsOf(attacker, 'square'),
+            cellsOf(target, 'square')
+        ) <= 1;
 
     return {
         attack: null,

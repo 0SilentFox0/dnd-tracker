@@ -24,9 +24,9 @@ export function piercingTargets(
 
     if (!first || !bothOnMap(map, attacker, first)) return [firstTargetId];
 
-    const origin = cellsOf(attacker);
+    const origin = cellsOf(attacker, 'square');
 
-    const through = closestCell(cellsOf(first), origin);
+    const through = closestCell(cellsOf(first, 'square'), origin);
 
     const apex = apexOf(origin, through);
 
@@ -41,7 +41,7 @@ export function piercingTargets(
             (p) =>
                 p.basicInfo.id !== firstTargetId &&
                 isHostile(map, attacker, p) &&
-                footprintDistance([apex], cellsOf(p)) >= reach
+                footprintDistance([apex], cellsOf(p, 'square')) >= reach
         )
         .map((p) => p.basicInfo.id);
 

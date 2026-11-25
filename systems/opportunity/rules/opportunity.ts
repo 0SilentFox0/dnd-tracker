@@ -94,7 +94,7 @@ export function resolveOpportunityAttacks(
 
     const enemies = flow.ps
         .filter((p) => isHostile(input.map, mover0, p) && isOnMap(p))
-        .map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p) }));
+        .map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p, 'square') }));
 
     const melee = new Map<
         string,
@@ -120,12 +120,12 @@ export function resolveOpportunityAttacks(
         return entry;
     };
 
-    let fromCells = footprint(start, size);
+    let fromCells = footprint(start, size, 'square');
 
     for (let i = 0; i < path.length; i++) {
         const from = i === 0 ? start : path[i - 1];
 
-        const toCells = footprint(path[i], size);
+        const toCells = footprint(path[i], size, 'square');
 
         for (const { id, reach } of enemies) {
             const e = findParticipant(flow.ps, id);

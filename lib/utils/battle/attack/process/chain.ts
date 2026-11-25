@@ -37,14 +37,14 @@ export function nextChainTarget({
 }: ChainStep): BattleParticipant | undefined {
     const range = attackRangeCells(attack.range, rules);
 
-    const origin = cellsOf(from);
+    const origin = cellsOf(from, 'square');
 
     const inRange = (p: BattleParticipant) =>
         !map ||
         range === null ||
         origin.length === 0 ||
         !isOnMap(p) ||
-        footprintDistance(origin, cellsOf(p)) <= range;
+        footprintDistance(origin, cellsOf(p, 'square')) <= range;
 
     const candidates = order.filter(
         (p) =>
@@ -57,7 +57,7 @@ export function nextChainTarget({
             (!map ||
                 !isOnMap(p) ||
                 origin.length === 0 ||
-                cellsConnected(map, 'fire', origin, cellsOf(p))) &&
+                cellsConnected(map, 'fire', origin, cellsOf(p, 'square'))) &&
             inRange(p)
     );
 

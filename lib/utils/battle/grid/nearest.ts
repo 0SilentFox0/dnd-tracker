@@ -7,12 +7,12 @@ export function nearestTo(
     from: BattleParticipant,
     candidates: BattleParticipant[]
 ): BattleParticipant | undefined {
-    const origin = cellsOf(from);
+    const origin = cellsOf(from, 'square');
 
     if (origin.length === 0) return candidates[0];
 
     const distance = (p: BattleParticipant) =>
-        isOnMap(p) ? footprintDistance(origin, cellsOf(p)) : Infinity;
+        isOnMap(p) ? footprintDistance(origin, cellsOf(p, 'square')) : Infinity;
 
     let best: BattleParticipant | undefined;
 

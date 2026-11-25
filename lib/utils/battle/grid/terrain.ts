@@ -33,7 +33,7 @@ export function isObscured(
     return (
         !!terrain &&
         isOnMap(p) &&
-        cellsOf(p).some((c) => terrain[cellKey(c)]?.obscured)
+        cellsOf(p, 'square').some((c) => terrain[cellKey(c)]?.obscured)
     );
 }
 
@@ -82,13 +82,13 @@ export function threatCells(
 ): Set<string> {
     const enemyCells = participants
         .filter((p) => threatens(p, mover))
-        .flatMap(cellsOf);
+        .flatMap((p) => cellsOf(p, 'square'));
 
     const own = new Set(enemyCells.map(cellKey));
 
     const result = new Set<string>();
 
-    for (const n of enemyCells.flatMap(neighbors)) {
+    for (const n of enemyCells.flatMap((c) => neighbors(c))) {
         const key = cellKey(n);
 
         if (inBounds(map, n) && !own.has(key)) result.add(key);

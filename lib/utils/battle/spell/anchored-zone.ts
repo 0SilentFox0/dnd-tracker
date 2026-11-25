@@ -66,8 +66,8 @@ function inRadius(
 ): boolean {
     return (
         footprintDistance(
-            footprint(aAt, sizeOf(a)),
-            footprint(bAt, sizeOf(b))
+            footprint(aAt, sizeOf(a), 'square'),
+            footprint(bAt, sizeOf(b), 'square')
         ) *
             cellFeetOf(rules) <=
         feet

@@ -40,7 +40,9 @@ function facingCells(at: GridPoint, { x: dx, y: dy }: GridPoint): GridPoint[] {
 }
 
 const touches = (p: BattleParticipant, cells: GridPoint[]) =>
-    cellsOf(p).some((c) => cells.some((f) => f.x === c.x && f.y === c.y));
+    cellsOf(p, 'square').some((c) =>
+        cells.some((f) => f.x === c.x && f.y === c.y)
+    );
 
 export function cleaveTargets(
     map: BattleMapConfig | null | undefined,
@@ -51,7 +53,7 @@ export function cleaveTargets(
 ): BattleParticipant[] {
     if (count <= 0 || !bothOnMap(map, attacker, target)) return [];
 
-    const mine = cellsOf(attacker);
+    const mine = cellsOf(attacker, 'square');
 
     const primary = findParticipant(order, target.basicInfo.id) ?? target;
 

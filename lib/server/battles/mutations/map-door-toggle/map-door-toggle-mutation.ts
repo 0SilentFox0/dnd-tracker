@@ -53,7 +53,7 @@ function playerActor(
 
     const { a, b } = parseEdgeKey(body.edge);
 
-    const near = new Set(cellsOf(actor).map(cellKey));
+    const near = new Set(cellsOf(actor, 'square').map(cellKey));
 
     if (!near.has(cellKey(a)) && !near.has(cellKey(b)))
         reject(REJECT.doorNotAdjacent);

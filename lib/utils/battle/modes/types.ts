@@ -6,7 +6,7 @@ import type {
 } from '@/lib/utils/battle/store/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
-import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
+import type { BattleMapConfig, GridKind, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface ModeView {
@@ -141,6 +141,7 @@ export interface ModeClientHooks<C> {
 
 export interface MapModeDefinition<C = unknown> {
     key: string;
+    grids?: GridKind[];
     configOf(map: BattleMapConfig | null | undefined): C | null;
     withConfig(map: BattleMapConfig, config: C | null): BattleMapConfig;
     emptyConfig?(): C;

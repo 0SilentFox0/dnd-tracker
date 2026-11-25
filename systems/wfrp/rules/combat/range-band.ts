@@ -69,7 +69,10 @@ export function pointBlankBetween(
     if (!attacker.battleData.position || !target.battleData.position)
         return false;
 
-    const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
+    const cells = footprintDistance(
+        cellsOf(attacker, 'square'),
+        cellsOf(target, 'square')
+    );
 
     return (cells * cellFeetOf(rules)) / FEET_PER_YARD <= POINT_BLANK_YD;
 }
@@ -93,7 +96,10 @@ export function rangeContext(
     )
         return null;
 
-    const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
+    const cells = footprintDistance(
+        cellsOf(attacker, 'square'),
+        cellsOf(target, 'square')
+    );
 
     const distanceYd = (cells * cellFeetOf(rules)) / FEET_PER_YARD;
 

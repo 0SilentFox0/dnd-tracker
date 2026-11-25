@@ -35,7 +35,7 @@ export function adjacentFreeCell(
         (p) => p.basicInfo.id !== mover.basicInfo.id
     );
 
-    const targetCells = cellsOf(target);
+    const targetCells = cellsOf(target, 'square');
 
     const near: GridPoint[] = [];
 
@@ -52,7 +52,7 @@ export function adjacentFreeCell(
 
         if (
             fits(map, a, size, blocked) &&
-            cellsAdjacentOnMap(map, footprint(a, size), targetCells)
+            cellsAdjacentOnMap(map, footprint(a, size, 'square'), targetCells)
         )
             near.push(a);
     }
@@ -124,12 +124,14 @@ export function teleportTo(
 
     if (!mover) return { participants, message: '' };
 
-    const blocked = occupiedBy(
-        participants,
-        (p) => p.basicInfo.id !== moverId
-    );
+    const blocked = occupiedBy(participants, (p) => p.basicInfo.id !== moverId);
 
-    if (!map || !cell || !isOnMap(mover) || !fits(map, cell, sizeOf(mover), blocked))
+    if (
+        !map ||
+        !cell ||
+        !isOnMap(mover) ||
+        !fits(map, cell, sizeOf(mover), blocked)
+    )
         return {
             participants,
             message: textRef('battleD20.spellFx.teleportBlocked', {

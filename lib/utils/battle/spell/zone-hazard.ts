@@ -158,9 +158,9 @@ function createTerrainCells(
 
     if (!target || !isOnMap(caster) || !isOnMap(target)) return [];
 
-    const from = cellsOf(caster);
+    const from = cellsOf(caster, 'square');
 
-    const to = cellsOf(target);
+    const to = cellsOf(target, 'square');
 
     const start = closestCell(from, to);
 

@@ -72,7 +72,9 @@ export function hazardUnder(
     const hazards = damagingHazards(map, live);
 
     return strongest(
-        footprint(anchor, sizeOf(p)).map((c) => hazards.get(cellKey(c)))
+        footprint(anchor, sizeOf(p), 'square').map((c) =>
+            hazards.get(cellKey(c))
+        )
     );
 }
 
@@ -86,10 +88,10 @@ export function hazardOnMove(
 ): TerrainCell | null {
     const hazards = damagingHazards(map, { participants, rules });
 
-    const start = new Set(cellsOf(mover).map(cellKey));
+    const start = new Set(cellsOf(mover, 'square').map(cellKey));
 
     const entered = strongest(
-        footprint(to, sizeOf(mover)).map((c) =>
+        footprint(to, sizeOf(mover), 'square').map((c) =>
             start.has(cellKey(c)) ? undefined : hazards.get(cellKey(c))
         )
     );
@@ -106,7 +108,7 @@ export function hazardOnMove(
     )
         return null;
 
-    const origin = cellsOf(mover);
+    const origin = cellsOf(mover, 'square');
 
     return strongest(
         [...avoid]

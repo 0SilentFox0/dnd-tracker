@@ -187,11 +187,11 @@ export function spellChain(
         pool.length > 0 &&
         isOnMap(out[out.length - 1])
     ) {
-        const from = cellsOf(out[out.length - 1]);
+        const from = cellsOf(out[out.length - 1], 'square');
 
         const next = pool.reduce((best, p) =>
-            footprintDistance(from, cellsOf(p)) <
-            footprintDistance(from, cellsOf(best))
+            footprintDistance(from, cellsOf(p, 'square')) <
+            footprintDistance(from, cellsOf(best, 'square'))
                 ? p
                 : best
         );
@@ -280,7 +280,7 @@ function resolveTemplate(
             .map((p) => p.basicInfo.id);
 
     if (targeting.shape === 'emanation') {
-        const centre = cellsOf(caster)[0];
+        const centre = cellsOf(caster, 'square')[0];
 
         const { cells, targets } = templateArea(
             map,
@@ -301,7 +301,7 @@ function resolveTemplate(
 
     if (
         !templateAimAllowed(
-            cellsOf(caster),
+            cellsOf(caster, 'square'),
             targeting,
             aim,
             targeting.range,
@@ -347,7 +347,14 @@ function resolveSkillRadius(
     if (!inBounds(scene.map, aim.cell))
         return fail(textRef('battleActions.spell.target.pointOutOfMap'));
 
-    if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range, scene.rules))
+    if (
+        !aimInRange(
+            cellsOf(scene.caster, 'square'),
+            aim.cell,
+            aim.range,
+            scene.rules
+        )
+    )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));
 
     const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
@@ -380,7 +387,8 @@ function outOfRange(
     return picked.some(
         (p) =>
             p.battleData.position !== undefined &&
-            footprintDistance(cellsOf(caster), cellsOf(p)) > max
+            footprintDistance(cellsOf(caster, 'square'), cellsOf(p, 'square')) >
+                max
     );
 }
 

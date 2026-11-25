@@ -1,20 +1,79 @@
 import { blockedSet, cellKey, footprint } from './geometry';
-import { sizeOf } from './occupancy';
+import {
+    HEX_H,
+    HEX_R,
+    hexCenter,
+    hexMapSize,
+    hexPointToCell,
+    hexPolygon,
+} from './hex';
+import { footprintSizeOf } from './occupancy';
 import { formatEdgeKey } from './walls';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
+import type { BattleMapConfig, GridKind, GridPoint } from '@/types/battle-grid';
 
 export const UNIT = 100;
 
 const R = UNIT / 2;
 
-export function mapSize(map: Pick<BattleMapConfig, 'cols' | 'rows'>): {
+export interface CellRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+export interface GridMetrics {
+    colStep: number;
+    rowStep: number;
+    size(map: Pick<BattleMapConfig, 'cols' | 'rows'>): {
+        width: number;
+        height: number;
+    };
+    cellRect(p: GridPoint): CellRect;
+}
+
+const SQUARE_METRICS: GridMetrics = {
+    colStep: UNIT,
+    rowStep: UNIT,
+    size: (map) => ({ width: map.cols * UNIT, height: map.rows * UNIT }),
+    cellRect: (p) => ({
+        x: p.x * UNIT,
+        y: p.y * UNIT,
+        width: UNIT,
+        height: UNIT,
+    }),
+};
+
+const HEX_METRICS: GridMetrics = {
+    colStep: 1.5 * HEX_R,
+    rowStep: HEX_H,
+    size: (map) => hexMapSize(map.cols, map.rows),
+    cellRect: (p) => {
+        const c = hexCenter(p);
+
+        return {
+            x: c.x - HEX_R,
+            y: c.y - HEX_H / 2,
+            width: 2 * HEX_R,
+            height: HEX_H,
+        };
+    },
+};
+
+export const gridMetrics = (grid: GridKind): GridMetrics =>
+    grid === 'hex' ? HEX_METRICS : SQUARE_METRICS;
+
+export function mapSize(
+    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    grid: GridKind = 'square'
+): {
     width: number;
     height: number;
 } {
-    return { width: map.cols * UNIT, height: map.rows * UNIT };
+    return gridMetrics(grid).size(map);
 }
 
 export interface ScreenMatrix {
@@ -30,7 +89,8 @@ export function cellAtScreenPoint(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     ctm: ScreenMatrix,
     clientX: number,
-    clientY: number
+    clientY: number,
+    grid: GridKind = 'square'
 ): GridPoint | null {
     const det = ctm.a * ctm.d - ctm.b * ctm.c;
 
@@ -39,6 +99,20 @@ export function cellAtScreenPoint(
     const dx = clientX - ctm.e;
 
     const dy = clientY - ctm.f;
+
+    if (grid === 'hex') {
+        const cell = hexPointToCell(
+            (ctm.d * dx - ctm.c * dy) / det,
+            (ctm.a * dy - ctm.b * dx) / det
+        );
+
+        return cell.x >= 0 &&
+            cell.y >= 0 &&
+            cell.x < map.cols &&
+            cell.y < map.rows
+            ? cell
+            : null;
+    }
 
     const x = Math.floor((ctm.d * dx - ctm.c * dy) / det / UNIT);
 
@@ -68,11 +142,10 @@ export function screenToUnit(
 
 export function cellScreenPoint(
     ctm: ScreenMatrix,
-    p: GridPoint
+    p: GridPoint,
+    grid: GridKind = 'square'
 ): { x: number; y: number } {
-    const ux = (p.x + 0.5) * UNIT;
-
-    const uy = (p.y + 0.5) * UNIT;
+    const { x: ux, y: uy } = cellCenter(p, grid);
 
     return {
         x: ctm.a * ux + ctm.c * uy + ctm.e,
@@ -121,11 +194,18 @@ export function edgeAtScreenPoint(
         : null;
 }
 
-export function cellCenter(p: GridPoint): { x: number; y: number } {
+export function cellCenter(
+    p: GridPoint,
+    grid: GridKind = 'square'
+): { x: number; y: number } {
+    if (grid === 'hex') return hexCenter(p);
+
     return { x: (p.x + 0.5) * UNIT, y: (p.y + 0.5) * UNIT };
 }
 
-export function cellPolygon(p: GridPoint): string {
+export function cellPolygon(p: GridPoint, grid: GridKind = 'square'): string {
+    if (grid === 'hex') return hexPolygon(p);
+
     const c = cellCenter(p);
 
     const corners = [
@@ -139,15 +219,16 @@ export function cellPolygon(p: GridPoint): string {
 }
 
 export function tokenBox(
-    p: BattleParticipant
+    p: BattleParticipant,
+    grid: GridKind = 'square'
 ): { cx: number; cy: number; size: number } | null {
     const anchor = p.battleData.position;
 
     if (!anchor) return null;
 
-    const size = sizeOf(p);
+    const size = footprintSizeOf(p, grid);
 
-    const cells = footprint(anchor, size).map(cellCenter);
+    const cells = footprint(anchor, size, grid).map((c) => cellCenter(c, grid));
 
     const cx = cells.reduce((s, c) => s + c.x, 0) / cells.length;
 
@@ -158,9 +239,14 @@ export function tokenBox(
 
 export function fitMapBox(
     avail: { width: number; height: number },
-    map: Pick<BattleMapConfig, 'cols' | 'rows'>
+    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    grid: GridKind = 'square'
 ): { width: number; height: number } {
-    const ratio = map.cols / map.rows;
+    const ratio =
+        grid === 'hex'
+            ? hexMapSize(map.cols, map.rows).width /
+              hexMapSize(map.cols, map.rows).height
+            : map.cols / map.rows;
 
     return {
         width: Math.min(avail.width, avail.height * ratio),

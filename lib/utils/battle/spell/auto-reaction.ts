@@ -50,7 +50,10 @@ const inRange = (
         return true;
 
     return (
-        footprintDistance(cellsOf(target), cellsOf(attacker)) *
+        footprintDistance(
+            cellsOf(target, 'square'),
+            cellsOf(attacker, 'square')
+        ) *
             cellFeetOf(rules) <=
         range
     );

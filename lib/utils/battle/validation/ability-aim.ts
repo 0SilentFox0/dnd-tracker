@@ -24,7 +24,7 @@ export function assertAbilityAim(
         cell.y < 0 ||
         cell.x >= map.cols ||
         cell.y >= map.rows ||
-        !aimInRange(cellsOf(actor), cell, ability.aim.range, rules)
+        !aimInRange(cellsOf(actor, 'square'), cell, ability.aim.range, rules)
     ) {
         throw new BattleRuleError('invalid_target', REJECT.tooFar);
     }

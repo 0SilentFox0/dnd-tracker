@@ -113,10 +113,13 @@ export function applyCastExtension(
     const inReach = (p: BattleParticipant) =>
         p.battleData.position === undefined ||
         ((reach === undefined ||
-            footprintDistance(cellsOf(ctx.caster), cellsOf(p)) <= reach) &&
+            footprintDistance(
+                cellsOf(ctx.caster, 'square'),
+                cellsOf(p, 'square')
+            ) <= reach) &&
             (radius === undefined ||
                 !ctx.aim ||
-                footprintDistance([ctx.aim], cellsOf(p)) <= radius));
+                footprintDistance([ctx.aim], cellsOf(p, 'square')) <= radius));
 
     const kept: string[] = [];
 

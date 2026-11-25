@@ -21,7 +21,7 @@ export function objectsNear(
             p.battleData.summonedBy === ownerId &&
             isActive(p) &&
             isOnMap(p) &&
-            footprintDistance(cellsOf(p), cellsOf(target)) *
+            footprintDistance(cellsOf(p, 'square'), cellsOf(target, 'square')) *
                 cellFeetOf(rules) <=
                 feet
     );

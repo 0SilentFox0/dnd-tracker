@@ -37,7 +37,7 @@ export function zonesAt(
 
     if (!map?.spellZones || !map.terrain || !anchor) return new Set();
 
-    const ids = footprint(anchor, sizeOf(p)).flatMap((c) => {
+    const ids = footprint(anchor, sizeOf(p), 'square').flatMap((c) => {
         const id = map.terrain?.[cellKey(c)]?.zoneId;
 
         return id && map.spellZones?.[id] ? [id] : [];
@@ -156,7 +156,7 @@ function pullTarget(
     const free = inside.filter(
         (c) =>
             canStand(map, ps, mover, c) &&
-            footprint(c, sizeOf(mover)).every(
+            footprint(c, sizeOf(mover), 'square').every(
                 (f) => map.terrain?.[cellKey(f)]?.zoneId === zoneId
             )
     );

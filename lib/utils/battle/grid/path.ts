@@ -130,7 +130,7 @@ export function searchPaths(
 
     const touchesAvoid = (anchor: GridPoint) =>
         !!avoid?.size &&
-        footprint(anchor, size).some((c) => avoid.has(cellKey(c)));
+        footprint(anchor, size, 'square').some((c) => avoid.has(cellKey(c)));
 
     const hasEdges =
         (wallsOf(map).size > 0 || !!map.bars?.length) && !passesWalls(mover);
@@ -138,9 +138,9 @@ export function searchPaths(
     const stepBlocked = (cur: GridPoint, next: GridPoint) => {
         if (!hasEdges) return false;
 
-        const to = footprint(next, size);
+        const to = footprint(next, size, 'square');
 
-        return footprint(cur, size).some((c, i) =>
+        return footprint(cur, size, 'square').some((c, i) =>
             edgeBlocks(map, c, to[i], 'move')
         );
     };
@@ -151,7 +151,7 @@ export function searchPaths(
 
     const stepCost = (anchor: GridPoint) =>
         difficult.size > 0 &&
-        footprint(anchor, size).some((c) => difficult.has(cellKey(c)))
+        footprint(anchor, size, 'square').some((c) => difficult.has(cellKey(c)))
             ? 2
             : 1;
 
@@ -220,14 +220,17 @@ export function frightenedBlocksMove(
 
     if (!sources.length) return false;
 
-    const destination = footprint(to, sizeOf(mover));
+    const destination = footprint(to, sizeOf(mover), 'square');
 
     return participants.some(
         (p) =>
             sources.includes(p.basicInfo.id) &&
             isActive(p) &&
             isOnMap(p) &&
-            footprintDistance(destination, cellsOf(p)) <
-                footprintDistance(cellsOf(mover), cellsOf(p))
+            footprintDistance(destination, cellsOf(p, 'square')) <
+                footprintDistance(
+                    cellsOf(mover, 'square'),
+                    cellsOf(p, 'square')
+                )
     );
 }

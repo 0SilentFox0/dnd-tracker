@@ -98,7 +98,9 @@ export async function mapUpdateMutation(
     );
 
     const stuck = ctx.participants.filter(
-        (p) => isOnMap(p) && cellsOf(p).some((c) => !isPlayable(header, c))
+        (p) =>
+            isOnMap(p) &&
+            cellsOf(p, 'square').some((c) => !isPlayable(header, c))
     );
 
     if (stuck.length > 0)

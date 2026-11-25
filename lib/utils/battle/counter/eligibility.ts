@@ -123,7 +123,10 @@ export function counterReactors(args: CounterReactorsArgs): CounterOffer[] {
                 map &&
                 isOnMap(p) &&
                 isOnMap(caster) &&
-                footprintDistance(cellsOf(p), cellsOf(caster)) *
+                footprintDistance(
+                    cellsOf(p, 'square'),
+                    cellsOf(caster, 'square')
+                ) *
                     cellFeetOf(rules) >
                     spell.range
             )

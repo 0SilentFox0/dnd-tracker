@@ -23,11 +23,11 @@ export function useAbilityMapAim(
 
     const fire = useRef(onAim);
 
-    const origin = useRef(cellsOf(participant));
+    const origin = useRef(cellsOf(participant, 'square'));
 
     useEffect(() => {
         fire.current = onAim;
-        origin.current = cellsOf(participant);
+        origin.current = cellsOf(participant, 'square');
     });
 
     const casterId = participant.basicInfo.id;

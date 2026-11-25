@@ -146,7 +146,7 @@ export function playgroundCellClick(
     const target = participants.find(
         (q) =>
             q.basicInfo.side !== active.basicInfo.side &&
-            cellsOf(q).some((c) => cellKey(c) === key)
+            cellsOf(q, 'square').some((c) => cellKey(c) === key)
     );
 
     if (!target) return;

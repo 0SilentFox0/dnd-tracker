@@ -230,9 +230,13 @@ export function participantsInCells(
             (p) =>
                 isTargetable(p) &&
                 isOnMap(p) &&
-                cellsOf(p).some((c) => set.has(cellKey(c)))
+                cellsOf(p, 'square').some((c) => set.has(cellKey(c)))
         )
-        .map((p, i) => ({ p, i, d: footprintDistance([from], cellsOf(p)) }))
+        .map((p, i) => ({
+            p,
+            i,
+            d: footprintDistance([from], cellsOf(p, 'square')),
+        }))
         .sort((a, b) => a.d - b.d || a.i - b.i)
         .map((x) => x.p);
 }
@@ -285,7 +289,7 @@ export function templateArea(
     aim: GridPoint,
     rules: Ruleset
 ): { cells: string[]; targets: BattleParticipant[] } {
-    const origin = cellsOf(caster);
+    const origin = cellsOf(caster, 'square');
 
     const cells = templateCells(map, template, origin, aim, rules);
 

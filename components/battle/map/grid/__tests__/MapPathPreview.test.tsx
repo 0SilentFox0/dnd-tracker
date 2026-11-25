@@ -44,7 +44,7 @@ describe('MapPathPreview', () => {
         const { container } = renderPreview(preview);
 
         const pts = [preview.from, ...preview.path]
-            .map(cellCenter)
+            .map((c) => cellCenter(c))
             .map((c) => `${c.x},${c.y}`)
             .join(' ');
 

@@ -104,12 +104,12 @@ function stepsOf(
         return steps;
     }
 
-    const own = new Set(cellsOf(mover).map(cellKey));
+    const own = new Set(cellsOf(mover, 'square').map(cellKey));
 
     for (const [key, cost] of anchors) {
         const step = { anchor: parseCellKey(key), cost };
 
-        for (const cell of footprint(step.anchor, size)) {
+        for (const cell of footprint(step.anchor, size, 'square')) {
             const k = cellKey(cell);
 
             const kept = steps.get(k);
@@ -170,7 +170,7 @@ export function targetMarks(
             ? 'target'
             : 'invalid-target';
 
-        for (const c of cellsOf(t)) marks.set(cellKey(c), mark);
+        for (const c of cellsOf(t, 'square')) marks.set(cellKey(c), mark);
     }
 
     return marks;

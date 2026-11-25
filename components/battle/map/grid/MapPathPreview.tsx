@@ -20,7 +20,7 @@ export const MapPathPreview = memo(function MapPathPreview({
 
     if (!preview || coarse) return null;
 
-    const points = [preview.from, ...preview.path].map(cellCenter);
+    const points = [preview.from, ...preview.path].map((c) => cellCenter(c));
 
     const end = points[points.length - 1];
 

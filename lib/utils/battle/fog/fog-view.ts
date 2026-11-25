@@ -106,7 +106,9 @@ export function fogView({
             (own && position) ||
             (!hidden &&
                 position &&
-                cellsOf(participant).some((cell) => visible.has(cellKey(cell))))
+                cellsOf(participant, 'square').some((cell) =>
+                    visible.has(cellKey(cell))
+                ))
         )
             visibleIds.add(basicInfo.id);
     }

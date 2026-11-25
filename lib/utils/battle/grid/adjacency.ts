@@ -26,7 +26,10 @@ export function isAdjacentOnMap(
     a: BattleParticipant,
     b: BattleParticipant
 ): boolean {
-    return isAdjacent(a, b) && cellsAdjacentOnMap(map, cellsOf(a), cellsOf(b));
+    return (
+        isAdjacent(a, b, 'square') &&
+        cellsAdjacentOnMap(map, cellsOf(a, 'square'), cellsOf(b, 'square'))
+    );
 }
 
 export const adjacencyOf =

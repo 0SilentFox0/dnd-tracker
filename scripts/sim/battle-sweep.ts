@@ -4230,7 +4230,9 @@ async function reserveCheck() {
     const occupied = P()
         .filter((p) => p.basicInfo.id !== revealedId && p.battleData.position)
         .some((p) =>
-            cellsOf(p).some((c) => c.x === placedAt?.x && c.y === placedAt?.y)
+            cellsOf(p, 'square').some(
+                (c) => c.x === placedAt?.x && c.y === placedAt?.y
+            )
         );
 
     tcheck(
@@ -4838,7 +4840,7 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
     const rows = 8;
 
     const footprint = (p: any) =>
-        new Set(cellsOf(p).map((c) => `${c.x}:${c.y}`));
+        new Set(cellsOf(p, 'square').map((c) => `${c.x}:${c.y}`));
 
     const near = (c: { x: number; y: number }) =>
         [-1, 0, 1]
@@ -4852,7 +4854,9 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
             (p) =>
                 alive(p) &&
                 p.battleData.position &&
-                cellsOf(p).some((c) => cells.includes(`${c.x}:${c.y}`))
+                cellsOf(p, 'square').some((c) =>
+                    cells.includes(`${c.x}:${c.y}`)
+                )
         );
 
     const castAt = async (spell: any, targetCell: { x: number; y: number }) => {
@@ -4898,7 +4902,9 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
         const centreOf = P()
             .filter(
                 (p) =>
-                    alive(p) && p.battleData.position && cellsOf(p).length === 1
+                    alive(p) &&
+                    p.battleData.position &&
+                    cellsOf(p, 'square').length === 1
             )
             .map((p) => {
                 const c = p.battleData.position;

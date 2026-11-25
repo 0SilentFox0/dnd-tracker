@@ -80,9 +80,9 @@ export function rangeDisadvantageReasons(
     )
         return [];
 
-    const mine = cellsOf(attacker);
+    const mine = cellsOf(attacker, 'square');
 
-    const distance = footprintDistance(mine, cellsOf(target));
+    const distance = footprintDistance(mine, cellsOf(target, 'square'));
 
     const thrown =
         isThrownMelee(attack, rules) &&
@@ -131,10 +131,10 @@ export function attackReachError(
 ): LogLine | null {
     if (!map || !attacker.battleData.position) return null;
 
-    const mine = cellsOf(attacker);
+    const mine = cellsOf(attacker, 'square');
 
     const distanceTo = (p: BattleParticipant) =>
-        footprintDistance(mine, cellsOf(p));
+        footprintDistance(mine, cellsOf(p, 'square'));
 
     const placed = targets.filter((t) => t.battleData.position);
 

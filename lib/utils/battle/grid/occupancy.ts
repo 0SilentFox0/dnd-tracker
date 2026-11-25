@@ -13,10 +13,14 @@ import {
     isEscaped,
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
+import type { BattleMapConfig, GridKind, GridPoint } from '@/types/battle-grid';
 
 export function sizeOf(p: BattleParticipant): number {
     return Math.min(4, Math.max(1, p.combatStats.gridSize ?? 1));
+}
+
+export function footprintSizeOf(p: BattleParticipant, grid: GridKind): number {
+    return grid === 'hex' ? 1 : sizeOf(p);
 }
 
 export function isFallen(p: BattleParticipant): boolean {
@@ -43,20 +47,21 @@ export function bothOnMap(
     return !!map && ps.every(isOnMap);
 }
 
-export function cellsOf(p: BattleParticipant): GridPoint[] {
+export function cellsOf(p: BattleParticipant, grid: GridKind): GridPoint[] {
     return p.battleData.position
-        ? footprint(p.battleData.position, sizeOf(p))
+        ? footprint(p.battleData.position, footprintSizeOf(p, grid), grid)
         : [];
 }
 
 export function isAdjacent(
     a: BattleParticipant,
-    b: BattleParticipant
+    b: BattleParticipant,
+    grid: GridKind
 ): boolean {
     return (
         isOnMap(a) &&
         isOnMap(b) &&
-        footprintDistance(cellsOf(a), cellsOf(b)) <= 1
+        footprintDistance(cellsOf(a, grid), cellsOf(b, grid), grid) <= 1
     );
 }
 
@@ -67,7 +72,7 @@ export function occupiedBy(
     return new Set(
         participants
             .filter((p) => isOnMap(p) && filter(p))
-            .flatMap((p) => cellsOf(p).map(cellKey))
+            .flatMap((p) => cellsOf(p, 'square').map(cellKey))
     );
 }
 
@@ -77,7 +82,7 @@ export function fits(
     size: number,
     blocked: Set<string>
 ): boolean {
-    return footprint(anchor, size).every(
+    return footprint(anchor, size, 'square').every(
         (c) => isPlayable(map, c) && !blocked.has(cellKey(c))
     );
 }

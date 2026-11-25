@@ -56,7 +56,8 @@ export function placeParticipants(
         )
             continue;
 
-        for (const c of footprint(position, sizeOf(p))) blocked.add(cellKey(c));
+        for (const c of footprint(position, sizeOf(p), 'square'))
+            blocked.add(cellKey(c));
         positions.set(p.basicInfo.id, position);
     }
 
@@ -110,7 +111,8 @@ export function placeParticipants(
 
         if (!anchor) return p;
 
-        for (const c of footprint(anchor, size)) blocked.add(cellKey(c));
+        for (const c of footprint(anchor, size, 'square'))
+            blocked.add(cellKey(c));
         positions.set(p.basicInfo.id, anchor);
 
         return { ...p, battleData: { ...p.battleData, position: anchor } };

@@ -94,7 +94,7 @@ export function squall(
     );
 
     const swept = new Set(
-        path.flatMap((c) => footprint(c, sizeOf(actor))).map(cellKey)
+        path.flatMap((c) => footprint(c, sizeOf(actor), 'square')).map(cellKey)
     );
 
     const victims = participantsInCells(ps, [...swept], start).filter(

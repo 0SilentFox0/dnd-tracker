@@ -107,7 +107,7 @@ export interface MapScene {
 }
 
 export function centreCell(p: BattleParticipant): GridPoint {
-    const [anchor] = cellsOf(p);
+    const [anchor] = cellsOf(p, 'square');
 
     const offset = Math.floor((sizeOf(p) - 1) / 2);
 
@@ -137,7 +137,7 @@ function enemyAt(
             !!of &&
             isHostile(map, of, x) &&
             isOnMap(x) &&
-            cellsOf(x).some((c) => cellKey(c) === key)
+            cellsOf(x, 'square').some((c) => cellKey(c) === key)
     );
 }
 
@@ -209,7 +209,7 @@ export function aimView(
         !caster ||
         !isOnMap(caster) ||
         !templateAimAllowed(
-            cellsOf(caster),
+            cellsOf(caster, 'square'),
             aim.template,
             at,
             aim.range,
@@ -234,7 +234,9 @@ export function aimView(
     const { shape, hollow } = aim.template;
 
     const pulseFrom =
-        shape === 'cone' || shape === 'line' ? apexOf(cellsOf(caster), at) : at;
+        shape === 'cone' || shape === 'line'
+            ? apexOf(cellsOf(caster, 'square'), at)
+            : at;
 
     return {
         marks: new Map(cells.map((key) => [key, 'template' as const])),
@@ -381,7 +383,7 @@ function pickMarks(
               ? 'picked'
               : 'pick';
 
-        for (const c of cellsOf(target)) marks.set(cellKey(c), mark);
+        for (const c of cellsOf(target, 'square')) marks.set(cellKey(c), mark);
     }
 
     return marks;
@@ -487,7 +489,7 @@ function aimClick(s: SceneState, p: GridPoint): MapClick {
         !aim ||
         !aimCaster ||
         !templateAimAllowed(
-            cellsOf(aimCaster),
+            cellsOf(aimCaster, 'square'),
             aim.template,
             p,
             aim.range,
@@ -536,7 +538,7 @@ function attackClick(
     )
         return null;
 
-    const mark = marks.get(cellKey(cellsOf(target)[0]));
+    const mark = marks.get(cellKey(cellsOf(target, 'square')[0]));
 
     if (mark !== 'target' && mark !== 'invalid-target') return null;
 
@@ -609,7 +611,9 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
 
     if (s.pick) {
         const occupant = s.participants.find(
-            (x) => isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key)
+            (x) =>
+                isOnMap(x) &&
+                cellsOf(x, 'square').some((c) => cellKey(c) === key)
         );
 
         return occupant
@@ -622,7 +626,7 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
     if (
         current &&
         isOnMap(current) &&
-        cellsOf(current).some((c) => cellKey(c) === key)
+        cellsOf(current, 'square').some((c) => cellKey(c) === key)
     )
         return { kind: 'select', id: current.basicInfo.id };
 
@@ -661,7 +665,7 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
         aimCaster &&
         aim.range !== undefined &&
         isCenteredTemplate(aim.template)
-            ? rangeWindow(map, cellsOf(aimCaster), aim.range, rules)
+            ? rangeWindow(map, cellsOf(aimCaster, 'square'), aim.range, rules)
             : null;
 
     const aimed = aim?.aim

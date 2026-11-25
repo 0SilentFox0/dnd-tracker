@@ -31,9 +31,9 @@ export function lineOfFire(
 ): LineOfFire {
     if (!bothOnMap(map, shooter, target)) return CLEAR;
 
-    const from = cellsOf(shooter);
+    const from = cellsOf(shooter, 'square');
 
-    const to = cellsOf(target);
+    const to = cellsOf(target, 'square');
 
     const start = closestCell(from, to);
 

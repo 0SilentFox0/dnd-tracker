@@ -30,7 +30,7 @@ export function syncMapAuras(
 
         managed.add(ownerId);
 
-        const ownerCells = cellsOf(owner);
+        const ownerCells = cellsOf(owner, 'square');
 
         for (const aura of areaAuras(owner)) {
             const round = owner.battleData.auraZones?.[aura.id] ?? 1;
@@ -40,7 +40,7 @@ export function syncMapAuras(
             for (const m of zoneCandidates(participants, owner, aura.target)) {
                 if (
                     !isOnMap(m) ||
-                    footprintDistance(ownerCells, cellsOf(m)) >
+                    footprintDistance(ownerCells, cellsOf(m, 'square')) >
                         AURA_RADIUS_CELLS
                 )
                     continue;

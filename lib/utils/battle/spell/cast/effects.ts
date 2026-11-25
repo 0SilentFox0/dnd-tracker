@@ -174,7 +174,7 @@ function scheduleHit(
     if (!bothOnMap(flow.ctx.map, me, target)) return false;
 
     const feet =
-        footprintDistance(cellsOf(me), cellsOf(target)) *
+        footprintDistance(cellsOf(me, 'square'), cellsOf(target, 'square')) *
         cellFeetOf(flow.ctx.rules);
 
     const { feet: near, perRoundFeet } = delay;
@@ -360,7 +360,7 @@ function distanceDamage(
     const onMap = bothOnMap(flow.ctx.map, me, target);
 
     const feet = onMap
-        ? footprintDistance(cellsOf(me), cellsOf(target)) *
+        ? footprintDistance(cellsOf(me, 'square'), cellsOf(target, 'square')) *
           cellFeetOf(flow.ctx.rules)
         : 0;
 
@@ -394,8 +394,8 @@ function distanceDamage(
         extra: state.actionModifiers[casterIdOf(state)],
         addAbilityMod: state.spell.definition.addAbilityMod,
         damageBonus:
-            (state.spell.definition.damageBonus ?? 0) +
-                state.overcastDamage || undefined,
+            (state.spell.definition.damageBonus ?? 0) + state.overcastDamage ||
+            undefined,
     }).damage;
 }
 

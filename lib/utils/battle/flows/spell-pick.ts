@@ -76,7 +76,9 @@ const AUTO_TARGETING = [
     'everyone',
 ];
 
-function choiceOf(effects: NonNullable<BookSpell['spellEffects']>): SpellPick['choice'] {
+function choiceOf(
+    effects: NonNullable<BookSpell['spellEffects']>
+): SpellPick['choice'] {
     for (const e of effects) {
         if (e.kind === 'transform' && e.pick && !e.unitId)
             return { kind: 'unit', creatureType: e.pick.creatureType };
@@ -327,8 +329,10 @@ export function spellTargetInRange(
 
     const inRange =
         range === undefined ||
-        footprintDistance(cellsOf(caster), cellsOf(target)) <=
-            feetToCells(range, rules);
+        footprintDistance(
+            cellsOf(caster, 'square'),
+            cellsOf(target, 'square')
+        ) <= feetToCells(range, rules);
 
     return (
         inRange &&
