@@ -9,7 +9,6 @@ import { RecommendedSpells } from './RecommendedSpells';
 import { type SlotRing, SpellSlotRow } from './SpellSlotRow';
 
 import {
-    HealthBar,
     HpFigure,
     TurnTimerBar,
     ZoomablePortrait,
@@ -26,13 +25,14 @@ import {
     heroSlotViews,
     NO_EFFECTS,
     showDock,
+    slotArcRadius,
     slotOrbit,
 } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
 const PORTRAIT = 104;
 
-const SLOT = 38;
+const ARC_SLOT = 30;
 
 const PHONE_PORTRAIT = 58;
 
@@ -213,67 +213,68 @@ export const HeroCluster = memo(function HeroCluster({
         );
     }
 
-    const ring = slots.length > 0;
+    const arcRadius = slotArcRadius(PORTRAIT, ARC_SLOT);
 
     return (
         <div
             data-tour="battle.hero"
             className="pointer-events-auto flex items-end gap-2"
         >
-            <div className="flex flex-col items-center gap-1">
-                {ring ? orbited(PORTRAIT, SLOT) : portrait}
+            <div className="flex flex-col items-start gap-1">
+                <div
+                    className="relative shrink-0"
+                    style={{
+                        width: PORTRAIT / 2 + arcRadius + ARC_SLOT / 2,
+                        height: PORTRAIT,
+                    }}
+                >
+                    {slotRow({
+                        cx: PORTRAIT / 2,
+                        cy: PORTRAIT / 2,
+                        radius: arcRadius,
+                        size: ARC_SLOT,
+                        arc: true,
+                    })}
+                    <div className="absolute top-0 left-0">{portrait}</div>
+                </div>
                 <div
                     className={cn(
                         HUD_GLASS,
-                        'w-[min(160px,100%)] rounded-xl px-2 py-1 empty:hidden [&>div]:mt-0'
+                        'rounded-xl px-2 py-1 empty:hidden [&>div]:mt-0'
                     )}
+                    style={{ width: PORTRAIT }}
                 >
                     <TurnTimerBar />
                 </div>
             </div>
-            <div className="flex w-[min(220px,40vw)] flex-col gap-2 pb-1">
-                {recommended}
-                <div
-                    className={cn(
-                        HUD_GLASS,
-                        'flex flex-col gap-2 rounded-2xl p-3'
-                    )}
-                >
-                    {statesPanel}
-                    <div className="flex items-center gap-2">
-                        <div className="min-w-0 flex-1">
-                            <div className="hud-sc flex items-baseline justify-between gap-2 text-[17px] font-bold text-[var(--ink)]">
-                                <span className="flex min-w-0 items-baseline gap-2">
-                                    <span className="truncate">
-                                        {hero.basicInfo.name}
-                                    </span>
-                                    {badges?.map((Badge, i) => (
-                                        <Badge
-                                            key={i}
-                                            participant={hero}
-                                            place="hero"
-                                        />
-                                    ))}
-                                </span>
-                                {hpFallback}
-                            </div>
-                            {!hpInDock && (
-                                <HealthBar
+            <div
+                className={cn(
+                    HUD_GLASS,
+                    'mb-1 flex w-fit max-w-[min(300px,34vw)] flex-col gap-2 rounded-2xl p-3'
+                )}
+            >
+                <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">{recommended}</div>
+                    {toggle}
+                </div>
+                {open && (
+                    <>
+                        {statesPanel}
+                        <div className="flex flex-wrap items-baseline gap-2 text-sm text-hud-text">
+                            {badges?.map((Badge, i) => (
+                                <Badge
+                                    key={i}
                                     participant={hero}
-                                    exact
-                                    className="h-1.5"
+                                    place="hero"
                                 />
-                            )}
+                            ))}
                             {HeroStats && (
-                                <div className="mt-1 text-sm text-hud-text">
-                                    <HeroStats hero={hero} compact={false} />
-                                </div>
+                                <HeroStats hero={hero} compact={false} />
                             )}
                         </div>
-                        {toggle}
-                    </div>
-                    {extras}
-                </div>
+                    </>
+                )}
+                {extras}
             </div>
         </div>
     );

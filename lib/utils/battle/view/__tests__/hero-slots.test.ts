@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
     defaultSlotLevel,
     heroSlotViews,
+    slotArcOffset,
+    slotArcRadius,
     slotOrbit,
     slotRingOffset,
 } from '../hero';
@@ -114,6 +116,29 @@ describe('slotOrbit', () => {
 
                 expect(box).toBe(2 * radius + slot);
             }
+        }
+    });
+});
+
+describe('slotArcOffset', () => {
+    it('fans out to the right: level 1 just left of the top, level 6 straight right', () => {
+        const r = 78;
+
+        expect(slotArcOffset(0, r).y).toBeLessThan(-r + 3);
+        expect(slotArcOffset(0, r).x).toBeLessThan(0);
+        expect(slotArcOffset(1, r).x).toBeGreaterThan(0);
+        expect(slotArcOffset(5, r).x).toBeGreaterThan(r * 0.4);
+    });
+
+    it('keeps neighbouring slots from touching', () => {
+        const radius = slotArcRadius(104, 30);
+
+        for (let i = 0; i < 8; i++) {
+            const a = slotArcOffset(i, radius);
+
+            const b = slotArcOffset(i + 1, radius);
+
+            expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(30);
         }
     });
 });

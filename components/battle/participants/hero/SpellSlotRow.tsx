@@ -5,13 +5,18 @@ import { useTranslations } from 'next-intl';
 
 import { HUD_GLASS, HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
-import { slotRingOffset, type SlotView } from '@/lib/utils/battle/view';
+import {
+    slotArcOffset,
+    slotRingOffset,
+    type SlotView,
+} from '@/lib/utils/battle/view';
 
 export interface SlotRing {
     cx: number;
     cy: number;
     radius: number;
     size: number;
+    arc?: boolean;
 }
 
 interface Props {
@@ -30,7 +35,11 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
         <div
             role="group"
             aria-label={t('title')}
-            className={ring ? 'absolute inset-0' : 'flex flex-wrap gap-1'}
+            className={
+                ring
+                    ? 'pointer-events-none absolute inset-0'
+                    : 'flex flex-wrap gap-1'
+            }
         >
             {slots.map((s, i) => {
                 const active = selected === s.level;
@@ -38,7 +47,9 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                 let style: CSSProperties | undefined;
 
                 if (ring) {
-                    const o = slotRingOffset(i, slots.length, ring.radius);
+                    const o = ring.arc
+                        ? slotArcOffset(i, ring.radius)
+                        : slotRingOffset(i, slots.length, ring.radius);
 
                     style = {
                         left: ring.cx + o.x - ring.size / 2,
@@ -63,7 +74,7 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                         className={cn(
                             'flex flex-col items-center justify-center rounded-full border text-[var(--ink)]',
                             ring
-                                ? `${HUD_GLASS} absolute`
+                                ? `${HUD_GLASS} pointer-events-auto absolute`
                                 : 'size-9 md:size-10',
                             'focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                             active

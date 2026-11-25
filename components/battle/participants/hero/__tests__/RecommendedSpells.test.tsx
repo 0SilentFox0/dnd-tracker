@@ -45,6 +45,22 @@ describe('RecommendedSpells', () => {
         expect(requestSpellBook).toHaveBeenCalledWith(1);
     });
 
+    it('shows at most 3 spells, native and stronger first', () => {
+        library.mockReturnValue([
+            { id: 'a', name: 'A manual', level: 1, executionMode: 'manual', dice: 9 },
+            { id: 'b', name: 'B weak', level: 1, executionMode: 'native', dice: 1 },
+            { id: 'c', name: 'C strong', level: 1, executionMode: 'native', dice: 3 },
+            { id: 'd', name: 'D mid', level: 1, executionMode: 'native', dice: 2 },
+            { id: 'e', name: 'E other level', level: 2, executionMode: 'native', dice: 9 },
+        ]);
+
+        render(<RecommendedSpells hero={hero} level={1} canCast />);
+
+        expect(
+            screen.getAllByRole('button').map((b) => b.textContent)
+        ).toEqual(['C strong', 'D mid', 'B weak']);
+    });
+
     it('keeps the spell query closed until a level is chosen', () => {
         library.mockReturnValue([]);
 

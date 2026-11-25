@@ -139,6 +139,32 @@ export function slotRingOffset(
     };
 }
 
+const ARC_START_DEG = -100;
+
+const ARC_STEP_DEG = 21;
+
+/** Offset from the portrait centre for slot `i`: a fixed arc fanning out to the right of the portrait, starting just left of the top */
+export function slotArcOffset(
+    i: number,
+    radius: number
+): { x: number; y: number } {
+    const angle = ((ARC_START_DEG + ARC_STEP_DEG * i) * Math.PI) / 180;
+
+    return {
+        x: Math.round(radius * Math.cos(angle) * 10) / 10,
+        y: Math.round(radius * Math.sin(angle) * 10) / 10,
+    };
+}
+
+/** Arc radius that clears the portrait and keeps neighbouring slots from touching */
+export function slotArcRadius(portrait: number, slot: number): number {
+    const clear = portrait / 2 + slot / 2 + 14;
+
+    const spread = (slot + 2) / (2 * Math.sin((ARC_STEP_DEG * Math.PI) / 360));
+
+    return Math.ceil(Math.max(clear, spread));
+}
+
 /** Orbit radius that clears the portrait and keeps neighbouring slots from touching */
 export function slotOrbit(
     n: number,
