@@ -12,7 +12,7 @@ describe('nearestTo', () => {
             nearestTo(from, [
                 placed('far', { at: { x: 9, y: 5 } }),
                 placed('near', { at: { x: 6, y: 6 } }),
-            ])?.basicInfo.id
+            ], 'square')?.basicInfo.id
         ).toBe('near');
     });
 
@@ -21,7 +21,7 @@ describe('nearestTo', () => {
             nearestTo(from, [
                 placed('a', { at: { x: 7, y: 5 } }),
                 placed('b', { at: { x: 3, y: 5 } }),
-            ])?.basicInfo.id
+            ], 'square')?.basicInfo.id
         ).toBe('a');
     });
 
@@ -30,17 +30,18 @@ describe('nearestTo', () => {
             nearestTo(from, [
                 placed('off'),
                 placed('on', { at: { x: 9, y: 9 } }),
-            ])?.basicInfo.id
+            ], 'square')?.basicInfo.id
         ).toBe('on');
     });
 
     it('from поза картою — перший кандидат; порожньо — undefined', () => {
         expect(
-            nearestTo(placed('x'), [
-                placed('a', { at: { x: 1, y: 1 } }),
-                placed('b'),
-            ])?.basicInfo.id
+            nearestTo(
+                placed('x'),
+                [placed('a', { at: { x: 1, y: 1 } }), placed('b')],
+                'square'
+            )?.basicInfo.id
         ).toBe('a');
-        expect(nearestTo(from, [])).toBeUndefined();
+        expect(nearestTo(from, [], 'square')).toBeUndefined();
     });
 });

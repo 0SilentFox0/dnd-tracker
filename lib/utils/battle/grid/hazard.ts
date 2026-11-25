@@ -2,9 +2,10 @@ import {
     cellKey,
     footprint,
     footprintDistance,
+    gridOf,
     parseCellKey,
 } from './geometry';
-import { cellsOf, sizeOf } from './occupancy';
+import { cellsOf, footprintSizeOf } from './occupancy';
 import { reachable } from './path';
 
 import { textRef } from '@/lib/i18n/text-ref';
@@ -71,8 +72,10 @@ export function hazardUnder(
 
     const hazards = damagingHazards(map, live);
 
+    const grid = gridOf(map);
+
     return strongest(
-        footprint(anchor, sizeOf(p), 'square').map((c) =>
+        footprint(anchor, footprintSizeOf(p, grid), grid).map((c) =>
             hazards.get(cellKey(c))
         )
     );
@@ -88,10 +91,12 @@ export function hazardOnMove(
 ): TerrainCell | null {
     const hazards = damagingHazards(map, { participants, rules });
 
-    const start = new Set(cellsOf(mover, 'square').map(cellKey));
+    const grid = gridOf(map);
+
+    const start = new Set(cellsOf(mover, grid).map(cellKey));
 
     const entered = strongest(
-        footprint(to, sizeOf(mover), 'square').map((c) =>
+        footprint(to, footprintSizeOf(mover, grid), grid).map((c) =>
             start.has(cellKey(c)) ? undefined : hazards.get(cellKey(c))
         )
     );
@@ -108,11 +113,14 @@ export function hazardOnMove(
     )
         return null;
 
-    const origin = cellsOf(mover, 'square');
+    const origin = cellsOf(mover, grid);
 
     return strongest(
         [...avoid]
-            .filter((k) => footprintDistance(origin, [parseCellKey(k)]) <= cost)
+            .filter(
+                (k) =>
+                    footprintDistance(origin, [parseCellKey(k)], grid) <= cost
+            )
             .map((k) => hazards.get(k))
     );
 }

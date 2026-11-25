@@ -3,6 +3,7 @@ import {
     cellsByRing,
     footprint,
     footprintDistance,
+    gridOf,
     isPlayable,
 } from './geometry';
 
@@ -67,12 +68,13 @@ export function isAdjacent(
 
 export function occupiedBy(
     participants: BattleParticipant[],
-    filter: (p: BattleParticipant) => boolean
+    filter: (p: BattleParticipant) => boolean,
+    grid: GridKind
 ): Set<string> {
     return new Set(
         participants
             .filter((p) => isOnMap(p) && filter(p))
-            .flatMap((p) => cellsOf(p, 'square').map(cellKey))
+            .flatMap((p) => cellsOf(p, grid).map(cellKey))
     );
 }
 
@@ -82,7 +84,7 @@ export function fits(
     size: number,
     blocked: Set<string>
 ): boolean {
-    return footprint(anchor, size, 'square').every(
+    return footprint(anchor, size, gridOf(map)).every(
         (c) => isPlayable(map, c) && !blocked.has(cellKey(c))
     );
 }
@@ -93,12 +95,15 @@ export function canStand(
     mover: BattleParticipant,
     anchor: GridPoint
 ): boolean {
+    const grid = gridOf(map);
+
     const others = occupiedBy(
         participants,
-        (p) => p.basicInfo.id !== mover.basicInfo.id
+        (p) => p.basicInfo.id !== mover.basicInfo.id,
+        grid
     );
 
-    return fits(map, anchor, sizeOf(mover), others);
+    return fits(map, anchor, footprintSizeOf(mover, grid), others);
 }
 
 export function nearestStandable(
@@ -107,14 +112,17 @@ export function nearestStandable(
     mover: BattleParticipant,
     from: GridPoint
 ): GridPoint | null {
+    const grid = gridOf(map);
+
     const others = occupiedBy(
         participants,
-        (p) => p.basicInfo.id !== mover.basicInfo.id
+        (p) => p.basicInfo.id !== mover.basicInfo.id,
+        grid
     );
 
-    const size = sizeOf(mover);
+    const size = footprintSizeOf(mover, grid);
 
-    for (const cell of cellsByRing(map, from)) {
+    for (const cell of cellsByRing(map, from, grid)) {
         if (fits(map, cell, size, others)) return cell;
     }
 

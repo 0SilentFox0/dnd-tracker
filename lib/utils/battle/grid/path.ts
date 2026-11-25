@@ -10,9 +10,16 @@ import {
     difficultSet,
     footprint,
     footprintDistance,
+    gridOf,
     neighbors,
 } from './geometry';
-import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from './occupancy';
+import {
+    cellsOf,
+    fits,
+    footprintSizeOf,
+    isOnMap,
+    occupiedBy,
+} from './occupancy';
 
 import { EffectMarker } from '@/lib/constants/battle';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
@@ -114,23 +121,26 @@ export function searchPaths(
 
     if (!start) return { cost: result, parent };
 
-    const size = sizeOf(mover);
+    const grid = gridOf(map);
+
+    const size = footprintSizeOf(mover, grid);
 
     const notMe = (p: BattleParticipant) =>
         p.basicInfo.id !== mover.basicInfo.id;
 
     const walls = occupiedBy(
         participants,
-        (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side
+        (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side,
+        grid
     );
 
-    const taken = occupiedBy(participants, notMe);
+    const taken = occupiedBy(participants, notMe, grid);
 
     const { avoid } = opts;
 
     const touchesAvoid = (anchor: GridPoint) =>
         !!avoid?.size &&
-        footprint(anchor, size, 'square').some((c) => avoid.has(cellKey(c)));
+        footprint(anchor, size, grid).some((c) => avoid.has(cellKey(c)));
 
     const hasEdges =
         (wallsOf(map).size > 0 || !!map.bars?.length) && !passesWalls(mover);
@@ -138,9 +148,9 @@ export function searchPaths(
     const stepBlocked = (cur: GridPoint, next: GridPoint) => {
         if (!hasEdges) return false;
 
-        const to = footprint(next, size, 'square');
+        const to = footprint(next, size, grid);
 
-        return footprint(cur, size, 'square').some((c, i) =>
+        return footprint(cur, size, grid).some((c, i) =>
             edgeBlocks(map, c, to[i], 'move')
         );
     };
@@ -151,7 +161,7 @@ export function searchPaths(
 
     const stepCost = (anchor: GridPoint) =>
         difficult.size > 0 &&
-        footprint(anchor, size, 'square').some((c) => difficult.has(cellKey(c)))
+        footprint(anchor, size, grid).some((c) => difficult.has(cellKey(c)))
             ? 2
             : 1;
 
@@ -163,7 +173,7 @@ export function searchPaths(
         for (const cur of buckets[cost] ?? []) {
             if (seen.get(cellKey(cur)) !== cost) continue;
 
-            for (const next of neighbors(cur)) {
+            for (const next of neighbors(cur, grid)) {
                 const key = cellKey(next);
 
                 const nextCost = cost + stepCost(next);
@@ -220,17 +230,20 @@ export function frightenedBlocksMove(
 
     if (!sources.length) return false;
 
-    const destination = footprint(to, sizeOf(mover), 'square');
+    const grid = gridOf(map);
+
+    const destination = footprint(to, footprintSizeOf(mover, grid), grid);
 
     return participants.some(
         (p) =>
             sources.includes(p.basicInfo.id) &&
             isActive(p) &&
             isOnMap(p) &&
-            footprintDistance(destination, cellsOf(p, 'square')) <
+            footprintDistance(destination, cellsOf(p, grid), grid) <
                 footprintDistance(
-                    cellsOf(mover, 'square'),
-                    cellsOf(p, 'square')
+                    cellsOf(mover, grid),
+                    cellsOf(p, grid),
+                    grid
                 )
     );
 }

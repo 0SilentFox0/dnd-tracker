@@ -264,10 +264,15 @@ export function footprintDistance(
     return best;
 }
 
-export function closestCell(cells: GridPoint[], to: GridPoint[]): GridPoint {
+export function closestCell(
+    cells: GridPoint[],
+    to: GridPoint[],
+    grid: GridKind = 'square'
+): GridPoint {
     return cells.reduce(
         (best, c) =>
-            footprintDistance(to, [c]) < footprintDistance(to, [best])
+            footprintDistance(to, [c], grid) <
+            footprintDistance(to, [best], grid)
                 ? c
                 : best,
         cells[0]

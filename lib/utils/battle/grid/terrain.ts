@@ -1,4 +1,4 @@
-import { cellKey, inBounds, neighbors } from './geometry';
+import { cellKey, gridOf, inBounds, neighbors } from './geometry';
 import { cellsOf, isOnMap } from './occupancy';
 
 import { AttackType, HAZARD_DICE_PATTERN } from '@/lib/constants/battle';
@@ -25,7 +25,7 @@ export function hazardDamage(
 }
 
 export function isObscured(
-    map: Pick<BattleMapConfig, 'terrain'> | null | undefined,
+    map: Pick<BattleMapConfig, 'terrain' | 'gridType'> | null | undefined,
     p: BattleParticipant
 ): boolean {
     const terrain = map?.terrain;
@@ -33,7 +33,7 @@ export function isObscured(
     return (
         !!terrain &&
         isOnMap(p) &&
-        cellsOf(p, 'square').some((c) => terrain[cellKey(c)]?.obscured)
+        cellsOf(p, gridOf(map)).some((c) => terrain[cellKey(c)]?.obscured)
     );
 }
 
@@ -76,19 +76,21 @@ function threatens(p: BattleParticipant, mover: BattleParticipant): boolean {
 }
 
 export function threatCells(
-    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    map: Pick<BattleMapConfig, 'cols' | 'rows' | 'gridType'>,
     participants: BattleParticipant[],
     mover: BattleParticipant
 ): Set<string> {
+    const grid = gridOf(map);
+
     const enemyCells = participants
         .filter((p) => threatens(p, mover))
-        .flatMap((p) => cellsOf(p, 'square'));
+        .flatMap((p) => cellsOf(p, grid));
 
     const own = new Set(enemyCells.map(cellKey));
 
     const result = new Set<string>();
 
-    for (const n of enemyCells.flatMap((c) => neighbors(c))) {
+    for (const n of enemyCells.flatMap((c) => neighbors(c, grid))) {
         const key = cellKey(n);
 
         if (inBounds(map, n) && !own.has(key)) result.add(key);

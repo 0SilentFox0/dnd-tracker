@@ -5,9 +5,19 @@ import {
     cellLine,
     closestCell,
     footprintDistance,
+    gridOf,
     isPlayable,
     parseCellKey,
 } from './geometry';
+import {
+    CUBE_DIRS,
+    cubeRound,
+    fromCube,
+    hexCenter,
+    hexDisk,
+    hexDistance,
+    toCube,
+} from './hex';
 import { cellsOf, isOnMap } from './occupancy';
 
 import { isTargetable } from '@/lib/utils/abilities/engine/core/participants';
@@ -15,6 +25,7 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
+    GridKind,
     GridPoint,
     SpellTemplate,
 } from '@/types/battle-grid';
@@ -22,6 +33,8 @@ import type {
 const CONE_TAN = 0.5;
 
 const EPS = 1e-9;
+
+const HEX_CONE_TAN = Math.tan(Math.PI / 6);
 
 export function feetToCells(feet: number, rules: Ruleset): number {
     return Math.max(1, Math.floor(feet / cellFeetOf(rules)));
@@ -31,11 +44,21 @@ export function areaRadiusCells(feet: number): number {
     return Math.max(1, Math.floor(feet / 10));
 }
 
-export function apexOf(origin: GridPoint[], aim: GridPoint): GridPoint {
-    return closestCell(origin, [aim]);
+export function apexOf(
+    origin: GridPoint[],
+    aim: GridPoint,
+    grid: GridKind
+): GridPoint {
+    return closestCell(origin, [aim], grid);
 }
 
-function circleCells(r: number, aim: GridPoint): GridPoint[] {
+function circleCells(
+    r: number,
+    aim: GridPoint,
+    grid: GridKind
+): GridPoint[] {
+    if (grid === 'hex') return hexDisk(aim, r);
+
     const out: GridPoint[] = [];
 
     for (let dy = -r; dy <= r; dy++) {
@@ -46,7 +69,13 @@ function circleCells(r: number, aim: GridPoint): GridPoint[] {
     return out;
 }
 
-function exactCircleCells(r: number, aim: GridPoint): GridPoint[] {
+function exactCircleCells(
+    r: number,
+    aim: GridPoint,
+    grid: GridKind
+): GridPoint[] {
+    if (grid === 'hex') return hexDisk(aim, r);
+
     const out: GridPoint[] = [];
 
     for (let dy = -r; dy <= r; dy++) {
@@ -59,11 +88,17 @@ function exactCircleCells(r: number, aim: GridPoint): GridPoint[] {
     return out;
 }
 
-function emanationCells(r: number, origin: GridPoint[]): GridPoint[] {
-    return origin.flatMap((o) => circleCells(r, o));
+function emanationCells(
+    r: number,
+    origin: GridPoint[],
+    grid: GridKind
+): GridPoint[] {
+    return origin.flatMap((o) => circleCells(r, o, grid));
 }
 
-function cubeCells(r: number, aim: GridPoint): GridPoint[] {
+function cubeCells(r: number, aim: GridPoint, grid: GridKind): GridPoint[] {
+    if (grid === 'hex') return hexDisk(aim, Math.floor(r / 2));
+
     const x0 = aim.x - Math.floor((r - 1) / 2);
 
     const y0 = aim.y - Math.floor((r - 1) / 2);
@@ -77,8 +112,20 @@ function cubeCells(r: number, aim: GridPoint): GridPoint[] {
     return out;
 }
 
-function crossCells(r: number, aim: GridPoint): GridPoint[] {
+function crossCells(r: number, aim: GridPoint, grid: GridKind): GridPoint[] {
     const out: GridPoint[] = [aim];
+
+    if (grid === 'hex') {
+        const c = toCube(aim);
+
+        for (const d of CUBE_DIRS)
+            for (let i = 1; i <= r; i++)
+                out.push(
+                    fromCube({ x: c.x + d.x * i, y: c.y + d.y * i, z: c.z + d.z * i })
+                );
+
+        return out;
+    }
 
     for (let d = 1; d <= r; d++)
         out.push(
@@ -91,7 +138,42 @@ function crossCells(r: number, aim: GridPoint): GridPoint[] {
     return out;
 }
 
-function coneCells(r: number, apex: GridPoint, aim: GridPoint): GridPoint[] {
+function hexConeCells(r: number, apex: GridPoint, aim: GridPoint): GridPoint[] {
+    const o = hexCenter(apex);
+
+    const t = hexCenter(aim);
+
+    const ax = t.x - o.x;
+
+    const ay = t.y - o.y;
+
+    if (ax === 0 && ay === 0) return [];
+
+    return hexDisk(apex, r).filter((c) => {
+        if (c.x === apex.x && c.y === apex.y) return false;
+
+        const p = hexCenter(c);
+
+        const dx = p.x - o.x;
+
+        const dy = p.y - o.y;
+
+        const dot = dx * ax + dy * ay;
+
+        const cross = Math.abs(dx * ay - dy * ax);
+
+        return dot > 0 && cross <= HEX_CONE_TAN * dot + EPS;
+    });
+}
+
+function coneCells(
+    r: number,
+    apex: GridPoint,
+    aim: GridPoint,
+    grid: GridKind
+): GridPoint[] {
+    if (grid === 'hex') return hexConeCells(r, apex, aim);
+
     const ax = aim.x - apex.x;
 
     const ay = aim.y - apex.y;
@@ -114,12 +196,57 @@ function coneCells(r: number, apex: GridPoint, aim: GridPoint): GridPoint[] {
     return out;
 }
 
+function hexRayCells(
+    map: BattleMapConfig,
+    from: GridPoint,
+    through: GridPoint,
+    opts: { maxCells: number; stopAtTarget?: boolean }
+): GridPoint[] {
+    const len = hexDistance(from, through);
+
+    if (len === 0) return [];
+
+    const a = toCube(from);
+
+    const b = toCube(through);
+
+    const k = opts.maxCells / len;
+
+    const end = opts.stopAtTarget
+        ? through
+        : fromCube(
+              cubeRound({
+                  x: a.x + (b.x - a.x) * k,
+                  y: a.y + (b.y - a.y) * k,
+                  z: a.z + (b.z - a.z) * k,
+              })
+          );
+
+    const out: GridPoint[] = [];
+
+    let prev = from;
+
+    for (const c of cellLine(from, end, 'hex').slice(1, opts.maxCells + 1)) {
+        if (!isPlayable(map, c) || edgeBlocks(map, prev, c, 'fire')) break;
+
+        prev = c;
+
+        out.push(c);
+    }
+
+    return out;
+}
+
 export function rayCells(
     map: BattleMapConfig,
     from: GridPoint,
     through: GridPoint,
     opts: { maxCells: number; stopAtTarget?: boolean }
 ): GridPoint[] {
+    const grid = gridOf(map);
+
+    if (grid === 'hex') return hexRayCells(map, from, through, opts);
+
     const vx = through.x - from.x;
 
     const vy = through.y - from.y;
@@ -139,7 +266,7 @@ export function rayCells(
 
     let prev = from;
 
-    for (const c of cellLine(from, end).slice(1, opts.maxCells + 1)) {
+    for (const c of cellLine(from, end, grid).slice(1, opts.maxCells + 1)) {
         if (!isPlayable(map, c) || edgeBlocks(map, prev, c, 'fire')) break;
 
         prev = c;
@@ -157,6 +284,8 @@ export function templateCells(
     aim: GridPoint,
     rules: Ruleset
 ): string[] {
+    const grid = gridOf(map);
+
     const r = feetToCells(template.size, rules);
 
     const cellFeet = cellFeetOf(rules);
@@ -168,23 +297,24 @@ export function templateCells(
     if (template.shape === 'circle')
         raw = (
             template.exact
-                ? exactCircleCells(Math.round(template.size / cellFeet), aim)
-                : circleCells(areaRadiusCells(template.size), aim)
+                ? exactCircleCells(Math.round(template.size / cellFeet), aim, grid)
+                : circleCells(areaRadiusCells(template.size), aim, grid)
         ).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
     else if (template.shape === 'emanation')
         raw = emanationCells(
             Math.round(template.size / cellFeet),
-            origin
+            origin,
+            grid
         ).filter((c) => !own.has(cellKey(c)));
-    else if (template.shape === 'cube') raw = cubeCells(r, aim);
-    else if (template.shape === 'cross') raw = crossCells(r, aim);
+    else if (template.shape === 'cube') raw = cubeCells(r, aim, grid);
+    else if (template.shape === 'cross') raw = crossCells(r, aim, grid);
     else if (origin.length === 0) raw = [];
     else {
-        const apex = apexOf(origin, aim);
+        const apex = apexOf(origin, aim, grid);
 
         raw =
             template.shape === 'cone'
-                ? coneCells(r, apex, aim)
+                ? coneCells(r, apex, aim, grid)
                 : rayCells(map, apex, aim, { maxCells: r });
 
         raw = raw.filter((c) => !own.has(cellKey(c)));
@@ -195,7 +325,7 @@ export function templateCells(
     const sources =
         template.shape === 'emanation'
             ? origin
-            : [aimSource(template, origin, aim)];
+            : [aimSource(template, origin, aim, grid)];
 
     const visible = wallsOf(map).size
         ? playable.filter(
@@ -211,9 +341,11 @@ export function templateCells(
 function aimSource(
     template: SpellTemplate,
     origin: GridPoint[],
-    aim: GridPoint
+    aim: GridPoint,
+    grid: GridKind
 ): GridPoint {
-    if (template.shape === 'cone' && origin.length) return apexOf(origin, aim);
+    if (template.shape === 'cone' && origin.length)
+        return apexOf(origin, aim, grid);
 
     return aim;
 }
@@ -221,7 +353,8 @@ function aimSource(
 export function participantsInCells(
     participants: BattleParticipant[],
     cells: string[],
-    from: GridPoint
+    from: GridPoint,
+    grid: GridKind
 ): BattleParticipant[] {
     const set = new Set(cells);
 
@@ -230,12 +363,12 @@ export function participantsInCells(
             (p) =>
                 isTargetable(p) &&
                 isOnMap(p) &&
-                cellsOf(p, 'square').some((c) => set.has(cellKey(c)))
+                cellsOf(p, grid).some((c) => set.has(cellKey(c)))
         )
         .map((p, i) => ({
             p,
             i,
-            d: footprintDistance([from], cellsOf(p, 'square')),
+            d: footprintDistance([from], cellsOf(p, grid), grid),
         }))
         .sort((a, b) => a.d - b.d || a.i - b.i)
         .map((x) => x.p);
@@ -244,10 +377,15 @@ export function participantsInCells(
 export const isCenteredTemplate = (t: SpellTemplate) =>
     t.shape === 'circle' || t.shape === 'cube' || t.shape === 'cross';
 
-export function areaCentre(cells: string[]): GridPoint | undefined {
+export function areaCentre(
+    cells: string[],
+    grid: GridKind
+): GridPoint | undefined {
     const points = cells.map(parseCellKey);
 
     if (points.length === 0) return undefined;
+
+    if (grid === 'hex') return hexAreaCentre(points);
 
     const cx = points.reduce((sum, p) => sum + p.x, 0) / points.length;
 
@@ -260,12 +398,30 @@ export function areaCentre(cells: string[]): GridPoint | undefined {
     );
 }
 
+function hexAreaCentre(points: GridPoint[]): GridPoint {
+    const centres = points.map(hexCenter);
+
+    const cx = centres.reduce((sum, p) => sum + p.x, 0) / points.length;
+
+    const cy = centres.reduce((sum, p) => sum + p.y, 0) / points.length;
+
+    const dist = (i: number) =>
+        Math.hypot(centres[i].x - cx, centres[i].y - cy);
+
+    let best = 0;
+
+    for (let i = 1; i < points.length; i++) if (dist(i) < dist(best)) best = i;
+
+    return points[best];
+}
+
 export function templateCentre(
     template: SpellTemplate,
     aim: GridPoint,
-    cells: string[]
+    cells: string[],
+    grid: GridKind
 ): GridPoint | undefined {
-    return isCenteredTemplate(template) ? aim : areaCentre(cells);
+    return isCenteredTemplate(template) ? aim : areaCentre(cells, grid);
 }
 
 export function templateAimAllowed(
@@ -273,11 +429,12 @@ export function templateAimAllowed(
     template: SpellTemplate,
     aim: GridPoint,
     rangeFeet: number | undefined,
-    rules: Ruleset
+    rules: Ruleset,
+    grid: GridKind
 ): boolean {
     return (
         !isCenteredTemplate(template) ||
-        aimInRange(origin, aim, rangeFeet, rules)
+        aimInRange(origin, aim, rangeFeet, rules, grid)
     );
 }
 
@@ -289,7 +446,9 @@ export function templateArea(
     aim: GridPoint,
     rules: Ruleset
 ): { cells: string[]; targets: BattleParticipant[] } {
-    const origin = cellsOf(caster, 'square');
+    const grid = gridOf(map);
+
+    const origin = cellsOf(caster, grid);
 
     const cells = templateCells(map, template, origin, aim, rules);
 
@@ -300,7 +459,8 @@ export function templateArea(
             cells,
             isCenteredTemplate(template) || origin.length === 0
                 ? aim
-                : apexOf(origin, aim)
+                : apexOf(origin, aim, grid),
+            grid
         ),
     };
 }
@@ -309,9 +469,10 @@ export function aimInRange(
     origin: GridPoint[],
     aim: GridPoint,
     rangeFeet: number | undefined,
-    rules: Ruleset
+    rules: Ruleset,
+    grid: GridKind
 ): boolean {
     if (rangeFeet === undefined) return true;
 
-    return footprintDistance(origin, [aim]) <= feetToCells(rangeFeet, rules);
+    return footprintDistance(origin, [aim], grid) <= feetToCells(rangeFeet, rules);
 }

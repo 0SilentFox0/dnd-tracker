@@ -1,10 +1,11 @@
+import { gridOf } from './geometry';
 import {
     fits,
+    footprintSizeOf,
     isFallen,
     nearestStandable,
     occupiedBy,
     occupiesCells,
-    sizeOf,
 } from './occupancy';
 
 import { modePlaceRevived } from '@/lib/utils/battle/modes/server';
@@ -16,6 +17,8 @@ export function placeRevived(
     before: BattleParticipant[],
     after: BattleParticipant[]
 ): BattleParticipant[] {
+    const grid = gridOf(map);
+
     const fallen = new Set(before.filter(isFallen).map((p) => p.basicInfo.id));
 
     const pending = new Set(
@@ -35,7 +38,7 @@ export function placeRevived(
 
         const standing = out.filter((q) => !pending.has(q.basicInfo.id));
 
-        const others = occupiedBy(standing, (q) => q.basicInfo.id !== id);
+        const others = occupiedBy(standing, (q) => q.basicInfo.id !== id, grid);
 
         const byMode = modePlaceRevived(map, {
             participants: standing,
@@ -46,7 +49,7 @@ export function placeRevived(
         const cell =
             byMode !== undefined
                 ? byMode
-                : fits(map, from, sizeOf(p), others)
+                : fits(map, from, footprintSizeOf(p, grid), others)
                   ? from
                   : nearestStandable(map, standing, p, from);
 

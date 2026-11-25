@@ -15,7 +15,8 @@ export function nearestMazeCell(
 ): GridPoint | null {
     const taken = occupiedBy(
         participants,
-        (p) => p.basicInfo.id !== mover.basicInfo.id
+        (p) => p.basicInfo.id !== mover.basicInfo.id,
+        'square'
     );
 
     const features = featureKeys(grid.maze);

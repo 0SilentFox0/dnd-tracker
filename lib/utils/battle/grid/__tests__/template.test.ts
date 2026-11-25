@@ -83,7 +83,7 @@ describe('templateCells', () => {
             ).sort()
         ).toEqual([k(5, 5), k(6, 5), k(4, 5), k(5, 6), k(5, 4)].sort());
         expect(
-            templateCentre({ shape: 'cross', size: 5 }, { x: 5, y: 5 }, [])
+            templateCentre({ shape: 'cross', size: 5 }, { x: 5, y: 5 }, [], 'square')
         ).toEqual({ x: 5, y: 5 });
     });
 
@@ -118,7 +118,7 @@ describe('templateCells', () => {
 
         expect(cells).toHaveLength(8);
         expect(cells).not.toContain(k(5, 5));
-        expect(templateCentre(ring, { x: 5, y: 5 }, cells)).toEqual({
+        expect(templateCentre(ring, { x: 5, y: 5 }, cells, 'square')).toEqual({
             x: 5,
             y: 5,
         });
@@ -341,7 +341,8 @@ describe('participantsInCells', () => {
         const out = participantsInCells(
             [big, near, dead, res, none],
             [k(5, 5), k(2, 2), k(2, 3), k(3, 2)],
-            { x: 0, y: 0 }
+            { x: 0, y: 0 },
+            'square'
         );
 
         expect(out.map((p) => p.basicInfo.id)).toEqual(['near', 'big']);
@@ -358,12 +359,12 @@ describe('aimInRange', () => {
         ];
 
         expect(
-            aimInRange(origin, { x: 50, y: 50 }, undefined, DEFAULT_RULES)
+            aimInRange(origin, { x: 50, y: 50 }, undefined, DEFAULT_RULES, 'square')
         ).toBe(true);
-        expect(aimInRange(origin, { x: 7, y: 1 }, 30, DEFAULT_RULES)).toBe(
+        expect(aimInRange(origin, { x: 7, y: 1 }, 30, DEFAULT_RULES, 'square')).toBe(
             true
         );
-        expect(aimInRange(origin, { x: 8, y: 1 }, 30, DEFAULT_RULES)).toBe(
+        expect(aimInRange(origin, { x: 8, y: 1 }, 30, DEFAULT_RULES, 'square')).toBe(
             false
         );
     });
@@ -374,14 +375,22 @@ describe('templateCentre', () => {
         const line = [k(2, 1), k(3, 1), k(4, 1), k(5, 1), k(6, 1)];
 
         expect(
-            templateCentre({ shape: 'circle', size: 10 }, { x: 4, y: 4 }, [
-                k(4, 4),
-            ])
+            templateCentre(
+                { shape: 'circle', size: 10 },
+                { x: 4, y: 4 },
+                [k(4, 4)],
+                'square'
+            )
         ).toEqual({ x: 4, y: 4 });
         expect(
-            templateCentre({ shape: 'line', size: 25 }, { x: 11, y: 1 }, line)
+            templateCentre(
+                { shape: 'line', size: 25 },
+                { x: 11, y: 1 },
+                line,
+                'square'
+            )
         ).toEqual({ x: 4, y: 1 });
-        expect(areaCentre([])).toBeUndefined();
+        expect(areaCentre([], 'square')).toBeUndefined();
     });
 });
 

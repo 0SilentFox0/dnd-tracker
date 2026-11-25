@@ -1,5 +1,5 @@
-import { cellKey, cellsByRing, footprint } from './geometry';
-import { fits, occupiesCells, sizeOf } from './occupancy';
+import { cellKey, cellsByRing, footprint, gridOf } from './geometry';
+import { fits, footprintSizeOf, occupiesCells } from './occupancy';
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { modePlaceAll } from '@/lib/utils/battle/modes/server';
@@ -42,6 +42,8 @@ export function placeParticipants(
 
     if (own) return own;
 
+    const grid = gridOf(map);
+
     const blocked = new Set<string>();
 
     const positions = new Map<string, GridPoint>();
@@ -52,11 +54,11 @@ export function placeParticipants(
         if (
             !position ||
             !occupiesCells(p) ||
-            !fits(map, position, sizeOf(p), blocked)
+            !fits(map, position, footprintSizeOf(p, grid), blocked)
         )
             continue;
 
-        for (const c of footprint(position, sizeOf(p), 'square'))
+        for (const c of footprint(position, footprintSizeOf(p, grid), grid))
             blocked.add(cellKey(c));
         positions.set(p.basicInfo.id, position);
     }
@@ -77,7 +79,7 @@ export function placeParticipants(
     return participants.map((p) => {
         if (!occupiesCells(p) || positions.has(p.basicInfo.id)) return p;
 
-        const size = sizeOf(p);
+        const size = footprintSizeOf(p, grid);
 
         const shift = (a: GridPoint) =>
             p.basicInfo.side === ParticipantSide.ENEMY
@@ -93,7 +95,7 @@ export function placeParticipants(
         let anchor: GridPoint | undefined;
 
         if (near) {
-            for (const a of cellsByRing(map, near))
+            for (const a of cellsByRing(map, near, grid))
                 if (fits(map, a, size, blocked)) {
                     anchor = a;
                     break;
@@ -111,7 +113,7 @@ export function placeParticipants(
 
         if (!anchor) return p;
 
-        for (const c of footprint(anchor, size, 'square'))
+        for (const c of footprint(anchor, size, grid))
             blocked.add(cellKey(c));
         positions.set(p.basicInfo.id, anchor);
 

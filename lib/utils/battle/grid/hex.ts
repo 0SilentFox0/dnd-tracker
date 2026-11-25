@@ -16,7 +16,7 @@ const R = HEX_R;
 
 const H = HEX_H;
 
-const CUBE_DIRS: readonly Cube[] = [
+export const CUBE_DIRS: readonly Cube[] = [
     { x: 1, y: -1, z: 0 },
     { x: 1, y: 0, z: -1 },
     { x: 0, y: 1, z: -1 },
@@ -50,7 +50,7 @@ export function hexDistance(a: GridPoint, b: GridPoint): number {
     return cubeDistance(toCube(a), toCube(b));
 }
 
-function cubeRound(c: Cube): Cube {
+export function cubeRound(c: Cube): Cube {
     let x = Math.round(c.x);
 
     let y = Math.round(c.y);

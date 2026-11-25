@@ -1,6 +1,12 @@
 import { pickAttack } from './attack-reach';
-import { cellKey, footprint, parseCellKey } from './geometry';
-import { cellsOf, isOnMap, sizeOf } from './occupancy';
+import {
+    cellDistance,
+    cellKey,
+    footprint,
+    gridOf,
+    parseCellKey,
+} from './geometry';
+import { cellsOf, footprintSizeOf, isOnMap } from './occupancy';
 import { moveBudget, type PathSearch, searchPaths } from './path';
 import { hazardCells, threatCells } from './terrain';
 
@@ -11,6 +17,7 @@ import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
     BattleMapMark,
+    GridKind,
     GridPoint,
 } from '@/types/battle-grid';
 
@@ -50,11 +57,16 @@ export interface MoveStep {
     cost: number;
 }
 
-function closerStep(a: MoveStep, b: MoveStep, from: GridPoint): boolean {
+function closerStep(
+    a: MoveStep,
+    b: MoveStep,
+    from: GridPoint,
+    grid: GridKind
+): boolean {
     if (a.cost !== b.cost) return a.cost < b.cost;
 
     const d = (s: MoveStep) => [
-        Math.max(Math.abs(s.anchor.x - from.x), Math.abs(s.anchor.y - from.y)),
+        cellDistance(s.anchor, from, grid),
         Math.abs(s.anchor.x - from.x) + Math.abs(s.anchor.y - from.y),
         s.anchor.y,
         s.anchor.x,
@@ -84,14 +96,15 @@ export function moveReach(
 ): { steps: Map<string, MoveStep>; search: PathSearch } {
     const search = moveSearch(map, participants, mover, opts);
 
-    return { steps: stepsOf(search.cost, mover), search };
+    return { steps: stepsOf(search.cost, mover, gridOf(map)), search };
 }
 
 function stepsOf(
     anchors: Map<string, number>,
-    mover: BattleParticipant
+    mover: BattleParticipant,
+    grid: GridKind
 ): Map<string, MoveStep> {
-    const size = sizeOf(mover);
+    const size = footprintSizeOf(mover, grid);
 
     const from = mover.battleData.position;
 
@@ -104,17 +117,17 @@ function stepsOf(
         return steps;
     }
 
-    const own = new Set(cellsOf(mover, 'square').map(cellKey));
+    const own = new Set(cellsOf(mover, grid).map(cellKey));
 
     for (const [key, cost] of anchors) {
         const step = { anchor: parseCellKey(key), cost };
 
-        for (const cell of footprint(step.anchor, size, 'square')) {
+        for (const cell of footprint(step.anchor, size, grid)) {
             const k = cellKey(cell);
 
             const kept = steps.get(k);
 
-            if (!own.has(k) && (!kept || closerStep(step, kept, from)))
+            if (!own.has(k) && (!kept || closerStep(step, kept, from, grid)))
                 steps.set(k, step);
         }
     }
@@ -170,7 +183,7 @@ export function targetMarks(
             ? 'target'
             : 'invalid-target';
 
-        for (const c of cellsOf(t, 'square')) marks.set(cellKey(c), mark);
+        for (const c of cellsOf(t, gridOf(map))) marks.set(cellKey(c), mark);
     }
 
     return marks;

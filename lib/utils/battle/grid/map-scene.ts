@@ -1,5 +1,6 @@
 import { pickAttack } from './attack-reach';
-import { cellKey } from './geometry';
+import { cellKey, gridOf, inBounds } from './geometry';
+import { hexDisk } from './hex';
 import type { GridWindow } from './layout';
 import { lineOfFire } from './line-of-fire';
 import {
@@ -9,7 +10,7 @@ import {
     moveZoneMarks,
     targetMarks,
 } from './map-view';
-import { cellsOf, isOnMap, sizeOf } from './occupancy';
+import { cellsOf, footprintSizeOf, isOnMap } from './occupancy';
 import { wallsAllowAim } from './sight';
 import {
     apexOf,
@@ -41,6 +42,7 @@ import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
     BattleMapView,
+    GridKind,
     GridPoint,
     SpellTemplate,
 } from '@/types/battle-grid';
@@ -106,10 +108,10 @@ export interface MapScene {
     tokenClick(id: string): MapClick;
 }
 
-export function centreCell(p: BattleParticipant): GridPoint {
-    const [anchor] = cellsOf(p, 'square');
+export function centreCell(p: BattleParticipant, grid: GridKind): GridPoint {
+    const [anchor] = cellsOf(p, grid);
 
-    const offset = Math.floor((sizeOf(p) - 1) / 2);
+    const offset = Math.floor((footprintSizeOf(p, grid) - 1) / 2);
 
     return { x: anchor.x + offset, y: anchor.y + offset };
 }
@@ -137,7 +139,7 @@ function enemyAt(
             !!of &&
             isHostile(map, of, x) &&
             isOnMap(x) &&
-            cellsOf(x, 'square').some((c) => cellKey(c) === key)
+            cellsOf(x, gridOf(map)).some((c) => cellKey(c) === key)
     );
 }
 
@@ -205,15 +207,18 @@ export function aimView(
 } | null {
     const caster = findParticipant(participants, aim.casterId);
 
+    const grid = gridOf(map);
+
     if (
         !caster ||
         !isOnMap(caster) ||
         !templateAimAllowed(
-            cellsOf(caster, 'square'),
+            cellsOf(caster, grid),
             aim.template,
             at,
             aim.range,
-            rules
+            rules,
+            grid
         ) ||
         modeAimHiddenText(map, caster, at) ||
         !wallsAllowAim(map, caster, at)
@@ -235,7 +240,7 @@ export function aimView(
 
     const pulseFrom =
         shape === 'cone' || shape === 'line'
-            ? apexOf(cellsOf(caster, 'square'), at)
+            ? apexOf(cellsOf(caster, grid), at, grid)
             : at;
 
     return {
@@ -245,7 +250,7 @@ export function aimView(
     };
 }
 
-function rangeWindow(
+export function rangeWindow(
     map: BattleMapConfig,
     origin: GridPoint[],
     rangeFeet: number,
@@ -254,6 +259,25 @@ function rangeWindow(
     if (!origin.length) return { x: 0, y: 0, cols: 0, rows: 0 };
 
     const r = feetToCells(rangeFeet, rules);
+
+    if (gridOf(map) === 'hex') {
+        const cells = origin
+            .flatMap((o) => hexDisk(o, r))
+            .filter((c) => inBounds(map, c));
+
+        if (!cells.length) return { x: 0, y: 0, cols: 0, rows: 0 };
+
+        const x0 = Math.min(...cells.map((c) => c.x));
+
+        const y0 = Math.min(...cells.map((c) => c.y));
+
+        return {
+            x: x0,
+            y: y0,
+            cols: Math.max(...cells.map((c) => c.x)) - x0 + 1,
+            rows: Math.max(...cells.map((c) => c.y)) - y0 + 1,
+        };
+    }
 
     const xs = origin.map((c) => c.x);
 
@@ -368,7 +392,8 @@ function resolveMode(
 
 function pickMarks(
     participants: BattleParticipant[],
-    pick: MapPick
+    pick: MapPick,
+    grid: GridKind
 ): Map<string, CellMark> {
     const marks = new Map<string, CellMark>();
 
@@ -383,7 +408,7 @@ function pickMarks(
               ? 'picked'
               : 'pick';
 
-        for (const c of cellsOf(target, 'square')) marks.set(cellKey(c), mark);
+        for (const c of cellsOf(target, grid)) marks.set(cellKey(c), mark);
     }
 
     return marks;
@@ -472,7 +497,7 @@ function buildMarks(
     }
 
     if (pick)
-        for (const [key, mark] of pickMarks(participants, pick))
+        for (const [key, mark] of pickMarks(participants, pick, gridOf(map)))
             marks.set(key, mark);
 
     return {
@@ -489,11 +514,12 @@ function aimClick(s: SceneState, p: GridPoint): MapClick {
         !aim ||
         !aimCaster ||
         !templateAimAllowed(
-            cellsOf(aimCaster, 'square'),
+            cellsOf(aimCaster, gridOf(map)),
             aim.template,
             p,
             aim.range,
-            rules
+            rules,
+            gridOf(map)
         )
     )
         return { kind: 'reject', reason: textRef(REJECT.outOfRange) };
@@ -538,7 +564,7 @@ function attackClick(
     )
         return null;
 
-    const mark = marks.get(cellKey(cellsOf(target, 'square')[0]));
+    const mark = marks.get(cellKey(cellsOf(target, gridOf(map))[0]));
 
     if (mark !== 'target' && mark !== 'invalid-target') return null;
 
@@ -575,7 +601,7 @@ function tokenClickOf(s: SceneState, id: string): MapClick {
 
     if (s.aim)
         return target && isOnMap(target)
-            ? aimClick(s, centreCell(target))
+            ? aimClick(s, centreCell(target, gridOf(s.map)))
             : { kind: 'none' };
 
     if (s.pick) return pickClick(s.pick, id);
@@ -613,7 +639,7 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
         const occupant = s.participants.find(
             (x) =>
                 isOnMap(x) &&
-                cellsOf(x, 'square').some((c) => cellKey(c) === key)
+                cellsOf(x, gridOf(s.map)).some((c) => cellKey(c) === key)
         );
 
         return occupant
@@ -626,7 +652,7 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
     if (
         current &&
         isOnMap(current) &&
-        cellsOf(current, 'square').some((c) => cellKey(c) === key)
+        cellsOf(current, gridOf(s.map)).some((c) => cellKey(c) === key)
     )
         return { kind: 'select', id: current.basicInfo.id };
 
@@ -665,7 +691,12 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
         aimCaster &&
         aim.range !== undefined &&
         isCenteredTemplate(aim.template)
-            ? rangeWindow(map, cellsOf(aimCaster, 'square'), aim.range, rules)
+            ? rangeWindow(
+                  map,
+                  cellsOf(aimCaster, gridOf(map)),
+                  aim.range,
+                  rules
+              )
             : null;
 
     const aimed = aim?.aim

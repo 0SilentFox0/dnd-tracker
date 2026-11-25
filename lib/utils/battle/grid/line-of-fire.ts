@@ -4,6 +4,7 @@ import {
     cellKey,
     cellLine,
     closestCell,
+    gridOf,
     impassableSet,
     inBounds,
 } from './geometry';
@@ -31,13 +32,15 @@ export function lineOfFire(
 ): LineOfFire {
     if (!bothOnMap(map, shooter, target)) return CLEAR;
 
-    const from = cellsOf(shooter, 'square');
+    const grid = gridOf(map);
 
-    const to = cellsOf(target, 'square');
+    const from = cellsOf(shooter, grid);
 
-    const start = closestCell(from, to);
+    const to = cellsOf(target, grid);
 
-    const line = cellLine(start, closestCell(to, [start]));
+    const start = closestCell(from, to, grid);
+
+    const line = cellLine(start, closestCell(to, [start], grid), grid);
 
     const own = new Set([...from, ...to].map(cellKey));
 
@@ -47,7 +50,7 @@ export function lineOfFire(
             p.basicInfo.id !== target.basicInfo.id
     );
 
-    const occupied = occupiedBy(others, (p) => isUp(p) && !isAirborne(p));
+    const occupied = occupiedBy(others, (p) => isUp(p) && !isAirborne(p), grid);
 
     const blocked = blockedSet(map);
 

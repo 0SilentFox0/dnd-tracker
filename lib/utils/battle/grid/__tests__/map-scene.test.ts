@@ -586,7 +586,7 @@ describe('deriveMapScene: наведення шаблону', () => {
                     y < r.y + r.rows;
 
                 expect(inside).toBe(
-                    aimInRange(caster, { x, y }, 15, DEFAULT_RULES)
+                    aimInRange(caster, { x, y }, 15, DEFAULT_RULES, 'square')
                 );
             }
     });

@@ -1,6 +1,6 @@
 import { EffectMarker } from '@/lib/constants/battle';
 import { isEscaped } from '@/lib/utils/abilities/engine/core/participants';
-import { cellKey } from '@/lib/utils/battle/grid/geometry';
+import { cellKey, gridOf } from '@/lib/utils/battle/grid/geometry';
 import { centreCell } from '@/lib/utils/battle/grid/map-scene';
 import { cellsOf, isFallen } from '@/lib/utils/battle/grid/occupancy';
 import { visibleFromMany } from '@/lib/utils/battle/vision/shadowcast';
@@ -69,7 +69,7 @@ export function fogView({
 
         const cells = visibleFromMany(
             map,
-            viewers.map(centreCell),
+            viewers.map((p) => centreCell(p, gridOf(map))),
             radius,
             tileBlocksSight
         );
@@ -106,7 +106,7 @@ export function fogView({
             (own && position) ||
             (!hidden &&
                 position &&
-                cellsOf(participant, 'square').some((cell) =>
+                cellsOf(participant, gridOf(map)).some((cell) =>
                     visible.has(cellKey(cell))
                 ))
         )
