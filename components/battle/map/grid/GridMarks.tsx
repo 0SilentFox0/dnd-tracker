@@ -2,22 +2,17 @@
 
 import { memo, useMemo } from 'react';
 
-import {
-    markFill,
-    type MarkValue,
-    OUT_OF_RANGE_FILL,
-    ZONE_CLASS,
-} from './grid-style';
+import { markFill, type MarkValue } from './grid-style';
 
 import {
     cellPolygon,
     gridLinesPath,
+    type GridWindow,
     isMoveMark,
     parseCellKey,
     regionFillPath,
     regionOutlinePath,
     UNIT,
-    windowPath,
 } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig, BattleMapView } from '@/types/battle-grid';
 
@@ -42,27 +37,21 @@ function splitMarks(
 ) {
     const move: string[] = [];
 
-    const danger: string[] = [];
-
     const sparse: Array<[string, MarkValue]> = [];
 
     if (marks)
         for (const [key, mark] of marks) {
             if (blocked.has(key)) continue;
 
-            if (mark === 'move-danger') danger.push(key);
-            else if (isMoveMark(mark)) move.push(key);
+            if (isMoveMark(mark)) move.push(key);
             else if (SPARSE.has(mark)) sparse.push([key, mark]);
         }
 
-    return { move, danger, sparse };
+    return { move, sparse };
 }
 
-function zonePaths(keys: string[]) {
-    return keys.length
-        ? { fill: regionFillPath(keys), outline: regionOutlinePath(keys) }
-        : null;
-}
+const rangeOutline = (w: GridWindow) =>
+    `M${w.x * UNIT} ${w.y * UNIT}h${w.cols * UNIT}v${w.rows * UNIT}h${-w.cols * UNIT}z`;
 
 export const GridMarks = memo(function GridMarks({
     map,
@@ -75,11 +64,8 @@ export const GridMarks = memo(function GridMarks({
 
     const split = useMemo(() => splitMarks(marks, blocked), [marks, blocked]);
 
-    const zones = useMemo(
-        () => ({
-            move: zonePaths(split.move),
-            danger: zonePaths(split.danger),
-        }),
+    const moveOutline = useMemo(
+        () => (split.move.length ? regionOutlinePath(split.move) : ''),
         [split]
     );
 
@@ -96,14 +82,9 @@ export const GridMarks = memo(function GridMarks({
         return keys.length ? regionFillPath(keys) : '';
     }, [blocked, terrain]);
 
-    const gridless = [staticMask, zones.move?.fill, zones.danger?.fill]
-        .filter(Boolean)
-        .join('');
+    const gridless = staticMask;
 
-    const outOfRange = useMemo(
-        () => (range ? windowPath({ cols, rows }, range) : ''),
-        [range, cols, rows]
-    );
+    const rangeD = useMemo(() => (range ? rangeOutline(range) : ''), [range]);
 
     return (
         <>
@@ -125,20 +106,6 @@ export const GridMarks = memo(function GridMarks({
                 </mask>
             )}
             <g pointerEvents="none">
-                {zones.move && (
-                    <path
-                        data-zone-fill="move"
-                        className={`${ZONE_CLASS.move}-fill battle-map-zone`}
-                        d={zones.move.fill}
-                    />
-                )}
-                {zones.danger && (
-                    <path
-                        data-zone-fill="danger"
-                        className={`${ZONE_CLASS.danger}-fill battle-map-zone`}
-                        d={zones.danger.fill}
-                    />
-                )}
                 {split.sparse.map(([key, mark]) => (
                     <polygon
                         key={key}
@@ -148,14 +115,6 @@ export const GridMarks = memo(function GridMarks({
                         fill={markFill(mark)}
                     />
                 ))}
-                {outOfRange && (
-                    <path
-                        data-out-of-range=""
-                        d={outOfRange}
-                        fillRule="evenodd"
-                        fill={OUT_OF_RANGE_FILL}
-                    />
-                )}
                 <path
                     data-grid-lines=""
                     d={lines}
@@ -166,27 +125,28 @@ export const GridMarks = memo(function GridMarks({
                     vectorEffect="non-scaling-stroke"
                     mask={gridless ? `url(#${maskId})` : undefined}
                 />
-                {(['move', 'danger'] as const).map((kind) => {
-                    const zone = zones[kind];
-
-                    return (
-                        zone && (
-                            <path
-                                key={kind}
-                                data-fx-zone={kind}
-                                className={`${ZONE_CLASS[kind]}-outline battle-map-zone`}
-                                d={zone.outline}
-                                fill="none"
-                                strokeWidth={1.5}
-                                strokeLinejoin="round"
-                                strokeDasharray={
-                                    kind === 'danger' ? '6 4' : undefined
-                                }
-                                vectorEffect="non-scaling-stroke"
-                            />
-                        )
-                    );
-                })}
+                {moveOutline && (
+                    <path
+                        data-fx-zone="move"
+                        className="battle-map-reach-outline battle-map-zone"
+                        d={moveOutline}
+                        fill="none"
+                        strokeWidth={1.5}
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                    />
+                )}
+                {rangeD && (
+                    <path
+                        data-range-outline=""
+                        className="battle-map-range-outline battle-map-zone"
+                        d={rangeD}
+                        fill="none"
+                        strokeWidth={1.5}
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                    />
+                )}
             </g>
         </>
     );

@@ -79,7 +79,7 @@ Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they
 
 - **Шари** (`components/battle/map/grid/`, збирає `GridLayer`): `GridStatic` (місцевість, жар, заблоковані клітинки — кілька злитих шляхів; вікно `window` видимих клітинок для жару), `GridMarks` (зони руху/небезпеки контурами `regionFillPath`/`regionOutlinePath` з `lib/utils/battle/grid/region-path.ts`, розріджені цілі шаблону поштучно `[data-mark-cell]`, лінії сітки під маскою зон/стін), `GridHit`. Усі `memo`: наведення не перерендерює сітку.
 - **Хіт-шар:** `GridHit` — один прозорий прямокутник на всю карту з делегованим pointer; клітинка визначається геометрично (`cellAtScreenPoint` по `getScreenCTM()`), штрих-малювання через `onStrokeStart`. Обробників на клітинку нема.
-- **Дальність (`range`):** `BattleMapView.range` — `GridWindow | null` (прямокутник, бо `footprintDistance` — метрика Чебишова), малюється одним evenodd-шляхом `windowPath`; замість позначок `out-of-range` на кожну клітинку.
+- **Дальність (`range`):** `BattleMapView.range` — `GridWindow | null` (прямокутник, бо `footprintDistance` — метрика Чебишова), малюється тонким зеленим контуром прямокутника (без заливки); токени поза вікном притемнюються через `placement.dimmed`.
 - **Видиме вікно:** `useGridWindow` (`lib/hooks/battle`) — вікно, квантоване до чанка, з CTM і скролу; `null` без CTM (SSR/тести) — рендериться все.
 - **FX:** `<svg data-fx-grid>` у `MapStage` — якір геометричного `cellPoint` у `components/fx/runtime/anchors.ts` (через CTM), `visiblePoint` відсікає цілі за межею прокрутки; FX більше не шукають `[data-fx-cell]`.
 - **Ліміт під прапорцем:** див. «Ліміти» вище (`battleMapMaxSide`, `dmMoveCap`).

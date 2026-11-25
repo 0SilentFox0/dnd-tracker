@@ -13,11 +13,6 @@ export const FLAME_ID = 'battle-map-flame';
 
 export const FLAME_SIZE = UNIT * 0.42;
 
-export const ZONE_CLASS = {
-    move: 'battle-map-reach',
-    danger: 'battle-map-threat',
-} as const;
-
 export type MarkValue = CellMark | number | undefined;
 
 export function markFill(mark: MarkValue): string {
@@ -29,8 +24,6 @@ export function markFill(mark: MarkValue): string {
 
     return mark === 'invalid-target' ? 'rgba(120,120,120,.25)' : 'transparent';
 }
-
-export const OUT_OF_RANGE_FILL = 'rgba(0,0,0,.45)';
 
 export const ZONE_FILL = 'rgba(160,130,210,.16)';
 

@@ -25,4 +25,5 @@ export interface MapPlacement {
     box: { cx: number; cy: number; size: number };
     mapSize: { width: number; height: number };
     pxPerUnit: number;
+    dimmed?: boolean;
 }

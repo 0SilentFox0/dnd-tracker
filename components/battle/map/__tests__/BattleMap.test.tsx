@@ -200,25 +200,42 @@ describe('BattleMap', () => {
         expect(onCellClick).toHaveBeenCalledWith({ x: 1, y: 1 });
     });
 
-    it('view.range darkens everything outside the rectangle with one evenodd path', () => {
+    it('view.range draws a thin green boundary and dims out-of-range tokens', () => {
         const { container } = render(
             <BattleMap
                 map={square}
                 participants={people}
-                view={{ range: { x: 1, y: 0, cols: 2, rows: 2 } }}
+                view={{
+                    currentId: 'h',
+                    range: { x: 0, y: 0, cols: 2, rows: 2 },
+                }}
             />
         );
 
-        const out = container.querySelectorAll('[data-out-of-range]');
+        const line = container.querySelectorAll('[data-range-outline]');
 
-        expect(out).toHaveLength(1);
-        expect(out[0].getAttribute('fill-rule')).toBe('evenodd');
-        expect(out[0].getAttribute('d')).toBe(
-            'M0 0h400v300h-400zM100 0h200v200h-200z'
-        );
+        expect(line).toHaveLength(1);
+        expect(line[0].getAttribute('d')).toBe('M0 0h200v200h-200z');
+        expect(line[0].getAttribute('fill')).toBe('none');
+        expect(container.querySelector('[data-out-of-range]')).toBeNull();
+
+        const dimmed = [...container.querySelectorAll('[data-dimmed]')];
+
+        expect(dimmed).toHaveLength(1);
+        expect(
+            dimmed[0].querySelector('[data-fx-participant="e"]')
+        ).not.toBeNull();
     });
 
-    it('a 100-cell move zone is one outline and one fill', () => {
+    it('tokens are not dimmed without a range', () => {
+        const { container } = render(
+            <BattleMap map={square} participants={people} view={{}} />
+        );
+
+        expect(container.querySelector('[data-dimmed]')).toBeNull();
+    });
+
+    it('a 100-cell move zone is one outline and no fill', () => {
         const marks = new Map<string, number>();
 
         for (let x = 0; x < 10; x++)
@@ -235,9 +252,7 @@ describe('BattleMap', () => {
         expect(
             container.querySelectorAll('[data-fx-zone="move"]')
         ).toHaveLength(1);
-        expect(
-            container.querySelectorAll('[data-zone-fill="move"]')
-        ).toHaveLength(1);
+        expect(container.querySelector('[data-zone-fill]')).toBeNull();
     });
 
     it('grid element count does not depend on the map area', () => {
@@ -673,7 +688,7 @@ describe('BattleMap', () => {
         ).toBe('rgba(230,80,60,.35)');
     });
 
-    it('move zone: thin outline, no cost numbers; danger is dashed', () => {
+    it('move zone: one thin outline over move and move-danger cells, no fill', () => {
         const marks = new Map<string, 'move-danger' | number>([
             ['1:0', 2],
             ['2:0', 'move-danger'],
@@ -689,40 +704,22 @@ describe('BattleMap', () => {
 
         expect(container.querySelectorAll('text')).toHaveLength(0);
 
-        const ok = container.querySelector(
-            '[data-fx-zone="move"]'
-        ) as SVGElement;
+        const ok = container.querySelectorAll('[data-fx-zone]');
 
-        const bad = container.querySelector(
-            '[data-fx-zone="danger"]'
-        ) as SVGElement;
-
-        expect(ok.getAttribute('class')).toContain('battle-map-reach-outline');
-        expect(ok.getAttribute('stroke-dasharray')).toBeNull();
-        expect(ok.getAttribute('vector-effect')).toBe('non-scaling-stroke');
-        expect(Number(ok.getAttribute('stroke-width'))).toBeLessThanOrEqual(
+        expect(ok).toHaveLength(1);
+        expect(ok[0].getAttribute('class')).toContain(
+            'battle-map-reach-outline'
+        );
+        expect(ok[0].getAttribute('stroke-dasharray')).toBeNull();
+        expect(ok[0].getAttribute('vector-effect')).toBe('non-scaling-stroke');
+        expect(Number(ok[0].getAttribute('stroke-width'))).toBeLessThanOrEqual(
             1.5
         );
-        expect(bad.getAttribute('class')).toContain(
-            'battle-map-threat-outline'
+        expect(ok[0].getAttribute('d')).toBe(
+            'M100 0h200M100 100h200M100 0v100M300 0v100'
         );
-        expect(bad.getAttribute('stroke-dasharray')).toBeTruthy();
-        expect(
-            container.querySelectorAll('[data-fx-zone="move"]')
-        ).toHaveLength(1);
-        expect(
-            container.querySelectorAll('[data-zone-fill="move"]')
-        ).toHaveLength(1);
-        expect(
-            container
-                .querySelector('[data-zone-fill="move"]')
-                ?.getAttribute('class')
-        ).toContain('battle-map-reach-fill');
-        expect(
-            container
-                .querySelector('[data-zone-fill="danger"]')
-                ?.getAttribute('class')
-        ).toContain('battle-map-threat-fill');
+        expect(container.querySelector('[data-zone-fill]')).toBeNull();
+        expect(container.innerHTML).not.toContain('threat');
     });
 
     it('renders wall, barrier and hazard terrain under the grid', () => {
@@ -823,11 +820,6 @@ describe('BattleMap', () => {
 
         expect(titleAt(1, 1)).toBe('Вогняна стіна · ще 2 раунди');
         expect(titleAt(3, 2)).toBe('Лава');
-        expect(
-            container
-                .querySelector('[data-zone-fill="danger"]')
-                ?.getAttribute('class')
-        ).toContain('battle-map-threat-fill');
         expect(titleAt(2, 0)).toBeUndefined();
         expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
     });
