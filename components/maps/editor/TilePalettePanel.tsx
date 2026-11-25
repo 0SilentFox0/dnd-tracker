@@ -119,7 +119,7 @@ export function TilePalettePanel({
                         <span className="truncate text-hud-muted">
                             {t(`layer.${tileEditor.activeLayer}`)}
                         </span>
-                        <span className="truncate font-medium text-hud-gold-bright">
+                        <span className="truncate font-medium text-hud-ink">
                             {tileLabel(selectedTile.key)}
                         </span>
                     </div>

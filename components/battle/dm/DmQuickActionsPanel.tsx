@@ -59,7 +59,7 @@ function QuickAction({
     return (
         <HudButton
             type="button"
-            className="hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/[.06]"
+            className="hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-hud-muted hover:bg-hud-panel-2"
             title={title}
             disabled={disabled}
             onClick={() => {
@@ -171,7 +171,7 @@ export function DmQuickActionsPanel({
                     onClick={() => setOpen(true)}
                     className={cn(
                         'fixed top-1/2 right-0 z-50 flex h-24 w-10 -translate-y-1/2 items-center justify-center',
-                        'border border-r-0 border-hud-line bg-hud-field/90 text-[var(--gold)] shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-[var(--gold)]/60',
+                        'border border-r-0 border-hud-line bg-hud-field/90 text-[var(--gold)] shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-hud-muted',
                         'transition-all duration-200',
                         open && 'pointer-events-none opacity-0'
                     )}

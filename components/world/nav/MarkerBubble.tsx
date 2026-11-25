@@ -51,7 +51,7 @@ export function MarkerBubble({
                 data-tour="world.bubble"
                 className="flex w-52 max-w-full items-center gap-1 rounded-lg border border-hud-rule bg-black/90 p-1.5 text-sm text-hud-ink shadow-lg"
             >
-                <Icon className="ml-1 size-4 shrink-0 text-hud-gold-bright" />
+                <Icon className="ml-1 size-4 shrink-0 text-hud-ink" />
                 <p
                     className="min-w-0 flex-1 truncate font-medium"
                     title={marker.name}
@@ -117,7 +117,7 @@ export function MarkerBubble({
                 <div className="flex items-start gap-2">
                     {children ?? (
                         <>
-                            <Icon className="mt-0.5 size-4 shrink-0 text-hud-gold-bright" />
+                            <Icon className="mt-0.5 size-4 shrink-0 text-hud-ink" />
                             <div className="min-w-0 flex-1">
                                 {embedded ? null : (
                                     <p className="font-medium break-words">

@@ -64,7 +64,7 @@ export function DiceRoller() {
                                 className={cn(
                                     'h-9 rounded border border-hud-rule text-sm font-semibold hover:bg-white/10',
                                     s === sides &&
-                                        'border-hud-gold-strong bg-hud-gold-strong/20 text-hud-gold-bright'
+                                        'border-hud-gold-strong bg-hud-panel-2 text-hud-ink'
                                 )}
                             >
                                 d{s}
@@ -103,14 +103,14 @@ export function DiceRoller() {
                         type="button"
                         disabled={isRolling}
                         onClick={() => void roll()}
-                        className="h-10 w-full rounded border-2 border-hud-gold-strong bg-hud-gold-strong/20 font-semibold text-hud-gold-bright hover:bg-hud-gold-strong/30 disabled:opacity-50"
+                        className="h-10 w-full rounded border-2 border-hud-gold-strong bg-hud-panel-2 font-semibold text-hud-ink hover:bg-hud-panel-2 disabled:opacity-50"
                     >
                         {t('roll', { count, sides })}
                     </HudButton>
                     <div aria-live="polite" className="min-h-12 text-center">
                         {result && (
                             <>
-                                <div className="text-3xl font-bold text-hud-gold-bright tabular-nums">
+                                <div className="text-3xl font-bold text-hud-ink tabular-nums">
                                     {result.total}
                                 </div>
                                 {result.values.length > 1 && (

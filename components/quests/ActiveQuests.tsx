@@ -25,7 +25,7 @@ export async function ActiveQuests({
             </h2>
             {items.map((q) => (
                 <Link
-                    className="block rounded border border-hud-line p-3 text-sm text-hud-ink hover:border-hud-gold"
+                    className="block rounded border border-hud-line p-3 text-sm text-hud-ink hover:border-hud-muted"
                     key={q.id}
                     href={`/campaigns/${campaignId}/journal?quest=${encodeURIComponent(q.id)}`}
                 >

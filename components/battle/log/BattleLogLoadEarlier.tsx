@@ -17,7 +17,7 @@ export function BattleLogLoadEarlier() {
             type="button"
             disabled={logHistory.isLoading}
             onClick={logHistory.loadEarlier}
-            className="w-full py-2.5 text-center text-xs text-[var(--hud-muted)] hover:text-[var(--gold)] disabled:opacity-60"
+            className="w-full py-2.5 text-center text-xs text-[var(--hud-muted)] hover:text-hud-ink disabled:opacity-60"
         >
             {logHistory.isLoading ? t('loading') : t('showEarlier')}
         </HudButton>

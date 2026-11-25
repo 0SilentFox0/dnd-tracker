@@ -26,7 +26,7 @@ export function HeaderActions({ mode = 'all' }: { mode?: 'all' | 'primary' | 'se
                 asChild
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
+                className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-ink"
             >
                 <Link href="/profile">
                     <UserAvatar user={sessionUser} className="size-7" />

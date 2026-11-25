@@ -65,7 +65,7 @@ export function ChildMapList({
                         type="button"
                         onClick={() => onOpen(m.id)}
                         className={cn(
-                            'flex w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]',
+                            'flex w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-hud-muted',
                             itemClassName
                         )}
                     >

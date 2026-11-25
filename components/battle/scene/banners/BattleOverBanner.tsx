@@ -26,7 +26,7 @@ export const BattleOverBanner = memo(function BattleOverBanner() {
         <HudButton
             type="button"
             onClick={() => resultScreen.setOpen(true)}
-            className="mx-4 mt-2 flex min-h-10 w-[calc(100%-2rem)] items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center"
+            className="mx-4 mt-2 flex min-h-10 w-[calc(100%-2rem)] items-center justify-center gap-3 border-y border-hud-line bg-hud-panel-2 px-3 py-1.5 text-center"
         >
             <Trophy className="size-4 shrink-0 text-[var(--gold)]" />
             <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">

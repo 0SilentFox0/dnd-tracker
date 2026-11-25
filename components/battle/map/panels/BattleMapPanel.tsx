@@ -41,7 +41,7 @@ function UpdateMapButton({
             className={cn(
                 tall ? 'h-8' : 'h-7',
                 'bg-black/60 px-2 text-xs text-hud-muted',
-                tool.available && 'border-[var(--gold)] text-hud-gold-bright'
+                tool.available && 'border-[var(--gold)] text-hud-ink'
             )}
         >
             {t('button')}

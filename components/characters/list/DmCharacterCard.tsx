@@ -135,7 +135,7 @@ export function DmCharacterCard({
                 {canEdit && (
                     <ActionsMenu
                         label={t('actions')}
-                        triggerClassName="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
+                        triggerClassName="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-ink"
                         onTriggerClick={(e) => e.preventDefault()}
                         actions={[
                             {

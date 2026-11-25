@@ -78,7 +78,7 @@ function QuickStatInput({
                     variant="ghost"
                     size="icon"
                     aria-label={tActions('save')}
-                    className="size-7 shrink-0 text-hud-gold hover:text-hud-gold-strong"
+                    className="size-7 shrink-0 text-hud-gold hover:text-hud-ink"
                     disabled={disabled}
                     onClick={(e) => {
                         e.preventDefault();

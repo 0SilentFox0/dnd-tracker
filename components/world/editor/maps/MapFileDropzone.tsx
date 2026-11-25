@@ -69,7 +69,7 @@ export function MapFileDropzone({
                 onDragLeave={() => setOver(false)}
                 onDrop={onDrop}
                 className={cn(
-                    'flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-dashed p-3 text-center text-sm text-hud-muted transition-colors hover:border-[var(--gold)]',
+                    'flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-dashed p-3 text-center text-sm text-hud-muted transition-colors hover:border-hud-muted',
                     over
                         ? 'border-[var(--gold)] bg-white/5'
                         : 'border-hud-line bg-black/30'

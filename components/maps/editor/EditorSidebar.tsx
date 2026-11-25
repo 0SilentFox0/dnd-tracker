@@ -95,7 +95,7 @@ export function EditorSidebar({
                 <p className="mt-2 text-xs text-hud-muted">{t('hexHint')}</p>
             )}
             <div className="my-3 rounded-md border border-hud-rule bg-black/20 px-3 py-2">
-                <h2 className="text-sm font-semibold text-hud-gold-bright">
+                <h2 className="text-sm font-semibold text-hud-ink">
                     {t(`panels.${panel}`)}
                 </h2>
                 <p className="mt-1 text-xs leading-relaxed text-hud-muted">

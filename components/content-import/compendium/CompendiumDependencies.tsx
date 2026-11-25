@@ -229,7 +229,7 @@ export function CompendiumDependencies({
                                             .map(refBlock)}
                                         <label className="flex items-start gap-2">
                                             <Checkbox
-                                                className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                                                className="mt-0.5 h-4 w-4 shrink-0 accent-hud-crimson"
                                                 checked={
                                                     options.overwriteKeys?.includes(
                                                         row.key

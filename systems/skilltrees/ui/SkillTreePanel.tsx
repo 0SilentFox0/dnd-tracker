@@ -17,7 +17,7 @@ export function SkillTreePanel({ manage }: PathPanelProps) {
     return (
         <>
             {personal && (
-                <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-gold/40 bg-hud-field p-3">
+                <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-line bg-hud-field p-3">
                     <EntityIcon
                         src={sheet.identity.avatar || personal.icon}
                         name={personal.name}

@@ -27,7 +27,7 @@ import { safeParseRules } from '@/lib/utils/rules/schema';
 import { systemKeyOf } from '@/lib/utils/rules/systems';
 
 const COVER_CARD =
-    'relative overflow-hidden !p-0 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-hud-gold/45 after:transition-colors hover:after:border-hud-gold focus-visible:after:border-hud-gold data-[tone=active]:after:border-hud-gold/75';
+    'relative overflow-hidden !p-0 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-hud-line after:transition-colors hover:after:border-hud-gold focus-visible:after:border-hud-gold data-[tone=active]:after:border-hud-line';
 
 export default async function CampaignsPage({
     searchParams,
@@ -208,9 +208,9 @@ export default async function CampaignsPage({
 
     return renderPage(
         <HudPage className="hud-wide">
-            <header className="mb-5 flex flex-col gap-4 border-b border-hud-gold/25 pt-1 pb-4 sm:mb-6 sm:pb-5 lg:flex-row lg:items-end lg:justify-between">
+            <header className="mb-5 flex flex-col gap-4 border-b border-hud-line pt-1 pb-4 sm:mb-6 sm:pb-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-hud-gold/40 bg-hud-panel text-hud-gold sm:size-12">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-hud-line bg-hud-panel text-hud-gold sm:size-12">
                         <Compass aria-hidden className="size-5 sm:size-6" />
                     </span>
                     <h1 className="hud-sc text-3xl leading-tight text-hud-ink sm:text-4xl">
@@ -238,7 +238,7 @@ export default async function CampaignsPage({
                     <JoinCampaignDialog />
                     <Button
                         size="lg"
-                        className="flex-1 border border-hud-gold/60 shadow-[0_0_18px_var(--color-hud-glow)] sm:flex-none"
+                        className="flex-1 border border-hud-line sm:flex-none"
                         asChild
                     >
                         <Link href="/campaigns/new">
@@ -349,7 +349,7 @@ export default async function CampaignsPage({
                 })}
                 <Link
                     href="/campaigns/new"
-                    className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-hud-gold hover:border-hud-gold"
+                    className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-hud-gold hover:border-hud-muted"
                 >
                     <Plus className="size-6" aria-hidden />
                     {t('page.new')}

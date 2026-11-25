@@ -30,7 +30,7 @@ export function PlayerHeroCard({
     if (!hero) {
         return (
             <HudPanel
-                className="border-hud-gold/45 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+                className="border-hud-line shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
                 data-tour="dashboard.hero"
             >
                 <div className="rounded-lg border border-dashed border-hud-rule bg-hud-page/35 p-4 sm:p-5">
@@ -56,7 +56,7 @@ export function PlayerHeroCard({
 
     return (
         <HudPanel
-            className="border-hud-gold/50 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+            className="border-hud-line shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
             data-tour="dashboard.hero"
         >
             <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
@@ -110,7 +110,7 @@ export function PlayerHeroCard({
                 </p>
             )}
             {activeBattle && (
-                <div className="mt-4 flex flex-col gap-3 rounded-lg border border-hud-gold/35 bg-hud-page/35 p-3 sm:flex-row sm:items-center">
+                <div className="mt-4 flex flex-col gap-3 rounded-lg border border-hud-line bg-hud-page/35 p-3 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
                         <HeroHp hp={activeBattle.hp} />
                     </div>

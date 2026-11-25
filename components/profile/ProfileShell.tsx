@@ -13,9 +13,9 @@ import { useProfileActions } from '@/lib/hooks/auth';
 import { cn } from '@/lib/utils';
 
 const ITEM =
-    'flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm text-hud-text hover:bg-hud-gold/10';
+    'flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm text-hud-text hover:bg-hud-panel-2';
 
-const ACTIVE = 'bg-hud-gold/15 text-hud-gold-strong';
+const ACTIVE = 'bg-hud-panel-2 text-hud-ink';
 
 const NAV = [
     { id: 'profile', icon: UserRound, href: '/profile' },

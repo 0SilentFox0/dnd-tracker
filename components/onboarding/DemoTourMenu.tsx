@@ -20,7 +20,7 @@ export function DemoTourMenu() {
         <section
             data-tour="dashboard.tours"
             aria-labelledby="demo-tour-menu-title"
-            className="rounded-lg border border-hud-gold/50 bg-hud-panel/80 p-3"
+            className="rounded-lg border border-hud-line bg-hud-panel/80 p-3"
         >
             <div className="mb-2 flex items-start gap-2">
                 <Compass

@@ -35,7 +35,7 @@ export function BattlePreparationView({
                 className="relative z-10 w-full max-w-2xl animate-in space-y-8 duration-300 slide-in-from-bottom-5 fade-in"
             >
                 <div className="space-y-4">
-                    <span className="hud-sc inline-flex h-8 items-center border-y border-[var(--gold)]/60 bg-[var(--gold)]/[.08] px-5 text-sm tracking-[.2em] text-[var(--gold)]">
+                    <span className="hud-sc inline-flex h-8 items-center border-y border-hud-line bg-hud-panel-2 px-5 text-sm tracking-[.2em] text-[var(--gold)]">
                         {t('badge')}
                     </span>
                     <h2 className="hud-sc text-4xl font-extrabold tracking-[.12em] text-[var(--ink)] drop-shadow-2xl sm:text-7xl">

@@ -165,7 +165,7 @@ describe('AbilityPanel collapsible sections', () => {
         ) as HTMLElement;
 
         expect(document.activeElement).toBe(section);
-        expect(section.classList.contains('bg-hud-gold/15')).toBe(true);
+        expect(section.classList.contains('bg-hud-panel-2')).toBe(true);
     });
 
     it('renders the limits shell in both the passive and regular branch', () => {

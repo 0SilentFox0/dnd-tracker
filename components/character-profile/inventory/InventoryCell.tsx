@@ -70,9 +70,9 @@ export function InventoryCell({
                               'border-hud-line'
                       )
                     : 'border border-dashed border-hud-rule bg-black/30 shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]',
-                state.selected && 'ring-2 ring-hud-gold-strong',
+                state.selected && 'ring-2',
                 state.drop === 'accept' &&
-                    'border-hud-gold-strong bg-hud-gold-strong/15',
+                    'border-hud-gold-strong bg-hud-panel-2',
                 state.drop === 'dim' && 'opacity-40',
                 dnd?.draggable && 'cursor-grab active:cursor-grabbing'
             )}

@@ -52,7 +52,7 @@ export function CompleteBattleDialog({
                     <Button
                         variant="outline"
                         disabled={actions.complete.isPending}
-                        className="border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)]/10"
+                        className="border-hud-line text-[var(--gold)] hover:bg-hud-panel-2"
                         onClick={() => finish()}
                     >
                         {t('auto')}

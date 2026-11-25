@@ -175,7 +175,7 @@ function EditorContent({
             <p
                 aria-live="polite"
                 role="status"
-                className="min-h-5 shrink-0 text-sm text-hud-gold-bright"
+                className="min-h-5 shrink-0 text-sm text-hud-ink"
             >
                 {notice ? text(notice) : draft.justSaved ? t('saved') : ''}
             </p>

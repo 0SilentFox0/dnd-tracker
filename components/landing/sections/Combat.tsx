@@ -27,7 +27,7 @@ export function Combat({ t }: { t: Translator }) {
                         >
                             <span
                                 aria-hidden
-                                className="hud-sc text-3xl leading-none text-hud-gold/70"
+                                className="hud-sc text-3xl leading-none text-hud-muted"
                             >
                                 {String(i + 1).padStart(2, '0')}
                             </span>

@@ -26,7 +26,7 @@ export function ZoomableEntityIcon(props: EntityIconProps) {
             <HudButton
                 type="button"
                 aria-label={t('zoomIcon', { name: props.name })}
-                className="shrink-0 cursor-zoom-in rounded-lg focus-visible:outline-2 focus-visible:outline-hud-gold"
+                className="shrink-0 cursor-zoom-in rounded-lg focus-visible:outline-2"
                 onClick={() => setOpen(true)}
             >
                 <EntityIcon {...props} />

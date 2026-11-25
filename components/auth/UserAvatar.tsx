@@ -21,7 +21,7 @@ export function UserAvatar({
         <span
             aria-hidden
             className={cn(
-                'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border border-hud-gold/60 bg-hud-panel text-hud-gold',
+                'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border border-hud-line bg-hud-panel text-hud-gold',
                 initials && 'text-white',
                 className
             )}

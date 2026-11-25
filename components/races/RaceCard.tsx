@@ -217,7 +217,7 @@ export function RaceCard({
                                                     >
                                                         {iconToShow ===
                                                             'bonus' && (
-                                                            <Plus className="h-3 w-3 text-hud-gold-strong" />
+                                                            <Plus className="h-3 w-3 text-hud-ink" />
                                                         )}
                                                         {iconToShow ===
                                                             'nonNegative' && (

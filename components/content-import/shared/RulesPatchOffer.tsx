@@ -23,7 +23,7 @@ export function RulesPatchOffer({
             {'conditions' in patch && <p>{t('rulesOffer.conditions')}</p>}
             <label className="flex items-start gap-2">
                 <Checkbox
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-crimson"
                     checked={!!options.rulesPatch}
                     disabled={busy}
                     onCheckedChange={(v) =>

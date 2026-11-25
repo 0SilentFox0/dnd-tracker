@@ -40,7 +40,7 @@ export default async function HelpPage() {
                             <li key={a.slug}>
                                 <Link
                                     href={`/help/${a.slug}`}
-                                    className="text-hud-ink hover:text-hud-gold-strong hover:underline"
+                                    className="text-hud-ink hover:text-hud-ink hover:underline"
                                 >
                                     {t(`${a.slug}.title`)}
                                 </Link>

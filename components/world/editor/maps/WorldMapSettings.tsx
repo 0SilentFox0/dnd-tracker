@@ -69,7 +69,7 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                     <label className="block space-y-1 text-sm">
                         <span className="flex items-center justify-between">
                             {t('editor.radiusView')}
-                            <span className="font-mono text-hud-gold-bright">
+                            <span className="font-mono text-hud-ink">
                                 {Math.round(m.radius * 100)}%
                             </span>
                         </span>

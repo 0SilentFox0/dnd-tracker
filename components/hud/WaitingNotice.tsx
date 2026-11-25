@@ -14,7 +14,7 @@ export function WaitingNotice({
         <div
             role="status"
             className={cn(
-                'flex min-h-10 items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center',
+                'flex min-h-10 items-center justify-center gap-3 border-y border-hud-line bg-hud-panel-2 px-3 py-1.5 text-center',
                 className
             )}
         >

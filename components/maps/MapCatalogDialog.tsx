@@ -94,7 +94,7 @@ export function MapCatalogDialog({
                                         variant="ghost"
                                         aria-pressed={selected?.id === entry.id}
                                         onClick={() => setSelectedId(entry.id)}
-                                        className={`block h-auto w-full rounded p-2 text-left text-sm font-normal whitespace-normal ${selected?.id === entry.id ? 'bg-hud-gold/15 text-hud-ink' : 'hover:bg-muted'}`}
+                                        className={`block h-auto w-full rounded p-2 text-left text-sm font-normal whitespace-normal ${selected?.id === entry.id ? 'bg-hud-panel-2 text-hud-ink' : 'hover:bg-muted'}`}
                                     >
                                         {entry.previewUrl ? (
                                             <Image

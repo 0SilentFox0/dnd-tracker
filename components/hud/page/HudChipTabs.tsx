@@ -19,7 +19,7 @@ const CHIP =
 const CHIP_LG = 'h-11 px-4 text-sm';
 
 const ACTIVE =
-    'text-hud-gold-bright shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_8px_var(--color-hud-glow)]';
+    'text-hud-ink';
 
 export function HudChipTabs({
     items,

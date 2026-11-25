@@ -39,7 +39,7 @@ export function DiceGrid({
                         n !== value &&
                             highlight?.rolls.includes(n) &&
                             (highlight.tone === 'gold'
-                                ? 'border-hud-gold-strong bg-hud-gold-strong/20 font-bold text-hud-gold-bright'
+                                ? 'border-hud-gold-strong bg-hud-panel-2 font-bold text-hud-ink'
                                 : 'border-[#c0392b] bg-[#c0392b]/25 font-bold text-hud-bad')
                     )}
                 >

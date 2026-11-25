@@ -124,7 +124,7 @@ export function ActionDock({
                             <HudButton
                                 type="button"
                                 onClick={on.end}
-                                className="hud-sc min-h-10 rounded-xl border border-[#ecd78d] px-2 text-[12px] leading-tight tracking-[.06em] text-[#ecd78d] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
+                                className="hud-sc min-h-10 rounded-xl border border-[#ecd78d] px-2 text-[12px] leading-tight tracking-[.06em] text-[#ecd78d] focus-visible:ring-2 focus-visible:outline-none"
                             >
                                 {t('endTurn')}
                             </HudButton>

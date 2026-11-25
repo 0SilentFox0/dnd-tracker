@@ -87,7 +87,7 @@ export function TrackGroups({
                                 type="button"
                                 aria-expanded={!folded}
                                 onClick={() => view.collapsed.toggle(g.name)}
-                                className="flex items-center gap-1 text-left text-hud-gold hover:text-hud-gold-bright"
+                                className="flex items-center gap-1 text-left text-hud-gold hover:text-hud-ink"
                             >
                                 {folded ? (
                                     <ChevronRight className="size-4" />

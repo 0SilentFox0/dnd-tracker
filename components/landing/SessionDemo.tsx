@@ -226,7 +226,7 @@ function DmScreen({ t }: { t: Translator }) {
                 </span>
                 <span
                     aria-hidden
-                    className="ld-check hud-sc absolute top-[46%] left-1/2 rounded-md bg-black/80 px-2 py-0.5 text-[10px] whitespace-nowrap text-hud-gold-bright ring-1 ring-hud-gold/50 sm:text-sm"
+                    className="ld-check hud-sc absolute top-[46%] left-1/2 rounded-md bg-black/80 px-2 py-0.5 text-[10px] whitespace-nowrap text-hud-ink ring-1 sm:text-sm"
                 >
                     {t('combat.demo.check')}
                 </span>

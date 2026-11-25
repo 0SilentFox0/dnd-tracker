@@ -125,7 +125,7 @@ export function DmParticipantRow({
         <div
             className={cn(
                 'flex flex-col gap-1 border-b border-white/[.08] py-1',
-                controlled && 'bg-[var(--gold)]/[.08]'
+                controlled && 'bg-hud-panel-2'
             )}
         >
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -190,8 +190,8 @@ export function DmParticipantRow({
                     type="button"
                     className={cn(
                         ICON,
-                        'text-[var(--gold)] hover:border-[var(--gold)]/40',
-                        controlled && 'border-[var(--gold)]/60'
+                        'text-[var(--gold)] hover:border-hud-muted',
+                        controlled && 'border-hud-line'
                     )}
                     title={controlled ? t('releaseControl') : t('takeControl')}
                     onClick={() => {
@@ -204,7 +204,7 @@ export function DmParticipantRow({
                 {hasLair && onToggleLair && (
                     <HudButton
                         type="button"
-                        className={cn(ICON, inLair && 'text-hud-gold-bright')}
+                        className={cn(ICON, inLair && 'text-hud-ink')}
                         aria-label={inLair ? t('lairOff') : t('lairOn')}
                         title={inLair ? t('inLair') : t('outLair')}
                         aria-pressed={inLair}
@@ -218,7 +218,7 @@ export function DmParticipantRow({
                         type="button"
                         className={cn(
                             ICON,
-                            'text-[var(--gold)] hover:border-[var(--gold)]/40'
+                            'text-[var(--gold)] hover:border-hud-muted'
                         )}
                         title={legendaryLabel}
                         aria-label={legendaryLabel}

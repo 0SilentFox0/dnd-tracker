@@ -40,7 +40,7 @@ export function WorldCrumbs({ maps, mapId, onOpen }: WorldCrumbsProps) {
                     ) : (
                         <HudButton
                             type="button"
-                            className="hud-sc min-h-6 text-hud-gold underline-offset-2 hover:text-hud-gold-bright hover:underline"
+                            className="hud-sc min-h-6 text-hud-gold underline-offset-2 hover:text-hud-ink hover:underline"
                             onClick={() => onOpen(m.id)}
                         >
                             {m.name}

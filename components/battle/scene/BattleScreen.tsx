@@ -196,7 +196,7 @@ export function BattleScreen() {
                     <BattlePlayerViewToggle className="fixed top-3 right-3 z-50" />
                     <Link
                         href={`/campaigns/${battle.campaignId}`}
-                        className="hud-sc fixed top-3 left-3 z-50 flex h-10 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
+                        className="hud-sc fixed top-3 left-3 z-50 flex h-10 items-center text-sm text-hud-soft hover:text-hud-ink"
                     >
                         {tTop('toCampaign')}
                     </Link>

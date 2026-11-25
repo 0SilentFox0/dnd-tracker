@@ -46,7 +46,7 @@ export function CompendiumCoverage({
                             <div
                                 role="row"
                                 key={kind}
-                                className={`${CATEGORY_ROW} border-t border-hud-rule ${count.partial > 0 ? 'bg-hud-gold/10' : ''}`}
+                                className={`${CATEGORY_ROW} border-t border-hud-rule ${count.partial > 0 ? 'bg-hud-panel-2' : ''}`}
                             >
                                 <span
                                     role="cell"

@@ -37,7 +37,7 @@ function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
                         <a
                             key={id}
                             href={`#${id}`}
-                            className="hud-sc text-sm text-hud-bone transition hover:text-hud-gold-strong"
+                            className="hud-sc text-sm text-hud-bone transition hover:text-hud-ink"
                         >
                             {t(`nav.items.${id}`)}
                         </a>
@@ -60,7 +60,7 @@ function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
                                 <Link
                                     prefetch={false}
                                     href="/sign-in"
-                                    className="hud-sc hidden rounded-md px-3 py-2 text-sm text-hud-bone hover:text-hud-gold-strong sm:block"
+                                    className="hud-sc hidden rounded-md px-3 py-2 text-sm text-hud-bone hover:text-hud-ink sm:block"
                                 >
                                     {t('nav.signIn')}
                                 </Link>
@@ -92,14 +92,14 @@ function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) {
                     <Link
                         prefetch={false}
                         href="/sign-in"
-                        className="hover:text-hud-gold-strong"
+                        className="hover:text-hud-ink"
                     >
                         {t('footer.signIn')}
                     </Link>
                     <Link
                         prefetch={false}
                         href="/sign-up"
-                        className="hover:text-hud-gold-strong"
+                        className="hover:text-hud-ink"
                     >
                         {t('footer.signUp')}
                     </Link>

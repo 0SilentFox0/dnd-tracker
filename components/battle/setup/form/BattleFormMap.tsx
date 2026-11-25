@@ -204,7 +204,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                         <p
                             aria-live="polite"
                             role="status"
-                            className="min-h-5 text-sm text-hud-gold-bright"
+                            className="min-h-5 text-sm text-hud-ink"
                         >
                             {notice && text(notice)}
                         </p>

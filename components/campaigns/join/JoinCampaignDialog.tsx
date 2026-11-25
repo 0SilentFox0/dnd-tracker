@@ -71,7 +71,7 @@ export function JoinCampaignDialog() {
                 onClick={() => handleOpenChange(true)}
                 variant="outline"
                 size="lg"
-                className="border-hud-gold/35 bg-hud-panel text-hud-ink hover:border-hud-gold"
+                className="border-hud-line bg-hud-panel text-hud-ink hover:border-hud-muted"
             >
                 <KeyRound aria-hidden />
                 {t('join.trigger')}

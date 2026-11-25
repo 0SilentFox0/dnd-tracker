@@ -20,7 +20,7 @@ export function Mechanics({ t }: { t: Translator }) {
                         text={t('mechanics.text')}
                     />
                     {LANDING_TEMPLATES && (
-                        <p className="hud-sc text-hud-gold-strong">
+                        <p className="hud-sc text-hud-ink">
                             {t('mechanics.templatesNote')}
                         </p>
                     )}
@@ -38,11 +38,11 @@ export function Mechanics({ t }: { t: Translator }) {
                     return (
                         <li
                             key={id}
-                            className="landing-reveal group flex gap-3 border-l-2 border-hud-rule py-2 pl-4 transition hover:border-hud-gold"
+                            className="landing-reveal group flex gap-3 border-l-2 border-hud-rule py-2 pl-4 transition hover:border-hud-muted"
                         >
                             <Icon
                                 aria-hidden
-                                className="mt-1 size-5 shrink-0 text-hud-gold transition group-hover:text-hud-gold-bright"
+                                className="mt-1 size-5 shrink-0 text-hud-gold transition group-hover:text-hud-ink"
                             />
                             <div>
                                 <h3 className="hud-sc text-lg text-hud-ink">

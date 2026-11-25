@@ -38,7 +38,7 @@ export interface SectionState {
     summary: string | null;
 }
 
-const HIGHLIGHT = ['bg-hud-gold/15', 'transition-colors'];
+const HIGHLIGHT = ['bg-hud-panel-2', 'transition-colors'];
 
 const HIGHLIGHT_MS = 1200;
 

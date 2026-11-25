@@ -88,7 +88,7 @@ export function InfoReferenceClient({
                         {filters.visible.classes && !ui.classesEmpty && (
                             <a
                                 href="#ref-classes"
-                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-gold-strong hover:underline"
+                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-ink hover:underline"
                             >
                                 {t('jump.classes')}
                             </a>
@@ -96,7 +96,7 @@ export function InfoReferenceClient({
                         {filters.visible.skills && !ui.skillsEmpty && (
                             <a
                                 href="#ref-skills"
-                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-gold-strong hover:underline"
+                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-ink hover:underline"
                             >
                                 {t('jump.skills')}
                             </a>
@@ -104,7 +104,7 @@ export function InfoReferenceClient({
                         {!ui.spellsEmpty && (
                             <a
                                 href="#ref-spells"
-                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-gold-strong hover:underline"
+                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-ink hover:underline"
                             >
                                 {t('jump.spells')}
                             </a>
@@ -112,7 +112,7 @@ export function InfoReferenceClient({
                         {!ui.artifactsEmpty && (
                             <a
                                 href="#ref-artifacts"
-                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-gold-strong hover:underline"
+                                className="touch-manipulation text-hud-gold underline-offset-2 hover:text-hud-ink hover:underline"
                             >
                                 {t('jump.artifacts')}
                             </a>

@@ -81,7 +81,7 @@ describe('AbilityPanel flow', () => {
         ) as HTMLElement;
 
         expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
-        expect(section.classList.contains('bg-hud-gold/15')).toBe(true);
+        expect(section.classList.contains('bg-hud-panel-2')).toBe(true);
     });
 
     it('keeps a single highlight when chips are clicked in quick succession', () => {
@@ -104,8 +104,8 @@ describe('AbilityPanel flow', () => {
             'abilities.0-section-then'
         ) as HTMLElement;
 
-        expect(when.classList.contains('bg-hud-gold/15')).toBe(false);
-        expect(then.classList.contains('bg-hud-gold/15')).toBe(true);
+        expect(when.classList.contains('bg-hud-panel-2')).toBe(false);
+        expect(then.classList.contains('bg-hud-panel-2')).toBe(true);
         expect(
             container
                 .querySelector('[data-part="then"]')
@@ -114,14 +114,14 @@ describe('AbilityPanel flow', () => {
 
         vi.advanceTimersByTime(1300);
 
-        expect(then.classList.contains('bg-hud-gold/15')).toBe(false);
+        expect(then.classList.contains('bg-hud-panel-2')).toBe(false);
 
         fireEvent.click(
             container.querySelector('[data-part="when"]') as HTMLElement
         );
         unmount();
 
-        expect(when.classList.contains('bg-hud-gold/15')).toBe(false);
+        expect(when.classList.contains('bg-hud-panel-2')).toBe(false);
         vi.useRealTimers();
     });
 });

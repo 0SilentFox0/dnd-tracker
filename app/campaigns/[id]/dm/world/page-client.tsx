@@ -471,7 +471,7 @@ mode: 'own',
                                                                                     hint: (
                                                                                         <p
                                                                                             role="status"
-                                                                                            className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
+                                                                                            className="pointer-events-none rounded-md border border-hud-line bg-black/80 px-3 py-1.5 text-xs text-hud-ink"
                                                                                         >
                                                                                             {t(
                                                                                                 'eyes.player'

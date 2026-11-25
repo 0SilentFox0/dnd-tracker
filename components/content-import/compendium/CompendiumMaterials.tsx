@@ -79,7 +79,7 @@ export function CompendiumMaterials({
                                 key={chapter.path}
                             >
                                 <Checkbox
-                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-crimson"
                                     checked={!excluded.includes(chapter.path)}
                                     disabled={busy}
                                     onCheckedChange={(v) =>

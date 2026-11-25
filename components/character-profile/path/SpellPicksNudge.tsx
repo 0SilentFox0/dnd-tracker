@@ -40,8 +40,8 @@ export function SpellPicksNudge({ onPick }: { onPick?: () => void }) {
 
     return (
         <>
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hud-gold-strong/60 p-3">
-                <p className="text-sm text-hud-gold-strong">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hud-line p-3">
+                <p className="text-sm text-hud-ink">
                     {t('spellNudge', { count })}
                 </p>
                 {sheet.choices?.canEdit ? (

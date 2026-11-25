@@ -110,7 +110,7 @@ function SessionFormDialogBody({
                                 className={cn(
                                     'size-7 rounded-full border-2 border-transparent',
                                     fields.color === c &&
-                                        'ring-2 ring-hud-gold-bright ring-offset-2 ring-offset-black'
+                                        'ring-2 ring-offset-2 ring-offset-black'
                                 )}
                                 style={{ background: c }}
                                 onClick={() => fields.setColor(c)}

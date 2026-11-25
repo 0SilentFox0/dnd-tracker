@@ -75,7 +75,7 @@ export function HudGameShell({
                                             className={cn(
                                                 'min-h-10 rounded-lg px-3 text-sm focus:bg-hud-field',
                                                 active &&
-                                                    'border-hud-gold/60 bg-hud-gold/10 text-hud-gold'
+                                                    'border-hud-line bg-hud-panel-2 text-hud-gold'
                                             )}
                                         >
                                             <Link

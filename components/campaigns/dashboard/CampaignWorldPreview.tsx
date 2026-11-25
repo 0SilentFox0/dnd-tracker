@@ -22,10 +22,10 @@ export function CampaignWorldPreview({
         <Link
             href={`/campaigns/${campaignId}/dm/world`}
             aria-label={worldMap ? `${t('gameNavigation.world')}: ${worldMap.name}` : t('gameNavigation.world')}
-            className="group block h-full rounded-xl outline-offset-2 focus-visible:outline-2 focus-visible:outline-hud-gold"
+            className="group block h-full rounded-xl outline-offset-2 focus-visible:outline-2"
         >
             <HudPanel
-                className="flex h-full flex-col transition-colors group-hover:border-hud-gold"
+                className="flex h-full flex-col transition-colors group-hover:border-hud-muted"
                 data-tour="dashboard.world-map"
             >
                 <h2 className="hud-sc mb-3 flex items-baseline justify-between gap-2 text-[13px] tracking-[.06em] text-hud-gold">

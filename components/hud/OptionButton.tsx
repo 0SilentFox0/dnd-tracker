@@ -13,7 +13,7 @@ interface OptionButtonProps {
 }
 
 const BATTLE =
-    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-[var(--gold)]/50 disabled:opacity-40 aria-checked:border-[var(--gold)] aria-checked:bg-[var(--gold)]/10';
+    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-40 aria-checked:border-[var(--gold)] aria-checked:bg-hud-panel-2';
 
 const VARIANTS = {
     battle: BATTLE,

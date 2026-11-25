@@ -41,7 +41,7 @@ export function DmRevivePrompt() {
                         type="button"
                         disabled={isPending}
                         onClick={() => revive(p)}
-                        className="flex h-8 shrink-0 items-center gap-1.5 border border-[var(--gold)]/50 px-2.5 text-[13px] text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50"
+                        className="flex h-8 shrink-0 items-center gap-1.5 border border-hud-line px-2.5 text-[13px] text-[var(--gold)] hover:bg-hud-panel-2 disabled:opacity-50"
                     >
                         <HeartPulse className="size-3.5" />
                         {t('action')}

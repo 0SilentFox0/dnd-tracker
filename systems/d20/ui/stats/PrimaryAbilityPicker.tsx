@@ -35,7 +35,7 @@ export function PrimaryAbilityPicker({
                         onCheckedChange={() =>
                             onChange(value === a.key ? null : a.key)
                         }
-                        className="size-5 accent-hud-gold"
+                        className="size-5 accent-hud-crimson"
                     />
                     {tg(`abilities.${a.key}.label`)}
                 </label>

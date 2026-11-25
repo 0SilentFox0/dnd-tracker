@@ -24,7 +24,7 @@ export function HudToggleChip({
                 tall ? 'h-8' : 'h-7',
                 'rounded-md border bg-black/60 px-2 text-xs hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50',
                 active
-                    ? 'border-[var(--gold)] text-hud-gold-bright'
+                    ? 'border-[var(--gold)] text-hud-ink'
                     : 'border-hud-rule text-hud-muted',
                 className
             )}

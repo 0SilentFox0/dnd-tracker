@@ -32,7 +32,7 @@ export function RollResultView({
                     'text-4xl font-bold tabular-nums',
                     accent?.tone === 'fumble'
                         ? 'text-hud-danger'
-                        : 'text-hud-gold-bright'
+                        : 'text-hud-ink'
                 )}
             >
                 {total}

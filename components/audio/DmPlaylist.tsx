@@ -66,7 +66,7 @@ function TrackRow({
                     title={track.title}
                     className={cn(
                         'min-w-0 flex-1 truncate rounded px-1.5 py-1 text-left hover:bg-white/10',
-                        current && 'bg-white/10 text-hud-gold-bright'
+                        current && 'bg-white/10 text-hud-ink'
                     )}
                 >
                     {track.kind === 'youtube' ? '▶ ' : '♪ '}
@@ -280,7 +280,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                                               onClick={() =>
                                                   view.collapsed.toggle(g.name)
                                               }
-                                              className="sticky top-0 z-[1] flex w-full items-center gap-1 bg-black/90 px-1 py-0.5 text-left text-hud-gold hover:text-hud-gold-bright"
+                                              className="sticky top-0 z-[1] flex w-full items-center gap-1 bg-black/90 px-1 py-0.5 text-left text-hud-gold hover:text-hud-ink"
                                           >
                                               {folded ? (
                                                   <ChevronRight className="size-3" />

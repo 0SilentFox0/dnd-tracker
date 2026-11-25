@@ -19,7 +19,7 @@ export function HudTile({
     return (
         <Link
             href={href}
-            className={`flex min-w-0 items-center gap-3 rounded-lg bg-hud-panel ${compact ? 'p-2' : 'p-3'} shadow-[inset_0_0_0_1px_var(--color-hud-edge)] transition-shadow hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_12px_var(--color-hud-glow)]`}
+            className={`flex min-w-0 items-center gap-3 rounded-lg bg-hud-panel ${compact ? 'p-2' : 'p-3'} shadow-[inset_0_0_0_1px_var(--color-hud-edge)] transition-shadow`}
         >
             {icon && (
                 <span

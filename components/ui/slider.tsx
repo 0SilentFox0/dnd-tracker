@@ -26,7 +26,7 @@ function Slider({
             step={step}
             onChange={(e) => onValueChange(Number(e.target.value))}
             className={cn(
-                'h-4 min-w-0 cursor-pointer accent-[var(--gold)] focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                'h-4 min-w-0 cursor-pointer accent-hud-crimson focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                 className
             )}
             {...props}

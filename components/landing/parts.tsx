@@ -82,7 +82,7 @@ export function CheckList({ items }: { items: string[] }) {
                 <li key={p} className="flex gap-2 text-hud-bone">
                     <Check
                         aria-hidden
-                        className="mt-0.5 size-4 shrink-0 text-hud-gold-strong"
+                        className="mt-0.5 size-4 shrink-0 text-hud-ink"
                     />
                     {p}
                 </li>

@@ -65,7 +65,7 @@ export function DmPartyCard({
                             <HudCard
                                 asChild
                                 key={hero.id}
-                                className="grid min-w-0 gap-3 p-3.5 transition-colors hover:border-hud-gold hover:bg-hud-raised"
+                                className="grid min-w-0 gap-3 p-3.5 transition-colors hover:border-hud-muted hover:bg-hud-raised"
                             >
                                 <Link
                                     href={`/campaigns/${campaignId}/dm/characters/${hero.id}`}

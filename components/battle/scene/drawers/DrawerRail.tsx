@@ -66,7 +66,7 @@ export function DrawerRail({
                         onClick={() => onToggle(key)}
                         className={cn(
                             HUD_GLASS,
-                            'flex size-11 items-center justify-center rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
+                            'flex size-11 items-center justify-center rounded-xl focus-visible:ring-2 focus-visible:outline-none',
                             active === key
                                 ? 'border-[var(--gold)] text-[var(--gold)]!'
                                 : ''

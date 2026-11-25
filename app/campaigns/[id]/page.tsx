@@ -211,7 +211,7 @@ export default async function CampaignDetailPage({
             </HudPanel>
 
             {isTemplate && (
-                <HudPanel className="flex flex-wrap items-start gap-2 border-hud-gold/60">
+                <HudPanel className="flex flex-wrap items-start gap-2 border-hud-line">
                     <Info className="mt-0.5 size-4 shrink-0 text-hud-gold" />
                     <p className="min-w-0 flex-1 text-sm text-hud-bone">
                         {t('page.templateNotice')}
@@ -241,7 +241,7 @@ export default async function CampaignDetailPage({
                 >
                     {isDemo && (
                         <HudPanel
-                            className="h-full border-hud-gold/60"
+                            className="h-full border-hud-line"
                             data-tour="dashboard.notice"
                         >
                             <p className="text-sm text-hud-bone">

@@ -117,7 +117,7 @@ export function ScenarioPageContent({
                 collapse={collapse}
             />
             {!canEdit && (
-                <aside className="mt-4 rounded-lg border border-hud-gold/40 bg-hud-panel/70 p-3 text-sm text-hud-muted">
+                <aside className="mt-4 rounded-lg border border-hud-line bg-hud-panel/70 p-3 text-sm text-hud-muted">
                     {t('demoPlaybackReadOnly')}
                 </aside>
             )}

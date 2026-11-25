@@ -113,7 +113,7 @@ function PickLine({
         <HudButton
             type="button"
             onClick={() => onPick?.(pickStepKey(progression.classId, pick))}
-            className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong"
+            className="min-h-10 w-full rounded-md border border-hud-line px-3 py-2 text-left text-sm text-hud-ink"
         >
             {label}
         </HudButton>
@@ -174,7 +174,7 @@ function PickLine({
 
     if (!onPick)
         return (
-            <span className="text-sm text-hud-gold-strong">
+            <span className="text-sm text-hud-ink">
                 {t('pickOpen', values)}
             </span>
         );
@@ -202,7 +202,7 @@ export function PathRowCard({
             data-state={row.state}
             className={cn(
                 'rounded-lg border border-hud-rule p-3',
-                row.state === 'current' && 'ring-1 ring-hud-gold-strong'
+                row.state === 'current' && 'ring-1'
             )}
         >
             <header className="mb-2 flex items-center justify-between gap-2">

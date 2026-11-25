@@ -155,7 +155,7 @@ export function SheetIdentityPanel({
                                         <HudButton
                                             type="button"
                                             onClick={onHistory}
-                                            className="ml-2 min-h-10 cursor-pointer text-[15px] font-bold text-hud-ink not-italic underline decoration-hud-gold decoration-2 underline-offset-4 focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
+                                            className="ml-2 min-h-10 cursor-pointer text-[15px] font-bold text-hud-ink not-italic underline decoration-hud-line decoration-2 underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
                                         >
                                             {t('tabs.story')}
                                         </HudButton>

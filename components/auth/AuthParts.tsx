@@ -108,7 +108,7 @@ export function AuthLink({
     return (
         <Link
             href={href}
-            className="text-hud-gold underline-offset-4 hover:text-hud-gold-strong hover:underline"
+            className="text-hud-gold underline-offset-4 hover:text-hud-ink hover:underline"
         >
             {children}
         </Link>

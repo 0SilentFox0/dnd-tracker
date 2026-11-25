@@ -11,7 +11,7 @@ function Inline({ text }: { text: string }) {
         s.marked ? (
             <mark
                 key={i}
-                className="bg-transparent text-hud-bone underline decoration-hud-gold/60 decoration-1 underline-offset-4"
+                className="bg-transparent text-hud-bone underline decoration-hud-line decoration-1 underline-offset-4"
             >
                 {s.text}
             </mark>
@@ -50,7 +50,7 @@ export function BiographyText({ text }: { text: string }) {
                     return (
                         <blockquote
                             key={i}
-                            className="border-l-2 border-hud-gold/60 py-0.5 pl-4 text-[17px] whitespace-pre-line text-hud-bone italic"
+                            className="border-l-2 border-hud-line py-0.5 pl-4 text-[17px] whitespace-pre-line text-hud-bone italic"
                         >
                             <Inline text={b.text} />
                         </blockquote>

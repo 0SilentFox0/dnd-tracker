@@ -27,7 +27,7 @@ export function Hero({ t }: { t: Translator }) {
                     <Link
                         prefetch={false}
                         href="#how"
-                        className="hud-sc inline-flex h-12 items-center rounded-lg border border-hud-line bg-black/40 px-6 text-base text-hud-ink transition hover:border-hud-gold hover:text-hud-gold-strong"
+                        className="hud-sc inline-flex h-12 items-center rounded-lg border border-hud-line bg-black/40 px-6 text-base text-hud-ink transition hover:border-hud-muted hover:text-hud-ink"
                     >
                         {t('hero.secondary')}
                     </Link>

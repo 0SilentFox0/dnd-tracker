@@ -17,7 +17,7 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
     const enemies = aura.target === 'nearbyEnemies';
 
     return (
-        <div className="space-y-2 border border-[var(--gold)]/50 bg-[var(--gold)]/5 p-3">
+        <div className="space-y-2 border border-hud-line bg-hud-panel-2 p-3">
             <div>
                 <div className="hud-sc text-lg font-bold">
                     {t('aura.title', { name: aura.ability.name })}

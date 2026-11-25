@@ -257,7 +257,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={onComplete}
-                            className="hud-sc h-11 rounded-xl border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10"
+                            className="hud-sc h-11 rounded-xl border border-hud-line text-sm text-[var(--gold)] hover:bg-hud-panel-2"
                         >
                             {t('complete')}
                         </HudButton>
@@ -296,7 +296,7 @@ export function ToolsContent({
             )}
             <Link
                 href={`/campaigns/${battle.campaignId}`}
-                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
+                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-hud-ink"
             >
                 {t('toCampaign')}
             </Link>

@@ -102,7 +102,7 @@ export function CompendiumImport({
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <label className="flex min-w-0 items-start gap-2 text-sm">
                                 <Checkbox
-                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-crimson"
                                     checked={rights}
                                     disabled={busy}
                                     onCheckedChange={(v) =>

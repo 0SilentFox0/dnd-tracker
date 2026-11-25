@@ -22,7 +22,7 @@ export function SetList({ sets }: { sets: SetProgress[] }) {
                     <span
                         className={cn(
                             'block text-sm',
-                            s.complete ? 'text-hud-gold-strong' : 'text-hud-ink'
+                            s.complete ? 'text-hud-ink' : 'text-hud-ink'
                         )}
                     >
                         ✦{' '}

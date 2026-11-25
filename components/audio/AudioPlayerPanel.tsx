@@ -98,7 +98,7 @@ export function AudioPlayerPanel({
                         step={0.05}
                         value={prefs.volume}
                         onValueChange={(v) => prefs.setVolume(v)}
-                        className="flex-1 accent-[var(--gold)]"
+                        className="flex-1 accent-hud-crimson"
                     />
                 </div>
             ) : (

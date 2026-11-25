@@ -22,7 +22,7 @@ export function SheetTopBar({ actions }: { actions?: ReactNode }) {
             >
                 <Link
                     href={`/campaigns/${campaignId}`}
-                    className="inline-flex min-h-10 items-center gap-1 hover:text-hud-ink focus-visible:ring-2 focus-visible:ring-hud-gold focus-visible:outline-none"
+                    className="inline-flex min-h-10 items-center gap-1 hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none"
                 >
                     <ChevronLeft aria-hidden className="size-4" />
                     {t('campaign')}

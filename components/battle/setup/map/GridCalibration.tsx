@@ -196,7 +196,7 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                                 {draft && (
                                     <div
                                         data-testid="calibration-draft"
-                                        className="pointer-events-none absolute border-2 border-hud-gold-bright bg-hud-gold-bright/20"
+                                        className="pointer-events-none absolute border-2 border-hud-gold-bright bg-hud-panel-2"
                                         style={{
                                             left: `${(draft.x / image.width) * 100}%`,
                                             top: `${(draft.y / image.height) * 100}%`,

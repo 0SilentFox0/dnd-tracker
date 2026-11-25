@@ -8,7 +8,7 @@ import { HudButton } from '@/components/hud';
 import { useBattleScene } from '@/lib/hooks/battle';
 
 const BOX =
-    'mx-4 mt-2 flex min-h-10 items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center';
+    'mx-4 mt-2 flex min-h-10 items-center justify-center gap-3 border-y border-hud-line bg-hud-panel-2 px-3 py-1.5 text-center';
 
 export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
     const t = useTranslations('battle.scene');

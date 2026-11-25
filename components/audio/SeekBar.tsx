@@ -49,7 +49,7 @@ export function SeekBar({
                 onPointerUp={commit}
                 onKeyUp={commit}
                 onBlur={commit}
-                className="flex-1 accent-[var(--gold)]"
+                className="flex-1 accent-hud-crimson"
             />
             <span className="w-9">{clock(durationSec)}</span>
         </div>

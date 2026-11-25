@@ -196,7 +196,7 @@ export default function SpellBattlePreviewPanel({
                             'ml-auto inline-flex min-h-7 items-center gap-1 rounded-full px-2.5 text-[11px]',
                             book
                                 ? 'spell-book-preview-title shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--book-accent)_60%,transparent)] hover:bg-[color-mix(in_srgb,var(--book-accent)_10%,transparent)]'
-                                : 'text-hud-gold-bright shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:bg-hud-raised'
+                                : 'text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:bg-hud-raised'
                         )}
                     >
                         <Play className="size-3" aria-hidden />

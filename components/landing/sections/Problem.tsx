@@ -34,7 +34,7 @@ export function Problem({ t }: { t: Translator }) {
                             </li>
                         ))}
                     </ul>
-                    <p className="hud-sc flex items-start gap-2 text-xl text-hud-gold-strong">
+                    <p className="hud-sc flex items-start gap-2 text-xl text-hud-ink">
                         <ArrowRight
                             aria-hidden
                             className="mt-1 size-5 shrink-0"
@@ -74,7 +74,7 @@ export function Problem({ t }: { t: Translator }) {
                         <span className="hud-sc text-hud-ink">
                             {BRAND.name}
                         </span>
-                        <span className="ml-auto text-xs text-hud-gold-bright">
+                        <span className="ml-auto text-xs text-hud-ink">
                             {t('problem.hubTag')}
                         </span>
                     </div>
