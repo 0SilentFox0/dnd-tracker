@@ -129,7 +129,7 @@ function JournalBook({
                                             key={kind}
                                             className="space-y-2"
                                         >
-                                            <h2 className="hud-sc flex justify-between px-2 text-xs tracking-widest text-hud-gold">
+                                            <h2 className="hud-sc flex justify-between px-2 text-xs tracking-widest text-hud-ink">
                                                 {t(kind)}
                                                 <span className="text-hud-muted">
                                                     {group.length}

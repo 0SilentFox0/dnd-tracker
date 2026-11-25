@@ -29,9 +29,9 @@ export function QuestDetails({
     return (
         <article className="w-full max-w-[760px] min-w-0 space-y-5 p-4 sm:p-7">
             <div className="flex items-start gap-3">
-                <ScrollText className="mt-1 size-7 shrink-0 text-hud-gold" />
+                <ScrollText className="mt-1 size-7 shrink-0 text-hud-muted" />
                 <div className="min-w-0 flex-1">
-                    <p className="text-xs tracking-widest text-hud-gold uppercase">
+                    <p className="text-xs tracking-widest text-hud-ink uppercase">
                         {t(quest.kind)}
                         {quest.marker && ` · ${quest.marker.name}`}
                     </p>
@@ -50,7 +50,7 @@ export function QuestDetails({
                 <QuestProgress quest={quest} />
             </div>
             <section className="space-y-2">
-                <h3 className="hud-sc text-hud-gold">{t('objectives')}</h3>
+                <h3 className="hud-sc text-hud-ink">{t('objectives')}</h3>
                 {quest.objectives.map((o, index) => (
                     <div
                         key={o.hidden ? `hidden-${index}` : o.id}
@@ -59,7 +59,7 @@ export function QuestDetails({
                         {o.hidden ? (
                             <HelpCircle className="size-5 shrink-0" />
                         ) : o.completed ? (
-                            <Check className="size-5 shrink-0 text-hud-gold" />
+                            <Check className="size-5 shrink-0 text-hud-crimson-fg" />
                         ) : (
                             <Circle className="size-5 shrink-0" />
                         )}
@@ -80,7 +80,7 @@ export function QuestDetails({
                 (field) =>
                     quest[field] && (
                         <section key={field} className="space-y-2">
-                            <h3 className="hud-sc text-hud-gold">{t(field)}</h3>
+                            <h3 className="hud-sc text-hud-ink">{t(field)}</h3>
                             <p
                                 className={`text-sm break-words whitespace-pre-wrap text-hud-bone ${field === 'reward' ? 'inline-block rounded-md border border-hud-line bg-hud-field px-2 py-1' : ''}`}
                             >
@@ -94,7 +94,7 @@ export function QuestDetails({
                     <Button
                         asChild
                         variant="outline"
-                        className="min-h-10 border-hud-gold text-hud-gold"
+                        className="min-h-10 border-hud-crimson text-hud-crimson-fg"
                     >
                         <Link
                             href={`/campaigns/${campaignId}/${isDM ? 'dm/' : ''}world?map=${encodeURIComponent(quest.marker.mapId)}&marker=${encodeURIComponent(quest.marker.id)}`}

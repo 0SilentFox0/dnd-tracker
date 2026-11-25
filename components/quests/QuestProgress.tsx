@@ -17,7 +17,7 @@ export function QuestProgress({ quest }: { quest: QuestView }) {
             </span>
             <div className="h-1 overflow-hidden rounded bg-hud-field">
                 <div
-                    className="h-full bg-hud-gold"
+                    className="h-full bg-hud-crimson"
                     style={{
                         width: `${quest.objectives.length ? (done / quest.objectives.length) * 100 : 0}%`,
                     }}

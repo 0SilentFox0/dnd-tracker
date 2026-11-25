@@ -24,9 +24,9 @@ export function QuestListItem({
             variant="ghost"
             aria-pressed={selected}
             onClick={onSelect}
-            className={`h-auto w-full items-start justify-start rounded-md border p-3 text-left whitespace-normal ${selected ? 'border-hud-gold bg-hud-field' : 'border-transparent'}`}
+            className={`h-auto w-full items-start justify-start rounded-md border p-3 text-left whitespace-normal ${selected ? 'border-hud-crimson bg-hud-panel-2' : 'border-transparent'}`}
         >
-            <ScrollText className="mt-1 size-5 shrink-0 text-hud-gold" />
+            <ScrollText className="mt-1 size-5 shrink-0 text-hud-muted" />
             <span className="min-w-0 flex-1 space-y-2">
                 <span className="flex items-start gap-2">
                     <span className="min-w-0 flex-1 break-words text-hud-ink">
@@ -34,7 +34,7 @@ export function QuestListItem({
                     </span>
                     {quest.tracked && (
                         <Star
-                            className="size-4 shrink-0 text-hud-gold"
+                            className="size-4 shrink-0 text-hud-crimson-fg"
                             aria-label={t('tracked')}
                         />
                     )}
