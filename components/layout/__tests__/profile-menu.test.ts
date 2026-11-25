@@ -5,12 +5,12 @@ import { PROFILE_MENU } from '@/components/layout/profile-menu';
 describe('PROFILE_MENU', () => {
     it('has unique ids in the expected order', () => {
         expect(PROFILE_MENU.map((e) => e.id)).toEqual([
-            'help',
-            'password',
             'preferences',
-            'soundLibrary',
+            'password',
             'aiKeys',
             'subscription',
+            'soundLibrary',
+            'help',
             'switchAccount',
             'signOut',
         ]);
