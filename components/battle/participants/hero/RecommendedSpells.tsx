@@ -45,7 +45,7 @@ export function RecommendedSpells({
 
     return (
         <div role="group" aria-label={t('recommended')} className="min-w-0">
-            <h3 className="hud-sc mb-1.5 text-[12px] tracking-[.06em] text-[var(--gold)]">
+            <h3 className="hud-sc mb-1.5 text-[12px] tracking-[.06em] text-[var(--gold)] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
                 {level === null
                     ? t('recommended')
                     : t('recommendedTitle', {
@@ -62,13 +62,13 @@ export function RecommendedSpells({
                         onClick={() =>
                             intents.requestSpellBook(level ?? s.level)
                         }
-                        className="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl border border-white/20 px-1.5 py-1 text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-50"
+                        className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-50"
                     >
                         <SpellIcon
                             spell={s}
-                            size={22}
-                            className="size-[22px]"
-                            iconClassName="size-5"
+                            size={66}
+                            className="size-[66px]"
+                            iconClassName="size-14"
                         />
                         <span className="max-w-full truncate text-[11px] leading-tight">
                             {s.name}

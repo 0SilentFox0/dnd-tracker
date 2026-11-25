@@ -19,7 +19,6 @@ export const MAP_LIMITS = {
     maxPerCampaign: 100,
     createRate: { limit: 20, windowSeconds: 60 },
     maxTerrainCells: 3600,
-    dmMoveCap: 60,
     doorsMax: 500,
     // temporary until battle stages C/D allow larger maps on the board
     battleMaxSide: 60,

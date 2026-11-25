@@ -15,12 +15,10 @@ import {
 import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from './occupancy';
 
 import { EffectMarker } from '@/lib/constants/battle';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { statWithModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
-import { controlledByDm } from '@/lib/utils/battle/participant/unit-control';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -191,21 +189,10 @@ export function searchPaths(
 }
 
 export function moveBudget(
-    {
-        map,
-        dmUserId,
-        rules,
-    }: { map: BattleMapConfig; dmUserId: string | null; rules: Ruleset },
+    { rules }: { map: BattleMapConfig; dmUserId: string | null; rules: Ruleset },
     p: BattleParticipant
 ): number {
-    if (
-        dmUserId === null ||
-        !controlledByDm(p, dmUserId) ||
-        hasEffectMarker(p, EffectMarker.IMMOBILIZED)
-    )
-        return remainingMovement(p, rules);
-
-    return Math.min(map.cols * map.rows, MAP_LIMITS.dmMoveCap);
+    return remainingMovement(p, rules);
 }
 
 export function frightenedBlocksMove(

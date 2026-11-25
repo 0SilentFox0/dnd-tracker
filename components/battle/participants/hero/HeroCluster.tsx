@@ -63,12 +63,7 @@ export const HeroCluster = memo(function HeroCluster({
             className="pointer-events-auto relative flex flex-col items-start gap-1"
         >
             {phone && recommended && (
-                <div
-                    className={cn(
-                        HUD_GLASS,
-                        'absolute bottom-full left-0 mb-2 w-[min(300px,calc(100vw-16px))] rounded-2xl p-2'
-                    )}
-                >
+                <div className="absolute bottom-full left-0 mb-2 w-[min(300px,calc(100vw-16px))]">
                     {recommended}
                 </div>
             )}
@@ -107,12 +102,7 @@ export const HeroCluster = memo(function HeroCluster({
                     </div>
                 </div>
                 {!phone && recommended && (
-                    <div
-                        className={cn(
-                            HUD_GLASS,
-                            'mb-1 w-fit max-w-[min(300px,34vw)] rounded-2xl p-3'
-                        )}
-                    >
+                    <div className="mb-1 w-fit max-w-[min(300px,34vw)]">
                         {recommended}
                     </div>
                 )}

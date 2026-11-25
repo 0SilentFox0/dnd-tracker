@@ -32,7 +32,6 @@ import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrac
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
-import { HUD_GLASS } from '@/components/hud';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
@@ -162,7 +161,9 @@ export function DesktopBattleLayout({
 
     useEffect(() => {
         const rail =
-            rootRef.current?.querySelector<HTMLElement>('[data-drawer-rail]');
+            rootRef.current?.querySelector<HTMLElement>(
+                '[data-hud-block="tools"]'
+            );
 
         if (!rail || typeof ResizeObserver === 'undefined') return;
 
@@ -223,11 +224,9 @@ export function DesktopBattleLayout({
                             block="initiative"
                             edge="top"
                             align="center"
-                            className="pointer-events-none absolute top-2 left-[calc(50%-var(--hud-side-w,0px)/2)] z-20 w-[min(560px,calc(100%-480px-var(--hud-side-w,0px)))] -translate-x-1/2"
+                            className="pointer-events-none absolute top-2 left-1/2 z-20 w-[min(560px,calc(100%-2*max(240px,var(--hud-side-w,0px))))] -translate-x-1/2"
                         >
-                            <div
-                                className={`${HUD_GLASS} pointer-events-auto mx-auto w-fit max-w-full rounded-full`}
-                            >
+                            <div className="pointer-events-auto mx-auto w-fit max-w-full">
                                 <InitiativeTrack onReorder={onReorder} />
                             </div>
                         </HudBlock>
