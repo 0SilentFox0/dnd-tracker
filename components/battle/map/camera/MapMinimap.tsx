@@ -52,12 +52,14 @@ export function MapMinimap({
 
     const hex = grid === 'hex';
 
-    const win: GridWindow = hex
+    const hexSpan = hex ? mapSize(map, grid) : null;
+
+    const win: GridWindow = hexSpan
         ? {
               x: 0,
               y: 0,
-              cols: mapSize(map, grid).width / UNIT,
-              rows: mapSize(map, grid).height / UNIT,
+              cols: hexSpan.width / UNIT,
+              rows: hexSpan.height / UNIT,
           }
         : cellWin;
 
@@ -179,10 +181,14 @@ export function MapMinimap({
                                       )
                                   );
 
-                            const centre = hex
+                            const hexCentre = hex
+                                ? cellCenter(point, grid)
+                                : null;
+
+                            const centre = hexCentre
                                 ? {
-                                      x: cellCenter(point, grid).x / UNIT,
-                                      y: cellCenter(point, grid).y / UNIT,
+                                      x: hexCentre.x / UNIT,
+                                      y: hexCentre.y / UNIT,
                                   }
                                 : {
                                       x: point.x + size / 2,

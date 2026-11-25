@@ -97,8 +97,6 @@ export const GridMarks = memo(function GridMarks({
         return keys.length ? regionFillPath(keys, grid) : '';
     }, [blocked, terrain, grid]);
 
-    const gridless = staticMask;
-
     const rangeD = useMemo(
         () => (range ? rangeOutline(range, grid) : ''),
         [range, grid]
@@ -106,7 +104,7 @@ export const GridMarks = memo(function GridMarks({
 
     return (
         <>
-            {gridless && (
+            {staticMask && (
                 <mask
                     id={maskId}
                     maskUnits="userSpaceOnUse"
@@ -116,7 +114,7 @@ export const GridMarks = memo(function GridMarks({
                     height={span.height}
                 >
                     <rect width={span.width} height={span.height} fill="#fff" />
-                    <path d={gridless} fill="#000" />
+                    <path d={staticMask} fill="#000" />
                 </mask>
             )}
             <g pointerEvents="none">
@@ -137,7 +135,7 @@ export const GridMarks = memo(function GridMarks({
                     strokeOpacity={map.opacity}
                     strokeWidth={1.5}
                     vectorEffect="non-scaling-stroke"
-                    mask={gridless ? `url(#${maskId})` : undefined}
+                    mask={staticMask ? `url(#${maskId})` : undefined}
                 />
                 {moveOutline && (
                     <path

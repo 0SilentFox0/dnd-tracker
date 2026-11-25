@@ -112,7 +112,7 @@ export function cellsToMask(
 
     if (hex) px = hex.px;
 
-    const key = `${grid === 'hex' ? 'hex:' : ''}${maskKey(levels, cols, rows)}@${px}`;
+    const key = `${hex ? 'hex:' : ''}${maskKey(levels, cols, rows)}@${px}`;
 
     const hit = cache.get(key);
 

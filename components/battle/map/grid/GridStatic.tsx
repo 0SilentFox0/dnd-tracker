@@ -160,10 +160,10 @@ export const GridStatic = memo(function GridStatic({
 
     const grid = gridOf(map);
 
-    const paths = useMemo(() => {
-        const hazard = [...g.damaging, ...g.timed];
+    const hazardKeys = useMemo(() => [...g.damaging, ...g.timed], [g]);
 
-        return {
+    const paths = useMemo(
+        () => ({
             wall: regionFillPath(g.wall, grid),
             barrier: regionFillPath(g.barrier, grid),
             difficultKind: regionFillPath(g.difficultKind, grid),
@@ -172,13 +172,12 @@ export const GridStatic = memo(function GridStatic({
             zone: regionFillPath(g.zone, grid),
             damaging: regionFillPath(g.damaging, grid),
             timed: regionFillPath(g.timed, grid),
-            hazardFill: regionFillPath(hazard, grid),
-            hazardOutline: regionOutlinePath(hazard, grid),
+            hazardFill: regionFillPath(hazardKeys, grid),
+            hazardOutline: regionOutlinePath(hazardKeys, grid),
             blocked: showBlocked ? regionFillPath(blocked, grid) : '',
-        };
-    }, [g, blocked, showBlocked, grid]);
-
-    const hazardKeys = useMemo(() => [...g.damaging, ...g.timed], [g]);
+        }),
+        [g, hazardKeys, blocked, showBlocked, grid]
+    );
 
     const flames = useMemo(
         () =>
