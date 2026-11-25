@@ -15,7 +15,7 @@ import { ROOT_NAMESPACES } from '../scopes';
 import { logScope, systemPackScope, systemScope } from '../system-scope';
 import { campaignPages, routeGraph } from '../test/route-namespaces';
 
-import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
+import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
 // limits are the measured uk gzip + ~0.5 KB headroom, rounded up to 0.1
 const ROOT_LIMIT_KB = 20;
@@ -62,7 +62,7 @@ const systemScopes = SYSTEM_META.filter(
 ).flatMap((meta) => {
     const key = meta.keys[0] as string;
 
-    const budgetKb = meta.i18n.budgetKb;
+    const budgetKb = (meta as SystemMeta).i18n.budgetKb;
 
     return Object.entries(budgetKb?.packs ?? {}).map(([pack, limit]) => ({
         name: `${key} pack ${pack}`,
