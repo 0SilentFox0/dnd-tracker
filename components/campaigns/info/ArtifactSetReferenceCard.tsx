@@ -9,7 +9,6 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Label } from '@/components/ui/label';
-import { useText } from '@/lib/i18n/use-text';
 import type { ArtifactSetForReference } from '@/types/info-reference';
 
 export function ArtifactSetReferenceCard({
@@ -18,8 +17,6 @@ export function ArtifactSetReferenceCard({
     set: ArtifactSetForReference;
 }) {
     const t = useTranslations('dashboard.reference.card');
-
-    const text = useText();
 
     return (
         <AccordionItem

@@ -135,7 +135,7 @@ export function ResponsiveDialog({
                             ? {}
                             : { 'aria-describedby': undefined })}
                         className={cn(
-                            'fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-[4px] border-t border-hud-line bg-hud-panel shadow-[0_30px_80px_-24px_rgba(0,0,0,.9)] outline-none data-[state=closed]:pointer-events-none!',
+                            'fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t border-hud-line bg-hud-panel shadow-[0_30px_80px_-24px_rgba(0,0,0,.9)] outline-none data-[state=closed]:pointer-events-none!',
                             hudClass,
                             sheetClasses(className)
                         )}

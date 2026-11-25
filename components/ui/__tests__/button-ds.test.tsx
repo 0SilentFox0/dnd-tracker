@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
 import { render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
@@ -28,7 +30,14 @@ describe('button DS', () => {
     });
 
     it('every variant carries a hover class', () => {
-        for (const variant of ['default', 'outline', 'secondary', 'destructive', 'ghost', 'link'] as const) {
+        for (const variant of [
+            'default',
+            'outline',
+            'secondary',
+            'destructive',
+            'ghost',
+            'link',
+        ] as const) {
             expect(buttonVariants({ variant })).toMatch(/hover:/);
         }
     });
@@ -48,5 +57,20 @@ describe('button DS', () => {
 
         expect(screen.getByText('A').getAttribute('aria-current')).toBe('page');
         expect(screen.getByText('B').getAttribute('aria-current')).toBeNull();
+    });
+
+    it('keeps the hud link rules inside @layer base so utilities win', () => {
+        const css = readFileSync(
+            join(process.cwd(), 'app/globals.css'),
+            'utf8'
+        );
+
+        const rule = css.indexOf('.hud-surface a[href]:hover');
+
+        expect(rule).toBeGreaterThan(css.indexOf('@layer base {'));
+        expect(css.lastIndexOf('@layer base {', rule)).toBeGreaterThan(-1);
+        expect(
+            css.slice(css.lastIndexOf('@layer base {', rule), rule)
+        ).not.toMatch(/\n}\n/);
     });
 });

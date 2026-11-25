@@ -152,6 +152,33 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
         ).toBeGreaterThanOrEqual(4.5);
     });
 
+    it('draws the native checkbox tick in accent-ink at 3:1 on the accent fill', () => {
+        const globals = readFileSync(
+            join(process.cwd(), 'app/globals.css'),
+            'utf8'
+        );
+
+        const tick = (selector: string) =>
+            `#${
+                globals
+                    .slice(globals.indexOf(selector))
+                    .match(/stroke='%23([\da-f]{6})'/i)?.[1]
+            }`.toLowerCase();
+
+        const base = tick('input[type="checkbox"]:checked {');
+
+        const parchment = tick(
+            'html[data-palette="parchment"] input[type="checkbox"]:checked'
+        );
+
+        expect(
+            contrastRatio(base, paletteTokens('tavern')['--hud-accent'])
+        ).toBeGreaterThanOrEqual(3);
+        expect(
+            contrastRatio(parchment, paletteTokens('parchment')['--hud-accent'])
+        ).toBeGreaterThanOrEqual(3);
+    });
+
     it('keeps crimson-ink at AA on crimson', () => {
         expect(
             contrastRatio(tokens['--hud-crimson-ink'], tokens['--hud-crimson'])

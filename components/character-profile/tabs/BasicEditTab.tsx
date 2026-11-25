@@ -28,7 +28,7 @@ export function BasicEditTab({
 
     const t = useTranslations('characterProfile.basic');
 
-        const { campaignId, sheet } = useProfile();
+    const { campaignId, sheet } = useProfile();
 
     const classMode = useClassMode(campaignId);
 
@@ -73,31 +73,29 @@ export function BasicEditTab({
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-4">
-                <CharacterBasicInfo
-                    basicInfo={form.basicInfo}
-                    campaignMembers={options.members}
-                    races={options.races}
-                    hide={{
-                        progression: ui.hideProgression,
-                        lineage: !def.lineage,
-                        class: !statColumnsOf(def).has('classes'),
-                        alignment: !def.identity.alignments,
-                        archetype: !statColumnsOf(def).has('archetype'),
-                    }}
-                    classMode={classUi ? classMode : undefined}
-                />
-                {classMode.enabled && !classUi && !ui.hideProgression && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setConverting(true)}
-                    >
-                        {t('toClasses')}
-                    </Button>
-                )}
-            </div>
+            <CharacterBasicInfo
+                basicInfo={form.basicInfo}
+                campaignMembers={options.members}
+                races={options.races}
+                hide={{
+                    progression: ui.hideProgression,
+                    lineage: !def.lineage,
+                    class: !statColumnsOf(def).has('classes'),
+                    alignment: !def.identity.alignments,
+                    archetype: !statColumnsOf(def).has('archetype'),
+                }}
+                classMode={classUi ? classMode : undefined}
+            />
+            {classMode.enabled && !classUi && !ui.hideProgression && (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConverting(true)}
+                >
+                    {t('toClasses')}
+                </Button>
+            )}
             <CharacterHpPreview hp={hp} />
             <div className="ds-panel flex items-center justify-end p-4 sm:p-5">
                 <Button

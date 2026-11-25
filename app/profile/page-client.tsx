@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 import { LoadingState } from '@/components/common/states';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { ProfileAccountActions } from '@/components/profile/ProfileAccountActions';
@@ -10,16 +8,14 @@ import { ProfileHeroCard } from '@/components/profile/ProfileHeroCard';
 import { ProfileHeroes } from '@/components/profile/ProfileHeroes';
 import { ProfileQuickSettings } from '@/components/profile/ProfileQuickSettings';
 import { useSessionUser } from '@/lib/hooks/auth';
-import type { ProfileSummary } from '@/lib/server/profile/summary';
+import type { ProfileSummary } from '@/types/profile';
 
-type Profile = { showOpsLink: boolean; summary: ProfileSummary };
+type Profile = { showOpsLink: boolean; summary: ProfileSummary; now: number };
 
 export function ProfileClient({ profile }: { profile: Profile }) {
     const user = useSessionUser();
 
-    const [now] = useState(Date.now);
-
-    const { summary } = profile;
+    const { summary, now } = profile;
 
     if (!user) return <LoadingState />;
 

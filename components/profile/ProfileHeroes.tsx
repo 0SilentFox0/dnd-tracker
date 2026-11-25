@@ -7,12 +7,12 @@ import { UserRound } from 'lucide-react';
 
 import { ProfileEmptyState } from '@/components/profile/ProfileEmptyState';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
-import type { ProfileCharacter } from '@/lib/server/profile/summary';
 import { avatarHue } from '@/lib/utils/auth/avatar';
 import {
     isHostedOnProjectStorage,
     toMediaUrl,
 } from '@/lib/utils/common/image-url';
+import type { ProfileCharacter } from '@/types/profile';
 
 function Portrait({ hero }: { hero: ProfileCharacter }) {
     return (

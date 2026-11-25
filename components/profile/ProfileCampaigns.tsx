@@ -7,8 +7,8 @@ import { Swords } from 'lucide-react';
 import { ProfileEmptyState } from '@/components/profile/ProfileEmptyState';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
 import { CampaignRole } from '@/lib/constants/campaigns';
-import type { ProfileCampaign } from '@/lib/server/profile/summary';
 import { formatRelativeDays } from '@/lib/utils/common/relative-days';
+import type { ProfileCampaign } from '@/types/profile';
 
 export function ProfileCampaigns({
     campaigns,

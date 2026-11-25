@@ -2,7 +2,11 @@
 
 import {
     createContext,
-    type ReactNode, useContext, useEffect, useState } from 'react';
+    type ReactNode,
+    useContext,
+    useEffect,
+    useState,
+} from 'react';
 
 import { createClient } from '@/lib/supabase/client';
 import { type SessionUser, toSessionUser } from '@/lib/utils/auth/session-user';

@@ -29,21 +29,22 @@ export function FormField({
 }: FormFieldProps) {
     return (
         <div className={cn('flex flex-col gap-1.5', className)}>
-            <Label
-                htmlFor={htmlFor}
-                className={cn('mb-0', labelClassName)}
-            >
+            <Label htmlFor={htmlFor} className={cn('mb-0', labelClassName)}>
                 {label}
                 {labelExtra}
-                {required && <span className="ml-1 text-hud-crimson-fg">*</span>}
+                {required && (
+                    <span className="ml-1 text-hud-crimson-fg">*</span>
+                )}
             </Label>
             {children}
             {description && (
                 <p className="text-sm text-hud-muted">{description}</p>
             )}
-            {error && <p role="alert" className="text-sm text-hud-crimson-fg">
+            {error && (
+                <p role="alert" className="text-sm text-hud-crimson-fg">
                     {error}
-                </p>}
+                </p>
+            )}
         </div>
     );
 }

@@ -15,7 +15,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useUpdateSpellAppearance } from '@/lib/hooks/spells';
-import { useText } from '@/lib/i18n/use-text';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
     formatMechanicsSpell,
@@ -45,8 +44,6 @@ export function SpellReferenceCard({
     );
 
     const t = useTranslations('dashboard.reference.card');
-
-    const text = useText();
 
     const translate = useTranslator();
 

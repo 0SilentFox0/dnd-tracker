@@ -41,7 +41,6 @@ const inProfile = (sheet: CharacterSheet, ui: ReactElement) =>
         { locale: 'en', namespaces: ['common', 'characterProfile', 'rest'] }
     );
 
-
 const longBio = 'word '.repeat(120);
 
 const sheetWithBio = (biography: string) =>
@@ -93,7 +92,10 @@ describe('SheetIdentityPanel description', () => {
             </form>
         );
 
-        expect(screen.getByTestId('sheet-actions')).toBeTruthy();
+        const bar = screen.getByTestId('sheet-actions');
+
+        expect(bar.className).toContain('sticky');
+        expect(bar.closest('.grid')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 

@@ -70,24 +70,24 @@ html[data-palette] body,
 
 /* fallbacks for pages without a palette; palettes.css sets the same tokens under html[data-palette] */
 .hud-surface {
-  --background: var(--palette-page, #111013);
-  --foreground: var(--hud-text, #c8beaf);
-  --card: var(--palette-panel, #18161a);
-  --card-foreground: var(--hud-text, #c8beaf);
-  --popover: var(--palette-panel, #18161a);
-  --popover-foreground: var(--hud-text, #c8beaf);
+  --background: var(--palette-page, #0d0a08);
+  --foreground: var(--hud-text, #e6dccb);
+  --card: var(--palette-panel, #1a140f);
+  --card-foreground: var(--hud-text, #e6dccb);
+  --popover: var(--palette-panel, #1a140f);
+  --popover-foreground: var(--hud-text, #e6dccb);
   --primary: var(--hud-accent, #c9b37a);
   --primary-foreground: var(--hud-accent-ink, #1a140f);
-  --secondary: var(--palette-panel-2, #1e1b20);
-  --secondary-foreground: var(--hud-text, #c8beaf);
-  --muted: var(--palette-panel-2, #1e1b20);
-  --muted-foreground: var(--hud-muted, #8b8277);
-  --accent: var(--palette-panel-2, #1e1b20);
-  --accent-foreground: var(--hud-text, #c8beaf);
-  --destructive: var(--hud-crimson-fg, #e0604f);
+  --secondary: var(--palette-panel-2, #2a2218);
+  --secondary-foreground: var(--hud-text, #e6dccb);
+  --muted: var(--palette-panel-2, #2a2218);
+  --muted-foreground: var(--hud-muted, #9b9080);
+  --accent: var(--palette-panel-2, #2a2218);
+  --accent-foreground: var(--hud-text, #e6dccb);
+  --destructive: var(--hud-crimson-fg, #e66a58);
   --border: var(--hud-line, rgba(236, 228, 214, 0.17));
   --input: var(--hud-line, rgba(236, 228, 214, 0.17));
-  --ring: var(--hud-ink, #ece4d6);
+  --ring: var(--hud-ink, #efe5d2);
 }
 @media (max-width: 639px) { .hud-form-page.ornate::after { display: none; } }
 .hud-scroll-x { scrollbar-width: none; }

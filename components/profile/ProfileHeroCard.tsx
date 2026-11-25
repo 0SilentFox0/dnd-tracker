@@ -4,8 +4,8 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { AvatarEditor } from '@/components/profile/AvatarEditor';
 import type { SessionUser } from '@/lib/hooks/auth';
-import type { ProfileSummary } from '@/lib/server/profile/summary';
 import { formatRelativeDays } from '@/lib/utils/common/relative-days';
+import type { ProfileSummary } from '@/types/profile';
 
 export function ProfileHeroCard({
     user,

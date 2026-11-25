@@ -77,6 +77,7 @@ export function PreferencesClient() {
                 <div className="mt-3">
                     <SelectField
                         id="time-zone"
+                        aria-label={t('timeZone')}
                         value={timeZone ?? AUTO}
                         onValueChange={(value) =>
                             void set(value === AUTO ? null : value)
