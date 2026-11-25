@@ -71,7 +71,7 @@ export function MapFileDropzone({
                 className={cn(
                     'flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-dashed p-3 text-center text-sm text-hud-muted transition-colors hover:border-hud-muted',
                     over
-                        ? 'border-[var(--gold)] bg-white/5'
+                        ? 'border-hud-crimson bg-hud-panel-2'
                         : 'border-hud-line bg-black/30'
                 )}
             >
@@ -93,7 +93,7 @@ export function MapFileDropzone({
                         className="h-auto max-h-40 w-auto rounded object-contain"
                     />
                 ) : (
-                    <ImagePlus className="size-7 text-hud-gold" aria-hidden />
+                    <ImagePlus className="size-7 text-hud-muted" aria-hidden />
                 )}
                 <span className="text-hud-ink">
                     {file ? file.name : t('prompt')}

@@ -69,7 +69,7 @@ export function WorldHeroes({
                             y1={ghost.from.y}
                             x2={ghost.point.x}
                             y2={ghost.point.y}
-                            stroke="var(--color-hud-gold-bright, #ffe08a)"
+                            stroke="var(--color-hud-crimson-fg)"
                             strokeWidth={2}
                             strokeDasharray="6 4"
                             vectorEffect="non-scaling-stroke"

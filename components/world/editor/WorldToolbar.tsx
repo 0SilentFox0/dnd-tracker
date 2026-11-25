@@ -88,7 +88,7 @@ function ToolButton({
                         BUTTON,
                         labelled && LABELLED,
                         active &&
-                            'metal-gold metal-fill border-[var(--gold)] hover:bg-transparent'
+                            'metal-gold metal-fill border-hud-crimson hover:bg-transparent'
                     )}
                 >
                     <Icon className="size-5" aria-hidden />

@@ -160,7 +160,7 @@ export function MarkerBubble({
                     className={bubbleButton(
                         false,
                         embedded
-                            ? 'min-h-11 border-hud-gold bg-hud-gold text-sm text-primary-foreground hover:bg-hud-gold-strong'
+                            ? 'min-h-11 border-hud-crimson bg-hud-crimson text-sm text-hud-crimson-ink hover:bg-hud-crimson-2'
                             : undefined
                     )}
                     onClick={actions.onMore}

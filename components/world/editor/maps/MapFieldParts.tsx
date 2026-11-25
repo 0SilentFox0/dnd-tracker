@@ -140,7 +140,7 @@ export function MarkerIconGrid({
                         'flex items-center justify-center rounded-md border bg-black/40 text-hud-muted hover:text-hud-ink',
                         cellClassName,
                         value === option
-                            ? 'metal-gold metal-fill border-[var(--gold)]'
+                            ? 'metal-gold metal-fill border-hud-crimson'
                             : 'border-hud-rule'
                     )}
                 >

@@ -15,7 +15,7 @@ export function WorldPanelHeader({
 }) {
     return (
         <div className="mb-4 flex items-center gap-3 border-b border-hud-rule pb-3">
-            <span className="metal-gold metal-fill flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]">
+            <span className="metal-gold metal-fill flex size-10 shrink-0 items-center justify-center rounded-full border border-hud-crimson">
                 {badge}
             </span>
             <div className="min-w-0">
