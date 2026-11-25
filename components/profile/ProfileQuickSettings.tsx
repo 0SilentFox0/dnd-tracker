@@ -7,7 +7,11 @@ import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { PaletteSwitcher } from '@/components/layout/PaletteSwitcher';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
 
-export function ProfileQuickSettings({ showOpsLink }: { showOpsLink: boolean }) {
+export function ProfileQuickSettings({
+    showOpsLink,
+}: {
+    showOpsLink: boolean;
+}) {
     const t = useTranslations('auth.profileSummary');
 
     const tProfile = useTranslations('common.profile');
