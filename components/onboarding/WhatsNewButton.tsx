@@ -63,7 +63,7 @@ export function WhatsNewButton() {
                             {e.href && (
                                 <Link
                                     href={e.href}
-                                    className="text-sm text-hud-crimson-fg hover:underline"
+                                    className="text-sm text-hud-accent-fg hover:underline"
                                     onClick={() => setOpen(false)}
                                 >
                                     {t('ui.open')}

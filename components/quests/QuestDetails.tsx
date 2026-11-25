@@ -59,7 +59,7 @@ export function QuestDetails({
                         {o.hidden ? (
                             <HelpCircle className="size-5 shrink-0" />
                         ) : o.completed ? (
-                            <Check className="size-5 shrink-0 text-hud-crimson-fg" />
+                            <Check className="size-5 shrink-0 text-hud-accent-fg" />
                         ) : (
                             <Circle className="size-5 shrink-0" />
                         )}
@@ -94,7 +94,7 @@ export function QuestDetails({
                     <Button
                         asChild
                         variant="outline"
-                        className="min-h-10 border-hud-crimson text-hud-crimson-fg"
+                        className="min-h-10 border-hud-accent text-hud-accent-fg"
                     >
                         <Link
                             href={`/campaigns/${campaignId}/${isDM ? 'dm/' : ''}world?map=${encodeURIComponent(quest.marker.mapId)}&marker=${encodeURIComponent(quest.marker.id)}`}

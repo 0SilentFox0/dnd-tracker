@@ -56,7 +56,7 @@ export function LocaleSwitcher({ hrefs }: { hrefs?: Record<Locale, string> }) {
                     </>
                 );
 
-                const className = active ? 'text-hud-crimson-fg' : 'text-hud-muted';
+                const className = active ? 'text-hud-accent-fg' : 'text-hud-muted';
 
                 return (
                     <Button

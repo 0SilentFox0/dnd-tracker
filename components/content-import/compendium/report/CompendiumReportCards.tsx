@@ -91,7 +91,7 @@ export function BlockerCard({
                 )}
             {group.code === 'UNRESOLVED_REF' && (
                 <a
-                    className="inline-block text-hud-crimson-fg underline"
+                    className="inline-block text-hud-accent-fg underline"
                     href={`#${DEPENDENCIES_ANCHOR}`}
                 >
                     {t('report.goToBinding')}
@@ -156,7 +156,7 @@ export function IssueGroupCard({
                                 <>
                                     {' '}
                                     <Link
-                                        className="text-hud-crimson-fg underline"
+                                        className="text-hud-accent-fg underline"
                                         href={link(group.code, item.path)}
                                     >
                                         {t('report.goToAction')}

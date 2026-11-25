@@ -50,7 +50,7 @@ export function OnboardingHint({
                 {hint.helpSlug && (
                     <Link
                         href={`/help/${hint.helpSlug}`}
-                        className="text-hud-crimson-fg hover:underline"
+                        className="text-hud-accent-fg hover:underline"
                     >
                         {t('ui.learnMore')}
                     </Link>

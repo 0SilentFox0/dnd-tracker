@@ -23,9 +23,8 @@ describe('DS utilities', () => {
         }
     });
 
-    it('drops the old background picture and dead effects', () => {
+    it('drops dead effects', () => {
         for (const removed of [
-            'vey-strait',
             'glass-card',
             'neon-border',
             'pulse-glow',

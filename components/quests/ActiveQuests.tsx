@@ -38,7 +38,7 @@ export async function ActiveQuests({
                 </p>
             )}
             <Link
-                className="inline-flex min-h-10 items-center text-sm text-hud-crimson-fg underline"
+                className="inline-flex min-h-10 items-center text-sm text-hud-accent-fg underline"
                 href={`/campaigns/${campaignId}/journal${isDM && !count ? '?create=1' : ''}`}
             >
                 {t(isDM && !count ? 'new' : 'open')}

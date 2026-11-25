@@ -27,7 +27,7 @@ function Block({
     return (
         <Link
             href={block.href}
-            className="inline-block text-hud-crimson-fg hover:underline"
+            className="inline-block text-hud-accent-fg hover:underline"
         >
             {t(base)}
         </Link>

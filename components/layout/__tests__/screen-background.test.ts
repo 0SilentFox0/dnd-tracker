@@ -9,8 +9,14 @@ const root = process.cwd();
 const css = readFileSync(path.join(root, 'app/globals.css'), 'utf8');
 
 describe('shared background', () => {
-    it('uses no image backgrounds (grain only)', () => {
-        expect(css).not.toMatch(/url\("\/bg\//);
+    it('paints the tavern picture only under the tavern palette', () => {
+        expect(css).toMatch(
+            /html\[data-palette="tavern"\] body::after[^}]*url\("\/bg\/vey-strait-2k\.webp"\)/
+        );
+        expect(css).toMatch(/\(min-width: 1921px\)/);
+        expect(css).not.toMatch(
+            /parchment[^{]*body::after[^}]*url\("\/bg\//
+        );
     });
 
     it('has no per-screen background rules', () => {

@@ -55,7 +55,7 @@ export function AudioPlayerPanel({
                         className={cn(
                             'flex items-center gap-1 rounded px-1 hover:text-hud-bone',
                             prefs.video.shown
-                                ? 'text-hud-crimson-fg'
+                                ? 'text-hud-accent-fg'
                                 : 'text-hud-muted'
                         )}
                     >
@@ -98,7 +98,7 @@ export function AudioPlayerPanel({
                         step={0.05}
                         value={prefs.volume}
                         onValueChange={(v) => prefs.setVolume(v)}
-                        className="flex-1 accent-hud-crimson"
+                        className="flex-1 accent-hud-accent"
                     />
                 </div>
             ) : (
