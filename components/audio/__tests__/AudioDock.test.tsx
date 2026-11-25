@@ -730,16 +730,16 @@ describe('AudioDock — перемикач «Відео»', () => {
 });
 
 describe('AudioDock — розташування', () => {
-    it('телефон: згорнутий чип зліва над смугою ходу', () => {
+    it('телефон: згорнутий чип зліва під ініціативою', () => {
         setWide(false);
 
         const { container } = dock({ audio: fileState, placement: 'strip' });
 
         const layer = container.querySelector('[data-battle-audio=strip]');
 
-        expect(layer?.className).toContain('inset-2');
+        expect(layer?.className).toContain('inset-x-2');
         expect(layer?.className).toContain('items-start');
-        expect(layer?.className).toContain('justify-end');
+        expect(layer?.className).toContain('justify-start');
     });
 
     it('телефон: розгорнута панель обмежена за висотою й гортається, заголовок із «Відео» і «Згорнути» липкий', () => {

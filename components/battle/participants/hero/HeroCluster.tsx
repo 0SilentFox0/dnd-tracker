@@ -54,7 +54,11 @@ export const HeroCluster = memo(function HeroCluster({
     };
 
     const recommended = !viewer.readOnly && spells.length > 0 && (
-        <RecommendedSpells spells={spells} level={level} />
+        <RecommendedSpells
+            spells={spells}
+            level={level}
+            compact={phone}
+        />
     );
 
     return (
@@ -63,7 +67,15 @@ export const HeroCluster = memo(function HeroCluster({
             className="pointer-events-auto relative flex flex-col items-start gap-1"
         >
             {phone && recommended && (
-                <div className="absolute bottom-full left-0 mb-2 w-[min(300px,calc(100vw-16px))]">
+                <div
+                    className="absolute bottom-full left-0 w-[min(300px,calc(100vw-16px))]"
+                    style={{
+                        marginBottom:
+                            slots.length > 0
+                                ? Math.max(8, arcRadius + slot / 2 - size / 2 + 6)
+                                : 8,
+                    }}
+                >
                     {recommended}
                 </div>
             )}

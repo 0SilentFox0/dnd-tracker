@@ -188,12 +188,15 @@ export function fitMapView(
         fillWidth = false,
         taller = 1,
         minCell = 0,
+        cover,
     }: {
         rotatable?: boolean;
         bothWays?: boolean;
         fillWidth?: boolean;
         taller?: number;
         minCell?: number;
+        /** max cropped share of the box before falling back to contain; omit to disable */
+        cover?: number;
     } = {}
 ): MapView {
     const landscapeMapInPortrait =
@@ -209,15 +212,35 @@ export function fitMapView(
 
     const shown = rotated ? { cols: map.rows, rows: map.cols } : map;
 
-    const box = fillWidth
-        ? {
-              width: avail.width,
-              height: (avail.width * shown.rows) / shown.cols,
-          }
-        : fitMapBox(
-              { width: avail.width, height: avail.height * taller },
-              shown
-          );
+    const ratio = shown.cols / shown.rows;
+
+    const contain = () =>
+        fillWidth
+            ? {
+                  width: avail.width,
+                  height: (avail.width * shown.rows) / shown.cols,
+              }
+            : fitMapBox(
+                  { width: avail.width, height: avail.height * taller },
+                  shown
+              );
+
+    const covered = {
+        width: Math.max(avail.width, avail.height * ratio),
+        height: Math.max(avail.height, avail.width / ratio),
+    };
+
+    const cropped =
+        1 -
+        Math.min(
+            avail.width / (covered.width || 1),
+            avail.height / (covered.height || 1)
+        );
+
+    const box =
+        cover !== undefined && avail.width > 0 && cropped <= cover
+            ? covered
+            : contain();
 
     const grow =
         box.width > 0 ? Math.max(1, (minCell * shown.cols) / box.width) : 1;

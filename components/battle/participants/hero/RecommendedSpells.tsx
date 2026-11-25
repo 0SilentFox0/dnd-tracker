@@ -10,7 +10,7 @@ import { useBattleScene } from '@/lib/hooks/battle';
 import { byName } from '@/lib/utils/common/text';
 import type { BookSpell } from '@/types/spells';
 
-const MAX_RECOMMENDED = 3;
+const MAX_RECOMMENDED = 5;
 
 // native spells first, then stronger dice, then name: stable and explainable
 const byStrength = (a: BookSpell, b: BookSpell) =>
@@ -22,9 +22,11 @@ const byStrength = (a: BookSpell, b: BookSpell) =>
 export function RecommendedSpells({
     spells,
     level,
+    compact = false,
 }: {
     spells: BookSpell[];
     level: number | null;
+    compact?: boolean;
 }) {
     const t = useTranslations('battle.hero.slots');
 
@@ -45,7 +47,7 @@ export function RecommendedSpells({
 
     return (
         <div role="group" aria-label={t('recommended')} className="min-w-0">
-            <h3 className="hud-sc mb-1.5 text-[12px] tracking-[.06em] text-[var(--gold)] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
+            <h3 className="hud-sc mb-1.5 text-[12px] tracking-[.06em] text-[#ecd78d] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
                 {level === null
                     ? t('recommended')
                     : t('recommendedTitle', {
@@ -62,13 +64,13 @@ export function RecommendedSpells({
                         onClick={() =>
                             intents.requestSpellBook(level ?? s.level)
                         }
-                        className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-50"
+                        className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] text-hud-bone focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-50"
                     >
                         <SpellIcon
                             spell={s}
-                            size={66}
-                            className="size-[66px]"
-                            iconClassName="size-14"
+                            size={compact ? 44 : 66}
+                            className={compact ? 'size-11' : 'size-[66px]'}
+                            iconClassName={compact ? 'size-9' : 'size-14'}
                         />
                         <span className="max-w-full truncate text-[11px] leading-tight">
                             {s.name}

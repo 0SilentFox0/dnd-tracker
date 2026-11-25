@@ -258,6 +258,7 @@ export function BattleMap({
                 'flex h-full w-full',
                 'relative',
                 !cameraMode && (phone || scrolls) && 'overflow-auto',
+                !cameraMode && !phone && !scrolls && 'overflow-hidden',
                 !cameraMode && phone && '[scrollbar-gutter:stable]',
                 cameraMode
                     ? 'items-center justify-center'
@@ -268,9 +269,7 @@ export function BattleMap({
                     ? ''
                     : scrollsY
                       ? 'items-start'
-                      : phone
-                        ? 'items-center'
-                        : 'items-end',
+                      : 'items-center',
                 className
             )}
         >
