@@ -29,7 +29,7 @@ export function LevelUpBadge({
             <HudButton
                 type="button"
                 onClick={onOpen}
-                className="motion-pulse motion-press hud-title inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[4px] bg-hud-crimson px-4 text-xl text-hud-crimson-ink focus-visible:ring-2 focus-visible:ring-hud-ink focus-visible:outline-none"
+                className="motion-pulse motion-press hud-title inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg bg-hud-accent px-4 text-xl text-hud-accent-ink focus-visible:ring-2 focus-visible:ring-hud-ink focus-visible:outline-none"
             >
                 <ArrowUp aria-hidden className="size-5" />
                 {t('distribute')}

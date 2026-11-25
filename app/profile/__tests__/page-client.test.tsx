@@ -104,9 +104,9 @@ describe('ProfileClient', () => {
 
         render(<ProfileClient profile={{ showOpsLink: false, summary }} />);
 
-        expect(
-            screen.getByText('campaignsEmptyLink').getAttribute('href')
-        ).toBe('/campaigns');
+        for (const link of screen.getAllByText('campaignsEmptyLink')) {
+            expect(link.closest('a')?.getAttribute('href')).toBe('/campaigns');
+        }
         expect(screen.getByText('heroesEmpty')).toBeTruthy();
     });
 
