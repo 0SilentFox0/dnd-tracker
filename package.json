@@ -15,6 +15,7 @@
     "lint:dirs": "bash scripts/lint-dirs.sh",
     "cycles": "tsx scripts/shared/cycles.ts",
     "ratchet:cyrillic-comments": "tsx scripts/shared/cyrillic-comments.ts",
+    "ratchet:hud-gold": "tsx scripts/shared/hud-gold.ts",
     "knip": "knip",
     "postinstall": "node scripts/postinstall.mjs",
     "deploy": "vercel --prod",
