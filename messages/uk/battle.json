@@ -111,6 +111,7 @@
     "toCampaign": "До кампанії",
     "complete": "Завершити",
     "nextTurn": "Наступний хід",
+    "nextTurnShort": "Далі",
     "nextTurnHint": "Завершити хід {name} і передати хід наступному",
     "nextTurnHintNoName": "Завершити поточний хід і передати хід наступному"
   },

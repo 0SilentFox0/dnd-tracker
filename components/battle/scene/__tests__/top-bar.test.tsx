@@ -165,7 +165,7 @@ describe('RoundBadge', () => {
             `Завершити хід ${name} і передати хід наступному`
         );
         expect(button.title).toBe(button.getAttribute('aria-label'));
-        expect(button.textContent).toBe('Наступний хід');
+        expect(button.textContent).toBe('Наступний хідДалі');
 
         fireEvent.click(button);
 

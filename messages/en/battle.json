@@ -111,6 +111,7 @@
     "toCampaign": "To campaign",
     "complete": "Complete",
     "nextTurn": "Next turn",
+    "nextTurnShort": "Next",
     "nextTurnHint": "End {name}'s turn and pass to the next",
     "nextTurnHintNoName": "End the current turn and pass to the next"
   },

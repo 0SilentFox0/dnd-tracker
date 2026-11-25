@@ -62,7 +62,7 @@ export function RoundBadge({ className }: { className?: string }) {
                     aria-label={hint}
                     title={hint}
                     onClick={() => actions.nextTurn.mutate({})}
-                    className="hud-sc pointer-events-auto relative -my-1 -mr-1.5 flex h-8 items-center gap-1.5 rounded-md border border-[var(--gold)]/50 px-2.5 text-sm tracking-[.06em] text-[var(--gold)] before:absolute before:inset-x-0 before:-inset-y-1 before:content-[''] hover:bg-[var(--gold)]/10 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70 max-md:-my-1.5 max-md:px-2 max-md:text-xs"
+                    className="hud-sc pointer-events-auto relative -my-1 -mr-1.5 flex h-8 items-center gap-1.5 rounded-md border border-[var(--gold)]/50 px-2.5 text-sm tracking-[.06em] text-[var(--gold)] before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-[''] hover:bg-[var(--gold)]/10 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70 max-md:-my-1.5 max-md:px-2 max-md:text-xs"
                 >
                     {pending ? (
                         <Loader2
@@ -72,7 +72,8 @@ export function RoundBadge({ className }: { className?: string }) {
                     ) : (
                         <NextTurnIcon className="size-3.5" aria-hidden />
                     )}
-                    {t('nextTurn')}
+                    <span className="max-md:hidden">{t('nextTurn')}</span>
+                    <span className="md:hidden">{t('nextTurnShort')}</span>
                 </HudButton>
             )}
         </span>
