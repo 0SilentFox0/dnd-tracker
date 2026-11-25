@@ -13,11 +13,11 @@ interface OptionButtonProps {
 }
 
 const BATTLE =
-    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-40 aria-checked:border-hud-crimson aria-checked:bg-hud-panel-2';
+    'border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-hud-muted disabled:opacity-40 aria-checked:bg-hud-panel-2 aria-checked:text-hud-ink aria-checked:shadow-[inset_0_-2px_0_var(--hud-crimson)]';
 
 const VARIANTS = {
     battle: BATTLE,
-    form: 'w-full rounded-md border border-hud-line/50 p-2 text-left text-sm text-hud-ink aria-checked:border-hud-crimson disabled:opacity-50',
+    form: 'w-full rounded-[4px] border border-hud-line p-2 text-left text-sm text-hud-muted aria-checked:bg-hud-panel-2 aria-checked:text-hud-ink aria-checked:shadow-[inset_0_-2px_0_var(--hud-crimson)] disabled:opacity-50',
 } as const;
 
 export function OptionButton({

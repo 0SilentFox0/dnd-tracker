@@ -22,10 +22,10 @@ export function HudToggleChip({
             aria-pressed={active}
             className={cn(
                 tall ? 'h-8' : 'h-7',
-                'rounded-md border bg-black/60 px-2 text-xs hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50',
+                'rounded-[4px] border px-2 text-xs disabled:cursor-not-allowed disabled:opacity-50',
                 active
-                    ? 'border-hud-crimson text-hud-ink'
-                    : 'border-hud-rule text-hud-muted',
+                    ? 'border-hud-line bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-crimson)]'
+                    : 'border-hud-line text-hud-muted hover:text-hud-ink',
                 className
             )}
             {...props}
