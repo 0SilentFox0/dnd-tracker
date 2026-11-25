@@ -6,7 +6,7 @@ const TONE = {
     gold: 'metal-gold metal-fill font-semibold',
     silver: 'metal-silver metal-fill font-semibold',
     bone: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
-    accent: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]',
+    accent: 'text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-crimson)]',
     muted: 'text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
     fact: 'text-hud-soft shadow-[inset_0_0_0_1px_var(--color-hud-line)]',
 } as const;
@@ -27,7 +27,7 @@ export function HudPill({
     return (
         <span
             className={cn(
-                'inline-flex shrink-0 items-center gap-1 rounded-full px-2 text-[11px] leading-5',
+                'inline-flex shrink-0 items-center gap-1 rounded-full px-2 text-[13px] leading-5',
                 TONE[tone],
                 className
             )}

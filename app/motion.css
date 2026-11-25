@@ -63,7 +63,7 @@
   bottom: 0;
   height: 3px;
   transform-origin: left center;
-  background: var(--hud-gold);
+  background: var(--hud-crimson);
 }
 
 .motion-bar {
@@ -81,7 +81,7 @@
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  box-shadow: 0 0 0 2px var(--hud-gold-strong);
+  box-shadow: 0 0 0 2px var(--hud-crimson-fg);
   opacity: 0;
   pointer-events: none;
   animation: motion-ring 2400ms var(--ease-out) 3;

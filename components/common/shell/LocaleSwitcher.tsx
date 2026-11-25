@@ -25,7 +25,7 @@ export function LocaleSwitcher({ hrefs }: { hrefs?: Record<Locale, string> }) {
                 <SelectTrigger
                     size="sm"
                     aria-label={NATIVE_LANGUAGE_NAMES[locale]}
-                    className="w-[88px] border-hud-line text-hud-gold"
+                    className="w-[88px] border-hud-line text-hud-ink"
                 >
                     <SelectValue>{locale.toUpperCase()}</SelectValue>
                 </SelectTrigger>
@@ -56,7 +56,7 @@ export function LocaleSwitcher({ hrefs }: { hrefs?: Record<Locale, string> }) {
                     </>
                 );
 
-                const className = active ? 'text-hud-gold' : 'text-hud-muted';
+                const className = active ? 'text-hud-crimson-fg' : 'text-hud-muted';
 
                 return (
                     <Button

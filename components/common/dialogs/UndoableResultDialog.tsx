@@ -94,7 +94,7 @@ export function UndoableResultDialog({
                 <div className="space-y-3">
                     {result ? (
                         <>
-                            <h3 className="hud-sc text-sm text-hud-gold">
+                            <h3 className="hud-sc text-sm text-hud-ink">
                                 {labels.result}
                             </h3>
                             {result}

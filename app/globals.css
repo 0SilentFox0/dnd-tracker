@@ -213,15 +213,15 @@
   }
   input[type="checkbox"]:hover:not(:disabled),
   input[type="radio"]:hover:not(:disabled) {
-    border-color: var(--color-hud-gold);
+    border-color: var(--color-hud-muted);
   }
   input[type="checkbox"]:checked,
   input[type="radio"]:checked {
-    border-color: var(--color-hud-gold-strong);
+    border-color: var(--color-hud-crimson);
   }
   input[type="checkbox"]:checked {
-    background-color: var(--color-hud-gold-strong);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231a140f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+    background-color: var(--color-hud-crimson);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fbefe9' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
     background-size: 100% 100%;
   }
   input[type="radio"]::before {
@@ -229,7 +229,7 @@
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 9999px;
-    background-color: var(--color-hud-gold-strong);
+    background-color: var(--color-hud-crimson);
     transform: scale(0);
     transition: transform 0.12s;
   }
@@ -239,7 +239,7 @@
   input[type="checkbox"]:focus-visible,
   input[type="radio"]:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-hud-gold-strong);
+    box-shadow: 0 0 0 2px var(--color-hud-crimson-fg);
   }
   input[type="checkbox"]:disabled,
   input[type="radio"]:disabled {

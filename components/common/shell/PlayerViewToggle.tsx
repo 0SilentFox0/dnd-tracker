@@ -27,7 +27,7 @@ export function PlayerViewToggle({
             title={`${label} (P)`}
             className={cn(
                 'hover:bg-white/10',
-                enabled ? 'text-[var(--gold)]' : 'text-hud-muted',
+                enabled ? 'text-hud-crimson-fg' : 'text-hud-muted',
                 className
             )}
         >

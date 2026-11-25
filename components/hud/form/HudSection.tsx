@@ -37,7 +37,7 @@ export function HudSection({
                 </div>
             ) : (
                 <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
                         {title}
                     </h2>
                     {action}

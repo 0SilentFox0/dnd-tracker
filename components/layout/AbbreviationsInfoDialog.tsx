@@ -25,7 +25,7 @@ export function AbbreviationsInfoDialog() {
                 onClick={() => setOpen(true)}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-hud-gold hover:bg-transparent hover:text-hud-ink"
+                className="h-8 w-8 text-hud-muted hover:bg-transparent hover:text-hud-ink"
                 title={t('title')}
             >
                 <Info className="h-4 w-4" />

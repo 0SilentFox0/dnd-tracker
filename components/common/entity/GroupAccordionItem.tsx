@@ -47,7 +47,7 @@ export function GroupAccordionItem({
                 <AccordionTrigger className="px-4 sm:px-6" data-tour={dataTour}>
                     <div className="flex w-full items-center gap-3 text-left sm:gap-4">
                         {Icon && (
-                            <Icon className="h-6 w-6 shrink-0 text-hud-gold sm:h-7 sm:w-7" />
+                            <Icon className="h-6 w-6 shrink-0 text-hud-muted sm:h-7 sm:w-7" />
                         )}
                         <div className="min-w-0 flex-1">
                             <h3 className="hud-sc truncate text-lg text-hud-ink">

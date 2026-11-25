@@ -52,7 +52,7 @@ export function HudGameShell({
                                 variant="outline"
                                 size="icon"
                                 aria-label={t('openMenu')}
-                                className="h-10 w-10 shrink-0 border-hud-rule text-hud-gold"
+                                className="h-10 w-10 shrink-0 border-hud-rule text-hud-ink"
                             >
                                 <Menu className="size-4" />
                             </Button>
@@ -75,7 +75,7 @@ export function HudGameShell({
                                             className={cn(
                                                 'min-h-10 rounded-lg px-3 text-sm focus:bg-hud-field',
                                                 active &&
-                                                    'border-hud-line bg-hud-panel-2 text-hud-gold'
+                                                    'border-hud-crimson bg-hud-panel-2 text-hud-ink'
                                             )}
                                         >
                                             <Link

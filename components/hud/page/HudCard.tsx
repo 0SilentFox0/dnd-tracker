@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const TONE = {
     default:
-        'shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]',
+        'shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-muted)]',
     active: '',
     muted: 'opacity-70 shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)]',
 } as const;

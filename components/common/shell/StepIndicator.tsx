@@ -28,7 +28,7 @@ export function StepIndicator({
                         className={cn(
                             'flex items-center gap-1.5',
                             active
-                                ? 'text-hud-gold'
+                                ? 'text-hud-crimson-fg'
                                 : done
                                   ? 'text-hud-ink'
                                   : 'text-hud-muted'
@@ -37,7 +37,7 @@ export function StepIndicator({
                         <span
                             className={cn(
                                 'flex size-5 items-center justify-center rounded-full border text-xs',
-                                active ? 'border-hud-gold' : 'border-hud-rule'
+                                active ? 'border-hud-crimson' : 'border-hud-rule'
                             )}
                         >
                             {done ? (

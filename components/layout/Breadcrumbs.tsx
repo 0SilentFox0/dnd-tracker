@@ -130,7 +130,7 @@ export function Breadcrumbs() {
                     <li className="flex items-center gap-1">
                         <Link
                             href="/campaigns"
-                            className="flex items-center text-hud-gold transition-colors hover:text-hud-ink"
+                            className="flex items-center text-hud-muted transition-colors hover:text-hud-ink"
                         >
                             <Home className="h-3.5 w-3.5" />
                             <span className="sr-only">{tHeader('home')}</span>

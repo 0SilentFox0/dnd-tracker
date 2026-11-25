@@ -91,7 +91,7 @@ export function Header() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-ink"
+                                        className="h-9 w-9 text-hud-muted hover:bg-transparent hover:text-hud-ink"
                                     >
                                         <Menu className="h-4 w-4" />
                                         <span className="sr-only">

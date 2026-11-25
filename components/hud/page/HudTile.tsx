@@ -23,7 +23,7 @@ export function HudTile({
         >
             {icon && (
                 <span
-                    className={`flex ${compact ? 'size-8' : 'size-10'} shrink-0 items-center justify-center rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] text-hud-gold shadow-[inset_0_0_0_2px_var(--color-hud-gold)]`}
+                    className={`flex ${compact ? 'size-8' : 'size-10'} shrink-0 items-center justify-center rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] text-hud-ink shadow-[inset_0_0_0_2px_var(--color-hud-line)]`}
                 >
                     {icon}
                 </span>

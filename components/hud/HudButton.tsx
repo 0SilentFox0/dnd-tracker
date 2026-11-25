@@ -7,7 +7,7 @@ type ButtonProps = React.ComponentProps<'button'>;
 const TONES = {
     muted: 'text-[var(--hud-muted)] hover:text-[var(--ink)]',
     danger: 'text-hud-danger hover:bg-hud-danger/15',
-    gold: 'text-[var(--gold)]',
+    gold: 'text-hud-crimson-fg',
 } as const;
 
 const ICON_SIZES = { sm: 'size-8', md: 'size-10' } as const;
