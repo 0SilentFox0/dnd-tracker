@@ -38,15 +38,6 @@ html[data-palette] {
   color-scheme: dark;
 }
 
-html[data-palette="parchment"], html[data-palette="frost"] {
-  --reach-fill: rgba(40, 100, 180, .14);
-  --reach-stroke: #1f5a99;
-  --threat-tint: rgba(170, 60, 30, .12);
-  --threat-stroke: #a8452c;
-  --path-label-ink: #101820;
-  --path-label-halo: #f6f1e4;
-}
-
 html[data-palette="tavern"] {
   --palette-background: #110e0b; --palette-foreground: #e6dccb; --palette-card: #1a140f; --palette-secondary: #2a2218; --palette-primary-foreground: #2a1d05;
   --palette-page: #0b0908; --palette-header: rgba(11, 9, 8, .97); --palette-overlay: rgba(0, 0, 0, .75);
@@ -169,3 +160,19 @@ html[data-palette="frost"] [class*="border-white/"]:is([class*="bg-black/"]) {
 :root { --fog-shadow: #2b3347; --fog-light: #a8b3cf; --fog-flat: #14121a; }
 html[data-palette="parchment"] { --fog-shadow: #5d4c38; --fog-light: #d9ccb0; --fog-flat: #4a3b2a; }
 html[data-palette="frost"] { --fog-shadow: #53677c; --fog-light: #d4e2ee; --fog-flat: #3d5166; }
+html[data-palette="parchment"]:where([data-palette]) {
+  --reach-fill: rgba(40, 100, 180, .14);
+  --reach-stroke: #1f5a99;
+  --threat-tint: rgba(170, 60, 30, .12);
+  --threat-stroke: #a8452c;
+  --path-label-ink: #101820;
+  --path-label-halo: #f6f1e4;
+}
+html[data-palette="frost"]:where([data-palette]) {
+  --reach-fill: rgba(40, 100, 180, .14);
+  --reach-stroke: #1f5a99;
+  --threat-tint: rgba(170, 60, 30, .12);
+  --threat-stroke: #a8452c;
+  --path-label-ink: #101820;
+  --path-label-halo: #f6f1e4;
+}
