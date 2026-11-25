@@ -1,7 +1,8 @@
+import { gridMetrics, UNIT } from './layout';
 import { MAX_SIDE, MIN_SIDE } from './map-editor';
 
 import { clamp } from '@/lib/utils/common/clamp';
-import type { BattleMapConfig } from '@/types/battle-grid';
+import type { BattleMapConfig, GridKind } from '@/types/battle-grid';
 
 export interface ImageSize {
     width: number;
@@ -14,14 +15,24 @@ export const MAX_CELL_PX = 200;
 
 export const MAX_GRID_OFFSET = 0.99;
 
+/** Step ratios of a cell against UNIT: 1 on square, column step / row step over UNIT on hex. */
+export function stepRatio(grid: GridKind): { kx: number; ky: number } {
+    const m = gridMetrics(grid);
+
+    return { kx: m.colStep / UNIT, ky: m.rowStep / UNIT };
+}
+
 export function gridForCellSize(
     img: ImageSize,
-    cellPx: number
+    cellPx: number,
+    grid: GridKind = 'square'
 ): { cols: number; rows: number; backgroundCols: number } {
+    const { kx, ky } = stepRatio(grid);
+
     return {
-        cols: clamp(Math.round(img.width / cellPx), MIN_SIDE, MAX_SIDE),
-        rows: clamp(Math.round(img.height / cellPx), MIN_SIDE, MAX_SIDE),
-        backgroundCols: img.width / cellPx,
+        cols: clamp(Math.round(img.width / (cellPx * kx)), MIN_SIDE, MAX_SIDE),
+        rows: clamp(Math.round(img.height / (cellPx * ky)), MIN_SIDE, MAX_SIDE),
+        backgroundCols: img.width / (cellPx * kx),
     };
 }
 
@@ -50,9 +61,12 @@ export function backgroundRowsOf(
 
 export function impliedCellPx(
     map: Pick<BattleMapConfig, 'cols' | 'rows' | 'backgroundCols'>,
-    img: ImageSize
+    img: ImageSize,
+    grid: GridKind = 'square'
 ): number {
-    return Math.round(img.width / backgroundColsOf(map, img));
+    return Math.round(
+        img.width / (backgroundColsOf(map, img) * stepRatio(grid).kx)
+    );
 }
 
 export interface BackgroundBox {
@@ -68,21 +82,31 @@ export function backgroundBox(
         'cols' | 'rows' | 'backgroundCols' | 'backgroundRows' | 'gridOffset'
     >,
     cellPx: number,
-    aspect: number | null
+    aspect: number | null,
+    grid: GridKind = 'square'
 ): BackgroundBox {
-    const left = -(map.gridOffset?.x ?? 0) * cellPx || 0;
+    const { kx, ky } = stepRatio(grid);
 
-    const top = -(map.gridOffset?.y ?? 0) * cellPx || 0;
+    const left = -(map.gridOffset?.x ?? 0) * cellPx * kx || 0;
+
+    const top = -(map.gridOffset?.y ?? 0) * cellPx * ky || 0;
 
     if (map.backgroundCols && aspect) {
-        const width = map.backgroundCols * cellPx;
+        const width = map.backgroundCols * cellPx * kx;
 
         const height = map.backgroundRows
-            ? map.backgroundRows * cellPx
+            ? map.backgroundRows * cellPx * ky
             : width * aspect;
 
         return { left, top, width, height };
     }
 
-    return { left, top, width: map.cols * cellPx, height: map.rows * cellPx };
+    const span = gridMetrics(grid).size(map);
+
+    return {
+        left,
+        top,
+        width: (span.width / UNIT) * cellPx,
+        height: (span.height / UNIT) * cellPx,
+    };
 }

@@ -8,6 +8,7 @@ import {
     useFogQuality,
     usePaletteVersion,
 } from '@/lib/hooks/common';
+import { mapPixelSize } from '@/lib/utils/battle/grid/layout';
 import {
     acquireCloudMotion,
     type CloudMotion,
@@ -24,6 +25,7 @@ import {
     featherMask,
 } from '@/lib/utils/canvas/fog/mask-canvas';
 import { subscribe } from '@/lib/utils/canvas/ticker';
+import type { GridKind } from '@/types/battle-grid';
 
 const REVEAL_MS = 400;
 
@@ -35,6 +37,7 @@ export interface FogGrid {
     cols: number;
     rows: number;
     cellPx: number;
+    kind?: GridKind;
     window: { x: number; y: number; cols: number; rows: number } | null;
 }
 
@@ -99,14 +102,22 @@ export function FogSurface({
 
     const paletteVersion = usePaletteVersion();
 
-    const { cols, rows, cellPx } = grid;
+    const { cols, rows, cellPx, kind = 'square' } = grid;
+
+    const hex = kind === 'hex';
 
     const mask = useMemo(
-        () => cellsToMask(cols, rows, visible, explored),
-        [cols, rows, visible, explored]
+        () => cellsToMask(cols, rows, visible, explored, undefined, kind),
+        [cols, rows, visible, explored, kind]
     );
 
-    const area = clampWindow(grid);
+    const full = mapPixelSize({ cols, rows }, cellPx, kind);
+
+    const area = hex ? { x: 0, y: 0, cols, rows } : clampWindow(grid);
+
+    const areaW = hex ? full.width : area.cols * cellPx;
+
+    const areaH = hex ? full.height : area.rows * cellPx;
 
     const motionRef = useRef<CloudMotion | null>(null);
 
@@ -139,13 +150,13 @@ export function FogSurface({
         if (!canvas || !ctx || !feathered || area.cols <= 0 || area.rows <= 0)
             return;
 
-        const cssW = area.cols * cellPx;
+        const cssW = areaW;
 
-        const cssH = area.rows * cellPx;
+        const cssH = areaH;
 
-        const mapW = cols * cellPx;
+        const mapW = full.width;
 
-        const mapH = rows * cellPx;
+        const mapH = full.height;
 
         const scale =
             Math.min(window.devicePixelRatio || 1, MAX_DPR) *
@@ -275,6 +286,11 @@ export function FogSurface({
         cols,
         rows,
         cellPx,
+        kind,
+        full.width,
+        full.height,
+        areaW,
+        areaH,
         area.x,
         area.y,
         area.cols,
@@ -291,8 +307,8 @@ export function FogSurface({
             style={{
                 left: area.x * cellPx,
                 top: area.y * cellPx,
-                width: area.cols * cellPx,
-                height: area.rows * cellPx,
+                width: areaW,
+                height: areaH,
             }}
         />
     );

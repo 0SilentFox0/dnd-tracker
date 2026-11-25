@@ -1,3 +1,6 @@
+import { hexMapSize, hexPointToCell } from '@/lib/utils/battle/grid/hex';
+import type { GridKind } from '@/types/battle-grid';
+
 // Clear level per cell: how much of the cloud a destination-out pass removes.
 export const CLEAR_VISIBLE = 255;
 
@@ -6,6 +9,23 @@ export const CLEAR_EXPLORED = 133;
 export const CLEAR_HIDDEN = 31;
 
 const MASK_PX_PER_CELL = 4;
+
+const HEX_COL_RATIO = 0.75;
+
+const HEX_W_RATIO = 2 / Math.sqrt(3);
+
+/** Pixel size of a hex mask: row height `px` (even, >= 2), column step 0.75 of the cell width, height (rows + 0.5) cells. */
+export function hexMaskSize(cols: number, rows: number, px: number) {
+    const h = Math.max(2, px + (px % 2));
+
+    const w = h * HEX_W_RATIO;
+
+    return {
+        px: h,
+        width: Math.ceil(HEX_COL_RATIO * w * cols + 0.25 * w),
+        height: Math.ceil(h * (rows + (cols > 1 ? 0.5 : 0))),
+    };
+}
 
 export interface FogMask {
     key: string;
@@ -83,11 +103,16 @@ export function cellsToMask(
     rows: number,
     visible: ReadonlySet<string> | null,
     explored: ReadonlySet<string>,
-    px = MASK_PX_PER_CELL
+    px = MASK_PX_PER_CELL,
+    grid: GridKind = 'square'
 ): FogMask {
     const levels = cellLevels(cols, rows, visible, explored);
 
-    const key = `${maskKey(levels, cols, rows)}@${px}`;
+    const hex = grid === 'hex' ? hexMaskSize(cols, rows, px) : null;
+
+    if (hex) px = hex.px;
+
+    const key = `${grid === 'hex' ? 'hex:' : ''}${maskKey(levels, cols, rows)}@${px}`;
 
     const hit = cache.get(key);
 
@@ -98,17 +123,36 @@ export function cellsToMask(
         return hit;
     }
 
-    const width = cols * px;
+    const width = hex ? hex.width : cols * px;
 
-    const height = rows * px;
+    const height = hex ? hex.height : rows * px;
 
     const data = new Uint8ClampedArray(width * height * 4);
 
-    for (let y = 0; y < height; y++) {
-        const row = Math.floor(y / px) * cols;
+    if (hex) {
+        const unit = hexMapSize(cols, rows);
 
-        for (let x = 0; x < width; x++)
-            data[(y * width + x) * 4 + 3] = levels[row + Math.floor(x / px)];
+        for (let y = 0; y < height; y++)
+            for (let x = 0; x < width; x++) {
+                const cell = hexPointToCell(
+                    ((x + 0.5) / width) * unit.width,
+                    ((y + 0.5) / height) * unit.height
+                );
+
+                const cx = Math.min(cols - 1, Math.max(0, cell.x));
+
+                const cy = Math.min(rows - 1, Math.max(0, cell.y));
+
+                data[(y * width + x) * 4 + 3] = levels[cy * cols + cx];
+            }
+    } else {
+        for (let y = 0; y < height; y++) {
+            const row = Math.floor(y / px) * cols;
+
+            for (let x = 0; x < width; x++)
+                data[(y * width + x) * 4 + 3] =
+                    levels[row + Math.floor(x / px)];
+        }
     }
 
     const mask = { key, cols, rows, px, width, height, data };

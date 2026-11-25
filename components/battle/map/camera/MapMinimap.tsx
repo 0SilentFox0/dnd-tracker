@@ -12,7 +12,10 @@ import { useLoadedAspect } from '@/lib/hooks/battle';
 import { createStorageFlag, useStorageValue } from '@/lib/hooks/common';
 import {
     backgroundBox,
+    cellCenter,
+    gridOf,
     type GridWindow,
+    mapSize,
     regionFillPath,
     UNIT,
 } from '@/lib/utils/battle/grid';
@@ -36,7 +39,7 @@ interface Props {
 
 export function MapMinimap({
     map,
-    win,
+    win: cellWin,
     participants,
     viewport,
     onPick,
@@ -44,6 +47,19 @@ export function MapMinimap({
     phone,
 }: Props) {
     const t = useTranslations('battle.map.camera');
+
+    const grid = gridOf(map);
+
+    const hex = grid === 'hex';
+
+    const win: GridWindow = hex
+        ? {
+              x: 0,
+              y: 0,
+              cols: mapSize(map, grid).width / UNIT,
+              rows: mapSize(map, grid).height / UNIT,
+          }
+        : cellWin;
 
     const store = phone ? phoneOpen : desktopOpen;
 
@@ -59,11 +75,13 @@ export function MapMinimap({
 
     const { aspect, imgProps } = useLoadedAspect(src);
 
-    const background = backgroundBox(map, 1, aspect);
+    const background = backgroundBox(map, 1, aspect, grid);
 
-    const blocked = map.blocked?.length ? regionFillPath(map.blocked) : '';
+    const blocked = map.blocked?.length
+        ? regionFillPath(map.blocked, grid)
+        : '';
 
-    const fog = hiddenCells ? regionFillPath(hiddenCells) : '';
+    const fog = hiddenCells ? regionFillPath(hiddenCells, grid) : '';
 
     const pick = (e: PointerEvent<SVGSVGElement>) => {
         e.stopPropagation();
@@ -151,13 +169,25 @@ export function MapMinimap({
 
                             if (!point) return null;
 
-                            const size = Math.min(
-                                3,
-                                Math.max(
-                                    1,
-                                    participant.combatStats.gridSize ?? 1
-                                )
-                            );
+                            const size = hex
+                                ? 1
+                                : Math.min(
+                                      3,
+                                      Math.max(
+                                          1,
+                                          participant.combatStats.gridSize ?? 1
+                                      )
+                                  );
+
+                            const centre = hex
+                                ? {
+                                      x: cellCenter(point, grid).x / UNIT,
+                                      y: cellCenter(point, grid).y / UNIT,
+                                  }
+                                : {
+                                      x: point.x + size / 2,
+                                      y: point.y + size / 2,
+                                  };
 
                             return (
                                 <circle
@@ -165,8 +195,8 @@ export function MapMinimap({
                                     data-minimap-participant={
                                         participant.basicInfo.id
                                     }
-                                    cx={point.x + size / 2 - win.x}
-                                    cy={point.y + size / 2 - win.y}
+                                    cx={centre.x - win.x}
+                                    cy={centre.y - win.y}
                                     r={Math.max(0.12, size * 0.16)}
                                     fill={
                                         participant.basicInfo.side ===

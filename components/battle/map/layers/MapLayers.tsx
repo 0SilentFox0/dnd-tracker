@@ -10,12 +10,14 @@ import {
     cellPolygon,
     parseCellKey,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapView, GridPoint } from '@/types/battle-grid';
+import type { BattleMapView, GridKind, GridPoint } from '@/types/battle-grid';
 
 export const StrokeLayer = memo(function StrokeLayer({
+    grid,
     preview,
     pending,
 }: {
+    grid: GridKind;
     preview: ReadonlySet<string>;
     pending?: ReadonlySet<string>;
 }) {
@@ -27,7 +29,7 @@ export const StrokeLayer = memo(function StrokeLayer({
                 <polygon
                     key={`p${k}`}
                     data-stroke-pending={k}
-                    points={cellPolygon(parseCellKey(k))}
+                    points={cellPolygon(parseCellKey(k), grid)}
                     fill={STROKE_COLORS.pendingFill}
                     stroke={STROKE_COLORS.stroke}
                     strokeOpacity={0.6}
@@ -40,7 +42,7 @@ export const StrokeLayer = memo(function StrokeLayer({
                 <polygon
                     key={`s${k}`}
                     data-stroke={k}
-                    points={cellPolygon(parseCellKey(k))}
+                    points={cellPolygon(parseCellKey(k), grid)}
                     fill={STROKE_COLORS.fill}
                     stroke={STROKE_COLORS.stroke}
                     strokeWidth={2}
@@ -51,14 +53,18 @@ export const StrokeLayer = memo(function StrokeLayer({
     );
 });
 
-const pulseStep = (from: GridPoint | null | undefined, p: GridPoint) =>
-    from ? cellDistance(from, p) : 0;
+const pulseStep = (
+    from: GridPoint | null | undefined,
+    p: GridPoint,
+    grid: GridKind
+) => (from ? cellDistance(from, p, grid) : 0);
 
 export const TemplateLayer = memo(function TemplateLayer({
+    grid,
     marks,
     aim,
     pulseFrom,
-}: Pick<BattleMapView, 'marks' | 'aim' | 'pulseFrom'>) {
+}: Pick<BattleMapView, 'marks' | 'aim' | 'pulseFrom'> & { grid: GridKind }) {
     const cells = marks
         ? [...marks].flatMap(([k, m]) => (m === 'template' ? [k] : []))
         : [];
@@ -66,7 +72,7 @@ export const TemplateLayer = memo(function TemplateLayer({
     if (cells.length === 0 && !aim) return null;
 
     const pulse = (p: GridPoint) => {
-        const step = pulseStep(pulseFrom, p);
+        const step = pulseStep(pulseFrom, p, grid);
 
         return {
             'data-pulse-step': step,
@@ -85,7 +91,7 @@ export const TemplateLayer = memo(function TemplateLayer({
                     key={`tp${k}`}
                     data-template-cell={k}
                     {...pulse(parseCellKey(k))}
-                    points={cellPolygon(parseCellKey(k))}
+                    points={cellPolygon(parseCellKey(k), grid)}
                     fill={TEMPLATE_COLORS.fill}
                     stroke={TEMPLATE_COLORS.stroke}
                     strokeWidth={1.5}
@@ -96,7 +102,7 @@ export const TemplateLayer = memo(function TemplateLayer({
                 <polygon
                     data-template-aim={cellKey(aim)}
                     {...pulse(aim)}
-                    points={cellPolygon(aim)}
+                    points={cellPolygon(aim, grid)}
                     fill={TEMPLATE_COLORS.aimFill}
                     stroke={TEMPLATE_COLORS.aimStroke}
                     strokeWidth={3}

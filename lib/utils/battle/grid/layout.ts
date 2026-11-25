@@ -18,6 +18,8 @@ export const UNIT = 100;
 
 const R = UNIT / 2;
 
+export const unitOf = (k: number): number => UNIT * k;
+
 export interface CellRect {
     x: number;
     y: number;
@@ -65,6 +67,19 @@ const HEX_METRICS: GridMetrics = {
 
 export const gridMetrics = (grid: GridKind): GridMetrics =>
     grid === 'hex' ? HEX_METRICS : SQUARE_METRICS;
+
+export function mapPixelSize(
+    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    cellPx: number,
+    grid: GridKind = 'square'
+): { width: number; height: number } {
+    if (grid !== 'hex')
+        return { width: map.cols * cellPx, height: map.rows * cellPx };
+
+    const { width, height } = hexMapSize(map.cols, map.rows);
+
+    return { width: (width / UNIT) * cellPx, height: (height / UNIT) * cellPx };
+}
 
 export function mapSize(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
@@ -242,11 +257,9 @@ export function fitMapBox(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     grid: GridKind = 'square'
 ): { width: number; height: number } {
-    const ratio =
-        grid === 'hex'
-            ? hexMapSize(map.cols, map.rows).width /
-              hexMapSize(map.cols, map.rows).height
-            : map.cols / map.rows;
+    const span = gridMetrics(grid).size(map);
+
+    const ratio = span.width / span.height;
 
     return {
         width: Math.min(avail.width, avail.height * ratio),
@@ -274,14 +287,18 @@ export function fitMapView(
         fillWidth = false,
         taller = 1,
         minCell = 0,
+        grid = 'square',
     }: {
         rotatable?: boolean;
         bothWays?: boolean;
         fillWidth?: boolean;
         taller?: number;
         minCell?: number;
+        grid?: GridKind;
     } = {}
 ): MapView {
+    const hex = grid === 'hex';
+
     const landscapeMapInPortrait =
         avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
 
@@ -291,22 +308,30 @@ export function fitMapView(
         map.rows >= map.cols * ROTATE_MIN_RATIO;
 
     const rotated =
-        (rotatable && landscapeMapInPortrait) || portraitMapInLandscape;
+        !hex &&
+        ((rotatable && landscapeMapInPortrait) || portraitMapInLandscape);
 
     const shown = rotated ? { cols: map.rows, rows: map.cols } : map;
+
+    const span = gridMetrics(grid).size(shown);
 
     const box = fillWidth
         ? {
               width: avail.width,
-              height: (avail.width * shown.rows) / shown.cols,
+              height: hex
+                  ? (avail.width * span.height) / span.width
+                  : (avail.width * shown.rows) / shown.cols,
           }
         : fitMapBox(
               { width: avail.width, height: avail.height * taller },
-              shown
+              shown,
+              grid
           );
 
     const grow =
-        box.width > 0 ? Math.max(1, (minCell * shown.cols) / box.width) : 1;
+        box.width > 0
+            ? Math.max(1, (minCell * (span.width / UNIT)) / box.width)
+            : 1;
 
     return {
         width: box.width * grow,
@@ -316,7 +341,13 @@ export function fitMapView(
     };
 }
 
-export type GridWindow = { x: number; y: number; cols: number; rows: number };
+export type GridWindow = {
+    x: number;
+    y: number;
+    cols: number;
+    rows: number;
+    cells?: string[];
+};
 
 const boundsCache = new WeakMap<string[], Map<string, GridWindow>>();
 
@@ -395,10 +426,13 @@ export function visibleGridWindow(
         ctm: ScreenMatrix;
         cols: number;
         rows: number;
+        grid?: GridKind;
     },
     margin: number = MAP_LIMITS.chunk
 ): GridWindow {
-    const { viewport, ctm, cols, rows } = input;
+    const { viewport, ctm, cols, rows, grid = 'square' } = input;
+
+    const { colStep, rowStep } = gridMetrics(grid);
 
     const corners = [
         [viewport.left, viewport.top],
@@ -409,9 +443,9 @@ export function visibleGridWindow(
 
     if (corners.some((c) => !c)) return { x: 0, y: 0, cols, rows };
 
-    const xs = corners.map((c) => (c ? c.x / UNIT : 0));
+    const xs = corners.map((c) => (c ? c.x / colStep : 0));
 
-    const ys = corners.map((c) => (c ? c.y / UNIT : 0));
+    const ys = corners.map((c) => (c ? c.y / rowStep : 0));
 
     const chunk = MAP_LIMITS.chunk;
 

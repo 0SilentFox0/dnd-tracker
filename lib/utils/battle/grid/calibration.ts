@@ -1,7 +1,12 @@
-import { type ImageSize, MAX_CELL_PX, MIN_CELL_PX } from './background';
+import {
+    type ImageSize,
+    MAX_CELL_PX,
+    MIN_CELL_PX,
+    stepRatio,
+} from './background';
 
 import { clamp } from '@/lib/utils/common/clamp';
-import type { BattleMapConfig } from '@/types/battle-grid';
+import type { BattleMapConfig, GridKind } from '@/types/battle-grid';
 
 export interface PixelRect {
     x: number;
@@ -23,11 +28,14 @@ const frac = (v: number) => ((v % 1) + 1) % 1;
 export function fromCellRect(
     img: ImageSize,
     rect: PixelRect,
-    n = 1
+    n = 1,
+    grid: GridKind = 'square'
 ): GridCalibration {
-    const cellW = clamp(rect.w / n, MIN_CELL_PX, MAX_CELL_PX);
+    const { kx, ky } = stepRatio(grid);
 
-    const cellH = clamp(rect.h / n, MIN_CELL_PX, MAX_CELL_PX);
+    const cellW = clamp((rect.w * kx) / n, MIN_CELL_PX, MAX_CELL_PX);
+
+    const cellH = clamp((rect.h * ky) / n, MIN_CELL_PX, MAX_CELL_PX);
 
     return {
         backgroundCols: img.width / cellW,

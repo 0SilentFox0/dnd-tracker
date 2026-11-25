@@ -21,7 +21,7 @@ const down = (overrides: Partial<PointerEvent> = {}) =>
 
 function setup(onStroke = vi.fn()) {
     const view = renderHook(() =>
-        useStrokePaint({ painting: true, dims, onStroke })
+        useStrokePaint({ painting: true, dims, grid: 'square', onStroke })
     );
 
     view.result.current.svgRef.current = {
@@ -69,7 +69,10 @@ describe('useStrokePaint', () => {
             )
         );
         act(() =>
-            view.result.current.onStrokeStart({ x: 0, y: 0 }, down({ button: 2 }))
+            view.result.current.onStrokeStart(
+                { x: 0, y: 0 },
+                down({ button: 2 })
+            )
         );
         act(() => pointer('pointerup', 0, 0));
 
@@ -91,7 +94,8 @@ describe('useStrokePaint', () => {
         const onStroke = vi.fn();
 
         const view = renderHook(
-            ({ painting }) => useStrokePaint({ painting, dims, onStroke }),
+            ({ painting }) =>
+                useStrokePaint({ painting, dims, grid: 'square', onStroke }),
             { initialProps: { painting: true } }
         );
 

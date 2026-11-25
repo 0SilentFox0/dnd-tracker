@@ -276,6 +276,7 @@ export function rangeWindow(
             y: y0,
             cols: Math.max(...cells.map((c) => c.x)) - x0 + 1,
             rows: Math.max(...cells.map((c) => c.y)) - y0 + 1,
+            cells: [...new Set(cells.map(cellKey))],
         };
     }
 

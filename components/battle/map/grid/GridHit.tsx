@@ -16,7 +16,8 @@ import {
     cellAtScreenPoint,
     cellKey,
     cellPolygon,
-    UNIT,
+    gridOf,
+    mapSize,
 } from '@/lib/utils/battle/grid';
 import type {
     BattleMapActions,
@@ -54,6 +55,10 @@ export const GridHit = memo(function GridHit({
 
     const { cols, rows, terrain } = map;
 
+    const grid = gridOf(map);
+
+    const span = mapSize(map, grid);
+
     const [hover, setHover] = useState<GridPoint | null>(null);
 
     const lastKey = useRef<string | null>(null);
@@ -62,7 +67,7 @@ export const GridHit = memo(function GridHit({
         const ctm = svgRef.current?.getScreenCTM?.();
 
         return ctm
-            ? cellAtScreenPoint({ cols, rows }, ctm, e.clientX, e.clientY)
+            ? cellAtScreenPoint({ cols, rows }, ctm, e.clientX, e.clientY, grid)
             : null;
     };
 
@@ -121,14 +126,14 @@ export const GridHit = memo(function GridHit({
         >
             <rect
                 data-grid-hit=""
-                width={cols * UNIT}
-                height={rows * UNIT}
+                width={span.width}
+                height={span.height}
                 fill="transparent"
             />
             {hover && !hoverBlocked && (
                 <polygon
                     data-grid-hover={hoverKey}
-                    points={cellPolygon(hover)}
+                    points={cellPolygon(hover, grid)}
                     fill="transparent"
                     pointerEvents="all"
                 >

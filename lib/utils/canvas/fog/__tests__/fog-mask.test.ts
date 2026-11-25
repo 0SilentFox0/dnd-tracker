@@ -87,3 +87,40 @@ describe('parseCssColor', () => {
         expect(parseCssColor('nope')).toBeNull();
     });
 });
+
+describe('cellsToMask on hex', () => {
+    it('sizes the mask by column step and half-row shift with an even px', () => {
+        const mask = cellsToMask(4, 3, set(), set(), 3, 'hex');
+
+        expect(mask.px).toBe(4);
+        expect(mask.height).toBe(Math.ceil(4 * 3.5));
+
+        const w = (4 * 2) / Math.sqrt(3);
+
+        expect(mask.width).toBe(Math.ceil(0.75 * w * 4 + 0.25 * w));
+    });
+
+    it('keeps a separate cache entry from the square mask', () => {
+        const hex = cellsToMask(3, 3, set('1:1'), set(), 4, 'hex');
+
+        const square = cellsToMask(3, 3, set('1:1'), set(), 4);
+
+        expect(hex.key).not.toBe(square.key);
+        expect(hex.key.startsWith('hex:')).toBe(true);
+    });
+
+    it('marks the visible hex and leaves a distant one fogged', () => {
+        const mask = cellsToMask(5, 5, set('2:2'), set(), 4, 'hex');
+
+        const alphaAt = (ux: number, uy: number) => {
+            const x = Math.floor((ux / (1.5 * 50 * 5 + 25)) * mask.width);
+
+            const y = Math.floor((uy / (86.6025 * 5.5)) * mask.height);
+
+            return mask.data[(y * mask.width + x) * 4 + 3];
+        };
+
+        expect(alphaAt(200, 86.6025 * 2.5)).toBe(CLEAR_VISIBLE);
+        expect(alphaAt(50, 43)).toBe(CLEAR_HIDDEN);
+    });
+});

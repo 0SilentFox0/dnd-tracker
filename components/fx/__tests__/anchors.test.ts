@@ -369,7 +369,12 @@ describe('точка шаблону', () => {
             const clip = document.createElement('div');
 
             clip.dataset.fxClip = '';
-            clip.getBoundingClientRect = domRect({ x: 0, y: 0, w: 300, h: 200 });
+            clip.getBoundingClientRect = domRect({
+                x: 0,
+                y: 0,
+                w: 300,
+                h: 200,
+            });
             document.body.appendChild(clip);
             anchor('t', { x: 10, y: 10, w: 20, h: 20 }, false, clip);
             grid(CAM, clip, { cols: 20, rows: 20 });
@@ -388,5 +393,51 @@ describe('точка шаблону', () => {
                 y: 150,
             });
         });
+    });
+});
+
+describe('cellPoint on a hex grid', () => {
+    it('uses the hex centre when the svg declares data-grid="hex"', () => {
+        const span = document.createElement('span');
+
+        span.dataset.fxParticipant = 't';
+        span.getBoundingClientRect = () =>
+            ({
+                left: 10,
+                top: 10,
+                width: 20,
+                height: 20,
+                right: 30,
+                bottom: 30,
+            }) as DOMRect;
+        document.body.appendChild(span);
+
+        const svg = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'svg'
+        ) as SVGSVGElement;
+
+        svg.setAttribute('data-fx-grid', '');
+        svg.setAttribute('data-grid', 'hex');
+        svg.setAttribute('data-cols', '10');
+        svg.setAttribute('data-rows', '8');
+        svg.getScreenCTM = () =>
+            ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) as DOMMatrix;
+        svg.getBoundingClientRect = () =>
+            ({
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100,
+                right: 100,
+                bottom: 100,
+            }) as DOMRect;
+        document.body.appendChild(svg);
+
+        const pt = resolve(
+            spec({ archetype: 'area', at: { x: 1, y: 0 }, targetIds: [] })
+        )?.at;
+
+        expect(pt).toEqual({ x: 125, y: 86.60254037844386 });
     });
 });

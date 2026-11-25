@@ -1,6 +1,11 @@
 import type { useTranslations } from 'next-intl';
 
-import { type CellMark, type GridWindow, UNIT } from '@/lib/utils/battle/grid';
+import {
+    cellKey,
+    type CellMark,
+    type GridWindow,
+    unitOf,
+} from '@/lib/utils/battle/grid';
 import type { GridPoint, TerrainCell } from '@/types/battle-grid';
 
 export const HATCH_ID = 'battle-map-barrier-hatch';
@@ -11,7 +16,7 @@ export const HAZARD_GRADIENT_ID = 'battle-map-hazard-fire';
 
 export const FLAME_ID = 'battle-map-flame';
 
-export const FLAME_SIZE = UNIT * 0.42;
+export const FLAME_SIZE = unitOf(0.42);
 
 export type MarkValue = CellMark | number | undefined;
 
@@ -34,8 +39,19 @@ export const TERRAIN_FILL = {
     hazard: `url(#${HAZARD_GRADIENT_ID})`,
 } as const;
 
-export const inWindow = (w: GridWindow, p: GridPoint) =>
-    p.x >= w.x && p.x < w.x + w.cols && p.y >= w.y && p.y < w.y + w.rows;
+const cellSets = new WeakMap<string[], Set<string>>();
+
+export function inWindow(w: GridWindow, p: GridPoint): boolean {
+    if (w.cells) {
+        let set = cellSets.get(w.cells);
+
+        if (!set) cellSets.set(w.cells, (set = new Set(w.cells)));
+
+        return set.has(cellKey(p));
+    }
+
+    return p.x >= w.x && p.x < w.x + w.cols && p.y >= w.y && p.y < w.y + w.rows;
+}
 
 type MapT = ReturnType<typeof useTranslations<'battle.map'>>;
 

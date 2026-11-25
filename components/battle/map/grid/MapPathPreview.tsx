@@ -4,15 +4,17 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useCoarsePointer } from '@/lib/hooks/common';
-import { cellCenter, UNIT } from '@/lib/utils/battle/grid';
-import type { PathPreview } from '@/types/battle-grid';
+import { cellCenter, unitOf } from '@/lib/utils/battle/grid';
+import type { GridKind, PathPreview } from '@/types/battle-grid';
 
 interface MapPathPreviewProps {
     preview: PathPreview | null | undefined;
+    grid: GridKind;
 }
 
 export const MapPathPreview = memo(function MapPathPreview({
     preview,
+    grid,
 }: MapPathPreviewProps) {
     const t = useTranslations('battle.map');
 
@@ -20,7 +22,9 @@ export const MapPathPreview = memo(function MapPathPreview({
 
     if (!preview || coarse) return null;
 
-    const points = [preview.from, ...preview.path].map((c) => cellCenter(c));
+    const points = [preview.from, ...preview.path].map((c) =>
+        cellCenter(c, grid)
+    );
 
     const end = points[points.length - 1];
 
@@ -41,15 +45,15 @@ export const MapPathPreview = memo(function MapPathPreview({
             <circle
                 cx={end.x}
                 cy={end.y}
-                r={UNIT * 0.12}
+                r={unitOf(0.12)}
                 className="battle-map-path-dot"
             />
             <text
                 data-path-cost=""
                 x={end.x}
-                y={end.y - UNIT * 0.5}
+                y={end.y - unitOf(0.5)}
                 textAnchor="middle"
-                fontSize={UNIT * 0.26}
+                fontSize={unitOf(0.26)}
                 fontWeight={700}
                 className="battle-map-path-label"
             >

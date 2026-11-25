@@ -15,7 +15,7 @@ import {
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { type FxImpact, hudMotifsOf } from '@/lib/utils/battle/fx';
-import { isFallen, sizeOf } from '@/lib/utils/battle/grid';
+import { footprintSizeOf, isFallen } from '@/lib/utils/battle/grid';
 import { isDown } from '@/lib/utils/battle/participant/state';
 import {
     HEALTH_LABEL,
@@ -93,7 +93,7 @@ function MapTokenHudImpl({
 
     const boxPx = box.size * pxPerUnit;
 
-    const small = sizeOf(participant) === 1;
+    const small = footprintSizeOf(participant, placement.grid) === 1;
 
     const hpFont = clamp(boxPx * (small ? 0.12 : 0.06), 7, small ? 11 : 13);
 

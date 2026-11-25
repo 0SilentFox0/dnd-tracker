@@ -6,7 +6,7 @@ import { FogWindowContext } from './fog-window-context';
 import { FogSurface } from './FogSurface';
 
 import { revealedHas } from '@/lib/utils/battle/fog/revealed-runs';
-import { cellKey } from '@/lib/utils/battle/grid/geometry';
+import { cellKey, gridOf } from '@/lib/utils/battle/grid/geometry';
 import type { BattleMapConfig, RevealedRun } from '@/types/battle-grid';
 
 const NO_CELLS: ReadonlySet<string> = new Set();
@@ -59,6 +59,7 @@ export function MapFogLayer({
                     cols: map.cols,
                     rows: map.rows,
                     cellPx,
+                    kind: gridOf(map),
                     window: viewport,
                 }}
                 visible={shown}

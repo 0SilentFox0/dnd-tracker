@@ -33,7 +33,7 @@ const preview: PathPreview = {
 const renderPreview = (p: PathPreview | null) =>
     render(
         <svg>
-            <MapPathPreview preview={p} />
+            <MapPathPreview grid="square" preview={p} />
         </svg>
     );
 

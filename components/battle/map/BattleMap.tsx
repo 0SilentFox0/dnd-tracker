@@ -84,7 +84,12 @@ export function BattleMap({
 
     const { cols, rows } = map;
 
-    const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
+    const grid = gridOf(map);
+
+    const size = useMemo(
+        () => mapSize({ cols, rows }, grid),
+        [cols, rows, grid]
+    );
 
     const { ref: outerRef, size: avail } = useElementSize<HTMLDivElement>({
         contentBox: true,
@@ -101,7 +106,7 @@ export function BattleMap({
     const { svgRef, preview, onStrokeStart } = useStrokePaint({
         painting,
         dims: { cols, rows },
-        grid: gridOf(map),
+        grid,
         onStroke: onPaintStroke,
     });
 
@@ -116,7 +121,7 @@ export function BattleMap({
         scrolls,
         pxPerUnit,
         frame,
-    } = useBattleMapFrame(map, avail, phone);
+    } = useBattleMapFrame(map, avail, phone, grid);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -131,6 +136,7 @@ export function BattleMap({
         participants,
         win,
         pxPerUnit,
+        grid,
     });
 
     const { zoom, x, y } = camera.camera;
@@ -155,12 +161,15 @@ export function BattleMap({
     const reveal = useCallback(
         (id: string) => {
             if (cameraMode) {
-                const t = followTarget(id, participants);
+                const t = followTarget(id, participants, grid);
 
                 if (t)
-                    focusPoint(cellPointPx(t.anchor, t.size, win, pxPerUnit), {
-                        animate: true,
-                    });
+                    focusPoint(
+                        cellPointPx(t.anchor, t.size, win, pxPerUnit, grid),
+                        {
+                            animate: true,
+                        }
+                    );
 
                 return;
             }
@@ -183,7 +192,7 @@ export function BattleMap({
                 behavior: 'smooth',
             });
         },
-        [cameraMode, participants, focusPoint, win, pxPerUnit, outerRef]
+        [cameraMode, participants, focusPoint, win, pxPerUnit, outerRef, grid]
     );
 
     useRevealListener(reveal);
@@ -191,7 +200,7 @@ export function BattleMap({
     const gridWindow = useGridWindow({
         svgRef,
         viewportRef: cameraMode ? containerRef : outerRef,
-        deps: { zoom, offset, size, pxPerUnit },
+        deps: { zoom, offset, size, pxPerUnit, cells: { cols, rows }, grid },
     });
 
     const layout = useMemo(

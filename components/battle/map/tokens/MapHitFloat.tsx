@@ -7,7 +7,7 @@ import { type MapPlacement, tokenBoxStyle } from './token-box';
 import { HitFloat } from '@/components/battle/hud';
 import { useHitChange } from '@/lib/hooks/battle';
 import type { FxImpact } from '@/lib/utils/battle/fx';
-import { sizeOf } from '@/lib/utils/battle/grid';
+import { footprintSizeOf } from '@/lib/utils/battle/grid';
 import { clamp } from '@/lib/utils/common/clamp';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -22,13 +22,13 @@ function MapHitFloatImpl({
     placement,
     impact = null,
 }: MapHitFloatProps) {
-    const { box, mapSize, pxPerUnit } = placement;
+    const { box, mapSize, pxPerUnit, grid } = placement;
 
     const { change } = useHitChange(participant, impact);
 
     if (!change) return null;
 
-    const cellPx = (box.size * pxPerUnit) / sizeOf(participant);
+    const cellPx = (box.size * pxPerUnit) / footprintSizeOf(participant, grid);
 
     return (
         <div

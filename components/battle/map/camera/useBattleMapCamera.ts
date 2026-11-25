@@ -7,7 +7,7 @@ import {
     type Frame,
 } from '@/lib/utils/battle/camera';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleMapView } from '@/types/battle-grid';
+import type { BattleMapView, GridKind } from '@/types/battle-grid';
 
 interface Params {
     frame: Frame | null;
@@ -20,6 +20,7 @@ interface Params {
     participants: BattleParticipant[];
     win: { x: number; y: number; cols: number; rows: number };
     pxPerUnit: number;
+    grid: GridKind;
 }
 
 export function useBattleMapCamera({
@@ -33,10 +34,19 @@ export function useBattleMapCamera({
     participants,
     win,
     pxPerUnit,
+    grid,
 }: Params) {
-    const cameraTarget = followTarget(view?.currentId ?? null, participants);
+    const cameraTarget = followTarget(
+        view?.currentId ?? null,
+        participants,
+        grid
+    );
 
-    const selfTarget = followTarget(view?.camera?.selfId ?? null, participants);
+    const selfTarget = followTarget(
+        view?.camera?.selfId ?? null,
+        participants,
+        grid
+    );
 
     const camera = useMapCamera({
         enabled: true,
@@ -54,7 +64,8 @@ export function useBattleMapCamera({
                               cameraTarget.anchor,
                               cameraTarget.size,
                               win,
-                              pxPerUnit
+                              pxPerUnit,
+                              grid
                           ),
                       }
                     : null,
@@ -65,7 +76,8 @@ export function useBattleMapCamera({
                               selfTarget.anchor,
                               selfTarget.size,
                               win,
-                              pxPerUnit
+                              pxPerUnit,
+                              grid
                           ),
                       }
                     : null,

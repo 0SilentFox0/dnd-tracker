@@ -295,7 +295,7 @@ export function useBattleMapEditor(
             doorLocked,
             notice,
             value: enabled ? map : null,
-            cellPx: image ? impliedCellPx(map, image) : null,
+            cellPx: image ? impliedCellPx(map, image, gridOf(map)) : null,
             image,
             imageSrc,
             pendingKeep,

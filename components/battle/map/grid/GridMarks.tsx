@@ -7,14 +7,20 @@ import { markFill, type MarkValue } from './grid-style';
 import {
     cellPolygon,
     gridLinesPath,
+    gridOf,
     type GridWindow,
     isMoveMark,
+    mapSize,
     parseCellKey,
     regionFillPath,
     regionOutlinePath,
-    UNIT,
+    unitOf,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, BattleMapView } from '@/types/battle-grid';
+import type {
+    BattleMapConfig,
+    BattleMapView,
+    GridKind,
+} from '@/types/battle-grid';
 
 interface GridMarksProps {
     map: BattleMapConfig;
@@ -50,8 +56,10 @@ function splitMarks(
     return { move, sparse };
 }
 
-const rangeOutline = (w: GridWindow) =>
-    `M${w.x * UNIT} ${w.y * UNIT}h${w.cols * UNIT}v${w.rows * UNIT}h${-w.cols * UNIT}z`;
+const rangeOutline = (w: GridWindow, grid: GridKind) =>
+    w.cells
+        ? regionOutlinePath(w.cells, grid)
+        : `M${unitOf(w.x)} ${unitOf(w.y)}h${unitOf(w.cols)}v${unitOf(w.rows)}h${-unitOf(w.cols)}z`;
 
 export const GridMarks = memo(function GridMarks({
     map,
@@ -62,14 +70,21 @@ export const GridMarks = memo(function GridMarks({
 }: GridMarksProps) {
     const { cols, rows, terrain } = map;
 
+    const grid = gridOf(map);
+
+    const span = mapSize(map, grid);
+
     const split = useMemo(() => splitMarks(marks, blocked), [marks, blocked]);
 
     const moveOutline = useMemo(
-        () => (split.move.length ? regionOutlinePath(split.move) : ''),
-        [split]
+        () => (split.move.length ? regionOutlinePath(split.move, grid) : ''),
+        [split, grid]
     );
 
-    const lines = useMemo(() => gridLinesPath(cols, rows), [cols, rows]);
+    const lines = useMemo(
+        () => gridLinesPath(cols, rows, grid),
+        [cols, rows, grid]
+    );
 
     const staticMask = useMemo(() => {
         const keys = [...blocked];
@@ -79,12 +94,15 @@ export const GridMarks = memo(function GridMarks({
                 if (cell.kind === 'wall' || cell.kind === 'barrier')
                     keys.push(key);
 
-        return keys.length ? regionFillPath(keys) : '';
-    }, [blocked, terrain]);
+        return keys.length ? regionFillPath(keys, grid) : '';
+    }, [blocked, terrain, grid]);
 
     const gridless = staticMask;
 
-    const rangeD = useMemo(() => (range ? rangeOutline(range) : ''), [range]);
+    const rangeD = useMemo(
+        () => (range ? rangeOutline(range, grid) : ''),
+        [range, grid]
+    );
 
     return (
         <>
@@ -94,14 +112,10 @@ export const GridMarks = memo(function GridMarks({
                     maskUnits="userSpaceOnUse"
                     x={0}
                     y={0}
-                    width={cols * UNIT}
-                    height={rows * UNIT}
+                    width={span.width}
+                    height={span.height}
                 >
-                    <rect
-                        width={cols * UNIT}
-                        height={rows * UNIT}
-                        fill="#fff"
-                    />
+                    <rect width={span.width} height={span.height} fill="#fff" />
                     <path d={gridless} fill="#000" />
                 </mask>
             )}
@@ -111,7 +125,7 @@ export const GridMarks = memo(function GridMarks({
                         key={key}
                         data-mark-cell={key}
                         data-mark={mark}
-                        points={cellPolygon(parseCellKey(key))}
+                        points={cellPolygon(parseCellKey(key), grid)}
                         fill={markFill(mark)}
                     />
                 ))}

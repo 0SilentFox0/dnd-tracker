@@ -63,6 +63,7 @@ const hud = (
         <MapTokenHud
             participant={unit(over.hp ?? 30, over.size)}
             placement={{
+                grid: 'square',
                 box: { cx: 50, cy: 50, size: 100 * (over.size ?? 1) },
                 mapSize: { width: 1000, height: 1000 },
                 pxPerUnit: over.px ?? 0.8,
