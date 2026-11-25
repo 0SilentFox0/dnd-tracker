@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import { NewPill } from '@/components/common/entity/NewPill';
-import { HudPanel, HudPill, HudTile } from '@/components/hud/page';
+import { HudPill, HudTile } from '@/components/hud/page';
 import {
     type DashboardContext,
     type DashboardSection,
@@ -85,10 +85,10 @@ export function DashboardGroups({
                     libraryCounts?.[s.key] !== undefined ? (
                         <HudPill tone="muted">{libraryCounts[s.key]}</HudPill>
                     ) : isPlayer &&
-                    hasUnread(
-                        notifications,
-                        NOTIFICATION_TILE_TYPES[s.key] ?? []
-                    ) ? (
+                      hasUnread(
+                          notifications,
+                          NOTIFICATION_TILE_TYPES[s.key] ?? []
+                      ) ? (
                         <NewPill />
                     ) : undefined
                 }
@@ -110,32 +110,30 @@ export function DashboardGroups({
     return (
         <div className="space-y-4">
             {mainItems.length > 0 && (
-                <HudPanel
-                    as="div"
-                    className="space-y-3"
+                <div
+                    className="border-hud-rule space-y-3 border-b pb-4"
                     data-tour="dashboard.sections"
                 >
                     {isPlayer && (
-                        <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
+                        <h2 className="hud-sc text-hud-ink text-[13px] tracking-[.06em]">
                             {t('groups.player')}
                         </h2>
                     )}
                     <div className={GRID}>{mainItems.map(tile)}</div>
-                </HudPanel>
+                </div>
             )}
             {libraryItems.length > 0 && (
-                <HudPanel
-                    as="div"
-                    className="space-y-3"
+                <div
+                    className="border-hud-rule space-y-3 border-b pb-4"
                     data-tour="dashboard.group-libraries"
                 >
-                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
+                    <h2 className="hud-sc text-hud-ink text-[13px] tracking-[.06em]">
                         {t('groups.libraries')}
                     </h2>
                     <div className={libraryGrid(libraryItems.length)}>
                         {libraryItems.map(tile)}
                     </div>
-                </HudPanel>
+                </div>
             )}
         </div>
     );

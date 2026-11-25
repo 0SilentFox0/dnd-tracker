@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { HeroHp } from '@/components/campaigns/dashboard/HeroHp';
 import { OptimizedImage } from '@/components/common/entity/OptimizedImage';
-import { HudPanel, HudPill } from '@/components/hud/page';
+import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { CharacterStatus } from '@/lib/constants/characters';
 import { useRuleSystem } from '@/lib/hooks/systems';
@@ -29,17 +29,17 @@ export function PlayerHeroCard({
 
     if (!hero) {
         return (
-            <HudPanel
-                className="border-hud-line shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+            <section
+                className="border-hud-rule border-b pb-4"
                 data-tour="dashboard.hero"
             >
-                <div className="rounded-lg border border-dashed border-hud-rule bg-hud-page/35 p-4 sm:p-5">
+                <div className="border-hud-rule bg-hud-page/35 rounded-lg border border-dashed p-4 sm:p-5">
                     <p className="text-hud-ink">{t('none')}</p>
                     <Button asChild className="mt-3 min-h-11 w-full sm:w-auto">
                         <Link href={`${base}/character`}>{t('create')}</Link>
                     </Button>
                 </div>
-            </HudPanel>
+            </section>
         );
     }
 
@@ -47,7 +47,7 @@ export function PlayerHeroCard({
 
     const initial = (
         <span
-            className="flex size-[88px] shrink-0 items-center justify-center rounded-full bg-hud-rule text-2xl text-hud-ink"
+            className="bg-hud-rule text-hud-ink flex size-[88px] shrink-0 items-center justify-center rounded-full text-2xl"
             aria-hidden
         >
             {hero.name.trim().charAt(0).toUpperCase()}
@@ -55,8 +55,8 @@ export function PlayerHeroCard({
     );
 
     return (
-        <HudPanel
-            className="border-hud-line shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+        <section
+            className="border-hud-rule border-b pb-4"
             data-tour="dashboard.hero"
         >
             <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
@@ -66,25 +66,25 @@ export function PlayerHeroCard({
                         alt={hero.name}
                         width={88}
                         height={88}
-                        className="size-[88px] shrink-0 rounded-full border-2 border-hud-line object-cover shadow-[0_0_0_4px_var(--color-hud-page)]"
+                        className="border-hud-line size-[88px] shrink-0 rounded-full border-2 object-cover shadow-[0_0_0_4px_var(--color-hud-page)]"
                         fallback={initial}
                     />
                 ) : (
-                    <span className="rounded-full border-2 border-hud-line shadow-[0_0_0_4px_var(--color-hud-page)]">
+                    <span className="border-hud-line rounded-full border-2 shadow-[0_0_0_4px_var(--color-hud-page)]">
                         {initial}
                     </span>
                 )}
                 <div className="min-w-0 flex-1">
-                    <h2 className="hud-sc break-words text-xl text-hud-ink sm:text-2xl">
+                    <h2 className="hud-sc text-hud-ink break-words text-xl sm:text-2xl">
                         {hero.name}
                     </h2>
-                    <p className="truncate text-sm text-hud-muted">
+                    <p className="text-hud-muted truncate text-sm">
                         {hero.race}
                         {system &&
                             statColumnsOf(system).has('classes') &&
                             ` · ${hero.class}`}
                     </p>
-                    <p className="text-xs text-hud-muted">
+                    <p className="text-hud-muted text-xs">
                         {t('stats', {
                             level: hero.level,
                             armorClass: hero.armorClass,
@@ -105,12 +105,12 @@ export function PlayerHeroCard({
                 )}
             </div>
             {pending && hero.reviewNote && (
-                <p className="mt-3 rounded-lg border border-hud-rule bg-hud-page/35 p-3 text-sm break-words text-hud-muted">
+                <p className="border-hud-rule bg-hud-page/35 text-hud-muted mt-3 break-words rounded-lg border p-3 text-sm">
                     {hero.reviewNote}
                 </p>
             )}
             {activeBattle && (
-                <div className="mt-4 flex flex-col gap-3 rounded-lg border border-hud-line bg-hud-page/35 p-3 sm:flex-row sm:items-center">
+                <div className="border-hud-line bg-hud-page/35 mt-4 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
                         <HeroHp hp={activeBattle.hp} />
                     </div>
@@ -128,6 +128,6 @@ export function PlayerHeroCard({
             >
                 <Link href={`${base}/character`}>{t('open')}</Link>
             </Button>
-        </HudPanel>
+        </section>
     );
 }
