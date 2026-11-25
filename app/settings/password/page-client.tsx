@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
 import { LoadingState } from '@/components/common/states';
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudFormPage, HudSection } from '@/components/hud/form';
 import { useUpdatePassword } from '@/lib/hooks/auth';
 
 export function PasswordSettingsClient() {
@@ -14,12 +14,11 @@ export function PasswordSettingsClient() {
         useUpdatePassword();
 
     return (
-        <HudPage width="md">
-            <HudPageHeader
-                title={hasPassword ? t('changeTitle') : t('setTitle')}
-                subtitle={hasPassword ? t('changeSubtitle') : t('setSubtitle')}
-            />
-            <HudPanel className="mx-auto w-full max-w-sm space-y-4">
+        <HudFormPage
+            title={hasPassword ? t('changeTitle') : t('setTitle')}
+            aside={hasPassword ? t('changeSubtitle') : t('setSubtitle')}
+        >
+            <HudSection className="mx-auto w-full max-w-sm space-y-4">
                 {session === 'checking' ? (
                     <LoadingState />
                 ) : (
@@ -47,7 +46,7 @@ export function PasswordSettingsClient() {
                         />
                     </>
                 )}
-            </HudPanel>
-        </HudPage>
+            </HudSection>
+        </HudFormPage>
     );
 }

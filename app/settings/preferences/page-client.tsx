@@ -4,9 +4,10 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudFormPage, HudSection } from '@/components/hud/form';
 import { PaletteSwitcher } from '@/components/layout/PaletteSwitcher';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     SelectField,
     type SelectOptionGroup,
@@ -58,30 +59,22 @@ export function PreferencesClient() {
     );
 
     return (
-        <HudPage width="md">
-            <HudPageHeader title={t('title')} subtitle={t('subtitle')} />
-            <HudPanel className="mx-auto w-full max-w-sm space-y-6">
-                <div className="space-y-2">
-                    <p className="text-sm text-hud-muted">{t('language')}</p>
-                    <LocaleSwitcher />
-                </div>
-                <div className="space-y-2">
-                    <p className="text-sm text-hud-muted">{t('theme')}</p>
-                    <PaletteSwitcher />
-                </div>
-                <div className="space-y-2">
-                    <label
-                        htmlFor="time-zone"
-                        className="text-sm text-hud-muted"
-                    >
-                        {t('timeZone')}
-                    </label>
-                    <Input
-                        aria-label={t('search')}
-                        placeholder={t('search')}
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    />
+        <HudFormPage title={t('title')} aside={t('subtitle')}>
+            <HudSection title={t('language')}>
+                <LocaleSwitcher />
+            </HudSection>
+            <HudSection title={t('theme')}>
+                <PaletteSwitcher />
+            </HudSection>
+            <HudSection title={t('timeZone')}>
+                <Label htmlFor="time-zone-search">{t('search')}</Label>
+                <Input
+                    id="time-zone-search"
+                    placeholder={t('search')}
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                />
+                <div className="mt-3">
                     <SelectField
                         id="time-zone"
                         value={timeZone ?? AUTO}
@@ -101,9 +94,9 @@ export function PreferencesClient() {
                             ...groups,
                         ]}
                     />
-                    <p className="text-xs text-hud-muted">{t('hint')}</p>
                 </div>
-            </HudPanel>
-        </HudPage>
+                <p className="mt-2 text-xs text-hud-muted">{t('hint')}</p>
+            </HudSection>
+        </HudFormPage>
     );
 }

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { HudFormPage, HudSection } from '@/components/hud/form';
 import { HelpArticleView } from '@/components/onboarding/HelpArticleView';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
@@ -30,22 +30,23 @@ export default async function HelpArticlePage({
     ]);
 
     return (
-        <HudPage>
-            <HudPageHeader
-                title={t(`${article.slug}.title`)}
-                subtitle={t(`${article.slug}.summary`)}
-                actions={
-                    <Link
-                        href="/help"
-                        className="self-center text-sm text-hud-crimson-fg hover:underline"
-                    >
-                        {ui('ui.allHelp')}
-                    </Link>
-                }
-            />
-            <HudPanel>
+        <HudFormPage
+            title={t(`${article.slug}.title`)}
+            aside={
+                <Link
+                    href="/help"
+                    className="text-hud-crimson-fg hover:underline"
+                >
+                    {ui('ui.allHelp')}
+                </Link>
+            }
+        >
+            <HudSection>
+                <p className="mb-3 text-sm text-hud-muted">
+                    {t(`${article.slug}.summary`)}
+                </p>
                 <HelpArticleView article={article} t={t} />
-            </HudPanel>
-        </HudPage>
+            </HudSection>
+        </HudFormPage>
     );
 }
