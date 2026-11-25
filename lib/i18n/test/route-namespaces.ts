@@ -443,7 +443,7 @@ export interface RouteGraph {
 const countsUse = (u: Use, file: string) =>
     !((u.how === 'literal' || u.how === 'template') && (FALSE_POSITIVE_FILES.has(file) || SERVER_TRANSLATED.has(u.ns)));
 
-function collectUses(files: Iterable<string>): NsUse[] {
+export function collectUses(files: Iterable<string>): NsUse[] {
     const out: NsUse[] = [];
 
     const seen = new Set<string>();
@@ -475,7 +475,7 @@ export function routeGraph(page: string): RouteGraph {
 
     const clientFiles = [...graph].filter(([, modes]) => modes.has('client')).map(([f]) => f);
 
-    const declaredRoutes = chain.flatMap((f) => [...read(f).matchAll(ROUTE_ATTR)].map((m) => m[1]));
+    const declaredRoutes = [...chain, page].flatMap((f) => [...read(f).matchAll(ROUTE_ATTR)].map((m) => m[1]));
 
     return {
         page,

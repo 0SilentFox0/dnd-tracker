@@ -1,7 +1,17 @@
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
+import { RouteScope } from '@/lib/i18n/route-scope';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+    children,
+    params,
+}: {
+    children: React.ReactNode;
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
+
     return (
-        <ExtendLocaleScope namespaces={['ai']}>{children}</ExtendLocaleScope>
+        <RouteScope route="[id]/dm/assistant" campaignId={id}>
+            {children}
+        </RouteScope>
     );
 }

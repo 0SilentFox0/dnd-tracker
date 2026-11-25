@@ -1,10 +1,17 @@
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
-import { BATTLE_NAMESPACES } from '@/lib/i18n/scopes';
+import { RouteScope } from '@/lib/i18n/route-scope';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+    children,
+    params,
+}: {
+    children: React.ReactNode;
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
+
     return (
-        <ExtendLocaleScope namespaces={[...BATTLE_NAMESPACES, 'tileLabels']}>
+        <RouteScope route="[id]/dm/maps/[mapId]" campaignId={id}>
             {children}
-        </ExtendLocaleScope>
+        </RouteScope>
     );
 }

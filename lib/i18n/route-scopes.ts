@@ -25,7 +25,7 @@ export const CAMPAIGN_BASE = [
 
 export const PACKS = {
     campaigns: ['campaigns'],
-    dashboard: ['dashboard'],
+    dashboard: ['dashboard', 'campaigns'],
     rules: ['rules'],
     characterSheet: [
         'characters',
@@ -38,8 +38,16 @@ export const PACKS = {
         'skills',
         'artifacts',
         'choices',
+        'spells',
+        'spellEditor',
+        'scenario',
     ],
-    abilityDisplay: ['abilityRegistry', 'abilityText', 'battleTerms'],
+    abilityDisplay: [
+        'abilityRegistry',
+        'abilityText',
+        'battleTerms',
+        'battleCommon',
+    ],
     abilityEditor: ['abilityEditor', 'spellEditor', 'editors'],
     contentLibrary: [
         'spells',
@@ -63,15 +71,20 @@ export const PACKS = {
         'music',
         'maps',
         'tileLabels',
+        'quests',
+        'rest',
+        'contentCopy',
     ],
-    battle: BATTLE_NAMESPACES,
-    ai: ['ai'],
+    battle: [...BATTLE_NAMESPACES, 'maps', 'tileLabels', 'music'],
+    ai: ['ai', 'scenario'],
     units: ['units'],
 } as const satisfies Record<PackKey, readonly Namespace[]>;
 
 const EDITOR = ['abilityDisplay', 'abilityEditor', 'characterSheet'] as const;
 
-const CONTENT_LIST = ['contentLibrary'] as const;
+const CONTENT_LIST = ['contentLibrary', 'abilityDisplay'] as const;
+
+const CONTENT_EDIT = [...CONTENT_LIST, 'abilityEditor', 'characterSheet'] as const;
 
 const CONSERVATIVE = [
     'characterSheet',
@@ -80,14 +93,22 @@ const CONSERVATIVE = [
     'contentLibrary',
 ] as const;
 
-const STORY = ['story', 'dashboard'] as const;
+const STORY = ['story'] as const;
+
+const STORY_DASHBOARD = ['story', 'dashboard'] as const;
+
+const SYSTEM_SECTION = [
+    'characterSheet',
+    'abilityDisplay',
+    'abilityEditor',
+] as const;
 
 export const ROUTE_SCOPES = {
     list: ['campaigns'],
     new: ['campaigns'],
     '[id]': ['dashboard', 'rules'],
     '[id]/info': ['dashboard', 'rules', 'characterSheet', 'abilityDisplay'],
-    '[id]/character': ['characterSheet', 'abilityDisplay', 'rules', 'story'],
+    '[id]/character': ['characterSheet', 'abilityDisplay', 'rules'],
     '[id]/character/draft': ['characterSheet', 'contentLibrary'],
     '[id]/character/new': ['characterSheet', 'contentLibrary'],
     '[id]/character/edit': ['characterSheet', 'contentLibrary'],
@@ -96,41 +117,33 @@ export const ROUTE_SCOPES = {
         'abilityDisplay',
         'characterSheet',
         'rules',
-        'story',
     ],
     '[id]/journal': ['story'],
     '[id]/world': ['story'],
     '[id]/show': ['story'],
     '[id]/acquaintances': ['story'],
-    '[id]/dm': ['contentLibrary'],
     '[id]/dm/spells': CONTENT_LIST,
     '[id]/dm/spells/[spellId]': EDITOR,
     '[id]/dm/spells/new': EDITOR,
     '[id]/dm/spell-groups': CONTENT_LIST,
-    '[id]/dm/races': CONTENT_LIST,
+    '[id]/dm/races': CONTENT_EDIT,
     '[id]/dm/races/[raceId]': EDITOR,
-    '[id]/dm/classes': CONSERVATIVE,
-    '[id]/dm/classes/[classId]': EDITOR,
+    '[id]/dm/classes': SYSTEM_SECTION,
+    '[id]/dm/classes/[classId]': CONTENT_EDIT,
     '[id]/dm/feats': CONTENT_LIST,
     '[id]/dm/feats/[featId]': EDITOR,
-    '[id]/dm/backgrounds': CONSERVATIVE,
-    '[id]/dm/backgrounds/[backgroundId]': EDITOR,
+    '[id]/dm/backgrounds': SYSTEM_SECTION,
+    '[id]/dm/backgrounds/[backgroundId]': CONTENT_EDIT,
     '[id]/dm/artifacts': CONTENT_LIST,
     '[id]/dm/artifacts/[artifactId]': EDITOR,
     '[id]/dm/artifacts/new': EDITOR,
-    '[id]/dm/skills': CONSERVATIVE,
+    '[id]/dm/skills': ['characterSheet', 'abilityDisplay'],
     '[id]/dm/skills/[skillId]': EDITOR,
     '[id]/dm/skills/new': EDITOR,
-    '[id]/dm/main-skills': CONSERVATIVE,
+    '[id]/dm/main-skills': ['characterSheet', 'abilityDisplay'],
     '[id]/dm/main-skills/[mainSkillId]': EDITOR,
     '[id]/dm/compendium': CONTENT_LIST,
-    '[id]/dm/npc-heroes': CONSERVATIVE,
     '[id]/dm/characters': [
-        'characterSheet',
-        'abilityDisplay',
-        'contentLibrary',
-    ],
-    '[id]/dm/characters/new': [
         'characterSheet',
         'abilityDisplay',
         'contentLibrary',
@@ -140,19 +153,15 @@ export const ROUTE_SCOPES = {
         'abilityDisplay',
         'contentLibrary',
     ],
-    '[id]/dm/units': ['units', 'contentLibrary'],
+    '[id]/dm/units': ['units', ...CONTENT_LIST],
     '[id]/dm/units/new': ['units', ...EDITOR],
     '[id]/dm/units/[unitId]': ['units', ...EDITOR],
     '[id]/dm/battles': ['battle', 'abilityDisplay'],
-    '[id]/dm/battles/new': ['battle', 'abilityDisplay'],
-    '[id]/dm/battles/[battleId]': ['battle', 'abilityDisplay'],
     '[id]/dm/maps': ['story'],
-    '[id]/dm/maps/[mapId]': ['story', 'battle'],
-    '[id]/dm/scenario': STORY,
-    '[id]/dm/scenario/[pageId]': STORY,
-    '[id]/dm/graph': STORY,
+    '[id]/dm/maps/[mapId]': ['story', 'battle', 'abilityDisplay'],
+    '[id]/dm/scenario': [...STORY_DASHBOARD, 'ai'],
+    '[id]/dm/graph': STORY_DASHBOARD,
     '[id]/dm/show': STORY,
-    '[id]/dm/show/[deckId]': STORY,
     '[id]/dm/world': STORY,
     '[id]/dm/music': STORY,
     '[id]/dm/ai': ['ai'],

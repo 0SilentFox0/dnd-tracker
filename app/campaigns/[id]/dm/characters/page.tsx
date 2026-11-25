@@ -1,10 +1,7 @@
 import { DMCharactersClient } from './page-client';
 
 import { CharacterType } from '@/lib/constants/characters';
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
-import { systemScope } from '@/lib/i18n/system-scope';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
-import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 
 export default async function DMCharactersPage({
     params,
@@ -19,7 +16,7 @@ export default async function DMCharactersPage({
 
     const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-    const client = (
+    return (
         <DMCharactersClient
             campaignId={id}
             maxLevel={campaign.maxLevel}
@@ -30,13 +27,5 @@ export default async function DMCharactersPage({
             }
             canEdit={!isDemo}
         />
-    );
-
-    const namespaces = systemScope(await systemOfCampaign(id), 'dmCharacters');
-
-    return namespaces.length ? (
-        <ExtendLocaleScope namespaces={namespaces}>{client}</ExtendLocaleScope>
-    ) : (
-        client
     );
 }

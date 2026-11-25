@@ -1,7 +1,4 @@
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
-import { BATTLE_NAMESPACES } from '@/lib/i18n/scopes';
-import { logScope, systemPackScope } from '@/lib/i18n/system-scope';
-import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
+import { RouteScope } from '@/lib/i18n/route-scope';
 
 export default async function Layout({
     children,
@@ -12,17 +9,9 @@ export default async function Layout({
 }) {
     const { id } = await params;
 
-    const system = await systemOfCampaign(id);
-
-    const namespaces = [
-        ...BATTLE_NAMESPACES,
-        ...systemPackScope(system, 'battle'),
-        ...logScope(system),
-    ];
-
     return (
-        <ExtendLocaleScope namespaces={namespaces}>
+        <RouteScope route="[id]/dm/battles" campaignId={id}>
             {children}
-        </ExtendLocaleScope>
+        </RouteScope>
     );
 }
