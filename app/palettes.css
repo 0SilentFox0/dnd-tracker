@@ -1,118 +1,98 @@
-/* Account palettes share one token surface. Battle participants and school hues remain semantic. */
+/* Two account palettes (DS section 13) share one token surface. Battle participants and school hues remain semantic. */
 html[data-palette] {
   --palette-art-ink: #efe5d2;
   --palette-art-shadow: #110e0b;
-  --palette-panel: color-mix(in srgb, var(--palette-card) 82%, transparent);
+  --hud-bone: var(--hud-text);
+  --hud-field: var(--palette-inset);
+  --palette-card: var(--palette-panel);
+  --palette-secondary: var(--palette-panel-2);
+  --palette-background: var(--palette-page);
+  --palette-foreground: var(--hud-text);
+  --palette-primary-foreground: var(--hud-crimson-ink);
+  --palette-header: color-mix(in srgb, var(--palette-page) 97%, transparent);
   --background: var(--palette-background);
   --foreground: var(--palette-foreground);
   --card: var(--palette-card);
   --card-foreground: var(--palette-foreground);
   --popover: var(--palette-card);
   --popover-foreground: var(--palette-foreground);
-  --primary: var(--hud-gold);
-  --primary-foreground: var(--palette-primary-foreground);
+  --primary: var(--hud-crimson);
+  --primary-foreground: var(--hud-crimson-ink);
   --secondary: var(--palette-secondary);
   --secondary-foreground: var(--palette-foreground);
   --muted: var(--palette-secondary);
   --muted-foreground: var(--hud-muted);
-  --accent: var(--palette-secondary);
+  --accent: var(--palette-panel-2);
   --accent-foreground: var(--palette-foreground);
+  --destructive: var(--hud-crimson-fg);
   --border: var(--hud-line);
   --input: var(--hud-line);
-  --ring: var(--hud-gold);
+  --ring: var(--hud-ink);
   --sidebar: var(--palette-card);
   --sidebar-foreground: var(--palette-foreground);
-  --sidebar-primary: var(--hud-gold);
-  --sidebar-primary-foreground: var(--palette-primary-foreground);
+  --sidebar-primary: var(--hud-crimson);
+  --sidebar-primary-foreground: var(--hud-crimson-ink);
   --sidebar-accent: var(--palette-secondary);
   --sidebar-accent-foreground: var(--palette-foreground);
   --sidebar-border: var(--hud-line);
-  --sidebar-ring: var(--hud-gold);
-  --palette-overlay: rgba(0, 0, 0, .76);
+  --sidebar-ring: var(--hud-ink);
   --reach-stroke: #2fd3c4;
   --range-stroke: #4ade80;
   --path-label-ink: #f3f6fb;
   --path-label-halo: #0c1118;
-  color-scheme: dark;
 }
 
 html[data-palette="tavern"] {
-  --palette-background: #110e0b; --palette-foreground: #e6dccb; --palette-card: #1a140f; --palette-secondary: #2a2218; --palette-primary-foreground: #2a1d05;
-  --palette-page: #0b0908; --palette-header: rgba(11, 9, 8, .97); --palette-overlay: rgba(0, 0, 0, .75);
-  --hud-muted: #9b9080; --hud-gold: #c9b37a; --hud-ink: #efe5d2; --hud-bone: #e6dccb; --hud-line: #756b5f; --hud-field: #1a140f; --hud-rule: #746b63; --hud-info: #9fc1df; --hud-danger: #d0705c; --hud-bad: #ff8a7a; --hud-good: #a8d48f; --hud-good-dim: #7fa86a; --hud-gold-bright: #ffe08a; --hud-gold-strong: #e6c25a;
+  --palette-page: #111013; --palette-panel: #18161a; --palette-panel-2: #1e1b20; --palette-inset: #0a090b;
+  --hud-ink: #ece4d6; --hud-text: #c8beaf; --hud-muted: #8b8277; --hud-faint: #5b554e;
+  --hud-rule: rgba(236, 228, 214, .08); --hud-line: rgba(236, 228, 214, .17); --hud-hi: rgba(255, 255, 255, .05);
+  --hud-crimson: #b3312c; --hud-crimson-2: #7c1e1d; --hud-crimson-fg: #e0604f; --hud-crimson-ink: #fbefe9;
+  --hud-hp: #c8382f; --hud-hp-2: #8a211c;
+  --hud-sh: 0 1px 2px rgba(0, 0, 0, .5), 0 16px 36px -18px rgba(0, 0, 0, .9);
+  --hud-sh-btn: 0 1px 0 rgba(0, 0, 0, .55), 0 4px 10px -4px rgba(0, 0, 0, .7);
+  --grain-op: .32; --grain-mode: overlay;
+  --hud-info: #9fc1df; --hud-danger: #d0705c; --hud-bad: #ff8a7a; --hud-good: #a8d48f; --hud-good-dim: #7fa86a;
+  --hud-gold: #c9b37a; --hud-gold-bright: #ffe08a; --hud-gold-strong: #e6c25a;
   --book-cover: #3a2016; --book-cover-ink: #e9dec5; --book-cover-muted: #c9b99f; --book-page: #e9dec5; --book-ink: #2a2018; --book-muted: #6b5942; --book-quiet: #6b5a45; --book-rule: #2a2018; --book-accent: #7a2a1f; --book-accent-ink: #7a2a1f; --book-choice: #9c2a1d; --book-wash: #9c2a1d;
-}
-
-html[data-palette="midnight"] {
-  --palette-background: #0c1424; --palette-foreground: #e1eafa; --palette-card: #131f34; --palette-secondary: #1c2b43; --palette-primary-foreground: #0d1a2d;
-  --palette-page: #0a1020; --palette-header: rgba(10, 16, 32, .97);
-  --hud-muted: #899dbb; --hud-gold: #8dbcf4; --hud-ink: #edf4ff; --hud-bone: #d8e6fa; --hud-line: #65748c; --hud-field: #131f34; --hud-rule: #677588; --hud-info: #9fcafa; --hud-danger: #ed8a83; --hud-bad: #ff9992; --hud-good: #91d5b3; --hud-good-dim: #6fb391; --hud-gold-bright: #c3ddff; --hud-gold-strong: #72a9e7;
-  --book-cover: #1b2f52; --book-cover-ink: #e1eafa; --book-cover-muted: #b3c2d6; --book-page: #e3eaf5; --book-ink: #17243b; --book-muted: #52668a; --book-quiet: #43587c; --book-rule: #17243b; --book-accent: #2d5d9f; --book-accent-ink: #234f8a; --book-choice: #2d5d9f; --book-wash: #2d5d9f;
-}
-
-html[data-palette="forest"] {
-  --palette-background: #0d1913; --palette-foreground: #e1eddf; --palette-card: #15251b; --palette-secondary: #203329; --palette-primary-foreground: #102116;
-  --palette-page: #09130d; --palette-header: rgba(9, 19, 13, .97);
-  --hud-muted: #91a58f; --hud-gold: #9ec89c; --hud-ink: #eef4eb; --hud-bone: #e1eddf; --hud-line: #667d6c; --hud-field: #15251b; --hud-rule: #697c6f; --hud-info: #a2c5d9; --hud-danger: #e08773; --hud-bad: #ff9a83; --hud-good: #a9d48f; --hud-good-dim: #79ad6e; --hud-gold-bright: #d6edb0; --hud-gold-strong: #8cba78;
-  --book-cover: #1f3d2a; --book-cover-ink: #e1eddf; --book-cover-muted: #b6cab1; --book-page: #e4ecdd; --book-ink: #172a1d; --book-muted: #566d5a; --book-quiet: #475e4c; --book-rule: #172a1d; --book-accent: #3b6f45; --book-accent-ink: #2e5d38; --book-choice: #3b6f45; --book-wash: #3b6f45;
+  color-scheme: dark;
 }
 
 html[data-palette="parchment"] {
-  --palette-background: #f1e9d9; --palette-foreground: #30271c; --palette-card: #faf5e9; --palette-secondary: #e7dcc8; --palette-primary-foreground: #fffaf0;
-  --palette-page: #eee5d4; --palette-header: rgba(248, 242, 230, .97); --palette-overlay: rgba(239, 230, 212, .3);
-  --hud-muted: #6d604e; --hud-gold: #795522; --hud-ink: #352c20; --hud-bone: #30271c; --hud-line: #877c67; --hud-field: #faf5e9; --hud-rule: #877c67; --hud-info: #355c83; --hud-danger: #a04030; --hud-bad: #a23227; --hud-good: #3f6938; --hud-good-dim: #476a40; --hud-gold-bright: #7e5c12; --hud-gold-strong: #795522;
-  --book-cover: #67401f; --book-cover-ink: #fff3d1; --book-cover-muted: #e8cda6; --book-page: #faf3e4; --book-ink: #30271c; --book-muted: #79674d; --book-quiet: #6e5c44; --book-rule: #806b50; --book-accent: #855334; --book-accent-ink: #784629; --book-choice: #9a5136; --book-wash: #855334;
-  --palette-overlay: rgba(243, 235, 219, .2); color-scheme: light;
-}
-
-html[data-palette="amethyst"] {
-  --palette-background: #191124; --palette-foreground: #ede2f7; --palette-card: #251a34; --palette-secondary: #342544; --palette-primary-foreground: #241432;
-  --palette-page: #120d1c; --palette-header: rgba(18, 13, 28, .97);
-  --hud-muted: #a495b6; --hud-gold: #c5a2e8; --hud-ink: #f3eaf9; --hud-bone: #ede2f7; --hud-line: #7b6f8a; --hud-field: #251a34; --hud-rule: #7a7086; --hud-info: #c3b5eb; --hud-danger: #e98a9d; --hud-bad: #ff9fb2; --hud-good: #a9d4b8; --hud-good-dim: #7db391; --hud-gold-bright: #e5c8ff; --hud-gold-strong: #ba8ee1;
-  --book-cover: #38214d; --book-cover-ink: #ede2f7; --book-cover-muted: #cdb9df; --book-page: #ece3f3; --book-ink: #26172f; --book-muted: #6f5d82; --book-quiet: #5f4e74; --book-rule: #26172f; --book-accent: #7a45a8; --book-accent-ink: #653793; --book-choice: #7a45a8; --book-wash: #7a45a8;
-}
-
-html[data-palette="frost"] {
-  --palette-background: #edf4fa; --palette-foreground: #203448; --palette-card: #f8fbfd; --palette-secondary: #dce8f1; --palette-primary-foreground: #f6fbff;
-  --palette-page: #e4edf5; --palette-header: rgba(245, 249, 253, .97); --palette-overlay: rgba(232, 240, 247, .27);
-  --hud-muted: #536a80; --hud-gold: #275f90; --hud-ink: #233a4d; --hud-bone: #203448; --hud-line: #788691; --hud-field: #f8fbfd; --hud-rule: #79858f; --hud-info: #275f90; --hud-danger: #a84048; --hud-bad: #b33242; --hud-good: #386d51; --hud-good-dim: #467057; --hud-gold-bright: #174a75; --hud-gold-strong: #326c99;
-  --book-cover: #345b7b; --book-cover-ink: #edf4fa; --book-cover-muted: #c6dbea; --book-page: #f5f9fc; --book-ink: #203448; --book-muted: #567086; --book-quiet: #49677e; --book-rule: #607d93; --book-accent: #34739c; --book-accent-ink: #27658f; --book-choice: #4385ad; --book-wash: #34739c;
+  --palette-page: #e9e1d1; --palette-panel: #f1ebdf; --palette-panel-2: #f8f4ec; --palette-inset: #dbd0bc;
+  --hud-ink: #1e1711; --hud-text: #3a2f25; --hud-muted: #64584b; --hud-faint: #a29482;
+  --hud-rule: rgba(55, 38, 20, .12); --hud-line: rgba(55, 38, 20, .25); --hud-hi: rgba(255, 255, 255, .75);
+  --hud-crimson: #a12b28; --hud-crimson-2: #761d1b; --hud-crimson-fg: #a12b28; --hud-crimson-ink: #fff4ef;
+  --hud-hp: #b0332a; --hud-hp-2: #84231d;
+  --hud-sh: 0 1px 2px rgba(70, 45, 20, .12), 0 14px 32px -20px rgba(70, 45, 20, .45);
+  --hud-sh-btn: 0 1px 0 rgba(70, 45, 20, .2), 0 4px 10px -5px rgba(70, 45, 20, .35);
+  --grain-op: .5; --grain-mode: multiply;
+  --hud-info: #355c83; --hud-danger: #a04030; --hud-bad: #a23227; --hud-good: #3f6938; --hud-good-dim: #476a40;
+  --hud-gold: #795522; --hud-gold-bright: #7e5c12; --hud-gold-strong: #795522;
+  --book-cover: #67401f; --book-cover-ink: #fff3d1; --book-cover-muted: #e8cda6; --book-page: #faf3e4; --book-ink: #30271c; --book-muted: #79674d; --book-quiet: #6e5c44; --book-rule: #806b50; --book-accent: #a12b28; --book-accent-ink: #8f2522; --book-choice: #9a5136; --book-wash: #855334;
   color-scheme: light;
 }
 
-html[data-palette="parchment"], html[data-palette="frost"] { --palette-overlay: rgba(236, 240, 238, .28); }
-html[data-palette="tavern"], html[data-palette="midnight"], html[data-palette="forest"], html[data-palette="amethyst"] { --palette-overlay: rgba(0, 0, 0, .72); }
-html[data-palette="parchment"] body::before, html[data-palette="frost"] body::before { background-image: none; }
-
-html[data-palette="parchment"] *, html[data-palette="frost"] * { scrollbar-color: var(--hud-gold-strong) transparent; }
-html[data-palette="parchment"] :where(*)::-webkit-scrollbar-thumb, html[data-palette="frost"] :where(*)::-webkit-scrollbar-thumb { background: var(--hud-gold-strong); }
 html[data-palette] body { color: var(--palette-foreground); background-color: var(--palette-page); }
-html[data-palette] body::after { background-color: var(--palette-overlay); }
 html[data-palette] header.sticky { color: var(--hud-bone); background-color: var(--palette-header); }
-html[data-palette="parchment"] header.sticky, html[data-palette="frost"] header.sticky { color: var(--palette-foreground); }
+html[data-palette="parchment"] header.sticky { color: var(--palette-foreground); }
 html[data-palette] .battle-hud { background-color: var(--palette-page); }
 html[data-palette] .battle-hud { --bone: var(--hud-bone); --ink: var(--hud-ink); --gold: var(--hud-gold); color: var(--hud-bone); }
-html[data-palette="parchment"] .battle-hud, html[data-palette="frost"] .battle-hud { background: linear-gradient(180deg, var(--palette-page), var(--palette-background)); }
-html[data-palette="parchment"] .battle-hud::before, html[data-palette="frost"] .battle-hud::before { background: none; }
-html[data-palette="parchment"] .battle-hud aside, html[data-palette="frost"] .battle-hud aside { background-color: color-mix(in srgb, var(--palette-card) 45%, transparent); border-color: color-mix(in srgb, var(--hud-line) 45%, transparent); }
-html[data-palette="parchment"] .slot-box, html[data-palette="frost"] .slot-box { background-color: var(--palette-card); border-color: var(--hud-rule); }
-html[data-palette="parchment"] .slot-box > *, html[data-palette="frost"] .slot-box > * { border-color: var(--hud-rule); }
-html[data-palette="parchment"] .slot-label, html[data-palette="frost"] .slot-label { color: var(--hud-ink); }
-html[data-palette="parchment"] .slot-off, html[data-palette="frost"] .slot-off { color: var(--hud-muted); }
-html[data-palette="parchment"] .slot-box i:not(.metal-fill), html[data-palette="frost"] .slot-box i:not(.metal-fill) { box-shadow: inset 0 0 0 1px var(--hud-muted); }
-html[data-palette] .hud-surface {
-  --background: var(--palette-background); --foreground: var(--palette-foreground); --card: var(--palette-card); --card-foreground: var(--palette-foreground); --popover: var(--palette-card); --popover-foreground: var(--palette-foreground);
-  --primary: var(--hud-gold); --primary-foreground: var(--palette-primary-foreground); --secondary: var(--palette-secondary); --secondary-foreground: var(--palette-foreground); --muted: var(--palette-secondary); --muted-foreground: var(--hud-muted);
-  --accent: var(--palette-secondary); --accent-foreground: var(--palette-foreground); --border: var(--hud-line); --input: var(--hud-line); --ring: var(--hud-gold);
-}
+html[data-palette="parchment"] .battle-hud { background: linear-gradient(180deg, var(--palette-page), var(--palette-background)); }
+html[data-palette="parchment"] .battle-hud::before { background: none; }
+html[data-palette="parchment"] .battle-hud aside { background-color: color-mix(in srgb, var(--palette-card) 45%, transparent); border-color: color-mix(in srgb, var(--hud-line) 45%, transparent); }
+html[data-palette="parchment"] .slot-box { background-color: var(--palette-card); border-color: var(--hud-rule); }
+html[data-palette="parchment"] .slot-box > * { border-color: var(--hud-rule); }
+html[data-palette="parchment"] .slot-label { color: var(--hud-ink); }
+html[data-palette="parchment"] .slot-off { color: var(--hud-muted); }
+html[data-palette="parchment"] .slot-box i:not(.metal-fill) { box-shadow: inset 0 0 0 1px var(--hud-muted); }
 html[data-palette] .hud-page, html[data-palette] .hud-surface { color: var(--hud-bone); }
 html[data-palette] .hud-surface [data-slot="accordion-item"] { background: color-mix(in srgb, var(--palette-card) 85%, transparent); border-color: var(--hud-line); }
 html[data-palette] .hud-surface [data-slot="skeleton-row"] { background: var(--palette-secondary); }
-html[data-palette="parchment"] .hud-form-page, html[data-palette="frost"] .hud-form-page, html[data-palette="parchment"] .skill-progression, html[data-palette="frost"] .skill-progression { background: radial-gradient(120% 80% at 50% 0, var(--palette-card), var(--palette-page)); }
+html[data-palette="parchment"] .hud-form-page, html[data-palette="parchment"] .skill-progression { background: radial-gradient(120% 80% at 50% 0, var(--palette-card), var(--palette-page)); }
 html[data-palette] .hud-form [data-slot="input"], html[data-palette] .hud-page [data-slot="input"], html[data-palette] .hud-form [data-slot="textarea"], html[data-palette] .hud-page [data-slot="textarea"], html[data-palette] .hud-form [data-slot="select-trigger"], html[data-palette] .hud-page [data-slot="select-trigger"] { background-color: var(--hud-field); color: var(--hud-ink); }
 html[data-palette] .hud-form [data-slot="input"]:focus-visible, html[data-palette] .hud-page [data-slot="input"]:focus-visible, html[data-palette] .hud-form [data-slot="textarea"]:focus-visible, html[data-palette] .hud-page [data-slot="textarea"]:focus-visible, html[data-palette] .hud-form [data-slot="select-trigger"]:focus-visible, html[data-palette] .hud-page [data-slot="select-trigger"]:focus-visible { border-color: var(--hud-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--hud-gold) 25%, transparent); }
 html[data-palette] .hud-form [data-slot="button"][data-variant="default"], html[data-palette] .hud-page [data-slot="button"][data-variant="default"] { background: var(--hud-gold); color: var(--palette-primary-foreground); }
-html[data-palette] .spellbook-dialog { --background: var(--palette-background); --foreground: var(--palette-foreground); --card: var(--palette-card); --card-foreground: var(--palette-foreground); --popover: var(--palette-card); --popover-foreground: var(--palette-foreground); --primary: var(--hud-gold); --primary-foreground: var(--palette-primary-foreground); --muted-foreground: var(--book-cover-muted); --border: var(--hud-line); --input: var(--hud-line); --ring: var(--hud-gold); --ink: var(--book-cover-ink); --bone: var(--book-cover-ink); --hud-muted: var(--book-cover-muted); background: var(--book-cover) !important; color: var(--book-cover-ink) !important; box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 0 0 2px color-mix(in srgb, var(--book-cover-ink) 70%, transparent) !important; }
+html[data-palette] .spellbook-dialog { --background: var(--palette-background); --foreground: var(--palette-foreground); --card: var(--palette-card); --card-foreground: var(--palette-foreground); --popover: var(--palette-card); --popover-foreground: var(--palette-foreground); --primary: var(--book-accent); --primary-foreground: var(--palette-primary-foreground); --muted-foreground: var(--book-cover-muted); --border: var(--hud-line); --input: var(--hud-line); --ring: var(--book-accent); --ink: var(--book-cover-ink); --bone: var(--book-cover-ink); --hud-muted: var(--book-cover-muted); background: var(--book-cover) !important; color: var(--book-cover-ink) !important; box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 0 0 2px color-mix(in srgb, var(--book-cover-ink) 70%, transparent) !important; }
 html[data-palette] .spellbook-dialog input:not([type="checkbox"]):not([type="radio"]) { border-color: var(--hud-line); background-color: color-mix(in srgb, var(--book-ink) 8%, var(--book-page)); color: var(--book-ink); }
 html[data-palette] .spellbook-dialog [class*="border-white/"] { border-color: color-mix(in srgb, var(--book-ink) 35%, transparent); }
 html[data-palette] .spellbook-dialog .spell-book-action { border-color: var(--book-accent); background: var(--book-accent); color: var(--book-page); }
@@ -139,26 +119,22 @@ html[data-palette] .battle-hud::before { background: linear-gradient(180deg, col
 /* Scenario follows the account palette unless the reader forced a theme. */
 html[data-palette] body .scenario-book:not([data-theme]) {
   --page: var(--palette-page); --ink: var(--hud-ink); --ink-soft: color-mix(in srgb, var(--hud-muted) 70%, var(--hud-ink)); --margin: var(--palette-secondary); --rule: color-mix(in srgb, var(--hud-line) 75%, transparent);
-  --blood: var(--hud-danger); --verdigris: var(--hud-good); --rust: color-mix(in srgb, var(--hud-danger) 65%, var(--hud-gold)); --gold: var(--hud-gold); --night: var(--hud-info); --shade: color-mix(in srgb, var(--hud-info) 55%, var(--hud-danger));
+  --blood: var(--hud-danger); --verdigris: var(--hud-good); --night: var(--hud-info); --shade: color-mix(in srgb, var(--hud-info) 55%, var(--hud-danger));
   --tint-blood: color-mix(in srgb, var(--blood) 10%, transparent); --tint-verd: color-mix(in srgb, var(--verdigris) 10%, transparent); --tint-gold: color-mix(in srgb, var(--gold) 10%, transparent);
   --tint-night: color-mix(in srgb, var(--night) 10%, transparent); --tint-shade: color-mix(in srgb, var(--shade) 10%, transparent); --tint-rust: color-mix(in srgb, var(--rust) 10%, transparent);
 }
 
 /* Dark glass chips/panels hard-code bg-black with palette text, which is dark-on-dark in light palettes. */
-html[data-palette="parchment"] [class*="bg-black/"]:is([class*="text-hud-"], [class*="text-[var(--ink"], [class*="text-[var(--bone"]),
-html[data-palette="frost"] [class*="bg-black/"]:is([class*="text-hud-"], [class*="text-[var(--ink"], [class*="text-[var(--bone"]) {
+html[data-palette="parchment"] [class*="bg-black/"]:is([class*="text-hud-"], [class*="text-[var(--ink"], [class*="text-[var(--bone"]) {
   background-color: color-mix(in srgb, var(--palette-card) 92%, transparent);
 }
-html[data-palette="parchment"] [class*="border-white/"]:is([class*="bg-black/"]),
-html[data-palette="frost"] [class*="border-white/"]:is([class*="bg-black/"]) {
+html[data-palette="parchment"] [class*="border-white/"]:is([class*="bg-black/"]) {
   border-color: color-mix(in srgb, var(--hud-line) 70%, transparent);
 }
 
 :root { --fog-shadow: #2b3347; --fog-light: #a8b3cf; --fog-flat: #14121a; }
 html[data-palette="parchment"] { --fog-shadow: #5d4c38; --fog-light: #d9ccb0; --fog-flat: #4a3b2a; }
-html[data-palette="frost"] { --fog-shadow: #53677c; --fog-light: #d4e2ee; --fog-flat: #3d5166; }
 html[data-palette="parchment"],
-html[data-palette="frost"] {
   --path-label-ink: #101820;
   --path-label-halo: #f6f1e4;
 }

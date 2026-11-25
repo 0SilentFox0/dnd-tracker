@@ -6,11 +6,15 @@
   --ink: var(--hud-ink, #efe5d2);
   --gold: var(--hud-gold, #c9b37a);
   color: var(--bone);
-  font-family: var(--font-hud-sans), system-ui, sans-serif;
-  font-variant-numeric: tabular-nums lining-nums;
+}
+html[data-palette] body,
+.hud-surface,
+.battle-hud {
+  font-family: var(--font-body), Georgia, serif;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.hud-sc { font-family: var(--font-hud-sc), serif; letter-spacing: 0.04em; }
+.hud-sc { font-family: var(--font-hud-sc), serif; font-weight: 700; }
 .hud-book { font-family: var(--font-hud-book), serif; }
 .hud-title { font-family: var(--font-title), Georgia, serif; font-weight: 700; }
 .hud-body { font-family: var(--font-body), Georgia, serif; }
@@ -66,26 +70,26 @@
 @keyframes hud-crack { to { stroke-dashoffset: 0; } }
 .profile-tab[data-state="active"] { background: var(--hud-gold-strong, #e6c25a); color: var(--palette-primary-foreground, #2a1d05); font-weight: 700; }
 
-/* shadcn tokens for forms, dialogs and buttons inside the HUD (html has .dark; these override it) */
+/* fallbacks for pages without a palette; palettes.css sets the same tokens under html[data-palette] */
 .hud-surface {
-  --background: var(--palette-background, #110e0b);
-  --foreground: var(--palette-foreground, #e6dccb);
-  --card: var(--palette-card, #1a140f);
-  --card-foreground: var(--palette-foreground, #e6dccb);
-  --popover: var(--palette-card, #1a140f);
-  --popover-foreground: var(--palette-foreground, #e6dccb);
-  --primary: var(--hud-gold, #c9b37a);
-  --primary-foreground: var(--palette-primary-foreground, #2a1d05);
-  --secondary: var(--palette-secondary, #2a2218);
-  --secondary-foreground: var(--palette-foreground, #efe5d2);
-  --muted: var(--palette-secondary, #1c1610);
-  --muted-foreground: var(--hud-muted, #8f8473);
-  --accent: var(--palette-secondary, #2a2218);
-  --accent-foreground: var(--palette-foreground, #efe5d2);
-  --destructive: var(--hud-danger, #d0705c);
-  --border: var(--hud-line, #4a3c2c);
-  --input: var(--hud-line, #4a3c2c);
-  --ring: var(--hud-gold, #c9b37a);
+  --background: var(--palette-page, #111013);
+  --foreground: var(--hud-text, #c8beaf);
+  --card: var(--palette-panel, #18161a);
+  --card-foreground: var(--hud-text, #c8beaf);
+  --popover: var(--palette-panel, #18161a);
+  --popover-foreground: var(--hud-text, #c8beaf);
+  --primary: var(--hud-crimson, #b3312c);
+  --primary-foreground: var(--hud-crimson-ink, #fbefe9);
+  --secondary: var(--palette-panel-2, #1e1b20);
+  --secondary-foreground: var(--hud-text, #c8beaf);
+  --muted: var(--palette-panel-2, #1e1b20);
+  --muted-foreground: var(--hud-muted, #8b8277);
+  --accent: var(--palette-panel-2, #1e1b20);
+  --accent-foreground: var(--hud-text, #c8beaf);
+  --destructive: var(--hud-crimson-fg, #e0604f);
+  --border: var(--hud-line, rgba(236, 228, 214, 0.17));
+  --input: var(--hud-line, rgba(236, 228, 214, 0.17));
+  --ring: var(--hud-ink, #ece4d6);
 }
 .hud-form [data-slot="input"],
 .hud-page [data-slot="input"],
@@ -151,13 +155,13 @@
   border-radius: .55rem;
 }
 
-html:is([data-palette="parchment"], [data-palette="frost"]) .game-shell-mobile-actions [data-slot="header-pill-link"] {
+html[data-palette="parchment"] .game-shell-mobile-actions [data-slot="header-pill-link"] {
   border-color: var(--color-hud-rule);
   background: var(--color-hud-field);
   color: var(--color-hud-gold);
 }
 
-html:is([data-palette="parchment"], [data-palette="frost"]) .game-shell-mobile-actions a[data-slot="header-pill-link"]:is(:hover, :active) {
+html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pill-link"]:is(:hover, :active) {
   border-color: var(--color-hud-gold);
   background: color-mix(in srgb, var(--color-hud-gold) 12%, var(--color-hud-field));
   filter: none;
@@ -183,3 +187,21 @@ html:is([data-palette="parchment"], [data-palette="frost"]) .game-shell-mobile-a
     .game-shell-header,
     .hud-page.hud-wide { zoom: 1.6; }
 }
+
+.ds-panel { background: var(--palette-panel); border: 1px solid var(--hud-rule); border-radius: var(--r); box-shadow: inset 0 1px 0 var(--hud-hi), var(--hud-sh); }
+.ds-inset { background: var(--palette-inset); border-radius: var(--r); box-shadow: inset 0 1px 3px rgba(0,0,0,.45); }
+.ds-raised { background: var(--palette-panel-2); border: 1px solid var(--hud-line); border-radius: var(--r); box-shadow: inset 0 1px 0 var(--hud-hi), var(--hud-sh-btn); }
+.ornate { position: relative; }
+.ornate::after { content: ""; position: absolute; inset: 6px; pointer-events: none; --c: color-mix(in srgb, var(--hud-muted) 70%, transparent);
+  background: linear-gradient(var(--c),var(--c)) top left/16px 2px, linear-gradient(var(--c),var(--c)) top left/2px 16px,
+    linear-gradient(var(--c),var(--c)) top right/16px 2px, linear-gradient(var(--c),var(--c)) top right/2px 16px,
+    linear-gradient(var(--c),var(--c)) bottom left/16px 2px, linear-gradient(var(--c),var(--c)) bottom left/2px 16px,
+    linear-gradient(var(--c),var(--c)) bottom right/16px 2px, linear-gradient(var(--c),var(--c)) bottom right/2px 16px;
+  background-repeat: no-repeat; }
+.orn { height: 10px; background: var(--hud-line);
+  -webkit-mask: linear-gradient(#000,#000) left center/calc(50% - 10px) 1px no-repeat,
+        linear-gradient(#000,#000) right center/calc(50% - 10px) 1px no-repeat,
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M5 0L10 5L5 10L0 5Z'/%3E%3C/svg%3E") center/10px 10px no-repeat;
+  mask: linear-gradient(#000,#000) left center/calc(50% - 10px) 1px no-repeat,
+        linear-gradient(#000,#000) right center/calc(50% - 10px) 1px no-repeat,
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M5 0L10 5L5 10L0 5Z'/%3E%3C/svg%3E") center/10px 10px no-repeat; }

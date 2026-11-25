@@ -27,7 +27,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
-html[data-palette="parchment"] .hud-glass, html[data-palette="frost"] .hud-glass {
+html[data-palette="parchment"] .hud-glass {
   background: color-mix(in srgb, var(--palette-card) 92%, transparent);
   color: var(--hud-ink);
   box-shadow: 0 10px 30px rgba(74, 61, 42, 0.25);

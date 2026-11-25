@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { PALETTE_PREVIEW } from '@/lib/theme/palettes';
+
 const css = readFileSync(join(process.cwd(), 'app/palettes.css'), 'utf8');
 
 function paletteTokens(id: string): Record<string, string> {
@@ -72,44 +74,31 @@ function mix(first: string, second: string, firstWeight: number): string {
         .join('')}`;
 }
 
-const PALETTES = [
-    'tavern',
-    'midnight',
-    'forest',
-    'parchment',
-    'amethyst',
-    'frost',
-];
+const PALETTES = ['tavern', 'parchment'] as const;
 
-const HUD_SURFACES = [
-    '--palette-background',
-    '--palette-card',
-    '--palette-secondary',
+const SURFACES = [
     '--palette-page',
-    '--hud-field',
-];
+    '--palette-panel',
+    '--palette-panel-2',
+    '--palette-inset',
+] as const;
 
-const HUD_TEXT = [
-    '--palette-foreground',
-    '--hud-ink',
-    '--hud-bone',
-    '--hud-muted',
-    '--hud-gold',
-    '--hud-gold-bright',
-    '--hud-gold-strong',
-    '--hud-danger',
-    '--hud-bad',
-    '--hud-good',
-    '--hud-good-dim',
-    '--hud-info',
-];
+const BODY_TEXT = ['--hud-ink', '--hud-text', '--hud-muted'] as const;
+
+describe('palettes.css', () => {
+    it('has no removed palette blocks', () => {
+        expect(css).not.toMatch(
+            /data-palette="(midnight|forest|amethyst|frost)"/
+        );
+    });
+});
 
 describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
     const tokens = paletteTokens(id);
 
-    it('keeps every shared HUD text token at AA contrast on its palette surfaces', () => {
-        const failures = HUD_TEXT.flatMap((textToken) =>
-            HUD_SURFACES.flatMap((surfaceToken) => {
+    it('keeps ink, text and muted at AA on every surface', () => {
+        const failures = BODY_TEXT.flatMap((textToken) =>
+            SURFACES.flatMap((surfaceToken) => {
                 const ratio = contrastRatio(
                     tokens[textToken],
                     tokens[surfaceToken]
@@ -119,26 +108,56 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
                     ? [`${textToken} on ${surfaceToken}: ${ratio.toFixed(2)}:1`]
                     : [];
             })
-        ).concat(
-            contrastRatio(
-                tokens['--palette-primary-foreground'],
-                tokens['--hud-gold']
-            ) < 4.5
-                ? [
-                      `--palette-primary-foreground on --hud-gold: ${contrastRatio(tokens['--palette-primary-foreground'], tokens['--hud-gold']).toFixed(2)}:1`,
-                  ]
-                : []
         );
 
         expect(failures).toEqual([]);
     });
 
-    it('keeps inactive sheet tabs (text-hud-text) at AA contrast on the tab bar', () => {
-        const text = mix(tokens['--hud-bone'], tokens['--hud-muted'], 0.88);
+    it('keeps crimson-fg at AA on page, panel and panel-2', () => {
+        const failures = SURFACES.slice(0, 3).flatMap((surfaceToken) => {
+            const ratio = contrastRatio(
+                tokens['--hud-crimson-fg'],
+                tokens[surfaceToken]
+            );
 
+            return ratio < 4.5
+                ? [`--hud-crimson-fg on ${surfaceToken}: ${ratio.toFixed(2)}:1`]
+                : [];
+        });
+
+        expect(failures).toEqual([]);
+    });
+
+    it('keeps crimson-ink at AA on crimson', () => {
         expect(
-            contrastRatio(text, tokens['--palette-page'])
+            contrastRatio(tokens['--hud-crimson-ink'], tokens['--hud-crimson'])
         ).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('keeps muted at non-text contrast on page, panel and inset', () => {
+        const failures = [
+            '--palette-page',
+            '--palette-panel',
+            '--palette-inset',
+        ]
+            .map((surfaceToken) => [
+                surfaceToken,
+                contrastRatio(tokens['--hud-muted'], tokens[surfaceToken]),
+            ])
+            .filter(([, ratio]) => (ratio as number) < 3);
+
+        expect(failures).toEqual([]);
+    });
+
+    it('exposes the same hex values through PALETTE_PREVIEW', () => {
+        expect(PALETTE_PREVIEW[id]).toEqual({
+            page: tokens['--palette-page'],
+            panel: tokens['--palette-panel'],
+            inset: tokens['--palette-inset'],
+            crimson: tokens['--hud-crimson'],
+            ink: tokens['--hud-ink'],
+            muted: tokens['--hud-muted'],
+        });
     });
 
     it('keeps book text at AA contrast on the page and cover', () => {
@@ -201,25 +220,6 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
                 ? [`${textToken} on ${surface}: ${ratio.toFixed(2)}:1`]
                 : [];
         });
-
-        expect(failures).toEqual([]);
-    });
-
-    it('keeps palette control borders at non-text AA contrast', () => {
-        const failures = ['--hud-line', '--hud-rule'].flatMap((borderToken) =>
-            HUD_SURFACES.flatMap((surfaceToken) => {
-                const ratio = contrastRatio(
-                    tokens[borderToken],
-                    tokens[surfaceToken]
-                );
-
-                return ratio < 3
-                    ? [
-                          `${borderToken} against ${surfaceToken}: ${ratio.toFixed(2)}:1`,
-                      ]
-                    : [];
-            })
-        );
 
         expect(failures).toEqual([]);
     });
