@@ -281,3 +281,14 @@ API компонентів не змінюється (пропси, `data-slot`)
 Фаза 0 → фаза 1 (хвилі 1–4, ratchet до 0, видалення токенів) → фаза 2 → фаза 3 (профіль-оболонка → профіль/налаштування → `ProfileEditor` → дашборд → ops) → i18n/whats-new → повний тест → живий прогін → Opus-рев'ю → `/simplify` → docs (`docs/architecture/ui-layers.md`, `platform.md`, `docs/STATUS.md`).
 
 Фазу 2 можна вести паралельно з хвилями 2–4 фази 1 (різні файли), якщо агенти не правлять ті самі файли: компоненти фази 2 (`components/ui`, `components/hud`, `components/common/fields`, CSS-база) входять у хвилю 1, тому фаза 2 стартує після хвилі 1.
+
+## Поправка власника 2026-11-25: вайб таверни
+
+Власник відхилив холодний вугільно-малиновий вигляд темної палітри. Рішення (обов'язкові):
+1. **Палітра tavern** — теплий коричневий + золото: page `#0d0a08`, panel `#1a140f`, panel-2 `#2a2218`, inset `#110d0a`; ink `#efe5d2`, text `#e6dccb`, muted `#9b9080`, faint `#6b6156`; rule/line — золотаві `rgba(201,179,122,.18/.35)`. Новий токен акценту `--hud-accent #c9b37a` / `--hud-accent-fg #e6c25a` (активний стан, виділена рамка, підкреслення табів/чіпів, майстерність, акцентні числа). Малинові токени (`--hud-crimson*`, `--hud-hp*`) лишаються лише для основної кнопки, HP, небезпеки, деструктивних дій і помилок. `--hud-crimson-fg` злегка посвітлено (`#e66a58`) заради контрасту 4.5 на panel-2; тест контрасту покриває й accent-fg.
+2. **Parchment** зберігає кольори; `--hud-accent` = `--hud-crimson`, `--hud-accent-fg` = `--hud-crimson-fg`, тож ті самі класи лишаються малиновими.
+3. **Tailwind**: `--color-hud-accent`, `--color-hud-accent-fg` у `@theme static` → утиліти `text-hud-accent-fg`, `border-hud-accent`, `bg-hud-accent`.
+4. **Кути**: радіуси xs 4, sm 6, md 8, lg 8, xl 12, 2xl 12, 3xl/4xl 16 px; `--radius: 8px`, `--r: 10px`. Контроли — `rounded-lg`, оверлеї/панелі — `rounded-xl`, таби/чіпи — `rounded-md`, чекбокс — 4 px; ромб радіо і `rounded-full` без змін.
+5. **М'які тіні замість рамок** для поверхонь (`.ds-panel`, `.ds-raised`, контент оверлеїв, `HudPanel`, `card`): `inset 0 1px 0 var(--hud-hi), 0 2px 6px -2px rgba(0,0,0,.5), 0 18px 40px -20px rgba(0,0,0,.85)` через `--hud-sh` (parchment — легший альфа). Контроли (інпути, кнопки) зберігають 1px рамку як affordance.
+6. **Тло**: повернуто `public/bg/vey-strait-{2k,4k}.webp`; картина лише в tavern під темною віньєткою (`body::after`), зерно поверх; parchment без картини; лендінг ховає обидва шари.
+7. **Реклас акценту**: `text-hud-crimson-fg` → `text-hud-accent-fg` для активного/вибраного/майстерності/акцентних чисел; малиновим лишаються помилки, деструктив, небезпека, шкода, HP, попередження. `border-hud-crimson` → `border-hud-accent` для активного/вибраного; `aria-invalid:` лишається. `bg-hud-crimson text-hud-crimson-ink` (основна дія) і банерні градієнти лишаються.
