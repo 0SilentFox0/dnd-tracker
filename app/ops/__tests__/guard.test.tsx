@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-const getSessionUserId = vi.hoisted(() => vi.fn());
+const getAuthUserOptional = vi.hoisted(() => vi.fn());
 
 const notFound = vi.hoisted(() =>
     vi.fn(() => {
@@ -11,29 +11,33 @@ const notFound = vi.hoisted(() =>
 );
 
 vi.mock('next/navigation', () => ({ notFound }));
-vi.mock('@/lib/auth', () => ({ getSessionUserId }));
+vi.mock('@/lib/auth', () => ({ getAuthUserOptional }));
 
 import robots from '@/app/robots';
 import { assertOpsAdmin } from '@/lib/server/ops/page-guard';
 
 describe('assertOpsAdmin', () => {
     beforeEach(() => {
-        getSessionUserId.mockReset();
+        getAuthUserOptional.mockReset();
         notFound.mockClear();
         vi.stubEnv('PLATFORM_ADMIN_USER_IDS', 'owner');
+        vi.stubEnv('OPS_ADMIN_EMAILS', 'ok@x.com');
     });
 
     it('calls notFound without a session and for non-owners', async () => {
-        getSessionUserId.mockResolvedValue(null);
+        getAuthUserOptional.mockResolvedValue(null);
         await expect(assertOpsAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
 
-        getSessionUserId.mockResolvedValue('someone');
+        getAuthUserOptional.mockResolvedValue({ id: 'someone', email: 'no@x.com' });
         await expect(assertOpsAdmin()).rejects.toThrow('NEXT_NOT_FOUND');
     });
 
     it('passes for the owner', async () => {
-        getSessionUserId.mockResolvedValue('owner');
+        getAuthUserOptional.mockResolvedValue({ id: 'owner', email: null });
 
+        await expect(assertOpsAdmin()).resolves.toBeUndefined();
+
+        getAuthUserOptional.mockResolvedValue({ id: 'x', email: 'OK@x.com' });
         await expect(assertOpsAdmin()).resolves.toBeUndefined();
         expect(notFound).not.toHaveBeenCalled();
     });

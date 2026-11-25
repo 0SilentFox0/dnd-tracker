@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ProfilePage from '../page';
 
-const getSessionUserId = vi.fn();
+const getAuthUserOptional = vi.fn();
 
 vi.mock('@/lib/auth', () => ({
-    getSessionUserId: () => getSessionUserId(),
+    getAuthUserOptional: () => getAuthUserOptional(),
 }));
 
 const redirect = vi.fn((url: string) => {
@@ -15,13 +15,14 @@ const redirect = vi.fn((url: string) => {
 vi.mock('next/navigation', () => ({
     redirect: (url: string) => redirect(url),
 }));
+vi.mock('@/lib/utils/api/ops-access', () => ({ isOpsAdmin: () => false }));
 vi.mock('../page-client', () => ({ ProfileClient: () => null }));
 
 beforeEach(() => vi.clearAllMocks());
 
 describe('/profile page', () => {
     it('redirects to sign-in when unauthenticated', async () => {
-        getSessionUserId.mockResolvedValue(null);
+        getAuthUserOptional.mockResolvedValue(null);
 
         await expect(ProfilePage()).rejects.toThrow(
             'REDIRECT:/sign-in?next=/profile'
@@ -29,7 +30,7 @@ describe('/profile page', () => {
     });
 
     it('renders for a signed-in user', async () => {
-        getSessionUserId.mockResolvedValue('u1');
+        getAuthUserOptional.mockResolvedValue({ id: 'u1', email: 'a@x.com' });
 
         await expect(ProfilePage()).resolves.toBeTruthy();
         expect(redirect).not.toHaveBeenCalled();

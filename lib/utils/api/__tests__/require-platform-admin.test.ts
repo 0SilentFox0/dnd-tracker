@@ -1,27 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getSessionUserId } = vi.hoisted(() => ({
-    getSessionUserId: vi.fn(),
+const { getAuthUserOptional } = vi.hoisted(() => ({
+    getAuthUserOptional: vi.fn(),
 }));
 
-vi.mock('@/lib/auth', () => ({ getSessionUserId }));
-vi.mock('@/lib/utils/api/platform-admin', () => ({
-    isPlatformAdmin: (id: string) => id === 'owner',
+vi.mock('@/lib/auth', () => ({ getAuthUserOptional }));
+vi.mock('@/lib/utils/api/ops-access', () => ({
+    isOpsAdmin: (u: { id: string }) => u.id === 'owner',
 }));
 
 import { requirePlatformAdmin } from '../require-platform-admin';
 
-beforeEach(() => getSessionUserId.mockReset());
+beforeEach(() => getAuthUserOptional.mockReset());
 
 describe('requirePlatformAdmin', () => {
     it('passes the owner', async () => {
-        getSessionUserId.mockResolvedValue('owner');
+        getAuthUserOptional.mockResolvedValue({ id: 'owner', email: null });
 
         expect(await requirePlatformAdmin()).toEqual({ userId: 'owner' });
     });
 
     it('returns 404 for another user', async () => {
-        getSessionUserId.mockResolvedValue('other');
+        getAuthUserOptional.mockResolvedValue({ id: 'other', email: null });
 
         const res = await requirePlatformAdmin();
 
@@ -29,7 +29,7 @@ describe('requirePlatformAdmin', () => {
     });
 
     it('returns 404 without a session', async () => {
-        getSessionUserId.mockResolvedValue(null);
+        getAuthUserOptional.mockResolvedValue(null);
 
         const res = await requirePlatformAdmin();
 

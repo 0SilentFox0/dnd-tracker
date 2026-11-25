@@ -2,10 +2,13 @@ import { redirect } from 'next/navigation';
 
 import { ProfileClient } from './page-client';
 
-import { getSessionUserId } from '@/lib/auth';
+import { getAuthUserOptional } from '@/lib/auth';
+import { isOpsAdmin } from '@/lib/utils/api/ops-access';
 
 export default async function ProfilePage() {
-    if (!(await getSessionUserId())) redirect('/sign-in?next=/profile');
+    const user = await getAuthUserOptional();
 
-    return <ProfileClient />;
+    if (!user) redirect('/sign-in?next=/profile');
+
+    return <ProfileClient showOpsLink={isOpsAdmin(user)} />;
 }

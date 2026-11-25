@@ -27,7 +27,7 @@ describe('ProfileClient', () => {
     it('shows loading without a session user', () => {
         state.user = null;
 
-        render(<ProfileClient />);
+        render(<ProfileClient showOpsLink={false} />);
 
         expect(screen.queryByTestId('editor')).toBeNull();
     });
@@ -40,8 +40,20 @@ describe('ProfileClient', () => {
             avatarUrl: null,
         };
 
-        render(<ProfileClient />);
+        render(<ProfileClient showOpsLink={false} />);
 
         expect(screen.getByTestId('hint-profile.avatar')).toBeTruthy();
+    });
+
+    it('shows the ops link only when allowed', () => {
+        state.user = { id: 'u1', email: 'a@x.com', name: 'A', avatarUrl: null };
+
+        const { rerender } = render(<ProfileClient showOpsLink={false} />);
+
+        expect(screen.queryByText('opsLink')).toBeNull();
+
+        rerender(<ProfileClient showOpsLink />);
+
+        expect(screen.getByText('opsLink')).toBeTruthy();
     });
 });

@@ -104,7 +104,7 @@ Findings (checked 2026-11-24 against the public docs):
 
 ## Dashboard (`/ops`)
 
-Owner-only page (`PLATFORM_ADMIN_USER_IDS`). `app/ops/layout.tsx` and `page.tsx` both call `assertOpsAdmin` (`lib/server/ops/page-guard.ts`): layouts and pages render in parallel, so the page must not rely on the layout's `notFound()` before it reads data. A non-owner gets 404; `robots.ts` disallows `/ops`, the layout sets `noindex`. Namespace `ops` (`OPS_NAMESPACES` in `lib/i18n/core-namespaces.ts`), not part of any campaign scope.
+Owner-only page (`OPS_ADMIN_EMAILS` or `PLATFORM_ADMIN_USER_IDS`, `lib/utils/api/ops-access.ts`; the profile page shows an `/ops` link to the same set). `app/ops/layout.tsx` and `page.tsx` both call `assertOpsAdmin` (`lib/server/ops/page-guard.ts`): layouts and pages render in parallel, so the page must not rely on the layout's `notFound()` before it reads data. A non-owner gets 404; `robots.ts` disallows `/ops`, the layout sets `noindex`. Namespace `ops` (`OPS_NAMESPACES` in `lib/i18n/core-namespaces.ts`), not part of any campaign scope.
 
 Read API (all `requirePlatformAdmin`, 404 for others, `privateJson`, `force-dynamic`):
 
