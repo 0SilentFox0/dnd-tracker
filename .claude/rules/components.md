@@ -22,6 +22,17 @@ paths:
 - `ActionBar` is `components/ui/action-bar`, `ImageUpload` is `components/common`; dice are `components/dice`.
 - Page states: `components/common/states` (`QueryState`, `EmptyState`, `LoadingState`, `ErrorState`); form buttons: `ActionBar`.
 
+## Design system (DS)
+
+Details in `docs/architecture/ui-layers.md#дизайн-система-ds`.
+
+- Surfaces: `ds-panel` / `ds-inset` / `ds-raised` (or `HudPanel`); soft shadow instead of a panel border. Inputs/buttons keep a 1px border.
+- Active / selected / mastery / accent numbers: `text-hud-accent-fg`, `border-hud-accent`, `bg-hud-accent text-hud-accent-ink`. Crimson (`hud-crimson*`, `hud-hp*`) only for HP, damage, danger, destructive actions and errors; never hard-code crimson for an accent. The primary `Button` is gold.
+- Radii: controls `rounded-lg`, panels/overlays `rounded-xl`, tabs/chips `rounded-md`. No raw `rounded-[Npx]`.
+- Every clickable element needs a hover state: use kit components, or add `ds-interactive` on a custom one.
+- Colours come from palette tokens (`tavern`, `parchment`), never hex; check both palettes (parchment accent is dark gold).
+- Account pages (`/profile`, `/settings/*`, `/library/sounds`, `/help`) render inside `AccountShell`; new entry = a row in `PROFILE_MENU`.
+
 ## Kit pairs: what to use when
 
 Not duplicates: the first of each pair is the primitive, the second adds label/state wiring on top.

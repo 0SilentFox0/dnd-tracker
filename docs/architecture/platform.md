@@ -18,6 +18,10 @@ Self-hosted (`public/fonts/*.woff2` + `@font-face` in `app/fonts.css`; latin+cyr
 
 Server pages call the GET handler's own function (`readBattleScene`, `readCharacterSheet`), take the body with `readOkJson` and wrap the client tree in `PrefetchedQuery` (`lib/providers/prefetched-query.tsx`) under the hook's query key; an error status just leaves the client to load as before. Query keys used on the server live in hook `keys.ts` files without `"use client"`.
 
+## Account pages: session in the first HTML
+
+`/profile`, `/settings/*`, `/library/sounds` layouts are server components: `getAccountSeed()` (`lib/auth.ts`, `getClaims`, no round trip) builds `{ user: SessionUser, hasPassword }` from the verified claims and passes it to `AccountSeedProvider` (`lib/hooks/auth/useSessionUser.tsx`). `useSessionUser` and the account UI (sidebar avatar/name, password tab) initialise from `useAccountSeed()`, so the first HTML is complete and there is no pop-in; `onAuthStateChange` still refreshes it on the client. A new account layout mirrors `app/profile/layout.tsx`. `/help` stays static (no seed). Profile summary data is prefetched the same way via `PrefetchedQuery` (`lib/server/profile/summary.ts`, types in `types/profile.ts`).
+
 ## Egress
 
 - Public Storage images and audio can be served through a Cloudflare cache Worker (`infra/media-worker`, host in `NEXT_PUBLIC_MEDIA_BASE_URL`). `toMediaUrl` rewrites the host at render time only; stored URLs stay canonical Supabase URLs, uploads still go to Supabase, unsetting the variable and redeploying rolls back (`NEXT_PUBLIC_*` is inlined at build). Free Workers plan: 100k requests/day.
