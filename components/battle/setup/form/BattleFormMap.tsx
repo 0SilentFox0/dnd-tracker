@@ -172,7 +172,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                         )}
                         {grid === 'hex' && (
                             <p className="text-sm text-hud-muted">
-                                {t('grid.hexEdgesOff')}
+                                {t('hexEdgesOff')}
                             </p>
                         )}
                         {grid === 'square' &&

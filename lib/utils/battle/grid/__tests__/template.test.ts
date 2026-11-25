@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { hexDisk, hexDistance } from '../hex';
 import {
     aimInRange,
     areaCentre,
@@ -83,7 +84,12 @@ describe('templateCells', () => {
             ).sort()
         ).toEqual([k(5, 5), k(6, 5), k(4, 5), k(5, 6), k(5, 4)].sort());
         expect(
-            templateCentre({ shape: 'cross', size: 5 }, { x: 5, y: 5 }, [], 'square')
+            templateCentre(
+                { shape: 'cross', size: 5 },
+                { x: 5, y: 5 },
+                [],
+                'square'
+            )
         ).toEqual({ x: 5, y: 5 });
     });
 
@@ -359,14 +365,20 @@ describe('aimInRange', () => {
         ];
 
         expect(
-            aimInRange(origin, { x: 50, y: 50 }, undefined, DEFAULT_RULES, 'square')
+            aimInRange(
+                origin,
+                { x: 50, y: 50 },
+                undefined,
+                DEFAULT_RULES,
+                'square'
+            )
         ).toBe(true);
-        expect(aimInRange(origin, { x: 7, y: 1 }, 30, DEFAULT_RULES, 'square')).toBe(
-            true
-        );
-        expect(aimInRange(origin, { x: 8, y: 1 }, 30, DEFAULT_RULES, 'square')).toBe(
-            false
-        );
+        expect(
+            aimInRange(origin, { x: 7, y: 1 }, 30, DEFAULT_RULES, 'square')
+        ).toBe(true);
+        expect(
+            aimInRange(origin, { x: 8, y: 1 }, 30, DEFAULT_RULES, 'square')
+        ).toBe(false);
     });
 });
 
@@ -437,5 +449,38 @@ describe('rayCells', () => {
         expect(
             rayCells(map, { x: 1, y: 1 }, { x: 1, y: 1 }, { maxCells: 3 })
         ).toEqual([]);
+    });
+});
+
+describe('hex circle radius parity with square', () => {
+    const hexMap: BattleMapConfig = { ...map, gridType: 'hex' };
+
+    const aim = { x: 6, y: 6 };
+
+    const keys = (grid: BattleMapConfig, feet: number) =>
+        templateCells(
+            grid,
+            { shape: 'circle', size: feet },
+            [],
+            aim,
+            DEFAULT_RULES
+        );
+
+    it('uses the same radius in cells as square for the same feet', () => {
+        expect(keys(hexMap, 10)).toHaveLength(7);
+        expect(keys(hexMap, 20)).toHaveLength(19);
+        expect(keys(map, 10)).toHaveLength(9);
+        expect(keys(map, 20)).toHaveLength(25);
+    });
+
+    it('hits targets at hexDistance 2 for a 20 ft circle and spares them at 10 ft', () => {
+        const ring = hexDisk(aim, 2).filter((c) => hexDistance(aim, c) === 2);
+
+        const wide = new Set(keys(hexMap, 20));
+
+        const narrow = new Set(keys(hexMap, 10));
+
+        expect(ring.every((c) => wide.has(`${c.x}:${c.y}`))).toBe(true);
+        expect(ring.some((c) => narrow.has(`${c.x}:${c.y}`))).toBe(false);
     });
 });

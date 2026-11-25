@@ -124,12 +124,14 @@ export function EditorSidebar({
                     <DoorToolOptions editor={editor} />
                 </div>
             </TabsContent>
-            <TabsContent value={panel === 'effects' ? 'effects' : 'tiles'}>
-                <TilePalettePanel
-                    workspace={workspace}
-                    effects={panel === 'effects'}
-                />
-            </TabsContent>
+            {!hex && (
+                <TabsContent value={panel === 'effects' ? 'effects' : 'tiles'}>
+                    <TilePalettePanel
+                        workspace={workspace}
+                        effects={panel === 'effects'}
+                    />
+                </TabsContent>
+            )}
         </Tabs>
     );
 }

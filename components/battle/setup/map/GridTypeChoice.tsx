@@ -16,7 +16,7 @@ export function GridTypeChoice({
     value: GridKind;
     onChange: (kind: GridKind) => void;
 }) {
-    const t = useTranslations('battleSetup.map.grid');
+    const t = useTranslations('maps.grid');
 
     const labelId = useId();
 

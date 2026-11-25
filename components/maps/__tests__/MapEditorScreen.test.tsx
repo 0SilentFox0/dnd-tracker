@@ -329,6 +329,44 @@ describe('MapEditorScreen', () => {
         expect(cols.value).toBe('120');
     });
 
+    it('hides the whole tile UI on a hex map', () => {
+        touch.value = false;
+        query.value = {
+            isPending: false,
+            isError: false,
+            data: {
+                id: 'm1',
+                name: 'Cave',
+                cols: 10,
+                rows: 8,
+                version: 1,
+                updatedAt: '',
+                map: {
+                    cols: 10,
+                    rows: 8,
+                    background: null,
+                    opacity: 0.35,
+                    gridType: 'hex',
+                },
+                walls: [],
+                bars: [],
+            },
+        };
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <ConfirmContext.Provider value={vi.fn() as never}>
+                    <MapEditorScreen campaignId="c1" mapId="m1" />
+                </ConfirmContext.Provider>
+            </QueryClientProvider>
+        );
+
+        expect(
+            screen.queryByRole('group', { name: 'maps.editor.tiles.layers' })
+        ).toBeNull();
+        expect(screen.queryByText('maps.editor.tiles.save')).toBeNull();
+        expect(screen.getByText('maps.editor.hexHint')).toBeTruthy();
+    });
+
     it('imports a UVTT file into the editor draft without saving it', async () => {
         touch.value = false;
         query.value = {
