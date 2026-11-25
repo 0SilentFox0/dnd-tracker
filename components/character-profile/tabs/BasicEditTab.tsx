@@ -72,8 +72,8 @@ export function BasicEditTab({
     };
 
     return (
-        <div className="space-y-5">
-            <div className="space-y-3">
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
                 <CharacterBasicInfo
                     basicInfo={form.basicInfo}
                     campaignMembers={options.members}
@@ -99,11 +99,11 @@ export function BasicEditTab({
                 )}
             </div>
             <CharacterHpPreview hp={hp} />
-            <div className="flex justify-end border-t border-hud-rule pt-4">
+            <div className="ds-panel flex items-center justify-end p-4 sm:p-5">
                 <Button
                     type="button"
                     variant="destructive"
-                    className="h-11 px-6"
+                    className="h-10 px-5"
                     onClick={() => void remove()}
                 >
                     {t('delete')}

@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
+import { BasicPanel } from '@/components/characters/basic/BasicPanel';
 import { CharacterClassesField } from '@/components/characters/basic/CharacterClassesField';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
-import { HudSection } from '@/components/hud/form';
 import { Label } from '@/components/ui/label';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';
@@ -90,9 +90,9 @@ export function CharacterBasicInfo({
         (!isPlayerView && !classMode && !hideProgression && !hideArchetype);
 
     return (
-        <div className="w-full">
-            <HudSection title={ts('identity')}>
-                <div className="grid w-full grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2">
+        <div className="flex w-full flex-col gap-4">
+            <BasicPanel title={ts('identity')}>
+                <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                     <LabeledInput
                         id="name"
                         label={t('name')}
@@ -169,10 +169,10 @@ export function CharacterBasicInfo({
                         />
                     )}
                 </div>
-            </HudSection>
+            </BasicPanel>
             {showOrigin && (
-                <HudSection title={to('origin')}>
-                    <div className="grid w-full grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2">
+                <BasicPanel title={to('origin')}>
+                    <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {!hideLineage && (
                             <>
                                 <div className="w-full min-w-0">
@@ -288,10 +288,10 @@ export function CharacterBasicInfo({
                             </div>
                         )}
                     </div>
-                </HudSection>
+                </BasicPanel>
             )}
             {!isPlayerView && (
-                <HudSection title={ts('portrait')}>
+                <BasicPanel title={ts('portrait')}>
                     {!isPlayerView && (
                         <div className="w-full min-w-0">
                             <ImageUpload
@@ -303,7 +303,7 @@ export function CharacterBasicInfo({
                             />
                         </div>
                     )}
-                </HudSection>
+                </BasicPanel>
             )}
         </div>
     );
