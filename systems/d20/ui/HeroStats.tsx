@@ -76,7 +76,7 @@ function FooterStat({
             <b
                 className={cn(
                     'hud-num text-[17px]',
-                    accent ? 'text-hud-gold' : 'text-hud-ink'
+                    accent ? 'text-hud-crimson-fg' : 'text-hud-ink'
                 )}
             >
                 {children}

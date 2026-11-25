@@ -34,7 +34,7 @@ export function ArtifactSetBonusDisplay({
                 className
             )}
         >
-            <p className="hud-sc text-xs tracking-[.06em] text-hud-gold">
+            <p className="hud-sc text-xs tracking-[.06em] text-hud-ink">
                 {t('bonus')}
             </p>
             {title && (

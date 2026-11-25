@@ -114,7 +114,7 @@ export function SkillTreeEditor({
                     ))}
                 </SelectField>
                 {canEdit && state.dirty && (
-                    <span className="text-xs text-hud-gold italic">
+                    <span className="text-xs text-hud-ink italic">
                         {t('editor.unsaved')}
                     </span>
                 )}

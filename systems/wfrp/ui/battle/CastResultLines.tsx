@@ -35,7 +35,7 @@ export function CastResultLines({ cast }: { cast: PercentileCastDetails }) {
             </div>
             {modifiers.length > 0 && <div>{modifiers.join(' · ')}</div>}
             {cast.overcastSteps > 0 && (
-                <div className="text-hud-gold">
+                <div className="text-hud-crimson-fg">
                     {t('overcast', { steps: cast.overcastSteps })}
                 </div>
             )}
@@ -45,7 +45,7 @@ export function CastResultLines({ cast }: { cast: PercentileCastDetails }) {
                 </div>
             )}
             {cast.fortune && (
-                <div className="text-hud-gold">
+                <div className="text-hud-crimson-fg">
                     {cast.fortune.kind === 'sl'
                         ? tf('usedSl')
                         : cast.fortune.kind === 'notFail'

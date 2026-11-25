@@ -32,7 +32,7 @@ export function EncumbranceBar({
                 className="mt-1 h-1.5 overflow-hidden rounded bg-hud-field"
             >
                 <div
-                    className={`h-full ${over ? 'bg-hud-danger' : 'bg-hud-gold-strong'}`}
+                    className={`h-full ${over ? 'bg-hud-danger' : 'bg-hud-crimson'}`}
                     style={{ width: `${percent}%` }}
                 />
             </div>

@@ -34,7 +34,7 @@ export function InspirationCardMark() {
     const t = useTranslations('inspiration');
 
     return (
-        <span title={t('card')} className="text-hud-gold">
+        <span title={t('card')} className="text-hud-crimson-fg">
             ✦
         </span>
     );
@@ -47,7 +47,7 @@ export function InspirationAttackOption({
     const t = useTranslations('inspiration');
 
     return (
-        <label className="mt-2 flex items-center gap-2 text-sm text-hud-gold">
+        <label className="mt-2 flex items-center gap-2 text-sm text-hud-ink">
             <Switch
                 checked={checked}
                 onCheckedChange={onChange}

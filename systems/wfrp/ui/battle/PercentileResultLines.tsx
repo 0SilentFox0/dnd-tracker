@@ -28,7 +28,7 @@ export function PercentileResultLines({
                 </div>
             )}
             {p.fortune && (
-                <div className="text-hud-gold">
+                <div className="text-hud-crimson-fg">
                     {p.fortune.kind === 'sl'
                         ? tf('usedSl')
                         : p.fortune.kind === 'notFail'
@@ -45,13 +45,13 @@ export function PercentileResultLines({
                 </div>
             )}
             {p.momentumUsed && (
-                <div className="text-hud-gold">{t('momentum.spent')}</div>
+                <div className="text-hud-crimson-fg">{t('momentum.spent')}</div>
             )}
             {p.momentumAdvantage && (
-                <div className="text-hud-gold">{t('momentum.advantage')}</div>
+                <div className="text-hud-crimson-fg">{t('momentum.advantage')}</div>
             )}
             {hit && (p.opposed ?? !!p.defender) && (
-                <div className="text-hud-gold">{t('momentum.gained')}</div>
+                <div className="text-hud-crimson-fg">{t('momentum.gained')}</div>
             )}
         </div>
     );

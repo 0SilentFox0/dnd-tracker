@@ -53,7 +53,7 @@ export function CorruptionBlock() {
                                 className="space-y-1 text-sm text-hud-bone"
                             >
                                 <p>
-                                    <span className="border-hud-border mr-2 rounded border px-1.5 text-xs text-hud-gold">
+                                    <span className="border-hud-border mr-2 rounded border px-1.5 text-xs text-hud-ink">
                                         {t(`kinds.${m.kind}`)}
                                     </span>
                                     {text(m.text)}

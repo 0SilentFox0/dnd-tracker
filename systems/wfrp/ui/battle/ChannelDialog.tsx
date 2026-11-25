@@ -30,7 +30,7 @@ export function ChannelDialog({
             title={t('title')}
             className={cn(HUD_SURFACE, 'border-white/25')}
         >
-            <div className="text-sm text-hud-gold">
+            <div className="text-sm text-hud-ink">
                 {t('target', { target: view.target, banked: view.banked })}
             </div>
             {view.error && (

@@ -26,7 +26,7 @@ export function SkillTreePanel({ manage }: PathPanelProps) {
                         className="hud-sc size-12 rounded-md border border-hud-line bg-hud-raised text-inherit"
                     />
                     <div className="min-w-0">
-                        <p className="text-[11px] text-hud-gold uppercase">
+                        <p className="text-[13px] text-hud-ink uppercase">
                             {t('personal')}
                         </p>
                         <h3 className="hud-sc text-base text-hud-ink">

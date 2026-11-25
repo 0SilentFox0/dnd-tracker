@@ -25,7 +25,7 @@ export function OptionCard({
             onClick={onSelect}
             className={cn(
                 'min-h-11 w-full rounded-lg border px-3 py-2 text-left text-sm',
-                selected ? 'border-hud-gold bg-hud-field' : 'border-hud-line'
+                selected ? 'border-hud-crimson bg-hud-field' : 'border-hud-line'
             )}
         >
             {children}
