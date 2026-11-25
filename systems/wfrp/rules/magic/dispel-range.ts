@@ -2,7 +2,7 @@ import type { LastCast } from '../slots';
 import { dispelRangeYards } from './dispel';
 
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
-import { cellDistance } from '@/lib/utils/battle/grid/geometry';
+import { cellDistance, gridOf } from '@/lib/utils/battle/grid/geometry';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -39,9 +39,12 @@ export function isDispelRange(
 
     const feet = cellFeetOf(rules);
 
+    const grid = gridOf(map);
+
     const reach = dispelRangeYards(dispeller);
 
     return spots.some(
-        (spot) => (cellDistance(from, spot) * feet) / FEET_PER_YARD <= reach
+        (spot) =>
+            (cellDistance(from, spot, grid) * feet) / FEET_PER_YARD <= reach
     );
 }

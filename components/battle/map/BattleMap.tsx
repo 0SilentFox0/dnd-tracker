@@ -31,7 +31,7 @@ import {
     followTarget,
     minimapViewport,
 } from '@/lib/utils/battle/camera';
-import { mapSize } from '@/lib/utils/battle/grid';
+import { gridOf, mapSize } from '@/lib/utils/battle/grid';
 import type {
     BattleMapActions,
     BattleMapView,
@@ -101,6 +101,7 @@ export function BattleMap({
     const { svgRef, preview, onStrokeStart } = useStrokePaint({
         painting,
         dims: { cols, rows },
+        grid: gridOf(map),
         onStroke: onPaintStroke,
     });
 

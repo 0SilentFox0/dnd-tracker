@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 import { skillTarget } from '../../rules/characteristics/derive';
-import {
-    engagedFoes,
-    engagementJournal,
-} from '../../rules/combat/engagement';
+import { engagedFoes, engagementJournal } from '../../rules/combat/engagement';
 import {
     chargeBand,
     sprintYards,
@@ -34,7 +31,7 @@ import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { currentOf, requireActor } from '@/lib/utils/battle/common/control';
 import { newBattleAction } from '@/lib/utils/battle/common/new-action';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
-import { cellDistance } from '@/lib/utils/battle/grid/geometry';
+import { cellDistance, gridOf } from '@/lib/utils/battle/grid/geometry';
 import { baseMovement } from '@/lib/utils/battle/grid/path';
 import { logFields } from '@/lib/utils/battle/log/lines';
 import { applyMainActionUsed } from '@/lib/utils/battle/participant/helpers';
@@ -244,7 +241,8 @@ export function movementMutation(
     if (!from || !to) throw reject(API_ERRORS.CHARGE_TOO_FAR);
 
     const yards = Math.round(
-        (cellDistance(from, to) * cellFeetOf(rules)) / yardsToFeet(1)
+        (cellDistance(from, to, gridOf(ctx.meta.map)) * cellFeetOf(rules)) /
+            yardsToFeet(1)
     );
 
     const band = chargeBand(chars, yards, tier);

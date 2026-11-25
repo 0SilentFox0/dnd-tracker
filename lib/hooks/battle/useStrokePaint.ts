@@ -10,7 +10,11 @@ import {
 
 import { DRAG_THRESHOLD } from '@/lib/hooks/common';
 import { cellAtScreenPoint, cellKey, cellLine } from '@/lib/utils/battle/grid';
-import type { BattleMapActions, GridPoint } from '@/types/battle-grid';
+import type {
+    BattleMapActions,
+    GridKind,
+    GridPoint,
+} from '@/types/battle-grid';
 
 interface Stroke {
     pointerId: number;
@@ -26,12 +30,14 @@ const NO_CELLS: ReadonlySet<string> = new Set();
 interface StrokePaintOptions {
     painting: boolean;
     dims: { cols: number; rows: number };
+    grid: GridKind;
     onStroke: BattleMapActions['onStroke'];
 }
 
 export function useStrokePaint({
     painting,
     dims,
+    grid,
     onStroke,
 }: StrokePaintOptions) {
     const { cols, rows } = dims;
@@ -84,11 +90,18 @@ export function useStrokePaint({
 
             const cell =
                 ctm &&
-                cellAtScreenPoint({ cols, rows }, ctm, e.clientX, e.clientY);
+                cellAtScreenPoint(
+                    { cols, rows },
+                    ctm,
+                    e.clientX,
+                    e.clientY,
+                    grid
+                );
 
             if (!cell || (cell.x === s.last.x && cell.y === s.last.y)) return;
 
-            for (const c of cellLine(s.last, cell)) s.cells.set(cellKey(c), c);
+            for (const c of cellLine(s.last, cell, grid))
+                s.cells.set(cellKey(c), c);
 
             s.last = cell;
             setPreview(new Set(s.cells.keys()));
@@ -128,7 +141,7 @@ export function useStrokePaint({
             window.removeEventListener('pointercancel', onCancel);
             drop();
         };
-    }, [painting, onStroke, cols, rows]);
+    }, [painting, onStroke, cols, rows, grid]);
 
     return { svgRef, preview, onStrokeStart };
 }

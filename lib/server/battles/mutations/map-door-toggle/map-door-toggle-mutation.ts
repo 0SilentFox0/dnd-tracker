@@ -5,7 +5,7 @@ import {
     isActive,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { canActNow, currentOf } from '@/lib/utils/battle/common/control';
-import { cellKey, cellsOf } from '@/lib/utils/battle/grid';
+import { cellKey, cellsOf, gridOf } from '@/lib/utils/battle/grid';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { baseDoorsOf } from '@/lib/utils/battle/map-storage/effective-map';
 import type {
@@ -106,6 +106,9 @@ export function mapDoorToggleMutation(
 
     if (!map)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
+
+    // doors are square-grid only (exempt in ratchets/grid-square-only.json)
+    if (gridOf(map) === 'hex') reject(REJECT.doorNotFound);
 
     const door = map.doors?.[body.edge];
 
