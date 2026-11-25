@@ -54,7 +54,11 @@ function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
                     alt=""
                     fill
                     sizes={phone && px > 0 ? `${px}px` : '100vw'}
-                    className="object-contain object-left-top"
+                    className={
+                        map.backgroundCols
+                            ? 'object-fill'
+                            : 'object-cover object-left-top'
+                    }
                     priority
                     {...imgProps}
                 />

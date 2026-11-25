@@ -192,6 +192,31 @@ describe('вибір маршруту', () => {
         );
     });
 
+    it('обходить союзника, якщо обхід коштує стільки ж, і проходить крізь нього, коли інакше не можна', () => {
+        const hero = at('h', { x: 0, y: 4 });
+
+        const ally = at('a', { x: 3, y: 4 });
+
+        const around = pathTo(wide, [hero, ally], hero, { x: 6, y: 4 }, 6) ?? [];
+
+        expect(around).toHaveLength(6);
+        expect(around.some((c) => c.x === 3 && c.y === 4)).toBe(false);
+
+        const corridor: BattleMapConfig = {
+            ...map,
+            cols: 5,
+            rows: 1,
+        };
+
+        const blocked = at('a', { x: 2, y: 0 });
+
+        const straight = at('h', { x: 0, y: 0 });
+
+        expect(
+            pathTo(corridor, [straight, blocked], straight, { x: 4, y: 0 }, 6)
+        ).toHaveLength(4);
+    });
+
     it('на hex теж найкоротший по прямій серед рівних', () => {
         const hex: BattleMapConfig = { ...wide, gridType: 'hex' };
 

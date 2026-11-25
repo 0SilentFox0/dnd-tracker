@@ -168,8 +168,10 @@ export function searchPaths(
 
     const seen = new Map([[cellKey(start), 0]]);
 
-    // Among equal-cost routes keep the geometrically shortest one (straight, not a detour).
+    // Among equal-cost routes prefer fewer occupied cells passed through, then the straightest.
     const length = new Map([[cellKey(start), 0]]);
+
+    const through = new Map([[cellKey(start), 0]]);
 
     const buckets: GridPoint[][] = [[start]];
 
@@ -197,9 +199,18 @@ export function searchPaths(
                     (length.get(curKey) ?? 0) +
                     Math.hypot(to.x - from.x, to.y - from.y);
 
+                const nextThrough =
+                    (through.get(curKey) ?? 0) +
+                    (fits(map, next, size, taken) ? 0 : 1);
+
+                const knownThrough = through.get(key) ?? Infinity;
+
                 if (
                     known === nextCost &&
-                    nextLength >= (length.get(key) ?? Infinity) - 1e-6
+                    (nextThrough > knownThrough ||
+                        (nextThrough === knownThrough &&
+                            nextLength >=
+                                (length.get(key) ?? Infinity) - 1e-6))
                 )
                     continue;
 
@@ -212,6 +223,7 @@ export function searchPaths(
 
                 seen.set(key, nextCost);
                 length.set(key, nextLength);
+                through.set(key, nextThrough);
                 parent.set(key, cur);
 
                 if (known === undefined) (buckets[nextCost] ??= []).push(next);

@@ -92,11 +92,27 @@ export function backgroundBox(
     const top = -(map.gridOffset?.y ?? 0) * cellPx * ky || 0;
 
     if (map.backgroundCols && aspect) {
-        const width = map.backgroundCols * cellPx * kx;
+        const span = gridMetrics(grid).size(map);
+
+        const fillTo = (size: number, edge: number, full: number) => {
+            const gap = full - (edge + size);
+
+            return gap > 0 && gap < cellPx ? size + gap : size;
+        };
+
+        const width = fillTo(
+            map.backgroundCols * cellPx * kx,
+            left,
+            (span.width / UNIT) * cellPx
+        );
 
         const height = map.backgroundRows
             ? map.backgroundRows * cellPx * ky
-            : width * aspect;
+            : fillTo(
+                  map.backgroundCols * cellPx * kx * aspect,
+                  top,
+                  (span.height / UNIT) * cellPx
+              );
 
         return { left, top, width, height };
     }
