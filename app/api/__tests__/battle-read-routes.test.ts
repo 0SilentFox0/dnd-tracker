@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { BATTLE_LOG_RECENT_EVENTS } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import {
     context,
@@ -258,7 +259,7 @@ describe('GET /battles/[battleId]', () => {
             { actionIndex: 3, resultText: 'Удар' },
         ]);
         expect(json.battleLogMode).toBeUndefined();
-        expect(deps.loadRecentEvents).toHaveBeenCalledWith('b1', 30);
+        expect(deps.loadRecentEvents).toHaveBeenCalledWith('b1', BATTLE_LOG_RECENT_EVENTS);
         expect(deps.saveBattle).not.toHaveBeenCalled();
     });
 
