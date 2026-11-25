@@ -160,8 +160,6 @@ html[data-palette="parchment"] { --fog-shadow: #5d4c38; --fog-light: #d9ccb0; --
 html[data-palette="frost"] { --fog-shadow: #53677c; --fog-light: #d4e2ee; --fog-flat: #3d5166; }
 html[data-palette="parchment"],
 html[data-palette="frost"] {
-  --reach-stroke: #0b7f75;
-  --range-stroke: #1f7a3a;
   --path-label-ink: #101820;
   --path-label-halo: #f6f1e4;
 }

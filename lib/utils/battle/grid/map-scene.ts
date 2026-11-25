@@ -696,6 +696,8 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
             currentId: current?.basicInfo.id ?? null,
             marks,
             range,
+            ...(range &&
+                aimCaster && { rangeCasterId: aimCaster.basicInfo.id }),
             reach:
                 steps && search && current
                     ? { search, steps, moverId: current.basicInfo.id }

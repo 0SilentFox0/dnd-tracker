@@ -206,7 +206,8 @@ describe('BattleMap', () => {
                 map={square}
                 participants={people}
                 view={{
-                    currentId: 'h',
+                    currentId: 'e',
+                    rangeCasterId: 'h',
                     range: { x: 0, y: 0, cols: 2, rows: 2 },
                 }}
             />

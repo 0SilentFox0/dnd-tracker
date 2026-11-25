@@ -63,7 +63,7 @@ export function useMapStageTokens({
 
     const range = view?.range ?? null;
 
-    const casterId = view?.currentId ?? undefined;
+    const casterId = view?.rangeCasterId;
 
     const routes = useMoveRoutes(map, participants);
 

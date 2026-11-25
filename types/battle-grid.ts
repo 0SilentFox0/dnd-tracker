@@ -246,6 +246,7 @@ export interface BattleMapView {
     currentId?: string | null;
     marks?: Map<string, BattleMapMark | number>;
     range?: GridWindow | null;
+    rangeCasterId?: string;
     reach?: MapReach | null;
     pathPreview?: PathPreview | null;
     trajectory?: {
