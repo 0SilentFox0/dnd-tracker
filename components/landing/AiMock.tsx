@@ -19,7 +19,7 @@ export function AiMock({ t }: { t: Translator }) {
                 <p className="text-hud-muted">{t('ai.mock.pageTail')}</p>
             </div>
             <div className="flex flex-col gap-2 bg-hud-page p-3 text-[11px] sm:text-xs">
-                <p className="flex items-center gap-1.5 text-hud-gold">
+                <p className="flex items-center gap-1.5 text-[var(--ld-gold)]">
                     <Sparkles aria-hidden className="size-3.5" />
                     <span className="hud-sc">{t('ai.mock.panelTitle')}</span>
                 </p>

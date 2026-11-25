@@ -105,7 +105,7 @@ export function Combat({ t }: { t: Translator }) {
                                 {a}
                             </li>
                         ))}
-                        <li className="rounded-full px-3 py-1 text-sm text-hud-gold">
+                        <li className="rounded-full px-3 py-1 text-sm text-[var(--ld-gold)]">
                             {t('combat.fx.more')}…
                         </li>
                     </ul>

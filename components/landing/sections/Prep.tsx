@@ -28,7 +28,7 @@ export function Prep({ t }: { t: Translator }) {
                             />
                         </MediaFrame>
                         <div className="space-y-3 px-1 pb-1">
-                            <p className="hud-sc text-xs tracking-[0.2em] text-hud-gold">
+                            <p className="hud-sc text-xs tracking-[0.2em] text-[var(--ld-gold)]">
                                 {p(id, 'eyebrow')}
                             </p>
                             <h3 className="hud-sc text-xl text-hud-ink">

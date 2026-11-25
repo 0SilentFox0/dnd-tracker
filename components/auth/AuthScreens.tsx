@@ -130,7 +130,7 @@ function SignUpCard() {
                         <HudButton
                             type="button"
                             onClick={reset}
-                            className="text-hud-gold hover:text-hud-ink"
+                            className="text-[var(--ld-gold)] hover:text-hud-ink"
                         >
                             {t('signUp.changeEmail')}
                         </HudButton>

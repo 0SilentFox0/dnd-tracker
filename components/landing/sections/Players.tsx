@@ -26,7 +26,7 @@ export function Players({ t }: { t: Translator }) {
                         />
                     </div>
                     <div className="space-y-3">
-                        <p className="hud-sc text-xs tracking-[0.2em] text-hud-gold">
+                        <p className="hud-sc text-xs tracking-[0.2em] text-[var(--ld-gold)]">
                             {p('phone', 'eyebrow')}
                         </p>
                         <h3 className="hud-sc text-2xl text-hud-ink">
@@ -43,7 +43,7 @@ export function Players({ t }: { t: Translator }) {
                         <Screen id="hero" alt={p('hero', 'alt')} />
                     </MediaFrame>
                     <div className="space-y-3">
-                        <p className="hud-sc text-xs tracking-[0.2em] text-hud-gold">
+                        <p className="hud-sc text-xs tracking-[0.2em] text-[var(--ld-gold)]">
                             {p('hero', 'eyebrow')}
                         </p>
                         <h3 className="hud-sc text-2xl text-hud-ink">

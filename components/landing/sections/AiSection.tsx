@@ -20,7 +20,7 @@ export function AiSection({ t }: { t: Translator }) {
                     </div>
                 </MediaFrame>
                 <div className="space-y-5">
-                    <p className="hud-sc text-sm tracking-[0.2em] text-hud-gold">
+                    <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                         {t('ai.eyebrow')}
                     </p>
                     <h2 className="hud-sc text-3xl text-hud-ink sm:text-4xl">

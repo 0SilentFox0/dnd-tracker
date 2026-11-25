@@ -236,7 +236,7 @@ function DmScreen({ t }: { t: Translator }) {
                         aria-hidden
                         className="ld-log hud-sc text-[10px] text-hud-bone sm:text-sm"
                     >
-                        <span className="text-hud-gold">
+                        <span className="text-[var(--ld-gold)]">
                             {t('combat.demo.logCaster')}
                         </span>{' '}
                         · {t('combat.demo.logText')}

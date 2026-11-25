@@ -42,7 +42,7 @@ export function Mechanics({ t }: { t: Translator }) {
                         >
                             <Icon
                                 aria-hidden
-                                className="mt-1 size-5 shrink-0 text-hud-gold transition group-hover:text-hud-ink"
+                                className="mt-1 size-5 shrink-0 text-[var(--ld-gold)] transition group-hover:text-hud-ink"
                             />
                             <div>
                                 <h3 className="hud-sc text-lg text-hud-ink">

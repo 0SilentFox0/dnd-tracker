@@ -22,7 +22,7 @@ export function Faq({ t }: { t: Translator }) {
                             {t(`faq.items.${key}.q`)}
                             <ChevronDown
                                 aria-hidden
-                                className="size-5 shrink-0 text-hud-gold transition group-open:rotate-180"
+                                className="size-5 shrink-0 text-[var(--ld-gold)] transition group-open:rotate-180"
                             />
                         </summary>
                         <p className="px-4 pb-4 text-hud-bone">
