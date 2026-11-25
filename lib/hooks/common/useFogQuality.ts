@@ -7,7 +7,7 @@ import { useReducedMotion } from './useReducedMotion';
 
 export type FogQuality = 'live' | 'still' | 'flat';
 
-export interface FogQualityInputs {
+interface FogQualityInputs {
     reduced: boolean;
     hidden: boolean;
     compact: boolean;

@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
+import { isTyping } from '@/lib/utils/world/is-typing';
+
 export type HudBlockKey = 'hero' | 'dock' | 'initiative' | 'tools';
 
-export interface HudVisibility {
+interface HudVisibility {
     all: boolean;
     collapsed: Partial<Record<HudBlockKey, boolean>>;
 }
@@ -100,10 +102,6 @@ export function useHudBlock(key: HudBlockKey, ignoreAll = false) {
 }
 
 export const useHudAllHidden = () => useHudState().all;
-
-const isTyping = (t: EventTarget | null) =>
-    t instanceof HTMLElement &&
-    (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 
 export function useHudHotkey() {
     useEffect(() => {
