@@ -1,7 +1,7 @@
 import { pickAttack } from './attack-reach';
 import { cellKey, footprint, parseCellKey } from './geometry';
 import { cellsOf, isOnMap, sizeOf } from './occupancy';
-import { moveBudget, reachable } from './path';
+import { moveBudget, type PathSearch, searchPaths } from './path';
 import { hazardCells, threatCells } from './terrain';
 
 import { isAttackable } from '@/lib/utils/abilities/engine/core/participants';
@@ -16,13 +16,13 @@ import type {
 
 export type CellMark = BattleMapMark;
 
-export function moveMarks(
+export function moveSearch(
     map: BattleMapConfig,
     participants: BattleParticipant[],
     mover: BattleParticipant,
     opts: { rules: Ruleset; dmUserId?: string | null }
-): Map<string, number> {
-    return reachable(
+): PathSearch {
+    return searchPaths(
         map,
         participants,
         mover,
@@ -31,6 +31,15 @@ export function moveMarks(
             mover
         )
     );
+}
+
+export function moveMarks(
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    mover: BattleParticipant,
+    opts: { rules: Ruleset; dmUserId?: string | null }
+): Map<string, number> {
+    return moveSearch(map, participants, mover, opts).cost;
 }
 
 export const isMoveMark = (m: CellMark | number | undefined): boolean =>
@@ -64,8 +73,24 @@ export function moveSteps(
     mover: BattleParticipant,
     opts: { rules: Ruleset; dmUserId?: string | null }
 ): Map<string, MoveStep> {
-    const anchors = moveMarks(map, participants, mover, opts);
+    return moveReach(map, participants, mover, opts).steps;
+}
 
+export function moveReach(
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    mover: BattleParticipant,
+    opts: { rules: Ruleset; dmUserId?: string | null }
+): { steps: Map<string, MoveStep>; search: PathSearch } {
+    const search = moveSearch(map, participants, mover, opts);
+
+    return { steps: stepsOf(search.cost, mover), search };
+}
+
+function stepsOf(
+    anchors: Map<string, number>,
+    mover: BattleParticipant
+): Map<string, MoveStep> {
     const size = sizeOf(mover);
 
     const from = mover.battleData.position;

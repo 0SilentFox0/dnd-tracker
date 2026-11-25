@@ -113,6 +113,7 @@
     "nextTurn": "Наступний хід"
   },
   "map": {
+    "pathCost": "{metres, number} м · {feet, number} фт",
     "hazardDefault": "Небезпечна зона",
     "hazardUntilEnd": "{label} · до кінця раунду {round}",
     "hazardRoundsLeft": "{label} · ще {rounds}",

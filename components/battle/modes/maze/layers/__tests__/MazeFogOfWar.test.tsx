@@ -3,6 +3,7 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BattleMap } from '@/components/battle/map';
+import { mockCanvas } from '@/components/battle/map/fog/__tests__/fog-canvas-mock';
 import {
     hero,
     mazeMap,
@@ -10,7 +11,20 @@ import {
     viewOf,
 } from '@/components/battle/modes/maze/__tests__/maze-fixtures';
 
-afterEach(cleanup);
+const quality = vi.hoisted(() => ({
+    value: 'live' as 'live' | 'still' | 'flat',
+}));
+
+vi.mock('@/lib/hooks/common', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/hooks/common')>()),
+    useFogQuality: () => quality.value,
+}));
+
+afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    quality.value = 'live';
+});
 
 vi.stubGlobal('ResizeObserver', RO);
 
@@ -106,5 +120,58 @@ describe('туман війни гравця', () => {
         );
 
         expect(spectator.container.querySelector('[data-maze-fow]')).toBeNull();
+    });
+
+    describe('хмарна текстура під маскою', () => {
+        const renderFog = () => {
+            mockCanvas();
+            vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue(
+                'data:image/png;base64,AA=='
+            );
+
+            return render(
+                <BattleMap
+                    map={map}
+                    participants={people}
+                    view={{ mode: viewOf(map, people, 'player') }}
+                />
+            );
+        };
+
+        it('live: зображення під тією самою маскою і повільний дрейф', () => {
+            const { container } = renderFog();
+
+            const cloud = container.querySelector('[data-maze-fow-cloud]')!;
+
+            const cover = container.querySelector('[data-maze-fow]')!;
+
+            expect(cloud.getAttribute('mask')).toBe(cover.getAttribute('mask'));
+            expect(
+                cloud.querySelector('image')?.getAttribute('href')
+            ).toContain('data:image/png');
+            expect(cloud.querySelector('animateTransform')).not.toBeNull();
+        });
+
+        it('still: статична хмара без анімації', () => {
+            quality.value = 'still';
+
+            const { container } = renderFog();
+
+            expect(
+                container.querySelector('[data-maze-fow-cloud]')
+            ).not.toBeNull();
+            expect(container.querySelector('animateTransform')).toBeNull();
+        });
+
+        it('flat: лише чорна маска, видимість не змінюється', () => {
+            quality.value = 'flat';
+
+            const { container } = renderFog();
+
+            expect(container.querySelector('[data-maze-fow-cloud]')).toBeNull();
+            expect(
+                container.querySelectorAll('[data-maze-visible]').length
+            ).toBeGreaterThan(0);
+        });
     });
 });

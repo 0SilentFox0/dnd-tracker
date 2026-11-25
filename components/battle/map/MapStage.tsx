@@ -4,8 +4,10 @@ import { memo, useMemo } from 'react';
 
 import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
+import { FogWindowContext } from './fog/fog-window-context';
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
+import { MapPathPreview } from './grid/MapPathPreview';
 import { DoorsLayer } from './layers/DoorsLayer';
 import { MapBackground } from './layers/MapBackground';
 import { StrokeLayer, TemplateLayer } from './layers/MapLayers';
@@ -187,12 +189,15 @@ function MapStageImpl({
                     />
                 )}
                 {edges && <EdgeEditor map={map} editing={edges} />}
+                <MapPathPreview preview={view?.pathPreview} />
                 {from && trajectory && (
                     <RangedHint from={from.box} trajectory={trajectory} />
                 )}
             </svg>
             {fog && (
-                <MapFogLayer map={map} cellPx={UNIT * pxPerUnit} {...fog} />
+                <FogWindowContext.Provider value={gridWindow}>
+                    <MapFogLayer map={map} cellPx={UNIT * pxPerUnit} {...fog} />
+                </FogWindowContext.Provider>
             )}
             {doorsTool?.menu && menuDoor && (
                 <DoorMenu

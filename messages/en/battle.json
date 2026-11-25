@@ -113,6 +113,7 @@
     "nextTurn": "Next turn"
   },
   "map": {
+    "pathCost": "{metres, number} m · {feet, number} ft",
     "hazardDefault": "Hazardous zone",
     "hazardUntilEnd": "{label} · until the end of round {round}",
     "hazardRoundsLeft": "{label} · {rounds} left",

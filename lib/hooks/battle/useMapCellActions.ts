@@ -77,7 +77,8 @@ export function useMapCellActions({
                     const next =
                         p &&
                         (l?.aiming ||
-                            l?.view.marks?.get(cellKey(p)) === 'target')
+                            l?.view.marks?.get(cellKey(p)) === 'target' ||
+                            l?.view.reach?.steps.has(cellKey(p)))
                             ? p
                             : null;
 

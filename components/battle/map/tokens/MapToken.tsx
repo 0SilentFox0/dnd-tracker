@@ -66,6 +66,7 @@ function MapTokenImpl({
         <div
             ref={glideRef}
             data-dormant={dormant || undefined}
+            data-dimmed={placement.dimmed || undefined}
             className="pointer-events-none absolute"
             style={{
                 ...tokenBoxStyle(box, mapSize),

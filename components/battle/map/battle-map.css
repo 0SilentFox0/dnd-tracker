@@ -25,6 +25,17 @@
   .battle-map-ember, .battle-map-flame, .battle-map-pulse { animation: none; }
 }
 
+@keyframes battle-map-zone-in { from { opacity: 0; } to { opacity: 1; } }
+.battle-map-zone { animation: battle-map-zone-in 160ms ease-out; }
+.battle-map-reach-outline { stroke: var(--reach-stroke, #2fd3c4); filter: drop-shadow(0 0 1px rgba(0, 0, 0, .7)); }
+.battle-map-range-outline { stroke: var(--range-stroke, #4ade80); filter: drop-shadow(0 0 1px rgba(0, 0, 0, .7)); }
+.battle-map-path-line { stroke: var(--reach-stroke, #2fd3c4); stroke-width: 3px; stroke-dasharray: 2 6; animation: battle-map-zone-in 160ms ease-out; }
+.battle-map-path-dot { fill: var(--reach-stroke, #2fd3c4); }
+.battle-map-path-label { fill: var(--path-label-ink, #f3f6fb); stroke: var(--path-label-halo, #0c1118); stroke-width: 3px; paint-order: stroke; }
+@media (prefers-reduced-motion: reduce) {
+  .battle-map-zone, .battle-map-path-line { animation: none; }
+}
+
 .map-spell-effect-cell { position: absolute; display: block; overflow: visible; }
 .map-spell-effect-cell .map-hud-fx { inset: 0; border-radius: 0; transform: scale(var(--map-fx-size, 1)); transform-origin: 50% 100%; opacity: var(--map-fx-intensity, 1); }
 .map-spell-effect-cell .map-hud-fx::before { box-shadow: none; }
@@ -268,6 +279,8 @@
 .maze-exit-swirl { transform-box: fill-box; transform-origin: center; animation: maze-exit-swirl 6s linear infinite; }
 
 [data-dormant] { opacity: 0.5; }
+[data-dimmed] { opacity: 0.55; transition: opacity 160ms ease-out; }
+@media (prefers-reduced-motion: reduce) { [data-dimmed] { transition: none; } }
 
 .map-token-z {
   position: absolute;

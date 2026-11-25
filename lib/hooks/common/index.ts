@@ -31,6 +31,7 @@ export { useExpiry } from './useExpiry';
 export type { UseFileImportReturn } from './useFileImport';
 export { useFileImport } from './useFileImport';
 export { useFlip } from './useFlip';
+export { type FogQuality, useFogCompact, useFogQuality } from './useFogQuality';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
 export { DESKTOP_QUERY, useIsMobile } from './useIsMobile';
@@ -45,11 +46,8 @@ export {
     type PagerControls,
     usePager,
 } from './usePager';
-export {
-    type PinchStep,
-    type PointerBind,
-    usePanPinch,
-} from './usePanPinch';
+export { usePaletteVersion } from './usePaletteVersion';
+export { type PinchStep, type PointerBind, usePanPinch } from './usePanPinch';
 export {
     type PlayerViewScope,
     resetPlayerViews,

@@ -1,4 +1,4 @@
-import type { CellMark, MoveStep } from '@/lib/utils/battle/grid';
+import type { CellMark, MoveStep, PathSearch } from '@/lib/utils/battle/grid';
 import type {
     BattleSceneState,
     NewBattleEvent,
@@ -21,6 +21,7 @@ export interface ModeView {
 export interface ModeMoveZone {
     steps: Map<string, MoveStep>;
     marks: Map<string, CellMark | number>;
+    search?: PathSearch;
 }
 
 export interface ModeAwareOutcome {

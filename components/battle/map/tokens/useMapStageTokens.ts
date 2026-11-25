@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { inWindow } from '../grid/grid-style';
 import type { MapPlacement } from './token-box';
 
 import { useMoveRoutes } from '@/lib/hooks/battle';
@@ -33,6 +34,18 @@ interface Params {
     wasDragged: () => boolean;
 }
 
+function isOutOfRange(
+    p: BattleParticipant,
+    range: BattleMapView['range'],
+    casterId: string | undefined
+) {
+    return (
+        !!range &&
+        p.basicInfo.id !== casterId &&
+        !inWindow(range, centreCell(p))
+    );
+}
+
 export function useMapStageTokens({
     map,
     participants,
@@ -47,6 +60,10 @@ export function useMapStageTokens({
     const onTokenClickProp = actions?.onTokenClick;
 
     const onCellHover = actions?.onCellHover;
+
+    const range = view?.range ?? null;
+
+    const casterId = view?.rangeCasterId;
 
     const routes = useMoveRoutes(map, participants);
 
@@ -74,12 +91,13 @@ export function useMapStageTokens({
                                       mapSize: size,
                                       pxPerUnit,
                                       route: routes.get(p.basicInfo.id),
+                                      dimmed: isOutOfRange(p, range, casterId),
                                   } satisfies MapPlacement,
                               },
                           ]
                         : [];
                 }),
-        [participants, modeView, size, pxPerUnit, routes]
+        [participants, modeView, size, pxPerUnit, routes, range, casterId]
     );
 
     const tokens = useMemo(
