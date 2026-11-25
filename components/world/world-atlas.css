@@ -58,7 +58,7 @@
 
 .atlas-pin[data-selected="true"] .atlas-seal {
   transform: translateY(-2px);
-  box-shadow: 0 0 0 2px var(--color-hud-crimson-fg), 0 0 0 4px var(--atlas-ink);
+  box-shadow: 0 0 0 2px var(--color-hud-accent-fg), 0 0 0 4px var(--atlas-ink);
 }
 
 .atlas-label {
@@ -113,7 +113,7 @@
 }
 
 .atlas-draft-dot[data-closable="true"] {
-  background: var(--color-hud-crimson-fg);
+  background: var(--color-hud-accent-fg);
   box-shadow: 0 0 0 2px var(--atlas-ink), 0 0 10px 3px rgba(255, 224, 138, 0.8);
 }
 
@@ -175,7 +175,7 @@
 }
 
 .atlas-hero-own {
-  box-shadow: 0 0 0 2px var(--color-hud-crimson-fg), 0 0 0 4px var(--atlas-ink);
+  box-shadow: 0 0 0 2px var(--color-hud-accent-fg), 0 0 0 4px var(--atlas-ink);
 }
 
 .atlas-top-layer { pointer-events: none; }
@@ -211,7 +211,7 @@
   width: 12px;
   height: 12px;
   border-radius: 9999px;
-  background: var(--color-hud-crimson-fg);
+  background: var(--color-hud-accent-fg);
   border: 2px solid var(--atlas-ink);
   cursor: grab;
   touch-action: none;
@@ -314,7 +314,7 @@
 .world-journey-result:hover,
 .world-journey-result:focus-within,
 .world-journey-result[data-current] {
-  border-color: var(--color-hud-crimson);
+  border-color: var(--color-hud-accent);
 }
 
 .world-journey-result[data-current] {
@@ -382,7 +382,7 @@
 .world-journey-icon:focus-visible,
 .world-journey-result[data-current] .world-journey-glyph {
   background: var(--color-hud-raised);
-  color: var(--color-hud-crimson-fg);
+  color: var(--color-hud-accent-fg);
 }
 
 .world-journey-empty {
@@ -516,7 +516,7 @@
 }
 
 .world-game-toolbar .world-editor-sections button[aria-pressed="true"] {
-  border-color: var(--color-hud-crimson);
+  border-color: var(--color-hud-accent);
 }
 
 .world-game-toolbar [data-slot="world-hero-eyes"] {
@@ -586,12 +586,12 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
   width: .55rem;
   height: .55rem;
   transform: rotate(45deg);
-  border: 1px solid var(--color-hud-crimson);
+  border: 1px solid var(--color-hud-accent);
   background: var(--color-hud-field);
 }
 
 .world-map-symbol-party {
-  background: var(--color-hud-crimson);
+  background: var(--color-hud-accent);
 }
 
 .world-map-symbol-fog {
@@ -614,7 +614,7 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
   width: 13px;
   height: 13px;
   transform: rotate(45deg);
-  border: 1px solid var(--color-hud-crimson);
+  border: 1px solid var(--color-hud-accent);
   border-radius: 2px;
   background: var(--color-hud-field);
 }
@@ -627,7 +627,7 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
 }
 
 .atlas-map[data-world-game] .atlas-pin[data-selected="true"] .atlas-seal {
-  background: var(--color-hud-crimson);
+  background: var(--color-hud-accent);
 }
 
 .atlas-map[data-world-game] .atlas-label,
@@ -652,7 +652,7 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
 .atlas-map[data-world-game] .atlas-hero[data-party] {
   z-index: 2;
   overflow: visible;
-  border: 2px solid var(--color-hud-crimson);
+  border: 2px solid var(--color-hud-accent);
   background: var(--color-hud-panel);
 }
 
@@ -665,7 +665,7 @@ html .world-game-toolbar [data-slot="world-hero-eyes"] [data-slot="select-trigge
   align-items: center;
   gap: .4rem;
   transform: translateX(-50%);
-  border-color: var(--color-hud-crimson);
+  border-color: var(--color-hud-accent);
   white-space: nowrap;
 }
 
@@ -989,7 +989,7 @@ body:has([data-shell-fit]) {
 .world-layer-select:hover,
 .world-layer-select:focus-visible,
 .world-layer-select[aria-pressed="true"] {
-  border-color: var(--color-hud-crimson);
+  border-color: var(--color-hud-accent);
 }
 
 .world-layer-select[aria-pressed="true"] {

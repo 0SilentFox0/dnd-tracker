@@ -71,7 +71,7 @@ export function MapFileDropzone({
                 className={cn(
                     'flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-dashed p-3 text-center text-sm text-hud-muted transition-colors hover:border-hud-muted',
                     over
-                        ? 'border-hud-crimson bg-hud-panel-2'
+                        ? 'border-hud-accent bg-hud-panel-2'
                         : 'border-hud-line bg-black/30'
                 )}
             >

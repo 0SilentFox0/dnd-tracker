@@ -188,7 +188,7 @@ export function DmMarkerBubble({ marker, actions }: DmMarkerBubbleProps) {
                             className={bubbleButton(
                                 false,
                                 m.redrawing
-                                    ? 'border-hud-crimson text-hud-ink'
+                                    ? 'border-hud-accent text-hud-ink'
                                     : undefined
                             )}
                             aria-pressed={m.redrawing}
