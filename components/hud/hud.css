@@ -60,7 +60,7 @@ html[data-palette] body,
 @keyframes hud-dropin { from { opacity: 0; transform: translateY(-60px) rotate(-200deg) scale(0.6); } }
 @keyframes hud-rise { from { opacity: 0; transform: translateY(16px) scale(0.94); letter-spacing: 0.3em; } }
 @keyframes hud-fade { from { opacity: 0; } }
-@keyframes hud-turn { 0% { transform: scale(.7); filter: brightness(.6); } 55% { transform: scale(1.12); box-shadow: 0 0 0 2px var(--hud-crimson), 0 0 22px 6px color-mix(in srgb, var(--hud-crimson) 65%, transparent); filter: brightness(1.35); } 100% { transform: none; } }
+@keyframes hud-turn { 0% { transform: scale(.7); filter: brightness(.6); } 55% { transform: scale(1.12); box-shadow: 0 0 0 2px var(--hud-accent), 0 0 22px 6px color-mix(in srgb, var(--hud-accent) 65%, transparent); filter: brightness(1.35); } 100% { transform: none; } }
 @keyframes hud-pop { from { opacity: 0; transform: scale(2); } }
 @keyframes hud-slash { from { transform: rotate(-20deg) scaleX(0); } }
 @keyframes hud-whoosh { from { transform: translateX(-160px); opacity: 0; } 60% { opacity: 1; } to { transform: translateX(120px); opacity: 0; } }
@@ -76,8 +76,8 @@ html[data-palette] body,
   --card-foreground: var(--hud-text, #c8beaf);
   --popover: var(--palette-panel, #18161a);
   --popover-foreground: var(--hud-text, #c8beaf);
-  --primary: var(--hud-crimson, #b3312c);
-  --primary-foreground: var(--hud-crimson-ink, #fbefe9);
+  --primary: var(--hud-accent, #c9b37a);
+  --primary-foreground: var(--hud-accent-ink, #1a140f);
   --secondary: var(--palette-panel-2, #1e1b20);
   --secondary-foreground: var(--hud-text, #c8beaf);
   --muted: var(--palette-panel-2, #1e1b20);
@@ -105,7 +105,7 @@ html[data-palette] body,
 .hud-page input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .hud-page [data-slot="empty-state"] { background: var(--palette-panel, rgba(17, 14, 11, 0.82)); }
 @keyframes hud-roll-settle {
-  0% { transform: scale(1.08); box-shadow: 0 0 0 1px var(--hud-crimson), 0 0 14px color-mix(in srgb, var(--hud-crimson) 70%, transparent); }
+  0% { transform: scale(1.08); box-shadow: 0 0 0 1px var(--hud-accent), 0 0 14px color-mix(in srgb, var(--hud-accent) 70%, transparent); }
   100% { transform: scale(1); box-shadow: 0 0 0 1px transparent, 0 0 0 transparent; }
 }
 @keyframes hud-roll-fade { from { opacity: 0; } to { opacity: 1; } }

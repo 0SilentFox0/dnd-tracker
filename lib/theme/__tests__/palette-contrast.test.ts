@@ -116,7 +116,7 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
     it('keeps accent-fg at AA on page, panel and panel-2', () => {
         const failures = SURFACES.slice(0, 3).flatMap((surfaceToken) => {
             const ratio = contrastRatio(
-                tokens['--hud-accent-fg'] ?? tokens['--hud-crimson-fg'],
+                tokens['--hud-accent-fg'],
                 tokens[surfaceToken]
             );
 
@@ -141,6 +141,15 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
         });
 
         expect(failures).toEqual([]);
+    });
+
+    it('keeps accent-ink at AA on the accent fill and accent-fg on inset', () => {
+        expect(
+            contrastRatio(tokens['--hud-accent-ink'], tokens['--hud-accent'])
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+            contrastRatio(tokens['--hud-accent-fg'], tokens['--palette-inset'])
+        ).toBeGreaterThanOrEqual(4.5);
     });
 
     it('keeps crimson-ink at AA on crimson', () => {
@@ -169,7 +178,7 @@ describe.each(PALETTES)('%s palette WCAG contrast', (id) => {
             page: tokens['--palette-page'],
             panel: tokens['--palette-panel'],
             inset: tokens['--palette-inset'],
-            crimson: tokens['--hud-crimson'],
+            accent: tokens['--hud-accent'],
             ink: tokens['--hud-ink'],
             muted: tokens['--hud-muted'],
         });

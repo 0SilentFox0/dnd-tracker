@@ -147,7 +147,7 @@ export function BattleResultScreen() {
                     ) : (
                         <Link
                             href={exitHref}
-                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-crimson bg-hud-crimson text-[17px] font-bold tracking-[.06em] text-hud-crimson-ink"
+                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-accent bg-hud-accent text-[17px] font-bold tracking-[.06em] text-hud-accent-ink"
                         >
                             {t('exit')}
                         </Link>

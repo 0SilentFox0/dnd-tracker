@@ -17,7 +17,7 @@ export interface PalettePreview {
     page: string;
     panel: string;
     inset: string;
-    crimson: string;
+    accent: string;
     ink: string;
     muted: string;
 }
@@ -27,7 +27,7 @@ export const PALETTE_PREVIEW: Record<PaletteId, PalettePreview> = {
         page: '#0d0a08',
         panel: '#1a140f',
         inset: '#110d0a',
-        crimson: '#b3312c',
+        accent: '#c9b37a',
         ink: '#efe5d2',
         muted: '#9b9080',
     },
@@ -35,7 +35,7 @@ export const PALETTE_PREVIEW: Record<PaletteId, PalettePreview> = {
         page: '#e9e1d1',
         panel: '#f1ebdf',
         inset: '#dbd0bc',
-        crimson: '#a12b28',
+        accent: '#7a5a0e',
         ink: '#1e1711',
         muted: '#64584b',
     },

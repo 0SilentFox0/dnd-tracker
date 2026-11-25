@@ -13,7 +13,7 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    'hud-sc text-[17px] hover:brightness-110 bg-hud-crimson text-hud-crimson-ink border border-hud-crimson-2 shadow-[inset_0_1px_0_rgba(255,255,255,.2),inset_0_-2px_0_rgba(0,0,0,.2)]',
+                    'hud-sc text-[17px] hover:brightness-110 bg-hud-accent text-hud-accent-ink border border-hud-accent-2 shadow-[inset_0_1px_0_rgba(255,255,255,.2),inset_0_-2px_0_rgba(0,0,0,.2)]',
                 destructive: `${OUTLINE} text-hud-crimson-fg`,
                 outline: OUTLINE,
                 secondary: OUTLINE,

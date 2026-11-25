@@ -31,7 +31,7 @@ export function PaletteCard({
             onClick={() => onSelect(id)}
             className={cn(
                 'h-auto flex-col items-stretch gap-2 whitespace-normal p-3',
-                selected && 'border-hud-crimson'
+                selected && 'border-hud-accent'
             )}
         >
             <span
@@ -49,7 +49,7 @@ export function PaletteCard({
                 />
                 <span
                     className="block h-3 w-1/2 rounded-sm"
-                    style={{ background: p.crimson }}
+                    style={{ background: p.accent }}
                 />
                 <span
                     className="block h-1.5 w-3/4 rounded-sm"

@@ -34,7 +34,7 @@ export function RoundBadge({ className }: { className?: string }) {
         <span
             data-tour="battle.topbar"
             className={cn(
-                `${HUD_GLASS} hud-sc flex items-center gap-2 border-l-2 border-l-hud-crimson text-sm text-hud-soft max-md:gap-1.5 max-md:text-xs`,
+                `${HUD_GLASS} hud-sc flex items-center gap-2 border-l-2 border-l-hud-accent text-sm text-hud-soft max-md:gap-1.5 max-md:text-xs`,
                 className
             )}
         >

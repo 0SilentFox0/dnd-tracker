@@ -15,7 +15,7 @@ import {
     MIN_CELL_PX,
 } from '@/lib/utils/battle/grid';
 
-const SLIDER = 'w-full accent-hud-crimson disabled:opacity-40';
+const SLIDER = 'w-full accent-hud-accent disabled:opacity-40';
 
 function RangeRow({
     id,

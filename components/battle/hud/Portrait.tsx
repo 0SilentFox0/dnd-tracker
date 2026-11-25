@@ -63,7 +63,7 @@ export function Portrait({
                 name.slice(0, 2)
             )}
             {extra && (
-                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-hud-crimson text-[10px] leading-none text-hud-crimson-ink">
+                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-hud-accent text-[10px] leading-none text-hud-accent-ink">
                     +
                 </span>
             )}

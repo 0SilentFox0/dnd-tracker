@@ -51,9 +51,9 @@
     border-radius: 10px;
 }
 .dashboard-hero-actions > .dashboard-primary {
-    border-color: var(--hud-crimson);
-    background: var(--hud-crimson);
-    color: var(--hud-crimson-ink);
+    border-color: var(--hud-accent);
+    background: var(--hud-accent);
+    color: var(--hud-accent-ink);
 }
 @media (max-width: 639px) {
     .campaign-dashboard { padding: 14px 12px; }

@@ -22,6 +22,8 @@
   --color-hud-good-dim: var(--hud-good-dim, #7fa86a);
   --color-hud-accent: var(--hud-accent, #c9b37a);
   --color-hud-accent-fg: var(--hud-accent-fg, #e6c25a);
+  --color-hud-accent-2: var(--hud-accent-2, #8f7a3f);
+  --color-hud-accent-ink: var(--hud-accent-ink, #1a140f);
   --color-hud-crimson: var(--hud-crimson, #b3312c);
   --color-hud-crimson-2: var(--hud-crimson-2, #7c1e1d);
   --color-hud-crimson-fg: var(--hud-crimson-fg, #e66a58);

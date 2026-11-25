@@ -37,7 +37,7 @@ export function CompendiumProgress({
                     className="h-2 overflow-hidden rounded-full bg-hud-line"
                 >
                     <div
-                        className="h-full bg-hud-crimson transition-[width]"
+                        className="h-full bg-hud-accent transition-[width]"
                         style={{
                             width: `${media.total > 0 ? Math.min(100, (done / media.total) * 100) : 0}%`,
                         }}

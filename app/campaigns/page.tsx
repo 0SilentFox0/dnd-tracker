@@ -305,7 +305,7 @@ export default async function CampaignsPage({
                                             {campaign.name}
                                         </h2>
                                         {isDM && (
-                                            <span className="shrink-0 rounded-full bg-hud-crimson px-2 text-[13px] text-hud-crimson-ink">
+                                            <span className="shrink-0 rounded-full bg-hud-accent px-2 text-[13px] text-hud-accent-ink">
                                                 {t('roles.dm')}
                                             </span>
                                         )}

@@ -175,7 +175,7 @@ export function BonusActionPicker({
                             type="button"
                             disabled={picked.length === 0 || isPending}
                             onClick={aiming.confirm}
-                            className="hud-sc flex h-12 w-full items-center justify-center border border-hud-crimson disabled:opacity-40"
+                            className="hud-sc flex h-12 w-full items-center justify-center border border-hud-accent disabled:opacity-40"
                         >
                             {t('bonus.confirm', { picked: picked.length, max })}
                         </HudButton>
