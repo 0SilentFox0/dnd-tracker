@@ -452,12 +452,7 @@
     "mode": "Tools mode",
     "modePlay": "Play",
     "modeEdit": "Edit map",
-    "grid": "Grid",
     "mapTools": "Map tools",
-    "gridShape": "Grid shape",
-    "gridSquare": "Square",
-    "gridHex": "Hex",
-    "gridHexSoon": "Hex grid is coming soon",
     "dmPanel": "DM panel",
     "close": "Close"
   },

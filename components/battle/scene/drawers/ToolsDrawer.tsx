@@ -7,7 +7,6 @@ import { Loader2, Sparkles } from 'lucide-react';
 
 import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
 import { BattleDrawer } from './BattleDrawer';
-import { GridShapePicker } from './GridShapePicker';
 import type { DrawerKey } from './rail-items';
 
 import { AudioDock } from '@/components/audio/AudioDock';
@@ -85,8 +84,6 @@ export function ToolsContent({
     } = useBattleScene();
 
     const [mode, setMode] = useState<'play' | 'edit'>('play');
-
-    const [gridOpen, setGridOpen] = useState(false);
 
     const confirm = useConfirm();
 
@@ -203,20 +200,6 @@ export function ToolsContent({
                         <h3 className={SECTION}>{td('mapTools')}</h3>
                         <div ref={slots?.tools} className={MAP_TOOLS_SLOT} />
                     </section>
-                    {isDM && !readOnly && mode === 'edit' && (
-                        <section className="flex flex-col gap-2">
-                            <h3 className={SECTION}>{td('gridShape')}</h3>
-                            <HudButton
-                                type="button"
-                                aria-expanded={gridOpen}
-                                onClick={() => setGridOpen((o) => !o)}
-                                className="h-11 rounded-xl border border-white/20 text-sm text-[var(--ink)]"
-                            >
-                                {td('grid')}
-                            </HudButton>
-                            {gridOpen && <GridShapePicker />}
-                        </section>
-                    )}
                 </>
             )}
             <section className="flex flex-col gap-2">
