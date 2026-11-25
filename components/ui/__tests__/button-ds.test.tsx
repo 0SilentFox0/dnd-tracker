@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 
 vi.mock('next/link', () => ({
     default: ({ href, children, ...rest }: Record<string, unknown>) => (
@@ -25,6 +25,12 @@ describe('button DS', () => {
 
         expect(b.getAttribute('data-variant')).toBe('outline');
         expect(b.getAttribute('data-size')).toBe('sm');
+    });
+
+    it('every variant carries a hover class', () => {
+        for (const variant of ['default', 'outline', 'secondary', 'destructive', 'ghost', 'link'] as const) {
+            expect(buttonVariants({ variant })).toMatch(/hover:/);
+        }
     });
 
     it('HudChipTabs marks only the active link as current page', () => {

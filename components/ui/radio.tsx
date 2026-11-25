@@ -10,7 +10,7 @@ function Radio({
         <input
             type="radio"
             data-slot="radio"
-            className={cn('shrink-0', className)}
+            className={cn('ds-interactive shrink-0', className)}
             {...props}
         />
     );

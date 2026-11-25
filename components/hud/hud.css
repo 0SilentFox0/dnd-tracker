@@ -182,3 +182,10 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
   mask: linear-gradient(#000,#000) left center/calc(50% - 10px) 1px no-repeat,
         linear-gradient(#000,#000) right center/calc(50% - 10px) 1px no-repeat,
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M5 0L10 5L5 10L0 5Z'/%3E%3C/svg%3E") center/10px 10px no-repeat; }
+
+.ds-interactive { transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease; }
+@media (hover: hover) {
+  .hud-range:not(:disabled):hover::-webkit-slider-thumb { border-color: var(--hud-accent); }
+  .hud-range:not(:disabled):hover::-moz-range-thumb { border-color: var(--hud-accent); }
+}
+.hud-range::-webkit-slider-thumb { transition: border-color .15s ease, transform .15s ease; }

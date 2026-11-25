@@ -18,7 +18,7 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ref={ref}
             type="button"
             data-slot="hud-button"
-            className={cn('cursor-pointer', className)}
+            className={cn('ds-interactive cursor-pointer', className)}
             {...props}
         />
     )
