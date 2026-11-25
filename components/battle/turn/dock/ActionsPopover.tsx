@@ -50,6 +50,7 @@ export function ActionsPopover({
                 side="top"
                 align="center"
                 sideOffset={10}
+                collisionPadding={12}
                 aria-label={title ?? t('panelTitle')}
                 className="hud-glass w-[min(420px,92vw)] p-3"
             >

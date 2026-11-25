@@ -73,7 +73,11 @@ export const InitiativeTrack = memo(function InitiativeTrack({
         <div
             ref={track}
             data-tour="battle.initiative"
-            className="pointer-events-none relative flex h-[76px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-1 *:pointer-events-auto [scrollbar-width:none] *:first:ml-auto *:last:mr-auto"
+            onWheel={(e) => {
+                if (e.deltaY && !e.shiftKey)
+                    e.currentTarget.scrollLeft += e.deltaY;
+            }}
+            className="pointer-events-none relative flex h-[84px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-6 *:pointer-events-auto sm:h-[100px] sm:pb-7 [scrollbar-width:none] *:first:ml-auto *:last:mr-auto"
         >
             {queue.map((e, i) => {
                 if (e.kind === 'round')
@@ -138,7 +142,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                             {near && (
                                 <small
                                     className={cn(
-                                        'hud-sc max-w-14 truncate text-[10px] leading-none text-[var(--hud-muted)]',
+                                        'hud-sc max-w-14 truncate text-[10px] leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]',
                                         !e.current && 'max-sm:hidden'
                                     )}
                                 >

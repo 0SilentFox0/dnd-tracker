@@ -57,7 +57,7 @@ export function ActionDock({
             className={cn(
                 'hud-sc flex size-16 shrink-0 max-md:h-[58px] max-md:w-14 flex-col items-center justify-center gap-0.5 rounded-xl border text-[13px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                 exhausted
-                    ? 'border-white/25 bg-black/55 text-[var(--ink)]'
+                    ? HUD_GLASS
                     : 'border-[var(--gold)] bg-[var(--gold)] text-[#2a1d05]'
             )}
         >
