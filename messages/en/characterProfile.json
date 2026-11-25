@@ -224,7 +224,11 @@
   },
   "basic": {
     "toClasses": "Switch to classes",
-    "delete": "Delete character"
+    "delete": "Delete character",
+    "sections": {
+      "identity": "Identity",
+      "portrait": "Portrait"
+    }
   },
   "editor": {
     "loading": "Loading the editor…",

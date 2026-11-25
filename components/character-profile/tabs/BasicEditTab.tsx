@@ -7,7 +7,6 @@ import { useProfile } from '../ProfileContext';
 
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import { CharacterHpPreview } from '@/components/characters/stats/CharacterHpPreview';
-import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
@@ -29,9 +28,7 @@ export function BasicEditTab({
 
     const t = useTranslations('characterProfile.basic');
 
-    const tc = useTranslations('common.tabs');
-
-    const { campaignId, sheet } = useProfile();
+        const { campaignId, sheet } = useProfile();
 
     const classMode = useClassMode(campaignId);
 
@@ -76,7 +73,7 @@ export function BasicEditTab({
 
     return (
         <div className="space-y-5">
-            <HudSection panel title={tc('basic')}>
+            <div className="space-y-3">
                 <CharacterBasicInfo
                     basicInfo={form.basicInfo}
                     campaignMembers={options.members}
@@ -100,9 +97,9 @@ export function BasicEditTab({
                         {t('toClasses')}
                     </Button>
                 )}
-            </HudSection>
+            </div>
             <CharacterHpPreview hp={hp} />
-            <div className="flex justify-end border-t border-hud-line pt-4">
+            <div className="flex justify-end border-t border-hud-rule pt-4">
                 <Button
                     type="button"
                     variant="destructive"

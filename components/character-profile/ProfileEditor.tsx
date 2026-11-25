@@ -140,7 +140,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                         )
                     }
                 />
-                <div className="min-w-0 flex-1">
+                <div className="mx-auto min-w-0 w-full max-w-[860px] flex-1">
                     {form.status.error && (
                         <FormAlert className="mx-4">
                             {form.status.error}
@@ -293,7 +293,6 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                           ) : (
                                               <div className="space-y-5">
                                                   <HudSection
-                                                      panel
                                                       title={t(
                                                           'editor.spellAbility'
                                                       )}
@@ -359,7 +358,6 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                           content: (
                                               <div className="space-y-5">
                                                   <HudSection
-                                                      panel
                                                       title={t('tabs.things')}
                                                   >
                                                       <CharacterArtifactsSection
