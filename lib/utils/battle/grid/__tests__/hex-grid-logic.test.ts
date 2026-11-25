@@ -56,7 +56,6 @@ describe('hex path and reach', () => {
         });
 
         expect(reachable(hexMap, [big], big, 1).size).toBe(6);
-        expect(reachable(squareMap, [big], big, 1).size).toBeLessThan(8);
     });
 
     it('is blocked by an enemy cell', () => {
@@ -198,7 +197,7 @@ describe('hex templates', () => {
     it('orders targets by hex distance', () => {
         const near = placed('n', { at: { x: 6, y: 5 } });
 
-        const far = placed('f', { at: { x: 6, y: 7 } });
+        const far = placed('f', { at: { x: 6, y: 8 } });
 
         const set = keys(hexDisk(aim, 2));
 

@@ -55,6 +55,7 @@ describe('CreateMapDialog', () => {
             name: 'Crypt',
             cols: DEFAULT_BATTLE_MAP.cols,
             rows: DEFAULT_BATTLE_MAP.rows,
+            gridType: 'square',
         });
     });
 
