@@ -142,6 +142,27 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'handoff',
     },
     {
+        route: 'campaigns/[id]/quests',
+        methods: ['GET', 'POST'],
+        task: 4,
+        adapter: 'handoffs/quests',
+        state: 'handoff',
+    },
+    {
+        route: 'campaigns/[id]/quests/[questId]',
+        methods: ['DELETE', 'PUT'],
+        task: 4,
+        adapter: 'handoffs/quests',
+        state: 'handoff',
+    },
+    {
+        route: 'campaigns/[id]/quests/[questId]/tracking',
+        methods: ['PUT'],
+        task: 4,
+        adapter: 'handoffs/quests',
+        state: 'handoff',
+    },
+    {
         route: 'campaigns/[id]/acquaintances',
         methods: ['GET', 'POST'],
         task: 4,
@@ -1289,11 +1310,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         adapter: 'show/puzzle, player route without assistant adapter',
         state: 'planned',
     },
-    ...(
-        [
-            ['/play', ['POST']],
-        ] as const
-    ).map(([suffix, methods]) => ({
+    ...([['/play', ['POST']]] as const).map(([suffix, methods]) => ({
         route: `campaigns/[id]/sounds${suffix}`,
         methods,
         task: 0,
