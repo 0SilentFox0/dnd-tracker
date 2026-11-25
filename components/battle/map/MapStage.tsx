@@ -4,6 +4,7 @@ import { memo, useMemo } from 'react';
 
 import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
+import { FogWindowContext } from './fog/fog-window-context';
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
 import { MapPathPreview } from './grid/MapPathPreview';
@@ -194,7 +195,9 @@ function MapStageImpl({
                 )}
             </svg>
             {fog && (
-                <MapFogLayer map={map} cellPx={UNIT * pxPerUnit} {...fog} />
+                <FogWindowContext.Provider value={gridWindow}>
+                    <MapFogLayer map={map} cellPx={UNIT * pxPerUnit} {...fog} />
+                </FogWindowContext.Provider>
             )}
             {doorsTool?.menu && menuDoor && (
                 <DoorMenu

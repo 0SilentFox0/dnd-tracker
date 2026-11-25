@@ -1,10 +1,15 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useContext, useMemo } from 'react';
+
+import { FogWindowContext } from './fog-window-context';
+import { FogSurface } from './FogSurface';
 
 import { revealedHas } from '@/lib/utils/battle/fog/revealed-runs';
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import type { BattleMapConfig, RevealedRun } from '@/types/battle-grid';
+
+const NO_CELLS: ReadonlySet<string> = new Set();
 
 export function MapFogLayer({
     map,
@@ -23,56 +28,37 @@ export function MapFogLayer({
     explored: ReadonlySet<string>;
     dmEditing: boolean;
 }) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const viewport = useContext(FogWindowContext);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
+    const dmReveal = dmEditing && mode === 'reveal';
 
-        const context = canvas?.getContext('2d');
+    const shown = useMemo(() => {
+        if (dmEditing && !dmReveal) return null;
 
-        if (!canvas || !context || mode === 'off') return;
+        if (!dmReveal) return visible;
 
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const cells = new Set<string>();
 
-        const width = map.cols * cellPx;
+        for (let y = 0; y < map.rows; y++)
+            for (let x = 0; x < map.cols; x++)
+                if (revealedHas(revealed, x, y)) cells.add(cellKey({ x, y }));
 
-        const height = map.rows * cellPx;
-
-        canvas.width = Math.ceil(width * dpr);
-        canvas.height = Math.ceil(height * dpr);
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-        context.setTransform(dpr, 0, 0, dpr, 0, 0);
-        context.clearRect(0, 0, width, height);
-
-        for (let y = 0; y < map.rows; y++) {
-            for (let x = 0; x < map.cols; x++) {
-                const key = cellKey({ x, y });
-
-                const isVisible = dmEditing
-                    ? mode === 'reveal'
-                        ? revealedHas(revealed, x, y)
-                        : true
-                    : visible.has(key);
-
-                if (isVisible) continue;
-
-                context.fillStyle = explored.has(key)
-                    ? 'rgba(0, 0, 0, 0.48)'
-                    : 'rgba(0, 0, 0, 0.88)';
-                context.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
-            }
-        }
-    }, [map, cellPx, mode, revealed, visible, explored, dmEditing]);
+        return cells;
+    }, [dmEditing, dmReveal, visible, revealed, map.cols, map.rows]);
 
     if (mode === 'off') return null;
 
     return (
-        <canvas
-            ref={canvasRef}
+        <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
             data-map-fog-layer
-        />
+        >
+            <FogSurface
+                grid={{ cols: map.cols, rows: map.rows, cellPx, window: viewport }}
+                visible={shown}
+                explored={dmEditing ? NO_CELLS : explored}
+            />
+        </div>
     );
 }

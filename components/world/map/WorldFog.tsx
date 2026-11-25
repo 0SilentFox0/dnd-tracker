@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from 'react';
 
+import { useFogQuality } from '@/lib/hooks/common';
 import {
-    createWorldCloudMotion,
-    worldCloudTexture,
-} from './world-cloud-texture';
-
+    acquireCloudMotion,
+    type CloudMotion,
+} from '@/lib/utils/canvas/fog/cloud-motion';
+import { cloudTexture } from '@/lib/utils/canvas/fog/cloud-texture';
+import { subscribe } from '@/lib/utils/canvas/ticker';
 import type { RevealShape } from '@/types/world';
 
 const FADE_MS = 400;
@@ -22,8 +24,6 @@ const CLOUD_EDGE_FEATHER = 0.15;
 const CLOUD_MAX_PIXELS = 580_000;
 
 const CLOUD_PIXEL_SCALE = 0.72;
-
-const DRIFT_FRAME_MS = 1000 / 30;
 
 const MASK_PAD = 0.2;
 
@@ -137,8 +137,12 @@ export function WorldFog({
     crop,
     zoom,
     offset,
-    still = false,
+    still: stillProp = false,
 }: WorldFogProps) {
+    const quality = useFogQuality();
+
+    const still = stillProp || quality !== 'live';
+
     const ref = useRef<HTMLCanvasElement>(null);
 
     const seen = useRef(shapes.length);
@@ -150,13 +154,11 @@ export function WorldFog({
         feathered: HTMLCanvasElement;
     } | null>(null);
 
-    const motionRef = useRef<
-        ReturnType<typeof createWorldCloudMotion> | undefined
-    >(undefined);
+    const motionRef = useRef<CloudMotion | null | undefined>(undefined);
 
     useEffect(
         () => () => {
-            motionRef.current?.dispose();
+            motionRef.current?.release();
             motionRef.current = undefined;
         },
         []
@@ -224,7 +226,7 @@ export function WorldFog({
         const fresh = revealAnimation?.first ?? shapes.length;
 
         if (cropped && motionRef.current === undefined)
-            motionRef.current = createWorldCloudMotion();
+            motionRef.current = acquireCloudMotion();
 
         const motion = cropped ? motionRef.current : null;
 
@@ -362,7 +364,7 @@ export function WorldFog({
             if (cropped) {
                 if (motion?.render(still ? 0 : now / 1000)) cloud = motion.canvas;
                 else {
-                    if (texture === undefined) texture = worldCloudTexture();
+                    if (texture === undefined) texture = cloudTexture();
 
                     cloud = texture;
                 }
@@ -457,61 +459,53 @@ export function WorldFog({
                   )
                 : 1;
 
-        let frame = 0;
-
-        let lastPaint = start;
-
-        let dirty = false;
+        let unsubscribe: (() => void) | null = null;
 
         let onScreen = true;
 
         const running = () => onScreen && !document.hidden;
 
+        const stop = () => {
+            unsubscribe?.();
+            unsubscribe = null;
+        };
+
         const tick = (now: number) => {
-            frame = 0;
+            if (!running()) {
+                stop();
+
+                return;
+            }
 
             const progress = revealAt(now);
 
-            const animating = progress < 1;
-
-            if (animating || dirty || now - lastPaint >= DRIFT_FRAME_MS - 1) {
-                paint(progress, now);
-                lastPaint = now;
-                dirty = false;
-            }
+            paint(progress, now);
 
             if (progress === 1 && reveal.current === revealAnimation)
                 reveal.current = null;
 
-            if (animating || drift) schedule();
+            if (progress === 1 && !drift) stop();
         };
 
         function schedule() {
-            if (!frame && running()) frame = requestAnimationFrame(tick);
+            if (!unsubscribe && running())
+                unsubscribe = subscribe(tick, { fps: 30 });
         }
 
         paint(revealAt(start), start);
 
         requestPaint.current = () => {
-            if (!running()) {
-                dirty = true;
-
-                return;
-            }
+            if (!running()) return;
 
             const now = performance.now();
 
             paint(revealAt(now), now);
-            lastPaint = now;
         };
 
         if (revealAt(start) < 1 || drift) schedule();
 
         const resume = () => {
-            if (!running()) return;
-
-            dirty = true;
-            schedule();
+            if (running()) schedule();
         };
 
         const observer =
@@ -527,7 +521,7 @@ export function WorldFog({
 
         return () => {
             requestPaint.current = null;
-            cancelAnimationFrame(frame);
+            stop();
             observer?.disconnect();
             document.removeEventListener('visibilitychange', resume);
         };

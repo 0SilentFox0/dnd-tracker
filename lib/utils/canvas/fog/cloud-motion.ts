@@ -1,93 +1,4 @@
-const TEXTURE_WIDTH = 224;
-
-const TEXTURE_HEIGHT = 144;
-
-let texture: HTMLCanvasElement | null = null;
-
-const mix = (a: number, b: number, t: number) => a + (b - a) * t;
-
-function ease(value: number) {
-    return value * value * (3 - 2 * value);
-}
-
-function smoothStep(from: number, to: number, value: number) {
-    return ease(Math.min(1, Math.max(0, (value - from) / (to - from))));
-}
-
-function grain(x: number, y: number, seed: number) {
-    const value = Math.sin(x * 127.1 + y * 311.7 + seed * 74.7) * 43758.5453;
-
-    return value - Math.floor(value);
-}
-
-function noise(x: number, y: number, seed: number) {
-    const ix = Math.floor(x);
-
-    const iy = Math.floor(y);
-
-    const u = ease(x - ix);
-
-    const v = ease(y - iy);
-
-    return mix(
-        mix(grain(ix, iy, seed), grain(ix + 1, iy, seed), u),
-        mix(grain(ix, iy + 1, seed), grain(ix + 1, iy + 1, seed), u),
-        v
-    );
-}
-
-export function worldCloudTexture() {
-    if (texture) return texture;
-
-    const canvas = document.createElement('canvas');
-
-    canvas.width = TEXTURE_WIDTH;
-    canvas.height = TEXTURE_HEIGHT;
-
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) return null;
-
-    const image = ctx.createImageData(canvas.width, canvas.height);
-
-    for (let y = 0; y < canvas.height; y++) {
-        const v = y / canvas.height;
-
-        for (let x = 0; x < canvas.width; x++) {
-            const u = x / canvas.width;
-
-            const warp = (noise(u * 2.2, v * 2.2, 5) - 0.5) * 0.3;
-
-            const px = u + warp;
-
-            const py = v - warp * 0.72;
-
-            const cloud =
-                noise(px * 3.5, py * 3.5, 19) * 0.46 +
-                noise(px * 6.8, py * 6.8, 23) * 0.29 +
-                noise(px * 13, py * 13, 31) * 0.17 +
-                noise(px * 24, py * 24, 47) * 0.08;
-
-            const shade = smoothStep(0.25, 0.71, cloud);
-
-            const moon = 1 - smoothStep(0.05, 1, u * 0.68 + v * 0.58);
-
-            const depth = smoothStep(0.36, 0.96, v);
-
-            const i = (y * canvas.width + x) * 4;
-
-            image.data[i] = 68 + shade * 116 + moon * 24 - depth * 17;
-            image.data[i + 1] = 75 + shade * 118 + moon * 25 - depth * 14;
-            image.data[i + 2] = 99 + shade * 123 + moon * 34 - depth * 11;
-            image.data[i + 3] = 255;
-        }
-    }
-
-    ctx.putImageData(image, 0, 0);
-    texture = canvas;
-
-    return texture;
-}
+import { DEFAULT_FOG_PALETTE, type FogPalette } from './cloud-texture';
 
 const VERTEX = `#version 300 es
 in vec2 position;
@@ -101,6 +12,9 @@ const FRAGMENT = `#version 300 es
 precision highp float;
 in vec2 uv;
 uniform float time;
+uniform vec3 uShadow;
+uniform vec3 uLight;
+uniform float uMoon;
 out vec4 color;
 
 float hash(vec2 p) {
@@ -138,9 +52,9 @@ void main() {
     float wisps = clouds(p * 7.9 - warp * 1.05 + vec2(time * .17, -time * .21));
     float shade = smoothstep(.25, .75, banks * .78 + wisps * .22);
     float reflection = smoothstep(.49, .85, wisps) * smoothstep(.35, .7, banks);
-    float moon = 1. - smoothstep(.12, 1., uv.x * .73 + uv.y * .56);
-    vec3 shadow = vec3(.17, .20, .28) + moon * vec3(.09, .10, .15);
-    vec3 light = vec3(.66, .70, .81) + moon * vec3(.08, .07, .08);
+    float moon = (1. - smoothstep(.12, 1., uv.x * .73 + uv.y * .56)) * uMoon;
+    vec3 shadow = uShadow + moon * vec3(.09, .10, .15);
+    vec3 light = uLight + moon * vec3(.08, .07, .08);
     color = vec4(mix(shadow, light, shade) + reflection * .1, 1.);
 }`;
 
@@ -159,7 +73,24 @@ function compile(gl: WebGL2RenderingContext, type: number, source: string) {
     return null;
 }
 
-export function createWorldCloudMotion() {
+interface SharedContext {
+    canvas: HTMLCanvasElement;
+    render: (seconds: number, palette: FogPalette) => boolean;
+    destroy: () => void;
+    refs: number;
+}
+
+let shared: SharedContext | null = null;
+
+function createShared(): SharedContext | null {
+    try {
+        return buildShared();
+    } catch {
+        return null;
+    }
+}
+
+function buildShared(): SharedContext | null {
     const canvas = document.createElement('canvas');
 
     canvas.width = 256;
@@ -212,23 +143,80 @@ export function createWorldCloudMotion() {
 
     const time = gl.getUniformLocation(program, 'time');
 
+    const shadow = gl.getUniformLocation(program, 'uShadow');
+
+    const light = gl.getUniformLocation(program, 'uLight');
+
+    const moon = gl.getUniformLocation(program, 'uMoon');
+
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
     return {
         canvas,
-        render(seconds: number) {
+        refs: 0,
+        render(seconds, palette) {
             if (gl.isContextLost()) return false;
 
             gl.uniform1f(time, seconds);
+            gl.uniform3f(
+                shadow,
+                palette.shadow[0] / 255,
+                palette.shadow[1] / 255,
+                palette.shadow[2] / 255
+            );
+            gl.uniform3f(
+                light,
+                palette.light[0] / 255,
+                palette.light[1] / 255,
+                palette.light[2] / 255
+            );
+            gl.uniform1f(moon, palette.moon);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
 
             return true;
         },
-        dispose() {
+        destroy() {
             gl.deleteBuffer(buffer);
             gl.deleteProgram(program);
             gl.getExtension('WEBGL_lose_context')?.loseContext();
+        },
+    };
+}
+
+export interface CloudMotion {
+    canvas: HTMLCanvasElement;
+    render: (seconds: number, palette?: FogPalette) => boolean;
+    release: () => void;
+}
+
+/** Refcounted: the one WebGL context lives until the last user releases it; consume `canvas` right after `render`. */
+export function acquireCloudMotion(): CloudMotion | null {
+    shared ??= createShared();
+
+    const context = shared;
+
+    if (!context) return null;
+
+    context.refs += 1;
+
+    let released = false;
+
+    return {
+        canvas: context.canvas,
+        render: (seconds, palette = DEFAULT_FOG_PALETTE) =>
+            !released && context.render(seconds, palette),
+        release() {
+            if (released) return;
+
+            released = true;
+            context.refs -= 1;
+
+            if (context.refs > 0) return;
+
+            context.destroy();
+
+            if (shared === context) shared = null;
         },
     };
 }
