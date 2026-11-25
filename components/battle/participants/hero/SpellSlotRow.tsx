@@ -1,20 +1,24 @@
 'use client';
 
+import { type CSSProperties } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { HudButton } from '@/components/hud';
+import { HUD_GLASS, HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
-import type { SlotView } from '@/lib/utils/battle/view';
+import { slotRingOffset,type SlotView } from '@/lib/utils/battle/view';
 
-export function SpellSlotRow({
-    slots,
-    selected,
-    onSelect,
-}: {
+export const SLOT_RING_RADIUS = 80;
+
+const RING_SLOT = 38;
+
+interface Props {
     slots: SlotView[];
     selected: number | null;
     onSelect(level: number): void;
-}) {
+    ring?: { cx: number; cy: number };
+}
+
+export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
     const t = useTranslations('battle.hero.slots');
 
     if (slots.length === 0) return null;
@@ -23,15 +27,27 @@ export function SpellSlotRow({
         <div
             role="group"
             aria-label={t('title')}
-            className="flex flex-wrap gap-1"
+            className={ring ? 'absolute inset-0' : 'flex flex-wrap gap-1'}
         >
-            {slots.map((s) => {
+            {slots.map((s, i) => {
                 const active = selected === s.level;
+
+                let style: CSSProperties | undefined;
+
+                if (ring) {
+                    const o = slotRingOffset(i, slots.length, SLOT_RING_RADIUS);
+
+                    style = {
+                        left: ring.cx + o.x - RING_SLOT / 2,
+                        top: ring.cy + o.y - RING_SLOT / 2,
+                    };
+                }
 
                 return (
                     <HudButton
                         key={s.pact ? 'pact' : s.level}
                         type="button"
+                        style={style}
                         aria-pressed={active}
                         aria-label={t(s.pact ? 'pactLabel' : 'label', {
                             level: s.level,
@@ -40,7 +56,10 @@ export function SpellSlotRow({
                         })}
                         onClick={() => onSelect(s.level)}
                         className={cn(
-                            'flex size-9 flex-col items-center justify-center rounded-full border text-[var(--ink)] md:size-10',
+                            'flex flex-col items-center justify-center rounded-full border text-[var(--ink)]',
+                            ring
+                                ? `${HUD_GLASS} absolute size-[38px]`
+                                : 'size-9 md:size-10',
                             'focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                             active
                                 ? 'border-[var(--gold)] ring-1 ring-[var(--gold)]'

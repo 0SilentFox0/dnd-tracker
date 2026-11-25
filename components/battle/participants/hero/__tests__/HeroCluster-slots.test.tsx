@@ -31,23 +31,32 @@ const slotButtons = () =>
     screen.queryAllByRole('button', { name: /^Рівень \d, \d з \d$/ });
 
 describe('HeroCluster spell slots', () => {
-    it('renders round slot buttons with aria-pressed and toggles selection', () => {
-        setup({ slots: { '1': { current: 2, max: 4 } } });
+    it('renders round slot buttons around the portrait, lowest usable level pressed by default', () => {
+        setup({
+            slots: {
+                '1': { current: 0, max: 4 },
+                '2': { current: 2, max: 3 },
+            },
+        });
 
-        const first = slotButtons()[0];
+        const [first, second] = slotButtons();
 
-        expect(first.getAttribute('aria-label')).toBe('Рівень 1, 2 з 4');
+        expect(first.getAttribute('aria-label')).toBe('Рівень 1, 0 з 4');
+        expect(first.style.left).not.toBe('');
         expect(first.getAttribute('aria-pressed')).toBe('false');
+        expect(second.getAttribute('aria-pressed')).toBe('true');
 
         fireEvent.click(first);
 
         expect(first.getAttribute('aria-pressed')).toBe('true');
+        expect(second.getAttribute('aria-pressed')).toBe('false');
     });
 
     it('renders no slot row for a hero without slots, avatar and hp stay', () => {
         setup({ slots: {} });
 
         expect(slotButtons()).toHaveLength(0);
+        expect(screen.queryByRole('group', { name: /слот/i })).toBeNull();
         expect(
             screen.queryByRole('button', { name: /Показати стани/ })
         ).not.toBeNull();
@@ -89,12 +98,12 @@ describe('HeroCluster phone', () => {
         return container;
     };
 
-    it('portrait is 52px and slots open from the avatar toggle', () => {
+    it('portrait is 58px and slots open from the avatar toggle', () => {
         const container = setupPhone();
 
         const portrait = container.querySelector<HTMLElement>('[style*="width"]');
 
-        expect(portrait?.style.width).toBe('52px');
+        expect(portrait?.style.width).toBe('58px');
         expect(slotButtons()).toHaveLength(0);
 
         fireEvent.click(screen.getByRole('button', { name: /Показати стани/ }));

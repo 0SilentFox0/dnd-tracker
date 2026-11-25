@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { heroSlotViews } from '../hero';
+import { defaultSlotLevel, heroSlotViews, slotRingOffset } from '../hero';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
@@ -47,5 +47,39 @@ describe('heroSlotViews', () => {
 
     it('returns nothing without spellcasting', () => {
         expect(heroSlotViews(createMockParticipant())).toEqual([]);
+    });
+});
+
+describe('defaultSlotLevel', () => {
+    const v = (level: number, current: number, max: number) => ({
+        level,
+        roman: String(level),
+        current,
+        max,
+    });
+
+    it('picks the lowest level with slots left, else the first with capacity', () => {
+        expect(defaultSlotLevel([v(1, 0, 2), v(2, 1, 2)])).toBe(2);
+        expect(defaultSlotLevel([v(1, 0, 2), v(2, 0, 2)])).toBe(1);
+        expect(defaultSlotLevel([v(1, 0, 0)])).toBeNull();
+        expect(defaultSlotLevel([])).toBeNull();
+    });
+});
+
+describe('slotRingOffset', () => {
+    it('centres a single slot above the portrait', () => {
+        const o = slotRingOffset(0, 1, 80);
+
+        expect(o.x).toBeCloseTo(0);
+        expect(o.y).toBeCloseTo(-80);
+    });
+
+    it('runs left to right along the arc and keeps the radius', () => {
+        const pts = Array.from({ length: 5 }, (_, i) => slotRingOffset(i, 5, 80));
+
+        for (let i = 1; i < pts.length; i++)
+            expect(pts[i].x).toBeGreaterThan(pts[i - 1].x);
+
+        for (const p of pts) expect(Math.hypot(p.x, p.y)).toBeCloseTo(80, 0);
     });
 });

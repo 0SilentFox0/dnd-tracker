@@ -6,7 +6,7 @@ import { ChevronUp } from 'lucide-react';
 
 import { HeroStatesPanel } from './HeroStatesPanel';
 import { RecommendedSpells } from './RecommendedSpells';
-import { SpellSlotRow } from './SpellSlotRow';
+import { SLOT_RING_RADIUS, SpellSlotRow } from './SpellSlotRow';
 
 import {
     HealthBar,
@@ -21,8 +21,16 @@ import { HUD_GLASS, HudButton } from '@/components/hud';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleRules, useBattleSceneData } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
-import { heroSlotViews, NO_EFFECTS } from '@/lib/utils/battle/view';
+import {
+    defaultSlotLevel,
+    heroSlotViews,
+    NO_EFFECTS,
+} from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
+
+const PORTRAIT = 104;
+
+const RING_BOX = 2 * (SLOT_RING_RADIUS + 19);
 
 export const HeroCluster = memo(function HeroCluster({
     hero,
@@ -37,7 +45,7 @@ export const HeroCluster = memo(function HeroCluster({
 
     const [open, setOpen] = useState(false);
 
-    const [level, setLevel] = useState<number | null>(null);
+    const [pickedLevel, setLevel] = useState<number | null>(null);
 
     const { battle, effects, viewer, turn } = useBattleSceneData();
 
@@ -49,6 +57,8 @@ export const HeroCluster = memo(function HeroCluster({
         () => (viewer.readOnly ? [] : heroSlotViews(hero)),
         [viewer.readOnly, hero]
     );
+
+    const level = pickedLevel ?? defaultSlotLevel(slots);
 
     const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
 
@@ -62,18 +72,23 @@ export const HeroCluster = memo(function HeroCluster({
         </div>
     );
 
+    const recommended = slots.length > 0 && (
+        <RecommendedSpells hero={hero} level={level} canCast={turn.isMyTurn} />
+    );
+
+    const slotRow = (ring?: { cx: number; cy: number }) => (
+        <SpellSlotRow
+            slots={slots}
+            selected={level}
+            onSelect={setLevel}
+            ring={ring}
+        />
+    );
+
     const slotsBlock = slots.length > 0 && (
         <div className={cn('flex flex-col gap-2', !open && 'max-md:hidden')}>
-            <SpellSlotRow
-                slots={slots}
-                selected={level}
-                onSelect={(l) => setLevel((cur) => (cur === l ? null : l))}
-            />
-            <RecommendedSpells
-                hero={hero}
-                level={level}
-                canCast={turn.isMyTurn}
-            />
+            {slotRow()}
+            {recommended}
         </div>
     );
 
@@ -91,7 +106,6 @@ export const HeroCluster = memo(function HeroCluster({
             {battle.status === BattleStatus.ACTIVE && (
                 <ReactionSpellButton participant={hero} />
             )}
-            <TurnTimerBar />
         </>
     );
 
@@ -115,7 +129,7 @@ export const HeroCluster = memo(function HeroCluster({
         <ZoomablePortrait
             participant={hero}
             fx="main"
-            size={phone ? 52 : 62}
+            size={phone ? 58 : PORTRAIT}
             me
         />
     );
@@ -153,6 +167,7 @@ export const HeroCluster = memo(function HeroCluster({
                         </div>
                     )}
                     {extras}
+                    <TurnTimerBar />
                 </div>
                 <div
                     className={cn(
@@ -166,49 +181,95 @@ export const HeroCluster = memo(function HeroCluster({
             </div>
         );
 
+    const ring = slots.length > 0;
+
+    const centre = RING_BOX / 2;
+
     return (
         <div
             data-tour="battle.hero"
-            className={cn(
-                HUD_GLASS,
-                'pointer-events-auto flex w-[min(300px,70vw)] flex-col gap-2 rounded-2xl p-3'
-            )}
+            className="pointer-events-auto flex items-end gap-2"
         >
-            {statesPanel}
-            <div className="flex items-center gap-3">
-                {portrait}
-                <div className="min-w-0 flex-1">
-                    <div className="hud-sc flex items-baseline justify-between gap-2 text-[17px] font-bold text-[var(--ink)]">
-                        <span className="flex min-w-0 items-baseline gap-2">
-                            <span className="truncate">
-                                {hero.basicInfo.name}
-                            </span>
-                            {badges?.map((Badge, i) => (
-                                <Badge
-                                    key={i}
-                                    participant={hero}
-                                    place="hero"
-                                />
-                            ))}
-                        </span>
-                        <span className="shrink-0 font-sans text-sm font-normal whitespace-nowrap">
-                            <HpFigure
-                                participant={hero}
-                                wounds={hpTerm === 'wounds'}
-                            />
-                        </span>
+            <div className="flex flex-col items-center gap-1">
+                <div
+                    className="relative"
+                    style={
+                        ring
+                            ? { width: RING_BOX, height: centre + PORTRAIT / 2 }
+                            : undefined
+                    }
+                >
+                    {ring && slotRow({ cx: centre, cy: centre })}
+                    <div
+                        className={ring ? 'absolute' : undefined}
+                        style={
+                            ring
+                                ? {
+                                      left: centre - PORTRAIT / 2,
+                                      top: centre - PORTRAIT / 2,
+                                  }
+                                : undefined
+                        }
+                    >
+                        {portrait}
                     </div>
-                    <HealthBar participant={hero} exact className="h-1.5" />
-                    {HeroStats && (
-                        <div className="mt-1 text-sm text-hud-text">
-                            <HeroStats hero={hero} compact={false} />
-                        </div>
-                    )}
                 </div>
-                {toggle}
+                <div
+                    className={cn(
+                        HUD_GLASS,
+                        'w-[min(160px,100%)] rounded-xl px-2 py-1 empty:hidden [&>div]:mt-0'
+                    )}
+                >
+                    <TurnTimerBar />
+                </div>
             </div>
-            {slotsBlock}
-            {extras}
+            <div className="flex w-[min(220px,40vw)] flex-col gap-2 pb-1">
+                {recommended}
+                <div
+                    className={cn(
+                        HUD_GLASS,
+                        'flex flex-col gap-2 rounded-2xl p-3'
+                    )}
+                >
+                    {statesPanel}
+                    <div className="flex items-center gap-2">
+                        <div className="min-w-0 flex-1">
+                            <div className="hud-sc flex items-baseline justify-between gap-2 text-[17px] font-bold text-[var(--ink)]">
+                                <span className="flex min-w-0 items-baseline gap-2">
+                                    <span className="truncate">
+                                        {hero.basicInfo.name}
+                                    </span>
+                                    {badges?.map((Badge, i) => (
+                                        <Badge
+                                            key={i}
+                                            participant={hero}
+                                            place="hero"
+                                        />
+                                    ))}
+                                </span>
+                                <span className="shrink-0 font-sans text-sm font-normal whitespace-nowrap">
+                                    <HpFigure
+                                        participant={hero}
+                                        wounds={hpTerm === 'wounds'}
+                                    />
+                                </span>
+                            </div>
+                            <HealthBar
+                                participant={hero}
+                                exact
+                                className="h-1.5"
+                            />
+                            {HeroStats && (
+                                <div className="mt-1 text-sm text-hud-text">
+                                    <HeroStats hero={hero} compact={false} />
+                                </div>
+                            )}
+                        </div>
+                        {toggle}
+                    </div>
+                    {extras}
+                </div>
+            </div>
         </div>
     );
 });

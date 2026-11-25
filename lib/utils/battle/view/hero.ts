@@ -119,6 +119,32 @@ export function heroSlotViews(p: BattleParticipant): SlotView[] {
         : views;
 }
 
+export function defaultSlotLevel(slots: SlotView[]): number | null {
+    const usable = slots.find((s) => s.current > 0);
+
+    return (usable ?? slots.find((s) => s.max > 0))?.level ?? null;
+}
+
+const RING_MAX_STEP = 32;
+
+const RING_SPAN = 220;
+
+/** Offset from the portrait centre for slot `i` of `n` on an arc centred above it */
+export function slotRingOffset(
+    i: number,
+    n: number,
+    radius: number
+): { x: number; y: number } {
+    const step = n > 1 ? Math.min(RING_MAX_STEP, RING_SPAN / (n - 1)) : 0;
+
+    const angle = ((90 + ((n - 1) / 2 - i) * step) * Math.PI) / 180;
+
+    return {
+        x: Math.round(radius * Math.cos(angle) * 10) / 10,
+        y: Math.round(-radius * Math.sin(angle) * 10) / 10,
+    };
+}
+
 export function canCastBonusSpell(
     p: BattleParticipant,
     spells: { level: number; cost?: string | null }[]
