@@ -8,6 +8,7 @@ const nav = vi.hoisted(() => ({ path: '/settings/ai' }));
 
 vi.mock('next/navigation', () => ({ usePathname: () => nav.path }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+vi.mock('@/lib/hooks/auth', () => ({ useSessionUser: () => null }));
 vi.mock('@/components/layout/GameShellClient', () => ({
     GameShellClient: ({ children }: { children: React.ReactNode }) => (
         <div>{children}</div>
@@ -40,8 +41,31 @@ describe('AccountShell', () => {
             .getAllByRole('link')
             .filter((a) => a.getAttribute('aria-current') === 'page');
 
-        expect(current).toHaveLength(1);
-        expect(current[0].getAttribute('href')).toBe('/settings/ai');
+        expect(current).toHaveLength(2);
+        expect(current.map((a) => a.getAttribute('href'))).toEqual([
+            '/settings/ai',
+            '/settings/ai',
+        ]);
         expect(screen.getByText('body')).toBeTruthy();
+    });
+
+    it('renders the sidebar nav landmark with the active link', () => {
+        nav.path = '/settings/password';
+
+        render(
+            <AccountShell>
+                <p>body</p>
+            </AccountShell>
+        );
+
+        const navs = screen.getAllByRole('navigation', { name: 'profile' });
+
+        const sidebar = navs.find((n) => n.closest('aside'));
+
+        expect(sidebar).toBeTruthy();
+
+        const current = sidebar?.querySelector('[aria-current="page"]');
+
+        expect(current?.getAttribute('href')).toBe('/settings/password');
     });
 });
