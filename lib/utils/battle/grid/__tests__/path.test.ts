@@ -4,6 +4,7 @@ import { canStand } from '../occupancy';
 import {
     moveBudget,
     movementBudget,
+    pathTo,
     reachable,
     remainingMovement,
 } from '../path';
@@ -164,5 +165,41 @@ describe('moveBudget', () => {
                 at('h', { x: 0, y: 0 })
             )
         ).toBe(6);
+    });
+});
+
+describe('вибір маршруту', () => {
+    const wide: BattleMapConfig = { ...map, cols: 12, rows: 9 };
+
+    it('при рівній вартості йде прямо, а не діагональним трикутником', () => {
+        const hero = at('h', { x: 0, y: 4 });
+
+        const path = pathTo(wide, [hero], hero, { x: 6, y: 4 }, 6) ?? [];
+
+        expect(path).toHaveLength(6);
+        expect(path.every((c) => c.y === 4)).toBe(true);
+    });
+
+    it('при зсуві по обох осях діагональ не робить гак', () => {
+        const hero = at('h', { x: 0, y: 4 });
+
+        const path = pathTo(wide, [hero], hero, { x: 6, y: 6 }, 6) ?? [];
+
+        expect(path).toHaveLength(6);
+        expect(Math.max(...path.map((c) => c.y))).toBe(6);
+        expect(path.map((c) => c.y)).toEqual(
+            [...path.map((c) => c.y)].sort((a, b) => a - b)
+        );
+    });
+
+    it('на hex теж найкоротший по прямій серед рівних', () => {
+        const hex: BattleMapConfig = { ...wide, gridType: 'hex' };
+
+        const hero = at('h', { x: 0, y: 4 });
+
+        const path = pathTo(hex, [hero], hero, { x: 6, y: 4 }, 6) ?? [];
+
+        expect(path).toHaveLength(6);
+        expect(path.every((c) => Math.abs(c.y - 4) <= 1)).toBe(true);
     });
 });

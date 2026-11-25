@@ -26,12 +26,13 @@ const map = { cols: 6, rows: 6, opacity: 0.3 } as BattleMapConfig;
 
 const blocked = new Set(['0:0', '1:0']);
 
-const renderMarks = (marks: Map<string, string>) => (
+const renderMarks = (marks: Map<string, string>, through?: string[]) => (
     <svg>
         <GridMarks
             map={map}
             blocked={blocked}
             marks={marks as never}
+            through={through}
             maskId="m"
         />
     </svg>
@@ -96,6 +97,22 @@ describe('GridMarks zone look', () => {
         );
         expect(container.innerHTML).not.toContain('threat');
         expect(container.querySelector('[data-fx-zone="danger"]')).toBeNull();
+    });
+
+    it('outline does not wrap tokens passed through inside the zone', () => {
+        const { container } = render(
+            renderMarks(
+                new Map([
+                    ['2:2', 'move'],
+                    ['4:2', 'move'],
+                ]),
+                ['3:2']
+            )
+        );
+
+        expect(
+            container.querySelector('[data-fx-zone="move"]')?.getAttribute('d')
+        ).toBe(regionOutlinePath(['2:2', '3:2', '4:2']));
     });
 
     it('zones carry the fade class that the reduced-motion rule disables', () => {

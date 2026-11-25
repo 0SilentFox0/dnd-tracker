@@ -21,8 +21,6 @@ export const FLAME_SIZE = unitOf(0.42);
 export type MarkValue = CellMark | number | undefined;
 
 export function markFill(mark: MarkValue): string {
-    if (mark === 'target') return 'rgba(230,80,60,.35)';
-
     if (mark === 'pick') return 'rgba(110,170,255,.3)';
 
     if (mark === 'picked') return 'rgba(240,200,70,.5)';

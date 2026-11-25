@@ -27,6 +27,7 @@ interface GridMarksProps {
     blocked: ReadonlySet<string>;
     marks: BattleMapView['marks'];
     range?: BattleMapView['range'];
+    through?: string[];
     maskId: string;
 }
 
@@ -66,6 +67,7 @@ export const GridMarks = memo(function GridMarks({
     blocked,
     marks,
     range,
+    through,
     maskId,
 }: GridMarksProps) {
     const { cols, rows, terrain } = map;
@@ -76,10 +78,13 @@ export const GridMarks = memo(function GridMarks({
 
     const split = useMemo(() => splitMarks(marks, blocked), [marks, blocked]);
 
-    const moveOutline = useMemo(
-        () => (split.move.length ? regionOutlinePath(split.move, grid) : ''),
-        [split, grid]
-    );
+    const moveOutline = useMemo(() => {
+        if (!split.move.length) return '';
+
+        const passed = (through ?? []).filter((k) => !blocked.has(k));
+
+        return regionOutlinePath([...split.move, ...passed], grid);
+    }, [split, through, blocked, grid]);
 
     const lines = useMemo(
         () => gridLinesPath(cols, rows, grid),

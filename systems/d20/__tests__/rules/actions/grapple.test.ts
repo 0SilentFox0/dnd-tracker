@@ -403,7 +403,7 @@ describe('тягнення при русі', () => {
         });
         expect(get(out.participants, 'gob').battleData.position).toEqual({
             x: 1,
-            y: 1,
+            y: 2,
         });
         expect(hasCondition(get(out.participants, 'gob'), 'grappled')).toBe(
             true
@@ -432,7 +432,7 @@ describe('тягнення при русі', () => {
     });
 
     it('клітинка зайнята — схоплення розривається, рух за звичайною вартістю', () => {
-        const blocker = mk('blk', 'ally', 1, 1);
+        const blocker = mk('blk', 'ally', 1, 2);
 
         const ps = grappled(g0, t0, [g0, t0, blocker]);
 

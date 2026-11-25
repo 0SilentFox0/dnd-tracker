@@ -80,6 +80,18 @@ function MapStageImpl({
 
     const onCellHover = actions?.onCellHover;
 
+    const reachSearch = view?.reach?.search;
+
+    const through = useMemo(
+        () =>
+            reachSearch
+                ? [...reachSearch.parent.keys()].filter(
+                      (k) => !reachSearch.cost.has(k)
+                  )
+                : undefined,
+        [reachSearch]
+    );
+
     const gridScene = useMemo(
         () => ({
             round,
@@ -87,8 +99,9 @@ function MapStageImpl({
             clickableBlocked,
             showBlocked,
             window: gridWindow,
+            through,
         }),
-        [round, rotated, clickableBlocked, showBlocked, gridWindow]
+        [round, rotated, clickableBlocked, showBlocked, gridWindow, through]
     );
 
     const cellActions = useMemo<GridCellActions>(

@@ -673,7 +673,7 @@ describe('BattleMap', () => {
         expect(clipOf(idle.container).dataset.attackCursor).toBeUndefined();
     });
 
-    it('colors marked cells', () => {
+    it('target cells get no red fill (the enemy token frame is enough)', () => {
         const { container } = render(
             <BattleMap
                 map={square}
@@ -686,7 +686,7 @@ describe('BattleMap', () => {
             container
                 .querySelector('polygon[data-mark-cell="0:0"]')
                 ?.getAttribute('fill')
-        ).toBe('rgba(230,80,60,.35)');
+        ).toBe('transparent');
     });
 
     it('move zone: one thin outline over move and move-danger cells, no fill', () => {

@@ -13,6 +13,7 @@ import {
     gridOf,
     neighbors,
 } from './geometry';
+import { cellCenter } from './layout';
 import {
     cellsOf,
     fits,
@@ -167,20 +168,42 @@ export function searchPaths(
 
     const seen = new Map([[cellKey(start), 0]]);
 
+    // Among equal-cost routes keep the geometrically shortest one (straight, not a detour).
+    const length = new Map([[cellKey(start), 0]]);
+
     const buckets: GridPoint[][] = [[start]];
 
     for (let cost = 0; cost < buckets.length && cost < budget; cost++) {
         for (const cur of buckets[cost] ?? []) {
-            if (seen.get(cellKey(cur)) !== cost) continue;
+            const curKey = cellKey(cur);
+
+            if (seen.get(curKey) !== cost) continue;
+
+            const from = cellCenter(cur, grid);
 
             for (const next of neighbors(cur, grid)) {
                 const key = cellKey(next);
 
                 const nextCost = cost + stepCost(next);
 
+                const known = seen.get(key);
+
+                if (nextCost > budget || (known ?? Infinity) < nextCost)
+                    continue;
+
+                const to = cellCenter(next, grid);
+
+                const nextLength =
+                    (length.get(curKey) ?? 0) +
+                    Math.hypot(to.x - from.x, to.y - from.y);
+
                 if (
-                    nextCost > budget ||
-                    (seen.get(key) ?? Infinity) <= nextCost ||
+                    known === nextCost &&
+                    nextLength >= (length.get(key) ?? Infinity) - 1e-6
+                )
+                    continue;
+
+                if (
                     stepBlocked(cur, next) ||
                     !fits(map, next, size, walls) ||
                     touchesAvoid(next)
@@ -188,8 +211,10 @@ export function searchPaths(
                     continue;
 
                 seen.set(key, nextCost);
+                length.set(key, nextLength);
                 parent.set(key, cur);
-                (buckets[nextCost] ??= []).push(next);
+
+                if (known === undefined) (buckets[nextCost] ??= []).push(next);
 
                 if (fits(map, next, size, taken)) result.set(key, nextCost);
                 else result.delete(key);
