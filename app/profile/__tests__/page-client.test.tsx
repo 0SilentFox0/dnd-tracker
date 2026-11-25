@@ -27,6 +27,12 @@ vi.mock('@/components/onboarding/OnboardingHint', () => ({
         <div data-testid={`hint-${id}`} />
     ),
 }));
+vi.mock('@/components/layout/PaletteSwitcher', () => ({
+    PaletteSwitcher: () => <div data-testid="palettes" />,
+}));
+vi.mock('@/components/common/shell/LocaleSwitcher', () => ({
+    LocaleSwitcher: () => <div data-testid="locale" />,
+}));
 vi.mock('next-intl', () => ({
     useTranslations: () => (key: string) => key,
     useLocale: () => 'en',
@@ -34,7 +40,13 @@ vi.mock('next-intl', () => ({
 
 afterEach(cleanup);
 
-const summary = { campaigns: 0, characters: 0, lastActivity: null };
+const summary = {
+    campaigns: 0,
+    characters: 0,
+    lastActivity: null,
+    recentCampaigns: [],
+    recentCharacters: [],
+};
 
 const user = { id: 'u1', email: 'a@x.com', name: 'A', avatarUrl: null };
 
@@ -77,7 +89,7 @@ describe('ProfileClient', () => {
             <ProfileClient
                 profile={{
                     showOpsLink: false,
-                    summary: { campaigns: 0, characters: 2, lastActivity: null },
+                    summary: { ...summary, characters: 2 },
                 }}
             />
         );
@@ -85,6 +97,61 @@ describe('ProfileClient', () => {
         expect(screen.getByText('2')).toBeTruthy();
         expect(screen.queryByText('campaigns')).toBeNull();
         expect(screen.queryByText('lastActivity')).toBeNull();
+    });
+
+    it('shows empty states with a link to campaigns', () => {
+        state.user = user;
+
+        render(<ProfileClient profile={{ showOpsLink: false, summary }} />);
+
+        expect(
+            screen.getByText('campaignsEmptyLink').getAttribute('href')
+        ).toBe('/campaigns');
+        expect(screen.getByText('heroesEmpty')).toBeTruthy();
+    });
+
+    it('renders recent campaigns and heroes as links', () => {
+        state.user = user;
+
+        render(
+            <ProfileClient
+                profile={{
+                    showOpsLink: false,
+                    summary: {
+                        ...summary,
+                        recentCampaigns: [
+                            {
+                                id: 'c1',
+                                name: 'Camp One',
+                                role: 'dm',
+                                updatedAt: '2026-11-20T10:00:00.000Z',
+                            },
+                        ],
+                        recentCharacters: [
+                            {
+                                id: 'h1',
+                                name: 'Hero One',
+                                level: 3,
+                                className: 'Wizard',
+                                avatar: null,
+                                campaignId: 'c1',
+                                campaignName: 'Camp One',
+                            },
+                        ],
+                    },
+                }}
+            />
+        );
+
+        expect(
+            screen
+                .getAllByRole('link')
+                .some((a) => a.getAttribute('href') === '/campaigns/c1')
+        ).toBe(true);
+        expect(
+            screen.getByText('Hero One').closest('a')?.getAttribute('href')
+        ).toBe('/campaigns/c1/character');
+        expect(screen.getByText('roleDm')).toBeTruthy();
     });
 
     it('signs out and switches account through the profile actions', () => {

@@ -1,0 +1,77 @@
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
+import type { ProfileCharacter } from '@/lib/server/profile/summary';
+import { avatarHue } from '@/lib/utils/auth/avatar';
+import {
+    isHostedOnProjectStorage,
+    toMediaUrl,
+} from '@/lib/utils/common/image-url';
+
+function Portrait({ hero }: { hero: ProfileCharacter }) {
+    return (
+        <span
+            aria-hidden
+            className="hud-sc relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg text-lg text-white"
+            style={{
+                backgroundColor: `hsl(${avatarHue(hero.id)}, 40%, 28%)`,
+            }}
+        >
+            {hero.avatar ? (
+                <Image
+                    src={toMediaUrl(hero.avatar)}
+                    alt=""
+                    fill
+                    sizes="44px"
+                    className="object-cover"
+                    unoptimized={!isHostedOnProjectStorage(hero.avatar)}
+                />
+            ) : (
+                hero.name.slice(0, 1).toUpperCase()
+            )}
+        </span>
+    );
+}
+
+export function ProfileHeroes({ heroes }: { heroes: ProfileCharacter[] }) {
+    const t = useTranslations('auth.profileSummary');
+
+    return (
+        <ProfileSectionCard title={t('heroesTitle')}>
+            {heroes.length === 0 ? (
+                <p className="text-sm text-hud-muted">{t('heroesEmpty')}</p>
+            ) : (
+                <ul className="grid gap-2 sm:grid-cols-2">
+                    {heroes.map((h) => (
+                        <li key={h.id}>
+                            <Link
+                                href={`/campaigns/${h.campaignId}/character`}
+                                className="flex min-h-14 items-center gap-3 rounded-lg px-2 py-2 hover:bg-hud-panel-2"
+                            >
+                                <Portrait hero={h} />
+                                <span className="min-w-0">
+                                    <span className="block truncate text-hud-ink">
+                                        {h.name}
+                                    </span>
+                                    <span className="block truncate text-xs text-hud-muted">
+                                        {t('heroLine', {
+                                            level: h.level,
+                                            class: h.className,
+                                        })}
+                                    </span>
+                                    <span className="block truncate text-xs text-hud-faint">
+                                        {h.campaignName}
+                                    </span>
+                                </span>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </ProfileSectionCard>
+    );
+}
