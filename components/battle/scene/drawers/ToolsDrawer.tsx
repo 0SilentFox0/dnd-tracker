@@ -48,8 +48,10 @@ export interface ToolsProps {
     onComplete?: () => void;
     view?: { mode: BattleViewMode; set: (mode: BattleViewMode) => void };
     tabs?: { value: MobileBattleTab; set: (tab: MobileBattleTab) => void };
-    onToolsSlot?: (el: HTMLDivElement | null) => void;
-    onPreviewSlot?: (el: HTMLDivElement | null) => void;
+    slots?: {
+        tools?: (el: HTMLDivElement | null) => void;
+        preview?: (el: HTMLDivElement | null) => void;
+    };
     onOpenDrawer?: (key: DrawerKey) => void;
     // phone keeps the player on the stage (`player: false`): the sheet unmounts on close and would stop the video
     audio?: { sound?: boolean; player?: boolean };
@@ -59,8 +61,7 @@ export function ToolsContent({
     onComplete,
     view,
     tabs,
-    onToolsSlot,
-    onPreviewSlot,
+    slots,
     onOpenDrawer,
     audio,
 }: ToolsProps) {
@@ -170,7 +171,7 @@ export function ToolsContent({
                     />
                 </section>
             )}
-            {onToolsSlot && battle.map && (
+            {slots?.tools && battle.map && (
                 <>
                     {isDM && !readOnly && (
                         <section className="flex flex-col gap-2">
@@ -200,7 +201,7 @@ export function ToolsContent({
                         className="flex flex-col gap-2"
                     >
                         <h3 className={SECTION}>{td('mapTools')}</h3>
-                        <div ref={onToolsSlot} className={MAP_TOOLS_SLOT} />
+                        <div ref={slots?.tools} className={MAP_TOOLS_SLOT} />
                     </section>
                     {isDM && !readOnly && mode === 'edit' && (
                         <section className="flex flex-col gap-2">
@@ -268,7 +269,7 @@ export function ToolsContent({
                             {t('nextTurn')}
                         </HudButton>
                     )}
-                    <div ref={onPreviewSlot} className="empty:hidden" />
+                    <div ref={slots?.preview} className="empty:hidden" />
                     {onComplete && battle.status === BattleStatus.ACTIVE && (
                         <HudButton
                             type="button"

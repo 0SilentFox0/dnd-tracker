@@ -50,7 +50,7 @@ describe('ToolsContent', () => {
         const { container } = render(
             <ToolsContent
                 audio={{ sound: false }}
-                onToolsSlot={vi.fn()}
+                slots={{ tools: vi.fn() }}
                 onOpenDrawer={vi.fn()}
             />,
             { wrapper }

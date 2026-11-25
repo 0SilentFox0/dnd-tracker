@@ -23,8 +23,7 @@ export interface GameShellNavItem {
 export function HudGameShell({
     items,
     activeId,
-    title,
-    breadcrumbRootLabel,
+    header,
     actions,
     menuActions,
     fit,
@@ -32,8 +31,7 @@ export function HudGameShell({
 }: {
     items: GameShellNavItem[];
     activeId: string;
-    title: string;
-    breadcrumbRootLabel?: string;
+    header: { title: string; breadcrumbRootLabel?: string };
     actions: ReactNode;
     menuActions?: ReactNode;
     fit?: boolean;
@@ -103,7 +101,7 @@ export function HudGameShell({
                             href="/campaigns"
                             className="shrink-0 text-hud-muted hover:text-hud-ink"
                         >
-                            {breadcrumbRootLabel ?? t('campaigns')}
+                            {header.breadcrumbRootLabel ?? t('campaigns')}
                         </Link>
                         {activeId !== 'campaigns' && (
                             <>
@@ -115,7 +113,7 @@ export function HudGameShell({
                                     aria-current="page"
                                     className="truncate font-medium text-hud-ink"
                                 >
-                                    {activeItem?.label ?? title}
+                                    {activeItem?.label ?? header.title}
                                 </span>
                             </>
                         )}

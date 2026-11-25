@@ -35,8 +35,7 @@ interface Props {
     viewport: { x: number; y: number; w: number; h: number };
     onPick(nx: number, ny: number): void;
     hiddenCells?: Iterable<string> | null;
-    phone: boolean;
-    rotated?: boolean;
+    layout: { phone: boolean; rotated?: boolean };
 }
 
 export function MapMinimap({
@@ -46,8 +45,7 @@ export function MapMinimap({
     viewport,
     onPick,
     hiddenCells,
-    phone,
-    rotated = false,
+    layout: { phone, rotated = false },
 }: Props) {
     const t = useTranslations('battle.map.camera');
 

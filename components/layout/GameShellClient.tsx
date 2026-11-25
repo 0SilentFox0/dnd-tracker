@@ -27,8 +27,7 @@ export function GameShellClient({
         <HudGameShell
             items={items}
             activeId={activeId}
-            title={title}
-            breadcrumbRootLabel={breadcrumbRootLabel}
+            header={{ title, breadcrumbRootLabel }}
             fit={fit}
             actions={
                 <>

@@ -306,8 +306,7 @@ export function DesktopBattleLayout({
                         }}
                         onComplete={onComplete}
                         view={{ mode: viewMode, set: setViewMode }}
-                        onToolsSlot={setToolsSlot}
-                        onPreviewSlot={setPreviewSlot}
+                        slots={{ tools: setToolsSlot, preview: setPreviewSlot }}
                         onOpenDrawer={toggle}
                     />
                 </div>

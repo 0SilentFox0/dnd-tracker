@@ -352,8 +352,10 @@ export default async function CampaignDetailPage({
                         isDemo={isDemo}
                         pendingDrafts={dm?.pendingDrafts ?? 0}
                         context={context}
-                        hiddenKeys={hiddenKeys}
-                        hostsDmBlocks={isDM && !isTemplate && !!dm}
+                        layout={{
+                            hiddenKeys,
+                            hostsDmBlocks: isDM && !isTemplate && !!dm,
+                        }}
                         libraryCounts={dm?.libraryCounts}
                     />
                 </div>

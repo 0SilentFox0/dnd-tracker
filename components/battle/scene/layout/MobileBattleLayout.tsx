@@ -281,8 +281,7 @@ export function MobileBattleLayout({
                         }}
                         onComplete={onComplete}
                         tabs={{ value: tab, set: setTab }}
-                        onToolsSlot={setToolsSlot}
-                        onPreviewSlot={setPreviewSlot}
+                        slots={{ tools: setToolsSlot, preview: setPreviewSlot }}
                         audio={{ player: false }}
                     />
                 </div>

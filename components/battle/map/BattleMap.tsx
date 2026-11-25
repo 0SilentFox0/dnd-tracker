@@ -355,8 +355,7 @@ export function BattleMap({
                     viewport={minimapViewport(camera.camera, frame)}
                     onPick={camera.flyToMinimap}
                     hiddenCells={[]}
-                    phone={phone}
-                    rotated={renderedFit.rotated}
+                    layout={{ phone, rotated: renderedFit.rotated }}
                 />
             )}
         </div>

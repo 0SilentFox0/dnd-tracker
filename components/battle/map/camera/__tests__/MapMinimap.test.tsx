@@ -57,7 +57,7 @@ describe('MapMinimap', () => {
                 viewport={{ x: 0.1, y: 0.1, w: 0.4, h: 0.5 }}
                 onPick={onPick}
                 hiddenCells={['3:2']}
-                phone={false}
+                layout={{ phone: false }}
             />
         );
 
@@ -103,7 +103,7 @@ describe('MapMinimap', () => {
                 participants={[]}
                 viewport={{ x: 0, y: 0, w: 1, h: 1 }}
                 onPick={vi.fn()}
-                phone
+                layout={{ phone: true }}
             />
         );
 
