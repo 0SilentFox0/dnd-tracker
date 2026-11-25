@@ -50,13 +50,10 @@ export function DrawerRail({
             data-drawer-rail
             role="toolbar"
             aria-label={t('rail')}
-            className="flex flex-col gap-2 pr-2"
+            className="flex flex-row gap-1.5"
         >
             {keys.map((key) => {
                 const Icon = ICON[key];
-
-                const labelled =
-                    active !== key && (key === 'log' || key === 'tools');
 
                 return (
                     <HudButton
@@ -69,16 +66,13 @@ export function DrawerRail({
                         onClick={() => onToggle(key)}
                         className={cn(
                             HUD_GLASS,
-                            'flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
+                            'flex size-11 items-center justify-center rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                             active === key
                                 ? 'border-[var(--gold)] text-[var(--gold)]!'
                                 : ''
                         )}
                     >
-                        <Icon className="size-5" aria-hidden />
-                        {labelled && (
-                            <span className="pr-2 text-xs">{t(key)}</span>
-                        )}
+                        <Icon className="size-6" aria-hidden />
                     </HudButton>
                 );
             })}

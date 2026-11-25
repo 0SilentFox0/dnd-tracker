@@ -116,9 +116,9 @@ function BattleMapPanelContent({
 
     const fog = useBattleMapFog(scene);
 
-    const inRow = !phone && !!slot;
+    const inRow = !!slot;
 
-    const noHost = !phone && slot === undefined;
+    const noHost = slot === undefined;
 
     const palettes =
         weatherTool &&
@@ -146,12 +146,10 @@ function BattleMapPanelContent({
         <div
             className={cn(
                 'z-20 flex flex-col items-start gap-1.5',
-                phone
-                    ? 'w-full shrink-0 px-1 pb-1'
-                    : noHost && 'absolute top-2 left-2'
+                noHost && 'absolute top-2 left-2'
             )}
         >
-            <div className={cn('flex flex-wrap gap-1.5', phone && 'w-full')}>
+            <div className="flex flex-wrap gap-1.5">
                 <HudToggleChip
                     active={placement.active}
                     onClick={placement.toggle}
@@ -295,8 +293,6 @@ function BattleMapPanelContent({
             data-tour="battle.map"
             className={cn('relative h-full', phone && 'flex flex-col')}
         >
-            {phone && tools}
-            {phone && fogControls}
             {hasDoors && (
                 <OnboardingHint
                     id="battle.map-doors"
@@ -315,9 +311,10 @@ function BattleMapPanelContent({
                 look={look}
                 phone={phone}
             />
-            {!phone &&
-                (noHost ? tools : inRow && tools && createPortal(tools, slot))}
-            {!phone && fogControls}
+            {noHost ? tools : inRow && tools && createPortal(tools, slot)}
+            {phone
+                ? inRow && createPortal(fogControls, slot)
+                : fogControls}
         </div>
     );
 }

@@ -40,7 +40,7 @@ export function MapFogControls({
         <div
             className={cn(
                 'z-20 flex max-w-full flex-wrap items-center gap-1.5 text-xs',
-                phone ? 'shrink-0 px-1 pb-1' : 'absolute top-2 right-2'
+                phone ? 'shrink-0 px-1 pb-1' : 'absolute top-14 right-2'
             )}
         >
             {isDM && (

@@ -16,7 +16,6 @@ export function BattleDrawer({
     open,
     onOpenChange,
     title,
-    side = 'right',
     keepMounted = false,
     children,
 }: {
@@ -24,7 +23,6 @@ export function BattleDrawer({
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title: ReactNode;
-    side?: 'left' | 'right';
     keepMounted?: boolean;
     children: ReactNode;
 }) {
@@ -48,7 +46,6 @@ export function BattleDrawer({
             open={open}
             onOpenChange={onOpenChange}
             title={title}
-            side={side}
             keepMounted={keepMounted}
         >
             {children}
@@ -61,7 +58,6 @@ function FloatingPanel({
     open,
     onOpenChange,
     title,
-    side,
     keepMounted,
     children,
 }: {
@@ -69,7 +65,6 @@ function FloatingPanel({
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title: ReactNode;
-    side: 'left' | 'right';
     keepMounted: boolean;
     children: ReactNode;
 }) {
@@ -97,10 +92,7 @@ function FloatingPanel({
             hidden={!open}
             className={cn(
                 HUD_GLASS,
-                'absolute top-20 z-40 flex w-[min(260px,calc(100vw-96px))] flex-col rounded-xl',
-                side === 'left'
-                    ? 'bottom-[max(7rem,calc(var(--hud-cluster-h,0px)+1.5rem))] left-3'
-                    : 'right-[68px] bottom-[max(7rem,calc(var(--hud-dock-h,0px)+1.5rem))]'
+                'absolute top-14 right-3 bottom-[max(7rem,calc(var(--hud-dock-h,0px)+4.75rem))] z-40 flex w-[min(260px,calc(100vw-96px))] flex-col rounded-xl'
             )}
         >
             <header className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-white/15 pr-1.5 pl-3">

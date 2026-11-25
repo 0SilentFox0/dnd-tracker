@@ -68,6 +68,21 @@ describe('DrawerRail', () => {
         ]);
     });
 
+    it('is a horizontal icon-only row with 40px+ targets', () => {
+        const { wrapper } = fakeScene({ isDM: true, map: MAP });
+
+        render(<DrawerRail active={null} onToggle={vi.fn()} />, { wrapper });
+
+        const rail = document.querySelector('[data-drawer-rail]') as HTMLElement;
+
+        expect(rail.className).toContain('flex-row');
+
+        for (const b of screen.getAllByRole('button')) {
+            expect(b.textContent).toBe('');
+            expect(b.className).toContain('size-11');
+        }
+    });
+
     it('player without a map sees log and tools only; the active button is pressed', () => {
         const { wrapper } = fakeScene({});
 

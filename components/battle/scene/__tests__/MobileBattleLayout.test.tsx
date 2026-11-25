@@ -20,9 +20,24 @@ vi.mock('@/components/battle/turn/MyTurnControls', () => ({
     },
 }));
 vi.mock('@/components/audio/AudioDock', () => ({ AudioDock: () => null }));
-vi.mock('@/components/battle/map/panels/BattleMapPanel', () => ({
-    BattleMapPanel: () => <div data-testid="map" />,
-}));
+vi.mock('@/components/battle/map/panels/BattleMapPanel', async () => {
+    const { useMapToolsSlot } = await import(
+        '@/components/battle/map/panels/MapToolsSlot'
+    );
+
+    return {
+        BattleMapPanel: () => {
+            const slot = useMapToolsSlot();
+
+            return (
+                <div
+                    data-testid="map"
+                    data-slot={slot === undefined ? 'none' : slot ? 'ready' : 'pending'}
+                />
+            );
+        },
+    };
+});
 vi.mock('@/components/battle/map/bubble/TokenBubble', () => ({
     TokenBubble: () => null,
 }));
@@ -69,6 +84,19 @@ afterEach(() => {
 });
 
 describe('MobileBattleLayout', () => {
+    it('map tools live in the tools drawer slot, not over the map', () => {
+        const { wrapper } = fakeScene({ isMyTurn: false, map: MAP, isDM: true });
+
+        render(<MobileBattleLayout />, { wrapper });
+
+        expect(screen.getByTestId('map').dataset.slot).toBe('pending');
+
+        openMenu();
+        fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
+
+        expect(screen.getByTestId('map').dataset.slot).toBe('ready');
+    });
+
     it('hero turn: the dock is mounted in dock mode, the old strip is gone', () => {
         const { wrapper } = fakeScene({ isMyTurn: true, map: MAP });
 

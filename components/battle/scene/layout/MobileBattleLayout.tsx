@@ -24,6 +24,7 @@ import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleLog } from '@/components/battle/log/BattleLog';
 import { TokenBubble } from '@/components/battle/map/bubble/TokenBubble';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
+import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
 import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
@@ -110,6 +111,8 @@ export function MobileBattleLayout({
         };
     }, [menuOpen]);
 
+    const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
+
     const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
@@ -132,10 +135,12 @@ export function MobileBattleLayout({
                     <div className="relative min-h-0 flex-1">
                         {mapView ? (
                             <main className="absolute inset-0">
-                                <BattleMapPanel
-                                    phone
-                                    onBusyChange={setMapBusy}
-                                />
+                                <MapToolsSlotContext.Provider value={toolsSlot}>
+                                    <BattleMapPanel
+                                        phone
+                                        onBusyChange={setMapBusy}
+                                    />
+                                </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
                             <main
@@ -173,7 +178,7 @@ export function MobileBattleLayout({
                         <AudioDock placement="strip" collapseOn={turnKey} />
                         <div
                             ref={menuRef}
-                            className="absolute top-1 right-2 z-30 flex flex-col items-end gap-1"
+                            className="absolute top-1 right-2 z-30 flex flex-row-reverse items-start gap-1.5"
                         >
                             <HudButton
                                 type="button"
@@ -187,17 +192,13 @@ export function MobileBattleLayout({
                                 <Ellipsis className="size-5" aria-hidden />
                             </HudButton>
                             {menuShown && (
-                                <div
-                                    className={`${HUD_GLASS} rounded-xl py-2 pl-2`}
-                                >
-                                    <DrawerRail
-                                        active={active}
-                                        onToggle={(key) => {
-                                            setMenuOpen(false);
-                                            toggle(key);
-                                        }}
-                                    />
-                                </div>
+                                <DrawerRail
+                                    active={active}
+                                    onToggle={(key) => {
+                                        setMenuOpen(false);
+                                        toggle(key);
+                                    }}
+                                />
                             )}
                         </div>
                         <div
@@ -248,6 +249,7 @@ export function MobileBattleLayout({
                         }}
                         onComplete={onComplete}
                         tabs={{ value: tab, set: setTab }}
+                        onToolsSlot={setToolsSlot}
                         audio={{ player: false }}
                     />
                 </div>

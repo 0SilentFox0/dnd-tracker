@@ -64,7 +64,7 @@ export function ToolsContent({
         actions,
     } = useBattleScene();
 
-    const [mode, setMode] = useState<'play' | 'edit'>('edit');
+    const [mode, setMode] = useState<'play' | 'edit'>('play');
 
     const [gridOpen, setGridOpen] = useState(false);
 
@@ -187,7 +187,7 @@ export function ToolsContent({
                     )}
                     <div
                         ref={onToolsSlot}
-                        hidden={mode === 'play'}
+                        hidden={isDM && !readOnly && mode === 'play'}
                         className="relative flex min-w-0 flex-col [&>div>div:first-child]:grid [&>div>div:first-child]:grid-cols-3"
                     />
                 </section>

@@ -56,6 +56,9 @@ describe('ToolsContent', () => {
             { wrapper }
         );
 
+        expect(screen.queryByRole('button', { name: 'Сітка' })).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Редагувати мапу' }));
         fireEvent.click(screen.getByRole('button', { name: 'Сітка' }));
         expect(screen.getByRole('button', { name: 'Гекс' })).toBeTruthy();
 

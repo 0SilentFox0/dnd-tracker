@@ -156,11 +156,6 @@ export function DesktopBattleLayout({
         [observeHeight]
     );
 
-    const bindCluster = useMemo(
-        () => observeHeight('--hud-cluster-h'),
-        [observeHeight]
-    );
-
     const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
     return (
@@ -178,12 +173,12 @@ export function DesktopBattleLayout({
                                 </MapToolsSlotContext.Provider>
                             </main>
                         ) : (
-                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto pt-28 pr-[72px] pb-40 pl-6">
+                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto pt-28 pr-6 pb-40 pl-6">
                                 <BattleColumns />
                             </main>
                         )}
                         <BattleTopBar />
-                        <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-340px))] -translate-x-1/2 flex-col gap-1">
+                        <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-440px))] -translate-x-1/2 flex-col gap-1">
                             <InitiativeTrack onReorder={onReorder} />
                             <div className={`${HUD_GLASS} pointer-events-auto rounded-xl`}>
                                 <LastActionTicker
@@ -200,15 +195,12 @@ export function DesktopBattleLayout({
                         </InNoticeStack>
                         <TokenBubble mapBusy={mapBusy} />
                         {hero && (
-                            <div
-                                ref={bindCluster}
-                                className="pointer-events-none absolute bottom-3 left-3 z-20"
-                            >
+                            <div className="pointer-events-none absolute bottom-3 left-3 z-20">
                                 <HeroCluster hero={hero} />
                             </div>
                         )}
                         <TurnDock />
-                        <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center *:pointer-events-auto">
+                        <div className="pointer-events-none absolute top-2 right-3 z-30 *:pointer-events-auto">
                             <DrawerRail active={active} onToggle={toggle} />
                         </div>
                         <div
@@ -236,7 +228,6 @@ export function DesktopBattleLayout({
                     )}
                     <BattleDrawer
                         drawer="log"
-                        side="left"
                         open={log.open}
                         onOpenChange={(o) => !o && log.close()}
                         title={t('log')}
