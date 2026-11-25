@@ -6,7 +6,7 @@ const { collectDbGauges, evaluateAlerts, flushMetrics, gauge, rollupAndPrune } =
         evaluateAlerts: vi.fn(),
         flushMetrics: vi.fn(),
         gauge: vi.fn(),
-        rollupAndPrune: vi.fn(),
+        rollupAndPrune: vi.fn().mockResolvedValue(undefined),
     }));
 
 vi.mock('@/lib/server/ops/collect-db', () => ({ collectDbGauges }));

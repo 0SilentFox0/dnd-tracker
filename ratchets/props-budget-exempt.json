@@ -2,8 +2,6 @@
     "components/abilities/editor/AbilityListEditor.tsx#AbilityListEditor": 9,
     "components/abilities/editor/NestedEffectsEditor.tsx#NestedEffectsEditor": 9,
     "components/battle/map/tokens/MapToken.tsx#MapToken": 10,
-    "components/campaigns/dashboard/DashboardGroups.tsx#DashboardGroups": 8,
     "components/hud/form/HudForm.tsx#HudForm": 10,
-    "components/hud/shell/GameShell.tsx#HudGameShell": 8,
     "components/world/map/WorldMapView.tsx#WorldMapView": 14
 }
