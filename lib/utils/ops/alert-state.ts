@@ -14,7 +14,10 @@ export interface AlertStateRow {
     silencedUntil: Date | null;
 }
 
-const RANK: Record<AlertStatus, number> = { ok: 0, warn: 1, crit: 2 };
+export const RANK: Record<AlertStatus, number> = { ok: 0, warn: 1, crit: 2 };
+
+export const asStatus = (s: string): AlertStatus =>
+    s === 'warn' || s === 'crit' ? s : 'ok';
 
 function breached(rule: AlertRule, value: number, threshold?: number): boolean {
     if (threshold === undefined) return false;

@@ -16,6 +16,7 @@ const UK_LATIN_ALLOWLIST = new Set<string>([
     'common.app.name', // product name
     'rest.arcane.aria', // D&D feature name kept in English across the uk UI
     'ai.page.restHeading', // technical term
+    'ops.status.tier.free', // provider plan name kept in English
 ]);
 
 /** Keys (`ns.path`) whose uk and en values are identical on purpose (names, formulas, shared terms). */

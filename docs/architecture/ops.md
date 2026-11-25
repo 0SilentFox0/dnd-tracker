@@ -1,6 +1,6 @@
 # Ops
 
-Self-monitoring of the app: application metrics in Postgres, a collector that adds DB and provider gauges, alert rules with a state machine, notifications (Telegram, email) and an external watchdog on Cloudflare. Phase P1 (data, collector, alerts, watchdog) is in code; the dashboard UI and the remaining provider adapters are later phases.
+Self-monitoring of the app: application metrics in Postgres, a collector that adds DB and provider gauges, alert rules with a state machine, notifications (Telegram, email) and an external watchdog on Cloudflare. Phase P1 (data, collector, alerts, watchdog) and P2 (read API, `/ops` dashboard, Supabase/Upstash/Vercel adapters) are in code.
 
 ## Metrics and tables
 
@@ -60,6 +60,9 @@ All optional unless noted; a missing variable switches the part off, it does not
 | `OPS_TELEGRAM_BOT_TOKEN`, `OPS_TELEGRAM_CHAT_ID` | Telegram notifier (app and worker) |
 | `RESEND_API_KEY`, `OPS_ALERT_EMAIL`, `OPS_ALERT_FROM` | email notifier |
 | `OPS_CLOUDFLARE_API_TOKEN`, `OPS_CLOUDFLARE_ACCOUNT_ID`, `OPS_CLOUDFLARE_WORKER_NAME` | Cloudflare adapter |
+| `OPS_SUPABASE_ACCESS_TOKEN` (or `SUPABASE_API_TOKEN`), `OPS_SUPABASE_PROJECT_REF` (default: derived from `NEXT_PUBLIC_SUPABASE_URL`) | Supabase adapter (disk usage; verified live 2026-11-25, HTTP 200) |
+| `OPS_UPSTASH_EMAIL`, `OPS_UPSTASH_API_KEY`, `OPS_UPSTASH_DB_ID` | Upstash adapter (commands, bandwidth, storage) |
+| `OPS_VERCEL_TOKEN`, `OPS_VERCEL_PROJECT_ID`, `OPS_VERCEL_TEAM_ID` | Vercel adapter (monthly cost) |
 | `PUSHER_APP_ID`, `PUSHER_SECRET` (+ the existing Pusher key/cluster) | Pusher adapter |
 | `OPS_PUSHER_FANOUT` | recipients per trigger for the daily messages estimate (default 6) |
 | `OPS_TIER_<SUPABASE\|VERCEL\|PUSHER\|UPSTASH\|CLOUDFLARE>` | `paid` selects the paid limits |
@@ -81,7 +84,7 @@ Worker secrets (`wrangler secret put`): `APP_URL`, `OPS_COLLECT_SECRET`, `HEALTH
 4. Send `POST /api/ops/test-notify` as a platform admin and check both channels.
 5. Rotate the Cloudflare API token by 2026-12-24 (tracked in `lib/ops/expiries.ts`, rule `secrets.expiry`); update `OPS_CLOUDFLARE_API_TOKEN` and, if the worker uses it, its secrets. After rotating, move the date in `expiries.ts`.
 6. Confirm the values in `lib/ops/limits.ts` against the current provider pricing pages; they are 2026-11-24 estimates and the provider rules alert from them.
-7. Adapters for Supabase, Vercel and Upstash do not exist yet: their limit rules stay silent until readings appear.
+7. Optional adapter tokens (Supabase, Upstash, Vercel) are listed in the Environment table; without them the dashboard shows "n/a" and a link to the provider panel.
 
 ## Provider adapters
 
@@ -90,8 +93,30 @@ Adapters live in `lib/server/ops/adapters/` (`PROVIDER_ADAPTERS`). Each returns 
 Findings (checked 2026-11-24 against the public docs):
 
 - Cloudflare: GraphQL Analytics API (`https://api.cloudflare.com/client/v4/graphql`), dataset `viewer.accounts[].workersInvocationsAdaptive`, filter `scriptName`, `datetime_geq/leq`, sums `requests`, `errors`, `subrequests`. We query from UTC midnight to now: `requests_day`, `errors_day`. Env: `OPS_CLOUDFLARE_API_TOKEN` (Analytics read), `OPS_CLOUDFLARE_ACCOUNT_ID`, `OPS_CLOUDFLARE_WORKER_NAME`.
+- Supabase (Management API, `Authorization: Bearer <personal access token>`): `GET /v1/projects/{ref}/config/disk/util` returns `metrics.fs_used_bytes` / `fs_size_bytes` (documented, needs `infra_disk_config_read`); we write `disk_used_bytes` and `disk_size_bytes`. Not available through any documented endpoint: egress / bandwidth of the billing period and auth MAU (so the `provider.supabase.egress_bytes` rule stays silent; use the dashboard). Logical DB size is already measured by the collector (`db.size_bytes`); the `database/query` endpoint is beta and not used. Compute size (`GET /v1/projects/{ref}/billing/addons`) is a name, not a number, so it is not collected. Checked 2026-11-24, API spec read only partly (last ~68k characters unread).
+- Upstash (Developer API, HTTP Basic `email:api_key`): `GET /v2/redis/stats/{id}?period=1h` returns `total_monthly_requests`, `daily_net_commands`, `total_monthly_bandwidth`, `current_storage`; we write `commands_month`, `commands_day`, `bandwidth_month_bytes`, `storage_bytes`. Upstash is not used in production (rate limit falls back to memory) and its Developer API is unavailable for accounts created through the Vercel integration, so this adapter stays `unavailable` until a native account is used. The plan limit is not read from the API (`PROVIDER_LIMITS` holds it). Field names come from the docs; the response was not called live.
+- Vercel (REST, `Bearer`): the only documented usage endpoint is `GET /v1/billing/charges?from&to[&teamId]` (FOCUS v1.3 JSONL, daily granularity). We sum `EffectiveCost` of the month (filtered by `Tags.ProjectId` when `OPS_VERCEL_PROJECT_ID` is set) into `cost_month_usd`. Raw invocation and bandwidth counts are not exposed, so the `provider.vercel.invocations` / `bandwidth_bytes` rules stay silent. Unit strings and Hobby-plan behaviour are unconfirmed; the response was not called live.
 - Pusher: the HTTP API has no total connection count. `GET /channels` lists occupied channels (used: `channels_occupied`); `subscription_count` is per single non-presence channel (opt-in in app settings) and `user_count` is presence-only, so a connection total is `unavailable` in v1.
 
 ## Notifiers
 
 `sendAlert` (`lib/server/ops/notify.ts`): Telegram (`OPS_TELEGRAM_BOT_TOKEN`, `OPS_TELEGRAM_CHAT_ID`) and Resend (`RESEND_API_KEY`, `OPS_ALERT_EMAIL`, `OPS_ALERT_FROM`); a channel without env is `off`; failures never throw and secrets are never logged. `POST /api/ops/test-notify` (platform admin) returns per-channel results.
+
+## Dashboard (`/ops`)
+
+Owner-only page (`PLATFORM_ADMIN_USER_IDS`). `app/ops/layout.tsx` and `page.tsx` both call `assertOpsAdmin` (`lib/server/ops/page-guard.ts`): layouts and pages render in parallel, so the page must not rely on the layout's `notFound()` before it reads data. A non-owner gets 404; `robots.ts` disallows `/ops`, the layout sets `noindex`. Namespace `ops` (`OPS_NAMESPACES` in `lib/i18n/core-namespaces.ts`), not part of any campaign scope.
+
+Read API (all `requirePlatformAdmin`, 404 for others, `privateJson`, `force-dynamic`):
+
+- `GET /api/ops/summary`: `heartbeatAgeSec`, provider rows (tier, available, worst status), limit rows (`value`, `limit` of the active tier, `percent`, `status`, `forecastHours`) and non-ok alert states. Limit rows are `PROVIDER_METRIC_LIMITS` plus `db.size`.
+- `GET /api/ops/series?range=1h|6h|24h|7d&metrics=a,b` (≤ 12 keys, `lib/schemas/ops.ts`): at most 240 points per series, empty bins are `null`. A key is `metric`, `metric{k=v}`, with an optional `:p50` / `:p95` (timings only) or `:rate` (counters, per minute) suffix (`parseSeriesKey`). A counter without a label adds up all label sets; a gauge without a label reads only the unlabeled row. Up to 24 h reads minute buckets, 7 d reads hourly rows plus the minute rows of the current (not yet rolled up) hour. Pure binning is `lib/utils/ops/series.ts`, loading is `lib/server/ops/read-series.ts`.
+- `GET /api/ops/alerts?limit=`: every rule with its state, plus the last transitions. `POST /api/ops/alerts/[rule]/mute` `{ minutes: 0 | 60 | 1440 }` writes `silencedUntil` (0 clears it; an unknown rule is 404).
+- `GET /api/ops/db-top`: top 10 `pg_stat_statements` by total time (query text cut to 200 chars) or `available: false`, plus open transactions longer than 5 s (duration, state and wait type only, no query text).
+
+Client: `lib/api/ops.ts` -> `lib/hooks/ops/` (`opsKeys`; summary, series, alerts poll every 15 s with `refetchIntervalInBackground: false`, so a hidden tab stops) -> `components/ops/*`. One series request per chart group (`CHART_GROUPS` in `lib/ops/chart-groups.ts`, which also holds the provider panel links). `UplotChart` is loaded with `next/dynamic` (`ssr: false`) so `uplot` and its CSS stay in the `/ops` chunk. Add a chart: a row in `CHART_GROUPS` plus `charts.items.*` / `charts.series.*` keys in `messages/{uk,en}/ops.json` (a test checks both).
+
+Live check data: `scripts/ops/seed-fake-metrics.ts` (local database only, refuses any other host; always wipes the ops tables first, `--clean` only wipes).
+
+Limit line: a chart whose series key (or `ChartDef.limitId`, e.g. `db.size`) matches a summary limit row with a non-null `limit` gets an extra dashed red "Limit" series at the active tier's value, so the y-scale always shows the headroom. The `connections` chart carries `db.max_connections` as its own series.
+
+Live check (2026-11-25, local `next start` + seeded fake metrics, Chrome): desktop render without raw keys or console errors, range tabs 1h/6h/24h/7d refetch `series`, mute 1h/24h and unmute, "Test notification" ("not configured" for both channels), non-owner gets 404 on the page and both APIs. Not verified: real 390 px window (checked in a 390 px iframe: no horizontal scroll), background-tab polling in a real browser (`refetchIntervalInBackground: false` is set in all three hooks). Adapters checked against live APIs: Supabase (disk/util, 200), Cloudflare (GraphQL shape, 0 requests today), Vercel (Hobby plan: charges feed answers 404 `costs_not_found`, mapped to cost 0). Upstash stays "n/a" (Developer API is not available to Vercel-provisioned accounts; Redis is unused in prod). Supabase egress/MAU and raw Vercel invocation counts are not exposed by any API.

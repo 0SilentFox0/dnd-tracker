@@ -37,6 +37,7 @@ import type landing from './messages/uk/landing.json';
 import type maps from './messages/uk/maps.json';
 import type music from './messages/uk/music.json';
 import type onboarding from './messages/uk/onboarding.json';
+import type ops from './messages/uk/ops.json';
 import type quests from './messages/uk/quests.json';
 import type races from './messages/uk/races.json';
 import type rest from './messages/uk/rest.json';
@@ -140,6 +141,7 @@ declare module 'next-intl' {
             battleSetup: typeof battleSetup;
             battleLog: typeof battleLog;
             battleActions: typeof battleActions;
+            ops: typeof ops;
         };
     }
 }

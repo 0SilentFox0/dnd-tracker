@@ -1,0 +1,171 @@
+{
+  "title": "Ops",
+  "subtitle": "Platform health and provider limits",
+  "loadError": "Could not load ops data",
+  "status": {
+    "title": "Status now",
+    "heartbeat": "Last collection {age} ago",
+    "heartbeatNever": "No collection recorded yet",
+    "collectorSilent": "Collector is silent: no data for over 3 minutes",
+    "tier": {
+      "free": "Free tier",
+      "paid": "Paid plan"
+    },
+    "state": {
+      "ok": "OK",
+      "warn": "Warning",
+      "crit": "Critical",
+      "unknown": "No limit data"
+    },
+    "unavailable": "n/a",
+    "openDashboard": "Open provider dashboard",
+    "providers": {
+      "supabase": "Supabase",
+      "vercel": "Vercel",
+      "pusher": "Pusher",
+      "upstash": "Upstash",
+      "cloudflare": "Cloudflare"
+    },
+    "age": {
+      "seconds": "{value} s",
+      "minutes": "{value} min",
+      "hours": "{value} h"
+    }
+  },
+  "limits": {
+    "title": "Limits",
+    "na": "n/a",
+    "used": "{value} of {limit}",
+    "percent": "{percent}%",
+    "forecast": "Limit reached in about {hours} h",
+    "noForecast": "No growth trend",
+    "period": {
+      "now": "current",
+      "day": "per day",
+      "month": "per month"
+    },
+    "names": {
+      "db_size": "Database size",
+      "provider_cloudflare_requests_day": "Cloudflare requests",
+      "provider_pusher_connections": "Pusher connections",
+      "provider_supabase_egress_bytes": "Supabase egress",
+      "provider_vercel_bandwidth_bytes": "Vercel bandwidth",
+      "provider_vercel_invocations": "Vercel invocations",
+      "provider_upstash_commands_month": "Upstash commands"
+    },
+    "reached": "Limit reached"
+  },
+  "ranges": {
+    "label": "Time range",
+    "1h": "1 h",
+    "6h": "6 h",
+    "24h": "24 h",
+    "7d": "7 d"
+  },
+  "charts": {
+    "title": "Charts",
+    "noData": "No data in this range",
+    "loading": "Loading chart",
+    "groups": {
+      "db": "Database",
+      "battle": "Battle",
+      "realtime": "Realtime and limits",
+      "providers": "Providers"
+    },
+    "items": {
+      "connections": "Connections",
+      "longestTx": "Longest transaction",
+      "locks": "Waiting locks",
+      "size": "Database size",
+      "cache": "Cache hit ratio",
+      "latency": "Battle mutation latency",
+      "conflicts": "Battle conflicts per minute",
+      "activeBattles": "Active battles",
+      "errors": "API 5xx per minute",
+      "triggers": "Pusher triggers per minute",
+      "ratelimit": "Rate limiter per minute",
+      "cloudflare": "Cloudflare requests today",
+      "pusherChannels": "Pusher occupied channels",
+      "supabaseEgress": "Supabase egress",
+      "vercelInvocations": "Vercel invocations",
+      "upstashCommands": "Upstash commands"
+    },
+    "series": {
+      "total": "Total",
+      "active": "Active",
+      "idleInTx": "Idle in transaction",
+      "max": "Max",
+      "longestTx": "Longest transaction",
+      "waitingLocks": "Waiting locks",
+      "size": "Size",
+      "cacheHit": "Cache hit",
+      "p50": "p50",
+      "p95": "p95",
+      "conflicts": "Conflicts",
+      "activeBattles": "Active battles",
+      "errors5xx": "5xx",
+      "ok": "Delivered",
+      "fail": "Failed",
+      "denied": "Denied",
+      "degraded": "Degraded mode",
+      "requestsDay": "Requests",
+      "channels": "Channels",
+      "egress": "Egress",
+      "invocations": "Invocations",
+      "commands": "Commands"
+    },
+    "units": {
+      "count": "count",
+      "bytes": "size",
+      "ms": "ms",
+      "seconds": "s",
+      "ratio": "ratio",
+      "perMin": "per min"
+    },
+    "time": "Time",
+    "limit": "Limit"
+  },
+  "slow": {
+    "title": "Slow queries and long transactions",
+    "statements": "Top queries by total time",
+    "unavailable": "pg_stat_statements is not available for this database",
+    "empty": "No statements recorded",
+    "calls": "Calls",
+    "total": "Total, ms",
+    "mean": "Mean, ms",
+    "query": "Query",
+    "longTx": "Open transactions longer than 5 s",
+    "noLongTx": "No long transactions",
+    "txRow": "{seconds} s, {state}"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "active": "Active",
+    "noActive": "No active alerts",
+    "history": "History",
+    "noHistory": "No status changes yet",
+    "mute1h": "Mute 1 h",
+    "mute24h": "Mute 24 h",
+    "unmute": "Unmute",
+    "mutedUntil": "Muted until {time}",
+    "transition": "{from} → {to}",
+    "notified": "notified",
+    "silent": "not sent",
+    "status": {
+      "ok": "OK",
+      "warn": "Warning",
+      "crit": "Critical"
+    }
+  },
+  "notify": {
+    "button": "Send test notification",
+    "sending": "Sending…",
+    "result": "Telegram: {telegram}; email: {email}",
+    "channel": {
+      "ok": "sent",
+      "fail": "failed",
+      "off": "not configured"
+    },
+    "error": "Could not send the test notification"
+  }
+}

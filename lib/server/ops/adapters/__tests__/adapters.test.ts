@@ -115,10 +115,13 @@ describe('pusher adapter', () => {
 });
 
 describe('registry', () => {
-    it('lists both adapters', () => {
+    it('lists every adapter', () => {
         expect(PROVIDER_ADAPTERS.map((a) => a.name)).toEqual([
             'cloudflare',
             'pusher',
+            'supabase',
+            'upstash',
+            'vercel',
         ]);
     });
 });
