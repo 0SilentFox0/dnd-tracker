@@ -25,6 +25,18 @@ export const CUBE_DIRS: readonly Cube[] = [
     { x: 0, y: -1, z: 1 },
 ];
 
+export const cubeStep = (c: Cube, d: Cube, k = 1): Cube => ({
+    x: c.x + d.x * k,
+    y: c.y + d.y * k,
+    z: c.z + d.z * k,
+});
+
+export const cubeLerp = (a: Cube, b: Cube, t: number): Cube => ({
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t,
+    z: a.z + (b.z - a.z) * t,
+});
+
 export function toCube(p: GridPoint): Cube {
     const z = p.y - (p.x - (p.x & 1)) / 2;
 
@@ -38,9 +50,7 @@ export function fromCube(c: Cube): GridPoint {
 export function hexNeighbors(p: GridPoint): GridPoint[] {
     const c = toCube(p);
 
-    return CUBE_DIRS.map((d) =>
-        fromCube({ x: c.x + d.x, y: c.y + d.y, z: c.z + d.z })
-    );
+    return CUBE_DIRS.map((d) => fromCube(cubeStep(c, d)));
 }
 
 const cubeDistance = (a: Cube, b: Cube): number =>
@@ -94,17 +104,7 @@ export function hexLine(from: GridPoint, to: GridPoint): GridPoint[] {
     const out: GridPoint[] = [];
 
     for (let i = 0; i <= n; i++) {
-        const t = i / n;
-
-        out.push(
-            fromCube(
-                cubeRound({
-                    x: na.x + (nb.x - na.x) * t,
-                    y: na.y + (nb.y - na.y) * t,
-                    z: na.z + (nb.z - na.z) * t,
-                })
-            )
-        );
+        out.push(fromCube(cubeRound(cubeLerp(na, nb, i / n))));
     }
 
     return out;
@@ -132,18 +132,14 @@ export function hexRing(centre: GridPoint, radius: number): GridPoint[] {
 
     const c = toCube(centre);
 
-    let cur: Cube = {
-        x: c.x + CUBE_DIRS[4].x * radius,
-        y: c.y + CUBE_DIRS[4].y * radius,
-        z: c.z + CUBE_DIRS[4].z * radius,
-    };
+    let cur = cubeStep(c, CUBE_DIRS[4], radius);
 
     const out: GridPoint[] = [];
 
     for (const d of CUBE_DIRS) {
         for (let i = 0; i < radius; i++) {
             out.push(fromCube(cur));
-            cur = { x: cur.x + d.x, y: cur.y + d.y, z: cur.z + d.z };
+            cur = cubeStep(cur, d);
         }
     }
 

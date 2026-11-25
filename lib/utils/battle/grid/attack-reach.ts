@@ -117,12 +117,14 @@ export function pickAttack(
         else rangedError ??= e;
     }
 
+    const grid = gridOf(map);
+
     const adjacent =
         !!target.battleData.position &&
         footprintDistance(
-            cellsOf(attacker, gridOf(map)),
-            cellsOf(target, gridOf(map)),
-            gridOf(map)
+            cellsOf(attacker, grid),
+            cellsOf(target, grid),
+            grid
         ) <= 1;
 
     return {

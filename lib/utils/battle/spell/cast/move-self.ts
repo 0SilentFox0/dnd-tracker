@@ -123,17 +123,19 @@ export function teleportTo(
 
     if (!mover) return { participants, message: '' };
 
+    const grid = gridOf(map);
+
     const blocked = occupiedBy(
         participants,
         (p) => p.basicInfo.id !== moverId,
-        gridOf(map)
+        grid
     );
 
     if (
         !map ||
         !cell ||
         !isOnMap(mover) ||
-        !fits(map, cell, footprintSizeOf(mover, gridOf(map)), blocked)
+        !fits(map, cell, footprintSizeOf(mover, grid), blocked)
     )
         return {
             participants,

@@ -103,6 +103,8 @@ export function anchorMove({
 
     const movedId = moved.basicInfo.id;
 
+    const grid = gridOf(ctx.map);
+
     for (const anchor of anchorsOf(participants)) {
         const bearer = findParticipant(ps, anchor.bearerId);
 
@@ -136,7 +138,7 @@ export function anchorMove({
                             otherAt,
                             anchor.state.radiusFeet,
                             ctx.rules,
-                            gridOf(ctx.map)
+                            grid
                         )
                     );
 
@@ -149,7 +151,7 @@ export function anchorMove({
                         step,
                         anchor.state.radiusFeet,
                         ctx.rules,
-                        gridOf(ctx.map)
+                        grid
                     )
                 );
             };

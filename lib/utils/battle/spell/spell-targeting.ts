@@ -283,8 +283,10 @@ function resolveTemplate(
             )
             .map((p) => p.basicInfo.id);
 
+    const grid = gridOf(map);
+
     if (targeting.shape === 'emanation') {
-        const centre = cellsOf(caster, gridOf(map))[0];
+        const centre = cellsOf(caster, grid)[0];
 
         const { cells, targets } = templateArea(
             map,
@@ -305,12 +307,12 @@ function resolveTemplate(
 
     if (
         !templateAimAllowed(
-            cellsOf(caster, gridOf(map)),
+            cellsOf(caster, grid),
             targeting,
             aim,
             targeting.range,
             rules,
-            gridOf(map)
+            grid
         )
     )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));
@@ -338,7 +340,7 @@ function resolveTemplate(
         ok: true,
         targetIds: passing(targets),
         cells,
-        centre: templateCentre(targeting, aim, cells, gridOf(map)),
+        centre: templateCentre(targeting, aim, cells, grid),
     };
 }
 
@@ -347,6 +349,8 @@ function resolveSkillRadius(
     radius: SkillRadius,
     aim: { cell?: GridPoint; range?: number }
 ): SpellTargetResolution {
+    const grid = gridOf(scene.map);
+
     if (!aim.cell) return fail(textRef('battleActions.spell.target.pickPoint'));
 
     if (!inBounds(scene.map, aim.cell))
@@ -354,11 +358,11 @@ function resolveSkillRadius(
 
     if (
         !aimInRange(
-            cellsOf(scene.caster, gridOf(scene.map)),
+            cellsOf(scene.caster, grid),
             aim.cell,
             aim.range,
             scene.rules,
-            gridOf(scene.map)
+            grid
         )
     )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));

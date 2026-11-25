@@ -511,16 +511,18 @@ function buildMarks(
 function aimClick(s: SceneState, p: GridPoint): MapClick {
     const { aim, aimCaster, map, participants, rules } = s;
 
+    const grid = gridOf(map);
+
     if (
         !aim ||
         !aimCaster ||
         !templateAimAllowed(
-            cellsOf(aimCaster, gridOf(map)),
+            cellsOf(aimCaster, grid),
             aim.template,
             p,
             aim.range,
             rules,
-            gridOf(map)
+            grid
         )
     )
         return { kind: 'reject', reason: textRef(REJECT.outOfRange) };

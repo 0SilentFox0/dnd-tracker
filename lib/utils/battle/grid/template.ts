@@ -11,7 +11,9 @@ import {
 } from './geometry';
 import {
     CUBE_DIRS,
+    cubeLerp,
     cubeRound,
+    cubeStep,
     fromCube,
     hexCenter,
     hexDisk,
@@ -74,7 +76,7 @@ function exactCircleCells(
     aim: GridPoint,
     grid: GridKind
 ): GridPoint[] {
-    if (grid === 'hex') return hexDisk(aim, r);
+    if (grid === 'hex') return circleCells(r, aim, grid);
 
     const out: GridPoint[] = [];
 
@@ -120,9 +122,7 @@ function crossCells(r: number, aim: GridPoint, grid: GridKind): GridPoint[] {
 
         for (const d of CUBE_DIRS)
             for (let i = 1; i <= r; i++)
-                out.push(
-                    fromCube({ x: c.x + d.x * i, y: c.y + d.y * i, z: c.z + d.z * i })
-                );
+                out.push(fromCube(cubeStep(c, d, i)));
 
         return out;
     }
@@ -214,13 +214,7 @@ function hexRayCells(
 
     const end = opts.stopAtTarget
         ? through
-        : fromCube(
-              cubeRound({
-                  x: a.x + (b.x - a.x) * k,
-                  y: a.y + (b.y - a.y) * k,
-                  z: a.z + (b.z - a.z) * k,
-              })
-          );
+        : fromCube(cubeRound(cubeLerp(a, b, k)));
 
     const out: GridPoint[] = [];
 
