@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     afterContentCommit,
     currentContentWrite,
+    currentTransaction,
     outsideWriteScope,
     runContentEffects,
     runContentWriteContext,
@@ -49,8 +50,9 @@ describe('outsideWriteScope', () => {
         const seen = await runContentWriteContext('c1', {}, async () => [
             currentContentWrite()?.campaignId,
             outsideWriteScope(() => currentContentWrite()),
+            outsideWriteScope(() => currentTransaction()),
         ]);
 
-        expect(seen).toEqual(['c1', undefined]);
+        expect(seen).toEqual(['c1', undefined, undefined]);
     });
 });

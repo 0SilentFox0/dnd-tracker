@@ -144,8 +144,8 @@ type AlertRule = {
 | `db.unreachable` | `sum db.unreachable`, 5 хв | ≥1 | ≥3 | 0 |
 | `db.longest_tx` | `max db.longest_tx_s` | 10 | 30 | 1 хв |
 | `db.size` | `db.size_bytes / limit` | 0.7 | 0.9 | 0 |
-| `battle.p95` | p95 `battle.mutation`, 5 хв | 1500 мс | 3000 мс | 3 хв |
-| `battle.conflict_rate` | `battle.conflict / battle.mutation:count`, 5 хв | 0.05 | 0.15 | 3 хв |
+| `battle.p95` | p95 `battle.mutation`, 5 хв | 750 мс | 2000 мс | 3 хв |
+| `battle.conflict_rate` | `battle.conflict / battle.mutation:count`, 5 хв | 0.02 | 0.1 | 3 хв |
 | `api.5xx` | `sum api.error5xx`, 5 хв | 10 | 50 | 0 |
 | `pusher.messages_day` | оцінка (trigger × fan-out) / ліміт | 0.7 | 0.9 | 0 |
 | `pusher.trigger_fail` | `sum pusher.trigger{result=fail}`, 5 хв | ≥5 | ≥30 | 0 |
@@ -154,6 +154,8 @@ type AlertRule = {
 | `provider.*` (кожен адаптерний із ліміту) | / ліміт | 0.7 | 0.9 | 0 |
 | `collector.silent` | `now − collector.heartbeat` | 3 хв | 10 хв | 0 |
 | `secrets.expiry` | дні до дати з `lib/ops/expiries.ts` | 14 | 3 | 0 |
+
+Калібрування P4 (2026-11-25, [capacity-baseline](../../product/capacity-baseline.md)): `battle.p95` 1500/3000 → 750/2000 мс (локальний p95 33–49 мс у тиші (36–118 мс p95 окремих прогонів), 690 мс на перевантаженому хості, плюс запас на мережу до pooler); `battle.conflict_rate` 0.05/0.15 → 0.02/0.1 (виміряно 0 %, 2 % — поріг рішення про advisory lock). Решта порогів і `PROVIDER_LIMITS` лишаються: локальний стенд не вимірює з'єднання pooler, егрес провайдерів і тарифні ліміти; значення лімітів — публічні тарифи, власник має звірити.
 
 Оцінка повідомлень Pusher: `triggers_за_добу × OPS_PUSHER_FANOUT` (env, за замовчуванням 6), на дашборді підписана «estimate».
 

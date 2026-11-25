@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { BATTLE_LOG_RECENT_EVENTS } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 import { getTranslator, type Translator } from '@/lib/i18n/translator';
@@ -593,7 +594,7 @@ export async function readBattleAction(
                     entries: await loadRecentEvents(
                         prisma,
                         loaded.scene.id,
-                        30
+                        BATTLE_LOG_RECENT_EVENTS
                     ),
                 },
                 { isDM: loaded.isDM }

@@ -1,6 +1,6 @@
 import encoding from 'k6/encoding';
 import http from 'k6/http';
-import { Counter } from 'k6/metrics';
+import { Counter, Trend } from 'k6/metrics';
 
 export const BASE = __ENV.BASE_URL || 'http://localhost:3200';
 const SUPABASE = __ENV.SUPABASE_URL;
@@ -9,6 +9,7 @@ const MAX_CHUNK = 3180;
 
 export const users = JSON.parse(open('../../.superpowers/loadtest/users.json'));
 export const conflicts = new Counter('battle_conflicts');
+export const respBytes = new Trend('resp_bytes');
 export const mutations = new Counter('battle_mutations');
 
 export function login(u) {
@@ -40,7 +41,10 @@ export function api(cookie, method, path, body, tags) {
         responseCallback: http.expectedStatuses({ min: 200, max: 399 }, 409, 422),
     };
     const url = `${BASE}/api${path}`;
-    return method === 'GET'
-        ? http.get(url, params)
-        : http.request(method, url, body ? JSON.stringify(body) : null, params);
+    const res =
+        method === 'GET'
+            ? http.get(url, params)
+            : http.request(method, url, body ? JSON.stringify(body) : null, params);
+    if (tags && tags.name) respBytes.add(res.body ? res.body.length : 0, tags);
+    return res;
 }

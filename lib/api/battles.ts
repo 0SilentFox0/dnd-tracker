@@ -74,7 +74,7 @@ export async function getBattle(
     battleId: string
 ): Promise<BattleScene> {
     return campaignGet<BattleScene>(campaignId, `/battles/${battleId}`, {
-        cache: 'no-store',
+        cache: 'no-cache',
     });
 }
 

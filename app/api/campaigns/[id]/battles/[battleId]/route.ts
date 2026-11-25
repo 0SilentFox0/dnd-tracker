@@ -9,7 +9,11 @@ export async function GET(req: Request, { params }: Params) {
     if (new URL(req.url).searchParams.has(BATTLE_VERSION_ONLY_PARAM))
         return readBattleVersion(await params);
 
-    return readBattleScene(await params);
+    return readBattleScene(
+        await params,
+        undefined,
+        req.headers.get('if-none-match')
+    );
 }
 
 export async function PATCH(req: Request, { params }: Params) {

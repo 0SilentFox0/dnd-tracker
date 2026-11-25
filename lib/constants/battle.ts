@@ -124,7 +124,7 @@ export const COUNTER_NUDGE_MEMBER_MS = 5_000;
 
 export const BATTLE_VERSION_ONLY_PARAM = 'versionOnly';
 
-export const BATTLE_LOG_RECENT_EVENTS = 30;
+export const BATTLE_LOG_RECENT_EVENTS = 10;
 
 export const BATTLE_LOG_PAGE_SIZE = 50;
 

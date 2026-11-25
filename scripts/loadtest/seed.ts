@@ -1,13 +1,15 @@
+import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-
-import { createClient } from '@supabase/supabase-js';
 
 import { prisma } from '@/lib/db';
 
 const CAMPAIGN_ID = process.env.LOADTEST_CAMPAIGN_ID ?? 'cmuylhk0c0001ia06lg5eommv';
+
 const PLAYERS = 6;
+
 const OUT = '.superpowers/loadtest/users.json';
+
 const DOMAIN = 'loadtest.example';
 
 interface LoadUser {
@@ -96,6 +98,37 @@ async function seed(): Promise<void> {
     console.info(`seeded ${users.length} users, ${heroes.length} heroes`);
 }
 
+const TARGETS = 5;
+
+const TARGET_PREFIX = 'loadtest-target-';
+
+async function targets(): Promise<void> {
+    const file = JSON.parse(readFileSync(OUT, 'utf8')) as {
+        users: LoadUser[];
+    };
+
+    const source = await prisma.campaign.findUniqueOrThrow({
+        where: { id: CAMPAIGN_ID },
+        select: { rules: true },
+    });
+
+    for (let i = 0; i < TARGETS; i++) {
+        const c = await prisma.campaign.create({
+            data: {
+                rules: source.rules ?? {},
+                name: `${TARGET_PREFIX}${i}`,
+                dmUserId: file.users[0].id,
+                inviteCode: randomBytes(6).toString('hex'),
+            },
+        });
+
+        await prisma.campaignMember.create({
+            data: { campaignId: c.id, userId: file.users[0].id, role: 'dm' },
+        });
+    }
+    console.info(`created ${TARGETS} empty target campaigns`);
+}
+
 async function cleanup(): Promise<void> {
     const { users } = JSON.parse(readFileSync(OUT, 'utf8')) as {
         users: LoadUser[];
@@ -105,6 +138,18 @@ async function cleanup(): Promise<void> {
 
     await prisma.battleScene.deleteMany({
         where: { campaignId: CAMPAIGN_ID, name: { startsWith: 'loadtest-' } },
+    });
+    await prisma.campaign.deleteMany({
+        where: {
+            name: { startsWith: TARGET_PREFIX },
+            dmUserId: users[0].id,
+        },
+    });
+    await prisma.feat.deleteMany({
+        where: {
+            campaignId: CAMPAIGN_ID,
+            name: { startsWith: 'loadtest-feat-' },
+        },
     });
     for (const u of users) {
         await supabase.auth.admin.deleteUser(u.id);
@@ -116,6 +161,7 @@ async function main(): Promise<void> {
     assertProdcopy();
 
     if (process.argv[2] === 'cleanup') await cleanup();
+    else if (process.argv[2] === 'targets') await targets();
     else await seed();
 }
 

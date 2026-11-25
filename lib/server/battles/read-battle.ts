@@ -70,15 +70,44 @@ async function authorize(params: BattleParams, deps: BattleReadDeps) {
     return { ...access, userId };
 }
 
-/** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. */
+const sceneEtag = (version: number, userId: string, isDM: boolean) =>
+    `W/"b${version}-${isDM ? 'dm' : 'p'}-${userId}"`;
+
+const REVALIDATE_HEADERS = { 'Cache-Control': 'private, no-cache' };
+
+/** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. A matching `If-None-Match` (battle version + viewer) answers 304 without loading the scene. */
 export async function readBattleScene(
     params: BattleParams,
-    deps: PipelineDeps = defaultPipelineDeps
+    deps: PipelineDeps = defaultPipelineDeps,
+    ifNoneMatch?: string | null,
+    readDeps: BattleReadDeps = defaultReadDeps
 ): Promise<NextResponse> {
     try {
         const userId = await deps.getUserId();
 
         if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
+
+        if (ifNoneMatch) {
+            const access = await readDeps.loadAccess({
+                battleId: params.battleId,
+                campaignId: params.id,
+                userId,
+            });
+
+            if (access && access.isMember) {
+                const etag = sceneEtag(
+                    access.version,
+                    userId,
+                    Boolean(access.isDM)
+                );
+
+                if (ifNoneMatch.split(',').some((t) => t.trim() === etag))
+                    return new NextResponse(null, {
+                        status: 304,
+                        headers: { ...REVALIDATE_HEADERS, ETag: etag },
+                    });
+            }
+        }
 
         const run = async () => {
             const loaded = await deps.loadBattle({
@@ -101,7 +130,17 @@ export async function readBattleScene(
                         includeKnowledge: true,
                     },
                     deps
-                )
+                ),
+                {
+                    headers: {
+                        ...REVALIDATE_HEADERS,
+                        ETag: sceneEtag(
+                            loaded.scene.version,
+                            userId,
+                            loaded.isDM
+                        ),
+                    },
+                }
             );
         };
 

@@ -66,6 +66,13 @@ function deps(over: Partial<PipelineDeps> = {}): PipelineDeps {
 
 const params = { id: 'c1', battleId: 'b1' };
 
+const readDeps = (
+    access: { version: number; isMember: boolean; isDM?: boolean } | null
+) =>
+    ({
+        loadAccess: vi.fn(async () => access),
+    }) as unknown as Parameters<typeof readBattleScene>[3];
+
 describe('readBattleScene', () => {
     it('401 without a session', async () => {
         const res = await readBattleScene(
@@ -161,6 +168,46 @@ describe('readBattleScene', () => {
             currentHp: 30,
             armorClass: 17,
         });
+    });
+
+    it('sets a version ETag on the scene', async () => {
+        const res = await readBattleScene(params, deps());
+
+        expect(res.headers.get('ETag')).toBe('W/"b3-p-u-player"');
+        expect(res.headers.get('Cache-Control')).toBe('private, no-cache');
+    });
+
+    it('304 without loading the scene when If-None-Match matches version and viewer', async () => {
+        const d = deps();
+
+        const res = await readBattleScene(
+            params,
+            d,
+            'W/"b3-p-u-player"',
+            readDeps({ version: 3, isMember: true })
+        );
+
+        expect(res.status).toBe(304);
+        expect(d.loadBattle).not.toHaveBeenCalled();
+    });
+
+    it('answers the full scene when the version moved or the viewer role differs', async () => {
+        const stale = await readBattleScene(
+            params,
+            deps(),
+            'W/"b2-p-u-player"',
+            readDeps({ version: 3, isMember: true })
+        );
+
+        const otherRole = await readBattleScene(
+            params,
+            deps(),
+            'W/"b3-dm-u-player"',
+            readDeps({ version: 3, isMember: true })
+        );
+
+        expect(stale.status).toBe(200);
+        expect(otherRole.status).toBe(200);
     });
 
     it('runs the read inside the campaign write lock and passes its errors through', async () => {

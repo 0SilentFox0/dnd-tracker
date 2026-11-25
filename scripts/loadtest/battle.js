@@ -37,6 +37,10 @@ export const options = {
         'http_req_duration{name:poll}': ['p(95)>=0'],
         'http_req_duration{name:scene}': ['p(95)>=0'],
         'http_req_duration{name:attack}': ['p(95)>=0'],
+        'resp_bytes{name:scene}': ['avg>=0'],
+        'resp_bytes{name:poll}': ['avg>=0'],
+        'resp_bytes{name:attack}': ['avg>=0'],
+        'resp_bytes{name:next-turn}': ['avg>=0'],
     },
     summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max'],
 };
