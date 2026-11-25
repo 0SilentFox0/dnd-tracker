@@ -4,10 +4,13 @@ import { memo, useEffect, useMemo, useRef } from 'react';
 
 import { Portrait } from '@/components/battle/hud';
 import { HudButton } from '@/components/hud';
+import { ROMAN_NUMERALS } from '@/lib/constants/spells';
 import { useBattleSceneData, useInitiativeDrag } from '@/lib/hooks/battle';
 import { useFlip, useReducedMotion } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 import { currentRoundQueue, queueKeys } from '@/lib/utils/battle/view';
+
+const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack({
     onReorder,
@@ -25,7 +28,10 @@ export const InitiativeTrack = memo(function InitiativeTrack({
         select,
     } = useBattleSceneData();
 
-    const queue = useMemo(() => currentRoundQueue(fullQueue), [fullQueue]);
+    const queue = useMemo(
+        () => (onReorder ? fullQueue : currentRoundQueue(fullQueue)),
+        [fullQueue, onReorder]
+    );
 
     const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 
@@ -82,7 +88,31 @@ export const InitiativeTrack = memo(function InitiativeTrack({
             )}
         >
             {queue.map((e, i) => {
-                if (e.kind === 'round') return null;
+                if (e.kind === 'round')
+                    return (
+                        <span
+                            key="round"
+                            data-flip="round"
+                            data-round-divider=""
+                            className={cn(
+                                'relative shrink-0 bg-white/30',
+                                vertical
+                                    ? 'my-0.5 ml-3 h-px w-9'
+                                    : 'mx-0.5 mb-3 h-9 w-px'
+                            )}
+                        >
+                            <span
+                                className={cn(
+                                    'hud-sc absolute text-[11px] text-[var(--hud-muted)]',
+                                    vertical
+                                        ? 'top-1/2 left-0 -translate-x-full -translate-y-1/2 pr-1'
+                                        : 'top-0 left-1/2 -translate-x-1/2 -translate-y-full'
+                                )}
+                            >
+                                {roman(e.round)}
+                            </span>
+                        </span>
+                    );
 
                 return (
                     <HudButton
