@@ -43,7 +43,7 @@ export function IconUrlField({
                     src={invalid ? null : url || null}
                     name={fallbackText}
                     size={64}
-                    className="size-16 rounded-lg border text-xl"
+                    className="ds-inset hud-sc size-16 border border-hud-line text-xl text-hud-muted"
                 />
                 <Input
                     id={inputId}
@@ -56,7 +56,7 @@ export function IconUrlField({
                 />
             </div>
             {invalid && (
-                <p className="text-xs text-destructive">{t('invalid')}</p>
+                <p className="text-sm text-hud-crimson-fg">{t('invalid')}</p>
             )}
         </div>
     );

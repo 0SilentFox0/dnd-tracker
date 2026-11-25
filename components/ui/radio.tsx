@@ -10,7 +10,7 @@ function Radio({
         <input
             type="radio"
             data-slot="radio"
-            className={cn('size-4 shrink-0 accent-primary', className)}
+            className={cn('shrink-0', className)}
             {...props}
         />
     );
