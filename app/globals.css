@@ -94,13 +94,13 @@
 }
 
 .page-transition {
-  animation: page-fade 200ms ease-out;
+  animation: page-fade 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes page-fade {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
