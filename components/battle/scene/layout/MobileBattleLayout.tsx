@@ -40,6 +40,7 @@ import {
     useBattleScene,
     useMobileBattleTabs,
     useSceneDrawers,
+    useTrackReorder,
 } from '@/lib/hooks/battle';
 import { useActiveDemoTour } from '@/lib/onboarding/active-demo-tour';
 import { myTurnKey } from '@/lib/utils/battle/view';
@@ -73,6 +74,8 @@ export function MobileBattleLayout({
         log,
         intents,
     } = useBattleScene();
+
+    const onReorder = useTrackReorder();
 
     const hasMap = !!battle.map;
 
@@ -179,7 +182,11 @@ export function MobileBattleLayout({
                                 detachedButton="absolute top-0 left-1/2 -translate-x-1/2"
                             >
                                 <div className="absolute top-[4.25rem] bottom-0 left-0 flex items-start">
-                                    <InitiativeTrack compact vertical />
+                                    <InitiativeTrack
+                                        compact
+                                        vertical
+                                        onReorder={onReorder}
+                                    />
                                 </div>
                             </HudBlock>
                         </div>

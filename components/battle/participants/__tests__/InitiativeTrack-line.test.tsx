@@ -131,4 +131,14 @@ describe('InitiativeTrack line', () => {
 
         expect(container.querySelector('[data-next-round-toggle]')).toBeNull();
     });
+
+    it('vertical compact track with onReorder is draggable and has no toggle', () => {
+        const { container } = render(
+            <InitiativeTrack compact vertical onReorder={vi.fn()} />,
+            { wrapper: fakeScene({ isMyTurn: false }).wrapper }
+        );
+
+        expect(container.querySelectorAll('[data-pid]').length).toBe(5);
+        expect(container.querySelector('[data-next-round-toggle]')).toBeNull();
+    });
 });
