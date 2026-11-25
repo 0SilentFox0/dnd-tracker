@@ -105,6 +105,7 @@
     "password": "Пароль",
     "preferences": "Мова і час",
     "soundLibrary": "Бібліотека звуків",
+    "subscription": "Підписка",
     "aiKeys": "AI-ключі",
     "switchAccount": "Змінити акаунт",
     "signOut": "Вийти",
@@ -113,11 +114,7 @@
       "label": "Кольорова тема",
       "names": {
         "tavern": "Таверна",
-        "midnight": "Опівніч",
-        "forest": "Ліс",
-        "parchment": "Пергамент",
-        "amethyst": "Аметист",
-        "frost": "Крига"
+        "parchment": "Пергамент"
       },
       "errors": {
         "load": "Не вдалося завантажити тему",

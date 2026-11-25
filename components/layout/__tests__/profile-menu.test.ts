@@ -10,6 +10,7 @@ describe('PROFILE_MENU', () => {
             'preferences',
             'soundLibrary',
             'aiKeys',
+            'subscription',
             'switchAccount',
             'signOut',
         ]);
@@ -23,5 +24,13 @@ describe('PROFILE_MENU', () => {
     it('keeps hrefs absolute', () => {
         for (const e of PROFILE_MENU)
             if ('href' in e) expect(e.href.startsWith('/')).toBe(true);
+    });
+});
+
+describe('subscription entry', () => {
+    it('links to the stub page', () => {
+        expect(PROFILE_MENU.find((e) => e.id === 'subscription')).toMatchObject({
+            href: '/settings/subscription',
+        });
     });
 });

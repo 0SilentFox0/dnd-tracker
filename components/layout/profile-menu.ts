@@ -1,5 +1,6 @@
 import {
     CircleHelp,
+    Crown,
     Globe,
     KeyRound,
     LogOut,
@@ -15,6 +16,7 @@ type ProfileMenuId =
     | 'preferences'
     | 'soundLibrary'
     | 'aiKeys'
+    | 'subscription'
     | 'switchAccount'
     | 'signOut';
 
@@ -45,6 +47,12 @@ export const PROFILE_MENU: readonly ProfileMenuEntry[] = [
         href: '/library/sounds',
     },
     { id: 'aiKeys', icon: Sparkles, labelKey: 'aiKeys', href: '/settings/ai' },
+    {
+        id: 'subscription',
+        icon: Crown,
+        labelKey: 'subscription',
+        href: '/settings/subscription',
+    },
     {
         id: 'switchAccount',
         icon: UserRoundCog,
