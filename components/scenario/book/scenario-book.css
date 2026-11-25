@@ -29,7 +29,8 @@ html.dark .scenario-book:not([data-theme]) {
   .scenario-book .sb-bar strong, .scenario-book .sb-bar-toc-label, .scenario-book .sb-bar-nav-label, .scenario-book .sb-hide-sm { display: none; }
   .scenario-book .sb-bar-btns { margin-left: auto; scrollbar-width: none; }
 }
-.scenario-book .toggle { font: inherit; background: none; border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.scenario-book .toggle { font: inherit; background: none; border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; transition: border-color .15s ease, color .15s ease, background-color .15s ease; }
+.scenario-book .toggle:hover:not(:disabled) { border-color: var(--blood); background-color: color-mix(in srgb, var(--blood) 8%, transparent); }
 .scenario-book .toggle[aria-pressed="true"] { border-color: var(--blood); color: var(--blood); }
 
 .scenario-book header.title { max-width: 1180px; margin: 0 auto; padding: 56px 24px 28px; }
