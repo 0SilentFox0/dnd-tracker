@@ -48,7 +48,7 @@ function ToolButton({
                 tall ? 'h-8' : 'h-7',
                 'shrink-0 rounded-md border bg-black/60 px-2 text-xs hover:bg-black/80',
                 active
-                    ? 'border-hud-crimson text-hud-ink'
+                    ? 'border-hud-accent text-hud-ink'
                     : 'border-hud-rule text-hud-muted'
             )}
         >

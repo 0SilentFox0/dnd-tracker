@@ -214,7 +214,7 @@ export function ToolsContent({
                         aria-pressed={fxOn}
                         className={cn(
                             'size-11 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
-                            fxOn ? 'text-hud-crimson-fg' : 'text-hud-muted'
+                            fxOn ? 'text-hud-accent-fg' : 'text-hud-muted'
                         )}
                     >
                         <Sparkles className="size-5" />

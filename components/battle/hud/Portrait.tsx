@@ -45,9 +45,9 @@ export function Portrait({
                 boxShadow: current
                     ? `0 0 0 2px var(--bone), 0 0 0 4px ${ring}`
                     : me
-                      ? `0 0 0 2px ${ring}, 0 0 0 3px #000, 0 0 0 5px var(--hud-crimson)`
+                      ? `0 0 0 2px ${ring}, 0 0 0 3px #000, 0 0 0 5px var(--hud-accent)`
                       : extra
-                        ? `0 0 0 2px var(--hud-crimson), 0 0 0 3px #000`
+                        ? `0 0 0 2px var(--hud-accent), 0 0 0 3px #000`
                         : `0 0 0 2px ${ring}, 0 0 0 3px #000`,
             }}
         >

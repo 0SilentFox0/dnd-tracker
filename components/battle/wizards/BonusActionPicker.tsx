@@ -91,7 +91,7 @@ export function BonusActionPicker({
                                 }}
                                 className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50"
                             >
-                                <Swords className="size-10 p-2 text-hud-crimson-fg" />
+                                <Swords className="size-10 p-2 text-hud-accent-fg" />
                                 <span className="hud-sc block font-bold">
                                     {t('bonus.offHand')}
                                 </span>
@@ -118,7 +118,7 @@ export function BonusActionPicker({
                                             className="size-10 shrink-0 rounded object-cover"
                                         />
                                     ) : (
-                                        <Zap className="size-10 shrink-0 p-2 text-hud-crimson-fg" />
+                                        <Zap className="size-10 shrink-0 p-2 text-hud-accent-fg" />
                                     )}
                                     <span className="min-w-0">
                                         <span className="hud-sc block font-bold">

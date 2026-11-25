@@ -81,7 +81,7 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                                 : 'size-9 md:size-10',
                             'focus-visible:ring-2 focus-visible:outline-none',
                             active
-                                ? 'border-hud-crimson ring-1'
+                                ? 'border-hud-accent ring-1'
                                 : 'border-white/20',
                             s.current === 0 && 'opacity-50',
                             s.pact && 'border-dashed'

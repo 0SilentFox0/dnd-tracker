@@ -37,7 +37,7 @@ export function ToolButtons({
                     className={cn(
                         'h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50',
                         tool === value
-                            ? 'border-hud-crimson text-hud-ink'
+                            ? 'border-hud-accent text-hud-ink'
                             : 'border-hud-rule text-hud-muted'
                     )}
                 >
@@ -65,7 +65,7 @@ export function DoorToolOptions({ editor }: { editor: BattleMapEditor }) {
                 className={cn(
                     'h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50',
                     doorLocked
-                        ? 'border-hud-crimson text-hud-ink'
+                        ? 'border-hud-accent text-hud-ink'
                         : 'border-hud-rule text-hud-muted'
                 )}
             >

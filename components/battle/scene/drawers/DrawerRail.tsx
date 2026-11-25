@@ -68,7 +68,7 @@ export function DrawerRail({
                             HUD_GLASS,
                             'flex size-11 items-center justify-center rounded-xl focus-visible:ring-2 focus-visible:outline-none',
                             active === key
-                                ? 'border-hud-crimson text-hud-crimson-fg!'
+                                ? 'border-hud-accent text-hud-accent-fg!'
                                 : ''
                         )}
                     >

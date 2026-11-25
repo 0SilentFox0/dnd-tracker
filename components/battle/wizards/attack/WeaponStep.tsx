@@ -45,9 +45,9 @@ export function WeaponStep({
                         )}
                     >
                         {a.type === AttackType.RANGED ? (
-                            <Crosshair className="size-7 shrink-0 text-hud-crimson-fg" />
+                            <Crosshair className="size-7 shrink-0 text-hud-accent-fg" />
                         ) : (
-                            <Swords className="size-7 shrink-0 text-hud-crimson-fg" />
+                            <Swords className="size-7 shrink-0 text-hud-accent-fg" />
                         )}
                         <span className="min-w-0 flex-1">
                             <span className="hud-sc block text-[17px] font-bold">
