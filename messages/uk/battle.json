@@ -459,6 +459,10 @@
     "dmPanel": "DM панель",
     "close": "Закрити"
   },
+  "initiative": {
+    "showNextRound": "Показати наступний раунд",
+    "hideNextRound": "Сховати наступний раунд"
+  },
   "hudBlocks": {
     "hide": "Сховати: {name}",
     "show": "Показати: {name}",

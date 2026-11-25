@@ -7,6 +7,7 @@ vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
+import { currentRoundQueue } from '@/lib/utils/battle/view';
 
 vi.unmock('next-intl');
 
@@ -72,7 +73,10 @@ describe('InitiativeTrack line', () => {
             wrapper: fakeScene({ isMyTurn: false }).wrapper,
         });
 
-        expect(container.querySelectorAll('button').length).toBe(2);
+        expect(
+            container.querySelectorAll('button:not([data-next-round-toggle])')
+                .length
+        ).toBe(2);
         expect(container.querySelector('[data-round-divider]')).toBeNull();
     });
 
@@ -84,5 +88,47 @@ describe('InitiativeTrack line', () => {
 
         expect(container.querySelectorAll('button').length).toBe(5);
         expect(container.querySelector('[data-round-divider]')).not.toBeNull();
+    });
+
+    it('toggle reveals and hides the next round without onReorder', () => {
+        const { container } = render(<InitiativeTrack />, {
+            wrapper: fakeScene({ isMyTurn: false }).wrapper,
+        });
+
+        const toggle = container.querySelector(
+            '[data-next-round-toggle]'
+        ) as Element;
+
+        expect(toggle.getAttribute('aria-pressed')).toBe('false');
+
+        fireEvent.click(toggle);
+
+        expect(toggle.getAttribute('aria-pressed')).toBe('true');
+        expect(container.querySelector('[data-round-divider]')).not.toBeNull();
+
+        fireEvent.click(toggle);
+
+        expect(container.querySelector('[data-round-divider]')).toBeNull();
+    });
+
+    it('has no toggle when there is no next round', () => {
+        const scene = fakeScene({ isMyTurn: false });
+
+        scene.value.turn.queue = currentRoundQueue(scene.value.turn.queue);
+
+        const { container } = render(<InitiativeTrack />, {
+            wrapper: scene.wrapper,
+        });
+
+        expect(container.querySelector('[data-next-round-toggle]')).toBeNull();
+    });
+
+    it('has no toggle with onReorder', () => {
+        const { container } = render(
+            <InitiativeTrack onReorder={vi.fn()} />,
+            { wrapper: fakeScene({ isMyTurn: false }).wrapper }
+        );
+
+        expect(container.querySelector('[data-next-round-toggle]')).toBeNull();
     });
 });

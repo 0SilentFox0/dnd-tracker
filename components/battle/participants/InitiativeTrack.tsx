@@ -1,6 +1,8 @@
 'use client';
 
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { ChevronsRight } from 'lucide-react';
 
 import { Portrait } from '@/components/battle/hud';
 import { HudButton } from '@/components/hud';
@@ -28,10 +30,18 @@ export const InitiativeTrack = memo(function InitiativeTrack({
         select,
     } = useBattleSceneData();
 
-    const queue = useMemo(
-        () => (onReorder ? fullQueue : currentRoundQueue(fullQueue)),
-        [fullQueue, onReorder]
+    const t = useTranslations('battle.initiative');
+
+    const [showNext, setShowNext] = useState(false);
+
+    const currentRound = useMemo(
+        () => currentRoundQueue(fullQueue),
+        [fullQueue]
     );
+
+    const hasNext = fullQueue.length > currentRound.length;
+
+    const queue = onReorder || showNext ? fullQueue : currentRound;
 
     const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 
@@ -168,6 +178,30 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                     </HudButton>
                 );
             })}
+            {!onReorder && hasNext && (
+                <HudButton
+                    type="button"
+                    data-next-round-toggle=""
+                    aria-pressed={showNext}
+                    aria-label={t(showNext ? 'hideNextRound' : 'showNextRound')}
+                    title={t(showNext ? 'hideNextRound' : 'showNextRound')}
+                    onClick={() => setShowNext((v) => !v)}
+                    className={cn(
+                        'flex shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',
+                        compact ? 'size-5' : 'size-7',
+                        showNext && 'text-[var(--gold)]'
+                    )}
+                >
+                    <ChevronsRight
+                        className={cn(
+                            compact ? 'size-3' : 'size-4',
+                            showNext && 'rotate-180',
+                            vertical && 'rotate-90',
+                            vertical && showNext && '-rotate-90'
+                        )}
+                    />
+                </HudButton>
+            )}
         </div>
     );
 });
