@@ -52,7 +52,6 @@ html[data-palette="tavern"] {
   --hud-sh-btn: 0 1px 0 rgba(0, 0, 0, .55), 0 4px 10px -4px rgba(0, 0, 0, .7);
   --grain-op: .32; --grain-mode: overlay;
   --hud-info: #9fc1df; --hud-danger: #d0705c; --hud-bad: #ff8a7a; --hud-good: #a8d48f; --hud-good-dim: #7fa86a;
-  --hud-gold: #c9b37a; --hud-gold-bright: #ffe08a; --hud-gold-strong: #e6c25a;
   --book-cover: #3a2016; --book-cover-ink: #e9dec5; --book-cover-muted: #c9b99f; --book-page: #e9dec5; --book-ink: #2a2018; --book-muted: #6b5942; --book-quiet: #6b5a45; --book-rule: #2a2018; --book-accent: #7a2a1f; --book-accent-ink: #7a2a1f; --book-choice: #9c2a1d; --book-wash: #9c2a1d;
   color-scheme: dark;
 }
@@ -67,7 +66,6 @@ html[data-palette="parchment"] {
   --hud-sh-btn: 0 1px 0 rgba(70, 45, 20, .2), 0 4px 10px -5px rgba(70, 45, 20, .35);
   --grain-op: .5; --grain-mode: multiply;
   --hud-info: #355c83; --hud-danger: #a04030; --hud-bad: #a23227; --hud-good: #3f6938; --hud-good-dim: #476a40;
-  --hud-gold: #795522; --hud-gold-bright: #7e5c12; --hud-gold-strong: #795522;
   --book-cover: #67401f; --book-cover-ink: #fff3d1; --book-cover-muted: #e8cda6; --book-page: #faf3e4; --book-ink: #30271c; --book-muted: #79674d; --book-quiet: #6e5c44; --book-rule: #806b50; --book-accent: #a12b28; --book-accent-ink: #8f2522; --book-choice: #9a5136; --book-wash: #855334;
   color-scheme: light;
 }
@@ -76,7 +74,7 @@ html[data-palette] body { color: var(--palette-foreground); background-color: va
 html[data-palette] header.sticky { color: var(--hud-bone); background-color: var(--palette-header); }
 html[data-palette="parchment"] header.sticky { color: var(--palette-foreground); }
 html[data-palette] .battle-hud { background-color: var(--palette-page); }
-html[data-palette] .battle-hud { --bone: var(--hud-bone); --ink: var(--hud-ink); --gold: var(--hud-gold); color: var(--hud-bone); }
+html[data-palette] .battle-hud { --bone: var(--hud-bone); --ink: var(--hud-ink); color: var(--hud-bone); }
 html[data-palette="parchment"] .battle-hud { background: linear-gradient(180deg, var(--palette-page), var(--palette-background)); }
 html[data-palette="parchment"] .battle-hud::before { background: none; }
 html[data-palette="parchment"] .battle-hud aside { background-color: color-mix(in srgb, var(--palette-card) 45%, transparent); border-color: color-mix(in srgb, var(--hud-line) 45%, transparent); }
@@ -115,7 +113,7 @@ html[data-palette] .battle-hud::before { background: linear-gradient(180deg, col
 html[data-palette] body .scenario-book:not([data-theme]) {
   --page: var(--palette-page); --ink: var(--hud-ink); --ink-soft: color-mix(in srgb, var(--hud-muted) 70%, var(--hud-ink)); --margin: var(--palette-secondary); --rule: color-mix(in srgb, var(--hud-line) 75%, transparent);
   --blood: var(--hud-danger); --verdigris: var(--hud-good); --night: var(--hud-info); --shade: color-mix(in srgb, var(--hud-info) 55%, var(--hud-danger));
-  --tint-blood: color-mix(in srgb, var(--blood) 10%, transparent); --tint-verd: color-mix(in srgb, var(--verdigris) 10%, transparent); --tint-gold: color-mix(in srgb, var(--gold) 10%, transparent);
+  --tint-blood: color-mix(in srgb, var(--blood) 10%, transparent); --tint-verd: color-mix(in srgb, var(--verdigris) 10%, transparent); --tint-gold: color-mix(in srgb, var(--gold, var(--hud-muted)) 10%, transparent);
   --tint-night: color-mix(in srgb, var(--night) 10%, transparent); --tint-shade: color-mix(in srgb, var(--shade) 10%, transparent); --tint-rust: color-mix(in srgb, var(--rust) 10%, transparent);
 }
 

@@ -8,7 +8,6 @@
 @theme static {
   --container-page: 72rem;
   --color-hud-muted: var(--hud-muted, #8b8277);
-  --color-hud-gold: var(--hud-gold, #c9b37a);
   --color-hud-ink: var(--hud-ink, #ece4d6);
   --color-hud-bone: var(--hud-bone, #c8beaf);
   --color-hud-text: var(--hud-text, #c8beaf);
@@ -21,8 +20,6 @@
   --color-hud-bad: var(--hud-bad, #ff8a7a);
   --color-hud-good: var(--hud-good, #a8d48f);
   --color-hud-good-dim: var(--hud-good-dim, #7fa86a);
-  --color-hud-gold-bright: var(--hud-gold-bright, #ffe08a);
-  --color-hud-gold-strong: var(--hud-gold-strong, #e6c25a);
   --color-hud-crimson: var(--hud-crimson, #b3312c);
   --color-hud-crimson-2: var(--hud-crimson-2, #7c1e1d);
   --color-hud-crimson-fg: var(--hud-crimson-fg, #e0604f);
@@ -38,7 +35,6 @@
   --color-hud-soft: color-mix(in srgb, var(--hud-muted, #8b8277) 45%, var(--hud-text, #c8beaf));
   --color-hud-edge: var(--hud-line, rgba(236, 228, 214, 0.17));
   --color-hud-edge-faint: var(--hud-rule, rgba(236, 228, 214, 0.08));
-  --color-hud-glow: color-mix(in srgb, var(--hud-gold-strong, #e6c25a) 20%, transparent);
   --flow-when: #6aa4e0;
   --flow-if: #e0b04a;
   --flow-then: #e07a6a;

@@ -1,21 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-    countHudGold,
-    hudGoldProblems,
-    readHudGoldExempt,
-    scanHudGold,
-} from '@/scripts/shared/hud-gold';
+import { countHudGold, scanHudGold } from '@/scripts/shared/hud-gold';
 
 const G = ['hud', 'gold'].join('-');
 
 vi.setConfig({ testTimeout: 30_000 });
 
-describe('hud-gold ratchet', () => {
-    it('gold tokens only fall', () =>
-        expect(hudGoldProblems(scanHudGold(), readHudGoldExempt())).toEqual(
-            []
-        ));
+describe('hud-gold ban', () => {
+    it('no gold tokens outside the scenario book and fx', () =>
+        expect(scanHudGold()).toEqual({}));
 
     it.each([
         [`text-${G}`, 1],
@@ -25,13 +18,4 @@ describe('hud-gold ratchet', () => {
         [`.a { color: var(--${G}); }`, 1],
         ['text-hud-ink border-hud-line', 0],
     ])('counts %s as %i', (text, n) => expect(countHudGold(text)).toBe(n));
-
-    it('reports growth and stale entries', () =>
-        expect(
-            hudGoldProblems({ 'a.ts': 3, 'b.ts': 1 }, { 'a.ts': 2, 'c.ts': 1 })
-        ).toEqual([
-            'new hud-gold: a.ts has 3',
-            'new hud-gold: b.ts has 1',
-            'lower the entry: c.ts',
-        ]));
 });

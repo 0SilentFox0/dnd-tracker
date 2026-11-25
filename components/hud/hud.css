@@ -4,7 +4,6 @@
   --enemy: #9c2a1d;
   --bone: var(--hud-bone, #e6dccb);
   --ink: var(--hud-ink, #efe5d2);
-  --gold: var(--hud-gold, #c9b37a);
   color: var(--bone);
 }
 html[data-palette] body,
