@@ -11,6 +11,7 @@ import {
 } from './write-context';
 
 import 'server-only';
+import { capacity } from '@/lib/config/capacity';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { lockCampaignRow } from '@/lib/server/campaigns/lock';
@@ -45,6 +46,8 @@ export async function withCampaignContentWrite<T>(
 
     const afterCommit: ContentEffect[] = [];
 
+    const cap = capacity();
+
     const result = await prisma.$transaction(
         async (tx) => {
             const rows = await lockCampaignRow(tx, campaignId, options.lock);
@@ -64,8 +67,8 @@ export async function withCampaignContentWrite<T>(
             );
         },
         {
-            timeout: options.timeout ?? 30_000,
-            maxWait: options.maxWait ?? 5_000,
+            timeout: options.timeout ?? cap.writeTxTimeoutMs,
+            maxWait: options.maxWait ?? cap.writeTxMaxWaitMs,
         }
     );
 

@@ -5,6 +5,7 @@ import { defaultPipelineDeps } from './pipeline-deps';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
+import { incr, observe } from '@/lib/ops/metrics';
 import { battleVersionBodySchema } from '@/lib/schemas/battles';
 import { ContentError } from '@/lib/server/content/errors';
 import { systemBattleOperation } from '@/lib/server/systems/registry';
@@ -61,6 +62,8 @@ export function battleErrorResponse(err: unknown): NextResponse {
     }
 
     if (err instanceof BattleConflictError) {
+        incr('battle.conflict');
+
         return apiErrorJson(
             {
                 code: 'conflict',
@@ -122,18 +125,30 @@ export async function runBattleMutation<TBody>(
             logLocale: await (deps.logLocale ?? getRequestLocale)(),
         };
 
-        const run = async () =>
-            respondWith(
-                options.respond,
-                await runGuardedBattleOperationCore(
-                    userId,
-                    raw,
-                    expectedVersion,
-                    options as RunBattleMutationOptions<unknown>,
-                    deps,
-                    write
-                )
-            );
+        const op = 'operation' in supplied ? supplied.operation : undefined;
+
+        const run = async () => {
+            const startedAt = performance.now();
+
+            try {
+                return respondWith(
+                    options.respond,
+                    await runGuardedBattleOperationCore(
+                        userId,
+                        raw,
+                        expectedVersion,
+                        options as RunBattleMutationOptions<unknown>,
+                        deps,
+                        write
+                    )
+                );
+            } finally {
+                if (op)
+                    observe('battle.mutation', performance.now() - startedAt, {
+                        op,
+                    });
+            }
+        };
 
         return await (deps.withWrite
             ? deps.withWrite(options.params.id, run)

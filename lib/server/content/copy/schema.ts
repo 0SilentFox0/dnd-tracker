@@ -22,5 +22,6 @@ export const copyRequestSchema = z.object({
         }),
         z.object({ all: z.literal(true) }),
     ]),
+    after: z.string().min(1).optional(),
     dryRun: z.boolean().optional(),
 });

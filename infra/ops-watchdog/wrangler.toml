@@ -1,0 +1,12 @@
+name = "critnest-ops-watchdog"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[triggers]
+crons = ["* * * * *"]
+
+# Replace id with the output of `wrangler kv namespace create STATE`
+[[kv_namespaces]]
+binding = "STATE"
+id = "2f6a4ebe830b46899d321780d533f9e1"

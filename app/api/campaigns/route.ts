@@ -15,6 +15,7 @@ import { errorResponse } from '@/lib/utils/api/api-response';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import { checkDailyLimit } from '@/lib/utils/api/rate-limit';
 
 export async function POST(request: Request) {
     try {
@@ -29,6 +30,10 @@ export async function POST(request: Request) {
         const data = await parseBody(createCampaignSchema, request);
 
         if (data instanceof NextResponse) return data;
+
+        const daily = await checkDailyLimit(userId, 'campaignCreate');
+
+        if (daily) return daily;
 
         await ensureDbUser(authUser);
 

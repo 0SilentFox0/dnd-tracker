@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { BATTLE_ACTIVE_REFETCH_INTERVAL_MS, useBattle } from '../useBattles';
+import { useBattle } from '../useBattles';
 
 import type { BattleScene } from '@/types/api';
 
@@ -93,9 +93,7 @@ describe('useBattle — опитування без Pusher', () => {
     it.each(['prepared', 'active'] as const)(
         'бій %s опитується раз на 30 с',
         async (status) => {
-            expect(await intervalFor(status)).toBe(
-                BATTLE_ACTIVE_REFETCH_INTERVAL_MS
-            );
+            expect(await intervalFor(status)).toBe(30_000);
         }
     );
 

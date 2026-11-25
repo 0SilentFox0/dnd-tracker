@@ -3,9 +3,11 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { incr } from '@/lib/ops/metrics';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { ContentError } from '@/lib/utils/api/content-error';
 import { logger } from '@/lib/utils/common/logger';
+import { classifyServerError } from '@/lib/utils/ops/classify-server-error';
 import { RulesSystemError } from '@/lib/utils/rules/schema';
 
 export interface ApiErrorContext {
@@ -43,5 +45,16 @@ export function handleApiError(
             return errorResponse(API_ERRORS.FOREIGN_KEY, 400);
     }
 
+    countServerError(error);
+
     return errorResponse(API_ERRORS.INTERNAL, 500);
+}
+
+function countServerError(error: unknown): void {
+    const { kind, code } = classifyServerError(error);
+
+    if (code === 'pool_timeout') incr('db.pool_timeout');
+    else if (code === 'unreachable') incr('db.unreachable');
+
+    incr('api.error5xx', 1, { kind });
 }

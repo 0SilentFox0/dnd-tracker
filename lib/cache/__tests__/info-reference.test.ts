@@ -14,7 +14,11 @@ vi.mock('next/cache', () => ({
     },
 }));
 vi.mock('@/lib/db', () => ({
-    prisma: { skill: { findMany: vi.fn() }, spell: { findMany: vi.fn() } },
+    prisma: {
+        skill: { findMany: vi.fn() },
+        spell: { findMany: vi.fn() },
+        campaign: { findUnique: vi.fn().mockResolvedValue({ contentVersion: 1 }) },
+    },
 }));
 
 import { getCachedInfoReference } from '@/lib/cache/info-reference';

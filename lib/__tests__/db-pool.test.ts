@@ -33,6 +33,14 @@ describe('withSafePoolLimits', () => {
         expect(p.get('pool_timeout')).toBe('10');
     });
 
+    it('CAPACITY_PROFILE=paid raises the pool without code changes', () => {
+        const p = params(
+            withSafePoolLimits(POOLER, { VERCEL: '1', CAPACITY_PROFILE: 'paid' })
+        );
+
+        expect(Number(p.get('connection_limit'))).toBeGreaterThan(5);
+    });
+
     it('honours PRISMA_CONNECTION_LIMIT', () => {
         const p = params(
             withSafePoolLimits(POOLER, {

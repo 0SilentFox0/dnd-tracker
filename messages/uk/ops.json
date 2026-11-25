@@ -1,0 +1,171 @@
+{
+  "title": "Ops",
+  "subtitle": "Стан платформи та ліміти провайдерів",
+  "loadError": "Не вдалося завантажити дані ops",
+  "status": {
+    "title": "Стан зараз",
+    "heartbeat": "Останній збір {age} тому",
+    "heartbeatNever": "Збір ще не записано",
+    "collectorSilent": "Колектор мовчить: даних немає понад 3 хвилини",
+    "tier": {
+      "free": "Free tier",
+      "paid": "Платний тариф"
+    },
+    "state": {
+      "ok": "Норма",
+      "warn": "Увага",
+      "crit": "Критично",
+      "unknown": "Немає даних про ліміт"
+    },
+    "unavailable": "н/д",
+    "openDashboard": "Відкрити панель провайдера",
+    "providers": {
+      "supabase": "Supabase",
+      "vercel": "Vercel",
+      "pusher": "Pusher",
+      "upstash": "Upstash",
+      "cloudflare": "Cloudflare"
+    },
+    "age": {
+      "seconds": "{value} с",
+      "minutes": "{value} хв",
+      "hours": "{value} год"
+    }
+  },
+  "limits": {
+    "title": "Ліміти",
+    "na": "н/д",
+    "used": "{value} з {limit}",
+    "percent": "{percent}%",
+    "forecast": "Ліміт буде вичерпано приблизно за {hours} год",
+    "noForecast": "Тренду зростання немає",
+    "period": {
+      "now": "поточний",
+      "day": "за добу",
+      "month": "за місяць"
+    },
+    "names": {
+      "db_size": "Розмір бази даних",
+      "provider_cloudflare_requests_day": "Запити Cloudflare",
+      "provider_pusher_connections": "З'єднання Pusher",
+      "provider_supabase_egress_bytes": "Вихідний трафік Supabase",
+      "provider_vercel_bandwidth_bytes": "Трафік Vercel",
+      "provider_vercel_invocations": "Виклики Vercel",
+      "provider_upstash_commands_month": "Команди Upstash"
+    },
+    "reached": "Ліміт досягнуто"
+  },
+  "ranges": {
+    "label": "Діапазон часу",
+    "1h": "1 год",
+    "6h": "6 год",
+    "24h": "24 год",
+    "7d": "7 дн"
+  },
+  "charts": {
+    "title": "Графіки",
+    "noData": "У цьому діапазоні даних немає",
+    "loading": "Графік завантажується",
+    "groups": {
+      "db": "База даних",
+      "battle": "Бій",
+      "realtime": "Реальний час і ліміти",
+      "providers": "Провайдери"
+    },
+    "items": {
+      "connections": "З'єднання",
+      "longestTx": "Найдовша транзакція",
+      "locks": "Очікування блокувань",
+      "size": "Розмір бази даних",
+      "cache": "Влучання в кеш",
+      "latency": "Затримка мутацій бою",
+      "conflicts": "Конфлікти бою за хвилину",
+      "activeBattles": "Активні бої",
+      "errors": "API 5xx за хвилину",
+      "triggers": "Pusher-події за хвилину",
+      "ratelimit": "Rate limiter за хвилину",
+      "cloudflare": "Запити Cloudflare за сьогодні",
+      "pusherChannels": "Зайняті канали Pusher",
+      "supabaseEgress": "Вихідний трафік Supabase",
+      "vercelInvocations": "Виклики Vercel",
+      "upstashCommands": "Команди Upstash"
+    },
+    "series": {
+      "total": "Усього",
+      "active": "Активні",
+      "idleInTx": "Простій у транзакції",
+      "max": "Максимум",
+      "longestTx": "Найдовша транзакція",
+      "waitingLocks": "Очікування блокувань",
+      "size": "Розмір",
+      "cacheHit": "Влучання в кеш",
+      "p50": "p50",
+      "p95": "p95",
+      "conflicts": "Конфлікти",
+      "activeBattles": "Активні бої",
+      "errors5xx": "5xx",
+      "ok": "Доставлено",
+      "fail": "Збої",
+      "denied": "Відхилено",
+      "degraded": "Деградований режим",
+      "requestsDay": "Запити",
+      "channels": "Канали",
+      "egress": "Egress",
+      "invocations": "Виклики",
+      "commands": "Команди"
+    },
+    "units": {
+      "count": "кількість",
+      "bytes": "розмір",
+      "ms": "мс",
+      "seconds": "с",
+      "ratio": "частка",
+      "perMin": "за хв"
+    },
+    "time": "Час",
+    "limit": "Ліміт"
+  },
+  "slow": {
+    "title": "Повільні запити та довгі транзакції",
+    "statements": "Топ запитів за сумарним часом",
+    "unavailable": "pg_stat_statements недоступний для цієї бази",
+    "empty": "Запитів не зафіксовано",
+    "calls": "Виклики",
+    "total": "Разом, мс",
+    "mean": "Середнє, мс",
+    "query": "Запит",
+    "longTx": "Відкриті транзакції довше 5 с",
+    "noLongTx": "Довгих транзакцій немає",
+    "txRow": "{seconds} с, {state}"
+  },
+  "alerts": {
+    "title": "Алерти",
+    "active": "Активні",
+    "noActive": "Активних алертів немає",
+    "history": "Історія",
+    "noHistory": "Змін статусу ще не було",
+    "mute1h": "Вимкнути на 1 год",
+    "mute24h": "Вимкнути на 24 год",
+    "unmute": "Увімкнути",
+    "mutedUntil": "Вимкнено до {time}",
+    "transition": "{from} → {to}",
+    "notified": "надіслано",
+    "silent": "не надіслано",
+    "status": {
+      "ok": "Норма",
+      "warn": "Увага",
+      "crit": "Критично"
+    }
+  },
+  "notify": {
+    "button": "Надіслати тестове сповіщення",
+    "sending": "Надсилаю…",
+    "result": "Telegram: {telegram}; пошта: {email}",
+    "channel": {
+      "ok": "надіслано",
+      "fail": "помилка",
+      "off": "не налаштовано"
+    },
+    "error": "Не вдалося надіслати тестове сповіщення"
+  }
+}

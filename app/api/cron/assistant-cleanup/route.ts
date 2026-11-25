@@ -5,10 +5,12 @@ import { cleanupAssistantData } from '@/lib/server/assistant/cleanup';
 import { cleanupBattleSnapshots } from '@/lib/server/battles/cleanup';
 import { cleanupDemoBattleCopies } from '@/lib/server/battles/demo-copy';
 import { cleanupReadNotifications } from '@/lib/server/notifications/cleanup';
+import { rollupAndPrune } from '@/lib/server/ops/rollup';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { bearerToken } from '@/lib/utils/api/bearer';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { safeEqual } from '@/lib/utils/api/safe-equal';
+import { logger } from '@/lib/utils/common/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +31,10 @@ export async function GET(request: Request) {
         const battleSnapshots = await cleanupBattleSnapshots();
 
         const demoCopies = await cleanupDemoBattleCopies();
+
+        await rollupAndPrune(new Date(), { lookbackHours: 47 }).catch((err) =>
+            logger.warn('[ops] rollup safety net failed', {}, err)
+        );
 
         return NextResponse.json({
             ok: true,

@@ -17,6 +17,9 @@ const BATTLE_KEY =
 // demo tour steps name `data-tour="battle.*"` anchors, not translation keys
 const TOUR_ANCHORS = 'lib/onboarding/demo-tours.ts';
 
+// ops metric keys such as `battle.mutation` are not translation keys
+const METRICS_CATALOG = 'lib/ops/metrics-catalog.ts';
+
 // reached via the ability condition registry -> grid/edges (relative import the walker cannot see); returns text refs, no namespace load
 const HEALTH_VIEW = 'lib/utils/battle/view/health.ts';
 
@@ -63,6 +66,7 @@ describe('battle namespaces stay inside the battle segments', () => {
                 return (
                     !file.startsWith('lib/i18n/') &&
                     file !== TOUR_ANCHORS &&
+                    file !== METRICS_CATALOG &&
                     file !== HEALTH_VIEW &&
                     BATTLE_KEY.test(source)
                 );

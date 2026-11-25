@@ -58,6 +58,12 @@ export const BattleStatus = {
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
 
+// prepared too: otherwise players without Pusher will not see the battle start.
+export const POLLED_BATTLE_STATUSES: readonly BattleStatus[] = [
+    BattleStatus.PREPARED,
+    BattleStatus.ACTIVE,
+];
+
 export const BATTLE_SNAPSHOT_RETENTION_DAYS = 90;
 
 export const DM_ACTOR = {
