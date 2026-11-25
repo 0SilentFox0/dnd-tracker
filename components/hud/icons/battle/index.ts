@@ -1,10 +1,4 @@
-import {
-    Footprints,
-    ScrollText,
-    Settings2,
-    UsersRound,
-    Wrench,
-} from 'lucide-react';
+import { Footprints } from 'lucide-react';
 
 import {
     BackpackIcon,
@@ -18,6 +12,12 @@ import {
     RicochetIcon,
     SpellBookIcon,
 } from './game';
+import {
+    RailDmIcon,
+    RailLogIcon,
+    RailReserveIcon,
+    RailToolsIcon,
+} from './rail';
 
 export const actionIcon = {
     actions: CrossedSwordsIcon,
@@ -31,10 +31,10 @@ export const actionIcon = {
     gear: BackpackIcon,
     strikeAndReturn: RicochetIcon,
     move: Footprints,
-    railLog: ScrollText,
-    railDm: Settings2,
-    railReserve: UsersRound,
-    railTools: Wrench,
+    railLog: RailLogIcon,
+    railDm: RailDmIcon,
+    railReserve: RailReserveIcon,
+    railTools: RailToolsIcon,
     nextTurn: FastForwardIcon,
 } as const;
 
