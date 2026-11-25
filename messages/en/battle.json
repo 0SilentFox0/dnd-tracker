@@ -110,7 +110,9 @@
     "connecting": "Connecting",
     "toCampaign": "To campaign",
     "complete": "Complete",
-    "nextTurn": "Next turn"
+    "nextTurn": "Next turn",
+    "nextTurnHint": "End {name}'s turn and pass to the next",
+    "nextTurnHintNoName": "End the current turn and pass to the next"
   },
   "map": {
     "pathCost": "{metres, number} m · {feet, number} ft",

@@ -4,9 +4,12 @@ import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 
 import { HUD_GLASS, HudButton } from '@/components/hud';
+import { actionIcon } from '@/components/hud/icons/battle';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleScene, useTurnTimer } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
+
+const NextTurnIcon = actionIcon.nextTurn;
 
 export function RoundBadge({ className }: { className?: string }) {
     const t = useTranslations('battle.topBar');
@@ -14,6 +17,7 @@ export function RoundBadge({ className }: { className?: string }) {
     const {
         battle: { currentRound, status },
         viewer: { isDM, readOnly },
+        turn: { current },
         actions,
         connection,
     } = useBattleScene();
@@ -21,6 +25,10 @@ export function RoundBadge({ className }: { className?: string }) {
     const canAdvance = isDM && !readOnly && status === BattleStatus.ACTIVE;
 
     const pending = actions.nextTurn.isPending;
+
+    const hint = current
+        ? t('nextTurnHint', { name: current.basicInfo.name })
+        : t('nextTurnHintNoName');
 
     return (
         <span
@@ -51,10 +59,10 @@ export function RoundBadge({ className }: { className?: string }) {
                     type="button"
                     disabled={pending}
                     data-tour="battle.next-turn"
-                    aria-label={t('nextTurn')}
-                    title={t('nextTurn')}
+                    aria-label={hint}
+                    title={hint}
                     onClick={() => actions.nextTurn.mutate({})}
-                    className="pointer-events-auto -my-2 -mr-2 flex size-10 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70 max-md:-my-1.5 max-md:-mr-1.5 max-md:size-8"
+                    className="hud-sc pointer-events-auto relative -my-1 -mr-1.5 flex h-8 items-center gap-1.5 rounded-md border border-[var(--gold)]/50 px-2.5 text-sm tracking-[.06em] text-[var(--gold)] before:absolute before:inset-x-0 before:-inset-y-1 before:content-[''] hover:bg-[var(--gold)]/10 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70 max-md:-my-1.5 max-md:px-2 max-md:text-xs"
                 >
                     {pending ? (
                         <Loader2
@@ -62,8 +70,9 @@ export function RoundBadge({ className }: { className?: string }) {
                             aria-hidden
                         />
                     ) : (
-                        <span aria-hidden>›</span>
+                        <NextTurnIcon className="size-3.5" aria-hidden />
                     )}
+                    {t('nextTurn')}
                 </HudButton>
             )}
         </span>

@@ -156,7 +156,18 @@ describe('RoundBadge', () => {
 
         render(<RoundBadge />, { wrapper: scene.wrapper });
 
-        fireEvent.click(screen.getByRole('button', { name: /Наступний хід/ }));
+        const button = screen.getByRole('button', { name: /Завершити хід/ });
+
+        const name = scene.value.turn.current?.basicInfo.name ?? '';
+
+        expect(name).not.toBe('');
+        expect(button.getAttribute('aria-label')).toBe(
+            `Завершити хід ${name} і передати хід наступному`
+        );
+        expect(button.title).toBe(button.getAttribute('aria-label'));
+        expect(button.textContent).toBe('Наступний хід');
+
+        fireEvent.click(button);
 
         expect(scene.value.actions.nextTurn.mutate).toHaveBeenCalledWith({});
     });

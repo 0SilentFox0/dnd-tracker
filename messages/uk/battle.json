@@ -110,7 +110,9 @@
     "connecting": "Підключення",
     "toCampaign": "До кампанії",
     "complete": "Завершити",
-    "nextTurn": "Наступний хід"
+    "nextTurn": "Наступний хід",
+    "nextTurnHint": "Завершити хід {name} і передати хід наступному",
+    "nextTurnHintNoName": "Завершити поточний хід і передати хід наступному"
   },
   "map": {
     "pathCost": "{metres, number} м · {feet, number} фт",
