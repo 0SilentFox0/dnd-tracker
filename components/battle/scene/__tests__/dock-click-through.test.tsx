@@ -35,7 +35,7 @@ describe('dock click-through', () => {
         expect(props.on.actions).toHaveBeenCalled();
     });
 
-    it('zoom buttons stay clickable and sit above the dock', () => {
+    it('zoom buttons stay clickable and sit in the top-right corner', () => {
         const onZoomIn = vi.fn();
 
         const { container } = render(
@@ -55,6 +55,6 @@ describe('dock click-through', () => {
         expect(onZoomIn).toHaveBeenCalled();
         expect(
             (container.firstElementChild as HTMLElement).className
-        ).toContain('--hud-dock-h');
+        ).toContain('top-[3.75rem]');
     });
 });

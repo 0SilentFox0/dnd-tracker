@@ -127,3 +127,8 @@ export {
     type UnitControlRow,
     useUnitControlPanel,
 } from './useUnitControlPanel';
+export {
+    type HudBlockKey,
+    useHudBlock,
+    useHudHotkey,
+} from './useHudVisibility';

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 
 import { BattlePlayerViewToggle } from '../BattlePlayerViewToggle';
 import { BattleDrawer } from './BattleDrawer';
@@ -12,6 +12,7 @@ import type { DrawerKey } from './rail-items';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { HudButton, HudIconButton } from '@/components/hud';
+import { actionIcon } from '@/components/hud/icons/battle';
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
 import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
@@ -33,6 +34,8 @@ const MAP_TOOLS_SLOT = cn(
     `${FIRST_ROW}>*:h-auto ${FIRST_ROW}>*:min-h-11 ${FIRST_ROW}>*:text-sm ${FIRST_ROW}>*:leading-tight ${FIRST_ROW}>*:whitespace-normal`,
     '[&_button[aria-pressed]]:min-h-11 [&_button[aria-pressed]]:text-sm'
 );
+
+const NextTurnIcon = actionIcon.nextTurn;
 
 const SECTION = 'hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]';
 
@@ -243,6 +246,25 @@ export function ToolsContent({
             {dmControls && (
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('dmSection')}</h3>
+                    {battle.status === BattleStatus.ACTIVE && (
+                        <HudButton
+                            type="button"
+                            data-tour="battle.next-turn"
+                            disabled={actions.nextTurn.isPending}
+                            onClick={() => actions.nextTurn.mutate({})}
+                            className="hud-sc flex h-11 items-center justify-center gap-2 rounded-xl border border-white/20 text-sm tracking-[.08em] disabled:opacity-70"
+                        >
+                            {actions.nextTurn.isPending ? (
+                                <Loader2
+                                    className="size-4 animate-spin"
+                                    aria-hidden
+                                />
+                            ) : (
+                                <NextTurnIcon className="size-4" aria-hidden />
+                            )}
+                            {t('nextTurn')}
+                        </HudButton>
+                    )}
                     {onComplete && battle.status === BattleStatus.ACTIVE && (
                         <HudButton
                             type="button"

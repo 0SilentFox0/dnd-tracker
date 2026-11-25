@@ -1,6 +1,5 @@
 'use client';
 
-import { DockNextTurn } from './DockNextTurn';
 import { DockWaiting } from './DockWaiting';
 
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
@@ -30,7 +29,6 @@ export function TurnDock() {
                 ) : (
                     current && <DockWaiting name={current.basicInfo.name} />
                 ))}
-            <DockNextTurn />
         </>
     );
 }

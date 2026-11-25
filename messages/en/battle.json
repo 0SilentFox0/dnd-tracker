@@ -285,7 +285,8 @@
       "title": "Spell slots",
       "label": "Level {level}, {current} of {max}",
       "pactLabel": "Pact slot, level {level}, {current} of {max}",
-      "recommended": "Recommended spells"
+      "recommended": "Recommended spells",
+      "recommendedTitle": "Recommended · level {level}"
     },
     "states": {
       "title": "Hero states",
@@ -441,7 +442,8 @@
     "waiting": "Turn: {name}",
     "move": "Move",
     "moveLeft": "{left}/{max}",
-    "panelTitle": "Actions"
+    "panelTitle": "Actions",
+    "moveCells": "Move · {left} cells"
   },
   "bubble": {
     "title": "Details: {name}",
@@ -470,5 +472,16 @@
     "gridHexSoon": "Hex grid is coming soon",
     "dmPanel": "DM panel",
     "close": "Close"
+  },
+  "hudBlocks": {
+    "hide": "Hide: {name}",
+    "show": "Show: {name}",
+    "names": {
+      "hero": "Hero",
+      "dock": "Turn",
+      "initiative": "Initiative",
+      "tools": "Tools"
+    },
+    "hotkey": "H hides or shows the whole interface"
   }
 }

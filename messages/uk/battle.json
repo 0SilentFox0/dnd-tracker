@@ -285,7 +285,8 @@
       "title": "Слоти заклять",
       "label": "Рівень {level}, {current} з {max}",
       "pactLabel": "Пактовий слот, рівень {level}, {current} з {max}",
-      "recommended": "Рекомендовані закляття"
+      "recommended": "Рекомендовані закляття",
+      "recommendedTitle": "Рекомендовані · коло {level}"
     },
     "states": {
       "title": "Стани героя",
@@ -441,7 +442,8 @@
     "waiting": "Хід: {name}",
     "move": "Рух",
     "moveLeft": "{left}/{max}",
-    "panelTitle": "Дії"
+    "panelTitle": "Дії",
+    "moveCells": "Рух · {left} кл."
   },
   "bubble": {
     "title": "Деталі: {name}",
@@ -470,5 +472,16 @@
     "gridHexSoon": "Гекс-сітка скоро",
     "dmPanel": "DM панель",
     "close": "Закрити"
+  },
+  "hudBlocks": {
+    "hide": "Сховати: {name}",
+    "show": "Показати: {name}",
+    "names": {
+      "hero": "Герой",
+      "dock": "Хід",
+      "initiative": "Ініціатива",
+      "tools": "Інструменти"
+    },
+    "hotkey": "H ховає або показує весь інтерфейс"
   }
 }

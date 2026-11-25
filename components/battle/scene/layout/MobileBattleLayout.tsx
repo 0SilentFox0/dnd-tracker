@@ -8,11 +8,11 @@ import { Ellipsis } from 'lucide-react';
 import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
 import { BattleOverBanner } from '../banners/BattleOverBanner';
 import { ConnectionBanner } from '../banners/ConnectionBanner';
-import { LastActionTicker } from '../banners/LastActionTicker';
 import { BattleDrawer } from '../drawers/BattleDrawer';
 import { DrawerRail } from '../drawers/DrawerRail';
 import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
+import { HudBlock } from './HudBlock';
 import { InNoticeStack, MapStripSlotContext } from './MapStrip';
 import {
     EMPTY_SCENE_SLOTS,
@@ -35,6 +35,7 @@ import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     MAP_TAB,
     useBattleScene,
+    useHudHotkey,
     useMobileBattleTabs,
     useSceneDrawers,
 } from '@/lib/hooks/battle';
@@ -123,6 +124,8 @@ export function MobileBattleLayout({
         []
     );
 
+    useHudHotkey();
+
     const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
     const turnKey =
@@ -158,14 +161,15 @@ export function MobileBattleLayout({
                         )}
                         <BattleTopBar />
                         <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
-                            <div className={`${HUD_GLASS} mr-12 rounded-xl`}>
-                                <InitiativeTrack />
-                            </div>
-                            <div className={`${HUD_GLASS} rounded-xl`}>
-                                <LastActionTicker
-                                    onOpenLog={() => log.show()}
-                                />
-                            </div>
+                            <HudBlock
+                                block="initiative"
+                                edge="top"
+                                className="mr-12 items-stretch"
+                            >
+                                <div className={`${HUD_GLASS} rounded-xl`}>
+                                    <InitiativeTrack />
+                                </div>
+                            </HudBlock>
                         </div>
                         <InNoticeStack>
                             <ConnectionBanner />
@@ -208,11 +212,22 @@ export function MobileBattleLayout({
                     </div>
                     {/* safe zone: the map ends above it, so tokens never sit under the dock */}
                     <div className="relative z-20 flex shrink-0 items-end gap-2 px-2 pt-2 pb-1">
-                        {hero && <HeroCluster hero={hero} phone />}
-                        <div
-                            ref={bindDock}
-                            className="flex min-w-0 flex-1 flex-col items-end"
-                        />
+                        {hero && (
+                            <HudBlock block="hero" edge="bottom">
+                                <HeroCluster hero={hero} phone />
+                            </HudBlock>
+                        )}
+                        <HudBlock
+                            block="dock"
+                            edge="bottom"
+                            align="end"
+                            className="min-w-0 flex-1"
+                        >
+                            <div
+                                ref={bindDock}
+                                className="flex min-w-0 flex-col items-end"
+                            />
+                        </HudBlock>
                     </div>
                     <TurnDock />
                     <ActionResultCard />

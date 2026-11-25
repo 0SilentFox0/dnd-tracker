@@ -7,11 +7,11 @@ import { useTranslations } from 'next-intl';
 import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
 import { BattleOverBanner } from '../banners/BattleOverBanner';
 import { ConnectionBanner } from '../banners/ConnectionBanner';
-import { LastActionTicker } from '../banners/LastActionTicker';
 import { BattleDrawer } from '../drawers/BattleDrawer';
 import { DrawerRail } from '../drawers/DrawerRail';
 import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
+import { HudBlock } from './HudBlock';
 import { InNoticeStack, MapStripSlotContext } from './MapStrip';
 import {
     EMPTY_SCENE_SLOTS,
@@ -29,11 +29,11 @@ import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrac
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
-import { HUD_GLASS } from '@/components/hud';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
     useBattleViewMode,
+    useHudHotkey,
     useSceneDrawers,
     useTrackReorder,
 } from '@/lib/hooks/battle';
@@ -111,6 +111,8 @@ export function DesktopBattleLayout({
 
     const onReorder = useTrackReorder();
 
+    useHudHotkey();
+
     const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
     const viewMode = intents.mapAim || intents.mapPick ? 'map' : storedMode;
@@ -186,14 +188,14 @@ export function DesktopBattleLayout({
                             </main>
                         )}
                         <BattleTopBar />
-                        <div className="pointer-events-none absolute top-2 left-[calc(50%-var(--hud-side-w,0px)/2)] z-20 flex w-[min(760px,calc(100%-440px-var(--hud-side-w,0px)))] -translate-x-1/2 flex-col gap-1">
+                        <HudBlock
+                            block="initiative"
+                            edge="top"
+                            align="center"
+                            className="pointer-events-none absolute top-2 left-[calc(50%-var(--hud-side-w,0px)/2)] z-20 w-[min(560px,calc(100%-480px-var(--hud-side-w,0px)))] -translate-x-1/2"
+                        >
                             <InitiativeTrack onReorder={onReorder} />
-                            <div className={`${HUD_GLASS} pointer-events-auto rounded-xl`}>
-                                <LastActionTicker
-                                    onOpenLog={() => log.show()}
-                                />
-                            </div>
-                        </div>
+                        </HudBlock>
                         <InNoticeStack>
                             <ConnectionBanner />
                             {battle.status === BattleStatus.COMPLETED && (
@@ -203,14 +205,23 @@ export function DesktopBattleLayout({
                         </InNoticeStack>
                         <TokenBubble mapBusy={mapBusy} />
                         {hero && (
-                            <div className="pointer-events-none absolute bottom-3 left-3 z-20">
+                            <HudBlock
+                                block="hero"
+                                edge="bottom"
+                                align="end"
+                                className="pointer-events-none absolute bottom-3 left-3 z-20"
+                            >
                                 <HeroCluster hero={hero} />
-                            </div>
+                            </HudBlock>
                         )}
                         <TurnDock />
-                        <div className="pointer-events-none absolute top-2 right-3 z-50 *:pointer-events-auto">
+                        <HudBlock
+                            block="tools"
+                            edge="right"
+                            className="pointer-events-none absolute top-2 right-3 z-50 gap-1.5"
+                        >
                             <DrawerRail active={active} onToggle={toggle} />
-                        </div>
+                        </HudBlock>
                         <div
                             ref={bindColumn}
                             className="pointer-events-none absolute right-[calc(0.75rem+var(--hud-side-w,0px))] bottom-3 z-20 flex w-[min(370px,calc(100%-24px-var(--hud-side-w,0px)))] flex-col items-stretch gap-2"
@@ -219,10 +230,12 @@ export function DesktopBattleLayout({
                                 ref={setResultSlot}
                                 className="pointer-events-auto empty:hidden"
                             />
-                            <div
-                                ref={bindDock}
-                                className="pointer-events-none flex flex-col items-stretch gap-2 *:pointer-events-auto"
-                            />
+                            <HudBlock block="dock" edge="bottom" align="end">
+                                <div
+                                    ref={bindDock}
+                                    className="pointer-events-none flex flex-col items-stretch gap-2 *:pointer-events-auto"
+                                />
+                            </HudBlock>
                         </div>
                     </div>
                     <ActionResultCard />

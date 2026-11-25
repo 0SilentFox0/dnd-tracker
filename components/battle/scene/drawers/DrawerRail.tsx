@@ -50,7 +50,7 @@ export function DrawerRail({
             data-drawer-rail
             role="toolbar"
             aria-label={t('rail')}
-            className="flex flex-row gap-1.5"
+            className="pointer-events-auto flex flex-row gap-1.5"
         >
             {keys.map((key) => {
                 const Icon = ICON[key];
