@@ -136,7 +136,7 @@ export function SheetIdentityPanel({
                                             </span>
                                         )}
                                         {i === 0 ? (
-                                            <b className="text-hud-crimson-fg">
+                                            <b className="text-hud-accent-fg">
                                                 {part}
                                             </b>
                                         ) : (

@@ -81,7 +81,7 @@ export function AddTokenDialog({
                             onClick={() => setColor(c)}
                             className={cn(
                                 'flex h-11 flex-1 items-center justify-center gap-2 rounded border border-hud-raised text-sm',
-                                color === c && 'border-hud-crimson text-hud-ink'
+                                color === c && 'border-hud-accent text-hud-ink'
                             )}
                         >
                             <span

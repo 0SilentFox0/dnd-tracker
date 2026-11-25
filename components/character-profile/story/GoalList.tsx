@@ -131,7 +131,7 @@ export function GoalList() {
                                     )
                                 )
                             }
-                            className="flex size-8 shrink-0 items-center justify-center text-hud-crimson-fg disabled:cursor-default"
+                            className="flex size-8 shrink-0 items-center justify-center text-hud-accent-fg disabled:cursor-default"
                         >
                             {g.status === 'done' ? (
                                 <Check className="size-4" />
