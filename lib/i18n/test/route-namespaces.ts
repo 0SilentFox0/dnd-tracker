@@ -357,17 +357,24 @@ const exportsName = (file: string, name: string, depth = 0): boolean => {
     return REEXPORTS.get(file)!.some((r) => (r.star ? exportsName(r.target, name, depth + 1) : r.map.some((x) => x.split('=')[0] === name || x === '*=*')));
 };
 
-export function reach(roots: string[], blockSystems: boolean, parents?: Map<string, string>) {
+export function reach(
+    roots: string[],
+    blockSystems: boolean,
+    parents?: Map<string, string>,
+    opts: { skip?: (file: string) => boolean; mode?: Mode } = {}
+) {
     const seen = new Map<string, Set<Mode>>();
 
     const barrelSeen = new Set<string>();
 
-    const queue: [string, Mode, string[] | null, string?][] = roots.map((r) => [r, 'server', null]);
+    const queue: [string, Mode, string[] | null, string?][] = roots.map((r) => [r, opts.mode ?? 'server', null]);
 
     while (queue.length) {
         const [f, m0, names, par] = queue.pop()!;
 
         if (blockSystems && f.startsWith('systems/')) continue;
+
+        if (opts.skip?.(f)) continue;
 
         const info = parse(f);
 

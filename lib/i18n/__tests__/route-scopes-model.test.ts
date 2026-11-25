@@ -56,9 +56,27 @@ describe('route scope model', () => {
                 'battleWfrp',
                 'wfrpDowntime',
                 'wfrpCorruption',
+                'wfrpCareers',
+                'wfrpMagic',
             ])
         );
+        expect(routeNamespaces('[id]/character', wfrp)).toContain('wfrpCareers');
         expect(routeNamespaces('[id]/dm/rules', null)).not.toContain('battle');
+    });
+
+    it('module-owned DM sections carry the import/export/copy texts', () => {
+        for (const route of [
+            '[id]/dm/classes',
+            '[id]/dm/backgrounds',
+            '[id]/dm/skills',
+            '[id]/dm/skills/[skillId]',
+            '[id]/dm/skills/new',
+            '[id]/dm/main-skills',
+            '[id]/dm/main-skills/[mainSkillId]',
+        ] as const)
+            expect(routeNamespaces(route, null)).toEqual(
+                expect.arrayContaining(['compendium', 'contentImport', 'contentCopy'])
+            );
     });
 
     it('a d20 campaign gets battleD20 only through the battle pack', () => {

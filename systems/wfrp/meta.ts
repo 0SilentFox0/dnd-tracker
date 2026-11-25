@@ -21,11 +21,17 @@ export const WFRP_META = {
             rules: ['wfrpTables'],
         },
         pages: {
-            character: ['wfrpDowntime', 'wfrpCorruption'],
+            character: ['wfrpDowntime', 'wfrpCorruption', 'wfrpCareers'],
             draft: ['wfrpCreation'],
             dmCharacter: ['wfrpDowntime', 'wfrpCorruption'],
             dmCharacters: ['wfrpDowntime'],
-            dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
+            dmRules: [
+                'battleWfrp',
+                'wfrpDowntime',
+                'wfrpCorruption',
+                'wfrpCareers',
+                'wfrpMagic',
+            ],
         },
         budgetKb: {
             packs: {

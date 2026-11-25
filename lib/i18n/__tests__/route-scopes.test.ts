@@ -14,6 +14,8 @@ import {
     reach,
     routeGraph,
 } from '../test/route-namespaces';
+import { isExempt } from '../test/route-scope-allow';
+import { ENTRIES, systemReads } from '../test/system-reads';
 
 import {
     SYSTEM_META,
@@ -55,33 +57,10 @@ const ROUTE_SCOPE_BASE_ONLY: { page: string; reason: string }[] = [
     },
 ];
 
-/** Literal/template keys read from code that is reachable but only returns text refs rendered elsewhere. */
-const ROUTE_SCOPE_LITERAL_EXEMPT: { file: string; reason: string }[] = [
-    {
-        file: 'lib/utils/battle/',
-        reason: 'the battle engine returns log refs, rendered only in battle',
-    },
-    {
-        file: 'lib/utils/spells/model/schema.ts',
-        reason: 'validation issue keys, translated where the form shows them',
-    },
-    {
-        file: 'lib/utils/rules/section-shapes.ts',
-        reason: 'validation issue keys, translated where the form shows them',
-    },
-    {
-        file: 'lib/constants/api-errors.ts',
-        reason: 'server error texts, translated on the server before the client sees them',
-    },
-];
-
-const REGISTRY =
-    'section rendered through the system registry (SystemDmPage); the graph cannot see systems/*/ui';
-
 const PACK =
     'pack granularity: the pack is shared by several routes and this one reads only part of it';
 
-/** Namespaces in a route scope that no page graph reads, each with the reason it stays. */
+/** Namespaces in a route scope that no page graph or system slot reads, each with the reason it stays. */
 const ROUTE_SCOPE_UNUSED_ALLOWED: {
     route: RouteKey;
     ns: string[];
@@ -164,13 +143,13 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/classes',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'spellEditor', 'scenario', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'editors'],
-        reason: REGISTRY,
+        ns: ['characterProfile', 'rest', 'races', 'backgrounds', 'skills', 'artifacts', 'scenario', 'editors'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/classes/[classId]',
-        ns: ['spells', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'contentImport', 'contentCopy', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'spellEditor', 'editors', 'characters', 'characterProfile', 'rest', 'scenario'],
-        reason: REGISTRY,
+        ns: ['races', 'backgrounds', 'skills', 'artifacts', 'editors', 'characterProfile', 'rest', 'scenario'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/feats',
@@ -184,13 +163,13 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/backgrounds',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'spellEditor', 'scenario', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'editors'],
-        reason: REGISTRY,
+        ns: ['characterProfile', 'rest', 'races', 'skills', 'artifacts', 'scenario', 'editors'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/backgrounds/[backgroundId]',
-        ns: ['spells', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'contentImport', 'contentCopy', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'spellEditor', 'editors', 'characters', 'characterProfile', 'rest', 'scenario'],
-        reason: REGISTRY,
+        ns: ['races', 'skills', 'artifacts', 'editors', 'characterProfile', 'rest', 'scenario'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/artifacts',
@@ -199,38 +178,38 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/artifacts/[artifactId]',
-        ns: ['editors', 'characterProfile', 'races', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
+        ns: ['editors', 'races', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
         reason: PACK,
     },
     {
         route: '[id]/dm/artifacts/new',
-        ns: ['editors', 'characterProfile', 'races', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
+        ns: ['editors', 'races', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
         reason: PACK,
     },
     {
         route: '[id]/dm/skills',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'spellEditor', 'scenario'],
-        reason: REGISTRY,
+        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario', 'editors'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/skills/[skillId]',
-        ns: ['abilityEditor', 'spellEditor', 'editors', 'characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'scenario'],
-        reason: REGISTRY,
+        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/skills/new',
-        ns: ['abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'spellEditor', 'editors', 'characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'scenario'],
-        reason: REGISTRY,
+        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/main-skills',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'spellEditor', 'scenario', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon'],
-        reason: REGISTRY,
+        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'scenario', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/main-skills/[mainSkillId]',
-        ns: ['abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'spellEditor', 'editors', 'characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'scenario'],
-        reason: REGISTRY,
+        ns: ['abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'editors', 'characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'scenario'],
+        reason: PACK,
     },
     {
         route: '[id]/dm/compendium',
@@ -254,12 +233,12 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/units/new',
-        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'scenario'],
+        ns: ['editors', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'scenario'],
         reason: PACK,
     },
     {
         route: '[id]/dm/units/[unitId]',
-        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'scenario'],
+        ns: ['editors', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'scenario'],
         reason: PACK,
     },
     {
@@ -314,15 +293,10 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/system',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'spellEditor', 'scenario', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'editors', 'compendium', 'contentImport', 'contentCopy'],
-        reason: REGISTRY,
+        ns: ['characterProfile', 'rest', 'races', 'scenario', 'editors'],
+        reason: PACK,
     },
 ];
-
-const isExempt = (file: string) =>
-    ROUTE_SCOPE_LITERAL_EXEMPT.some((e) =>
-        e.file.endsWith('/') ? file.startsWith(e.file) : file === e.file
-    );
 
 const scopeOf = (routes: readonly string[]) =>
     new Set<string>([
@@ -357,7 +331,7 @@ describe('campaign route scopes', () => {
                 !scope.has(u.ns) &&
                 (u.kind === 'hook' ||
                     u.kind === 'server' ||
-                    !isExempt(u.file))
+                    !isExempt(u.file, page))
         );
 
         expect(
@@ -368,6 +342,20 @@ describe('campaign route scopes', () => {
 
     const graphs = PAGES.map((page) => routeGraph(page));
 
+    const readsOf = (route: string) =>
+        new Set<string>([
+            ...graphs
+                .filter((g) => g.declaredRoutes.includes(route))
+                .flatMap((g) => g.uses.map((u) => u.ns)),
+            ...graphs
+                .filter((g) => g.declaredRoutes.includes(route))
+                .flatMap((g) =>
+                    ENTRIES.flatMap(({ moduleIds }) =>
+                        systemReads(g.page, moduleIds).map((u) => u.ns)
+                    )
+                ),
+        ]);
+
     it.each(Object.keys(ROUTE_SCOPES))(
         '%s has no unused namespaces',
         (route) => {
@@ -375,7 +363,7 @@ describe('campaign route scopes', () => {
                 g.declaredRoutes.includes(route)
             );
 
-            const read = new Set(declaring.flatMap((g) => g.uses.map((u) => u.ns)));
+            const read = readsOf(route);
 
             const allowed = new Set(
                 ROUTE_SCOPE_UNUSED_ALLOWED.filter(
@@ -394,11 +382,7 @@ describe('campaign route scopes', () => {
 
     it('the unused allowlist has no stale entries', () => {
         const stale = ROUTE_SCOPE_UNUSED_ALLOWED.flatMap((e) => {
-            const read = new Set(
-                graphs
-                    .filter((g) => g.declaredRoutes.includes(e.route))
-                    .flatMap((g) => g.uses.map((u) => u.ns))
-            );
+            const read = readsOf(e.route);
 
             const scope = new Set<string>(routeNamespaces(e.route, null));
 

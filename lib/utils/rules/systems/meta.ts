@@ -33,6 +33,7 @@ export type PackKey =
     | 'abilityDisplay'
     | 'abilityEditor'
     | 'contentLibrary'
+    | 'contentTransfer'
     | 'story'
     | 'battle'
     | 'ai'

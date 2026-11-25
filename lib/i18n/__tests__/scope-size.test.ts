@@ -6,13 +6,13 @@ import { loadMessages, loadStaticMessages, trimWhatsNew } from '../messages';
 import {
     CAMPAIGN_BASE,
     CAMPAIGN_BASE_LIMIT_KB,
-    ROUTE_BUDGETS_KB,
     ROUTE_SCOPES,
     type RouteKey,
     routeNamespaces,
 } from '../route-scopes';
 import { ROOT_NAMESPACES } from '../scopes';
 import { logScope, systemPackScope, systemScope } from '../system-scope';
+import { ROUTE_BUDGETS_KB } from '../test/route-budgets';
 import { campaignPages, routeGraph } from '../test/route-namespaces';
 
 import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
