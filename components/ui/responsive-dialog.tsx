@@ -77,7 +77,7 @@ export function ResponsiveDialog({
 
     const nested = useContext(InsideSheet);
 
-    const hudClass = hud ? `${HUD_SURFACE} hud-form hud-form-page` : undefined;
+    const hudClass = hud ? `${HUD_SURFACE} hud-form` : undefined;
 
     const hudPortal = hud || !!className?.split(/\s+/).includes(HUD_SURFACE);
 

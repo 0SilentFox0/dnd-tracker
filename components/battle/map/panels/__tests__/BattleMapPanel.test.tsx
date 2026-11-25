@@ -68,7 +68,7 @@ describe('BattleMapPanel', () => {
         fireEvent.click(toggle);
 
         expect(toggle.getAttribute('aria-pressed')).toBe('true');
-        expect(toggle.className).toContain('border-hud-crimson');
+        expect(toggle.className).toContain('var(--hud-crimson)');
     });
 
     it('гравець не бачить перемикача', () => {

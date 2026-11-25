@@ -19,6 +19,7 @@ const STATIC_SAFE = [
     'app/dev/battle-map/page.tsx',
     'app/dev/fx-lab/page.tsx',
     'app/dev/fx-spells/page.tsx',
+    'app/help/[slug]/page.tsx',
     'app/help/page.tsx',
     'app/page.tsx',
     'app/library/sounds/page.tsx',
@@ -26,6 +27,7 @@ const STATIC_SAFE = [
     'app/settings/ai/page.tsx',
     'app/settings/password/page.tsx',
     'app/settings/preferences/page.tsx',
+    'app/settings/subscription/page.tsx',
     'app/uk/page.tsx',
 ];
 

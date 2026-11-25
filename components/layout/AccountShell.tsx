@@ -18,8 +18,14 @@ const NAV = [
     ),
 ];
 
-export function accountNavItems(t: (k: string) => string): GameShellNavItem[] {
-    return NAV.map(({ id, href }) => ({ id, href, label: t(id) }));
+type HeaderT = ReturnType<typeof useTranslations<'common.header'>>;
+
+export function accountNavItems(t: HeaderT): GameShellNavItem[] {
+    return NAV.map(({ id, href }) => ({
+        id,
+        href,
+        label: t(id as Parameters<HeaderT>[0]),
+    }));
 }
 
 export function accountActiveId(pathname: string): string {
