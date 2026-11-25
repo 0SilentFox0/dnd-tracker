@@ -78,24 +78,28 @@ export function SheetLayout({
                     onHistory={
                         hasStory ? () => tabs.onChange('story') : undefined
                     }
+                    body={
+                        <>
+                            <div className="empty:hidden">{children}</div>
+                            <SheetAbilities />
+                            <ProfileTabs
+                                variant="sheet"
+                                value={value}
+                                onValueChange={tabs.onChange}
+                                tabs={tabs.items}
+                                header={
+                                    scrolledPast ? (
+                                        <div className="lg:hidden">
+                                            <CompactHero />
+                                        </div>
+                                    ) : null
+                                }
+                            />
+                        </>
+                    }
                 >
                     <SheetHud />
                 </SheetIdentityPanel>
-                <div className="empty:hidden">{children}</div>
-                <SheetAbilities />
-                <ProfileTabs
-                    variant="sheet"
-                    value={value}
-                    onValueChange={tabs.onChange}
-                    tabs={tabs.items}
-                    header={
-                        scrolledPast ? (
-                            <div className="lg:hidden">
-                                <CompactHero />
-                            </div>
-                        ) : null
-                    }
-                />
             </div>
         </SheetRollProvider>
     );

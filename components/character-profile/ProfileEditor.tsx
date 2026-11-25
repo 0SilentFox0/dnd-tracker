@@ -26,7 +26,6 @@ import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
 import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
-import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
@@ -139,294 +138,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                             />
                         )
                     }
-                />
-                <div className="mx-auto min-w-0 w-full max-w-[860px] flex-1">
-                    {form.status.error && (
-                        <FormAlert className="mx-4">
-                            {form.status.error}
-                        </FormAlert>
-                    )}
-                    <ProfileTabs
-                        variant="sheet"
-                        value={tab}
-                        onValueChange={setTab}
-                        tabs={[
-                            {
-                                id: 'basic',
-                                label: tc('basic'),
-                                content: (
-                                    <BasicEditTab
-                                        editor={editor}
-                                        onDeleted={() =>
-                                            router.push(
-                                                `/campaigns/${campaignId}/dm/characters`
-                                            )
-                                        }
-                                    />
-                                ),
-                            },
-                            {
-                                id: 'combat',
-                                label: t('tabs.combat'),
-                                content: (
-                                    <div className="space-y-6">
-                                        <Ui.StatsFields
-                                            bindings={form}
-                                            campaignId={campaignId}
-                                            mode="edit"
-                                            extraFields={
-                                                <SystemFormFields
-                                                    campaignId={campaignId}
-                                                    combatStats={
-                                                        form.combatStats
-                                                    }
-                                                />
-                                            }
-                                            classArmor={
-                                                classesEnabled &&
-                                                (
-                                                    formData.basicInfo
-                                                        .classes ?? []
-                                                ).length > 0
-                                                    ? sheet.armorClass
-                                                    : undefined
-                                            }
-                                        />
-                                        {!Ui.hideProgression && (
-                                            <CharacterSkillsSection
-                                                skills={skills}
-                                            />
-                                        )}
-                                    </div>
-                                ),
-                            },
-                            ...(Ui.hideProgression
-                                ? []
-                                : [
-                                      {
-                                          id: 'skills' as const,
-                                          label: t('tabs.path'),
-                                          content: (
-                                              <div className="space-y-4">
-                                                  <CharacterAbilitiesSection
-                                                      campaignId={campaignId}
-                                                      abilities={abilities}
-                                                  />
-                                                  <SkillsTab
-                                                      manage
-                                                      classLevelUp={
-                                                          classLevelUp
-                                                      }
-                                                  />
-                                              </div>
-                                          ),
-                                      },
-                                  ]),
-                            ...(sheet.viewer.isDM && Ui.AdvancementEditor
-                                ? [
-                                      {
-                                          id: 'advancement' as const,
-                                          label: t('tabs.advancement'),
-                                          content: (
-                                              <Ui.AdvancementEditor
-                                                  bindings={form}
-                                                  campaignId={campaignId}
-                                              />
-                                          ),
-                                      },
-                                  ]
-                                : []),
-                            ...(showChoices
-                                ? [
-                                      {
-                                          id: 'choices' as const,
-                                          label: tc('choices'),
-                                          content: (
-                                              <CharacterChoicesPanel
-                                                  campaignId={campaignId}
-                                                  characterId={characterId}
-                                                  initial={{
-                                                      backgroundId:
-                                                          formData.choices
-                                                              ?.backgroundId,
-                                                      backgroundChoices:
-                                                          formData.choices
-                                                              ?.backgroundChoices,
-                                                      backgroundFeatPicks:
-                                                          formData.choices
-                                                              ?.backgroundFeatPicks,
-                                                      raceChoices:
-                                                          formData.choices
-                                                              ?.raceChoices ??
-                                                          {},
-                                                      feats:
-                                                          formData.choices
-                                                              ?.feats ?? [],
-                                                      classes: heroClasses,
-                                                  }}
-                                                  hero={{
-                                                      race: formData.basicInfo
-                                                          .race,
-                                                      level: formData.basicInfo
-                                                          .level,
-                                                      scores: abilityScores.data,
-                                                      skills: skills.data
-                                                          .skills,
-                                                      classMode: heroClassMode,
-                                                  }}
-                                                  onSaved={
-                                                      editor.dmActions
-                                                          .applyClassLevelUp
-                                                  }
-                                              />
-                                          ),
-                                      },
-                                  ]
-                                : []),
-                            ...(system.spells
-                                ? [
-                                      {
-                                          id: 'magic' as const,
-                                          label: t('tabs.magic'),
-                                          content: Ui.MagicTab ? (
-                                              <Ui.MagicTab />
-                                          ) : (
-                                              <div className="space-y-5">
-                                                  <HudSection
-                                                      title={t(
-                                                          'editor.spellAbility'
-                                                      )}
-                                                  >
-                                                      <div className="space-y-2">
-                                                          <Label
-                                                              htmlFor="spellcastingAbility"
-                                                              className="sr-only"
-                                                          >
-                                                              {t(
-                                                                  'editor.spellAbility'
-                                                              )}
-                                                          </Label>
-                                                          <SelectField
-                                                              id="spellcastingAbility"
-                                                              value={
-                                                                  spellcasting
-                                                                      .data
-                                                                      .spellcastingAbility ??
-                                                                  ''
-                                                              }
-                                                              onValueChange={(
-                                                                  v
-                                                              ) =>
-                                                                  spellcasting.set(
-                                                                      'spellcastingAbility',
-                                                                      toSpellcastingAbility(
-                                                                          v
-                                                                      )
-                                                                  )
-                                                              }
-                                                              options={SPELLCASTING_ABILITIES.map(
-                                                                  (key) => ({
-                                                                      value: key,
-                                                                      label: tg(
-                                                                          `abilities.${key}.label`
-                                                                      ),
-                                                                  })
-                                                              )}
-                                                              allowNone
-                                                              noneLabel={t(
-                                                                  'editor.none'
-                                                              )}
-                                                          />
-                                                          <p className="text-xs text-muted-foreground">
-                                                              {t(
-                                                                  'editor.spellAbilityHint'
-                                                              )}
-                                                          </p>
-                                                      </div>
-                                                  </HudSection>
-                                                  <MagicTab />
-                                              </div>
-                                          ),
-                                      },
-                                  ]
-                                : []),
-                            ...(system.inventory
-                                ? [
-                                      {
-                                          id: 'items' as const,
-                                          label: t('tabs.things'),
-                                          content: (
-                                              <div className="space-y-5">
-                                                  <HudSection
-                                                      title={t('tabs.things')}
-                                                  >
-                                                      <CharacterArtifactsSection
-                                                          campaignId={
-                                                              campaignId
-                                                          }
-                                                          characterId={
-                                                              characterId
-                                                          }
-                                                          equipped={equipped}
-                                                          artifacts={artifacts.map(
-                                                              (a) => ({
-                                                                  id: a.id,
-                                                                  name: a.name,
-                                                                  slot:
-                                                                      a.slot ??
-                                                                      'item',
-                                                                  icon:
-                                                                      a.icon ??
-                                                                      null,
-                                                                  modifiers:
-                                                                      a.modifiers,
-                                                              })
-                                                          )}
-                                                          holders={holders}
-                                                          onEquippedChange={
-                                                              setEquipped
-                                                          }
-                                                      />
-                                                  </HudSection>
-                                                  {Ui.sheet?.itemSections?.map(
-                                                      (Section, i) => (
-                                                          <Section
-                                                              key={i}
-                                                              sheet={sheet}
-                                                              variant="editor"
-                                                          />
-                                                      )
-                                                  )}
-                                              </div>
-                                          ),
-                                      },
-                                  ]
-                                : []),
-                            {
-                                id: 'story',
-                                label: t('tabs.story'),
-                                content: (
-                                    <div className="space-y-6">
-                                        <GoalList />
-                                        <BiographyEditor
-                                            value={
-                                                formData.basicInfo.background ??
-                                                ''
-                                            }
-                                            onChange={(v) =>
-                                                form.basicInfo.set(
-                                                    'background',
-                                                    v
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                ),
-                            },
-                        ]}
-                    />
-                    <div className="px-4">
-                        <ActionBar className="justify-end sm:sticky sm:bottom-0 sm:z-10 sm:border-t sm:border-hud-line sm:bg-hud-page/95 sm:py-3">
+                    actions={
+                        <>
                             <Button
                                 type="button"
                                 variant="outline"
@@ -446,9 +159,330 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                     ? t('editor.saving')
                                     : tca('save')}
                             </Button>
-                        </ActionBar>
-                    </div>
-                </div>
+                        </>
+                    }
+                    body={
+                        <>
+                            {form.status.error && (
+                                <FormAlert className="mx-4">
+                                    {form.status.error}
+                                </FormAlert>
+                            )}
+                            <ProfileTabs
+                                variant="sheet"
+                                value={tab}
+                                onValueChange={setTab}
+                                tabs={[
+                                    {
+                                        id: 'basic',
+                                        label: tc('basic'),
+                                        content: (
+                                            <BasicEditTab
+                                                editor={editor}
+                                                onDeleted={() =>
+                                                    router.push(
+                                                        `/campaigns/${campaignId}/dm/characters`
+                                                    )
+                                                }
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        id: 'combat',
+                                        label: t('tabs.combat'),
+                                        content: (
+                                            <div className="space-y-6">
+                                                <Ui.StatsFields
+                                                    bindings={form}
+                                                    campaignId={campaignId}
+                                                    mode="edit"
+                                                    extraFields={
+                                                        <SystemFormFields
+                                                            campaignId={
+                                                                campaignId
+                                                            }
+                                                            combatStats={
+                                                                form.combatStats
+                                                            }
+                                                        />
+                                                    }
+                                                    classArmor={
+                                                        classesEnabled &&
+                                                        (
+                                                            formData.basicInfo
+                                                                .classes ?? []
+                                                        ).length > 0
+                                                            ? sheet.armorClass
+                                                            : undefined
+                                                    }
+                                                />
+                                                {!Ui.hideProgression && (
+                                                    <CharacterSkillsSection
+                                                        skills={skills}
+                                                    />
+                                                )}
+                                            </div>
+                                        ),
+                                    },
+                                    ...(Ui.hideProgression
+                                        ? []
+                                        : [
+                                              {
+                                                  id: 'skills' as const,
+                                                  label: t('tabs.path'),
+                                                  content: (
+                                                      <div className="space-y-4">
+                                                          <CharacterAbilitiesSection
+                                                              campaignId={
+                                                                  campaignId
+                                                              }
+                                                              abilities={
+                                                                  abilities
+                                                              }
+                                                          />
+                                                          <SkillsTab
+                                                              manage
+                                                              classLevelUp={
+                                                                  classLevelUp
+                                                              }
+                                                          />
+                                                      </div>
+                                                  ),
+                                              },
+                                          ]),
+                                    ...(sheet.viewer.isDM &&
+                                    Ui.AdvancementEditor
+                                        ? [
+                                              {
+                                                  id: 'advancement' as const,
+                                                  label: t('tabs.advancement'),
+                                                  content: (
+                                                      <Ui.AdvancementEditor
+                                                          bindings={form}
+                                                          campaignId={
+                                                              campaignId
+                                                          }
+                                                      />
+                                                  ),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(showChoices
+                                        ? [
+                                              {
+                                                  id: 'choices' as const,
+                                                  label: tc('choices'),
+                                                  content: (
+                                                      <CharacterChoicesPanel
+                                                          campaignId={
+                                                              campaignId
+                                                          }
+                                                          characterId={
+                                                              characterId
+                                                          }
+                                                          initial={{
+                                                              backgroundId:
+                                                                  formData
+                                                                      .choices
+                                                                      ?.backgroundId,
+                                                              backgroundChoices:
+                                                                  formData
+                                                                      .choices
+                                                                      ?.backgroundChoices,
+                                                              backgroundFeatPicks:
+                                                                  formData
+                                                                      .choices
+                                                                      ?.backgroundFeatPicks,
+                                                              raceChoices:
+                                                                  formData
+                                                                      .choices
+                                                                      ?.raceChoices ??
+                                                                  {},
+                                                              feats:
+                                                                  formData
+                                                                      .choices
+                                                                      ?.feats ??
+                                                                  [],
+                                                              classes:
+                                                                  heroClasses,
+                                                          }}
+                                                          hero={{
+                                                              race: formData
+                                                                  .basicInfo
+                                                                  .race,
+                                                              level: formData
+                                                                  .basicInfo
+                                                                  .level,
+                                                              scores: abilityScores.data,
+                                                              skills: skills
+                                                                  .data.skills,
+                                                              classMode:
+                                                                  heroClassMode,
+                                                          }}
+                                                          onSaved={
+                                                              editor.dmActions
+                                                                  .applyClassLevelUp
+                                                          }
+                                                      />
+                                                  ),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(system.spells
+                                        ? [
+                                              {
+                                                  id: 'magic' as const,
+                                                  label: t('tabs.magic'),
+                                                  content: Ui.MagicTab ? (
+                                                      <Ui.MagicTab />
+                                                  ) : (
+                                                      <div className="space-y-5">
+                                                          <HudSection
+                                                              title={t(
+                                                                  'editor.spellAbility'
+                                                              )}
+                                                          >
+                                                              <div className="space-y-2">
+                                                                  <Label
+                                                                      htmlFor="spellcastingAbility"
+                                                                      className="sr-only"
+                                                                  >
+                                                                      {t(
+                                                                          'editor.spellAbility'
+                                                                      )}
+                                                                  </Label>
+                                                                  <SelectField
+                                                                      id="spellcastingAbility"
+                                                                      value={
+                                                                          spellcasting
+                                                                              .data
+                                                                              .spellcastingAbility ??
+                                                                          ''
+                                                                      }
+                                                                      onValueChange={(
+                                                                          v
+                                                                      ) =>
+                                                                          spellcasting.set(
+                                                                              'spellcastingAbility',
+                                                                              toSpellcastingAbility(
+                                                                                  v
+                                                                              )
+                                                                          )
+                                                                      }
+                                                                      options={SPELLCASTING_ABILITIES.map(
+                                                                          (
+                                                                              key
+                                                                          ) => ({
+                                                                              value: key,
+                                                                              label: tg(
+                                                                                  `abilities.${key}.label`
+                                                                              ),
+                                                                          })
+                                                                      )}
+                                                                      allowNone
+                                                                      noneLabel={t(
+                                                                          'editor.none'
+                                                                      )}
+                                                                  />
+                                                                  <p className="text-xs text-muted-foreground">
+                                                                      {t(
+                                                                          'editor.spellAbilityHint'
+                                                                      )}
+                                                                  </p>
+                                                              </div>
+                                                          </HudSection>
+                                                          <MagicTab />
+                                                      </div>
+                                                  ),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(system.inventory
+                                        ? [
+                                              {
+                                                  id: 'items' as const,
+                                                  label: t('tabs.things'),
+                                                  content: (
+                                                      <div className="space-y-5">
+                                                          <HudSection
+                                                              title={t(
+                                                                  'tabs.things'
+                                                              )}
+                                                          >
+                                                              <CharacterArtifactsSection
+                                                                  campaignId={
+                                                                      campaignId
+                                                                  }
+                                                                  characterId={
+                                                                      characterId
+                                                                  }
+                                                                  equipped={
+                                                                      equipped
+                                                                  }
+                                                                  artifacts={artifacts.map(
+                                                                      (a) => ({
+                                                                          id: a.id,
+                                                                          name: a.name,
+                                                                          slot:
+                                                                              a.slot ??
+                                                                              'item',
+                                                                          icon:
+                                                                              a.icon ??
+                                                                              null,
+                                                                          modifiers:
+                                                                              a.modifiers,
+                                                                      })
+                                                                  )}
+                                                                  holders={
+                                                                      holders
+                                                                  }
+                                                                  onEquippedChange={
+                                                                      setEquipped
+                                                                  }
+                                                              />
+                                                          </HudSection>
+                                                          {Ui.sheet?.itemSections?.map(
+                                                              (Section, i) => (
+                                                                  <Section
+                                                                      key={i}
+                                                                      sheet={
+                                                                          sheet
+                                                                      }
+                                                                      variant="editor"
+                                                                  />
+                                                              )
+                                                          )}
+                                                      </div>
+                                                  ),
+                                              },
+                                          ]
+                                        : []),
+                                    {
+                                        id: 'story',
+                                        label: t('tabs.story'),
+                                        content: (
+                                            <div className="space-y-6">
+                                                <GoalList />
+                                                <BiographyEditor
+                                                    value={
+                                                        formData.basicInfo
+                                                            .background ?? ''
+                                                    }
+                                                    onChange={(v) =>
+                                                        form.basicInfo.set(
+                                                            'background',
+                                                            v
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        ),
+                                    },
+                                ]}
+                            />
+                        </>
+                    }
+                />
             </div>
         </form>
     );
