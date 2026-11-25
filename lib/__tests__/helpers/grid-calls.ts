@@ -26,10 +26,13 @@ export const ARITY: Record<string, number> = {
     templateAimAllowed: 6,
     participantsInCells: 4,
     awayStep: 3,
+    tokenBox: 2,
+    cellCenter: 2,
+    cellPolygon: 2,
 };
 
 const GRID_MODULE =
-    /^(?:@\/lib\/utils\/battle\/grid(?:\/(?:geometry|occupancy|template|nearest|push|map-scene))?|\.\/(?:geometry|occupancy|template|nearest|push|map-scene))$/;
+    /^(?:@\/lib\/utils\/battle\/grid(?:\/(?:geometry|occupancy|template|nearest|push|map-scene|layout))?|\.\/(?:geometry|occupancy|template|nearest|push|map-scene|layout))$/;
 
 const RANGE_BAND_MODULE = /range-band$/;
 
@@ -183,7 +186,9 @@ export function scanGridCalls(file: string, text: string): Violation[] {
                 (ts.isPropertyAssignment(parent) && parent.name === n) ||
                 (ts.isShorthandPropertyAssignment(parent) && false);
 
-            if (!isCallee && !isDeclaration && !isMemberName)
+            const isTypeQuery = ts.isTypeQueryNode(parent);
+
+            if (!isCallee && !isDeclaration && !isMemberName && !isTypeQuery)
                 add(n, 'ref', `${tracked.get(n.text)} used point-free`);
         }
 

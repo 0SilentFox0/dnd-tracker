@@ -29,4 +29,5 @@ export interface MapPlacement {
     mapSize: { width: number; height: number };
     pxPerUnit: number;
     dimmed?: boolean;
+    hovered?: boolean;
 }

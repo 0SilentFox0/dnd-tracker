@@ -381,8 +381,7 @@ describe('BattleMap', () => {
                 ) as HTMLElement;
 
                 expect(strip.className).toContain('bottom-0');
-                expect(strip.className).toContain('max-h-full');
-                expect(strip.className).toContain('w-[94%]');
+                expect(strip.className).toContain('w-[70%]');
                 expect(strip.className).not.toContain('top-');
 
                 const portrait = container.querySelector<HTMLElement>(
@@ -395,59 +394,29 @@ describe('BattleMap', () => {
             }
         );
 
-        it('both size-1 and size-2 cards show the name', () => {
-            const big = {
-                ...at('g', 0, 0),
-                combatStats: { ...base.combatStats, gridSize: 2 },
-            };
-
+        it('HUD shows no name by default and the name+value on token hover', () => {
             const { container } = render(
                 <BattleMap
                     map={square}
-                    participants={[at('small', 3, 0), big]}
+                    participants={[at('small', 3, 0)]}
+                    view={{ hud: new Map([['small', { exact: true }]]) }}
                 />
             );
 
-            expect(
-                container.querySelector('[data-map-hud="small"]')?.textContent
-            ).toContain('small');
-            expect(
-                container.querySelector('[data-map-hud="g"]')?.textContent
-            ).toContain('g');
-        });
+            const hud = container.querySelector(
+                '[data-map-hud="small"]'
+            ) as HTMLElement;
 
-        it('плашка великого токена обіймає вміст (без висоти 28 %), смуга HP товща за списочну', () => {
-            const big = {
-                ...at('g', 0, 0),
-                combatStats: { ...base.combatStats, gridSize: 2 },
-            };
+            expect(hud.textContent).toBe('');
 
-            const { container } = render(
-                <BattleMap
-                    map={square}
-                    participants={[at('small', 3, 0), big]}
-                    view={{
-                        hud: new Map([
-                            ['g', { exact: true }],
-                            ['small', { exact: true }],
-                        ]),
-                    }}
-                />
+            fireEvent.pointerEnter(
+                container.querySelector(
+                    '[data-fx-participant="small"]'
+                ) as HTMLElement
             );
 
-            const strip = (id: string) =>
-                container.querySelector<HTMLElement>(
-                    `[data-map-hud="${id}"] [data-map-hud-strip]`
-                ) as HTMLElement;
-
-            expect(strip('g').textContent).toContain('g');
-            expect(strip('g').style.height).toBe('');
-
-            for (const id of ['g', 'small']) {
-                const bar = strip(id).lastElementChild as HTMLElement;
-
-                expect(parseFloat(bar.style.height)).toBeGreaterThanOrEqual(6);
-            }
+            expect(hud.textContent).toContain('small');
+            expect(hud.textContent).toMatch(/\d+\/\d+/);
         });
 
         it('tiny fit-all cells hide the HUD until the camera zooms in', () => {
@@ -461,9 +430,7 @@ describe('BattleMap', () => {
                 />
             );
 
-            expect(
-                container.querySelector('[data-map-hud="h"]')?.textContent
-            ).toBeUndefined();
+            expect(container.querySelector('[data-map-hud="h"]')).toBeNull();
         });
     });
 
@@ -518,14 +485,22 @@ describe('BattleMap', () => {
                 </TooltipProvider>
             );
 
-        it('exact: HP numbers (size 1)', () => {
+        it('exact: HP numbers only on hover (size 1)', () => {
             const { container } = renderHud(new Map([['h', { exact: true }]]));
 
             const max = base.combatStats.maxHp;
 
-            expect(container.textContent).toContain(
-                `${base.combatStats.currentHp}/${max}`
+            const text = `${base.combatStats.currentHp}/${max}`;
+
+            expect(container.textContent).not.toContain(text);
+
+            fireEvent.pointerEnter(
+                container.querySelector(
+                    '[data-fx-participant="h"]'
+                ) as HTMLElement
             );
+
+            expect(container.textContent).toContain(text);
         });
 
         it('missing hud entry hides exact HP', () => {

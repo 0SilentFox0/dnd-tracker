@@ -33,6 +33,15 @@ describe('grid-aware call ratchet: fixtures', () => {
         expect(v.map((x) => x.kind)).toEqual(['arity', 'arity']);
     });
 
+    it('flags tokenBox and cellCenter called without the grid', () => {
+        const v = scanGridCalls(
+            'components/battle/map/x.ts',
+            "import { tokenBox, cellCenter } from '@/lib/utils/battle/grid';\ntokenBox(p); cellCenter(c); tokenBox(p, grid);"
+        );
+
+        expect(v.map((x) => x.kind)).toEqual(['arity', 'arity']);
+    });
+
     it('accepts a full call and ignores spread args', () => {
         expect(
             scanGridCalls(

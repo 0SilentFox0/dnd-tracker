@@ -1,3 +1,5 @@
+import { useCallback, useState } from 'react';
+
 import { MapHitFloat } from '../tokens/MapHitFloat';
 import { MapToken } from '../tokens/MapToken';
 import { MapTokenHud } from '../tokens/MapTokenHud';
@@ -38,9 +40,17 @@ export function MapTokensLayer({
 
     const { onTokenClick, onTokenHover } = handlers;
 
-    const onCellHover = actions?.onCellHover;
-
     const modeView = view?.mode;
+
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+    const onHover = useCallback(
+        (id: string | null) => {
+            setHoveredId(id);
+            onTokenHover(id);
+        },
+        [onTokenHover]
+    );
 
     return (
         <div
@@ -56,9 +66,7 @@ export function MapTokensLayer({
                     selected={view?.selectedId === p.basicInfo.id}
                     current={view?.currentId === p.basicInfo.id}
                     onClick={onTokenClick}
-                    onHover={
-                        painting || !onCellHover ? undefined : onTokenHover
-                    }
+                    onHover={painting ? undefined : onHover}
                     passThrough={passAll || movingId === p.basicInfo.id}
                     impact={view?.impactFor?.(p.basicInfo.id)}
                     effects={view?.effects?.get(p.basicInfo.id)}
@@ -74,7 +82,11 @@ export function MapTokensLayer({
                     <MapTokenHud
                         key={`hud:${id}`}
                         participant={p}
-                        placement={placement}
+                        placement={
+                            hoveredId === id
+                                ? { ...placement, hovered: true }
+                                : placement
+                        }
                         exact={hud?.exact ?? false}
                         raised={
                             view?.selectedId === id || view?.currentId === id
