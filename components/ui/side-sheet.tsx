@@ -45,12 +45,12 @@ export function SideSheet({
                         contentRef.current?.focus();
                     }}
                     className={cn(
-                        'fixed inset-y-0 z-40 flex flex-col border-l border-white/20 bg-black/85 shadow-[-12px_0_40px_rgba(0,0,0,.6)] outline-none data-[state=closed]:hidden',
+                        'fixed inset-y-0 z-40 flex flex-col border-l border-hud-line bg-hud-panel shadow-[-12px_0_40px_rgba(0,0,0,.6)] outline-none data-[state=closed]:hidden',
                         hudClass,
                         className
                     )}
                 >
-                    <DialogPrimitive.Title className="hud-sc h-12 shrink-0 border-b border-white/15 px-4 text-[15px] leading-[48px] font-bold tracking-[.1em] text-hud-ink">
+                    <DialogPrimitive.Title className="hud-sc h-12 shrink-0 border-b border-hud-line px-4 text-[20px] leading-[48px] font-normal text-hud-ink">
                         {title}
                     </DialogPrimitive.Title>
                     <div className="min-h-0 flex-1 overflow-y-auto p-4">
