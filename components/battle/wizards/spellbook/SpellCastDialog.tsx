@@ -28,9 +28,9 @@ import {
 
 type Book = ReturnType<typeof useSpellBook>;
 
-const ghost = cn(btn, 'border-white/25');
+const ghost = cn(btn, 'border-hud-line');
 
-const primary = cn(btn, primaryBtn, 'spell-book-action disabled:opacity-50');
+const primary = cn(btn, primaryBtn, 'disabled:opacity-50');
 
 function BackCancel({ book, disabled }: { book: Book; disabled?: boolean }) {
     const tc = useTranslations('common.actions');
@@ -142,7 +142,7 @@ function RollsStep({ book }: { book: Book }) {
                 </>
             )}
             {!view.cast && view.attackTargets.length > 0 && (
-                <p className="mt-1 text-xs text-[var(--hud-muted)] italic">
+                <p className="mt-1 text-xs text-hud-muted italic">
                     {tw('serverD20')}
                 </p>
             )}
@@ -160,7 +160,7 @@ function RollsStep({ book }: { book: Book }) {
                         onChange={(e) =>
                             actions.setInputCount(Number(e.target.value))
                         }
-                        className="w-20 rounded border border-white/25 bg-transparent px-2 py-1 text-right"
+                        className="w-20 rounded border border-hud-line bg-transparent px-2 py-1 text-right"
                     />
                 </label>
             )}
@@ -318,7 +318,7 @@ export function SpellCastDialog({ book }: { book: Book }) {
             open={open}
             onOpenChange={(o) => !o && actions.close()}
             title={view.selected?.name ?? tw('fallbackName')}
-            className={cn(HUD_SURFACE, 'spellbook-dialog border-white/25')}
+            className={HUD_SURFACE}
         >
             {step !== 'submitting' && !view.cast && <SlotSelect book={book} />}
             {step === 'targets' && <TargetsStep book={book} />}
