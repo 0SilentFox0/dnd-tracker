@@ -40,7 +40,7 @@ export const PACKS = {
         'choices',
     ],
     abilityDisplay: ['abilityRegistry', 'abilityText', 'battleTerms'],
-    abilityEditor: ['spellEditor', 'editors'],
+    abilityEditor: ['abilityEditor', 'spellEditor', 'editors'],
     contentLibrary: [
         'spells',
         'races',

@@ -1,0 +1,506 @@
+{
+  "fields": {
+    "stat": "Stat",
+    "flat": "Number / formula",
+    "percent": "% (number / formula)",
+    "atLeast": "At least (ability, armor, speed)",
+    "attackKind": "Attack type",
+    "spellLevels": "Slot levels",
+    "target": "Target",
+    "duration": "Duration (rounds)",
+    "until": "Ends at the end of my turn",
+    "filter": {
+      "kind": "Damage type",
+      "school": "Magic school"
+    },
+    "perMark": "Per mark (mark id)",
+    "flag": "Flag",
+    "text": "Text",
+    "amount": "Amount (number, dice, formula, %)",
+    "damageType": "Type",
+    "falloff": "% damage per target in order (100, 50, 25…)",
+    "killIfHpAtMost": "Kills the target if its HP is at most",
+    "revive": "Revives",
+    "damagePerRound": "Damage/round (number, dice, formula)",
+    "healPerRound": "Healing/round (number, dice, formula)",
+    "damageBonusPercent": "Damage bonus, %",
+    "condition": "Condition",
+    "levels": "Exhaustion levels (1–6)",
+    "saveEnds": "Saving throw at end of turn",
+    "breakOnDamage": "Ends when taking damage",
+    "extraActions": "Extra actions",
+    "itemAttacks": "Extra attacks with this item only",
+    "refreshAction": "Refresh action",
+    "refreshBonusAction": "Refresh bonus action",
+    "refreshReaction": "Refresh reaction",
+    "budget": "Level budget",
+    "maxSlotLevel": "Max slot level",
+    "count": "How many",
+    "delta": "Change",
+    "markId": "Mark identifier",
+    "unitId": "Specific unit (instead of group and Tier)",
+    "group": "Group (unit race)",
+    "tier": "Tier (unit level 1–7)",
+    "hpPercent": "HP, %",
+    "includeConditions": "Remove conditions too",
+    "includeBuffs": "Remove beneficial effects too",
+    "positive": "Beneficial marker",
+    "maneuver": "Maneuver",
+    "percentOfAttack": "% of attack damage",
+    "options": "Options",
+    "sense": "Sense",
+    "range": "Range, feet",
+    "attackAbility": "Only attacks with this ability",
+    "againstId": "Only against this participant (id)",
+    "consumeOn": "Ends after the first attack",
+    "school": "School",
+    "spellIds": "Spells (one of them, at random)",
+    "mode": "Mode",
+    "maxTargets": "Max targets (area)",
+    "maxLevel": "Max spell level",
+    "attackKinds": "On attacks",
+    "bonusPercent": "Damage bonus, %",
+    "jumps": "Jumps",
+    "value": "Minimum (−3…3)",
+    "size": "Cone, ft",
+    "abilities": "Abilities",
+    "vsTags": "Only against these sources",
+    "vsCreatureTypes": "Only against creature types",
+    "vsSpells": "Only against spells",
+    "whileTempHp": "Only while temp HP remain",
+    "upcastDamage": "Damage per slot level above base",
+    "upcastAmount": "Temp HP per slot level above base",
+    "skills": "Skills",
+    "kinds": "Proficiency",
+    "conditions": "Conditions",
+    "phase": "Phase",
+    "role": "Role",
+    "whose": "Whose role",
+    "result": "Result",
+    "who": "Who",
+    "kind": "Type",
+    "types": "Creature types",
+    "races": "Races",
+    "traits": "Weapon traits",
+    "free": "Free (no action cost)",
+    "unlessDamagedBy": "Blocked if damaged by (types)",
+    "temp": "Gives temporary HP",
+    "bySelf": "Only my mark",
+    "categories": "Categories",
+    "shield": "Shield",
+    "byDistance": "Dice by distance (feet:dice, spells only)",
+    "delayIfBeyond": {
+      "feet": "Delay the hit if the target is farther than (feet, spells only)",
+      "perRoundFeet": "…flies per round (feet)"
+    },
+    "linkedToCondition": "Ends with this spell's condition",
+    "escapeDc": "\"Escape\" against the spell DC (for grapples)",
+    "onlyIfAffected": "Only if at least one spell target is affected (for self)"
+  },
+  "flags": {
+    "sense": {
+      "label": "Sense"
+    },
+    "advantage": {
+      "label": "Advantage",
+      "fields": {
+        "attackKind": "Attacks"
+      },
+      "options": {
+        "attackKind": {
+          "melee": "melee",
+          "ranged": "ranged"
+        }
+      }
+    },
+    "disadvantage": {
+      "label": "Disadvantage on own attacks"
+    },
+    "disadvantageForAttackers": {
+      "label": "Disadvantage for attackers"
+    },
+    "advantageForAttackers": {
+      "label": "Advantage for attackers"
+    },
+    "guaranteedHit": {
+      "label": "Guaranteed hit"
+    },
+    "resistance": {
+      "label": "Damage resistance / immunity",
+      "fields": {
+        "percent": "%, 100 = immunity, negative = vulnerability",
+        "attackKind": "Only against attacks",
+        "damageType": "Damage type (all, physical, spell, fire…)",
+        "school": "Only from spells of the school"
+      },
+      "options": {
+        "attackKind": {
+          "melee": "melee",
+          "ranged": "ranged"
+        }
+      }
+    },
+    "spellAbsorb": {
+      "label": "Spell damage absorption",
+      "fields": {
+        "percent": "% of damage healed",
+        "school": "Spell school"
+      }
+    },
+    "castSpellOnHit": {
+      "label": "Spell on hit",
+      "fields": {
+        "attackKind": "Only attacks"
+      },
+      "options": {
+        "attackKind": {
+          "melee": "melee",
+          "ranged": "ranged"
+        }
+      }
+    },
+    "spellImmunity": {
+      "label": "Spell immunity",
+      "fields": {
+        "spellIds": "Spells (empty = all)"
+      }
+    },
+    "spellTargeting": {
+      "label": "Spell targeting mode",
+      "fields": {
+        "spellIds": "Spell"
+      }
+    },
+    "counterAttack": {
+      "label": "Counterattack"
+    },
+    "thorns": {
+      "label": "Thorns",
+      "fields": {
+        "damage": "Damage",
+        "damageType": "Damage type"
+      }
+    },
+    "attackHitsAllEnemies": {
+      "label": "Attack hits all enemies"
+    },
+    "seeEnemyHp": {
+      "label": "Sees enemy HP"
+    },
+    "multiTargetFalloff": {
+      "label": "Ranged attack extra-target damage",
+      "fields": {
+        "percent": "% damage to extra targets"
+      }
+    },
+    "chainShot": {
+      "label": "Chain shot",
+      "fields": {
+        "percent": "% of previous damage"
+      }
+    },
+    "lifesteal": {
+      "label": "Vampirism (healing from attack damage)",
+      "fields": {
+        "percent": "% of damage dealt"
+      }
+    },
+    "moraleChance": {
+      "label": "Extra turn chance from morale",
+      "fields": {
+        "percent": "+% extra turn chance"
+      }
+    },
+    "noRetaliation": {
+      "label": "No retaliation"
+    },
+    "strikeAndReturn": {
+      "label": "Hit and return"
+    },
+    "unlimitedRetaliation": {
+      "label": "Unlimited retaliation"
+    },
+    "extraRetaliations": {
+      "label": "Extra retaliations per round",
+      "fields": {
+        "count": "Extra retaliations"
+      }
+    },
+    "noNegativeMorale": {
+      "label": "Morale not below 0"
+    },
+    "ignoreMorale": {
+      "label": "Morale has no effect"
+    },
+    "minMorale": {
+      "label": "Minimum morale"
+    },
+    "extraSummons": {
+      "label": "Extra summoned creatures",
+      "fields": {
+        "count": "Extra creatures",
+        "spellIds": "Spells (empty = all summoning spells)"
+      }
+    },
+    "piercingShot": {
+      "label": "Piercing shot"
+    },
+    "fireWave": {
+      "label": "Fire wave",
+      "fields": {
+        "percent": "% of hit damage"
+      }
+    },
+    "banishSummons": {
+      "label": "Banish enemy summons",
+      "fields": {
+        "percent": "% HP lost"
+      }
+    },
+    "saveAdvantage": {
+      "label": "Advantage on saving throws"
+    },
+    "saveDisadvantage": {
+      "label": "Disadvantage on saving throws"
+    },
+    "autoFailSave": {
+      "label": "Auto-fail saving throws"
+    },
+    "saveProficiency": {
+      "label": "Saving throw proficiency"
+    },
+    "checkAdvantage": {
+      "label": "Advantage on checks"
+    },
+    "checkDisadvantage": {
+      "label": "Disadvantage on checks"
+    },
+    "skillProficiency": {
+      "label": "Skill proficiency"
+    },
+    "skillExpertise": {
+      "label": "Skill expertise"
+    },
+    "proficiency": {
+      "label": "Armor and weapon proficiency"
+    },
+    "autoCritAdjacent": {
+      "label": "Crits from neighbors"
+    },
+    "twoWeaponFighting": {
+      "label": "Two-weapon fighting"
+    },
+    "critImmunity": {
+      "label": "Crit immunity"
+    },
+    "noSpellcasting": {
+      "label": "Cannot cast spells"
+    },
+    "passesWalls": {
+      "label": "Passes through walls"
+    },
+    "ignoreDifficultTerrain": {
+      "label": "Ignores difficult terrain"
+    },
+    "cunningAction": {
+      "label": "Cunning Action"
+    },
+    "evasion": {
+      "label": "Evasion"
+    },
+    "proneDefense": {
+      "label": "Protection of the downed"
+    },
+    "conditionImmunity": {
+      "label": "Condition immunity",
+      "fields": {
+        "conditions": "Conditions"
+      }
+    },
+    "damageThreshold": {
+      "label": "Damage threshold",
+      "fields": {
+        "value": "Damage below the threshold (1-100) becomes 0"
+      }
+    }
+  },
+  "optionGroups": {
+    "conditionsStandard": "5e conditions",
+    "mechanicalConditions": "Mechanical conditions"
+  },
+  "templates": {
+    "stats": {
+      "label": "Passive stat bonus",
+      "hint": "+Strength, +AC, +HP… always",
+      "defaultName": "Stat bonus",
+      "params": {
+        "stat": "Stat",
+        "value": "Bonus"
+      }
+    },
+    "damage": {
+      "label": "Damage bonus",
+      "hint": "+% / +number to melee, ranged, magic (school)",
+      "defaultName": "Damage bonus",
+      "params": {
+        "filter": "Damage kind",
+        "percent": "Bonus, %"
+      }
+    },
+    "onHit": {
+      "label": "Effect on hit",
+      "hint": "DOT, debuff, condition on the target",
+      "defaultName": "Bleeding",
+      "params": {
+        "dice": "Damage per round",
+        "damageType": "Damage type",
+        "rounds": "Rounds"
+      }
+    },
+    "resistance": {
+      "label": "Resistance / immunity",
+      "hint": "physical, magical, elemental, spells",
+      "defaultName": "Resistance",
+      "params": {
+        "damageType": "Damage type",
+        "percent": "Resistance, %"
+      }
+    },
+    "aura": {
+      "label": "Aura",
+      "hint": "bonus to all allies / penalty to enemies",
+      "defaultName": "Aura",
+      "params": {
+        "value": "Armor bonus"
+      }
+    },
+    "survive": {
+      "label": "Once per battle: survive with 1 HP",
+      "hint": "lethal damage → 1 HP",
+      "defaultName": "Undying",
+      "params": {}
+    },
+    "bonusAction": {
+      "label": "Bonus action",
+      "hint": "player button: healing, morale, slot…",
+      "defaultName": "Second Wind",
+      "params": {
+        "dice": "Healing"
+      }
+    },
+    "spellSlots": {
+      "label": "Spell slots",
+      "hint": "+N slots of a level",
+      "defaultName": "Slots",
+      "params": {
+        "level": "Slot level",
+        "count": "Slots"
+      }
+    },
+    "custom": {
+      "defaultName": "New ability",
+      "note": "Describe the ability"
+    },
+    "damageSpell": {
+      "label": "Damage",
+      "hint": "Deals damage of a chosen type",
+      "defaultName": "Strike",
+      "params": {
+        "dice": "Damage",
+        "damageType": "Damage type"
+      }
+    },
+    "healSpell": {
+      "label": "Healing",
+      "hint": "Restores hit points",
+      "defaultName": "Healing",
+      "params": {
+        "dice": "Healing"
+      }
+    },
+    "dotSpell": {
+      "label": "Damage over time",
+      "hint": "Damage every round",
+      "defaultName": "Poison",
+      "params": {
+        "dice": "Damage per round",
+        "damageType": "Damage type",
+        "rounds": "Rounds"
+      }
+    },
+    "hotSpell": {
+      "label": "Healing over time",
+      "hint": "Healing every round",
+      "defaultName": "Regeneration",
+      "params": {
+        "dice": "Healing per round",
+        "rounds": "Rounds"
+      }
+    },
+    "condition": {
+      "label": "Condition",
+      "hint": "Stun, fear, restrain and more",
+      "defaultName": "Disabling",
+      "params": {
+        "condition": "Condition",
+        "rounds": "Rounds"
+      }
+    },
+    "pushBack": {
+      "label": "Push back",
+      "hint": "Pushes the target away from the caster",
+      "defaultName": "Shove",
+      "params": {
+        "feet": "Distance, ft"
+      }
+    },
+    "buffArmor": {
+      "label": "Armor buff",
+      "hint": "Temporary armor bonus",
+      "defaultName": "Shield",
+      "params": {
+        "value": "Armor bonus",
+        "rounds": "Rounds"
+      }
+    },
+    "cleanse": {
+      "label": "Cleanse",
+      "hint": "Removes negative effects",
+      "defaultName": "Cleansing",
+      "params": {}
+    },
+    "morale": {
+      "label": "Morale",
+      "hint": "Raises or lowers morale",
+      "defaultName": "Inspiration",
+      "params": {
+        "delta": "Morale change"
+      }
+    },
+    "concentrationBuff": {
+      "label": "Concentration buff",
+      "hint": "Armor bonus while concentrating",
+      "defaultName": "Warding",
+      "params": {
+        "value": "Armor bonus",
+        "rounds": "Rounds"
+      }
+    },
+    "categories": {
+      "defense": "Defense",
+      "offense": "Offense",
+      "support": "Support",
+      "resource": "Resources",
+      "control": "Control",
+      "traits": "Traits"
+    }
+  },
+  "triggerGroups": {
+    "always": "Always",
+    "boundaries": "Start and end",
+    "myTurn": "My turn",
+    "incoming": "Attacks on me",
+    "outgoing": "My actions",
+    "other": "Other"
+  }
+}

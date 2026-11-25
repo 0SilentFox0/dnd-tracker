@@ -29,7 +29,7 @@ export function FlagEditor({
 }) {
     const t = useTranslations('abilities.fields');
 
-    const tr = useTranslator('abilityRegistry');
+    const tr = useTranslator('abilityEditor');
 
     const { flags } = useAbilityComposition(useAbilityEditor().campaignId);
 

@@ -38,7 +38,7 @@ describe('RaceFormFields', () => {
             screen.getByRole('button', { name: 'abilities.chips.add' })
         );
         fireEvent.click(
-            screen.getByText('abilityRegistry.templates.resistance.label')
+            screen.getByText('abilityEditor.templates.resistance.label')
         );
         fireEvent.click(
             screen.getByRole('button', { name: 'abilities.templates.create' })

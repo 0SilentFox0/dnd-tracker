@@ -38,6 +38,7 @@ describe('LimitsSection (en)', () => {
                     'validation',
                     'abilities',
                     'abilityRegistry',
+                    'abilityEditor',
                 ],
             }
         );

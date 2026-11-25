@@ -38,6 +38,7 @@ async function renderEn(effect: Effect) {
                 'validation',
                 'abilities',
                 'abilityRegistry',
+                    'abilityEditor',
             ],
         }
     );

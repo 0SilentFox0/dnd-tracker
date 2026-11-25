@@ -33,8 +33,10 @@ export function TriggerSection({
 
     const tr = useTranslator('abilityRegistry');
 
+    const te = useTranslator('abilityEditor');
+
     const groups = TRIGGER_GROUPS.map((group) => ({
-        label: tr(`triggerGroups.${group}`),
+        label: te(`triggerGroups.${group}`),
         options: TRIGGERS_BY_GROUP[group].map((event) => ({
             value: event,
             label: tr(`triggers.${event}.label`),
