@@ -127,7 +127,7 @@ html[data-palette="parchment"] [class*="border-white/"]:is([class*="bg-black/"])
 
 :root { --fog-shadow: #2b3347; --fog-light: #a8b3cf; --fog-flat: #14121a; }
 html[data-palette="parchment"] { --fog-shadow: #5d4c38; --fog-light: #d9ccb0; --fog-flat: #4a3b2a; }
-html[data-palette="parchment"],
+html[data-palette="parchment"] {
   --path-label-ink: #101820;
   --path-label-halo: #f6f1e4;
 }
