@@ -124,12 +124,11 @@ html[data-palette] body,
 }
 
 .hud-range { appearance: none; width: 100%; height: 1.5rem; background: transparent; cursor: pointer; }
-.hud-range::-webkit-slider-runnable-track { height: 6px; border-radius: 9999px; background: linear-gradient(90deg, var(--m2, var(--hud-crimson)) var(--fill, 0%), var(--hud-rule, #3a2e22) var(--fill, 0%)); border: 1px solid var(--palette-card, #1a140f); }
-.hud-range::-moz-range-track { height: 6px; border-radius: 9999px; background: var(--hud-rule, #3a2e22); border: 1px solid var(--palette-card, #1a140f); }
+.hud-range::-webkit-slider-runnable-track { height: 6px; border-radius: 9999px; background: linear-gradient(90deg, var(--m2, var(--hud-crimson)) var(--fill, 0%), var(--palette-inset) var(--fill, 0%)); border: 1px solid var(--hud-line); }
+.hud-range::-moz-range-track { height: 6px; border-radius: 9999px; background: var(--palette-inset); border: 1px solid var(--hud-line); }
 .hud-range::-moz-range-progress { height: 6px; border-radius: 9999px; background: var(--m2, var(--hud-crimson)); }
-.hud-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 9999px; background: var(--hud-crimson); border: 2px solid var(--hud-crimson-ink); box-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
-.hud-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 9999px; background: var(--hud-crimson); border: 2px solid var(--hud-crimson-ink); }
-.hud-range:focus-visible { outline: 2px solid var(--hud-crimson-fg); outline-offset: 2px; border-radius: 9999px; }
+.hud-range::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; margin-top: -8px; border-radius: 9999px; background: var(--palette-panel-2); border: 1px solid var(--hud-line); box-shadow: var(--hud-sh-btn); }
+.hud-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 9999px; background: var(--palette-panel-2); border: 1px solid var(--hud-line); box-shadow: var(--hud-sh-btn); }
 
 .game-shell-mobile-actions [data-slot="header-pill-link"] {
   width: 44px;
