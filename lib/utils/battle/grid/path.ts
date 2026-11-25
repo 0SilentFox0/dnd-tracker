@@ -13,6 +13,7 @@ import {
     gridOf,
     neighbors,
 } from './geometry';
+import { hexCenter } from './hex';
 import { cellCenter } from './layout';
 import {
     cellsOf,
@@ -64,6 +65,7 @@ export function remainingMovement(
 export interface PathSearch {
     cost: Map<string, number>;
     parent: Map<string, GridPoint>;
+    preds?: Map<string, GridPoint[]>;
 }
 
 export function reachable(
@@ -76,14 +78,103 @@ export function reachable(
     return searchPaths(map, participants, mover, budget, opts).cost;
 }
 
+interface Route {
+    through: number;
+    deviation: number;
+    prev: GridPoint | null;
+}
+
+// Hex steps are all the same length, so among the equal-cost routes (the `preds` DAG) pick the one
+// that passes through the fewest occupied cells, then stays closest to the straight segment.
+function straightestHexPath(
+    { cost, preds }: Required<PathSearch>,
+    start: GridPoint,
+    to: GridPoint
+): GridPoint[] {
+    const a = hexCenter(start);
+
+    const b = hexCenter(to);
+
+    const dx = b.x - a.x;
+
+    const dy = b.y - a.y;
+
+    const span = Math.hypot(dx, dy) || 1;
+
+    const offLine = (c: GridPoint) => {
+        const p = hexCenter(c);
+
+        return Math.abs(dx * (a.y - p.y) - (a.x - p.x) * dy) / span;
+    };
+
+    const startKey = cellKey(start);
+
+    const memo = new Map<string, Route>([
+        [startKey, { through: 0, deviation: 0, prev: null }],
+    ]);
+
+    const best = (cell: GridPoint): Route => {
+        const key = cellKey(cell);
+
+        const known = memo.get(key);
+
+        if (known) return known;
+
+        const own = cost.has(key) ? 0 : 1;
+
+        const d = offLine(cell);
+
+        let route: Route | null = null;
+
+        for (const p of preds.get(key) ?? []) {
+            const sub = best(p);
+
+            const through = sub.through + own;
+
+            const deviation = Math.max(sub.deviation, d);
+
+            if (
+                !route ||
+                through < route.through ||
+                (through === route.through &&
+                    deviation < route.deviation - 1e-6)
+            )
+                route = { through, deviation, prev: p };
+        }
+
+        const result = route ?? { through: 0, deviation: d, prev: null };
+
+        memo.set(key, result);
+
+        return result;
+    };
+
+    best(to);
+
+    const path: GridPoint[] = [];
+
+    for (
+        let cur: GridPoint | null = to;
+        cur && cellKey(cur) !== startKey;
+        cur = memo.get(cellKey(cur))?.prev ?? null
+    )
+        path.unshift(cur);
+
+    return path;
+}
+
 export function pathFrom(
-    { cost, parent }: PathSearch,
+    search: PathSearch,
     mover: BattleParticipant,
     to: GridPoint
 ): GridPoint[] | null {
+    const { cost, parent, preds } = search;
+
     const start = mover.battleData.position;
 
     if (!start || !cost.has(cellKey(to))) return null;
+
+    if (preds) return straightestHexPath({ cost, parent, preds }, start, to);
 
     const path: GridPoint[] = [];
 
@@ -121,6 +212,8 @@ export function searchPaths(
     if (!start) return { cost: result, parent };
 
     const grid = gridOf(map);
+
+    const preds = grid === 'hex' ? new Map<string, GridPoint[]>() : undefined;
 
     const size = footprintSizeOf(mover, grid);
 
@@ -204,18 +297,19 @@ export function searchPaths(
                 const knownThrough = through.get(key) ?? Infinity;
 
                 if (
-                    known === nextCost &&
-                    (nextThrough > knownThrough ||
-                        (nextThrough === knownThrough &&
-                            nextLength >=
-                                (length.get(key) ?? Infinity) - 1e-6))
-                )
-                    continue;
-
-                if (
                     stepBlocked(cur, next) ||
                     !fits(map, next, size, walls) ||
                     touchesAvoid(next)
+                )
+                    continue;
+
+                if (known === nextCost) preds?.get(key)?.push(cur);
+
+                if (
+                    known === nextCost &&
+                    (nextThrough > knownThrough ||
+                        (nextThrough === knownThrough &&
+                            nextLength >= (length.get(key) ?? Infinity) - 1e-6))
                 )
                     continue;
 
@@ -223,6 +317,8 @@ export function searchPaths(
                 length.set(key, nextLength);
                 through.set(key, nextThrough);
                 parent.set(key, cur);
+
+                if (known !== nextCost) preds?.set(key, [cur]);
 
                 if (known === undefined) (buckets[nextCost] ??= []).push(next);
 
@@ -232,11 +328,13 @@ export function searchPaths(
         }
     }
 
-    return { cost: result, parent };
+    return { cost: result, parent, preds };
 }
 
 export function moveBudget(
-    { rules }: { map: BattleMapConfig; dmUserId: string | null; rules: Ruleset },
+    {
+        rules,
+    }: { map: BattleMapConfig; dmUserId: string | null; rules: Ruleset },
     p: BattleParticipant
 ): number {
     return remainingMovement(p, rules);
@@ -264,10 +362,6 @@ export function frightenedBlocksMove(
             isActive(p) &&
             isOnMap(p) &&
             footprintDistance(destination, cellsOf(p, grid), grid) <
-                footprintDistance(
-                    cellsOf(mover, grid),
-                    cellsOf(p, grid),
-                    grid
-                )
+                footprintDistance(cellsOf(mover, grid), cellsOf(p, grid), grid)
     );
 }
