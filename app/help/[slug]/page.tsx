@@ -37,7 +37,7 @@ export default async function HelpArticlePage({
                 actions={
                     <Link
                         href="/help"
-                        className="self-center text-sm text-hud-gold hover:underline"
+                        className="self-center text-sm text-hud-crimson-fg hover:underline"
                     >
                         {ui('ui.allHelp')}
                     </Link>

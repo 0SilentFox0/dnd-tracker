@@ -20,7 +20,7 @@ export function CategoryChip({
             className={cn(
                 'inline-flex cursor-pointer items-center rounded-full border px-3 py-1 text-sm transition-colors has-[:focus-visible]:ring-2',
                 checked
-                    ? 'border-hud-gold bg-hud-panel-2 text-hud-ink'
+                    ? 'border-hud-crimson bg-hud-panel-2 text-hud-ink'
                     : 'border-hud-rule text-hud-muted hover:border-hud-muted',
                 disabled && 'cursor-not-allowed opacity-50'
             )}

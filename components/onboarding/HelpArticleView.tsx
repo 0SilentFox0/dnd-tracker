@@ -27,7 +27,7 @@ function Block({
     return (
         <Link
             href={block.href}
-            className="inline-block text-hud-gold hover:underline"
+            className="inline-block text-hud-crimson-fg hover:underline"
         >
             {t(base)}
         </Link>
@@ -48,7 +48,7 @@ export function HelpArticleView({
 
                 return (
                     <section key={i} className="space-y-2">
-                        <h2 className="hud-sc text-base text-hud-gold">
+                        <h2 className="hud-sc text-base text-hud-ink">
                             {t(`${base}.heading`)}
                         </h2>
                         {section.blocks.map((block, j) => (

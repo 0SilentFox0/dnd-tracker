@@ -24,7 +24,7 @@ export function DemoTourMenu() {
         >
             <div className="mb-2 flex items-start gap-2">
                 <Compass
-                    className="mt-0.5 size-4 shrink-0 text-hud-gold"
+                    className="mt-0.5 size-4 shrink-0 text-hud-muted"
                     aria-hidden
                 />
                 <div>

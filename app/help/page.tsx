@@ -28,7 +28,7 @@ export default async function HelpPage() {
             />
             {GROUPS.map((g) => (
                 <HudPanel key={g.audience}>
-                    <h2 className="hud-sc mb-2 text-hud-gold">
+                    <h2 className="hud-sc mb-2 text-hud-ink">
                         {ui(g.titleKey)}
                     </h2>
                     <ul className="space-y-3">
@@ -53,7 +53,7 @@ export default async function HelpPage() {
                 </HudPanel>
             ))}
             <HudPanel>
-                <h2 className="hud-sc mb-2 text-hud-gold">
+                <h2 className="hud-sc mb-2 text-hud-ink">
                     {ui('ui.hintsHeading')}
                 </h2>
                 <HelpSettings />

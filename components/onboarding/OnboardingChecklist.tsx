@@ -25,7 +25,7 @@ function StepRow({ step, role }: { step: StepStatus; role: OnboardingRole }) {
             <Icon
                 className={cn(
                     'mt-0.5 size-4 shrink-0',
-                    step.done ? 'text-hud-gold' : 'text-hud-muted'
+                    step.done ? 'text-hud-crimson-fg' : 'text-hud-muted'
                 )}
                 aria-hidden
             />
@@ -73,7 +73,7 @@ export function OnboardingChecklist({ campaignId }: { campaignId: string }) {
         return (
             <HudPanel className="flex items-center justify-between gap-2 text-sm">
                 <span className="text-hud-muted">{t('ui.firstStepsDone')}</span>
-                <Link href="/help" className="text-hud-gold hover:underline">
+                <Link href="/help" className="text-hud-crimson-fg hover:underline">
                     {t('ui.help')}
                 </Link>
             </HudPanel>

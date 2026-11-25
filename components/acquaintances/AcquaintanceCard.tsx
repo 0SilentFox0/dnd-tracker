@@ -92,7 +92,7 @@ export function AcquaintanceCard({
                     <ul className="space-y-1 border-t border-hud-rule pt-2 text-sm">
                         {others.map((n) => (
                             <li key={n.id}>
-                                <span className="font-semibold text-hud-gold">
+                                <span className="font-semibold text-hud-ink">
                                     {n.authorName}
                                 </span>
                                 <p className="whitespace-pre-wrap">{n.text}</p>

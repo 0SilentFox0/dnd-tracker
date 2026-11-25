@@ -39,7 +39,7 @@ export function OnboardingHint({
             )}
         >
             <Lightbulb
-                className="mt-0.5 size-4 shrink-0 text-hud-gold"
+                className="mt-0.5 size-4 shrink-0 text-hud-muted"
                 aria-hidden
             />
             <div className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ export function OnboardingHint({
                 {hint.helpSlug && (
                     <Link
                         href={`/help/${hint.helpSlug}`}
-                        className="text-hud-gold hover:underline"
+                        className="text-hud-crimson-fg hover:underline"
                     >
                         {t('ui.learnMore')}
                     </Link>

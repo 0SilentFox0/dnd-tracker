@@ -181,7 +181,7 @@ export function CompendiumReport({
             <Disclosure
                 defaultOpen
                 summary={
-                    <span className="text-hud-gold">{t('report.sources')}</span>
+                    <span className="text-hud-ink">{t('report.sources')}</span>
                 }
             >
                 <ul className="text-hud-muted">

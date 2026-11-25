@@ -85,7 +85,7 @@ export function SpellCard({
             className="flex h-full flex-col gap-2"
         >
             <div className="flex items-start gap-3">
-                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-gold)]">
+                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-crimson)]">
                     <ZoomableEntityIcon
                         src={spell.icon}
                         name={spell.name}

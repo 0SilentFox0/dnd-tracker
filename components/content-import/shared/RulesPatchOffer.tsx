@@ -18,7 +18,7 @@ export function RulesPatchOffer({
     if (!patch) return null;
 
     return (
-        <div className="space-y-1 rounded-lg border border-hud-gold p-3 text-sm">
+        <div className="space-y-1 rounded-lg border border-hud-crimson p-3 text-sm">
             {'classes' in patch && <p>{t('rulesOffer.text')}</p>}
             {'conditions' in patch && <p>{t('rulesOffer.conditions')}</p>}
             <label className="flex items-start gap-2">

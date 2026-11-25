@@ -44,7 +44,7 @@ export function CompendiumMaterials({
                         key={`${block.kind}:${block.index}`}
                         className="rounded-lg border border-hud-rule p-2 text-sm"
                         summary={
-                            <span className="text-hud-gold">
+                            <span className="text-hud-ink">
                                 {t('materials.summary', {
                                     title: block.title,
                                     chosen,
