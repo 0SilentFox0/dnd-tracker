@@ -77,3 +77,33 @@ Phone FPS (мітигація: маска 1–4 px/клітинку, canvas scal
 
 ## Що не чіпаємо
 Правила, руховий бюджет, `runBattleMutation`/`snapshotHash`/`advanceTurn`, дельти, видимість і серверні маски, Walls/Doors/Tiles на square, умови за rule system, арт.
+
+## Поправки після Opus-рев'ю (мають пріоритет над текстом вище)
+
+**Структура:** Ч7 ділиться на три незалежні під-частини з окремими живими прогонами: **7a-reach** (новий вигляд дальності + шлях, лише square, без гекса), **7b fog**, **7c hex** (останнім, найризикованіше). 7a-reach і 7b не залежать від hex.
+
+**7a-reach:**
+- `PathSearch` у `deriveMapScene` немає: `moveMarks → reachable()` повертає лише `.cost` (`path.ts:70`, `map-view.ts:25`). Ланцюг `moveMarks/moveSteps/openMoveZone` повертає й search. У maze (`modeMoveZone`) превʼю шляху немає. Для size>1 hover → `steps.get(key).anchor` перед `pathFrom` (як `map-scene.ts:620`). Тест порівнює з серверним `searchPaths` у `move-mutation.ts:126` з тим самим `moveBudget` (з DM cap).
+- Одиниці: не «метри», а `distanceOf(rules)` (`cell-feet.ts`: `perCell` + `ft|yd`).
+- Touch: тап по клітинці руху рухає одразу (`map-click.ts:36`), long-press хука немає. v1: превʼю шляху лише при hover (desktop); touch лише контур і заливка (питання власнику: чи робити двотап-підтвердження).
+- Fade: зони перемонтуються, тому `@keyframes` + reduced-motion override, а не transition.
+- «Діагональ лише square» прибрано: `searchPaths` не має діагональної вартості.
+
+**7b fog:**
+- Maze не може бути canvas-сиблінгом: `MazeFogOfWar` рендериться в `<svg>` через слот `MapModeUi.MapLayers` (`maze/ui.tsx:52`) між Features і PartyVision/Walls; зовнішній canvas зламає z-order. Рішення: лишити SVG-маску і додати під маскою хмарний `<image>`/pattern (canvas-текстура → dataURL один раз), без зміни контракту режимів.
+- Спільне ядро (текстура/рух/маска) живе в `lib/utils/canvas/fog/` (поруч з `ticker`), не в `components/battle`; `components/world` і battle імпортують звідти.
+- WebGL: `dispose()` викликає `loseContext`; спільний контекст = refcount (карта монтується двічі phone+desktop). Шейдер має темні кольори хардкодом: `--fog-*` для parchment/frost передаємо uniform-ами з computed style.
+- Розмір canvas: рендерити лише `gridWindow` (як `TileCanvas`), dpr ≤1.5, а не всю карту.
+- `MapFogLayer` вже на 7 props (бюджет `props-budget`): нові дані через існуючий обʼєкт/контекст, не новий prop.
+- B3 звужено: світ лише переходить на спільні текстуру/рух, `ticker` і `useFogQuality`; mask-код `WorldFog` (crop/zoom, shapes) і тести лишаються.
+
+**7c hex (окремий під-пакет, окремий live run):**
+- Helpers, що мають `map`, виводять `gridOf(map)` всередині (searchPaths, fits, canStand, lineOfFire, templateCells, adjacency); map-less (`occupancy.ts:52 isAdjacent`, `cellsOf`, `footprint`) отримують явний параметр; умови здібностей беруть `adjacencyOf(map)`. `adjacency.ts:17` і `map-view.ts:48` мають inline Chebyshev, переводимо на helper. Odd-q (1,1)↔(0,0): Chebyshev 1, hex 2, тому fallback «square» неприпустимий.
+- Повний перелік call sites (≈45 файлів поза grid/): `spell/*` (targeting, burst, effects, extension, move-self, move-summon, anchored-zone, zone-hazard, zone-triggers, auto-reaction), `attack/process/{chain,fire-wave,piercing,cleave}`, `attack/bonus-math.ts`, `counter/eligibility`, `abilities/engine/effects/map-auras`, `abilities/registry/conditions.ts`, `summon/*`, `maneuvers/{dive,squall,fire-burst}`, `systems/opportunity/rules`, `systems/wfrp/rules/{combat/range-band,combat/engagement,magic/dispel-range,traits/frenzy}`, `systems/wfrp/server/battle/movement-mutation.ts`. Напрямки: `push.ts awayStep` і `fire-wave.ts` (`Math.sign`) → cube `hexAwayStep`; cone `template.ts:127` → 60° клин; sphere → hex disk. Семантику описати в `battle.md`.
+- Ratchet-тест покриває весь `lib/utils/battle`, `lib/utils/abilities`, `lib/server/battles`, `systems/*/{rules,server}`, а не «перелічені файли».
+- Великі токени: v1 лишаємо size² offset-footprint усюди (сервер і клієнт узгоджено) і малюємо чесно; НЕ «1 клітинка» (інакше occupancy/path розходяться з малюнком). Питання власнику.
+- Layout: `gridMetrics(grid)` (`colStep,rowStep,size,cellRect`) + ratchet проти сирого `* UNIT` поза `layout.ts`. Додатково: `useGridWindow.ts:57`, `camera/follow.ts:13`, `useBattleMapFrame.ts:66,80`, `MapStage.tsx:122-218`, `MapBackground/backgroundBox`, `calibration.ts`, `useMapGridSizing.ts`, `RangedHint`, `MapToken/MapTokenHud/MapHitFloat`, `useStrokePaint`, `components/fx/runtime/anchors.ts` (+`data-grid`).
+- Заборона перетину: Zod refine `gridType:'hex'` ⇒ без `maze`, `walls`, `bars`, `doors`, tiles; зміна `gridType` після створення/посеред бою заборонена (або стрипає поля). Maze-сумісність через capability реєстру режиму (`grids: GridKind[]`), без `=== 'maze'` у ядрі.
+- Fog на hex: маска grid-aware (hex полігони); серверний shadowcast лишається square-octant, видимість на hex у v1 = square-LOS (документувати).
+- DOM-інваріант (`map-modes.md:78`): hex `regionFillPath` = один `<path>` з підшляхами, `regionOutlinePath` скасовує внутрішні ребра (без поклітинних polygon і внутрішнього пунктиру).
+- i18n: ключі для підпису вартості шляху і підказок «недоступно на гекс-карті» (uk/en).
