@@ -27,7 +27,7 @@ import { safeParseRules } from '@/lib/utils/rules/schema';
 import { systemKeyOf } from '@/lib/utils/rules/systems';
 
 const COVER_CARD =
-    'relative overflow-hidden !p-0 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-hud-line after:transition-colors hover:after:border-hud-gold focus-visible:after:border-hud-gold data-[tone=active]:after:border-hud-line';
+    'relative overflow-hidden !p-0 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-hud-line after:transition-colors hover:after:border-hud-muted  data-[tone=active]:after:border-hud-line';
 
 export default async function CampaignsPage({
     searchParams,
@@ -188,7 +188,7 @@ export default async function CampaignsPage({
                             error={new Error(t('page.dbError.message'))}
                         />
                         <div className="rounded-lg bg-hud-field p-4">
-                            <p className="mb-2 text-sm font-semibold text-hud-gold">
+                            <p className="mb-2 text-sm font-semibold text-hud-ink">
                                 {t('page.dbError.fixTitle')}
                             </p>
                             <ol className="list-inside list-decimal space-y-1 text-sm text-hud-bone">
@@ -210,7 +210,7 @@ export default async function CampaignsPage({
         <HudPage className="hud-wide">
             <header className="mb-5 flex flex-col gap-4 border-b border-hud-line pt-1 pb-4 sm:mb-6 sm:pb-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-hud-line bg-hud-panel text-hud-gold sm:size-12">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-hud-line bg-hud-panel text-hud-muted sm:size-12">
                         <Compass aria-hidden className="size-5 sm:size-6" />
                     </span>
                     <h1 className="hud-sc text-3xl leading-tight text-hud-ink sm:text-4xl">
@@ -305,7 +305,7 @@ export default async function CampaignsPage({
                                             {campaign.name}
                                         </h2>
                                         {isDM && (
-                                            <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[var(--palette-primary-foreground,#2a1d05)]">
+                                            <span className="shrink-0 rounded-full bg-hud-crimson px-2 text-[13px] text-hud-crimson-ink">
                                                 {t('roles.dm')}
                                             </span>
                                         )}
@@ -339,7 +339,7 @@ export default async function CampaignsPage({
                                             </p>
                                         )}
                                     </div>
-                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded border border-hud-gold bg-hud-field px-4 text-sm font-medium text-hud-gold">
+                                    <span className="mt-auto flex min-h-11 items-center justify-center rounded border border-hud-crimson bg-hud-field px-4 text-sm font-medium text-hud-ink">
                                         {t('card.continue')}
                                     </span>
                                 </div>
@@ -349,7 +349,7 @@ export default async function CampaignsPage({
                 })}
                 <Link
                     href="/campaigns/new"
-                    className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-hud-gold hover:border-hud-muted"
+                    className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-hud-ink hover:border-hud-muted"
                 >
                     <Plus className="size-6" aria-hidden />
                     {t('page.new')}
