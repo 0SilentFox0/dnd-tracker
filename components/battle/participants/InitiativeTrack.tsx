@@ -10,6 +10,20 @@ import { useFlip, useReducedMotion } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 import { arcStyle, queueKeys } from '@/lib/utils/battle/view';
 
+const roundDividerShift = (
+    queue: { kind: string }[],
+    i: number,
+    current: number
+) => {
+    const [lo, hi] = i > current ? [current, i] : [i, current];
+
+    const dividers = queue
+        .slice(lo, hi)
+        .filter((e) => e.kind === 'round').length;
+
+    return i > current ? dividers : -dividers;
+};
+
 const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack({
@@ -59,7 +73,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
         <div
             ref={track}
             data-tour="battle.initiative"
-            className="relative flex h-[76px] items-end justify-start gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] *:first:ml-auto *:last:mr-auto"
+            className="pointer-events-none relative flex h-[76px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-1 *:pointer-events-auto [scrollbar-width:none] *:first:ml-auto *:last:mr-auto"
         >
             {queue.map((e, i) => {
                 if (e.kind === 'round')
@@ -75,7 +89,12 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         </span>
                     );
 
-                const d = currentIndex < 0 ? 0 : i - currentIndex;
+                const d =
+                    currentIndex < 0
+                        ? 0
+                        : i -
+                          currentIndex -
+                          roundDividerShift(queue, i, currentIndex);
 
                 const arc = arcStyle(d);
 

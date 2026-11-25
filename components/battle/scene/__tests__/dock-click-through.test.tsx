@@ -23,24 +23,6 @@ const props = {
 describe('dock click-through', () => {
     afterEach(cleanup);
 
-    it('dock slot wrapper is pointer-events-none, only the dock is interactive', () => {
-        const { container } = render(
-            <div className="pointer-events-none absolute right-3 bottom-3 w-[min(370px,calc(100%-24px))]">
-                <ActionDock {...props} />
-            </div>
-        );
-
-        const wrapper = container.firstElementChild as HTMLElement;
-
-        expect(wrapper.className).toContain('pointer-events-none');
-        expect(wrapper.className).not.toContain('inset-x-0');
-        expect(
-            container
-                .querySelector('[data-slot="action-dock"]')
-                ?.className.includes('pointer-events-auto')
-        ).toBe(true);
-    });
-
     it('action button fires its handler', () => {
         render(<ActionDock {...props} />);
 

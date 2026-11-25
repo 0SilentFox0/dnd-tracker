@@ -97,8 +97,10 @@ function FloatingPanel({
             hidden={!open}
             className={cn(
                 HUD_GLASS,
-                'absolute top-20 bottom-28 z-40 flex w-[min(260px,calc(100vw-96px))] flex-col rounded-xl',
-                side === 'left' ? 'left-3' : 'right-[68px]'
+                'absolute top-20 z-40 flex w-[min(260px,calc(100vw-96px))] flex-col rounded-xl',
+                side === 'left'
+                    ? 'bottom-[max(7rem,calc(var(--hud-cluster-h,0px)+1.5rem))] left-3'
+                    : 'right-[68px] bottom-[max(7rem,calc(var(--hud-dock-h,0px)+1.5rem))]'
             )}
         >
             <header className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-white/15 pr-1.5 pl-3">

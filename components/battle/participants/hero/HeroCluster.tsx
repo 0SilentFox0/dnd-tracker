@@ -39,7 +39,7 @@ export const HeroCluster = memo(function HeroCluster({
 
     const [level, setLevel] = useState<number | null>(null);
 
-    const { battle, effects, viewer } = useBattleSceneData();
+    const { battle, effects, viewer, turn } = useBattleSceneData();
 
     const { hpTerm } = useBattleRules();
 
@@ -69,7 +69,11 @@ export const HeroCluster = memo(function HeroCluster({
                 selected={level}
                 onSelect={(l) => setLevel((cur) => (cur === l ? null : l))}
             />
-            <RecommendedSpells hero={hero} level={level} />
+            <RecommendedSpells
+                hero={hero}
+                level={level}
+                canCast={turn.isMyTurn}
+            />
         </div>
     );
 

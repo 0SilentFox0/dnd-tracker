@@ -53,7 +53,7 @@ export function RoundBadge({ className }: { className?: string }) {
                     aria-label={t('nextTurn')}
                     title={t('nextTurn')}
                     onClick={() => actions.nextTurn.mutate({})}
-                    className="pointer-events-auto flex size-6 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
+                    className="pointer-events-auto relative flex size-6 items-center before:absolute before:-inset-2 before:content-[''] justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
                 >
                     {pending ? (
                         <Loader2

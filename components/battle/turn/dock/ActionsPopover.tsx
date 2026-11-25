@@ -51,7 +51,7 @@ export function ActionsPopover({
                 align="center"
                 sideOffset={10}
                 aria-label={title ?? t('panelTitle')}
-                className="w-[min(420px,92vw)] border-white/20 bg-black/80 p-3"
+                className="hud-glass w-[min(420px,92vw)] p-3"
             >
                 {title && (
                     <div className="hud-sc text-[15px] tracking-[.08em] text-[var(--gold)]">

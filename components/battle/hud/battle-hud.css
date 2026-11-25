@@ -21,8 +21,8 @@
 .hud-glass {
   border: 1px solid var(--hud-line);
   border-radius: 12px;
-  background: var(--palette-panel);
-  color: var(--hud-bone);
+  background: var(--palette-panel, rgba(17, 14, 11, 0.82));
+  color: var(--hud-bone, #e6dccb);
   backdrop-filter: blur(14px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }

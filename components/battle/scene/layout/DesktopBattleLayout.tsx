@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
@@ -123,38 +123,54 @@ export function DesktopBattleLayout({
 
     const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
 
-    const stageRef = useRef<HTMLDivElement>(null);
-
     const bindDock = useCallback((el: HTMLDivElement | null) => {
         setSlots((prev) => (prev.dock === el ? prev : { dock: el }));
 
         if (!el) return;
 
-        const ro =
-            typeof ResizeObserver === 'undefined'
-                ? null
-                : new ResizeObserver(() =>
-                      stageRef.current?.style.setProperty(
-                          '--hud-dock-h',
-                          `${el.offsetHeight}px`
-                      )
-                  );
-
-        ro?.observe(el);
-
-        return () => {
-            ro?.disconnect();
-            setSlots((prev) => (prev.dock === el ? { dock: null } : prev));
-        };
+        return () => setSlots((prev) => (prev.dock === el ? { dock: null } : prev));
     }, []);
+
+    const rootRef = useRef<HTMLDivElement>(null);
+
+    const observeHeight = useCallback(
+        (cssVar: string) => (el: HTMLDivElement | null) => {
+            if (!el || typeof ResizeObserver === 'undefined') return;
+
+            const ro = new ResizeObserver(() =>
+                rootRef.current?.style.setProperty(
+                    cssVar,
+                    `${el.offsetHeight}px`
+                )
+            );
+
+            ro.observe(el);
+
+            return () => ro.disconnect();
+        },
+        []
+    );
+
+    const bindColumn = useMemo(
+        () => observeHeight('--hud-dock-h'),
+        [observeHeight]
+    );
+
+    const bindCluster = useMemo(
+        () => observeHeight('--hud-cluster-h'),
+        [observeHeight]
+    );
 
     const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
     return (
         <SceneSlotsContext value={slots}>
             <MapStripSlotContext value={resultSlot}>
-                <div className="scene-full relative flex flex-col overflow-hidden">
-                    <div ref={stageRef} className="relative min-h-0 flex-1">
+                <div
+                    ref={rootRef}
+                    className="scene-full relative flex flex-col overflow-hidden"
+                >
+                    <div className="relative min-h-0 flex-1">
                         {battle.map && viewMode === 'map' ? (
                             <main className="absolute inset-0">
                                 <MapToolsSlotContext.Provider value={toolsSlot}>
@@ -167,9 +183,9 @@ export function DesktopBattleLayout({
                             </main>
                         )}
                         <BattleTopBar />
-                        <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-340px))] -translate-x-1/2 flex-col gap-1 *:pointer-events-auto">
+                        <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-340px))] -translate-x-1/2 flex-col gap-1">
                             <InitiativeTrack onReorder={onReorder} />
-                            <div className={`${HUD_GLASS} rounded-xl`}>
+                            <div className={`${HUD_GLASS} pointer-events-auto rounded-xl`}>
                                 <LastActionTicker
                                     onOpenLog={() => log.show()}
                                 />
@@ -184,7 +200,10 @@ export function DesktopBattleLayout({
                         </InNoticeStack>
                         <TokenBubble mapBusy={mapBusy} />
                         {hero && (
-                            <div className="pointer-events-none absolute bottom-3 left-3 z-20">
+                            <div
+                                ref={bindCluster}
+                                className="pointer-events-none absolute bottom-3 left-3 z-20"
+                            >
                                 <HeroCluster hero={hero} />
                             </div>
                         )}
@@ -192,8 +211,14 @@ export function DesktopBattleLayout({
                         <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex flex-col items-end justify-center *:pointer-events-auto">
                             <DrawerRail active={active} onToggle={toggle} />
                         </div>
-                        <div className="pointer-events-none absolute right-3 bottom-3 z-20 flex w-[min(370px,calc(100%-24px))] flex-col items-stretch gap-2">
-                            <div ref={setResultSlot} />
+                        <div
+                            ref={bindColumn}
+                            className="pointer-events-none absolute right-3 bottom-3 z-20 flex w-[min(370px,calc(100%-24px))] flex-col items-stretch gap-2"
+                        >
+                            <div
+                                ref={setResultSlot}
+                                className="pointer-events-auto empty:hidden"
+                            />
                             <div
                                 ref={bindDock}
                                 className="pointer-events-none flex flex-col items-stretch gap-2 *:pointer-events-auto"

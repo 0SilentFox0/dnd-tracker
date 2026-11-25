@@ -13,15 +13,20 @@ const MAX_RECOMMENDED = 4;
 export function RecommendedSpells({
     hero,
     level,
+    canCast,
 }: {
     hero: BattleParticipant;
     level: number | null;
+    canCast: boolean;
 }) {
     const t = useTranslations('battle.hero.slots');
 
     const { intents } = useBattleScene();
 
-    const spells = useBattleSpellLibrary(hero, { isOpen: true, free: false });
+    const spells = useBattleSpellLibrary(hero, {
+        isOpen: level !== null,
+        free: false,
+    });
 
     const list = useMemo(
         () =>
@@ -46,8 +51,10 @@ export function RecommendedSpells({
                 <HudButton
                     key={s.id}
                     type="button"
+                    disabled={!canCast}
+                    aria-disabled={!canCast}
                     onClick={() => intents.requestSpellBook(level)}
-                    className="min-h-9 max-w-full truncate rounded-full border border-white/20 px-3 text-sm text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none md:min-h-10"
+                    className="min-h-9 max-w-full truncate rounded-full border border-white/20 px-3 text-sm text-[var(--ink)] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none md:min-h-10"
                 >
                     {s.name}
                 </HudButton>

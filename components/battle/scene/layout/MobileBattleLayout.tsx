@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Ellipsis } from 'lucide-react';
@@ -37,6 +37,7 @@ import {
     useMobileBattleTabs,
     useSceneDrawers,
 } from '@/lib/hooks/battle';
+import { useActiveDemoTour } from '@/lib/onboarding/active-demo-tour';
 import { myTurnKey } from '@/lib/utils/battle/view';
 
 const ActionResultCard = dynamic(
@@ -81,6 +82,33 @@ export function MobileBattleLayout({
     const [mapBusy, setMapBusy] = useState(false);
 
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    const tourActive = useActiveDemoTour() !== null;
+
+    const menuShown = menuOpen || tourActive;
+
+    useEffect(() => {
+        if (!menuOpen) return;
+
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && !e.defaultPrevented) setMenuOpen(false);
+        };
+
+        const onDown = (e: PointerEvent) => {
+            if (!menuRef.current?.contains(e.target as Node))
+                setMenuOpen(false);
+        };
+
+        document.addEventListener('keydown', onKey);
+        document.addEventListener('pointerdown', onDown);
+
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            document.removeEventListener('pointerdown', onDown);
+        };
+    }, [menuOpen]);
 
     const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
 
@@ -143,18 +171,22 @@ export function MobileBattleLayout({
                         </InNoticeStack>
                         <TokenBubble mapBusy={mapBusy} />
                         <AudioDock placement="strip" collapseOn={turnKey} />
-                        <div className="absolute top-1 right-2 z-30 flex flex-col items-end gap-1">
+                        <div
+                            ref={menuRef}
+                            className="absolute top-1 right-2 z-30 flex flex-col items-end gap-1"
+                        >
                             <HudButton
                                 type="button"
                                 aria-label={td('more')}
                                 title={td('more')}
-                                aria-expanded={menuOpen}
+                                aria-expanded={menuShown}
+                                aria-haspopup="true"
                                 onClick={() => setMenuOpen((v) => !v)}
                                 className={`${HUD_GLASS} flex size-10 items-center justify-center rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
                             >
                                 <Ellipsis className="size-5" aria-hidden />
                             </HudButton>
-                            {menuOpen && (
+                            {menuShown && (
                                 <div
                                     className={`${HUD_GLASS} rounded-xl py-2 pl-2`}
                                 >
