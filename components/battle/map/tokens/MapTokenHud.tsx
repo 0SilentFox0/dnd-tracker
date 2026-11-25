@@ -1,8 +1,9 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { HP_LINE_LIFT } from '../constants';
 import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
 import { Button } from '@/components/ui/button';
@@ -67,11 +68,14 @@ function MapTokenHudImpl({
     effects = NO_EFFECTS,
     onReturn,
 }: MapTokenHudProps) {
-    const { box, mapSize, pxPerUnit, hovered } = placement;
+    const { box, mapSize, pxPerUnit, hovered, route } = placement;
 
-    const glideRef = useTokenGlide<HTMLDivElement>(
-        routeFrames(placement.route, placement)
+    const frames = useMemo(
+        () => routeFrames(route, { box, mapSize }),
+        [route, box, mapSize]
     );
+
+    const glideRef = useTokenGlide<HTMLDivElement>(frames);
 
     const t = useTranslations('battle.map');
 
@@ -133,8 +137,9 @@ function MapTokenHudImpl({
                     ref={shake}
                     data-map-hud-strip
                     data-hud-rim={motifs[0]}
+                    style={{ bottom: `${HP_LINE_LIFT * 100}%` }}
                     className={cn(
-                        'map-hud-plaque absolute bottom-0 left-[15%] w-[70%]',
+                        'map-hud-plaque absolute left-[15%] w-[70%]',
                         motionAllowed && 'map-hud-anim',
                         down && 'opacity-40'
                     )}

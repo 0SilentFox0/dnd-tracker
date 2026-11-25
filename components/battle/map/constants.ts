@@ -2,6 +2,10 @@ export const PULSE_STEP_MS = 130;
 
 export const PORTRAIT_SHARE = 0.7;
 
+export const PORTRAIT_DROP = 0.08;
+
+export const HP_LINE_LIFT = 0.1;
+
 export const RANGED_HINT_DOT_RATIO = 0.18;
 
 export const RANGED_HINT_LABEL_OFFSET_RATIO = 0.45;

@@ -380,7 +380,7 @@ describe('BattleMap', () => {
                     '[data-map-hud-strip]'
                 ) as HTMLElement;
 
-                expect(strip.className).toContain('bottom-0');
+                expect(strip.style.bottom).toBe('10%');
                 expect(strip.className).toContain('w-[70%]');
                 expect(strip.className).not.toContain('top-');
 
@@ -390,7 +390,7 @@ describe('BattleMap', () => {
 
                 expect(pct(portrait.style.width)).toBeLessThanOrEqual(72);
                 expect(pct(portrait.style.width)).toBeGreaterThanOrEqual(68);
-                expect(portrait.className).toContain('top-0');
+                expect(portrait.style.top).toBe('8%');
             }
         );
 

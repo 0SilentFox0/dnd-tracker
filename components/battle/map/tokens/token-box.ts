@@ -12,7 +12,7 @@ export const tokenBoxStyle = (
 
 export const routeFrames = (
     route: readonly { cx: number; cy: number }[] | undefined,
-    { box, mapSize }: MapPlacement
+    { box, mapSize }: Pick<MapPlacement, 'box' | 'mapSize'>
 ) =>
     route && route.length > 1
         ? route.map((c) => {
