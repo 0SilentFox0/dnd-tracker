@@ -81,8 +81,8 @@ export function ActionDock({
             {phase !== 'acting' && <DockHp />}
             {phase === 'acting' && (
                 <div className="flex items-end gap-3 px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] max-md:justify-end max-md:gap-2">
-                    <div className="flex min-w-0 flex-1 flex-col gap-2.5 max-md:max-w-[96px] max-md:flex-none max-md:gap-1.5">
-                        <div className="flex items-start gap-3">
+                    <div className="flex min-w-0 flex-1 flex-col gap-2.5 max-md:max-w-[148px] max-md:flex-none max-md:gap-1.5">
+                        <div className="flex items-start gap-3 max-md:gap-2">
                             <DockDiamond
                                 label={t('action')}
                                 spent={status.actionUsed}
