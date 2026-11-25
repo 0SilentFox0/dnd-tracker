@@ -64,7 +64,7 @@ ESLint `raw-controls/no-raw-control` (`eslint/raw-controls.mjs`) заборон�
 - **Кути:** контроли `rounded-lg` (8), панелі й оверлеї `rounded-xl` (12), таби/чіпи `rounded-md`, чекбокс 4; сирі `rounded-[Npx]` заборонені.
 - **Hover:** кожен інтерактивний елемент має відгук через `ds-interactive` (вбудований у kit); власний клікабельний елемент додає цей клас. Правила `.hud-surface a[href]` — у `@layer base`, щоб утиліти їх перебивали.
 - **Переходи:** `PageTransition` (`components/layout`) на зміну сторінки, фейд вкладок; `prefers-reduced-motion` вимикає все в `app/motion.css`.
-- **Акаунтна оболонка:** `AccountShell` + `AccountSidebar` (`components/layout`; ≥ md бічне меню, на телефоні смуга чіпів) для `/profile`, `/settings/*`, `/library/sounds`, `/help`; пункти — реєстр `PROFILE_MENU`. Дані сесії — через `AccountSeedProvider` ([platform.md](platform.md#акаунтні-сторінки-без-стрибка)).
+- **Акаунтна оболонка:** `AccountShell` + `AccountSidebar` (`components/layout`; ≥ md бічне меню, на телефоні смуга чіпів) для `/profile`, `/settings/*`, `/library/sounds`, `/help`; пункти — реєстр `PROFILE_MENU`. Дані сесії — через `AccountSeedProvider` ([platform.md](platform.md#account-pages-session-in-the-first-html)).
 - Нативні checkbox/radio «checked» теж accent; контраст accent-ink на accent і accent-fg на panel-2 перевіряє `lib/theme/__tests__/palette-contrast.test.ts` (парсить реальний `app/palettes.css`).
 
 ## Допущене й відкладене
