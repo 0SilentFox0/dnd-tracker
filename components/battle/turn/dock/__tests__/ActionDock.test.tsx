@@ -74,11 +74,13 @@ describe('ActionDock', () => {
         expect(base.on.end).toHaveBeenCalled();
     });
 
-    it('uses the shared glass surface and a square action button', () => {
+    it('uses the shared glass surface and a hexagonal action button', () => {
         const { container } = render(<ActionDock {...base} />);
 
         expect(container.querySelector('.hud-glass')).not.toBeNull();
-        expect(container.innerHTML).not.toContain('clip-path');
+        expect(
+            container.querySelector('[data-tour="battle.turn-controls"]')?.className
+        ).toContain('clip-path');
     });
 
     it('countdown keeps its content and hides the action bar', () => {

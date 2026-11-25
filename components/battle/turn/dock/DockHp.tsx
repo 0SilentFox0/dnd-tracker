@@ -1,5 +1,7 @@
 'use client';
 
+import { Heart } from 'lucide-react';
+
 import { HealthBar, HpFigure } from '@/components/battle/hud';
 import { useBattleRules, useBattleScene } from '@/lib/hooks/battle';
 
@@ -14,10 +16,14 @@ export function DockHp() {
 
     return (
         <div data-slot="dock-hp" className="flex min-w-0 flex-col gap-1">
-            <div className="flex items-baseline justify-between gap-2 text-sm text-[var(--ink)]">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--ink)]">
+                <Heart
+                    aria-hidden
+                    className="size-3 fill-current text-[#e0594e]"
+                />
                 <HpFigure participant={hero} wounds={hpTerm === 'wounds'} />
             </div>
-            <HealthBar participant={hero} exact className="h-2" />
+            <HealthBar participant={hero} exact className="h-1.5" />
         </div>
     );
 }

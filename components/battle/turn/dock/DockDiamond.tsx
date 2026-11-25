@@ -12,26 +12,21 @@ export function DockDiamond({
     return (
         <span
             data-state={spent ? 'spent' : 'ready'}
-            className={cn(
-                'flex min-w-12 flex-col max-md:min-w-0 items-center gap-1.5 text-[11px] leading-none',
-                spent ? 'text-[var(--hud-muted)]' : 'text-[var(--ink)]'
-            )}
+            className="flex min-w-10 flex-col items-center gap-1.5 text-[10px] leading-none text-[#c7f2dc] max-md:min-w-0"
         >
             <span
                 aria-hidden
                 className={cn(
-                    'size-3.5 rotate-45 rounded-[3px] border',
+                    'size-3.5 rotate-45 border',
                     spent
-                        ? 'border-white/25 bg-white/10'
-                        : 'border-[var(--gold)] bg-[var(--gold)]'
+                        ? 'border-transparent bg-[#7d8581]'
+                        : 'border-[#3bd38a] bg-[#167a50]'
                 )}
             />
-            <span className="hud-sc tracking-[.06em] max-md:sr-only">
+            <span className="hud-sc tracking-[.07em] uppercase max-md:sr-only">
                 {label}
             </span>
-            {spent && <span className="font-sans italic max-md:sr-only">
-                    {spentLabel}
-                </span>}
+            {spent && <span className="sr-only">{spentLabel}</span>}
         </span>
     );
 }

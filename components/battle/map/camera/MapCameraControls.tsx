@@ -5,6 +5,7 @@ import { LocateFixed, Minus, Plus } from 'lucide-react';
 
 import { HUD_GLASS } from '@/components/hud';
 import { Button } from '@/components/ui/button';
+import { useHudBlock } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -28,14 +29,15 @@ export function MapCameraControls({
 }: Props) {
     const t = useTranslations('battle.map.camera');
 
+    const { hidden } = useHudBlock('tools');
+
     return (
         <div
+            hidden={!phone && hidden}
             className={cn(
                 HUD_GLASS,
                 'absolute right-[calc(0.75rem+var(--hud-side-w,0px))] z-30 flex items-center rounded-xl',
-                phone
-                    ? 'bottom-2'
-                    : 'bottom-[calc(var(--hud-dock-h,0px)+1.25rem)]'
+                phone ? 'bottom-2' : 'top-[3.75rem]'
             )}
         >
             <Button

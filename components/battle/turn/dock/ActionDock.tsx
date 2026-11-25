@@ -56,14 +56,19 @@ export function ActionDock({
             onClick={on.actions}
             data-tour={panel?.open ? undefined : 'battle.turn-controls'}
             className={cn(
-                'hud-sc flex size-16 shrink-0 max-md:h-[58px] max-md:w-14 flex-col items-center justify-center gap-0.5 rounded-xl border text-[13px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
-                exhausted
-                    ? HUD_GLASS
-                    : 'border-[var(--gold)] bg-[var(--gold)] text-[var(--palette-primary-foreground,#2a1d05)]'
+                'group relative flex h-[71px] w-[82px] shrink-0 flex-col items-center justify-center gap-0.5 border-0 p-0 text-[11px] font-bold tracking-[.06em] uppercase [clip-path:polygon(25%_0,75%_0,100%_50%,75%_100%,25%_100%,0_50%)] focus-visible:text-white focus-visible:outline-none max-md:h-[58px] max-md:w-[66px]',
+                'bg-gradient-to-br from-[#e4ca78] to-[#a9812f] focus-visible:from-[#fff1a8] focus-visible:to-[#e4ca78]',
+                exhausted ? 'text-[#211a14]' : 'text-[#ecd78d]'
             )}
         >
-            <Icon className="size-6" aria-hidden />
-            {t('actions')}
+            {!exhausted && (
+                <span
+                    aria-hidden
+                    className="absolute inset-[2px] -z-0 bg-gradient-to-br from-[#2e251d] to-[#191410] [clip-path:inherit]"
+                />
+            )}
+            <Icon className="relative size-5" aria-hidden />
+            <span className="hud-sc relative">{t('actions')}</span>
         </HudButton>
     );
 
@@ -82,12 +87,11 @@ export function ActionDock({
                 <div
                     className={cn(
                         HUD_GLASS,
-                        'flex items-center gap-3 rounded-2xl px-3 py-2 max-md:gap-2 max-md:px-2'
+                        'flex items-center gap-3 rounded-2xl px-3 py-2.5 max-md:gap-2 max-md:px-2'
                     )}
                 >
-                    <div className="flex min-w-0 flex-1 flex-col gap-2">
-                        <DockHp />
-                        <div className="flex items-start justify-around gap-1">
+                    <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+                        <div className="flex items-start gap-3">
                             <DockDiamond
                                 label={t('action')}
                                 spent={status.actionUsed}
@@ -110,28 +114,31 @@ export function ActionDock({
                                 )}
                         </div>
                         {move && <MoveBar {...move} />}
+                        <DockHp />
                     </div>
-                    {panel ? (
-                        <ActionsPopover
-                            open={panel.open}
-                            onOpenChange={panel.onOpenChange}
-                            anchor={actionsButton}
-                            title={panel.title}
-                        >
-                            {panel.content}
-                        </ActionsPopover>
-                    ) : (
-                        actionsButton
-                    )}
-                    {exhausted && (
-                        <HudButton
-                            type="button"
-                            onClick={on.end}
-                            className="hud-sc min-h-10 max-w-24 shrink-0 max-md:max-w-16 max-md:px-1 rounded-xl border border-[var(--gold)] px-2 text-[13px] leading-tight tracking-[.06em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
-                        >
-                            {t('endTurn')}
-                        </HudButton>
-                    )}
+                    <div className="flex shrink-0 flex-col items-center gap-1.5">
+                        {panel ? (
+                            <ActionsPopover
+                                open={panel.open}
+                                onOpenChange={panel.onOpenChange}
+                                anchor={actionsButton}
+                                title={panel.title}
+                            >
+                                {panel.content}
+                            </ActionsPopover>
+                        ) : (
+                            actionsButton
+                        )}
+                        {exhausted && (
+                            <HudButton
+                                type="button"
+                                onClick={on.end}
+                                className="hud-sc min-h-10 rounded-xl border border-[var(--gold)] px-2 text-[12px] leading-tight tracking-[.06em] text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none"
+                            >
+                                {t('endTurn')}
+                            </HudButton>
+                        )}
+                    </div>
                 </div>
             )}
         </div>

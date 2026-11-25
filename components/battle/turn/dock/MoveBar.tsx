@@ -1,11 +1,7 @@
 import { useTranslations } from 'next-intl';
 
-import { actionIcon } from '@/components/hud/icons/battle';
-
 export function MoveBar({ used, max }: { used: number; max: number }) {
     const t = useTranslations('battle.dock');
-
-    const Icon = actionIcon.move;
 
     const left = Math.max(0, max - used);
 
@@ -16,17 +12,14 @@ export function MoveBar({ used, max }: { used: number; max: number }) {
             aria-valuemin={0}
             aria-valuemax={max}
             aria-valuenow={left}
-            className="flex w-full min-w-16 flex-col gap-1 text-[11px] text-[var(--ink)]"
+            className="grid w-full min-w-16 grid-cols-[auto_1fr] items-center gap-2 text-[10px] text-[var(--ink)]"
         >
-            <span className="flex items-center gap-1">
-                <Icon className="size-3.5 text-[var(--gold)]" aria-hidden />
-                <span className="hud-sc tracking-[.06em]">
-                    {t('moveLeft', { left, max })}
-                </span>
+            <span className="hud-sc font-bold tracking-[.08em] whitespace-nowrap uppercase">
+                {t('moveCells', { left })}
             </span>
-            <span className="h-1 overflow-hidden rounded-full bg-white/15">
+            <span className="h-1 overflow-hidden rounded-full bg-white/25">
                 <span
-                    className="block h-full bg-[var(--gold)]"
+                    className="block h-full rounded-full bg-[#16a765]"
                     style={{ width: `${max ? (left / max) * 100 : 0}%` }}
                 />
             </span>

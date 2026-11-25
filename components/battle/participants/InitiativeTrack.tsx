@@ -83,7 +83,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                 if (e.deltaY && !e.shiftKey)
                     e.currentTarget.scrollLeft += e.deltaY;
             }}
-            className="pointer-events-none relative flex h-[84px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-6 *:pointer-events-auto sm:h-[100px] sm:pb-7 [scrollbar-width:none] before:w-1/2 before:shrink-0 before:content-[''] after:w-1/2 after:shrink-0 after:content-['']"
+            className="pointer-events-none relative flex h-[92px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-1 *:pointer-events-auto sm:h-[118px] [scrollbar-width:none] before:w-1/2 before:shrink-0 before:content-[''] after:w-1/2 after:shrink-0 after:content-['']"
         >
             {queue.map((e, i) => {
                 if (e.kind === 'round')
@@ -137,7 +137,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                     e.current && 'animate-[hud-turn_.6s_ease-out]'
                                 )}
                                 participant={e.participant}
-                                size={e.current ? 48 : 32}
+                                size={e.current ? 48 : 38}
                                 current={e.current}
                                 me={
                                     !e.current &&
