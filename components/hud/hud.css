@@ -68,7 +68,6 @@ html[data-palette] body,
 @keyframes hud-shake-title { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
 @keyframes hud-countdown { from { width: 100%; } to { width: 0; } }
 @keyframes hud-crack { to { stroke-dashoffset: 0; } }
-.profile-tab[data-state="active"] { background: var(--palette-panel-2); color: var(--hud-ink); font-weight: 700; box-shadow: inset 0 -2px 0 var(--hud-crimson); }
 
 /* fallbacks for pages without a palette; palettes.css sets the same tokens under html[data-palette] */
 .hud-surface {
@@ -91,13 +90,9 @@ html[data-palette] body,
   --input: var(--hud-line, rgba(236, 228, 214, 0.17));
   --ring: var(--hud-ink, #ece4d6);
 }
-.hud-form-page { background: radial-gradient(120% 80% at 50% 0, var(--palette-card, #1d1611), var(--palette-page, #0b0908)); }
+@media (max-width: 639px) { .hud-form-page.ornate::after { display: none; } }
 .hud-scroll-x { scrollbar-width: none; }
 .hud-scroll-x::-webkit-scrollbar { display: none; }
-.hud-surface [data-slot="accordion-item"] { background: color-mix(in srgb, var(--palette-card, #1a140f) 85%, transparent); border-color: var(--hud-line, #4a3c2c); }
-.hud-surface [data-slot="accordion-trigger"] { font-family: var(--font-hud-sc), serif; letter-spacing: 0.04em; color: var(--hud-ink, #efe5d2); }
-.hud-surface [data-slot="accordion-trigger"]:hover { background: var(--palette-panel-2); text-decoration: none; }
-.hud-surface [data-slot="accordion-trigger"] svg { color: var(--hud-muted, #8f8473); }
 .hud-surface [data-slot="empty-state"] { border-color: var(--hud-line, #4a3c2c); }
 .hud-surface [data-slot="empty-state"] [data-slot="empty-state-title"] { font-family: var(--font-hud-sc), serif; color: var(--hud-ink, #efe5d2); }
 .hud-surface [data-slot="error-state"] { border-color: rgba(208, 112, 92, 0.5); }

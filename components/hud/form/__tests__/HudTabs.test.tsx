@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { HudTabs } from '@/components/hud/form';
@@ -89,7 +89,7 @@ describe('HudTabs', () => {
         expect(inactive.className).not.toMatch(/(^|\s)text-hud-muted/);
         expect(active.className).toContain('data-[state=active]:font-bold');
         expect(active.className).toContain(
-            'data-[state=active]:bg-hud-raised!'
+            'data-[state=active]:bg-hud-panel-2!'
         );
         expect(screen.getByRole('tablist').className).toContain(
             'border-hud-line'
@@ -149,6 +149,44 @@ describe('HudTabs', () => {
         expect(screen.getByRole('tabpanel').className).toContain(
             'motion-panel'
         );
+    });
+
+    it('keyboard: arrows, Home and End move focus and selection; aria wiring', async () => {
+        const Three = () => {
+            const [v, setV] = useState<'a' | 'b' | 'c'>('a');
+
+            return (
+                <HudTabs
+                    value={v}
+                    onValueChange={setV}
+                    tabs={[
+                        { id: 'a', label: 'Перший', content: 'А' },
+                        { id: 'b', label: 'Другий', content: 'Б' },
+                        { id: 'c', label: 'Третій', content: 'В' },
+                    ]}
+                />
+            );
+        };
+
+        render(<Three />);
+
+        const tab = (n: string) => screen.getByRole('tab', { name: n });
+
+        tab('Перший').focus();
+        fireEvent.keyDown(document.activeElement as Element, { key: 'ArrowRight' });
+        await waitFor(() => expect(tab('Другий')).toHaveFocus());
+        expect(tab('Другий')).toHaveAttribute('aria-selected', 'true');
+        fireEvent.keyDown(document.activeElement as Element, { key: 'End' });
+        await waitFor(() => expect(tab('Третій')).toHaveFocus());
+        expect(tab('Третій')).toHaveAttribute('aria-selected', 'true');
+        fireEvent.keyDown(document.activeElement as Element, { key: 'Home' });
+        await waitFor(() => expect(tab('Перший')).toHaveFocus());
+        expect(tab('Перший')).toHaveAttribute('aria-selected', 'true');
+
+        const panel = screen.getByRole('tabpanel');
+
+        expect(tab('Перший').getAttribute('aria-controls')).toBe(panel.id);
+        expect(panel.getAttribute('aria-labelledby')).toBe(tab('Перший').id);
     });
 
     it('unmounts inactive panels by default and switches on click', () => {

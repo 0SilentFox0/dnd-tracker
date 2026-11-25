@@ -75,13 +75,13 @@ export function HudTabs<T extends string>({
                         invalidLabel={t('ui.hasErrors')}
                     />
                 ) : (
-                    <TabsList className="hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1.5 md:flex-wrap md:overflow-x-visible">
+                    <TabsList className="hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1.5 [mask-image:linear-gradient(90deg,transparent,#000_16px,#000_calc(100%-16px),transparent)] md:flex-wrap md:overflow-x-visible md:[mask-image:none]">
                         {tabs.map((tab) => (
                             <TabsTrigger
                                 key={tab.id}
                                 value={tab.id}
                                 className={cn(
-                                    'profile-tab hud-sc h-10 min-w-fit flex-1 shrink-0 rounded-md px-2.5 text-[13px] text-hud-muted data-[state=active]:shadow-none',
+                                    'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[15px] text-hud-muted',
                                     styles.trigger
                                 )}
                             >
