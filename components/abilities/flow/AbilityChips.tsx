@@ -70,7 +70,7 @@ export function AbilityChips({
                 type="button"
                 variant="ghost"
                 onClick={onAdd}
-                className="h-8 shrink-0 rounded-full px-3 text-[13px] text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)] hover:bg-transparent hover:text-hud-ink"
+                className="h-8 shrink-0 rounded-full px-3 text-[13px] text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:bg-transparent hover:text-hud-ink"
             >
                 {t('add')}
             </Button>
