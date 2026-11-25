@@ -11,8 +11,6 @@ import {
 
 import type { PackKey } from '@/lib/utils/rules/systems/meta';
 
-export type { PackKey };
-
 export const CAMPAIGN_BASE = [
     'common',
     'validation',
@@ -182,7 +180,7 @@ export const ROUTE_SCOPES = {
 
 export type RouteKey = keyof typeof ROUTE_SCOPES;
 
-export const ROUTE_SYSTEM_PAGE: Partial<Record<RouteKey, SystemScopeSlot>> = {
+const ROUTE_SYSTEM_PAGE: Partial<Record<RouteKey, SystemScopeSlot>> = {
     '[id]/character': 'character',
     '[id]/character/draft': 'draft',
     '[id]/character/new': 'draft',

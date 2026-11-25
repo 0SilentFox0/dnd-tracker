@@ -1,5 +1,5 @@
 /** Literal/template keys read from code that is reachable but only returns text refs rendered elsewhere. */
-export const ROUTE_SCOPE_LITERAL_EXEMPT: {
+const ROUTE_SCOPE_LITERAL_EXEMPT: {
     file: string;
     reason: string;
     /** the exemption does not apply to pages whose path contains this */
@@ -40,7 +40,7 @@ export const isExempt = (file: string, page = '') =>
     );
 
 /** Battle texts read by module UI outside battle, known gaps from before route scopes (final review M2): the module's battle namespace is battle-only. */
-export const SYSTEM_READ_ALLOWED: { file: string; reason: string }[] = [
+const SYSTEM_READ_ALLOWED: { file: string; reason: string }[] = [
     {
         file: 'ui/battle/FortunePicker.tsx',
         reason: 'sheet roll dialog',
