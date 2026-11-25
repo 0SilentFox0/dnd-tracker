@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cellPointPx, followTarget } from '../follow';
+import { cellPointPx, followTarget, participantsCenterPx } from '../follow';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { UNIT } from '@/lib/utils/battle/grid/layout';
@@ -33,6 +33,12 @@ describe('followTarget', () => {
 });
 
 describe('cellPointPx', () => {
+    it('rotated 90deg: (x, y) -> (rows*UNIT - y, x)', () => {
+        expect(
+            cellPointPx({ x: 2, y: 1 }, 1, { x: 0, y: 0, rows: 10 }, 1, true)
+        ).toEqual({ x: 10 * UNIT - 1.5 * UNIT, y: 2.5 * UNIT });
+    });
+
     it('центр клітинки з урахуванням вікна', () => {
         expect(cellPointPx({ x: 2, y: 1 }, 1, { x: 0, y: 0 }, 0.5)).toEqual({
             x: 2.5 * UNIT * 0.5,
@@ -49,5 +55,18 @@ describe('cellPointPx', () => {
             x: 4 * UNIT,
             y: 4 * UNIT,
         });
+    });
+});
+
+describe('participantsCenterPx', () => {
+    it('centre of the footprint bounding box, null without positions', () => {
+        expect(participantsCenterPx([], { x: 0, y: 0 }, 1)).toBeNull();
+        expect(
+            participantsCenterPx(
+                [at('a', { x: 0, y: 0 }), at('b', { x: 4, y: 2 })],
+                { x: 0, y: 0 },
+                1
+            )
+        ).toEqual({ x: 2.5 * UNIT, y: 1.5 * UNIT });
     });
 });

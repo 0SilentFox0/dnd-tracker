@@ -18,7 +18,7 @@ export function HeroExtras({ hero }: { hero: BattleParticipant }) {
     return createPortal(
         <div className="flex flex-col items-stretch empty:hidden [&>*]:mt-1">
             {hero.battleData.pendingCast && (
-                <p className="text-sm text-hud-bone [text-shadow:0_1px_3px_#000]">
+                <p className="text-sm text-[#e6dccb] [text-shadow:0_1px_3px_#000]">
                     {t('pendingCast', {
                         spell: hero.battleData.pendingCast.spellName,
                         rounds: hero.battleData.pendingCast.remainingRounds,

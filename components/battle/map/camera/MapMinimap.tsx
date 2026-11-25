@@ -10,6 +10,7 @@ import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useLoadedAspect } from '@/lib/hooks/battle';
 import { createStorageFlag, useStorageValue } from '@/lib/hooks/common';
+import { cn } from '@/lib/utils';
 import {
     backgroundBox,
     type GridWindow,
@@ -32,6 +33,7 @@ interface Props {
     onPick(nx: number, ny: number): void;
     hiddenCells?: Iterable<string> | null;
     phone: boolean;
+    rotated?: boolean;
 }
 
 export function MapMinimap({
@@ -42,6 +44,7 @@ export function MapMinimap({
     onPick,
     hiddenCells,
     phone,
+    rotated = false,
 }: Props) {
     const t = useTranslations('battle.map.camera');
 
@@ -51,9 +54,13 @@ export function MapMinimap({
 
     const maxSide = phone ? 120 : 160;
 
-    const width = Math.round(maxSide * Math.min(1, win.cols / win.rows));
+    const vbW = rotated ? win.rows : win.cols;
 
-    const height = Math.round(maxSide * Math.min(1, win.rows / win.cols));
+    const vbH = rotated ? win.cols : win.rows;
+
+    const width = Math.round(maxSide * Math.min(1, vbW / vbH));
+
+    const height = Math.round(maxSide * Math.min(1, vbH / vbW));
 
     const src = toMediaUrl(map.background ?? DEFAULT_MAP_BACKGROUND);
 
@@ -80,7 +87,12 @@ export function MapMinimap({
     };
 
     return (
-        <div className="absolute top-2 right-2 z-30">
+        <div
+            className={cn(
+                'absolute z-30',
+                phone ? 'top-11 right-2' : 'top-2 right-2'
+            )}
+        >
             {!expanded ? (
                 <Button
                     type="button"
@@ -116,80 +128,88 @@ export function MapMinimap({
                         data-map-minimap
                         role="img"
                         aria-label={t('minimap')}
-                        viewBox={`0 0 ${win.cols} ${win.rows}`}
+                        viewBox={`0 0 ${vbW} ${vbH}`}
                         width={width}
                         height={height}
                         preserveAspectRatio="none"
                         onPointerDown={pick}
                         className="block cursor-crosshair touch-none"
                     >
-                        <image
-                            href={src}
-                            x={background.left - win.x}
-                            y={background.top - win.y}
-                            width={background.width}
-                            height={background.height}
-                            preserveAspectRatio="none"
-                        />
-                        <rect
-                            x="0"
-                            y="0"
-                            width={win.cols}
-                            height={win.rows}
-                            fill="#292522"
-                            opacity=".65"
-                        />
-                        {blocked && (
-                            <path
-                                d={blocked}
-                                transform={`translate(${-win.x} ${-win.y}) scale(${1 / UNIT})`}
-                                fill="#080706"
+                        <g
+                            transform={
+                                rotated
+                                    ? `translate(${win.rows} 0) rotate(90)`
+                                    : undefined
+                            }
+                        >
+                            <image
+                                href={src}
+                                x={background.left - win.x}
+                                y={background.top - win.y}
+                                width={background.width}
+                                height={background.height}
+                                preserveAspectRatio="none"
                             />
-                        )}
-                        {participants.map((participant) => {
-                            const point = participant.battleData.position;
-
-                            if (!point) return null;
-
-                            const size = Math.min(
-                                3,
-                                Math.max(
-                                    1,
-                                    participant.combatStats.gridSize ?? 1
-                                )
-                            );
-
-                            return (
-                                <circle
-                                    key={participant.basicInfo.id}
-                                    data-minimap-participant={
-                                        participant.basicInfo.id
-                                    }
-                                    cx={point.x + size / 2 - win.x}
-                                    cy={point.y + size / 2 - win.y}
-                                    r={Math.max(0.12, size * 0.16)}
-                                    fill={
-                                        participant.basicInfo.side ===
-                                        ParticipantSide.ALLY
-                                            ? 'var(--ally)'
-                                            : 'var(--enemy)'
-                                    }
+                            <rect
+                                x="0"
+                                y="0"
+                                width={win.cols}
+                                height={win.rows}
+                                fill="#292522"
+                                opacity=".65"
+                            />
+                            {blocked && (
+                                <path
+                                    d={blocked}
+                                    transform={`translate(${-win.x} ${-win.y}) scale(${1 / UNIT})`}
+                                    fill="#080706"
                                 />
-                            );
-                        })}
-                        {fog && (
-                            <path
-                                d={fog}
-                                data-minimap-fog
-                                transform={`translate(${-win.x} ${-win.y}) scale(${1 / UNIT})`}
-                                fill="#000"
-                            />
-                        )}
+                            )}
+                            {participants.map((participant) => {
+                                const point = participant.battleData.position;
+
+                                if (!point) return null;
+
+                                const size = Math.min(
+                                    3,
+                                    Math.max(
+                                        1,
+                                        participant.combatStats.gridSize ?? 1
+                                    )
+                                );
+
+                                return (
+                                    <circle
+                                        key={participant.basicInfo.id}
+                                        data-minimap-participant={
+                                            participant.basicInfo.id
+                                        }
+                                        cx={point.x + size / 2 - win.x}
+                                        cy={point.y + size / 2 - win.y}
+                                        r={Math.max(0.12, size * 0.16)}
+                                        fill={
+                                            participant.basicInfo.side ===
+                                            ParticipantSide.ALLY
+                                                ? 'var(--ally)'
+                                                : 'var(--enemy)'
+                                        }
+                                    />
+                                );
+                            })}
+                            {fog && (
+                                <path
+                                    d={fog}
+                                    data-minimap-fog
+                                    transform={`translate(${-win.x} ${-win.y}) scale(${1 / UNIT})`}
+                                    fill="#000"
+                                />
+                            )}
+                        </g>
                         <rect
-                            x={viewport.x * win.cols}
-                            y={viewport.y * win.rows}
-                            width={viewport.w * win.cols}
-                            height={viewport.h * win.rows}
+                            x={viewport.x * vbW}
+                            y={viewport.y * vbH}
+                            width={viewport.w * vbW}
+                            height={viewport.h * vbH}
                             fill="rgba(255,255,255,.08)"
                             stroke="#fff"
                             strokeWidth=".08"

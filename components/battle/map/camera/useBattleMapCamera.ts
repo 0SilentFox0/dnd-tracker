@@ -1,10 +1,11 @@
-import { type RefObject } from 'react';
+import { type RefObject, useMemo } from 'react';
 
 import { type ModeTools, useMapCamera } from '@/lib/hooks/battle';
 import {
     cellPointPx,
     followTarget,
     type Frame,
+    participantsCenterPx,
 } from '@/lib/utils/battle/camera';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapView } from '@/types/battle-grid';
@@ -20,6 +21,8 @@ interface Params {
     participants: BattleParticipant[];
     win: { x: number; y: number; cols: number; rows: number };
     pxPerUnit: number;
+    phone: boolean;
+    rotated: boolean;
 }
 
 export function useBattleMapCamera({
@@ -33,10 +36,20 @@ export function useBattleMapCamera({
     participants,
     win,
     pxPerUnit,
+    phone,
+    rotated,
 }: Params) {
     const cameraTarget = followTarget(view?.currentId ?? null, participants);
 
     const selfTarget = followTarget(view?.camera?.selfId ?? null, participants);
+
+    const overview = useMemo(() => {
+        if (phone) return null;
+
+        const point = participantsCenterPx(participants, win, pxPerUnit);
+
+        return point && { point };
+    }, [phone, participants, win, pxPerUnit]);
 
     const camera = useMapCamera({
         enabled: true,
@@ -54,7 +67,8 @@ export function useBattleMapCamera({
                               cameraTarget.anchor,
                               cameraTarget.size,
                               win,
-                              pxPerUnit
+                              pxPerUnit,
+                              rotated
                           ),
                       }
                     : null,
@@ -65,11 +79,14 @@ export function useBattleMapCamera({
                               selfTarget.anchor,
                               selfTarget.size,
                               win,
-                              pxPerUnit
+                              pxPerUnit,
+                              rotated
                           ),
                       }
                     : null,
             enabled: cameraMode && (view?.camera?.follow ?? false),
+            startOverview: phone,
+            overview,
         },
     });
 

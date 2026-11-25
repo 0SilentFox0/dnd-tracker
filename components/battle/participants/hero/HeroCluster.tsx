@@ -37,8 +37,11 @@ export const HeroCluster = memo(function HeroCluster({
     const spells = useBattleSpellLibrary(hero, { isOpen: true, free: false });
 
     const slots = useMemo(
-        () => (viewer.readOnly || !spells.length ? [] : heroSlotViews(hero)),
-        [viewer.readOnly, spells.length, hero]
+        () =>
+            phone || viewer.readOnly || !spells.length
+                ? []
+                : heroSlotViews(hero),
+        [phone, viewer.readOnly, spells.length, hero]
     );
 
     const level = pickedLevel ?? defaultSlotLevel(slots);
@@ -53,7 +56,8 @@ export const HeroCluster = memo(function HeroCluster({
         arc: true,
     };
 
-    const recommended = !viewer.readOnly && spells.length > 0 && (
+    const recommended = !phone &&
+        !viewer.readOnly && spells.length > 0 && (
         <RecommendedSpells
             spells={spells}
             level={level}
@@ -66,25 +70,14 @@ export const HeroCluster = memo(function HeroCluster({
             data-tour="battle.hero"
             className="pointer-events-auto relative flex flex-col items-start gap-1"
         >
-            {phone && recommended && (
-                <div
-                    className="absolute bottom-full left-0 w-[min(300px,calc(100vw-16px))]"
-                    style={{
-                        marginBottom:
-                            slots.length > 0
-                                ? Math.max(8, arcRadius + slot / 2 - size / 2 + 6)
-                                : 8,
-                    }}
-                >
-                    {recommended}
-                </div>
-            )}
             <div className="flex items-end gap-2">
                 <div className="flex flex-col items-start gap-1">
                     <div
                         className="relative shrink-0"
                         style={{
-                            width: size / 2 + arcRadius + slot / 2,
+                            width: phone
+                                ? size
+                                : size / 2 + arcRadius + slot / 2,
                             height: size,
                         }}
                     >
@@ -113,7 +106,7 @@ export const HeroCluster = memo(function HeroCluster({
                         <TurnTimerBar />
                     </div>
                 </div>
-                {!phone && recommended && (
+                {recommended && (
                     <div className="mb-1 w-fit max-w-[min(300px,34vw)]">
                         {recommended}
                     </div>

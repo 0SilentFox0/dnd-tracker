@@ -288,7 +288,7 @@ describe('BattleMap', () => {
         expect(container.querySelectorAll('[data-fx-clip]')).toHaveLength(1);
     });
 
-    it('fits the whole tall map into the container height', () => {
+    it('desktop always covers the container, even with a tall map', () => {
         avail = { width: 1000, height: 1000 };
 
         const { container } = render(
@@ -300,8 +300,8 @@ describe('BattleMap', () => {
 
         const clip = container.querySelector('[data-fx-clip]') as HTMLElement;
 
-        expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1000);
-        expect(parseFloat(clip.style.width)).toBeCloseTo(1000 * (2 / 3));
+        expect(parseFloat(clip.style.width)).toBeCloseTo(1000);
+        expect(parseFloat(clip.style.height)).toBeCloseTo(1500);
     });
 
     it('дрібні клітинки — вмикається камера без нативного прокручування', () => {
@@ -309,7 +309,7 @@ describe('BattleMap', () => {
 
         const { container } = render(
             <BattleMap
-                map={{ ...square, cols: 30, rows: 80 }}
+                map={{ ...square, cols: 40, rows: 100 }}
                 participants={[]}
             />
         );
@@ -998,7 +998,7 @@ describe('BattleMap — поворот у портреті', () => {
         );
 
         expect(container.querySelector('[data-map-rotated]')).toBeNull();
-        expect(clip(container).style.height).toBe('150px');
+        expect(clip(container).style.height).toBe('600px');
     });
 
     it('phone: рамка — лише ігрові клітинки, карта зсунута на поля', () => {
@@ -1060,48 +1060,25 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
         );
     });
 
-    it('висока карта прокручується — touch-pan-y; у режимі місцевості — touch-none', () => {
-        avail = { width: 300, height: 300 };
-
-        const scrolling = render(
-            <BattleMap map={tall} participants={people} phone />
-        );
-
-        expect(clip(scrolling.container).className).toContain('touch-pan-y');
-        cleanup();
-
-        const painting = render(
-            <BattleMap
-                map={tall}
-                participants={people}
-                phone
-                actions={{ onStroke: vi.fn() }}
-                editing={{ strokeTool: true }}
-            />
-        );
-
-        expect(clip(painting.container).className).toContain('touch-none');
-    });
-
-    it('висока карта без зуму: колесо гортає, Ctrl/⌘+колесо масштабує', () => {
+    it('phone shows the whole map: no native scroll, touch-none', () => {
         avail = { width: 300, height: 300 };
 
         const { container } = render(
             <BattleMap map={tall} participants={people} phone />
         );
 
-        expect(fireEvent.wheel(clip(container), { deltaY: 100 })).toBe(true);
+        expect(clip(container).className).toContain('touch-none');
+        expect(clip(container).className).not.toContain('touch-pan');
+    });
 
-        // happy-dom drops ctrlKey from the WheelEvent initialiser
-        const zoomWheel = new WheelEvent('wheel', {
-            deltaY: -100,
-            cancelable: true,
-            bubbles: true,
-        });
+    it('phone: the wheel zooms the whole-map view', () => {
+        avail = { width: 300, height: 300 };
 
-        Object.defineProperty(zoomWheel, 'ctrlKey', { value: true });
+        const { container } = render(
+            <BattleMap map={tall} participants={people} phone />
+        );
 
-        expect(fireEvent(clip(container), zoomWheel)).toBe(false);
+        expect(fireEvent.wheel(clip(container), { deltaY: 100 })).toBe(false);
     });
 
     it('фон просить зображення реальної ширини, а не 100vw', () => {
@@ -1112,7 +1089,7 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
         );
 
         expect(container.querySelector('img')?.getAttribute('sizes')).toBe(
-            '300px'
+            '60px'
         );
     });
 
@@ -1166,63 +1143,6 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
             3
         );
         expect(outer(container).className).not.toContain('overflow-auto');
-    });
-
-    it('на початку ходу прокручує до поточного токена, якщо він за краєм', () => {
-        avail = { width: 300, height: 300 };
-
-        const { container, rerender } = render(
-            <BattleMap
-                map={tall}
-                participants={people}
-                view={{ currentId: 'h' }}
-                phone
-            />
-        );
-
-        const box = outer(container);
-
-        Object.defineProperty(box, 'clientHeight', { value: 300 });
-        Object.defineProperty(box, 'scrollHeight', { value: 1500 });
-        box.getBoundingClientRect = () =>
-            ({
-                top: 0,
-                bottom: 300,
-                left: 0,
-                right: 300,
-                width: 300,
-                height: 300,
-            }) as DOMRect;
-        box.scrollBy = vi.fn() as unknown as typeof box.scrollBy;
-
-        const token = container.querySelector(
-            '[data-fx-participant="e"]'
-        ) as HTMLElement;
-
-        token.getBoundingClientRect = () =>
-            ({
-                top: 800,
-                bottom: 850,
-                left: 10,
-                right: 60,
-                width: 50,
-                height: 50,
-            }) as DOMRect;
-
-        rerender(
-            <BattleMap
-                map={tall}
-                participants={people}
-                view={{ currentId: 'e' }}
-                phone
-            />
-        );
-
-        expect(box.scrollBy).toHaveBeenCalledWith({
-            top: 550,
-            left: 0,
-            behavior: 'smooth',
-        });
     });
 });
 

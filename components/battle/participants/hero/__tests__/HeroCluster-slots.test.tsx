@@ -115,10 +115,10 @@ describe('HeroCluster phone', () => {
         );
     };
 
-    it('slots sit in an arc right away, no states toggle', () => {
+    it('phone has no slot badges and no recommended spells', () => {
         setupPhone();
 
-        expect(slotButtons().length).toBeGreaterThan(0);
+        expect(slotButtons()).toHaveLength(0);
         expect(
             screen.queryByRole('button', { name: /Показати стани/ })
         ).toBeNull();

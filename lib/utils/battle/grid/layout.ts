@@ -189,6 +189,7 @@ export function fitMapView(
         taller = 1,
         minCell = 0,
         cover,
+        alwaysRotate = false,
     }: {
         rotatable?: boolean;
         bothWays?: boolean;
@@ -197,10 +198,15 @@ export function fitMapView(
         minCell?: number;
         /** max cropped share of the box before falling back to contain; omit to disable */
         cover?: number;
+        /** rotatable: a landscape map in a portrait box is always turned, whatever the gain */
+        alwaysRotate?: boolean;
     } = {}
 ): MapView {
     const landscapeMapInPortrait =
-        avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
+        avail.height > avail.width &&
+        (alwaysRotate
+            ? map.cols > map.rows
+            : map.cols >= map.rows * ROTATE_MIN_RATIO);
 
     const portraitMapInLandscape =
         bothWays &&

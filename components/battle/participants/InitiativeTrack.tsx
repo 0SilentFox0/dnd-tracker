@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 import { Portrait } from '@/components/battle/hud';
 import { HudButton } from '@/components/hud';
@@ -8,21 +8,27 @@ import { ROMAN_NUMERALS } from '@/lib/constants/spells';
 import { useBattleSceneData, useInitiativeDrag } from '@/lib/hooks/battle';
 import { useFlip, useReducedMotion } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-import { queueKeys } from '@/lib/utils/battle/view';
+import { currentRoundQueue, queueKeys } from '@/lib/utils/battle/view';
 
 const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack({
     onReorder,
+    compact = false,
+    vertical = false,
 }: {
     onReorder?: (order: string[]) => void;
+    compact?: boolean;
+    vertical?: boolean;
 }) {
     const {
         battle,
-        turn: { queue },
+        turn: { queue: fullQueue },
         roster: { myParticipants },
         select,
     } = useBattleSceneData();
+
+    const queue = useMemo(() => currentRoundQueue(fullQueue), [fullQueue]);
 
     const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 
@@ -39,7 +45,9 @@ export const InitiativeTrack = memo(function InitiativeTrack({
         onReorder
     );
 
-    const currentIndex = queue.findIndex((e) => e.kind !== 'round' && e.current);
+    const currentIndex = queue.findIndex(
+        (e) => e.kind !== 'round' && e.current
+    );
 
     const currentKey = currentIndex < 0 ? null : keys[currentIndex];
 
@@ -52,24 +60,29 @@ export const InitiativeTrack = memo(function InitiativeTrack({
 
         placed.current = true;
 
-        track.current
-            ?.querySelector('[data-current]')
-            ?.scrollIntoView?.({
-                inline: 'center',
-                block: 'nearest',
-                behavior: reduceMotion || first ? 'auto' : 'smooth',
-            });
-    }, [currentKey, reduceMotion]);
+        track.current?.querySelector('[data-current]')?.scrollIntoView?.({
+            inline: vertical ? 'nearest' : 'center',
+            block: vertical ? 'center' : 'nearest',
+            behavior: reduceMotion || first ? 'auto' : 'smooth',
+        });
+    }, [currentKey, reduceMotion, vertical]);
 
     return (
         <div
             ref={track}
             data-tour="battle.initiative"
             onWheel={(e) => {
-                if (e.deltaY && !e.shiftKey)
+                if (e.deltaY && !e.shiftKey && !vertical)
                     e.currentTarget.scrollLeft += e.deltaY;
             }}
-            className="pointer-events-auto relative flex w-full items-center gap-2 overflow-x-auto overflow-y-hidden px-3 py-1.5 [scrollbar-width:none]"
+            className={cn(
+                'pointer-events-auto relative flex [scrollbar-width:none]',
+                vertical
+                    ? 'max-h-full w-fit flex-col items-center gap-1 overflow-x-hidden overflow-y-auto px-0.5 py-1'
+                    : 'w-full items-center overflow-x-auto overflow-y-hidden',
+                !vertical &&
+                    (compact ? 'gap-1 px-1.5 py-0.5' : 'gap-2 px-3 py-1.5')
+            )}
         >
             {queue.map((e, i) => {
                 if (e.kind === 'round')
@@ -77,9 +90,27 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         <span
                             key="round"
                             data-flip="round"
-                            className="relative mx-0.5 mb-3 h-9 w-px shrink-0 bg-white/30"
+                            className={cn(
+                                'relative shrink-0 bg-white/30',
+                                vertical
+                                    ? 'my-0.5 h-px w-4'
+                                    : cn(
+                                          'mx-0.5 w-px',
+                                          compact
+                                              ? 'mb-1.5 h-[18px]'
+                                              : 'mb-3 h-9'
+                                      )
+                            )}
                         >
-                            <span className="hud-sc absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full text-[11px] text-[var(--hud-muted)]">
+                            <span
+                                className={cn(
+                                    'hud-sc absolute text-[var(--hud-muted)]',
+                                    vertical
+                                        ? 'top-1/2 right-full mr-0.5 -translate-y-1/2'
+                                        : 'top-0 left-1/2 -translate-x-1/2 -translate-y-full',
+                                    compact ? 'text-[8px]' : 'text-[11px]'
+                                )}
+                            >
                                 {roman(e.round)}
                             </span>
                         </span>
@@ -103,10 +134,19 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                 fx="track"
                                 key={e.current ? 'current' : 'queued'}
                                 className={cn(
-                                    e.current && 'animate-[hud-turn_.6s_ease-out]'
+                                    e.current &&
+                                        'animate-[hud-turn_.6s_ease-out]'
                                 )}
                                 participant={e.participant}
-                                size={e.current ? 48 : 38}
+                                size={
+                                    compact
+                                        ? e.current
+                                            ? 24
+                                            : 19
+                                        : e.current
+                                          ? 48
+                                          : 38
+                                }
                                 current={e.current}
                                 me={
                                     !e.current &&
@@ -115,7 +155,14 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                                 extra={e.kind === 'extra'}
                             />
                             {e.current && (
-                                <small className="hud-sc max-w-20 truncate text-[10px] leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]">
+                                <small
+                                    className={cn(
+                                        'hud-sc truncate leading-none font-bold text-[#f3ead2] [text-shadow:0_1px_3px_#000,0_0_2px_#000]',
+                                        compact
+                                            ? 'max-w-10 text-[7px]'
+                                            : 'max-w-20 text-[10px]'
+                                    )}
+                                >
                                     {e.participant.basicInfo.name}
                                 </small>
                             )}

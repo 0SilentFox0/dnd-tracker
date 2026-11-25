@@ -18,12 +18,15 @@ export function HudBlock({
     edge,
     align = 'start',
     className,
+    detachedButton,
     children,
 }: {
     block: HudBlockKey;
     edge: 'top' | 'bottom' | 'left' | 'right';
     align?: 'start' | 'center' | 'end';
     className?: string;
+    /** icon-only button placed by these classes instead of in the flow */
+    detachedButton?: string;
     children: ReactNode;
 }) {
     const t = useTranslations('battle.hudBlocks');
@@ -54,15 +57,17 @@ export function HudBlock({
             onClick={toggle}
             className={cn(
                 'pointer-events-auto flex h-10 items-center justify-center gap-1 rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
-                collapsed
-                    ? `${HUD_GLASS} hud-sc px-3 text-[13px] tracking-[.08em]`
-                    : 'w-10 border border-white/15 bg-black/30 hover:bg-white/10',
+                detachedButton
+                    ? `${HUD_GLASS} size-8 rounded-lg ${detachedButton}`
+                    : collapsed
+                      ? `${HUD_GLASS} hud-sc px-3 text-[13px] tracking-[.08em]`
+                      : 'w-10 border border-white/15 bg-black/30 hover:bg-white/10',
                 align === 'end' && 'self-end',
                 align === 'center' && 'self-center'
             )}
         >
             <Chevron className="size-4" aria-hidden />
-            {collapsed && name}
+            {collapsed && !detachedButton && name}
         </HudButton>
     );
 
@@ -70,7 +75,10 @@ export function HudBlock({
         <div
             data-hud-block={block}
             hidden={allHidden}
-            className={cn(row ? 'flex flex-row items-start' : 'flex flex-col', className)}
+            className={cn(
+                row ? 'flex flex-row items-start' : 'flex flex-col',
+                className
+            )}
         >
             {buttonFirst && button}
             <div hidden={hidden} className="contents">

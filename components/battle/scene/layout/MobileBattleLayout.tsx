@@ -169,14 +169,15 @@ export function MobileBattleLayout({
                             </main>
                         )}
                         <BattleTopBar />
-                        <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
+                        <div className="pointer-events-none absolute inset-x-2 top-1 bottom-[7.5rem] z-20">
                             <HudBlock
                                 block="initiative"
                                 edge="top"
-                                className="items-center"
+                                className="static"
+                                detachedButton="absolute top-0 left-1/2 -translate-x-1/2"
                             >
-                                <div className="mx-auto w-fit max-w-full">
-                                    <InitiativeTrack />
+                                <div className="absolute top-[4.25rem] bottom-0 left-0 flex items-start">
+                                    <InitiativeTrack compact vertical />
                                 </div>
                             </HudBlock>
                         </div>

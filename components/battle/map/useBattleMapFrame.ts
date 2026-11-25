@@ -16,8 +16,6 @@ import type { BattleMapConfig } from '@/types/battle-grid';
 
 const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
 
-const DESKTOP_MAX_CROP = 0.25;
-
 export function useBattleMapFrame(
     map: BattleMapConfig,
     avail: { width: number; height: number },
@@ -34,11 +32,12 @@ export function useBattleMapFrame(
         () =>
             fitMapView(avail, win, {
                 rotatable: phone,
+                alwaysRotate: phone,
                 bothWays: !phone,
-                fillWidth: phone,
+                fillWidth: false,
                 taller: 1,
                 minCell: MIN_TAP_CELL_PX,
-                cover: phone ? undefined : DESKTOP_MAX_CROP,
+                cover: phone ? undefined : Infinity,
             }),
         [avail, win, phone]
     );
@@ -49,11 +48,12 @@ export function useBattleMapFrame(
         () =>
             cameraMode
                 ? fitMapView(avail, win, {
-                      rotatable: false,
+                      rotatable: phone,
+                      alwaysRotate: phone,
                       bothWays: false,
                       fillWidth: false,
                       taller: 1,
-                      cover: phone ? Infinity : DESKTOP_MAX_CROP,
+                      cover: phone ? undefined : Infinity,
                   })
                 : fit,
         [cameraMode, avail, win, fit, phone]
