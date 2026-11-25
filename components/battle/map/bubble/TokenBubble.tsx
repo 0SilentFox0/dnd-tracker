@@ -155,24 +155,28 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
                     if (onSelectedToken(e.target, selectedId))
                         e.preventDefault();
                 }}
-                className={cn(
-                    HUD_GLASS,
-                    'max-h-[min(70dvh,640px)] w-[min(380px,92vw)] overflow-y-auto rounded-xl p-4'
-                )}
+                className="w-[min(380px,92vw)] rounded-xl border-0 bg-transparent p-0 shadow-none"
             >
-                {!anchor.inView && (
-                    <div className="mb-3 flex items-center justify-between gap-2 text-sm text-hud-muted">
-                        <span>{t('offscreen')}</span>
-                        <HudButton
-                            type="button"
-                            onClick={() => revealToken(selectedId)}
-                            className="h-10 shrink-0 rounded-xl border border-white/20 px-3 text-[var(--ink)]"
-                        >
-                            {t('toToken')}
-                        </HudButton>
-                    </div>
-                )}
-                {body}
+                <div
+                    className={cn(
+                        HUD_GLASS,
+                        'max-h-[min(70dvh,640px)] overflow-y-auto rounded-xl p-4'
+                    )}
+                >
+                    {!anchor.inView && (
+                        <div className="mb-3 flex items-center justify-between gap-2 text-sm text-hud-muted">
+                            <span>{t('offscreen')}</span>
+                            <HudButton
+                                type="button"
+                                onClick={() => revealToken(selectedId)}
+                                className="h-10 shrink-0 rounded-xl border border-white/20 px-3 text-[var(--ink)]"
+                            >
+                                {t('toToken')}
+                            </HudButton>
+                        </div>
+                    )}
+                    {body}
+                </div>
             </PopoverContent>
         </Popover>
     );

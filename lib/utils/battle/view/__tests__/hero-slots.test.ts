@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { defaultSlotLevel, heroSlotViews, slotRingOffset } from '../hero';
+import {
+    defaultSlotLevel,
+    heroSlotViews,
+    slotOrbit,
+    slotRingOffset,
+} from '../hero';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
@@ -67,19 +72,48 @@ describe('defaultSlotLevel', () => {
 });
 
 describe('slotRingOffset', () => {
-    it('centres a single slot above the portrait', () => {
-        const o = slotRingOffset(0, 1, 80);
+    it('puts the first slot at the top of the orbit', () => {
+        const o = slotRingOffset(0, 6, 80);
 
         expect(o.x).toBeCloseTo(0);
         expect(o.y).toBeCloseTo(-80);
     });
 
-    it('runs left to right along the arc and keeps the radius', () => {
-        const pts = Array.from({ length: 5 }, (_, i) => slotRingOffset(i, 5, 80));
+    it('spreads slots evenly around the full circle at a constant radius', () => {
+        const n = 8;
 
-        for (let i = 1; i < pts.length; i++)
-            expect(pts[i].x).toBeGreaterThan(pts[i - 1].x);
+        const pts = Array.from({ length: n }, (_, i) => slotRingOffset(i, n, 80));
 
         for (const p of pts) expect(Math.hypot(p.x, p.y)).toBeCloseTo(80, 0);
+
+        expect(pts.some((p) => p.y > 40)).toBe(true);
+        expect(pts[n / 2].x).toBeCloseTo(0);
+        expect(pts[n / 2].y).toBeCloseTo(80);
+    });
+});
+
+describe('slotOrbit', () => {
+    it('clears the portrait and keeps neighbours apart for up to 10 slots', () => {
+        for (const [portrait, slot] of [
+            [104, 38],
+            [58, 36],
+        ]) {
+            for (let n = 1; n <= 10; n++) {
+                const { radius, box } = slotOrbit(n, portrait, slot);
+
+                expect(radius).toBeGreaterThanOrEqual(portrait / 2 + slot / 2);
+
+                const gap = slotRingOffset(0, n, radius);
+
+                const next = slotRingOffset(1, n, radius);
+
+                if (n > 1)
+                    expect(
+                        Math.hypot(gap.x - next.x, gap.y - next.y)
+                    ).toBeGreaterThanOrEqual(slot);
+
+                expect(box).toBe(2 * radius + slot);
+            }
+        }
     });
 });

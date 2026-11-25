@@ -4,11 +4,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ActionDock } from '../ActionDock';
 
-import { render } from '@/lib/i18n/test/render-uk';
+import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
+import { render as renderUk } from '@/lib/i18n/test/render-uk';
 import { showDock } from '@/lib/utils/battle/view/dock-status';
 import type { BattleParticipant } from '@/types/battle';
 
 vi.unmock('next-intl');
+
+const render = (ui: React.ReactElement) =>
+    renderUk(ui, { wrapper: fakeScene().wrapper });
 
 const base = {
     status: { actionUsed: false, bonusAvailable: true, reactionAvailable: true },

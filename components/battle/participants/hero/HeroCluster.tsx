@@ -6,7 +6,7 @@ import { ChevronUp } from 'lucide-react';
 
 import { HeroStatesPanel } from './HeroStatesPanel';
 import { RecommendedSpells } from './RecommendedSpells';
-import { SLOT_RING_RADIUS, SpellSlotRow } from './SpellSlotRow';
+import { type SlotRing, SpellSlotRow } from './SpellSlotRow';
 
 import {
     HealthBar,
@@ -25,12 +25,18 @@ import {
     defaultSlotLevel,
     heroSlotViews,
     NO_EFFECTS,
+    showDock,
+    slotOrbit,
 } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
 const PORTRAIT = 104;
 
-const RING_BOX = 2 * (SLOT_RING_RADIUS + 19);
+const SLOT = 38;
+
+const PHONE_PORTRAIT = 58;
+
+const PHONE_SLOT = 36;
 
 export const HeroCluster = memo(function HeroCluster({
     hero,
@@ -47,7 +53,7 @@ export const HeroCluster = memo(function HeroCluster({
 
     const [pickedLevel, setLevel] = useState<number | null>(null);
 
-    const { battle, effects, viewer, turn } = useBattleSceneData();
+    const { battle, effects, viewer, turn, roster } = useBattleSceneData();
 
     const { hpTerm } = useBattleRules();
 
@@ -57,6 +63,10 @@ export const HeroCluster = memo(function HeroCluster({
         () => (viewer.readOnly ? [] : heroSlotViews(hero)),
         [viewer.readOnly, hero]
     );
+
+    const hpInDock =
+        showDock(roster.hero, viewer.readOnly) &&
+        battle.status === BattleStatus.ACTIVE;
 
     const level = pickedLevel ?? defaultSlotLevel(slots);
 
@@ -76,20 +86,13 @@ export const HeroCluster = memo(function HeroCluster({
         <RecommendedSpells hero={hero} level={level} canCast={turn.isMyTurn} />
     );
 
-    const slotRow = (ring?: { cx: number; cy: number }) => (
+    const slotRow = (ring?: SlotRing) => (
         <SpellSlotRow
             slots={slots}
             selected={level}
             onSelect={setLevel}
             ring={ring}
         />
-    );
-
-    const slotsBlock = slots.length > 0 && (
-        <div className={cn('flex flex-col gap-2', !open && 'max-md:hidden')}>
-            {slotRow()}
-            {recommended}
-        </div>
     );
 
     const extras = (
@@ -129,12 +132,45 @@ export const HeroCluster = memo(function HeroCluster({
         <ZoomablePortrait
             participant={hero}
             fx="main"
-            size={phone ? 58 : PORTRAIT}
+            size={phone ? PHONE_PORTRAIT : PORTRAIT}
             me
         />
     );
 
-    if (phone)
+    const orbitOf = (size: number, slot: number): SlotRing & { box: number } => {
+        const { radius, box } = slotOrbit(slots.length, size, slot);
+
+        return { cx: box / 2, cy: box / 2, radius, size: slot, box };
+    };
+
+    const hpFallback = !hpInDock && (
+        <span className="shrink-0 font-sans text-sm font-normal whitespace-nowrap">
+            <HpFigure participant={hero} wounds={hpTerm === 'wounds'} />
+        </span>
+    );
+
+    const orbited = (size: number, slot: number) => {
+        const o = orbitOf(size, slot);
+
+        return (
+            <div
+                className="relative shrink-0"
+                style={{ width: o.box, height: o.box }}
+            >
+                {slotRow(o)}
+                <div
+                    className="absolute"
+                    style={{ left: o.cx - size / 2, top: o.cy - size / 2 }}
+                >
+                    {portrait}
+                </div>
+            </div>
+        );
+    };
+
+    if (phone) {
+        const orbitOpen = open && slots.length > 0;
+
         return (
             <div
                 data-tour="battle.hero"
@@ -155,15 +191,10 @@ export const HeroCluster = memo(function HeroCluster({
                                 <span className="truncate">
                                     {hero.basicInfo.name}
                                 </span>
-                                <span className="shrink-0 font-sans text-sm font-normal">
-                                    <HpFigure
-                                        participant={hero}
-                                        wounds={hpTerm === 'wounds'}
-                                    />
-                                </span>
+                                {hpFallback}
                             </div>
                             {statesPanel}
-                            {slotsBlock}
+                            {recommended}
                         </div>
                     )}
                     {extras}
@@ -171,19 +202,18 @@ export const HeroCluster = memo(function HeroCluster({
                 </div>
                 <div
                     className={cn(
-                        HUD_GLASS,
-                        'flex items-center gap-1.5 rounded-2xl p-1.5'
+                        'flex items-center gap-1.5',
+                        !orbitOpen && `${HUD_GLASS} rounded-2xl p-1.5`
                     )}
                 >
-                    {portrait}
+                    {orbitOpen ? orbited(PHONE_PORTRAIT, PHONE_SLOT) : portrait}
                     {toggle}
                 </div>
             </div>
         );
+    }
 
     const ring = slots.length > 0;
-
-    const centre = RING_BOX / 2;
 
     return (
         <div
@@ -191,29 +221,7 @@ export const HeroCluster = memo(function HeroCluster({
             className="pointer-events-auto flex items-end gap-2"
         >
             <div className="flex flex-col items-center gap-1">
-                <div
-                    className="relative"
-                    style={
-                        ring
-                            ? { width: RING_BOX, height: centre + PORTRAIT / 2 }
-                            : undefined
-                    }
-                >
-                    {ring && slotRow({ cx: centre, cy: centre })}
-                    <div
-                        className={ring ? 'absolute' : undefined}
-                        style={
-                            ring
-                                ? {
-                                      left: centre - PORTRAIT / 2,
-                                      top: centre - PORTRAIT / 2,
-                                  }
-                                : undefined
-                        }
-                    >
-                        {portrait}
-                    </div>
-                </div>
+                {ring ? orbited(PORTRAIT, SLOT) : portrait}
                 <div
                     className={cn(
                         HUD_GLASS,
@@ -247,18 +255,15 @@ export const HeroCluster = memo(function HeroCluster({
                                         />
                                     ))}
                                 </span>
-                                <span className="shrink-0 font-sans text-sm font-normal whitespace-nowrap">
-                                    <HpFigure
-                                        participant={hero}
-                                        wounds={hpTerm === 'wounds'}
-                                    />
-                                </span>
+                                {hpFallback}
                             </div>
-                            <HealthBar
-                                participant={hero}
-                                exact
-                                className="h-1.5"
-                            />
+                            {!hpInDock && (
+                                <HealthBar
+                                    participant={hero}
+                                    exact
+                                    className="h-1.5"
+                                />
+                            )}
                             {HeroStats && (
                                 <div className="mt-1 text-sm text-hud-text">
                                     <HeroStats hero={hero} compact={false} />

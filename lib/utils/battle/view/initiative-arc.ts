@@ -4,7 +4,7 @@ export interface ArcStyle {
     y: number;
 }
 
-const ARC_MAX_Y = 24;
+const ARC_MAX_Y = 26;
 
 export function arcStyle(d: number): ArcStyle {
     const a = Math.abs(d);
@@ -12,6 +12,6 @@ export function arcStyle(d: number): ArcStyle {
     return {
         scale: Math.max(0.7, 1 - 0.1 * a),
         opacity: Math.max(0.45, 1 - 0.18 * a),
-        y: Math.min(3 * d * d, ARC_MAX_Y),
+        y: Math.min(1.4 * d * d, ARC_MAX_Y),
     };
 }

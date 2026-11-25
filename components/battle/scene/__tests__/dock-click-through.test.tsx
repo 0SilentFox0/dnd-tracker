@@ -5,9 +5,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MapCameraControls } from '../../map/camera/MapCameraControls';
 import { ActionDock } from '../../turn/dock/ActionDock';
 
-import { render } from '@/lib/i18n/test/render-uk';
+import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
+import { render as renderUk } from '@/lib/i18n/test/render-uk';
 
 vi.unmock('next-intl');
+
+const render = (ui: React.ReactElement) =>
+    renderUk(ui, { wrapper: fakeScene().wrapper });
 
 const props = {
     status: {

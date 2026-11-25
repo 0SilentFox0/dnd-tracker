@@ -5,17 +5,20 @@ import { useTranslations } from 'next-intl';
 
 import { HUD_GLASS, HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
-import { slotRingOffset,type SlotView } from '@/lib/utils/battle/view';
+import { slotRingOffset, type SlotView } from '@/lib/utils/battle/view';
 
-export const SLOT_RING_RADIUS = 80;
-
-const RING_SLOT = 38;
+export interface SlotRing {
+    cx: number;
+    cy: number;
+    radius: number;
+    size: number;
+}
 
 interface Props {
     slots: SlotView[];
     selected: number | null;
     onSelect(level: number): void;
-    ring?: { cx: number; cy: number };
+    ring?: SlotRing;
 }
 
 export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
@@ -35,11 +38,13 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                 let style: CSSProperties | undefined;
 
                 if (ring) {
-                    const o = slotRingOffset(i, slots.length, SLOT_RING_RADIUS);
+                    const o = slotRingOffset(i, slots.length, ring.radius);
 
                     style = {
-                        left: ring.cx + o.x - RING_SLOT / 2,
-                        top: ring.cy + o.y - RING_SLOT / 2,
+                        left: ring.cx + o.x - ring.size / 2,
+                        top: ring.cy + o.y - ring.size / 2,
+                        width: ring.size,
+                        height: ring.size,
                     };
                 }
 
@@ -58,7 +63,7 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
                         className={cn(
                             'flex flex-col items-center justify-center rounded-full border text-[var(--ink)]',
                             ring
-                                ? `${HUD_GLASS} absolute size-[38px]`
+                                ? `${HUD_GLASS} absolute`
                                 : 'size-9 md:size-10',
                             'focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                             active

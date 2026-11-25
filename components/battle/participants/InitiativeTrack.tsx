@@ -57,15 +57,21 @@ export const InitiativeTrack = memo(function InitiativeTrack({
 
     const currentKey = currentIndex < 0 ? null : keys[currentIndex];
 
+    const placed = useRef(false);
+
     useEffect(() => {
         if (!currentKey) return;
+
+        const first = !placed.current;
+
+        placed.current = true;
 
         track.current
             ?.querySelector('[data-current]')
             ?.scrollIntoView?.({
                 inline: 'center',
                 block: 'nearest',
-                behavior: reduceMotion ? 'auto' : 'smooth',
+                behavior: reduceMotion || first ? 'auto' : 'smooth',
             });
     }, [currentKey, reduceMotion]);
 
@@ -77,7 +83,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                 if (e.deltaY && !e.shiftKey)
                     e.currentTarget.scrollLeft += e.deltaY;
             }}
-            className="pointer-events-none relative flex h-[84px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-6 *:pointer-events-auto sm:h-[100px] sm:pb-7 [scrollbar-width:none] *:first:ml-auto *:last:mr-auto"
+            className="pointer-events-none relative flex h-[84px] items-end justify-start gap-1.5 overflow-x-auto overflow-y-hidden px-3 pb-6 *:pointer-events-auto sm:h-[100px] sm:pb-7 [scrollbar-width:none] before:w-1/2 before:shrink-0 before:content-[''] after:w-1/2 after:shrink-0 after:content-['']"
         >
             {queue.map((e, i) => {
                 if (e.kind === 'round')

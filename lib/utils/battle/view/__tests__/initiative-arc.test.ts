@@ -26,12 +26,15 @@ describe('arcStyle', () => {
     });
 
     it('caps the vertical offset for long queues', () => {
-        expect(arcStyle(20).y).toBe(24);
-        expect(arcStyle(-20).y).toBe(24);
+        expect(arcStyle(20).y).toBe(26);
+        expect(arcStyle(-20).y).toBe(26);
     });
 
-    it('bends visibly: neighbours sit lower than the active one', () => {
-        expect(arcStyle(1).y).toBe(3);
-        expect(arcStyle(2).y).toBe(12);
+    it('keeps bending across the whole visible queue before it saturates', () => {
+        expect(arcStyle(1).y).toBeCloseTo(1.4);
+        expect(arcStyle(2).y).toBeCloseTo(5.6);
+
+        for (let d = 1; d < 4; d++)
+            expect(arcStyle(d + 1).y - arcStyle(d).y).toBeGreaterThan(1);
     });
 });

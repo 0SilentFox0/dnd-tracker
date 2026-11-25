@@ -46,6 +46,20 @@ describe('InitiativeTrack arc', () => {
         expect(next.style.transform).toContain(`scale(${arcStyle(1).scale})`);
     });
 
+    it('centres the active participant instantly on first render', () => {
+        const scroll = vi.fn();
+
+        Element.prototype.scrollIntoView = scroll;
+
+        const scene = fakeScene();
+
+        render(<InitiativeTrack />, { wrapper: scene.wrapper });
+
+        expect(scroll).toHaveBeenCalledWith(
+            expect.objectContaining({ inline: 'center', behavior: 'auto' })
+        );
+    });
+
     it('click selects the participant', () => {
         const scene = fakeScene();
 

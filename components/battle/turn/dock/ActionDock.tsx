@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { ActionsPopover } from './ActionsPopover';
 import { DockDiamond } from './DockDiamond';
+import { DockHp } from './DockHp';
 import { MoveBar } from './MoveBar';
 
 import { HUD_GLASS, HudButton } from '@/components/hud';
@@ -58,7 +59,7 @@ export function ActionDock({
                 'hud-sc flex size-16 shrink-0 max-md:h-[58px] max-md:w-14 flex-col items-center justify-center gap-0.5 rounded-xl border text-[13px] tracking-[.08em] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
                 exhausted
                     ? HUD_GLASS
-                    : 'border-[var(--gold)] bg-[var(--gold)] text-[#2a1d05]'
+                    : 'border-[var(--gold)] bg-[var(--gold)] text-[var(--palette-primary-foreground,#2a1d05)]'
             )}
         >
             <Icon className="size-6" aria-hidden />
@@ -72,6 +73,11 @@ export function ActionDock({
             className="pointer-events-auto flex w-full flex-col items-stretch gap-2"
         >
             {children}
+            {phase !== 'acting' && (
+                <div className={cn(HUD_GLASS, 'rounded-2xl px-3 py-2')}>
+                    <DockHp />
+                </div>
+            )}
             {phase === 'acting' && (
                 <div
                     className={cn(
@@ -80,6 +86,7 @@ export function ActionDock({
                     )}
                 >
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <DockHp />
                         <div className="flex items-start justify-around gap-1">
                             <DockDiamond
                                 label={t('action')}

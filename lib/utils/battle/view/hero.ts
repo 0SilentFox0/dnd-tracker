@@ -125,24 +125,33 @@ export function defaultSlotLevel(slots: SlotView[]): number | null {
     return (usable ?? slots.find((s) => s.max > 0))?.level ?? null;
 }
 
-const RING_MAX_STEP = 32;
-
-const RING_SPAN = 220;
-
-/** Offset from the portrait centre for slot `i` of `n` on an arc centred above it */
+/** Offset from the portrait centre for slot `i` of `n`, evenly around a full circle starting at the top */
 export function slotRingOffset(
     i: number,
     n: number,
     radius: number
 ): { x: number; y: number } {
-    const step = n > 1 ? Math.min(RING_MAX_STEP, RING_SPAN / (n - 1)) : 0;
-
-    const angle = ((90 + ((n - 1) / 2 - i) * step) * Math.PI) / 180;
+    const angle = (2 * Math.PI * i) / Math.max(1, n);
 
     return {
-        x: Math.round(radius * Math.cos(angle) * 10) / 10,
-        y: Math.round(-radius * Math.sin(angle) * 10) / 10,
+        x: Math.round(radius * Math.sin(angle) * 10) / 10,
+        y: Math.round(-radius * Math.cos(angle) * 10) / 10,
     };
+}
+
+/** Orbit radius that clears the portrait and keeps neighbouring slots from touching */
+export function slotOrbit(
+    n: number,
+    portrait: number,
+    slot: number
+): { radius: number; box: number } {
+    const clear = portrait / 2 + slot / 2 + 8;
+
+    const spread = n > 1 ? (slot + 6) / (2 * Math.sin(Math.PI / n)) : 0;
+
+    const radius = Math.ceil(Math.max(clear, spread));
+
+    return { radius, box: 2 * (radius + slot / 2) };
 }
 
 export function canCastBonusSpell(

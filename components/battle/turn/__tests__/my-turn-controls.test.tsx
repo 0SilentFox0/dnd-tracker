@@ -84,6 +84,7 @@ vi.mock('@/lib/hooks/battle', () => ({
     useBattleRules: () => rules.current,
     useBattleScene: () => ({
         anyPending: false,
+        roster: { hero: null },
         battle: {
             initiativeOrder: [],
             currentRound: 1,
