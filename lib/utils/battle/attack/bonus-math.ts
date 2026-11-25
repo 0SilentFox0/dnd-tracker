@@ -12,6 +12,7 @@ import { effectName } from '@/lib/utils/battle/common/terms';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isAdjacentAttack } from '@/lib/utils/battle/grid/adjacent-attack';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import * as reachCheck from '@/lib/utils/battle/grid/reach-check';
@@ -102,6 +103,8 @@ export function rollModeReasonsOf(
 
     const id = attacker.basicInfo.id;
 
+    const grid = gridOf(opts.map);
+
     const abilityKey = () => sys.abilityOf(attacker, attack).key;
 
     const flagEntries = (
@@ -127,8 +130,11 @@ export function rollModeReasonsOf(
         if (!other || !isOnMap(viewer) || !isOnMap(other)) return false;
 
         const feet =
-            footprintDistance(cellsOf(viewer), cellsOf(other)) *
-            cellFeetOf(opts.rules);
+            footprintDistance(
+                cellsOf(viewer, grid),
+                cellsOf(other, grid),
+                grid
+            ) * cellFeetOf(opts.rules);
 
         return collectModifiers(ps, viewer.basicInfo.id, {
             flag: 'sense',

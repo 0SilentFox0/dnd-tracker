@@ -2,7 +2,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
 import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import { getMap } from '@/lib/server/battle-maps/library-service';
-import { cellsOf, isOnMap, isPlayable } from '@/lib/utils/battle/grid';
+import { cellsOf, gridOf, isOnMap, isPlayable } from '@/lib/utils/battle/grid';
 import {
     baseDoorsOf,
     composeEffectiveMap,
@@ -61,6 +61,9 @@ export async function mapUpdateMutation(
             API_ERRORS.BATTLE_MAP_NOT_FOUND
         );
 
+    if (gridOf(library.map) !== gridOf(map))
+        throw new BattleRuleError('action_rejected', REJECT.mapGridChanged);
+
     const unchanged: MutationResult = {
         participants: ctx.participants,
         pending: ctx.pending,
@@ -98,7 +101,9 @@ export async function mapUpdateMutation(
     );
 
     const stuck = ctx.participants.filter(
-        (p) => isOnMap(p) && cellsOf(p).some((c) => !isPlayable(header, c))
+        (p) =>
+            isOnMap(p) &&
+            cellsOf(p, gridOf(header)).some((c) => !isPlayable(header, c))
     );
 
     if (stuck.length > 0)

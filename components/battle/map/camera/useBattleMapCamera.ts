@@ -1,13 +1,14 @@
-import { type RefObject } from 'react';
+import { type RefObject, useMemo } from 'react';
 
 import { type ModeTools, useMapCamera } from '@/lib/hooks/battle';
 import {
     cellPointPx,
     followTarget,
     type Frame,
+    participantsCenterPx,
 } from '@/lib/utils/battle/camera';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleMapView } from '@/types/battle-grid';
+import type { BattleMapView, GridKind } from '@/types/battle-grid';
 
 interface Params {
     frame: Frame | null;
@@ -20,6 +21,9 @@ interface Params {
     participants: BattleParticipant[];
     win: { x: number; y: number; cols: number; rows: number };
     pxPerUnit: number;
+    grid: GridKind;
+    phone: boolean;
+    rotated: boolean;
 }
 
 export function useBattleMapCamera({
@@ -33,10 +37,35 @@ export function useBattleMapCamera({
     participants,
     win,
     pxPerUnit,
+    grid,
+    phone,
+    rotated,
 }: Params) {
-    const cameraTarget = followTarget(view?.currentId ?? null, participants);
+    const cameraTarget = followTarget(
+        view?.currentId ?? null,
+        participants,
+        grid
+    );
 
-    const selfTarget = followTarget(view?.camera?.selfId ?? null, participants);
+    const selfTarget = followTarget(
+        view?.camera?.selfId ?? null,
+        participants,
+        grid
+    );
+
+    const overview = useMemo(() => {
+        if (phone) return null;
+
+        const point = participantsCenterPx(
+            participants,
+            win,
+            pxPerUnit,
+            rotated,
+            grid
+        );
+
+        return point && { point };
+    }, [phone, participants, win, pxPerUnit, rotated, grid]);
 
     const camera = useMapCamera({
         enabled: true,
@@ -54,7 +83,9 @@ export function useBattleMapCamera({
                               cameraTarget.anchor,
                               cameraTarget.size,
                               win,
-                              pxPerUnit
+                              pxPerUnit,
+                              rotated,
+                              grid
                           ),
                       }
                     : null,
@@ -65,11 +96,15 @@ export function useBattleMapCamera({
                               selfTarget.anchor,
                               selfTarget.size,
                               win,
-                              pxPerUnit
+                              pxPerUnit,
+                              rotated,
+                              grid
                           ),
                       }
                     : null,
             enabled: cameraMode && (view?.camera?.follow ?? false),
+            startOverview: phone,
+            overview,
         },
     });
 

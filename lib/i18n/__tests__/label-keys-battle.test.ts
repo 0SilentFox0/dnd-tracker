@@ -36,11 +36,6 @@ describe('battle has translations', () => {
         'kills',
         'damageTaken',
     ]);
-    expectLabelKeys('battle', 'turnControls.strip', [
-        'waiting',
-        'acting',
-        'ended',
-    ]);
     expectLabelKeys('battle', 'critChoice.kinds', ['success', 'fail']);
     expectLabelKeys(
         'gameTerms',

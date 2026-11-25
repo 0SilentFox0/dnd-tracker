@@ -366,7 +366,9 @@
     "doorLocked": "The door is locked",
     "doorDmOnly": "Only the DM can lock doors",
     "doorOpenLock": "Only a closed door can be locked",
-    "doorNotAdjacent": "The door is too far: move next to it"
+    "doorNotAdjacent": "The door is too far: move next to it",
+    "mapHexSquareOnly": "Walls, bars and doors are not available on a hex map",
+    "mapGridChanged": "The library map changed its grid type; it cannot be applied to this battle"
   },
   "spellFx": {
     "riderSave": "🎲 {target}: {rider} — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",

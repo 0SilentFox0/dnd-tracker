@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { inWindow } from '../grid/grid-style';
 import type { MapPlacement } from './token-box';
 
 import { useMoveRoutes } from '@/lib/hooks/battle';
 import { isEscaped } from '@/lib/utils/abilities/engine/core/participants';
 import {
     centreCell,
+    gridOf,
     isFallen,
     isMoveMark,
     tokenBox,
@@ -15,6 +17,7 @@ import type {
     BattleMapActions,
     BattleMapConfig,
     BattleMapView,
+    GridKind,
 } from '@/types/battle-grid';
 
 export interface PlacedToken {
@@ -33,6 +36,19 @@ interface Params {
     wasDragged: () => boolean;
 }
 
+function isOutOfRange(
+    p: BattleParticipant,
+    range: BattleMapView['range'],
+    casterId: string | undefined,
+    grid: GridKind
+) {
+    return (
+        !!range &&
+        p.basicInfo.id !== casterId &&
+        !inWindow(range, centreCell(p, grid))
+    );
+}
+
 export function useMapStageTokens({
     map,
     participants,
@@ -42,11 +58,17 @@ export function useMapStageTokens({
     pxPerUnit,
     wasDragged,
 }: Params) {
+    const grid = gridOf(map);
+
     const modeView = view?.mode;
 
     const onTokenClickProp = actions?.onTokenClick;
 
     const onCellHover = actions?.onCellHover;
+
+    const range = view?.range ?? null;
+
+    const casterId = view?.rangeCasterId;
 
     const routes = useMoveRoutes(map, participants);
 
@@ -62,7 +84,7 @@ export function useMapStageTokens({
                             modeView.visibleIds.has(p.basicInfo.id))
                 )
                 .flatMap((p) => {
-                    const box = tokenBox(p);
+                    const box = tokenBox(p, grid);
 
                     return box
                         ? [
@@ -70,16 +92,23 @@ export function useMapStageTokens({
                                   p,
                                   box,
                                   placement: {
+                                      grid,
                                       box,
                                       mapSize: size,
                                       pxPerUnit,
                                       route: routes.get(p.basicInfo.id),
+                                      dimmed: isOutOfRange(
+                                          p,
+                                          range,
+                                          casterId,
+                                          grid
+                                      ),
                                   } satisfies MapPlacement,
                               },
                           ]
                         : [];
                 }),
-        [participants, modeView, size, pxPerUnit, routes]
+        [participants, modeView, size, pxPerUnit, routes, range, casterId, grid]
     );
 
     const tokens = useMemo(
@@ -105,9 +134,9 @@ export function useMapStageTokens({
                 ? tokens.find((t) => t.p.basicInfo.id === id)
                 : undefined;
 
-            onCellHover?.(token ? centreCell(token.p) : null);
+            onCellHover?.(token ? centreCell(token.p, grid) : null);
         },
-        [tokens, onCellHover]
+        [tokens, onCellHover, grid]
     );
 
     const movingId =

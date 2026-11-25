@@ -20,13 +20,18 @@ import './battle-map.css';
 import { modeUiOf } from '@/components/battle/modes';
 import {
     useGridWindow,
+    useRevealListener,
     useScrollToCurrent,
     useStrokePaint,
 } from '@/lib/hooks/battle';
 import { useElementSize } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-import { minimapViewport } from '@/lib/utils/battle/camera';
-import { mapSize } from '@/lib/utils/battle/grid';
+import {
+    cellPointPx,
+    followTarget,
+    minimapViewport,
+} from '@/lib/utils/battle/camera';
+import { gridOf, mapSize } from '@/lib/utils/battle/grid';
 import type {
     BattleMapActions,
     BattleMapView,
@@ -79,7 +84,12 @@ export function BattleMap({
 
     const { cols, rows } = map;
 
-    const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
+    const grid = gridOf(map);
+
+    const size = useMemo(
+        () => mapSize({ cols, rows }, grid),
+        [cols, rows, grid]
+    );
 
     const { ref: outerRef, size: avail } = useElementSize<HTMLDivElement>({
         contentBox: true,
@@ -96,6 +106,7 @@ export function BattleMap({
     const { svgRef, preview, onStrokeStart } = useStrokePaint({
         painting,
         dims: { cols, rows },
+        grid,
         onStroke: onPaintStroke,
     });
 
@@ -110,7 +121,7 @@ export function BattleMap({
         scrolls,
         pxPerUnit,
         frame,
-    } = useBattleMapFrame(map, avail, phone);
+    } = useBattleMapFrame(map, avail, phone, grid);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -125,6 +136,9 @@ export function BattleMap({
         participants,
         win,
         pxPerUnit,
+        grid,
+        phone,
+        rotated: renderedFit.rotated,
     });
 
     const { zoom, x, y } = camera.camera;
@@ -144,10 +158,67 @@ export function BattleMap({
         scrolls && !cameraMode && (view?.camera?.follow ?? true)
     );
 
+    const { focusPoint } = camera;
+
+    const reveal = useCallback(
+        (id: string) => {
+            if (cameraMode) {
+                const t = followTarget(id, participants, grid);
+
+                if (t)
+                    focusPoint(
+                        cellPointPx(
+                            t.anchor,
+                            t.size,
+                            win,
+                            pxPerUnit,
+                            renderedFit.rotated,
+                            grid
+                        ),
+                        {
+                            animate: true,
+                        }
+                    );
+
+                return;
+            }
+
+            const outer = outerRef.current;
+
+            const token = containerRef.current?.querySelector(
+                `[data-fx-participant="${id}"][data-fx-anchor="map"]`
+            );
+
+            if (!outer || !token) return;
+
+            const t = token.getBoundingClientRect();
+
+            const o = outer.getBoundingClientRect();
+
+            outer.scrollBy({
+                left: t.left + t.width / 2 - (o.left + o.width / 2),
+                top: t.top + t.height / 2 - (o.top + o.height / 2),
+                behavior: 'smooth',
+            });
+        },
+        [
+            cameraMode,
+            participants,
+            focusPoint,
+            win,
+            pxPerUnit,
+            outerRef,
+            renderedFit.rotated,
+            grid,
+        ]
+    );
+
+    useRevealListener(reveal);
+
     const gridWindow = useGridWindow({
         svgRef,
         viewportRef: cameraMode ? containerRef : outerRef,
-        deps: { zoom, offset, size, pxPerUnit },
+        deps: { zoom, offset, size, pxPerUnit, cells: { cols, rows }, grid },
     });
 
     const layout = useMemo(
@@ -155,21 +226,12 @@ export function BattleMap({
             win,
             size,
             pxPerUnit,
-            rotated: cameraMode ? false : fit.rotated,
+            rotated: renderedFit.rotated,
             phone,
             window: gridWindow,
             tiles,
         }),
-        [
-            win,
-            size,
-            pxPerUnit,
-            cameraMode,
-            fit.rotated,
-            phone,
-            gridWindow,
-            tiles,
-        ]
+        [win, size, pxPerUnit, renderedFit.rotated, phone, gridWindow, tiles]
     );
 
     const interaction = useMemo(
@@ -214,7 +276,9 @@ export function BattleMap({
             className={cn(
                 'flex h-full w-full',
                 'relative',
+                phone && 'pt-11',
                 !cameraMode && (phone || scrolls) && 'overflow-auto',
+                !cameraMode && !phone && !scrolls && 'overflow-hidden',
                 !cameraMode && phone && '[scrollbar-gutter:stable]',
                 cameraMode
                     ? 'items-center justify-center'
@@ -232,7 +296,6 @@ export function BattleMap({
                 className={cn(
                     'relative shrink-0 overflow-hidden bg-black select-none',
                     touch,
-                    !phone && 'rounded-xl border border-white/10',
                     // the weapon cursor must beat the inline cursor: pointer on cells and tokens
                     trajectory &&
                         'cursor-(--attack-cursor)! **:cursor-(--attack-cursor)!'
@@ -276,6 +339,7 @@ export function BattleMap({
                     onZoomIn={() => camera.zoomBy(ZOOM_STEP)}
                     onZoomOut={() => camera.zoomBy(1 / ZOOM_STEP)}
                     onRecenter={camera.recenter}
+                    zoom={zoom}
                     canRecenter={
                         cameraMode ? !!selfTarget || !!cameraTarget : zoom > 1
                     }
@@ -291,7 +355,7 @@ export function BattleMap({
                     viewport={minimapViewport(camera.camera, frame)}
                     onPick={camera.flyToMinimap}
                     hiddenCells={[]}
-                    phone={phone}
+                    layout={{ phone, rotated: renderedFit.rotated }}
                 />
             )}
         </div>

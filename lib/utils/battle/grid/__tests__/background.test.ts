@@ -69,7 +69,7 @@ describe('розмір клітинки фону', () => {
                 10,
                 0.6
             )
-        ).toEqual({ left: 0, top: 0, width: 156.25, height: 93.75 });
+        ).toEqual({ left: 0, top: 0, width: 160, height: 93.75 });
     });
 
     it('окрема кількість рядків фону дає неквадратні клітинки; без неї стара поведінка', () => {
@@ -95,5 +95,29 @@ describe('розмір клітинки фону', () => {
         expect(
             backgroundRowsOf({ cols: 20, rows: 12, backgroundCols: 19.8 }, tomb)
         ).toBeCloseTo(12);
+    });
+});
+
+describe('backgroundBox fills the grid', () => {
+    const base = { cols: 24, rows: 13, backgroundCols: 23.5 };
+
+    it('stretches a calibrated image over a sub-cell gap on both axes', () => {
+        const box = backgroundBox(base, 10, 12.4 / 23.5);
+
+        expect(box.width).toBe(240);
+        expect(box.height).toBe(130);
+    });
+
+    it('leaves a gap of a whole cell or more alone', () => {
+        const box = backgroundBox(base, 10, 10 / 23.5);
+
+        expect(box.width).toBe(240);
+        expect(box.height).toBeCloseTo(100);
+    });
+
+    it('keeps an explicit backgroundRows height', () => {
+        const box = backgroundBox({ ...base, backgroundRows: 12.4 }, 10, 0.5);
+
+        expect(box.height).toBeCloseTo(124);
     });
 });

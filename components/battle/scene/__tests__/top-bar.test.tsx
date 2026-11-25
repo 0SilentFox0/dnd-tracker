@@ -16,7 +16,8 @@ vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
     }),
 }));
 
-import { BattleTopBar } from '@/components/battle/scene/layout/BattleTopBar';
+import { ToolsContent } from '@/components/battle/scene/drawers/ToolsDrawer';
+import { RoundBadge } from '@/components/battle/scene/layout/BattleTopBar';
 import { BattleSceneContext } from '@/lib/hooks/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { usePlayerView } from '@/lib/hooks/common';
@@ -24,13 +25,15 @@ import { render } from '@/lib/i18n/test/render-uk';
 
 vi.unmock('next-intl');
 
-describe('BattleTopBar: перемикач анімацій', () => {
+describe('ToolsContent: перемикач анімацій', () => {
     afterEach(cleanup);
 
     it('«Зменшити рух» у системі: кнопка вимкнена з підказкою', () => {
         fx.motionAllowed = false;
 
-        render(<BattleTopBar />, { wrapper: fakeScene().wrapper });
+        render(<ToolsContent audio={{ sound: false }} />, {
+            wrapper: fakeScene().wrapper,
+        });
 
         const toggle = screen.getByRole('button', {
             name: /Анімації дій/,
@@ -43,7 +46,9 @@ describe('BattleTopBar: перемикач анімацій', () => {
     it('рух дозволено: кнопка активна без підказки', () => {
         fx.motionAllowed = true;
 
-        render(<BattleTopBar />, { wrapper: fakeScene().wrapper });
+        render(<ToolsContent audio={{ sound: false }} />, {
+            wrapper: fakeScene().wrapper,
+        });
 
         const toggle = screen.getByRole('button', {
             name: /Анімації дій/,
@@ -54,7 +59,7 @@ describe('BattleTopBar: перемикач анімацій', () => {
     });
 });
 
-describe('BattleTopBar: вигляд гравця', () => {
+describe('ToolsContent: вигляд гравця', () => {
     afterEach(() => {
         cleanup();
         window.sessionStorage.clear();
@@ -99,7 +104,9 @@ describe('BattleTopBar: вигляд гравця', () => {
     };
 
     it('ДМ бачить перемикач, aria-pressed слідує за станом, перемикач лишається ввімкненим', () => {
-        render(<BattleTopBar />, { wrapper: stateful(true) });
+        render(<ToolsContent audio={{ sound: false }} />, {
+            wrapper: stateful(true),
+        });
 
         const btn = () =>
             screen.getByRole('button', {
@@ -108,22 +115,22 @@ describe('BattleTopBar: вигляд гравця', () => {
 
         expect(btn().getAttribute('aria-pressed')).toBe('false');
         expect(
-            screen.queryByRole('button', { name: /Наступний хід/ })
+            screen.queryByRole('button', { name: /Скинути/ })
         ).not.toBeNull();
 
         fireEvent.click(btn());
 
         expect(btn().getAttribute('aria-pressed')).toBe('true');
-        expect(
-            screen.queryByRole('button', { name: /Наступний хід/ })
-        ).toBeNull();
+        expect(screen.queryByRole('button', { name: /Скинути/ })).toBeNull();
         expect(window.sessionStorage.getItem('player-view:b-top')).toBe('on');
     });
 
     it('прапорець у sessionStorage переживає повторне монтування', () => {
         window.sessionStorage.setItem('player-view:b-top', 'on');
 
-        render(<BattleTopBar />, { wrapper: stateful(true) });
+        render(<ToolsContent audio={{ sound: false }} />, {
+            wrapper: stateful(true),
+        });
 
         expect(
             screen
@@ -133,8 +140,38 @@ describe('BattleTopBar: вигляд гравця', () => {
     });
 
     it('гравець не бачить перемикача', () => {
-        render(<BattleTopBar />, { wrapper: stateful(false) });
+        render(<ToolsContent audio={{ sound: false }} />, {
+            wrapper: stateful(false),
+        });
 
         expect(screen.queryByRole('button', { name: /гравця/i })).toBeNull();
+    });
+});
+
+describe('RoundBadge', () => {
+    afterEach(cleanup);
+
+    it('DM gets the next-turn button that calls nextTurn', () => {
+        const scene = fakeScene({ isDM: true });
+
+        render(<RoundBadge />, { wrapper: scene.wrapper });
+
+        fireEvent.click(screen.getByRole('button', { name: /Наступний хід/ }));
+
+        expect(scene.value.actions.nextTurn.mutate).toHaveBeenCalledWith({});
+    });
+
+    it('player has no next-turn button', () => {
+        render(<RoundBadge />, { wrapper: fakeScene().wrapper });
+
+        expect(screen.queryByRole('button')).toBeNull();
+    });
+
+    it('read-only DM (player view) has no next-turn button', () => {
+        render(<RoundBadge />, {
+            wrapper: fakeScene({ isDM: true, playerView: true }).wrapper,
+        });
+
+        expect(screen.queryByRole('button')).toBeNull();
     });
 });

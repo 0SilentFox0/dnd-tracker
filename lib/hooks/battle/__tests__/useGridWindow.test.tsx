@@ -34,7 +34,14 @@ function Probe({ zoom = 1 }: { zoom?: number }) {
     seen = useGridWindow({
         svgRef,
         viewportRef,
-        deps: { zoom, offset: { x: 0, y: 0 }, size: SIZE, pxPerUnit: 1 },
+        deps: {
+            zoom,
+            offset: { x: 0, y: 0 },
+            size: SIZE,
+            pxPerUnit: 1,
+            cells: { cols: SIZE.width / 100, rows: SIZE.height / 100 },
+            grid: 'square',
+        },
     });
 
     return (

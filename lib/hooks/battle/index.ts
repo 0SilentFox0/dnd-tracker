@@ -11,6 +11,7 @@ export {
 } from './use-counter-window';
 export { useAbilityMapAim } from './useAbilityMapAim';
 export { useAbilityPicker } from './useAbilityPicker';
+export { useActionHotkeys } from './useActionHotkeys';
 export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
 export { useAddParticipantForm } from './useAddParticipantForm';
 export { useAttackWizard } from './useAttackWizard';
@@ -33,6 +34,7 @@ export {
     useBattleSceneDataValue,
     useBattleSceneValue,
 } from './useBattleScene';
+export { useBattleSpellLibrary } from './useBattleSpellLibrary';
 export { useBattleTitle } from './useBattleTitle';
 export { type BattleViewMode, useBattleViewMode } from './useBattleViewMode';
 export {
@@ -59,6 +61,13 @@ export { useGearSwap } from './useGearSwap';
 export { useGridWindow } from './useGridWindow';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
+export {
+    type HudBlockKey,
+    toggleHudAll,
+    useHudAllHidden,
+    useHudBlock,
+    useHudHotkey,
+} from './useHudVisibility';
 export type { IngredientLine } from './useIngredientPlan';
 export { useInitiativeDrag } from './useInitiativeDrag';
 export { useInitiativeOrder, useTrackReorder } from './useInitiativeOrder';
@@ -101,8 +110,8 @@ export {
     useParticipantFacesValue,
 } from './useParticipantFace';
 export { usePlayerTurn } from './usePlayerTurn';
+export { type SceneDrawerKey, useSceneDrawers } from './useSceneDrawers';
 export { useScrollToCurrent } from './useScrollToCurrent';
-export { useSelectedParticipant } from './useSelectedParticipant';
 export {
     useBonusSpells,
     useReactionSpells,
@@ -112,6 +121,13 @@ export {
 export { type FxRunner, useSpellFxPlayback } from './useSpellFxPlayback';
 export { useSpellMapTargeting } from './useSpellMapTargeting';
 export { useStrokePaint } from './useStrokePaint';
+export {
+    anchorRect,
+    revealToken,
+    type TokenAnchor,
+    useRevealListener,
+    useTokenAnchor,
+} from './useTokenAnchor';
 export { type GlideFrame, useTokenGlide } from './useTokenGlide';
 export { useTurnCountdown, useTurnTimer } from './useTurnTimer';
 export {

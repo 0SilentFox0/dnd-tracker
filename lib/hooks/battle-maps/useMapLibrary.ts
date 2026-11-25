@@ -11,6 +11,7 @@ import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
 import { useLibraryList, useNotify } from '@/lib/hooks/common';
 import type { UvttImport } from '@/lib/utils/battle/uvtt/parse';
 import { errorMessage } from '@/lib/utils/common/error-message';
+import type { GridKind } from '@/types/battle-grid';
 import type { BattleMapBrief } from '@/types/battle-map';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 
@@ -18,6 +19,7 @@ export interface NewMapForm {
     name: string;
     cols: number;
     rows: number;
+    gridType: GridKind;
 }
 
 const NAME_MAX = 80;
@@ -73,11 +75,11 @@ export function useMapLibrary(campaignId: string) {
 
                 router.push(`/campaigns/${campaignId}/dm/maps/${created.id}`);
             },
-            create: ({ name, cols, rows }: NewMapForm) =>
+            create: ({ name, cols, rows, gridType }: NewMapForm) =>
                 mutations.create.mutate(
                     {
                         name,
-                        map: { ...DEFAULT_BATTLE_MAP, cols, rows },
+                        map: { ...DEFAULT_BATTLE_MAP, cols, rows, gridType },
                         walls: [],
                         bars: [],
                     },

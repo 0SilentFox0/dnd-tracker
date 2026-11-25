@@ -61,6 +61,12 @@ export function turnQueue(
     return all.filter(live);
 }
 
+export function currentRoundQueue(queue: QueueEntry[]): QueueEntry[] {
+    const end = queue.findIndex((e) => e.kind === 'round');
+
+    return end < 0 ? queue : queue.slice(0, end);
+}
+
 export const filterQueueByView = (
     queue: QueueEntry[],
     view: Pick<ModeView, 'visibleIds'>

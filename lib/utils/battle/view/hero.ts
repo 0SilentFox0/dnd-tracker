@@ -1,4 +1,5 @@
 import { ParticipantSide } from '@/lib/constants/battle';
+import { spellLevelRoman } from '@/lib/constants/spells';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
     isAirborne,
@@ -82,6 +83,103 @@ export function pactSlot(
     return pact
         ? { level: pact.level ?? 1, max: pact.max, current: pact.current }
         : null;
+}
+
+export type SlotView = {
+    level: number;
+    roman: string;
+    current: number;
+    max: number;
+    pact?: boolean;
+};
+
+export function heroSlotViews(p: BattleParticipant): SlotView[] {
+    const views: SlotView[] = slotLevels(p)
+        .filter((s) => s.max > 0)
+        .map(({ level, current, max }) => ({
+            level,
+            roman: spellLevelRoman(level),
+            current,
+            max,
+        }));
+
+    const pact = pactSlot(p);
+
+    if (!pact && views.length === 0) return [];
+
+    return pact
+        ? [
+              ...views,
+              {
+                  level: pact.level,
+                  roman: spellLevelRoman(pact.level),
+                  current: pact.current,
+                  max: pact.max,
+                  pact: true,
+              },
+          ]
+        : views;
+}
+
+export function defaultSlotLevel(slots: SlotView[]): number | null {
+    const usable = slots.find((s) => s.current > 0);
+
+    return (usable ?? slots.find((s) => s.max > 0))?.level ?? null;
+}
+
+/** Offset from the portrait centre for slot `i` of `n`, evenly around a full circle starting at the top */
+export function slotRingOffset(
+    i: number,
+    n: number,
+    radius: number
+): { x: number; y: number } {
+    const angle = (2 * Math.PI * i) / Math.max(1, n);
+
+    return {
+        x: Math.round(radius * Math.sin(angle) * 10) / 10,
+        y: Math.round(-radius * Math.cos(angle) * 10) / 10,
+    };
+}
+
+const ARC_START_DEG = -100;
+
+const ARC_STEP_DEG = 21;
+
+/** Offset from the portrait centre for slot `i`: a fixed arc fanning out to the right of the portrait, starting just left of the top */
+export function slotArcOffset(
+    i: number,
+    radius: number
+): { x: number; y: number } {
+    const angle = ((ARC_START_DEG + ARC_STEP_DEG * i) * Math.PI) / 180;
+
+    return {
+        x: Math.round(radius * Math.cos(angle) * 10) / 10,
+        y: Math.round(radius * Math.sin(angle) * 10) / 10,
+    };
+}
+
+/** Arc radius that clears the portrait and keeps neighbouring slots from touching */
+export function slotArcRadius(portrait: number, slot: number): number {
+    const clear = portrait / 2 + slot / 2 + 14;
+
+    const spread = (slot + 2) / (2 * Math.sin((ARC_STEP_DEG * Math.PI) / 360));
+
+    return Math.ceil(Math.max(clear, spread));
+}
+
+/** Box height of the slot arc cluster: never shorter than the portrait, grows when the arc swings below it */
+export function slotArcHeight(
+    n: number,
+    portrait: number,
+    slot: number
+): number {
+    if (n < 1) return portrait;
+
+    const radius = slotArcRadius(portrait, slot);
+
+    const low = slotArcOffset(n - 1, radius).y + portrait / 2 + slot / 2;
+
+    return Math.max(portrait, Math.ceil(low));
 }
 
 export function canCastBonusSpell(

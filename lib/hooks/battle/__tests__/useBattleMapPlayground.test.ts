@@ -164,7 +164,7 @@ describe('useBattleMapPlayground', () => {
         expect(participants.every((p) => p.battleData.position)).toBe(true);
 
         const cells = participants.flatMap((p) => [
-            ...occupiedBy([p], () => true),
+            ...occupiedBy([p], () => true, 'square'),
         ]);
 
         expect(new Set(cells).size).toBe(cells.length);
@@ -186,7 +186,7 @@ describe('useBattleMapPlayground', () => {
         const targetId = result.current.participants.find(
             (p) =>
                 p.basicInfo.side === 'enemy' &&
-                occupiedBy([p], () => true).has(key)
+                occupiedBy([p], () => true, 'square').has(key)
         )!.basicInfo.id;
 
         const hpBefore = result.current.participants.find(

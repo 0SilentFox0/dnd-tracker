@@ -4,12 +4,12 @@ import { canStand } from '../occupancy';
 import {
     moveBudget,
     movementBudget,
+    pathTo,
     reachable,
     remainingMovement,
 } from '../path';
 
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { makeEffect } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
@@ -151,10 +151,9 @@ describe('moveBudget', () => {
             { ...unit, basicInfo: { ...unit.basicInfo, controlledBy: 'dm' } }
         );
 
-    it('ДМ: min(cols*rows, dmMoveCap)', () => {
-        expect(dm(100, 100)).toBe(MAP_LIMITS.dmMoveCap);
-        expect(MAP_LIMITS.dmMoveCap).toBe(60);
-        expect(dm(5, 5)).toBe(25);
+    it('ДМ: така сама швидкість, як у гравця', () => {
+        expect(dm(100, 100)).toBe(6);
+        expect(dm(5, 5)).toBe(6);
     });
 
     it('гравець — залишок швидкості', () => {
@@ -164,5 +163,66 @@ describe('moveBudget', () => {
                 at('h', { x: 0, y: 0 })
             )
         ).toBe(6);
+    });
+});
+
+describe('вибір маршруту', () => {
+    const wide: BattleMapConfig = { ...map, cols: 12, rows: 9 };
+
+    it('при рівній вартості йде прямо, а не діагональним трикутником', () => {
+        const hero = at('h', { x: 0, y: 4 });
+
+        const path = pathTo(wide, [hero], hero, { x: 6, y: 4 }, 6) ?? [];
+
+        expect(path).toHaveLength(6);
+        expect(path.every((c) => c.y === 4)).toBe(true);
+    });
+
+    it('при зсуві по обох осях діагональ не робить гак', () => {
+        const hero = at('h', { x: 0, y: 4 });
+
+        const path = pathTo(wide, [hero], hero, { x: 6, y: 6 }, 6) ?? [];
+
+        expect(path).toHaveLength(6);
+        expect(Math.max(...path.map((c) => c.y))).toBe(6);
+        expect(path.map((c) => c.y)).toEqual(
+            [...path.map((c) => c.y)].sort((a, b) => a - b)
+        );
+    });
+
+    it('обходить союзника, якщо обхід коштує стільки ж, і проходить крізь нього, коли інакше не можна', () => {
+        const hero = at('h', { x: 0, y: 4 });
+
+        const ally = at('a', { x: 3, y: 4 });
+
+        const around = pathTo(wide, [hero, ally], hero, { x: 6, y: 4 }, 6) ?? [];
+
+        expect(around).toHaveLength(6);
+        expect(around.some((c) => c.x === 3 && c.y === 4)).toBe(false);
+
+        const corridor: BattleMapConfig = {
+            ...map,
+            cols: 5,
+            rows: 1,
+        };
+
+        const blocked = at('a', { x: 2, y: 0 });
+
+        const straight = at('h', { x: 0, y: 0 });
+
+        expect(
+            pathTo(corridor, [straight, blocked], straight, { x: 4, y: 0 }, 6)
+        ).toHaveLength(4);
+    });
+
+    it('на hex теж найкоротший по прямій серед рівних', () => {
+        const hex: BattleMapConfig = { ...wide, gridType: 'hex' };
+
+        const hero = at('h', { x: 0, y: 4 });
+
+        const path = pathTo(hex, [hero], hero, { x: 6, y: 4 }, 6) ?? [];
+
+        expect(path).toHaveLength(6);
+        expect(path.every((c) => Math.abs(c.y - 4) <= 1)).toBe(true);
     });
 });

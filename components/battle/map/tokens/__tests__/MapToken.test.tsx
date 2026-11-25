@@ -53,6 +53,7 @@ const token = (hp: number, impact: FxImpact | null) => (
     <MapToken
         participant={p(hp)}
         placement={{
+            grid: 'square',
             box: { cx: 50, cy: 50, size: 100 },
             mapSize: { width: 1000, height: 1000 },
             pxPerUnit: 0.5,
@@ -128,6 +129,7 @@ describe('MapToken status auras', () => {
             <MapToken
                 participant={p(30)}
                 placement={{
+                    grid: 'square',
                     box: { cx: 50, cy: 50, size: 100 },
                     mapSize: { width: 1000, height: 1000 },
                     pxPerUnit: 0.8,

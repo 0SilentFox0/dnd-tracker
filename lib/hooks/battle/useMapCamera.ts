@@ -33,6 +33,10 @@ export interface MapCameraOptions {
         target: CameraTarget | null;
         self: CameraTarget | null;
         enabled: boolean;
+        /** where the initial camera looks when `startOverview` is off or there is no turn target */
+        overview?: CameraTarget | null;
+        /** initial camera shows the whole content instead of the turn target */
+        startOverview?: boolean;
     };
 }
 
@@ -204,7 +208,9 @@ export function useMapCamera({
                       ),
                       activeFrame
                   )
-                : fitAllCamera(activeFrame)
+                : follow.overview
+                  ? centerOn(follow.overview.point, 1, activeFrame)
+                  : fitAllCamera(activeFrame)
         );
         setMovedTurn(null);
     }, [
@@ -212,6 +218,7 @@ export function useMapCamera({
         cancelAnimation,
         follow.self,
         follow.target,
+        follow.overview,
         frameRef,
         updateCamera,
     ]);

@@ -17,12 +17,13 @@ import {
 
 import {
     cellCenter,
+    gridOf,
     type GridWindow,
     isDamagingCell,
     parseCellKey,
     regionFillPath,
     regionOutlinePath,
-    UNIT,
+    unitOf,
 } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -78,33 +79,33 @@ export const GridDefs = memo(function GridDefs() {
             <pattern
                 id={HATCH_ID}
                 patternUnits="userSpaceOnUse"
-                width={UNIT * 0.14}
-                height={UNIT * 0.14}
+                width={unitOf(0.14)}
+                height={unitOf(0.14)}
                 patternTransform="rotate(45)"
             >
                 <line
                     x1="0"
                     y1="0"
                     x2="0"
-                    y2={UNIT * 0.14}
+                    y2={unitOf(0.14)}
                     stroke={GRID_COLORS.barrierHatch}
-                    strokeWidth={UNIT * 0.03}
+                    strokeWidth={unitOf(0.03)}
                 />
             </pattern>
             <pattern
                 id={DIFFICULT_HATCH_ID}
                 patternUnits="userSpaceOnUse"
-                width={UNIT * 0.2}
-                height={UNIT * 0.2}
+                width={unitOf(0.2)}
+                height={unitOf(0.2)}
                 patternTransform="rotate(-45)"
             >
                 <line
                     x1="0"
                     y1="0"
                     x2="0"
-                    y2={UNIT * 0.2}
+                    y2={unitOf(0.2)}
                     stroke={GRID_COLORS.difficultHatch}
-                    strokeWidth={UNIT * 0.035}
+                    strokeWidth={unitOf(0.035)}
                 />
             </pattern>
             <radialGradient id={HAZARD_GRADIENT_ID}>
@@ -157,25 +158,26 @@ export const GridStatic = memo(function GridStatic({
         [map.terrain, blocked]
     );
 
-    const paths = useMemo(() => {
-        const hazard = [...g.damaging, ...g.timed];
-
-        return {
-            wall: regionFillPath(g.wall),
-            barrier: regionFillPath(g.barrier),
-            difficultKind: regionFillPath(g.difficultKind),
-            difficult: regionFillPath(g.difficult),
-            obscured: regionFillPath(g.obscured),
-            zone: regionFillPath(g.zone),
-            damaging: regionFillPath(g.damaging),
-            timed: regionFillPath(g.timed),
-            hazardFill: regionFillPath(hazard),
-            hazardOutline: regionOutlinePath(hazard),
-            blocked: showBlocked ? regionFillPath(blocked) : '',
-        };
-    }, [g, blocked, showBlocked]);
+    const grid = gridOf(map);
 
     const hazardKeys = useMemo(() => [...g.damaging, ...g.timed], [g]);
+
+    const paths = useMemo(
+        () => ({
+            wall: regionFillPath(g.wall, grid),
+            barrier: regionFillPath(g.barrier, grid),
+            difficultKind: regionFillPath(g.difficultKind, grid),
+            difficult: regionFillPath(g.difficult, grid),
+            obscured: regionFillPath(g.obscured, grid),
+            zone: regionFillPath(g.zone, grid),
+            damaging: regionFillPath(g.damaging, grid),
+            timed: regionFillPath(g.timed, grid),
+            hazardFill: regionFillPath(hazardKeys, grid),
+            hazardOutline: regionOutlinePath(hazardKeys, grid),
+            blocked: showBlocked ? regionFillPath(blocked, grid) : '',
+        }),
+        [g, hazardKeys, blocked, showBlocked, grid]
+    );
 
     const flames = useMemo(
         () =>
@@ -263,7 +265,7 @@ export const GridStatic = memo(function GridStatic({
                     </g>
                     <g className="battle-map-flame">
                         {flames.map((k) => {
-                            const c = cellCenter(parseCellKey(k));
+                            const c = cellCenter(parseCellKey(k), grid);
 
                             return (
                                 <use

@@ -1,8 +1,8 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
-import { PORTRAIT_SHARE } from '../constants';
+import { PORTRAIT_DROP, PORTRAIT_SHARE } from '../constants';
 import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
 import { hitFlashClass, Portrait } from '@/components/battle/hud';
@@ -47,11 +47,14 @@ function MapTokenImpl({
         shakeRef,
     } = useHitFx<HTMLButtonElement>(live, impact);
 
-    const { box, mapSize, pxPerUnit } = placement;
+    const { box, mapSize, pxPerUnit, route } = placement;
 
-    const glideRef = useTokenGlide<HTMLDivElement>(
-        routeFrames(placement.route, placement)
+    const frames = useMemo(
+        () => routeFrames(route, { box, mapSize }),
+        [route, box, mapSize]
     );
+
+    const glideRef = useTokenGlide<HTMLDivElement>(frames);
 
     const { id, name } = participant.basicInfo;
 
@@ -66,6 +69,7 @@ function MapTokenImpl({
         <div
             ref={glideRef}
             data-dormant={dormant || undefined}
+            data-dimmed={placement.dimmed || undefined}
             className="pointer-events-none absolute"
             style={{
                 ...tokenBoxStyle(box, mapSize),
@@ -86,11 +90,12 @@ function MapTokenImpl({
                 onPointerEnter={onHover && (() => onHover(id))}
                 onPointerLeave={onHover && (() => onHover(null))}
                 className={cn(
-                    'absolute top-0 left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full',
+                    'absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full',
                     passThrough ? 'pointer-events-none' : 'pointer-events-auto',
                     selected && 'ring-2 ring-[var(--gold)]'
                 )}
                 style={{
+                    top: `${PORTRAIT_DROP * 100}%`,
                     width: `${PORTRAIT_SHARE * 100}%`,
                     height: `${PORTRAIT_SHARE * 100}%`,
                 }}

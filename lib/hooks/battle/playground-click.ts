@@ -13,6 +13,7 @@ import {
     aimView,
     cellKey,
     cellsOf,
+    gridOf,
     type MapAim,
     templateArea,
 } from '@/lib/utils/battle/grid';
@@ -146,7 +147,7 @@ export function playgroundCellClick(
     const target = participants.find(
         (q) =>
             q.basicInfo.side !== active.basicInfo.side &&
-            cellsOf(q).some((c) => cellKey(c) === key)
+            cellsOf(q, gridOf(map)).some((c) => cellKey(c) === key)
     );
 
     if (!target) return;

@@ -63,6 +63,19 @@ const refineBattleMap = (
     m: z.infer<typeof battleMapBase>,
     ctx: z.RefinementCtx
 ) => {
+    if (
+        m.map.gridType === 'hex' &&
+        (m.map.maze ||
+            m.walls.length ||
+            m.bars.length ||
+            Object.keys(m.map.doors ?? {}).length)
+    )
+        ctx.addIssue({
+            code: 'custom',
+            message: 'battleSetup.validation.hexSquareOnly',
+            path: ['map', 'gridType'],
+        });
+
     if (!staticTerrainOnly(m.map.terrain))
         ctx.addIssue({
             code: 'custom',

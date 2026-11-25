@@ -1,16 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ReserveParticipantRow } from './ReserveParticipantRow';
 
 import { SideDot } from '@/components/battle/hud';
-import { HUD_SURFACE, HudButton } from '@/components/hud';
-import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
-import { cn } from '@/lib/utils';
 
 const SIDES = [
     { side: ParticipantSide.ALLY, label: 'allies' },
@@ -62,37 +58,5 @@ export function ReserveGroup() {
             </h3>
             <ReserveList />
         </section>
-    );
-}
-
-export function ReserveSheetButton() {
-    const t = useTranslations('battle.reserve');
-
-    const {
-        roster: { reserve },
-    } = useBattleScene();
-
-    const [open, setOpen] = useState(false);
-
-    if (reserve.length === 0) return null;
-
-    return (
-        <>
-            <HudButton
-                type="button"
-                onClick={() => setOpen(true)}
-                className="hud-sc flex shrink-0 items-center px-2 text-[14px] tracking-[.06em] text-[var(--gold)]"
-            >
-                {t('title', { count: reserve.length })}
-            </HudButton>
-            <ResponsiveDialog
-                open={open}
-                onOpenChange={setOpen}
-                title={t('title', { count: reserve.length })}
-                className={cn(HUD_SURFACE, 'border-white/25 bg-hud-surface')}
-            >
-                <ReserveList />
-            </ResponsiveDialog>
-        </>
     );
 }

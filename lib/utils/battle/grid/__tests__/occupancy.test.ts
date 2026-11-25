@@ -46,7 +46,7 @@ describe('герой, що вмирає (5e), лишається на полі',
         const foe = placed('b', { at: { x: 2, y: 1 } });
 
         expect(isOnMap(dying)).toBe(true);
-        expect(isAdjacent(dying, foe)).toBe(true);
+        expect(isAdjacent(dying, foe, 'square')).toBe(true);
         expect(isFallen(dying)).toBe(false);
     });
 

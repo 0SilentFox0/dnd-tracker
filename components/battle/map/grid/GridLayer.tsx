@@ -21,6 +21,7 @@ export interface GridScene {
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     window: GridWindow | null;
+    through?: string[];
 }
 
 interface GridLayerProps {
@@ -62,6 +63,7 @@ export const GridLayer = memo(function GridLayer({
                 blocked={blocked}
                 marks={marks}
                 range={range}
+                through={scene.through}
                 maskId={maskId}
             />
             <GridHit

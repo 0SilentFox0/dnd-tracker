@@ -1,4 +1,5 @@
 import { cellsConnected, wallsOf } from './edges';
+import { gridOf } from './geometry';
 import { cellsOf, isOnMap } from './occupancy';
 
 import { modeSightedTargets } from '@/lib/utils/battle/modes/engine';
@@ -20,9 +21,11 @@ function allowSight(
 
     if (!isOnMap(viewer) || !isOnMap(target)) return true;
 
-    const from = cellsOf(viewer);
+    const grid = gridOf(map);
 
-    const to = cellsOf(target);
+    const from = cellsOf(viewer, grid);
+
+    const to = cellsOf(target, grid);
 
     if (!zonesAllowSight(map, from, to, blocking)) return false;
 
@@ -52,7 +55,7 @@ export function wallsAllowAim(
 ): boolean {
     if (!map || !wallsOf(map).size || !isOnMap(caster)) return true;
 
-    return cellsConnected(map, 'fire', cellsOf(caster), [aim]);
+    return cellsConnected(map, 'fire', cellsOf(caster, gridOf(map)), [aim]);
 }
 
 export function sightedTargets(

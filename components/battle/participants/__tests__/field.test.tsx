@@ -152,10 +152,10 @@ describe('поле бою', () => {
         expect(screen.getByText('9 / 40')).toBeTruthy();
     });
 
-    it('трек: межа наступного раунду і додатковий хід «+»', () => {
+    it('track: this round only (no next-round boundary), extra turn «+»', () => {
         render(<InitiativeTrack />, { wrapper: wrap(scene()) });
 
-        expect(screen.getByText('IV')).toBeTruthy();
+        expect(screen.queryByText('IV')).toBeNull();
         expect(screen.getAllByText('+').length).toBe(1);
     });
 

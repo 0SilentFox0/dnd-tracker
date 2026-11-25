@@ -25,10 +25,10 @@ export const WFRP_META = {
             dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
         },
         budgetKb: {
-            battle: 117.3,
-            member: 120.3,
+            battle: 117.9,
+            member: 120.9,
             // W8 gear texts, world layers/errors messages and W9 reactive Dispel labels, the canon-tech epic (P1-P12) the system editor fields and the Ch5 character sheet keys grew the wfrp scopes past their old budgets
-            dm: 125.8,
+            dm: 126.3,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },

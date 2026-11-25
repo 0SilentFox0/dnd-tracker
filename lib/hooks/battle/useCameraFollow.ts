@@ -28,6 +28,8 @@ export interface CameraFollowOptions {
         target: CameraTarget | null;
         self: CameraTarget | null;
         enabled: boolean;
+        overview?: CameraTarget | null;
+        startOverview?: boolean;
     };
     flight: Pick<
         Flight,
@@ -71,11 +73,15 @@ export function useCameraFollow({
         }
 
         if (!initialized.current) {
-            const target = follow.self ?? follow.target;
+            const target = follow.startOverview
+                ? null
+                : (follow.self ?? follow.target);
 
             const initial = target
                 ? centerOn(target.point, focusZoomOf(frame), frame)
-                : fitAllCamera(frame);
+                : follow.overview
+                  ? centerOn(follow.overview.point, 1, frame)
+                  : fitAllCamera(frame);
 
             initialized.current = true;
             animationRef.current = requestAnimationFrame(() => {
@@ -123,6 +129,8 @@ export function useCameraFollow({
         modeKey,
         follow.self,
         follow.target,
+        follow.overview,
+        follow.startOverview,
         updateCamera,
         cancelAnimation,
     ]);

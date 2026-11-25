@@ -127,7 +127,8 @@
       "save": "Save tiles",
       "saving": "Saving...",
       "saveFailed": "Failed to save tiles"
-    }
+    },
+    "hexHint": "Hex maps have no walls, bars, doors or textures."
   },
   "catalog": {
     "title": "Map catalog",
@@ -142,5 +143,11 @@
     "add": "Add map to campaign",
     "adding": "Adding map…",
     "importFailed": "Could not import this map."
+  },
+  "grid": {
+    "label": "Grid",
+    "square": "Squares",
+    "hex": "Hexes",
+    "hexHint": "The grid type cannot be changed after the map is created. Hex maps have no maze, walls, bars, doors or textures."
   }
 }

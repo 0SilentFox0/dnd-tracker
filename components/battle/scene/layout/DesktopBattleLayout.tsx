@@ -1,35 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
 import { AwaitingDmBanner } from '../banners/AwaitingDmBanner';
 import { BattleOverBanner } from '../banners/BattleOverBanner';
 import { ConnectionBanner } from '../banners/ConnectionBanner';
-import { LastActionTicker } from '../banners/LastActionTicker';
+import { BattleDrawer } from '../drawers/BattleDrawer';
+import { DrawerRail } from '../drawers/DrawerRail';
+import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
+import { HudBlock, HudRestoreButton } from './HudBlock';
+import { InNoticeStack, MapStripSlotContext } from './MapStrip';
+import {
+    EMPTY_SCENE_SLOTS,
+    type SceneSlots,
+    SceneSlotsContext,
+} from './SceneSlots';
 
 import { SideDot } from '@/components/battle/hud';
 import { BattleLog } from '@/components/battle/log/BattleLog';
+import { TokenBubble } from '@/components/battle/map/bubble/TokenBubble';
 import { BattleMapPanel } from '@/components/battle/map/panels/BattleMapPanel';
-import { MapToolsSlotContext } from '@/components/battle/map/panels/MapToolsSlot';
+import {
+    MapPreviewSlotContext,
+    MapToolsSlotContext,
+} from '@/components/battle/map/panels/MapToolsSlot';
+import { HeroCluster } from '@/components/battle/participants/hero/HeroCluster';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
-import { MyHeroPanel } from '@/components/battle/participants/MyHeroPanel';
-import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
-import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
-import { HudButton } from '@/components/hud';
-import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
+import { TurnDock } from '@/components/battle/turn/dock/TurnDock';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
     useBattleViewMode,
-    useSelectedParticipant,
+    useHudHotkey,
+    useSceneDrawers,
     useTrackReorder,
 } from '@/lib/hooks/battle';
-import { myTurnKey } from '@/lib/utils/battle/view';
+
+const ActionResultCard = dynamic(
+    () =>
+        import('@/components/battle/overlays/ActionResultCard').then(
+            (m) => m.ActionResultCard
+        ),
+    { ssr: false }
+);
 
 const DmPanel = dynamic(
     () => import('@/components/battle/dm/DmPanel').then((m) => m.DmPanel),
@@ -82,134 +100,217 @@ export function DesktopBattleLayout({
 }: {
     onComplete: () => void;
 }) {
-    const t = useTranslations('battle.scene');
+    const t = useTranslations('battle.drawers');
 
     const {
         battle,
         battleId,
         awaiting,
-        roster: { hero },
-        turn: { isMyTurn },
-        viewer: { isDM, readOnly },
-        select,
-        log,
         intents,
+        log,
+        roster: { hero, reserve },
+        viewer: { isDM, readOnly },
     } = useBattleScene();
 
     const onReorder = useTrackReorder();
+
+    useHudHotkey();
 
     const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
     const viewMode = intents.mapAim || intents.mapPick ? 'map' : storedMode;
 
+    const [mapBusy, setMapBusy] = useState(false);
+
     const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
-    const selected = useSelectedParticipant();
+    const [previewSlot, setPreviewSlot] = useState<HTMLDivElement | null>(null);
+
+    const [resultSlot, setResultSlot] = useState<HTMLDivElement | null>(null);
+
+    const [slots, setSlots] = useState<SceneSlots>(EMPTY_SCENE_SLOTS);
+
+    const bindDock = useCallback((el: HTMLDivElement | null) => {
+        setSlots((prev) => (prev.dock === el ? prev : { dock: el }));
+
+        if (!el) return;
+
+        return () =>
+            setSlots((prev) => (prev.dock === el ? { dock: null } : prev));
+    }, []);
+
+    const rootRef = useRef<HTMLDivElement>(null);
+
+    const observeHeight = useCallback(
+        (cssVar: string) => (el: HTMLDivElement | null) => {
+            if (!el || typeof ResizeObserver === 'undefined') return;
+
+            const ro = new ResizeObserver(() =>
+                rootRef.current?.style.setProperty(
+                    cssVar,
+                    `${el.offsetHeight}px`
+                )
+            );
+
+            ro.observe(el);
+
+            return () => ro.disconnect();
+        },
+        []
+    );
+
+    useEffect(() => {
+        const rail = rootRef.current?.querySelector<HTMLElement>(
+            '[data-hud-block="tools"]'
+        );
+
+        if (!rail || typeof ResizeObserver === 'undefined') return;
+
+        const ro = new ResizeObserver(() =>
+            rootRef.current?.style.setProperty(
+                '--hud-rail-w',
+                `${rail.offsetWidth}px`
+            )
+        );
+
+        ro.observe(rail);
+
+        return () => ro.disconnect();
+    }, []);
+
+    const bindColumn = useMemo(
+        () => observeHeight('--hud-dock-h'),
+        [observeHeight]
+    );
+
+    const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
+
+    const sideOpen =
+        active !== null && !(active === 'reserve' && reserve.length === 0);
 
     return (
-        <div className="below-header flex flex-col overflow-hidden">
-            <ConnectionBanner />
-            <BattleTopBar onComplete={onComplete} />
-            {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
-            {awaiting && <AwaitingDmBanner />}
-            <div className="flex h-20 items-center border-y border-white/[.08]">
-                <div className="min-w-0 flex-1">
-                    <InitiativeTrack onReorder={onReorder} />
-                </div>
-                <div className="w-[420px] shrink-0">
-                    <LastActionTicker />
-                </div>
-            </div>
-            <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">
-                <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
-                    {hero && <MyHeroPanel hero={hero} />}
-                    {isMyTurn && hero && (
-                        <MyTurnControls
-                            key={myTurnKey(hero, battle.currentRound)}
-                            hero={hero}
-                        />
-                    )}
-                    {!isMyTurn &&
-                        !isDM &&
-                        !readOnly &&
-                        battle.status === BattleStatus.ACTIVE && (
-                            <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm text-[var(--hud-muted)] italic">
-                                {t('actionsWait')}
-                            </div>
+        <SceneSlotsContext value={slots}>
+            <MapStripSlotContext value={resultSlot}>
+                <div
+                    ref={rootRef}
+                    style={
+                        {
+                            '--hud-side-w': sideOpen ? '340px' : '0px',
+                        } as React.CSSProperties
+                    }
+                    className="scene-full relative flex flex-col overflow-hidden"
+                >
+                    <div className="relative min-h-0 flex-1">
+                        {battle.map && viewMode === 'map' ? (
+                            <main className="absolute inset-0">
+                                <MapToolsSlotContext.Provider value={toolsSlot}>
+                                    <MapPreviewSlotContext.Provider
+                                        value={previewSlot}
+                                    >
+                                        <BattleMapPanel
+                                            onBusyChange={setMapBusy}
+                                        />
+                                    </MapPreviewSlotContext.Provider>
+                                </MapToolsSlotContext.Provider>
+                            </main>
+                        ) : (
+                            <main className="absolute inset-0 grid grid-cols-2 content-start gap-6 overflow-y-auto pt-28 pr-6 pb-40 pl-6">
+                                <BattleColumns />
+                            </main>
                         )}
-                    {isDM && <DmPanel />}
-                    {battle.map && viewMode === 'map' && <ReserveGroup />}
-                </aside>
-                {battle.map ? (
-                    <main className="flex min-h-0 flex-col">
+                        <BattleTopBar />
+                        <HudBlock
+                            block="initiative"
+                            edge="top"
+                            align="center"
+                            className="pointer-events-none absolute top-2 left-1/2 z-20 w-[min(560px,calc(100%-2*max(240px,var(--hud-side-w,0px))))] -translate-x-1/2"
+                        >
+                            <div className="pointer-events-auto mx-auto w-fit max-w-full">
+                                <InitiativeTrack onReorder={onReorder} />
+                            </div>
+                        </HudBlock>
+                        <InNoticeStack>
+                            <ConnectionBanner />
+                            {battle.status === BattleStatus.COMPLETED && (
+                                <BattleOverBanner />
+                            )}
+                            {awaiting && <AwaitingDmBanner />}
+                        </InNoticeStack>
+                        <TokenBubble mapBusy={mapBusy} />
+                        {hero && (
+                            <HudBlock
+                                block="hero"
+                                edge="bottom"
+                                align="end"
+                                className="pointer-events-none absolute bottom-3 left-3 z-20"
+                            >
+                                <HeroCluster hero={hero} />
+                            </HudBlock>
+                        )}
+                        <TurnDock />
+                        <HudRestoreButton />
+                        <HudBlock
+                            block="tools"
+                            edge="right"
+                            className="pointer-events-none absolute top-2 right-3 z-50 gap-1.5"
+                        >
+                            <DrawerRail active={active} onToggle={toggle} />
+                        </HudBlock>
                         <div
-                            data-tour="battle.map-tools"
-                            className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-1 pt-1"
+                            ref={bindColumn}
+                            className="pointer-events-none absolute right-[calc(0.75rem+var(--hud-side-w,0px))] bottom-3 z-20 flex w-[min(370px,calc(100%-24px-var(--hud-side-w,0px)))] flex-col items-stretch gap-2"
                         >
                             <div
-                                ref={setToolsSlot}
-                                className="flex min-w-0 items-center"
+                                ref={setResultSlot}
+                                className="pointer-events-auto empty:hidden"
                             />
-                            <HudChipTabs
-                                ariaLabel={t('viewMode')}
-                                items={[
-                                    {
-                                        key: 'map',
-                                        label: t('viewMap'),
-                                        active: viewMode === 'map',
-                                        onSelect: () => setViewMode('map'),
-                                    },
-                                    {
-                                        key: 'columns',
-                                        label: t('viewColumns'),
-                                        active: viewMode === 'columns',
-                                        onSelect: () => setViewMode('columns'),
-                                    },
-                                ]}
-                            />
+                            <HudBlock block="dock" edge="bottom" align="end">
+                                <div
+                                    ref={bindDock}
+                                    className="pointer-events-none flex flex-col items-stretch gap-2 *:pointer-events-auto"
+                                />
+                            </HudBlock>
                         </div>
-                        {viewMode === 'map' ? (
-                            <div className="min-h-0 flex-1 p-1">
-                                <MapToolsSlotContext.Provider value={toolsSlot}>
-                                    <BattleMapPanel />
-                                </MapToolsSlotContext.Provider>
-                            </div>
-                        ) : (
-                            <div className="grid min-h-0 flex-1 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
-                                <BattleColumns />
-                            </div>
-                        )}
-                    </main>
-                ) : (
-                    <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
-                        <BattleColumns />
-                    </main>
-                )}
-                <aside
-                    data-tour="battle.log"
-                    className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4"
-                >
-                    <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
-                        {selected ? t('participant') : t('log')}
-                        {selected && (
-                            <HudButton
-                                type="button"
-                                onClick={() => select(null)}
-                                className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]"
-                            >
-                                {t('backToLog')}
-                            </HudButton>
-                        )}
-                    </h3>
-                    {selected ? (
-                        <div className="pt-3">
-                            <ParticipantDetails participant={selected} />
-                        </div>
-                    ) : (
-                        <BattleLog key={log.focus ?? 'latest'} />
+                    </div>
+                    <ActionResultCard />
+                    {isDM && !readOnly && (
+                        <DmPanel
+                            panel={{
+                                open: drawer === 'dm',
+                                onOpenChange: onOpenChange('dm'),
+                            }}
+                        />
                     )}
-                </aside>
-            </div>
-        </div>
+                    <BattleDrawer
+                        drawer="log"
+                        open={log.open}
+                        onOpenChange={(o) => !o && log.close()}
+                        title={t('log')}
+                    >
+                        <BattleLog key={log.focus ?? 'latest'} />
+                    </BattleDrawer>
+                    {battle.map && (
+                        <BattleDrawer
+                            drawer="reserve"
+                            open={drawer === 'reserve' && reserve.length > 0}
+                            onOpenChange={onOpenChange('reserve')}
+                            title={t('reserve')}
+                        >
+                            <ReserveGroup />
+                        </BattleDrawer>
+                    )}
+                    <ToolsDrawer
+                        panel={{
+                            open: drawer === 'tools',
+                            onOpenChange: onOpenChange('tools'),
+                        }}
+                        onComplete={onComplete}
+                        view={{ mode: viewMode, set: setViewMode }}
+                        slots={{ tools: setToolsSlot, preview: setPreviewSlot }}
+                        onOpenDrawer={toggle}
+                    />
+                </div>
+            </MapStripSlotContext>
+        </SceneSlotsContext>
     );
 }

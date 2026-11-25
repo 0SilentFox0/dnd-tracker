@@ -1,7 +1,13 @@
 import { pickAttack } from './attack-reach';
-import { cellKey, footprint, parseCellKey } from './geometry';
-import { cellsOf, isOnMap, sizeOf } from './occupancy';
-import { moveBudget, reachable } from './path';
+import {
+    cellDistance,
+    cellKey,
+    footprint,
+    gridOf,
+    parseCellKey,
+} from './geometry';
+import { cellsOf, footprintSizeOf, isOnMap } from './occupancy';
+import { moveBudget, type PathSearch, searchPaths } from './path';
 import { hazardCells, threatCells } from './terrain';
 
 import { isAttackable } from '@/lib/utils/abilities/engine/core/participants';
@@ -11,18 +17,19 @@ import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
     BattleMapMark,
+    GridKind,
     GridPoint,
 } from '@/types/battle-grid';
 
 export type CellMark = BattleMapMark;
 
-export function moveMarks(
+export function moveSearch(
     map: BattleMapConfig,
     participants: BattleParticipant[],
     mover: BattleParticipant,
     opts: { rules: Ruleset; dmUserId?: string | null }
-): Map<string, number> {
-    return reachable(
+): PathSearch {
+    return searchPaths(
         map,
         participants,
         mover,
@@ -33,6 +40,15 @@ export function moveMarks(
     );
 }
 
+export function moveMarks(
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    mover: BattleParticipant,
+    opts: { rules: Ruleset; dmUserId?: string | null }
+): Map<string, number> {
+    return moveSearch(map, participants, mover, opts).cost;
+}
+
 export const isMoveMark = (m: CellMark | number | undefined): boolean =>
     typeof m === 'number' || m === 'move' || m === 'move-danger';
 
@@ -41,11 +57,16 @@ export interface MoveStep {
     cost: number;
 }
 
-function closerStep(a: MoveStep, b: MoveStep, from: GridPoint): boolean {
+function closerStep(
+    a: MoveStep,
+    b: MoveStep,
+    from: GridPoint,
+    grid: GridKind
+): boolean {
     if (a.cost !== b.cost) return a.cost < b.cost;
 
     const d = (s: MoveStep) => [
-        Math.max(Math.abs(s.anchor.x - from.x), Math.abs(s.anchor.y - from.y)),
+        cellDistance(s.anchor, from, grid),
         Math.abs(s.anchor.x - from.x) + Math.abs(s.anchor.y - from.y),
         s.anchor.y,
         s.anchor.x,
@@ -64,9 +85,26 @@ export function moveSteps(
     mover: BattleParticipant,
     opts: { rules: Ruleset; dmUserId?: string | null }
 ): Map<string, MoveStep> {
-    const anchors = moveMarks(map, participants, mover, opts);
+    return moveReach(map, participants, mover, opts).steps;
+}
 
-    const size = sizeOf(mover);
+export function moveReach(
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    mover: BattleParticipant,
+    opts: { rules: Ruleset; dmUserId?: string | null }
+): { steps: Map<string, MoveStep>; search: PathSearch } {
+    const search = moveSearch(map, participants, mover, opts);
+
+    return { steps: stepsOf(search.cost, mover, gridOf(map)), search };
+}
+
+function stepsOf(
+    anchors: Map<string, number>,
+    mover: BattleParticipant,
+    grid: GridKind
+): Map<string, MoveStep> {
+    const size = footprintSizeOf(mover, grid);
 
     const from = mover.battleData.position;
 
@@ -79,17 +117,17 @@ export function moveSteps(
         return steps;
     }
 
-    const own = new Set(cellsOf(mover).map(cellKey));
+    const own = new Set(cellsOf(mover, grid).map(cellKey));
 
     for (const [key, cost] of anchors) {
         const step = { anchor: parseCellKey(key), cost };
 
-        for (const cell of footprint(step.anchor, size)) {
+        for (const cell of footprint(step.anchor, size, grid)) {
             const k = cellKey(cell);
 
             const kept = steps.get(k);
 
-            if (!own.has(k) && (!kept || closerStep(step, kept, from)))
+            if (!own.has(k) && (!kept || closerStep(step, kept, from, grid)))
                 steps.set(k, step);
         }
     }
@@ -145,7 +183,7 @@ export function targetMarks(
             ? 'target'
             : 'invalid-target';
 
-        for (const c of cellsOf(t)) marks.set(cellKey(c), mark);
+        for (const c of cellsOf(t, gridOf(map))) marks.set(cellKey(c), mark);
     }
 
     return marks;

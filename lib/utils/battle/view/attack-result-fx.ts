@@ -1,10 +1,10 @@
+import { counterOutcome } from './counter-outcome';
 import { critOutcome } from './crit-outcome';
 import {
     type BattleKnowledge,
     formatKnownArmorClass,
     resolveKnownArmorClass,
 } from './knowledge';
-import { counterOutcome } from './counter-outcome';
 import { volleyResults } from './volley-results';
 
 import type { AttackOutcomeSummary } from '@/lib/utils/battle/flows';

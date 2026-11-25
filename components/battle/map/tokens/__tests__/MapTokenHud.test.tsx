@@ -56,6 +56,7 @@ const hud = (
         exact?: boolean;
         effects?: ActiveEffect[];
         px?: number;
+        hovered?: boolean;
         onReturn?: () => void;
     } = {}
 ) =>
@@ -63,9 +64,11 @@ const hud = (
         <MapTokenHud
             participant={unit(over.hp ?? 30, over.size)}
             placement={{
+                grid: 'square',
                 box: { cx: 50, cy: 50, size: 100 * (over.size ?? 1) },
                 mapSize: { width: 1000, height: 1000 },
                 pxPerUnit: over.px ?? 0.8,
+                hovered: over.hovered,
             }}
             exact={over.exact ?? true}
             raised={false}
@@ -84,7 +87,7 @@ afterEach(() => {
 });
 
 describe('MapTokenHud bar', () => {
-    it('exact: заливка й слід на частку HP, тон за порогами, число всередині смуги', () => {
+    it('заливка й слід на частку HP, тон за порогами, без тексту й імені', () => {
         const { container } = hud({ hp: 30 });
 
         const bar = q(container, '[data-map-hud-bar]');
@@ -92,7 +95,9 @@ describe('MapTokenHud bar', () => {
         expect(q(bar, '[data-map-hud-fill]').style.width).toBe('75%');
         expect(q(bar, '[data-map-hud-trail]').style.width).toBe('75%');
         expect(bar.dataset.hpTone).toBe('high');
-        expect(bar.textContent).toBe('30/40');
+        expect(parseFloat(bar.style.height)).toBeLessThanOrEqual(5);
+        expect(container.textContent).toBe('');
+        expect(container.querySelector('[data-map-hud-name]')).toBeNull();
     });
 
     it.each([
@@ -104,55 +109,64 @@ describe('MapTokenHud bar', () => {
         expect(q(container, '[data-map-hud-bar]').dataset.hpTone).toBe(tone);
     });
 
-    it('не exact: мітка стану замість чисел, ширина за сегментами', () => {
+    it('не exact: ширина за сегментами', () => {
         const { container } = hud({ hp: 15, exact: false });
 
-        const bar = q(container, '[data-map-hud-bar]');
-
-        expect(bar.textContent).toBe('закривавлений');
-        expect(bar.textContent).not.toMatch(/\d/);
-        expect(q(bar, '[data-map-hud-fill]').style.width).toBe('50%');
+        expect(q(container, '[data-map-hud-fill]').style.width).toBe('50%');
     });
 
-    it("великий токен показує ім'я над смугою", () => {
-        const { container } = hud({ size: 2 });
+    it('товщина смуги росте з масштабом, але лишається тонкою', () => {
+        const thin = parseFloat(
+            q(hud({ px: 0.3 }).container, '[data-map-hud-bar]').style.height
+        );
 
-        const strip = q(container, '[data-map-hud-strip]');
+        const thick = parseFloat(
+            q(hud({ size: 2, px: 1.5 }).container, '[data-map-hud-bar]').style
+                .height
+        );
 
-        expect(strip.textContent).toContain('Огр');
-        expect(strip.lastElementChild?.hasAttribute('data-map-hud-bar')).toBe(
-            true
+        expect(thin).toBeLessThanOrEqual(thick);
+        expect(thick).toBeLessThanOrEqual(5);
+    });
+});
+
+describe('MapTokenHud hover tip', () => {
+    it("exact: при наведенні — ім'я й cur/max", () => {
+        const { container } = hud({ hp: 30, hovered: true });
+
+        const tip = q(container, '[data-map-hud-tip]');
+
+        expect(q(tip, '[data-map-hud-name]').textContent).toBe('Огр');
+        expect(q(tip, '[data-map-hud-value]').textContent).toBe('30/40');
+        expect(tip.className).not.toContain('pointer-events-auto');
+    });
+
+    it('не exact: при наведенні — мітка стану без чисел', () => {
+        const { container } = hud({ hp: 15, exact: false, hovered: true });
+
+        expect(q(container, '[data-map-hud-value]').textContent).toBe(
+            'закривавлений'
+        );
+        expect(q(container, '[data-map-hud-tip]').textContent).not.toMatch(
+            /\d/
         );
     });
 
-    it("малий токен теж показує ім'я, але дрібнішим шрифтом", () => {
-        const nameFont = (c: HTMLElement) =>
-            parseFloat(q(c, '[data-map-hud-name]').style.fontSize);
+    it('без наведення підказки немає', () => {
+        const { container } = hud({ hp: 30 });
 
-        const small = hud({ size: 1 }).container;
-
-        const big = hud({ size: 2 }).container;
-
-        expect(q(small, '[data-map-hud-strip]').textContent).toContain('Огр');
-        expect(nameFont(small)).toBeLessThan(nameFont(big));
+        expect(container.querySelector('[data-map-hud-tip]')).toBeNull();
     });
 });
 
 describe('MapTokenHud fit', () => {
-    it('середня клітинка — лише тонка смуга без тексту', () => {
-        const { container } = hud({ px: 0.5 });
-
-        expect(container.querySelector('[data-map-hud-name]')).toBeNull();
-        expect(q(container, '[data-map-hud-bar]').textContent).toBe('');
-    });
-
     it('дрібна клітинка — HUD прибраний повністю, щоб не закривати жетон', () => {
         const { container } = hud({ px: 0.15 });
 
         expect(container.firstChild).toBeNull();
     });
 
-    it('дрібна клітинка з кнопкою повернення — кнопка лишається, плашки немає', () => {
+    it('дрібна клітинка з кнопкою повернення — кнопка лишається, смуги немає', () => {
         const { container } = hud({ px: 0.15, onReturn: vi.fn() });
 
         expect(container.querySelector('[data-map-return]')).not.toBeNull();

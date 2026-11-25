@@ -2,6 +2,7 @@ import { eventActorId, eventTargetIds } from './events';
 import { findParticipant, isDormant, isTargetable } from './participants';
 
 import type { AbilityTarget } from '@/lib/utils/abilities/schema';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { nearestTo } from '@/lib/utils/battle/grid/nearest';
 import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
 import { modeSees } from '@/lib/utils/battle/modes/engine';
@@ -52,7 +53,7 @@ export function resolveTargetIds(
 
             const from = findParticipant(ps, taken[0] ?? '');
 
-            const pick = from ? nearestTo(from, others) : others[0];
+            const pick = from ? nearestTo(from, others, gridOf(map)) : others[0];
 
             return pick ? [pick.basicInfo.id] : [];
         }

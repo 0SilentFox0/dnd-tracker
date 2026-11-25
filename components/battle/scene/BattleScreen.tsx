@@ -2,6 +2,8 @@
 
 import { type ComponentType, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 import { BattleToast } from './banners/BattleToast';
 import { CornerStack } from './layout/CornerStack';
@@ -19,7 +21,6 @@ import {
 } from '@/components/battle/use-system-battle-ui';
 import { hudFontClassName } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
-import { SoundboardPanel } from '@/components/soundboard/SoundboardPanel';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
@@ -33,7 +34,6 @@ import {
     usePlayerViewKey,
 } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-import { myTurnKey } from '@/lib/utils/battle/view';
 import type { BattlePreparationParticipant } from '@/types/battle';
 
 type DesktopLayout = ComponentType<{ onComplete: () => void }>;
@@ -69,14 +69,6 @@ const CompleteBattleDialog = dynamic(
     () =>
         import('@/components/battle/dm/CompleteBattleDialog').then(
             (m) => m.CompleteBattleDialog
-        ),
-    { ssr: false }
-);
-
-const ActionResultCard = dynamic(
-    () =>
-        import('@/components/battle/overlays/ActionResultCard').then(
-            (m) => m.ActionResultCard
         ),
     { ssr: false }
 );
@@ -124,6 +116,8 @@ const onFieldCount = (participants: BattlePreparationParticipant[]) =>
     );
 
 export function BattleScreen() {
+    const tTop = useTranslations('battle.topBar');
+
     const {
         battle,
         viewer: { isDM, readOnly },
@@ -147,13 +141,11 @@ export function BattleScreen() {
 
     const [completeOpen, setCompleteOpen] = useState(false);
 
+    const onComplete = () => setCompleteOpen(true);
+
     useEffect(() => {
         if (readOnly) setCompleteOpen(false);
     }, [readOnly]);
-
-    // as on phones: a new turn collapses the player, otherwise the expanded panel covers the morale and action buttons
-    const turnKey =
-        hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
     const [notices, setNotices] = useState<HTMLElement | null>(null);
 
@@ -177,7 +169,7 @@ export function BattleScreen() {
             {battle.status === BattleStatus.PREPARED ? (
                 <div
                     className={cn(
-                        'battle-hud below-header overflow-y-auto',
+                        'battle-hud scene-full overflow-y-auto',
                         hudFontClassName
                     )}
                 >
@@ -202,26 +194,35 @@ export function BattleScreen() {
                         canStart={onFieldCount(battle.participants) > 0}
                     />
                     <BattlePlayerViewToggle className="fixed top-3 right-3 z-50" />
+                    <Link
+                        href={`/campaigns/${battle.campaignId}`}
+                        className="hud-sc fixed top-3 left-3 z-50 flex h-10 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
+                    >
+                        {tTop('toCampaign')}
+                    </Link>
                     <CornerStack>
                         <AudioDock placement="corner" />
                     </CornerStack>
                 </div>
             ) : (
                 <div className={cn('battle-hud', hudFontClassName)}>
-                    {Desktop ? (
-                        <Desktop onComplete={() => setCompleteOpen(true)} />
-                    ) : (
-                        <NoticeStackContext value={notices}>
-                            <MobileBattleLayout />
-                        </NoticeStackContext>
-                    )}
+                    <NoticeStackContext value={notices}>
+                        {Desktop ? (
+                            <Desktop onComplete={onComplete} />
+                        ) : (
+                            <MobileBattleLayout onComplete={onComplete} />
+                        )}
+                    </NoticeStackContext>
                     {battle.status === BattleStatus.COMPLETED && (
                         <BattleResultScreen />
                     )}
                     <div
                         ref={setNotices}
                         data-notice-stack
-                        className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto"
+                        className={cn(
+                            'pointer-events-none fixed inset-x-4 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto',
+                            Desktop ? 'top-[116px]' : 'top-[148px]'
+                        )}
                     >
                         <BattleToast />
                         <CounterWindowBanner />
@@ -232,26 +233,12 @@ export function BattleScreen() {
                             <OnboardingHint id="player.battle" />
                         )}
                     </div>
-                    {Desktop && (
-                        <CornerStack>
-                            <ActionResultCard />
-                            <AudioDock
-                                placement="corner"
-                                collapseOn={turnKey}
-                            />
-                            {isDM && !readOnly && (
-                                <SoundboardPanel
-                                    campaignId={battle.campaignId}
-                                />
-                            )}
-                        </CornerStack>
-                    )}
                     {isDM && <DmRevivePrompt />}
                     <CounterWindowDialog />
                     {systemDialogs?.map((Dialog, i) => (
                         <Dialog key={i} />
                     ))}
-                    {Desktop && isDM && (
+                    {isDM && (
                         <CompleteBattleDialog
                             open={completeOpen}
                             onOpenChange={setCompleteOpen}

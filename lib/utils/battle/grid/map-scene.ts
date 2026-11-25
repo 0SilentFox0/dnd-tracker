@@ -1,15 +1,16 @@
 import { pickAttack } from './attack-reach';
-import { cellKey } from './geometry';
+import { cellKey, gridOf, inBounds } from './geometry';
+import { hexDisk } from './hex';
 import type { GridWindow } from './layout';
 import { lineOfFire } from './line-of-fire';
 import {
     type CellMark,
     isMoveMark,
-    moveSteps,
+    moveReach,
     moveZoneMarks,
     targetMarks,
 } from './map-view';
-import { cellsOf, isOnMap, sizeOf } from './occupancy';
+import { cellsOf, footprintSizeOf, isOnMap } from './occupancy';
 import { wallsAllowAim } from './sight';
 import {
     apexOf,
@@ -41,6 +42,7 @@ import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
     BattleMapView,
+    GridKind,
     GridPoint,
     SpellTemplate,
 } from '@/types/battle-grid';
@@ -106,10 +108,10 @@ export interface MapScene {
     tokenClick(id: string): MapClick;
 }
 
-export function centreCell(p: BattleParticipant): GridPoint {
-    const [anchor] = cellsOf(p);
+export function centreCell(p: BattleParticipant, grid: GridKind): GridPoint {
+    const [anchor] = cellsOf(p, grid);
 
-    const offset = Math.floor((sizeOf(p) - 1) / 2);
+    const offset = Math.floor((footprintSizeOf(p, grid) - 1) / 2);
 
     return { x: anchor.x + offset, y: anchor.y + offset };
 }
@@ -137,7 +139,7 @@ function enemyAt(
             !!of &&
             isHostile(map, of, x) &&
             isOnMap(x) &&
-            cellsOf(x).some((c) => cellKey(c) === key)
+            cellsOf(x, gridOf(map)).some((c) => cellKey(c) === key)
     );
 }
 
@@ -205,15 +207,18 @@ export function aimView(
 } | null {
     const caster = findParticipant(participants, aim.casterId);
 
+    const grid = gridOf(map);
+
     if (
         !caster ||
         !isOnMap(caster) ||
         !templateAimAllowed(
-            cellsOf(caster),
+            cellsOf(caster, grid),
             aim.template,
             at,
             aim.range,
-            rules
+            rules,
+            grid
         ) ||
         modeAimHiddenText(map, caster, at) ||
         !wallsAllowAim(map, caster, at)
@@ -234,7 +239,9 @@ export function aimView(
     const { shape, hollow } = aim.template;
 
     const pulseFrom =
-        shape === 'cone' || shape === 'line' ? apexOf(cellsOf(caster), at) : at;
+        shape === 'cone' || shape === 'line'
+            ? apexOf(cellsOf(caster, grid), at, grid)
+            : at;
 
     return {
         marks: new Map(cells.map((key) => [key, 'template' as const])),
@@ -243,7 +250,7 @@ export function aimView(
     };
 }
 
-function rangeWindow(
+export function rangeWindow(
     map: BattleMapConfig,
     origin: GridPoint[],
     rangeFeet: number,
@@ -252,6 +259,26 @@ function rangeWindow(
     if (!origin.length) return { x: 0, y: 0, cols: 0, rows: 0 };
 
     const r = feetToCells(rangeFeet, rules);
+
+    if (gridOf(map) === 'hex') {
+        const cells = origin
+            .flatMap((o) => hexDisk(o, r))
+            .filter((c) => inBounds(map, c));
+
+        if (!cells.length) return { x: 0, y: 0, cols: 0, rows: 0 };
+
+        const x0 = Math.min(...cells.map((c) => c.x));
+
+        const y0 = Math.min(...cells.map((c) => c.y));
+
+        return {
+            x: x0,
+            y: y0,
+            cols: Math.max(...cells.map((c) => c.x)) - x0 + 1,
+            rows: Math.max(...cells.map((c) => c.y)) - y0 + 1,
+            cells: [...new Set(cells.map(cellKey))],
+        };
+    }
 
     const xs = origin.map((c) => c.x);
 
@@ -292,10 +319,14 @@ function openMoveZone({
     dmUserId,
     rules,
 }: MoveZoneInput): MoveZone {
-    const steps = moveSteps(map, participants, mover, { dmUserId, rules });
+    const { steps, search } = moveReach(map, participants, mover, {
+        dmUserId,
+        rules,
+    });
 
     return {
         steps,
+        search,
         marks: moveZoneMarks(map, participants, mover, {
             dmUserId,
             rules,
@@ -322,6 +353,7 @@ interface SceneState {
     attacks: BattleParticipant['battleData']['attacks'];
     marks: Map<string, CellMark | number>;
     steps: MoveZone['steps'] | null;
+    search: MoveZone['search'] | null;
 }
 
 const canSee = (p: BattleParticipant, { isDM, viewer }: MapSceneActor) =>
@@ -361,7 +393,8 @@ function resolveMode(
 
 function pickMarks(
     participants: BattleParticipant[],
-    pick: MapPick
+    pick: MapPick,
+    grid: GridKind
 ): Map<string, CellMark> {
     const marks = new Map<string, CellMark>();
 
@@ -376,7 +409,7 @@ function pickMarks(
               ? 'picked'
               : 'pick';
 
-        for (const c of cellsOf(target)) marks.set(cellKey(c), mark);
+        for (const c of cellsOf(target, grid)) marks.set(cellKey(c), mark);
     }
 
     return marks;
@@ -414,7 +447,11 @@ function buildMarks(
     >,
     aimed: ReturnType<typeof aimView>,
     modeView: ModeView | null | undefined
-): { marks: Map<string, CellMark | number>; steps: SceneState['steps'] } {
+): {
+    marks: Map<string, CellMark | number>;
+    steps: SceneState['steps'];
+    search: SceneState['search'];
+} {
     const { map, rules, participants, actor, aim, pick } = state;
 
     const { current, viewer, canAct, isDM } = actor;
@@ -461,24 +498,31 @@ function buildMarks(
     }
 
     if (pick)
-        for (const [key, mark] of pickMarks(participants, pick))
+        for (const [key, mark] of pickMarks(participants, pick, gridOf(map)))
             marks.set(key, mark);
 
-    return { marks, steps: zone?.steps ?? null };
+    return {
+        marks,
+        steps: zone?.steps ?? null,
+        search: zone?.search ?? null,
+    };
 }
 
 function aimClick(s: SceneState, p: GridPoint): MapClick {
     const { aim, aimCaster, map, participants, rules } = s;
 
+    const grid = gridOf(map);
+
     if (
         !aim ||
         !aimCaster ||
         !templateAimAllowed(
-            cellsOf(aimCaster),
+            cellsOf(aimCaster, grid),
             aim.template,
             p,
             aim.range,
-            rules
+            rules,
+            grid
         )
     )
         return { kind: 'reject', reason: textRef(REJECT.outOfRange) };
@@ -523,7 +567,7 @@ function attackClick(
     )
         return null;
 
-    const mark = marks.get(cellKey(cellsOf(target)[0]));
+    const mark = marks.get(cellKey(cellsOf(target, gridOf(map))[0]));
 
     if (mark !== 'target' && mark !== 'invalid-target') return null;
 
@@ -560,7 +604,7 @@ function tokenClickOf(s: SceneState, id: string): MapClick {
 
     if (s.aim)
         return target && isOnMap(target)
-            ? aimClick(s, centreCell(target))
+            ? aimClick(s, centreCell(target, gridOf(s.map)))
             : { kind: 'none' };
 
     if (s.pick) return pickClick(s.pick, id);
@@ -596,7 +640,9 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
 
     if (s.pick) {
         const occupant = s.participants.find(
-            (x) => isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key)
+            (x) =>
+                isOnMap(x) &&
+                cellsOf(x, gridOf(s.map)).some((c) => cellKey(c) === key)
         );
 
         return occupant
@@ -609,7 +655,7 @@ function cellClickOf(s: SceneState, p: GridPoint): MapClick {
     if (
         current &&
         isOnMap(current) &&
-        cellsOf(current).some((c) => cellKey(c) === key)
+        cellsOf(current, gridOf(s.map)).some((c) => cellKey(c) === key)
     )
         return { kind: 'select', id: current.basicInfo.id };
 
@@ -648,7 +694,12 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
         aimCaster &&
         aim.range !== undefined &&
         isCenteredTemplate(aim.template)
-            ? rangeWindow(map, cellsOf(aimCaster), aim.range, rules)
+            ? rangeWindow(
+                  map,
+                  cellsOf(aimCaster, gridOf(map)),
+                  aim.range,
+                  rules
+              )
             : null;
 
     const aimed = aim?.aim
@@ -665,9 +716,9 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
         attacks: current?.battleData.attacks ?? [],
     };
 
-    const { marks, steps } = buildMarks(base, aimed, modeView);
+    const { marks, steps, search } = buildMarks(base, aimed, modeView);
 
-    const state: SceneState = { ...base, marks, steps };
+    const state: SceneState = { ...base, marks, steps, search };
 
     const hud: NonNullable<BattleMapView['hud']> = new Map(
         participants.map((p) => [
@@ -683,6 +734,12 @@ export function deriveMapScene(input: MapSceneInput): MapScene {
             currentId: current?.basicInfo.id ?? null,
             marks,
             range,
+            ...(range &&
+                aimCaster && { rangeCasterId: aimCaster.basicInfo.id }),
+            reach:
+                steps && search && current
+                    ? { search, steps, moverId: current.basicInfo.id }
+                    : null,
             trajectory: null,
             hud,
             ...(aimed && { aim: aimed.aim, pulseFrom: aimed.pulseFrom }),

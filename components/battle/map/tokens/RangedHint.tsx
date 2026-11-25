@@ -4,16 +4,22 @@ import {
     RANGED_HINT_LABEL_SIZE_RATIO,
 } from '../constants';
 
-import { cellCenter, parseCellKey, UNIT } from '@/lib/utils/battle/grid';
-import type { BattleMapView } from '@/types/battle-grid';
+import {
+    cellCenter,
+    cellPolygon,
+    parseCellKey,
+    unitOf,
+} from '@/lib/utils/battle/grid';
+import type { BattleMapView, GridKind } from '@/types/battle-grid';
 
 interface RangedHintProps {
     from: { cx: number; cy: number };
+    grid: GridKind;
     trajectory: NonNullable<BattleMapView['trajectory']>;
 }
 
-export function RangedHint({ from, trajectory }: RangedHintProps) {
-    const end = cellCenter(trajectory.to);
+export function RangedHint({ from, trajectory, grid }: RangedHintProps) {
+    const end = cellCenter(trajectory.to, grid);
 
     const color = trajectory.cover ? '#e0603a' : '#f2c14e';
 
@@ -34,20 +40,34 @@ export function RangedHint({ from, trajectory }: RangedHintProps) {
             <circle
                 cx={end.x}
                 cy={end.y}
-                r={UNIT * RANGED_HINT_DOT_RATIO}
+                r={unitOf(RANGED_HINT_DOT_RATIO)}
                 fill={color}
             />
             {trajectory.cover?.map((key) => {
-                const c = cellCenter(parseCellKey(key));
+                const fill = 'rgba(224,96,58,.3)';
+
+                if (grid === 'hex')
+                    return (
+                        <polygon
+                            key={key}
+                            points={cellPolygon(parseCellKey(key), grid)}
+                            fill={fill}
+                            stroke="#e0603a"
+                            strokeWidth={2}
+                            vectorEffect="non-scaling-stroke"
+                        />
+                    );
+
+                const c = cellCenter(parseCellKey(key), grid);
 
                 return (
                     <rect
                         key={key}
-                        x={c.x - UNIT / 2}
-                        y={c.y - UNIT / 2}
-                        width={UNIT}
-                        height={UNIT}
-                        fill="rgba(224,96,58,.3)"
+                        x={c.x - unitOf(0.5)}
+                        y={c.y - unitOf(0.5)}
+                        width={unitOf(1)}
+                        height={unitOf(1)}
+                        fill={fill}
                         stroke="#e0603a"
                         strokeWidth={2}
                         vectorEffect="non-scaling-stroke"
@@ -57,9 +77,9 @@ export function RangedHint({ from, trajectory }: RangedHintProps) {
             {trajectory.cover && (
                 <text
                     x={end.x}
-                    y={end.y - UNIT * RANGED_HINT_LABEL_OFFSET_RATIO}
+                    y={end.y - unitOf(RANGED_HINT_LABEL_OFFSET_RATIO)}
                     textAnchor="middle"
-                    fontSize={UNIT * RANGED_HINT_LABEL_SIZE_RATIO}
+                    fontSize={unitOf(RANGED_HINT_LABEL_SIZE_RATIO)}
                     fontWeight={700}
                     fill="#ffd2b8"
                     stroke="#3a1a10"

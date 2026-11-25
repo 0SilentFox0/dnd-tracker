@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { createElement, lazy, Suspense } from 'react';
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { render } from '@/lib/i18n/test/render-uk';
@@ -10,7 +10,16 @@ vi.unmock('next-intl');
 
 const rules = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 
-const turnState = vi.hoisted(() => ({ phase: 'acting', turnStart: false }));
+const turnState = vi.hoisted(() => ({
+    phase: 'acting',
+    turnStart: false,
+    mapAim: null as object | null,
+    mapPick: null as object | null,
+}));
+
+const hotkeys = vi.hoisted(() => ({
+    enabled: undefined as boolean | undefined,
+}));
 
 vi.mock('next/dynamic', () => ({
     default: (loader: () => Promise<React.ComponentType<object>>) => {
@@ -60,18 +69,22 @@ vi.mock('@/components/battle/wizards/BonusActionPicker', () => ({
 vi.mock('@/components/battle/wizards/AuraZonePicker', () => ({
     AuraZonePicker: () => null,
 }));
-vi.mock('@/components/battle/scene/layout/MapStrip', () => ({
-    MapStripRow: () => null,
-}));
 vi.mock('@/components/battle/modes', () => ({ modeUiOf: () => undefined }));
 vi.mock('@/lib/utils/battle/attack/off-hand', () => ({
     canOffHandAttack: () => true,
 }));
-vi.mock('@/lib/utils/battle/view', () => ({ usableAbilities: () => [] }));
+vi.mock('@/lib/utils/battle/view', () => ({
+    usableAbilities: () => [],
+    reactionAvailable: () => true,
+}));
 vi.mock('@/lib/hooks/battle', () => ({
+    useActionHotkeys: (args: { enabled: boolean }) => {
+        hotkeys.enabled = args.enabled;
+    },
     useBattleRules: () => rules.current,
     useBattleScene: () => ({
         anyPending: false,
+        roster: { hero: null },
         battle: {
             initiativeOrder: [],
             currentRound: 1,
@@ -85,8 +98,10 @@ vi.mock('@/lib/hooks/battle', () => ({
         intents: {
             attack: null,
             clearAttack: vi.fn(),
-            mapAim: null,
-            mapPick: null,
+            spellBook: null,
+            clearSpellBook: vi.fn(),
+            mapAim: turnState.mapAim,
+            mapPick: turnState.mapPick,
             setAttackReady: vi.fn(),
         },
     }),
@@ -108,6 +123,7 @@ vi.mock('@/lib/hooks/battle', () => ({
     }),
 }));
 
+import { SceneSlotsContext } from '@/components/battle/scene/layout/SceneSlots';
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -121,6 +137,9 @@ describe('MyTurnControls: gating за прапорцями правил', () => 
         cleanup();
         turnState.phase = 'acting';
         turnState.turnStart = false;
+        turnState.mapAim = null;
+        turnState.mapPick = null;
+        hotkeys.enabled = undefined;
     });
 
     it('у фазі gate панель старту ходу береться зі слота; без слота її немає', () => {
@@ -237,5 +256,38 @@ describe('MyTurnControls: gating за прапорцями правил', () => 
         expect(
             screen.queryByRole('button', { name: /Скерування/ })
         ).not.toBeInTheDocument();
+    });
+
+    it('hotkeys are enabled only while the actions panel is open and no map aim or pick is active', () => {
+        rules.current = {
+            actionEconomy: { bonusAction: true, reaction: true },
+            spells: true,
+        };
+
+        const open = () => {
+            const dock = document.body.appendChild(
+                document.createElement('div')
+            );
+
+            const view = render(
+                <SceneSlotsContext value={{ dock }}>
+                    <MyTurnControls hero={hero} dock />
+                </SceneSlotsContext>
+            );
+
+            fireEvent.click(screen.getByRole('button', { name: 'Дія' }));
+
+            return view;
+        };
+
+        open().unmount();
+
+        expect(hotkeys.enabled).toBe(true);
+
+        cleanup();
+        turnState.mapAim = {};
+        open();
+
+        expect(hotkeys.enabled).toBe(false);
     });
 });

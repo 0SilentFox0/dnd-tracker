@@ -16,16 +16,22 @@ interface ChipItem {
 const CHIP =
     'flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]';
 
+const CHIP_LG = 'h-11 px-4 text-sm';
+
 const ACTIVE =
     'text-hud-gold-bright shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_8px_var(--color-hud-glow)]';
 
 export function HudChipTabs({
     items,
     ariaLabel,
+    size = 'md',
 }: {
     items: ChipItem[];
     ariaLabel: string;
+    size?: 'md' | 'lg';
 }) {
+    const chip = cn(CHIP, size === 'lg' && CHIP_LG);
+
     return (
         <nav
             aria-label={ariaLabel}
@@ -37,7 +43,7 @@ export function HudChipTabs({
                         key={it.key}
                         href={it.href}
                         aria-current={it.active ? 'page' : undefined}
-                        className={cn(CHIP, it.active && ACTIVE)}
+                        className={cn(chip, it.active && ACTIVE)}
                     >
                         {it.label}
                     </Link>
@@ -47,7 +53,7 @@ export function HudChipTabs({
                         type="button"
                         aria-pressed={it.active}
                         onClick={it.onSelect}
-                        className={cn(CHIP, it.active && ACTIVE)}
+                        className={cn(chip, it.active && ACTIVE)}
                     >
                         {it.label}
                     </button>

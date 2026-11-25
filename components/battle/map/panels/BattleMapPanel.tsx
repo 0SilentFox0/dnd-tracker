@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useMemo } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 
@@ -49,20 +49,34 @@ function UpdateMapButton({
     );
 }
 
-export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
+export function BattleMapPanel({
+    phone = false,
+    onBusyChange,
+}: {
+    phone?: boolean;
+    onBusyChange?: (busy: boolean) => void;
+}) {
     const scene = useBattleMapScene(useSystemFx());
 
     if (!scene) return null;
 
-    return <BattleMapPanelContent phone={phone} scene={scene} />;
+    return (
+        <BattleMapPanelContent
+            phone={phone}
+            scene={scene}
+            onBusyChange={onBusyChange}
+        />
+    );
 }
 
 function BattleMapPanelContent({
     phone,
     scene,
+    onBusyChange,
 }: {
     phone: boolean;
     scene: NonNullable<ReturnType<typeof useBattleMapScene>>;
+    onBusyChange?: (busy: boolean) => void;
 }) {
     const t = useTranslations('battle.map.tools');
 
@@ -83,13 +97,28 @@ function BattleMapPanelContent({
 
     const modeTools = phone ? null : scene.modeTools;
 
+    const busy = !!(
+        placement?.active ||
+        terrainTool?.active ||
+        fogTool?.active ||
+        scene.modeTools?.toolActive
+    );
+
+    useEffect(() => {
+        onBusyChange?.(busy);
+
+        return () => onBusyChange?.(false);
+    }, [busy, onBusyChange]);
+
     const ui = modeUiOf(scene.map);
 
     const hasDoors = Object.keys(scene.map.doors ?? {}).length > 0;
 
     const fog = useBattleMapFog(scene);
 
-    const inRow = !phone && !!slot;
+    const inRow = !!slot;
+
+    const noHost = slot === undefined;
 
     const palettes =
         weatherTool &&
@@ -117,12 +146,10 @@ function BattleMapPanelContent({
         <div
             className={cn(
                 'z-20 flex flex-col items-start gap-1.5',
-                phone
-                    ? 'w-full shrink-0 px-1 pb-1'
-                    : !inRow && 'absolute top-2 left-2'
+                noHost && 'absolute top-2 left-2'
             )}
         >
-            <div className={cn('flex flex-wrap gap-1.5', phone && 'w-full')}>
+            <div className="flex flex-wrap gap-1.5">
                 <HudToggleChip
                     active={placement.active}
                     onClick={placement.toggle}
@@ -177,12 +204,7 @@ function BattleMapPanelContent({
             {(terrainTool.active ||
                 palettes.some((p) => p.tool.active) ||
                 fogTool?.active) && (
-                <div
-                    className={cn(
-                        'flex flex-col items-start gap-1.5',
-                        inRow && 'absolute inset-x-3 top-full z-30 mt-1'
-                    )}
-                >
+                <div className="flex flex-col items-start gap-1.5">
                     {terrainTool.active && (
                         <MapTerrainToolbar
                             tool={terrainTool}
@@ -200,11 +222,7 @@ function BattleMapPanelContent({
                 </div>
             )}
             {modeTools?.paletteOpen && ui?.EditPalette && (
-                <div
-                    className={cn(
-                        inRow && 'absolute inset-x-3 top-full z-30 mt-1'
-                    )}
-                >
+                <div>
                     <ui.EditPalette tools={modeTools.raw} />
                 </div>
             )}
@@ -275,8 +293,6 @@ function BattleMapPanelContent({
             data-tour="battle.map"
             className={cn('relative h-full', phone && 'flex flex-col')}
         >
-            {phone && tools}
-            {phone && fogControls}
             {hasDoors && (
                 <OnboardingHint
                     id="battle.map-doors"
@@ -295,8 +311,10 @@ function BattleMapPanelContent({
                 look={look}
                 phone={phone}
             />
-            {!phone && (inRow ? tools && createPortal(tools, slot) : tools)}
-            {!phone && fogControls}
+            {noHost ? tools : inRow && tools && createPortal(tools, slot)}
+            {phone
+                ? inRow && createPortal(fogControls, slot)
+                : fogControls}
         </div>
     );
 }

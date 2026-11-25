@@ -41,7 +41,7 @@ describe('DashboardGroups', () => {
                 isDM
                 pendingDrafts={0}
                 context={FULL_CONTEXT}
-                hostsDmBlocks
+                layout={{ hostsDmBlocks: true }}
             />
         );
 
@@ -95,7 +95,7 @@ describe('DashboardGroups', () => {
                 campaignId="c1"
                 isDM={false}
                 pendingDrafts={0}
-                hiddenKeys={['player-world']}
+                layout={{ hiddenKeys: ['player-world'] }}
             />
         );
 
@@ -153,7 +153,7 @@ describe('DashboardGroups', () => {
                 campaignId="c1"
                 isDM={false}
                 pendingDrafts={0}
-                hiddenKeys={['acquaintances']}
+                layout={{ hiddenKeys: ['acquaintances'] }}
             />
         );
 

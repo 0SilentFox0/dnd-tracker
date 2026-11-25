@@ -56,9 +56,14 @@ const MAP = { cols: 4, rows: 3, background: null, opacity: 0.3 };
 
 const ALLOWED = [
     /^Анімації дій/,
+    /^(Сховати|Показати): /,
     /^Вигляд гравця/,
+    /^(Показати|Сховати) наступний раунд$/,
     /^Карта$/,
+    /^(Союзники|Вороги) \d+$/,
+    /^(Закрити|Згорнути)$/,
     /^Колонки$/,
+    /^(Журнал|Інструменти|Меню)$/,
     /^(Фрейда|Гоблін|Годрік)$/,
     /^(Фр|Го)/,
     /^ходить /,
@@ -108,7 +113,8 @@ describe('BattleScreen: player view is view-only', () => {
     it('desktop: only allow-listed buttons, no DM/hero controls', async () => {
         media.wide = true;
         mount({});
-        await screen.findByText('Журнал');
+        await screen.findByRole('button', { name: 'Журнал' });
+        fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
 
         const names = buttonNames();
 
@@ -129,7 +135,7 @@ describe('BattleScreen: player view is view-only', () => {
 
         const s = mount({});
 
-        await screen.findByText('Журнал');
+        await screen.findByRole('button', { name: 'Журнал' });
 
         const tokens = document.querySelectorAll<HTMLElement>(
             '[data-fx-clip] button'
@@ -149,6 +155,9 @@ describe('BattleScreen: player view is view-only', () => {
     it('mobile map tab: the indicator is reachable, nothing else acts', async () => {
         media.wide = false;
         mount({});
+
+        fireEvent.click(screen.getByRole('button', { name: 'Меню' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
 
         expect(
             await screen.findByRole('button', { name: 'Вигляд гравця: увімк.' })
@@ -192,7 +201,7 @@ describe('BattleScreen: player view is view-only', () => {
         mount({ map: mazeMap({}, 4, 3) }, (children) => (
             <MazeViewProvider>{children}</MazeViewProvider>
         ));
-        await screen.findByText('Журнал');
+        await screen.findByRole('button', { name: 'Журнал' });
 
         expect(
             buttonNames().filter((n) => !ALLOWED.some((re) => re.test(n)))

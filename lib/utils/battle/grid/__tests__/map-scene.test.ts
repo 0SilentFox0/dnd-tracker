@@ -87,6 +87,22 @@ function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
     };
 }
 
+describe('deriveMapScene: reach', () => {
+    it('exposes the path search of the current mover', () => {
+        const s = deriveMapScene(input());
+
+        expect(s.view.reach?.moverId).toBe('h');
+        expect(s.view.reach?.search.cost.get('2:0')).toBe(2);
+        expect(s.view.reach?.steps.get('2:0')?.anchor).toEqual({ x: 2, y: 0 });
+    });
+
+    it('has no search when the viewer cannot act', () => {
+        const s = deriveMapScene(input({ actor: { canAct: false } }));
+
+        expect(s.view.reach).toBeNull();
+    });
+});
+
 describe('deriveMapScene: danger', () => {
     const ranged = {
         id: 'r',
@@ -570,7 +586,7 @@ describe('deriveMapScene: наведення шаблону', () => {
                     y < r.y + r.rows;
 
                 expect(inside).toBe(
-                    aimInRange(caster, { x, y }, 15, DEFAULT_RULES)
+                    aimInRange(caster, { x, y }, 15, DEFAULT_RULES, 'square')
                 );
             }
     });
@@ -660,7 +676,7 @@ describe('deriveMapScene: наведення шаблону', () => {
     });
 });
 
-describe('deriveMapScene: DM без ліміту руху', () => {
+describe('deriveMapScene: ДМ рухає в межах швидкості', () => {
     const dmUnit = at('g', { x: 0, y: 0 }, ParticipantSide.ENEMY);
 
     const unit = {
@@ -673,7 +689,7 @@ describe('deriveMapScene: DM без ліміту руху', () => {
         basicInfo: { ...hero.basicInfo, controlledBy: 'u1' },
     };
 
-    it('юніт ДМ: усі досяжні клітинки поза швидкістю підсвічені; герой — лише в межах швидкості', () => {
+    it('юніт ДМ, як і герой, підсвічує лише клітинки в межах швидкості', () => {
         const dm = deriveMapScene(
             input({
                 participants: [unit],
@@ -690,7 +706,7 @@ describe('deriveMapScene: DM без ліміту руху', () => {
             })
         );
 
-        expect(dm.view.marks?.get('9:4')).toBe(9);
+        expect(dm.view.marks?.get('9:4')).toBeUndefined();
 
         const player = deriveMapScene(
             input({

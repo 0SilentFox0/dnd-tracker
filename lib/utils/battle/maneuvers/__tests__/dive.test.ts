@@ -137,11 +137,13 @@ describe('Пікірування', () => {
         expect(g.actionFlags.hasUsedAction).toBe(true);
 
         const enemyCells = new Set(
-            cellsOf(byId(r.participants, 'e')).map(cellKey)
+            cellsOf(byId(r.participants, 'e'), 'square').map(cellKey)
         );
 
         expect(g.battleData.position).toBeDefined();
-        expect(cellsOf(g).some((c) => enemyCells.has(cellKey(c)))).toBe(false);
+        expect(
+            cellsOf(g, 'square').some((c) => enemyCells.has(cellKey(c)))
+        ).toBe(false);
     });
 
     it('клітинку зайняв союзник — сідає на найближчу вільну, союзник цілий', () => {
@@ -167,7 +169,7 @@ describe('Пікірування', () => {
         expect(
             Math.max(Math.abs(pos.x - 10), Math.abs(pos.y - 10))
         ).toBeLessThanOrEqual(2);
-        expect(cellsOf(g).map(cellKey)).not.toContain('10:10');
+        expect(cellsOf(g, 'square').map(cellKey)).not.toContain('10:10');
     });
 
     it('порожня клітинка — удар у порожнечу, сідає туди', () => {

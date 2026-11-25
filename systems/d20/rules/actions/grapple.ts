@@ -23,6 +23,7 @@ import {
     releaseGrapples,
 } from '@/lib/utils/battle/conditions/grapple-links';
 import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { canStand } from '@/lib/utils/battle/grid/occupancy';
 import { awayStep } from '@/lib/utils/battle/grid/push';
 import { getSpellSaveDC } from '@/lib/utils/common/calculations';
@@ -339,7 +340,7 @@ export function runShove(
 
     const at = target.battleData.position;
 
-    const dest = mode === 'push' && from && at ? awayStep(from, at) : null;
+    const dest = mode === 'push' && from && at ? awayStep(from, at, gridOf(map)) : null;
 
     if (dest && map && canStand(map, participants, target, dest)) {
         messages.push(

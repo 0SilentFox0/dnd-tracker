@@ -53,7 +53,8 @@ export function mazeReachable(
 
     const blocked = occupiedBy(
         participants,
-        (p) => p.basicInfo.id !== mover.basicInfo.id
+        (p) => p.basicInfo.id !== mover.basicInfo.id,
+        'square'
     );
 
     const terminal = featureKeys(grid.maze);
@@ -117,7 +118,8 @@ export function applyMazeMove(
 
     const blocked = occupiedBy(
         participants,
-        (p) => p.basicInfo.id !== mover.basicInfo.id
+        (p) => p.basicInfo.id !== mover.basicInfo.id,
+        'square'
     );
 
     const partner = teleportPartner(grid.maze, to);
@@ -155,7 +157,7 @@ export function placeMazeParticipants(
             : p
     );
 
-    const taken = occupiedBy(sized, () => true);
+    const taken = occupiedBy(sized, () => true, 'square');
 
     const reserved = featureKeys(grid.maze);
 

@@ -73,7 +73,7 @@ export function AudioDock({
             data-tour="music.dock"
             className={cn(
                 strip &&
-                    'pointer-events-none absolute inset-2 z-40 flex flex-col items-start justify-end'
+                    'pointer-events-none absolute inset-x-2 top-[2.25rem] bottom-2 z-40 flex flex-col items-start justify-start'
             )}
         >
             <div

@@ -15,3 +15,11 @@ export function shouldUseGameShell(
             normalized !== '/campaigns/new')
     );
 }
+
+export function isFullBleedRoute(pathname: string | null | undefined): boolean {
+    if (!pathname) return false;
+
+    return /^\/campaigns\/[^/]+\/battles\/[^/]+$/.test(
+        pathname.replace(/\/$/, '')
+    );
+}

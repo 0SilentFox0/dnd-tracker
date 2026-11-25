@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { GridTypeChoice } from '../map/GridTypeChoice';
 import { MapBackgroundSection } from '../map/MapBackgroundSection';
 import { MapCellToolsSection } from '../map/MapCellToolsSection';
 import {
@@ -46,7 +47,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
 
     const touch = useCoarsePointer();
 
-    const { enabled, map, mode, margins, tool, notice } = editor.state;
+    const { enabled, map, mode, grid, margins, tool, notice } = editor.state;
 
     const { actions } = editor;
 
@@ -73,7 +74,8 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
         Object.entries(MAP_MODE_UI) as [MapModeKey, MapModeUi][]
     ).map(
         ([key, { SetupToggle }]) =>
-            SetupToggle && (
+            SetupToggle &&
+            editor.state.modeSupported(key) && (
                 <SetupToggle
                     key={key}
                     checked={mode === key}
@@ -94,6 +96,10 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
             {enabled && (
                 <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
                     <div className="space-y-4">
+                        <GridTypeChoice
+                            value={grid}
+                            onChange={actions.setGridType}
+                        />
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <Label htmlFor="map-cols">{t('cols')}</Label>
@@ -164,7 +170,13 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 {t('edgesDisabledMode')}
                             </p>
                         )}
-                        {!(mode && MAP_MODE_UI[mode].hidesTerrain) &&
+                        {grid === 'hex' && (
+                            <p className="text-sm text-hud-muted">
+                                {t('hexEdgesOff')}
+                            </p>
+                        )}
+                        {grid === 'square' &&
+                            !(mode && MAP_MODE_UI[mode].hidesTerrain) &&
                             (touch ? (
                                 <p className="text-sm text-hud-muted">
                                     {t('edgesDesktopOnly')}

@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
     ChevronLeft,
@@ -132,6 +132,22 @@ export function DmQuickActionsPanel({
         onChangeHp: dialogs.hp.show,
         onDone: closePanel,
     });
+
+    useEffect(() => {
+        if (!open) return;
+
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key !== 'Escape' || e.defaultPrevented) return;
+
+            e.preventDefault();
+
+            setOpen(false);
+        };
+
+        document.addEventListener('keydown', onKey);
+
+        return () => document.removeEventListener('keydown', onKey);
+    }, [open, setOpen]);
 
     const SystemDialog = useSystemBattleUi().ConditionsDialog;
 

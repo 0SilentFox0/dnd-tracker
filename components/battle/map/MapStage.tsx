@@ -4,8 +4,10 @@ import { memo, useMemo } from 'react';
 
 import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
+import { FogWindowContext } from './fog/fog-window-context';
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
+import { MapPathPreview } from './grid/MapPathPreview';
 import { DoorsLayer } from './layers/DoorsLayer';
 import { MapBackground } from './layers/MapBackground';
 import { StrokeLayer, TemplateLayer } from './layers/MapLayers';
@@ -18,7 +20,7 @@ import { useMapStageTokens } from './tokens/useMapStageTokens';
 import type { MapStageProps } from './map-stage-types';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { UNIT } from '@/lib/utils/battle/grid';
+import { gridMetrics, gridOf, unitOf } from '@/lib/utils/battle/grid';
 
 export type {
     MapStageEditing,
@@ -64,6 +66,12 @@ function MapStageImpl({
 
     const ui = modeUiOf(map);
 
+    const grid = gridOf(map);
+
+    const { colStep, rowStep } = gridMetrics(grid);
+
+    const cellPx = unitOf(pxPerUnit);
+
     const modeView = view?.mode;
 
     const round = view?.round;
@@ -72,6 +80,18 @@ function MapStageImpl({
 
     const onCellHover = actions?.onCellHover;
 
+    const reachSearch = view?.reach?.search;
+
+    const through = useMemo(
+        () =>
+            reachSearch
+                ? [...reachSearch.parent.keys()].filter(
+                      (k) => !reachSearch.cost.has(k)
+                  )
+                : undefined,
+        [reachSearch]
+    );
+
     const gridScene = useMemo(
         () => ({
             round,
@@ -79,8 +99,9 @@ function MapStageImpl({
             clickableBlocked,
             showBlocked,
             window: gridWindow,
+            through,
         }),
-        [round, rotated, clickableBlocked, showBlocked, gridWindow]
+        [round, rotated, clickableBlocked, showBlocked, gridWindow, through]
     );
 
     const cellActions = useMemo<GridCellActions>(
@@ -119,8 +140,8 @@ function MapStageImpl({
         <div
             className="absolute"
             style={{
-                left: -win.x * UNIT * pxPerUnit,
-                top: -win.y * UNIT * pxPerUnit,
+                left: -win.x * colStep * pxPerUnit,
+                top: -win.y * rowStep * pxPerUnit,
                 width: size.width * pxPerUnit,
                 height: size.height * pxPerUnit,
             }}
@@ -128,7 +149,7 @@ function MapStageImpl({
             {(map.background || showDefaultBackground) && (
                 <MapBackground
                     map={map}
-                    cellPx={UNIT * pxPerUnit}
+                    cellPx={cellPx}
                     phone={phone}
                     rotated={rotated}
                 />
@@ -137,7 +158,7 @@ function MapStageImpl({
                 <TileCanvas
                     tiles={tiles}
                     viewport={gridWindow}
-                    cellPx={UNIT * pxPerUnit}
+                    cellPx={cellPx}
                 />
             )}
             <svg
@@ -146,6 +167,7 @@ function MapStageImpl({
                 viewBox={`0 0 ${size.width} ${size.height}`}
                 preserveAspectRatio="none"
                 data-fx-grid=""
+                data-grid={grid}
                 data-cols={map.cols}
                 data-rows={map.rows}
             >
@@ -176,23 +198,32 @@ function MapStageImpl({
                     />
                 )}
                 <TemplateLayer
+                    grid={grid}
                     marks={view?.marks}
                     aim={view?.aim}
                     pulseFrom={view?.pulseFrom}
                 />
                 {painting && (
                     <StrokeLayer
+                        grid={grid}
                         preview={preview}
                         pending={view?.pendingStroke}
                     />
                 )}
                 {edges && <EdgeEditor map={map} editing={edges} />}
+                <MapPathPreview grid={grid} preview={view?.pathPreview} />
                 {from && trajectory && (
-                    <RangedHint from={from.box} trajectory={trajectory} />
+                    <RangedHint
+                        grid={grid}
+                        from={from.box}
+                        trajectory={trajectory}
+                    />
                 )}
             </svg>
             {fog && (
-                <MapFogLayer map={map} cellPx={UNIT * pxPerUnit} {...fog} />
+                <FogWindowContext.Provider value={gridWindow}>
+                    <MapFogLayer map={map} cellPx={cellPx} {...fog} />
+                </FogWindowContext.Provider>
             )}
             {doorsTool?.menu && menuDoor && (
                 <DoorMenu
@@ -215,7 +246,7 @@ function MapStageImpl({
                     chunks={tiles.chunks}
                     window={gridWindow}
                     map={map}
-                    cellPx={UNIT * pxPerUnit}
+                    cellPx={cellPx}
                 />
             )}
         </div>

@@ -60,7 +60,7 @@ describe('полеглий на карті', () => {
 
         expect(isOnMap(dead)).toBe(false);
         expect(isOnMap(down)).toBe(false);
-        expect(occupiedBy([dead, down], () => true).size).toBe(0);
+        expect(occupiedBy([dead, down], () => true, 'square').size).toBe(0);
     });
 
     it('клітинку мертвого можна обійти й стати на неї', () => {

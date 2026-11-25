@@ -11,6 +11,7 @@ import {
     nearestTo,
     wallsAllowSight,
 } from '@/lib/utils/battle/grid';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { isHostile, modeSees } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
@@ -37,14 +38,16 @@ export function nextChainTarget({
 }: ChainStep): BattleParticipant | undefined {
     const range = attackRangeCells(attack.range, rules);
 
-    const origin = cellsOf(from);
+    const grid = gridOf(map);
+
+    const origin = cellsOf(from, grid);
 
     const inRange = (p: BattleParticipant) =>
         !map ||
         range === null ||
         origin.length === 0 ||
         !isOnMap(p) ||
-        footprintDistance(origin, cellsOf(p)) <= range;
+        footprintDistance(origin, cellsOf(p, grid), grid) <= range;
 
     const candidates = order.filter(
         (p) =>
@@ -57,9 +60,9 @@ export function nextChainTarget({
             (!map ||
                 !isOnMap(p) ||
                 origin.length === 0 ||
-                cellsConnected(map, 'fire', origin, cellsOf(p))) &&
+                cellsConnected(map, 'fire', origin, cellsOf(p, grid))) &&
             inRange(p)
     );
 
-    return map ? nearestTo(from, candidates) : candidates[0];
+    return map ? nearestTo(from, candidates, grid) : candidates[0];
 }

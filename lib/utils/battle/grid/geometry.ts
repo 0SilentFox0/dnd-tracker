@@ -1,8 +1,15 @@
+import { hexDistance, hexLine, hexNeighbors, hexRing } from './hex';
+
 import type {
     BattleMapConfig,
+    GridKind,
     GridPoint,
     TerrainCell,
 } from '@/types/battle-grid';
+
+export const gridOf = (
+    map: Pick<BattleMapConfig, 'gridType'> | null | undefined
+): GridKind => map?.gridType ?? 'square';
 
 const DIRS = [
     [-1, -1],
@@ -35,7 +42,12 @@ const ORTHO_DIRS = [
     [0, -1],
 ] as const;
 
-export function neighbors(p: GridPoint): GridPoint[] {
+export function neighbors(
+    p: GridPoint,
+    grid: GridKind = 'square'
+): GridPoint[] {
+    if (grid === 'hex') return hexNeighbors(p);
+
     return DIRS.map(([dx, dy]) => ({ x: p.x + dx, y: p.y + dy }));
 }
 
@@ -48,11 +60,23 @@ export function orthoNeighbors(
     );
 }
 
-export function cellDistance(a: GridPoint, b: GridPoint): number {
+export function cellDistance(
+    a: GridPoint,
+    b: GridPoint,
+    grid: GridKind = 'square'
+): number {
+    if (grid === 'hex') return hexDistance(a, b);
+
     return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
-export function cellLine(from: GridPoint, to: GridPoint): GridPoint[] {
+export function cellLine(
+    from: GridPoint,
+    to: GridPoint,
+    grid: GridKind = 'square'
+): GridPoint[] {
+    if (grid === 'hex') return hexLine(from, to);
+
     if (![from.x, from.y, to.x, to.y].every(Number.isFinite)) return [];
 
     const a = { x: Math.round(from.x), y: Math.round(from.y) };
@@ -209,8 +233,12 @@ export function marginCells(
     return keys;
 }
 
-export function footprint(anchor: GridPoint, size: number): GridPoint[] {
-    if (size <= 1) return [anchor];
+export function footprint(
+    anchor: GridPoint,
+    size: number,
+    grid: GridKind
+): GridPoint[] {
+    if (size <= 1 || grid === 'hex') return [anchor];
 
     const cells: GridPoint[] = [];
 
@@ -222,20 +250,29 @@ export function footprint(anchor: GridPoint, size: number): GridPoint[] {
     return cells;
 }
 
-export function footprintDistance(a: GridPoint[], b: GridPoint[]): number {
+export function footprintDistance(
+    a: GridPoint[],
+    b: GridPoint[],
+    grid: GridKind = 'square'
+): number {
     let best = Infinity;
 
     for (const p of a) {
-        for (const q of b) best = Math.min(best, cellDistance(p, q));
+        for (const q of b) best = Math.min(best, cellDistance(p, q, grid));
     }
 
     return best;
 }
 
-export function closestCell(cells: GridPoint[], to: GridPoint[]): GridPoint {
+export function closestCell(
+    cells: GridPoint[],
+    to: GridPoint[],
+    grid: GridKind = 'square'
+): GridPoint {
     return cells.reduce(
         (best, c) =>
-            footprintDistance(to, [c]) < footprintDistance(to, [best])
+            footprintDistance(to, [c], grid) <
+            footprintDistance(to, [best], grid)
                 ? c
                 : best,
         cells[0]
@@ -260,9 +297,25 @@ export const mapCentre = (
 
 export function* cellsByRing(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
-    from: GridPoint
+    from: GridPoint,
+    grid: GridKind = 'square'
 ): Generator<GridPoint> {
     if (map.cols <= 0 || map.rows <= 0) return;
+
+    if (grid === 'hex') {
+        const last = Math.max(
+            hexDistance(from, { x: 0, y: 0 }),
+            hexDistance(from, { x: map.cols - 1, y: 0 }),
+            hexDistance(from, { x: 0, y: map.rows - 1 }),
+            hexDistance(from, { x: map.cols - 1, y: map.rows - 1 })
+        );
+
+        for (let d = 0; d <= last; d++) {
+            for (const c of hexRing(from, d)) if (inBounds(map, c)) yield c;
+        }
+
+        return;
+    }
 
     const last = Math.max(
         Math.abs(from.x),
@@ -301,7 +354,8 @@ export function* cellsByRing(
 
 export function cellsByDistance(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
-    from: GridPoint
+    from: GridPoint,
+    grid: GridKind = 'square'
 ): GridPoint[] {
-    return [...cellsByRing(map, from)];
+    return [...cellsByRing(map, from, grid)];
 }

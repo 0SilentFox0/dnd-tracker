@@ -121,9 +121,14 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
         step('music', 'play'),
         step('music', 'source'),
         step('music', 'battle', { route: BATTLES, anchor: 'battle.open' }),
-        step('music', 'dock', {
+        step('music', 'tools', {
             routeFromTarget: 'battle.open',
-            placement: 'right',
+            anchor: 'battle.map-tools',
+            placement: 'left',
+        }),
+        step('music', 'dock', {
+            clickFromTarget: 'battle.map-tools',
+            placement: 'left',
         }),
         step('music', 'transport', {
             clickFromTarget: 'music.expand',
@@ -159,7 +164,7 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
         step('battle', 'topbar', { clickFromTarget: 'battle.start' }),
         step('battle', 'initiative'),
         step('battle', 'hero', { placement: 'right' }),
-        step('battle', 'map-tools'),
+        step('battle', 'map-tools', { placement: 'left' }),
         step('battle', 'map', { placement: 'left' }),
         step('battle', 'log', { placement: 'left' }),
         step('battle', 'next-turn'),
@@ -175,7 +180,7 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
         step('battle', 'initiative-roll', { placement: 'left' }),
         step('battle', 'dm-participants', { placement: 'left' }),
         step('battle', 'audio', {
-            clickFromTarget: 'battle.dm-close',
+            clickFromTarget: 'battle.map-tools',
             anchor: 'music.dock',
             placement: 'right',
         }),

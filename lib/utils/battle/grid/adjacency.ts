@@ -1,4 +1,5 @@
 import { edgeBlocks, wallsOf } from './edges';
+import { cellDistance, gridOf } from './geometry';
 import { cellsOf, isAdjacent } from './occupancy';
 
 import type { BattleParticipant } from '@/types/battle';
@@ -11,11 +12,12 @@ export function cellsAdjacentOnMap(
 ): boolean {
     const walled = !!map && wallsOf(map).size > 0;
 
+    const grid = gridOf(map);
+
     return aCells.some((from) =>
         bCells.some(
             (to) =>
-                Math.max(Math.abs(from.x - to.x), Math.abs(from.y - to.y)) <=
-                    1 &&
+                cellDistance(from, to, grid) <= 1 &&
                 (!walled || !edgeBlocks(map, from, to, 'sight'))
         )
     );
@@ -26,7 +28,12 @@ export function isAdjacentOnMap(
     a: BattleParticipant,
     b: BattleParticipant
 ): boolean {
-    return isAdjacent(a, b) && cellsAdjacentOnMap(map, cellsOf(a), cellsOf(b));
+    const grid = gridOf(map);
+
+    return (
+        isAdjacent(a, b, grid) &&
+        cellsAdjacentOnMap(map, cellsOf(a, grid), cellsOf(b, grid))
+    );
 }
 
 export const adjacencyOf =

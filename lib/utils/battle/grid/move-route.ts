@@ -1,4 +1,4 @@
-import { cellKey } from './geometry';
+import { cellKey, gridOf } from './geometry';
 import { tokenBox } from './layout';
 import { pathTo } from './path';
 
@@ -19,6 +19,8 @@ export function moveRoutes(
 ): Map<string, RoutePoint[]> {
     const routes = new Map<string, RoutePoint[]>();
 
+    const grid = gridOf(map);
+
     const before = new Map(prev.map((p) => [p.basicInfo.id, p]));
 
     for (const p of next) {
@@ -34,10 +36,13 @@ export function moveRoutes(
             pathTo(map, [...prev], old, to, SEARCH_BUDGET) ?? ([to] as const);
 
         const points = [from, ...cells].flatMap((anchor) => {
-            const box = tokenBox({
-                ...p,
-                battleData: { ...p.battleData, position: anchor },
-            });
+            const box = tokenBox(
+                {
+                    ...p,
+                    battleData: { ...p.battleData, position: anchor },
+                },
+                grid
+            );
 
             return box ? [{ cx: box.cx, cy: box.cy }] : [];
         });

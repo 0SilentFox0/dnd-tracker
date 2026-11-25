@@ -2,11 +2,8 @@
 
 import { type RefObject, useEffect, useRef, useState } from 'react';
 
-import {
-    type GridWindow,
-    UNIT,
-    visibleGridWindow,
-} from '@/lib/utils/battle/grid';
+import { type GridWindow, visibleGridWindow } from '@/lib/utils/battle/grid';
+import type { GridKind } from '@/types/battle-grid';
 
 interface GridWindowOptions {
     svgRef: RefObject<SVGSVGElement | null>;
@@ -16,6 +13,8 @@ interface GridWindowOptions {
         offset: { x: number; y: number };
         size: { width: number; height: number };
         pxPerUnit: number;
+        cells: { cols: number; rows: number };
+        grid: GridKind;
     };
 }
 
@@ -37,7 +36,7 @@ export function useGridWindow({
 
     const current = useRef<GridWindow | null>(null);
 
-    const { zoom, offset, size, pxPerUnit } = deps;
+    const { zoom, offset, size, pxPerUnit, cells, grid } = deps;
 
     useEffect(() => {
         const viewport = viewportRef.current;
@@ -54,8 +53,9 @@ export function useGridWindow({
                     ? visibleGridWindow({
                           viewport: viewport.getBoundingClientRect(),
                           ctm,
-                          cols: size.width / UNIT,
-                          rows: size.height / UNIT,
+                          cols: cells.cols,
+                          rows: cells.rows,
+                          grid,
                       })
                     : null;
 
@@ -86,6 +86,9 @@ export function useGridWindow({
         size.width,
         size.height,
         pxPerUnit,
+        cells.cols,
+        cells.rows,
+        grid,
     ]);
 
     return win;

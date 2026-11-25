@@ -1,0 +1,18 @@
+{
+  "lib/utils/battle/modes/maze/features.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/modes/maze/movement.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/modes/maze/placement.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/modes/maze/revive.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/modes/maze/scatter.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/modes/maze/tunnel.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/modes/maze/vision.ts": "square-only: maze mode (capability grids=['square'])",
+  "lib/utils/battle/tiles/edit.ts": "square-only: tiles are not available on hex",
+  "lib/server/battles/mutations/map-door-toggle/map-door-toggle-mutation.ts": "square-only: doors do not exist on hex",
+  "lib/utils/abilities/registry/conditions.ts": "default lambda when no map is injected: square fallback",
+  "lib/utils/battle/grid/edges.ts": "square-only: edge walls/doors do not exist on hex",
+  "lib/utils/battle/grid/walls.ts": "square-only: edge walls do not exist on hex",
+  "unit:components/battle/map/edges/DoorMenu.tsx": "square-only: edge walls/doors render in square units",
+  "unit:components/battle/map/edges/edge-geometry.ts": "square-only: edge walls/doors render in square units",
+  "unit:components/battle/map/layers/DoorsLayer.tsx": "square-only: edge walls/doors render in square units",
+  "unit:components/battle/map/layers/WallsLayer.tsx": "square-only: edge walls/doors render in square units"
+}

@@ -48,6 +48,7 @@ const PRODUCT_TERMS = [
     'game-icons.net',
     'Delapouite',
     'Lorc',
+    'Caro Asercion',
     'CC BY',
     'Wizards of the Coast',
     'Dungeons & Dragons',

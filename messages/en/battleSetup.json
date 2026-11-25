@@ -164,7 +164,8 @@
     "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
     "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer",
     "doorLocked": "Locked",
-    "doorLimit": "Door limit reached, the extra doors were not added"
+    "doorLimit": "Door limit reached, the extra doors were not added",
+    "hexEdgesOff": "Walls, bars and doors are not available on a hex grid."
   },
   "characters": {
     "title": "Characters",
@@ -265,6 +266,7 @@
     "barrierNeedsDuration": "A barrier needs a duration",
     "tooManyTerrainCells": "Too many terrain cells",
     "playableAreaTooSmall": "The playable area is too small: at least a free 2×2 area is required",
+    "hexSquareOnly": "Hex maps cannot have a maze, walls, bars or doors",
     "badEdges": "Invalid walls or bars: out of bounds, duplicated or overlapping",
     "mapAndMapId": "Pass either an inline map or a library map, not both",
     "photoMapTooLarge": "Photo maps are limited to 60×60 cells",

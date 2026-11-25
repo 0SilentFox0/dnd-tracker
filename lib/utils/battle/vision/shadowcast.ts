@@ -1,10 +1,25 @@
 import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
-import { cellKey, inBounds } from '@/lib/utils/battle/grid/geometry';
-import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
+import {
+    cellKey,
+    gridOf,
+    inBounds,
+} from '@/lib/utils/battle/grid/geometry';
+import { hexDistance, hexLine } from '@/lib/utils/battle/grid/hex';
+import type {
+    BattleMapConfig,
+    GridKind,
+    GridPoint,
+} from '@/types/battle-grid';
 
 const MAX_RADIUS = 40;
 
-export function gridRay(from: GridPoint, to: GridPoint): GridPoint[] {
+export function gridRay(
+    from: GridPoint,
+    to: GridPoint,
+    grid: GridKind = 'square'
+): GridPoint[] {
+    if (grid === 'hex') return hexLine(from, to);
+
     const dx = Math.abs(to.x - from.x);
 
     const dy = Math.abs(to.y - from.y);
@@ -51,7 +66,7 @@ function lineVisible(
     to: GridPoint,
     opaque: ReadonlySet<string>
 ): boolean {
-    const line = gridRay(from, to);
+    const line = gridRay(from, to, gridOf(map));
 
     for (let index = 1; index < line.length; index++) {
         const previous = line[index - 1];
@@ -101,9 +116,13 @@ function visibleFromWith(
 
     const boundedRadius = Math.max(0, Math.min(MAX_RADIUS, Math.floor(radius)));
 
+    const hex = gridOf(map) === 'hex';
+
+    const rowSpan = hex ? Math.ceil(boundedRadius * 1.5) + 1 : boundedRadius;
+
     for (
-        let y = Math.max(0, source.y - boundedRadius);
-        y <= Math.min(map.rows - 1, source.y + boundedRadius);
+        let y = Math.max(0, source.y - rowSpan);
+        y <= Math.min(map.rows - 1, source.y + rowSpan);
         y++
     ) {
         for (
@@ -117,7 +136,12 @@ function visibleFromWith(
 
             const dy = y - source.y;
 
-            if (dx * dx + dy * dy > boundedRadius * boundedRadius) continue;
+            if (
+                hex
+                    ? hexDistance(source, target) > boundedRadius
+                    : dx * dx + dy * dy > boundedRadius * boundedRadius
+            )
+                continue;
 
             if (
                 lineVisible(map, source, target, opaque) &&
@@ -160,16 +184,18 @@ export function sightBlockingCells(
 }
 
 export function zonesAllowSight(
-    map: Pick<BattleMapConfig, 'terrain'>,
+    map: Pick<BattleMapConfig, 'terrain' | 'gridType'>,
     from: readonly GridPoint[],
     to: readonly GridPoint[],
     blocking: ReadonlySet<string> = sightBlockingCells(map)
 ): boolean {
     if (!blocking.size) return true;
 
+    const grid = gridOf(map);
+
     return from.some((a) =>
         to.some((b) => {
-            const line = gridRay(a, b);
+            const line = gridRay(a, b, grid);
 
             for (let i = 1; i < line.length - 1; i++)
                 if (blocking.has(cellKey(line[i]))) return false;

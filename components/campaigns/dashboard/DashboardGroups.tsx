@@ -29,8 +29,7 @@ export function DashboardGroups({
     isDemo = false,
     pendingDrafts,
     context = DEFAULT_DASHBOARD_CONTEXT,
-    hiddenKeys,
-    hostsDmBlocks = false,
+    layout,
     libraryCounts,
 }: {
     campaignId: string;
@@ -38,13 +37,14 @@ export function DashboardGroups({
     isDemo?: boolean;
     pendingDrafts: number;
     context?: DashboardContext;
-    hiddenKeys?: string[];
-    hostsDmBlocks?: boolean;
+    layout?: { hiddenKeys?: string[]; hostsDmBlocks?: boolean };
     libraryCounts?: Record<string, number>;
 }) {
     const t = useTranslator('dashboard');
 
     const isPlayer = !isDM && !isDemo;
+
+    const hostsDmBlocks = layout?.hostsDmBlocks ?? false;
 
     const { data: notifications } = useNotifications(campaignId, {
         enabled: isPlayer,
@@ -57,8 +57,8 @@ export function DashboardGroups({
           : PLAYER_DASHBOARD_SECTIONS;
 
     const base = useMemo(
-        () => sections.filter((s) => !hiddenKeys?.includes(s.key)),
-        [sections, hiddenKeys]
+        () => sections.filter((s) => !layout?.hiddenKeys?.includes(s.key)),
+        [sections, layout?.hiddenKeys]
     );
 
     const tile = (s: DashboardSection) => {

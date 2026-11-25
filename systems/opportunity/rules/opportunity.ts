@@ -12,8 +12,9 @@ import {
     cellsOf,
     footprint,
     footprintDistance,
+    footprintSizeOf,
+    gridOf,
     isOnMap,
-    sizeOf,
 } from '@/lib/utils/battle/grid';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
@@ -90,11 +91,13 @@ export function resolveOpportunityAttacks(
             sceneState: flow.sceneState,
         };
 
-    const size = sizeOf(mover0);
+    const grid = gridOf(input.map);
+
+    const size = footprintSizeOf(mover0, grid);
 
     const enemies = flow.ps
         .filter((p) => isHostile(input.map, mover0, p) && isOnMap(p))
-        .map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p) }));
+        .map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p, grid) }));
 
     const melee = new Map<
         string,
@@ -120,12 +123,12 @@ export function resolveOpportunityAttacks(
         return entry;
     };
 
-    let fromCells = footprint(start, size);
+    let fromCells = footprint(start, size, grid);
 
     for (let i = 0; i < path.length; i++) {
         const from = i === 0 ? start : path[i - 1];
 
-        const toCells = footprint(path[i], size);
+        const toCells = footprint(path[i], size, grid);
 
         for (const { id, reach } of enemies) {
             const e = findParticipant(flow.ps, id);
@@ -137,8 +140,8 @@ export function resolveOpportunityAttacks(
             if (!attack) continue;
 
             if (
-                footprintDistance(fromCells, reach) > range ||
-                footprintDistance(toCells, reach) <= range ||
+                footprintDistance(fromCells, reach, grid) > range ||
+                footprintDistance(toCells, reach, grid) <= range ||
                 !cellsConnected(input.map, 'sight', fromCells, reach)
             )
                 continue;

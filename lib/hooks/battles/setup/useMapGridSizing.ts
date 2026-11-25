@@ -7,6 +7,7 @@ import {
     clampMargins,
     type GridCalibration,
     gridForCellSize,
+    gridOf,
     hasPlayableArea,
     type ImageSize,
     type Margins,
@@ -81,13 +82,13 @@ export function useMapGridSizing({
         (cellPx: number) => {
             if (!image) return;
 
-            const grid = gridForCellSize(image, cellPx);
+            const grid = gridForCellSize(image, cellPx, gridOf(map));
 
             resize(grid.cols, grid.rows, {
                 backgroundCols: grid.backgroundCols,
             });
         },
-        [image, resize]
+        [image, resize, map]
     );
 
     const applyCalibration = useCallback(

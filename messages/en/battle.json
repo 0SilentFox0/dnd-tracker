@@ -62,7 +62,13 @@
     "collapseAll": "Collapse all",
     "round": "Round {round}",
     "loading": "Loading…",
-    "showEarlier": "Show earlier"
+    "showEarlier": "Show earlier",
+    "filters": "Log filter",
+    "filter": {
+      "all": "All",
+      "battle": "Battle",
+      "system": "System"
+    }
   },
   "page": {
     "loading": "Loading battle…",
@@ -77,20 +83,15 @@
   "scene": {
     "awaitingDm": "Waiting for the DM's decision",
     "awaitingYou": "The battle awaits your decision — reserve",
-    "awaitingYouShort": "The battle awaits your decision",
     "over": "Battle over",
     "offline": "No connection — the state may be out of date",
     "openLog": "log ›",
-    "actionsWait": "Actions become available on your turn",
     "viewMode": "Battle view",
     "viewMap": "Map",
     "viewColumns": "Columns",
     "participant": "Participant",
     "log": "Log",
-    "backToLog": "← log",
-    "yourTurn": "Your turn",
-    "waitingFor": "<b>{name}</b> is acting",
-    "openDmActions": "Open DM quick actions"
+    "yourTurn": "Your turn"
   },
   "topBar": {
     "fxDisabledHint": "Animations are off: “Reduce motion” is enabled in the system",
@@ -105,10 +106,14 @@
     "playerViewOff": "Player view: off",
     "playerViewHero": "Viewing as",
     "round": "Round {round}",
+    "connected": "Connected",
+    "connecting": "Connecting",
+    "toCampaign": "To campaign",
     "complete": "Complete",
     "nextTurn": "Next turn"
   },
   "map": {
+    "pathCost": "{metres, number} m · {feet, number} ft",
     "hazardDefault": "Hazardous zone",
     "hazardUntilEnd": "{label} · until the end of round {round}",
     "hazardRoundsLeft": "{label} · {rounds} left",
@@ -151,7 +156,8 @@
       "minimapShow": "Show minimap",
       "minimapHide": "Collapse minimap",
       "follow": "Follow the turn",
-      "followHint": "Automatically move the camera to the active participant at the start of their turn"
+      "followHint": "Automatically move the camera to the active participant at the start of their turn",
+      "zoomLevel": "Zoom level"
     },
     "backgroundLabel": "Map background",
     "defaultBackground": "Default background",
@@ -275,7 +281,20 @@
     "acting": "acting",
     "turnIn": "turn in {count}",
     "cooldown": "recharge: {duration}",
-    "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration"
+    "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration",
+    "slots": {
+      "title": "Spell slots",
+      "label": "Level {level}, {current} of {max}",
+      "pactLabel": "Pact slot, level {level}, {current} of {max}",
+      "recommended": "Recommended spells",
+      "recommendedTitle": "Recommended · level {level}"
+    },
+    "states": {
+      "title": "Hero states",
+      "none": "No states",
+      "expand": "Show states",
+      "collapse": "Hide states"
+    }
   },
   "participant": {
     "deathSaves": "Death saves",
@@ -319,17 +338,12 @@
     "ability": "Ability",
     "bonus": "Bonus",
     "core": "Actions",
-    "gear": "Inventory",
+    "gear": "Item",
     "strikeAndReturn": "Return",
-    "endTurn": "End turn"
+    "endTurn": "End turn",
+    "popoverTitle": "Turn actions · {name} · round {round}"
   },
   "turnControls": {
-    "strip": {
-      "waiting": "Your turn",
-      "acting": "Your turn · Actions",
-      "ended": "Your turn"
-    },
-    "pickAuraZone": "Choose the aura zone",
     "reactionSpell": "Reaction spell"
   },
   "readied": {
@@ -404,5 +418,60 @@
       "hit": "{name} hits {target}: -{damage}",
       "turn": "Turn: {name}"
     }
+  },
+  "dock": {
+    "actions": "Act",
+    "action": "Action",
+    "bonus": "Bonus",
+    "reaction": "Reaction",
+    "spent": "used",
+    "endTurn": "End turn",
+    "waiting": "Turn: {name}",
+    "move": "Move",
+    "panelTitle": "Actions",
+    "moveCells": "Move · {left} cells"
+  },
+  "bubble": {
+    "title": "Details: {name}",
+    "toToken": "To token",
+    "offscreen": "Token is off screen"
+  },
+  "drawers": {
+    "rail": "Battle panels",
+    "log": "Log",
+    "dm": "DM actions",
+    "reserve": "Reserve",
+    "tools": "Tools",
+    "view": "View",
+    "display": "Display",
+    "sound": "Sound and music",
+    "dmSection": "DM",
+    "more": "Menu",
+    "mode": "Tools mode",
+    "modePlay": "Play",
+    "modeEdit": "Edit map",
+    "grid": "Grid",
+    "mapTools": "Map tools",
+    "gridShape": "Grid shape",
+    "gridSquare": "Square",
+    "gridHex": "Hex",
+    "gridHexSoon": "Hex grid is coming soon",
+    "dmPanel": "DM panel",
+    "close": "Close"
+  },
+  "initiative": {
+    "showNextRound": "Show next round",
+    "hideNextRound": "Hide next round"
+  },
+  "hudBlocks": {
+    "hide": "Hide: {name}",
+    "show": "Show: {name}",
+    "names": {
+      "hero": "Hero",
+      "dock": "Turn",
+      "initiative": "Initiative",
+      "tools": "Tools"
+    },
+    "hotkey": "H hides or shows the whole interface"
   }
 }

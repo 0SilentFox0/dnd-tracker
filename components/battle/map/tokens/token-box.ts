@@ -1,3 +1,5 @@
+import type { GridKind } from '@/types/battle-grid';
+
 export const tokenBoxStyle = (
     box: { cx: number; cy: number; size: number },
     mapSize: { width: number; height: number }
@@ -10,7 +12,7 @@ export const tokenBoxStyle = (
 
 export const routeFrames = (
     route: readonly { cx: number; cy: number }[] | undefined,
-    { box, mapSize }: MapPlacement
+    { box, mapSize }: Pick<MapPlacement, 'box' | 'mapSize'>
 ) =>
     route && route.length > 1
         ? route.map((c) => {
@@ -21,8 +23,11 @@ export const routeFrames = (
         : null;
 
 export interface MapPlacement {
+    grid: GridKind;
     route?: { cx: number; cy: number }[];
     box: { cx: number; cy: number; size: number };
     mapSize: { width: number; height: number };
     pxPerUnit: number;
+    dimmed?: boolean;
+    hovered?: boolean;
 }

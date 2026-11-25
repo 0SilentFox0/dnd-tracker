@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useBattleScene } from './useBattleScene';
 
-import { aimInRange, cellsOf, sizeOf } from '@/lib/utils/battle/grid';
+import {
+    aimInRange,
+    cellsOf,
+    footprintSizeOf,
+    gridOf,
+} from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
@@ -16,23 +21,25 @@ export function useAbilityMapAim(
 ) {
     const {
         intents: { setMapAim },
-        battle: { rules },
+        battle: { rules, map },
     } = useBattleScene();
 
     const [ability, setAbility] = useState<ResolvedAbility | null>(null);
 
     const fire = useRef(onAim);
 
-    const origin = useRef(cellsOf(participant));
+    const grid = gridOf(map);
+
+    const origin = useRef(cellsOf(participant, grid));
 
     useEffect(() => {
         fire.current = onAim;
-        origin.current = cellsOf(participant);
+        origin.current = cellsOf(participant, grid);
     });
 
     const casterId = participant.basicInfo.id;
 
-    const size = sizeOf(participant) * cellFeetOf(rules);
+    const size = footprintSizeOf(participant, grid) * cellFeetOf(rules);
 
     useEffect(() => {
         if (!ability?.aim) return;
@@ -49,7 +56,7 @@ export function useAbilityMapAim(
             onAim: (cell) => {
                 if (
                     kind === 'direction' &&
-                    !aimInRange(origin.current, cell, range, rules)
+                    !aimInRange(origin.current, cell, range, rules, grid)
                 )
                     return;
 
@@ -68,7 +75,7 @@ export function useAbilityMapAim(
             window.removeEventListener('keydown', onKey);
             setMapAim(null);
         };
-    }, [ability, casterId, size, setMapAim, rules]);
+    }, [ability, casterId, size, setMapAim, rules, grid]);
 
     const cancel = useCallback(() => setAbility(null), []);
 

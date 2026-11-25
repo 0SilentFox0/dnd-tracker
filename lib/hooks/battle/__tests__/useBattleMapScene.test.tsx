@@ -169,8 +169,13 @@ describe('useBattleMapScene', () => {
 
         const view = current().view;
 
-        act(() => current().actions.onCellHover?.({ x: 5, y: 3 }));
-        act(() => current().actions.onCellHover?.({ x: 6, y: 3 }));
+        const away = (x: number) =>
+            Array.from({ length: 30 }, (_, y) => ({ x, y })).find(
+                (p) => !view.reach?.steps.has(`${p.x}:${p.y}`)
+            ) ?? { x, y: 0 };
+
+        act(() => current().actions.onCellHover?.(away(5)));
+        act(() => current().actions.onCellHover?.(away(6)));
 
         expect(current().view).toBe(view);
     });

@@ -7,6 +7,7 @@ import type {
 import { textRef } from '@/lib/i18n/text-ref';
 import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import { isDying } from '@/lib/utils/battle/death-saves';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
@@ -76,7 +77,9 @@ const AUTO_TARGETING = [
     'everyone',
 ];
 
-function choiceOf(effects: NonNullable<BookSpell['spellEffects']>): SpellPick['choice'] {
+function choiceOf(
+    effects: NonNullable<BookSpell['spellEffects']>
+): SpellPick['choice'] {
     for (const e of effects) {
         if (e.kind === 'transform' && e.pick && !e.unitId)
             return { kind: 'unit', creatureType: e.pick.creatureType };
@@ -325,9 +328,11 @@ export function spellTargetInRange(
     )
         return true;
 
+    const grid = gridOf(map);
+
     const inRange =
         range === undefined ||
-        footprintDistance(cellsOf(caster), cellsOf(target)) <=
+        footprintDistance(cellsOf(caster, grid), cellsOf(target, grid), grid) <=
             feetToCells(range, rules);
 
     return (

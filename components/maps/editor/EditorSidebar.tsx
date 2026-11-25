@@ -22,6 +22,12 @@ import type {
     useUvttImport,
 } from '@/lib/hooks/battle-maps';
 
+const HEX_HIDDEN: ReadonlySet<EditorPanel> = new Set([
+    'edges',
+    'tiles',
+    'effects',
+]);
+
 const GROUP_LABEL =
     'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';
 
@@ -42,6 +48,10 @@ export function EditorSidebar({
 
     const { panel } = workspace;
 
+    const hex = editor.state.grid === 'hex';
+
+    const panels = hex ? PANELS.filter((p) => !HEX_HIDDEN.has(p)) : PANELS;
+
     return (
         <Tabs
             value={panel}
@@ -53,7 +63,7 @@ export function EditorSidebar({
                 className="sticky top-0 z-20 grid h-auto w-full grid-cols-2 gap-1 rounded-md border border-hud-rule bg-background p-1 shadow-sm"
             >
                 <span className={GROUP_LABEL}>{t('groups.map')}</span>
-                {PANELS.map((p) => {
+                {panels.map((p) => {
                     const Icon = PANEL_ICONS[p];
 
                     return (
@@ -81,6 +91,9 @@ export function EditorSidebar({
                     );
                 })}
             </TabsList>
+            {hex && (
+                <p className="mt-2 text-xs text-hud-muted">{t('hexHint')}</p>
+            )}
             <div className="my-3 rounded-md border border-hud-rule bg-black/20 px-3 py-2">
                 <h2 className="text-sm font-semibold text-hud-gold-bright">
                     {t(`panels.${panel}`)}
@@ -111,12 +124,14 @@ export function EditorSidebar({
                     <DoorToolOptions editor={editor} />
                 </div>
             </TabsContent>
-            <TabsContent value={panel === 'effects' ? 'effects' : 'tiles'}>
-                <TilePalettePanel
-                    workspace={workspace}
-                    effects={panel === 'effects'}
-                />
-            </TabsContent>
+            {!hex && (
+                <TabsContent value={panel === 'effects' ? 'effects' : 'tiles'}>
+                    <TilePalettePanel
+                        workspace={workspace}
+                        effects={panel === 'effects'}
+                    />
+                </TabsContent>
+            )}
         </Tabs>
     );
 }

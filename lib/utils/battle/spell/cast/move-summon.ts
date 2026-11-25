@@ -6,12 +6,13 @@ import {
     put,
 } from '@/lib/utils/battle/common/action-flow';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { cellDistance, cellLine } from '@/lib/utils/battle/grid/geometry';
+import { footprintSizeOf } from '@/lib/utils/battle/grid/occupancy';
 import {
     fits,
     isOnMap,
     occupiedBy,
-    sizeOf,
 } from '@/lib/utils/battle/grid/occupancy';
 import { zoneMove } from '@/lib/utils/battle/spell/zone-triggers';
 import type { GridPoint } from '@/types/battle-grid';
@@ -54,7 +55,9 @@ export function moveSummon({
 
     if (!map || !aim || !from || !isOnMap(summon)) return;
 
-    if (cellDistance(from, aim) * cellFeetOf(rules) > feet) {
+    const grid = gridOf(map);
+
+    if (cellDistance(from, aim, grid) * cellFeetOf(rules) > feet) {
         flow.messages.push(
             textRef('battleLog.spellFx.moveSummonFar', {
                 caster,
@@ -66,12 +69,16 @@ export function moveSummon({
         return;
     }
 
-    const blocked = occupiedBy(flow.ps, (p) => p.basicInfo.id !== summon.basicInfo.id);
+    const blocked = occupiedBy(
+        flow.ps,
+        (p) => p.basicInfo.id !== summon.basicInfo.id,
+        grid
+    );
 
     const path: GridPoint[] = [];
 
-    for (const cell of cellLine(from, aim).slice(1)) {
-        if (!fits(map, cell, sizeOf(summon), blocked)) break;
+    for (const cell of cellLine(from, aim, grid).slice(1)) {
+        if (!fits(map, cell, footprintSizeOf(summon, grid), blocked)) break;
 
         path.push(cell);
     }

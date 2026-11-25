@@ -8,7 +8,7 @@ import { MotionBackground } from '../motion/MotionBackground';
 import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { useLoadedAspect } from '@/lib/hooks/battle';
 import { useReducedMotion } from '@/lib/hooks/common';
-import { backgroundBox } from '@/lib/utils/battle/grid';
+import { backgroundBox, gridOf } from '@/lib/utils/battle/grid';
 import { toMediaUrl } from '@/lib/utils/common/image-url';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -27,7 +27,7 @@ function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
 
     const { aspect, imgProps } = useLoadedAspect(src, onReady);
 
-    const box = backgroundBox(map, cellPx, aspect);
+    const box = backgroundBox(map, cellPx, aspect, gridOf(map));
 
     if (map.motion)
         return (
@@ -54,7 +54,11 @@ function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
                     alt=""
                     fill
                     sizes={phone && px > 0 ? `${px}px` : '100vw'}
-                    className="object-contain object-left-top"
+                    className={
+                        map.backgroundCols
+                            ? 'object-fill'
+                            : 'object-cover object-left-top'
+                    }
                     priority
                     {...imgProps}
                 />

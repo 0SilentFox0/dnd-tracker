@@ -2,30 +2,32 @@
 
 import { memo, useMemo } from 'react';
 
-import {
-    markFill,
-    type MarkValue,
-    OUT_OF_RANGE_FILL,
-    ZONE,
-} from './grid-style';
+import { markFill, type MarkValue } from './grid-style';
 
 import {
     cellPolygon,
     gridLinesPath,
+    gridOf,
+    type GridWindow,
     isMoveMark,
+    mapSize,
     parseCellKey,
     regionFillPath,
     regionOutlinePath,
-    UNIT,
-    windowPath,
+    unitOf,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, BattleMapView } from '@/types/battle-grid';
+import type {
+    BattleMapConfig,
+    BattleMapView,
+    GridKind,
+} from '@/types/battle-grid';
 
 interface GridMarksProps {
     map: BattleMapConfig;
     blocked: ReadonlySet<string>;
     marks: BattleMapView['marks'];
     range?: BattleMapView['range'];
+    through?: string[];
     maskId: string;
 }
 
@@ -42,48 +44,52 @@ function splitMarks(
 ) {
     const move: string[] = [];
 
-    const danger: string[] = [];
-
     const sparse: Array<[string, MarkValue]> = [];
 
     if (marks)
         for (const [key, mark] of marks) {
             if (blocked.has(key)) continue;
 
-            if (mark === 'move-danger') danger.push(key);
-            else if (isMoveMark(mark)) move.push(key);
+            if (isMoveMark(mark)) move.push(key);
             else if (SPARSE.has(mark)) sparse.push([key, mark]);
         }
 
-    return { move, danger, sparse };
+    return { move, sparse };
 }
 
-function zonePaths(keys: string[]) {
-    return keys.length
-        ? { fill: regionFillPath(keys), outline: regionOutlinePath(keys) }
-        : null;
-}
+const rangeOutline = (w: GridWindow, grid: GridKind) =>
+    w.cells
+        ? regionOutlinePath(w.cells, grid)
+        : `M${unitOf(w.x)} ${unitOf(w.y)}h${unitOf(w.cols)}v${unitOf(w.rows)}h${-unitOf(w.cols)}z`;
 
 export const GridMarks = memo(function GridMarks({
     map,
     blocked,
     marks,
     range,
+    through,
     maskId,
 }: GridMarksProps) {
     const { cols, rows, terrain } = map;
 
+    const grid = gridOf(map);
+
+    const span = mapSize(map, grid);
+
     const split = useMemo(() => splitMarks(marks, blocked), [marks, blocked]);
 
-    const zones = useMemo(
-        () => ({
-            move: zonePaths(split.move),
-            danger: zonePaths(split.danger),
-        }),
-        [split]
-    );
+    const moveOutline = useMemo(() => {
+        if (!split.move.length) return '';
 
-    const lines = useMemo(() => gridLinesPath(cols, rows), [cols, rows]);
+        const passed = (through ?? []).filter((k) => !blocked.has(k));
+
+        return regionOutlinePath([...split.move, ...passed], grid);
+    }, [split, through, blocked, grid]);
+
+    const lines = useMemo(
+        () => gridLinesPath(cols, rows, grid),
+        [cols, rows, grid]
+    );
 
     const staticMask = useMemo(() => {
         const keys = [...blocked];
@@ -93,69 +99,39 @@ export const GridMarks = memo(function GridMarks({
                 if (cell.kind === 'wall' || cell.kind === 'barrier')
                     keys.push(key);
 
-        return keys.length ? regionFillPath(keys) : '';
-    }, [blocked, terrain]);
+        return keys.length ? regionFillPath(keys, grid) : '';
+    }, [blocked, terrain, grid]);
 
-    const gridless = [staticMask, zones.move?.fill, zones.danger?.fill]
-        .filter(Boolean)
-        .join('');
-
-    const outOfRange = useMemo(
-        () => (range ? windowPath({ cols, rows }, range) : ''),
-        [range, cols, rows]
+    const rangeD = useMemo(
+        () => (range ? rangeOutline(range, grid) : ''),
+        [range, grid]
     );
 
     return (
         <>
-            {gridless && (
+            {staticMask && (
                 <mask
                     id={maskId}
                     maskUnits="userSpaceOnUse"
                     x={0}
                     y={0}
-                    width={cols * UNIT}
-                    height={rows * UNIT}
+                    width={span.width}
+                    height={span.height}
                 >
-                    <rect
-                        width={cols * UNIT}
-                        height={rows * UNIT}
-                        fill="#fff"
-                    />
-                    <path d={gridless} fill="#000" />
+                    <rect width={span.width} height={span.height} fill="#fff" />
+                    <path d={staticMask} fill="#000" />
                 </mask>
             )}
             <g pointerEvents="none">
-                {zones.move && (
-                    <path
-                        data-zone-fill="move"
-                        d={zones.move.fill}
-                        fill={ZONE.move.fill}
-                    />
-                )}
-                {zones.danger && (
-                    <path
-                        data-zone-fill="danger"
-                        d={zones.danger.fill}
-                        fill={ZONE.danger.fill}
-                    />
-                )}
                 {split.sparse.map(([key, mark]) => (
                     <polygon
                         key={key}
                         data-mark-cell={key}
                         data-mark={mark}
-                        points={cellPolygon(parseCellKey(key))}
+                        points={cellPolygon(parseCellKey(key), grid)}
                         fill={markFill(mark)}
                     />
                 ))}
-                {outOfRange && (
-                    <path
-                        data-out-of-range=""
-                        d={outOfRange}
-                        fillRule="evenodd"
-                        fill={OUT_OF_RANGE_FILL}
-                    />
-                )}
                 <path
                     data-grid-lines=""
                     d={lines}
@@ -164,35 +140,30 @@ export const GridMarks = memo(function GridMarks({
                     strokeOpacity={map.opacity}
                     strokeWidth={1.5}
                     vectorEffect="non-scaling-stroke"
-                    mask={gridless ? `url(#${maskId})` : undefined}
+                    mask={staticMask ? `url(#${maskId})` : undefined}
                 />
-                {(['move', 'danger'] as const).map((kind) => {
-                    const zone = zones[kind];
-
-                    return (
-                        zone && (
-                            <g key={kind}>
-                                <path
-                                    d={zone.outline}
-                                    fill="none"
-                                    stroke={ZONE[kind].glow}
-                                    strokeWidth={4}
-                                    strokeLinejoin="round"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-                                <path
-                                    data-fx-zone={kind}
-                                    d={zone.outline}
-                                    fill="none"
-                                    stroke={ZONE[kind].stroke}
-                                    strokeWidth={1.5}
-                                    strokeLinejoin="round"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-                            </g>
-                        )
-                    );
-                })}
+                {moveOutline && (
+                    <path
+                        data-fx-zone="move"
+                        className="battle-map-reach-outline battle-map-zone"
+                        d={moveOutline}
+                        fill="none"
+                        strokeWidth={1.5}
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                    />
+                )}
+                {rangeD && (
+                    <path
+                        data-range-outline=""
+                        className="battle-map-range-outline battle-map-zone"
+                        d={rangeD}
+                        fill="none"
+                        strokeWidth={1.5}
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                    />
+                )}
             </g>
         </>
     );

@@ -388,5 +388,13 @@
   "2026-11-24-character-sheet": {
     "title": "New character sheet",
     "body": "The character sheet has a new layout: a pinned hero panel on the left, HP, stats and skills on top, tabs below. On a phone the skills are a separate tab. The DM can apply damage, healing and temporary HP right from the HP block."
+  },
+  "2026-11-24-game-ui-battle": {
+    "title": "Full-screen battle",
+    "body": "The map fills the whole screen with no header. Actions live in a compact HUD at the bottom right (hotkeys 1-6), your hero with spell slots sits bottom-left, initiative runs as an arc along the top, and the log and tools float as glass panels. Tap a token to see its details in a bubble; on phones the panels fold into a \"•••\" menu."
+  },
+  "2026-11-26-hex-grid": {
+    "title": "Square or hex grid",
+    "body": "When you create a battle map, pick its geometry: squares or hexes. On a hex map movement, range, spell templates, visibility and fog work over six neighbours, and every token takes one cell. The geometry cannot be changed after creation; maze, walls, doors and tiles are available on square grids only."
   }
 }

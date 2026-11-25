@@ -113,4 +113,13 @@ describe('mergeLibraryHeader doors', () => {
             '2:2:e': { open: false, locked: true },
         });
     });
+
+    it('keeps gridType through a merge', () => {
+        const hex: BattleMapConfig = { ...base, gridType: 'hex' };
+
+        expect(mergeLibraryHeader(hex, hex, hex).gridType).toBe('hex');
+        expect(
+            mergeLibraryHeader(hex, { ...hex, opacity: 0.5 }, hex).gridType
+        ).toBe('hex');
+    });
 });

@@ -1,6 +1,6 @@
 import { isAdjacentOnMap } from './adjacency';
 import { cellFeetOf } from './cell-feet';
-import { footprintDistance } from './geometry';
+import { footprintDistance, gridOf } from './geometry';
 import { lineOfFire } from './line-of-fire';
 import { cellsOf, isOnMap } from './occupancy';
 import { wallsAllowSight } from './sight';
@@ -80,9 +80,11 @@ export function rangeDisadvantageReasons(
     )
         return [];
 
-    const mine = cellsOf(attacker);
+    const grid = gridOf(map);
 
-    const distance = footprintDistance(mine, cellsOf(target));
+    const mine = cellsOf(attacker, grid);
+
+    const distance = footprintDistance(mine, cellsOf(target, grid), grid);
 
     const thrown =
         isThrownMelee(attack, rules) &&
@@ -131,10 +133,12 @@ export function attackReachError(
 ): LogLine | null {
     if (!map || !attacker.battleData.position) return null;
 
-    const mine = cellsOf(attacker);
+    const grid = gridOf(map);
+
+    const mine = cellsOf(attacker, grid);
 
     const distanceTo = (p: BattleParticipant) =>
-        footprintDistance(mine, cellsOf(p));
+        footprintDistance(mine, cellsOf(p, grid), grid);
 
     const placed = targets.filter((t) => t.battleData.position);
 

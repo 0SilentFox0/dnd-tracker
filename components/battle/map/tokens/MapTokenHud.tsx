@@ -1,8 +1,9 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { HP_LINE_LIFT } from '../constants';
 import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,7 @@ import {
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { type FxImpact, hudMotifsOf } from '@/lib/utils/battle/fx';
-import { isFallen, sizeOf } from '@/lib/utils/battle/grid';
+import { isFallen } from '@/lib/utils/battle/grid';
 import { isDown } from '@/lib/utils/battle/participant/state';
 import {
     HEALTH_LABEL,
@@ -39,9 +40,7 @@ export interface MapTokenHudProps {
     onReturn?: () => void;
 }
 
-const HUD_MAX_SHARE = 0.42;
-
-const PLAQUE_CHROME = { text: 6, bar: 4 };
+const MIN_LINE_BOX_PX = 20;
 
 function hpView(
     participant: BattleParticipant,
@@ -69,11 +68,14 @@ function MapTokenHudImpl({
     effects = NO_EFFECTS,
     onReturn,
 }: MapTokenHudProps) {
-    const { box, mapSize, pxPerUnit } = placement;
+    const { box, mapSize, pxPerUnit, hovered, route } = placement;
 
-    const glideRef = useTokenGlide<HTMLDivElement>(
-        routeFrames(placement.route, placement)
+    const frames = useMemo(
+        () => routeFrames(route, { box, mapSize }),
+        [route, box, mapSize]
     );
+
+    const glideRef = useTokenGlide<HTMLDivElement>(frames);
 
     const t = useTranslations('battle.map');
 
@@ -93,27 +95,13 @@ function MapTokenHudImpl({
 
     const boxPx = box.size * pxPerUnit;
 
-    const small = sizeOf(participant) === 1;
+    const showLine = boxPx >= MIN_LINE_BOX_PX;
 
-    const hpFont = clamp(boxPx * (small ? 0.12 : 0.06), 7, small ? 11 : 13);
+    if (!showLine && !onReturn) return null;
 
-    const nameFont = small
-        ? clamp(boxPx * 0.1, 6, 9)
-        : clamp(boxPx * 0.075, 7, 14);
+    const barPx = clamp(Math.round(boxPx * 0.07), 2, 5);
 
-    const textBarPx = Math.round(hpFont * 1.45);
-
-    const thinBarPx = clamp(Math.round(boxPx * 0.08), 4, 8);
-
-    const fits = (px: number) => px <= boxPx * HUD_MAX_SHARE;
-
-    const showText = fits(nameFont * 1.25 + 1 + textBarPx + PLAQUE_CHROME.text);
-
-    const showHud = showText || fits(thinBarPx + PLAQUE_CHROME.bar);
-
-    if (!showHud && !onReturn) return null;
-
-    const barPx = showText ? textBarPx : thinBarPx;
+    const labelFont = clamp(boxPx * 0.12, 8, 12);
 
     const { ratio, text: hpText } = hpView(participant, exact);
 
@@ -124,7 +112,10 @@ function MapTokenHudImpl({
             ref={glideRef}
             data-map-hud={participant.basicInfo.id}
             className="pointer-events-none absolute"
-            style={{ ...tokenBoxStyle(box, mapSize), zIndex: raised ? 20 : 10 }}
+            style={{
+                ...tokenBoxStyle(box, mapSize),
+                zIndex: hovered ? 30 : raised ? 20 : 10,
+            }}
         >
             {onReturn && (
                 <Button
@@ -141,14 +132,14 @@ function MapTokenHudImpl({
                     {t('returnToToken')}
                 </Button>
             )}
-            {showHud && (
+            {showLine && (
                 <div
                     ref={shake}
                     data-map-hud-strip
                     data-hud-rim={motifs[0]}
+                    style={{ bottom: `${HP_LINE_LIFT * 100}%` }}
                     className={cn(
-                        'map-hud-plaque absolute bottom-0 left-[3%] flex max-h-full w-[94%] flex-col justify-end',
-                        showText ? 'px-[3px] py-[2px]' : 'p-px',
+                        'map-hud-plaque absolute left-[15%] w-[70%]',
                         motionAllowed && 'map-hud-anim',
                         down && 'opacity-40'
                     )}
@@ -161,25 +152,10 @@ function MapTokenHudImpl({
                             className="map-hud-fx"
                         />
                     ))}
-                    {showText && (
-                        <div
-                            data-map-hud-name
-                            className={cn(
-                                'hud-sc relative truncate text-center leading-tight font-bold whitespace-nowrap text-[#fffaf0]',
-                                down && 'line-through'
-                            )}
-                            style={{ fontSize: nameFont }}
-                        >
-                            {participant.basicInfo.name}
-                        </div>
-                    )}
                     <div
                         data-map-hud-bar
                         data-hp-tone={down ? 'down' : hpTone(ratio)}
-                        className={cn(
-                            'map-hud-bar relative shrink-0',
-                            showText && 'mt-px'
-                        )}
+                        className="map-hud-bar relative"
                         style={{ height: barPx }}
                     >
                         <i
@@ -192,24 +168,29 @@ function MapTokenHudImpl({
                             className="map-hud-fill"
                             style={{ width }}
                         />
-                        {showText && (
+                    </div>
+                    {hovered && (
+                        <div
+                            data-map-hud-tip
+                            className={cn(
+                                'map-hud-tip hud-sc absolute top-full left-1/2 mt-1 -translate-x-1/2 text-center leading-tight font-bold whitespace-nowrap',
+                                down && 'line-through'
+                            )}
+                            style={{ fontSize: labelFont }}
+                        >
+                            <span data-map-hud-name>
+                                {participant.basicInfo.name}
+                            </span>{' '}
                             <span
+                                data-map-hud-value
                                 className={cn(
-                                    'map-hud-text',
-                                    exact
-                                        ? 'font-sans font-semibold'
-                                        : 'hud-sc italic',
-                                    down && 'line-through'
+                                    exact ? 'font-sans font-semibold' : 'italic'
                                 )}
-                                style={{
-                                    fontSize: hpFont,
-                                    lineHeight: `${barPx}px`,
-                                }}
                             >
                                 {fmt(hpText)}
                             </span>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

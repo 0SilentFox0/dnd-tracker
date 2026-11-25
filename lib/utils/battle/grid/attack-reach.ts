@@ -1,4 +1,4 @@
-import { footprintDistance } from './geometry';
+import { footprintDistance, gridOf } from './geometry';
 import { cellsOf, isOnMap } from './occupancy';
 import * as check from './reach-check';
 
@@ -117,9 +117,15 @@ export function pickAttack(
         else rangedError ??= e;
     }
 
+    const grid = gridOf(map);
+
     const adjacent =
         !!target.battleData.position &&
-        footprintDistance(cellsOf(attacker), cellsOf(target)) <= 1;
+        footprintDistance(
+            cellsOf(attacker, grid),
+            cellsOf(target, grid),
+            grid
+        ) <= 1;
 
     return {
         attack: null,

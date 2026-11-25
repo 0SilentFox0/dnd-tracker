@@ -13,6 +13,7 @@ import {
     screenToUnit,
     tokenBox,
     UNIT,
+    viewCellPx,
     visibleGridWindow,
 } from '../layout';
 
@@ -69,6 +70,30 @@ describe('fitMapBox', () => {
         expect(
             fitMapBox({ width: 1000, height: 500 }, { cols: 20, rows: 40 })
         ).toEqual({ width: 250, height: 500 });
+    });
+});
+
+describe('fitMapView cover', () => {
+    it('fills both axes of the available box', () => {
+        const v = fitMapView(
+            { width: 1000, height: 600 },
+            { cols: 20, rows: 10 },
+            { cover: 0.25 }
+        );
+
+        expect(v.width).toBe(1200);
+
+        expect(v.height).toBe(600);
+    });
+
+    it('falls back to contain when too much would be cropped', () => {
+        const v = fitMapView(
+            { width: 1000, height: 1000 },
+            { cols: 10, rows: 15 },
+            { cover: 0.25 }
+        );
+
+        expect(v.height).toBe(1000);
     });
 });
 
@@ -443,5 +468,42 @@ describe('visibleGridWindow', () => {
         expect(win.x + win.cols).toBeGreaterThanOrEqual(14);
         expect(win.y).toBeLessThanOrEqual(5);
         expect(win.y + win.rows).toBeGreaterThanOrEqual(10);
+    });
+});
+
+describe('fitMapView alwaysRotate', () => {
+    const portraitBox = { width: 400, height: 800 };
+
+    it('turns a mildly landscape map in a portrait box only when alwaysRotate', () => {
+        const map = { cols: 11, rows: 10 };
+
+        expect(fitMapView(portraitBox, map, { rotatable: true }).rotated).toBe(
+            false
+        );
+        expect(
+            fitMapView(portraitBox, map, {
+                rotatable: true,
+                alwaysRotate: true,
+            }).rotated
+        ).toBe(true);
+    });
+
+    it('does not turn a square or portrait map', () => {
+        expect(
+            fitMapView(
+                portraitBox,
+                { cols: 10, rows: 10 },
+                { rotatable: true, alwaysRotate: true }
+            ).rotated
+        ).toBe(false);
+    });
+});
+
+describe('viewCellPx', () => {
+    it('divides by rows when the view is rotated', () => {
+        const win = { cols: 40, rows: 20 };
+
+        expect(viewCellPx({ width: 400, rotated: false }, win)).toBe(10);
+        expect(viewCellPx({ width: 400, rotated: true }, win)).toBe(20);
     });
 });

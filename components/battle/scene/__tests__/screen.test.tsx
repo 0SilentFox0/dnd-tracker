@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { renderToString } from 'react-dom/server';
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
@@ -59,6 +59,14 @@ const IMP = {
     battleData: { ...base.battleData, reserved: true },
 };
 
+const openTools = () => {
+    const menu = screen.queryByRole('button', { name: 'Меню' });
+
+    if (menu) fireEvent.click(menu);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Інструменти' }));
+};
+
 describe('BattleScreen', () => {
     afterEach(cleanup);
 
@@ -79,7 +87,9 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        expect(await screen.findByText('Журнал')).toBeTruthy();
+        expect(
+            await screen.findByRole('button', { name: 'Журнал' })
+        ).toBeTruthy();
         expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
         expect(screen.queryByText(/Союзники ·/)).toBeNull();
         expect(screen.queryByText(/Вороги ·/)).toBeNull();
@@ -93,7 +103,9 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        fireEvent.click(await screen.findByRole('button', { name: 'Колонки' }));
+        await screen.findByRole('button', { name: 'Журнал' });
+        openTools();
+        fireEvent.click(screen.getByRole('button', { name: 'Колонки' }));
         expect(screen.getByText(/Союзники ·/)).toBeTruthy();
         expect(screen.getByText(/Вороги ·/)).toBeTruthy();
         expect(container.querySelector('[data-fx-clip]')).toBeNull();
@@ -102,7 +114,7 @@ describe('BattleScreen', () => {
         expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
     });
 
-    it('десктоп, вигляд «Карта»: резерв окремою групою з кнопкою введення; у «Колонках» — лише в списку', async () => {
+    it('десктоп, вигляд «Карта»: резерв у шторці з кнопкою введення; у «Колонках» ще й у списку', async () => {
         media.wide = true;
         window.localStorage.clear();
 
@@ -115,9 +127,13 @@ describe('BattleScreen', () => {
 
         render(<BattleScreen />, { wrapper });
 
-        const group = await screen.findByRole('region', { name: 'Резерв' });
+        fireEvent.click(await screen.findByRole('button', { name: 'Резерв' }));
 
-        expect(group.textContent).toContain('Резерв (1)');
+        const group = (
+            await screen.findAllByRole('region', { name: 'Резерв' })
+        ).find((el) => el.textContent?.includes('Резерв (1)'));
+
+        expect(group?.textContent).toContain('Резерв (1)');
         fireEvent.click(
             screen.getByRole('button', { name: 'Ввести в бій: Біс' })
         );
@@ -125,11 +141,16 @@ describe('BattleScreen', () => {
             participantIds: ['imp'],
         });
 
+        openTools();
         fireEvent.click(screen.getByRole('button', { name: 'Колонки' }));
-        expect(screen.queryByRole('region', { name: 'Резерв' })).toBeNull();
+        fireEvent.click(
+            within(
+                document.querySelector('[data-drawer-rail]') as HTMLElement
+            ).getByRole('button', { name: 'Резерв' })
+        );
         expect(
             screen.getAllByRole('button', { name: 'Ввести в бій: Біс' })
-        ).toHaveLength(1);
+        ).toHaveLength(2);
     });
 
     it('телефон, вкладка «Карта»: кнопка «Резерв (N)» відкриває список; без резерву кнопки немає', async () => {
@@ -144,7 +165,8 @@ describe('BattleScreen', () => {
 
         render(<BattleScreen />, { wrapper });
 
-        fireEvent.click(screen.getByRole('button', { name: 'Резерв (1)' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Меню' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Резерв' }));
         fireEvent.click(
             await screen.findByRole('button', { name: 'Ввести в бій: Біс' })
         );
@@ -156,6 +178,7 @@ describe('BattleScreen', () => {
         render(<BattleScreen />, {
             wrapper: fakeScene({ isMyTurn: false, map: MAP }).wrapper,
         });
+        fireEvent.click(screen.getByRole('button', { name: 'Меню' }));
         expect(screen.queryByRole('button', { name: /Резерв/ })).toBeNull();
     });
 
@@ -177,20 +200,23 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        expect(
-            screen
-                .getByRole('tab', { name: /Карта/ })
-                .getAttribute('aria-selected')
-        ).toBe('true');
         expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
 
-        fireEvent.click(screen.getByRole('tab', { name: /Вороги/ }));
+        openTools();
+
+        expect(
+            screen
+                .getByRole('button', { name: /Карта/ })
+                .getAttribute('aria-pressed')
+        ).toBe('true');
+
+        fireEvent.click(screen.getByRole('button', { name: /Вороги/ }));
 
         expect(container.querySelector('[data-fx-clip]')).toBeNull();
         expect(
             screen
-                .getByRole('tab', { name: /Вороги/ })
-                .getAttribute('aria-selected')
+                .getByRole('button', { name: /Вороги/ })
+                .getAttribute('aria-pressed')
         ).toBe('true');
     });
 
@@ -221,11 +247,12 @@ describe('BattleScreen', () => {
             wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper,
         });
 
-        fireEvent.click(screen.getByRole('tab', { name: /Вороги/ }));
+        openTools();
+        fireEvent.click(screen.getByRole('button', { name: /Вороги/ }));
         expect(
             screen
-                .getByRole('tab', { name: /Карта/ })
-                .getAttribute('aria-selected')
+                .getByRole('button', { name: /Карта/ })
+                .getAttribute('aria-pressed')
         ).toBe('true');
     });
 
@@ -236,7 +263,9 @@ describe('BattleScreen', () => {
 
         const { container } = render(<BattleScreen />, { wrapper });
 
-        expect(screen.queryByRole('tab', { name: /Карта/ })).toBeNull();
+        openTools();
+
+        expect(screen.queryByRole('button', { name: /Карта/ })).toBeNull();
         expect(container.querySelector('[data-fx-clip]')).toBeNull();
     });
 
@@ -252,29 +281,32 @@ describe('BattleScreen', () => {
         );
 
         expect(html).not.toContain('- 0px)');
-        expect(html).toContain('below-header');
+        expect(html).toContain('scene-full');
     });
 
-    it('телефон, не мій хід: вкладки, «ходить», мій герой, без кнопок дій', () => {
+    it('телефон, не мій хід: вкладки в «Інструментах», «Хід: …», без кнопок дій', () => {
         media.wide = false;
 
         const { wrapper } = fakeScene({ isMyTurn: false });
 
         render(<BattleScreen />, { wrapper });
 
-        expect(screen.getByRole('tab', { name: /Вороги/ })).toBeTruthy();
-        expect(screen.getByText(/ходить/)).toBeTruthy();
+        openTools();
+
+        expect(screen.getByRole('button', { name: /Вороги/ })).toBeTruthy();
+        expect(screen.getByText(/Хід:/)).toBeTruthy();
         expect(screen.queryByRole('button', { name: /Атака/ })).toBeNull();
     });
 
-    it('телефон, мій хід: банер і дії', () => {
+    it('телефон, мій хід: док із діями', () => {
         media.wide = false;
 
         const { wrapper } = fakeScene({ isMyTurn: true });
 
         render(<BattleScreen />, { wrapper });
 
-        expect(screen.getAllByText('Твій хід').length).toBeGreaterThan(0);
+        fireEvent.click(screen.getByRole('button', { name: 'Дія' }));
+
         expect(screen.getByRole('button', { name: /Атака/ })).toBeTruthy();
     });
 
@@ -288,7 +320,7 @@ describe('BattleScreen', () => {
         expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
         expect(screen.queryByRole('tab')).toBeNull();
         expect(screen.getByText(/Вороги ·/)).toBeTruthy();
-        expect(screen.getByText('Журнал')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Журнал' })).toBeTruthy();
     });
 
     it('завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі', async () => {
@@ -325,6 +357,9 @@ describe('BattleScreen', () => {
         });
 
         render(<BattleScreen />, { wrapper });
+
+        await screen.findByRole('button', { name: 'Інструменти' });
+        openTools();
 
         expect(
             await screen.findByRole('button', { name: 'Скинути' })

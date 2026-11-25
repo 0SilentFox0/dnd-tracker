@@ -17,6 +17,8 @@ export interface Frame {
     content: Size;
     bounds: { min: number; max: number };
     focusZoom?: number;
+    /** per-side part of `avail` cropped off-screen (cover fit); pan can reach it */
+    inset?: Size;
 }
 
 export const CAMERA_MAX_CELL_PX = 3 * MIN_TAP_CELL_PX;
@@ -56,8 +58,15 @@ export function needsCamera(view: MapView): boolean {
     return view.grow > 1;
 }
 
-function clampAxis(offset: number, avail: number, span: number): number {
-    return span <= avail ? (avail - span) / 2 : clamp(offset, avail - span, 0);
+function clampAxis(
+    offset: number,
+    avail: number,
+    span: number,
+    inset = 0
+): number {
+    return span <= avail - 2 * inset
+        ? (avail - span) / 2
+        : clamp(offset, avail - inset - span, inset);
 }
 
 export function clampCamera(cam: Camera, frame: Frame): Camera {
@@ -65,13 +74,30 @@ export function clampCamera(cam: Camera, frame: Frame): Camera {
 
     return {
         zoom,
-        x: clampAxis(cam.x, frame.avail.width, frame.content.width * zoom),
-        y: clampAxis(cam.y, frame.avail.height, frame.content.height * zoom),
+        x: clampAxis(
+            cam.x,
+            frame.avail.width,
+            frame.content.width * zoom,
+            frame.inset?.width
+        ),
+        y: clampAxis(
+            cam.y,
+            frame.avail.height,
+            frame.content.height * zoom,
+            frame.inset?.height
+        ),
     };
 }
 
 export function fitAllCamera(frame: Frame): Camera {
-    return clampCamera({ zoom: 1, x: 0, y: 0 }, frame);
+    return clampCamera(
+        {
+            zoom: 1,
+            x: (frame.avail.width - frame.content.width) / 2,
+            y: (frame.avail.height - frame.content.height) / 2,
+        },
+        frame
+    );
 }
 
 export function centerOn(

@@ -16,6 +16,7 @@ import {
 import { useMapMotionTool } from '@/lib/hooks/battle/useMapMotionTool';
 import { useImageSize } from '@/lib/hooks/common';
 import {
+    gridOf,
     hasPlayableArea,
     hazardDamage,
     impliedCellPx,
@@ -34,6 +35,7 @@ import {
 } from '@/lib/utils/battle/modes';
 import type {
     BattleMapConfig,
+    GridKind,
     GridPoint,
     MapMotion,
 } from '@/types/battle-grid';
@@ -43,6 +45,9 @@ const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
 
 const modeOf = (key: MapModeKey) =>
     MAP_MODE_REGISTRY[key] as MapModeDefinition<unknown>;
+
+const supportsGrid = (key: MapModeKey, grid: GridKind) =>
+    modeOf(key).grids?.includes(grid) ?? true;
 
 /** Hazard brush; empty dice means a hazard without damage */
 export interface HazardBrush {
@@ -156,6 +161,7 @@ export function useBattleMapEditor(
                 ...m,
                 ...imported,
                 bars: [],
+                gridType: 'square',
                 backgroundRows: undefined,
                 blocked: undefined,
                 terrain: undefined,
@@ -174,6 +180,8 @@ export function useBattleMapEditor(
     const setMode = useCallback(
         (key: MapModeKey, on: boolean) => {
             const mode = modeOf(key);
+
+            if (on && !supportsGrid(key, gridOf(map))) return;
 
             // one mode per battle; in a mode, core walls/grates are not editable and disappear when it is enabled
             setMap((m) => {
@@ -200,8 +208,25 @@ export function useBattleMapEditor(
                 );
             }
         },
-        [map.walls, map.bars, map.doors]
+        [map]
     );
+
+    const setGridType = useCallback((kind: GridKind) => {
+        setMap((m) => {
+            if (gridOf(m) === kind) return m;
+
+            if (kind === 'square') return { ...m, gridType: 'square' };
+
+            const { walls, bars, doors, ...rest } = m;
+
+            return MODE_KEYS.reduce(
+                (acc, key) => modeOf(key).withConfig(acc, null),
+                { ...rest, gridType: 'hex' } as BattleMapConfig
+            );
+        });
+        setToolState(null);
+        setNotice(null);
+    }, []);
 
     const setMotion = useCallback(
         (motion: MapMotion | null) => setMap((m) => ({ ...m, motion })),
@@ -263,12 +288,14 @@ export function useBattleMapEditor(
             enabled,
             map,
             mode: activeMode,
+            grid: gridOf(map),
+            modeSupported: (key: MapModeKey) => supportsGrid(key, gridOf(map)),
             margins,
             tool,
             doorLocked,
             notice,
             value: enabled ? map : null,
-            cellPx: image ? impliedCellPx(map, image) : null,
+            cellPx: image ? impliedCellPx(map, image, gridOf(map)) : null,
             image,
             imageSrc,
             pendingKeep,
@@ -292,6 +319,7 @@ export function useBattleMapEditor(
             replaceMapFromImport,
             setBrush,
             setMode,
+            setGridType,
             onStroke,
         },
     };

@@ -6,6 +6,7 @@ import {
     applyTerrain,
     blockedSet,
     cellKey,
+    gridOf,
     inBounds,
     occupiedBy,
     removeSpellZones,
@@ -72,7 +73,7 @@ export function mapTerrainMutation(
     const occupied =
         terrain.kind === 'hazard' || terrain.kind === 'difficult'
             ? new Set<string>()
-            : occupiedBy(ctx.participants, () => true);
+            : occupiedBy(ctx.participants, () => true, gridOf(map));
 
     const usable = (k: string) =>
         inBounds(map, parseKey(k)) && !blocked.has(k) && !occupied.has(k);

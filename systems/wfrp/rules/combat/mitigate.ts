@@ -36,6 +36,7 @@ import { isBrokenWeapon, wornWeaponDamage } from './weapon-wear';
 import { AttackType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import type {
     DamageCtx,
     DamageResult,
@@ -86,7 +87,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
         isHelpless(target) &&
         target.combatStats.currentHp > 0 &&
         (attackKindOf(ctx.attack.type) === AttackType.MELEE ||
-            pointBlankBetween(attacker, target, ctx.rules));
+            pointBlankBetween(attacker, target, ctx.rules, gridOf(ctx.map)));
 
     if (ctx.amount <= 0 && !slain) return { amount: 0, steps: [], totalLabel };
 

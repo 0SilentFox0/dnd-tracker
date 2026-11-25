@@ -16,6 +16,7 @@ import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import { gridOf } from '@/lib/utils/battle/grid';
 
 type Ctx = { params: Promise<{ id: string; mapId: string }> };
 
@@ -74,6 +75,9 @@ export async function PUT(req: Request, { params }: Ctx) {
     const meta = await loadOwned(getMapMeta(mapId), id);
 
     if (meta instanceof NextResponse) return meta;
+
+    if (gridOf(meta.header) === 'hex')
+        return errorResponse(API_ERRORS.BATTLE_MAP_HEX_SQUARE_ONLY, 400);
 
     const body = await parseBody(
         battleMapTilePatchSchema,

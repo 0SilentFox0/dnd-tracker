@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { shouldUseGameShell } from '../game-shell-route';
+import { isFullBleedRoute, shouldUseGameShell } from '../game-shell-route';
 
 describe('shouldUseGameShell', () => {
     it('enables the shell for the campaign list, dashboard, journal and both world views', () => {
@@ -38,5 +38,16 @@ describe('shouldUseGameShell', () => {
         ).toBe(false);
         expect(shouldUseGameShell('/campaigns/new')).toBe(false);
         expect(shouldUseGameShell(null)).toBe(false);
+    });
+});
+
+describe('isFullBleedRoute', () => {
+    it('is true only for a single battle screen', () => {
+        expect(isFullBleedRoute('/campaigns/c1/battles/b1')).toBe(true);
+        expect(isFullBleedRoute('/campaigns/c1/battles/b1/')).toBe(true);
+        expect(isFullBleedRoute('/campaigns/c1/battles')).toBe(false);
+        expect(isFullBleedRoute('/campaigns/new')).toBe(false);
+        expect(isFullBleedRoute('/campaigns/c1')).toBe(false);
+        expect(isFullBleedRoute(null)).toBe(false);
     });
 });

@@ -33,7 +33,8 @@ export function mazePlacementError(
     if (
         occupiedBy(
             participants,
-            (p) => p.basicInfo.id !== mover.basicInfo.id
+            (p) => p.basicInfo.id !== mover.basicInfo.id,
+            'square'
         ).has(cellKey(to))
     )
         return ERROR.taken;

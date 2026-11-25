@@ -37,7 +37,7 @@ export function useGridCalibration(editor: BattleMapEditor) {
 
     const confirm = useConfirm();
 
-    const { map, image, cellPx, pendingKeep } = editor.state;
+    const { map, image, cellPx, pendingKeep, grid } = editor.state;
 
     const {
         applyCalibration,
@@ -66,9 +66,9 @@ export function useGridCalibration(editor: BattleMapEditor) {
     const preview = useMemo<GridCalibration | null>(
         () =>
             image && draft && draft.w >= MIN_DRAFT_PX && draft.h >= MIN_DRAFT_PX
-                ? fromCellRect(image, draft, n)
+                ? fromCellRect(image, draft, n, grid)
                 : null,
-        [image, draft, n]
+        [image, draft, n, grid]
     );
 
     const reset = useCallback(() => {

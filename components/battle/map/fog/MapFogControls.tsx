@@ -1,6 +1,9 @@
 'use client';
 
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
+
+import { usePreviewSlot } from '../panels/MapToolsSlot';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { SelectField } from '@/components/ui/select-field';
@@ -25,6 +28,8 @@ export function MapFogControls({
 }) {
     const t = useTranslations('battle.map.fog');
 
+    const slot = usePreviewSlot();
+
     const previewable = participants
         .filter(
             (participant) =>
@@ -36,49 +41,68 @@ export function MapFogControls({
             label: participant.basicInfo.name,
         }));
 
-    return (
-        <div
-            className={cn(
-                'z-20 flex max-w-full flex-wrap items-center gap-1.5 text-xs',
-                phone ? 'shrink-0 px-1 pb-1' : 'absolute top-2 right-2'
-            )}
-        >
-            {isDM && (
-                <div className={CHIP}>
-                    {t('preview')}
-                    <SelectField
-                        aria-label={t('preview')}
-                        value={fog.preview.participantId}
-                        onValueChange={fog.preview.setParticipantId}
-                        options={previewable}
-                        allowNone
-                        noneLabel={t('dmView')}
-                        triggerClassName="h-7 max-w-40 text-xs"
-                    />
-                </div>
-            )}
-            {fog.showRemember && (
-                <label className={CHIP}>
-                    <Checkbox
-                        checked={fog.memory.remember}
-                        onCheckedChange={(checked) =>
-                            fog.memory.set(checked === true)
-                        }
-                    />
-                    {t('remember')}
-                </label>
-            )}
-            {fog.mode === 'vision' && (
-                <label className={CHIP}>
-                    <Checkbox
-                        checked={fog.share.on}
-                        onCheckedChange={(checked) =>
-                            fog.share.set(checked === true)
-                        }
-                    />
-                    {t('shareAllies')}
-                </label>
-            )}
+    const select = (triggerClassName: string) => (
+        <SelectField
+            aria-label={t('preview')}
+            value={fog.preview.participantId}
+            onValueChange={fog.preview.setParticipantId}
+            options={previewable}
+            allowNone
+            noneLabel={t('dmView')}
+            triggerClassName={triggerClassName}
+        />
+    );
+
+    const preview = (
+        <div className={CHIP}>
+            {t('preview')}
+            {select('h-7 max-w-40 text-xs')}
         </div>
+    );
+
+    return (
+        <>
+            {isDM &&
+                slot &&
+                createPortal(
+                    <div className="flex flex-col gap-1.5 text-sm text-hud-muted">
+                        {t('preview')}
+                        {select('h-11 w-full text-sm')}
+                    </div>,
+                    slot
+                )}
+            <div
+                className={cn(
+                    'z-20 flex max-w-full flex-wrap items-center gap-1.5 text-xs',
+                    phone
+                        ? 'shrink-0 px-1 pb-1'
+                        : 'absolute top-[3.75rem] right-[calc(0.5rem+var(--hud-side-w,0px))]'
+                )}
+            >
+                {isDM && slot === undefined && preview}
+                {fog.showRemember && (
+                    <label className={CHIP}>
+                        <Checkbox
+                            checked={fog.memory.remember}
+                            onCheckedChange={(checked) =>
+                                fog.memory.set(checked === true)
+                            }
+                        />
+                        {t('remember')}
+                    </label>
+                )}
+                {fog.mode === 'vision' && (
+                    <label className={CHIP}>
+                        <Checkbox
+                            checked={fog.share.on}
+                            onCheckedChange={(checked) =>
+                                fog.share.set(checked === true)
+                            }
+                        />
+                        {t('shareAllies')}
+                    </label>
+                )}
+            </div>
+        </>
     );
 }

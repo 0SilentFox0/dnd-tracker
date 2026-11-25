@@ -60,8 +60,12 @@ describe('demo visual tours', () => {
         expect(by('battle', 'arena')).toMatchObject({
             routeFromTarget: 'battle.open',
         });
-        expect(by('music', 'dock')).toMatchObject({
+        expect(by('music', 'tools')).toMatchObject({
             routeFromTarget: 'battle.open',
+            target: '[data-tour="battle.map-tools"]',
+        });
+        expect(by('music', 'dock')).toMatchObject({
+            clickFromTarget: 'battle.map-tools',
         });
 
         expect(by('world', 'bubble')).toMatchObject({
@@ -82,7 +86,7 @@ describe('demo visual tours', () => {
             placement: 'left',
         });
         expect(by('battle', 'audio')).toMatchObject({
-            clickFromTarget: 'battle.dm-close',
+            clickFromTarget: 'battle.map-tools',
             target: '[data-tour="music.dock"]',
         });
         expect(by('libraries', 'dashboard')).toMatchObject({

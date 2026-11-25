@@ -19,8 +19,9 @@ import {
     footprint,
     participantsInCells,
     rayCells,
-    sizeOf,
 } from '@/lib/utils/battle/grid';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
+import { footprintSizeOf } from '@/lib/utils/battle/grid/occupancy';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -85,6 +86,8 @@ export function squall(
 
     const map = input.map;
 
+    const grid = gridOf(map);
+
     const path = flightPath(
         map,
         start,
@@ -94,10 +97,12 @@ export function squall(
     );
 
     const swept = new Set(
-        path.flatMap((c) => footprint(c, sizeOf(actor))).map(cellKey)
+        path
+            .flatMap((c) => footprint(c, footprintSizeOf(actor, grid), grid))
+            .map(cellKey)
     );
 
-    const victims = participantsInCells(ps, [...swept], start).filter(
+    const victims = participantsInCells(ps, [...swept], start, grid).filter(
         isEnemyOf(actor, map)
     );
 

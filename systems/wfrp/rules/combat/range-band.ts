@@ -3,10 +3,11 @@ import { ATTACK_SLOT } from '../slots';
 import { isFlier } from '../traits/creature';
 
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
-import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
+import { footprintDistance, gridOf } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
+import type { GridKind } from '@/types/battle-grid';
 
 export type RangeBand = 'pointBlank' | 'short' | 'medium' | 'long' | 'extreme';
 
@@ -64,12 +65,17 @@ export const sbRangeFt = (sb: number, multiplier: number): number =>
 export function pointBlankBetween(
     attacker: BattleParticipant,
     target: BattleParticipant,
-    rules: ResolveAttackCtx['rules']
+    rules: ResolveAttackCtx['rules'],
+    grid: GridKind
 ): boolean {
     if (!attacker.battleData.position || !target.battleData.position)
         return false;
 
-    const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
+    const cells = footprintDistance(
+        cellsOf(attacker, grid),
+        cellsOf(target, grid),
+        grid
+    );
 
     return (cells * cellFeetOf(rules)) / FEET_PER_YARD <= POINT_BLANK_YD;
 }
@@ -93,7 +99,13 @@ export function rangeContext(
     )
         return null;
 
-    const cells = footprintDistance(cellsOf(attacker), cellsOf(target));
+    const grid = gridOf(map);
+
+    const cells = footprintDistance(
+        cellsOf(attacker, grid),
+        cellsOf(target, grid),
+        grid
+    );
 
     const distanceYd = (cells * cellFeetOf(rules)) / FEET_PER_YARD;
 

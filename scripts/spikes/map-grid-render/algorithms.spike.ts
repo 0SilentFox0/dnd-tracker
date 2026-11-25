@@ -145,7 +145,7 @@ it('grid algorithms on synthetic maps', () => {
                             map,
                             participants,
                             hero,
-                            cellsOf(dmMover)[0]
+                            cellsOf(dmMover, 'square')[0]
                         ),
                     RUNS
                 ).median
@@ -155,7 +155,8 @@ it('grid algorithms on synthetic maps', () => {
             ),
             'hazardCells (ms)': ms(time(() => hazardCells(map), RUNS).median),
             'rangeWindow 60ft (ms)': ms(
-                time(() => rangeWindow(map, cellsOf(hero), 60), RUNS).median
+                time(() => rangeWindow(map, cellsOf(hero, 'square'), 60), RUNS)
+                    .median
             ),
             'DM zone fill+outline (ms)': ms(
                 time(() => dmZone(map, dmMarks), RUNS).median

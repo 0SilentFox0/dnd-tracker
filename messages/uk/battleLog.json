@@ -366,7 +366,9 @@
     "doorLocked": "Двері замкнені",
     "doorDmOnly": "Замикати двері може лише ДМ",
     "doorOpenLock": "Замкнути можна лише зачинені двері",
-    "doorNotAdjacent": "Двері надто далеко: підійдіть до них упритул"
+    "doorNotAdjacent": "Двері надто далеко: підійдіть до них упритул",
+    "mapHexSquareOnly": "Стіни, ґрати й двері недоступні на hex-карті",
+    "mapGridChanged": "Бібліотечна карта змінила тип сітки; її не можна застосувати до цього бою"
   },
   "spellFx": {
     "riderSave": "🎲 {target}: {rider} — рятівний {ability} {total} проти СК {dc}: {success, select, true {успіх} other {провал}}",

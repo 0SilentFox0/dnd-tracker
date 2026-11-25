@@ -126,7 +126,9 @@ function cellPoint(
 
         if (!ctm || svg.getBoundingClientRect().width <= 0) continue;
 
-        const pt = cellScreenPoint(ctm, at);
+        const grid = svg.dataset.grid === 'hex' ? 'hex' : 'square';
+
+        const pt = cellScreenPoint(ctm, at, grid);
 
         if (visiblePoint(pt, svg)) return pt;
     }

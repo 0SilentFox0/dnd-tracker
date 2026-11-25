@@ -190,9 +190,13 @@
         "title": "Music in battle",
         "description": "The player for the party lives on the battle screen. Let's open the prepared battle."
       },
+      "tools": {
+        "title": "Battle tools",
+        "description": "The Tools button on the right edge opens the panel with the battle player."
+      },
       "dock": {
         "title": "Player",
-        "description": "The music panel at the bottom left. A new turn in battle collapses it automatically."
+        "description": "The music panel inside the Tools panel. It keeps playing while the panel is closed."
       },
       "transport": {
         "title": "Controls",
@@ -256,7 +260,7 @@
       },
       "topbar": {
         "title": "Top bar",
-        "description": "Name, round and the animation toggle. On the right — complete, reset and next turn."
+        "description": "Round and connection status at the top left of the map."
       },
       "initiative": {
         "title": "Initiative",
@@ -268,7 +272,7 @@
       },
       "map-tools": {
         "title": "Map tools",
-        "description": "Place participants, paint terrain, pick weather. On the right — the “Map/Columns” switch."
+        "description": "The Tools panel on the right edge: map tools, Map/Columns switch, animations, player view, sound, complete and reset."
       },
       "map": {
         "title": "Battle map",
@@ -276,7 +280,7 @@
       },
       "log": {
         "title": "Log",
-        "description": "Every battle event. With a participant selected, this shows their stat block, effects and a button back to the log."
+        "description": "The log button on the right edge: every battle event. Tapping the last-action line at the top opens it too."
       },
       "next-turn": {
         "title": "Next turn",
@@ -300,7 +304,7 @@
       },
       "audio": {
         "title": "Music",
-        "description": "The battle player at the bottom left. More in the “Music” tour."
+        "description": "The battle player, in the Tools panel."
       },
       "reset": {
         "title": "Reset the battle",

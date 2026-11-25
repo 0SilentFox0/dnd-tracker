@@ -33,6 +33,7 @@ export type { UseFileImportReturn } from './useFileImport';
 export { useFileImport } from './useFileImport';
 export { useFlip } from './useFlip';
 export { type GhostFlash, useGhostValue } from './useGhostValue';
+export { type FogQuality, useFogCompact, useFogQuality } from './useFogQuality';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
 export { flipDelta, useIndicatorFlip } from './useIndicatorFlip';
@@ -48,6 +49,7 @@ export {
     type PagerControls,
     usePager,
 } from './usePager';
+export { usePaletteVersion } from './usePaletteVersion';
 export { type PinchStep, type PointerBind, usePanPinch } from './usePanPinch';
 export {
     type PlayerViewScope,

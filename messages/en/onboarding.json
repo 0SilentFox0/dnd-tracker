@@ -115,7 +115,7 @@
       },
       "battle-scene": {
         "title": "Running a battle",
-        "body": "You see the whole map and all sides. You take the units' turns yourself, players act from their phones; the server calculates rolls and damage."
+        "body": "The map fills the screen. You see all sides and take the units' turns yourself (Next turn is in the dock); the log, DM actions, reserve and tools are drawers on the right. The server calculates rolls and damage."
       },
       "scenario": {
         "title": "Scenario",
@@ -157,7 +157,7 @@
       },
       "battle": {
         "title": "Battle from your phone",
-        "body": "When your turn comes, choose an action: move, attack, spell. The server calculates rolls and damage; you end your turn with the end turn button."
+        "body": "When your turn comes, open \"Actions\" in the dock at the bottom: move, attack, spell. Tap a token on the map for its details; the log and tools are the buttons on the right. The server calculates rolls and damage; end your turn with the End turn button."
       }
     },
     "profile": {

@@ -116,6 +116,7 @@ export interface MitigateCtx {
     rules: Ruleset;
     /** A free strike outside the actor's turn */
     offTurn?: boolean;
+    map?: BattleMapConfig | null;
 }
 
 export interface MitigateResult {
@@ -426,7 +427,8 @@ export interface RuleSystemCombat {
     initiative(
         p: BattleParticipant,
         ctx: {
-            rules: Pick<Ruleset, 'initiative'> & Partial<Pick<Ruleset, 'edition'>>;
+            rules: Pick<Ruleset, 'initiative'> &
+                Partial<Pick<Ruleset, 'edition'>>;
             rng: Rng;
             roll?: boolean;
         }

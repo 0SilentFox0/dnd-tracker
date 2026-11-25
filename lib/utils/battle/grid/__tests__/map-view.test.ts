@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { moveMarks, targetMarks } from '../map-view';
+import { moveMarks, moveReach, moveSteps, targetMarks } from '../map-view';
+import { moveBudget, pathTo, searchPaths } from '../path';
 
 import {
     AttackType,
@@ -44,6 +45,29 @@ describe('підсвітка карти', () => {
 
         expect(marks.get('2:2')).toBe(2);
         expect(marks.has('3:0')).toBe(false);
+    });
+
+    it('moveReach returns the search used for the costs, no recompute needed', () => {
+        const hero = at('h', { x: 0, y: 0 }, ParticipantSide.ALLY);
+
+        const opts = { rules: DEFAULT_RULES };
+
+        const { search, steps } = moveReach(map, [hero], hero, opts);
+
+        const budget = moveBudget(
+            { map, dmUserId: null, rules: DEFAULT_RULES },
+            hero
+        );
+
+        expect(search.cost).toEqual(
+            searchPaths(map, [hero], hero, budget).cost
+        );
+        expect(search.cost).toEqual(moveMarks(map, [hero], hero, opts));
+        expect(steps).toEqual(moveSteps(map, [hero], hero, opts));
+        expect(search.parent.get('2:0')).toBeDefined();
+        expect(
+            pathTo(map, [hero], hero, { x: 2, y: 0 }, budget)
+        ).not.toBeNull();
     });
 
     it('цілі — сусід доступний, далекий ворог ні, союзник не підсвічується', () => {

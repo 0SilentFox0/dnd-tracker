@@ -25,19 +25,26 @@
   .battle-map-ember, .battle-map-flame, .battle-map-pulse { animation: none; }
 }
 
+@keyframes battle-map-zone-in { from { opacity: 0; } to { opacity: 1; } }
+.battle-map-zone { animation: battle-map-zone-in 160ms ease-out; }
+.battle-map-reach-outline { stroke: var(--reach-stroke, #2fd3c4); filter: drop-shadow(0 0 1px rgba(0, 0, 0, .7)); }
+.battle-map-range-outline { stroke: var(--range-stroke, #4ade80); filter: drop-shadow(0 0 1px rgba(0, 0, 0, .7)); }
+.battle-map-path-line { stroke: var(--reach-stroke, #2fd3c4); stroke-width: 3px; stroke-dasharray: 2 6; animation: battle-map-zone-in 160ms ease-out; }
+.battle-map-path-dot { fill: var(--reach-stroke, #2fd3c4); }
+.battle-map-path-label { fill: var(--path-label-ink, #f3f6fb); stroke: var(--path-label-halo, #0c1118); stroke-width: 3px; paint-order: stroke; }
+@media (prefers-reduced-motion: reduce) {
+  .battle-map-zone, .battle-map-path-line { animation: none; }
+}
+
 .map-spell-effect-cell { position: absolute; display: block; overflow: visible; }
 .map-spell-effect-cell .map-hud-fx { inset: 0; border-radius: 0; transform: scale(var(--map-fx-size, 1)); transform-origin: 50% 100%; opacity: var(--map-fx-intensity, 1); }
 .map-spell-effect-cell .map-hud-fx::before { box-shadow: none; }
 .map-spell-effect-cell .map-hud-fx::after { filter: drop-shadow(0 0 5px var(--fx-glow)); }
 .map-spell-effect-cell .map-hud-fx::before, .map-spell-effect-cell .map-hud-fx::after { animation-delay: var(--map-fx-delay, 0s); }
 
-/* Плашка HP токена: лише transform/opacity в анімаціях — токенів багато, фільтри й перемальовування дорогі */
+/* Тонка смуга HP токена: лише transform/opacity в анімаціях — токенів багато, фільтри й перемальовування дорогі */
 .map-hud-plaque {
   --hud-rim: rgba(201, 179, 122, 0.55);
-  border: 1px solid var(--hud-rim);
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(36, 28, 20, 0.86), rgba(10, 8, 6, 0.9));
-  box-shadow: inset 0 1px 0 rgba(255, 236, 200, 0.12), 0 2px 5px rgba(0, 0, 0, 0.55);
 }
 
 .map-hud-plaque[data-hud-rim="frost"] { --hud-rim: #8fd3ff; }
@@ -79,17 +86,13 @@
 
 .map-hud-fill::after { content: ""; position: absolute; inset: 0 0 52% 0; border-radius: inherit; background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.05)); }
 
-.map-hud-text {
-  position: relative;
-  display: block;
-  height: 100%;
-  padding: 0 3px;
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.map-hud-tip {
+  padding: 1px 5px;
+  border-radius: 4px;
+  pointer-events: none;
   color: #fffaf0;
-  text-shadow: 0 1px 1px #000, 0 0 3px rgba(0, 0, 0, 0.95);
+  background: rgba(14, 10, 7, 0.88);
+  text-shadow: 0 1px 1px #000;
 }
 
 .map-hud-fx { position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; }
@@ -268,6 +271,8 @@
 .maze-exit-swirl { transform-box: fill-box; transform-origin: center; animation: maze-exit-swirl 6s linear infinite; }
 
 [data-dormant] { opacity: 0.5; }
+[data-dimmed] { opacity: 0.55; transition: opacity 160ms ease-out; }
+@media (prefers-reduced-motion: reduce) { [data-dimmed] { transition: none; } }
 
 .map-token-z {
   position: absolute;

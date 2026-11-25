@@ -1,5 +1,5 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { inBounds, paintEdges, parseEdgeKey } from '@/lib/utils/battle/grid';
+import { gridOf, inBounds, paintEdges, parseEdgeKey } from '@/lib/utils/battle/grid';
 import {
     baseDoorsOf,
     pruneRemoved,
@@ -22,6 +22,9 @@ export function mapWallsMutation(
 
     if (!effective)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
+
+    if (gridOf(effective) === 'hex')
+        throw new BattleRuleError('action_rejected', REJECT.mapHexSquareOnly);
 
     if (ctx.meta.mapRef)
         throw new BattleRuleError('action_rejected', REJECT.mapEdgesLinked);

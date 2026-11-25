@@ -2,11 +2,15 @@ import { conditionLevel } from '../conditions/levels';
 import { wfrpState } from '../state';
 
 import { inPlay } from '@/lib/utils/abilities/engine/core/participants';
-import { footprint, footprintDistance } from '@/lib/utils/battle/grid/geometry';
-import { cellsOf, sizeOf } from '@/lib/utils/battle/grid/occupancy';
+import {
+    footprint,
+    footprintDistance,
+    gridOf,
+} from '@/lib/utils/battle/grid/geometry';
+import { cellsOf, footprintSizeOf } from '@/lib/utils/battle/grid/occupancy';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleMapConfig } from '@/types/battle-grid';
+import type { BattleMapConfig, GridKind } from '@/types/battle-grid';
 
 export const FRENZY_DAMAGE_BONUS = 1;
 
@@ -19,11 +23,14 @@ export const isFrenzied = (p: BattleParticipant): boolean =>
 const distanceTo = (
     from: NonNullable<BattleParticipant['battleData']['position']>,
     size: number,
-    foes: BattleParticipant[]
+    foes: BattleParticipant[],
+    grid: GridKind
 ): { distance: number; nearest: BattleParticipant[] } => {
-    const cells = footprint(from, size);
+    const cells = footprint(from, size, grid);
 
-    const ds = foes.map((o) => footprintDistance(cells, cellsOf(o)));
+    const ds = foes.map((o) =>
+        footprintDistance(cells, cellsOf(o, grid), grid)
+    );
 
     const distance = ds.length ? Math.min(...ds) : Infinity;
 
@@ -50,8 +57,15 @@ export function nearestFoes(
     map?: BattleMapConfig | null,
     from = p.battleData.position
 ): BattleParticipant[] {
+    const grid = gridOf(map);
+
     return from
-        ? distanceTo(from, sizeOf(p), placedFoes(ps, p, map)).nearest
+        ? distanceTo(
+              from,
+              footprintSizeOf(p, grid),
+              placedFoes(ps, p, map),
+              grid
+          ).nearest
         : [];
 }
 
@@ -68,9 +82,13 @@ export function frenzyMoveAllowed(
 
     const foes = placedFoes(ps, mover, map);
 
-    const before = distanceTo(start, sizeOf(mover), foes).distance;
+    const grid = gridOf(map);
 
-    const after = distanceTo(end, sizeOf(mover), foes).distance;
+    const size = footprintSizeOf(mover, grid);
+
+    const before = distanceTo(start, size, foes, grid).distance;
+
+    const after = distanceTo(end, size, foes, grid).distance;
 
     return before === Infinity || after < before || (before <= 1 && after <= 1);
 }

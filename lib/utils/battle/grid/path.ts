@@ -10,17 +10,23 @@ import {
     difficultSet,
     footprint,
     footprintDistance,
+    gridOf,
     neighbors,
 } from './geometry';
-import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from './occupancy';
+import { cellCenter } from './layout';
+import {
+    cellsOf,
+    fits,
+    footprintSizeOf,
+    isOnMap,
+    occupiedBy,
+} from './occupancy';
 
 import { EffectMarker } from '@/lib/constants/battle';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { statWithModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
-import { controlledByDm } from '@/lib/utils/battle/participant/unit-control';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -114,23 +120,26 @@ export function searchPaths(
 
     if (!start) return { cost: result, parent };
 
-    const size = sizeOf(mover);
+    const grid = gridOf(map);
+
+    const size = footprintSizeOf(mover, grid);
 
     const notMe = (p: BattleParticipant) =>
         p.basicInfo.id !== mover.basicInfo.id;
 
     const walls = occupiedBy(
         participants,
-        (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side
+        (p) => notMe(p) && p.basicInfo.side !== mover.basicInfo.side,
+        grid
     );
 
-    const taken = occupiedBy(participants, notMe);
+    const taken = occupiedBy(participants, notMe, grid);
 
     const { avoid } = opts;
 
     const touchesAvoid = (anchor: GridPoint) =>
         !!avoid?.size &&
-        footprint(anchor, size).some((c) => avoid.has(cellKey(c)));
+        footprint(anchor, size, grid).some((c) => avoid.has(cellKey(c)));
 
     const hasEdges =
         (wallsOf(map).size > 0 || !!map.bars?.length) && !passesWalls(mover);
@@ -138,9 +147,9 @@ export function searchPaths(
     const stepBlocked = (cur: GridPoint, next: GridPoint) => {
         if (!hasEdges) return false;
 
-        const to = footprint(next, size);
+        const to = footprint(next, size, grid);
 
-        return footprint(cur, size).some((c, i) =>
+        return footprint(cur, size, grid).some((c, i) =>
             edgeBlocks(map, c, to[i], 'move')
         );
     };
@@ -151,26 +160,59 @@ export function searchPaths(
 
     const stepCost = (anchor: GridPoint) =>
         difficult.size > 0 &&
-        footprint(anchor, size).some((c) => difficult.has(cellKey(c)))
+        footprint(anchor, size, grid).some((c) => difficult.has(cellKey(c)))
             ? 2
             : 1;
 
     const seen = new Map([[cellKey(start), 0]]);
 
+    // Among equal-cost routes prefer fewer occupied cells passed through, then the straightest.
+    const length = new Map([[cellKey(start), 0]]);
+
+    const through = new Map([[cellKey(start), 0]]);
+
     const buckets: GridPoint[][] = [[start]];
 
     for (let cost = 0; cost < buckets.length && cost < budget; cost++) {
         for (const cur of buckets[cost] ?? []) {
-            if (seen.get(cellKey(cur)) !== cost) continue;
+            const curKey = cellKey(cur);
 
-            for (const next of neighbors(cur)) {
+            if (seen.get(curKey) !== cost) continue;
+
+            const from = cellCenter(cur, grid);
+
+            for (const next of neighbors(cur, grid)) {
                 const key = cellKey(next);
 
                 const nextCost = cost + stepCost(next);
 
+                const known = seen.get(key);
+
+                if (nextCost > budget || (known ?? Infinity) < nextCost)
+                    continue;
+
+                const to = cellCenter(next, grid);
+
+                const nextLength =
+                    (length.get(curKey) ?? 0) +
+                    Math.hypot(to.x - from.x, to.y - from.y);
+
+                const nextThrough =
+                    (through.get(curKey) ?? 0) +
+                    (fits(map, next, size, taken) ? 0 : 1);
+
+                const knownThrough = through.get(key) ?? Infinity;
+
                 if (
-                    nextCost > budget ||
-                    (seen.get(key) ?? Infinity) <= nextCost ||
+                    known === nextCost &&
+                    (nextThrough > knownThrough ||
+                        (nextThrough === knownThrough &&
+                            nextLength >=
+                                (length.get(key) ?? Infinity) - 1e-6))
+                )
+                    continue;
+
+                if (
                     stepBlocked(cur, next) ||
                     !fits(map, next, size, walls) ||
                     touchesAvoid(next)
@@ -178,8 +220,11 @@ export function searchPaths(
                     continue;
 
                 seen.set(key, nextCost);
+                length.set(key, nextLength);
+                through.set(key, nextThrough);
                 parent.set(key, cur);
-                (buckets[nextCost] ??= []).push(next);
+
+                if (known === undefined) (buckets[nextCost] ??= []).push(next);
 
                 if (fits(map, next, size, taken)) result.set(key, nextCost);
                 else result.delete(key);
@@ -191,21 +236,10 @@ export function searchPaths(
 }
 
 export function moveBudget(
-    {
-        map,
-        dmUserId,
-        rules,
-    }: { map: BattleMapConfig; dmUserId: string | null; rules: Ruleset },
+    { rules }: { map: BattleMapConfig; dmUserId: string | null; rules: Ruleset },
     p: BattleParticipant
 ): number {
-    if (
-        dmUserId === null ||
-        !controlledByDm(p, dmUserId) ||
-        hasEffectMarker(p, EffectMarker.IMMOBILIZED)
-    )
-        return remainingMovement(p, rules);
-
-    return Math.min(map.cols * map.rows, MAP_LIMITS.dmMoveCap);
+    return remainingMovement(p, rules);
 }
 
 export function frightenedBlocksMove(
@@ -220,14 +254,20 @@ export function frightenedBlocksMove(
 
     if (!sources.length) return false;
 
-    const destination = footprint(to, sizeOf(mover));
+    const grid = gridOf(map);
+
+    const destination = footprint(to, footprintSizeOf(mover, grid), grid);
 
     return participants.some(
         (p) =>
             sources.includes(p.basicInfo.id) &&
             isActive(p) &&
             isOnMap(p) &&
-            footprintDistance(destination, cellsOf(p)) <
-                footprintDistance(cellsOf(mover), cellsOf(p))
+            footprintDistance(destination, cellsOf(p, grid), grid) <
+                footprintDistance(
+                    cellsOf(mover, grid),
+                    cellsOf(p, grid),
+                    grid
+                )
     );
 }

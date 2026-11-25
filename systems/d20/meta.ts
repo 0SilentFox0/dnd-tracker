@@ -23,7 +23,7 @@ export const D20_META = {
             'abilityText.log.hotTemp': 'battleD20.abilityLog.hotTemp',
             'abilityText.log.maxHpBoost': 'battleD20.abilityLog.maxHpBoost',
         },
-        budgetKb: { battle: 113.2 },
+        budgetKb: { battle: 113.9 },
     },
     dmSections: ['classes', 'backgrounds'],
     contentKinds: ['classes', 'backgrounds'],

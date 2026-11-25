@@ -12,6 +12,7 @@ import {
 import type { FlagEffect } from '@/lib/utils/abilities/schema';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isDying } from '@/lib/utils/battle/death-saves';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprintDistance, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import {
@@ -43,6 +44,7 @@ import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
+import type { GridKind } from '@/types/battle-grid';
 import type {
     BattleMapConfig,
     GridPoint,
@@ -182,16 +184,18 @@ export function spellChain(
 
     const out = [first];
 
+    const grid = gridOf(map);
+
     while (
         out.length < chain.maxTargets &&
         pool.length > 0 &&
         isOnMap(out[out.length - 1])
     ) {
-        const from = cellsOf(out[out.length - 1]);
+        const from = cellsOf(out[out.length - 1], grid);
 
         const next = pool.reduce((best, p) =>
-            footprintDistance(from, cellsOf(p)) <
-            footprintDistance(from, cellsOf(best))
+            footprintDistance(from, cellsOf(p, grid), grid) <
+            footprintDistance(from, cellsOf(best, grid), grid)
                 ? p
                 : best
         );
@@ -279,8 +283,10 @@ function resolveTemplate(
             )
             .map((p) => p.basicInfo.id);
 
+    const grid = gridOf(map);
+
     if (targeting.shape === 'emanation') {
-        const centre = cellsOf(caster)[0];
+        const centre = cellsOf(caster, grid)[0];
 
         const { cells, targets } = templateArea(
             map,
@@ -301,11 +307,12 @@ function resolveTemplate(
 
     if (
         !templateAimAllowed(
-            cellsOf(caster),
+            cellsOf(caster, grid),
             targeting,
             aim,
             targeting.range,
-            rules
+            rules,
+            grid
         )
     )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));
@@ -333,7 +340,7 @@ function resolveTemplate(
         ok: true,
         targetIds: passing(targets),
         cells,
-        centre: templateCentre(targeting, aim, cells),
+        centre: templateCentre(targeting, aim, cells, grid),
     };
 }
 
@@ -342,12 +349,22 @@ function resolveSkillRadius(
     radius: SkillRadius,
     aim: { cell?: GridPoint; range?: number }
 ): SpellTargetResolution {
+    const grid = gridOf(scene.map);
+
     if (!aim.cell) return fail(textRef('battleActions.spell.target.pickPoint'));
 
     if (!inBounds(scene.map, aim.cell))
         return fail(textRef('battleActions.spell.target.pointOutOfMap'));
 
-    if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range, scene.rules))
+    if (
+        !aimInRange(
+            cellsOf(scene.caster, grid),
+            aim.cell,
+            aim.range,
+            scene.rules,
+            grid
+        )
+    )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));
 
     const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
@@ -371,7 +388,8 @@ function outOfRange(
     caster: BattleParticipant,
     picked: BattleParticipant[],
     range: number | undefined,
-    rules: Ruleset
+    rules: Ruleset,
+    grid: GridKind
 ): boolean {
     if (range === undefined) return false;
 
@@ -380,7 +398,11 @@ function outOfRange(
     return picked.some(
         (p) =>
             p.battleData.position !== undefined &&
-            footprintDistance(cellsOf(caster), cellsOf(p)) > max
+            footprintDistance(
+                cellsOf(caster, grid),
+                cellsOf(p, grid),
+                grid
+            ) > max
     );
 }
 
@@ -453,7 +475,13 @@ function resolveRaw(
     if (
         live &&
         'range' in targeting &&
-        outOfRange(caster, picked, targeting.range, live.rules)
+        outOfRange(
+            caster,
+            picked,
+            targeting.range,
+            live.rules,
+            gridOf(live.map)
+        )
     )
         return fail(textRef('battleActions.spell.target.targetOutOfRange'));
 

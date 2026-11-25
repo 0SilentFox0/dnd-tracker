@@ -100,7 +100,12 @@ describe('useMapLibrary', () => {
         const { result } = setup();
 
         await act(async () =>
-            result.current.actions.create({ name: 'New', cols: 12, rows: 9 })
+            result.current.actions.create({
+                name: 'New',
+                cols: 12,
+                rows: 9,
+                gridType: 'square',
+            })
         );
         await waitFor(() =>
             expect(push).toHaveBeenCalledWith('/campaigns/c1/dm/maps/m9')

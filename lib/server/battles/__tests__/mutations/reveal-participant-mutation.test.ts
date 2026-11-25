@@ -237,10 +237,10 @@ describe('reveal-participant на карті', () => {
 
         const taken = (saved?.participants ?? [])
             .filter((p) => p !== imp)
-            .flatMap((p) => cellsOf(p).map((c) => `${c.x}:${c.y}`));
+            .flatMap((p) => cellsOf(p, 'square').map((c) => `${c.x}:${c.y}`));
 
         expect(
-            cellsOf(imp as BattleParticipant).some((c) =>
+            cellsOf(imp as BattleParticipant, 'square').some((c) =>
                 taken.includes(`${c.x}:${c.y}`)
             )
         ).toBe(false);

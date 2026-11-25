@@ -200,25 +200,43 @@ describe('BattleMap', () => {
         expect(onCellClick).toHaveBeenCalledWith({ x: 1, y: 1 });
     });
 
-    it('view.range darkens everything outside the rectangle with one evenodd path', () => {
+    it('view.range draws a thin green boundary and dims out-of-range tokens', () => {
         const { container } = render(
             <BattleMap
                 map={square}
                 participants={people}
-                view={{ range: { x: 1, y: 0, cols: 2, rows: 2 } }}
+                view={{
+                    currentId: 'e',
+                    rangeCasterId: 'h',
+                    range: { x: 0, y: 0, cols: 2, rows: 2 },
+                }}
             />
         );
 
-        const out = container.querySelectorAll('[data-out-of-range]');
+        const line = container.querySelectorAll('[data-range-outline]');
 
-        expect(out).toHaveLength(1);
-        expect(out[0].getAttribute('fill-rule')).toBe('evenodd');
-        expect(out[0].getAttribute('d')).toBe(
-            'M0 0h400v300h-400zM100 0h200v200h-200z'
-        );
+        expect(line).toHaveLength(1);
+        expect(line[0].getAttribute('d')).toBe('M0 0h200v200h-200z');
+        expect(line[0].getAttribute('fill')).toBe('none');
+        expect(container.querySelector('[data-out-of-range]')).toBeNull();
+
+        const dimmed = [...container.querySelectorAll('[data-dimmed]')];
+
+        expect(dimmed).toHaveLength(1);
+        expect(
+            dimmed[0].querySelector('[data-fx-participant="e"]')
+        ).not.toBeNull();
     });
 
-    it('a 100-cell move zone is one outline and one fill', () => {
+    it('tokens are not dimmed without a range', () => {
+        const { container } = render(
+            <BattleMap map={square} participants={people} view={{}} />
+        );
+
+        expect(container.querySelector('[data-dimmed]')).toBeNull();
+    });
+
+    it('a 100-cell move zone is one outline and no fill', () => {
         const marks = new Map<string, number>();
 
         for (let x = 0; x < 10; x++)
@@ -235,9 +253,7 @@ describe('BattleMap', () => {
         expect(
             container.querySelectorAll('[data-fx-zone="move"]')
         ).toHaveLength(1);
-        expect(
-            container.querySelectorAll('[data-zone-fill="move"]')
-        ).toHaveLength(1);
+        expect(container.querySelector('[data-zone-fill]')).toBeNull();
     });
 
     it('grid element count does not depend on the map area', () => {
@@ -272,7 +288,7 @@ describe('BattleMap', () => {
         expect(container.querySelectorAll('[data-fx-clip]')).toHaveLength(1);
     });
 
-    it('fits the whole tall map into the container height', () => {
+    it('desktop always covers the container, even with a tall map', () => {
         avail = { width: 1000, height: 1000 };
 
         const { container } = render(
@@ -284,8 +300,8 @@ describe('BattleMap', () => {
 
         const clip = container.querySelector('[data-fx-clip]') as HTMLElement;
 
-        expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1000);
-        expect(parseFloat(clip.style.width)).toBeCloseTo(1000 * (2 / 3));
+        expect(parseFloat(clip.style.width)).toBeCloseTo(1000);
+        expect(parseFloat(clip.style.height)).toBeCloseTo(1500);
     });
 
     it('дрібні клітинки — вмикається камера без нативного прокручування', () => {
@@ -293,7 +309,7 @@ describe('BattleMap', () => {
 
         const { container } = render(
             <BattleMap
-                map={{ ...square, cols: 30, rows: 80 }}
+                map={{ ...square, cols: 40, rows: 100 }}
                 participants={[]}
             />
         );
@@ -364,9 +380,8 @@ describe('BattleMap', () => {
                     '[data-map-hud-strip]'
                 ) as HTMLElement;
 
-                expect(strip.className).toContain('bottom-0');
-                expect(strip.className).toContain('max-h-full');
-                expect(strip.className).toContain('w-[94%]');
+                expect(strip.style.bottom).toBe('10%');
+                expect(strip.className).toContain('w-[70%]');
                 expect(strip.className).not.toContain('top-');
 
                 const portrait = container.querySelector<HTMLElement>(
@@ -375,63 +390,33 @@ describe('BattleMap', () => {
 
                 expect(pct(portrait.style.width)).toBeLessThanOrEqual(72);
                 expect(pct(portrait.style.width)).toBeGreaterThanOrEqual(68);
-                expect(portrait.className).toContain('top-0');
+                expect(portrait.style.top).toBe('8%');
             }
         );
 
-        it('both size-1 and size-2 cards show the name', () => {
-            const big = {
-                ...at('g', 0, 0),
-                combatStats: { ...base.combatStats, gridSize: 2 },
-            };
-
+        it('HUD shows no name by default and the name+value on token hover', () => {
             const { container } = render(
                 <BattleMap
                     map={square}
-                    participants={[at('small', 3, 0), big]}
+                    participants={[at('small', 3, 0)]}
+                    view={{ hud: new Map([['small', { exact: true }]]) }}
                 />
             );
 
-            expect(
-                container.querySelector('[data-map-hud="small"]')?.textContent
-            ).toContain('small');
-            expect(
-                container.querySelector('[data-map-hud="g"]')?.textContent
-            ).toContain('g');
-        });
+            const hud = container.querySelector(
+                '[data-map-hud="small"]'
+            ) as HTMLElement;
 
-        it('плашка великого токена обіймає вміст (без висоти 28 %), смуга HP товща за списочну', () => {
-            const big = {
-                ...at('g', 0, 0),
-                combatStats: { ...base.combatStats, gridSize: 2 },
-            };
+            expect(hud.textContent).toBe('');
 
-            const { container } = render(
-                <BattleMap
-                    map={square}
-                    participants={[at('small', 3, 0), big]}
-                    view={{
-                        hud: new Map([
-                            ['g', { exact: true }],
-                            ['small', { exact: true }],
-                        ]),
-                    }}
-                />
+            fireEvent.pointerEnter(
+                container.querySelector(
+                    '[data-fx-participant="small"]'
+                ) as HTMLElement
             );
 
-            const strip = (id: string) =>
-                container.querySelector<HTMLElement>(
-                    `[data-map-hud="${id}"] [data-map-hud-strip]`
-                ) as HTMLElement;
-
-            expect(strip('g').textContent).toContain('g');
-            expect(strip('g').style.height).toBe('');
-
-            for (const id of ['g', 'small']) {
-                const bar = strip(id).lastElementChild as HTMLElement;
-
-                expect(parseFloat(bar.style.height)).toBeGreaterThanOrEqual(6);
-            }
+            expect(hud.textContent).toContain('small');
+            expect(hud.textContent).toMatch(/\d+\/\d+/);
         });
 
         it('tiny fit-all cells hide the HUD until the camera zooms in', () => {
@@ -445,9 +430,7 @@ describe('BattleMap', () => {
                 />
             );
 
-            expect(
-                container.querySelector('[data-map-hud="h"]')?.textContent
-            ).toBeUndefined();
+            expect(container.querySelector('[data-map-hud="h"]')).toBeNull();
         });
     });
 
@@ -502,14 +485,22 @@ describe('BattleMap', () => {
                 </TooltipProvider>
             );
 
-        it('exact: HP numbers (size 1)', () => {
+        it('exact: HP numbers only on hover (size 1)', () => {
             const { container } = renderHud(new Map([['h', { exact: true }]]));
 
             const max = base.combatStats.maxHp;
 
-            expect(container.textContent).toContain(
-                `${base.combatStats.currentHp}/${max}`
+            const text = `${base.combatStats.currentHp}/${max}`;
+
+            expect(container.textContent).not.toContain(text);
+
+            fireEvent.pointerEnter(
+                container.querySelector(
+                    '[data-fx-participant="h"]'
+                ) as HTMLElement
             );
+
+            expect(container.textContent).toContain(text);
         });
 
         it('missing hud entry hides exact HP', () => {
@@ -657,7 +648,7 @@ describe('BattleMap', () => {
         expect(clipOf(idle.container).dataset.attackCursor).toBeUndefined();
     });
 
-    it('colors marked cells', () => {
+    it('target cells get no red fill (the enemy token frame is enough)', () => {
         const { container } = render(
             <BattleMap
                 map={square}
@@ -670,10 +661,10 @@ describe('BattleMap', () => {
             container
                 .querySelector('polygon[data-mark-cell="0:0"]')
                 ?.getAttribute('fill')
-        ).toBe('rgba(230,80,60,.35)');
+        ).toBe('transparent');
     });
 
-    it('move zone: bright crisp outlines, no cost numbers; danger is red', () => {
+    it('move zone: one thin outline over move and move-danger cells, no fill', () => {
         const marks = new Map<string, 'move-danger' | number>([
             ['1:0', 2],
             ['2:0', 'move-danger'],
@@ -689,36 +680,22 @@ describe('BattleMap', () => {
 
         expect(container.querySelectorAll('text')).toHaveLength(0);
 
-        const ok = container.querySelector(
-            '[data-fx-zone="move"]'
-        ) as SVGElement;
+        const ok = container.querySelectorAll('[data-fx-zone]');
 
-        const bad = container.querySelector(
-            '[data-fx-zone="danger"]'
-        ) as SVGElement;
-
-        expect(ok.getAttribute('stroke')).toBe('rgba(140,255,110,.6)');
-        expect(ok.getAttribute('vector-effect')).toBe('non-scaling-stroke');
-        expect(Number(ok.getAttribute('stroke-width'))).toBeLessThanOrEqual(
+        expect(ok).toHaveLength(1);
+        expect(ok[0].getAttribute('class')).toContain(
+            'battle-map-reach-outline'
+        );
+        expect(ok[0].getAttribute('stroke-dasharray')).toBeNull();
+        expect(ok[0].getAttribute('vector-effect')).toBe('non-scaling-stroke');
+        expect(Number(ok[0].getAttribute('stroke-width'))).toBeLessThanOrEqual(
             1.5
         );
-        expect(bad.getAttribute('stroke')).toBe('rgba(255,100,85,.65)');
-        expect(
-            container.querySelectorAll('[data-fx-zone="move"]')
-        ).toHaveLength(1);
-        expect(
-            container.querySelectorAll('[data-zone-fill="move"]')
-        ).toHaveLength(1);
-        expect(
-            container
-                .querySelector('[data-zone-fill="move"]')
-                ?.getAttribute('fill')
-        ).toBe('rgba(90,210,80,.07)');
-        expect(
-            container
-                .querySelector('[data-zone-fill="danger"]')
-                ?.getAttribute('fill')
-        ).toBe('rgba(225,70,55,.09)');
+        expect(ok[0].getAttribute('d')).toBe(
+            'M100 0h200M100 100h200M100 0v100M300 0v100'
+        );
+        expect(container.querySelector('[data-zone-fill]')).toBeNull();
+        expect(container.innerHTML).not.toContain('threat');
     });
 
     it('renders wall, barrier and hazard terrain under the grid', () => {
@@ -819,11 +796,6 @@ describe('BattleMap', () => {
 
         expect(titleAt(1, 1)).toBe('Вогняна стіна · ще 2 раунди');
         expect(titleAt(3, 2)).toBe('Лава');
-        expect(
-            container
-                .querySelector('[data-zone-fill="danger"]')
-                ?.getAttribute('fill')
-        ).toBe('rgba(225,70,55,.09)');
         expect(titleAt(2, 0)).toBeUndefined();
         expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
     });
@@ -1001,7 +973,7 @@ describe('BattleMap — поворот у портреті', () => {
         );
 
         expect(container.querySelector('[data-map-rotated]')).toBeNull();
-        expect(clip(container).style.height).toBe('150px');
+        expect(clip(container).style.height).toBe('600px');
     });
 
     it('phone: рамка — лише ігрові клітинки, карта зсунута на поля', () => {
@@ -1063,48 +1035,25 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
         );
     });
 
-    it('висока карта прокручується — touch-pan-y; у режимі місцевості — touch-none', () => {
-        avail = { width: 300, height: 300 };
-
-        const scrolling = render(
-            <BattleMap map={tall} participants={people} phone />
-        );
-
-        expect(clip(scrolling.container).className).toContain('touch-pan-y');
-        cleanup();
-
-        const painting = render(
-            <BattleMap
-                map={tall}
-                participants={people}
-                phone
-                actions={{ onStroke: vi.fn() }}
-                editing={{ strokeTool: true }}
-            />
-        );
-
-        expect(clip(painting.container).className).toContain('touch-none');
-    });
-
-    it('висока карта без зуму: колесо гортає, Ctrl/⌘+колесо масштабує', () => {
+    it('phone shows the whole map: no native scroll, touch-none', () => {
         avail = { width: 300, height: 300 };
 
         const { container } = render(
             <BattleMap map={tall} participants={people} phone />
         );
 
-        expect(fireEvent.wheel(clip(container), { deltaY: 100 })).toBe(true);
+        expect(clip(container).className).toContain('touch-none');
+        expect(clip(container).className).not.toContain('touch-pan');
+    });
 
-        // happy-dom drops ctrlKey from the WheelEvent initialiser
-        const zoomWheel = new WheelEvent('wheel', {
-            deltaY: -100,
-            cancelable: true,
-            bubbles: true,
-        });
+    it('phone: the wheel zooms the whole-map view', () => {
+        avail = { width: 300, height: 300 };
 
-        Object.defineProperty(zoomWheel, 'ctrlKey', { value: true });
+        const { container } = render(
+            <BattleMap map={tall} participants={people} phone />
+        );
 
-        expect(fireEvent(clip(container), zoomWheel)).toBe(false);
+        expect(fireEvent.wheel(clip(container), { deltaY: 100 })).toBe(false);
     });
 
     it('фон просить зображення реальної ширини, а не 100vw', () => {
@@ -1115,7 +1064,7 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
         );
 
         expect(container.querySelector('img')?.getAttribute('sizes')).toBe(
-            '300px'
+            '60px'
         );
     });
 
@@ -1169,63 +1118,6 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
             3
         );
         expect(outer(container).className).not.toContain('overflow-auto');
-    });
-
-    it('на початку ходу прокручує до поточного токена, якщо він за краєм', () => {
-        avail = { width: 300, height: 300 };
-
-        const { container, rerender } = render(
-            <BattleMap
-                map={tall}
-                participants={people}
-                view={{ currentId: 'h' }}
-                phone
-            />
-        );
-
-        const box = outer(container);
-
-        Object.defineProperty(box, 'clientHeight', { value: 300 });
-        Object.defineProperty(box, 'scrollHeight', { value: 1500 });
-        box.getBoundingClientRect = () =>
-            ({
-                top: 0,
-                bottom: 300,
-                left: 0,
-                right: 300,
-                width: 300,
-                height: 300,
-            }) as DOMRect;
-        box.scrollBy = vi.fn() as unknown as typeof box.scrollBy;
-
-        const token = container.querySelector(
-            '[data-fx-participant="e"]'
-        ) as HTMLElement;
-
-        token.getBoundingClientRect = () =>
-            ({
-                top: 800,
-                bottom: 850,
-                left: 10,
-                right: 60,
-                width: 50,
-                height: 50,
-            }) as DOMRect;
-
-        rerender(
-            <BattleMap
-                map={tall}
-                participants={people}
-                view={{ currentId: 'e' }}
-                phone
-            />
-        );
-
-        expect(box.scrollBy).toHaveBeenCalledWith({
-            top: 550,
-            left: 0,
-            behavior: 'smooth',
-        });
     });
 });
 

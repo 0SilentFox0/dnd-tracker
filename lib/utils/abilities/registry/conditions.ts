@@ -268,7 +268,7 @@ function allyNextToTarget({
     owner,
     event,
     participants,
-    adjacent = isAdjacent,
+    adjacent = (a, b) => isAdjacent(a, b, 'square'), // no map injected: square fallback
 }: ConditionContext): boolean {
     const target = event
         ? eventTargetIds(event)

@@ -189,6 +189,7 @@ export const mapSide = (max: number) =>
     z.number().int().min(MAP_LIMITS.minSide).max(max);
 
 export const battleMapObject = z.object({
+    gridType: z.enum(['square', 'hex']).optional(),
     cols: mapSide(MAP_LIMITS.photoMaxSide),
     rows: mapSide(MAP_LIMITS.photoMaxSide),
     background: mapBackgroundSchema,
@@ -305,6 +306,19 @@ export const battleMapObject = z.object({
 
 export const battleMapSchema = battleMapObject
     .superRefine((m, ctx) => {
+        if (
+            m.gridType === 'hex' &&
+            (m.maze ||
+                m.walls?.length ||
+                m.bars?.length ||
+                Object.keys(m.doors ?? {}).length)
+        )
+            ctx.addIssue({
+                code: 'custom',
+                message: 'battleSetup.validation.hexSquareOnly',
+                path: ['gridType'],
+            });
+
         const walls = new Set<string>();
 
         for (const key of ['walls', 'bars'] as const) {

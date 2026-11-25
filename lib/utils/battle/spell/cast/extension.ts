@@ -1,7 +1,7 @@
 import { MAX_DURATION_ROUNDS } from '@/lib/constants/duration';
 import { textRef } from '@/lib/i18n/text-ref';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
-import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
+import { footprintDistance, gridOf } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import { areaRadiusCells, feetToCells } from '@/lib/utils/battle/grid/template';
 import { TOUCH_FEET } from '@/lib/utils/battle/spell/attack-type';
@@ -9,7 +9,7 @@ import type { ChosenSpell } from '@/lib/utils/battle/spell/cast/state';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
-import type { GridPoint } from '@/types/battle-grid';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 type ChosenEffect = ChosenSpell['definition']['effects'][number];
@@ -41,6 +41,7 @@ export interface ExtensionContext {
     participants: BattleParticipant[];
     rules: Ruleset;
     aim?: GridPoint;
+    map?: BattleMapConfig | null;
 }
 
 export interface AppliedExtension {
@@ -110,13 +111,19 @@ export function applyCastExtension(
                 : areaRadiusCells(t.size * (actual.areaMul ?? 1))
             : undefined;
 
+    const grid = gridOf(ctx.map);
+
     const inReach = (p: BattleParticipant) =>
         p.battleData.position === undefined ||
         ((reach === undefined ||
-            footprintDistance(cellsOf(ctx.caster), cellsOf(p)) <= reach) &&
+            footprintDistance(
+                cellsOf(ctx.caster, grid),
+                cellsOf(p, grid),
+                grid
+            ) <= reach) &&
             (radius === undefined ||
                 !ctx.aim ||
-                footprintDistance([ctx.aim], cellsOf(p)) <= radius));
+                footprintDistance([ctx.aim], cellsOf(p, grid), grid) <= radius));
 
     const kept: string[] = [];
 

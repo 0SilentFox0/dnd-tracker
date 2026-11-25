@@ -100,6 +100,7 @@ import { edgeBlocks, wallsOf } from '@/lib/utils/battle/grid/edges';
 import {
     cellDistance,
     cellKey,
+    gridOf,
     inBounds,
     mapCentre,
     neighbors,
@@ -2347,7 +2348,10 @@ async function main() {
 
     if (runs('reserve')) await reserveCheck();
 
-    if (runs('map')) await mapCheck(spells);
+    if (runs('map')) {
+        await mapCheck(spells);
+        await hexMapCheck(spells);
+    }
 
     if (runs('maze')) await mazeCheck();
 
@@ -4230,7 +4234,9 @@ async function reserveCheck() {
     const occupied = P()
         .filter((p) => p.basicInfo.id !== revealedId && p.battleData.position)
         .some((p) =>
-            cellsOf(p).some((c) => c.x === placedAt?.x && c.y === placedAt?.y)
+            cellsOf(p, gridOf(state.map)).some(
+                (c) => c.x === placedAt?.x && c.y === placedAt?.y
+            )
         );
 
     tcheck(
@@ -4827,6 +4833,222 @@ async function mapSkillAllCheck(spells: Map<string, any>) {
     );
 }
 
+async function hexMapCheck(spells: Map<string, any>) {
+    await applyRotation(0);
+    battleLabel = 'Гекс';
+
+    const units = interleaveByRace(
+        await prisma.unit.findMany({
+            where: { campaignId: ctx.campaignId },
+            select: { id: true, raceId: true },
+        })
+    ).slice(0, 4);
+
+    const setup = [
+        ...heroRows.map((h) => ({
+            id: h.id,
+            type: ParticipantSourceType.CHARACTER,
+            side: 'ally',
+        })),
+        ...units.map((id, i) => ({
+            id,
+            type: ParticipantSourceType.UNIT,
+            side: i === 3 ? 'ally' : 'enemy',
+            quantity: 1,
+        })),
+    ];
+
+    const b = await createTestBattle({
+        data: {
+            campaignId: ctx.campaignId,
+            name: 'ТЕСТ Гекс',
+            status: 'prepared',
+            participants: setup as any,
+            map: {
+                cols: 12,
+                rows: 8,
+                background: null,
+                opacity: 0.5,
+                gridType: 'hex',
+            },
+            currentRound: 1,
+            currentTurnIndex: 0,
+        },
+    });
+
+    ctx.battleId = b.id;
+    state = await readState();
+    await call('start', START);
+
+    const pos = (p: any) =>
+        p.battleData.position as { x: number; y: number } | undefined;
+
+    const placed = P().filter((p) => pos(p));
+
+    const keys = placed.map((p) => cellKey(pos(p) as any));
+
+    tcheck(
+        'Гекс: розстановка — усі на карті, клітинки унікальні, footprint 1',
+        placed.length === P().length &&
+            new Set(keys).size === keys.length &&
+            placed.every((p) => cellsOf(p, 'hex').length === 1),
+        `${placed.length}/${P().length} з позицією, унікальних ${new Set(keys).size}`
+    );
+
+    const isHero = (p: any) => p.basicInfo.side === 'ally' && alive(p);
+
+    await untilTurnOf(isHero);
+
+    const mover = current();
+
+    const from = pos(mover);
+
+    const taken = new Set(
+        P()
+            .filter(alive)
+            .map((p) => cellKey(pos(p) as any))
+    );
+
+    const free = from
+        ? neighbors(from, 'hex').filter(
+              (c) => inBounds(state.map, c) && !taken.has(cellKey(c))
+          )
+        : [];
+
+    let mv: Awaited<ReturnType<typeof call>> | undefined;
+
+    for (const c of free) {
+        mv = await call('move', MOVE, {
+            participantId: mover.basicInfo.id,
+            to: c,
+        });
+
+        if (mv.status === 200) break;
+    }
+
+    const to = pos(byId(mover.basicInfo.id));
+
+    tcheck(
+        'Гекс: рух на сусідню гекс-клітинку',
+        mv?.status === 200 &&
+            !!from &&
+            !!to &&
+            cellDistance(from, to, 'hex') === 1,
+        `${mover.basicInfo.name} ${JSON.stringify(from)} → ${JSON.stringify(to)}, статус ${mv?.status ?? 'немає вільної клітинки'}`
+    );
+
+    const fire = [...spells.values()].find(
+        (s: any) => s.name === 'Вогняна куля'
+    );
+
+    const winter = [...spells.values()].find(
+        (s: any) => s.name === 'Коло зими'
+    );
+
+    const castAt = async (spell: any, targetCell: { x: number; y: number }) => {
+        const caster = current();
+
+        const dice = casterSpellDice(
+            caster,
+            { dice: spell.dice ?? 0, groupId: spell.groupId ?? null },
+            DEFAULT_RULES
+        );
+
+        const r = await call('spell', SPELL, {
+            casterId: caster.basicInfo.id,
+            spellId: spell.id,
+            targetIds: [],
+            targetCell,
+            diceRolls: Array.from({ length: dice.count }, () => 1),
+            free: true,
+        });
+
+        const cast = r.log.find((e: any) => e.actionType === 'spell');
+
+        return {
+            r,
+            aim: cast?.actionDetails?.aimCell,
+            hitIds: (cast?.targets ?? []).map(
+                (t: any) => t.participantId
+            ) as string[],
+        };
+    };
+
+    const fireName = 'Гекс: Вогняна куля — усі цілі в гекс-радіусі 4 від точки';
+
+    if (state.status !== 'active')
+        tskip(fireName, `бій не активний (${state.status})`);
+    else if (!fire) tskip(fireName, 'закляття «Вогняна куля» немає в кампанії');
+    else {
+        const centre = P().find((p) => alive(p) && pos(p));
+
+        const c = pos(centre) as { x: number; y: number };
+
+        const { r, aim, hitIds } = await castAt(fire, c);
+
+        const inside = hitIds.every((id) => {
+            const p = byId(id);
+
+            return !!p && cellDistance(c, pos(p) as any, 'hex') <= 4;
+        });
+
+        tcheck(
+            fireName,
+            r.status === 200 &&
+                aim?.x === c.x &&
+                aim?.y === c.y &&
+                hitIds.length > 0 &&
+                inside,
+            `${r.status} точка ${JSON.stringify(c)}; цілей ${hitIds.length}; aimCell=${JSON.stringify(aim)}${r.status !== 200 ? ` ${JSON.stringify(r.body).slice(0, 200)}` : ''}`
+        );
+    }
+
+    const ringName =
+        'Гекс: «Коло зими» — центр не ціль, цілі лише на гекс-кільці';
+
+    if (state.status !== 'active')
+        tskip(ringName, `бій не активний (${state.status})`);
+    else if (!winter) tskip(ringName, 'закляття «Коло зими» немає в кампанії');
+    else {
+        const centre = P().find(
+            (p) =>
+                alive(p) &&
+                pos(p) &&
+                neighbors(pos(p) as any, 'hex').some((n) =>
+                    P().some(
+                        (o) =>
+                            o !== p &&
+                            alive(o) &&
+                            cellKey(pos(o) as any) === cellKey(n)
+                    )
+                )
+        );
+
+        if (!centre)
+            tskip(ringName, 'немає учасника із сусідом на гекс-кільці');
+        else {
+            const c = pos(centre) as { x: number; y: number };
+
+            const { r, aim, hitIds } = await castAt(winter, c);
+
+            const ring = new Set(neighbors(c, 'hex').map(cellKey));
+
+            tcheck(
+                ringName,
+                r.status === 200 &&
+                    aim?.x === c.x &&
+                    aim?.y === c.y &&
+                    !hitIds.includes(centre.basicInfo.id) &&
+                    hitIds.length > 0 &&
+                    hitIds.every((id) =>
+                        ring.has(cellKey(pos(byId(id)) as any))
+                    ),
+                `${r.status} центр ${centre.basicInfo.name} ${JSON.stringify(c)}; цілей ${hitIds.length}`
+            );
+        }
+    }
+}
+
 async function mapRingAndEmptyCheck(spells: Map<string, any>) {
     const ringName = 'Карта: кільце «Коло зими» — центр не ціль, кільце — цілі';
 
@@ -4838,7 +5060,7 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
     const rows = 8;
 
     const footprint = (p: any) =>
-        new Set(cellsOf(p).map((c) => `${c.x}:${c.y}`));
+        new Set(cellsOf(p, gridOf(state.map)).map((c) => `${c.x}:${c.y}`));
 
     const near = (c: { x: number; y: number }) =>
         [-1, 0, 1]
@@ -4852,7 +5074,9 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
             (p) =>
                 alive(p) &&
                 p.battleData.position &&
-                cellsOf(p).some((c) => cells.includes(`${c.x}:${c.y}`))
+                cellsOf(p, gridOf(state.map)).some((c) =>
+                    cells.includes(`${c.x}:${c.y}`)
+                )
         );
 
     const castAt = async (spell: any, targetCell: { x: number; y: number }) => {
@@ -4898,7 +5122,9 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
         const centreOf = P()
             .filter(
                 (p) =>
-                    alive(p) && p.battleData.position && cellsOf(p).length === 1
+                    alive(p) &&
+                    p.battleData.position &&
+                    cellsOf(p, gridOf(state.map)).length === 1
             )
             .map((p) => {
                 const c = p.battleData.position;

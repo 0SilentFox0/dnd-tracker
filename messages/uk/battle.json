@@ -62,7 +62,13 @@
     "collapseAll": "Згорнути всі",
     "round": "Раунд {round}",
     "loading": "Завантаження…",
-    "showEarlier": "Показати раніші"
+    "showEarlier": "Показати раніші",
+    "filters": "Фільтр журналу",
+    "filter": {
+      "all": "Усі",
+      "battle": "Бій",
+      "system": "Система"
+    }
   },
   "page": {
     "loading": "Завантаження бою…",
@@ -77,20 +83,15 @@
   "scene": {
     "awaitingDm": "Очікуємо рішення ДМ",
     "awaitingYou": "Бій чекає вашого рішення — резерв",
-    "awaitingYouShort": "Бій чекає вашого рішення",
     "over": "Бій завершено",
     "offline": "Немає зв'язку — стан може бути застарілим",
     "openLog": "журнал ›",
-    "actionsWait": "Дії стануть доступні у твій хід",
     "viewMode": "Вигляд бою",
     "viewMap": "Карта",
     "viewColumns": "Колонки",
     "participant": "Учасник",
     "log": "Журнал",
-    "backToLog": "← журнал",
-    "yourTurn": "Твій хід",
-    "waitingFor": "ходить <b>{name}</b>",
-    "openDmActions": "Відкрити швидкі дії DM"
+    "yourTurn": "Твій хід"
   },
   "topBar": {
     "fxDisabledHint": "Анімації вимкнено: у системі ввімкнено «Зменшити рух»",
@@ -105,10 +106,14 @@
     "playerViewOff": "Вигляд гравця: вимк.",
     "playerViewHero": "Бачить",
     "round": "Раунд {round}",
+    "connected": "Підключено",
+    "connecting": "Підключення",
+    "toCampaign": "До кампанії",
     "complete": "Завершити",
     "nextTurn": "Наступний хід"
   },
   "map": {
+    "pathCost": "{metres, number} м · {feet, number} фт",
     "hazardDefault": "Небезпечна зона",
     "hazardUntilEnd": "{label} · до кінця раунду {round}",
     "hazardRoundsLeft": "{label} · ще {rounds}",
@@ -151,7 +156,8 @@
       "minimapShow": "Показати мінімапу",
       "minimapHide": "Згорнути мінімапу",
       "follow": "Слідкувати за ходом",
-      "followHint": "Автоматично переводити камеру до активного учасника на початку його ходу"
+      "followHint": "Автоматично переводити камеру до активного учасника на початку його ходу",
+      "zoomLevel": "Масштаб"
     },
     "backgroundLabel": "Фон карти",
     "defaultBackground": "Стандартний фон",
@@ -275,7 +281,20 @@
     "acting": "ходить",
     "turnIn": "хід через {count}",
     "cooldown": "перезарядка: {duration}",
-    "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація"
+    "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація",
+    "slots": {
+      "title": "Слоти заклять",
+      "label": "Рівень {level}, {current} з {max}",
+      "pactLabel": "Пактовий слот, рівень {level}, {current} з {max}",
+      "recommended": "Рекомендовані закляття",
+      "recommendedTitle": "Рекомендовані · коло {level}"
+    },
+    "states": {
+      "title": "Стани героя",
+      "none": "Без станів",
+      "expand": "Показати стани",
+      "collapse": "Сховати стани"
+    }
   },
   "participant": {
     "deathSaves": "Кидки смерті",
@@ -319,17 +338,12 @@
     "ability": "Вміння",
     "bonus": "Бонус",
     "core": "Дії",
-    "gear": "Інвентар",
+    "gear": "Річ",
     "strikeAndReturn": "Повернутися",
-    "endTurn": "Завершити хід"
+    "endTurn": "Завершити хід",
+    "popoverTitle": "Дії ходу · {name} · раунд {round}"
   },
   "turnControls": {
-    "strip": {
-      "waiting": "Твій хід",
-      "acting": "Твій хід · Дії",
-      "ended": "Твій хід"
-    },
-    "pickAuraZone": "Оберіть зону аури",
     "reactionSpell": "Заклинання реакцією"
   },
   "readied": {
@@ -404,5 +418,60 @@
       "hit": "{name} вражає {target}: -{damage}",
       "turn": "Хід: {name}"
     }
+  },
+  "dock": {
+    "actions": "Дія",
+    "action": "Дія",
+    "bonus": "Бонус",
+    "reaction": "Реакція",
+    "spent": "використано",
+    "endTurn": "Кінець ходу",
+    "waiting": "Хід: {name}",
+    "move": "Рух",
+    "panelTitle": "Дії",
+    "moveCells": "Рух · {left} кл."
+  },
+  "bubble": {
+    "title": "Деталі: {name}",
+    "toToken": "До токена",
+    "offscreen": "Токен поза екраном"
+  },
+  "drawers": {
+    "rail": "Панелі бою",
+    "log": "Журнал",
+    "dm": "Дії ведучого",
+    "reserve": "Резерв",
+    "tools": "Інструменти",
+    "view": "Вигляд",
+    "display": "Відображення",
+    "sound": "Звук і музика",
+    "dmSection": "Ведучий",
+    "more": "Меню",
+    "mode": "Режим інструментів",
+    "modePlay": "Грати",
+    "modeEdit": "Редагувати мапу",
+    "grid": "Сітка",
+    "mapTools": "Інструменти мапи",
+    "gridShape": "Форма сітки",
+    "gridSquare": "Квадрат",
+    "gridHex": "Гекс",
+    "gridHexSoon": "Гекс-сітка скоро",
+    "dmPanel": "DM панель",
+    "close": "Закрити"
+  },
+  "initiative": {
+    "showNextRound": "Показати наступний раунд",
+    "hideNextRound": "Сховати наступний раунд"
+  },
+  "hudBlocks": {
+    "hide": "Сховати: {name}",
+    "show": "Показати: {name}",
+    "names": {
+      "hero": "Герой",
+      "dock": "Хід",
+      "initiative": "Ініціатива",
+      "tools": "Інструменти"
+    },
+    "hotkey": "H ховає або показує весь інтерфейс"
   }
 }

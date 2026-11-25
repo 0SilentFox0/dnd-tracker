@@ -5,6 +5,7 @@ import { poolLeft } from '@/lib/utils/abilities/engine/core/usage';
 import { reactionsOf } from '@/lib/utils/battle/actions/access';
 import { cellsOf, footprintDistance, isOnMap } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
 import { controlledByDm } from '@/lib/utils/battle/participant/unit-control';
 import { isGrantLive } from '@/lib/utils/battle/spell/inline-grant';
@@ -109,6 +110,8 @@ export function counterReactors(args: CounterReactorsArgs): CounterOffer[] {
 
     const blocker = reactionsOf(rules).blocker;
 
+    const grid = gridOf(map);
+
     return participants.flatMap((p) => {
         if (
             p.basicInfo.side === caster.basicInfo.side ||
@@ -123,7 +126,11 @@ export function counterReactors(args: CounterReactorsArgs): CounterOffer[] {
                 map &&
                 isOnMap(p) &&
                 isOnMap(caster) &&
-                footprintDistance(cellsOf(p), cellsOf(caster)) *
+                footprintDistance(
+                    cellsOf(p, grid),
+                    cellsOf(caster, grid),
+                    grid
+                ) *
                     cellFeetOf(rules) >
                     spell.range
             )
