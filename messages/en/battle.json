@@ -459,6 +459,10 @@
     "dmPanel": "DM panel",
     "close": "Close"
   },
+  "initiative": {
+    "showNextRound": "Show next round",
+    "hideNextRound": "Hide next round"
+  },
   "hudBlocks": {
     "hide": "Hide: {name}",
     "show": "Show: {name}",
