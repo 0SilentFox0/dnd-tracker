@@ -42,6 +42,15 @@ describe('LimitGauge', () => {
         ).toBe('80');
     });
 
+    it('shows a textual state for critical, not only colour', async () => {
+        await renderWithIntl(
+            <LimitGauge row={row({ status: 'crit', percent: 0.97 })} />,
+            opts
+        );
+
+        expect(screen.getByText('Critical')).toBeTruthy();
+    });
+
     it('shows n/a for a null limit', async () => {
         await renderWithIntl(
             <LimitGauge

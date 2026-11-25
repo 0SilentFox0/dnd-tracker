@@ -1,7 +1,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, CheckCircle2, CircleHelp, XCircle } from 'lucide-react';
+import {
+    CircleCheck,
+    CircleHelp,
+    OctagonAlert,
+    TriangleAlert,
+} from 'lucide-react';
 
 import { HudPanel } from '@/components/hud/page';
 import { Badge } from '@/components/ui/badge';
@@ -11,9 +16,9 @@ import { splitAge } from '@/lib/utils/ops/format';
 import type { OpsSummary } from '@/types/ops';
 
 const STATE_ICON = {
-    ok: CheckCircle2,
-    warn: AlertTriangle,
-    crit: XCircle,
+    ok: CircleCheck,
+    warn: TriangleAlert,
+    crit: OctagonAlert,
     unknown: CircleHelp,
 } as const;
 
@@ -37,7 +42,7 @@ export function OpsStatusGrid({ summary }: { summary: OpsSummary }) {
 
     return (
         <section aria-labelledby="ops-status" className="space-y-3">
-            <h2 id="ops-status" className="text-lg font-semibold">
+            <h2 id="ops-status" className="hud-sc text-lg">
                 {t('title')}
             </h2>
             <p

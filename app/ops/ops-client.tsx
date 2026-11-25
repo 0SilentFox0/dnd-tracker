@@ -54,7 +54,7 @@ export function OpsClient() {
                             >
                                 <h2
                                     id="ops-limits"
-                                    className="text-lg font-semibold"
+                                    className="hud-sc text-lg"
                                 >
                                     {t('limits.title')}
                                 </h2>
@@ -70,7 +70,7 @@ export function OpsClient() {
             </QueryState>
             <HudPanel className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h2 id="ops-charts" className="text-lg font-semibold">
+                    <h2 id="ops-charts" className="hud-sc text-lg">
                         {t('charts.title')}
                     </h2>
                     <OpsRangeTabs value={range} onChange={setRange} />

@@ -53,7 +53,12 @@
       "provider_vercel_invocations": "Виклики Vercel",
       "provider_upstash_commands_month": "Команди Upstash"
     },
-    "reached": "Ліміт досягнуто"
+    "reached": "Ліміт досягнуто",
+    "state": {
+      "ok": "Норма",
+      "warn": "Увага",
+      "crit": "Критично"
+    }
   },
   "ranges": {
     "label": "Діапазон часу",

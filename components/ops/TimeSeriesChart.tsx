@@ -62,7 +62,7 @@ export function TimeSeriesChart({
 
     return (
         <HudPanel as="div" className="space-y-2">
-            <h3 className="text-sm font-medium">{t(`items.${chart.id}`)}</h3>
+            <h3 className="hud-sc text-sm">{t(`items.${chart.id}`)}</h3>
             {empty ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">
                     {response ? t('noData') : t('loading')}

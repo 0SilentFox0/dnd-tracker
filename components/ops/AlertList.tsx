@@ -1,6 +1,7 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
+import { OctagonAlert, TriangleAlert } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,11 +38,11 @@ export function AlertList({
 
     return (
         <section aria-labelledby="ops-alerts" className="space-y-4">
-            <h2 id="ops-alerts" className="text-lg font-semibold">
+            <h2 id="ops-alerts" className="hud-sc text-lg">
                 {t('title')}
             </h2>
             <div className="space-y-2">
-                <h3 className="text-sm font-medium">{t('active')}</h3>
+                <h3 className="hud-sc text-sm">{t('active')}</h3>
                 {active.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         {t('noActive')}
@@ -51,11 +52,22 @@ export function AlertList({
                         {active.map((r) => (
                             <li
                                 key={r.id}
-                                className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
+                                className="flex flex-col gap-2 border-b border-[var(--hud-rule)] py-3 sm:flex-row sm:items-center sm:justify-between"
                             >
                                 <div className="min-w-0 space-y-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <Badge variant={BADGE[r.status]}>
+                                        <Badge variant={BADGE[r.status]} className="gap-1">
+                                            {r.status === 'crit' ? (
+                                                <OctagonAlert
+                                                    className="size-3"
+                                                    aria-hidden
+                                                />
+                                            ) : (
+                                                <TriangleAlert
+                                                    className="size-3"
+                                                    aria-hidden
+                                                />
+                                            )}
                                             {t(`status.${r.status}`)}
                                         </Badge>
                                         <code className="text-xs">{r.id}</code>
@@ -108,13 +120,13 @@ export function AlertList({
                 )}
             </div>
             <div className="space-y-2">
-                <h3 className="text-sm font-medium">{t('history')}</h3>
+                <h3 className="hud-sc text-sm">{t('history')}</h3>
                 {alerts.events.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         {t('noHistory')}
                     </p>
                 ) : (
-                    <ul className="divide-y rounded-lg border text-sm">
+                    <ul className="divide-y divide-[var(--hud-rule)] border-y border-[var(--hud-rule)] text-sm">
                         {alerts.events.map((e) => (
                             <li
                                 key={e.id}

@@ -53,7 +53,12 @@
       "provider_vercel_invocations": "Vercel invocations",
       "provider_upstash_commands_month": "Upstash commands"
     },
-    "reached": "Limit reached"
+    "reached": "Limit reached",
+    "state": {
+      "ok": "OK",
+      "warn": "Warning",
+      "crit": "Critical"
+    }
   },
   "ranges": {
     "label": "Time range",
