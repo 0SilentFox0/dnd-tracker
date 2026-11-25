@@ -34,7 +34,7 @@ export function InspirationCardMark() {
     const t = useTranslations('inspiration');
 
     return (
-        <span title={t('card')} className="text-hud-crimson-fg">
+        <span title={t('card')} className="text-hud-accent-fg">
             ✦
         </span>
     );

@@ -88,7 +88,7 @@ describe('d20 StatsTab', () => {
             .getAllByText('characterProfile.combat.saveShort')[0]
             .closest('button');
 
-        expect(save?.querySelector('i.bg-hud-crimson')).not.toBeNull();
+        expect(save?.querySelector('i.bg-hud-accent')).not.toBeNull();
         expect(screen.getByText('+1')).toBeInTheDocument();
     });
 
@@ -98,8 +98,8 @@ describe('d20 StatsTab', () => {
         const items = screen.getAllByRole('listitem');
 
         expect(items).toHaveLength(2);
-        expect(items[0].querySelectorAll('i.bg-hud-crimson')).toHaveLength(1);
-        expect(items[1].querySelectorAll('i.bg-hud-crimson')).toHaveLength(0);
+        expect(items[0].querySelectorAll('i.bg-hud-accent')).toHaveLength(1);
+        expect(items[1].querySelectorAll('i.bg-hud-accent')).toHaveLength(0);
         expect(document.body.textContent).toContain(
             'characterProfile.combat.passives'
         );
@@ -116,8 +116,8 @@ describe('d20 StatsTab', () => {
     it('top section tints proficient save bonuses crimson', () => {
         renderTab({ section: 'top' });
 
-        expect(screen.getByText('+5')).toHaveClass('text-hud-crimson-fg');
-        expect(screen.getByText('+1')).toHaveClass('text-hud-crimson-fg');
+        expect(screen.getByText('+5')).toHaveClass('text-hud-accent-fg');
+        expect(screen.getByText('+1')).toHaveClass('text-hud-accent-fg');
     });
 
     it('rolls a save from the ability tile', () => {
