@@ -16,7 +16,7 @@ export function HeroHp({ hp }: { hp: HeroHpValue }) {
             </p>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-hud-rule">
                 <div
-                    className="h-full rounded-full bg-hud-gold"
+                    className="h-full rounded-full bg-hud-crimson"
                     style={{ width: `${pct}%` }}
                 />
             </div>

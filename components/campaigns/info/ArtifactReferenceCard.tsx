@@ -64,7 +64,7 @@ export function ArtifactReferenceCard({
                 <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
                     {artifact.description && (
                         <div>
-                            <Label className="hud-sc text-xs text-hud-gold">
+                            <Label className="hud-sc text-xs text-hud-ink">
                                 {t('description')}
                             </Label>
                             <p className="mt-0.5 text-sm">
@@ -74,7 +74,7 @@ export function ArtifactReferenceCard({
                     )}
                     {artifact.effects.length > 0 && (
                         <div>
-                            <Label className="hud-sc text-xs text-hud-gold">
+                            <Label className="hud-sc text-xs text-hud-ink">
                                 {t('effects')}
                             </Label>
                             <div className="mt-1">

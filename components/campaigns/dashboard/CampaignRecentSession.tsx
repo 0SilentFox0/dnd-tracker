@@ -29,7 +29,7 @@ export function CampaignRecentSession({
 
     return (
         <HudPanel data-tour="dashboard.recent-session">
-            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
+            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-ink">
                 {t('recentSession.title')}
             </h2>
             {session ? (
@@ -87,7 +87,7 @@ export function CampaignRecentSession({
             {!session && (
                 <Link
                     href={base}
-                    className="mt-3 inline-flex min-h-8 items-center text-sm font-medium text-hud-gold underline-offset-4 hover:underline"
+                    className="mt-3 inline-flex min-h-8 items-center text-sm font-medium text-hud-crimson-fg underline-offset-4 hover:underline"
                 >
                     {t('recentSession.openScenario')}
                 </Link>

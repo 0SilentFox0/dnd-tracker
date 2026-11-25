@@ -116,7 +116,7 @@ export function DashboardGroups({
                     data-tour="dashboard.sections"
                 >
                     {isPlayer && (
-                        <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                        <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
                             {t('groups.player')}
                         </h2>
                     )}
@@ -129,7 +129,7 @@ export function DashboardGroups({
                     className="space-y-3"
                     data-tour="dashboard.group-libraries"
                 >
-                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-gold">
+                    <h2 className="hud-sc text-[13px] tracking-[.06em] text-hud-ink">
                         {t('groups.libraries')}
                     </h2>
                     <div className={libraryGrid(libraryItems.length)}>

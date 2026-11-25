@@ -103,7 +103,7 @@ export function ReferenceGroupSection({
                     title={title}
                     icon={icon}
                     count={count}
-                    className="border-b border-hud-line px-4 py-3 text-hud-gold"
+                    className="border-b border-hud-line px-4 py-3 text-hud-ink"
                 />
             </header>
             <div className="p-3 sm:p-4">{children}</div>

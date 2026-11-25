@@ -26,7 +26,7 @@ export function DmNextSteps({
 
     return (
         <HudPanel className="flex flex-col" data-tour="dashboard.dm-next-steps">
-            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
+            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-ink">
                 {t('nextSteps.title')}
             </h2>
             <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-3">
@@ -38,7 +38,7 @@ export function DmNextSteps({
                         className={TILE}
                     >
                         <Link href={href(campaignId)}>
-                            <Icon aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                            <Icon aria-hidden className="size-7 shrink-0 text-hud-muted" />
                             <span className="line-clamp-2 text-center text-xs leading-tight">
                                 {t(`sections.${key}.title`)}
                             </span>
@@ -54,7 +54,7 @@ export function DmNextSteps({
                         href={`/campaigns/${campaignId}/dm/compendium`}
                         aria-label={t('page.compendium.link')}
                     >
-                        <Database aria-hidden className="size-7 shrink-0 text-hud-gold" />
+                        <Database aria-hidden className="size-7 shrink-0 text-hud-muted" />
                         <span className="line-clamp-2 text-center text-xs leading-tight">
                             {t('page.compendium.action')}
                         </span>

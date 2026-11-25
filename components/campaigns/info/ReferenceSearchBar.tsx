@@ -216,7 +216,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
                     <HudButton
                         type="button"
                         onClick={() => panel.setOpen((o) => !o)}
-                        className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold)] md:hidden"
+                        className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-hud-ink shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-muted)] md:hidden"
                     >
                         <Filter className="h-4 w-4" />
                         {t('search.filters')}

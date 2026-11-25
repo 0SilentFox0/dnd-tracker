@@ -29,7 +29,7 @@ export function DmPrepPanel({
 
     return (
         <HudPanel className="flex flex-col" data-tour="dashboard.dm-prep">
-            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-gold">
+            <h2 className="hud-sc mb-3 text-[13px] tracking-[.06em] text-hud-ink">
                 {t('prep.title')}
             </h2>
             <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -56,7 +56,7 @@ export function DmPrepPanel({
                             <li key={p.id}>
                                 <Link href={`${base}/dm/scenario/${p.id}`} className={ROW}>
                                     <ScrollText
-                                        className="size-4 shrink-0 text-hud-gold"
+                                        className="size-4 shrink-0 text-hud-muted"
                                         aria-hidden
                                     />
                                     <span className="min-w-0 truncate">{p.title}</span>
@@ -79,7 +79,7 @@ export function DmPrepPanel({
                         <p className="text-sm text-hud-muted">{t('prep.empty')}</p>
                         <Link
                             href={`${base}/dm/scenario`}
-                            className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-gold underline-offset-4 hover:underline"
+                            className="mt-2 inline-flex min-h-8 items-center text-sm font-medium text-hud-crimson-fg underline-offset-4 hover:underline"
                         >
                             {t('prep.create')}
                         </Link>

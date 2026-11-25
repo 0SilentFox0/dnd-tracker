@@ -100,7 +100,7 @@ export function ReferenceSectionAccordion({
                 <HudPanel className="space-y-3">
                     {showBoth && (
                         <h2
-                            className="hud-sc scroll-mt-4 text-lg text-hud-gold"
+                            className="hud-sc scroll-mt-4 text-lg text-hud-ink"
                             id="ref-classes"
                         >
                             {t('classes.title')}
@@ -125,7 +125,7 @@ export function ReferenceSectionAccordion({
                 <HudPanel className="space-y-3">
                     {showBoth && (
                         <h2
-                            className="hud-sc scroll-mt-4 text-lg text-hud-gold"
+                            className="hud-sc scroll-mt-4 text-lg text-hud-ink"
                             id="ref-skills"
                         >
                             {t('skills.title')}
@@ -189,7 +189,7 @@ export function ReferenceSectionAccordion({
                 <HudPanel className="space-y-3">
                     {showBoth && (
                         <h2
-                            className="hud-sc scroll-mt-4 text-lg text-hud-gold"
+                            className="hud-sc scroll-mt-4 text-lg text-hud-ink"
                             id="ref-spells"
                         >
                             {t('spells.title')}
@@ -246,7 +246,7 @@ export function ReferenceSectionAccordion({
                 <HudPanel className="space-y-3">
                     {showBoth && (
                         <h2
-                            className="hud-sc scroll-mt-4 text-lg text-hud-gold"
+                            className="hud-sc scroll-mt-4 text-lg text-hud-ink"
                             id="ref-artifacts"
                         >
                             {t('artifacts.title')}
@@ -296,7 +296,7 @@ export function ReferenceSectionAccordion({
                     </Accordion>
                     {artifactSets.length > 0 && (
                         <div className="space-y-2">
-                            <h3 className="hud-sc text-base text-hud-gold">
+                            <h3 className="hud-sc text-base text-hud-ink">
                                 {t('sets.title')}
                             </h3>
                             <Accordion

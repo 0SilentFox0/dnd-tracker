@@ -89,7 +89,7 @@ export function SkillReferenceCard({
                 <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
                     {skill.description && (
                         <div>
-                            <Label className="hud-sc text-xs text-hud-gold">
+                            <Label className="hud-sc text-xs text-hud-ink">
                                 {t('skillDescription')}
                             </Label>
                             <p className="mt-0.5 text-sm">
@@ -98,7 +98,7 @@ export function SkillReferenceCard({
                         </div>
                     )}
                     <div>
-                        <Label className="hud-sc text-xs text-hud-gold">
+                        <Label className="hud-sc text-xs text-hud-ink">
                             {t('skillHow')}
                         </Label>
                         <p className="mt-0.5 text-sm">
@@ -106,7 +106,7 @@ export function SkillReferenceCard({
                         </p>
                     </div>
                     <div>
-                        <Label className="hud-sc text-xs text-hud-gold">
+                        <Label className="hud-sc text-xs text-hud-ink">
                             {t('appearanceSkill')}
                         </Label>
                         {isDM ? (

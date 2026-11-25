@@ -66,11 +66,11 @@ export function PlayerHeroCard({
                         alt={hero.name}
                         width={88}
                         height={88}
-                        className="size-[88px] shrink-0 rounded-full border-2 border-hud-gold object-cover shadow-[0_0_0_4px_var(--color-hud-page)]"
+                        className="size-[88px] shrink-0 rounded-full border-2 border-hud-line object-cover shadow-[0_0_0_4px_var(--color-hud-page)]"
                         fallback={initial}
                     />
                 ) : (
-                    <span className="rounded-full border-2 border-hud-gold shadow-[0_0_0_4px_var(--color-hud-page)]">
+                    <span className="rounded-full border-2 border-hud-line shadow-[0_0_0_4px_var(--color-hud-page)]">
                         {initial}
                     </span>
                 )}

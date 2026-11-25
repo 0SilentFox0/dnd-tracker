@@ -28,7 +28,7 @@ export function CampaignWorldPreview({
                 className="flex h-full flex-col transition-colors group-hover:border-hud-muted"
                 data-tour="dashboard.world-map"
             >
-                <h2 className="hud-sc mb-3 flex items-baseline justify-between gap-2 text-[13px] tracking-[.06em] text-hud-gold">
+                <h2 className="hud-sc mb-3 flex items-baseline justify-between gap-2 text-[13px] tracking-[.06em] text-hud-ink">
                     <span>{t('gameNavigation.world')}</span>
                     {worldMap && (
                         <span className="max-w-[65%] truncate text-xs font-normal tracking-normal text-hud-muted">
@@ -54,7 +54,7 @@ export function CampaignWorldPreview({
                 ) : (
                     <div className="flex min-h-44 flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-hud-rule bg-hud-page/30 px-4 text-center text-sm text-hud-muted">
                         <span>{tDashboard('page.worldMap.empty')}</span>
-                        <span className="font-medium text-hud-gold">
+                        <span className="font-medium text-hud-ink">
                             {tDashboard('page.worldMap.create')}
                         </span>
                     </div>

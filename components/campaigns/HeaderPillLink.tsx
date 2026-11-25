@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 
 const PILL =
-    'flex h-8 items-center gap-1.5 rounded border border-hud-gold-strong bg-[var(--hud-gold-strong)] px-2.5 text-xs font-semibold tracking-[.08em] text-[var(--palette-primary-foreground)]';
+    'flex h-8 items-center gap-1.5 rounded border border-hud-crimson bg-hud-crimson px-2.5 text-xs font-semibold tracking-[.08em] text-hud-crimson-ink';
 
 export function HeaderPillLink({
     href,

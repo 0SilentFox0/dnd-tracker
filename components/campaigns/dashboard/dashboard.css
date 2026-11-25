@@ -1,5 +1,5 @@
 .campaign-dashboard {
-    --dashboard-line: color-mix(in srgb, var(--hud-gold) 25%, transparent);
+    --dashboard-line: var(--hud-line);
     max-width: 1400px;
     padding: 24px 18px;
     font-size: 15px;
@@ -51,8 +51,9 @@
     border-radius: 10px;
 }
 .dashboard-hero-actions > .dashboard-primary {
-    border-color: var(--hud-gold);
-    background: color-mix(in srgb, var(--hud-gold) 25%, var(--palette-art-shadow));
+    border-color: var(--hud-crimson);
+    background: var(--hud-crimson);
+    color: var(--hud-crimson-ink);
 }
 @media (max-width: 639px) {
     .campaign-dashboard { padding: 14px 12px; }
