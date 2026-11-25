@@ -3,7 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { UserRound } from 'lucide-react';
 
+import { ProfileEmptyState } from '@/components/profile/ProfileEmptyState';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
 import type { ProfileCharacter } from '@/lib/server/profile/summary';
 import { avatarHue } from '@/lib/utils/auth/avatar';
@@ -43,7 +45,12 @@ export function ProfileHeroes({ heroes }: { heroes: ProfileCharacter[] }) {
     return (
         <ProfileSectionCard title={t('heroesTitle')}>
             {heroes.length === 0 ? (
-                <p className="text-sm text-hud-muted">{t('heroesEmpty')}</p>
+                <ProfileEmptyState
+                    icon={UserRound}
+                    text={t('heroesEmpty')}
+                    href="/campaigns"
+                    cta={t('campaignsEmptyLink')}
+                />
             ) : (
                 <ul className="grid gap-2 sm:grid-cols-2">
                     {heroes.map((h) => (

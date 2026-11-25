@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { Swords } from 'lucide-react';
 
+import { ProfileEmptyState } from '@/components/profile/ProfileEmptyState';
 import { ProfileSectionCard } from '@/components/profile/ProfileSectionCard';
 import { CampaignRole } from '@/lib/constants/campaigns';
 import type { ProfileCampaign } from '@/lib/server/profile/summary';
@@ -22,12 +24,12 @@ export function ProfileCampaigns({
     return (
         <ProfileSectionCard title={t('campaignsTitle')}>
             {campaigns.length === 0 ? (
-                <p className="text-sm text-hud-muted">
-                    {t('campaignsEmpty')}{' '}
-                    <Link href="/campaigns" className="underline">
-                        {t('campaignsEmptyLink')}
-                    </Link>
-                </p>
+                <ProfileEmptyState
+                    icon={Swords}
+                    text={t('campaignsEmpty')}
+                    href="/campaigns"
+                    cta={t('campaignsEmptyLink')}
+                />
             ) : (
                 <ul className="space-y-1">
                     {campaigns.map((c) => (

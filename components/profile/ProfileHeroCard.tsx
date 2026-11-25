@@ -40,12 +40,16 @@ export function ProfileHeroCard({
         },
     ].filter((x) => typeof x === 'object' && x !== null);
 
+    const fresh = tiles.length === 0;
+
     return (
         <section className="ds-panel ornate space-y-5 p-5 sm:p-6">
             <AvatarEditor user={user} />
-            {tiles.length > 0 && (
+            <div className="orn" aria-hidden />
+            {fresh ? (
+                <p className="text-sm text-hud-muted">{t('welcome')}</p>
+            ) : (
                 <>
-                    <div className="orn" aria-hidden />
                     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                         {tiles.map((x) => (
                             <li
