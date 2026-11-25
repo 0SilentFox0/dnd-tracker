@@ -2,6 +2,7 @@ import { areaAuras, auraZoneEffect, zoneCandidates } from './area-aura';
 
 import { AURA_RADIUS_CELLS } from '@/lib/constants/battle';
 import { inPlay } from '@/lib/utils/abilities/engine/core/participants';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
@@ -12,6 +13,8 @@ export function syncMapAuras(
     map: BattleMapConfig | null
 ): BattleParticipant[] {
     if (!map) return participants;
+
+    const grid = gridOf(map);
 
     const managed = new Set<string>();
 
@@ -30,7 +33,7 @@ export function syncMapAuras(
 
         managed.add(ownerId);
 
-        const ownerCells = cellsOf(owner, 'square');
+        const ownerCells = cellsOf(owner, grid);
 
         for (const aura of areaAuras(owner)) {
             const round = owner.battleData.auraZones?.[aura.id] ?? 1;
@@ -40,7 +43,7 @@ export function syncMapAuras(
             for (const m of zoneCandidates(participants, owner, aura.target)) {
                 if (
                     !isOnMap(m) ||
-                    footprintDistance(ownerCells, cellsOf(m, 'square')) >
+                    footprintDistance(ownerCells, cellsOf(m, grid), grid) >
                         AURA_RADIUS_CELLS
                 )
                     continue;

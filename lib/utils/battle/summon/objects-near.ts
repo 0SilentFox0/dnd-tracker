@@ -4,6 +4,7 @@ import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
+import type { GridKind } from '@/types/battle-grid';
 
 export function objectsNear(
     ps: BattleParticipant[],
@@ -11,7 +12,8 @@ export function objectsNear(
     spellId: string,
     target: BattleParticipant,
     feet: number,
-    rules: Ruleset
+    rules: Ruleset,
+    grid: GridKind
 ): BattleParticipant[] {
     if (!isOnMap(target)) return [];
 
@@ -21,7 +23,7 @@ export function objectsNear(
             p.battleData.summonedBy === ownerId &&
             isActive(p) &&
             isOnMap(p) &&
-            footprintDistance(cellsOf(p, 'square'), cellsOf(target, 'square')) *
+            footprintDistance(cellsOf(p, grid), cellsOf(target, grid), grid) *
                 cellFeetOf(rules) <=
                 feet
     );

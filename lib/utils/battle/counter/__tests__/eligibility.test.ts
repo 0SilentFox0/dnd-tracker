@@ -204,4 +204,24 @@ describe('counterReactors', () => {
     it('ignores range and sight without a map', () => {
         expect(run(wizard({}, 40), { map: null })).toHaveLength(1);
     });
+
+    it('measures the interrupt range in hex steps on a hex map', () => {
+        const diag = (x: number): BattleParticipant => {
+            const w = wizard({}, x);
+
+            return {
+                ...w,
+                battleData: { ...w.battleData, position: { x: 1, y: 6 } },
+            };
+        };
+
+        const near = { ...COUNTER, range: 5 };
+
+        const args = { interruptSpells: [near] };
+
+        const hexMap = { ...map, gridType: 'hex' as const };
+
+        expect(run(diag(1), args)).toHaveLength(1);
+        expect(run(diag(1), { ...args, map: hexMap })).toEqual([]);
+    });
 });

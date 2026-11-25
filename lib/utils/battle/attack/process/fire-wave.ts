@@ -11,6 +11,8 @@ import {
     participantsInCells,
     templateCells,
 } from '@/lib/utils/battle/grid';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
+import { hexAwayStep } from '@/lib/utils/battle/grid/hex';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
@@ -39,30 +41,33 @@ export function fireWaveVictims(
             .slice(0, FIRE_WAVE_NO_MAP_VICTIMS)
             .map((p) => p.basicInfo.id);
 
-    const from = cellsOf(attacker, 'square');
+    const grid = gridOf(map);
 
-    const vc = closestCell(cellsOf(victim, 'square'), from);
+    const from = cellsOf(attacker, grid);
 
-    const ac = apexOf(from, vc);
+    const victimCells = cellsOf(victim, grid);
 
-    const aim = {
-        x: vc.x + Math.sign(vc.x - ac.x),
-        y: vc.y + Math.sign(vc.y - ac.y),
-    };
+    const vc = closestCell(victimCells, from, grid);
+
+    const ac = apexOf(from, vc, grid);
+
+    const aim =
+        grid === 'hex'
+            ? hexAwayStep(ac, vc)
+            : {
+                  x: vc.x + Math.sign(vc.x - ac.x),
+                  y: vc.y + Math.sign(vc.y - ac.y),
+              };
 
     const cells = templateCells(
         map,
         { shape: 'cone', size: sizeFt },
-        cellsOf(victim, 'square'),
+        victimCells,
         aim,
         rules
     );
 
-    return participantsInCells(
-        ps,
-        cells,
-        apexOf(cellsOf(victim, 'square'), aim)
-    )
+    return participantsInCells(ps, cells, apexOf(victimCells, aim, grid), grid)
         .filter(isEnemy)
         .map((p) => p.basicInfo.id);
 }

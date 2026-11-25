@@ -12,6 +12,7 @@ import {
 import type { FlagEffect } from '@/lib/utils/abilities/schema';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isDying } from '@/lib/utils/battle/death-saves';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprintDistance, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import {
@@ -43,6 +44,7 @@ import type { CastExtension } from '@/lib/utils/rules/systems/types';
 import { cantripTier } from '@/lib/utils/spells/model/dice';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
+import type { GridKind } from '@/types/battle-grid';
 import type {
     BattleMapConfig,
     GridPoint,
@@ -182,16 +184,18 @@ export function spellChain(
 
     const out = [first];
 
+    const grid = gridOf(map);
+
     while (
         out.length < chain.maxTargets &&
         pool.length > 0 &&
         isOnMap(out[out.length - 1])
     ) {
-        const from = cellsOf(out[out.length - 1], 'square');
+        const from = cellsOf(out[out.length - 1], grid);
 
         const next = pool.reduce((best, p) =>
-            footprintDistance(from, cellsOf(p, 'square')) <
-            footprintDistance(from, cellsOf(best, 'square'))
+            footprintDistance(from, cellsOf(p, grid), grid) <
+            footprintDistance(from, cellsOf(best, grid), grid)
                 ? p
                 : best
         );
@@ -280,7 +284,7 @@ function resolveTemplate(
             .map((p) => p.basicInfo.id);
 
     if (targeting.shape === 'emanation') {
-        const centre = cellsOf(caster, 'square')[0];
+        const centre = cellsOf(caster, gridOf(map))[0];
 
         const { cells, targets } = templateArea(
             map,
@@ -301,11 +305,12 @@ function resolveTemplate(
 
     if (
         !templateAimAllowed(
-            cellsOf(caster, 'square'),
+            cellsOf(caster, gridOf(map)),
             targeting,
             aim,
             targeting.range,
-            rules
+            rules,
+            gridOf(map)
         )
     )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));
@@ -333,7 +338,7 @@ function resolveTemplate(
         ok: true,
         targetIds: passing(targets),
         cells,
-        centre: templateCentre(targeting, aim, cells),
+        centre: templateCentre(targeting, aim, cells, gridOf(map)),
     };
 }
 
@@ -349,10 +354,11 @@ function resolveSkillRadius(
 
     if (
         !aimInRange(
-            cellsOf(scene.caster, 'square'),
+            cellsOf(scene.caster, gridOf(scene.map)),
             aim.cell,
             aim.range,
-            scene.rules
+            scene.rules,
+            gridOf(scene.map)
         )
     )
         return fail(textRef('battleActions.spell.target.pointOutOfRange'));
@@ -378,7 +384,8 @@ function outOfRange(
     caster: BattleParticipant,
     picked: BattleParticipant[],
     range: number | undefined,
-    rules: Ruleset
+    rules: Ruleset,
+    grid: GridKind
 ): boolean {
     if (range === undefined) return false;
 
@@ -387,8 +394,11 @@ function outOfRange(
     return picked.some(
         (p) =>
             p.battleData.position !== undefined &&
-            footprintDistance(cellsOf(caster, 'square'), cellsOf(p, 'square')) >
-                max
+            footprintDistance(
+                cellsOf(caster, grid),
+                cellsOf(p, grid),
+                grid
+            ) > max
     );
 }
 
@@ -461,7 +471,13 @@ function resolveRaw(
     if (
         live &&
         'range' in targeting &&
-        outOfRange(caster, picked, targeting.range, live.rules)
+        outOfRange(
+            caster,
+            picked,
+            targeting.range,
+            live.rules,
+            gridOf(live.map)
+        )
     )
         return fail(textRef('battleActions.spell.target.targetOutOfRange'));
 

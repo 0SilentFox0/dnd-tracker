@@ -253,6 +253,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             participants: flow.ps,
             rules: params.rules,
             aim: params.aim,
+            map: flow.ctx.map,
         }
     );
 

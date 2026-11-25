@@ -19,8 +19,9 @@ import {
     footprint,
     movementBudget,
     parseCellKey,
-    sizeOf,
 } from '@/lib/utils/battle/grid';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
+import { footprintSizeOf } from '@/lib/utils/battle/grid/occupancy';
 import { replaceTerrain } from '@/lib/utils/battle/grid/terrain';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -37,7 +38,7 @@ export function zonesAt(
 
     if (!map?.spellZones || !map.terrain || !anchor) return new Set();
 
-    const ids = footprint(anchor, sizeOf(p), 'square').flatMap((c) => {
+    const ids = footprint(anchor, footprintSizeOf(p, gridOf(map)), gridOf(map)).flatMap((c) => {
         const id = map.terrain?.[cellKey(c)]?.zoneId;
 
         return id && map.spellZones?.[id] ? [id] : [];
@@ -149,6 +150,8 @@ function pullTarget(
 ): GridPoint {
     if (!centre) return fallback;
 
+    const grid = gridOf(map);
+
     const inside = Object.entries(map.terrain ?? {})
         .filter(([, c]) => c.zoneId === zoneId)
         .map(([k]) => parseCellKey(k));
@@ -156,7 +159,7 @@ function pullTarget(
     const free = inside.filter(
         (c) =>
             canStand(map, ps, mover, c) &&
-            footprint(c, sizeOf(mover), 'square').every(
+            footprint(c, footprintSizeOf(mover, grid), grid).every(
                 (f) => map.terrain?.[cellKey(f)]?.zoneId === zoneId
             )
     );
@@ -164,7 +167,9 @@ function pullTarget(
     return (
         free.reduce<GridPoint | null>(
             (best, c) =>
-                !best || cellDistance(c, centre) < cellDistance(best, centre)
+                !best ||
+                cellDistance(c, centre, grid) <
+                    cellDistance(best, centre, grid)
                     ? c
                     : best,
             null

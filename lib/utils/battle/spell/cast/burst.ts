@@ -6,6 +6,7 @@ import {
 import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
 import { cellsOf, footprintDistance } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { bothOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { burstsOf } from '@/lib/utils/battle/spell/cast/state';
 import { fireTrigger } from '@/lib/utils/battle/spell/zone-fire';
@@ -45,6 +46,8 @@ export function applyBursts({
 
     const { map, rules, round, rng } = flow.ctx;
 
+    const grid = gridOf(map);
+
     for (const { effect, index } of burstsOf(effects)) {
         const victims = flow.ps.filter(
             (p) =>
@@ -53,8 +56,9 @@ export function applyBursts({
                 (p.basicInfo.id === centre.basicInfo.id ||
                     (bothOnMap(map, centre, p) &&
                         footprintDistance(
-                            cellsOf(centre, 'square'),
-                            cellsOf(p, 'square')
+                            cellsOf(centre, grid),
+                            cellsOf(p, grid),
+                            grid
                         ) *
                             cellFeetOf(rules) <=
                             effect.radiusFeet))

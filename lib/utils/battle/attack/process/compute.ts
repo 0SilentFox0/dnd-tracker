@@ -42,9 +42,11 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { MitigateResult } from '@/lib/utils/rules/systems/types';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { DamageRow, DamageStep } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface ComputeHitDamageParams {
+    map?: BattleMapConfig | null;
     attacker: BattleParticipant;
     target: BattleParticipant;
     attack: BattleAttack;
@@ -492,6 +494,7 @@ function mitigateHit(
             location: location ?? '',
             attackRoll: totalAttackValue,
             attack: params.attack,
+            map: params.map,
             rng: params.rng ?? Math.random,
             ...(params.offTurn && { offTurn: true }),
         },

@@ -16,6 +16,7 @@ import { applyBalanceDamageMultiplier } from '@/lib/utils/battle/damage/balance-
 import { isLethal, lethalAmount } from '@/lib/utils/battle/damage/lethal';
 import { bothOnMap, cellsOf, footprintDistance } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { dealsNoDamage } from '@/lib/utils/battle/participant/state';
 import { applyResistance, immunityNote } from '@/lib/utils/battle/resistance';
 import { outcomeFor } from '@/lib/utils/battle/spell/cast/outcome';
@@ -173,8 +174,10 @@ function scheduleHit(
 
     if (!bothOnMap(flow.ctx.map, me, target)) return false;
 
+    const grid = gridOf(flow.ctx.map);
+
     const feet =
-        footprintDistance(cellsOf(me, 'square'), cellsOf(target, 'square')) *
+        footprintDistance(cellsOf(me, grid), cellsOf(target, grid), grid) *
         cellFeetOf(flow.ctx.rules);
 
     const { feet: near, perRoundFeet } = delay;
@@ -233,7 +236,8 @@ function dealSpellDamage(
               spell.id,
               target,
               state.spell.definition.perObjectFeet,
-              flow.ctx.rules
+              flow.ctx.rules,
+              gridOf(flow.ctx.map)
           ).length
         : 1;
 
@@ -359,8 +363,10 @@ function distanceDamage(
 
     const onMap = bothOnMap(flow.ctx.map, me, target);
 
+    const grid = gridOf(flow.ctx.map);
+
     const feet = onMap
-        ? footprintDistance(cellsOf(me, 'square'), cellsOf(target, 'square')) *
+        ? footprintDistance(cellsOf(me, grid), cellsOf(target, grid), grid) *
           cellFeetOf(flow.ctx.rules)
         : 0;
 

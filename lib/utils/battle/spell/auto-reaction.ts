@@ -5,6 +5,7 @@ import { reactionsOf } from '@/lib/utils/battle/actions/access';
 import { type ActionFlow, getP } from '@/lib/utils/battle/common/action-flow';
 import { cellsOf, footprintDistance, isOnMap } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import {
     isGrantLive,
@@ -17,6 +18,7 @@ import type {
 import { rollDiceList } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const anchoredOn = (
     target: BattleParticipant,
@@ -33,7 +35,7 @@ const inRange = (
     grant: SpellGrant,
     target: BattleParticipant,
     attacker: BattleParticipant,
-    hasMap: boolean,
+    map: BattleMapConfig | null | undefined,
     rules: Ruleset
 ) => {
     const targeting = grant.inline?.targeting;
@@ -43,16 +45,19 @@ const inRange = (
 
     if (
         range === undefined ||
-        !hasMap ||
+        !map ||
         !isOnMap(target) ||
         !isOnMap(attacker)
     )
         return true;
 
+    const grid = gridOf(map);
+
     return (
         footprintDistance(
-            cellsOf(target, 'square'),
-            cellsOf(attacker, 'square')
+            cellsOf(target, grid),
+            cellsOf(attacker, grid),
+            grid
         ) *
             cellFeetOf(rules) <=
         range
@@ -105,7 +110,7 @@ export function runAutoReactions(
         if (
             reactionsOf(flow.ctx.rules).blocker(holder) ||
             !anchoredOn(target, holderId, grant.inline.anchorMarkId) ||
-            !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules)
+            !inRange(grant, target, attacker, flow.ctx.map, flow.ctx.rules)
         )
             continue;
 

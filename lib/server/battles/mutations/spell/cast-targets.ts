@@ -8,6 +8,7 @@ import type {
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
 import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { inputDiceOf } from '@/lib/utils/battle/spell/cast/state';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
@@ -66,7 +67,8 @@ function assertObjectsNear(
                 spell.id,
                 t,
                 reach,
-                ctx.meta.rules
+                ctx.meta.rules,
+                gridOf(ctx.meta.map)
             ).length === 0
         );
     });

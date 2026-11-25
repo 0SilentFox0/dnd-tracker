@@ -1,3 +1,4 @@
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import {
     cellKey,
     cellLine,
@@ -158,15 +159,17 @@ function createTerrainCells(
 
     if (!target || !isOnMap(caster) || !isOnMap(target)) return [];
 
-    const from = cellsOf(caster, 'square');
+    const grid = gridOf(map);
 
-    const to = cellsOf(target, 'square');
+    const from = cellsOf(caster, grid);
 
-    const start = closestCell(from, to);
+    const to = cellsOf(target, grid);
+
+    const start = closestCell(from, to, grid);
 
     const own = new Set([...from, ...to].map(cellKey));
 
-    return cellLine(start, closestCell(to, [start]))
+    return cellLine(start, closestCell(to, [start], grid), grid)
         .filter((c) => !own.has(cellKey(c)) && inBounds(map, c))
         .map(cellKey)
         .slice(0, effect.cells);
@@ -192,7 +195,7 @@ export function spellTerrainEffects(
 
     let changed = false;
 
-    const taken = occupiedBy(participants, () => true);
+    const taken = occupiedBy(participants, () => true, gridOf(map));
 
     effects.forEach((effect, i) => {
         const keys = createTerrainCells(effect, { ...input, map }).filter(

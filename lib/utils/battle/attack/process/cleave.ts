@@ -9,11 +9,14 @@ import {
     isAdjacentOnMap,
     isOnMap,
 } from '@/lib/utils/battle/grid';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
+import { hexNeighbors } from '@/lib/utils/battle/grid/hex';
 import {
     isHostile,
     modeMeleeBlockedText,
 } from '@/lib/utils/battle/modes/engine';
 import type { BattleParticipant } from '@/types/battle';
+import type { GridKind } from '@/types/battle-grid';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const FACINGS: GridPoint[] = [
@@ -39,8 +42,19 @@ function facingCells(at: GridPoint, { x: dx, y: dy }: GridPoint): GridPoint[] {
     ];
 }
 
-const touches = (p: BattleParticipant, cells: GridPoint[]) =>
-    cellsOf(p, 'square').some((c) =>
+function hexArcs(at: GridPoint): GridPoint[][] {
+    const ring = hexNeighbors(at);
+
+    return ring.map((n) => [
+        n,
+        ...hexNeighbors(n).filter((c) =>
+            ring.some((r) => r.x === c.x && r.y === c.y)
+        ),
+    ]);
+}
+
+const touches = (p: BattleParticipant, cells: GridPoint[], grid: GridKind) =>
+    cellsOf(p, grid).some((c) =>
         cells.some((f) => f.x === c.x && f.y === c.y)
     );
 
@@ -53,7 +67,9 @@ export function cleaveTargets(
 ): BattleParticipant[] {
     if (count <= 0 || !bothOnMap(map, attacker, target)) return [];
 
-    const mine = cellsOf(attacker, 'square');
+    const grid = gridOf(map);
+
+    const mine = cellsOf(attacker, grid);
 
     const primary = findParticipant(order, target.basicInfo.id) ?? target;
 
@@ -72,12 +88,15 @@ export function cleaveTargets(
 
     let best: BattleParticipant[] = [];
 
-    for (const facing of FACINGS) {
-        const cells = facingCells(mine[0], facing);
+    const arcs =
+        grid === 'hex'
+            ? hexArcs(mine[0])
+            : FACINGS.map((facing) => facingCells(mine[0], facing));
 
-        if (!touches(primary, cells)) continue;
+    for (const cells of arcs) {
+        if (!touches(primary, cells, grid)) continue;
 
-        const hit = candidates.filter((p) => touches(p, cells));
+        const hit = candidates.filter((p) => touches(p, cells, grid));
 
         if (hit.length > best.length) best = hit;
     }

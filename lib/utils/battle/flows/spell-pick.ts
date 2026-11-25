@@ -7,6 +7,7 @@ import type {
 import { textRef } from '@/lib/i18n/text-ref';
 import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import { isDying } from '@/lib/utils/battle/death-saves';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
@@ -327,12 +328,12 @@ export function spellTargetInRange(
     )
         return true;
 
+    const grid = gridOf(map);
+
     const inRange =
         range === undefined ||
-        footprintDistance(
-            cellsOf(caster, 'square'),
-            cellsOf(target, 'square')
-        ) <= feetToCells(range, rules);
+        footprintDistance(cellsOf(caster, grid), cellsOf(target, grid), grid) <=
+            feetToCells(range, rules);
 
     return (
         inRange &&

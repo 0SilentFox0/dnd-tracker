@@ -9,10 +9,13 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { footprint, footprintDistance } from '@/lib/utils/battle/grid/geometry';
-import { isOnMap, sizeOf } from '@/lib/utils/battle/grid/occupancy';
+import { footprintSizeOf } from '@/lib/utils/battle/grid/occupancy';
+import { isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { GridKind } from '@/types/battle-grid';
 import type { AnchoredZoneState, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
@@ -62,12 +65,14 @@ function inRadius(
     b: BattleParticipant,
     bAt: GridPoint,
     feet: number,
-    rules: Ruleset
+    rules: Ruleset,
+    grid: GridKind
 ): boolean {
     return (
         footprintDistance(
-            footprint(aAt, sizeOf(a), 'square'),
-            footprint(bAt, sizeOf(b), 'square')
+            footprint(aAt, footprintSizeOf(a, grid), grid),
+            footprint(bAt, footprintSizeOf(b, grid), grid),
+            grid
         ) *
             cellFeetOf(rules) <=
         feet
@@ -130,7 +135,8 @@ export function anchorMove({
                             other,
                             otherAt,
                             anchor.state.radiusFeet,
-                            ctx.rules
+                            ctx.rules,
+                            gridOf(ctx.map)
                         )
                     );
 
@@ -142,7 +148,8 @@ export function anchorMove({
                         other,
                         step,
                         anchor.state.radiusFeet,
-                        ctx.rules
+                        ctx.rules,
+                        gridOf(ctx.map)
                     )
                 );
             };
@@ -201,7 +208,8 @@ export function anchorTurnStart(
             target,
             at,
             anchor.state.radiusFeet,
-            ctx.rules
+            ctx.rules,
+            gridOf(ctx.map)
         );
 
         if (!inside && anchor.state.endsWhenStartOutside) {

@@ -16,6 +16,7 @@ import {
 import type { Rng } from '@/lib/utils/abilities/engine/core/types';
 import {
     cellKey,
+    gridOf,
     nearestStandable,
     participantsInCells,
 } from '@/lib/utils/battle/grid';
@@ -69,7 +70,12 @@ function victimOf(
     const enemy = isEnemyOf(actor, map);
 
     if (map && landAt)
-        return participantsInCells(ps, [cellKey(landAt)], landAt).find(enemy);
+        return participantsInCells(
+            ps,
+            [cellKey(landAt)],
+            landAt,
+            gridOf(map)
+        ).find(enemy);
 
     const target = targetId ? findParticipant(ps, targetId) : undefined;
 

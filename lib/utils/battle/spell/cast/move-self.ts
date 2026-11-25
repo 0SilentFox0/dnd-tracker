@@ -1,16 +1,18 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import { cellsAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import {
+    cellDistance,
     cellsByRing,
     footprint,
     footprintDistance,
 } from '@/lib/utils/battle/grid/geometry';
+import { footprintSizeOf } from '@/lib/utils/battle/grid/occupancy';
 import {
     cellsOf,
     fits,
     isOnMap,
     occupiedBy,
-    sizeOf,
 } from '@/lib/utils/battle/grid/occupancy';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
@@ -28,37 +30,34 @@ export function adjacentFreeCell(
 
     if (!targetAnchor || !from) return null;
 
-    const size = sizeOf(mover);
+    const grid = gridOf(map);
+
+    const size = footprintSizeOf(mover, grid);
 
     const blocked = occupiedBy(
         participants,
-        (p) => p.basicInfo.id !== mover.basicInfo.id
+        (p) => p.basicInfo.id !== mover.basicInfo.id,
+        grid
     );
 
-    const targetCells = cellsOf(target, 'square');
+    const targetCells = cellsOf(target, grid);
 
     const near: GridPoint[] = [];
 
-    const reach = size + sizeOf(target);
+    const reach = size + footprintSizeOf(target, grid);
 
-    for (const a of cellsByRing(map, targetAnchor)) {
-        if (
-            Math.max(
-                Math.abs(a.x - targetAnchor.x),
-                Math.abs(a.y - targetAnchor.y)
-            ) > reach
-        )
-            break;
+    for (const a of cellsByRing(map, targetAnchor, grid)) {
+        if (cellDistance(a, targetAnchor, grid) > reach) break;
 
         if (
             fits(map, a, size, blocked) &&
-            cellsAdjacentOnMap(map, footprint(a, size, 'square'), targetCells)
+            cellsAdjacentOnMap(map, footprint(a, size, grid), targetCells)
         )
             near.push(a);
     }
 
     const away = (a: GridPoint) =>
-        footprintDistance([a], [from]) * 1000 +
+        footprintDistance([a], [from], grid) * 1000 +
         (a.x - from.x) ** 2 +
         (a.y - from.y) ** 2;
 
@@ -124,13 +123,17 @@ export function teleportTo(
 
     if (!mover) return { participants, message: '' };
 
-    const blocked = occupiedBy(participants, (p) => p.basicInfo.id !== moverId);
+    const blocked = occupiedBy(
+        participants,
+        (p) => p.basicInfo.id !== moverId,
+        gridOf(map)
+    );
 
     if (
         !map ||
         !cell ||
         !isOnMap(mover) ||
-        !fits(map, cell, sizeOf(mover), blocked)
+        !fits(map, cell, footprintSizeOf(mover, gridOf(map)), blocked)
     )
         return {
             participants,

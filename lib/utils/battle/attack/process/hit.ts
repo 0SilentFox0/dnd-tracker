@@ -60,6 +60,7 @@ export function resolveHit(p: ResolveHitParams): {
     const { flow, attackerId, targetId, attack } = p;
 
     const hitDamage = computeHitDamage({
+        map: flow.ctx.map,
         attacker: getP(flow, attackerId),
         target: getP(flow, targetId),
         attack,

@@ -1,3 +1,4 @@
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import { aimInRange } from '@/lib/utils/battle/grid/template';
 import { modeAimHiddenText } from '@/lib/utils/battle/modes/engine';
@@ -24,7 +25,13 @@ export function assertAbilityAim(
         cell.y < 0 ||
         cell.x >= map.cols ||
         cell.y >= map.rows ||
-        !aimInRange(cellsOf(actor, 'square'), cell, ability.aim.range, rules)
+        !aimInRange(
+            cellsOf(actor, gridOf(map)),
+            cell,
+            ability.aim.range,
+            rules,
+            gridOf(map)
+        )
     ) {
         throw new BattleRuleError('invalid_target', REJECT.tooFar);
     }
