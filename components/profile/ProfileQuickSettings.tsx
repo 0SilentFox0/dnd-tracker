@@ -29,14 +29,12 @@ export function ProfileQuickSettings({ showOpsLink }: { showOpsLink: boolean }) 
                     {t('allSettings')}
                 </Link>
                 {showOpsLink && (
-                    <div>
-                        <Link
-                            href="/ops"
-                            className="inline-flex min-h-10 items-center text-sm underline"
-                        >
-                            {tProfile('opsLink')}
-                        </Link>
-                    </div>
+                    <Link
+                        href="/ops"
+                        className="flex min-h-10 items-center text-sm underline"
+                    >
+                        {tProfile('opsLink')}
+                    </Link>
                 )}
             </div>
         </ProfileSectionCard>

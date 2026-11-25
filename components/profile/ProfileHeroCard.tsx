@@ -49,23 +49,21 @@ export function ProfileHeroCard({
             {fresh ? (
                 <p className="text-sm text-hud-muted">{t('welcome')}</p>
             ) : (
-                <>
-                    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        {tiles.map((x) => (
-                            <li
-                                key={x.key}
-                                className="ds-inset min-w-0 rounded-lg px-3 py-2.5"
-                            >
-                                <p className="hud-num truncate text-2xl text-hud-ink">
-                                    {x.value}
-                                </p>
-                                <p className="hud-sc truncate text-xs text-hud-muted">
-                                    {x.label}
-                                </p>
-                            </li>
-                        ))}
-                    </ul>
-                </>
+                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {tiles.map((x) => (
+                        <li
+                            key={x.key}
+                            className="ds-inset min-w-0 rounded-lg px-3 py-2.5"
+                        >
+                            <p className="hud-num truncate text-2xl text-hud-ink">
+                                {x.value}
+                            </p>
+                            <p className="hud-sc truncate text-xs text-hud-muted">
+                                {x.label}
+                            </p>
+                        </li>
+                    ))}
+                </ul>
             )}
         </section>
     );
