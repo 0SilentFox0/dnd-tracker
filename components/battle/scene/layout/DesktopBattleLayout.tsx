@@ -158,11 +158,19 @@ export function DesktopBattleLayout({
 
     const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
+    const sideOpen =
+        active !== null && !(active === 'reserve' && reserve.length === 0);
+
     return (
         <SceneSlotsContext value={slots}>
             <MapStripSlotContext value={resultSlot}>
                 <div
                     ref={rootRef}
+                    style={
+                        {
+                            '--hud-side-w': sideOpen ? '340px' : '0px',
+                        } as React.CSSProperties
+                    }
                     className="scene-full relative flex flex-col overflow-hidden"
                 >
                     <div className="relative min-h-0 flex-1">
@@ -178,7 +186,7 @@ export function DesktopBattleLayout({
                             </main>
                         )}
                         <BattleTopBar />
-                        <div className="pointer-events-none absolute top-2 left-1/2 z-20 flex w-[min(760px,calc(100%-440px))] -translate-x-1/2 flex-col gap-1">
+                        <div className="pointer-events-none absolute top-2 left-[calc(50%-var(--hud-side-w,0px)/2)] z-20 flex w-[min(760px,calc(100%-440px-var(--hud-side-w,0px)))] -translate-x-1/2 flex-col gap-1">
                             <InitiativeTrack onReorder={onReorder} />
                             <div className={`${HUD_GLASS} pointer-events-auto rounded-xl`}>
                                 <LastActionTicker
@@ -200,12 +208,12 @@ export function DesktopBattleLayout({
                             </div>
                         )}
                         <TurnDock />
-                        <div className="pointer-events-none absolute top-2 right-3 z-30 *:pointer-events-auto">
+                        <div className="pointer-events-none absolute top-2 right-3 z-50 *:pointer-events-auto">
                             <DrawerRail active={active} onToggle={toggle} />
                         </div>
                         <div
                             ref={bindColumn}
-                            className="pointer-events-none absolute right-3 bottom-3 z-20 flex w-[min(370px,calc(100%-24px))] flex-col items-stretch gap-2"
+                            className="pointer-events-none absolute right-[calc(0.75rem+var(--hud-side-w,0px))] bottom-3 z-20 flex w-[min(370px,calc(100%-24px-var(--hud-side-w,0px)))] flex-col items-stretch gap-2"
                         >
                             <div
                                 ref={setResultSlot}

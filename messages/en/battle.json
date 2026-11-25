@@ -458,16 +458,17 @@
     "display": "Display",
     "sound": "Sound and music",
     "dmSection": "DM",
-    "collapse": "Collapse",
     "more": "Menu",
     "mode": "Tools mode",
     "modePlay": "Play",
     "modeEdit": "Edit map",
     "grid": "Grid",
+    "mapTools": "Map tools",
     "gridShape": "Grid shape",
     "gridSquare": "Square",
     "gridHex": "Hex",
     "gridHexSoon": "Hex grid is coming soon",
-    "dmPanel": "DM panel"
+    "dmPanel": "DM panel",
+    "close": "Close"
   }
 }

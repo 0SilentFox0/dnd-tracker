@@ -32,7 +32,7 @@ export function MapCameraControls({
         <div
             className={cn(
                 HUD_GLASS,
-                'absolute right-3 z-30 flex items-center rounded-xl',
+                'absolute right-[calc(0.75rem+var(--hud-side-w,0px))] z-30 flex items-center rounded-xl',
                 phone
                     ? 'bottom-2'
                     : 'bottom-[calc(var(--hud-dock-h,0px)+1.25rem)]'

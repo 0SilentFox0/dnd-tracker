@@ -25,6 +25,15 @@ import {
 import { useConfirm } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 
+const FIRST_ROW = '[&>div>div:first-child]';
+
+const MAP_TOOLS_SLOT = cn(
+    'relative flex min-w-0 flex-col gap-2',
+    `${FIRST_ROW}:grid ${FIRST_ROW}:grid-cols-2 ${FIRST_ROW}:gap-2`,
+    `${FIRST_ROW}>*:h-auto ${FIRST_ROW}>*:min-h-11 ${FIRST_ROW}>*:text-sm ${FIRST_ROW}>*:leading-tight ${FIRST_ROW}>*:whitespace-normal`,
+    '[&_button[aria-pressed]]:min-h-11 [&_button[aria-pressed]]:text-sm'
+);
+
 const SECTION = 'hud-sc text-[13px] tracking-[.1em] text-[var(--hud-muted)]';
 
 export interface ToolsProps {
@@ -99,6 +108,7 @@ export function ToolsContent({
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('view')}</h3>
                     <HudChipTabs
+                        size="lg"
                         ariaLabel={ts('viewMode')}
                         items={[
                             {
@@ -121,6 +131,7 @@ export function ToolsContent({
                 <section className="flex flex-col gap-2">
                     <h3 className={SECTION}>{td('view')}</h3>
                     <HudChipTabs
+                        size="lg"
                         ariaLabel={ts('viewMode')}
                         items={[
                             ...(battle.map
@@ -150,10 +161,12 @@ export function ToolsContent({
                 </section>
             )}
             {onToolsSlot && battle.map && (
-                <section className="flex flex-col gap-2">
+                <>
                     {isDM && !readOnly && (
-                        <>
+                        <section className="flex flex-col gap-2">
+                            <h3 className={SECTION}>{td('mode')}</h3>
                             <HudChipTabs
+                                size="lg"
                                 ariaLabel={td('mode')}
                                 items={[
                                     {
@@ -170,27 +183,33 @@ export function ToolsContent({
                                     },
                                 ]}
                             />
-                            {mode === 'edit' && (
-                                <>
-                                    <HudButton
-                                        type="button"
-                                        aria-expanded={gridOpen}
-                                        onClick={() => setGridOpen((o) => !o)}
-                                        className="h-10 rounded-xl border border-white/20 text-sm text-[var(--ink)]"
-                                    >
-                                        {td('grid')}
-                                    </HudButton>
-                                    {gridOpen && <GridShapePicker />}
-                                </>
-                            )}
-                        </>
+                        </section>
                     )}
-                    <div
-                        ref={onToolsSlot}
+                    <section
                         hidden={isDM && !readOnly && mode === 'play'}
-                        className="relative flex min-w-0 flex-col [&>div>div:first-child]:grid [&>div>div:first-child]:grid-cols-3"
-                    />
-                </section>
+                        className="flex flex-col gap-2"
+                    >
+                        <h3 className={SECTION}>{td('mapTools')}</h3>
+                        <div
+                            ref={onToolsSlot}
+                            className={MAP_TOOLS_SLOT}
+                        />
+                    </section>
+                    {isDM && !readOnly && mode === 'edit' && (
+                        <section className="flex flex-col gap-2">
+                            <h3 className={SECTION}>{td('gridShape')}</h3>
+                            <HudButton
+                                type="button"
+                                aria-expanded={gridOpen}
+                                onClick={() => setGridOpen((o) => !o)}
+                                className="h-11 rounded-xl border border-white/20 text-sm text-[var(--ink)]"
+                            >
+                                {td('grid')}
+                            </HudButton>
+                            {gridOpen && <GridShapePicker />}
+                        </section>
+                    )}
+                </>
             )}
             <section className="flex flex-col gap-2">
                 <h3 className={SECTION}>{td('display')}</h3>
@@ -203,13 +222,13 @@ export function ToolsContent({
                         aria-label={fxOn ? t('fxOn') : t('fxOff')}
                         aria-pressed={fxOn}
                         className={cn(
-                            'size-10 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
+                            'size-11 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
                             fxOn ? 'text-[var(--gold)]' : 'text-hud-muted'
                         )}
                     >
                         <Sparkles className="size-5" />
                     </HudIconButton>
-                    <BattlePlayerViewToggle className="size-10" />
+                    <BattlePlayerViewToggle className="size-11" />
                 </div>
             </section>
             {withSound && (withPlayer || soundboard) && (
@@ -228,7 +247,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={onComplete}
-                            className="hud-sc h-10 rounded-xl border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10"
+                            className="hud-sc h-11 rounded-xl border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10"
                         >
                             {t('complete')}
                         </HudButton>
@@ -237,7 +256,7 @@ export function ToolsContent({
                         type="button"
                         data-tour="battle.reset"
                         onClick={() => void reset()}
-                        className="hud-sc h-10 rounded-xl border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10"
+                        className="hud-sc h-11 rounded-xl border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10"
                     >
                         {t('reset')}
                     </HudButton>
@@ -249,7 +268,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={() => onOpenDrawer('dm')}
-                            className="hud-sc h-10 flex-1 rounded-xl border border-white/20 text-sm"
+                            className="hud-sc h-11 flex-1 rounded-xl border border-white/20 text-sm"
                         >
                             {td('dmPanel')}
                         </HudButton>
@@ -258,7 +277,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={() => onOpenDrawer('reserve')}
-                            className="hud-sc h-10 flex-1 rounded-xl border border-white/20 text-sm"
+                            className="hud-sc h-11 flex-1 rounded-xl border border-white/20 text-sm"
                         >
                             {td('reserve')}
                         </HudButton>
@@ -267,7 +286,7 @@ export function ToolsContent({
             )}
             <Link
                 href={`/campaigns/${battle.campaignId}`}
-                className="hud-sc flex h-10 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
+                className="hud-sc flex h-11 items-center text-sm text-hud-soft hover:text-[var(--gold)]"
             >
                 {t('toCampaign')}
             </Link>

@@ -18,7 +18,7 @@ vi.unmock('next-intl');
 afterEach(cleanup);
 
 describe('floating panels', () => {
-    it('collapse button closes the panel', () => {
+    it('close button closes the panel', () => {
         const onOpenChange = vi.fn();
 
         render(
@@ -32,7 +32,7 @@ describe('floating panels', () => {
             </BattleDrawer>
         );
 
-        fireEvent.click(screen.getByRole('button', { name: 'Згорнути' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Закрити' }));
         expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 

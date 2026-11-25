@@ -458,16 +458,17 @@
     "display": "Відображення",
     "sound": "Звук і музика",
     "dmSection": "Ведучий",
-    "collapse": "Згорнути",
     "more": "Меню",
     "mode": "Режим інструментів",
     "modePlay": "Грати",
     "modeEdit": "Редагувати мапу",
     "grid": "Сітка",
+    "mapTools": "Інструменти мапи",
     "gridShape": "Форма сітки",
     "gridSquare": "Квадрат",
     "gridHex": "Гекс",
     "gridHexSoon": "Гекс-сітка скоро",
-    "dmPanel": "DM панель"
+    "dmPanel": "DM панель",
+    "close": "Закрити"
   }
 }

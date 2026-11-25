@@ -65,7 +65,7 @@ describe('ToolsContent', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Грати' }));
         expect(screen.queryByRole('button', { name: 'Сітка' })).toBeNull();
         expect(
-            container.querySelector('div.relative.flex.min-w-0')
+            container.querySelector('div.relative.flex.min-w-0')?.parentElement
         ).toHaveProperty('hidden', true);
     });
 

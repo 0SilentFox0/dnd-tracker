@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Minus } from 'lucide-react';
+import { X } from 'lucide-react';
 
 import type { DrawerKey } from './rail-items';
 
@@ -34,14 +34,14 @@ export function BattleDrawer({
                 open={open}
                 onOpenChange={onOpenChange}
                 title={title}
-                className={cn(HUD_SURFACE, 'border-white/25 bg-hud-surface')}
+                className={cn(HUD_SURFACE, 'h-[92dvh] border-white/25 bg-hud-surface')}
             >
                 {children}
             </ResponsiveDialog>
         );
 
     return (
-        <FloatingPanel
+        <SideSheet
             drawer={drawer}
             open={open}
             onOpenChange={onOpenChange}
@@ -49,11 +49,11 @@ export function BattleDrawer({
             keepMounted={keepMounted}
         >
             {children}
-        </FloatingPanel>
+        </SideSheet>
     );
 }
 
-function FloatingPanel({
+function SideSheet({
     drawer,
     open,
     onOpenChange,
@@ -86,30 +86,30 @@ function FloatingPanel({
 
     return (
         <section
-            data-slot="floating-panel"
+            data-slot="side-sheet"
             data-drawer={drawer}
             aria-label={typeof title === 'string' ? title : undefined}
             hidden={!open}
             className={cn(
                 HUD_GLASS,
-                'absolute top-14 right-3 bottom-[max(7rem,calc(var(--hud-dock-h,0px)+4.75rem))] z-40 flex w-[min(260px,calc(100vw-96px))] flex-col rounded-xl'
+                'absolute inset-y-0 right-0 z-40 flex w-[min(340px,100%)] flex-col rounded-none rounded-l-2xl border-r-0 pt-14'
             )}
         >
-            <header className="flex h-10 shrink-0 items-center justify-between gap-2 border-b border-white/15 pr-1.5 pl-3">
-                <h2 className="hud-sc text-[13px] font-bold tracking-[.1em] text-[var(--gold)]">
+            <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-y border-white/15 pr-2 pl-4">
+                <h2 className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
                     {title}
                 </h2>
                 <HudIconButton
                     type="button"
-                    aria-label={t('collapse')}
-                    title={t('collapse')}
+                    aria-label={t('close')}
+                    title={t('close')}
                     onClick={() => onOpenChange(false)}
-                    className="size-8 text-[var(--ink)] hover:bg-white/10"
+                    className="size-10 text-[var(--ink)] hover:bg-white/10"
                 >
-                    <Minus className="size-4" />
+                    <X className="size-4" />
                 </HudIconButton>
             </header>
-            <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
         </section>
     );
 }
