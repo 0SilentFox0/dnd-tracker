@@ -36,6 +36,8 @@ export function api(cookie, method, path, body, tags) {
     const params = {
         headers: { cookie, 'content-type': 'application/json', origin: BASE },
         tags: tags || {},
+        // 409 = counted as a conflict, 422 = morale gate (handled by the caller)
+        responseCallback: http.expectedStatuses({ min: 200, max: 399 }, 409, 422),
     };
     const url = `${BASE}/api${path}`;
     return method === 'GET'

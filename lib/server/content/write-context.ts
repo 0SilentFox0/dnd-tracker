@@ -39,6 +39,10 @@ export const bumpBatch = new AsyncLocalStorage<ContentBumpBatch>();
 
 export const currentContentWrite = () => context.getStore();
 
+/** Runs fn with no inherited write/transaction scope (e.g. `after()` callbacks that outlive the request transaction). */
+export const outsideWriteScope = <R>(fn: () => R): R =>
+    context.exit(() => transaction.exit(fn));
+
 export function runContentWriteContext<T>(
     campaignId: string,
     db: object,

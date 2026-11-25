@@ -27,12 +27,23 @@ export const options = {
             exec: 'playerLoop',
         },
     },
-    thresholds: { http_req_failed: ['rate<0.05'] },
+    thresholds: {
+        http_req_failed: ['rate<0.05'],
+        'http_req_failed{name:poll}': ['rate>=0'],
+        'http_req_failed{name:scene}': ['rate>=0'],
+        'http_req_failed{name:attack}': ['rate>=0'],
+        'http_req_failed{name:next-turn}': ['rate>=0'],
+        'http_req_failed{name:morale-check}': ['rate>=0'],
+        'http_req_duration{name:poll}': ['p(95)>=0'],
+        'http_req_duration{name:scene}': ['p(95)>=0'],
+        'http_req_duration{name:attack}': ['p(95)>=0'],
+    },
     summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max'],
 };
 
 export function setup() {
-    const cookie = login(dm);
+    const cookies = users.users.map((u) => login(u));
+    const cookie = cookies[0];
     const unitsRes = api(cookie, 'GET', `/campaigns/${campaignId}/units`);
     const units = unitsRes.json().map((u) => u.id).slice(0, 4);
     const battles = [];
@@ -51,7 +62,7 @@ export function setup() {
         if (s.status >= 300) throw new Error(`start ${s.status} ${s.body}`);
         battles.push(id);
     }
-    return { battles };
+    return { battles, cookies };
 }
 
 function turnLoop(cookie, battleId, me, side) {
@@ -115,12 +126,12 @@ function turnLoop(cookie, battleId, me, side) {
 
 export function dmLoop(data) {
     const idx = exec.scenario.iterationInTest;
-    turnLoop(login(dm), data.battles[idx], dm, 'dm');
+    turnLoop(data.cookies[0], data.battles[idx], dm, 'dm');
 }
 
 export function playerLoop(data) {
     const n = exec.scenario.iterationInTest;
     const idx = Math.floor(n / players.length) % BATTLES;
-    const me = players[n % players.length];
-    turnLoop(login(me), data.battles[idx], me, 'player');
+    const slot = n % players.length;
+    turnLoop(data.cookies[slot + 1], data.battles[idx], players[slot], 'player');
 }

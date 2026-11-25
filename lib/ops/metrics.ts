@@ -8,6 +8,7 @@ import {
     metricDef,
     type MetricKey,
 } from '@/lib/ops/metrics-catalog';
+import { outsideWriteScope } from '@/lib/server/content/write-context';
 import { logger } from '@/lib/utils/common/logger';
 import { bucketStart, latencyBucket } from '@/lib/utils/ops/latency';
 
@@ -73,9 +74,9 @@ function maybeFlush(): void {
     lastFlushAt = now;
 
     try {
-        after(() => flushMetrics());
+        after(() => outsideWriteScope(flushMetrics));
     } catch {
-        void flushMetrics();
+        void outsideWriteScope(flushMetrics);
     }
 }
 

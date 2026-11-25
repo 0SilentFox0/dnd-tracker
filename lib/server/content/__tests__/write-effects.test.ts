@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { afterContentCommit, runContentEffects } from '../write-context';
+import {
+    afterContentCommit,
+    currentContentWrite,
+    outsideWriteScope,
+    runContentEffects,
+    runContentWriteContext,
+} from '../write-context';
 
 describe('after-commit effects', () => {
     afterEach(() => vi.restoreAllMocks());
@@ -35,5 +41,16 @@ describe('after-commit effects', () => {
         await new Promise((r) => setTimeout(r, 0));
 
         expect(error).toHaveBeenCalledOnce();
+    });
+});
+
+describe('outsideWriteScope', () => {
+    it('hides the inherited write context from the callback', async () => {
+        const seen = await runContentWriteContext('c1', {}, async () => [
+            currentContentWrite()?.campaignId,
+            outsideWriteScope(() => currentContentWrite()),
+        ]);
+
+        expect(seen).toEqual(['c1', undefined]);
     });
 });
