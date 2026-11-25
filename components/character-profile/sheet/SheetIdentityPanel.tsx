@@ -113,8 +113,8 @@ export function SheetIdentityPanel({
                         <EntityIcon
                             src={id.raceIcon}
                             name={id.race}
-                            size={32}
-                            className="absolute bottom-[11%] left-1/2 hidden size-8 -translate-x-1/2 rounded-none bg-transparent text-[color:var(--banner-ink)] opacity-70 lg:flex"
+                            size={64}
+                            className="absolute bottom-[11%] left-1/2 hidden size-16 -translate-x-1/2 rounded-none bg-transparent text-[color:var(--banner-ink)] opacity-70 lg:flex"
                         />
                     </div>
                     {!Ui.hideProgression && (
