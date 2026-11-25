@@ -42,6 +42,7 @@ vi.mock('@/lib/db', () => ({
 }));
 vi.mock('@/lib/utils/api/rate-limit', () => ({
     checkRateLimit: mocks.rate,
+    checkDailyLimit: async () => null,
     rateLimitResponse: () => NextResponse.json({}, { status: 429 }),
 }));
 import { compendiumRoute } from '../http';

@@ -113,6 +113,26 @@ function warnNoRedisInProduction() {
     );
 }
 
+/** Scopes that spend money or heavy compute: without Redis in production they answer 503 instead of failing open. */
+const FAIL_CLOSED_SCOPES: ReadonlySet<string> = new Set([
+    'content-import-ai-map',
+    'scenario-summary',
+    'campaign-create',
+    'content-import',
+    'template-publish',
+    'content-copy',
+    'map-background-upload',
+]);
+
+const FAIL_CLOSED_PREFIXES = ['assistant-', 'ai-', 'mcp', 'draft-'] as const;
+
+export function isFailClosedScope(scope: string): boolean {
+    return (
+        FAIL_CLOSED_SCOPES.has(scope) ||
+        FAIL_CLOSED_PREFIXES.some((prefix) => scope.startsWith(prefix))
+    );
+}
+
 export async function checkRateLimit(
     input: RateLimitInput
 ): Promise<RateLimitResult> {
@@ -138,7 +158,7 @@ async function evaluateRateLimit(
         limit,
         windowSeconds,
         memoryFallback = true,
-        failClosed = false,
+        failClosed = isFailClosedScope(scope),
     } = input;
 
     const result: RateLimitResult = {
@@ -270,3 +290,29 @@ export const IP_RATE_LIMITS = {
     public: { limit: 60, windowSeconds: 60 },
     'csp-report': { limit: 120, windowSeconds: 60 },
 } as const;
+
+const DAY_SECONDS = 86_400;
+
+/** Per-user daily caps on abuse-prone heavy actions. */
+export const DAILY_LIMITS = {
+    campaignCreate: { scope: 'campaign-create', limit: 20 },
+    contentImport: { scope: 'content-import', limit: 50 },
+    templatePublish: { scope: 'template-publish', limit: 30 },
+    contentCopy: { scope: 'content-copy', limit: 100 },
+} as const;
+
+export async function checkDailyLimit(
+    userId: string,
+    key: keyof typeof DAILY_LIMITS
+): Promise<NextResponse | null> {
+    const { scope, limit } = DAILY_LIMITS[key];
+
+    const rate = await checkRateLimit({
+        userId,
+        scope,
+        limit,
+        windowSeconds: DAY_SECONDS,
+    });
+
+    return rate.allowed ? null : rateLimitResponse(rate);
+}

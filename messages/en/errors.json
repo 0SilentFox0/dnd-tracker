@@ -100,6 +100,7 @@
   "invalidJson": "Invalid JSON in the request body",
   "tooManyRequests": "Too many requests, try again shortly",
   "rateLimitUnavailable": "Service temporarily unavailable, try again shortly",
+  "serverBusy": "The server is busy with a heavy operation, try again in a few seconds",
   "abilityTooManyTargets": "Too many targets for this ability",
   "abilityTargetRequired": "Choose a target for this ability",
   "abilityTargetInvalid": "Invalid target for this ability",

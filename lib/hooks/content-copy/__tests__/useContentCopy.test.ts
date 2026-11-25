@@ -53,6 +53,32 @@ describe('useContentCopy', () => {
         });
     });
 
+    it('continues through next until the server is done', async () => {
+        const report = (campaignId: string) => ({
+            campaignId,
+            name: campaignId,
+            status: 'ok' as const,
+            created: [],
+            reused: [],
+            skipped: [],
+            warnings: [],
+        });
+
+        vi.mocked(contentCopyApi.copy)
+            .mockResolvedValueOnce({ targets: [report('a')], next: 'a' })
+            .mockResolvedValueOnce({ targets: [report('b')] });
+
+        const { result } = renderHook(() => useContentCopy('c1'), { wrapper });
+
+        const out = await act(() =>
+            result.current.run.mutateAsync({ ...body, targets: { all: true } })
+        );
+
+        expect(contentCopyApi.copy).toHaveBeenCalledTimes(2);
+        expect(vi.mocked(contentCopyApi.copy).mock.calls[1][1].after).toBe('a');
+        expect(out?.targets.map((t) => t.campaignId)).toEqual(['a', 'b']);
+    });
+
     it('invalidates cached queries of targets that received content', async () => {
         const client = new QueryClient({
             defaultOptions: { queries: { retry: false } },

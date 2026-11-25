@@ -9,6 +9,7 @@ export type CopyTargets = { campaignIds: string[] } | { all: true };
 export type CopyRequest = {
     items: CopyItem[];
     targets: CopyTargets;
+    after?: string;
     dryRun?: boolean;
 };
 
@@ -25,4 +26,4 @@ export type CopyTargetReport = {
     error?: string;
 };
 
-export type CopyResult = { targets: CopyTargetReport[] };
+export type CopyResult = { targets: CopyTargetReport[]; next?: string };

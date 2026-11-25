@@ -1,9 +1,11 @@
 import { applyCopy, copyRowRef } from './apply';
+import { sliceTargets } from './batch';
 import { copyMaps } from './maps';
 import { buildCopyPlan } from './plan';
 import { resolveTargets } from './targets';
 
 import 'server-only';
+import { capacity } from '@/lib/config/capacity';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { ContentKind } from '@/lib/constants/content-kinds';
 import { MAX_TRACKS_PER_CAMPAIGN } from '@/lib/constants/music';
@@ -25,6 +27,7 @@ export async function copyContent(args: {
     actor: Actor;
     items: CopyItem[];
     targets: CopyTargets;
+    after?: string;
     dryRun?: boolean;
 }): Promise<CopyResult> {
     const { actor, items, dryRun } = args;
@@ -46,11 +49,15 @@ export async function copyContent(args: {
               })
             : null;
 
-    const targets = await resolveTargets({
-        userId: actor.userId,
-        sourceCampaignId: actor.campaignId,
-        targets: args.targets,
-    });
+    const { batch: targets, next } = sliceTargets(
+        await resolveTargets({
+            userId: actor.userId,
+            sourceCampaignId: actor.campaignId,
+            targets: args.targets,
+        }),
+        args.after,
+        capacity().copyTargetsBatch
+    );
 
     const reports: CopyTargetReport[] = [];
 
@@ -157,5 +164,5 @@ export async function copyContent(args: {
         reports.push(report);
     }
 
-    return { targets: reports };
+    return next ? { targets: reports, next } : { targets: reports };
 }

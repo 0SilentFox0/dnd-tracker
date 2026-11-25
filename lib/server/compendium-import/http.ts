@@ -20,10 +20,15 @@ import {
 import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator, type Translator } from '@/lib/i18n/translator';
+import { withHeavySlot } from '@/lib/server/ops/heavy-limiter';
 import { storeCompendiumImage } from '@/lib/supabase/compendium-media-storage';
 import { resolveActor } from '@/lib/utils/api/actor';
 import { privateJson } from '@/lib/utils/api/api-response';
-import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
+import {
+    checkDailyLimit,
+    checkRateLimit,
+    rateLimitResponse,
+} from '@/lib/utils/api/rate-limit';
 import { isSameOriginRequest } from '@/lib/utils/api/same-origin';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { fromJson } from '@/lib/utils/common/json';
@@ -319,9 +324,19 @@ export function compendiumRoute(mode: Mode) {
                 limit: mode === 'media' ? 60 : mutation ? 20 : 120,
                 windowSeconds: 60,
                 memoryFallback: true,
+                failClosed: mutation,
             });
 
             if (!rate.allowed) return rateLimitResponse(rate);
+
+            if (mode === 'confirm') {
+                const daily = await checkDailyLimit(
+                    actor.userId,
+                    'contentImport'
+                );
+
+                if (daily) return daily;
+            }
 
             if (mode === 'options')
                 return privateJson(await importTargetOptions(actor));
@@ -349,7 +364,7 @@ export function compendiumRoute(mode: Mode) {
 
             if (mode === 'media') return await mediaResponse(scope);
 
-            return await importResponse(mode, scope);
+            return await withHeavySlot(() => importResponse(mode, scope));
         } catch (error) {
             return failureResponse(error);
         }
