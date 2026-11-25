@@ -33,7 +33,7 @@ export function GraphLegend({ showSequence }: { showSequence: boolean }) {
                 ))}
                 {showSequence ? (
                     <span className={item}>
-                        <span className="inline-block h-0 w-4 border-t-2 border-[var(--color-hud-gold-bright)]" />
+                        <span className="inline-block h-0 w-4 border-t-2 border-[var(--color-hud-crimson-fg)]" />
                         {t('sequence')}
                     </span>
                 ) : null}
