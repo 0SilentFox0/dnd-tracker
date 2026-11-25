@@ -61,6 +61,13 @@ export { useGearSwap } from './useGearSwap';
 export { useGridWindow } from './useGridWindow';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
+export {
+    type HudBlockKey,
+    toggleHudAll,
+    useHudAllHidden,
+    useHudBlock,
+    useHudHotkey,
+} from './useHudVisibility';
 export type { IngredientLine } from './useIngredientPlan';
 export { useInitiativeDrag } from './useInitiativeDrag';
 export { useInitiativeOrder, useTrackReorder } from './useInitiativeOrder';
@@ -127,8 +134,3 @@ export {
     type UnitControlRow,
     useUnitControlPanel,
 } from './useUnitControlPanel';
-export {
-    type HudBlockKey,
-    useHudBlock,
-    useHudHotkey,
-} from './useHudVisibility';

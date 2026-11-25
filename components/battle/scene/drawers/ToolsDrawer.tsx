@@ -253,7 +253,6 @@ export function ToolsContent({
                     {battle.status === BattleStatus.ACTIVE && (
                         <HudButton
                             type="button"
-                            data-tour="battle.next-turn"
                             disabled={actions.nextTurn.isPending}
                             onClick={() => actions.nextTurn.mutate({})}
                             className="hud-sc flex h-11 items-center justify-center gap-2 rounded-xl border border-white/20 text-sm tracking-[.08em] disabled:opacity-70"

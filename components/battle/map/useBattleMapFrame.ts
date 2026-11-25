@@ -11,6 +11,7 @@ import {
     MIN_TAP_CELL_PX,
     playableBounds,
     UNIT,
+    viewCellPx,
 } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -71,6 +72,8 @@ export function useBattleMapFrame(
         renderedFit.width /
         ((renderedFit.rotated ? win.rows : win.cols) * UNIT);
 
+    const fitCell = viewCellPx(fitAll, win);
+
     const frame = useMemo<Frame | null>(() => {
         if (avail.width <= 0 || avail.height <= 0) return null;
 
@@ -86,8 +89,6 @@ export function useBattleMapFrame(
                           height: Math.max(0, (fit.height - avail.height) / 2),
                       },
             };
-
-        const fitCell = fitAll.width / win.cols;
 
         const focusPx = focusCellPx(avail);
 
@@ -105,7 +106,7 @@ export function useBattleMapFrame(
         fit.height,
         fitAll.width,
         fitAll.height,
-        win.cols,
+        fitCell,
     ]);
 
     return {

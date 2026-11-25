@@ -69,4 +69,15 @@ describe('participantsCenterPx', () => {
             )
         ).toEqual({ x: 2.5 * UNIT, y: 1.5 * UNIT });
     });
+
+    it('rotated: same transform as cellPointPx', () => {
+        const ps = [at('a', { x: 0, y: 0 }), at('b', { x: 4, y: 2 })];
+
+        const win = { x: 0, y: 0, rows: 10 };
+
+        expect(participantsCenterPx(ps, win, 1, true)).toEqual({
+            x: 10 * UNIT - 1.5 * UNIT,
+            y: 2.5 * UNIT,
+        });
+    });
 });

@@ -94,16 +94,18 @@ export type SlotView = {
 };
 
 export function heroSlotViews(p: BattleParticipant): SlotView[] {
-    const views: SlotView[] = slotLevels(p).map(({ level, current, max }) => ({
-        level,
-        roman: spellLevelRoman(level),
-        current,
-        max,
-    }));
+    const views: SlotView[] = slotLevels(p)
+        .filter((s) => s.max > 0)
+        .map(({ level, current, max }) => ({
+            level,
+            roman: spellLevelRoman(level),
+            current,
+            max,
+        }));
 
     const pact = pactSlot(p);
 
-    if (!pact && !views.some((v) => v.max > 0)) return [];
+    if (!pact && views.length === 0) return [];
 
     return pact
         ? [
@@ -165,19 +167,19 @@ export function slotArcRadius(portrait: number, slot: number): number {
     return Math.ceil(Math.max(clear, spread));
 }
 
-/** Orbit radius that clears the portrait and keeps neighbouring slots from touching */
-export function slotOrbit(
+/** Box height of the slot arc cluster: never shorter than the portrait, grows when the arc swings below it */
+export function slotArcHeight(
     n: number,
     portrait: number,
     slot: number
-): { radius: number; box: number } {
-    const clear = portrait / 2 + slot / 2 + 8;
+): number {
+    if (n < 1) return portrait;
 
-    const spread = n > 1 ? (slot + 6) / (2 * Math.sin(Math.PI / n)) : 0;
+    const radius = slotArcRadius(portrait, slot);
 
-    const radius = Math.ceil(Math.max(clear, spread));
+    const low = slotArcOffset(n - 1, radius).y + portrait / 2 + slot / 2;
 
-    return { radius, box: 2 * (radius + slot / 2) };
+    return Math.max(portrait, Math.ceil(low));
 }
 
 export function canCastBonusSpell(

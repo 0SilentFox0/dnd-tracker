@@ -4,13 +4,10 @@ import { memo, useEffect, useMemo, useRef } from 'react';
 
 import { Portrait } from '@/components/battle/hud';
 import { HudButton } from '@/components/hud';
-import { ROMAN_NUMERALS } from '@/lib/constants/spells';
 import { useBattleSceneData, useInitiativeDrag } from '@/lib/hooks/battle';
 import { useFlip, useReducedMotion } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 import { currentRoundQueue, queueKeys } from '@/lib/utils/battle/view';
-
-const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
 export const InitiativeTrack = memo(function InitiativeTrack({
     onReorder,
@@ -85,36 +82,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
             )}
         >
             {queue.map((e, i) => {
-                if (e.kind === 'round')
-                    return (
-                        <span
-                            key="round"
-                            data-flip="round"
-                            className={cn(
-                                'relative shrink-0 bg-white/30',
-                                vertical
-                                    ? 'my-0.5 h-px w-4'
-                                    : cn(
-                                          'mx-0.5 w-px',
-                                          compact
-                                              ? 'mb-1.5 h-[18px]'
-                                              : 'mb-3 h-9'
-                                      )
-                            )}
-                        >
-                            <span
-                                className={cn(
-                                    'hud-sc absolute text-[var(--hud-muted)]',
-                                    vertical
-                                        ? 'top-1/2 right-full mr-0.5 -translate-y-1/2'
-                                        : 'top-0 left-1/2 -translate-x-1/2 -translate-y-full',
-                                    compact ? 'text-[8px]' : 'text-[11px]'
-                                )}
-                            >
-                                {roman(e.round)}
-                            </span>
-                        </span>
-                    );
+                if (e.kind === 'round') return null;
 
                 return (
                     <HudButton

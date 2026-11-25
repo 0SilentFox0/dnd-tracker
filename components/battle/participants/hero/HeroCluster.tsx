@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import {
     defaultSlotLevel,
     heroSlotViews,
+    slotArcHeight,
     slotArcRadius,
 } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
@@ -34,7 +35,10 @@ export const HeroCluster = memo(function HeroCluster({
 
     const { viewer } = useBattleSceneData();
 
-    const spells = useBattleSpellLibrary(hero, { isOpen: true, free: false });
+    const spells = useBattleSpellLibrary(hero, {
+        isOpen: !phone && !viewer.readOnly,
+        free: false,
+    });
 
     const slots = useMemo(
         () =>
@@ -56,12 +60,12 @@ export const HeroCluster = memo(function HeroCluster({
         arc: true,
     };
 
-    const recommended = !phone &&
-        !viewer.readOnly && spells.length > 0 && (
+    const recommended = !phone && !viewer.readOnly && spells.length > 0 && (
         <RecommendedSpells
             spells={spells}
             level={level}
             compact={phone}
+            actionLeft={!hero.actionFlags.hasUsedAction}
         />
     );
 
@@ -78,7 +82,7 @@ export const HeroCluster = memo(function HeroCluster({
                             width: phone
                                 ? size
                                 : size / 2 + arcRadius + slot / 2,
-                            height: size,
+                            height: slotArcHeight(slots.length, size, slot),
                         }}
                     >
                         <SpellSlotRow

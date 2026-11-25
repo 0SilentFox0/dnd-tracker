@@ -50,10 +50,11 @@ export function RoundBadge({ className }: { className?: string }) {
                 <HudButton
                     type="button"
                     disabled={pending}
+                    data-tour="battle.next-turn"
                     aria-label={t('nextTurn')}
                     title={t('nextTurn')}
                     onClick={() => actions.nextTurn.mutate({})}
-                    className="pointer-events-auto -my-2 -mr-2 flex size-10 max-md:-my-1.5 max-md:-mr-1.5 max-md:size-8 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70"
+                    className="pointer-events-auto -my-2 -mr-2 flex size-10 items-center justify-center rounded-md text-base leading-none text-[var(--gold)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-70 max-md:-my-1.5 max-md:-mr-1.5 max-md:size-8"
                 >
                     {pending ? (
                         <Loader2

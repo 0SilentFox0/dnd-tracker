@@ -175,6 +175,13 @@ export interface MapView {
     grow: number;
 }
 
+export function viewCellPx(
+    view: Pick<MapView, 'width' | 'rotated'>,
+    win: { cols: number; rows: number }
+): number {
+    return view.width / (view.rotated ? win.rows : win.cols);
+}
+
 const ROTATE_MIN_RATIO = 1.15;
 
 export const MIN_TAP_CELL_PX = 30;

@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
     defaultSlotLevel,
     heroSlotViews,
+    slotArcHeight,
     slotArcOffset,
     slotArcRadius,
-    slotOrbit,
     slotRingOffset,
 } from '../hero';
 
@@ -20,10 +20,10 @@ const withSlots = (
     } as never);
 
 describe('heroSlotViews', () => {
-    it('always lists levels 1-5 for a caster with slots', () => {
+    it('lists only levels with capacity', () => {
         const views = heroSlotViews(withSlots({ '1': { current: 2, max: 4 } }));
 
-        expect(views.map((v) => v.level)).toEqual([1, 2, 3, 4, 5]);
+        expect(views.map((v) => v.level)).toEqual([1]);
         expect(views[0]).toMatchObject({ roman: 'I', current: 2, max: 4 });
     });
 
@@ -35,7 +35,7 @@ describe('heroSlotViews', () => {
             })
         );
 
-        expect(views.map((v) => v.level)).toEqual([1, 2, 3, 4, 5, 6]);
+        expect(views.map((v) => v.level)).toEqual([1, 6]);
     });
 
     it('appends the pact slot', () => {
@@ -84,7 +84,9 @@ describe('slotRingOffset', () => {
     it('spreads slots evenly around the full circle at a constant radius', () => {
         const n = 8;
 
-        const pts = Array.from({ length: n }, (_, i) => slotRingOffset(i, n, 80));
+        const pts = Array.from({ length: n }, (_, i) =>
+            slotRingOffset(i, n, 80)
+        );
 
         for (const p of pts) expect(Math.hypot(p.x, p.y)).toBeCloseTo(80, 0);
 
@@ -94,29 +96,19 @@ describe('slotRingOffset', () => {
     });
 });
 
-describe('slotOrbit', () => {
-    it('clears the portrait and keeps neighbours apart for up to 10 slots', () => {
-        for (const [portrait, slot] of [
-            [104, 38],
-            [58, 36],
-        ]) {
-            for (let n = 1; n <= 10; n++) {
-                const { radius, box } = slotOrbit(n, portrait, slot);
+describe('slotArcHeight', () => {
+    it('keeps the portrait height for few slots and grows to contain a long arc', () => {
+        expect(slotArcHeight(0, 104, 30)).toBe(104);
+        expect(slotArcHeight(4, 104, 30)).toBe(104);
 
-                expect(radius).toBeGreaterThanOrEqual(portrait / 2 + slot / 2);
+        const r = slotArcRadius(104, 30);
 
-                const gap = slotRingOffset(0, n, radius);
+        const h = slotArcHeight(10, 104, 30);
 
-                const next = slotRingOffset(1, n, radius);
+        expect(h).toBeGreaterThan(104);
 
-                if (n > 1)
-                    expect(
-                        Math.hypot(gap.x - next.x, gap.y - next.y)
-                    ).toBeGreaterThanOrEqual(slot);
-
-                expect(box).toBe(2 * radius + slot);
-            }
-        }
+        for (let i = 0; i < 10; i++)
+            expect(52 + slotArcOffset(i, r).y + 15).toBeLessThanOrEqual(h);
     });
 });
 

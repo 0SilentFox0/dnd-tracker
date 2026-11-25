@@ -42,7 +42,10 @@ export function SpellSlotRow({ slots, selected, onSelect, ring }: Props) {
             }
         >
             {slots.map((s, i) => {
-                const active = selected === s.level;
+                const active =
+                    selected === s.level &&
+                    (!s.pact ||
+                        !slots.some((o) => !o.pact && o.level === s.level));
 
                 let style: CSSProperties | undefined;
 

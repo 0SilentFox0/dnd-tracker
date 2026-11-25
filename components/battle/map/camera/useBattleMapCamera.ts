@@ -46,10 +46,15 @@ export function useBattleMapCamera({
     const overview = useMemo(() => {
         if (phone) return null;
 
-        const point = participantsCenterPx(participants, win, pxPerUnit);
+        const point = participantsCenterPx(
+            participants,
+            win,
+            pxPerUnit,
+            rotated
+        );
 
         return point && { point };
-    }, [phone, participants, win, pxPerUnit]);
+    }, [phone, participants, win, pxPerUnit, rotated]);
 
     const camera = useMapCamera({
         enabled: true,

@@ -7,10 +7,16 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronUp,
+    Eye,
 } from 'lucide-react';
 
 import { HUD_GLASS, HudButton } from '@/components/hud';
-import { type HudBlockKey, useHudBlock } from '@/lib/hooks/battle';
+import {
+    type HudBlockKey,
+    toggleHudAll,
+    useHudAllHidden,
+    useHudBlock,
+} from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
 export function HudBlock({
@@ -19,6 +25,7 @@ export function HudBlock({
     align = 'start',
     className,
     detachedButton,
+    ignoreAll,
     children,
 }: {
     block: HudBlockKey;
@@ -27,11 +34,15 @@ export function HudBlock({
     className?: string;
     /** icon-only button placed by these classes instead of in the flow */
     detachedButton?: string;
+    ignoreAll?: boolean;
     children: ReactNode;
 }) {
     const t = useTranslations('battle.hudBlocks');
 
-    const { collapsed, hidden, allHidden, toggle } = useHudBlock(block);
+    const { collapsed, hidden, allHidden, toggle } = useHudBlock(
+        block,
+        ignoreAll
+    );
 
     const name = t(`names.${block}`);
 
@@ -86,5 +97,23 @@ export function HudBlock({
             </div>
             {!buttonFirst && button}
         </div>
+    );
+}
+
+export function HudRestoreButton() {
+    const t = useTranslations('battle.hudBlocks');
+
+    if (!useHudAllHidden()) return null;
+
+    return (
+        <HudButton
+            type="button"
+            aria-label={t('hotkey')}
+            title={t('hotkey')}
+            onClick={toggleHudAll}
+            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
+        >
+            <Eye className="size-4" aria-hidden />
+        </HudButton>
     );
 }

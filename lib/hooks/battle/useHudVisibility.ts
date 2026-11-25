@@ -27,7 +27,21 @@ function load() {
     try {
         const raw = window.localStorage.getItem(STORAGE_KEY);
 
-        if (raw) state = { ...EMPTY, ...JSON.parse(raw) };
+        const parsed: unknown = raw ? JSON.parse(raw) : null;
+
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            const p = parsed as Partial<HudVisibility>;
+
+            state = {
+                all: p.all === true,
+                collapsed:
+                    p.collapsed &&
+                    typeof p.collapsed === 'object' &&
+                    !Array.isArray(p.collapsed)
+                        ? p.collapsed
+                        : {},
+            };
+        }
     } catch {}
 }
 
@@ -73,15 +87,19 @@ const subscribe = (cb: () => void) => {
 const useHudState = () =>
     useSyncExternalStore(subscribe, getHudVisibility, () => EMPTY);
 
-export function useHudBlock(key: HudBlockKey) {
+export function useHudBlock(key: HudBlockKey, ignoreAll = false) {
     const s = useHudState();
 
     const collapsed = !!s.collapsed[key];
 
+    const allHidden = s.all && !ignoreAll;
+
     const toggle = useCallback(() => toggleHudBlock(key), [key]);
 
-    return { collapsed, hidden: collapsed || s.all, allHidden: s.all, toggle };
+    return { collapsed, hidden: collapsed || allHidden, allHidden, toggle };
 }
+
+export const useHudAllHidden = () => useHudState().all;
 
 const isTyping = (t: EventTarget | null) =>
     t instanceof HTMLElement &&
@@ -90,12 +108,18 @@ const isTyping = (t: EventTarget | null) =>
 export function useHudHotkey() {
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key.toLowerCase() !== 'h') return;
+            if (e.code !== 'KeyH' || e.repeat) return;
 
             if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented)
                 return;
 
             if (isTyping(e.target)) return;
+
+            if (
+                e.target instanceof Element &&
+                e.target.closest('[role="dialog"],[role="alertdialog"]')
+            )
+                return;
 
             toggleHudAll();
         };

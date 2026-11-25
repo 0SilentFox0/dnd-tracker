@@ -14,7 +14,9 @@ export function cellPointPx(
 
     const y = (anchor.y + size / 2 - win.y) * UNIT * pxPerUnit;
 
-    return rotated ? { x: (win.rows ?? 0) * UNIT * pxPerUnit - y, y: x } : { x, y };
+    return rotated
+        ? { x: (win.rows ?? 0) * UNIT * pxPerUnit - y, y: x }
+        : { x, y };
 }
 
 export function followTarget(
@@ -30,8 +32,9 @@ export function followTarget(
 
 export function participantsCenterPx(
     participants: readonly BattleParticipant[],
-    win: { x: number; y: number },
-    pxPerUnit: number
+    win: { x: number; y: number; rows?: number },
+    pxPerUnit: number,
+    rotated = false
 ): { x: number; y: number } | null {
     let x0 = Infinity;
 
@@ -56,8 +59,11 @@ export function participantsCenterPx(
 
     if (x0 === Infinity) return null;
 
-    return {
-        x: ((x0 + x1) / 2 - win.x) * UNIT * pxPerUnit,
-        y: ((y0 + y1) / 2 - win.y) * UNIT * pxPerUnit,
-    };
+    return cellPointPx(
+        { x: (x0 + x1) / 2 - 0.5, y: (y0 + y1) / 2 - 0.5 },
+        1,
+        win,
+        pxPerUnit,
+        rotated
+    );
 }
