@@ -164,7 +164,14 @@
     "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
     "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer",
     "doorLocked": "Locked",
-    "doorLimit": "Door limit reached, the extra doors were not added"
+    "doorLimit": "Door limit reached, the extra doors were not added",
+    "grid": {
+      "label": "Grid",
+      "square": "Squares",
+      "hex": "Hexes",
+      "hexHint": "The grid type cannot be changed after the map is created. Hex maps have no maze, walls, bars, doors or textures.",
+      "hexEdgesOff": "Walls, bars and doors are not available on a hex grid."
+    }
   },
   "characters": {
     "title": "Characters",

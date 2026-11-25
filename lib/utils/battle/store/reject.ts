@@ -65,6 +65,8 @@ export const REJECT = {
     doorOpenLock: 'battleLog.reject.doorOpenLock',
     doorNotAdjacent: 'battleLog.reject.doorNotAdjacent',
     mapNotLinked: 'battleLog.reject.mapNotLinked',
+    mapHexSquareOnly: 'battleLog.reject.mapHexSquareOnly',
+    mapGridChanged: 'battleLog.reject.mapGridChanged',
     mapUpdateCollision: 'battleLog.reject.mapUpdateCollision',
     rollbackAcrossMapUpdate: 'battleLog.reject.rollbackAcrossMapUpdate',
     rollbackLimit: 'battleLog.reject.rollbackLimit',

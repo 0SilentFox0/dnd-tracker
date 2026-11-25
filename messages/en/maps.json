@@ -127,7 +127,8 @@
       "save": "Save tiles",
       "saving": "Saving...",
       "saveFailed": "Failed to save tiles"
-    }
+    },
+    "hexHint": "Hex maps have no walls, bars, doors or textures."
   },
   "catalog": {
     "title": "Map catalog",

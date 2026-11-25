@@ -623,5 +623,7 @@
   "leadershipAllyDeaf": "Союзник вас не чує",
   "conditionTestEngaged": "У ближньому бою не можна оговтатися від Broken",
   "leadershipSkillMissing": "У героя немає навички Лідерство",
-  "fortuneConditionUnavailable": "Зняти стан Удачею неможливо"
+  "fortuneConditionUnavailable": "Зняти стан Удачею неможливо",
+  "battleMapHexSquareOnly": "Стіни, двері й текстури недоступні на hex-картах",
+  "battleMapGridLocked": "Тип сітки карти не можна змінити після створення"
 }

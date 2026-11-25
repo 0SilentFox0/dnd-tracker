@@ -17,6 +17,7 @@ import { handleApiError } from '@/lib/utils/api/error-handler';
 import { ifNoneMatch, weakEtag } from '@/lib/utils/api/etag';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import { gridOf } from '@/lib/utils/battle/grid';
 
 type Ctx = { params: Promise<{ id: string; mapId: string }> };
 
@@ -97,6 +98,9 @@ export async function PUT(req: Request, { params }: Ctx) {
     const body = await parseBody(battleMapSaveSchema, req);
 
     if (body instanceof NextResponse) return body;
+
+    if (gridOf(body.map) !== gridOf(existing.header))
+        return errorResponse(API_ERRORS.BATTLE_MAP_GRID_LOCKED, 400);
 
     try {
         const input = await withStoredBackground(

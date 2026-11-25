@@ -100,6 +100,18 @@ describe('copyMaps', () => {
         );
     });
 
+    it('keeps the hex grid type in the copied header', async () => {
+        setup([
+            source({
+                header: { cols: 10, rows: 8, background: BG, gridType: 'hex' },
+            }),
+        ]);
+
+        await run();
+
+        expect(h.create.mock.calls[0][0].data.header.gridType).toBe('hex');
+    });
+
     it('copies chunks 1:1 with version 1 and a new background path in the target', async () => {
         setup([source()]);
 

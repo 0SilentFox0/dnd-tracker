@@ -183,6 +183,32 @@ describe('buildClientDelta', () => {
         ).not.toHaveProperty('terrain');
     });
 
+    it('gridType change ships the whole map, not a patch', () => {
+        const a = p('a');
+
+        const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+        const hex = { ...map, gridType: 'hex' as const };
+
+        const { scene: delta } = buildClientDelta({
+            before: {
+                scene,
+                meta: { ...meta, map },
+                participants: [a],
+                pending: [],
+            },
+            after: { ...scene, version: 8 },
+            participants: [a],
+            pending: [],
+            stored: [],
+            fullIds: [],
+            log: [],
+            map: hex,
+        });
+
+        expect(delta.map).toEqual(hex);
+    });
+
     it('зняття місцевості — removed; без змін місцевості — нічого', () => {
         const a = p('a');
 

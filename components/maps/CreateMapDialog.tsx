@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { GridTypeChoice } from '@/components/battle/setup/map/GridTypeChoice';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { NewMapForm } from '@/lib/hooks/battle-maps';
 import { MIN_SIDE } from '@/lib/utils/battle/grid';
+import type { GridKind } from '@/types/battle-grid';
 
 const FORM_ID = 'create-map-form';
 
@@ -37,10 +39,12 @@ export function CreateMapDialog({
         rows: DEFAULT_BATTLE_MAP.rows as number,
     });
 
+    const [gridType, setGridType] = useState<GridKind>('square');
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        onSubmit({ name: name.trim(), ...size });
+        onSubmit({ name: name.trim(), ...size, gridType });
     };
 
     return (
@@ -81,6 +85,7 @@ export function CreateMapDialog({
                         onChange={(e) => setName(e.target.value)}
                     />
                 </div>
+                <GridTypeChoice value={gridType} onChange={setGridType} />
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                         <Label htmlFor="create-map-cols">{t('cols')}</Label>

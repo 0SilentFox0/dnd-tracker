@@ -50,6 +50,7 @@ export function useImportCatalogMap(campaignId: string) {
                 name: entry.name.slice(0, 80),
                 map: {
                     ...DEFAULT_BATTLE_MAP,
+                    gridType: 'square',
                     cols: parsed.cols,
                     rows: parsed.rows,
                     background,

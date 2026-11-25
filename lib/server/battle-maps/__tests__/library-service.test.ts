@@ -498,6 +498,31 @@ describe('battle map library service', () => {
         ]);
     });
 
+    it('clone keeps the hex grid type', async () => {
+        const { id } = await createMap(
+            'c1',
+            input({
+                map: {
+                    cols: 20,
+                    rows: 20,
+                    background: null,
+                    opacity: 0.5,
+                    gridType: 'hex',
+                },
+                walls: [],
+                bars: [],
+            })
+        );
+
+        const source = await getMap(id);
+
+        if (!source) throw new Error('expected source map');
+
+        const copy = await cloneMap(source, undefined);
+
+        expect((await getMap(copy.id))?.map.gridType).toBe('hex');
+    });
+
     it('clone copies tile layers to the new rows and its first version snapshot, including tile-only chunks', async () => {
         const { id } = await createMap('c1', input());
 

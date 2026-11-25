@@ -1,5 +1,6 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
+import { gridOf } from '@/lib/utils/battle/grid';
 import type {
     BattleMutationContext,
     MutationResult,
@@ -17,6 +18,9 @@ export function mapEdgeRemoveMutation(
 
     if (!map)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
+
+    if (gridOf(map) === 'hex')
+        throw new BattleRuleError('action_rejected', REJECT.mapHexSquareOnly);
 
     const state = ctx.meta.mapState ?? { removedEdges: [], doors: {} };
 
