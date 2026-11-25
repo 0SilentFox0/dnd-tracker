@@ -703,7 +703,9 @@ describe('BattleMap', () => {
         expect(Number(ok.getAttribute('stroke-width'))).toBeLessThanOrEqual(
             1.5
         );
-        expect(bad.getAttribute('class')).toContain('battle-map-threat-outline');
+        expect(bad.getAttribute('class')).toContain(
+            'battle-map-threat-outline'
+        );
         expect(bad.getAttribute('stroke-dasharray')).toBeTruthy();
         expect(
             container.querySelectorAll('[data-fx-zone="move"]')

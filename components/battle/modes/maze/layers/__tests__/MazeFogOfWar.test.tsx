@@ -11,7 +11,9 @@ import {
     viewOf,
 } from '@/components/battle/modes/maze/__tests__/maze-fixtures';
 
-const quality = vi.hoisted(() => ({ value: 'live' as 'live' | 'still' | 'flat' }));
+const quality = vi.hoisted(() => ({
+    value: 'live' as 'live' | 'still' | 'flat',
+}));
 
 vi.mock('@/lib/hooks/common', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/lib/hooks/common')>()),
@@ -144,9 +146,9 @@ describe('туман війни гравця', () => {
             const cover = container.querySelector('[data-maze-fow]')!;
 
             expect(cloud.getAttribute('mask')).toBe(cover.getAttribute('mask'));
-            expect(cloud.querySelector('image')?.getAttribute('href')).toContain(
-                'data:image/png'
-            );
+            expect(
+                cloud.querySelector('image')?.getAttribute('href')
+            ).toContain('data:image/png');
             expect(cloud.querySelector('animateTransform')).not.toBeNull();
         });
 
@@ -155,7 +157,9 @@ describe('туман війни гравця', () => {
 
             const { container } = renderFog();
 
-            expect(container.querySelector('[data-maze-fow-cloud]')).not.toBeNull();
+            expect(
+                container.querySelector('[data-maze-fow-cloud]')
+            ).not.toBeNull();
             expect(container.querySelector('animateTransform')).toBeNull();
         });
 

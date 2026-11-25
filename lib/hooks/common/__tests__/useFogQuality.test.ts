@@ -16,7 +16,9 @@ describe('fogQualityOf', () => {
     });
 
     it('freezes a modest phone but keeps a strong one live', () => {
-        expect(fogQualityOf({ ...base, compact: true, cores: 4 })).toBe('still');
+        expect(fogQualityOf({ ...base, compact: true, cores: 4 })).toBe(
+            'still'
+        );
         expect(fogQualityOf({ ...base, compact: true, cores: 8 })).toBe('live');
     });
 

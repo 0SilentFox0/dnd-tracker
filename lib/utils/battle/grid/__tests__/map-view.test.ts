@@ -59,11 +59,15 @@ describe('підсвітка карти', () => {
             hero
         );
 
-        expect(search.cost).toEqual(searchPaths(map, [hero], hero, budget).cost);
+        expect(search.cost).toEqual(
+            searchPaths(map, [hero], hero, budget).cost
+        );
         expect(search.cost).toEqual(moveMarks(map, [hero], hero, opts));
         expect(steps).toEqual(moveSteps(map, [hero], hero, opts));
         expect(search.parent.get('2:0')).toBeDefined();
-        expect(pathTo(map, [hero], hero, { x: 2, y: 0 }, budget)).not.toBeNull();
+        expect(
+            pathTo(map, [hero], hero, { x: 2, y: 0 }, budget)
+        ).not.toBeNull();
     });
 
     it('цілі — сусід доступний, далекий ворог ні, союзник не підсвічується', () => {

@@ -22,7 +22,12 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-const map: BattleMapConfig = { cols: 3, rows: 2, background: null, opacity: 0.3 };
+const map: BattleMapConfig = {
+    cols: 3,
+    rows: 2,
+    background: null,
+    opacity: 0.3,
+};
 
 const props = {
     map,
@@ -34,7 +39,9 @@ const props = {
 };
 
 function maskLevels(ctx: ReturnType<typeof mockCanvas>['ctx']) {
-    const image = ctx.putImageData.mock.calls[0][0] as { data: Uint8ClampedArray };
+    const image = ctx.putImageData.mock.calls[0][0] as {
+        data: Uint8ClampedArray;
+    };
 
     const cell = 4;
 
@@ -91,7 +98,12 @@ describe('MapFogLayer', () => {
         const reveal = mockCanvas();
 
         render(
-            <MapFogLayer {...props} mode="reveal" dmEditing revealed={[[0, 0, 2]]} />
+            <MapFogLayer
+                {...props}
+                mode="reveal"
+                dmEditing
+                revealed={[[0, 0, 2]]}
+            />
         );
 
         expect(maskLevels(reveal.ctx)).toEqual([

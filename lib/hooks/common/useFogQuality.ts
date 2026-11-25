@@ -35,7 +35,10 @@ export function fogQualityOf(i: FogQualityInputs): FogQuality {
     return 'live';
 }
 
-type Hints = Pick<FogQualityInputs, 'saveData' | 'memory' | 'cores' | 'effectiveType'>;
+type Hints = Pick<
+    FogQualityInputs,
+    'saveData' | 'memory' | 'cores' | 'effectiveType'
+>;
 
 const NO_HINTS: Hints = {};
 
@@ -78,7 +81,11 @@ export function useFogQuality(): FogQuality {
 
     const compact = useFogCompact();
 
-    const device = useSyncExternalStore(subscribeNone, readHints, () => NO_HINTS);
+    const device = useSyncExternalStore(
+        subscribeNone,
+        readHints,
+        () => NO_HINTS
+    );
 
     return fogQualityOf({ reduced, hidden, compact, ...device });
 }

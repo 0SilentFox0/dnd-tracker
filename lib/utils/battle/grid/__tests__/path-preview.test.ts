@@ -19,7 +19,11 @@ const map: BattleMapConfig = {
     blocked: ['1:0'],
 };
 
-const sword = { id: 's', name: 'Sword', type: AttackType.MELEE } as BattleAttack;
+const sword = {
+    id: 's',
+    name: 'Sword',
+    type: AttackType.MELEE,
+} as BattleAttack;
 
 const p = createMockParticipant();
 
@@ -66,9 +70,7 @@ describe('derivePathPreview', () => {
             DEFAULT_RULES
         );
 
-        expect(preview?.path).toEqual(
-            pathTo(map, [hero], hero, to, budget)
-        );
+        expect(preview?.path).toEqual(pathTo(map, [hero], hero, to, budget));
         expect(preview?.cost).toBe(2);
         expect(preview?.feet).toBe(10);
         expect(preview?.metres).toBe(3);

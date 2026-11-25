@@ -42,10 +42,7 @@ describe('cellsToMask', () => {
 
         expect([mask.width, mask.height]).toEqual([4, 2]);
 
-        const alpha = Array.from(
-            { length: 8 },
-            (_, i) => mask.data[i * 4 + 3]
-        );
+        const alpha = Array.from({ length: 8 }, (_, i) => mask.data[i * 4 + 3]);
 
         expect(alpha).toEqual([
             CLEAR_HIDDEN,

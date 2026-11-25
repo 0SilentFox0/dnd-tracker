@@ -55,7 +55,12 @@ export function MapFogLayer({
             data-map-fog-layer
         >
             <FogSurface
-                grid={{ cols: map.cols, rows: map.rows, cellPx, window: viewport }}
+                grid={{
+                    cols: map.cols,
+                    rows: map.rows,
+                    cellPx,
+                    window: viewport,
+                }}
                 visible={shown}
                 explored={dmEditing ? NO_CELLS : explored}
             />

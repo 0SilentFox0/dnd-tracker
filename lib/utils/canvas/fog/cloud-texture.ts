@@ -142,4 +142,3 @@ export function cloudTextureUrl(palette: FogPalette) {
 
     return url;
 }
-

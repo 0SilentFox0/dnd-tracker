@@ -69,12 +69,16 @@ describe('GridMarks zone look', () => {
         const { container } = render(renderMarks(new Map([['2:2', 'move']])));
 
         expect(
-            container.querySelector('[data-zone-fill="move"]')?.getAttribute('class')
+            container
+                .querySelector('[data-zone-fill="move"]')
+                ?.getAttribute('class')
         ).toContain('battle-map-reach-fill');
 
         const outline = container.querySelector('[data-fx-zone="move"]')!;
 
-        expect(outline.getAttribute('class')).toContain('battle-map-reach-outline');
+        expect(outline.getAttribute('class')).toContain(
+            'battle-map-reach-outline'
+        );
         expect(outline.getAttribute('stroke-width')).toBe('1.5');
         expect(outline.getAttribute('stroke-dasharray')).toBeNull();
     });
@@ -85,12 +89,16 @@ describe('GridMarks zone look', () => {
         );
 
         expect(
-            container.querySelector('[data-zone-fill="danger"]')?.getAttribute('class')
+            container
+                .querySelector('[data-zone-fill="danger"]')
+                ?.getAttribute('class')
         ).toContain('battle-map-threat-fill');
 
         const outline = container.querySelector('[data-fx-zone="danger"]')!;
 
-        expect(outline.getAttribute('class')).toContain('battle-map-threat-outline');
+        expect(outline.getAttribute('class')).toContain(
+            'battle-map-threat-outline'
+        );
         expect(outline.getAttribute('stroke-dasharray')).toBeTruthy();
     });
 
@@ -98,7 +106,9 @@ describe('GridMarks zone look', () => {
         const { container } = render(renderMarks(new Map([['2:2', 'move']])));
 
         expect(
-            container.querySelector('[data-fx-zone="move"]')?.getAttribute('class')
+            container
+                .querySelector('[data-fx-zone="move"]')
+                ?.getAttribute('class')
         ).toContain('battle-map-zone');
     });
 });

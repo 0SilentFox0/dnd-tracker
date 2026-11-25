@@ -34,7 +34,14 @@ function eachCell(
 
         const y = Number(key.slice(at + 1));
 
-        if (Number.isInteger(x) && Number.isInteger(y) && x >= 0 && y >= 0 && x < cols && y < rows)
+        if (
+            Number.isInteger(x) &&
+            Number.isInteger(y) &&
+            x >= 0 &&
+            y >= 0 &&
+            x < cols &&
+            y < rows
+        )
             fn(x, y);
     }
 }

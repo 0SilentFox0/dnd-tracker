@@ -61,10 +61,7 @@ export function featherMask(mask: FogMask): FeatheredMask | null {
 
     const gutter = supported ? Math.ceil(blur * 3) : 0;
 
-    const canvas = newCanvas(
-        mask.width + 2 * gutter,
-        mask.height + 2 * gutter
-    );
+    const canvas = newCanvas(mask.width + 2 * gutter, mask.height + 2 * gutter);
 
     const ctx = canvas.getContext('2d');
 

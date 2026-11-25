@@ -362,7 +362,8 @@ export function WorldFog({
             let cloud: HTMLCanvasElement | null = null;
 
             if (cropped) {
-                if (motion?.render(still ? 0 : now / 1000)) cloud = motion.canvas;
+                if (motion?.render(still ? 0 : now / 1000))
+                    cloud = motion.canvas;
                 else {
                     if (texture === undefined) texture = cloudTexture();
 
@@ -370,7 +371,8 @@ export function WorldFog({
                 }
             }
 
-            const current = cloud && masks ? ensureMask(progress, z, o, r) : null;
+            const current =
+                cloud && masks ? ensureMask(progress, z, o, r) : null;
 
             if (cloud && masks && current) {
                 const living = cloud === motion?.canvas;
@@ -512,7 +514,8 @@ export function WorldFog({
             typeof IntersectionObserver === 'undefined'
                 ? null
                 : new IntersectionObserver((entries) => {
-                      onScreen = entries[entries.length - 1]?.isIntersecting ?? true;
+                      onScreen =
+                          entries[entries.length - 1]?.isIntersecting ?? true;
                       resume();
                   });
 
