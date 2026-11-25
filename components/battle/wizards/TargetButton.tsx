@@ -13,7 +13,7 @@ const TONE = {
         portrait: 36,
     },
     gold: {
-        on: 'border-[var(--gold)] bg-hud-panel-2',
+        on: 'border-hud-crimson bg-hud-panel-2',
         off: 'border-white/15',
         extra: '',
         portrait: 36,

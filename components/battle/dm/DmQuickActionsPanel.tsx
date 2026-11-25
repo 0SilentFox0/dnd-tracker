@@ -52,7 +52,7 @@ function QuickAction({
     label,
     onClick,
     closeAfter,
-    tone = 'text-[var(--gold)]',
+    tone = 'text-hud-ink',
     title,
     disabled,
 }: QuickActionProps) {
@@ -171,7 +171,7 @@ export function DmQuickActionsPanel({
                     onClick={() => setOpen(true)}
                     className={cn(
                         'fixed top-1/2 right-0 z-50 flex h-24 w-10 -translate-y-1/2 items-center justify-center',
-                        'border border-r-0 border-hud-line bg-hud-field/90 text-[var(--gold)] shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-hud-muted',
+                        'border border-r-0 border-hud-line bg-hud-field/90 text-hud-ink shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-hud-muted',
                         'transition-all duration-200',
                         open && 'pointer-events-none opacity-0'
                     )}
@@ -194,7 +194,7 @@ export function DmQuickActionsPanel({
                 style={{ width: PANEL_WIDTH }}
             >
                 <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hud-rule px-4">
-                    <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
+                    <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-hud-ink">
                         {t('panel.title')}
                     </span>
                     <HudIconButton

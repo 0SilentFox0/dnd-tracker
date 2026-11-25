@@ -46,7 +46,7 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
                 type="button"
                 disabled={pending}
                 onClick={() => void confirm()}
-                className="hud-sc flex h-11 w-full items-center justify-center border border-[var(--gold)] disabled:opacity-40"
+                className="hud-sc flex h-11 w-full items-center justify-center border border-hud-crimson disabled:opacity-40"
             >
                 {t('aura.confirm', { count: selected.length })}
             </HudButton>

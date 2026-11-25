@@ -35,7 +35,7 @@ export function BattlePreparationView({
                 className="relative z-10 w-full max-w-2xl animate-in space-y-8 duration-300 slide-in-from-bottom-5 fade-in"
             >
                 <div className="space-y-4">
-                    <span className="hud-sc inline-flex h-8 items-center border-y border-hud-line bg-hud-panel-2 px-5 text-sm tracking-[.2em] text-[var(--gold)]">
+                    <span className="hud-sc inline-flex h-8 items-center border-y border-hud-line bg-hud-panel-2 px-5 text-sm tracking-[.2em] text-hud-ink">
                         {t('badge')}
                     </span>
                     <h2 className="hud-sc text-4xl font-extrabold tracking-[.12em] text-[var(--ink)] drop-shadow-2xl sm:text-7xl">
@@ -83,7 +83,7 @@ export function BattlePreparationView({
                         <HudButton
                             type="button"
                             data-tour="battle.start"
-                            className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] shadow-[0_0_40px_rgba(230,194,90,.35)] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
+                            className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
                             onClick={onStartBattle}
                             disabled={isStarting || !canStart}
                         >

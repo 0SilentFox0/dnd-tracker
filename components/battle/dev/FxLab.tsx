@@ -96,7 +96,7 @@ export function FxLab() {
                         <>
                             <Link
                                 href="/dev/fx-spells"
-                                className="flex h-9 items-center rounded-full px-4 text-sm text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]"
+                                className="flex h-9 items-center rounded-full px-4 text-sm text-hud-bone"
                             >
                                 Spells and effects
                             </Link>

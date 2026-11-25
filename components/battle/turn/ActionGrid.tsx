@@ -34,12 +34,12 @@ const Tile = ({
             className={cn(
                 'flex h-16 min-w-0 items-center gap-3 border px-3.5 text-left text-[var(--ink)] disabled:opacity-40',
                 primary
-                    ? 'border-[var(--gold)] bg-hud-panel-2'
+                    ? 'border-hud-crimson bg-hud-panel-2'
                     : 'border-white/25 bg-black/55'
             )}
         >
             <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-hud-line bg-black/30">
-                <Icon className="size-10 text-[var(--gold)]" />
+                <Icon className="size-10 text-hud-crimson-fg" />
             </span>
             <span className="min-w-0 flex-1">
                 <span className="hud-sc block text-[17px] leading-5 [overflow-wrap:anywhere]">

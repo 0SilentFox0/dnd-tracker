@@ -132,7 +132,7 @@ function BattleSetupLayout({
                                     className={cn(
                                         'min-h-28 rounded-lg border p-4 text-left transition-colors',
                                         mapChoice === choice
-                                            ? 'border-hud-gold bg-hud-panel-2 ring-1'
+                                            ? 'border-hud-crimson bg-hud-panel-2 ring-1'
                                             : 'border-hud-rule bg-background/40 hover:border-hud-muted hover:bg-background/70'
                                     )}
                                 >

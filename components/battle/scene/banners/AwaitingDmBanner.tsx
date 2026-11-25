@@ -21,7 +21,7 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
     if (!isDM) {
         return (
             <div className={BOX}>
-                <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
+                <Hourglass className="size-4 shrink-0 text-hud-muted" />
                 <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
                     {t('awaitingDm')}
                 </span>
@@ -36,7 +36,7 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
             disabled={dialogs.awaitingDm.open}
             className={`${BOX} w-[calc(100%-2rem)]`}
         >
-            <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
+            <Hourglass className="size-4 shrink-0 text-hud-muted" />
             <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
                 {t('awaitingYou')}
             </span>

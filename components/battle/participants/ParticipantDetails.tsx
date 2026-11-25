@@ -63,7 +63,7 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
         <div className="flex gap-3 border-b border-white/[.08] py-2.5">
             <span
                 className={
-                    e.type === 'buff' ? 'text-hud-gold' : 'text-hud-danger'
+                    e.type === 'buff' ? 'text-hud-ink' : 'text-hud-danger'
                 }
             >
                 <EffectIcon effect={e} size={36} />

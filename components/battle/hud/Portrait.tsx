@@ -45,9 +45,9 @@ export function Portrait({
                 boxShadow: current
                     ? `0 0 0 2px var(--bone), 0 0 0 4px ${ring}`
                     : me
-                      ? `0 0 0 2px ${ring}, 0 0 0 3px #000, 0 0 0 5px var(--gold)`
+                      ? `0 0 0 2px ${ring}, 0 0 0 3px #000, 0 0 0 5px var(--hud-crimson)`
                       : extra
-                        ? `0 0 0 2px var(--gold), 0 0 0 3px #000`
+                        ? `0 0 0 2px var(--hud-crimson), 0 0 0 3px #000`
                         : `0 0 0 2px ${ring}, 0 0 0 3px #000`,
             }}
         >
@@ -63,7 +63,7 @@ export function Portrait({
                 name.slice(0, 2)
             )}
             {extra && (
-                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-[var(--gold)] text-[10px] leading-none text-black">
+                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-hud-crimson text-[10px] leading-none text-hud-crimson-ink">
                     +
                 </span>
             )}

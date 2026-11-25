@@ -79,7 +79,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
                                 aria-label={t(symbol)}
                                 disabled={anyPending}
                                 onClick={() => place(symbol)}
-                                className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-[var(--gold)] disabled:opacity-50"
+                                className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-hud-ink disabled:opacity-50"
                             >
                                 <Icon className="size-5" />
                             </HudButton>

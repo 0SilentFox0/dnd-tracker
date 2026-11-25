@@ -16,7 +16,7 @@ import { HERO_STATUS_LABEL, resolveOutcome } from '@/lib/utils/battle/view';
 import type { BattleSummaryHero } from '@/types/api';
 
 const HEADLINE = {
-    victory: 'text-[var(--gold)]',
+    victory: 'text-hud-ink',
     defeat: 'text-[var(--enemy)]',
     unknown: 'text-[var(--ink)]',
 } as const;
@@ -147,7 +147,7 @@ export function BattleResultScreen() {
                     ) : (
                         <Link
                             href={exitHref}
-                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-gold-strong bg-[#8a6414] text-[17px] font-bold tracking-[.06em] text-[#fff3d1]"
+                            className="hud-sc flex h-[52px] items-center justify-center border border-hud-crimson bg-hud-crimson text-[17px] font-bold tracking-[.06em] text-hud-crimson-ink"
                         >
                             {t('exit')}
                         </Link>

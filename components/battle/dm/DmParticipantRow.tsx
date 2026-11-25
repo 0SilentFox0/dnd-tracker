@@ -190,7 +190,7 @@ export function DmParticipantRow({
                     type="button"
                     className={cn(
                         ICON,
-                        'text-[var(--gold)] hover:border-hud-muted',
+                        'text-hud-ink hover:border-hud-muted',
                         controlled && 'border-hud-line'
                     )}
                     title={controlled ? t('releaseControl') : t('takeControl')}
@@ -218,7 +218,7 @@ export function DmParticipantRow({
                         type="button"
                         className={cn(
                             ICON,
-                            'text-[var(--gold)] hover:border-hud-muted'
+                            'text-hud-ink hover:border-hud-muted'
                         )}
                         title={legendaryLabel}
                         aria-label={legendaryLabel}

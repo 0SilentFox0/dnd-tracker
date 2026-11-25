@@ -82,7 +82,7 @@ export function MapCameraControls({
                     onClick={onRecenter}
                     className={cn(
                         phone && 'size-8',
-                        userMoved && 'text-[var(--gold)]'
+                        userMoved && 'text-hud-crimson-fg'
                     )}
                 >
                     <LocateFixed />

@@ -214,7 +214,7 @@ export function ToolsContent({
                         aria-pressed={fxOn}
                         className={cn(
                             'size-11 hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent',
-                            fxOn ? 'text-[var(--gold)]' : 'text-hud-muted'
+                            fxOn ? 'text-hud-crimson-fg' : 'text-hud-muted'
                         )}
                     >
                         <Sparkles className="size-5" />
@@ -257,7 +257,7 @@ export function ToolsContent({
                         <HudButton
                             type="button"
                             onClick={onComplete}
-                            className="hud-sc h-11 rounded-xl border border-hud-line text-sm text-[var(--gold)] hover:bg-hud-panel-2"
+                            className="hud-sc h-11 rounded-xl border border-hud-line text-sm text-hud-ink hover:bg-hud-panel-2"
                         >
                             {t('complete')}
                         </HudButton>

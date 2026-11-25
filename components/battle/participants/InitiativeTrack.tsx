@@ -189,7 +189,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                     className={cn(
                         'flex shrink-0 items-center justify-center rounded-full text-[var(--hud-muted)] hover:text-[var(--ink)]',
                         compact ? 'size-5' : 'size-7',
-                        showNext && 'text-[var(--gold)]'
+                        showNext && 'text-hud-crimson-fg'
                     )}
                 >
                     <ChevronsRight

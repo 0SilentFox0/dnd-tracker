@@ -113,7 +113,7 @@ function D20RollBody({
                 ))}
             </div>
             {view.forcedMode && (
-                <div className="mt-1.5 text-xs text-hud-gold">
+                <div className="mt-1.5 text-xs text-hud-ink">
                     {text(view.forcedMode.reason)}
                 </div>
             )}
