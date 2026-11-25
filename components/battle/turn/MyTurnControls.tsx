@@ -175,10 +175,12 @@ export function MyTurnControls({
     useEffect(() => {
         if (spellBookIntent === null) return;
 
-        if (phase === 'acting') openBook(spellBookIntent);
+        if (phase !== 'acting') return;
+
+        if (!actionUsed && !skipped) openBook(spellBookIntent);
 
         clearSpellBook();
-    }, [spellBookIntent, phase, openBook, clearSpellBook]);
+    }, [spellBookIntent, phase, actionUsed, skipped, openBook, clearSpellBook]);
 
     useEffect(() => {
         if (attackIntent === null) return;
@@ -227,8 +229,7 @@ export function MyTurnControls({
             }
             pending={anyPending}
             hotkeys={{
-                enabled:
-                    actionsOpen && !intents.mapAim && !intents.mapPick,
+                enabled: actionsOpen && !intents.mapAim && !intents.mapPick,
                 close: () => setActionsOpen(false),
             }}
             available={{
@@ -251,6 +252,7 @@ export function MyTurnControls({
                 ability: () => run(() => setAbilityOpen(true)),
                 core: () => run(() => setCoreOpen(true)),
                 gear: () => run(() => setGearOpen(true)),
+                strikeAndReturn: () => run(() => turn.strikeAndReturn.run()),
             }}
         />
     );

@@ -11,7 +11,7 @@ import { BattleDrawer } from '../drawers/BattleDrawer';
 import { DrawerRail } from '../drawers/DrawerRail';
 import { ToolsDrawer } from '../drawers/ToolsDrawer';
 import { BattleTopBar } from './BattleTopBar';
-import { HudBlock } from './HudBlock';
+import { HudBlock, HudRestoreButton } from './HudBlock';
 import { InNoticeStack, MapStripSlotContext } from './MapStrip';
 import {
     EMPTY_SCENE_SLOTS,
@@ -160,10 +160,9 @@ export function DesktopBattleLayout({
     );
 
     useEffect(() => {
-        const rail =
-            rootRef.current?.querySelector<HTMLElement>(
-                '[data-hud-block="tools"]'
-            );
+        const rail = rootRef.current?.querySelector<HTMLElement>(
+            '[data-hud-block="tools"]'
+        );
 
         if (!rail || typeof ResizeObserver === 'undefined') return;
 
@@ -249,6 +248,7 @@ export function DesktopBattleLayout({
                             </HudBlock>
                         )}
                         <TurnDock />
+                        <HudRestoreButton />
                         <HudBlock
                             block="tools"
                             edge="right"

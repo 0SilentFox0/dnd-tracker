@@ -137,6 +137,8 @@ export function BattleMap({
         win,
         pxPerUnit,
         grid,
+        phone,
+        rotated: renderedFit.rotated,
     });
 
     const { zoom, x, y } = camera.camera;
@@ -165,7 +167,14 @@ export function BattleMap({
 
                 if (t)
                     focusPoint(
-                        cellPointPx(t.anchor, t.size, win, pxPerUnit, grid),
+                        cellPointPx(
+                            t.anchor,
+                            t.size,
+                            win,
+                            pxPerUnit,
+                            renderedFit.rotated,
+                            grid
+                        ),
                         {
                             animate: true,
                         }
@@ -192,7 +201,16 @@ export function BattleMap({
                 behavior: 'smooth',
             });
         },
-        [cameraMode, participants, focusPoint, win, pxPerUnit, outerRef, grid]
+        [
+            cameraMode,
+            participants,
+            focusPoint,
+            win,
+            pxPerUnit,
+            outerRef,
+            renderedFit.rotated,
+            grid,
+        ]
     );
 
     useRevealListener(reveal);
@@ -208,21 +226,12 @@ export function BattleMap({
             win,
             size,
             pxPerUnit,
-            rotated: cameraMode ? false : fit.rotated,
+            rotated: renderedFit.rotated,
             phone,
             window: gridWindow,
             tiles,
         }),
-        [
-            win,
-            size,
-            pxPerUnit,
-            cameraMode,
-            fit.rotated,
-            phone,
-            gridWindow,
-            tiles,
-        ]
+        [win, size, pxPerUnit, renderedFit.rotated, phone, gridWindow, tiles]
     );
 
     const interaction = useMemo(
@@ -267,6 +276,7 @@ export function BattleMap({
             className={cn(
                 'flex h-full w-full',
                 'relative',
+                phone && 'pt-11',
                 !cameraMode && (phone || scrolls) && 'overflow-auto',
                 !cameraMode && !phone && !scrolls && 'overflow-hidden',
                 !cameraMode && phone && '[scrollbar-gutter:stable]',
@@ -275,11 +285,7 @@ export function BattleMap({
                     : scrollsX
                       ? 'justify-start'
                       : 'justify-center',
-                cameraMode
-                    ? ''
-                    : scrollsY
-                      ? 'items-start'
-                      : 'items-center',
+                cameraMode ? '' : scrollsY ? 'items-start' : 'items-center',
                 className
             )}
         >
@@ -350,6 +356,7 @@ export function BattleMap({
                     onPick={camera.flyToMinimap}
                     hiddenCells={[]}
                     phone={phone}
+                    rotated={renderedFit.rotated}
                 />
             )}
         </div>

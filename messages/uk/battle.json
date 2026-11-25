@@ -428,7 +428,6 @@
     "endTurn": "Кінець ходу",
     "waiting": "Хід: {name}",
     "move": "Рух",
-    "moveLeft": "{left}/{max}",
     "panelTitle": "Дії",
     "moveCells": "Рух · {left} кл."
   },

@@ -12,12 +12,11 @@ import {
     MIN_TAP_CELL_PX,
     playableBounds,
     UNIT,
+    viewCellPx,
 } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig, GridKind } from '@/types/battle-grid';
 
 const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
-
-const DESKTOP_MAX_CROP = 0.25;
 
 export function useBattleMapFrame(
     map: BattleMapConfig,
@@ -39,12 +38,13 @@ export function useBattleMapFrame(
         () =>
             fitMapView(avail, win, {
                 rotatable: phone,
+                alwaysRotate: phone,
                 bothWays: !phone,
-                fillWidth: phone,
+                fillWidth: false,
                 taller: 1,
                 minCell: MIN_TAP_CELL_PX,
                 grid,
-                cover: phone ? undefined : DESKTOP_MAX_CROP,
+                cover: phone ? undefined : Infinity,
             }),
         [avail, win, phone, grid]
     );
@@ -55,12 +55,13 @@ export function useBattleMapFrame(
         () =>
             cameraMode
                 ? fitMapView(avail, win, {
-                      rotatable: false,
+                      rotatable: phone,
+                      alwaysRotate: phone,
                       bothWays: false,
                       fillWidth: false,
                       taller: 1,
                       grid,
-                      cover: phone ? Infinity : DESKTOP_MAX_CROP,
+                      cover: phone ? undefined : Infinity,
                   })
                 : fit,
         [cameraMode, avail, win, fit, phone, grid]
@@ -80,6 +81,9 @@ export function useBattleMapFrame(
 
     const gridCols = spanWidth / UNIT;
 
+    const fitCell =
+        grid === 'hex' ? fitAll.width / gridCols : viewCellPx(fitAll, win);
+
     const frame = useMemo<Frame | null>(() => {
         if (avail.width <= 0 || avail.height <= 0) return null;
 
@@ -95,8 +99,6 @@ export function useBattleMapFrame(
                           height: Math.max(0, (fit.height - avail.height) / 2),
                       },
             };
-
-        const fitCell = fitAll.width / gridCols;
 
         const focusPx = focusCellPx(avail);
 
@@ -114,7 +116,7 @@ export function useBattleMapFrame(
         fit.height,
         fitAll.width,
         fitAll.height,
-        gridCols,
+        fitCell,
     ]);
 
     return {

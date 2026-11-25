@@ -77,7 +77,11 @@ export function TokenBubble({ mapBusy = false }: { mapBusy?: boolean }) {
         if (!open) return;
 
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && !e.defaultPrevented) select(null);
+            if (e.key !== 'Escape' || e.defaultPrevented) return;
+
+            e.preventDefault();
+
+            select(null);
         };
 
         document.addEventListener('keydown', onKey);

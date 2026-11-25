@@ -274,6 +274,13 @@ export interface MapView {
     grow: number;
 }
 
+export function viewCellPx(
+    view: Pick<MapView, 'width' | 'rotated'>,
+    win: { cols: number; rows: number }
+): number {
+    return view.width / (view.rotated ? win.rows : win.cols);
+}
+
 const ROTATE_MIN_RATIO = 1.15;
 
 export const MIN_TAP_CELL_PX = 30;
@@ -289,6 +296,7 @@ export function fitMapView(
         minCell = 0,
         grid = 'square',
         cover,
+        alwaysRotate = false,
     }: {
         rotatable?: boolean;
         bothWays?: boolean;
@@ -298,12 +306,17 @@ export function fitMapView(
         grid?: GridKind;
         /** max cropped share of the box before falling back to contain; omit to disable */
         cover?: number;
+        /** rotatable: a landscape map in a portrait box is always turned, whatever the gain */
+        alwaysRotate?: boolean;
     } = {}
 ): MapView {
     const hex = grid === 'hex';
 
     const landscapeMapInPortrait =
-        avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
+        avail.height > avail.width &&
+        (alwaysRotate
+            ? map.cols > map.rows
+            : map.cols >= map.rows * ROTATE_MIN_RATIO);
 
     const portraitMapInLandscape =
         bothWays &&

@@ -137,7 +137,11 @@ export function DmQuickActionsPanel({
         if (!open) return;
 
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && !e.defaultPrevented) setOpen(false);
+            if (e.key !== 'Escape' || e.defaultPrevented) return;
+
+            e.preventDefault();
+
+            setOpen(false);
         };
 
         document.addEventListener('keydown', onKey);

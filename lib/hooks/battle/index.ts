@@ -63,6 +63,8 @@ export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
 export {
     type HudBlockKey,
+    toggleHudAll,
+    useHudAllHidden,
     useHudBlock,
     useHudHotkey,
 } from './useHudVisibility';

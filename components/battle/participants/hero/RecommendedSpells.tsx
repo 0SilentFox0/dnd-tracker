@@ -23,16 +23,18 @@ export function RecommendedSpells({
     spells,
     level,
     compact = false,
+    actionLeft = true,
 }: {
     spells: BookSpell[];
     level: number | null;
     compact?: boolean;
+    actionLeft?: boolean;
 }) {
     const t = useTranslations('battle.hero.slots');
 
     const { intents, turn } = useBattleScene();
 
-    const canCast = turn.isMyTurn;
+    const canCast = turn.isMyTurn && actionLeft;
 
     const list = useMemo(
         () =>
@@ -64,7 +66,7 @@ export function RecommendedSpells({
                         onClick={() =>
                             intents.requestSpellBook(level ?? s.level)
                         }
-                        className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 [text-shadow:0_1px_3px_#000,0_0_2px_#000] text-hud-bone focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-50"
+                        className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-[#e6dccb] [text-shadow:0_1px_3px_#000,0_0_2px_#000] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none disabled:opacity-50"
                     >
                         <SpellIcon
                             spell={s}

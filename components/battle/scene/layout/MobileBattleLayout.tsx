@@ -38,7 +38,6 @@ import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     MAP_TAB,
     useBattleScene,
-    useHudHotkey,
     useMobileBattleTabs,
     useSceneDrawers,
 } from '@/lib/hooks/battle';
@@ -98,7 +97,11 @@ export function MobileBattleLayout({
         if (!menuOpen) return;
 
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && !e.defaultPrevented) setMenuOpen(false);
+            if (e.key !== 'Escape' || e.defaultPrevented) return;
+
+            e.preventDefault();
+
+            setMenuOpen(false);
         };
 
         const onDown = (e: PointerEvent) => {
@@ -128,8 +131,6 @@ export function MobileBattleLayout({
             setSlots((prev) => (prev.dock === el ? prev : { dock: el })),
         []
     );
-
-    useHudHotkey();
 
     const { drawer, active, toggle, onOpenChange } = useSceneDrawers(log);
 
@@ -169,14 +170,16 @@ export function MobileBattleLayout({
                             </main>
                         )}
                         <BattleTopBar />
-                        <div className="pointer-events-none absolute inset-x-2 top-12 z-20 flex flex-col gap-1 *:pointer-events-auto">
+                        <div className="pointer-events-none absolute inset-x-2 top-1 bottom-[7.5rem] z-20">
                             <HudBlock
+                                ignoreAll
                                 block="initiative"
                                 edge="top"
-                                className="items-center"
+                                className="static"
+                                detachedButton="absolute top-0 left-1/2 -translate-x-1/2"
                             >
-                                <div className="mx-auto w-fit max-w-full">
-                                    <InitiativeTrack />
+                                <div className="absolute top-[4.25rem] bottom-0 left-0 flex items-start">
+                                    <InitiativeTrack compact vertical />
                                 </div>
                             </HudBlock>
                         </div>
@@ -222,6 +225,7 @@ export function MobileBattleLayout({
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end gap-2 px-2 pt-2 pb-1 *:pointer-events-auto">
                         {hero && (
                             <HudBlock
+                                ignoreAll
                                 block="hero"
                                 edge="left"
                                 className="items-end gap-1"
@@ -230,6 +234,7 @@ export function MobileBattleLayout({
                             </HudBlock>
                         )}
                         <HudBlock
+                            ignoreAll
                             block="dock"
                             edge="bottom"
                             align="end"

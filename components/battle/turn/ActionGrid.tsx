@@ -60,7 +60,6 @@ const Tile = ({
 
 type TileSpec = {
     id: string;
-    group: 'action' | 'bonus';
     icon: ActionIconKey;
     label: ReactNode;
     used: boolean;
@@ -100,6 +99,7 @@ export function ActionGrid({
         ability?(): void;
         core?(): void;
         gear?(): void;
+        strikeAndReturn?(): void;
     };
 }) {
     const t = useTranslations('battle.actions');
@@ -109,7 +109,6 @@ export function ActionGrid({
     const tiles: TileSpec[] = [
         {
             id: 'attack',
-            group: 'action',
             icon: 'attack',
             label: t('attack'),
             used:
@@ -123,7 +122,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'magic',
-                      group: 'action' as const,
                       icon: 'magic' as const,
                       label: t('magic'),
                       used:
@@ -139,7 +137,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'channel',
-                      group: 'action' as const,
                       icon: 'channel' as const,
                       label: channelLabel,
                       used: status.actionUsed || status.skipped || pending,
@@ -151,7 +148,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'ability',
-                      group: 'action' as const,
                       icon: 'ability' as const,
                       label: t('ability'),
                       used: status.actionUsed || status.skipped || pending,
@@ -163,7 +159,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'core',
-                      group: 'action' as const,
                       icon: 'core' as const,
                       label: t('core'),
                       used: status.skipped || pending,
@@ -175,7 +170,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'gate',
-                      group: 'action' as const,
                       icon: 'gate' as const,
                       label: gateLabel,
                       used: true,
@@ -186,7 +180,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'bonus',
-                      group: 'bonus' as const,
                       icon: 'bonus' as const,
                       label: t('bonus'),
                       used:
@@ -202,7 +195,6 @@ export function ActionGrid({
             ? [
                   {
                       id: 'gear',
-                      group: 'bonus' as const,
                       icon: 'gear' as const,
                       label: t('gear'),
                       used: !status.bonusAvailable || status.skipped || pending,
@@ -214,11 +206,10 @@ export function ActionGrid({
             ? [
                   {
                       id: 'strikeAndReturn',
-                      group: 'bonus' as const,
                       icon: 'strikeAndReturn' as const,
                       label: t('strikeAndReturn'),
                       used: pending,
-                      run: turn.strikeAndReturn.run,
+                      run: actions.strikeAndReturn ?? turn.strikeAndReturn.run,
                   },
               ]
             : []),

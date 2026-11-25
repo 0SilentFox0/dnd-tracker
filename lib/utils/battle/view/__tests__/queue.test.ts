@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import {
+    currentRoundQueue,
     type QueueEntry,
     queueKeys,
     turnQueue,
@@ -109,5 +110,25 @@ describe('turnQueue', () => {
         expect(turnsUntil(q, ['me2', 'me'])).toBe(2);
         expect(turnsUntil(q, ['a'])).toBe(0);
         expect(turnsUntil(q, ['nobody'])).toBeNull();
+    });
+});
+
+describe('currentRoundQueue', () => {
+    it('cuts the queue at the round boundary, no next-round repeats', () => {
+        const q = turnQueue([p('a'), p('b'), p('c')], 1, 3);
+
+        expect(shape(currentRoundQueue(q))).toEqual(['b*', 'c']);
+    });
+
+    it('keeps extra turns of this round', () => {
+        const q = turnQueue([p('a', { extra: true }), p('b'), p('c')], 1, 1);
+
+        expect(shape(currentRoundQueue(q))).toEqual(['b*', 'c', '+a']);
+    });
+
+    it('returns a queue without a boundary unchanged', () => {
+        const q = turnQueue([p('a')], 0, 1).slice(0, 1);
+
+        expect(currentRoundQueue(q)).toBe(q);
     });
 });

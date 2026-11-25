@@ -17,7 +17,7 @@ export function DockWaiting({ name }: { name: string }) {
     return createPortal(
         <div
             role="status"
-            className="pointer-events-auto flex flex-col gap-2 px-2 py-1 text-hud-bone [text-shadow:0_1px_3px_#000,0_0_2px_#000]"
+            className="pointer-events-auto flex flex-col gap-2 px-2 py-1 text-[#e6dccb] [text-shadow:0_1px_3px_#000,0_0_2px_#000]"
         >
             <DockHp />
             <span className="hud-sc text-[15px] tracking-[.08em]">

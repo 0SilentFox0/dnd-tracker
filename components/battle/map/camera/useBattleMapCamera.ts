@@ -1,10 +1,11 @@
-import { type RefObject } from 'react';
+import { type RefObject, useMemo } from 'react';
 
 import { type ModeTools, useMapCamera } from '@/lib/hooks/battle';
 import {
     cellPointPx,
     followTarget,
     type Frame,
+    participantsCenterPx,
 } from '@/lib/utils/battle/camera';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapView, GridKind } from '@/types/battle-grid';
@@ -21,6 +22,8 @@ interface Params {
     win: { x: number; y: number; cols: number; rows: number };
     pxPerUnit: number;
     grid: GridKind;
+    phone: boolean;
+    rotated: boolean;
 }
 
 export function useBattleMapCamera({
@@ -35,6 +38,8 @@ export function useBattleMapCamera({
     win,
     pxPerUnit,
     grid,
+    phone,
+    rotated,
 }: Params) {
     const cameraTarget = followTarget(
         view?.currentId ?? null,
@@ -47,6 +52,20 @@ export function useBattleMapCamera({
         participants,
         grid
     );
+
+    const overview = useMemo(() => {
+        if (phone) return null;
+
+        const point = participantsCenterPx(
+            participants,
+            win,
+            pxPerUnit,
+            rotated,
+            grid
+        );
+
+        return point && { point };
+    }, [phone, participants, win, pxPerUnit, rotated, grid]);
 
     const camera = useMapCamera({
         enabled: true,
@@ -65,6 +84,7 @@ export function useBattleMapCamera({
                               cameraTarget.size,
                               win,
                               pxPerUnit,
+                              rotated,
                               grid
                           ),
                       }
@@ -77,11 +97,14 @@ export function useBattleMapCamera({
                               selfTarget.size,
                               win,
                               pxPerUnit,
+                              rotated,
                               grid
                           ),
                       }
                     : null,
             enabled: cameraMode && (view?.camera?.follow ?? false),
+            startOverview: phone,
+            overview,
         },
     });
 

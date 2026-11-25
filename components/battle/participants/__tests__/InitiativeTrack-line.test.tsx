@@ -66,4 +66,23 @@ describe('InitiativeTrack line', () => {
 
         expect(container.querySelector('[style*="transform"]')).toBeNull();
     });
+
+    it('shows only the current round without onReorder', () => {
+        const { container } = render(<InitiativeTrack />, {
+            wrapper: fakeScene({ isMyTurn: false }).wrapper,
+        });
+
+        expect(container.querySelectorAll('button').length).toBe(2);
+        expect(container.querySelector('[data-round-divider]')).toBeNull();
+    });
+
+    it('shows the full queue with a round divider when onReorder is given', () => {
+        const { container } = render(
+            <InitiativeTrack onReorder={vi.fn()} />,
+            { wrapper: fakeScene({ isMyTurn: false }).wrapper }
+        );
+
+        expect(container.querySelectorAll('button').length).toBe(5);
+        expect(container.querySelector('[data-round-divider]')).not.toBeNull();
+    });
 });

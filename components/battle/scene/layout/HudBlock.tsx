@@ -7,10 +7,16 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronUp,
+    Eye,
 } from 'lucide-react';
 
 import { HUD_GLASS, HudButton } from '@/components/hud';
-import { type HudBlockKey, useHudBlock } from '@/lib/hooks/battle';
+import {
+    type HudBlockKey,
+    toggleHudAll,
+    useHudAllHidden,
+    useHudBlock,
+} from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
 export function HudBlock({
@@ -18,17 +24,25 @@ export function HudBlock({
     edge,
     align = 'start',
     className,
+    detachedButton,
+    ignoreAll,
     children,
 }: {
     block: HudBlockKey;
     edge: 'top' | 'bottom' | 'left' | 'right';
     align?: 'start' | 'center' | 'end';
     className?: string;
+    /** icon-only button placed by these classes instead of in the flow */
+    detachedButton?: string;
+    ignoreAll?: boolean;
     children: ReactNode;
 }) {
     const t = useTranslations('battle.hudBlocks');
 
-    const { collapsed, hidden, allHidden, toggle } = useHudBlock(block);
+    const { collapsed, hidden, allHidden, toggle } = useHudBlock(
+        block,
+        ignoreAll
+    );
 
     const name = t(`names.${block}`);
 
@@ -54,15 +68,17 @@ export function HudBlock({
             onClick={toggle}
             className={cn(
                 'pointer-events-auto flex h-10 items-center justify-center gap-1 rounded-xl text-[var(--ink)] focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none',
-                collapsed
-                    ? `${HUD_GLASS} hud-sc px-3 text-[13px] tracking-[.08em]`
-                    : 'w-10 border border-white/15 bg-black/30 hover:bg-white/10',
+                detachedButton
+                    ? `${HUD_GLASS} size-8 rounded-lg ${detachedButton}`
+                    : collapsed
+                      ? `${HUD_GLASS} hud-sc px-3 text-[13px] tracking-[.08em]`
+                      : 'w-10 border border-white/15 bg-black/30 hover:bg-white/10',
                 align === 'end' && 'self-end',
                 align === 'center' && 'self-center'
             )}
         >
             <Chevron className="size-4" aria-hidden />
-            {collapsed && name}
+            {collapsed && !detachedButton && name}
         </HudButton>
     );
 
@@ -70,7 +86,10 @@ export function HudBlock({
         <div
             data-hud-block={block}
             hidden={allHidden}
-            className={cn(row ? 'flex flex-row items-start' : 'flex flex-col', className)}
+            className={cn(
+                row ? 'flex flex-row items-start' : 'flex flex-col',
+                className
+            )}
         >
             {buttonFirst && button}
             <div hidden={hidden} className="contents">
@@ -78,5 +97,23 @@ export function HudBlock({
             </div>
             {!buttonFirst && button}
         </div>
+    );
+}
+
+export function HudRestoreButton() {
+    const t = useTranslations('battle.hudBlocks');
+
+    if (!useHudAllHidden()) return null;
+
+    return (
+        <HudButton
+            type="button"
+            aria-label={t('hotkey')}
+            title={t('hotkey')}
+            onClick={toggleHudAll}
+            className={`${HUD_GLASS} pointer-events-auto absolute right-3 bottom-3 z-50 flex size-8 items-center justify-center rounded-lg text-[var(--ink)] opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none`}
+        >
+            <Eye className="size-4" aria-hidden />
+        </HudButton>
     );
 }

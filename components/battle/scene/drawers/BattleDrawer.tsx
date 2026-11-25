@@ -34,7 +34,10 @@ export function BattleDrawer({
                 open={open}
                 onOpenChange={onOpenChange}
                 title={title}
-                className={cn(HUD_SURFACE, 'h-[92dvh] border-white/25 bg-hud-surface')}
+                className={cn(
+                    HUD_SURFACE,
+                    'h-[92dvh] border-white/25 bg-hud-surface'
+                )}
             >
                 {children}
             </ResponsiveDialog>
@@ -74,7 +77,11 @@ function SideSheet({
         if (!open) return;
 
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && !e.defaultPrevented) onOpenChange(false);
+            if (e.key !== 'Escape' || e.defaultPrevented) return;
+
+            e.preventDefault();
+
+            onOpenChange(false);
         };
 
         document.addEventListener('keydown', onKey);

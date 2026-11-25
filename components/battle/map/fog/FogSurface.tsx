@@ -33,7 +33,7 @@ const MAX_DPR = 1.5;
 
 const NO_CELLS: ReadonlySet<string> = new Set();
 
-export interface FogGrid {
+interface FogGrid {
     cols: number;
     rows: number;
     cellPx: number;
