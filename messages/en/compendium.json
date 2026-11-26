@@ -113,8 +113,6 @@
     "back": "Back to campaign",
     "rights": "I have the right to use this file and its images in this campaign",
     "confirm": "Import",
-    "saved": "Import saved: {runId}",
-    "close": "Clear the file and close the wizard",
     "steps": {
       "label": "Import steps",
       "file": "File",
@@ -232,9 +230,6 @@
     "editionCount": "{edition}: {count}",
     "colCategory": "Category",
     "colPresent": "Present",
-    "colMapped": "Mapped",
-    "colPartial": "Partial",
-    "colSkipped": "Skipped",
     "rows": "Records and coverage",
     "openEditor": "Open the editor / description",
     "sourceNotes": "Source and notes",
@@ -243,11 +238,7 @@
     "rowsNext": "Next records",
     "next": "What next",
     "blocker": "Blocker",
-    "manualCheck": "Manual check",
     "goToAction": "Go to the action",
-    "actionsPager": "Action pages",
-    "actionsPrev": "Previous actions",
-    "actionsNext": "Next actions",
     "infoNote": "{summary}. No action is needed.",
     "omitted": "{count, plural, one {# more warning} other {# more warnings}}; count by code: {codes}",
     "codeCount": "{code} — {count}",
@@ -277,7 +268,8 @@
     "technical": "Technical categories ({count}): skipped, Foundry data is not loaded",
     "records": "Records",
     "noRows": "No records for this filter.",
-    "showUnchanged": "{count} unchanged — show"
+    "showUnchanged": "{count} unchanged — show",
+    "tabDeps": "Dependencies"
   },
   "rulesOffer": {
     "text": "Races, backgrounds and feats from the file are not assembled on the hero sheet while 5e classes mode is off in the campaign or there are no base classes.",
@@ -410,15 +402,21 @@
     "active": "● enabled"
   },
   "wizard": {
-    "resetNotice": "Changing the selection resets the check"
+    "resetNotice": "Changing the selection resets the check",
+    "restart": "Start over",
+    "restartText": "The file, check and result will be cleared."
   },
   "confirm": {
     "until": "Check valid until {time}",
     "expired": "The check has expired",
-    "recheck": "Check again"
+    "recheck": "Check again",
+    "changes": "What will change"
   },
   "history": {
     "row": "Import #{id}",
     "open": "Open report"
+  },
+  "result": {
+    "title": "Import complete"
   }
 }

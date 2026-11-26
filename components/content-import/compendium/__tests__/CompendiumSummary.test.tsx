@@ -99,9 +99,7 @@ describe('CompendiumSummary', () => {
         expect(primary().textContent).toBe('compendium.confirm.recheck');
         fireEvent.click(primary());
         expect(actions.runPreview).toHaveBeenCalled();
-        expect(screen.getByRole('alert').textContent).toBe(
-            'compendium.confirm.expired'
-        );
+        expect(screen.queryByRole('alert')).toBeNull();
     });
 
     it('advances the view with Next', () => {

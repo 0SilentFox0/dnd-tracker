@@ -128,7 +128,7 @@ export function CompendiumSummary({
                     ))}
                 </dl>
             </div>
-            {checking && expiry.expiresAt && (
+            {checking && expiry.expiresAt && !(expiry.expired && view.step === 3) && (
                 <p
                     role={expiry.expired ? 'alert' : undefined}
                     className={

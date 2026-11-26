@@ -2,12 +2,33 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
-import { CompendiumReport } from '../CompendiumReport';
+import type { BlockerActions } from '../CompendiumReportCards';
+import { CompendiumReportTabs } from '../CompendiumReportTabs';
+import { CompendiumVerdict } from '../CompendiumVerdict';
 
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import type { CompendiumReport as Report } from '@/lib/server/compendium-import/service';
 
 vi.unmock('next-intl');
+
+function CompendiumReport({
+    blockerActions,
+    ...props
+}: React.ComponentProps<typeof CompendiumReportTabs> & {
+    blockerActions?: BlockerActions;
+}) {
+    return (
+        <>
+            <CompendiumVerdict
+                report={props.report}
+                committed={props.committed}
+                blockerActions={blockerActions}
+            />
+            <CompendiumReportTabs {...props} />
+        </>
+    );
+}
+
 afterEach(cleanup);
 
 const render = (ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') =>
@@ -237,6 +258,7 @@ it('omits the blockers block and empty categories when there is nothing to show'
     await render(
         <CompendiumReport
             campaignId="c"
+            initialTab="sources"
             report={{
                 ...base,
                 rows: [],
@@ -335,7 +357,7 @@ it('collapses technical categories and aligns the main table cells', async () =>
 
     const { container } = await render(
         <CompendiumReport
-            campaignId="c"
+            campaignId="c" initialTab="sources"
             report={{ ...base, rows: [], countsByCategory }}
         />
     );

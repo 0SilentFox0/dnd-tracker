@@ -1,23 +1,15 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 import { CompendiumCoverage } from './CompendiumCoverage';
 import { CompendiumMediaSummary } from './CompendiumMediaSummary';
-import {
-    type BlockerActions,
-    BlockerCard,
-    Counts,
-    DEPENDENCIES_ANCHOR,
-    IssueGroupCard,
-    RowCard,
-} from './CompendiumReportCards';
+import { IssueGroupCard, RowCard } from './CompendiumReportCards';
 
 import { PagerNav } from '@/components/common/shell/PagerNav';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { Disclosure } from '@/components/ui/disclosure';
 import { COMPENDIUM_PAGE_SIZES } from '@/lib/constants/compendium-import';
 import { usePager } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -36,34 +28,30 @@ import type { CompendiumReport as Report } from '@/types/compendium-import';
 
 type Filter = keyof typeof REPORT_ROW_FILTERS;
 
-export { DEPENDENCIES_ANCHOR };
-export type { BlockerActions };
+export type ReportTab = 'records' | 'deps' | 'sources' | 'media';
 
-export function CompendiumReport({
+export function CompendiumReportTabs({
     campaignId,
     report,
     committed = false,
-    blockerActions,
+    initialTab = 'records',
+    deps,
+    activeTab,
+    onTabChange,
 }: {
     campaignId: string;
     report: Report;
     committed?: boolean;
-    blockerActions?: BlockerActions;
+    initialTab?: ReportTab;
+    deps?: ReactNode;
+    activeTab?: ReportTab;
+    onTabChange?: (tab: ReportTab) => void;
 }) {
     const t = useTranslator('compendium');
 
     const { actions: manualActions, info } = useMemo(
         () => splitInfoIssues(report.nextActions),
         [report.nextActions]
-    );
-
-    const blockers = useMemo(
-        () =>
-            groupIssues(
-                t,
-                manualActions.filter((issue) => issue.severity === 'error')
-            ),
-        [t, manualActions]
     );
 
     const groups = useMemo(
@@ -79,6 +67,8 @@ export function CompendiumReport({
         () => splitCategories(report.countsByCategory),
         [report.countsByCategory]
     );
+
+    const [ownTab, setOwnTab] = useState(initialTab);
 
     const [filter, setFilter] = useState<Filter>(() =>
         report.rows.some(REPORT_ROW_FILTERS.changed) ||
@@ -111,7 +101,38 @@ export function CompendiumReport({
             code,
         });
 
-    const chips = (
+    const unresolved = report.nextActions.filter(
+        (issue) => issue.code === 'UNRESOLVED_REF'
+    ).length;
+
+    const withMedia = !committed && !!report.media;
+
+    const tabs: Array<[ReportTab, string]> = [
+        ['records', t('report.records')],
+        ...(deps && !committed
+            ? ([['deps', `${t('report.tabDeps')} (${unresolved})`]] as const)
+            : []),
+        ['sources', t('report.sources')],
+        ...(withMedia
+            ? ([
+                  [
+                      'media',
+                      `${t('import.media.title')} (${report.media?.queued ?? 0})`,
+                  ],
+              ] as const)
+            : []),
+    ];
+
+    const wanted = activeTab ?? ownTab;
+
+    const tab = tabs.some(([key]) => key === wanted) ? wanted : 'records';
+
+    const select = (next: ReportTab) => {
+        setOwnTab(next);
+        onTabChange?.(next);
+    };
+
+    const filterChips = (
         [
             ['changed', t('report.filterChanged')],
             ['manual', t('report.filterManual')],
@@ -127,155 +148,120 @@ export function CompendiumReport({
     const hidden = report.rows.length - visible.length;
 
     return (
-        <section
-            className="space-y-4 text-sm break-words"
-            aria-label={t('report.ariaLabel')}
-        >
-            <div className="space-y-3 rounded-xl border border-hud-line p-3">
-                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                    <p
-                        className={`text-base font-semibold ${report.readyToImport ? 'text-hud-good' : 'text-hud-bad'}`}
-                    >
-                        {t(
-                            report.readyToImport
-                                ? committed
-                                    ? 'report.imported'
-                                    : 'report.canImport'
-                                : 'report.blocked'
-                        )}
-                    </p>
-                    <p className="text-hud-muted">
-                        {t(
-                            report.readyToPlay
-                                ? 'report.playReady'
-                                : 'report.manualNeeded'
-                        )}
-                    </p>
-                </div>
-                <Counts counts={report.counts} />
-            </div>
-            {blockers.length > 0 && (
-                <div
-                    role="alert"
-                    className="space-y-2 rounded-xl border border-hud-bad p-3"
-                >
-                    <h3 className="hud-sc text-base text-hud-bad">
-                        {t('report.blockersTitle', {
-                            count: blockers.reduce(
-                                (sum, group) => sum + group.items.length,
-                                0
-                            ),
-                        })}
-                    </h3>
-                    <ul className="space-y-2">
-                        {blockers.map((group) => (
-                            <BlockerCard
-                                key={group.code}
-                                group={group}
-                                actions={blockerActions}
-                            />
-                        ))}
-                    </ul>
-                </div>
-            )}
-            <Disclosure
-                defaultOpen
-                summary={
-                    <span className="text-hud-ink">{t('report.sources')}</span>
-                }
-            >
-                <ul className="text-hud-muted">
-                    {report.sources.map((source, index) => (
-                        <li key={index}>{sourceLabel(t, source)}</li>
-                    ))}
-                </ul>
-                <p>
-                    {Object.entries(report.editionSummary)
-                        .map(([key, value]) =>
-                            t('report.editionCount', {
-                                edition: editionLabel(t, key),
-                                count: value,
-                            })
-                        )
-                        .join('; ')}
-                </p>
-            </Disclosure>
-            <CompendiumCoverage categories={categories} />
-            <div className="space-y-2">
-                <h3 className="hud-sc text-base text-hud-ink">
-                    {t('report.records')}
-                </h3>
-                <HudChipTabs
-                    ariaLabel={t('report.filterLabel')}
-                    items={chips}
-                />
-                <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    {rows.pageItems.map((row, index) => (
-                        <RowCard
-                            key={`${row.canonicalKey}:${index}`}
-                            row={row}
-                            committed={committed}
-                            onNotes={setNotes}
-                            campaignId={campaignId}
+        <div className="space-y-4 text-sm break-words">
+            <HudChipTabs
+                ariaLabel={t('report.rows')}
+                items={tabs.map(([key, label]) => ({
+                    key,
+                    label,
+                    active: tab === key,
+                    onSelect: () => select(key),
+                }))}
+            />
+            {tab === 'records' && (
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <HudChipTabs
+                            ariaLabel={t('report.filterLabel')}
+                            items={filterChips}
                         />
-                    ))}
-                </ul>
-                {visible.length === 0 && (
-                    <p className="text-hud-muted">{t('report.noRows')}</p>
-                )}
-                {filter !== 'all' && hidden > 0 && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setFilter('all')}
-                    >
-                        {t('report.showUnchanged', { count: hidden })}
-                    </Button>
-                )}
-                <PagerNav
-                    ariaLabel={t('report.rowsPager')}
-                    pager={rows}
-                    labels={{
-                        prev: t('report.rowsPrev'),
-                        next: t('report.rowsNext'),
-                    }}
-                />
-            </div>
-            {groups.length > 0 && (
-                <div className="space-y-2">
-                    <h3 className="hud-sc text-base text-hud-ink">
-                        {t('report.next')}
-                    </h3>
-                    <ul className="space-y-2">
-                        {groups.map((group) => (
-                            <IssueGroupCard
-                                key={group.code}
-                                group={group}
-                                link={committed ? actionLink : undefined}
-                            />
-                        ))}
-                    </ul>
+                        <ul className="grid grid-cols-1 items-start gap-3 @2xl:grid-cols-2 @5xl:grid-cols-3">
+                            {rows.pageItems.map((row, index) => (
+                                <RowCard
+                                    key={`${row.canonicalKey}:${index}`}
+                                    row={row}
+                                    committed={committed}
+                                    onNotes={setNotes}
+                                    campaignId={campaignId}
+                                />
+                            ))}
+                        </ul>
+                        {visible.length === 0 && (
+                            <p className="text-hud-muted">
+                                {t('report.noRows')}
+                            </p>
+                        )}
+                        {filter !== 'all' && hidden > 0 && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setFilter('all')}
+                            >
+                                {t('report.showUnchanged', { count: hidden })}
+                            </Button>
+                        )}
+                        <PagerNav
+                            ariaLabel={t('report.rowsPager')}
+                            pager={rows}
+                            labels={{
+                                prev: t('report.rowsPrev'),
+                                next: t('report.rowsNext'),
+                            }}
+                        />
+                    </div>
+                    {groups.length > 0 && (
+                        <div className="space-y-2">
+                            <h3 className="hud-sc text-base text-hud-ink">
+                                {t('report.next')}
+                            </h3>
+                            <ul className="space-y-2">
+                                {groups.map((group) => (
+                                    <IssueGroupCard
+                                        key={group.code}
+                                        group={group}
+                                        link={committed ? actionLink : undefined}
+                                    />
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {info.length > 0 && (
+                        <p className="text-hud-muted">
+                            {t('report.infoNote', {
+                                summary: infoSummary(t, info),
+                            })}
+                        </p>
+                    )}
+                    {report.omittedIssues > 0 && (
+                        <p>
+                            {t('report.omitted', {
+                                count: report.omittedIssues,
+                                codes: Object.entries(report.issueCounts)
+                                    .map(([code, n]) =>
+                                        t('report.codeCount', {
+                                            code,
+                                            count: n,
+                                        })
+                                    )
+                                    .join('; '),
+                            })}
+                        </p>
+                    )}
                 </div>
             )}
-            {!committed && report.media && (
-                <CompendiumMediaSummary media={report.media} />
-            )}
-            {info.length > 0 && (
-                <p className="text-hud-muted">
-                    {t('report.infoNote', { summary: infoSummary(t, info) })}
-                </p>
-            )}
-            {report.omittedIssues > 0 && (
-                <p>
-                    {t('report.omitted', {
-                        count: report.omittedIssues,
-                        codes: Object.entries(report.issueCounts)
-                            .map(([code, n]) =>
-                                t('report.codeCount', { code, count: n })
+            {tab === 'deps' && deps}
+            {tab === 'sources' && (
+                <div className="space-y-4">
+                    <ul className="text-hud-muted">
+                        {report.sources.map((source, index) => (
+                            <li key={index}>{sourceLabel(t, source)}</li>
+                        ))}
+                    </ul>
+                    <p>
+                        {Object.entries(report.editionSummary)
+                            .map(([key, value]) =>
+                                t('report.editionCount', {
+                                    edition: editionLabel(t, key),
+                                    count: value,
+                                })
                             )
-                            .join('; '),
-                    })}
-                </p>
+                            .join('; ')}
+                    </p>
+                    <CompendiumCoverage categories={categories} />
+                </div>
+            )}
+            {tab === 'media' && report.media && (
+                <CompendiumMediaSummary media={report.media} />
             )}
             <p>{t('report.backstories')}</p>
             <Button
@@ -301,6 +287,6 @@ export function CompendiumReport({
                 {t('report.download')}
             </Button>
             {notes && <SourceNotes campaignId={campaignId} {...notes} />}
-        </section>
+        </div>
     );
 }
