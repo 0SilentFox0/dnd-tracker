@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { themeApi } from '@/lib/api/theme';
-import { createClient } from '@/lib/supabase/client';
 import {
     applyPalette,
     cachePalette,
@@ -60,8 +59,6 @@ export function usePaletteState(pathname: string) {
 
         let authEvent = false;
 
-        const client = createClient();
-
         const sync = (userId: string | null) => {
             if (!alive || owner.current === userId) return;
 
@@ -106,21 +103,32 @@ export function usePaletteState(pathname: string) {
                 });
         };
 
-        const {
-            data: { subscription },
-        } = client.auth.onAuthStateChange((_event, session) => {
-            authEvent = true;
-            sync(session?.user.id ?? null);
-        });
+        let unsubscribe = () => {};
 
-        void client.auth
-            .getSession()
-            .then(({ data }) => {
-                if (!authEvent) sync(data.session?.user.id ?? null);
-            })
-            .catch(() => {
-                if (!authEvent) sync(null);
+        // dynamic: keeps the Supabase client out of the entry chunk of public pages
+        void import('@/lib/supabase/client').then(({ createClient }) => {
+            if (!alive) return;
+
+            const client = createClient();
+
+            const {
+                data: { subscription },
+            } = client.auth.onAuthStateChange((_event, session) => {
+                authEvent = true;
+                sync(session?.user.id ?? null);
             });
+
+            unsubscribe = () => subscription.unsubscribe();
+
+            void client.auth
+                .getSession()
+                .then(({ data }) => {
+                    if (!authEvent) sync(data.session?.user.id ?? null);
+                })
+                .catch(() => {
+                    if (!authEvent) sync(null);
+                });
+        });
 
         const onStorage = (event: StorageEvent) => {
             if (
@@ -142,7 +150,7 @@ export function usePaletteState(pathname: string) {
             alive = false;
             invalidateRevision(revision);
             owner.current = undefined;
-            subscription.unsubscribe();
+            unsubscribe();
             window.removeEventListener('storage', onStorage);
         };
     }, [enabled]);

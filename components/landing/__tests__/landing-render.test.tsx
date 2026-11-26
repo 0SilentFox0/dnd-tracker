@@ -13,7 +13,7 @@ vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
-vi.mock('@/lib/hooks/auth', () => ({ useHasSessionCookie: () => false }));
+vi.mock('@/lib/hooks/auth/useHasSessionCookie', () => ({ useHasSessionCookie: () => false }));
 
 const MESSAGES = { en, uk };
 

@@ -14,7 +14,7 @@ vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
-vi.mock('@/lib/hooks/auth', () => ({ useHasSessionCookie: () => false }));
+vi.mock('@/lib/hooks/auth/useHasSessionCookie', () => ({ useHasSessionCookie: () => false }));
 
 const render = async (locale: 'en' | 'uk', doc: (typeof LEGAL_DOCS)[number]) =>
     renderToStaticMarkup(await LegalPage({ locale, doc }));

@@ -75,6 +75,8 @@ export function Screen({
                     MEDIA_SIZES[media.ratio === '9/16' ? 'phone' : 'wide']
                 }
                 priority={priority}
+                fetchPriority={priority ? 'high' : undefined}
+                quality={60}
                 className="object-cover object-top"
             />
         </div>
