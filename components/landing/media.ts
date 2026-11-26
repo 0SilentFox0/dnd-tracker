@@ -123,11 +123,10 @@ export const FX_SPRITES = [
 
 export const FEATURE_ITEMS: Record<
     string,
-    { icon: LucideIcon; shot?: ShowcaseId }
+    { icon: LucideIcon; shot: ShowcaseId }
 > = {
     sheet: { icon: UserRound, shot: 'sheet' },
     world: { icon: Globe, shot: 'world' },
-    mapEditor: { icon: Map },
     soundboard: { icon: Music, shot: 'soundboard' },
     scenarioGraph: { icon: Network, shot: 'scenarioGraph' },
     contentCopy: { icon: Copy, shot: 'contentCopy' },

@@ -1,11 +1,7 @@
 import type { CSSProperties } from 'react';
 
 import { FEATURE_ITEMS } from '@/components/landing/media';
-import {
-    MediaFrame,
-    Screen,
-    ScreenPlaceholder,
-} from '@/components/landing/MediaFrame';
+import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { SectionTitle } from '@/components/landing/parts';
 import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
@@ -37,22 +33,13 @@ export function Features({ t, locale }: { t: Translator; locale: Locale }) {
                                     className="ld-tiltcard flex h-full flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
                                 >
                                     <MediaFrame title={title}>
-                                        {shot ? (
-                                            <Screen
-                                                locale={locale}
-                                                id={shot}
-                                                alt={title}
-                                                sizes="(min-width: 1024px) 380px, 100vw"
-                                                className="ld-inner-par"
-                                            />
-                                        ) : (
-                                            <ScreenPlaceholder alt={title}>
-                                                <Icon
-                                                    aria-hidden
-                                                    className="size-10 text-[var(--ld-gold)]"
-                                                />
-                                            </ScreenPlaceholder>
-                                        )}
+                                        <Screen
+                                            locale={locale}
+                                            id={shot}
+                                            alt={title}
+                                            sizes="(min-width: 1024px) 380px, 100vw"
+                                            className="ld-inner-par"
+                                        />
                                     </MediaFrame>
                                     <div className="space-y-2 px-1 pb-1">
                                         <h3 className="hud-sc flex items-center gap-2 text-xl text-hud-ink">

@@ -44,10 +44,9 @@ describe('showcaseMedia', () => {
 });
 
 describe('FEATURE_ITEMS', () => {
-    // the map editor is not filmed: its card keeps the placeholder
-    it('every feature but mapEditor has a screenshot', () => {
+    it('every feature has a screenshot', () => {
         for (const [id, item] of Object.entries(FEATURE_ITEMS))
-            if (id !== 'mapEditor') expect(item.shot, id).toBeTruthy();
+            expect(item.shot, id).toBeTruthy();
     });
 });
 

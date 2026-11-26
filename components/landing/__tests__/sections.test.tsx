@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
+import { FEATURE_ITEMS } from '@/components/landing/media';
 import { CombatDemo } from '@/components/landing/sections/CombatDemo';
 import { Features } from '@/components/landing/sections/Features';
 import { Replace } from '@/components/landing/sections/Replace';
@@ -43,9 +44,11 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
         expect(html.replace).not.toContain('landing.');
     });
 
-    it('Features renders seven articles', () => {
+    it('Features renders one article per feature', () => {
         expect(html.features).toContain('id="features"');
-        expect(html.features.match(/<article[\s>]/g)).toHaveLength(7);
+        expect(html.features.match(/<article[\s>]/g)).toHaveLength(
+            Object.keys(FEATURE_ITEMS).length
+        );
         expect(html.features).not.toContain('landing.');
     });
 
