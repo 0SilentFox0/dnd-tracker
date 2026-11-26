@@ -103,7 +103,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
                     id={FORM_ID}
                     onSubmit={onSubmit}
                     tabs={tabs}
-                    triggerClassName="flex-none px-3"
+                    tabStyles={{ trigger: 'flex-none px-3' }}
                     actions={
                         <>
                             <Button

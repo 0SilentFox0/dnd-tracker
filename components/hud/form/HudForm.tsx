@@ -1,8 +1,9 @@
 'use client';
 
 import { type FormEvent, type ReactNode, useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 
-import { type HudTab, HudTabs } from './HudTabs';
+import { type HudTab, HudTabs, type HudTabsStyles } from './HudTabs';
 import { useRevealInvalidTab } from './reveal-invalid-tab';
 
 import { ActionBar } from '@/components/ui/action-bar';
@@ -15,10 +16,10 @@ interface HudFormProps<T extends string> {
     tab?: T;
     onTabChange?: (tab: T) => void;
     children?: ReactNode;
-    actions: ReactNode;
+    actions?: ReactNode;
     error?: string | null;
     className?: string;
-    triggerClassName?: string;
+    tabStyles?: HudTabsStyles;
 }
 
 export function HudForm<T extends string>({
@@ -31,7 +32,7 @@ export function HudForm<T extends string>({
     actions,
     error,
     className,
-    triggerClassName,
+    tabStyles,
 }: HudFormProps<T>) {
     const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
 
@@ -54,23 +55,31 @@ export function HudForm<T extends string>({
             onInvalidCapture={onInvalidCapture}
             className={cn('flex flex-1 flex-col', className)}
         >
+            {error && (
+                <p
+                    role="alert"
+                    className="flex items-center gap-1.5 px-4 pt-3 text-sm text-hud-crimson-fg"
+                >
+                    <AlertCircle className="size-4 shrink-0" aria-hidden />
+                    {error}
+                </p>
+            )}
             {tabs && active ? (
                 <HudTabs
                     tabs={tabs}
                     value={active}
                     onValueChange={setActive}
-                    styles={{ trigger: triggerClassName }}
+                    styles={tabStyles}
                     keepMounted
                 />
             ) : (
                 <div className="px-4 py-3">{children}</div>
             )}
-            <ActionBar
-                error={error}
-                className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit"
-            >
-                {actions}
-            </ActionBar>
+            {actions && (
+                <ActionBar className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit">
+                    {actions}
+                </ActionBar>
+            )}
         </form>
     );
 }
