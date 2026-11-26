@@ -5,6 +5,12 @@ import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 export const WHATS_NEW_BUNDLED = 15;
 
 const CORE_WHATS_NEW: WhatsNewEntry[] = [
+    {
+        id: '2026-11-26-delete-account',
+        date: '2026-11-26',
+        audience: 'all',
+        href: '/profile',
+    },
     { id: '2026-11-26-codex', date: '2026-11-26', audience: 'all' },
     { id: '2026-11-26-map-art', date: '2026-11-26', audience: 'dm' },
     { id: '2026-11-26-hex-edges', date: '2026-11-26', audience: 'dm' },

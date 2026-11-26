@@ -38,11 +38,11 @@
       },
       "5": {
         "heading": "How long we keep data",
-        "body": "We keep account data and content for as long as your account exists. When you email us at {contactEmail} to delete your account and data, we delete your account and the content you own; backups and logs are overwritten within a limited period afterwards. Content you shared in a campaign owned by another person belongs to that campaign and stays with it. We keep technical logs only as long as needed for security and diagnostics."
+        "body": "We keep account data and content for as long as your account exists. When you delete your account in your profile (or email us at {contactEmail}), we delete your account and the content you own; backups and logs are overwritten within a limited period afterwards. Content you shared in a campaign owned by another person belongs to that campaign and stays with it. We keep technical logs only as long as needed for security and diagnostics."
       },
       "6": {
         "heading": "Your rights",
-        "body": "Depending on where you live, including under the GDPR, you have the right to access your data, correct it, delete it, restrict or object to its processing, receive it in a portable format, and withdraw consent. You can edit most data yourself in your profile; to delete your account and data, or for anything else, write to {contactEmail} and we will answer within one month. You may also lodge a complaint with your local data protection authority."
+        "body": "Depending on where you live, including under the GDPR, you have the right to access your data, correct it, delete it, restrict or object to its processing, receive it in a portable format, and withdraw consent. You can edit most data yourself in your profile; you can delete your account and data in your profile, and for anything else write to {contactEmail}; we will answer within one month. You may also lodge a complaint with your local data protection authority."
       },
       "7": {
         "heading": "Security",
@@ -87,7 +87,7 @@
       },
       "7": {
         "heading": "Termination",
-        "body": "You can stop using the service at any time and email us at {contactEmail} to delete your account and data. We may suspend or end access if you breach these terms or if needed to protect the service or other users, and we may discontinue the service with reasonable notice where possible."
+        "body": "You can stop using the service at any time and delete your account and data in your profile, or email us at {contactEmail}. We may suspend or end access if you breach these terms or if needed to protect the service or other users, and we may discontinue the service with reasonable notice where possible."
       },
       "8": {
         "heading": "Limitation of liability",
