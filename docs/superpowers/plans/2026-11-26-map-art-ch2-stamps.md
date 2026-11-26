@@ -37,6 +37,7 @@
 - **Невідомий ассет у painter/редакторі** — штамп пропускається мовчки (дані могли пережити видалення з реєстру).
 - **Конвертер** (Task 6) після `fix/map-art-tails` мусить працювати і з картами, що **вже мають** арт-рядок (на проді обидві карти отримають його в tails): окремий режим `--objects` додає штампи в наявну сцену. Деталі й умови — в Task 6.
 - `deriveMechanics(scene, map: MapDims)` замість `grid` (потрібні розміри для відкидання клітинок поза картою).
+- **Погляд (рішення власника 2026-11-27, варіант «а»):** `StampDef.sight?: true` — клітинки footprint такого штампа блокують і погляд. Виводяться в нове поле карти `BattleMapConfig.sightBlocked?: string[]`, **не** в `map.terrain` (terrain — шар DM з обов'язковим `kind`, стирається інструментами terrain; змішувати не можна). Видимість читає його в обох точках `lib/utils/battle/vision/shadowcast.ts`: `opaqueCells` (рядок ~95) і `sightBlockingCells` (~176) — через них проходять `visibleFrom`, `grid/sight.ts` і туман. Мутації бою не змінюються.
 
 ## Карта файлів
 
@@ -134,17 +135,44 @@ const stampSchema = z.object({
 
 ---
 
+### Task 1b: Штампи, що блокують погляд
+
+**Files:**
+- Modify: `types/battle-grid.ts` (`BattleMapConfig.sightBlocked?: string[]`), `lib/schemas/battles.ts:211` (поруч із `blocked`: `sightBlocked: z.array(cellKey).max(MAP_LIMITS.maxTerrainCells).optional()`), `types/battle-map.ts` (`ArtMapPatch` += `'sightBlocked'`), `lib/constants/map-art/stamps.ts` (`StampDef.sight?: true`), `lib/utils/battle/map-art/{stamp-cells,derive,compose}.ts`, `lib/utils/battle/vision/shadowcast.ts`
+- Test: `lib/utils/battle/map-art/__tests__/{stamp-cells,derive,compose}.test.ts`, `lib/utils/battle/vision/__tests__/shadowcast.test.ts` (наявний — доповнити), тест завантаження бою з бібліотечною картою (знайти наявний для `composeEffectiveMap`/`load-battle`)
+
+**Interfaces — Produces:**
+
+```ts
+// stamp-cells.ts
+export function stampCells(stamps: readonly MapArtStamp[], map: MapDims, lookup?: ...): { blocked: Set<string>; sight: Set<string> };
+// stampBlockedCells(...) = stampCells(...).blocked (лишити як обгортку)
+// derive.ts: DerivedMechanics += sightBlocked: string[] (sorted)
+// compose.ts: map.sightBlocked = sightBlocked, якщо непорожній; інакше поле прибрати (як blocked)
+```
+
+`sight` має сенс лише разом із `blocks` (валідація в CSV-парсері Task 2: `sight` без `blocks` → помилка рядка). Клітинки `sight` = клітинки `blocks` того ж штампа.
+
+`shadowcast.ts`: `opaqueCells` додає `map.sightBlocked ?? []`; `sightBlockingCells` — те саме (тип параметра `Pick<BattleMapConfig, 'terrain' | 'sightBlocked'>`; при порожньому результаті повертати `EMPTY_KEYS`, як зараз).
+
+Перевірити, що поле доходить до бою: header бібліотечної карти → `composeEffectiveMap` (`load-battle.ts`) → клієнтський `useBattleMapFog`. Якщо десь мапа копіюється за списком полів (pick/whitelist) — додати `sightBlocked`. Знайти: `grep -rn "blocked" lib/server/battle-maps lib/server/battles/store lib/utils/battle/map-storage`.
+
+- [ ] **Step 1: Тести:** `stampCells` — штамп `sight` дає ті самі клітинки в обох множинах, без `sight` — лише `blocked`; `deriveMechanics` повертає відсортований `sightBlocked`; `composeArtSave` пише/прибирає поле; `visibleFrom` — клітинка за `sightBlocked`-клітинкою не видима, а за `blocked` без sight — видима; `sightBlockingCells` враховує поле; ефективна мапа бою зберігає `sightBlocked` з header.
+- [ ] **Step 2:** реалізація; коміт `feat(map-art): stamps that block line of sight`.
+
+---
+
 ### Task 2: Реєстр + CSV-маніфест + build, 35 наявних об'єктів
 
 **Files:**
-- Create: `docs/assets/stamp-prompts/stamps.csv` (поки 35 рядків legacy), `scripts/assets/stamps/csv.ts`, `scripts/assets/stamps/build.ts`, `lib/constants/map-art/stamps-data.ts` (генерований), `lib/constants/map-art/__tests__/stamps.test.ts`, `scripts/assets/stamps/__tests__/csv.test.ts`
+- Create: `docs/assets/stamp-prompts/stamps.csv` (колонки `file,name,biome,category,layer,cols,rows,shadow,blocks,sight,prompt,priority`; поки 35 рядків legacy), `scripts/assets/stamps/csv.ts`, `scripts/assets/stamps/build.ts`, `lib/constants/map-art/stamps-data.ts` (генерований), `lib/constants/map-art/__tests__/stamps.test.ts`, `scripts/assets/stamps/__tests__/csv.test.ts`
 - Modify: `lib/constants/map-art/stamps.ts` (`package.json`-скрипт `assets:stamps` додається в Task 5 разом із `run.ts`; тут `build` запускається як `pnpm exec tsx --tsconfig tsconfig.scripts.json scripts/assets/stamps/build.ts`)
 
 **Interfaces — Produces:**
 
 ```ts
 // scripts/assets/stamps/csv.ts
-export interface StampRow { file: string; name: string; biome: StampBiome; category: string; layer: StampLayer; cols: number; rows: number; shadow: 'none'|'soft'|'hard'; blocks: StampBlocks | null; prompt: string; priority: 1 | 2 }
+export interface StampRow { file: string; name: string; biome: StampBiome; category: string; layer: StampLayer; cols: number; rows: number; shadow: 'none'|'soft'|'hard'; blocks: StampBlocks | null; sight: boolean; prompt: string; priority: 1 | 2 }
 export function parseStampsCsv(text: string): StampRow[];          // кидає з номером рядка
 export function parseBlocks(v: string): StampBlocks | null;        // '' | 'rect:2x1' | 'ellipse:1.6x1.6'
 export function rowToDef(row: StampRow): StampDef;
@@ -165,7 +193,7 @@ Legacy-рядки (35): `biome/category/layer/shadow/blocks` за таблице
 | nature | boulder (hard), bush, rock-small, tree-oak (canopy), tree-pine (canopy), campfire |
 | settlement | cart, fountain, tent, well |
 
-Сума = 35 (14 + 11 + 6 + 4). **Механіка legacy = механіка каталогу** (інакше конвертер змінить бій на наявних картах): `blocks = rect:<cols>x<rows>` рівно для тих ключів, де в `TILE_CATALOG` `blocks: true` (усі, крім `passable`: `blood-stain, bones, cobweb, stairs-down, stairs-up`). Тобто `trapdoor` — decal **з** `rect:1x1`, дерева — canopy з `rect:2x2`. Footprint — з каталогу (`bed` і `cart` — `WIDE` 2×1, `fountain/tent/tree-*` — `BIG` 2×2, решта 1×1), навіть якщо промпт тайла каже інакше. Тест Task 2 перевіряє цю рівність.
+Сума = 35 (14 + 11 + 6 + 4). **Механіка legacy = механіка каталогу** (інакше конвертер змінить бій на наявних картах): `blocks = rect:<cols>x<rows>` рівно для тих ключів, де в `TILE_CATALOG` `blocks: true` (усі, крім `passable`: `blood-stain, bones, cobweb, stairs-down, stairs-up`). Тобто `trapdoor` — decal **з** `rect:1x1`, дерева — canopy з `rect:2x2`. Footprint — з каталогу (`bed` і `cart` — `WIDE` 2×1, `fountain/tent/tree-*` — `BIG` 2×2, решта 1×1), навіть якщо промпт тайла каже інакше. Так само `sight = true` рівно там, де `TILE_CATALOG.blocksSight` (зараз збігається з `blocks`). CSV отримує колонку `sight` (`1`/порожньо) після `blocks` — оновити й заголовок CSV у spec-описі README. Тест Task 2 перевіряє обидві рівності.
 
 - [ ] **Step 1: Тести** `csv.test.ts`: лапки й коми в prompt; `parseBlocks` валідні/невалідні; помилка з номером рядка для невідомого `biome`/`layer`; `rowToDef` legacy і new.
 - [ ] **Step 2: Тести** `stamps.test.ts`: `renderStampsData(buildDefs(parseStampsCsv(csv), existsInPublic)) === readFileSync(stamps-data.ts)` (CSV — джерело правди; `buildDefs(rows, exists)` — спільна функція `csv.ts`, що відкидає рядки без файла, її ж викликає `build.ts`); legacy `blocks` ⇔ `TILE_CATALOG.blocks`; файл кожного def існує в `public/`; id унікальні; `blocks.w ≤ cols && blocks.h ≤ rows`; legacy `cols/rows` = `footprint` каталогу; кожен `nameKey` є в `messages/en` і `messages/uk` (через наявний хелпер тестів i18n-ключів — знайти в `lib/__tests__` за `messages`).
@@ -339,7 +367,7 @@ export function objectsToStamps(tileLayers: ChunkTileLayers, map: ConvertMap, ex
 
 Режими скрипта:
 - без змін (за замовчуванням): карти **без** арт-рядка — як зараз + `scene.stamps = objectsToStamps(...)`; `objects` прибираються з CURRENT chunk'ів і нового snapshot разом з ground/wallfill (додати `'objects'` до strip-списку цієї гілки).
-- `--objects`: карти **з** арт-рядком і непорожнім шаром `objects`: у транзакції `scene = {...scene, stamps: [...existing, ...new]}`, перевірка `mapArtSceneSchema` + ліміт блокованих (через `deriveMechanics` → `blocked.length ≤ maxTerrainCells`; інакше skip з причиною), `sceneVersion + 1`, `objects` прибираються з CURRENT chunk'ів і нового snapshot (`mapVersion + 1`, як `applyConversionTx`). Карти з **запеченим** артом (`bakedSceneVersion !== null`) за замовчуванням пропускаються з рядком `needs re-bake: <id> <name>` (після конвертації запечений фон був би без об'єктів, поки DM не збереже карту); `--include-baked` вмикає їх. **Механіка в тій самій транзакції:** сьогодні тайлові об'єкти блокують рух і погляд не через `map.blocked`, а через `deriveTileCells` під час завантаження бою (`lib/server/battles/store/load-battle.ts:198`, `useBattleMapFog.ts:51`). Якщо прибрати `objects` з chunk'ів і не записати клітинки, об'єкти перестануть блокувати до першого Save DM. Тому скрипт записує в header `blocked = sorted(header.blocked ∪ stampBlockedCells(newStamps, map))` (і в новий snapshot). Для `blocksSight` див. відкрите питання 3. Обидва режими (з арт-рядком і без) роблять це однаково. Тест: після `applyConversionTx` header.blocked містить footprint непрохідного об'єкта.
+- `--objects`: карти **з** арт-рядком і непорожнім шаром `objects`: у транзакції `scene = {...scene, stamps: [...existing, ...new]}`, перевірка `mapArtSceneSchema` + ліміт блокованих (через `deriveMechanics` → `blocked.length ≤ maxTerrainCells`; інакше skip з причиною), `sceneVersion + 1`, `objects` прибираються з CURRENT chunk'ів і нового snapshot (`mapVersion + 1`, як `applyConversionTx`). Карти з **запеченим** артом (`bakedSceneVersion !== null`) за замовчуванням пропускаються з рядком `needs re-bake: <id> <name>` (після конвертації запечений фон був би без об'єктів, поки DM не збереже карту); `--include-baked` вмикає їх. **Механіка в тій самій транзакції:** сьогодні тайлові об'єкти блокують рух і погляд не через `map.blocked`, а через `deriveTileCells` під час завантаження бою (`lib/server/battles/store/load-battle.ts:198`, `useBattleMapFog.ts:51`). Якщо прибрати `objects` з chunk'ів і не записати клітинки, об'єкти перестануть блокувати до першого Save DM. Тому скрипт записує в header `blocked = sorted(header.blocked ∪ stampCells(newStamps, map).blocked)` і `sightBlocked = sorted(header.sightBlocked ∪ stampCells(...).sight)` (і в новий snapshot). Тест: після конвертації колони клітинка за нею невидима (`visibleFrom` на header). Обидва режими (з арт-рядком і без) роблять це однаково. Тест: після `applyConversionTx` header.blocked містить footprint непрохідного об'єкта.
 - Dry run друкує на карту: `objects N → stamps M · unknown U · outside O · new blocked B`.
 
 Тайловий painter об'єктів не видаляти (лишаються карти без арт-рядка).
@@ -366,4 +394,4 @@ export function objectsToStamps(tileLayers: ChunkTileLayers, map: ConvertMap, ex
 
 1. Read-only підрахунок карт з шаром `objects` на проді (зараз; з `DIRECT_URL` з `.env.production-db.local`, без запису) — так/ні?
 2. Конвертер для вже запечених карт: за замовчуванням пропускати (рекомендую) чи конвертувати з умовою, що DM перезбереже карту?
-3. **Погляд.** Непрохідні тайлові об'єкти сьогодні блокують і рух, і погляд (`blocksSight` у `deriveTileCells` → туман/видимість). Spec для штампів описує лише рух (`map.blocked` погляд не блокує). Варіанти: (а) додати в `StampDef` `sight?: boolean` і виводити ці клітинки в `map.terrain[k].blocksSight` (зачіпає `deriveMechanics`, `ArtMapPatch`, `composeArtSave`; +½ задачі в Task 1); (б) прийняти: штампи погляд не блокують, після конвертації колони/статуї/дерева стануть «прозорими». Рекомендую (а) — інакше конвертер змінює бій на наявних картах.
+3. ~~Погляд~~ — вирішено 2026-11-27: варіант «а», поле `map.sightBlocked` (Task 1b).
