@@ -10,6 +10,7 @@ import { SpellFormBody } from '@/components/spells/form/forms/SpellFormBody';
 import type { SpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { getDefaultSpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { SPELL_FORM_ID } from '@/components/spells/form/spell-form-tabs';
+import { SpellPlayerPreview } from '@/components/spells/form/SpellPlayerPreview';
 import { Button } from '@/components/ui/button';
 import { useNotify } from '@/lib/hooks/common';
 import {
@@ -73,6 +74,13 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
                 </>
             }
             aside={t('createAside')}
+            side={
+                <SpellPlayerPreview
+                    campaignId={id}
+                    data={formData}
+                    groupName={spellGroups.find((g) => g.id === formData.groupId)?.name}
+                />
+            }
             actions={
                 <>
                     <Button type="button" variant="outline" asChild>

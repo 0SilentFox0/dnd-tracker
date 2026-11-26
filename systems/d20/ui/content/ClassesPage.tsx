@@ -4,12 +4,13 @@ import { ClassForm } from './classes/ClassForm';
 import type { DmPageProps } from '@/components/systems/types';
 import type { GameClassData } from '@/types/classes';
 
-export function ClassesPage({ campaignId, canEdit, view, data }: DmPageProps) {
+export function ClassesPage({ campaignId, canEdit, view, data, side }: DmPageProps) {
     if (view?.type === 'edit')
         return (
             <ClassForm
                 campaignId={campaignId}
                 gameClass={data as GameClassData}
+                side={side}
             />
         );
 

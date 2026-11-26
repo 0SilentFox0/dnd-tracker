@@ -199,7 +199,8 @@
     "saveFailed": "Помилка збереження",
     "preview": "Перегляд",
     "previewTitle": "Як бачать гравці",
-    "more": "Ще дії"
+    "more": "Ще дії",
+    "playerView": "Як бачать гравці"
   },
   "dmSections": {
     "scenario": "Сценарій",

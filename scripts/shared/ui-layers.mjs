@@ -14,6 +14,7 @@ export const SYSTEM_UI_KIT = [
     '@/components/abilities',
     '@/components/abilities/flow/AbilityFlow',
     '@/components/artifacts/ArtifactCard',
+    '@/components/campaigns/info/detail/ClassReferenceDetail',
     '@/components/choices/editor/ChoiceListEditor',
     '@/components/content-copy/ContentCopyButton',
     '@/components/content-import/shared/ContentTransferButtons',

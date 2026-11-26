@@ -1,9 +1,14 @@
 'use client';
 
+import type { ReactNode } from 'react';
+import { useDeferredValue } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import { BackgroundCard } from './BackgroundCard';
+
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
+import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
 import {
     HUD_SELECT_TRIGGER_CLASS,
@@ -29,9 +34,11 @@ const FORM_ID = 'background-form';
 export function BackgroundForm({
     campaignId,
     background,
+    side,
 }: {
     campaignId: string;
     background: BackgroundData;
+    side?: ReactNode;
 }) {
     const t = useTranslations('backgrounds');
 
@@ -47,6 +54,8 @@ export function BackgroundForm({
     } = useBackgroundForm(campaignId, background);
 
     const { data: feats = [] } = useFeats(campaignId);
+
+    const deferred = useDeferredValue(data);
 
     const tabs: HudTab<'basics' | 'choices'>[] = [
         {
@@ -216,6 +225,15 @@ export function BackgroundForm({
                 </>
             }
             aside={t('form.editAside')}
+            side={
+                <PlayerPreview notes={side}>
+                    <BackgroundCard
+                        background={{ ...background, ...deferred }}
+                        campaignId={campaignId}
+                        canEdit={false}
+                    />
+                </PlayerPreview>
+            }
             actions={
                 <>
                     <Button

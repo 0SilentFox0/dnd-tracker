@@ -199,7 +199,8 @@
     "saveFailed": "Failed to save",
     "preview": "Preview",
     "previewTitle": "As players see it",
-    "more": "More actions"
+    "more": "More actions",
+    "playerView": "How players see it"
   },
   "dmSections": {
     "scenario": "Scenario",

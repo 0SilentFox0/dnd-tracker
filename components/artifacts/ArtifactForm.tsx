@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useDeferredValue, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -14,6 +14,8 @@ import { ArtifactItemFields } from './ArtifactItemFields';
 import { ArtifactWeaponFields } from './ArtifactWeaponFields';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
+import { ArtifactReferenceDetail } from '@/components/campaigns/info/detail/ArtifactReferenceDetail';
+import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
 import { IconUrlField } from '@/components/common/fields/IconUrlField';
 import {
     HudForm,
@@ -39,6 +41,7 @@ import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import type { ArmorStats } from '@/lib/utils/artifacts/armor-stats';
 import type { ArtifactFormSubmitPayload } from '@/lib/utils/artifacts/artifact-form';
+import { toArtifactReferencePreview } from '@/lib/utils/artifacts/artifact-preview';
 import { isWeaponSlot } from '@/lib/utils/artifacts/weapon-slot';
 import type { WeaponStats } from '@/lib/utils/artifacts/weapon-stats';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
@@ -98,6 +101,8 @@ export function ArtifactForm({
     const editor = useArtifactForm({ initial, mode, ...actions });
 
     const { data, set } = editor.form;
+
+    const deferred = useDeferredValue(data);
 
     const hasWeapon = isWeaponSlot(data.slot);
 
@@ -326,7 +331,17 @@ export function ArtifactForm({
                 </>
             }
             aside={labels.description}
-            side={labels.side}
+            side={
+                <PlayerPreview notes={labels.side}>
+                    <ArtifactReferenceDetail
+                        item={toArtifactReferencePreview(deferred, {
+                            setName: artifactSets.find(
+                                (x) => x.id === deferred.setId
+                            )?.name,
+                        })}
+                    />
+                </PlayerPreview>
+            }
             actions={
                 <>
                     {actions.onDelete && (

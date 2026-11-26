@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { type ReactNode, useDeferredValue, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -11,12 +11,15 @@ import { ClassProgressionMap } from './progression';
 import { SubclassesEditor } from './SubclassesEditor';
 
 import { withAbilityErrors } from '@/components/abilities';
+import { ClassReferenceDetail } from '@/components/campaigns/info/detail/ClassReferenceDetail';
+import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useClassForm } from '@/lib/hooks/classes';
 import { useErrorTotals } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { buildClassProgression } from '@/lib/utils/characters/classes';
+import { toClassReferencePreview } from '@/lib/utils/characters/classes/class-preview';
 import type { GameClassData } from '@/types/classes';
 
 const FORM_ID = 'class-form';
@@ -26,9 +29,11 @@ type ClassFormTabId = 'map' | 'basics' | 'table' | 'features' | 'subclasses';
 export function ClassForm({
     campaignId,
     gameClass,
+    side,
 }: {
     campaignId: string;
     gameClass: GameClassData;
+    side?: ReactNode;
 }) {
     const t = useTranslations();
 
@@ -53,6 +58,8 @@ export function ClassForm({
     };
 
     const { data, set } = editor.form;
+
+    const deferred = useDeferredValue(data);
 
     const [tab, setTab] = useState<ClassFormTabId>('map');
 
@@ -148,6 +155,15 @@ export function ClassForm({
                 </>
             }
             aside={t('classes.form.aside')}
+            side={
+                <PlayerPreview notes={side}>
+                    <ClassReferenceDetail
+                        item={toClassReferencePreview(deferred, { id })}
+                        campaignId={campaignId}
+                        isDM={false}
+                    />
+                </PlayerPreview>
+            }
             actions={
                 <>
                     <Button

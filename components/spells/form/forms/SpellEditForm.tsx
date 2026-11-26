@@ -12,6 +12,7 @@ import { SpellFormBody } from '@/components/spells/form/forms/SpellFormBody';
 import type { SpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { getDefaultSpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { SPELL_FORM_ID } from '@/components/spells/form/spell-form-tabs';
+import { SpellPlayerPreview } from '@/components/spells/form/SpellPlayerPreview';
 import { Button } from '@/components/ui/button';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import {
@@ -132,7 +133,15 @@ export function SpellEditForm({
                 </>
             }
             aside={t('spellEditor.page.editAside')}
-            side={side}
+            side={
+                <SpellPlayerPreview
+                    campaignId={id}
+                    spellId={spellId}
+                    data={formData}
+                    groupName={spellGroups.find((g) => g.id === formData.groupId)?.name}
+                    notes={side}
+                />
+            }
             actions={
                 <>
                     <HudFormMenu
