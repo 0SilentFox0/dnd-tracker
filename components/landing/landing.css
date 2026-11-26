@@ -39,7 +39,7 @@ body:has([data-landing])::after { display: none; }
   .ld-bg { animation: ld-push 2.5s cubic-bezier(.16, .84, .3, 1) both; }
   @supports (animation-timeline: scroll()) {
     .ld-bg { animation: ld-push 2.5s cubic-bezier(.16, .84, .3, 1) both, ld-bg-scroll linear both; animation-timeline: auto, scroll(root); }
-    .ld-fog-wrap { animation: ld-fog-part linear both; animation-timeline: scroll(root); animation-range: 0 90vh; }
+    .ld-fog-hero { animation: ld-fog-part linear both; animation-timeline: scroll(root); animation-range: 0 90vh; }
   }
 }
 @keyframes ld-bg-scroll { to { translate: 0 -8%; } }
@@ -47,11 +47,18 @@ body:has([data-landing])::after { display: none; }
 @keyframes ld-fog-part { to { opacity: 0; scale: 1.25; } }
 
 /* canvas fog (LandingFog): fades in once painted, then parts as the page scrolls */
-.ld-fog-wrap {
-  position: absolute; inset: 0 0 auto; height: 100svh; z-index: -1; pointer-events: none;
+.ld-fog-wrap { position: absolute; z-index: -1; pointer-events: none; }
+.ld-fog-hero {
+  inset: 0 0 auto; height: 100svh;
   transform: translate3d(calc(var(--mx, 0) * 30px), calc(var(--my, 0) * 20px), 0);
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
-  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent);
+}
+/* bookend: the same fog closes back in around the final call to action */
+.ld-fog-final {
+  inset: 0; opacity: 0.82;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 72%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 72%, transparent);
 }
 .ld-fog-canvas { display: block; width: 100%; height: 100%; opacity: 0; }
 .ld-fog-canvas[data-ready] { opacity: 1; }

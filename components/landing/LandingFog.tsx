@@ -11,7 +11,7 @@ const PIXEL_SCALE = { desktop: 0.6, compact: 0.4 };
 
 const TRAIL_SCALE = 0.25;
 
-const BRUSH_RADIUS = 150;
+const BRUSH_RADIUS = 170;
 
 const REFILL_SECONDS = 0.8;
 
@@ -19,6 +19,8 @@ const REFILL_SECONDS = 0.8;
 const TRAIL_RESET_MS = 2600;
 
 const FPS = 30;
+
+const HAZE = 'rgba(96, 106, 130, 0.42)';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -45,13 +47,15 @@ function afterFirstPaint(run: () => void) {
     };
 }
 
+type Thin = 'left' | 'center' | null;
+
 function paintFog(
     ctx: Ctx,
     cloud: HTMLCanvasElement,
     w: number,
     h: number,
     now: number,
-    thinLeft: boolean
+    thin: Thin
 ) {
     const scale = Math.max(w / cloud.width, h / cloud.height) * 1.28;
 
@@ -69,26 +73,59 @@ function paintFog(
 
     ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, w, h);
-    ctx.globalAlpha = 0.8;
+    // flat haze under the clouds so the gaps between them never show bare map
+    ctx.fillStyle = HAZE;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalAlpha = 0.95;
     ctx.drawImage(cloud, left + dx, top + dy, width, height);
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.6;
     ctx.drawImage(cloud, left - dx * 0.7, top - dy * 0.8, width, height);
+    // third layer drifts on the swapped phase so the density never lines up
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(
+        cloud,
+        left + dy * (w / h) * 0.9,
+        top - dx * (h / w) * 0.9,
+        width,
+        height
+    );
     ctx.globalAlpha = 1;
 
-    if (!thinLeft) return;
+    if (!thin) return;
 
-    // thinner behind the copy so the heading keeps its contrast
-    const side = ctx.createLinearGradient(0, 0, w, 0);
+    const hole =
+        thin === 'left'
+            ? ctx.createLinearGradient(0, 0, w, 0)
+            : ctx.createRadialGradient(
+                  w / 2,
+                  h / 2,
+                  0,
+                  w / 2,
+                  h / 2,
+                  Math.max(w, h) * 0.42
+              );
 
-    side.addColorStop(0, 'rgba(0,0,0,0.72)');
-    side.addColorStop(0.38, 'rgba(0,0,0,0.55)');
-    side.addColorStop(0.68, 'rgba(0,0,0,0)');
+    if (thin === 'left') {
+        // thinner behind the copy so the heading keeps its contrast
+        hole.addColorStop(0, 'rgba(0,0,0,0.78)');
+        hole.addColorStop(0.4, 'rgba(0,0,0,0.6)');
+        hole.addColorStop(0.66, 'rgba(0,0,0,0)');
+    } else {
+        hole.addColorStop(0, 'rgba(0,0,0,0.96)');
+        hole.addColorStop(0.45, 'rgba(0,0,0,0.8)');
+        hole.addColorStop(1, 'rgba(0,0,0,0)');
+    }
+
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = side;
+    ctx.fillStyle = hole;
     ctx.fillRect(0, 0, w, h);
 }
 
-export function LandingFog() {
+export function LandingFog({
+    variant = 'hero',
+}: {
+    variant?: 'hero' | 'final';
+}) {
     const ref = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -107,17 +144,22 @@ export function LandingFog() {
         let cleanup: (() => void) | null = null;
 
         const cancelStart = afterFirstPaint(() => {
-            cleanup = start(canvas, { reduced, interactive, compact });
+            cleanup = start(canvas, {
+                reduced,
+                interactive,
+                thin: variant === 'final' ? 'center' : compact ? null : 'left',
+                compact,
+            });
         });
 
         return () => {
             cancelStart();
             cleanup?.();
         };
-    }, []);
+    }, [variant]);
 
     return (
-        <div aria-hidden className="ld-fog-wrap">
+        <div aria-hidden className={`ld-fog-wrap ld-fog-${variant}`}>
             <canvas ref={ref} className="ld-fog-canvas" />
         </div>
     );
@@ -125,7 +167,12 @@ export function LandingFog() {
 
 function start(
     canvas: HTMLCanvasElement,
-    mode: { reduced: boolean; interactive: boolean; compact: boolean }
+    mode: {
+        reduced: boolean;
+        interactive: boolean;
+        compact: boolean;
+        thin: Thin;
+    }
 ) {
     const ctx = canvas.getContext('2d');
 
@@ -195,7 +242,7 @@ function start(
     };
 
     const draw = (now: number, dt: number) => {
-        paintFog(ctx, cloud, w, h, mode.reduced ? 0 : now, !mode.compact);
+        paintFog(ctx, cloud, w, h, mode.reduced ? 0 : now, mode.thin);
 
         if (fadeTrail(now, dt)) {
             ctx.globalCompositeOperation = 'destination-out';

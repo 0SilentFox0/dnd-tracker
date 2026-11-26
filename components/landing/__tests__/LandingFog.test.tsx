@@ -116,4 +116,37 @@ describe('LandingFog', () => {
         expect(moveListeners(add)).toBe(0);
         expect(ticker.subscribe).not.toHaveBeenCalled();
     });
+
+    it('final variant clears a hole in the centre instead of the left side', () => {
+        mockMedia({ '(prefers-reduced-motion: reduce)': true });
+
+        const radial = vi.fn(() => ({ addColorStop: vi.fn() }));
+
+        const linear = vi.fn(() => ({ addColorStop: vi.fn() }));
+
+        const ctx = new Proxy(
+            {},
+            {
+                get: (_, key) =>
+                    key === 'createRadialGradient'
+                        ? radial
+                        : key === 'createLinearGradient'
+                          ? linear
+                          : vi.fn(),
+                set: () => true,
+            }
+        );
+
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+            ctx as unknown as CanvasRenderingContext2D
+        );
+
+        const { container } = render(<LandingFog variant="final" />);
+
+        expect(container.firstElementChild?.classList).toContain(
+            'ld-fog-final'
+        );
+        expect(radial).toHaveBeenCalledTimes(1);
+        expect(linear).not.toHaveBeenCalled();
+    });
 });
