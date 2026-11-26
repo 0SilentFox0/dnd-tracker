@@ -8,7 +8,7 @@ import './_local-db-guard';
 import '@/lib/utils/rules/systems/registry';
 import iconsJson from '@/data/templates/srd-5.2/icons.json';
 import { prisma } from '@/lib/db';
-import { type Bundle,BUNDLE_TABLES } from '@/lib/server/templates/bundle';
+import { type Bundle, BUNDLE_TABLES } from '@/lib/server/templates/bundle';
 import { exportCampaign } from '@/lib/server/templates/export-campaign';
 import { importBundle } from '@/lib/server/templates/import-bundle';
 import { deriveClassApplication } from '@/lib/utils/characters/classes/application';
@@ -17,7 +17,8 @@ import { d20RowData } from '@/scripts/shared/d20-row-data';
 
 const CAMPAIGN = 'example-demo-5e';
 
-const ICONS = 'https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/unit-icons';
+const ICONS =
+    'https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/unit-icons';
 
 const json = (v: unknown) => v as Prisma.InputJsonValue;
 
@@ -78,7 +79,12 @@ const HEROES: HeroDef[] = [
         },
         bgAbilities: ['intelligence', 'intelligence', 'constitution'],
         choices: (ctx) => ({
-            cantrips: ['Fire Bolt', 'Mage Hand', 'Ray of Frost', 'Prestidigitation'].map(ctx.spell),
+            cantrips: [
+                'Fire Bolt',
+                'Mage Hand',
+                'Ray of Frost',
+                'Prestidigitation',
+            ].map(ctx.spell),
             'prepared-spells': [
                 'Magic Missile',
                 'Shield',
@@ -121,7 +127,12 @@ const HEROES: HeroDef[] = [
         bgAbilities: ['wisdom', 'wisdom', 'intelligence'],
         choices: (ctx) => ({
             'divine-order-1': [{ id: 'protector' }],
-            cantrips: ['Sacred Flame', 'Guidance', 'Spare the Dying', 'Light'].map(ctx.spell),
+            cantrips: [
+                'Sacred Flame',
+                'Guidance',
+                'Spare the Dying',
+                'Light',
+            ].map(ctx.spell),
             'prepared-spells': [
                 'Bless',
                 'Cure Wounds',
@@ -164,10 +175,16 @@ const HEROES: HeroDef[] = [
         bgAbilities: ['strength', 'strength', 'constitution'],
         choices: (ctx) => ({
             'fighting-style-1': [{ id: ctx.feat('Defense') }],
-            'weapon-mastery-1': [{ id: 'longsword' }, { id: 'greatsword' }, { id: 'handaxe' }],
+            'weapon-mastery-1': [
+                { id: 'longsword' },
+                { id: 'greatsword' },
+                { id: 'handaxe' },
+            ],
             'ability-score-improvement-4': [asi(ctx, 'strength')],
             'ability-score-improvement-6': [asi(ctx, 'strength')],
-            'ability-score-improvement-8': [asi(ctx, 'constitution', 'dexterity')],
+            'ability-score-improvement-8': [
+                asi(ctx, 'constitution', 'dexterity'),
+            ],
         }),
     },
     {
@@ -183,7 +200,13 @@ const HEROES: HeroDef[] = [
         ac: 16,
         initiative: 5,
         saves: ['dexterity', 'intelligence'],
-        skills: ['stealth', 'sleightOfHand', 'acrobatics', 'perception', 'deception'],
+        skills: [
+            'stealth',
+            'sleightOfHand',
+            'acrobatics',
+            'perception',
+            'deception',
+        ],
         portrait: 'srd-2024_assassin',
         gear: {
             weapon: 'Dagger of Venom',
@@ -221,8 +244,12 @@ async function main() {
     });
 
     const template = {
-        id: (await prisma.campaign.findUniqueOrThrow({ where: { id: CAMPAIGN }, select: { createdFromId: true } }))
-            .createdFromId!,
+        id: (
+            await prisma.campaign.findUniqueOrThrow({
+                where: { id: CAMPAIGN },
+                select: { createdFromId: true },
+            })
+        ).createdFromId!,
     };
 
     const source = await exportCampaign(prisma, template.id);
@@ -237,22 +264,35 @@ async function main() {
     for (const h of HEROES) h.choices(ctxProbe);
 
     const haveSpells = new Map(
-        (await prisma.spell.findMany({ where: { campaignId: CAMPAIGN }, select: { id: true, name: true } })).map(
-            (s) => [s.name, s.id]
-        )
+        (
+            await prisma.spell.findMany({
+                where: { campaignId: CAMPAIGN },
+                select: { id: true, name: true },
+            })
+        ).map((s) => [s.name, s.id])
     );
 
-    const gearNames = new Set([...HEROES.flatMap((h) => Object.values(h.gear)), ...Object.values(LARK_GEAR)]);
+    const gearNames = new Set([
+        ...HEROES.flatMap((h) => Object.values(h.gear)),
+        ...Object.values(LARK_GEAR),
+    ]);
 
     const haveArtifacts = new Map(
-        (await prisma.artifact.findMany({ where: { campaignId: CAMPAIGN }, select: { id: true, name: true } })).map(
-            (s) => [s.name, s.id]
-        )
+        (
+            await prisma.artifact.findMany({
+                where: { campaignId: CAMPAIGN },
+                select: { id: true, name: true },
+            })
+        ).map((s) => [s.name, s.id])
     );
 
-    const newSpells = (source.spells as Row[]).filter((s) => wantedSpells.has(s.name) && !haveSpells.has(s.name));
+    const newSpells = (source.spells as Row[]).filter(
+        (s) => wantedSpells.has(s.name) && !haveSpells.has(s.name)
+    );
 
-    const newArtifacts = (source.artifacts as Row[]).filter((a) => gearNames.has(a.name) && !haveArtifacts.has(a.name));
+    const newArtifacts = (source.artifacts as Row[]).filter(
+        (a) => gearNames.has(a.name) && !haveArtifacts.has(a.name)
+    );
 
     const sourceSpells = source.spells as Row[];
 
@@ -264,7 +304,12 @@ async function main() {
         const text = JSON.stringify([...newSpells, ...newArtifacts]);
 
         for (const sp of sourceSpells) {
-            if (!text.includes(sp.id) || newSpells.some((n) => n.id === sp.id) || spellReuse.has(sp.id)) continue;
+            if (
+                !text.includes(sp.id) ||
+                newSpells.some((n) => n.id === sp.id) ||
+                spellReuse.has(sp.id)
+            )
+                continue;
 
             const existing = haveSpells.get(sp.name);
 
@@ -276,10 +321,12 @@ async function main() {
     }
 
     for (const n of wantedSpells)
-        if (!haveSpells.has(n) && !newSpells.some((s) => s.name === n)) throw new Error(`No SRD spell ${n}`);
+        if (!haveSpells.has(n) && !newSpells.some((s) => s.name === n))
+            throw new Error(`No SRD spell ${n}`);
 
     for (const n of gearNames)
-        if (!haveArtifacts.has(n) && !newArtifacts.some((s) => s.name === n)) throw new Error(`No SRD artifact ${n}`);
+        if (!haveArtifacts.has(n) && !newArtifacts.some((s) => s.name === n))
+            throw new Error(`No SRD artifact ${n}`);
 
     if (newSpells.length || newArtifacts.length) {
         const empty = Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, []]));
@@ -293,38 +340,60 @@ async function main() {
         } as unknown as Bundle;
 
         const targetGroups = new Map(
-            (await prisma.spellGroup.findMany({ where: { campaignId: CAMPAIGN }, select: { id: true, name: true } })).map(
-                (g) => [g.name, g.id]
-            )
+            (
+                await prisma.spellGroup.findMany({
+                    where: { campaignId: CAMPAIGN },
+                    select: { id: true, name: true },
+                })
+            ).map((g) => [g.name, g.id])
         );
 
         const reuse = new Map<string, string>([
             ...spellReuse,
-            ...            (source.spellGroups as Row[]).flatMap((g) => (targetGroups.has(g.name) ? [[g.id, targetGroups.get(g.name)!] as [string, string]] : []))
+            ...(source.spellGroups as Row[]).flatMap((g) =>
+                targetGroups.has(g.name)
+                    ? [[g.id, targetGroups.get(g.name)!] as [string, string]]
+                    : []
+            ),
         ]);
 
-        await prisma.$transaction((tx) => importBundle(tx, bundle, CAMPAIGN, undefined, { detached: true, reuse }), {
-            timeout: 120_000,
-        });
+        await prisma.$transaction(
+            (tx) =>
+                importBundle(tx, bundle, CAMPAIGN, undefined, {
+                    detached: true,
+                    reuse,
+                }),
+            {
+                timeout: 120_000,
+            }
+        );
     }
 
     const spellId = new Map(
-        (await prisma.spell.findMany({ where: { campaignId: CAMPAIGN }, select: { id: true, name: true } })).map(
-            (s) => [s.name, s.id]
-        )
+        (
+            await prisma.spell.findMany({
+                where: { campaignId: CAMPAIGN },
+                select: { id: true, name: true },
+            })
+        ).map((s) => [s.name, s.id])
     );
 
     const artifactId = new Map(
-        (await prisma.artifact.findMany({ where: { campaignId: CAMPAIGN }, select: { id: true, name: true } })).map(
-            (s) => [s.name, s.id]
-        )
+        (
+            await prisma.artifact.findMany({
+                where: { campaignId: CAMPAIGN },
+                select: { id: true, name: true },
+            })
+        ).map((s) => [s.name, s.id])
     );
 
     const featId = new Map(
-        (await prisma.feat.findMany({ where: { campaignId: CAMPAIGN }, select: { id: true, name: true } })).map((s) => [
-            s.name,
-            s.id,
-        ])
+        (
+            await prisma.feat.findMany({
+                where: { campaignId: CAMPAIGN },
+                select: { id: true, name: true },
+            })
+        ).map((s) => [s.name, s.id])
     );
 
     const ctx: Ctx = {
@@ -339,7 +408,9 @@ async function main() {
     };
 
     for (const h of HEROES) {
-        const row = await prisma.gameClass.findFirstOrThrow({ where: { campaignId: CAMPAIGN, name: h.className } });
+        const row = await prisma.gameClass.findFirstOrThrow({
+            where: { campaignId: CAMPAIGN, name: h.className },
+        });
 
         const data = toGameClassData(row);
 
@@ -347,7 +418,12 @@ async function main() {
 
         if (!sub) throw new Error(`No subclass ${h.subclass}`);
 
-        const entry = { classId: row.id, level: h.level, subclassId: sub.id, choices: h.choices(ctx) };
+        const entry = {
+            classId: row.id,
+            level: h.level,
+            subclassId: sub.id,
+            choices: h.choices(ctx),
+        };
 
         const applied = deriveClassApplication(
             {
@@ -360,19 +436,28 @@ async function main() {
         );
 
         if (!applied.ok || !applied.data) {
-            console.error(h.name, JSON.stringify(applied, null, 1).slice(0, 1500));
+            console.error(
+                h.name,
+                JSON.stringify(applied, null, 1).slice(0, 1500)
+            );
             throw new Error(`derive failed for ${h.name}`);
         }
 
-        const bg = await prisma.background.findFirstOrThrow({ where: { campaignId: CAMPAIGN, name: h.background } });
+        const bg = await prisma.background.findFirstOrThrow({
+            where: { campaignId: CAMPAIGN, name: h.background },
+        });
 
         const [str, dex, con, int, wis, cha] = h.abilities;
 
         const caster = data.caster !== 'none';
 
-        const prepared = (entry.choices['prepared-spells'] ?? []) as Array<{ id: string }>;
+        const prepared = (entry.choices['prepared-spells'] ?? []) as Array<{
+            id: string;
+        }>;
 
-        const cantrips = (entry.choices.cantrips ?? []) as Array<{ id: string }>;
+        const cantrips = (entry.choices.cantrips ?? []) as Array<{
+            id: string;
+        }>;
 
         const base = {
             campaignId: CAMPAIGN,
@@ -396,15 +481,21 @@ async function main() {
             initiative: h.initiative,
             speed: 30,
             avatar: icons.units[h.portrait],
-            savingThrows: json(Object.fromEntries(h.saves.map((s) => [s, true]))),
+            savingThrows: json(
+                Object.fromEntries(h.saves.map((s) => [s, true]))
+            ),
             skills: json(Object.fromEntries(h.skills.map((s) => [s, true]))),
-            spellcastingAbility: caster ? (data.spellcastingAbility ?? null) : null,
+            spellcastingAbility: caster
+                ? (data.spellcastingAbility ?? null)
+                : null,
             spellSlots: json(applied.data.spellSlots),
             knownSpells: json([...cantrips, ...prepared].map((s) => s.id)),
             proficiencies: json(data.proficiencies),
             languages: json(['Common', 'Elvish', 'Dwarvish']),
             feats: json([]),
-            backgroundChoices: json({ 'ability-scores': h.bgAbilities.map((id) => ({ id })) }),
+            backgroundChoices: json({
+                'ability-scores': h.bgAbilities.map((id) => ({ id })),
+            }),
             raceChoices: json(h.raceChoices),
             status: 'active',
         };
@@ -415,14 +506,28 @@ async function main() {
             update: d20RowData(base),
         });
         await seedInventory(h.id, h.gear);
-        console.info('hero', h.id, applied.data.class, 'spells', base.knownSpells);
+        console.info(
+            'hero',
+            h.id,
+            applied.data.class,
+            'spells',
+            base.knownSpells
+        );
     }
 
-    await prisma.character.update({ where: { id: LARK_ID }, data: { avatar: icons.units['srd-2024_scout'] } });
+    await prisma.character.update({
+        where: { id: LARK_ID },
+        data: { avatar: icons.units['srd-2024_scout'] },
+    });
     await seedInventory(LARK_ID, LARK_GEAR);
 
-    async function seedInventory(characterId: string, gear: Record<string, string>) {
-        const equipped = Object.fromEntries(Object.entries(gear).map(([slot, n]) => [slot, artifactId.get(n)!]));
+    async function seedInventory(
+        characterId: string,
+        gear: Record<string, string>
+    ) {
+        const equipped = Object.fromEntries(
+            Object.entries(gear).map(([slot, n]) => [slot, artifactId.get(n)!])
+        );
 
         const data = {
             equipped: json(equipped),
