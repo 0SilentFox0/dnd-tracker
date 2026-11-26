@@ -191,7 +191,8 @@
   },
   "portrait": {
     "add": "Add a photo",
-    "open": "Open the photo"
+    "open": "Open the photo",
+    "change": "Change the portrait"
   },
   "spellBook": {
     "toList": "← To the list",
