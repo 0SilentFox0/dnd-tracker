@@ -107,21 +107,18 @@ export function CompendiumReportTabs({
 
     const withMedia = !committed && !!report.media;
 
-    const tabs: Array<[ReportTab, string]> = [
-        ['records', t('report.records')],
-        ...(deps && !committed
-            ? ([['deps', `${t('report.tabDeps')} (${unresolved})`]] as const)
-            : []),
-        ['sources', t('report.sources')],
-        ...(withMedia
-            ? ([
-                  [
-                      'media',
-                      `${t('import.media.title')} (${report.media?.queued ?? 0})`,
-                  ],
-              ] as const)
-            : []),
-    ];
+    const tabs: Array<[ReportTab, string]> = [['records', t('report.records')]];
+
+    if (deps && !committed)
+        tabs.push(['deps', `${t('report.tabDeps')} (${unresolved})`]);
+
+    tabs.push(['sources', t('report.sources')]);
+
+    if (withMedia)
+        tabs.push([
+            'media',
+            `${t('import.media.title')} (${report.media?.queued ?? 0})`,
+        ]);
 
     const wanted = activeTab ?? ownTab;
 

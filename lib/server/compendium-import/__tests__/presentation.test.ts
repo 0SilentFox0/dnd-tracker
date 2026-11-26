@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it, vi } from 'vitest';
 
-import { CompendiumReport } from '@/components/content-import/compendium/report/CompendiumReport';
+import { CompendiumReportTabs } from '@/components/content-import/compendium/report/CompendiumReportTabs';
 import type { CompendiumReport as Report } from '@/lib/server/compendium-import/service';
 import { publicToolData } from '@/lib/utils/common/public-tool-data';
 vi.mock('../repository', () => ({ kindTable: {}, prismaImportRepository: {} }));
@@ -66,7 +66,11 @@ it('renders imported HTML and unsafe source URLs as inert report text', () => {
     };
 
     const html = renderToStaticMarkup(
-        createElement(CompendiumReport, { campaignId: 'synthetic', report })
+        createElement(CompendiumReportTabs, {
+            campaignId: 'synthetic',
+            report,
+            initialTab: 'sources',
+        })
     );
 
     expect(html).toContain('&lt;img');

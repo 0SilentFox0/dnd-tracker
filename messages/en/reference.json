@@ -35,7 +35,7 @@
     "setBonuses": "Set bonuses"
   },
   "filters": {
-    "artifactSet": {
+    "set": {
       "label": "Artifact set"
     }
   }

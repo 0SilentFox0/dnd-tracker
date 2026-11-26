@@ -41,6 +41,7 @@ import type onboarding from './messages/uk/onboarding.json';
 import type ops from './messages/uk/ops.json';
 import type quests from './messages/uk/quests.json';
 import type races from './messages/uk/races.json';
+import type reference from './messages/uk/reference.json';
 import type rest from './messages/uk/rest.json';
 import type rules from './messages/uk/rules.json';
 import type scenario from './messages/uk/scenario.json';
@@ -96,6 +97,7 @@ declare module 'next-intl' {
             abilityRegistry: typeof abilityRegistry;
             rules: typeof rules;
             skillTree: typeof skillTree;
+            reference: typeof reference;
             scenario: typeof scenario;
             scenarioGraph: typeof scenarioGraph;
             show: typeof show;

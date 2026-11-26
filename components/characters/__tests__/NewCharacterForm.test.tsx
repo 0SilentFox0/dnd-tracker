@@ -82,7 +82,7 @@ const renderForm = () =>
     render(
         <NewCharacterForm
             campaignId="c1"
-            characterType="PLAYER"
+            characterType="player"
             systemKey="d20"
         />
     );

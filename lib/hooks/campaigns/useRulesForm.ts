@@ -8,6 +8,7 @@ import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useNotify } from '@/lib/hooks/common';
 import { sameJson } from '@/lib/utils/common/json';
 import { type Ruleset, type RulesetPatch } from '@/lib/utils/rules';
+import type { CampaignRulesView } from '@/types/campaigns';
 
 export const HERO_LEVELS = Array.from(
     { length: MAX_CLASS_LEVEL },
@@ -20,7 +21,7 @@ export interface RulesFormState {
     set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
 }
 
-export function useRulesForm(campaignId: string, opts?: { initial?: Ruleset }) {
+export function useRulesForm(campaignId: string, opts?: { initial?: CampaignRulesView }) {
     const query = useCampaignRules(campaignId, opts);
 
     const update = useUpdateCampaignRules(campaignId);

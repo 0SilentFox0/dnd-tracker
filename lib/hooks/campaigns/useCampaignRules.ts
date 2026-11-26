@@ -6,12 +6,13 @@ import { campaignKeys } from './keys';
 
 import { getCampaignRules, updateCampaignRules } from '@/lib/api/rules';
 import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
-import type { Ruleset, RulesetPatch } from '@/lib/utils/rules';
+import type { RulesetPatch } from '@/lib/utils/rules';
 import { preloadSystem } from '@/lib/utils/rules/systems/preload';
+import type { CampaignRulesView } from '@/types/campaigns';
 
 export function useCampaignRules(
     campaignId: string,
-    opts?: { initial?: Ruleset }
+    opts?: { initial?: CampaignRulesView }
 ) {
     return useQuery({
         queryKey: campaignKeys.rules(campaignId),

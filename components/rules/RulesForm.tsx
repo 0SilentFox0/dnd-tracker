@@ -6,7 +6,7 @@ import { RulesBook } from './RulesBook';
 
 import { ErrorState, LoadingState } from '@/components/common/states';
 import { useRulesForm } from '@/lib/hooks/campaigns';
-import type { Ruleset } from '@/lib/utils/rules';
+import type { CampaignRulesView } from '@/types/campaigns';
 
 export function RulesForm({
     campaignId,
@@ -17,7 +17,7 @@ export function RulesForm({
     campaignId: string;
     title: ReactNode;
     readOnly?: boolean;
-    initial?: Ruleset;
+    initial?: CampaignRulesView;
 }) {
     const rules = useRulesForm(campaignId, { initial });
 

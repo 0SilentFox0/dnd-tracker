@@ -233,7 +233,7 @@ describe('CompendiumImport', () => {
     });
     it('embedded mode has no page header, history or hint', async () => {
         const fetchMock = vi.fn(
-            async () =>
+            async (_url: string) =>
                 new Response(JSON.stringify({ runs: [], hasMore: false }))
         );
 
@@ -251,7 +251,7 @@ describe('CompendiumImport', () => {
         expect(container.querySelector('.hud-page')).toBeNull();
         expect(screen.queryByText('Збережені звіти')).toBeNull();
         expect(
-            fetchMock.mock.calls.some(([url]) => String(url).includes('reports'))
+            fetchMock.mock.calls.some((call) => String(call[0]).includes('reports'))
         ).toBe(false);
     });
     it('asks for confirmation before restarting when a preview exists', async () => {
