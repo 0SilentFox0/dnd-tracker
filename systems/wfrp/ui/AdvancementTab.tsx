@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { AdvanceLedger } from './advancement/AdvanceLedger';
-import { AdvanceRow } from './advancement/AdvanceRow';
+import { AdvanceRow, TILE_GRID } from './advancement/AdvanceRow';
 import { CareerPanel } from './advancement/CareerPanel';
 import { NewSkillPicker } from './advancement/NewSkillPicker';
 import { TalentRows } from './advancement/TalentRows';
@@ -101,7 +101,7 @@ export function AdvancementTab() {
                 </p>
             )}
             <HudSection title={t('characteristics')}>
-                <ul>
+                <ul className={TILE_GRID}>
                     {CHARACTERISTIC_KEYS.map((key) => (
                         <AdvanceRow
                             key={key}
@@ -133,7 +133,7 @@ export function AdvancementTab() {
                 </ul>
             </HudSection>
             <HudSection title={t('skills')}>
-                <ul>
+                <ul className={TILE_GRID}>
                     {skillRows.map((s) => {
                         const key = skillAdvanceKey(s.key, s.spec);
 
