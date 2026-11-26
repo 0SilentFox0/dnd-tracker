@@ -122,7 +122,7 @@ export function classSummaryText(
     if (params.ability)
         params.ability = t(`gameTerms.abilities.${params.ability}.label`);
 
-    return t(`dashboard.reference.summary.${line.key}`, params);
+    return t(`reference.summary.${line.key}`, params);
 }
 
 export function classSearchText(c: ClassForReference, t: Translator): string {
@@ -153,12 +153,12 @@ export function formatMechanicsSkill(
 
     if (s.mainSkillName)
         parts.push(
-            t('dashboard.reference.mechanics.branch', { name: s.mainSkillName })
+            t('reference.mechanics.branch', { name: s.mainSkillName })
         );
 
     if (s.abilitySummary.length > 0)
         parts.push(
-            t('dashboard.reference.mechanics.abilities', {
+            t('reference.mechanics.abilities', {
                 list: linesText(
                     abilityRegistryOf(t),
                     s.abilitySummary.map(flowSegments)
@@ -168,7 +168,7 @@ export function formatMechanicsSkill(
 
     if (s.grantedSpellName)
         parts.push(
-            t('dashboard.reference.mechanics.grantedSpell', {
+            t('reference.mechanics.grantedSpell', {
                 name: s.grantedSpellName,
             })
         );
@@ -183,20 +183,20 @@ export function formatMechanicsSpell(
     const labels = spellLabelsOf(t);
 
     const parts: string[] = [
-        t('dashboard.reference.mechanics.spell', {
+        t('reference.mechanics.spell', {
             level: t(`gameTerms.spellLevels.${s.level}`),
             type: labels.targeting(s.targeting),
         }),
     ];
 
     if (s.dice > 0)
-        parts.push(t('dashboard.reference.mechanics.dice', { count: s.dice }));
+        parts.push(t('reference.mechanics.dice', { count: s.dice }));
 
     parts.push(
-        t('dashboard.reference.mechanics.resolution', {
+        t('reference.mechanics.resolution', {
             value: labels.resolution(s.resolution),
         }),
-        t('dashboard.reference.mechanics.cost', { value: labels.cost(s.cost) })
+        t('reference.mechanics.cost', { value: labels.cost(s.cost) })
     );
 
     return parts.join('. ');

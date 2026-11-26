@@ -68,27 +68,27 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
 }[] = [
     {
         route: '[id]/info',
-        ns: ['campaigns', 'characters', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'choices', 'scenario'],
+        ns: ['campaigns', 'characters', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'choices'],
         reason: PACK,
     },
     {
         route: '[id]/character/draft',
-        ns: ['rest', 'races', 'skills', 'artifacts', 'spells', 'spellEditor', 'scenario', 'contentImport', 'contentCopy'],
+        ns: ['rest', 'races', 'skills', 'artifacts', 'spells', 'spellEditor', 'contentImport', 'contentCopy'],
         reason: PACK,
     },
     {
         route: '[id]/character/new',
-        ns: ['rest', 'races', 'skills', 'artifacts', 'spells', 'spellEditor', 'scenario', 'contentImport', 'contentCopy'],
+        ns: ['rest', 'races', 'skills', 'artifacts', 'spells', 'spellEditor', 'contentImport', 'contentCopy'],
         reason: PACK,
     },
     {
         route: '[id]/character/edit',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'spellEditor', 'scenario', 'compendium', 'contentImport', 'contentCopy'],
+        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'spells', 'spellEditor', 'compendium', 'contentImport', 'contentCopy'],
         reason: PACK,
     },
     {
         route: '[id]/battles',
-        ns: ['tileLabels', 'characters', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
+        ns: ['tileLabels', 'characters', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'skills', 'choices'],
         reason: PACK,
     },
     {
@@ -118,12 +118,12 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/spells/[spellId]',
-        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'scenario'],
+        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts'],
         reason: PACK,
     },
     {
         route: '[id]/dm/spells/new',
-        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'scenario'],
+        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts'],
         reason: PACK,
     },
     {
@@ -133,22 +133,22 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/races',
-        ns: ['backgrounds', 'artifacts', 'editors', 'characterProfile', 'rest', 'scenario'],
+        ns: ['backgrounds', 'artifacts', 'editors', 'characterProfile', 'rest'],
         reason: PACK,
     },
     {
         route: '[id]/dm/races/[raceId]',
-        ns: ['editors', 'characterProfile', 'rest', 'backgrounds', 'skills', 'artifacts', 'scenario'],
+        ns: ['editors', 'characterProfile', 'rest', 'backgrounds', 'artifacts'],
         reason: PACK,
     },
     {
         route: '[id]/dm/classes',
-        ns: ['characterProfile', 'rest', 'races', 'backgrounds', 'skills', 'artifacts', 'scenario', 'editors'],
+        ns: ['characterProfile', 'rest', 'races', 'backgrounds', 'skills', 'artifacts', 'editors'],
         reason: PACK,
     },
     {
         route: '[id]/dm/classes/[classId]',
-        ns: ['races', 'backgrounds', 'skills', 'artifacts', 'editors', 'characterProfile', 'rest', 'scenario'],
+        ns: ['races', 'backgrounds', 'skills', 'artifacts', 'editors', 'characterProfile', 'rest'],
         reason: PACK,
     },
     {
@@ -158,17 +158,17 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/feats/[featId]',
-        ns: ['editors', 'characterProfile', 'rest', 'races', 'backgrounds', 'skills', 'artifacts', 'scenario'],
+        ns: ['editors', 'characterProfile', 'rest', 'races', 'backgrounds', 'skills', 'artifacts'],
         reason: PACK,
     },
     {
         route: '[id]/dm/backgrounds',
-        ns: ['characterProfile', 'rest', 'races', 'skills', 'artifacts', 'scenario', 'editors'],
+        ns: ['characterProfile', 'rest', 'races', 'skills', 'artifacts', 'editors'],
         reason: PACK,
     },
     {
         route: '[id]/dm/backgrounds/[backgroundId]',
-        ns: ['races', 'skills', 'artifacts', 'editors', 'characterProfile', 'rest', 'scenario'],
+        ns: ['races', 'skills', 'artifacts', 'editors', 'characterProfile', 'rest'],
         reason: PACK,
     },
     {
@@ -178,37 +178,37 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/artifacts/[artifactId]',
-        ns: ['editors', 'races', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
+        ns: ['editors', 'races', 'feats', 'backgrounds', 'skills', 'choices'],
         reason: PACK,
     },
     {
         route: '[id]/dm/artifacts/new',
-        ns: ['editors', 'races', 'feats', 'backgrounds', 'skills', 'choices', 'scenario'],
+        ns: ['editors', 'races', 'feats', 'backgrounds', 'skills', 'choices'],
         reason: PACK,
     },
     {
         route: '[id]/dm/skills',
-        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario', 'editors'],
+        ns: ['characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'editors'],
         reason: PACK,
     },
     {
         route: '[id]/dm/skills/[skillId]',
-        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario'],
+        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices'],
         reason: PACK,
     },
     {
         route: '[id]/dm/skills/new',
-        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario'],
+        ns: ['editors', 'characterProfile', 'rest', 'races', 'feats', 'backgrounds', 'artifacts', 'choices'],
         reason: PACK,
     },
     {
         route: '[id]/dm/main-skills',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'scenario', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon'],
+        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon'],
         reason: PACK,
     },
     {
         route: '[id]/dm/main-skills/[mainSkillId]',
-        ns: ['abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'editors', 'characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells', 'scenario'],
+        ns: ['abilityRegistry', 'abilityText', 'battleTerms', 'battleCommon', 'abilityEditor', 'editors', 'characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'spells'],
         reason: PACK,
     },
     {
@@ -233,12 +233,12 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/units/new',
-        ns: ['editors', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'scenario'],
+        ns: ['editors', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices'],
         reason: PACK,
     },
     {
         route: '[id]/dm/units/[unitId]',
-        ns: ['editors', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices', 'scenario'],
+        ns: ['editors', 'rest', 'races', 'feats', 'backgrounds', 'skills', 'artifacts', 'choices'],
         reason: PACK,
     },
     {
@@ -288,12 +288,12 @@ const ROUTE_SCOPE_UNUSED_ALLOWED: {
     },
     {
         route: '[id]/dm/print',
-        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'scenario', 'abilityEditor', 'editors', 'contentImport', 'contentCopy'],
+        ns: ['characters', 'characterProfile', 'rest', 'races', 'classes', 'feats', 'backgrounds', 'artifacts', 'choices', 'abilityEditor', 'editors', 'contentImport', 'contentCopy'],
         reason: PACK,
     },
     {
         route: '[id]/dm/system',
-        ns: ['characterProfile', 'rest', 'races', 'scenario', 'editors'],
+        ns: ['characterProfile', 'rest', 'races', 'editors'],
         reason: PACK,
     },
 ];

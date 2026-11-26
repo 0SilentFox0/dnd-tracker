@@ -27,7 +27,7 @@ export function SkillReferenceDetail({
     item,
     isDM,
 }: SkillReferenceDetailProps) {
-    const t = useTranslations('dashboard.reference.card');
+    const ts = useTranslations('dashboard.reference.skill');
 
     const translate = useTranslator();
 
@@ -64,11 +64,11 @@ export function SkillReferenceDetail({
                 }}
             />
             {item.description && (
-                <DetailSection title={t('skillDescription')}>
+                <DetailSection title={ts('description')}>
                     {item.description}
                 </DetailSection>
             )}
-            <DetailSection title={t('skillHow')}>
+            <DetailSection title={ts('how')}>
                 {formatMechanicsSkill(item, translate)}
             </DetailSection>
         </DetailRoot>

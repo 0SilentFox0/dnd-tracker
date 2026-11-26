@@ -13,6 +13,7 @@ export const CAMPAIGN_NAMESPACES = [
     'choices',
     'campaigns',
     'dashboard',
+    'reference',
     'characters',
     'characterProfile',
     'inventory',

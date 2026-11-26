@@ -23,7 +23,7 @@ export function AppearanceBlock({
     onSave,
     kind = 'spell',
 }: AppearanceBlockProps) {
-    const t = useTranslations('dashboard.reference');
+    const t = useTranslations('reference');
 
     const tc = useTranslations('common.actions');
 
@@ -58,7 +58,7 @@ export function AppearanceBlock({
                     {title}
                     {canEdit && !editing && (
                         <HudIconButton
-                            aria-label={t('detail.edit')}
+                            aria-label={tc('edit')}
                             onClick={() => {
                                 setDraft(text ?? '');
                                 setEditing(true);

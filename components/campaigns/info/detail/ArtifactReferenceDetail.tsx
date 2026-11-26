@@ -23,7 +23,7 @@ interface ArtifactReferenceDetailProps {
 export function ArtifactReferenceDetail({
     item,
 }: ArtifactReferenceDetailProps) {
-    const t = useTranslations('dashboard.reference');
+    const t = useTranslations('reference');
 
     const ta = useTranslator('artifacts');
 

@@ -9,7 +9,7 @@ import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
 import type { ArtifactSetForReference } from '@/types/info-reference';
 
 export function ArtifactSetBlock({ set }: { set: ArtifactSetForReference }) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('reference.card');
 
     return (
         <DetailRoot>

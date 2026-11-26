@@ -207,16 +207,6 @@
     "back": "Назад до кампанії"
   },
   "reference": {
-    "summary": {
-      "hitDie": "Кістка здоров'я: к{die}",
-      "savingThrows": "Рятівні кидки: {list}",
-      "caster": "{caster}",
-      "casterAbility": "{caster} ({ability})",
-      "armor": "Обладунки: {list}",
-      "weapons": "Зброя: {list}",
-      "tools": "Інструменти: {list}",
-      "skills": "Навички: {count} з {list}"
-    },
     "tabs": {
       "label": "Розділ довідника",
       "all": "Усі",
@@ -282,38 +272,8 @@
         "title": "Артефакти"
       }
     },
-    "card": {
-      "levelShort": "рів. {level}",
-      "description": "Опис",
-      "effects": "Ефекти",
-      "mechanics": "Механіка",
-      "skillDescription": "Опис / механіка",
-      "skillHow": "Як діє (бонуси, ефекти, тригери)",
-      "appearanceSkill": "Опис вигляду (як виглядає в грі)",
-      "appearanceSpell": "Опис вигляду (як виглядає заклинання)",
-      "appearancePlaceholderSkill": "Наприклад: яскрава вогняна сфера, що летить до цілі...",
-      "appearancePlaceholderSpell": "Наприклад: вогняна куля, що вибухає яскравим полум'ям...",
-      "saveAppearance": "Зберегти опис вигляду",
-      "featuresByLevel": "Вміння за рівнями",
-      "subclass": "Підклас: {name}",
-      "gear": "спорядження",
-      "heldBy": "у {name}",
-      "free": "вільний",
-      "setItems": "Предмети: {names}",
-      "setBonuses": "Бонуси сету"
-    },
-    "mechanics": {
-      "branch": "Гілка: {name}",
-      "abilities": "Вміння: {list}",
-      "grantedSpell": "Додає заклинання: {name}",
-      "spell": "{level}, {type}",
-      "dice": "Кубики: {count}к",
-      "resolution": "Перевірка: {value}",
-      "cost": "Вартість: {value}"
-    },
     "detail": {
-      "empty": "Оберіть запис зі списку",
-      "edit": "Редагувати"
+      "empty": "Оберіть запис зі списку"
     },
     "list": {
       "showAll": "Показати всі ({count})",
@@ -321,6 +281,10 @@
     },
     "rail": {
       "sections": "Розділи"
+    },
+    "skill": {
+      "description": "Опис / механіка",
+      "how": "Як діє (бонуси, ефекти, тригери)"
     }
   },
   "prep": {

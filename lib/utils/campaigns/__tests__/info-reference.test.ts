@@ -43,7 +43,7 @@ describe('довідка скілів', () => {
         expect(
             formatMechanicsSkill(skill([line('шкода ближня +10%')]), t)
         ).toBe(
-            'dashboard.reference.mechanics.branch {"name":"Бій"}. dashboard.reference.mechanics.abilities {"list":"abilityRegistry.summary.text {\\"value\\":\\"шкода ближня +10%\\"}"}'
+            'reference.mechanics.branch {"name":"Бій"}. reference.mechanics.abilities {"list":"abilityRegistry.summary.text {\\"value\\":\\"шкода ближня +10%\\"}"}'
         );
     });
 

@@ -11,7 +11,7 @@ export function SpellReferenceRow({
     item,
     ...row
 }: { item: SpellForReference } & ReferenceRowState) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('reference.card');
 
     return (
         <ReferenceRowShell

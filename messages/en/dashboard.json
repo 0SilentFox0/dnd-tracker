@@ -207,16 +207,6 @@
     "back": "Back to campaign"
   },
   "reference": {
-    "summary": {
-      "hitDie": "Hit die: d{die}",
-      "savingThrows": "Saving throws: {list}",
-      "caster": "{caster}",
-      "casterAbility": "{caster} ({ability})",
-      "armor": "Armor: {list}",
-      "weapons": "Weapons: {list}",
-      "tools": "Tools: {list}",
-      "skills": "Skills: {count} from {list}"
-    },
     "tabs": {
       "label": "Reference section",
       "all": "All",
@@ -282,38 +272,8 @@
         "title": "Artifacts"
       }
     },
-    "card": {
-      "levelShort": "lvl {level}",
-      "description": "Description",
-      "effects": "Effects",
-      "mechanics": "Mechanics",
-      "skillDescription": "Description / mechanics",
-      "skillHow": "How it works (bonuses, effects, triggers)",
-      "appearanceSkill": "Appearance description (how it looks in the game)",
-      "appearanceSpell": "Appearance description (how the spell looks)",
-      "appearancePlaceholderSkill": "For example: a bright fire orb flying at the target...",
-      "appearancePlaceholderSpell": "For example: a fireball exploding in bright flames...",
-      "saveAppearance": "Save appearance description",
-      "featuresByLevel": "Features by level",
-      "subclass": "Subclass: {name}",
-      "gear": "gear",
-      "heldBy": "held by {name}",
-      "free": "free",
-      "setItems": "Items: {names}",
-      "setBonuses": "Set bonuses"
-    },
-    "mechanics": {
-      "branch": "Branch: {name}",
-      "abilities": "Abilities: {list}",
-      "grantedSpell": "Grants spell: {name}",
-      "spell": "{level}, {type}",
-      "dice": "Dice: {count}d",
-      "resolution": "Check: {value}",
-      "cost": "Cost: {value}"
-    },
     "detail": {
-      "empty": "Select an entry from the list",
-      "edit": "Edit"
+      "empty": "Select an entry from the list"
     },
     "list": {
       "showAll": "Show all ({count})",
@@ -321,6 +281,10 @@
     },
     "rail": {
       "sections": "Sections"
+    },
+    "skill": {
+      "description": "Description / mechanics",
+      "how": "How it works (bonuses, effects, triggers)"
     }
   },
   "prep": {

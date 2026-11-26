@@ -12,7 +12,7 @@ export function ArtifactReferenceRow({
     item,
     ...row
 }: { item: ArtifactForReference } & ReferenceRowState) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('reference.card');
 
     const ta = useTranslator('artifacts');
 

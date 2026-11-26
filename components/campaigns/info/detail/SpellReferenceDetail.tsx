@@ -29,7 +29,7 @@ export function SpellReferenceDetail({
     item,
     isDM,
 }: SpellReferenceDetailProps) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('reference.card');
 
     const translate = useTranslator();
 

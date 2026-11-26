@@ -20,7 +20,7 @@ interface ClassReferenceDetailProps {
 }
 
 function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('reference.card');
 
     return (
         <ul className="space-y-2">
@@ -54,7 +54,7 @@ function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
 }
 
 export function ClassReferenceDetail({ item }: ClassReferenceDetailProps) {
-    const t = useTranslations('dashboard.reference.card');
+    const t = useTranslations('reference.card');
 
     const translate = useTranslator();
 
