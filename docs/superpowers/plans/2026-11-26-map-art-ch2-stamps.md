@@ -99,7 +99,7 @@ export function stampBlockedCells(stamps: readonly MapArtStamp[], map: MapDims, 
 export function deriveMechanics(scene: MapArtScene, map: MapDims): DerivedMechanics;
 ```
 
-Алгоритм `stampBlockedCells`: для кожного штампа з `def.blocks` — AABB footprint (`w·scale × h·scale` UNIT, повернутий) → діапазон кандидатів через `gridMetrics(grid)` (`colStep/rowStep`, +1 клітинка запасу) → для кожної клітинки в межах карти `cellCenter(p, grid)` у фігурі (строго всередині, щоб центр на межі не блокувався: rect `|u| < W/2−ε && |v| < H/2−ε` після оберту на `−rot`; ellipse `(u/(W/2))²+(v/(H/2))² < 1−ε`, ε=1e-6) → `cellKey`. Плюс клітинка, що містить центр штампа (`cellAtPoint` — знайти наявну утиліту в `layout.ts` (`cellAtScreenPoint`/`screenToUnit` вже конвертують; якщо прямої «unit-point → cell» немає, додати `cellAtUnitPoint(p, grid)` поруч у `layout.ts` і покрити тестом), якщо в межах. Flip ігнорується.
+Алгоритм `stampBlockedCells`: для кожного штампа з `def.blocks` — AABB footprint (`w·scale × h·scale` UNIT, повернутий) → діапазон кандидатів через `gridMetrics(grid)` (`colStep/rowStep`, +1 клітинка запасу) → для кожної клітинки в межах карти `cellCenter(p, grid)` у фігурі (строго всередині, щоб центр на межі не блокувався: rect `|u| < W/2−ε && |v| < H/2−ε` після оберту на `−rot`; ellipse `(u/(W/2))²+(v/(H/2))² < 1−ε`, ε=1e-6) → `cellKey`. Плюс клітинка, що містить центр штампа, якщо в межах: додати в `layout.ts` `cellAtUnitPoint(p, grid): GridPoint` = hex → `hexPointToCell(p.x, p.y)` (`grid/hex.ts:169`), square → `{ x: floor(p.x/UNIT), y: floor(p.y/UNIT) }` (та сама логіка, що в `cellAtScreenPoint`, без матриці) + тест. Гекс flat-top: `HEX_R = 50`, `HEX_H ≈ 86.6`, відстань між сусідами = 86.6, не 100. Flip ігнорується.
 
 Схема:
 
@@ -125,7 +125,7 @@ const stampSchema = z.object({
   - rect 1×1 scale 2 у `(300, 300)` → `{"2:2","3:2","2:3","3:3"}`; ellipse 2×2 у `(300, 300)` → ті самі 4 (відстань центрів √2·50 < 100);
   - штамп `blocks` 0.2×0.2 → рівно клітинка з центром штампа;
   - штамп біля краю → лише клітинки в межах карти; штамп без `blocks` → порожньо;
-  - hex 10×10: rect 1×1 у центрі клітинки `3:3` → `{"3:3"}`; ellipse 3×3 → клітинка + 6 сусідів (`neighbors`);
+  - hex 10×10: rect 1×1 у центрі клітинки `3:3` → `{"3:3"}`; ellipse 2.5×2.5 (радіус 125: кільце 1 на 86.6 — всередині, кільце 2 від 150 — ні) → клітинка + 6 сусідів (`neighbors`);
   - `flip` не змінює результат.
 - [ ] **Step 2:** `derive.test.ts`: `scene.blocked` ∪ штампи, сортування, дублі зливаються; клітинки поза картою відкидаються.
 - [ ] **Step 3:** схема: невідомий asset, дубль id, `scale` 0.2/4.1, `rot` 360, `z` 1.5, 2001 штамп → помилка; тіло: 2000 штампів < 2 MB (рахувати `JSON.stringify().length`); `tooManyBlocked` (сцена з 3600 `blocked` + один `blocks`-штамп на нову клітинку); `clipScene` відкидає штамп за межами й повертає той самий об'єкт, якщо нічого не змінилось.
@@ -138,7 +138,7 @@ const stampSchema = z.object({
 
 **Files:**
 - Create: `docs/assets/stamp-prompts/stamps.csv` (поки 35 рядків legacy), `scripts/assets/stamps/csv.ts`, `scripts/assets/stamps/build.ts`, `lib/constants/map-art/stamps-data.ts` (генерований), `lib/constants/map-art/__tests__/stamps.test.ts`, `scripts/assets/stamps/__tests__/csv.test.ts`
-- Modify: `lib/constants/map-art/stamps.ts`, `package.json` (`"assets:stamps": "tsx --tsconfig tsconfig.scripts.json scripts/assets/stamps/run.ts"` — сам `run.ts` у Task 5; до того `build` викликається як `pnpm exec tsx --tsconfig tsconfig.scripts.json scripts/assets/stamps/build.ts`)
+- Modify: `lib/constants/map-art/stamps.ts` (`package.json`-скрипт `assets:stamps` додається в Task 5 разом із `run.ts`; тут `build` запускається як `pnpm exec tsx --tsconfig tsconfig.scripts.json scripts/assets/stamps/build.ts`)
 
 **Interfaces — Produces:**
 
@@ -152,7 +152,7 @@ export function renderStampsData(defs: readonly StampDef[]): string; // дете
 ```
 
 Правила `rowToDef`:
-- `file` виду `tiles_<key>.png` → legacy: `id = key`, `file = '/assets/battle-tiles/objects/tiles_<key>.png'`, `nameKey` = `nameKey` з `TILE_CATALOG` за `key` (для `barrel` це `battle.tiles.barrel`), `cols/rows` у CSV мають збігатися з `footprint` каталогу (перевірка в тесті).
+- `file` виду `tiles_<key>.png` → legacy: `id = key`, `file = '/assets/battle-tiles/objects/tiles_<key>.png'`, `nameKey = 'tileLabels.<key>'` (усі 35 назв є в `messages/{uk,en}/tileLabels.json`; `TILE_CATALOG.nameKey` вказує на `maps.editor.tiles.name.*`, де більшості ключів немає — не використовувати), `cols/rows` у CSV мають збігатися з `footprint` каталогу (перевірка в тесті).
 - Інакше `id = basename без .webp`, `file = '/assets/map-stamps/<biome>/<id>.webp'`, `nameKey = 'maps.editor.stamps.name.<id>'`.
 - CSV-парсер: наявного парсера CSV у репо немає (перевірити `grep -rn "parseCsv\|csv-parse" lib scripts`); якщо немає — мінімальний RFC4180 (лапки, `""`), без залежностей.
 
@@ -165,10 +165,10 @@ Legacy-рядки (35): `biome/category/layer/shadow/blocks` за таблице
 | nature | boulder (hard), bush, rock-small, tree-oak (canopy), tree-pine (canopy), campfire |
 | settlement | cart, fountain, tent, well |
 
-(Перевір: сума = 35 і кожен ключ з `public/assets/battle-tiles/objects` присутній; якщо `blocks` у каталозі для decal-подібних `true`, за CSV вирішує таблиця вище — плями/сходи/люки не блокують.) Для `canopy`-дерев `blocks` = `ellipse:0.6x0.6` (лише стовбур).
+Сума = 35 (14 + 11 + 6 + 4). **Механіка legacy = механіка каталогу** (інакше конвертер змінить бій на наявних картах): `blocks = rect:<cols>x<rows>` рівно для тих ключів, де в `TILE_CATALOG` `blocks: true` (усі, крім `passable`: `blood-stain, bones, cobweb, stairs-down, stairs-up`). Тобто `trapdoor` — decal **з** `rect:1x1`, дерева — canopy з `rect:2x2`. Footprint — з каталогу (`bed` і `cart` — `WIDE` 2×1, `fountain/tent/tree-*` — `BIG` 2×2, решта 1×1), навіть якщо промпт тайла каже інакше. Тест Task 2 перевіряє цю рівність.
 
 - [ ] **Step 1: Тести** `csv.test.ts`: лапки й коми в prompt; `parseBlocks` валідні/невалідні; помилка з номером рядка для невідомого `biome`/`layer`; `rowToDef` legacy і new.
-- [ ] **Step 2: Тести** `stamps.test.ts`: `renderStampsData(parseStampsCsv(csv).map(rowToDef)) === readFileSync(stamps-data.ts)` (CSV — джерело правди); файл кожного def існує в `public/`; id унікальні; `blocks.w ≤ cols && blocks.h ≤ rows`; legacy `cols/rows` = `footprint` каталогу; кожен `nameKey` є в `messages/en` і `messages/uk` (через наявний хелпер тестів i18n-ключів — знайти в `lib/__tests__` за `messages`).
+- [ ] **Step 2: Тести** `stamps.test.ts`: `renderStampsData(buildDefs(parseStampsCsv(csv), existsInPublic)) === readFileSync(stamps-data.ts)` (CSV — джерело правди; `buildDefs(rows, exists)` — спільна функція `csv.ts`, що відкидає рядки без файла, її ж викликає `build.ts`); legacy `blocks` ⇔ `TILE_CATALOG.blocks`; файл кожного def існує в `public/`; id унікальні; `blocks.w ≤ cols && blocks.h ≤ rows`; legacy `cols/rows` = `footprint` каталогу; кожен `nameKey` є в `messages/en` і `messages/uk` (через наявний хелпер тестів i18n-ключів — знайти в `lib/__tests__` за `messages`).
 - [ ] **Step 3:** `build.ts`: читає CSV → пише `stamps-data.ts` (`--check` — лише порівняння, exit 1). Згенерувати файл.
 - [ ] **Step 4:** коміт `feat(map-art): stamp registry generated from CSV (35 legacy objects)`.
 
@@ -255,6 +255,8 @@ export function useStampSelection(args: { stamps: MapArtStamp[]; api: EditorStam
 
 `StampPalette`: вкладки біомів (`STAMP_BIOMES`), селект категорій, пошук за перекладеною назвою; сітка мініатюр `<img src={def.file} loading="lazy">` (не `next/image`: статичні локальні файли в редакторі — так само робить наявна палітра тайлів; перевір і повтори її підхід); дані фільтрації — `useStampPalette(t)` (хук повертає `{ biome, setBiome, category, setCategory, query, setQuery, items }`). `StampControls` (для виділеного): поворот/масштаб числами, flip, z ±, дублювати, видалити, «snap», «показати блокування всіх».
 
+Назви: `def.nameKey` — повний ключ із двох namespace (`tileLabels.<key>` для legacy, `maps.editor.stamps.name.<id>` для нових); обидва namespace вже є в route-scope редактора (`lib/i18n/route-scopes.ts:74`), перекладати кореневим `useTranslations()` без namespace.
+
 i18n `maps.editor.stamps.*`: `tool`, `select`, `biome.{dungeon,building,nature,settlement}`, `category.<cat>` (усі категорії CSV), `search`, `snap`, `showBlocking`, `rotate`, `scale`, `flip`, `forward`, `backward`, `duplicate`, `delete`, `limit`, `empty`, `hints` (клавіші). Назви `name.<id>` — для нових штампів у Task 5.
 
 - [ ] **Step 1: Тести** хука (`useMapArtEditor.test.tsx`, happy-dom): place (snap on/off), update + coalesce (два move з тим самим ключем → один крок undo), remove, duplicate (новий id, зсув, виділення), reorder, undo/redo, ліміт 2000 → notice; `rot` 370 → 10, `scale` 9 → 4.
@@ -337,7 +339,7 @@ export function objectsToStamps(tileLayers: ChunkTileLayers, map: ConvertMap, ex
 
 Режими скрипта:
 - без змін (за замовчуванням): карти **без** арт-рядка — як зараз + `scene.stamps = objectsToStamps(...)`; `objects` прибираються з CURRENT chunk'ів і нового snapshot разом з ground/wallfill (додати `'objects'` до strip-списку цієї гілки).
-- `--objects`: карти **з** арт-рядком і непорожнім шаром `objects`: у транзакції `scene = {...scene, stamps: [...existing, ...new]}`, перевірка `mapArtSceneSchema` + ліміт блокованих (через `deriveMechanics` → `blocked.length ≤ maxTerrainCells`; інакше skip з причиною), `sceneVersion + 1`, `objects` прибираються з CURRENT chunk'ів і нового snapshot (`mapVersion + 1`, як `applyConversionTx`). Карти з **запеченим** артом (`bakedSceneVersion !== null`) за замовчуванням пропускаються з рядком `needs re-bake: <id> <name>` (після конвертації запечений фон був би без об'єктів, поки DM не збереже карту); `--include-baked` вмикає їх. Механіка `map.blocked` у header не перераховується скриптом — вона оновиться при наступному Save DM (у dry-run друкувати, скільки нових блокованих клітинок дасть Save).
+- `--objects`: карти **з** арт-рядком і непорожнім шаром `objects`: у транзакції `scene = {...scene, stamps: [...existing, ...new]}`, перевірка `mapArtSceneSchema` + ліміт блокованих (через `deriveMechanics` → `blocked.length ≤ maxTerrainCells`; інакше skip з причиною), `sceneVersion + 1`, `objects` прибираються з CURRENT chunk'ів і нового snapshot (`mapVersion + 1`, як `applyConversionTx`). Карти з **запеченим** артом (`bakedSceneVersion !== null`) за замовчуванням пропускаються з рядком `needs re-bake: <id> <name>` (після конвертації запечений фон був би без об'єктів, поки DM не збереже карту); `--include-baked` вмикає їх. **Механіка в тій самій транзакції:** сьогодні тайлові об'єкти блокують рух і погляд не через `map.blocked`, а через `deriveTileCells` під час завантаження бою (`lib/server/battles/store/load-battle.ts:198`, `useBattleMapFog.ts:51`). Якщо прибрати `objects` з chunk'ів і не записати клітинки, об'єкти перестануть блокувати до першого Save DM. Тому скрипт записує в header `blocked = sorted(header.blocked ∪ stampBlockedCells(newStamps, map))` (і в новий snapshot). Для `blocksSight` див. відкрите питання 3. Обидва режими (з арт-рядком і без) роблять це однаково. Тест: після `applyConversionTx` header.blocked містить footprint непрохідного об'єкта.
 - Dry run друкує на карту: `objects N → stamps M · unknown U · outside O · new blocked B`.
 
 Тайловий painter об'єктів не видаляти (лишаються карти без арт-рядка).
@@ -364,3 +366,4 @@ export function objectsToStamps(tileLayers: ChunkTileLayers, map: ConvertMap, ex
 
 1. Read-only підрахунок карт з шаром `objects` на проді (зараз; з `DIRECT_URL` з `.env.production-db.local`, без запису) — так/ні?
 2. Конвертер для вже запечених карт: за замовчуванням пропускати (рекомендую) чи конвертувати з умовою, що DM перезбереже карту?
+3. **Погляд.** Непрохідні тайлові об'єкти сьогодні блокують і рух, і погляд (`blocksSight` у `deriveTileCells` → туман/видимість). Spec для штампів описує лише рух (`map.blocked` погляд не блокує). Варіанти: (а) додати в `StampDef` `sight?: boolean` і виводити ці клітинки в `map.terrain[k].blocksSight` (зачіпає `deriveMechanics`, `ArtMapPatch`, `composeArtSave`; +½ задачі в Task 1); (б) прийняти: штампи погляд не блокують, після конвертації колони/статуї/дерева стануть «прозорими». Рекомендую (а) — інакше конвертер змінює бій на наявних картах.
