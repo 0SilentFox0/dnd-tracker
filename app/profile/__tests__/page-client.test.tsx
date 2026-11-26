@@ -22,6 +22,9 @@ vi.mock('@/components/profile/AvatarEditor', () => ({
         <div data-testid="editor">{children}</div>
     ),
 }));
+vi.mock('@/components/profile/DeleteAccountSection', () => ({
+    DeleteAccountSection: () => <div data-testid="delete-account" />,
+}));
 vi.mock('@/components/onboarding/OnboardingHint', () => ({
     OnboardingHint: ({ id }: { id: string }) => (
         <div data-testid={`hint-${id}`} />

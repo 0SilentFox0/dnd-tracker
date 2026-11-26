@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { deleteAccount } from '@/lib/api/account';
+import { ApiError } from '@/lib/api/client';
 import { createClient } from '@/lib/supabase/client';
 
 export function useDeleteAccount() {
@@ -20,5 +21,7 @@ export function useDeleteAccount() {
         remove: (email: string) => mutation.mutateAsync(email).catch(() => {}),
         isPending: mutation.isPending,
         error: mutation.error,
+        isBlocked:
+            mutation.error instanceof ApiError && mutation.error.status === 409,
     };
 }

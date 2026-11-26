@@ -2,6 +2,7 @@
 
 import { LoadingState } from '@/components/common/states';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
+import { DeleteAccountSection } from '@/components/profile/DeleteAccountSection';
 import { ProfileAccountActions } from '@/components/profile/ProfileAccountActions';
 import { ProfileCampaigns } from '@/components/profile/ProfileCampaigns';
 import { ProfileHeroCard } from '@/components/profile/ProfileHeroCard';
@@ -34,6 +35,9 @@ export function ProfileClient({ profile }: { profile: Profile }) {
                 <div className="min-w-0 space-y-4">
                     <ProfileQuickSettings showOpsLink={profile.showOpsLink} />
                     <ProfileAccountActions />
+                    {user.email ? (
+                        <DeleteAccountSection email={user.email} />
+                    ) : null}
                 </div>
             </div>
         </div>
