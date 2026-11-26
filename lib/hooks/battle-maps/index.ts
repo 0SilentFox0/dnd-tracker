@@ -9,6 +9,7 @@ export {
     usePatchBattleMapTiles,
 } from './useBattleMaps';
 export { useImportCatalogMap } from './useImportCatalogMap';
+export { type ArtTool, useMapArtEditor } from './useMapArtEditor';
 export { useMapCatalog } from './useMapCatalog';
 export { useMapEditorDraft } from './useMapEditorDraft';
 export { type EditorPanel, useMapEditorWorkspace } from './useMapEditorWorkspace';
