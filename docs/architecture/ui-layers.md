@@ -56,7 +56,7 @@ ESLint `raw-controls/no-raw-control` (`eslint/raw-controls.mjs`) заборон�
 
 ## Дизайн-система (DS)
 
-Токени — `app/palettes.css`, утиліти — `components/hud/hud.css`, ключові класи й перехід — `app/globals.css`, `app/motion.css`. Рішення власника — в «Поправці 2026-11-25» у `docs/superpowers/specs/2026-11-25-design-system-migration-design.md`.
+Токени — `app/palettes.css`, утиліти — `components/hud/hud.css`, ключові класи й перехід — `app/globals.css`, `app/motion.css`. Рішення власника — в «Поправці 2026-11-25» у `docs/archive/superpowers/2026-11-25-design-system-migration-design.md`.
 
 - **Поверхні:** `ds-panel` (панель), `ds-inset` (вдавлене поле), `ds-raised` (піднята картка); `HudPanel`, контент оверлеїв і `card` на них же. М'яка тінь `--hud-sh` замість 1px-рамки панелі; контроли (інпути, кнопки) рамку зберігають.
 - **Акцент:** активне/вибране/майстерність/акцентні числа — `text-hud-accent-fg`, `border-hud-accent`, `bg-hud-accent` (текст на ньому — `text-hud-accent-ink`); токени `--hud-accent`, `--hud-accent-fg`, `--hud-accent-ink`. Малинове (`--hud-crimson*`, `--hud-hp*`) — лише HP, шкода, небезпека, деструктивні дії, помилки (`aria-invalid:`), попередження. Основна `Button` — золота (accent), не малинова. Жорстко прошитий crimson для акценту заборонений.
