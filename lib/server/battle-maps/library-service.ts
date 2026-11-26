@@ -349,106 +349,118 @@ const conflict = () => new ContentError(API_ERRORS.BATTLE_MAP_CONFLICT, 409);
 
 const plain = (v: unknown) => JSON.parse(JSON.stringify(v)) as unknown;
 
+type Released = { campaignId: string; urls: (string | null)[] };
+
 /** `input.expectedVersion` guards against overwriting a newer save; an identical payload only renames. */
+export async function saveMapTx(
+    tx: Prisma.TransactionClient,
+    mapId: string,
+    rawInput: BattleMapSaveInput,
+    opts: { artBaked?: boolean } = {}
+): Promise<{ brief: BattleMapBrief; released: Released }> {
+    const input = opts.artBaked
+        ? { ...rawInput, map: { ...rawInput.map, artBaked: true as const } }
+        : rawInput;
+
+    const { header, chunks, headerJson, payloadJson } = payloadOf(input);
+
+    const released: Released = { campaignId: '', urls: [] };
+
+    const current = await tx.battleMap.findUniqueOrThrow({
+        where: { id: mapId },
+        select: { mapVersion: true, header: true, campaignId: true },
+    });
+
+    released.campaignId = current.campaignId;
+
+    released.urls.push(backgroundOf(current.header));
+
+    const base = current.mapVersion;
+
+    if (input.expectedVersion !== base) throw conflict();
+
+    const oldRows = await tx.battleMapChunk.findMany({
+        where: { mapId },
+        select: { cx: true, cy: true, data: true, tileLayers: true },
+    });
+
+    const tileLayers = tileLayersFromRows(oldRows);
+
+    const versionPayload = {
+        ...payloadJson,
+        tileLayers,
+    } as Prisma.InputJsonObject;
+
+    const snapshot = await tx.battleMapVersion.findUnique({
+        where: { mapId_version: { mapId, version: base } },
+    });
+
+    const snapshotPayload = snapshot
+        ? (plain(snapshot.payload) as Record<string, unknown>)
+        : null;
+
+    released.urls.push(backgroundOf(snapshotPayload?.header));
+
+    const unchanged =
+        !!snapshotPayload &&
+        isDeepStrictEqual(
+            {
+                ...snapshotPayload,
+                tileLayers: snapshotPayload.tileLayers ?? {},
+            },
+            plain(versionPayload)
+        );
+
+    const { count } = await tx.battleMap.updateMany({
+        where: { id: mapId, mapVersion: base },
+        data: unchanged
+            ? { name: input.name }
+            : {
+                  name: input.name,
+                  cols: header.cols,
+                  rows: header.rows,
+                  header: headerJson,
+                  mapVersion: { increment: 1 },
+              },
+    });
+
+    if (count === 0) throw conflict();
+
+    const row = await tx.battleMap.findUniqueOrThrow({
+        where: { id: mapId },
+    });
+
+    if (unchanged) return { brief: toBrief(row), released };
+
+    await tx.battleMapChunk.deleteMany({ where: { mapId } });
+
+    await tx.battleMapChunk.createMany({
+        data: chunkRowsWithTiles(chunks, tileLayers).map((chunk) => ({
+            mapId,
+            ...chunk,
+        })),
+    });
+
+    await tx.battleMapVersion.create({
+        data: {
+            mapId,
+            version: row.mapVersion,
+            payload: versionPayload,
+        },
+    });
+
+    await pruneMapVersions(tx, mapId, row.mapVersion);
+
+    return { brief: toBrief(row), released };
+}
+
 export async function saveMap(
     mapId: string,
     input: BattleMapSaveInput
 ): Promise<BattleMapBrief> {
-    const { header, chunks, headerJson, payloadJson } = payloadOf(input);
-
-    const released: { campaignId: string; urls: (string | null)[] } = {
-        campaignId: '',
-        urls: [],
-    };
-
-    const brief = await prisma.$transaction(async (tx) => {
-        const current = await tx.battleMap.findUniqueOrThrow({
-            where: { id: mapId },
-            select: { mapVersion: true, header: true, campaignId: true },
-        });
-
-        released.campaignId = current.campaignId;
-
-        released.urls.push(backgroundOf(current.header));
-
-        const base = current.mapVersion;
-
-        if (input.expectedVersion !== base) throw conflict();
-
-        const oldRows = await tx.battleMapChunk.findMany({
-            where: { mapId },
-            select: { cx: true, cy: true, data: true, tileLayers: true },
-        });
-
-        const tileLayers = tileLayersFromRows(oldRows);
-
-        const versionPayload = {
-            ...payloadJson,
-            tileLayers,
-        } as Prisma.InputJsonObject;
-
-        const snapshot = await tx.battleMapVersion.findUnique({
-            where: { mapId_version: { mapId, version: base } },
-        });
-
-        const snapshotPayload = snapshot
-            ? (plain(snapshot.payload) as Record<string, unknown>)
-            : null;
-
-        released.urls.push(backgroundOf(snapshotPayload?.header));
-
-        const unchanged =
-            !!snapshotPayload &&
-            isDeepStrictEqual(
-                {
-                    ...snapshotPayload,
-                    tileLayers: snapshotPayload.tileLayers ?? {},
-                },
-                plain(versionPayload)
-            );
-
-        const { count } = await tx.battleMap.updateMany({
-            where: { id: mapId, mapVersion: base },
-            data: unchanged
-                ? { name: input.name }
-                : {
-                      name: input.name,
-                      cols: header.cols,
-                      rows: header.rows,
-                      header: headerJson,
-                      mapVersion: { increment: 1 },
-                  },
-        });
-
-        if (count === 0) throw conflict();
-
-        const row = await tx.battleMap.findUniqueOrThrow({
-            where: { id: mapId },
-        });
-
-        if (unchanged) return toBrief(row);
-
-        await tx.battleMapChunk.deleteMany({ where: { mapId } });
-
-        await tx.battleMapChunk.createMany({
-            data: chunkRowsWithTiles(chunks, tileLayers).map((row) => ({
-                mapId,
-                ...row,
-            })),
-        });
-
-        await tx.battleMapVersion.create({
-            data: {
-                mapId,
-                version: row.mapVersion,
-                payload: versionPayload,
-            },
-        });
-
-        await pruneMapVersions(tx, mapId, row.mapVersion);
-
-        return toBrief(row);
-    });
+    const { brief, released } = await prisma.$transaction((tx) =>
+        saveMapTx(tx, mapId, input)
+    );
 
     await removeUnreferencedBackgrounds(released.campaignId, released.urls);
 
