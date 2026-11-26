@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 
 import { CareerForm } from './CareerForm';
 
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudFormMenu } from '@/components/hud';
 import { HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
@@ -96,15 +95,6 @@ export function CareerEditPage({
                         {tc('actions.save')}
                     </Button>
                 </>
-            }
-            side={
-                career ? (
-                    <SourceNotes
-                        campaignId={campaignId}
-                        kind="careers"
-                        targetId={career.id}
-                    />
-                ) : undefined
             }
         >
             <CareerForm

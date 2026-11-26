@@ -61,7 +61,7 @@ export function ArtifactArmorFields({
 
     return (
         <HudSection title={t('title')} className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="ds-fields">
                 <div className="space-y-1">
                     <Label
                         htmlFor="armor-category"

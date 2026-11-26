@@ -50,7 +50,7 @@ export function UnitAttack({
                         {tCommon('delete')}
                     </Button>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="ds-fields">
                     <LabeledInput
                         id={`attack-name-${index}`}
                         label={t('name')}
@@ -165,7 +165,7 @@ export function UnitAttack({
                     value={attack}
                     onChange={onChange}
                 />
-                <div className="grid grid-cols-3 items-end gap-2">
+                <div className="ds-fields ds-fields--num items-end">
                     <LabeledInput
                         id={`attack-bonus-${index}`}
                         label={t('bonus')}
@@ -226,7 +226,7 @@ export function UnitAttack({
                 {attack.targetType === 'aoe' && (
                     <div className="space-y-2">
                         <Label>{t('distribution')}</Label>
-                        <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
+                        <div className="ds-fields ds-fields--num items-end">
                             {Array.from({ length: attack.maxTargets ?? 3 }).map(
                                 (_, i) => (
                                     <LabeledInput

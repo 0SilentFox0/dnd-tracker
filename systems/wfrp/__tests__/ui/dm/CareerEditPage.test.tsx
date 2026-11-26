@@ -24,9 +24,6 @@ vi.mock('@/systems/wfrp/hooks/careers', () => ({
 vi.mock('@/systems/wfrp/ui/careers/CareerForm', () => ({
     CareerForm: () => <form id="career-form" />,
 }));
-vi.mock('@/components/content-import/shared/SourceNotes', () => ({
-    SourceNotes: () => null,
-}));
 vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),
     useConfirm: () => mocks.confirm,
@@ -49,6 +46,8 @@ afterEach(() => {
 describe('CareerEditPage', () => {
     it('binds the single save button to the form id and offers no delete for a new career', () => {
         render(<CareerEditPage campaignId="c" listHref="/list" />);
+
+        expect(document.querySelector('.hud-form-side')).toBeNull();
 
         const save = screen.getByRole('button', { name: 'Зберегти' });
 

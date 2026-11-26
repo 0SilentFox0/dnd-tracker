@@ -78,7 +78,7 @@ export function ArtifactWeaponFields({
         : NUMBER_FIELDS;
 
     const numberGrid = (
-        <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
+        <div className="ds-fields ds-fields--num items-end">
             {numberFields.map((f) => (
                 <div
                     key={f.key}
@@ -121,7 +121,7 @@ export function ArtifactWeaponFields({
 
     return (
         <HudSection title={t('title')} className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="ds-fields">
                 {TEXT_FIELDS.map((f) => (
                     <div key={f.key} className="space-y-1">
                         <Label
