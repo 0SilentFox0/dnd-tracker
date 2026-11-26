@@ -315,7 +315,11 @@
     "weak": "Слабко",
     "excess": "Забагато",
     "hintWeak": "Слабко: додайте {list}",
-    "hintExcess": "Забагато: приберіть {list}"
+    "hintExcess": "Забагато: приберіть {list}",
+    "scalesAria": "Співвідношення сил: союзники {share}%",
+    "detailsAria": "Деталі балансу",
+    "shortEmpty": "Баланс —",
+    "evenShort": "Рівно"
   },
   "xp": {
     "title": "Баланс бою (XP 5e)",
@@ -363,5 +367,35 @@
     "preview": "Перегляд обраної мапи",
     "selectedMark": "Обрано",
     "clear": "Зняти вибір"
+  },
+  "participants": {
+    "catalogAria": "Каталог учасників",
+    "tabHeroes": "Герої · {count}",
+    "tabUnits": "Істоти · {count}",
+    "search": "Пошук за назвою",
+    "raceFilter": "Фільтр за расою",
+    "players": "Гравці",
+    "npc": "NPC герої",
+    "noMatches": "Нічого не знайдено",
+    "emptyHeroes": "Немає доступних героїв",
+    "emptyUnits": "Немає доступних істот",
+    "ally": "Союзник",
+    "enemy": "Ворог",
+    "addAlly": "Додати {name} до союзників",
+    "addEnemy": "Додати {name} до ворогів",
+    "sideAria": "Сторона: {name}",
+    "quantityAria": "Кількість: {name}",
+    "quantityLess": "Менше: {name}",
+    "quantityMore": "Більше: {name}",
+    "remove": "Прибрати {name}",
+    "dprHow": "Як рахується DPR",
+    "dprTitle": "Розрахунок DPR",
+    "dprSummary": "Фізика: {physical} · Магія: {spell} · Навички: {nonMagic}",
+    "emptyAllies": "Додайте союзників із каталогу",
+    "emptyEnemies": "Додайте ворогів із каталогу",
+    "autopick": "Автопідбір ворогів",
+    "roster": "Склад",
+    "rosterTitle": "Склад сторін",
+    "versus": "{ally} VS {enemy}"
   }
 }

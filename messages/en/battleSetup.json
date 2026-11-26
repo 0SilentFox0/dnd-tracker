@@ -315,7 +315,11 @@
     "weak": "Too weak",
     "excess": "Too strong",
     "hintWeak": "Too weak: add {list}",
-    "hintExcess": "Too strong: remove {list}"
+    "hintExcess": "Too strong: remove {list}",
+    "scalesAria": "Power ratio: allies {share}%",
+    "detailsAria": "Balance details",
+    "shortEmpty": "Balance —",
+    "evenShort": "Even"
   },
   "xp": {
     "title": "Battle balance (5e XP)",
@@ -363,5 +367,35 @@
     "preview": "Selected map preview",
     "selectedMark": "Selected",
     "clear": "Deselect"
+  },
+  "participants": {
+    "catalogAria": "Participant catalog",
+    "tabHeroes": "Heroes · {count}",
+    "tabUnits": "Creatures · {count}",
+    "search": "Search by name",
+    "raceFilter": "Filter by race",
+    "players": "Players",
+    "npc": "NPC heroes",
+    "noMatches": "Nothing found",
+    "emptyHeroes": "No heroes available",
+    "emptyUnits": "No creatures available",
+    "ally": "Ally",
+    "enemy": "Enemy",
+    "addAlly": "Add {name} to allies",
+    "addEnemy": "Add {name} to enemies",
+    "sideAria": "Side: {name}",
+    "quantityAria": "Quantity: {name}",
+    "quantityLess": "Fewer: {name}",
+    "quantityMore": "More: {name}",
+    "remove": "Remove {name}",
+    "dprHow": "How DPR is calculated",
+    "dprTitle": "DPR breakdown",
+    "dprSummary": "Physical: {physical} · Magic: {spell} · Skills: {nonMagic}",
+    "emptyAllies": "Add allies from the catalog",
+    "emptyEnemies": "Add enemies from the catalog",
+    "autopick": "Enemy autopick",
+    "roster": "Roster",
+    "rosterTitle": "Sides roster",
+    "versus": "{ally} VS {enemy}"
   }
 }
