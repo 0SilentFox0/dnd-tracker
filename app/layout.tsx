@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 
 import './globals.css';
 import './fonts.css';
@@ -61,6 +62,7 @@ export default async function RootLayout({
                         </ThemeProvider>
                     </QueryProvider>
                 </ClientLocaleProvider>
+                <Analytics />
             </body>
         </html>
     );
