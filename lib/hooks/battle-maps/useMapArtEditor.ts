@@ -404,6 +404,8 @@ export function useMapArtEditor({
                     if (onWall.length < add.length)
                         setLastNotice(notice('openingNeedsWall'));
 
+                    if (!onWall.length && !remove.length) return;
+
                     const openings = withoutKeys(raw.openings, remove);
 
                     for (const k of onWall)

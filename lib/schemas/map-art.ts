@@ -12,6 +12,7 @@ import { edgeKeySchema } from '@/lib/schemas/battles';
 import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
 import { gridOf, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { unitOf } from '@/lib/utils/battle/grid/layout';
+import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { CHUNK_SIDE } from '@/lib/utils/battle/map-storage/chunk-key';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
@@ -138,6 +139,20 @@ const refineSceneForMap = (
 
         if (!inBounds(map, { x, y })) issue('outOfBounds', ['scene', 'blocked', key]);
     }
+
+    if (
+        !hasPlayableArea({
+            cols: map.cols,
+            rows: map.rows,
+            blocked: Object.keys(scene.blocked),
+            terrain: map.terrain,
+        })
+    )
+        ctx.addIssue({
+            code: 'custom',
+            message: 'battleSetup.validation.playableAreaTooSmall',
+            path: ['scene', 'blocked'],
+        });
 
     for (const [key, data] of Object.entries(scene.floors)) {
         const [cx, cy] = key.split(':').map(Number);

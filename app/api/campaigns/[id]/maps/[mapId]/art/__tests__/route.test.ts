@@ -55,7 +55,7 @@ const scene = (over: Record<string, unknown> = {}) => ({
 const payload = (over: Record<string, unknown> = {}) => ({
     save: {
         name: 'M',
-        map: { cols: 20, rows: 20, background: null },
+        map: { cols: 20, rows: 20, background: null, opacity: 1 },
         walls: ['0:0:e'],
         bars: [],
         expectedVersion: 2,
