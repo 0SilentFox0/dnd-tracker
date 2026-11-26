@@ -59,7 +59,7 @@ export function ClassBasicsTab({
     const isCaster = data.caster !== 'none';
 
     return (
-        <div className="space-y-4">
+        <div className="ds-fields ds-panel p-4">
             <div className="space-y-2">
                 <Label htmlFor="class-name">{t('classes.basics.name')}</Label>
                 <Input
@@ -102,7 +102,7 @@ export function ClassBasicsTab({
                 />
             </div>
 
-            <fieldset className="space-y-2">
+            <fieldset className="ds-span space-y-2">
                 <legend className="text-sm font-medium">
                     {t('classes.basics.savingThrows')}
                 </legend>
@@ -176,7 +176,7 @@ export function ClassBasicsTab({
                 />
             </div>
 
-            <fieldset className="space-y-2">
+            <fieldset className="ds-span space-y-2">
                 <legend className="text-sm font-medium">
                     {t('classes.basics.skillList')}
                 </legend>
