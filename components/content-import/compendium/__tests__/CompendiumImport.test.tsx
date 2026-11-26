@@ -111,8 +111,8 @@ describe('CompendiumImport', () => {
             })
         );
         await render(<CompendiumImport campaignId="c" />);
-        await screen.findByText('Звіт old');
-        fireEvent.change(screen.getByLabelText('JSON-компендіум'), {
+        await screen.findByText('Імпорт #old');
+        fireEvent.change(screen.getByLabelText('Перетягніть JSON або виберіть файл'), {
             target: { files: [new File(['{}'], 'synthetic.json')] },
         });
         await screen.findByLabelText('Заклинання (1)');
@@ -124,6 +124,8 @@ describe('CompendiumImport', () => {
         await screen.findByText('Можна імпортувати');
         expect(screen.getByText('Потрібні ручні дії до гри')).toBeTruthy();
         expect(calls.filter((x) => x.url.endsWith('confirm'))).toHaveLength(0);
+        expect(screen.queryByRole('button', { name: 'Імпортувати' })).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Далі' }));
         expect(
             (
                 screen.getByRole('button', {
@@ -185,7 +187,7 @@ describe('CompendiumImport', () => {
             })
         );
         await render(<CompendiumImport campaignId="c" />);
-        fireEvent.change(screen.getByLabelText('JSON-компендіум'), {
+        fireEvent.change(screen.getByLabelText('Перетягніть JSON або виберіть файл'), {
             target: { files: [new File(['{}'], 'synthetic.json')] },
         });
         await screen.findByLabelText('Заклинання (1)');
@@ -242,7 +244,7 @@ describe('CompendiumImport', () => {
         );
         await render(<CompendiumImport campaignId="c" />);
         fireEvent.click(
-            await screen.findByRole('button', { name: 'Звіт old' })
+            await screen.findByRole('button', { name: 'Відкрити звіт' })
         );
         await screen.findByText('Налаштуйте цілі');
         expect(
@@ -261,7 +263,7 @@ describe('CompendiumImport', () => {
             )
         );
         await render(<CompendiumImport campaignId="c" />);
-        fireEvent.change(screen.getByLabelText('JSON-компендіум'), {
+        fireEvent.change(screen.getByLabelText('Перетягніть JSON або виберіть файл'), {
             target: { files: [new File(['{}'], 'synthetic.json')] },
         });
         fireEvent.click(
@@ -280,14 +282,14 @@ describe('CompendiumImport', () => {
             )
         );
         await render(<CompendiumImport campaignId="c" />);
-        fireEvent.change(screen.getByLabelText('JSON-компендіум'), {
+        fireEvent.change(screen.getByLabelText('Перетягніть JSON або виберіть файл'), {
             target: { files: [new File(['{}'], 'synthetic.json')] },
         });
         await screen.findByLabelText('Заклинання (1)');
         expect(screen.getByTestId('import-summary').textContent).toBe(
             'Обрано 2 категорій, ≈1 записів'
         );
-        fireEvent.click(screen.getByRole('button', { name: 'Нічого' }));
+        fireEvent.click(screen.getByRole('radio', { name: 'Нічого' }));
         expect(screen.getByTestId('import-summary').textContent).toBe(
             'Обрано 0 категорій, ≈0 записів'
         );
@@ -298,9 +300,9 @@ describe('CompendiumImport', () => {
                 }) as HTMLButtonElement
             ).disabled
         ).toBe(true);
-        fireEvent.click(screen.getByRole('button', { name: 'Усе' }));
+        fireEvent.click(screen.getByRole('radio', { name: 'Усе' }));
         expect(screen.getByLabelText('Сторінки книг (1)')).toBeChecked();
-        fireEvent.click(screen.getByRole('button', { name: 'Рекомендоване' }));
+        fireEvent.click(screen.getByRole('radio', { name: 'Рекомендоване' }));
         expect(screen.getByLabelText('Сторінки книг (1)')).not.toBeChecked();
         expect(screen.getByText('Класи та персонажі')).toBeTruthy();
         expect(screen.getByText('Матеріали ДМ')).toBeTruthy();

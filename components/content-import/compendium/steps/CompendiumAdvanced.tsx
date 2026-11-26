@@ -59,21 +59,7 @@ export function CompendiumAdvanced({
     };
 
     return (
-        <Disclosure
-            className="rounded-lg border border-hud-rule p-2 text-sm"
-            chevronClassName="text-hud-muted"
-            summary={
-                <span className="text-hud-ink">
-                    {t('advanced.title')}
-                    {advancedActive(options) && (
-                        <span className="ml-2 text-hud-good">
-                            {t('advanced.active')}
-                        </span>
-                    )}
-                </span>
-            }
-        >
-            <div className="mt-2 space-y-3">
+            <div className="space-y-3 text-sm">
                 <label className="flex items-start gap-2">
                     <Checkbox
                         className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
@@ -157,6 +143,5 @@ export function CompendiumAdvanced({
                     )}
                 </Disclosure>
             </div>
-        </Disclosure>
     );
 }

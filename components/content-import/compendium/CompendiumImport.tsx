@@ -3,24 +3,30 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { RulesPatchOffer } from '../shared/RulesPatchOffer';
+import { CompendiumStepRail } from './layout/CompendiumStepRail';
+import { CompendiumSummary } from './layout/CompendiumSummary';
+import { CompendiumWizardLayout } from './layout/CompendiumWizardLayout';
+import { CompendiumHistory } from './report/CompendiumHistory';
 import { CompendiumMediaReport } from './report/CompendiumMediaReport';
 import {
     CompendiumReport,
     DEPENDENCIES_ANCHOR,
 } from './report/CompendiumReport';
-import { CompendiumRunsList } from './report/CompendiumRunsList';
-import { CompendiumCategories } from './CompendiumCategories';
+import { CategoriesStep } from './steps/CategoriesStep';
+import { FileStep } from './steps/FileStep';
 import { CompendiumDependencies } from './CompendiumDependencies';
-import { CompendiumFileStep } from './CompendiumFileStep';
 import { CompendiumProgress } from './CompendiumProgress';
-import { CompendiumSteps } from './CompendiumSteps';
 
+import { FormAlert } from '@/components/common/states';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
-import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useCompendiumImport } from '@/lib/hooks/compendium-import';
+import {
+    useCompendiumImport,
+    useCompendiumWizardView,
+    usePreviewExpiry,
+} from '@/lib/hooks/compendium-import';
 
 export function CompendiumImport({
     campaignId,
@@ -33,22 +39,25 @@ export function CompendiumImport({
 
     const wizard = useCompendiumImport(campaignId, initialFile);
 
+    const view = useCompendiumWizardView(wizard.state);
+
+    const expiry = usePreviewExpiry(wizard.state.preview);
+
     const {
         preview,
         input,
         result,
         rights,
         busy,
-        root,
         options,
         phase,
         media,
         mediaPaused,
+        error,
     } = wizard.state;
 
     const {
         setRights,
-        confirm,
         close,
         applyOptions,
         media: mediaActions,
@@ -60,105 +69,120 @@ export function CompendiumImport({
                 title={t('title')}
                 subtitle={t('subtitle')}
                 actions={
-                    <Button variant="outline" asChild>
-                        <Link href={`/campaigns/${campaignId}`}>
-                            {t('back')}
-                        </Link>
-                    </Button>
+                    <>
+                        <Button
+                            variant="outline"
+                            disabled={busy && !!input}
+                            onClick={close}
+                        >
+                            {t('close')}
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href={`/campaigns/${campaignId}`}>
+                                {t('back')}
+                            </Link>
+                        </Button>
+                    </>
                 }
             />
             {!initialFile && <OnboardingHint id="dm.compendium-import" />}
-            <CompendiumProgress phase={phase} media={media} />
-            <CompendiumSteps wizard={wizard} />
-            <CompendiumFileStep wizard={wizard} />
-            {root && <CompendiumCategories wizard={wizard} />}
-            {preview && (
-                <>
-                    <HudPanel className="space-y-3">
-                        <RulesPatchOffer wizard={wizard} />
-                        <CompendiumReport
-                            campaignId={campaignId}
-                            report={preview.report}
-                            blockerActions={{
-                                busy,
-                                allowMixedEdition: options.allowMixedEdition
-                                    ? undefined
-                                    : () =>
-                                          applyOptions({
-                                              ...options,
-                                              allowMixedEdition: true,
-                                          }),
-                            }}
-                        />
-                    </HudPanel>
-                    <HudPanel className="space-y-3">
-                        <span id={DEPENDENCIES_ANCHOR} />
-                        <CompendiumDependencies
-                            key={preview.token}
-                            wizard={wizard}
-                        />
-                    </HudPanel>
-                    <HudPanel className="space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <label className="flex min-w-0 items-start gap-2 text-sm">
-                                <Checkbox
-                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
-                                    checked={rights}
-                                    disabled={busy}
-                                    onCheckedChange={(v) =>
-                                        setRights(v === true)
-                                    }
-                                />{' '}
-                                {t('rights')}
-                            </label>
-                            <Button
-                                disabled={
-                                    busy ||
-                                    !rights ||
-                                    !preview.report.readyToImport
-                                }
-                                onClick={() => void confirm()}
-                            >
-                                {t('confirm')}
-                            </Button>
-                        </div>
-                        <p className="text-xs text-hud-muted">
-                            {t('previewTtl')}
-                        </p>
-                    </HudPanel>
-                </>
-            )}
-            {result && (
-                <HudPanel className="space-y-3">
-                    <p className="text-hud-good">
-                        {t('saved', { runId: result.runId ?? '' })}
-                    </p>
-                    {media && (
-                        <CompendiumMediaReport
-                            media={media}
-                            running={phase === 'media'}
-                            paused={mediaPaused}
-                            actions={mediaActions}
-                        />
-                    )}
-                    <CompendiumReport
-                        key={result.runId}
-                        campaignId={campaignId}
-                        report={result}
-                        committed
+            <CompendiumWizardLayout
+                embedded={!!initialFile}
+                rail={<CompendiumStepRail wizard={wizard} view={view} />}
+                summary={
+                    <CompendiumSummary
+                        wizard={wizard}
+                        view={view}
+                        expiry={expiry}
                     />
-                </HudPanel>
-            )}
-            <CompendiumRunsList campaignId={campaignId} wizard={wizard} />
-            <ActionBar>
-                <Button
-                    variant="outline"
-                    disabled={busy && !!input}
-                    onClick={close}
-                >
-                    {t('close')}
-                </Button>
-            </ActionBar>
+                }
+                step={
+                    <div
+                        key={view.step}
+                        className="motion-rise space-y-4"
+                    >
+                        <CompendiumProgress phase={phase} media={media} />
+                        {error && <FormAlert>{error}</FormAlert>}
+                        {view.step === 0 && (
+                            <>
+                                <FileStep wizard={wizard} />
+                                {!initialFile && (
+                                    <CompendiumHistory
+                                        campaignId={campaignId}
+                                        wizard={wizard}
+                                    />
+                                )}
+                            </>
+                        )}
+                        {view.step === 1 && <CategoriesStep wizard={wizard} />}
+                        {view.step === 2 && preview && (
+                            <>
+                                <HudPanel className="space-y-3">
+                                    <RulesPatchOffer wizard={wizard} />
+                                    <CompendiumReport
+                                        campaignId={campaignId}
+                                        report={preview.report}
+                                        blockerActions={{
+                                            busy,
+                                            allowMixedEdition:
+                                                options.allowMixedEdition
+                                                    ? undefined
+                                                    : () =>
+                                                          applyOptions({
+                                                              ...options,
+                                                              allowMixedEdition: true,
+                                                          }),
+                                        }}
+                                    />
+                                </HudPanel>
+                                <HudPanel className="space-y-3">
+                                    <span id={DEPENDENCIES_ANCHOR} />
+                                    <CompendiumDependencies
+                                        key={preview.token}
+                                        wizard={wizard}
+                                    />
+                                </HudPanel>
+                            </>
+                        )}
+                        {view.step === 3 && preview && (
+                            <HudPanel>
+                                <label className="flex min-w-0 items-start gap-2 text-sm">
+                                    <Checkbox
+                                        className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
+                                        checked={rights}
+                                        disabled={busy}
+                                        onCheckedChange={(v) =>
+                                            setRights(v === true)
+                                        }
+                                    />{' '}
+                                    {t('rights')}
+                                </label>
+                            </HudPanel>
+                        )}
+                        {view.step === 4 && result && (
+                            <HudPanel className="space-y-3">
+                                <p className="text-hud-good">
+                                    {t('saved', { runId: result.runId ?? '' })}
+                                </p>
+                                {media && (
+                                    <CompendiumMediaReport
+                                        media={media}
+                                        running={phase === 'media'}
+                                        paused={mediaPaused}
+                                        actions={mediaActions}
+                                    />
+                                )}
+                                <CompendiumReport
+                                    key={result.runId}
+                                    campaignId={campaignId}
+                                    report={result}
+                                    committed
+                                />
+                            </HudPanel>
+                        )}
+                    </div>
+                }
+            />
         </HudPage>
     );
 }

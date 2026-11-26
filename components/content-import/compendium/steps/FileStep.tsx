@@ -1,39 +1,39 @@
 'use client';
 import { useTranslations } from 'next-intl';
 
-import { FormAlert } from '@/components/common/states';
-import { HudPanel } from '@/components/hud/page';
-import { Input } from '@/components/ui/input';
+import { FileDropZone } from '@/components/common/fields/FileDropZone';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import { metaSummary } from '@/lib/utils/compendium-import/labels';
 
-export function CompendiumFileStep({
-    wizard,
-}: {
-    wizard: CompendiumImportController;
-}) {
+export function FileStep({ wizard }: { wizard: CompendiumImportController }) {
     const t = useTranslations('compendium.file');
 
-    const { busy, error } = wizard.state;
+    const tc = useTranslator('compendium');
+
+    const { root, file, busy } = wizard.state;
+
+    const edition = root ? metaSummary(tc, root._meta).edition : undefined;
 
     return (
-        <HudPanel className="space-y-3">
+        <div className="space-y-3">
             <p className="text-sm">{t('intro')}</p>
-            <p className="text-sm text-hud-muted">{t('csvHint')}</p>
-            <label className="block text-sm">
-                {t('label')}
-                <Input
-                    className="mt-2"
-                    type="file"
-                    accept=".json,application/json"
-                    disabled={busy}
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-
-                        if (file) void wizard.actions.selectFile(file);
-                    }}
-                />
-            </label>
-            {error && <FormAlert>{error}</FormAlert>}
-        </HudPanel>
+            <FileDropZone
+                accept=".json,application/json"
+                label={t('drop')}
+                hint={t('csvHint')}
+                busy={busy}
+                file={
+                    file
+                        ? {
+                              ...file,
+                              meta: edition,
+                              replaceLabel: t('replace'),
+                          }
+                        : null
+                }
+                onFile={(picked) => void wizard.actions.selectFile(picked)}
+            />
+                </div>
     );
 }

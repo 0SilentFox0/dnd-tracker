@@ -2,7 +2,7 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
-import { CompendiumCategories } from '../CompendiumCategories';
+import { CategoriesStep } from '../steps/CategoriesStep';
 
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
@@ -35,14 +35,30 @@ const wizard = {
 
 it('renders English text without raw keys', async () => {
     const { container } = await renderWithIntl(
-        <CompendiumCategories wizard={wizard} />,
+        <CategoriesStep wizard={wizard} />,
         { locale: 'en', namespaces: ['common', 'validation', 'compendium'] }
     );
 
     expect(screen.getByLabelText('Spells (1)')).toBeInTheDocument();
     expect(
-        screen.getByRole('button', { name: 'Check JSON' })
+        screen.getByRole('radio', { name: 'Recommended' })
     ).toBeInTheDocument();
     expect(screen.getByText('Edition: classic 5e')).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/\bcompendium\./);
+});
+
+it('shows the reset notice when a check already exists', async () => {
+    const withPreview = {
+        ...wizard,
+        state: { ...wizard.state, preview: { token: 't' } },
+    } as unknown as CompendiumImportController;
+
+    await renderWithIntl(<CategoriesStep wizard={withPreview} />, {
+        locale: 'en',
+        namespaces: ['common', 'validation', 'compendium'],
+    });
+
+    expect(
+        screen.getByText('Changing the selection resets the check')
+    ).toBeInTheDocument();
 });
