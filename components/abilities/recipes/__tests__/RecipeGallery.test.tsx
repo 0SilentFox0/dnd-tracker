@@ -32,7 +32,7 @@ Object.assign(Element.prototype, {
     scrollIntoView: () => {},
 });
 
-const label = (id: string) => `abilityRegistry.templates.${id}.label`;
+const label = (id: string) => `abilityEditor.templates.${id}.label`;
 
 function renderGallery(props: {
     scope: 'ability' | 'spell';
@@ -76,19 +76,19 @@ describe('RecipeGallery', () => {
         const all = RECIPES.filter((r) => r.scopes.includes('ability'));
 
         expect(
-            screen.getAllByText(/abilityRegistry\.templates\..+\.label/)
+            screen.getAllByText(/abilityEditor\.templates\..+\.label/)
         ).toHaveLength(all.length);
 
         fireEvent.click(
             screen.getByRole('button', {
-                name: 'abilityRegistry.templates.categories.defense',
+                name: 'abilityEditor.templates.categories.defense',
             })
         );
 
         const defense = all.filter((r) => r.category === 'defense');
 
         expect(
-            screen.getAllByText(/abilityRegistry\.templates\..+\.label/)
+            screen.getAllByText(/abilityEditor\.templates\..+\.label/)
         ).toHaveLength(defense.length);
         expect(
             screen.queryByText(
@@ -102,7 +102,7 @@ describe('RecipeGallery', () => {
             })
         );
         expect(
-            screen.getAllByText(/abilityRegistry\.templates\..+\.label/)
+            screen.getAllByText(/abilityEditor\.templates\..+\.label/)
         ).toHaveLength(all.length);
     });
 
@@ -111,7 +111,7 @@ describe('RecipeGallery', () => {
 
         expect(screen.getByText(label('survive'))).toBeInTheDocument();
         expect(
-            screen.getByText('abilityRegistry.templates.survive.hint')
+            screen.getByText('abilityEditor.templates.survive.hint')
         ).toBeInTheDocument();
         expect(document.querySelector('[data-part]')).not.toBeNull();
     });
@@ -137,7 +137,7 @@ describe('RecipeGallery', () => {
 
         expect(
             screen.getByLabelText('abilities.templates.nameLabel')
-        ).toHaveValue('abilityRegistry.templates.bonusAction.defaultName');
+        ).toHaveValue('abilityEditor.templates.bonusAction.defaultName');
 
         const create = screen.getByRole('button', {
             name: 'abilities.templates.create',
@@ -145,7 +145,7 @@ describe('RecipeGallery', () => {
 
         fireEvent.change(
             screen.getByLabelText(
-                'abilityRegistry.templates.bonusAction.params.dice'
+                'abilityEditor.templates.bonusAction.params.dice'
             ),
             { target: { value: '2d' } }
         );
@@ -156,7 +156,7 @@ describe('RecipeGallery', () => {
 
         fireEvent.change(
             screen.getByLabelText(
-                'abilityRegistry.templates.bonusAction.params.dice'
+                'abilityEditor.templates.bonusAction.params.dice'
             ),
             { target: { value: '2d6' } }
         );
@@ -198,7 +198,7 @@ describe('RecipeGallery', () => {
         const spell = RECIPES.filter((r) => r.scopes.includes('spell'));
 
         expect(
-            screen.getAllByText(/abilityRegistry\.templates\..+\.label/)
+            screen.getAllByText(/abilityEditor\.templates\..+\.label/)
         ).toHaveLength(spell.length);
         expect(screen.queryByText('abilities.templates.scratch')).toBeNull();
         expect(screen.queryByText('abilities.templates.copyFrom')).toBeNull();
@@ -220,11 +220,11 @@ describe('RecipeGallery', () => {
         renderGallery({ scope: 'ability', onPick: vi.fn(), onOpenChange });
         fireEvent.click(
             screen.getByRole('button', {
-                name: 'abilityRegistry.templates.categories.support',
+                name: 'abilityEditor.templates.categories.support',
             })
         );
         fireEvent.click(
-            screen.getAllByText(/abilityRegistry\.templates\..+\.label/)[0]
+            screen.getAllByText(/abilityEditor\.templates\..+\.label/)[0]
         );
         fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
 
@@ -247,7 +247,7 @@ describe('RecipeGallery', () => {
         fireEvent.click(screen.getByText(label('bonusAction')));
         fireEvent.submit(
             screen.getByLabelText(
-                'abilityRegistry.templates.bonusAction.params.dice'
+                'abilityEditor.templates.bonusAction.params.dice'
             )
         );
 
@@ -316,7 +316,7 @@ describe('RecipeGallery', () => {
 
         const dice = () =>
             screen.getByLabelText(
-                'abilityRegistry.templates.bonusAction.params.dice'
+                'abilityEditor.templates.bonusAction.params.dice'
             );
 
         const initial = (dice() as HTMLInputElement).value;
@@ -353,7 +353,7 @@ describe('RecipeGallery', () => {
             renderGallery({ scope: 'ability', onPick });
             fireEvent.click(
                 screen.getByRole('button', {
-                    name: 'abilityRegistry.templates.categories.traits',
+                    name: 'abilityEditor.templates.categories.traits',
                 })
             );
 
@@ -383,7 +383,7 @@ describe('RecipeGallery', () => {
 
             expect(
                 screen.queryByRole('button', {
-                    name: 'abilityRegistry.templates.categories.traits',
+                    name: 'abilityEditor.templates.categories.traits',
                 })
             ).toBeNull();
             expect(screen.queryByText(traitLabel('ward'))).toBeNull();

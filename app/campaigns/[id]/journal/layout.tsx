@@ -1,18 +1,18 @@
-import type { ReactNode } from 'react';
-
 import SystemLayout from '@/app/campaigns/[id]/system-layout';
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
+import { RouteScope } from '@/lib/i18n/route-scope';
 
-export default function JournalLayout({
+export default async function Layout({
     children,
     params,
 }: {
-    children: ReactNode;
+    children: React.ReactNode;
     params: Promise<{ id: string }>;
 }) {
+    const { id } = await params;
+
     return (
-        <ExtendLocaleScope namespaces={['quests', 'scenario', 'world']}>
+        <RouteScope route="[id]/journal" campaignId={id}>
             <SystemLayout params={params}>{children}</SystemLayout>
-        </ExtendLocaleScope>
+        </RouteScope>
     );
 }

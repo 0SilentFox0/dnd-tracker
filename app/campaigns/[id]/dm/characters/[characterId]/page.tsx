@@ -2,13 +2,10 @@ import { CampaignGameShell } from '@/app/campaigns/[id]/campaign-game-shell';
 import { CharacterProfile } from '@/components/character-profile';
 import { campaignKeys } from '@/lib/hooks/campaigns';
 import { characterKeys } from '@/lib/hooks/characters';
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
-import { systemScope } from '@/lib/i18n/system-scope';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import { readCharacterSheet } from '@/lib/server/characters/core/read-sheet';
-import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 import { readOkJson } from '@/lib/utils/api/read-json';
 import type { CharacterSheet } from '@/types/characters';
 
@@ -62,21 +59,13 @@ export default async function DmCharacterPage({
         </PrefetchedQuery>
     );
 
-    const namespaces = systemScope(await systemOfCampaign(id), 'dmCharacter');
-
     return (
         <CampaignGameShell
             campaign={campaign}
             viewer={{ isDM: true, isDemo, userId }}
             active="character"
         >
-            {namespaces.length ? (
-                <ExtendLocaleScope namespaces={namespaces}>
-                    {profile}
-                </ExtendLocaleScope>
-            ) : (
-                profile
-            )}
+            {profile}
         </CampaignGameShell>
     );
 }

@@ -8,8 +8,6 @@ import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 
 const readCharacterSheet = vi.hoisted(() => vi.fn());
 
-const wfrp = vi.hoisted(() => ({ is: false }));
-
 vi.mock('@/lib/server/campaigns/access', () => ({
     requireCampaignDMOrDemo: vi.fn(async () => ({
         campaign: { maxLevel: 20 },
@@ -22,18 +20,6 @@ vi.mock('@/lib/server/characters/core/read-sheet', () => ({
 }));
 vi.mock('@/lib/server/campaigns/rules', () => ({
     loadRules: vi.fn(async () => ({ morale: { enabled: false } })),
-}));
-vi.mock('@/lib/server/systems/campaign-system', () => ({
-    systemOfCampaign: () => Promise.resolve({ key: wfrp.is ? 'wfrp' : 'homm' }),
-}));
-vi.mock('@/lib/i18n/extend-locale-scope', () => ({
-    ExtendLocaleScope: ({
-        children,
-        namespaces,
-    }: {
-        children: React.ReactNode;
-        namespaces: string[];
-    }) => <div data-scope={namespaces.join(',')}>{children}</div>,
 }));
 vi.mock('@/components/character-profile', () => ({
     CharacterProfile: () => null,
@@ -76,25 +62,5 @@ describe('DmCharacterPage (server)', () => {
             morale: { enabled: false },
         });
         expect(el.props.children.props.children.props.canEdit).toBe(true);
-    });
-
-    it('wfrp: профіль у scope wfrpDowntime+wfrpCorruption', async () => {
-        readCharacterSheet.mockResolvedValue(NextResponse.json({}));
-        wfrp.is = true;
-
-        const el = (
-            (await DmCharacterPage({
-                params: Promise.resolve({ id: 'c1', characterId: 'ch9' }),
-                searchParams: Promise.resolve({}),
-            })) as ReactElement<{ children: ReactElement }>
-        ).props.children as ReactElement<{
-            namespaces: string[];
-            children: ReactElement;
-        }>;
-
-        expect(el.props.namespaces).toEqual(['wfrpDowntime', 'wfrpCorruption']);
-        expect(el.props.children.type).toBe(PrefetchedQuery);
-
-        wfrp.is = false;
     });
 });

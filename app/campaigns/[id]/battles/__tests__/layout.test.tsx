@@ -7,13 +7,11 @@ vi.mock('@/components/common/states', () => ({
     LoadingState: () => <div data-testid="skeleton" />,
 }));
 
-vi.mock('@/lib/i18n/extend-locale-scope', () => ({
-    ExtendLocaleScope: ({ children }: { children: React.ReactNode }) =>
-        children,
+vi.mock('@/lib/i18n/route-scope', () => ({
+    RouteScope: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 vi.mock('@/lib/server/systems/campaign-system', () => ({
-    systemOfCampaign: async () => ({ key: 'dnd5e' }),
     systemSelectionOfCampaign: async () => ({ key: 'dnd5e' }),
 }));
 

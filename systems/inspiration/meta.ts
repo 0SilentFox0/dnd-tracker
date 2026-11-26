@@ -10,7 +10,7 @@ export const INSPIRATION_META = {
         { column: 'inspiration', path: ['ext', 'inspiration', 'available'] },
     ],
     i18n: {
-        campaign: ['inspiration'],
+        packs: { characterSheet: ['inspiration'], battle: ['inspiration'] },
         rules: ['rulesInspiration'],
         log: ['inspirationLog'],
         legacyKeys: {

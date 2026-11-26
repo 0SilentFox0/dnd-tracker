@@ -7,49 +7,20 @@ import {
 } from '@/lib/utils/rules/systems/catalog';
 import {
     metaOf,
+    type PackKey,
     SYSTEM_META,
     type SystemMeta,
     type SystemPageScope,
 } from '@/lib/utils/rules/systems/meta';
 
-export type SystemScopeSlot =
-    | 'battle'
-    | 'campaign'
-    | 'member'
-    | 'dm'
-    | SystemPageScope;
+export type SystemScopeSlot = SystemPageScope;
 
 export interface SystemScopeInput {
     key: string | null;
     modules?: readonly string[];
 }
 
-const PLAIN_SLOTS = new Set<SystemScopeSlot>([
-    'battle',
-    'campaign',
-    'member',
-    'dm',
-]);
-
-const slotOf = (
-    meta: SystemMeta | undefined,
-    slot: SystemScopeSlot
-): readonly Namespace[] => {
-    const i18n = meta?.i18n;
-
-    if (!i18n) return [];
-
-    const list = PLAIN_SLOTS.has(slot)
-        ? i18n[slot as 'battle' | 'campaign' | 'member' | 'dm']
-        : i18n.pages?.[slot as SystemPageScope];
-
-    return (list ?? []) as readonly Namespace[];
-};
-
-export function systemScope(
-    system: SystemScopeInput | null,
-    slot: SystemScopeSlot
-): readonly Namespace[] {
+const metasOf = (system: SystemScopeInput | null): SystemMeta[] => {
     if (!system?.key) return [];
 
     const selection = { key: system.key, modules: system.modules };
@@ -59,14 +30,27 @@ export function systemScope(
 
     const { base, modules } = composition(selection);
 
-    const metas = [
+    return [
         metaOf(system.key),
         moduleMetaOf(base),
         ...modules.map((id) => moduleMetaOf(id)),
-    ];
+    ].filter((meta): meta is SystemMeta => !!meta);
+};
 
-    return [...new Set(metas.flatMap((meta) => slotOf(meta, slot)))];
-}
+const unique = (list: readonly string[]): readonly Namespace[] =>
+    [...new Set(list)] as readonly Namespace[];
+
+export const systemScope = (
+    system: SystemScopeInput | null,
+    slot: SystemScopeSlot
+): readonly Namespace[] =>
+    unique(metasOf(system).flatMap((meta) => meta.i18n.pages?.[slot] ?? []));
+
+export const systemPackScope = (
+    system: SystemScopeInput | null,
+    pack: PackKey
+): readonly Namespace[] =>
+    unique(metasOf(system).flatMap((meta) => meta.i18n.packs?.[pack] ?? []));
 
 /** Keys of `gameTerms.ruleSystem.*` follow the open set of system keys, so the typed translator cannot check them. */
 export const ruleSystemLabelKey = (key: string): never =>

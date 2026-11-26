@@ -2,12 +2,9 @@ import { HudFormPage } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { RulesForm } from '@/components/rules/RulesForm';
 import type { Namespace } from '@/lib/i18n/config';
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
-import { rulesFormScope, systemScope } from '@/lib/i18n/system-scope';
 import { getTranslator } from '@/lib/i18n/translator';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
-import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 import { MECHANIC_REGISTRY } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ALL_SECTIONS } from '@/lib/utils/rules/section-registry';
@@ -68,22 +65,9 @@ export default async function DMRulesPage({
         );
     }
 
-    const form = (
+    return (
         <HudFormPage title={t('page.title')}>
             <RulesForm campaignId={id} />
         </HudFormPage>
-    );
-
-    const namespaces = [
-        ...new Set([
-            ...systemScope(await systemOfCampaign(id), 'dmRules'),
-            ...rulesFormScope(),
-        ]),
-    ];
-
-    return namespaces.length ? (
-        <ExtendLocaleScope namespaces={namespaces}>{form}</ExtendLocaleScope>
-    ) : (
-        form
     );
 }

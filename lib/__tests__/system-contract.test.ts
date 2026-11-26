@@ -10,6 +10,7 @@ import { D6POOL_UI } from './fixtures/d6pool/ui';
 import { assertSystemContract } from './helpers/system-contract';
 
 import { SYSTEM_UI } from '@/components/systems/registry';
+import { PACKS } from '@/lib/i18n/route-scopes';
 import { SYSTEM_SERVER } from '@/lib/server/systems/registry';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import {
@@ -107,6 +108,14 @@ describe('system exhaustiveness', () => {
                 ).toBe(true);
         }
     );
+
+    it('every pack key of a meta is a known pack', () => {
+        for (const meta of SYSTEM_META as readonly SystemMeta[])
+            for (const key of Object.keys(meta.i18n.packs ?? {}))
+                expect(Object.keys(PACKS), `${meta.module}.${key}`).toContain(
+                    key
+                );
+    });
 
     it('every base system declares ratchet tokens', () => {
         const bases = (SYSTEM_META as readonly SystemMeta[]).filter(

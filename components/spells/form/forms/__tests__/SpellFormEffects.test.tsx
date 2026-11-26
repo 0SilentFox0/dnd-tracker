@@ -64,7 +64,7 @@ function openMenu() {
     });
 }
 
-const recipeLabel = (id: string) => `abilityRegistry.templates.${id}.label`;
+const recipeLabel = (id: string) => `abilityEditor.templates.${id}.label`;
 
 function pickRecipe(id: string) {
     openMenu();

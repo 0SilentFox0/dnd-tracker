@@ -51,10 +51,12 @@ export function FieldRenderer({
 }: FieldRendererProps) {
     const tr = useTranslator('abilityRegistry');
 
+    const te = useTranslator('abilityEditor');
+
     const errors = useErrorsUnder(path);
 
     const meta = owner
-        ? localizeField(tr, owner, rawMeta)
+        ? localizeField(tr, te, owner, rawMeta)
         : (rawMeta as LocalizedFieldMeta);
 
     const targetOptions = TARGET_KEYS.map((value) => ({

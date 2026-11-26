@@ -7,8 +7,6 @@ import { systemUiOf } from '@/components/systems';
 import { SystemGate } from '@/components/systems/SystemGate';
 import { CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
-import { systemScope } from '@/lib/i18n/system-scope';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';
 import { parseRules } from '@/lib/utils/rules/schema';
 
@@ -42,11 +40,9 @@ export default async function NewPlayerCharacterPage({
 
     if (DraftForm) {
         return (
-            <ExtendLocaleScope namespaces={systemScope(system, 'draft')}>
-                <SystemGate system={system}>
-                    <DraftForm campaignId={id} />
-                </SystemGate>
-            </ExtendLocaleScope>
+            <SystemGate system={system}>
+                <DraftForm campaignId={id} />
+            </SystemGate>
         );
     }
 

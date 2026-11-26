@@ -12,7 +12,7 @@ vi.unmock('next-intl');
 
 afterEach(cleanup);
 
-const NS = ['common', 'abilities', 'abilityRegistry'] as const;
+const NS = ['common', 'abilities', 'abilityRegistry', 'abilityEditor'] as const;
 
 const full: AbilityFlowSummary = {
     when: [seg('summary.trigger.passive')],

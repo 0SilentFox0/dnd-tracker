@@ -67,7 +67,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
     const t = useTranslations('abilities.templates');
 
-    const tr = useTranslator('abilityRegistry');
+    const tr = useTranslator('abilityEditor');
 
     const { campaignId } = useAbilityEditor();
 

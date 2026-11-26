@@ -20,7 +20,7 @@ describe('useRecipeText', () => {
         const { result } = renderHook(() => useRecipeText());
 
         expect(result.current(RECIPES[0], 'hint')).toBe(
-            `abilityRegistry.templates.${RECIPES[0].id}.hint`
+            `abilityEditor.templates.${RECIPES[0].id}.hint`
         );
     });
 });
