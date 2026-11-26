@@ -8,6 +8,7 @@ body:has([data-landing])::after { display: none; }
 
   @supports (animation-timeline: view()) {
     .landing-reveal { animation: ld-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
+    .landing-reveal.ld-drift { animation: ld-reveal linear both, ld-drift linear both; animation-timeline: view(), view(); animation-range: entry 0% entry 60%, cover; }
   }
 }
 
@@ -16,12 +17,12 @@ body:has([data-landing])::after { display: none; }
 /* shared backdrop: fixed layers behind all sections; --mx/--my come from PointerParallax */
 .ld-bg, .ld-fog, .ld-light, .ld-vignette { position: fixed; pointer-events: none; z-index: -1; }
 .ld-bg {
-  inset: -6%;
-  background: #0b0908 image-set(url(/bg/vey-strait-2k.webp) 1x) center / cover no-repeat;
+  inset: -6% -6% -16%;
+  background: #0b0908 url(/bg/vey-strait-2k.webp) center / cover no-repeat;
   transform: translate3d(calc(var(--mx, 0) * -12px), calc(var(--my, 0) * -12px), 0);
 }
 @media (min-width: 1921px) {
-  .ld-bg { background-image: image-set(url(/bg/vey-strait-4k.webp) 1x); }
+  .ld-bg { background-image: url(/bg/vey-strait-4k.webp); }
 }
 .ld-fog, .ld-light, .ld-vignette { inset: 0; }
 .ld-fog {
@@ -56,6 +57,7 @@ section > .ld-container, section > div > .ld-container { width: min(100%, var(--
 .ld-h2 { font-size: clamp(1.75rem, 1rem + 2vw, 3.75rem); }
 .ld-lead { font-size: clamp(1rem, 0.9rem + 0.35vw, 1.375rem); }
 .ld-panel {
+  background: rgba(13, 10, 8, 0.78);
   background: color-mix(in srgb, var(--palette-page) 78%, transparent);
   backdrop-filter: blur(6px);
   border: 1px solid var(--hud-rule);

@@ -63,11 +63,11 @@ describe('PointerParallax', () => {
 
         expect(Number(root.getPropertyValue('--mx'))).toBeGreaterThan(0);
         expect(Number(root.getPropertyValue('--my'))).toBeLessThan(0);
-        expect(add.mock.calls.some((c) => c[0] === 'pointermove')).toBe(true);
+        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(true);
 
         unmount();
         expect(root.getPropertyValue('--mx')).toBe('');
-        expect(remove.mock.calls.some((c) => c[0] === 'pointermove')).toBe(
+        expect(remove.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(
             true
         );
     });
@@ -78,7 +78,7 @@ describe('PointerParallax', () => {
         const add = vi.spyOn(window, 'addEventListener');
 
         render(<PointerParallax />);
-        expect(add.mock.calls.some((c) => c[0] === 'pointermove')).toBe(false);
+        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(false);
     });
 
     it('subscribes to nothing under reduced motion', () => {
@@ -87,6 +87,6 @@ describe('PointerParallax', () => {
         const add = vi.spyOn(window, 'addEventListener');
 
         render(<PointerParallax />);
-        expect(add.mock.calls.some((c) => c[0] === 'pointermove')).toBe(false);
+        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(false);
     });
 });

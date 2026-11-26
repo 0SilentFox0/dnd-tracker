@@ -48,7 +48,7 @@ export async function LegalPage({
             localeHrefs={localeHrefs}
             anchorBase={LANDING_PATH[locale]}
         >
-            <main className="ld-container px-4 pt-28 pb-16">
+            <main className="ld-container pt-28 pb-16">
                 <article className="ld-panel mx-auto max-w-[65ch] rounded-lg p-6 sm:p-10">
                     <nav
                         aria-label={t('page.navAria')}
@@ -60,11 +60,11 @@ export async function LegalPage({
                                 prefetch={false}
                                 href={LEGAL_PATH[locale][d]}
                                 aria-current={d === doc ? 'page' : undefined}
-                                className={
+                                className={`inline-flex min-h-10 items-center px-1 ${
                                     d === doc
                                         ? 'text-hud-ink'
                                         : 'hover:text-hud-ink'
-                                }
+                                }`}
                             >
                                 {t(`page.navLabels.${d}`)}
                             </Link>
@@ -99,7 +99,7 @@ export async function LegalPage({
                         <Link
                             prefetch={false}
                             href={LANDING_PATH[locale]}
-                            className="hud-sc text-sm text-hud-soft hover:text-hud-ink"
+                            className="hud-sc inline-flex min-h-10 items-center px-1 text-sm text-hud-soft hover:text-hud-ink"
                         >
                             {t('page.backToHome')}
                         </Link>

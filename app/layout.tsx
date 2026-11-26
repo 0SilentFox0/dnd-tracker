@@ -62,7 +62,7 @@ export default async function RootLayout({
                         </ThemeProvider>
                     </QueryProvider>
                 </ClientLocaleProvider>
-                <Analytics />
+                {process.env.VERCEL === '1' && <Analytics />}
             </body>
         </html>
     );

@@ -32,7 +32,7 @@ export function LandingNav({
 }) {
     return (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-hud-rule/60 bg-hud-page/85 backdrop-blur-md">
-            <div className="ld-container flex h-16 items-center justify-between gap-4 px-4">
+            <div className="ld-container flex h-16 items-center justify-between gap-4">
                 <Brand locale={locale} />
                 <nav
                     aria-label={t('nav.aria')}
@@ -97,14 +97,14 @@ export function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) 
                     <Link
                         prefetch={false}
                         href="/sign-in"
-                        className="hover:text-hud-ink"
+                        className="inline-flex min-h-10 items-center px-1 hover:text-hud-ink"
                     >
                         {t('footer.signIn')}
                     </Link>
                     <Link
                         prefetch={false}
                         href="/sign-up"
-                        className="hover:text-hud-ink"
+                        className="inline-flex min-h-10 items-center px-1 hover:text-hud-ink"
                     >
                         {t('footer.signUp')}
                     </Link>
@@ -119,7 +119,7 @@ export function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) 
                         key={doc}
                         prefetch={false}
                         href={LEGAL_PATH[locale][doc]}
-                        className="hover:text-hud-ink"
+                        className="inline-flex min-h-10 items-center px-1 hover:text-hud-ink"
                     >
                         {t(`footer.legal.${doc}`)}
                     </Link>

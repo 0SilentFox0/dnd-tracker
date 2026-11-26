@@ -17,5 +17,7 @@ describe('LandingBackdrop', () => {
     it('preloads the 2k background', () => {
         expect(html).toContain('rel="preload"');
         expect(html).toContain('href="/bg/vey-strait-2k.webp"');
+        expect(html).toContain('media="(max-width: 1920px)"');
+        expect(html.toLowerCase()).toContain('fetchpriority="high"');
     });
 });
