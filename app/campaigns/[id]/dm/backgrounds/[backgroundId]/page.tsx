@@ -35,11 +35,6 @@ export default async function EditBackgroundPage({
 
     return (
         <>
-            <SourceNotes
-                campaignId={id}
-                kind="backgrounds"
-                targetId={backgroundId}
-            />
             <SystemDmPage
                 campaignId={id}
                 section="backgrounds"
@@ -47,6 +42,13 @@ export default async function EditBackgroundPage({
                 canEdit
                 view={{ type: 'edit', id: backgroundId }}
                 data={toBackgroundData(row)}
+                side={
+                    <SourceNotes
+                        campaignId={id}
+                        kind="backgrounds"
+                        targetId={backgroundId}
+                    />
+                }
             />
         </>
     );

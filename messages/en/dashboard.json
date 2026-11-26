@@ -284,15 +284,6 @@
         "title": "Sets"
       }
     },
-    "mechanics": {
-      "branch": "Branch: {name}",
-      "abilities": "Abilities: {list}",
-      "grantedSpell": "Grants spell: {name}",
-      "spell": "{level}, {type}",
-      "dice": "Dice: {count}d",
-      "resolution": "Check: {value}",
-      "cost": "Cost: {value}"
-    },
     "detail": {
       "empty": "Pick an entry from the list"
     },

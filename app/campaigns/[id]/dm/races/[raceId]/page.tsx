@@ -35,9 +35,10 @@ export default async function EditRacePage({
     const race = toRace(raceData, { abilities, abilityIssues });
 
     return (
-        <>
-            <SourceNotes campaignId={id} kind="races" targetId={raceId} />
-            <RaceEditForm campaignId={id} race={race} />
-        </>
+        <RaceEditForm
+            campaignId={id}
+            race={race}
+            side={<SourceNotes campaignId={id} kind="races" targetId={raceId} />}
+        />
     );
 }

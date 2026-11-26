@@ -9,12 +9,14 @@ export function BackgroundsPage({
     canEdit,
     view,
     data,
+    side,
 }: DmPageProps) {
     if (view?.type === 'edit')
         return (
             <BackgroundForm
                 campaignId={campaignId}
                 background={data as BackgroundData}
+                side={side}
             />
         );
 

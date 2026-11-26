@@ -95,6 +95,7 @@ export interface DmPageProps {
     view?: DmPageView;
     /** Server-read payload of the view (the page narrows it itself) */
     data?: unknown;
+    side?: ReactNode;
 }
 
 export interface ItemGroupsLinkProps {

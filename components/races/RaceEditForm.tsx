@@ -1,11 +1,14 @@
 'use client';
 
+import { type ReactNode, useDeferredValue } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { RaceFormFields } from './RaceFormFields';
 
 import { withAbilityErrors } from '@/components/abilities';
+import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
 import { HudForm, HudFormPage } from '@/components/hud/form';
+import { RaceCard } from '@/components/races/RaceCard';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { useRaceForm } from '@/lib/hooks/races';
@@ -20,9 +23,10 @@ const FORM_ID = 'race-form';
 interface RaceEditFormProps {
     campaignId: string;
     race: Race;
+    side?: ReactNode;
 }
 
-export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
+export function RaceEditForm({ campaignId, race, side }: RaceEditFormProps) {
     const t = useTranslations('races');
 
     const ta = useTranslator('abilities');
@@ -39,10 +43,22 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
         getInitialRaceFormData(race)
     );
 
+    const deferred = useDeferredValue(editor.form.data);
+
     return (
         <HudFormPage
+            width="wide"
             title={t('edit.title')}
             aside={t('edit.aside')}
+            side={
+                <PlayerPreview notes={side}>
+                    <RaceCard
+                        race={{ ...race, ...deferred }}
+                        campaignId={campaignId}
+                        canEdit={false}
+                    />
+                </PlayerPreview>
+            }
             actions={
                 <>
                     <Button

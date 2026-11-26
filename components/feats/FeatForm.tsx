@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useDeferredValue, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -8,6 +8,8 @@ import { FeatBasicsTab } from './FeatBasicsTab';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
+import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
+import { FeatCard } from '@/components/feats/FeatCard';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useErrorTotals } from '@/lib/hooks/common';
@@ -39,6 +41,8 @@ export function FeatForm({
     const editor = useFeatForm(campaignId, id, initial);
 
     const { data, set } = editor.form;
+
+    const deferred = useDeferredValue(data);
 
     const [invalid, setInvalid] = useState({
         abilities: false,
@@ -118,7 +122,15 @@ export function FeatForm({
                 </>
             }
             aside={t('form.editAside')}
-            side={side}
+            side={
+                <PlayerPreview notes={side}>
+                    <FeatCard
+                        feat={{ id, ...deferred }}
+                        campaignId={campaignId}
+                        canEdit={false}
+                    />
+                </PlayerPreview>
+            }
             actions={
                 <>
                     <Button

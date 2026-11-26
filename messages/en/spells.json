@@ -325,6 +325,12 @@
     "mechanics": "Mechanics",
     "appearance": "Appearance description (how the spell looks)",
     "appearancePlaceholder": "For example: a fireball exploding in bright flames...",
-    "saveAppearance": "Save appearance description"
+    "saveAppearance": "Save appearance description",
+    "mech": {
+      "spell": "{level}, {type}",
+      "dice": "Dice: {count}d",
+      "resolution": "Check: {value}",
+      "cost": "Cost: {value}"
+    }
   }
 }
