@@ -220,7 +220,7 @@ export function TilePalettePanel({
                             <TileAssetImage
                                 tile={selectedTile}
                                 alt={tileLabel(selectedTile.key)}
-                                className={'max-h-full max-w-full object-contain'}
+                                className="max-h-full max-w-full object-contain"
                             />
                         </div>
                     </div>
@@ -252,7 +252,7 @@ export function TilePalettePanel({
                                 <TileAssetImage
                                     tile={tile}
                                     alt=""
-                                    className={'max-h-full max-w-full object-contain'}
+                                    className="max-h-full max-w-full object-contain"
                                 />
                             </span>
                             <span className="line-clamp-2 w-full text-[11px] leading-tight">

@@ -10,7 +10,9 @@ import {
     grappledBy,
     releaseGrapples,
 } from '@/lib/utils/battle/conditions/grapple-links';
+import { edgeKeyBetween } from '@/lib/utils/battle/grid/edge-keys';
 import { pathTo, reachable } from '@/lib/utils/battle/grid/path';
+import { awayStep } from '@/lib/utils/battle/grid/push';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     contest,
@@ -237,6 +239,43 @@ describe('grapple / shove / escape', () => {
 
         expect(hasCondition(get(out.participants, 't'), 'prone')).toBe(true);
     });
+
+    it.each(['square', 'hex'] as const)(
+        'shove push stops at a wall (%s)',
+        (grid) => {
+            const a = mk('a', 'ally', 0, 1, 5);
+
+            const tp = { x: 1, y: 1 };
+
+            const dest = awayStep({ x: 0, y: 1 }, tp, grid);
+
+            const walled: BattleMapConfig = {
+                ...map,
+                gridType: grid,
+                walls: [edgeKeyBetween(grid, tp, dest)!],
+            };
+
+            const out = runCoreAction({
+                participants: [a, mk('t', 'enemy', tp.x, tp.y)],
+                body: {
+                    action: 'shove',
+                    participantId: 'a',
+                    targetId: 't',
+                    mode: 'push',
+                },
+                map: walled,
+                rules: on(),
+                round: 1,
+                rng: () => 0.5,
+                battleId: 'b1',
+            });
+
+            expect(get(out.participants, 't').battleData.position).toEqual(tp);
+            expect(hasCondition(get(out.participants, 't'), 'prone')).toBe(
+                true
+            );
+        }
+    );
 
     it('shove push відштовхує на клітинку по прямій; зайнято — лише prone', () => {
         const a = mk('a', 'ally', 0, 1, 5);

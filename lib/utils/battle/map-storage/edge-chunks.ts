@@ -98,7 +98,7 @@ function locate(edge: string, grid: GridKind) {
     const parsed = parseEdge(edge);
 
     if (!parsed || parsed.grid !== grid) {
-        throw new EdgeChunkError('invalid edge key');
+        throw new EdgeChunkError(`invalid edge key: ${edge}`);
     }
 
     const { a, side } = parsed;
@@ -145,7 +145,8 @@ export function encodeEdges(
 
     const { header } = layoutOf(grid);
 
-    for (const e of edges.bars ?? []) put(chunks, e, KIND_BAR, cols, rows, grid);
+    for (const e of edges.bars ?? [])
+        put(chunks, e, KIND_BAR, cols, rows, grid);
 
     for (const e of edges.walls ?? []) {
         const { key, idx, byte } = locate(e, grid);

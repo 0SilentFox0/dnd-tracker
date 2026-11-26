@@ -23,9 +23,8 @@ import {
     releaseGrapples,
 } from '@/lib/utils/battle/conditions/grapple-links';
 import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
-import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { canStand } from '@/lib/utils/battle/grid/occupancy';
-import { awayStep } from '@/lib/utils/battle/grid/push';
+import { pushAway } from '@/lib/utils/battle/grid/push';
 import { getSpellSaveDC } from '@/lib/utils/common/calculations';
 import type { Ruleset } from '@/lib/utils/rules';
 import { checkBonus, rollCheck } from '@/systems/d20/rules/checks/roll-check';
@@ -253,7 +252,8 @@ export function runGrapple(input: GrappleActionInput): GrappleActionResult {
 
     const name = actor.basicInfo.name;
 
-    if (tooBigToHold(actor, target)) return reject(actionReason('targetTooBig'));
+    if (tooBigToHold(actor, target))
+        return reject(actionReason('targetTooBig'));
 
     if (
         hasCondition(target, 'grappled') &&
@@ -310,7 +310,8 @@ export function runShove(
 
     if (mode === 'push' && !map) return reject(actionReason('pushNeedsMap'));
 
-    if (tooBigToHold(actor, target)) return reject(actionReason('targetTooBig'));
+    if (tooBigToHold(actor, target))
+        return reject(actionReason('targetTooBig'));
 
     const name = actor.basicInfo.name;
 
@@ -340,9 +341,12 @@ export function runShove(
 
     const at = target.battleData.position;
 
-    const dest = mode === 'push' && from && at ? awayStep(from, at, gridOf(map)) : null;
+    const pushed =
+        mode === 'push' && from && at && map
+            ? pushAway(map, participants, from, target, 1)
+            : null;
 
-    if (dest && map && canStand(map, participants, target, dest)) {
+    if (pushed && pushed.steps > 0) {
         messages.push(
             textRef('battleActions.grapple.pushed', {
                 target: target.basicInfo.name,
@@ -352,7 +356,7 @@ export function runShove(
         return {
             participants: replaceParticipant(participants, {
                 ...target,
-                battleData: { ...target.battleData, position: dest },
+                battleData: { ...target.battleData, position: pushed.position },
             }),
             message: joinLines(messages, '; '),
         };

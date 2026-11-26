@@ -1,5 +1,5 @@
-import { edgeCellsOf,edgeSegment, edgesOfCell } from './edge-keys';
-import { blockedSet, cellKey, footprint, inBounds } from './geometry';
+import { edgeCellsOf, edgeSegment, edgesOfCell } from './edge-keys';
+import { blockedSet, cellKey, footprint, gridOf, inBounds } from './geometry';
 import {
     HEX_H,
     HEX_R,
@@ -226,7 +226,7 @@ export function edgeAtScreenPoint(
     y: number,
     tolerance?: number
 ): string | null {
-    if (map.gridType === 'hex')
+    if (gridOf(map) === 'hex')
         return hexEdgeAtPoint(map, x, y, tolerance ?? HEX_EDGE_TOLERANCE);
 
     return squareEdgeAtPoint(map, x, y, tolerance ?? EDGE_TOLERANCE);
