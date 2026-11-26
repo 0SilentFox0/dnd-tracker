@@ -104,16 +104,27 @@ export function artTextureUrls(scene: MapArtScene): string[] {
 
 const imageCache = new Map<string, Promise<CanvasImageSource | undefined>>();
 
+const loadedImages = new Map<string, CanvasImageSource>();
+
+export const loadedImage = (url: string): CanvasImageSource | undefined =>
+    loadedImages.get(url);
+
 function loadCached(url: string): Promise<CanvasImageSource | undefined> {
     const cached = imageCache.get(url);
 
     if (cached) return cached;
 
-    const promise = loadImage(url).catch(() => {
-        imageCache.delete(url);
+    const promise = loadImage(url)
+        .then((img): CanvasImageSource => {
+            loadedImages.set(url, img);
 
-        return undefined;
-    });
+            return img;
+        })
+        .catch(() => {
+            imageCache.delete(url);
+
+            return undefined;
+        });
 
     imageCache.set(url, promise);
 

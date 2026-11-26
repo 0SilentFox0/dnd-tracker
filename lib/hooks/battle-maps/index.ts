@@ -10,12 +10,20 @@ export {
 } from './useBattleMaps';
 export { useImportCatalogMap } from './useImportCatalogMap';
 export { useDeleteMapArt, useMapArt } from './useMapArt';
-export { type ArtTool, useMapArtEditor } from './useMapArtEditor';
+export {
+    type ArtTool,
+    type EditorStamps,
+    isStampTool,
+    STAMP_SCALE,
+    useMapArtEditor,
+} from './useMapArtEditor';
 export { useMapArtSave } from './useMapArtSave';
 export { useMapCatalog } from './useMapCatalog';
 export { useMapEditorDraft } from './useMapEditorDraft';
 export { type EditorPanel, useMapEditorWorkspace } from './useMapEditorWorkspace';
 export { type NewMapForm, useMapLibrary } from './useMapLibrary';
+export { ALL_CATEGORIES, useStampPalette } from './useStampPalette';
+export { pickStamp, useStampSelection } from './useStampSelection';
 export { useTileEditor } from './useTileEditor';
 export { useTileSave } from './useTileSave';
 export { useUvttImport,type UvttImportFailure } from './useUvttImport';

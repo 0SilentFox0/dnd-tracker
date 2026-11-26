@@ -167,4 +167,140 @@ describe('useMapArtEditor', () => {
         act(() => result.current.undo());
         expect(sceneOf(result.current).lights[0]).toMatchObject({ x: 5, intensity: 0.5 });
     });
+
+    describe('stamps', () => {
+        const stampsOf = (r: { scene: MapArtScene | null }) => sceneOf(r).stamps;
+
+        const started = () => {
+            const hook = setup();
+
+            act(() => hook.result.current.start());
+            act(() => hook.result.current.stamps.setAsset('altar'));
+
+            return hook;
+        };
+
+        it('places on the cell centre with snap and at the exact point without', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.place({ x: 130, y: 270 }));
+            expect(stampsOf(result.current)[0]).toMatchObject({
+                asset: 'altar',
+                x: 150,
+                y: 250,
+                z: 0,
+                scale: 1,
+            });
+            expect(result.current.stamps.selectedId).toBe(stampsOf(result.current)[0].id);
+
+            act(() => result.current.stamps.setSnap(false));
+            act(() => result.current.stamps.place({ x: 130, y: 270 }));
+            expect(stampsOf(result.current)[1]).toMatchObject({ x: 130, y: 270, z: 1 });
+            expect(stampsOf(result.current)[1].id.length).toBeLessThanOrEqual(40);
+        });
+
+        it('applies the ghost rotation and flip to new stamps', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.rotateGhost(1));
+            act(() => result.current.stamps.flipGhost());
+            act(() => result.current.stamps.place({ x: 50, y: 50 }));
+            expect(stampsOf(result.current)[0]).toMatchObject({ rot: 15, flip: true });
+        });
+
+        it('normalises rotation, clamps scale and position', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.place({ x: 50, y: 50 }));
+
+            const { id } = stampsOf(result.current)[0];
+
+            act(() =>
+                result.current.stamps.update(id, { rot: 370, scale: 9, x: 5000, y: -4 })
+            );
+            expect(stampsOf(result.current)[0]).toMatchObject({
+                rot: 10,
+                scale: 4,
+                x: 800,
+                y: 0,
+            });
+            act(() => result.current.stamps.update(id, { rot: -30 }));
+            expect(stampsOf(result.current)[0].rot).toBe(330);
+        });
+
+        it('coalesces moves with one key into a single undo step', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.place({ x: 50, y: 50 }));
+
+            const { id } = stampsOf(result.current)[0];
+
+            const key = `stamp-move:${id}`;
+
+            act(() => result.current.stamps.update(id, { x: 100 }, key));
+            act(() => result.current.stamps.update(id, { x: 200 }, key));
+            expect(stampsOf(result.current)[0].x).toBe(200);
+            act(() => result.current.undo());
+            expect(stampsOf(result.current)[0].x).toBe(50);
+            act(() => result.current.redo());
+            expect(stampsOf(result.current)[0].x).toBe(200);
+        });
+
+        it('duplicates with an offset and selects the copy, removes and reorders', () => {
+            const { result } = started();
+
+            act(() => result.current.stamps.place({ x: 150, y: 150 }));
+
+            const src = stampsOf(result.current)[0];
+
+            act(() => result.current.stamps.duplicate(src.id));
+
+            const copy = stampsOf(result.current)[1];
+
+            expect(copy.id).not.toBe(src.id);
+            expect(copy).toMatchObject({ asset: 'altar', x: src.x + 50, y: src.y + 50, z: 1 });
+            expect(result.current.stamps.selectedId).toBe(copy.id);
+
+            act(() => result.current.stamps.reorder(copy.id, -1));
+            act(() => result.current.stamps.reorder(copy.id, -1));
+            expect(stampsOf(result.current)[1].z).toBe(-1);
+
+            act(() => result.current.stamps.remove(copy.id));
+            expect(stampsOf(result.current)).toHaveLength(1);
+            expect(result.current.stamps.selectedId).toBeNull();
+        });
+
+        it('stops at the 2000 limit with a notice', () => {
+            const { result } = started();
+
+            const full = Array.from({ length: 2000 }, (_, i) => ({
+                id: `s${i}`,
+                asset: 'altar',
+                x: 10,
+                y: 10,
+                rot: 0,
+                scale: 1,
+                flip: false,
+                z: i,
+            }));
+
+            act(() =>
+                result.current.reset({
+                    scene: { ...sceneOf(result.current), stamps: full },
+                    sceneVersion: 0,
+                    bakedSceneVersion: null,
+                    bakedUrl: null,
+                    bakedAt: null,
+                })
+            );
+            act(() => result.current.stamps.place({ x: 50, y: 50 }));
+            expect(stampsOf(result.current)).toHaveLength(2000);
+            expect(result.current.notice?.message).toBe('maps.editor.stamps.limit');
+
+            act(() => result.current.clearNotice());
+            act(() => result.current.stamps.duplicate('s0'));
+            expect(stampsOf(result.current)).toHaveLength(2000);
+            expect(result.current.notice?.message).toBe('maps.editor.stamps.limit');
+        });
+    });
 });
