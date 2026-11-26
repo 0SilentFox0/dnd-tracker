@@ -44,7 +44,13 @@ export async function GET(req: Request, { params }: Ctx) {
 
     const record = await getArt(mapId);
 
-    const etag = weakEtag(mapId, 'art', record.sceneVersion);
+    const etag = weakEtag(
+        mapId,
+        'art',
+        record.sceneVersion,
+        record.bakedSceneVersion ?? 'none',
+        record.bakedAt ?? 'none'
+    );
 
     const notModified = ifNoneMatch(req, etag);
 

@@ -122,6 +122,27 @@ describe('map art API', () => {
         expect(second.status).toBe(304);
     });
 
+    it('changes the ETag when the same scene is re-baked', async () => {
+        const first = await GET(request('GET'), ctx);
+
+        art.getArt.mockResolvedValueOnce({
+            scene: null,
+            sceneVersion: 3,
+            bakedSceneVersion: 3,
+            bakedUrl: 'https://cdn/b.webp',
+            bakedAt: '2026-11-26T00:00:00.000Z',
+        });
+
+        const second = await GET(
+            request('GET', undefined, {
+                'if-none-match': first.headers.get('ETag') as string,
+            }),
+            ctx
+        );
+
+        expect(second.status).toBe(200);
+    });
+
     it('rejects hex edge keys on a square map with issues', async () => {
         const res = await PUT(
             request('PUT', payload({ scene: scene({ walls: { '1:1:ne': 'stone' } }) })),
