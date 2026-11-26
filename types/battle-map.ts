@@ -8,6 +8,7 @@ export interface BattleMapBrief {
     rows: number;
     version: number;
     updatedAt: string;
+    thumb: string | null;
 }
 
 export interface BattleMapFull extends BattleMapBrief {

@@ -14,6 +14,7 @@ const brief = (id: string, cols: number) => ({
     rows: 10,
     version: 1,
     updatedAt: '',
+    thumb: null,
 });
 
 vi.unmock('next-intl');

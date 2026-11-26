@@ -1,5 +1,6 @@
 export { battleMapKeys } from './keys';
 export { useMapLibrarySync } from './mapLibrarySync';
+export { useActiveToolChip } from './useActiveToolChip';
 export { useBattleMapEdges } from './useBattleMapEdges';
 export {
     useBattleMap,
@@ -16,6 +17,7 @@ export { useMapCatalog } from './useMapCatalog';
 export { useMapEditorDraft } from './useMapEditorDraft';
 export { type EditorPanel, useMapEditorWorkspace } from './useMapEditorWorkspace';
 export { type NewMapForm, useMapLibrary } from './useMapLibrary';
+export { useSaveMapToLibrary } from './useSaveMapToLibrary';
 export { useTileEditor } from './useTileEditor';
 export { useTileSave } from './useTileSave';
 export { useUvttImport,type UvttImportFailure } from './useUvttImport';

@@ -164,7 +164,47 @@
     "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
     "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer",
     "doorLocked": "Locked",
-    "doorLimit": "Door limit reached, the extra doors were not added"
+    "doorLimit": "Door limit reached, the extra doors were not added",
+    "sidebar": "Battle map panels",
+    "groups": {
+      "map": "Map",
+      "draw": "Drawing",
+      "special": "Special"
+    },
+    "panels": {
+      "size": "Size and grid",
+      "background": "Background",
+      "cells": "Cells",
+      "edges": "Walls and doors",
+      "mode": "Mode",
+      "motion": "Motion"
+    },
+    "panelDescription": {
+      "size": "Grid type, cell count and non-playable margins.",
+      "background": "Map image, grid scale and offset, calibration.",
+      "cells": "Mark blocked cells and hazardous areas.",
+      "edges": "Draw walls, bars and doors along cell edges.",
+      "mode": "A special map mode, such as a maze.",
+      "motion": "Movement animation on the map."
+    },
+    "hexEdgesOff": "Walls and doors are unavailable on a hex grid — switch to a square grid",
+    "quickStart": {
+      "title": "Get started",
+      "image": "Upload a map image",
+      "uvtt": "Import UVTT (.dd2vtt)",
+      "grid": "Empty grid — draw by hand"
+    },
+    "saveToLibrary": {
+      "button": "Save to library",
+      "title": "Save map to the library",
+      "description": "The battle keeps its own map; the library gets a separate copy.",
+      "name": "Map name",
+      "submit": "Save",
+      "saving": "Saving...",
+      "saved": "Map saved to the library.",
+      "open": "Open library",
+      "failed": "Could not save the map to the library"
+    }
   },
   "characters": {
     "title": "Characters",
