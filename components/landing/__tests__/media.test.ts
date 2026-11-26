@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -17,6 +19,13 @@ describe('showcaseMedia', () => {
         );
     });
 
+    it('combat triptych maps to screen-combat-N', () => {
+        const media = showcaseMedia('uk');
+
+        expect(media.combat1.image).toBe('/landing/uk/screen-combat-1.webp');
+        expect(media.combat3.image).toBe('/landing/uk/screen-combat-3.webp');
+    });
+
     it('only the phone frame is portrait', () => {
         const media = showcaseMedia('en');
 
@@ -29,7 +38,7 @@ describe('showcaseMedia', () => {
     it.each(LOCALES)('%s: every id has an image in its locale folder', (l) => {
         for (const [id, m] of Object.entries(showcaseMedia(l)))
             expect(m.image, id).toMatch(
-                new RegExp(`^/landing/${l}/screen-[a-z-]+\\.webp$`)
+                new RegExp(`^/landing/${l}/screen-[a-z0-9-]+\\.webp$`)
             );
     });
 });
@@ -41,7 +50,17 @@ describe('FEATURE_ITEMS', () => {
     });
 });
 
-// Files exist only after the shoot (landing-v3 Task 6).
-describe.skip('screenshot files (after shooting)', () => {
-    it.todo('every showcaseMedia image exists in public/');
+const NOT_SHOT_YET: ShowcaseId[] = ['mapEditor'];
+
+describe('screenshot files', () => {
+    it.each(LOCALES)('%s: every showcase image exists in public/', (l) => {
+        for (const [id, m] of Object.entries(showcaseMedia(l))) {
+            if (NOT_SHOT_YET.includes(id as ShowcaseId)) continue;
+
+            expect(
+                existsSync(path.join(process.cwd(), 'public', m.image ?? '')),
+                `${l}/${id}`
+            ).toBe(true);
+        }
+    });
 });

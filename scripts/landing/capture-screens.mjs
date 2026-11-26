@@ -2,7 +2,7 @@
 // Re-shoots public/landing/<locale>/screen-*.webp from a local database profile (scripts/landing/shots.json).
 // Usage: pnpm landing:screens --profile=en-srd [--only=battle,hero] [--base=http://localhost:3140] [--port=3140]
 //        pnpm landing:screens --login
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -23,7 +23,7 @@ const LOGIN_DB = 'landingshots';
 const DESKTOP = { viewport: { width: 1920, height: 1200 }, dpr: 2, width: 3840 };
 const MOBILE = { viewport: { width: 390, height: 844 }, dpr: 3, width: 1170 };
 const KB_LIMIT = 450;
-const QUALITIES = [82, 76, 70];
+const QUALITIES = [82, 76, 70, 62, 54, 46];
 const OFFLINE_TEXTS = ['No connection', "Немає зв'язку"];
 
 const { profiles } = JSON.parse(
@@ -167,6 +167,55 @@ async function prepareBattle(browser) {
 
 const resolved = (v) => !JSON.stringify(v).includes('TODO');
 
+function restoreBattle() {
+    const r = spawnSync('node', [path.join(import.meta.dirname, 'battle-state.mjs'), '--restore', `--db=${profile.db}`, `--battle=${profile.battleId}`], { encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(r.stderr);
+}
+
+async function runSteps(page, steps = []) {
+    for (const step of steps) {
+        if (step.click) await page.click(fill(tx(step.click)));
+        if (step.link)
+            await page
+                .getByRole('link', { name: fill(tx(step.link)) })
+                .first()
+                .click();
+        if (step.role)
+            for (let i = 0; i < (step.times ?? 1); i++)
+                await page
+                    .getByRole('button', { name: tx(step.role) })
+                    .first()
+                    .click(step.optional ? { timeout: 3000 } : {})
+                    .catch((e) => {
+                        if (!step.optional) throw e;
+                    });
+        if (step.press) await page.keyboard.press(step.press);
+        if (step.at) await page.mouse.click(...step.at);
+        if (step.wheel) {
+            await page.mouse.move(960, 600);
+            await page.mouse.wheel(...step.wheel);
+        }
+        if (step.drag) {
+            const [x1, y1, x2, y2] = step.drag;
+            await page.mouse.move(x1, y1);
+            await page.mouse.down();
+            await page.mouse.move(x2, y2, { steps: 12 });
+            await page.mouse.up();
+        }
+        if (step.goto)
+            await page.goto(c(step.goto), { waitUntil: 'networkidle' });
+        if (step.text)
+            await page.getByText(tx(step.text), { exact: step.exact ?? true }).first().click();
+        if (step.eval) await page.evaluate(step.eval);
+        if (step.scroll !== undefined)
+            await page.evaluate((y) => {
+                const el = [...document.querySelectorAll('main, [data-scroll]')].find((e) => e.scrollHeight > e.clientHeight);
+                (el ?? document.scrollingElement).scrollTo({ top: y });
+            }, step.scroll);
+        if (step.wait) await page.waitForTimeout(step.wait);
+    }
+}
+
 async function shoot(browser, shot) {
     const kind = shot.mobile ? MOBILE : DESKTOP;
     const zoom = shot.zoom ?? 1;
@@ -184,31 +233,15 @@ async function shoot(browser, shot) {
     const page = await ctx.newPage();
     await page.goto(url(shot), { waitUntil: 'networkidle' });
     if (shot.waitFor) await page.waitForSelector(shot.waitFor);
-    for (const step of shot.steps ?? []) {
-        if (step.click) await page.click(fill(tx(step.click)));
-        if (step.link)
-            await page
-                .getByRole('link', { name: fill(tx(step.link)) })
-                .first()
-                .click();
-        if (step.role)
-            for (let i = 0; i < (step.times ?? 1); i++)
-                await page
-                    .getByRole('button', { name: tx(step.role) })
-                    .first()
-                    .click();
-        if (step.goto)
-            await page.goto(c(step.goto), { waitUntil: 'networkidle' });
-        if (step.text)
-            await page.getByText(tx(step.text), { exact: true }).first().click();
-        if (step.eval) await page.evaluate(step.eval);
-        if (step.scroll !== undefined)
-            await page.evaluate((y) => {
-                const el = [...document.querySelectorAll('main, [data-scroll]')].find((e) => e.scrollHeight > e.clientHeight);
-                (el ?? document.scrollingElement).scrollTo({ top: y });
-            }, step.scroll);
-        if (step.wait) await page.waitForTimeout(step.wait);
+    await runSteps(page, shot.steps);
+    for (const frame of shot.frames ?? [shot]) {
+        if (frame !== shot) await runSteps(page, frame.steps);
+        await capture(page, frame, shot, kind);
     }
+    await ctx.close();
+}
+
+async function capture(page, frame, shot, kind) {
     for (const hint of await page
         .getByRole('button', {
             name: uiLocale === 'uk' ? 'Закрити підказку' : 'Dismiss hint',
@@ -218,7 +251,7 @@ async function shoot(browser, shot) {
     await page.addStyleTag({
         content: 'nextjs-portal, [data-nextjs-toast] { display: none !important; }',
     });
-    await page.waitForTimeout(400);
+    if (!frame.fast) await page.waitForTimeout(400);
     await page.evaluate(
         (texts) => {
             for (const el of document.querySelectorAll('div'))
@@ -231,21 +264,24 @@ async function shoot(browser, shot) {
         },
         shot.hide ?? OFFLINE_TEXTS
     );
-    await page.waitForTimeout(shot.settle ?? 1500);
+    await page.waitForTimeout(frame.settle ?? shot.settle ?? 1500);
     const png = await page.screenshot({ type: 'png' });
 
     let buf;
-    for (const quality of shot.quality ? [shot.quality] : QUALITIES) {
-        buf = await sharp(png)
-            .resize({ width: kind.width })
-            .webp({ quality, effort: 6 })
-            .toBuffer();
+    const widths = shot.mobile ? [kind.width] : [kind.width, 3456, 3072];
+    for (const width of widths) {
+        for (const quality of shot.quality ? [shot.quality] : QUALITIES) {
+            buf = await sharp(png)
+                .resize({ width })
+                .webp({ quality, effort: 6 })
+                .toBuffer();
+            if (shot.mobile || buf.length / 1024 <= KB_LIMIT) break;
+        }
         if (shot.mobile || buf.length / 1024 <= KB_LIMIT) break;
-        console.warn(`${shot.name}: ${(buf.length / 1024).toFixed(0)} KB > ${KB_LIMIT} KB at q${quality}, retrying lower`);
+        console.warn(`${frame.name}: ${(buf.length / 1024).toFixed(0)} KB > ${KB_LIMIT} KB at width ${width}, shrinking`);
     }
-    await writeFile(path.join(OUT, `screen-${shot.name}.webp`), buf);
-    console.log(`${shot.name}: ${(buf.length / 1024).toFixed(0)} KB`);
-    await ctx.close();
+    await writeFile(path.join(OUT, `screen-${frame.name}.webp`), buf);
+    console.log(`${frame.name}: ${(buf.length / 1024).toFixed(0)} KB`);
 }
 
 const server = await startServer();
@@ -267,7 +303,7 @@ try {
         for (const shot of profile.shots) {
             if (ONLY && !ONLY.includes(shot.name)) continue;
             const pending = [
-                ...JSON.stringify([shot.path, shot.steps ?? '']).matchAll(/\{(\w+)\}/g),
+                ...JSON.stringify([shot.path, shot.steps ?? '', shot.frames ?? '']).matchAll(/\{(\w+)\}/g),
             ]
                 .map((m) => m[1])
                 .filter((k) => !profile[k] || !resolved(profile[k]));
@@ -275,6 +311,7 @@ try {
                 console.warn(`${shot.name}: skipped, profile has no ${[...new Set(pending)].join(', ')}`);
                 continue;
             }
+            if (shot.restore) restoreBattle();
             await shoot(browser, shot);
         }
     }

@@ -8,13 +8,168 @@
             "scenePageId": "demo-bell-scene",
             "deckId": "demo-deck-listening-grove",
             "heroId": "demo-character-scout",
-            "sheetId": "demo-character-scout",
-            "mapId": "cmwxfbp3f0001eyghvyff9lyk",
+            "sheetId": "demo-character-rogue",
             "classLink": "Ranger",
             "shots": [
                 {
                     "name": "battle",
-                    "path": "/battles/{battleId}"
+                    "path": "/battles/{battleId}",
+                    "steps": [
+                        {
+                            "click": "[data-tour='battle.dm-open']"
+                        },
+                        {
+                            "wait": 600
+                        },
+                        {
+                            "click": "div.border-b:has-text('Maelis') >> button[title='Take control']"
+                        },
+                        {
+                            "wait": 1200
+                        },
+                        {
+                            "role": "Auto-roll",
+                            "optional": true
+                        },
+                        {
+                            "wait": 1500
+                        },
+                        {
+                            "eval": "document.querySelectorAll(\"[data-hud-block='hero'] button[aria-expanded='false'], [data-hud-block='dock'] button[aria-expanded='false']\").forEach(b=>b.click())"
+                        },
+                        {
+                            "wait": 1200
+                        }
+                    ],
+                    "restore": true
+                },
+                {
+                    "name": "combat",
+                    "path": "/battles/{battleId}",
+                    "restore": true,
+                    "steps": [
+                        {
+                            "click": "[data-tour='battle.dm-open']"
+                        },
+                        {
+                            "wait": 600
+                        },
+                        {
+                            "click": "div.border-b:has-text('Maelis') >> button[title='Take control']"
+                        },
+                        {
+                            "wait": 1500
+                        },
+                        {
+                            "eval": "document.head.insertAdjacentHTML('beforeend','<style>.battle-map-reach-outline,.battle-map-path-line,.battle-map-path-dot{display:none!important}</style>')"
+                        },
+                        {
+                            "wait": 500
+                        }
+                    ],
+                    "frames": [
+                        {
+                            "name": "combat-1",
+                            "steps": []
+                        },
+                        {
+                            "name": "combat-2",
+                            "fast": true,
+                            "settle": 0,
+                            "steps": [
+                                {
+                                    "at": [
+                                        210,
+                                        1125
+                                    ]
+                                },
+                                {
+                                    "wait": 1200
+                                },
+                                {
+                                    "at": [
+                                        170,
+                                        735
+                                    ]
+                                },
+                                {
+                                    "wait": 900
+                                },
+                                {
+                                    "at": [
+                                        1389,
+                                        998
+                                    ]
+                                },
+                                {
+                                    "wait": 1500
+                                },
+                                {
+                                    "at": [
+                                        1160,
+                                        330
+                                    ]
+                                },
+                                {
+                                    "wait": 700
+                                },
+                                {
+                                    "at": [
+                                        1168,
+                                        912
+                                    ]
+                                },
+                                {
+                                    "wait": 700
+                                },
+                                {
+                                    "text": "Next · rolls",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 900
+                                },
+                                {
+                                    "text": "Auto roll",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 800
+                                },
+                                {
+                                    "text": "Next · summary",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 900
+                                },
+                                {
+                                    "text": "Apply",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 450
+                                }
+                            ]
+                        },
+                        {
+                            "name": "combat-3",
+                            "steps": [
+                                {
+                                    "wait": 6000
+                                },
+                                {
+                                    "at": [
+                                        1786,
+                                        29
+                                    ]
+                                },
+                                {
+                                    "wait": 1500
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "name": "scenario",
@@ -43,7 +198,27 @@
                 },
                 {
                     "name": "world",
-                    "path": "/world"
+                    "path": "/world",
+                    "steps": [
+                        {
+                            "role": "Play"
+                        },
+                        {
+                            "wait": 1500
+                        },
+                        {
+                            "click": "[role=combobox]:has-text('DM view')"
+                        },
+                        {
+                            "wait": 800
+                        },
+                        {
+                            "click": "[role=option]:has-text('Lark')"
+                        },
+                        {
+                            "wait": 2500
+                        }
+                    ]
                 },
                 {
                     "name": "constructor",
@@ -55,7 +230,8 @@
                         {
                             "wait": 1500
                         }
-                    ]
+                    ],
+                    "zoom": 1.25
                 },
                 {
                     "name": "player-mobile",
@@ -65,10 +241,6 @@
                 {
                     "name": "dashboard",
                     "path": ""
-                },
-                {
-                    "name": "map-editor",
-                    "path": "/dm/maps/{mapId}"
                 },
                 {
                     "name": "soundboard",
@@ -81,7 +253,23 @@
                 },
                 {
                     "name": "scenario-graph",
-                    "path": "/dm/graph"
+                    "path": "/dm/graph",
+                    "steps": [
+                        {
+                            "text": "Show all entities",
+                            "exact": true
+                        },
+                        {
+                            "wait": 1500
+                        },
+                        {
+                            "text": "Show single-link entities",
+                            "exact": true
+                        },
+                        {
+                            "wait": 2000
+                        }
+                    ]
                 },
                 {
                     "name": "content-copy",
@@ -94,16 +282,43 @@
                             }
                         },
                         {
-                            "wait": 1200
+                            "wait": 900
+                        },
+                        {
+                            "click": "[role=dialog] label:has-text('Crypt of the Silent Bell')"
+                        },
+                        {
+                            "wait": 300
+                        },
+                        {
+                            "click": "[role=dialog] label:has-text('Ashen Vale Chronicle')"
+                        },
+                        {
+                            "wait": 300
+                        },
+                        {
+                            "click": "[role=dialog] label:has-text('Sunken Crown')"
+                        },
+                        {
+                            "wait": 300
                         }
-                    ]
+                    ],
+                    "zoom": 1.6
                 },
                 {
                     "name": "mcp",
-                    "path": "/dm/ai"
+                    "path": "/dm/ai",
+                    "zoom": 1.4,
+                    "steps": [
+                        {
+                            "eval": "const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode())) n.textContent=n.textContent.replaceAll('http://localhost:3000','https://critnest.com');"
+                        },
+                        {
+                            "wait": 300
+                        }
+                    ]
                 }
-            ],
-            "replayBattle": true
+            ]
         },
         "en-homm": {
             "locale": "en",
@@ -115,10 +330,6 @@
                 {
                     "name": "hero",
                     "path": "/dm/characters/{heroId}"
-                },
-                {
-                    "name": "sheet",
-                    "path": "/dm/characters/{sheetId}"
                 }
             ]
         },
@@ -131,12 +342,146 @@
             "deckId": "cmw3cax840001k008ocemtz00",
             "heroId": "cmv3tpjyk0015eyo0azxe9oq2",
             "sheetId": "cmv3tpjyk0015eyo0azxe9oq2",
-            "mapId": "cmwxfbsup0001eyiv8eyh9xe8",
             "classLink": "Маг стихій",
             "shots": [
                 {
                     "name": "battle",
-                    "path": "/battles/{battleId}"
+                    "path": "/battles/{battleId}",
+                    "steps": [
+                        {
+                            "click": "[data-tour='battle.dm-open']"
+                        },
+                        {
+                            "wait": 600
+                        },
+                        {
+                            "click": "div.border-b:has-text('Зехір') >> button[title='Взяти керування']"
+                        },
+                        {
+                            "wait": 1200
+                        },
+                        {
+                            "role": "Авто-кидок",
+                            "optional": true
+                        },
+                        {
+                            "wait": 1500
+                        },
+                        {
+                            "eval": "document.querySelectorAll(\"[data-hud-block='hero'] button[aria-expanded='false'], [data-hud-block='dock'] button[aria-expanded='false']\").forEach(b=>b.click())"
+                        },
+                        {
+                            "wait": 1200
+                        }
+                    ]
+                },
+                {
+                    "name": "combat",
+                    "path": "/battles/{battleId}",
+                    "restore": true,
+                    "steps": [
+                        {
+                            "click": "[data-tour='battle.dm-open']"
+                        },
+                        {
+                            "wait": 600
+                        },
+                        {
+                            "click": "div.border-b:has-text('Зехір') >> button[title='Взяти керування']"
+                        },
+                        {
+                            "wait": 1500
+                        },
+                        {
+                            "eval": "document.head.insertAdjacentHTML('beforeend','<style>.battle-map-reach-outline,.battle-map-path-line,.battle-map-path-dot{display:none!important}</style>')"
+                        },
+                        {
+                            "wait": 500
+                        }
+                    ],
+                    "frames": [
+                        {
+                            "name": "combat-1",
+                            "steps": []
+                        },
+                        {
+                            "name": "combat-2",
+                            "fast": true,
+                            "settle": 0,
+                            "steps": [
+                                {
+                                    "text": "Потойбічна стріла",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 1500
+                                },
+                                {
+                                    "at": [
+                                        200,
+                                        497
+                                    ]
+                                },
+                                {
+                                    "wait": 900
+                                },
+                                {
+                                    "text": "Навести на карті",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 1500
+                                },
+                                {
+                                    "at": [
+                                        1220,
+                                        590
+                                    ]
+                                },
+                                {
+                                    "wait": 1500
+                                },
+                                {
+                                    "text": "Авто-кидок",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 800
+                                },
+                                {
+                                    "text": "Далі · підсумок",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 1000
+                                },
+                                {
+                                    "text": "Застосувати",
+                                    "exact": false
+                                },
+                                {
+                                    "wait": 1300
+                                }
+                            ]
+                        },
+                        {
+                            "name": "combat-3",
+                            "steps": [
+                                {
+                                    "wait": 6000
+                                },
+                                {
+                                    "at": [
+                                        1786,
+                                        29
+                                    ]
+                                },
+                                {
+                                    "wait": 1500
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "name": "scenario",
@@ -207,10 +552,6 @@
                 {
                     "name": "dashboard",
                     "path": ""
-                },
-                {
-                    "name": "map-editor",
-                    "path": "/dm/maps/{mapId}"
                 },
                 {
                     "name": "soundboard",
