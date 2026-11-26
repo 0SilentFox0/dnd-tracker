@@ -1,5 +1,6 @@
 import { after } from 'next/server';
 import { Prisma } from '@prisma/client';
+import { metric } from '@vercel/functions';
 
 import { prisma } from '@/lib/db';
 import {
@@ -56,6 +57,22 @@ function record(
     }
 }
 
+function mirror(key: string, value: number, canonical: string): void {
+    if (key.startsWith('provider.') || key.startsWith('vercel.')) return;
+
+    const tags: Record<string, string> = {};
+
+    for (const pair of canonical ? canonical.split(',') : []) {
+        const at = pair.indexOf('=');
+
+        if (at > 0) tags[pair.slice(0, at)] = pair.slice(at + 1);
+    }
+
+    try {
+        metric(key, value, tags);
+    } catch {}
+}
+
 function lookup(key: string): MetricDef | null {
     const def = metricDef(key);
 
@@ -83,14 +100,20 @@ function maybeFlush(): void {
 export function incr(key: MetricKey, by = 1, labels?: Labels): void {
     if (!lookup(key)) return;
 
-    record(bucketStart(new Date()), key, canonicalLabels(labels, key), by);
+    const canonical = canonicalLabels(labels, key);
+
+    record(bucketStart(new Date()), key, canonical, by);
+    mirror(key, by, canonical);
     maybeFlush();
 }
 
 export function gauge(key: MetricKey, value: number, labels?: Labels): void {
     if (!lookup(key)) return;
 
-    record(bucketStart(new Date()), key, canonicalLabels(labels, key), value);
+    const canonical = canonicalLabels(labels, key);
+
+    record(bucketStart(new Date()), key, canonical, value);
+    mirror(key, value, canonical);
     maybeFlush();
 }
 
@@ -101,6 +124,7 @@ export function observe(key: MetricKey, ms: number, labels?: Labels): void {
 
     const base = canonicalLabels(labels, key);
 
+    mirror(key, ms, base);
     record(bucket, `${key}:count`, base, 1);
     record(bucket, `${key}:sum`, base, ms);
     record(

@@ -2,15 +2,11 @@ import type { ProviderAdapter } from './types';
 
 import 'server-only';
 import { fetchWithTimeout } from '@/lib/server/ops/fetch-with-timeout';
+import { parseVercelCharges } from '@/lib/utils/ops/vercel-charges';
 
 const TIMEOUT_MS = 7000;
 
-type Charge = {
-    EffectiveCost?: string | number;
-    Tags?: { ProjectId?: string };
-};
-
-// The FOCUS charges feed is the only documented usage endpoint; raw invocation and bandwidth counts are not exposed.
+// The FOCUS charges feed is the only documented usage endpoint; bandwidth and invocations are summed from its consumed quantities.
 export const vercelAdapter: ProviderAdapter = {
     name: 'vercel',
     async collect() {
@@ -55,19 +51,25 @@ export const vercelAdapter: ProviderAdapter = {
 
             if (!response.ok) return 'unavailable';
 
-            let cost = 0;
+            const usage = parseVercelCharges(await response.text(), projectId);
 
-            for (const line of (await response.text()).split('\n')) {
-                if (!line.trim()) continue;
+            const readings = [
+                { metric: 'cost_month_usd', value: usage.costUsd },
+            ];
 
-                const row = JSON.parse(line) as Charge;
+            if (usage.bandwidthBytes !== null)
+                readings.push({
+                    metric: 'bandwidth_bytes',
+                    value: usage.bandwidthBytes,
+                });
 
-                if (projectId && row.Tags?.ProjectId !== projectId) continue;
+            if (usage.invocations !== null)
+                readings.push({
+                    metric: 'invocations',
+                    value: usage.invocations,
+                });
 
-                cost += Number(row.EffectiveCost) || 0;
-            }
-
-            return [{ metric: 'cost_month_usd', value: cost }];
+            return readings;
         } catch {
             return 'unavailable';
         }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import './globals.css';
 import './fonts.css';
@@ -63,6 +64,7 @@ export default async function RootLayout({
                     </QueryProvider>
                 </ClientLocaleProvider>
                 {process.env.VERCEL === '1' && <Analytics />}
+                {process.env.VERCEL === '1' && <SpeedInsights />}
             </body>
         </html>
     );

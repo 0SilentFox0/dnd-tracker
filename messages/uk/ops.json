@@ -92,10 +92,12 @@
       "cloudflare": "Запити Cloudflare за сьогодні",
       "pusherChannels": "Зайняті канали Pusher",
       "supabaseEgress": "Вихідний трафік Supabase",
+      "vercelBandwidth": "Трафік Vercel",
       "vercelInvocations": "Виклики Vercel",
       "upstashCommands": "Команди Upstash"
     },
     "series": {
+      "bandwidth": "Трафік",
       "total": "Усього",
       "active": "Активні",
       "idleInTx": "Простій у транзакції",

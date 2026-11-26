@@ -6,6 +6,10 @@ const { executeRaw, afterMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/db', () => ({ prisma: { $executeRaw: executeRaw } }));
+
+const { metricMock } = vi.hoisted(() => ({ metricMock: vi.fn() }));
+
+vi.mock('@vercel/functions', () => ({ metric: metricMock }));
 vi.mock('next/server', () => ({ after: afterMock }));
 vi.mock('@/lib/utils/common/logger', () => ({
     logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -101,5 +105,18 @@ describe('metrics buffer', () => {
 
         expect(afterMock).toHaveBeenCalledTimes(1);
         expect(executeRaw).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('Vercel Custom Metrics mirror', () => {
+    it('mirrors app metrics with tags and skips provider gauges', () => {
+        metricMock.mockReset();
+        incr('pusher.trigger', 2, { result: 'ok' });
+        gauge('provider.vercel.cost_month_usd', 5);
+
+        expect(metricMock).toHaveBeenCalledTimes(1);
+        expect(metricMock).toHaveBeenCalledWith('pusher.trigger', 2, {
+            result: 'ok',
+        });
     });
 });

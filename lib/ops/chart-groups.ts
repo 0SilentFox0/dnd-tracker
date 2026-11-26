@@ -142,6 +142,13 @@ export const CHART_GROUPS: ChartGroup[] = [
                 ],
             },
             {
+                id: 'vercelBandwidth',
+                unit: 'bytes',
+                series: [
+                    { id: 'bandwidth', key: 'provider.vercel.bandwidth_bytes' },
+                ],
+            },
+            {
                 id: 'vercelInvocations',
                 unit: 'count',
                 series: [

@@ -92,10 +92,12 @@
       "cloudflare": "Cloudflare requests today",
       "pusherChannels": "Pusher occupied channels",
       "supabaseEgress": "Supabase egress",
+      "vercelBandwidth": "Vercel bandwidth",
       "vercelInvocations": "Vercel invocations",
       "upstashCommands": "Upstash commands"
     },
     "series": {
+      "bandwidth": "Bandwidth",
       "total": "Total",
       "active": "Active",
       "idleInTx": "Idle in transaction",
