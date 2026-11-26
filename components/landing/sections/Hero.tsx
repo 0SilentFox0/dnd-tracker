@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { LandingFog } from '@/components/landing/LandingFog';
+import { HERO_SHOT } from '@/components/landing/media';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { BrandMark } from '@/components/landing/parts';
 import { PrimaryCta } from '@/components/landing/PrimaryCta';
@@ -67,7 +68,7 @@ export function Hero({ t }: { t: Translator }) {
                         className="shadow-[0_50px_120px_-30px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.2)]"
                     >
                         <Screen
-                            id="combat"
+                            id={HERO_SHOT}
                             alt={t('hero.alt')}
                             priority
                             sizes="(min-width: 2560px) 1800px, (min-width: 1024px) 1200px, 100vw"

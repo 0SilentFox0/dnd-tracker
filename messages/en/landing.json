@@ -28,7 +28,7 @@
     "member": "My campaigns",
     "secondary": "See how it works",
     "note": "Works in the browser · players join from their phones",
-    "alt": "The DM screen of a battle: initiative queue, tactical map with tokens, combat log and music player"
+    "alt": "The DM's world map: regions, towns, marked points and zones of the campaign"
   },
   "problem": {
     "eyebrow": "Sound familiar?",
@@ -144,20 +144,44 @@
         "text": "Enemy strength scales to your party automatically, or follow an XP budget for 5e-style encounters."
       }
     },
-    "frames": {
-      "label": "Three moments of one battle",
+    "demo": {
+      "label": "A battle playing out on the DM screen",
       "windowTitle": "DM screen · battle",
-      "1": {
-        "caption": "Initiative is rolled and ordered automatically",
-        "alt": "The battle screen at the start: tokens placed on the map and the initiative order across the top"
+      "alt": "The DM's battle screen: initiative queue, tactical map with tokens and the combat log",
+      "names": {
+        "captain": "Guard Captain #1",
+        "priest": "Priest Acolyte #1",
+        "treant": "Treant #1",
+        "spider1": "Wolf Spider #1",
+        "spider2": "Wolf Spider #2"
       },
-      "2": {
-        "caption": "Pick an attack or spell, the dice and the rules do the rest",
-        "alt": "The battle screen mid-turn: an attack with its roll and visible effect on the map"
+      "turn": {
+        "captain": "Turn · Guard Captain #1",
+        "priest": "Turn · Priest Acolyte #1"
       },
-      "3": {
-        "caption": "Damage and effects are applied, logged and synced to players",
-        "alt": "The battle screen after the attack: damage, conditions and a new entry in the combat log"
+      "roll": {
+        "label": "Attack roll",
+        "target": "vs AC 15",
+        "hit": "Hit"
+      },
+      "spell": {
+        "name": "Fireball",
+        "dc": "DEX save · DC 14"
+      },
+      "save": {
+        "label": "DEX save",
+        "fail": "Fail",
+        "success": "Success"
+      },
+      "log": {
+        "title": "Combat log",
+        "round3": "Round 3",
+        "round2": "Round 2",
+        "attack": "attack",
+        "spell": "spell",
+        "hit": "Guard Captain #1 → Treant #1: 22 vs AC 15, hit for 12 slashing damage",
+        "fireball": "Priest Acolyte #1 casts Fireball: Wolf Spider #1 fails the save, Wolf Spider #2 takes half",
+        "older": "Guard Captain #1 → Treant #1: 2 damage"
       }
     },
     "fx": {

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
+import { CombatDemo } from '@/components/landing/sections/CombatDemo';
 import { Features } from '@/components/landing/sections/Features';
 import { Replace } from '@/components/landing/sections/Replace';
 import { Systems } from '@/components/landing/sections/Systems';
@@ -17,7 +18,17 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
         replace: renderToStaticMarkup(<Replace t={t} />),
         features: renderToStaticMarkup(<Features t={t} />),
         systems: renderToStaticMarkup(<Systems t={t} />),
+        demo: renderToStaticMarkup(<CombatDemo t={t} />),
     };
+
+    it('CombatDemo plays one fight over a single battle frame', () => {
+        expect(html.demo.match(/<img/g)).toHaveLength(1);
+        expect(html.demo.match(/class="ld-demo-foe"/g)).toHaveLength(3);
+        expect(html.demo.match(/class="ld-demo-entry"/g)).toHaveLength(2);
+        expect(html.demo).toContain(t('combat.demo.spell.name'));
+        expect(html.demo).not.toMatch(/warhammer|wfrp/i);
+        expect(html.demo).not.toContain('landing.');
+    });
 
     it('Replace renders a table with six rows and no competitor-style fallbacks', () => {
         expect(html.replace).toContain('id="replace"');

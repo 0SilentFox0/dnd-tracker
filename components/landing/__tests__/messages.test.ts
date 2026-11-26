@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    COMBAT_FRAMES,
     FX_SPRITES,
+    HERO_SHOT,
     PREP_PANELS,
     SHOWCASE_MEDIA,
 } from '@/components/landing/media';
@@ -71,10 +71,8 @@ describe('landing messages', () => {
             ] as (keyof typeof SHOWCASE_MEDIA)[])
                 expect(SHOWCASE_MEDIA[id]?.image, id).toBeTruthy();
 
-            for (const [i, id] of COMBAT_FRAMES.entries()) {
-                expect(SHOWCASE_MEDIA[id].image, id).toBeTruthy();
-                expect(m.combat.frames[String(i + 1) as '1'].caption).toBeTruthy();
-            }
+            expect(SHOWCASE_MEDIA[HERO_SHOT].image).toBeTruthy();
+            expect(SHOWCASE_MEDIA.combat.image).toBeTruthy();
 
             expect(Object.keys(m.prep.panels)).toEqual([...PREP_PANELS]);
             expect(Object.keys(m.combat.fx.names)).toHaveLength(
@@ -127,7 +125,7 @@ describe('landing messages', () => {
     it('has no unfulfilled claims', () => {
         for (const { path, value } of leaves(en))
             expect(value, path).not.toMatch(
-                /obojima|video|remembers everything|testimonial/i
+                /obojima|video|remembers everything|testimonial|warhammer|wfrp/i
             );
     });
 });
