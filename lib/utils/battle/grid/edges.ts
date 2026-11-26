@@ -1,4 +1,5 @@
-import { cellLine } from './geometry';
+import { edgeKeyBetween } from './edge-keys';
+import { cellLine, gridOf } from './geometry';
 import { cornerOpen, edgeKey, wallSet } from './walls';
 
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
@@ -155,6 +156,14 @@ function edgeBlocksPlain(
     a: GridPoint,
     b: GridPoint
 ): boolean {
+    const grid = gridOf(map);
+
+    if (grid === 'hex') {
+        const key = edgeKeyBetween('hex', a, b);
+
+        return key !== null && set.has(key);
+    }
+
     const dx = Math.abs(b.x - a.x);
 
     const dy = Math.abs(b.y - a.y);
@@ -162,7 +171,7 @@ function edgeBlocksPlain(
     if (dx + dy === 0) return false;
 
     if (dx + dy === 1) {
-        const key = edgeKey(a, b);
+        const key = edgeKey(a, b, grid);
 
         return key !== null && set.has(key);
     }
@@ -180,7 +189,7 @@ export function cellsConnected(
 ): boolean {
     for (const from of fromCells) {
         for (const to of toCells) {
-            const line = cellLine(from, to);
+            const line = cellLine(from, to, gridOf(map));
 
             let clear = true;
 

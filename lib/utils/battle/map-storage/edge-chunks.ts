@@ -28,7 +28,7 @@ export class EdgeChunkError extends Error {
     }
 }
 
-function slot(x: number, y: number, side: 'e' | 's'): number {
+function slot(x: number, y: number, side: string): number {
     return (
         ((y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)) * 2 +
         (side === 'e' ? 0 : 1)

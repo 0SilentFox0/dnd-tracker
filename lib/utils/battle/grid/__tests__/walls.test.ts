@@ -29,6 +29,12 @@ describe('edgeKey / parseEdgeKey', () => {
     });
 });
 
+describe('parseEdgeKey: invalid', () => {
+    it('does not throw and yields NaN cells', () => {
+        expect(Number.isNaN(parseEdgeKey('x:y:s').a.x)).toBe(true);
+    });
+});
+
 describe('wallSet', () => {
     it('кешує за ідентичністю масиву, порожнє — спільний порожній набір', () => {
         const list = ['0:0:e'];

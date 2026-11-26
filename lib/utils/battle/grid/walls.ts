@@ -1,8 +1,11 @@
-import { cellKey, inBounds, neighbors } from './geometry';
+import type { EdgeSide } from './edge-keys';
+import { edgeKeyBetween, formatEdge, parseEdge } from './edge-keys';
+import { gridOf, inBounds, neighbors } from './geometry';
+import { hexDistance } from './hex';
 
-import type { GridPoint } from '@/types/battle-grid';
+import type { GridKind, GridPoint } from '@/types/battle-grid';
 
-export type GridSize = { cols: number; rows: number };
+export type GridSize = { cols: number; rows: number; gridType?: GridKind };
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
 
@@ -21,36 +24,33 @@ export function wallSet(list?: string[]): ReadonlySet<string> {
     return set;
 }
 
-export function formatEdgeKey(p: GridPoint, side: 'e' | 's'): string {
-    return `${cellKey(p)}:${side}`;
-}
+export const formatEdgeKey = (p: GridPoint, side: EdgeSide): string =>
+    formatEdge(p, side);
 
-export function edgeKey(a: GridPoint, b: GridPoint): string | null {
-    const dx = b.x - a.x;
-
-    const dy = b.y - a.y;
-
-    if (Math.abs(dx) + Math.abs(dy) !== 1) return null;
-
-    const first = dx < 0 || dy < 0 ? b : a;
-
-    return formatEdgeKey(first, dx !== 0 ? 'e' : 's');
+export function edgeKey(
+    a: GridPoint,
+    b: GridPoint,
+    grid: GridKind = 'square'
+): string | null {
+    return edgeKeyBetween(grid, a, b);
 }
 
 export interface ParsedEdge {
     a: GridPoint;
     b: GridPoint;
-    side: 'e' | 's';
+    side: EdgeSide;
 }
 
 export function parseEdgeKey(edge: string): ParsedEdge {
-    const [x, y, side] = edge.split(':');
+    const parsed = parseEdge(edge);
+
+    if (parsed) return { a: parsed.a, b: parsed.b, side: parsed.side };
+
+    const [x, y] = edge.split(':');
 
     const a = { x: Number(x), y: Number(y) };
 
-    return side === 'e'
-        ? { a, b: { x: a.x + 1, y: a.y }, side }
-        : { a, b: { x: a.x, y: a.y + 1 }, side: 's' };
+    return { a, b: { x: a.x, y: a.y + 1 }, side: 's' };
 }
 
 export function edgeCells(edge: string): [GridPoint, GridPoint] {
@@ -67,7 +67,7 @@ export function hasWall(
 ): boolean {
     if (!inBounds(grid, a) || !inBounds(grid, b)) return true;
 
-    const key = edgeKey(a, b);
+    const key = edgeKey(a, b, gridOf(grid));
 
     return key !== null && walls.has(key);
 }
@@ -96,6 +96,10 @@ export function canStep(
     a: GridPoint,
     b: GridPoint
 ): boolean {
+    if (gridOf(grid) === 'hex') {
+        return hexDistance(a, b) === 1 && !hasWall(grid, walls, a, b);
+    }
+
     const dx = Math.abs(b.x - a.x);
 
     const dy = Math.abs(b.y - a.y);
