@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
     FX_SPRITES,
+    HERO_SHOT,
     PREP_PANELS,
-    SHOWCASE_MEDIA,
+    type ShowcaseId,
+    showcaseMedia,
 } from '@/components/landing/media';
 import { BRAND } from '@/lib/constants/site';
 import { LOCALES } from '@/lib/i18n/config';
@@ -41,6 +43,7 @@ const PRODUCT_TERMS = [
     'Gemini',
     'XP',
     'SRD',
+    'Grim',
     'RPG',
     'PDF',
     '3D',
@@ -50,6 +53,8 @@ const PRODUCT_TERMS = [
     'Lorc',
     'Caro Asercion',
     'CC BY',
+    'cookie',
+    'LLC',
     'Wizards of the Coast',
     'Dungeons & Dragons',
     BRAND.short,
@@ -64,8 +69,11 @@ describe('landing messages', () => {
             for (const id of [
                 ...PREP_PANELS,
                 ...Object.keys(m.players.panels),
-            ] as (keyof typeof SHOWCASE_MEDIA)[])
-                expect(SHOWCASE_MEDIA[id]?.image, id).toBeTruthy();
+            ] as ShowcaseId[])
+                expect(showcaseMedia(locale)[id]?.image, id).toBeTruthy();
+
+            expect(showcaseMedia(locale)[HERO_SHOT].image).toBeTruthy();
+            expect(showcaseMedia(locale).combat.image).toBeTruthy();
 
             expect(Object.keys(m.prep.panels)).toEqual([...PREP_PANELS]);
             expect(Object.keys(m.combat.fx.names)).toHaveLength(
@@ -118,7 +126,7 @@ describe('landing messages', () => {
     it('has no unfulfilled claims', () => {
         for (const { path, value } of leaves(en))
             expect(value, path).not.toMatch(
-                /obojima|video|remembers everything|testimonial/i
+                /obojima|video|remembers everything|testimonial|warhammer|wfrp/i
             );
     });
 });

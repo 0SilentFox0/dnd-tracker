@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SignInScreen } from '@/components/auth/AuthScreens';
+import { SignInScreen, SignUpScreen } from '@/components/auth/AuthScreens';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 
@@ -37,5 +37,36 @@ describe('SignInScreen in English', () => {
 
         expect(await screen.findByText('Invalid email address')).toBeTruthy();
         expect(screen.getByText('This field is required')).toBeTruthy();
+    });
+});
+
+describe('SignUpScreen consent line', () => {
+    const consentLinks = async (locale: 'en' | 'uk') => {
+        await renderWithIntl(
+            <ConfirmProvider>
+                <SignUpScreen />
+            </ConfirmProvider>,
+            { locale, namespaces: ['common', 'validation', 'auth'] }
+        );
+
+        await screen.findAllByRole('button');
+
+        return screen
+            .getAllByRole('link')
+            .map((a) => a.getAttribute('href'));
+    };
+
+    it('links terms and privacy of the current locale', async () => {
+        const hrefs = await consentLinks('en');
+
+        expect(hrefs).toContain('/terms');
+        expect(hrefs).toContain('/privacy');
+    });
+
+    it('uses the Ukrainian paths in the uk locale', async () => {
+        const hrefs = await consentLinks('uk');
+
+        expect(hrefs).toContain('/uk/terms');
+        expect(hrefs).toContain('/uk/privacy');
     });
 });

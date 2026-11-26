@@ -1,6 +1,11 @@
 import type { MetadataRoute } from 'next';
 
-import { LANDING_PATH, SITE_URL } from '@/lib/constants/site';
+import {
+    LANDING_PATH,
+    LEGAL_DOCS,
+    LEGAL_PATH,
+    SITE_URL,
+} from '@/lib/constants/site';
 import { LOCALES } from '@/lib/i18n/config';
 
 const landingUrl = (path: string) =>
@@ -19,6 +24,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 1,
             alternates: { languages: LANDING_LANGUAGES },
         })),
+        ...LEGAL_DOCS.flatMap((doc) => {
+            const languages = {
+                ...Object.fromEntries(
+                    LOCALES.map((l) => [l, `${SITE_URL}${LEGAL_PATH[l][doc]}`])
+                ),
+                'x-default': `${SITE_URL}${LEGAL_PATH.en[doc]}`,
+            };
+
+            return LOCALES.map((l) => ({
+                url: `${SITE_URL}${LEGAL_PATH[l][doc]}`,
+                changeFrequency: 'yearly' as const,
+                priority: 0.3,
+                alternates: { languages },
+            }));
+        }),
         {
             url: `${SITE_URL}/sign-up`,
             changeFrequency: 'yearly',

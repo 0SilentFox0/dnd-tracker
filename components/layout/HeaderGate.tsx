@@ -7,7 +7,7 @@ import {
     shouldUseGameShell,
 } from '@/components/layout/game-shell-route';
 import { Header } from '@/components/layout/Header';
-import { LANDING_PATHS } from '@/lib/constants/site';
+import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
 
 const AUTH_SCREENS = [
     '/sign-in',
@@ -22,7 +22,7 @@ export function HeaderGate() {
     if (
         shouldUseGameShell(pathname) ||
         isFullBleedRoute(pathname) ||
-        (pathname && LANDING_PATHS.includes(pathname)) ||
+        (pathname && STATIC_PUBLIC_PATHS.includes(pathname)) ||
         AUTH_SCREENS.some((p) => pathname?.startsWith(p))
     )
         return null;

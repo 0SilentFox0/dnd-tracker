@@ -31,6 +31,25 @@ export function Brand({ locale }: { locale: Locale }) {
     );
 }
 
+// the party's trail arriving at this section: a drawn ink path ending in a waypoint
+export function TrailMark({ className }: { className?: string }) {
+    return (
+        <span aria-hidden className={cn('ld-trailmark', className)}>
+            <svg viewBox="0 0 40 72" className="ld-trail-path">
+                <path
+                    d="M20 0 C 4 16, 36 30, 20 46 S 18 62, 20 68"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeDasharray="3 5"
+                    strokeLinecap="round"
+                />
+            </svg>
+            <i className="ld-waypoint" />
+        </span>
+    );
+}
+
 export function SectionTitle({
     id,
     eyebrow,
@@ -54,17 +73,18 @@ export function SectionTitle({
                     : 'mx-auto max-w-2xl space-y-3 text-center'
             }
         >
+            <TrailMark className={left ? undefined : 'mx-auto'} />
             <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                 {eyebrow}
             </p>
-            <h2 id={id} className="hud-sc text-3xl text-hud-ink sm:text-4xl">
+            <h2 id={id} className="hud-sc ld-h2 ld-ink text-hud-ink">
                 {title}
             </h2>
-            {text && <p className="text-lg text-hud-bone">{text}</p>}
+            {text && <p className="ld-lead text-hud-bone">{text}</p>}
             {!left && (
                 <div
                     aria-hidden
-                    className="mx-auto flex max-w-xs items-center gap-3 pt-2"
+                    className="ld-rule mx-auto flex max-w-xs items-center gap-3 pt-2"
                 >
                     <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[color-mix(in_srgb,var(--ld-gold)_60%,transparent)]" />
                     <span className="size-2 rotate-45 border border-[var(--ld-gold)]" />
