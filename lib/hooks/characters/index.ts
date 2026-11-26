@@ -1,5 +1,6 @@
 export { characterKeys } from './keys';
 export { characterWriteKeys } from './keys';
+export { useAlignmentLabel } from './useAlignmentLabel';
 export { useArcaneRecovery } from './useArcaneRecovery';
 export { useArchetypeOptions } from './useArchetypeOptions';
 export { useCharacterChoices } from './useCharacterChoices';

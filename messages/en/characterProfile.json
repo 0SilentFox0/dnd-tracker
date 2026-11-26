@@ -191,7 +191,8 @@
   },
   "portrait": {
     "add": "Add a photo",
-    "open": "Open the photo"
+    "open": "Open the photo",
+    "change": "Change portrait"
   },
   "spellBook": {
     "toList": "← To the list",
@@ -229,7 +230,7 @@
     "delete": "Delete character",
     "sections": {
       "identity": "Identity",
-      "portrait": "Portrait"
+      "classLevel": "Class and level"
     }
   },
   "editor": {

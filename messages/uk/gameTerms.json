@@ -391,5 +391,43 @@
       "name": "Атаки нагоди",
       "summary": "Вихід із зони ближнього бою провокує атаку нагоди."
     }
+  },
+  "alignments": {
+    "lawfulGood": {
+      "name": "Законно-добрий",
+      "short": "ЗД"
+    },
+    "neutralGood": {
+      "name": "Нейтрально-добрий",
+      "short": "НД"
+    },
+    "chaoticGood": {
+      "name": "Хаотично-добрий",
+      "short": "ХД"
+    },
+    "lawfulNeutral": {
+      "name": "Законно-нейтральний",
+      "short": "ЗН"
+    },
+    "trueNeutral": {
+      "name": "Істинно нейтральний",
+      "short": "Н"
+    },
+    "chaoticNeutral": {
+      "name": "Хаотично-нейтральний",
+      "short": "ХН"
+    },
+    "lawfulEvil": {
+      "name": "Законно-злий",
+      "short": "ЗЗ"
+    },
+    "neutralEvil": {
+      "name": "Нейтрально-злий",
+      "short": "НЗ"
+    },
+    "chaoticEvil": {
+      "name": "Хаотично-злий",
+      "short": "ХЗ"
+    }
   }
 }

@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { buildIdentityDraft } from '@/components/character-profile/sheet/banner/build-identity-draft';
+import { PortraitDialog } from '@/components/character-profile/sheet/banner/PortraitDialog';
+import { SheetBanner } from '@/components/character-profile/sheet/banner/SheetBanner';
 import { CharacterAbilitiesSection } from '@/components/characters/abilities/CharacterAbilitiesSection';
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import {
@@ -68,6 +71,8 @@ export function NewCharacterForm({
     const hasClasses = statColumnsOf(system).has('classes');
 
     const refsRef = useRef<ChoiceRefsView | null>(null);
+
+    const [portraitOpen, setPortraitOpen] = useState(false);
 
     const {
         status: { isLoading, error },
@@ -190,30 +195,65 @@ export function NewCharacterForm({
             : []),
     ];
 
+    const hero = buildIdentityDraft(basicInfo.data, {
+        races,
+        classesById: classMode.byId,
+    });
+
     return (
-        <HudFormPage title={t('form.title')} aside={t('form.aside')}>
-            <HudForm
-                id="character-form"
-                onSubmit={handleSubmit}
-                error={error}
-                tabs={tabs}
-                actions={
-                    <>
-                        <Button
-                            type="submit"
-                            disabled={isLoading || membersLoading}
-                        >
-                            {isLoading
-                                ? tc('actions.creating')
-                                : t('form.submit')}
-                        </Button>
-                        <Button type="button" variant="outline" asChild>
-                            <Link href={`/campaigns/${id}/dm/characters`}>
-                                {tc('actions.cancel')}
-                            </Link>
-                        </Button>
-                    </>
-                }
+        <HudFormPage
+            width="wide"
+            title={t('form.title')}
+            aside={t('form.aside')}
+            actions={
+                <>
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={`/campaigns/${id}/dm/characters`}>
+                            {tc('actions.cancel')}
+                        </Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        form="character-form"
+                        disabled={isLoading || membersLoading}
+                    >
+                        {isLoading ? tc('actions.creating') : t('form.submit')}
+                    </Button>
+                </>
+            }
+        >
+            <div className="grid gap-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-8 col-span-full">
+                <div className="flex items-start gap-4 px-4 lg:contents lg:px-0">
+                    <div className="w-[104px] shrink-0 lg:contents">
+                        <SheetBanner
+                            hero={{
+                                name: hero.name,
+                                avatar: hero.avatar,
+                                raceColor: hero.raceColor,
+                                raceIcon: hero.raceIcon,
+                                level: Ui?.hideProgression
+                                    ? undefined
+                                    : hero.level,
+                            }}
+                            onPortrait={() => setPortraitOpen(true)}
+                        />
+                    </div>
+                    <p className="hud-title min-w-0 text-xl [overflow-wrap:anywhere] text-hud-ink lg:hidden">
+                        {hero.name}
+                    </p>
+                </div>
+                <HudForm
+                    id="character-form"
+                    onSubmit={handleSubmit}
+                    error={error}
+                    tabs={tabs}
+                />
+            </div>
+            <PortraitDialog
+                open={portraitOpen}
+                onOpenChange={setPortraitOpen}
+                value={hero.avatar}
+                onChange={(url) => basicInfo.set('avatar', url ?? '')}
             />
         </HudFormPage>
     );

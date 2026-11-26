@@ -1,42 +1,25 @@
 'use client';
 
-import { type CSSProperties, type ReactNode, type Ref, useState } from 'react';
+import { type ReactNode, type Ref, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { HeroPortrait } from '../hero/HeroPortrait';
 import { useProfile } from '../ProfileContext';
 import { ArcaneRecoveryPanel } from '../rest/ArcaneRecoveryPanel';
 import { HitDicePanel } from '../rest/HitDicePanel';
 import { RestBadges } from '../rest/RestBadges';
-import { SheetLevelPlate, SheetXpBar } from './SheetPortraitStrip';
+import { overlayIdentity } from './banner/build-identity-draft';
+import { useIdentityDraft } from './banner/IdentityDraft';
+import { SheetBanner } from './banner/SheetBanner';
+import { SheetXpBar } from './SheetPortraitStrip';
 
-import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
-import {
-    contrastTextColor,
-    normalizeHexColor,
-} from '@/lib/theme/contrast-text-color';
 import { cn } from '@/lib/utils';
+import { alignmentLabel } from '@/lib/utils/characters/alignment';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
-
-const HEX = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
-
-export const bannerPalette = (color: string | null) => {
-    if (!color || !HEX.test(color.trim())) {
-        return {
-            base: 'var(--color-hud-crimson)',
-            ink: 'var(--color-hud-crimson-ink)',
-        };
-    }
-
-    const base = normalizeHexColor(color);
-
-    return { base, ink: contrastTextColor(base) };
-};
 
 const LEAD_FOLD = 320;
 
@@ -52,6 +35,7 @@ export function SheetIdentityPanel({
     actions,
     body,
     onHistory,
+    onPortrait,
     children,
     ref,
 }: {
@@ -59,18 +43,21 @@ export function SheetIdentityPanel({
     actions?: ReactNode;
     body?: ReactNode;
     onHistory?: () => void;
+    onPortrait?: () => void;
     children?: ReactNode;
     ref?: Ref<HTMLElement>;
 }) {
-    const { campaignId, sheet, canEdit } = useProfile();
+    const { campaignId, sheet } = useProfile();
 
     const t = useTranslations('characterProfile');
 
     const tc = useTranslations('characterProfile.hero');
 
+    const tg = useTranslations('gameTerms');
+
     const [open, setOpen] = useState(false);
 
-    const id = sheet.identity;
+    const id = overlayIdentity(sheet.identity, useIdentityDraft());
 
     const { def: system, system: current } = useCampaignSystem(
         campaignId,
@@ -91,14 +78,12 @@ export function SheetIdentityPanel({
               : null,
         `${id.race}${id.subrace ? ` (${id.subrace})` : ''}`,
         background,
-        system.identity.alignments ? id.alignment : null,
+        system.identity.alignments ? alignmentLabel(id.alignment, (key) => tg(key)) : null,
     ].filter(Boolean);
 
     const lead = excerpt(sheet.story.biography);
 
     const long = (lead?.length ?? 0) > LEAD_FOLD;
-
-    const banner = bannerPalette(id.raceColor);
 
     return (
         <>
@@ -111,36 +96,16 @@ export function SheetIdentityPanel({
                 </div>
             )}
             <div className="motion-rise grid grid-cols-[104px_minmax(0,1fr)] px-4 pt-4 pb-4 max-lg:gap-x-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-x-8">
-                <div className="relative h-44 lg:sticky lg:top-[calc((var(--shell-header-h,57px)+16px)/var(--sheet-zoom,1))] lg:h-[340px] lg:self-start">
-                    <div
-                        data-testid="sheet-banner"
-                        style={
-                            {
-                                '--banner': banner.base,
-                                '--banner-ink': banner.ink,
-                            } as CSSProperties
-                        }
-                        className="relative h-full bg-[linear-gradient(90deg,rgba(0,0,0,.22),transparent_18%,transparent_82%,rgba(0,0,0,.22)),linear-gradient(var(--banner),color-mix(in_srgb,var(--banner)_55%,var(--color-hud-surface)))] p-[9px] pb-0 [clip-path:polygon(0_0,100%_0,100%_100%,50%_90%,0_100%)] lg:p-5 lg:pb-0"
-                    >
-                        <div className="relative rounded-lg bg-hud-surface p-[3px] shadow-[0_0_0_1px_var(--color-hud-line),0_18px_40px_-14px_rgba(0,0,0,.8)] lg:p-2">
-                            <HeroPortrait
-                                src={id.avatar}
-                                name={id.name}
-                                canEdit={canEdit}
-                                className="aspect-[4/5] rounded-md border-0"
-                            />
-                        </div>
-                        <EntityIcon
-                            src={id.raceIcon}
-                            name={id.race}
-                            size={64}
-                            className="absolute bottom-[11%] left-1/2 hidden size-16 -translate-x-1/2 rounded-none bg-transparent text-[color:var(--banner-ink)] opacity-70 lg:flex"
-                        />
-                    </div>
-                    {!Ui.hideProgression && (
-                        <SheetLevelPlate level={id.level} />
-                    )}
-                </div>
+                <SheetBanner
+                    hero={{
+                        name: id.name,
+                        avatar: id.avatar,
+                        raceColor: id.raceColor,
+                        raceIcon: id.raceIcon,
+                        level: Ui.hideProgression ? undefined : id.level,
+                    }}
+                    onPortrait={onPortrait}
+                />
                 <div className="contents lg:col-start-2 lg:row-start-1 lg:block lg:min-w-0">
                     <header
                         ref={ref}

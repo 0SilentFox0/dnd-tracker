@@ -23,7 +23,7 @@ describe('characters in en', () => {
 
         await renderWithIntl(
             <CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
 
         expect(screen.getByText('Race *')).toBeInTheDocument();
@@ -31,7 +31,8 @@ describe('characters in en', () => {
         expect(
             screen.getByText('Create a race in the Races section first')
         ).toBeInTheDocument();
-        expect(screen.getByText('Character portrait')).toBeInTheDocument();
+        expect(screen.queryByText('Character portrait')).toBeNull();
+        expect(screen.getByText('Class and level')).toBeInTheDocument();
     });
 
     it('hideLineage hides race, subrace and alignment', async () => {
@@ -46,7 +47,7 @@ describe('characters in en', () => {
                 races={[]}
                 hide={{ lineage: true }}
             />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
 
         expect(screen.queryByText('Race *')).toBeNull();
@@ -65,7 +66,7 @@ describe('characters in en', () => {
 
         await renderWithIntl(
             <CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
         expect(document.getElementById('class')).toBeRequired();
         cleanup();
@@ -76,7 +77,7 @@ describe('characters in en', () => {
                 races={[]}
                 hide={{ class: true }}
             />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
         expect(document.getElementById('class')).toBeNull();
         expect(document.getElementById('subclass')).toBeNull();
@@ -90,7 +91,7 @@ describe('characters in en', () => {
 
         await renderWithIntl(
             <CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
         expect(document.getElementById('alignment')).not.toBeNull();
         cleanup();
@@ -101,7 +102,7 @@ describe('characters in en', () => {
                 races={[]}
                 hide={{ alignment: true }}
             />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
         expect(document.getElementById('alignment')).toBeNull();
         expect(screen.getByText('Race *')).toBeInTheDocument();
@@ -110,7 +111,7 @@ describe('characters in en', () => {
     it('DraftBanner interpolates the DM comment', async () => {
         await renderWithIntl(
             <DraftBanner campaignId="c1" note="Add a goal" isOwner={false} />,
-            { locale: 'en', namespaces: ['common', 'characters'] }
+            { locale: 'en', namespaces: ['common', 'characters', 'characterProfile', 'gameTerms'] }
         );
 
         expect(screen.getByText('DM comment: Add a goal')).toBeInTheDocument();

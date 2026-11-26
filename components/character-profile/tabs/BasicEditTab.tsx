@@ -17,13 +17,7 @@ import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 
-export function BasicEditTab({
-    editor,
-    onDeleted,
-}: {
-    editor: DmCharacterEditor;
-    onDeleted: () => void;
-}) {
+export function BasicEditTab({ editor }: { editor: DmCharacterEditor }) {
     const { form, options } = editor;
 
     const t = useTranslations('characterProfile.basic');
@@ -67,46 +61,33 @@ export function BasicEditTab({
           }
         : sheet.hp;
 
-    const remove = async () => {
-        if (await editor.dmActions.remove()) onDeleted();
-    };
-
     return (
-        <div className="flex flex-col gap-4">
-            <CharacterBasicInfo
-                basicInfo={form.basicInfo}
-                campaignMembers={options.members}
-                races={options.races}
-                hide={{
-                    progression: ui.hideProgression,
-                    lineage: !def.lineage,
-                    class: !statColumnsOf(def).has('classes'),
-                    alignment: !def.identity.alignments,
-                    archetype: !statColumnsOf(def).has('archetype'),
-                }}
-                classMode={classUi ? classMode : undefined}
-            />
-            {classMode.enabled && !classUi && !ui.hideProgression && (
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setConverting(true)}
-                >
-                    {t('toClasses')}
-                </Button>
-            )}
-            <CharacterHpPreview hp={hp} />
-            <div className="ds-panel flex items-center justify-end p-4 sm:p-5">
-                <Button
-                    type="button"
-                    variant="destructive"
-                    className="h-10 px-5"
-                    onClick={() => void remove()}
-                >
-                    {t('delete')}
-                </Button>
-            </div>
-        </div>
+        <CharacterBasicInfo
+            basicInfo={form.basicInfo}
+            campaignMembers={options.members}
+            races={options.races}
+            hide={{
+                progression: ui.hideProgression,
+                lineage: !def.lineage,
+                class: !statColumnsOf(def).has('classes'),
+                alignment: !def.identity.alignments,
+                archetype: !statColumnsOf(def).has('archetype'),
+            }}
+            classMode={classUi ? classMode : undefined}
+            slots={{
+                classAction:
+                    classMode.enabled && !classUi && !ui.hideProgression ? (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setConverting(true)}
+                        >
+                            {t('toClasses')}
+                        </Button>
+                    ) : undefined,
+                classAside: <CharacterHpPreview hp={hp} />,
+            }}
+        />
     );
 }

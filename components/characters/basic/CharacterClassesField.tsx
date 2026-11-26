@@ -38,7 +38,7 @@ export function CharacterClassesField({
     const hint = resolved.find((e) => e.class)?.class?.skillChoices;
 
     return (
-        <div className="col-span-2 space-y-3">
+        <div className="ds-span space-y-3">
             {resolved.length > 0 && (
                 <div
                     aria-hidden="true"

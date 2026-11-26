@@ -8,6 +8,9 @@ import {
     type ClassLevelUpProps,
     LevelUpAction,
 } from './level-up/LevelUpAction';
+import { buildIdentityDraft } from './sheet/banner/build-identity-draft';
+import { IdentityDraftProvider } from './sheet/banner/IdentityDraft';
+import { PortraitDialog } from './sheet/banner/PortraitDialog';
 import { SheetIdentityPanel } from './sheet/SheetIdentityPanel';
 import { BiographyEditor } from './story/BiographyEditor';
 import { GoalList } from './story/GoalList';
@@ -24,7 +27,7 @@ import { SystemFormFields } from '@/components/characters/stats/SystemFormFields
 import { CharacterChoicesPanel } from '@/components/choices/character/CharacterChoicesPanel';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
-import { HudSection } from '@/components/hud/form';
+import { HudFormMenu, HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -38,6 +41,7 @@ import {
     useCharacterRoster,
     useDmCharacterEditor,
 } from '@/lib/hooks/characters';
+import { useClassMode } from '@/lib/hooks/classes';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
@@ -53,6 +57,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
     const tca = useTranslations('common.actions');
 
+    const tf = useTranslations('common.form');
+
     const editor = useDmCharacterEditor({
         campaignId,
         characterId,
@@ -60,6 +66,10 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     });
 
     const [tab, setTab] = useState<ProfileTabId>('basic');
+
+    const [portraitOpen, setPortraitOpen] = useState(false);
+
+    const classMode = useClassMode(campaignId);
 
     const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
@@ -118,14 +128,21 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
               }
             : undefined;
 
+    const identityDraft = buildIdentityDraft(formData.basicInfo, {
+        races: editor.options.races,
+        classesById: classMode.byId,
+    });
+
     return (
         <form
             id="profile-edit"
             className="hud-form"
             onSubmit={form.actions.handleSubmit}
         >
+            <IdentityDraftProvider value={identityDraft}>
             <div className="sheet-root mx-auto w-full">
                 <SheetIdentityPanel
+                    onPortrait={() => setPortraitOpen(true)}
                     badge={
                         Ui.hideProgression ? undefined : (
                             <LevelUpAction
@@ -140,6 +157,21 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                     }
                     actions={
                         <>
+                            <HudFormMenu
+                                label={tf('more')}
+                                items={[
+                                    {
+                                        label: t('basic.delete'),
+                                        tone: 'danger',
+                                        onSelect: async () => {
+                                            if (await editor.dmActions.remove())
+                                                router.push(
+                                                    `/campaigns/${campaignId}/dm/characters`
+                                                );
+                                        },
+                                    },
+                                ]}
+                            />
                             <Button
                                 type="button"
                                 variant="outline"
@@ -177,14 +209,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                         id: 'basic',
                                         label: tc('basic'),
                                         content: (
-                                            <BasicEditTab
-                                                editor={editor}
-                                                onDeleted={() =>
-                                                    router.push(
-                                                        `/campaigns/${campaignId}/dm/characters`
-                                                    )
-                                                }
-                                            />
+                                            <BasicEditTab editor={editor} />
                                         ),
                                     },
                                     {
@@ -484,6 +509,13 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                     }
                 />
             </div>
+            </IdentityDraftProvider>
+            <PortraitDialog
+                open={portraitOpen}
+                onOpenChange={setPortraitOpen}
+                value={formData.basicInfo.avatar ?? null}
+                onChange={(url) => form.basicInfo.set('avatar', url ?? '')}
+            />
         </form>
     );
 }

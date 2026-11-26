@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bannerPalette } from '../sheet/SheetIdentityPanel';
+import { bannerPalette } from '../sheet/banner/SheetBanner';
 
 describe('bannerPalette', () => {
     it('falls back to crimson without a race colour', () => {
