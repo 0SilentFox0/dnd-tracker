@@ -8,13 +8,13 @@ export function Players({ t }: { t: Translator }) {
         t(`players.panels.${id}.${key}`);
 
     return (
-        <section id="players" className="ld-lazy scroll-mt-20 px-4 py-20">
+        <section id="players" className="ld-lazy ld-panel scroll-mt-20 px-4 py-20">
             <SectionTitle
                 eyebrow={t('players.eyebrow')}
                 title={t('players.title')}
                 text={t('players.text')}
             />
-            <div className="mx-auto mt-12 grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.2fr]">
+            <div className="ld-container mt-12 grid items-center gap-12 lg:grid-cols-[1fr_1.2fr]">
                 <article className="landing-reveal flex flex-col items-center gap-6 sm:flex-row">
                     <div className="w-44 shrink-0 rounded-[1.6rem] border-2 border-hud-rule bg-hud-page p-2 shadow-[0_30px_60px_-10px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.25)]">
                         <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-hud-raised" />

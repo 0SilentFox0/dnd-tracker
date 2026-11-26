@@ -9,17 +9,17 @@ export function Combat({ t }: { t: Translator }) {
     return (
         <section
             id="combat"
-            className="ld-lazy scroll-mt-20 border-t border-hud-rule px-4 py-20"
+            className="ld-lazy ld-panel scroll-mt-20 border-t border-hud-rule px-4 py-20"
         >
             <SectionTitle
                 eyebrow={t('combat.eyebrow')}
                 title={t('combat.title')}
                 text={t('combat.text')}
             />
-            <div className="mx-auto mt-14 max-w-6xl">
+            <div className="ld-container mt-14">
                 <SessionDemo t={t} />
 
-                <ol className="mt-20 grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+                <ol className="mt-20 grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 min-[2560px]:grid-cols-4">
                     {keysOf(t, 'combat.points').map((key, i) => (
                         <li
                             key={key}

@@ -8,7 +8,7 @@ export function Faq({ t }: { t: Translator }) {
     return (
         <section
             id="faq"
-            className="ld-lazy scroll-mt-20 border-t border-hud-rule px-4 py-20"
+            className="ld-lazy ld-panel scroll-mt-20 border-t border-hud-rule px-4 py-20"
         >
             <SectionTitle eyebrow={t('faq.eyebrow')} title={t('faq.title')} />
             <div className="mx-auto mt-10 max-w-3xl space-y-3">

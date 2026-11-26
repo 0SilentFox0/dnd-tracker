@@ -13,7 +13,7 @@ export function AiSection({ t }: { t: Translator }) {
             className="ld-lazy relative isolate scroll-mt-20 overflow-hidden border-y border-hud-rule px-4 py-20"
         >
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_20%_40%,rgba(138,92,201,.16),transparent_60%),#0b0908]" />
-            <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <div className="ld-container grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
                 <MediaFrame title={t('ai.screen')} className="landing-reveal">
                     <div role="img" aria-label={t('ai.alt')}>
                         <AiMock t={t} />

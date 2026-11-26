@@ -8,8 +8,8 @@ import type { Translator } from '@/lib/i18n/translator';
 
 export function Problem({ t }: { t: Translator }) {
     return (
-        <section aria-labelledby="pain-title" className="ld-lazy px-4 py-20">
-            <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
+        <section aria-labelledby="pain-title" className="ld-lazy ld-panel px-4 py-20">
+            <div className="ld-container grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
                 <div className="space-y-5">
                     <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                         {t('problem.eyebrow')}

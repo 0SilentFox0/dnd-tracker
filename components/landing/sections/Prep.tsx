@@ -8,13 +8,13 @@ export function Prep({ t }: { t: Translator }) {
     const p = (id: string, key: string) => t(`prep.panels.${id}.${key}`);
 
     return (
-        <section id="prep" className="ld-lazy scroll-mt-20 px-4 py-20">
+        <section id="prep" className="ld-lazy ld-panel scroll-mt-20 px-4 py-20">
             <SectionTitle
                 eyebrow={t('prep.eyebrow')}
                 title={t('prep.title')}
                 text={t('prep.text')}
             />
-            <div className="mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-3">
+            <div className="ld-container mt-12 grid gap-6 lg:grid-cols-3 min-[2560px]:grid-cols-4">
                 {PREP_PANELS.map((id) => (
                     <article
                         key={id}

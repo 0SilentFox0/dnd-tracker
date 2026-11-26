@@ -6,10 +6,10 @@ export function HowItWorks({ t }: { t: Translator }) {
     return (
         <section
             id="how"
-            className="ld-lazy scroll-mt-20 border-t border-hud-rule px-4 py-20"
+            className="ld-lazy ld-panel scroll-mt-20 border-t border-hud-rule px-4 py-20"
         >
             <SectionTitle eyebrow={t('how.eyebrow')} title={t('how.title')} />
-            <ol className="mx-auto mt-12 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <ol className="ld-container mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {keysOf(t, 'how.steps').map((key, i) => (
                     <li
                         key={key}

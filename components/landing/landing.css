@@ -48,6 +48,25 @@ body:has([data-landing])::after { display: none; }
 @keyframes ld-fog-drift { from { translate: -3% 0; } to { translate: 3% -2%; } }
 @keyframes ld-bg-scroll { to { translate: 0 -8%; } }
 
+/* fluid layout utilities; inside a padded section the container already has its gutter */
+[data-landing] { --ld-max: clamp(72rem, 80vw, 120rem); }
+.ld-container { width: min(100% - 2rem, var(--ld-max)); margin-inline: auto; }
+section > .ld-container, section > div > .ld-container { width: min(100%, var(--ld-max)); }
+.ld-h1 { font-size: clamp(2.5rem, 1.2rem + 4vw, 6rem); }
+.ld-h2 { font-size: clamp(1.75rem, 1rem + 2vw, 3.75rem); }
+.ld-lead { font-size: clamp(1rem, 0.9rem + 0.35vw, 1.375rem); }
+.ld-panel {
+  background: color-mix(in srgb, var(--palette-page) 78%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--hud-rule);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ld-drift { animation: ld-drift linear both; animation-timeline: view(); animation-range: cover; }
+  }
+}
+@keyframes ld-drift { from { translate: 0 4%; } to { translate: 0 -4%; } }
+
 /* Hero session demo: one 8s loop, every element keys off the same percentages */
 .ld-demo { --ld-t: 8s; }
 .ld-demo :is(.ld-tap, .ld-ripple, .ld-die, .ld-die-roll, .ld-die-result, .ld-check, .ld-orb, .ld-blast, .ld-ring, .ld-dmg-a, .ld-dmg-b, .ld-fall, .ld-hp-a, .ld-hp-b, .ld-turn-a, .ld-turn-b, .ld-log, .ld-step-1, .ld-step-2, .ld-step-3, .ld-step-4, .ld-progress) {

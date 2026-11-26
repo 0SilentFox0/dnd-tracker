@@ -11,7 +11,7 @@ export function Mechanics({ t }: { t: Translator }) {
             className="ld-lazy relative isolate scroll-mt-20 overflow-hidden border-y border-hud-rule px-4 py-20"
         >
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_85%_10%,rgba(230,194,90,.1),transparent_55%),#0b0908]" />
-            <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
+            <div className="ld-container grid items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
                 <div className="space-y-5">
                     <SectionTitle
                         align="left"
@@ -33,7 +33,7 @@ export function Mechanics({ t }: { t: Translator }) {
                 </MediaFrame>
             </div>
 
-            <ul className="mx-auto mt-14 grid max-w-6xl gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="ld-container mt-14 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3 min-[2560px]:grid-cols-4">
                 {Object.entries(CAPABILITY_ICONS).map(([id, Icon]) => {
                     return (
                         <li

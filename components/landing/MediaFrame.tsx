@@ -9,7 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const FRAME =
-    'overflow-hidden rounded-xl border border-hud-line bg-hud-page shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.15)] transition duration-500 hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.4),0_0_60px_-20px_rgba(230,194,90,.35)]';
+    'ld-drift overflow-hidden rounded-xl border border-hud-line bg-hud-page shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.15)] transition duration-500 hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.4),0_0_60px_-20px_rgba(230,194,90,.35)]';
 
 export function MediaFrame({
     title,
@@ -37,6 +37,11 @@ export function MediaFrame({
     );
 }
 
+export const MEDIA_SIZES = {
+    wide: '(min-width: 2560px) 1800px, (min-width: 1440px) 1200px, (min-width: 768px) 90vw, 100vw',
+    phone: '(min-width: 768px) 360px, 80vw',
+};
+
 interface ScreenProps {
     id: ShowcaseId;
     alt: string;
@@ -50,7 +55,7 @@ export function Screen({
     id,
     alt,
     priority,
-    sizes = '(min-width: 1152px) 550px, (min-width: 1024px) 45vw, 100vw',
+    sizes,
     className,
 }: ScreenProps) {
     const media: ShowcaseMedia = SHOWCASE_MEDIA[id];
@@ -82,7 +87,7 @@ export function Screen({
                 src={media.image}
                 alt={alt}
                 fill
-                sizes={sizes}
+                sizes={sizes ?? MEDIA_SIZES[media.ratio === '9/16' ? 'phone' : 'wide']}
                 priority={priority}
                 className="object-cover object-top"
             />

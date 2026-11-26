@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils';
 function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-hud-rule/60 bg-hud-page/85 backdrop-blur-md">
-            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+            <div className="ld-container flex h-16 items-center justify-between gap-4 px-4">
                 <Brand locale={locale} />
                 <nav
                     aria-label={t('nav.aria')}
@@ -84,8 +84,8 @@ function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
 
 function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) {
     return (
-        <footer className="border-t border-hud-rule px-4 py-8 text-sm text-hud-soft">
-            <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
+        <footer className="ld-panel border-t border-hud-rule py-8 text-sm text-hud-soft">
+            <div className="ld-container flex flex-col items-center justify-between gap-4 sm:flex-row">
                 <Brand locale={locale} />
                 <p>
                     {t('footer.tagline')} · {new Date().getFullYear()}
@@ -107,7 +107,7 @@ function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) {
                     </Link>
                 </nav>
             </div>
-            <p className="mx-auto mt-6 max-w-6xl text-center text-xs sm:text-left">
+            <p className="ld-container mt-6 text-center text-xs sm:text-left">
                 {t('footer.credits')}{' '}
                 {t('footer.disclaimer', { brand: BRAND.name })}
             </p>
