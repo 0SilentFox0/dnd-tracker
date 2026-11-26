@@ -36,6 +36,7 @@ import {
 import { actionResult } from '@/lib/server/assistant/json';
 import { resultLabel } from '@/lib/server/assistant/result-labels';
 import type { ActionResult } from '@/lib/server/assistant/types';
+import { deleteCampaignRows } from '@/lib/server/campaigns/delete-campaign-rows';
 import { assertCan } from '@/lib/server/content/access';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
 import {
@@ -363,10 +364,7 @@ export async function deleteCampaign(actor: Actor) {
             select: { userId: true },
         });
 
-        await prisma.campaignContentHide.deleteMany({
-            where: { campaignId: actor.campaignId },
-        });
-        await prisma.campaign.delete({ where: { id: actor.campaignId } });
+        await deleteCampaignRows(prisma, actor.campaignId);
         afterContentCommit(async () => {
             await invalidateCampaignLists(members.map((m) => m.userId));
             invalidateAllReference(actor.campaignId);
