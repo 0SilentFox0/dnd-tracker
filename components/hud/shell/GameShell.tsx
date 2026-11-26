@@ -3,15 +3,10 @@
 import { type ReactNode } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ChevronRight, Menu } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { HudShellHeader } from '@/components/hud/shell/HudShellHeader';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 export interface GameShellNavItem {
@@ -43,28 +38,12 @@ export function HudGameShell({
 
     const content = (
         <>
-            <header className="game-shell-header hud-surface sticky top-0 z-50 border-b border-hud-rule bg-hud-page/80 backdrop-blur-xl">
-                <div className="game-shell-inner mx-auto flex h-14 max-w-[1400px] items-center gap-2 px-3 sm:gap-3 sm:px-4">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                aria-label={t('openMenu')}
-                                className="h-10 w-10 shrink-0 border-hud-rule text-hud-ink"
-                            >
-                                <Menu className="size-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            align="start"
-                            className="w-64 max-w-[calc(100vw-1.5rem)] p-2"
-                        >
-                            <nav
-                                aria-label={t('label')}
-                                className="grid gap-1"
-                            >
+            <HudShellHeader
+                menu={{
+                    label: t('openMenu'),
+                    content: (
+                        <>
+                            <nav aria-label={t('label')} className="grid gap-1">
                                 {items.map((item) => {
                                     const active = item.id === activeId;
 
@@ -90,9 +69,15 @@ export function HudGameShell({
                                     );
                                 })}
                             </nav>
-                            {menuActions && <div className="mt-2 flex gap-2 border-t border-hud-rule pt-2 sm:hidden [&_button]:size-10">{menuActions}</div>}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            {menuActions && (
+                                <div className="mt-2 flex gap-2 border-t border-hud-rule pt-2 sm:hidden [&_button]:size-10">
+                                    {menuActions}
+                                </div>
+                            )}
+                        </>
+                    ),
+                }}
+                breadcrumb={
                     <nav
                         aria-label={t('breadcrumb')}
                         className="flex min-w-0 items-center gap-1 text-[13px]"
@@ -118,11 +103,9 @@ export function HudGameShell({
                             </>
                         )}
                     </nav>
-                    <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2 [&_button]:min-h-10 [&_button]:min-w-10 [&_a]:min-h-10 [&_a]:min-w-10">
-                        {actions}
-                    </div>
-                </div>
-            </header>
+                }
+                actions={actions}
+            />
             {children}
         </>
     );

@@ -149,6 +149,8 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
   outline-offset: 2px;
 }
 
+:root { --shell-header-h: 57px; }
+
 /* wide monitors: widen the game shell, then scale it up (layout stays that of a 1800px screen) */
 @media (min-width: 1800px) {
     .game-shell-inner,
@@ -216,8 +218,8 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 @media (min-width: 1024px) {
   .hud-form-wide { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: none; grid-template-areas: "head actions" "rail side" "notice side" "main side"; }
   .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head actions" "rail rail" "notice notice" "main main"; }
-  .hud-form-wide > .hud-form-side { display: block; position: sticky; top: calc(var(--shell-header-h, 57px) + 64px); align-self: start; }
-  .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h, 57px); bottom: auto; border-top: 0; background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 8px 0; justify-content: flex-end; }
+  .hud-form-wide > .hud-form-side { display: block; position: sticky; top: calc(var(--shell-header-h) + 64px); align-self: start; }
+  .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h); bottom: auto; border-top: 0; background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 8px 0; justify-content: flex-end; }
   .hud-form-wide:has(> .hud-form-actions) { grid-template-rows: none; }
 }
 @media (min-width: 1024px) and (max-width: 1279px) {

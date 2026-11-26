@@ -104,7 +104,7 @@ export function HudTabs<T extends string>({
                         className={cn(
                             'flex h-auto w-full justify-start bg-transparent p-1.5',
                             vertical
-                                ? 'sticky top-[calc(var(--shell-header-h,57px)+64px)] flex-col items-stretch gap-0.5 self-start p-0'
+                                ? 'sticky top-[calc(var(--shell-header-h)+64px)] flex-col items-stretch gap-0.5 self-start p-0'
                                 : railMobile === 'list'
                                   ? 'flex-col items-stretch gap-0.5 p-0'
                                   : 'hud-scroll-x gap-1 overflow-x-auto'
@@ -157,7 +157,7 @@ export function HudTabs<T extends string>({
                     className={cn(
                         'sticky z-20',
                         sheet
-                            ? 'top-[calc(var(--shell-header-h,57px)/var(--sheet-zoom,1))] px-4 py-2'
+                            ? 'top-[calc(var(--shell-header-h)/var(--sheet-zoom,1))] px-4 py-2'
                             : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule bg-hud-page/[.97]'
                     )}
                 >

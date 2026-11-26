@@ -72,7 +72,7 @@ export function SheetBanner({
             className={cn(
                 'relative h-44',
                 large &&
-                    'lg:sticky lg:top-[calc((var(--shell-header-h,57px)+16px)/var(--sheet-zoom,1))] lg:h-[340px] lg:self-start',
+                    'lg:sticky lg:top-[calc((var(--shell-header-h)+16px)/var(--sheet-zoom,1))] lg:h-[340px] lg:self-start',
                 className
             )}
         >

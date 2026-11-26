@@ -107,7 +107,7 @@ export function SheetIdentityPanel({
             {actions && (
                 <div
                     data-testid="sheet-actions"
-                    className="sticky top-[calc(var(--shell-header-h,57px)/var(--sheet-zoom,1))] z-20 flex min-h-12 items-center justify-end gap-2 border-b border-hud-rule bg-hud-page/[.97] px-4 py-2 backdrop-blur"
+                    className="sticky top-[calc(var(--shell-header-h)/var(--sheet-zoom,1))] z-20 flex min-h-12 items-center justify-end gap-2 border-b border-hud-rule bg-hud-page/[.97] px-4 py-2 backdrop-blur"
                 >
                     {actions}
                 </div>
