@@ -1,5 +1,9 @@
 export { HudCard } from './HudCard';
-export { HudChipTabs } from './HudChipTabs';
+export {
+    HUD_CHIP_ACTIVE_CLASS,
+    HUD_CHIP_CLASS,
+    HudChipTabs,
+} from './HudChipTabs';
 export { HudPage } from './HudPage';
 export { HudPageHeader } from './HudPageHeader';
 export { HudPanel } from './HudPanel';

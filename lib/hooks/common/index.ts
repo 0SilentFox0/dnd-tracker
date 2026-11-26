@@ -63,6 +63,7 @@ export {
     usePusherConnection,
 } from './usePusherChannel';
 export { useReducedMotion } from './useReducedMotion';
+export { useRovingIndex } from './useRovingIndex';
 export { useRowKeys } from './useRowKeys';
 export { useScrollLock } from './useScrollLock';
 export { SEARCH_DEBOUNCE_MS, type SearchState, useSearch } from './useSearch';
