@@ -49,7 +49,7 @@ describe('RulesForm (en)', () => {
     it('renders the morale section in English without raw keys', async () => {
         await renderWithIntl(
             <ConfirmProvider>
-                <RulesForm campaignId="c1" />
+                <RulesForm campaignId="c1" title="T" />
             </ConfirmProvider>,
             {
                 locale: 'en',
@@ -61,6 +61,7 @@ describe('RulesForm (en)', () => {
                     'rulesHeroScaling',
                     'rulesDeathSaves',
                     'rulesInspiration',
+                    'gameTerms',
                     'battleTerms',
                 ],
             }

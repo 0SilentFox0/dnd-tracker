@@ -1,4 +1,3 @@
-import { HudFormPage } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { RulesForm } from '@/components/rules/RulesForm';
 import type { Namespace } from '@/lib/i18n/config';
@@ -66,8 +65,6 @@ export default async function DMRulesPage({
     }
 
     return (
-        <HudFormPage header={{ title: t('page.title') }}>
-            <RulesForm campaignId={id} />
-        </HudFormPage>
+        <RulesForm campaignId={id} title={t('page.title')} />
     );
 }

@@ -20,10 +20,7 @@ export interface RulesFormState {
     set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
 }
 
-export function useRulesForm(
-    campaignId: string,
-    opts?: { initial?: Ruleset }
-) {
+export function useRulesForm(campaignId: string, opts?: { initial?: Ruleset }) {
     const query = useCampaignRules(campaignId, opts);
 
     const update = useUpdateCampaignRules(campaignId);

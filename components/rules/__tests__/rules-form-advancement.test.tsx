@@ -39,7 +39,7 @@ afterEach(cleanup);
 describe('RulesForm advancement tab', () => {
     it('is offered for wfrp only', () => {
         mocks.system = 'wfrp';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.getByRole('tab', {
@@ -49,7 +49,7 @@ describe('RulesForm advancement tab', () => {
 
         cleanup();
         mocks.system = 'homm';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.queryByRole('tab', {
@@ -60,7 +60,7 @@ describe('RulesForm advancement tab', () => {
 
     it('system sections come from the system ui; homm gets neither tab', () => {
         mocks.system = 'wfrp';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.getByRole('tab', { name: 'rules.mechanics.tables.label' })
@@ -68,7 +68,7 @@ describe('RulesForm advancement tab', () => {
 
         cleanup();
         mocks.system = 'homm';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.queryByRole('tab', { name: 'rules.mechanics.tables.label' })
