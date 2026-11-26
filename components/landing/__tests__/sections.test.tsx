@@ -23,7 +23,9 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
 
     it('CombatDemo plays one fight over a single battle frame', () => {
         expect(html.demo.match(/<img/g)).toHaveLength(1);
-        expect(html.demo.match(/class="ld-demo-foe"/g)).toHaveLength(3);
+        expect(html.demo.match(/class="ld-demo-foe[ "]/g)).toHaveLength(
+            locale === 'en' ? 3 : 2
+        );
         expect(html.demo.match(/class="ld-demo-entry"/g)).toHaveLength(2);
         expect(html.demo).toContain(t('combat.demo.spell.name'));
         expect(html.demo).not.toMatch(/warhammer|wfrp/i);

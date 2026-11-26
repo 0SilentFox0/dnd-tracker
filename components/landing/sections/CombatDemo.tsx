@@ -9,37 +9,13 @@ import { cn } from '@/lib/utils';
 
 type Point = { x: number; y: number };
 
-// % of the battle frame (showcaseMedia(locale).combat); retune all of these whenever that screenshot changes
-const ANCHORS = {
-    initiative: {
-        captain: { x: 9.54, y: 19.04 },
-        priest: { x: 25.7, y: 19.04 },
-    },
-    captain: { x: 32.2, y: 36.7 },
-    priest: { x: 57.9, y: 36.7 },
-    treant: { x: 37.5, y: 53 },
-    spider1: { x: 63, y: 63 },
-    spider2: { x: 70.5, y: 75 },
-    die: { x: 44.6, y: 49.5 },
-    blast: { x: 66.7, y: 69 },
-    turnChip: { x: 57.4, y: 26.4 },
-    rollChip: { x: 42, y: 53.6 },
-    spellChip: { x: 60.8, y: 43.6 },
-    save1: { x: 59.6, y: 61.4 },
-    save2: { x: 67.2, y: 72.4 },
-    log: { x: 82, y: 31.6, w: 16.8, h: 53 },
-} as const;
-
-// frame is 16:10, so one % of height is 0.625 cqw
-const ASPECT = 10 / 16;
-
 // seconds into the 12 s loop
 const T = {
     turnA: 0.3,
     die: 1,
     roll: 2.3,
     slash: 2.95,
-    treantHit: 3.05,
+    hit1: 3.05,
     logHit: 3.5,
     advance: 5.2,
     turnB: 5.7,
@@ -48,13 +24,130 @@ const T = {
     burst: 7.2,
     save1: 7.6,
     save2: 7.85,
-    spider1Hit: 7.9,
-    spider2Hit: 8.1,
+    hitA: 7.9,
+    hitB: 8.1,
     logSpell: 8.4,
 };
 
-// sprite index in /landing/demo-portraits.webp
-const PORTRAIT = { treant: 0, spider: 1, captain: 2, priest: 3 };
+type FoeSpec = {
+    key: 'target' | 'foeA' | 'foeB';
+    p: Point;
+    hp: number[];
+    hits: number[];
+    max: number;
+    bare?: boolean;
+    size?: number;
+};
+
+type Scene = {
+    sprite: string;
+    initiative: { from: number; to: number; y: number };
+    attacker: Point;
+    caster: Point;
+    ring: number;
+    target: Point;
+    blast: Point;
+    blastSize: number;
+    foes: FoeSpec[];
+    die: Point;
+    turnChip: Point;
+    rollChip: { p: Point; end?: boolean };
+    spellChip: Point;
+    save1: Point;
+    save2: Point;
+    log: { x: number; y: number; w: number; h: number };
+};
+
+// % of each locale's battle frame (showcaseMedia(locale).combat); retune whenever those screenshots change.
+// Foes flagged bare sit on real tokens (plate and damage only); the others are overlay tokens on empty floor.
+const SCENES: Record<Locale, Scene> = {
+    en: {
+        sprite: '/landing/en/demo-tokens.webp',
+        initiative: { from: 54.4, to: 56.6, y: 3.9 },
+        attacker: { x: 16.7, y: 23.6 },
+        caster: { x: 38.9, y: 58.8 },
+        ring: 7.4,
+        target: { x: 72, y: 40 },
+        blast: { x: 66.3, y: 73 },
+        blastSize: 17,
+        foes: [
+            {
+                key: 'target',
+                p: { x: 72.2, y: 57.5 },
+                hp: [59, 47],
+                hits: [T.hit1],
+                max: 59,
+                bare: true,
+            },
+            {
+                key: 'foeA',
+                p: { x: 61.1, y: 82.6 },
+                hp: [26, 2],
+                hits: [T.hitA],
+                max: 26,
+                bare: true,
+            },
+            {
+                key: 'foeB',
+                p: { x: 71.5, y: 69 },
+                hp: [26, 14],
+                hits: [T.hitB],
+                max: 26,
+                size: 6.6,
+            },
+        ],
+        die: { x: 24.5, y: 19.5 },
+        turnChip: { x: 40.5, y: 9 },
+        rollChip: { p: { x: 21, y: 28.5 } },
+        spellChip: { x: 42.8, y: 52 },
+        save1: { x: 60.8, y: 66 },
+        save2: { x: 60.8, y: 60 },
+        log: { x: 40.5, y: 73, w: 15.5, h: 24 },
+    },
+    uk: {
+        sprite: '/landing/uk/demo-tokens.webp',
+        initiative: { from: 51.8, to: 54.2, y: 3.75 },
+        attacker: { x: 34.8, y: 62 },
+        caster: { x: 34.8, y: 28.7 },
+        ring: 5.3,
+        target: { x: 62, y: 47 },
+        blast: { x: 60.25, y: 56.5 },
+        blastSize: 16,
+        foes: [
+            {
+                key: 'foeA',
+                p: { x: 63.5, y: 54.3 },
+                hp: [60, 48, 24],
+                hits: [T.hit1, T.hitA],
+                max: 60,
+                bare: true,
+            },
+            {
+                key: 'foeB',
+                p: { x: 57, y: 64 },
+                hp: [60, 48],
+                hits: [T.hitB],
+                max: 60,
+                size: 6.4,
+            },
+        ],
+        die: { x: 26.5, y: 50.5 },
+        turnChip: { x: 44.5, y: 10.8 },
+        rollChip: { p: { x: 32.5, y: 55.5 }, end: true },
+        spellChip: { x: 39, y: 21 },
+        save1: { x: 70, y: 38 },
+        save2: { x: 51.5, y: 68 },
+        log: { x: 72, y: 9, w: 18, h: 36 },
+    },
+};
+
+// frame is 16:10, so one % of height is 0.625 cqw
+const ASPECT = 10 / 16;
+
+// sprite index in the locale's demo-tokens.webp
+const PORTRAIT = { attacker: 0, caster: 1, overlay: 2 };
+
+const SPRITE_COLS = 3;
 
 type Vars = Record<`--${string}`, string | number>;
 
@@ -66,42 +159,65 @@ const vars = (v: Vars) => v as CSSProperties;
 function Foe({
     name,
     p,
-    portrait,
-    hp: [from, to, max],
-    hitAt,
+    hp,
+    max,
+    hits,
+    bare,
+    size = 3.9,
 }: {
     name: string;
     p: Point;
-    portrait: number;
-    hp: [number, number, number];
-    hitAt: number;
+    hp: number[];
+    max: number;
+    hits: number[];
+    bare?: boolean;
+    size?: number;
 }) {
+    const [h0, h1, h2 = h1] = hp;
+
+    const [t1, t2 = 99] = hits;
+
     return (
         <div
-            className="ld-demo-foe"
+            className={cn('ld-demo-foe', bare && 'ld-demo-foe-bare')}
             style={at(p, {
-                '--t': hitAt,
-                '--hp0': from / max,
-                '--hp1': to / max,
+                '--t': t1,
+                '--t2h': t2,
+                '--hp0': h0 / max,
+                '--hp1': h1 / max,
+                '--hp2': h2 / max,
+                '--ps': `${size}cqw`,
             })}
         >
-            <span
-                className="ld-demo-portrait"
-                style={vars({ '--i': portrait })}
-            />
+            {!bare && (
+                <span
+                    className="ld-demo-portrait"
+                    style={vars({ '--i': PORTRAIT.overlay })}
+                />
+            )}
             <span className="ld-demo-plate">
                 <b>{name}</b>
                 <span className="ld-demo-hp">
                     <i />
                     <span className="ld-demo-hp-a">
-                        {from}/{max}
+                        {h0}/{max}
                     </span>
                     <span className="ld-demo-hp-b">
-                        {to}/{max}
+                        {h1}/{max}
                     </span>
+                    {hp.length > 2 && (
+                        <span className="ld-demo-hp-c">
+                            {h2}/{max}
+                        </span>
+                    )}
                 </span>
             </span>
-            <span className="ld-demo-dmg">−{from - to}</span>
+            <span className="ld-demo-dmg">−{h0 - h1}</span>
+            {hp.length > 2 && (
+                <span className="ld-demo-dmg" style={vars({ '--t': t2 })}>
+                    −{h1 - h2}
+                </span>
+            )}
         </div>
     );
 }
@@ -172,17 +288,39 @@ function Entry({
 }
 
 export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
-    const name = (k: 'captain' | 'priest' | 'treant' | 'spider1' | 'spider2') =>
+    const scene = SCENES[locale];
+
+    const name = (k: 'attacker' | 'caster' | 'target' | 'foeA' | 'foeB') =>
         t(`combat.demo.names.${k}`);
 
-    const { priest, blast, initiative } = ANCHORS;
+    const { caster, blast, initiative, attacker, foes, log } = scene;
 
-    const angle = Math.atan2((blast.y - priest.y) * ASPECT, blast.x - priest.x);
+    const foe = (key: FoeSpec['key']) => foes.find((f) => f.key === key);
+
+    const hit = foe('target') ?? foe('foeA');
+
+    const hitLoss = hit ? hit.hp[0] - hit.hp[1] : 0;
+
+    const spellLoss = (key: 'foeA' | 'foeB') => {
+        const f = foe(key);
+
+        return f ? f.hp[f.hp.length - 2] - f.hp[f.hp.length - 1] : 0;
+    };
+
+    const angle = Math.atan2((blast.y - caster.y) * ASPECT, blast.x - caster.x);
 
     return (
         <PlayInView className="ld-demo" label={t('combat.demo.label')}>
             <MediaFrame title={t('combat.demo.windowTitle')}>
-                <div className="ld-demo-screen">
+                <div
+                    className="ld-demo-screen"
+                    style={vars({
+                        '--sprite': `url(${scene.sprite})`,
+                        '--cols': SPRITE_COLS,
+                        '--ring': `${scene.ring}cqw`,
+                        '--blast': `${scene.blastSize}cqw`,
+                    })}
+                >
                     <div className="relative">
                         <Screen
                             locale={locale}
@@ -193,49 +331,31 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                             <span
                                 className="ld-demo-init"
                                 style={vars({
-                                    '--x0': initiative.captain.x,
-                                    '--x1': initiative.priest.x,
-                                    '--y': initiative.captain.y,
+                                    '--x0': initiative.from,
+                                    '--x1': initiative.to,
+                                    '--y': initiative.y,
                                     '--t': T.advance,
                                 })}
                             />
                             <span
                                 className="ld-demo-active ld-demo-active-a"
-                                style={at(ANCHORS.captain, {
+                                style={at(attacker, {
                                     '--t': T.turnA,
                                     '--t2': T.advance,
                                 })}
                             />
                             <span
                                 className="ld-demo-active"
-                                style={at(priest, { '--t': T.turnB })}
+                                style={at(caster, { '--t': T.turnB })}
                             />
 
-                            <Foe
-                                name={name('treant')}
-                                p={ANCHORS.treant}
-                                portrait={PORTRAIT.treant}
-                                hp={[30, 18, 34]}
-                                hitAt={T.treantHit}
-                            />
-                            <Foe
-                                name={name('spider1')}
-                                p={ANCHORS.spider1}
-                                portrait={PORTRAIT.spider}
-                                hp={[26, 2, 26]}
-                                hitAt={T.spider1Hit}
-                            />
-                            <Foe
-                                name={name('spider2')}
-                                p={ANCHORS.spider2}
-                                portrait={PORTRAIT.spider}
-                                hp={[26, 14, 26]}
-                                hitAt={T.spider2Hit}
-                            />
+                            {foes.map(({ key, ...f }) => (
+                                <Foe key={key} name={name(key)} {...f} />
+                            ))}
 
                             <span
                                 className="ld-demo-die"
-                                style={at(ANCHORS.die, {
+                                style={at(scene.die, {
                                     '--t': T.die,
                                     '--t2': T.roll,
                                 })}
@@ -245,14 +365,14 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                             <svg
                                 viewBox="0 0 100 100"
                                 className="ld-demo-slash"
-                                style={at(ANCHORS.treant, { '--t': T.slash })}
+                                style={at(scene.target, { '--t': T.slash })}
                             >
                                 <path d="M14 22 Q52 46 86 80" />
                                 <path d="M26 12 Q60 38 92 64" />
                             </svg>
                             <span
                                 className="ld-demo-sprite ld-demo-spark"
-                                style={at(ANCHORS.treant, { '--t': T.slash })}
+                                style={at(scene.target, { '--t': T.slash })}
                             />
 
                             <span
@@ -262,8 +382,8 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                             <span
                                 className="ld-demo-bolt"
                                 style={vars({
-                                    '--x0': priest.x,
-                                    '--y0': priest.y,
+                                    '--x0': caster.x,
+                                    '--y0': caster.y,
                                     '--x1': blast.x,
                                     '--y1': blast.y,
                                     '--ang': `${angle}rad`,
@@ -284,21 +404,29 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                             className="ld-demo-chips ld-demo-layer"
                         >
                             <Chip
-                                p={ANCHORS.turnChip}
+                                p={scene.turnChip}
                                 t={T.turnA}
                                 until={T.advance}
                                 className="ld-demo-turn ld-demo-turn-a"
                             >
-                                {t('combat.demo.turn.captain')}
+                                {t('combat.demo.turn.attacker')}
                             </Chip>
                             <Chip
-                                p={ANCHORS.turnChip}
+                                p={scene.turnChip}
                                 t={T.turnB}
                                 className="ld-demo-turn"
                             >
-                                {t('combat.demo.turn.priest')}
+                                {t('combat.demo.turn.caster')}
                             </Chip>
-                            <Chip p={ANCHORS.rollChip} t={T.roll}>
+                            <Chip
+                                p={scene.rollChip.p}
+                                t={T.roll}
+                                className={
+                                    scene.rollChip.end
+                                        ? 'ld-demo-end'
+                                        : undefined
+                                }
+                            >
                                 <span className="ld-demo-label">
                                     {t('combat.demo.roll.label')}
                                 </span>
@@ -310,19 +438,19 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                                     {t('combat.demo.roll.hit')}
                                 </span>
                             </Chip>
-                            <Chip p={ANCHORS.spellChip} t={T.spell}>
+                            <Chip p={scene.spellChip} t={T.spell}>
                                 <span className="ld-demo-spell">
                                     {t('combat.demo.spell.name')}
                                 </span>
                                 <span>{t('combat.demo.spell.dc')}</span>
                             </Chip>
                             <Chip
-                                p={ANCHORS.save1}
+                                p={scene.save1}
                                 t={T.save1}
                                 className="ld-demo-end"
                             >
                                 <span className="ld-demo-label">
-                                    {name('spider1')}
+                                    {name('foeA')}
                                 </span>
                                 <span>{t('combat.demo.save.label')}</span>
                                 <span className="ld-demo-math">9</span>
@@ -331,12 +459,12 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                                 </span>
                             </Chip>
                             <Chip
-                                p={ANCHORS.save2}
+                                p={scene.save2}
                                 t={T.save2}
                                 className="ld-demo-end"
                             >
                                 <span className="ld-demo-label">
-                                    {name('spider2')}
+                                    {name('foeB')}
                                 </span>
                                 <span>{t('combat.demo.save.label')}</span>
                                 <span className="ld-demo-math">16</span>
@@ -349,10 +477,10 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                         <div
                             className="ld-demo-log"
                             style={vars({
-                                '--x': ANCHORS.log.x,
-                                '--y': ANCHORS.log.y,
-                                '--w': ANCHORS.log.w,
-                                '--h': ANCHORS.log.h,
+                                '--x': log.x,
+                                '--y': log.y,
+                                '--w': log.w,
+                                '--h': log.h,
                             })}
                         >
                             <p className="ld-demo-round">
@@ -361,32 +489,32 @@ export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
                             <ol aria-label={t('combat.demo.log.title')}>
                                 <Entry
                                     t={T.logSpell}
-                                    portrait={PORTRAIT.priest}
-                                    who={name('priest')}
+                                    portrait={PORTRAIT.caster}
+                                    who={name('caster')}
                                     kind={t('combat.demo.log.spell')}
                                     text={t('combat.demo.log.fireball')}
                                     tags={[
-                                        `${name('spider1')} −24`,
-                                        `${name('spider2')} −12`,
+                                        `${name('foeA')} −${spellLoss('foeA')}`,
+                                        `${name('foeB')} −${spellLoss('foeB')}`,
                                     ]}
                                 />
                                 <Entry
                                     t={T.logHit}
-                                    portrait={PORTRAIT.captain}
-                                    who={name('captain')}
+                                    portrait={PORTRAIT.attacker}
+                                    who={name('attacker')}
                                     kind={t('combat.demo.log.attack')}
                                     text={t('combat.demo.log.hit')}
-                                    tags={[`${name('treant')} −12`]}
+                                    tags={[`${name('target')} −${hitLoss}`]}
                                 />
                                 <li className="ld-demo-round">
                                     {t('combat.demo.log.round2')}
                                 </li>
                                 <Entry
-                                    portrait={PORTRAIT.captain}
-                                    who={name('captain')}
+                                    portrait={PORTRAIT.attacker}
+                                    who={name('attacker')}
                                     kind={t('combat.demo.log.attack')}
                                     text={t('combat.demo.log.older')}
-                                    tags={[`${name('treant')} −2`]}
+                                    tags={[`${name('target')} −2`]}
                                 />
                             </ol>
                         </div>

@@ -147,21 +147,21 @@
     "demo": {
       "label": "A battle playing out on the DM screen",
       "windowTitle": "DM screen · battle",
-      "alt": "The DM's battle screen: initiative queue, tactical map with tokens and the combat log",
+      "alt": "The DM's battle screen: initiative queue, tactical map with tokens, turn actions and the combat log",
       "names": {
-        "captain": "Guard Captain #1",
-        "priest": "Priest Acolyte #1",
-        "treant": "Treant #1",
-        "spider1": "Wolf Spider #1",
-        "spider2": "Wolf Spider #2"
+        "attacker": "Elowen Thorne",
+        "caster": "Maelis Voss",
+        "target": "Treant #1",
+        "foeA": "Wolf Spider #1",
+        "foeB": "Wolf Spider #2"
       },
       "turn": {
-        "captain": "Turn · Guard Captain #1",
-        "priest": "Turn · Priest Acolyte #1"
+        "attacker": "Turn · Elowen Thorne",
+        "caster": "Turn · Maelis Voss"
       },
       "roll": {
         "label": "Attack roll",
-        "target": "vs AC 15",
+        "target": "vs AC 16",
         "hit": "Hit"
       },
       "spell": {
@@ -179,9 +179,9 @@
         "round2": "Round 2",
         "attack": "attack",
         "spell": "spell",
-        "hit": "Guard Captain #1 → Treant #1: 22 vs AC 15, hit for 12 slashing damage",
-        "fireball": "Priest Acolyte #1 casts Fireball: Wolf Spider #1 fails the save, Wolf Spider #2 takes half",
-        "older": "Guard Captain #1 → Treant #1: 2 damage"
+        "hit": "Elowen Thorne → Treant #1: 22 vs AC 16, hit for 12 piercing damage",
+        "fireball": "Maelis Voss casts Fireball: Wolf Spider #1 fails the save, Wolf Spider #2 takes half",
+        "older": "Elowen Thorne → Treant #1: 2 damage"
       }
     },
     "fx": {
