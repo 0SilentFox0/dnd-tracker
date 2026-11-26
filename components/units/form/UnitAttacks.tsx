@@ -51,7 +51,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
     return (
         <HudSection
             title={t('title')}
-            className="space-y-4"
+            panel
             action={
                 <Button
                     type="button"
@@ -64,7 +64,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
             }
         >
             {attacks.length > 0 ? (
-                <div className="space-y-3">
+                <div className="ds-list-grid">
                     {attacks.map((attack, index) => (
                         <UnitAttackEditor
                             key={index}

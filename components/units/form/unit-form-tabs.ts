@@ -7,3 +7,4 @@ export const UNIT_FORM_TAB = {
 } as const;
 
 export type UnitFormTabId = (typeof UNIT_FORM_TAB)[keyof typeof UNIT_FORM_TAB];
+export const UNIT_FORM_ID = 'unit-form';

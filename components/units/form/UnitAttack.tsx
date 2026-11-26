@@ -50,7 +50,7 @@ export function UnitAttack({
                         {tCommon('delete')}
                     </Button>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="ds-fields">
                     <LabeledInput
                         id={`attack-name-${index}`}
                         label={t('name')}
