@@ -44,7 +44,7 @@ export function BackgroundForm({
     const { data: feats = [] } = useFeats(campaignId);
 
     return (
-        <HudFormPage title={t('form.editTitle')} aside={t('form.editAside')}>
+        <HudFormPage header={{ title: t('form.editTitle'), aside: t('form.editAside') }}>
             <HudForm
                 id="background-form"
                 onSubmit={actions.submit}

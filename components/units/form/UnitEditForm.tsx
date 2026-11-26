@@ -29,10 +29,7 @@ export function UnitEditForm({
     const editor = useUnitEditForm(id, unitId);
 
     return (
-        <HudFormPage
-            title={t('editTitle', { name: editor.form.data.name ?? '' })}
-            aside={t('editAside')}
-        >
+        <HudFormPage header={{ title: t('editTitle', { name: editor.form.data.name ?? '' }), aside: t('editAside') }}>
             <QueryState
                 query={editor.query}
                 loading={<LoadingState rows={8} label={t('loading')} />}

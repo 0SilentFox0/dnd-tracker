@@ -30,17 +30,14 @@ export default async function HelpArticlePage({
     ]);
 
     return (
-        <HudFormPage
-            title={t(`${article.slug}.title`)}
-            aside={
+        <HudFormPage header={{ title: t(`${article.slug}.title`), aside: 
                 <Link
                     href="/help"
                     className="text-hud-accent-fg hover:underline"
                 >
                     {ui('ui.allHelp')}
                 </Link>
-            }
-        >
+             }}>
             <HudSection>
                 <p className="mb-3 text-sm text-hud-muted">
                     {t(`${article.slug}.summary`)}

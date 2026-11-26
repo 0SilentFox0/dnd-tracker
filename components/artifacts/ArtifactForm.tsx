@@ -304,7 +304,7 @@ export function ArtifactForm({
     ];
 
     return (
-        <HudFormPage title={labels.title} aside={labels.description}>
+        <HudFormPage header={{ title: labels.title, aside: labels.description }}>
             <HudForm
                 id="artifact-form"
                 onSubmit={editor.actions.submit}

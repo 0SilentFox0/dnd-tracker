@@ -191,7 +191,7 @@ export function NewCharacterForm({
     ];
 
     return (
-        <HudFormPage title={t('form.title')} aside={t('form.aside')}>
+        <HudFormPage header={{ title: t('form.title'), aside: t('form.aside') }}>
             <HudForm
                 id="character-form"
                 onSubmit={handleSubmit}

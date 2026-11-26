@@ -51,7 +51,7 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     };
 
     return (
-        <HudFormPage title={t('createTitle')} aside={t('createAside')}>
+        <HudFormPage header={{ title: t('createTitle'), aside: t('createAside') }}>
             <SpellFormBody
                 campaignId={id}
                 form={{ data: formData, set: setFormData }}

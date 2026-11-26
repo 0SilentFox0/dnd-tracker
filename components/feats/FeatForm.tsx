@@ -96,7 +96,7 @@ export function FeatForm({
     ];
 
     return (
-        <HudFormPage title={t('form.editTitle')} aside={t('form.editAside')}>
+        <HudFormPage header={{ title: t('form.editTitle'), aside: t('form.editAside') }}>
             <HudForm
                 id="feat-form"
                 onSubmit={editor.actions.submit}

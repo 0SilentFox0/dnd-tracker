@@ -95,7 +95,7 @@ export function SpellEditForm({
 
     if (fetching) {
         return (
-            <HudFormPage title={t('spellEditor.page.editTitle')}>
+            <HudFormPage header={{ title: t('spellEditor.page.editTitle') }}>
                 <div className="px-4 py-3">
                     <LoadingState
                         rows={6}
@@ -107,12 +107,9 @@ export function SpellEditForm({
     }
 
     return (
-        <HudFormPage
-            title={t('spellEditor.page.editTitleNamed', {
+        <HudFormPage header={{ title: t('spellEditor.page.editTitleNamed', {
                 name: formData.name ?? '',
-            })}
-            aside={t('spellEditor.page.editAside')}
-        >
+            }), aside: t('spellEditor.page.editAside') }}>
             <SpellFormBody
                 campaignId={id}
                 form={{ data: formData, set: setFormData }}

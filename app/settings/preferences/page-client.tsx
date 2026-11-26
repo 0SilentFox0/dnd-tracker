@@ -59,7 +59,7 @@ export function PreferencesClient() {
     );
 
     return (
-        <HudFormPage title={t('title')} aside={t('subtitle')}>
+        <HudFormPage header={{ title: t('title'), aside: t('subtitle') }}>
             <HudSection title={t('language')}>
                 <LocaleSwitcher />
             </HudSection>

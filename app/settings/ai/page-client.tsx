@@ -22,10 +22,7 @@ export function AiSettingsClient({ configured }: { configured: boolean }) {
         return <ErrorState error={new Error(t('settings.notConfigured'))} />;
 
     return (
-        <HudFormPage
-            title={t('settings.title')}
-            aside={t('settings.subtitle')}
-        >
+        <HudFormPage header={{ title: t('settings.title'), aside: t('settings.subtitle') }}>
             <HudSection>
             <QueryState query={ai.query}>
                 {(credentials) => (

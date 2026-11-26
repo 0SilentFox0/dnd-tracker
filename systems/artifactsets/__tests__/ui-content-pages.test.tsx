@@ -13,12 +13,10 @@ vi.mock('@/systems/artifactsets/ui/content/ArtifactSetForm', () => ({
 }));
 vi.mock('@/components/hud/form', () => ({
     HudFormPage: ({
-        title,
-        aside,
+        header: { title, aside },
         children,
     }: {
-        title: string;
-        aside: string;
+        header: { title: string; aside: string };
         children: React.ReactNode;
     }) => (
         <section>

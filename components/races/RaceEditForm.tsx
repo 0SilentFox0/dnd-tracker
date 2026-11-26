@@ -38,7 +38,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
     );
 
     return (
-        <HudFormPage title={t('edit.title')} aside={t('edit.aside')}>
+        <HudFormPage header={{ title: t('edit.title'), aside: t('edit.aside') }}>
             <HudForm
                 id="race-form"
                 onSubmit={editor.actions.submit}

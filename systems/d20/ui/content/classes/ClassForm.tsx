@@ -126,10 +126,7 @@ export function ClassForm({
     ];
 
     return (
-        <HudFormPage
-            title={t('classes.form.title')}
-            aside={t('classes.form.aside')}
-        >
+        <HudFormPage header={{ title: t('classes.form.title'), aside: t('classes.form.aside') }}>
             <HudForm
                 id="class-form"
                 onSubmit={editor.actions.submit}

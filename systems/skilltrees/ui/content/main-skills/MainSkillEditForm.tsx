@@ -26,10 +26,7 @@ export function MainSkillEditForm({
     );
 
     return (
-        <HudFormPage
-            title={t('skills.mainSkills.edit.title')}
-            aside={t('skills.mainSkills.edit.aside')}
-        >
+        <HudFormPage header={{ title: t('skills.mainSkills.edit.title'), aside: t('skills.mainSkills.edit.aside') }}>
             <HudForm
                 id="main-skill-form"
                 onSubmit={actions.submit}

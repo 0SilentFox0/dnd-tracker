@@ -76,18 +76,15 @@ export function SkillCreateForm({
     ];
 
     return (
-        <HudFormPage
-            title={
+        <HudFormPage header={{ title: 
                 isEdit
                     ? t('skills.form.editTitle')
                     : t('skills.form.createTitle')
-            }
-            aside={
+            , aside: 
                 isEdit
                     ? t('skills.form.editAside')
                     : t('skills.form.createAside')
-            }
-        >
+             }}>
             <HudForm
                 id="skill-form"
                 onSubmit={actions.submit}

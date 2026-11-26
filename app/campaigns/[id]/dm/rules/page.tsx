@@ -66,7 +66,7 @@ export default async function DMRulesPage({
     }
 
     return (
-        <HudFormPage title={t('page.title')}>
+        <HudFormPage header={{ title: t('page.title') }}>
             <RulesForm campaignId={id} />
         </HudFormPage>
     );

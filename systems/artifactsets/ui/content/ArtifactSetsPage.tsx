@@ -19,7 +19,7 @@ export function ArtifactSetsPage({ campaignId, view, data }: DmPageProps) {
 
     if (view?.type === 'new')
         return (
-            <HudFormPage title={t('new.title')} aside={t('new.aside')}>
+            <HudFormPage header={{ title: t('new.title'), aside: t('new.aside') }}>
                 <ArtifactSetForm campaignId={campaignId} />
             </HudFormPage>
         );
@@ -28,7 +28,7 @@ export function ArtifactSetsPage({ campaignId, view, data }: DmPageProps) {
         const edit = data as ArtifactSetEditData;
 
         return (
-            <HudFormPage title={t('edit.title')} aside={edit.name}>
+            <HudFormPage header={{ title: t('edit.title'), aside: edit.name }}>
                 <ArtifactSetForm
                     campaignId={campaignId}
                     setId={edit.setId}

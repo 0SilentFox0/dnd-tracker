@@ -22,7 +22,7 @@ export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
     const editor = useUnitCreateForm(id);
 
     return (
-        <HudFormPage title={t('newTitle')} aside={t('newAside')}>
+        <HudFormPage header={{ title: t('newTitle'), aside: t('newAside') }}>
             <HudForm
                 id="unit-form"
                 onSubmit={editor.actions.submit}
