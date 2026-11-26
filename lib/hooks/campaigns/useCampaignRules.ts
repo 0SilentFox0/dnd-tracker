@@ -6,14 +6,18 @@ import { campaignKeys } from './keys';
 
 import { getCampaignRules, updateCampaignRules } from '@/lib/api/rules';
 import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
-import type { RulesetPatch } from '@/lib/utils/rules';
+import type { Ruleset, RulesetPatch } from '@/lib/utils/rules';
 import { preloadSystem } from '@/lib/utils/rules/systems/preload';
 
-export function useCampaignRules(campaignId: string) {
+export function useCampaignRules(
+    campaignId: string,
+    opts?: { initial?: Ruleset }
+) {
     return useQuery({
         queryKey: campaignKeys.rules(campaignId),
         queryFn: () => getCampaignRules(campaignId),
-        enabled: !!campaignId,
+        enabled: !!campaignId && !opts?.initial,
+        initialData: opts?.initial,
         staleTime: REFERENCE_STALE_MS,
     });
 }

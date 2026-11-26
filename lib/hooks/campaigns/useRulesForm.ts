@@ -20,8 +20,11 @@ export interface RulesFormState {
     set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
 }
 
-export function useRulesForm(campaignId: string) {
-    const query = useCampaignRules(campaignId);
+export function useRulesForm(
+    campaignId: string,
+    opts?: { initial?: Ruleset }
+) {
+    const query = useCampaignRules(campaignId, opts);
 
     const update = useUpdateCampaignRules(campaignId);
 
@@ -118,5 +121,14 @@ export function useRulesForm(campaignId: string) {
         loadError: query.isError ? query.error : null,
         reload: () => void query.refetch(),
         reset: () => setChanges({}),
+        dirtyKeys,
+        resetKey: (key: keyof Ruleset) =>
+            setChanges((prev) => {
+                const next = { ...prev };
+
+                delete next[key];
+
+                return next;
+            }),
     };
 }

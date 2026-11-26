@@ -15,6 +15,8 @@ export interface RulesItem<T = unknown> {
     upgrade?(legacy: unknown): T | undefined;
 }
 
+export type RulesGroup = 'system' | 'combat' | 'characters' | 'world';
+
 export interface RulesSection {
     /** Module id or "core" */
     owner: string;
@@ -23,6 +25,8 @@ export interface RulesSection {
     refine?(value: Record<string, unknown>): boolean;
     refineMessage?: string;
     mechanic: boolean;
+    /** Table-of-contents group in the rule book; no group lands under "other" */
+    group?: RulesGroup;
     /** Namespace holding `label` and `description` of the section when it is not core (`rules.mechanics.<name>`) */
     labels?: string;
     /** Last touch on the value the form sends (e.g. fill blanks) */

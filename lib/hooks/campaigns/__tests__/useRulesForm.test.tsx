@@ -174,4 +174,43 @@ describe('useRulesForm', () => {
         expect(result.current.form.data).toEqual(DEFAULT_RULES);
         expect(result.current.isDirty).toBe(false);
     });
+
+    it('exposes dirtyKeys and resets a single section', async () => {
+        const { result } = await setup();
+
+        act(() =>
+            result.current.form.set('morale', { enabled: false, cap: 3 })
+        );
+        act(() =>
+            result.current.form.set('items', {
+                ...DEFAULT_RULES.items,
+                enabled: !DEFAULT_RULES.items.enabled,
+            })
+        );
+
+        expect(result.current.dirtyKeys).toEqual(['morale', 'items']);
+
+        act(() => result.current.resetKey('morale'));
+
+        expect(result.current.dirtyKeys).toEqual(['items']);
+        expect(result.current.form.data.morale).toEqual(DEFAULT_RULES.morale);
+    });
+
+    it('initial rules skip the request', async () => {
+        const client = new QueryClient();
+
+        const view = renderHook(
+            () => useRulesForm('c1', { initial: DEFAULT_RULES }),
+            {
+                wrapper: ({ children }: { children: ReactNode }) => (
+                    <QueryClientProvider client={client}>
+                        <ConfirmProvider>{children}</ConfirmProvider>
+                    </QueryClientProvider>
+                ),
+            }
+        );
+
+        expect(view.result.current.form?.data).toEqual(DEFAULT_RULES);
+        expect(getCampaignRules).not.toHaveBeenCalled();
+    });
 });

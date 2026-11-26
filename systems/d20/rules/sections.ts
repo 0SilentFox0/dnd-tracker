@@ -64,6 +64,7 @@ export const D20_SECTIONS: SectionsContribution = {
     sections: {
         criticals: {
             owner: 'd20',
+            group: 'combat',
             mechanic: true,
             items: sectionItems('criticals'),
             refine: (v) =>
@@ -74,11 +75,13 @@ export const D20_SECTIONS: SectionsContribution = {
         },
         formulas: {
             owner: 'd20',
+            group: 'characters',
             mechanic: true,
             items: sectionItems('formulas'),
         },
         initiative: {
             owner: 'd20',
+            group: 'combat',
             mechanic: true,
             items: sectionItems('initiative'),
             refine: (v) =>
@@ -87,14 +90,21 @@ export const D20_SECTIONS: SectionsContribution = {
                 v.heroMin <= v.heroMax,
             refineMessage: INITIATIVE_ORDER_MESSAGE,
         },
-        saves: { owner: 'd20', mechanic: true, items: sectionItems('saves') },
+        saves: {
+            owner: 'd20',
+            group: 'combat',
+            mechanic: true,
+            items: sectionItems('saves'),
+        },
         concentration: {
             owner: 'd20',
+            group: 'combat',
             mechanic: true,
             items: sectionItems('concentration'),
         },
         conditions: {
             owner: 'd20',
+            group: 'combat',
             mechanic: true,
             items: sectionItems('conditions'),
             patchExtras: {
@@ -108,11 +118,13 @@ export const D20_SECTIONS: SectionsContribution = {
         },
         actions: {
             owner: 'd20',
+            group: 'combat',
             mechanic: true,
             items: sectionItems('actions', ['enabled', 'variant']),
         },
         classes: {
             owner: 'd20',
+            group: 'characters',
             mechanic: true,
             items: sectionItems('classes'),
         },
