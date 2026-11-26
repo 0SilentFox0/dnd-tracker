@@ -30,6 +30,7 @@ export type {
 export { useReferenceSelection } from './useReferenceSelection';
 export { useRemoveCustomCondition } from './useRemoveCustomCondition';
 export { HERO_LEVELS, type RulesFormState, useRulesForm } from './useRulesForm';
+export { useRulesSection } from './useRulesSection';
 export { useSaveAsTemplate } from './useSaveAsTemplate';
 export {
     useApplySafeSourceChanges,

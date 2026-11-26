@@ -5,7 +5,6 @@ import { type ComponentType, type FormEvent, type ReactNode } from 'react';
 import { CompositionChip, RulesAside } from './book/RulesAside';
 import { RulesChangedChip } from './book/RulesChangedChip';
 import { RulesToc, type RulesTocGroup } from './book/RulesToc';
-import { useRulesSection } from './book/useRulesSection';
 import { DefaultAttacksSection } from './sections/DefaultAttacksSection';
 import { EncountersSection } from './sections/EncountersSection';
 import { ItemsSection } from './sections/ItemsSection';
@@ -22,7 +21,11 @@ import { systemUiOf } from '@/components/systems';
 import type { RulesSectionProps } from '@/components/systems/types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { useCampaignModules, useRulesForm } from '@/lib/hooks/campaigns';
+import {
+    useCampaignModules,
+    useRulesForm,
+    useRulesSection,
+} from '@/lib/hooks/campaigns';
 import { useSearch } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
@@ -147,7 +150,9 @@ export function RulesForm({
 
     const isChanged = (key: string) => dirtyKeys.has(key as keyof Ruleset);
 
-    const groups: RulesTocGroup[] = [...RULES_SECTION_GROUPS, 'other']
+    const groups: RulesTocGroup[] = (
+        [...RULES_SECTION_GROUPS, 'other'] as const
+    )
         .map((id) => ({
             id,
             items: search.items

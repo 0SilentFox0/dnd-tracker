@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import type { RulesSectionGroup } from '@/lib/utils/rules/sections';
 
 export interface RulesTocItem {
     key: string;
@@ -12,7 +13,7 @@ export interface RulesTocItem {
 }
 
 export interface RulesTocGroup {
-    id: string;
+    id: RulesSectionGroup | 'other';
     items: RulesTocItem[];
 }
 
