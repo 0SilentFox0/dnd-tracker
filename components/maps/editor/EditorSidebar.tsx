@@ -2,12 +2,16 @@
 
 import { useTranslations } from 'next-intl';
 
-import { PANEL_ICONS, PANELS } from './editor-icons';
+import { ArtPanel } from './art/ArtPanel';
+import { PANEL_ICONS, panelsFor } from './editor-icons';
 import { TilePalettePanel } from './TilePalettePanel';
 import { UvttImportSection } from './UvttImportSection';
 
 import { MapBackgroundSection } from '@/components/battle/setup/map/MapBackgroundSection';
-import { MapCellToolsSection } from '@/components/battle/setup/map/MapCellToolsSection';
+import {
+    ART_CELL_TOOLS,
+    MapCellToolsSection,
+} from '@/components/battle/setup/map/MapCellToolsSection';
 import {
     DoorToolOptions,
     EDGE_TOOLS,
@@ -17,12 +21,12 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {
     EditorPanel,
+    useMapArtEditor,
+    useMapArtSave,
     useMapEditorDraft,
     useMapEditorWorkspace,
     useUvttImport,
 } from '@/lib/hooks/battle-maps';
-
-const HEX_HIDDEN: ReadonlySet<EditorPanel> = new Set(['objects']);
 
 const GROUP_LABEL =
     'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';
@@ -31,11 +35,17 @@ export function EditorSidebar({
     draft,
     workspace,
     uvtt,
+    art,
     onSelectPanel,
 }: {
     draft: ReturnType<typeof useMapEditorDraft>;
     workspace: ReturnType<typeof useMapEditorWorkspace>;
     uvtt: ReturnType<typeof useUvttImport>;
+    art: {
+        editor: ReturnType<typeof useMapArtEditor>;
+        save: ReturnType<typeof useMapArtSave>;
+        ids: { campaignId: string; mapId: string };
+    };
     onSelectPanel: (panel: EditorPanel) => void;
 }) {
     const t = useTranslations('maps.editor');
@@ -46,7 +56,9 @@ export function EditorSidebar({
 
     const hex = editor.state.grid === 'hex';
 
-    const panels = hex ? PANELS.filter((p) => !HEX_HIDDEN.has(p)) : PANELS;
+    const panels = panelsFor({ hex, artActive: art.editor.active });
+
+    const firstPaint = panels.find((p) => p !== 'background' && p !== 'cells');
 
     return (
         <Tabs
@@ -64,7 +76,7 @@ export function EditorSidebar({
 
                     return (
                         <div key={p} className="contents">
-                            {p === 'edges' && (
+                            {p === firstPaint && (
                                 <span className={`${GROUP_LABEL} pt-2`}>
                                     {t('groups.paint')}
                                 </span>
@@ -107,7 +119,10 @@ export function EditorSidebar({
                 <MapBackgroundSection editor={editor} />
             </TabsContent>
             <TabsContent value="cells">
-                <MapCellToolsSection editor={editor} />
+                <MapCellToolsSection
+                    editor={editor}
+                    tools={art.editor.active ? ART_CELL_TOOLS : undefined}
+                />
             </TabsContent>
             <TabsContent value="edges">
                 <div className="space-y-2">
@@ -119,6 +134,13 @@ export function EditorSidebar({
                     />
                     <DoorToolOptions editor={editor} />
                 </div>
+            </TabsContent>
+            <TabsContent value="art">
+                <ArtPanel
+                    art={art.editor}
+                    artSave={art.save}
+                    ids={art.ids}
+                />
             </TabsContent>
             {!hex && (
                 <TabsContent value="objects">

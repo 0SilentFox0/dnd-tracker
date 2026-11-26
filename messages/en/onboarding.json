@@ -111,7 +111,7 @@
       },
       "maps": {
         "title": "Map library",
-        "body": "Keep battle maps in the campaign and reuse them in battles. The wall and bars editor is desktop-only; pull a changed map into a battle with \"Update map\"."
+        "body": "Keep battle maps in the campaign and reuse them in battles. The wall and bars editor is desktop-only; map art (floors, walls, lights) is painted and baked into the background on desktop; pull a changed map into a battle with \"Update map\"."
       },
       "battle-scene": {
         "title": "Running a battle",

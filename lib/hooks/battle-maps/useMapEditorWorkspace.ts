@@ -2,18 +2,25 @@
 
 import { useEffect, useState } from 'react';
 
+import type { useMapArtEditor } from '@/lib/hooks/battle-maps/useMapArtEditor';
 import type { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
 import { useTileEditor } from '@/lib/hooks/battle-maps/useTileEditor';
 import { useUnsavedChangesGuard } from '@/lib/hooks/common';
 import { chordBlocked } from '@/lib/hooks/common/shortcut-guard';
 import type { BattleMapFull, BattleMapTileChunks } from '@/types/battle-map';
 
-export type EditorPanel = 'background' | 'cells' | 'edges' | 'objects';
+export type EditorPanel = 'background' | 'cells' | 'edges' | 'art' | 'objects';
+
+type ArtHistory = Pick<
+    ReturnType<typeof useMapArtEditor>,
+    'active' | 'isDirty' | 'undo' | 'redo' | 'setTool'
+>;
 
 export function useMapEditorWorkspace(
     source: BattleMapFull,
     draft: ReturnType<typeof useMapEditorDraft>,
-    tileData: BattleMapTileChunks
+    tileData: BattleMapTileChunks,
+    art: ArtHistory
 ) {
     const { map } = draft.editor.state;
 
@@ -26,19 +33,25 @@ export function useMapEditorWorkspace(
     const hex = draft.editor.state.grid === 'hex';
 
     const [panel, setPanel] = useState<EditorPanel>(() => {
-        if (source.map.background) return 'background';
+        if (art.active || !source.map.background) return 'art';
 
-        return hex ? 'cells' : 'objects';
+        return 'background';
     });
 
     const paintingTiles = !hex && panel === 'objects';
 
-    const { undo, redo } = tileEditor;
+    const paintingArt = panel === 'art' && art.active;
+
+    const history = paintingTiles ? tileEditor : art;
+
+    const { undo, redo } = history;
 
     const { setTool } = draft.editor.actions;
 
+    const { setTool: setArtTool } = art;
+
     useEffect(() => {
-        if (!paintingTiles) return;
+        if (!paintingTiles && !paintingArt) return;
 
         const onKeyDown = (event: KeyboardEvent) => {
             if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
@@ -61,14 +74,17 @@ export function useMapEditorWorkspace(
         window.addEventListener('keydown', onKeyDown);
 
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [paintingTiles, redo, undo]);
+    }, [paintingTiles, paintingArt, redo, undo]);
 
-    useUnsavedChangesGuard(draft.isDirty || tileEditor.isDirty);
+    useUnsavedChangesGuard(draft.isDirty || tileEditor.isDirty || art.isDirty);
 
     const selectPanel = (next: EditorPanel) => {
         if (hex && next === 'objects') return;
 
-        if (panel !== next) setTool(null);
+        if (panel !== next) {
+            setTool(null);
+            setArtTool(null);
+        }
 
         setPanel(next);
     };
@@ -78,5 +94,6 @@ export function useMapEditorWorkspace(
         panel,
         selectPanel,
         paintingTiles,
+        paintingArt,
     };
 }

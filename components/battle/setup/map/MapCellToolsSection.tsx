@@ -15,7 +15,15 @@ import type { SetupTool } from '@/lib/utils/battle/grid';
 
 const TOOLS: SetupTool[] = ['blocked', 'wall', 'hazard', 'erase'];
 
-export function MapCellToolsSection({ editor }: { editor: BattleMapEditor }) {
+export const ART_CELL_TOOLS: SetupTool[] = ['wall', 'hazard', 'erase'];
+
+export function MapCellToolsSection({
+    editor,
+    tools = TOOLS,
+}: {
+    editor: BattleMapEditor;
+    tools?: SetupTool[];
+}) {
     const t = useTranslations('battleSetup.map');
 
     const tDamage = useTranslations('gameTerms.damageTypes');
@@ -35,7 +43,7 @@ export function MapCellToolsSection({ editor }: { editor: BattleMapEditor }) {
             hidden={!!mode && !!MAP_MODE_UI[mode].hidesTerrain}
         >
             <Label>{t('drawing')}</Label>
-            <ToolButtons tools={TOOLS} tool={tool} onPick={actions.setTool} />
+            <ToolButtons tools={tools} tool={tool} onPick={actions.setTool} />
             {tool === 'hazard' && (
                 <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
                     <Input

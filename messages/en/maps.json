@@ -61,12 +61,14 @@
       "background": "Background",
       "cells": "Cells",
       "edges": "Edges",
+      "art": "Art",
       "objects": "Objects"
     },
     "panelDescription": {
       "background": "Import a UVTT file or set the background image and grid scale.",
       "cells": "Mark blocked cells and hazardous areas.",
       "edges": "Draw walls, bars, and interactive doors along cell edges.",
+      "art": "Paint floors, walls, doors and lights; the art is baked into the map background.",
       "objects": "Choose an object and a tool, then paint on the map."
     },
     "tiles": {
@@ -109,7 +111,118 @@
       "saving": "Saving...",
       "saveFailed": "Failed to save tiles"
     },
-    "hexHint": "Hex maps have no textures."
+    "hexHint": "Hex maps have no textures.",
+    "art": {
+      "intro": "Paint floors, walls, doors and lights right in the editor — the art is baked into the map image. Walls and doors become battle mechanics.",
+      "start": "Start art",
+      "tools": "Art tools",
+      "tool": {
+        "floor": "Floor",
+        "floor-fill": "Fill",
+        "floor-erase": "Erase floor",
+        "room": "Room",
+        "wall": "Wall",
+        "wall-erase": "Erase wall",
+        "opening": "Openings",
+        "blocked": "Rubble",
+        "light": "Light"
+      },
+      "toolHint": {
+        "floor": "Paint floor with the brush.",
+        "floor-fill": "Click to fill a connected floor area.",
+        "floor-erase": "Removes floor with the brush.",
+        "room": "Drag a rectangle: floor with walls around the perimeter.",
+        "wall": "Draw walls along cell edges.",
+        "wall-erase": "Removes walls together with openings on them.",
+        "opening": "Click walls to place a door, window, bars or portcullis.",
+        "blocked": "Click to place or remove rubble.",
+        "light": "Click to add a light; drag the handles to move."
+      },
+      "brushSize": "Brush size",
+      "floorMaterial": "Floor",
+      "wallMaterialTitle": "Wall material",
+      "openingMaterial": "Type and material",
+      "locked": "Locked",
+      "blockedMaterial": "Rubble look",
+      "lights": "Lights",
+      "noLightSelected": "Select a light on the map or click to add one.",
+      "lightRadius": "Radius: {value} cells",
+      "lightColor": "Colour",
+      "lightIntensity": "Intensity: {value}%",
+      "lightRemove": "Delete light",
+      "ambient": "Ambience",
+      "ambientTint": "Tint",
+      "darkness": "Darkness: {value}%",
+      "bake": "Bake",
+      "bakeStale": "The background is out of date — bake it.",
+      "bakeDone": "Baked in {seconds} s, {px} px/cell",
+      "detach": "Detach art",
+      "phase": {
+        "baking": "Baking...",
+        "uploading": "Uploading...",
+        "saving": "Saving..."
+      },
+      "confirmDetach": {
+        "title": "Detach art?",
+        "body": "The art scene will be deleted. Walls stay on the baked background but are edited separately as regular walls."
+      },
+      "wallMaterial": {
+        "stone": "Stone",
+        "brick": "Brick",
+        "cave": "Cave",
+        "hedge": "Hedge",
+        "ice": "Ice",
+        "wood": "Wood"
+      },
+      "openingMaterials": {
+        "wood": "Wooden door",
+        "iron": "Iron door",
+        "window": "Window",
+        "bars-iron": "Bars",
+        "portcullis": "Portcullis"
+      },
+      "blockedMaterials": {
+        "none": "Plain",
+        "rubble": "Rubble",
+        "boulder": "Boulder",
+        "rock": "Rock"
+      },
+      "lightColors": {
+        "torch": "Torch",
+        "candle": "Candle",
+        "daylight": "Daylight",
+        "moon": "Moon",
+        "magic": "Magic",
+        "fire": "Fire",
+        "nature": "Nature",
+        "frost": "Frost"
+      },
+      "tints": {
+        "none": "None",
+        "night": "Night",
+        "dusk": "Dusk",
+        "cave": "Cave",
+        "swamp": "Swamp",
+        "blood": "Blood"
+      },
+      "bakeFailed": {
+        "too-large": "The map is too large to bake in the browser. Reduce the map size.",
+        "canvas": "The browser could not create a canvas for baking.",
+        "encode": "Could not encode the baked image."
+      },
+      "notice": {
+        "openingNeedsWall": "Openings can only be placed on walls.",
+        "terrainLimit": "The rubble limit for this map is reached.",
+        "lightLimit": "The light limit for this map is reached."
+      },
+      "validation": {
+        "badEdge": "Invalid wall or opening edge.",
+        "openingWithoutWall": "An opening without a wall.",
+        "tooManyDoors": "Too many doors on the map.",
+        "outOfBounds": "An art element is outside the map.",
+        "badFloor": "Invalid floor data."
+      }
+    }
   },
   "catalog": {
     "title": "Map catalog",

@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type {
+    useMapArtEditor,
+    useMapArtSave,
     useMapEditorDraft,
     useMapEditorWorkspace,
     useTileSave,
@@ -34,11 +36,16 @@ export function EditorHeader({
     draft,
     workspace,
     tileSave,
+    art,
 }: {
     campaignId: string;
     draft: ReturnType<typeof useMapEditorDraft>;
     workspace: ReturnType<typeof useMapEditorWorkspace>;
     tileSave: ReturnType<typeof useTileSave>;
+    art: {
+        editor: ReturnType<typeof useMapArtEditor>;
+        save: ReturnType<typeof useMapArtSave>;
+    };
 }) {
     const t = useTranslations('maps.editor');
 
@@ -46,15 +53,32 @@ export function EditorHeader({
 
     const tTiles = useTranslations('maps.editor.tiles');
 
+    const tArt = useTranslations('maps.editor.art');
+
     const { editor } = draft;
 
     const { map } = editor.state;
 
-    const { tileEditor, paintingTiles } = workspace;
+    const { tileEditor, paintingTiles, paintingArt } = workspace;
 
-    const maxSide = map.background
+    const { editor: artEditor, save: artSave } = art;
+
+    const photoSized = map.background && !artEditor.active && !map.artBaked;
+
+    const maxSide = photoSized
         ? MAP_LIMITS.photoMaxSide
         : MAP_LIMITS.tileMaxSide;
+
+    const canSave = draft.canSave || (artEditor.active && artEditor.isDirty);
+
+    const saving = artEditor.active ? artSave.isSaving : draft.isSaving;
+
+    const saveLabel =
+        artEditor.active && artSave.phase !== 'idle'
+            ? tArt(`phase.${artSave.phase}`)
+            : saving
+              ? t('saving')
+              : t('save');
 
     return (
         <div className="flex shrink-0 flex-wrap items-end gap-3 rounded-lg border border-hud-rule bg-background/60 p-3 shadow-sm">
@@ -99,9 +123,37 @@ export function EditorHeader({
                     onValueChange={(v) => editor.actions.setSize(map.cols, v)}
                 />
             </div>
-            <Button onClick={draft.save} disabled={!draft.canSave} size="sm">
-                {draft.isSaving ? t('saving') : t('save')}
+            <Button
+                onClick={() =>
+                    artEditor.active ? artSave.save() : draft.save()
+                }
+                disabled={!canSave || (artEditor.active && artSave.isSaving)}
+                size="sm"
+            >
+                {saveLabel}
             </Button>
+            {paintingArt && (
+                <>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={!artEditor.canUndo}
+                        onClick={artEditor.undo}
+                    >
+                        {tTiles('undo')}
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={!artEditor.canRedo}
+                        onClick={artEditor.redo}
+                    >
+                        {tTiles('redo')}
+                    </Button>
+                </>
+            )}
             {paintingTiles && (
                 <>
                     <Button
