@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { CompendiumImport } from './compendium/CompendiumImport';
@@ -31,6 +32,8 @@ export function ContentImportWizard({
     const tc = useTranslations('common.actions');
 
     const wizard = useContentImport(campaignId, kind);
+
+    const [footerSlot, setFooterSlot] = useState<HTMLElement | null>(null);
 
     const { busy, progress, error } = wizard.status;
 
@@ -102,10 +105,12 @@ export function ContentImportWizard({
                 open={open}
                 onOpenChange={close}
                 title={t('wizard.compendiumTitle')}
+                footer={<div ref={setFooterSlot} className="w-full" />}
             >
                 <CompendiumImport
                     campaignId={campaignId}
                     initialFile={wizard.aggregateFile}
+                    footerSlot={footerSlot}
                 />
             </ResponsiveDialog>
         );

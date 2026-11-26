@@ -158,23 +158,15 @@ export function CompendiumDependencies({
 
     return (
         <div className="space-y-3">
-            <Disclosure
-                defaultOpen
-                className="text-sm"
-                chevronClassName="text-hud-muted"
-                summary={
-                    <span className="text-hud-ink">
-                        {hiddenCount > 0 && !showAll
-                            ? t('dependencies.titleCountOf', {
-                                  shown: shown.length,
-                                  total: all.length,
-                              })
-                            : t('dependencies.titleCount', {
-                                  shown: shown.length,
-                              })}
-                    </span>
-                }
-            >
+            <p className="text-sm text-hud-ink">
+                {hiddenCount > 0 && !showAll
+                    ? t('dependencies.titleCountOf', {
+                          shown: shown.length,
+                          total: all.length,
+                      })
+                    : t('dependencies.titleCount', { shown: shown.length })}
+            </p>
+            <div className="space-y-3">
                 <div className="my-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     {pager.pageItems.map((row) => (
                         <div
@@ -277,7 +269,7 @@ export function CompendiumDependencies({
                               })}
                     </Button>
                 )}
-            </Disclosure>
+            </div>
             {!preview.report.readyToImport && (
                 <ActionBar>
                     <Button

@@ -10,6 +10,9 @@ import type { CompendiumReport as Report } from '@/lib/server/compendium-import/
 vi.unmock('next-intl');
 afterEach(cleanup);
 
+const openSources = () =>
+    fireEvent.click(screen.getByRole('button', { name: 'Джерела й покриття' }));
+
 const render = (ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') =>
     renderWithIntl(ui, {
         locale,
@@ -107,17 +110,18 @@ it('groups skipped categories into one info line and hides raw keys and source J
     );
 
     expect(container.textContent).not.toContain('[1,');
-    expect(container.textContent).not.toContain('_meta');
     expect(container.textContent).toContain('Риса');
     expect(container.textContent).toContain('«cloud hopper»');
-    expect(container.textContent).toContain(
-        'Пропущено непідтримувані категорії: foundrySpell'
-    );
     expect(
         screen.queryByText(/Ручна перевірка · UNSUPPORTED_CATEGORY/)
     ).toBeNull();
     expect(screen.getAllByText('Механіку рис налаштувати вручну')).toHaveLength(
         1
+    );
+    openSources();
+    expect(container.textContent).not.toContain('_meta');
+    expect(container.textContent).toContain(
+        'Пропущено непідтримувані категорії: foundrySpell'
     );
 });
 
@@ -248,6 +252,7 @@ it('omits the blockers block and empty categories when there is nothing to show'
         />
     );
     expect(screen.queryByRole('alert')).toBeNull();
+    openSources();
     expect(screen.getByText('Риси')).toBeTruthy();
     expect(screen.queryByText('Заклинання')).toBeNull();
 });
@@ -340,9 +345,12 @@ it('collapses technical categories and aligns the main table cells', async () =>
         />
     );
 
+    openSources();
     expect(screen.getByText(/Технічні категорії \(1\)/)).toBeTruthy();
     expect(container.querySelectorAll('[role=row]')).toHaveLength(2);
     expect(
-        screen.getByText(/Технічні категорії/).closest('[data-slot="disclosure"]')?.textContent
+        screen
+            .getByText(/Технічні категорії/)
+            .closest('[data-slot="disclosure"]')?.textContent
     ).toContain('foundryFeat');
 });
