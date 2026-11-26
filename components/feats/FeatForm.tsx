@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { FeatBasicsTab } from './FeatBasicsTab';
+import { FeatCard } from './FeatCard';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
@@ -37,6 +39,10 @@ export function FeatForm({
     const editor = useFeatForm(campaignId, id, initial);
 
     const { data, set } = editor.form;
+
+    const preview = useDeferredValue(
+        useMemo<FeatData>(() => ({ id, ...data }), [id, data])
+    );
 
     const [invalid, setInvalid] = useState({
         abilities: false,
@@ -136,11 +142,20 @@ export function FeatForm({
                 </>
             }
             side={
-                <SourceNotes
-                    campaignId={campaignId}
-                    kind="feats"
-                    targetId={id}
-                />
+                <>
+                    <FormPreviewPanel>
+                        <FeatCard
+                            feat={preview}
+                            campaignId={campaignId}
+                            canEdit={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="feats"
+                        targetId={id}
+                    />
+                </>
             }
         >
             <HudForm

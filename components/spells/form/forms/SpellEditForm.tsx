@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { SpellReferenceDetail } from '@/components/campaigns/info/detail/SpellReferenceDetail';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { LoadingState } from '@/components/common/states';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudFormMenu } from '@/components/hud';
@@ -27,6 +29,7 @@ import {
     spellFormIssue,
     spellToForm,
 } from '@/lib/utils/spells/model/form';
+import { toSpellReferencePreview } from '@/lib/utils/spells/reference-preview';
 
 const FORM_ID = 'spell-form';
 
@@ -60,6 +63,19 @@ export function SpellEditForm({
     const deleteSpellMutation = useDeleteSpell(id, spellId);
 
     useSpellFormSync(spell, setFormData, spellToForm);
+
+    const preview = useDeferredValue(
+        useMemo(
+            () =>
+                toSpellReferencePreview(formData, {
+                    id: spellId,
+                    groupName:
+                        spellGroups.find((g) => g.id === formData.groupId)
+                            ?.name ?? null,
+                }),
+            [formData, spellId, spellGroups]
+        )
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -148,7 +164,21 @@ export function SpellEditForm({
                 </>
             }
             side={
-                <SourceNotes campaignId={id} kind="spells" targetId={spellId} />
+                <>
+                    <FormPreviewPanel>
+                        <SpellReferenceDetail
+                            key={spellId}
+                            campaignId={id}
+                            item={preview}
+                            isDM={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={id}
+                        kind="spells"
+                        targetId={spellId}
+                    />
+                </>
             }
         >
             <SpellFormBody

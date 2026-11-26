@@ -389,6 +389,8 @@ describe('ArtifactForm', () => {
         expect(
             within(rail as HTMLElement).getAllByRole('tab').length
         ).toBeGreaterThanOrEqual(3);
-        expect(document.querySelector('.hud-form-side')).toBeNull();
+        expect(document.querySelector('.hud-form-side')).toHaveTextContent(
+            'Sword'
+        );
     });
 });

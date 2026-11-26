@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ClassBasicsTab } from './ClassBasicsTab';
@@ -10,6 +10,8 @@ import { ClassProgressionMap } from './progression';
 import { SubclassesEditor } from './SubclassesEditor';
 
 import { withAbilityErrors } from '@/components/abilities';
+import { ClassReferenceDetail } from '@/components/campaigns/info/detail/ClassReferenceDetail';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
@@ -17,6 +19,7 @@ import { useClassForm } from '@/lib/hooks/classes';
 import { useErrorTotals } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { buildClassProgression } from '@/lib/utils/characters/classes';
+import { toClassReferencePreview } from '@/lib/utils/characters/classes/reference-preview';
 import type { GameClassData } from '@/types/classes';
 
 const FORM_ID = 'class-form';
@@ -59,6 +62,10 @@ export function ClassForm({
     const progression = useMemo(
         () => buildClassProgression({ id, ...data }),
         [id, data]
+    );
+
+    const preview = useDeferredValue(
+        useMemo(() => toClassReferencePreview(data, { id }), [data, id])
     );
 
     const tabs: HudTab<ClassFormTabId>[] = [
@@ -168,11 +175,20 @@ export function ClassForm({
                 </>
             }
             side={
-                <SourceNotes
-                    campaignId={campaignId}
-                    kind="classes"
-                    targetId={id}
-                />
+                <>
+                    <FormPreviewPanel>
+                        <ClassReferenceDetail
+                            campaignId={campaignId}
+                            item={preview}
+                            isDM={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="classes"
+                        targetId={id}
+                    />
+                </>
             }
         >
             <HudForm

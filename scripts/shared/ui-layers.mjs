@@ -18,6 +18,7 @@ export const SYSTEM_UI_KIT = [
     '@/components/content-copy/ContentCopyButton',
     '@/components/content-import/shared/ContentTransferButtons',
     '@/components/content-import/shared/SourceNotes',
+    '@/components/campaigns/info/detail/ClassReferenceDetail',
     '@/components/onboarding/OnboardingHint',
     '@/components/skills/list/SkillCard',
 ];

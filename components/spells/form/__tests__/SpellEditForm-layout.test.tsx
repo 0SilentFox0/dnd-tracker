@@ -18,6 +18,12 @@ vi.mock('@/components/spells/form/forms/SpellFormBody', () => ({
     ),
 }));
 
+vi.mock('@/components/campaigns/info/detail/SpellReferenceDetail', () => ({
+    SpellReferenceDetail: ({ item }: { item: { name: string } }) => (
+        <p>preview-{item.name}</p>
+    ),
+}));
+
 vi.mock('@/components/content-import/shared/SourceNotes', () => ({
     SourceNotes: () => <p>source-notes</p>,
 }));
@@ -40,6 +46,9 @@ describe('SpellEditForm layout', () => {
 
         expect(document.querySelector('.hud-form-side')).toHaveTextContent(
             'source-notes'
+        );
+        expect(document.querySelector('.hud-form-side')).toHaveTextContent(
+            'preview-Fireball'
         );
         expect(
             document.querySelector('.hud-form-actions button[type=submit]')

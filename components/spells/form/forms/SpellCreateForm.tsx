@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { SpellReferenceDetail } from '@/components/campaigns/info/detail/SpellReferenceDetail';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { HudFormPage } from '@/components/hud/form';
 import { SpellFormBody } from '@/components/spells/form/forms/SpellFormBody';
 import type { SpellFormData } from '@/components/spells/form/spell-form-defaults';
@@ -17,6 +19,7 @@ import {
     useSpellIssueText,
 } from '@/lib/hooks/spells';
 import { formToPayload, spellFormIssue } from '@/lib/utils/spells/model/form';
+import { toSpellReferencePreview } from '@/lib/utils/spells/reference-preview';
 
 const FORM_ID = 'spell-form';
 
@@ -40,6 +43,18 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     const { data: spellGroups = [] } = useSpellGroups(id);
 
     const createSpellMutation = useCreateSpell(id);
+
+    const preview = useDeferredValue(
+        useMemo(
+            () =>
+                toSpellReferencePreview(formData, {
+                    groupName:
+                        spellGroups.find((g) => g.id === formData.groupId)
+                            ?.name ?? null,
+                }),
+            [formData, spellGroups]
+        )
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,6 +96,15 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
                             : t('createSubmit')}
                     </Button>
                 </>
+            }
+            side={
+                <FormPreviewPanel>
+                    <SpellReferenceDetail
+                        campaignId={id}
+                        item={preview}
+                        isDM={false}
+                    />
+                </FormPreviewPanel>
             }
         >
             <SpellFormBody

@@ -1,13 +1,16 @@
 'use client';
 
+import { useDeferredValue, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { RACE_FORM_TAB } from './race-form-tabs';
 import { useRaceFormTabs } from './useRaceFormTabs';
 
 import { withAbilityErrors } from '@/components/abilities';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage } from '@/components/hud/form';
+import { RaceCard } from '@/components/races/RaceCard';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { useRaceForm } from '@/lib/hooks/races';
@@ -15,6 +18,7 @@ import { useRuleSystem } from '@/lib/hooks/systems';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { getInitialRaceFormData } from '@/lib/utils/races/race-form';
+import { toRacePreview } from '@/lib/utils/races/reference-preview';
 import type { Race } from '@/types/races';
 
 const FORM_ID = 'race-form';
@@ -39,6 +43,13 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
         campaignId,
         race.id,
         getInitialRaceFormData(race)
+    );
+
+    const preview = useDeferredValue(
+        useMemo(
+            () => toRacePreview(race, editor.form.data),
+            [race, editor.form.data]
+        )
     );
 
     const tabs = useRaceFormTabs({
@@ -101,11 +112,20 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
                 </>
             }
             side={
-                <SourceNotes
-                    campaignId={campaignId}
-                    kind="races"
-                    targetId={race.id}
-                />
+                <>
+                    <FormPreviewPanel>
+                        <RaceCard
+                            race={preview}
+                            campaignId={campaignId}
+                            canEdit={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="races"
+                        targetId={race.id}
+                    />
+                </>
             }
         >
             <HudForm

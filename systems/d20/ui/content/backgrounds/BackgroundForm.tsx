@@ -1,9 +1,13 @@
 'use client';
 
+import { useDeferredValue, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+
+import { BackgroundCard } from './BackgroundCard';
 
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import {
     HUD_SELECT_TRIGGER_CLASS,
@@ -46,6 +50,13 @@ export function BackgroundForm({
 
     const { data: feats = [] } = useFeats(campaignId);
 
+    const preview = useDeferredValue(
+        useMemo<BackgroundData>(
+            () => ({ id: background.id, ...data }),
+            [background.id, data]
+        )
+    );
+
     return (
         <HudFormPage
             width="wide"
@@ -76,11 +87,20 @@ export function BackgroundForm({
                 </>
             }
             side={
-                <SourceNotes
-                    campaignId={campaignId}
-                    kind="backgrounds"
-                    targetId={background.id}
-                />
+                <>
+                    <FormPreviewPanel>
+                        <BackgroundCard
+                            background={preview}
+                            campaignId={campaignId}
+                            canEdit={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="backgrounds"
+                        targetId={background.id}
+                    />
+                </>
             }
         >
             <HudForm

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -13,7 +13,9 @@ import { ArtifactItemFields } from './ArtifactItemFields';
 import { ArtifactWeaponFields } from './ArtifactWeaponFields';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
+import { ArtifactReferenceDetail } from '@/components/campaigns/info/detail/ArtifactReferenceDetail';
 import { IconUrlField } from '@/components/common/fields/IconUrlField';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
@@ -34,6 +36,7 @@ import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import type { ArmorStats } from '@/lib/utils/artifacts/armor-stats';
 import type { ArtifactFormSubmitPayload } from '@/lib/utils/artifacts/artifact-form';
+import { toArtifactReferencePreview } from '@/lib/utils/artifacts/reference-preview';
 import { isWeaponSlot } from '@/lib/utils/artifacts/weapon-slot';
 import type { WeaponStats } from '@/lib/utils/artifacts/weapon-stats';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
@@ -101,6 +104,18 @@ export function ArtifactForm({
     const hasWeapon = isWeaponSlot(data.slot);
 
     const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
+
+    const preview = useDeferredValue(
+        useMemo(
+            () =>
+                toArtifactReferencePreview(data, {
+                    setName:
+                        artifactSets.find((x) => x.id === data.setId)?.name ??
+                        null,
+                }),
+            [data, artifactSets]
+        )
+    );
 
     const rules = useCampaignRules(campaignId).data;
 
@@ -356,7 +371,18 @@ export function ArtifactForm({
                     </Button>
                 </>
             }
-            side={side}
+            side={
+                <>
+                    <FormPreviewPanel>
+                        <ArtifactReferenceDetail
+                            campaignId={campaignId}
+                            item={preview}
+                            isDM={false}
+                        />
+                    </FormPreviewPanel>
+                    {side}
+                </>
+            }
         >
             <HudForm
                 id={FORM_ID}
