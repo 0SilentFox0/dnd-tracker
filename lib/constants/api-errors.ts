@@ -240,6 +240,8 @@ export const API_ERRORS = {
     TEMPLATE_FORBIDDEN: 'errors.templateForbidden',
     TEMPLATE_NOT_JOINABLE: 'errors.templateNotJoinable',
     DEMO_NOT_JOINABLE: 'errors.demoNotJoinable',
+    ACCOUNT_DELETE_BLOCKED: 'errors.accountDeleteBlocked',
+    ACCOUNT_EMAIL_MISMATCH: 'errors.accountEmailMismatch',
     BUNDLE_INVALID: 'errors.bundleInvalid',
     BUNDLE_TOO_LARGE: 'errors.bundleTooLarge',
     AI_NOT_CONFIGURED: 'errors.aiNotConfigured',

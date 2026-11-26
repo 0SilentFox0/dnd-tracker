@@ -626,5 +626,7 @@
   "leadershipSkillMissing": "У героя немає навички Лідерство",
   "fortuneConditionUnavailable": "Зняти стан Удачею неможливо",
   "battleMapHexSquareOnly": "Текстури недоступні на hex-картах",
-  "battleMapGridLocked": "Тип сітки карти не можна змінити після створення"
+  "battleMapGridLocked": "Тип сітки карти не можна змінити після створення",
+  "accountDeleteBlocked": "Ваші шаблони використовують чужі кампанії, тому акаунт поки не можна видалити",
+  "accountEmailMismatch": "Email не збігається з email акаунта"
 }
