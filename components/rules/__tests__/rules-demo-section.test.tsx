@@ -24,6 +24,7 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => new URLSearchParams(nav.search),
 }));
 vi.mock('@/lib/hooks/common/useIsMobile', () => ({
+    useIsCompact: () => nav.mobile,
     useIsMobile: () => nav.mobile,
 }));
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({

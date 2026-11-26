@@ -74,7 +74,7 @@ export function ReferenceList<T>({
                 return (
                     <section key={g.key}>
                         <h3
-                            className="hud-sc sticky top-0 z-[1] bg-hud-page/97 px-3 py-1.5 text-xs text-hud-muted"
+                            className="hud-sc sticky top-[var(--shell-header-h)] z-[1] bg-hud-page/97 px-3 py-1.5 text-xs text-hud-muted"
                             style={
                                 g.accent
                                     ? { boxShadow: `inset 2px 0 0 ${g.accent}` }

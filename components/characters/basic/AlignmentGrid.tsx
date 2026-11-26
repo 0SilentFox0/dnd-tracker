@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { OptionButton } from '@/components/hud/OptionButton';
@@ -35,15 +35,10 @@ export function AlignmentGrid({
         (name) => alignmentKey(name) === selected
     );
 
-    const [focus, setFocus] = useState(Math.max(selectedIndex, 0));
-
     const roving = useRovingIndex({
         count: ALIGNMENTS.length,
-        active: focus,
-        onMove: (i) => {
-            setFocus(i);
-            onChange(ALIGNMENTS[i]);
-        },
+        active: Math.max(selectedIndex, 0),
+        onMove: (i) => onChange(ALIGNMENTS[i]),
         cols: 3,
     });
 
@@ -86,10 +81,7 @@ export function AlignmentGrid({
                                 role="radio"
                                 variant="form"
                                 checked={selected === key}
-                                onClick={() => {
-                                    setFocus(i);
-                                    onChange(name);
-                                }}
+                                onClick={() => onChange(name)}
                                 text={{
                                     title: (
                                         <>

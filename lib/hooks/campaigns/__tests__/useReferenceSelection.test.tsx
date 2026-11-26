@@ -19,7 +19,7 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/campaigns/c1/info',
     useSearchParams: () => new URLSearchParams(query),
 }));
-vi.mock('@/lib/hooks/common', () => ({ useIsMobile: () => mobile }));
+vi.mock('@/lib/hooks/common', () => ({ useIsCompact: () => mobile }));
 
 const visible: RefKey[] = ['spell:1', 'spell:2'];
 

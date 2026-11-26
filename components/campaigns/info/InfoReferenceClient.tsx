@@ -24,7 +24,7 @@ import {
     useReferenceGroups,
     useReferenceSelection,
 } from '@/lib/hooks/campaigns';
-import { useIsMobile } from '@/lib/hooks/common';
+import { useIsCompact } from '@/lib/hooks/common';
 import type {
     ArtifactForReference,
     ArtifactSetForReference,
@@ -84,7 +84,7 @@ export function InfoReferenceClient({
 }: InfoReferenceClientProps) {
     const t = useTranslations('dashboard.reference');
 
-    const isMobile = useIsMobile();
+    const isMobile = useIsCompact();
 
     const { filters, results } = useInfoReferenceFilters(
         skills,

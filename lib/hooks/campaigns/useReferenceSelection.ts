@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { useIsMobile } from '@/lib/hooks/common';
+import { useIsCompact } from '@/lib/hooks/common';
 import type { SectionTab } from '@/types/info-reference';
 
 export type RefKey = `${'spell' | 'skill' | 'artifact' | 'class'}:${string}`;
@@ -33,7 +33,7 @@ export function useReferenceSelection({
 
     const params = useSearchParams();
 
-    const isMobile = useIsMobile();
+    const isMobile = useIsCompact();
 
     const pushed = useRef(false);
 

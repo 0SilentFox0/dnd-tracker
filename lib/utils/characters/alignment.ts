@@ -25,9 +25,13 @@ export const ALIGNMENT_KEYS: readonly AlignmentKey[] = [
 
 const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();
 
-const BY_NAME = new Map(
-    ALIGNMENTS.map((name, i) => [normalize(name), ALIGNMENT_KEYS[i]])
-);
+const BY_NAME = new Map<string, AlignmentKey>([
+    ...ALIGNMENTS.map((name, i): [string, AlignmentKey] => [
+        normalize(name),
+        ALIGNMENT_KEYS[i],
+    ]),
+    ['neutral', 'trueNeutral'],
+]);
 
 export function alignmentKey(
     value: string | null | undefined

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { useIsMobile } from '@/lib/hooks/common';
+import { useIsCompact } from '@/lib/hooks/common';
 
 const PARAM = 'section';
 
@@ -14,7 +14,7 @@ export function useRulesSection(keys: readonly string[]) {
 
     const params = useSearchParams();
 
-    const isMobile = useIsMobile();
+    const isMobile = useIsCompact();
 
     const pushed = useRef(false);
 
