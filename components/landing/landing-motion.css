@@ -1,0 +1,166 @@
+/* Section choreography: the page is a journey across the campaign map.
+   Base rules are the final state; motion lives only inside the gated blocks below,
+   so without scroll timelines (Firefox) or with reduced motion everything is static and in place. */
+
+@property --ld-n { syntax: "<integer>"; inherits: false; initial-value: 0; }
+
+/* the party's trail arriving at each section */
+.ld-trailmark { display: flex; flex-direction: column; align-items: center; width: 40px; margin-top: -2.75rem; color: var(--ld-gold); }
+.ld-trail-path { width: 40px; height: 64px; opacity: 0.75; }
+.ld-waypoint { position: relative; width: 10px; height: 10px; margin-top: -3px; rotate: 45deg; background: var(--ld-gold); }
+.ld-waypoint::after { content: ""; position: absolute; inset: -5px; border: 1px solid color-mix(in srgb, var(--ld-gold) 45%, transparent); }
+
+.ld-pile { isolation: isolate; }
+.ld-pin { position: absolute; top: -4px; left: 50%; width: 7px; height: 7px; border-radius: 50%; background: #8f2f22; box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6); }
+.ld-note { box-shadow: 0 10px 18px -10px rgba(0, 0, 0, 0.9); }
+
+.ld-merge-col {
+  position: absolute; top: 0; bottom: 0; right: 0; width: 37%; border-radius: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--ld-gold) 50%, transparent);
+  background: linear-gradient(to bottom, rgba(230, 194, 90, 0.08), rgba(230, 194, 90, 0.02));
+}
+
+.ld-tiltcard { position: relative; }
+.ld-entry::before {
+  content: ""; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px; transform-origin: top;
+  background: color-mix(in srgb, var(--ld-gold) 60%, transparent);
+}
+.ld-count { display: inline-block; min-width: var(--w); text-align: right; font-variant-numeric: tabular-nums; }
+.ld-route-path { overflow: visible; opacity: 0.7; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ld-trail-path { animation: ld-draw-down linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; }
+    .ld-waypoint { animation: ld-light linear both; animation-timeline: view(); animation-range: entry 80% cover 42%; }
+
+    /* headings are written in with an ink sweep */
+    .ld-ink {
+      -webkit-mask-image: linear-gradient(100deg, #000 42%, transparent 58%);
+      mask-image: linear-gradient(100deg, #000 42%, transparent 58%);
+      -webkit-mask-size: 280% 100%; mask-size: 280% 100%;
+      -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+      animation: ld-ink linear both; animation-timeline: view(); animation-range: entry 40% cover 40%;
+    }
+    .ld-rule > span { animation: ld-rule linear both; animation-timeline: view(); animation-range: entry 60% cover 45%; }
+    .ld-rule > span:first-child { transform-origin: right; }
+    .ld-rule > span:last-child { transform-origin: left; }
+
+    .ld-strike { transform-origin: left; animation: ld-strike linear both; animation-timeline: view(); animation-range: cover 30% cover 45%; }
+
+    .ld-ours { animation: ld-fold linear both; animation-timeline: view(); animation-range: entry 20% cover 40%; }
+    .ld-merge-col { animation: ld-col linear both; animation-timeline: view(); animation-range: entry 10% cover 35%; }
+
+    .ld-die-in { animation: ld-die-in linear both; animation-timeline: view(); animation-range: entry 30% cover 40%; }
+    .ld-count-static { display: none; }
+    .ld-count { counter-reset: ld-n var(--ld-n); animation: ld-count linear both; animation-timeline: view(); animation-range: entry 40% cover 45%; }
+    .ld-count::after { content: counter(ld-n); }
+
+    .ld-entry { view-timeline: --ld-entry block; }
+    .ld-entry::before { animation: ld-ink-y linear both; animation-timeline: --ld-entry; animation-range: entry 60% cover 40%; }
+    .ld-stamp { animation: ld-stamp linear both; animation-timeline: view(); animation-range: entry 70% cover 40%; }
+
+    .ld-ai-stage { view-timeline: --ld-ai block; }
+    .ld-msg { animation: ld-msg linear both; animation-timeline: --ld-ai; animation-range: entry 70% cover 30%; }
+    .ld-msg-2 { animation-range: cover 28% cover 36%; }
+    .ld-msg-3 { animation-range: cover 34% cover 42%; }
+    .ld-msg-4 { animation-range: cover 40% cover 48%; }
+
+    .ld-route { view-timeline: --ld-route block; }
+    .ld-route-path { animation: ld-draw-right linear both; animation-timeline: --ld-route; animation-range: cover 15% cover 45%; }
+    .ld-stop { animation: ld-stop linear both; animation-timeline: --ld-route; animation-range: cover calc(15% + var(--c, 0) * 9%) cover calc(21% + var(--c, 0) * 9%); }
+
+    .ld-fog-final { animation: ld-fog-close linear both; animation-timeline: view(); animation-range: entry 0% cover 50%; }
+    .ld-cta-light { animation: ld-up linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
+  }
+}
+
+/* desktop: depth, 3D and scattered layers */
+@media (prefers-reduced-motion: no-preference) and (min-width: 769px) {
+  @supports (animation-timeline: view()) {
+    .ld-note { animation: ld-tidy linear both; animation-timeline: view(); animation-range: entry 0% cover 48%; }
+    .ld-hub { animation: ld-hub linear both; animation-timeline: view(); animation-range: entry 10% cover 45%; }
+
+    .ld-stage { perspective: 2200px; }
+    .ld-stage-tilt { transform-origin: 50% 85%; animation: ld-stage linear both; animation-timeline: view(); animation-range: entry 0% cover 40%; }
+    .ld-depth { animation: ld-depth linear both; animation-timeline: view(); animation-range: cover; }
+
+    .ld-rise { animation: ld-rise linear both; animation-timeline: view(); animation-range: entry calc(var(--c, 0) * 12%) cover calc(28% + var(--c, 0) * 5%); }
+    .ld-inner-par { animation: ld-inner linear both; animation-timeline: view(); animation-range: cover; }
+
+    .ld-unfurl { transform-origin: 50% 0; animation: ld-unfurl linear both; animation-timeline: view(); animation-range: entry calc(var(--c, 0) * 12%) cover calc(30% + var(--c, 0) * 5%); }
+    .ld-page-in { transform-origin: 0 50%; animation: ld-page linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+    .ld-phone-in { animation: ld-phone linear both; animation-timeline: view(); animation-range: entry 0% cover 38%; }
+    .ld-sheet-in { transform-origin: 100% 50%; animation: ld-sheet linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+  }
+}
+
+/* phones: one light rise instead of the 3D choreography */
+@media (prefers-reduced-motion: no-preference) and (max-width: 768px) {
+  @supports (animation-timeline: view()) {
+    .ld-hub, .ld-rise, .ld-unfurl, .ld-page-in, .ld-phone-in, .ld-sheet-in {
+      animation: ld-up linear both; animation-timeline: view(); animation-range: entry 0% entry 90%;
+    }
+    .ld-stop { animation-timeline: view(); animation-range: entry 60% cover 30%; }
+  }
+}
+
+/* pointer tilt with a soft sheen on feature cards (--tx/--ty from PointerParallax) */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (min-width: 769px) {
+  .ld-tiltcard {
+    transform: perspective(1000px) rotateX(calc(var(--ty, 0) * -7deg)) rotateY(calc(var(--tx, 0) * 9deg));
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .ld-tiltcard::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+    background: radial-gradient(380px circle at calc(50% + var(--tx, 0) * 100%) calc(50% + var(--ty, 0) * 100%), rgba(255, 240, 210, 0.07), transparent 65%);
+    transition: opacity 0.4s;
+  }
+  .ld-tiltcard:hover::after { opacity: 1; }
+}
+
+@keyframes ld-draw-down { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+@keyframes ld-draw-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes ld-light { 0% { scale: 0.2; opacity: 0.3; } 70% { scale: 1.35; opacity: 1; } 100% { scale: 1; } }
+@keyframes ld-ink {
+  from { -webkit-mask-position: 100% 0; mask-position: 100% 0; translate: 0.35em 0; }
+  to { -webkit-mask-position: 0 0; mask-position: 0 0; translate: 0 0; }
+}
+@keyframes ld-rule { from { scale: 0 1; } }
+@keyframes ld-strike { from { scale: 0 1; } }
+@keyframes ld-fold { from { transform: translateX(-60%); opacity: 0; } }
+@keyframes ld-col { from { clip-path: inset(0 0 100% 0 round 0.9rem); } to { clip-path: inset(0 round 0.9rem); } }
+@keyframes ld-die-in {
+  0% { transform: rotate(-320deg) scale(0.35); opacity: 0; }
+  75% { transform: rotate(14deg) scale(1.1); opacity: 1; }
+  100% { transform: rotate(0) scale(1); }
+}
+@keyframes ld-count { from { --ld-n: 0; } to { --ld-n: var(--to); } }
+@keyframes ld-ink-y { from { scale: 1 0; } }
+@keyframes ld-stamp { 0% { transform: scale(1.9) rotate(-25deg); opacity: 0; } 80% { transform: scale(0.92); opacity: 1; } 100% { transform: none; } }
+@keyframes ld-msg { from { transform: translateY(12px) scale(0.96); opacity: 0; } }
+@keyframes ld-stop { 0% { transform: scale(0.3); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: none; } }
+@keyframes ld-fog-close { from { opacity: 0; transform: scale(1.45); } }
+@keyframes ld-up { from { transform: translateY(28px); opacity: 0; } }
+@keyframes ld-tidy { from { transform: translate(var(--sx), var(--sy)) rotate(var(--sr)); } }
+@keyframes ld-hub { from { transform: translateY(48px) scale(0.92); opacity: 0; } }
+@keyframes ld-stage { from { transform: rotateX(22deg) translateY(4rem) scale(0.9); } to { transform: rotateX(0) translateY(0) scale(1); } }
+@keyframes ld-depth { from { translate: 0 calc(var(--d, 1) * 80px); } to { translate: 0 calc(var(--d, 1) * -80px); } }
+@keyframes ld-rise {
+  from { transform: perspective(1200px) translateY(64px) rotateX(14deg) scale(0.95); opacity: 0; }
+  to { transform: perspective(1200px) translateY(0) rotateX(0) scale(1); opacity: 1; }
+}
+@keyframes ld-inner { from { transform: scale(1.1) translateY(-4%); } to { transform: scale(1.1) translateY(4%); } }
+@keyframes ld-unfurl {
+  from { transform: perspective(1400px) rotateX(-70deg) translateY(-1.5rem); opacity: 0; }
+  60% { opacity: 1; }
+  to { transform: perspective(1400px) rotateX(0) translateY(0); opacity: 1; }
+}
+@keyframes ld-page {
+  from { transform: perspective(1800px) rotateY(-24deg) translateX(-3rem); opacity: 0; }
+  to { transform: perspective(1800px) rotateY(0) translateX(0); opacity: 1; }
+}
+@keyframes ld-phone { from { transform: translateX(-8rem) rotate(-10deg); opacity: 0; } }
+@keyframes ld-sheet {
+  from { transform: perspective(1800px) rotateY(18deg) translateX(4rem); opacity: 0; }
+  to { transform: perspective(1800px) rotateY(0) translateX(0); opacity: 1; }
+}

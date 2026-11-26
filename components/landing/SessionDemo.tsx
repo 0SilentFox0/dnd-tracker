@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import Image from 'next/image';
 
 import { listOf } from '@/components/landing/messages';
@@ -308,7 +309,10 @@ export function SessionDemo({ t }: { t: Translator }) {
         <figure className="ld-demo mx-auto w-full max-w-5xl">
             <div className="relative">
                 <DmScreen t={t} />
-                <div className="absolute -bottom-6 -left-1 sm:-bottom-10 sm:-left-8 lg:-left-16">
+                <div
+                    className="ld-depth absolute -bottom-6 -left-1 sm:-bottom-10 sm:-left-8 lg:-left-16"
+                    style={{ '--d': 0.9 } as CSSProperties}
+                >
                     <PlayerPhone t={t} />
                 </div>
             </div>

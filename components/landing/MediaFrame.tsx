@@ -66,7 +66,7 @@ export function ScreenPlaceholder({
             role="img"
             aria-label={alt}
             className={cn(
-                'grid place-items-center bg-[radial-gradient(ellipse_at_50%_30%,rgba(230,194,90,.14),transparent_65%),#120e0b]',
+                'grid place-items-center [background:radial-gradient(ellipse_at_50%_30%,rgba(230,194,90,.14),transparent_65%),#120e0b]',
                 ratio === '9/16' ? 'aspect-[9/16]' : 'aspect-[16/10]',
                 className
             )}
@@ -82,19 +82,19 @@ export function ScreenPlaceholder({
 }
 
 // a missing screenshot degrades to a styled placeholder, never to a broken image
-export function Screen({
-    id,
-    alt,
-    priority,
-    sizes,
-    className,
-}: ScreenProps) {
+export function Screen({ id, alt, priority, sizes, className }: ScreenProps) {
     const media: ShowcaseMedia = SHOWCASE_MEDIA[id];
 
     const ratio = media.ratio === '9/16' ? 'aspect-[9/16]' : 'aspect-[16/10]';
 
     if (!media.image)
-        return <ScreenPlaceholder alt={alt} ratio={media.ratio} className={className} />;
+        return (
+            <ScreenPlaceholder
+                alt={alt}
+                ratio={media.ratio}
+                className={className}
+            />
+        );
 
     return (
         <div className={cn('relative', ratio, className)}>
@@ -102,7 +102,10 @@ export function Screen({
                 src={media.image}
                 alt={alt}
                 fill
-                sizes={sizes ?? MEDIA_SIZES[media.ratio === '9/16' ? 'phone' : 'wide']}
+                sizes={
+                    sizes ??
+                    MEDIA_SIZES[media.ratio === '9/16' ? 'phone' : 'wide']
+                }
                 priority={priority}
                 className="object-cover object-top"
             />

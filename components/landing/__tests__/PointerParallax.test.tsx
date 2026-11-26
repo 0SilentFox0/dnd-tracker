@@ -2,7 +2,10 @@
 import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { PointerParallax } from '@/components/landing/PointerParallax';
+import {
+    PointerParallax,
+    trackTilt,
+} from '@/components/landing/PointerParallax';
 
 function mockMedia(matches: Record<string, boolean>) {
     vi.stubGlobal('matchMedia', (q: string) => ({
@@ -63,13 +66,15 @@ describe('PointerParallax', () => {
 
         expect(Number(root.getPropertyValue('--mx'))).toBeGreaterThan(0);
         expect(Number(root.getPropertyValue('--my'))).toBeLessThan(0);
-        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(true);
+        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(
+            true
+        );
 
         unmount();
         expect(root.getPropertyValue('--mx')).toBe('');
-        expect(remove.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(
-            true
-        );
+        expect(
+            remove.mock.calls.some((c) => String(c[0]) === 'pointermove')
+        ).toBe(true);
     });
 
     it('subscribes to nothing on coarse pointers', () => {
@@ -78,7 +83,9 @@ describe('PointerParallax', () => {
         const add = vi.spyOn(window, 'addEventListener');
 
         render(<PointerParallax />);
-        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(false);
+        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(
+            false
+        );
     });
 
     it('subscribes to nothing under reduced motion', () => {
@@ -87,6 +94,49 @@ describe('PointerParallax', () => {
         const add = vi.spyOn(window, 'addEventListener');
 
         render(<PointerParallax />);
-        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(false);
+        expect(add.mock.calls.some((c) => String(c[0]) === 'pointermove')).toBe(
+            false
+        );
+    });
+});
+
+describe('trackTilt', () => {
+    const card = () => {
+        const el = document.createElement('div');
+
+        el.setAttribute('data-ld-tilt', '');
+        el.innerHTML = '<span></span>';
+        el.getBoundingClientRect = () =>
+            ({ left: 100, top: 50, width: 200, height: 100 }) as DOMRect;
+        document.body.append(el);
+
+        return el;
+    };
+
+    const move = (target: Element, x: number, y: number) =>
+        ({ target, clientX: x, clientY: y }) as unknown as PointerEvent;
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('sets --tx/--ty relative to the hovered card from a nested target', () => {
+        const el = card();
+
+        expect(trackTilt(move(el.firstElementChild ?? el, 250, 75), null)).toBe(
+            el
+        );
+        expect(el.style.getPropertyValue('--tx')).toBe('0.250');
+        expect(el.style.getPropertyValue('--ty')).toBe('-0.250');
+    });
+
+    it('resets the previous card when the pointer leaves it', () => {
+        const el = card();
+
+        trackTilt(move(el, 300, 150), null);
+
+        expect(trackTilt(move(document.body, 0, 0), el)).toBeNull();
+        expect(el.style.getPropertyValue('--tx')).toBe('');
+        expect(el.style.getPropertyValue('--ty')).toBe('');
     });
 });

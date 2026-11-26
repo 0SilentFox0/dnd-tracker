@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import '@/components/hud/hud.css';
 import '@/components/landing/landing.css';
+import '@/components/landing/landing-motion.css';
 import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HUD_SURFACE } from '@/components/hud';
 import { LandingBackdrop } from '@/components/landing/LandingBackdrop';
@@ -9,11 +10,7 @@ import { keysOf } from '@/components/landing/messages';
 import { Brand } from '@/components/landing/parts';
 import { PointerParallax } from '@/components/landing/PointerParallax';
 import { SessionSwitch } from '@/components/landing/SessionSwitch';
-import {
-    BRAND,
-    LEGAL_DOCS,
-    LEGAL_PATH,
-} from '@/lib/constants/site';
+import { BRAND, LEGAL_DOCS, LEGAL_PATH } from '@/lib/constants/site';
 import type { Locale } from '@/lib/i18n/config';
 import { FixedLocaleProvider } from '@/lib/i18n/fixed-locale-provider';
 import type { Translator } from '@/lib/i18n/translator';
@@ -85,7 +82,13 @@ export function LandingNav({
     );
 }
 
-export function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) {
+export function LandingFooter({
+    t,
+    locale,
+}: {
+    t: Translator;
+    locale: Locale;
+}) {
     return (
         <footer className="ld-panel border-t border-hud-rule py-8 text-sm text-hud-soft">
             <div className="ld-container flex flex-col items-center justify-between gap-4 sm:flex-row">
@@ -151,7 +154,10 @@ export function LandingShell({
             <div
                 data-landing
                 lang={locale}
-                className={cn(HUD_SURFACE, 'relative isolate min-h-screen bg-hud-page')}
+                className={cn(
+                    HUD_SURFACE,
+                    'relative isolate min-h-screen bg-hud-page'
+                )}
             >
                 <LandingBackdrop />
                 <PointerParallax />

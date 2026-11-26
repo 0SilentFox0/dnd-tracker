@@ -22,7 +22,11 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
     it('Replace renders a table with six rows and no competitor-style fallbacks', () => {
         expect(html.replace).toContain('id="replace"');
         expect(html.replace).toContain('<caption');
-        expect(html.replace.match(/<tbody>[\s\S]*<\/tbody>/)?.[0].match(/<tr[\s>]/g)).toHaveLength(6);
+        expect(
+            html.replace
+                .match(/<tbody>[\s\S]*<\/tbody>/)?.[0]
+                .match(/<tr[\s>]/g)
+        ).toHaveLength(6);
         expect(html.replace).not.toContain('landing.');
     });
 
@@ -38,6 +42,10 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
         expect(html.systems).toContain('id="systems"');
         expect(html.systems).toContain(String(spells));
         expect(html.systems).toContain('Grim d100');
+        expect(html.systems).toContain(`--to:${spells}`);
+        expect(html.systems).toContain(
+            `<span class="sr-only">${t('systems.count.spells', { n: spells })}</span>`
+        );
         expect(html.systems).not.toMatch(/warhammer|wfrp/i);
         expect(html.systems).not.toContain('landing.');
     });

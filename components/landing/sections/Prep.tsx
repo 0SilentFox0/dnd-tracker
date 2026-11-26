@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 import { PREP_PANELS } from '@/components/landing/media';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { listOf } from '@/components/landing/messages';
@@ -14,11 +16,12 @@ export function Prep({ t }: { t: Translator }) {
                 title={t('prep.title')}
                 text={t('prep.text')}
             />
-            <div className="ld-container mt-12 grid gap-6 lg:grid-cols-3 min-[2560px]:grid-cols-4">
-                {PREP_PANELS.map((id) => (
+            <div className="ld-container mt-12 grid gap-6 min-[2560px]:grid-cols-4 lg:grid-cols-3">
+                {PREP_PANELS.map((id, i) => (
                     <article
                         key={id}
-                        className="landing-reveal flex flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
+                        style={{ '--c': i } as CSSProperties}
+                        className="ld-unfurl flex flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]"
                     >
                         <MediaFrame title={p(id, 'screen')}>
                             <Screen

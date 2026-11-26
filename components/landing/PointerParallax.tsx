@@ -6,6 +6,38 @@ const LERP = 0.08;
 
 const EPSILON = 0.001;
 
+const TILT = '[data-ld-tilt]';
+
+// pointer position inside the hovered [data-ld-tilt] card as --tx/--ty in -0.5…0.5
+export function trackTilt(e: PointerEvent, prev: HTMLElement | null) {
+    const el =
+        e.target instanceof Element
+            ? e.target.closest<HTMLElement>(TILT)
+            : null;
+
+    if (prev && prev !== el) {
+        prev.style.removeProperty('--tx');
+        prev.style.removeProperty('--ty');
+    }
+
+    if (!el) return null;
+
+    const r = el.getBoundingClientRect();
+
+    if (!r.width || !r.height) return el;
+
+    el.style.setProperty(
+        '--tx',
+        ((e.clientX - r.left) / r.width - 0.5).toFixed(3)
+    );
+    el.style.setProperty(
+        '--ty',
+        ((e.clientY - r.top) / r.height - 0.5).toFixed(3)
+    );
+
+    return el;
+}
+
 export function PointerParallax(): null {
     useEffect(() => {
         if (
@@ -22,6 +54,8 @@ export function PointerParallax(): null {
         const cur = { x: 0, y: 0 };
 
         let raf = 0;
+
+        let tilted: HTMLElement | null = null;
 
         const tick = () => {
             cur.x += (target.x - cur.x) * LERP;
@@ -47,6 +81,7 @@ export function PointerParallax(): null {
         const onMove = (e: PointerEvent) => {
             target.x = (e.clientX / window.innerWidth) * 2 - 1;
             target.y = (e.clientY / window.innerHeight) * 2 - 1;
+            tilted = trackTilt(e, tilted);
 
             if (!document.hidden) start();
         };
