@@ -1,3 +1,4 @@
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import {
     decodeEdges,
@@ -27,7 +28,12 @@ export function assembleGeometry(
     header: MapGeometry['map'],
     chunks: EdgeChunks
 ): MapGeometry {
-    const { walls, bars } = decodeEdges(chunks, header.cols, header.rows);
+    const { walls, bars } = decodeEdges(
+        chunks,
+        header.cols,
+        header.rows,
+        gridOf(header)
+    );
 
     return { map: header, walls, bars };
 }

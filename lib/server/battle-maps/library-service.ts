@@ -23,6 +23,7 @@ import {
 import { verifyBattleMapBackground } from '@/lib/server/battle-maps/background-upload';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import {
     type EdgeChunks,
@@ -59,7 +60,7 @@ const toBrief = (r: {
 const payloadOf = (input: BattleMapInput) => {
     const header = withoutEdges(input.map as BattleMapConfig);
 
-    const chunks = encodeEdges(input, header.cols, header.rows);
+    const chunks = encodeEdges(input, header.cols, header.rows, gridOf(header));
 
     return {
         header,

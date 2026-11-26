@@ -1,12 +1,31 @@
-import { formatEdgeKey, parseEdgeKey } from '@/lib/utils/battle/grid/walls';
+import {
+    edgeSidesOf,
+    formatEdge,
+    parseEdge,
+} from '@/lib/utils/battle/grid/edge-keys';
 import {
     CHUNK_SIDE,
     chunkKey,
     parseChunkKey,
 } from '@/lib/utils/battle/map-storage/chunk-key';
 import { toBase64 } from '@/lib/utils/common/base64';
+import type { GridKind } from '@/types/battle-grid';
 
-const CHUNK_BYTES = (CHUNK_SIDE * CHUNK_SIDE * 2 * 2) / 8;
+const HEX_VERSION = 2;
+
+function layoutOf(grid: GridKind) {
+    const sides = edgeSidesOf(grid);
+
+    const header = grid === 'hex' ? 1 : 0;
+
+    return {
+        sides,
+        header,
+        bytes: header + (CHUNK_SIDE * CHUNK_SIDE * sides.length * 2) / 8,
+    };
+}
+
+const CHUNK_BYTES = layoutOf('square').bytes;
 
 export const EMPTY_EDGE_CHUNK = toBase64(new Uint8Array(CHUNK_BYTES));
 
@@ -28,14 +47,16 @@ export class EdgeChunkError extends Error {
     }
 }
 
-function slot(x: number, y: number, side: string): number {
+function slot(x: number, y: number, side: string, grid: GridKind): number {
+    const sides = layoutOf(grid).sides;
+
     return (
-        ((y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)) * 2 +
-        (side === 'e' ? 0 : 1)
+        ((y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)) * sides.length +
+        sides.indexOf(side as (typeof sides)[number])
     );
 }
 
-function fromBase64(value: string, key: string): Uint8Array {
+function fromBase64(value: string, key: string, grid: GridKind): Uint8Array {
     let bin: string;
 
     try {
@@ -44,13 +65,52 @@ function fromBase64(value: string, key: string): Uint8Array {
         throw new EdgeChunkError(`chunk ${key}: invalid base64`);
     }
 
-    if (bin.length !== CHUNK_BYTES) {
+    const layout = layoutOf(grid);
+
+    const other = layoutOf(grid === 'hex' ? 'square' : 'hex').bytes;
+
+    if (bin.length === other) {
+        throw new EdgeChunkError(`chunk ${key}: format does not match grid`);
+    }
+
+    if (bin.length !== layout.bytes) {
         throw new EdgeChunkError(
-            `chunk ${key}: expected ${CHUNK_BYTES} bytes, got ${bin.length}`
+            `chunk ${key}: expected ${layout.bytes} bytes, got ${bin.length}`
         );
     }
 
+    if (layout.header && bin.charCodeAt(0) !== HEX_VERSION) {
+        throw new EdgeChunkError(`chunk ${key}: format does not match grid`);
+    }
+
     return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+}
+
+function newChunk(grid: GridKind): Uint8Array {
+    const bytes = new Uint8Array(layoutOf(grid).bytes);
+
+    if (grid === 'hex') bytes[0] = HEX_VERSION;
+
+    return bytes;
+}
+
+function locate(edge: string, grid: GridKind) {
+    const parsed = parseEdge(edge);
+
+    if (!parsed || parsed.grid !== grid) {
+        throw new EdgeChunkError('invalid edge key');
+    }
+
+    const { a, side } = parsed;
+
+    const key = chunkKey(
+        Math.floor(a.x / CHUNK_SIDE),
+        Math.floor(a.y / CHUNK_SIDE)
+    );
+
+    const idx = slot(a.x, a.y, side, grid);
+
+    return { a, key, idx, byte: layoutOf(grid).header + (idx >> 2) };
 }
 
 function put(
@@ -58,59 +118,41 @@ function put(
     edge: string,
     kind: number,
     cols: number,
-    rows: number
+    rows: number,
+    grid: GridKind
 ) {
-    const { a, side } = parseEdgeKey(edge);
-
-    if (!Number.isInteger(a.x) || !Number.isInteger(a.y)) {
-        throw new EdgeChunkError(`invalid edge key ${edge}`);
-    }
+    const { a, key, idx, byte } = locate(edge, grid);
 
     if (a.x < 0 || a.y < 0 || a.x >= cols || a.y >= rows) return;
-
-    const key = chunkKey(
-        Math.floor(a.x / CHUNK_SIDE),
-        Math.floor(a.y / CHUNK_SIDE)
-    );
 
     let bytes = chunks.get(key);
 
     if (!bytes) {
-        bytes = new Uint8Array(CHUNK_BYTES);
+        bytes = newChunk(grid);
         chunks.set(key, bytes);
     }
 
-    const idx = slot(a.x, a.y, side);
-
-    bytes[idx >> 2] |= kind << ((idx & 3) * 2);
+    bytes[byte] |= kind << ((idx & 3) * 2);
 }
 
 export function encodeEdges(
     edges: Partial<EdgeSets>,
     cols: number,
-    rows: number
+    rows: number,
+    grid: GridKind = 'square'
 ): EdgeChunks {
     const chunks = new Map<string, Uint8Array>();
 
-    for (const e of edges.bars ?? []) put(chunks, e, KIND_BAR, cols, rows);
+    for (const e of edges.bars ?? []) put(chunks, e, KIND_BAR, cols, rows, grid);
 
     for (const e of edges.walls ?? []) {
-        const { a, side } = parseEdgeKey(e);
-
-        const key = chunkKey(
-            Math.floor(a.x / CHUNK_SIDE),
-            Math.floor(a.y / CHUNK_SIDE)
-        );
+        const { key, idx, byte } = locate(e, grid);
 
         const bytes = chunks.get(key);
 
-        if (bytes) {
-            const idx = slot(a.x, a.y, side);
+        if (bytes) bytes[byte] &= ~(3 << ((idx & 3) * 2));
 
-            bytes[idx >> 2] &= ~(3 << ((idx & 3) * 2));
-        }
-
-        put(chunks, e, KIND_WALL, cols, rows);
+        put(chunks, e, KIND_WALL, cols, rows, grid);
     }
 
     const out: EdgeChunks = {};
@@ -126,7 +168,7 @@ export function encodeEdges(
     for (const key of keys) {
         const bytes = chunks.get(key);
 
-        if (bytes && bytes.some((b) => b !== 0)) out[key] = toBase64(bytes);
+        if (bytes && bytes.slice(layoutOf(grid).header).some((b) => b !== 0)) out[key] = toBase64(bytes);
     }
 
     return out;
@@ -135,11 +177,18 @@ export function encodeEdges(
 export function decodeEdges(
     chunks: EdgeChunks,
     cols: number,
-    rows: number
+    rows: number,
+    grid: GridKind = 'square'
 ): EdgeSets {
-    const walls: { x: number; y: number; side: 'e' | 's' }[] = [];
+    const { sides, header } = layoutOf(grid);
 
-    const bars: { x: number; y: number; side: 'e' | 's' }[] = [];
+    const n = sides.length;
+
+    type Found = { x: number; y: number; side: number };
+
+    const walls: Found[] = [];
+
+    const bars: Found[] = [];
 
     for (const [key, value] of Object.entries(chunks)) {
         const parsed = parseChunkKey(key);
@@ -148,17 +197,17 @@ export function decodeEdges(
 
         const { cx, cy } = parsed;
 
-        const bytes = fromBase64(value, key);
+        const bytes = fromBase64(value, key, grid);
 
-        for (let idx = 0; idx < CHUNK_SIDE * CHUNK_SIDE * 2; idx++) {
-            const kind = (bytes[idx >> 2] >> ((idx & 3) * 2)) & 3;
+        for (let idx = 0; idx < CHUNK_SIDE * CHUNK_SIDE * n; idx++) {
+            const kind = (bytes[header + (idx >> 2)] >> ((idx & 3) * 2)) & 3;
 
             if (kind === 0) continue;
 
             if (kind === 3)
                 throw new EdgeChunkError(`chunk ${key}: reserved edge kind`);
 
-            const cell = idx >> 1;
+            const cell = Math.floor(idx / n);
 
             const x = cx * CHUNK_SIDE + (cell % CHUNK_SIDE);
 
@@ -170,19 +219,14 @@ export function decodeEdges(
                 );
             }
 
-            (kind === KIND_WALL ? walls : bars).push({
-                x,
-                y,
-                side: idx & 1 ? 's' : 'e',
-            });
+            (kind === KIND_WALL ? walls : bars).push({ x, y, side: idx % n });
         }
     }
 
-    const order = (p: { x: number; y: number; side: string }, q: typeof p) =>
-        p.y - q.y || p.x - q.x || p.side.localeCompare(q.side);
+    const order = (p: Found, q: Found) =>
+        p.y - q.y || p.x - q.x || p.side - q.side;
 
-    const str = (e: { x: number; y: number; side: 'e' | 's' }) =>
-        formatEdgeKey(e, e.side);
+    const str = (e: Found) => formatEdge(e, sides[e.side]);
 
     return {
         walls: walls.sort(order).map(str),
