@@ -34,3 +34,163 @@ tiles_cart.png,"Cart",settlement,cart,object,2,1,soft,rect:2x1,1,"a wooden hand 
 tiles_fountain.png,"Fountain",settlement,fountain,object,2,2,soft,rect:2x2,1,"a round stone fountain with water, footprint 2x2 cells.",1
 tiles_tent.png,"Tent",settlement,tent,object,2,2,soft,rect:2x2,1,"a canvas adventurer tent seen from above, footprint 2x2 cells.",1
 tiles_well.png,"Well",settlement,well,object,1,1,soft,rect:1x1,1,"a round stone well with a wooden roof beam and a bucket, 1x1 cell footprint.",1
+column-carved.webp,"Carved column",dungeon,structure,object,1,1,soft,ellipse:0.8x0.8,1,"a round carved stone column seen from above, spiral runes on a weathered capital, dark grey stone.",1
+sarcophagus.webp,"Sarcophagus",dungeon,container,object,2,1,soft,rect:2x1,,"a heavy stone sarcophagus with a carved knight effigy lid, slightly ajar.",1
+torch-standing.webp,"Standing torch",dungeon,light,object,1,1,soft,ellipse:0.4x0.4,,"an iron floor stand holding a burning torch with a warm flame, seen from above.",1
+iron-cage.webp,"Iron cage",dungeon,structure,object,1,1,soft,rect:1x1,,"a square rusty iron prison cage with bars and a small door, empty inside.",1
+weapon-rack.webp,"Weapon rack",dungeon,furniture,object,2,1,soft,rect:2x0.6,,"a wooden rack holding swords, axes and spears laid side by side, seen from above.",1
+skeleton-sprawled.webp,"Sprawled skeleton",dungeon,remains,decal,1,1,none,,,"a human skeleton sprawled on the floor with scattered ribs and a skull, in worn rags.",1
+summoning-circle.webp,"Summoning circle",dungeon,decor,decal,2,2,none,,,"a glowing arcane summoning circle with runes and a pentagram painted on the floor, faint purple light.",1
+spike-trap.webp,"Spike trap",dungeon,decor,decal,1,1,none,,,"a square floor trap plate with raised steel spikes and a few dark stains.",1
+lever-stone.webp,"Stone lever",dungeon,structure,object,1,1,soft,ellipse:0.5x0.5,,"a short stone pedestal with an iron lever handle, seen from above.",1
+crystal-cluster.webp,"Crystal cluster",dungeon,rock,object,1,1,soft,ellipse:0.8x0.8,,"a cluster of glowing blue cave crystals growing from dark rock.",1
+glowing-mushrooms.webp,"Glowing mushrooms",dungeon,plant,object,1,1,soft,,,"a patch of bioluminescent cave mushrooms with teal glowing caps.",1
+cave-pool.webp,"Underground pool",dungeon,water,decal,2,2,none,,,"a still pool of dark water with a rocky rim and faint ripples.",1
+stalagmite.webp,"Stalagmite",dungeon,rock,object,1,1,soft,ellipse:0.7x0.7,1,"a tall grey stalagmite cluster seen from above, layered mineral rings.",1
+coffin-open.webp,"Open coffin",dungeon,container,object,1,2,soft,rect:1x2,,"an open wooden coffin with a dusty lid slid aside and tattered lining.",1
+torture-rack.webp,"Torture rack",dungeon,furniture,object,2,1,soft,rect:2x1,,"a wooden torture rack with rollers, ropes and iron cuffs.",1
+skull-pile.webp,"Skull pile",dungeon,remains,object,1,1,soft,rect:0.8x0.8,,"a heaped pile of human skulls and bones.",1
+web-large.webp,"Large cobweb",dungeon,decor,decal,2,2,none,,,"a big sprawling cobweb with thick silk strands and a few wrapped cocoons.",2
+chains-floor.webp,"Floor chains",dungeon,decor,decal,1,1,none,,,"a tangle of rusty iron chains and an open shackle lying on the floor.",2
+bookshelf-ruined.webp,"Ruined bookshelf",dungeon,furniture,object,2,1,soft,rect:2x0.7,,"a collapsed rotting bookshelf with scattered mouldy books and torn pages.",2
+throne-stone.webp,"Stone throne",dungeon,furniture,object,1,1,soft,rect:1x1,1,"a grim high-backed stone throne with carved skulls on the arms.",2
+pit-hole.webp,"Open pit",dungeon,decor,decal,2,2,none,,,"a round black pit in the floor with crumbling stone edges, depth fading to darkness.",2
+altar-bloody.webp,"Blood altar",dungeon,structure,object,2,1,soft,rect:2x1,,"a dark stone sacrificial altar with dried blood channels and a ritual dagger.",2
+candle-cluster.webp,"Candle cluster",dungeon,light,decal,1,1,none,,,"a cluster of melted candles on the floor with small flames and dripped wax.",2
+column-fallen.webp,"Fallen column",dungeon,structure,object,2,1,soft,rect:2x0.8,,"a broken stone column lying on its side in several segments.",2
+rubble-collapse.webp,"Cave-in",dungeon,remains,decal,2,2,none,,,"a large collapsed ceiling debris field with boulders, dust and broken beams.",2
+moss-patch.webp,"Moss patch",dungeon,plant,decal,1,1,none,,,"a damp green moss patch with tiny white flowers on stone.",2
+gold-scatter.webp,"Scattered coins",dungeon,decor,decal,1,1,none,,,"a loose scatter of gold coins and a couple of gems.",2
+urn-ceramic.webp,"Ceramic urn",dungeon,container,object,1,1,soft,ellipse:0.6x0.6,,"an old sealed clay burial urn with a wax-stoppered lid.",2
+barrel-cluster.webp,"Barrel cluster",dungeon,container,object,1,1,soft,rect:1x1,,"three old rotting barrels leaning together, one cracked open.",2
+ritual-table.webp,"Ritual table",dungeon,furniture,object,2,1,soft,rect:2x1,,"a stained wooden table with bone tools, a bowl and runed parchment.",2
+straw-bed.webp,"Straw bed",dungeon,furniture,decal,1,2,none,,,"a thin straw pallet with a torn blanket on the floor.",2
+skeleton-chained.webp,"Chained skeleton",dungeon,remains,decal,1,1,none,,,"a skeleton sitting slumped with rusty manacles on the wrists.",2
+runestone.webp,"Runestone",dungeon,structure,object,1,1,soft,ellipse:0.7x0.7,1,"an upright standing stone carved with faintly glowing runes.",2
+lava-pool.webp,"Lava pool",dungeon,water,decal,2,2,none,,,"a glowing lava pool with dark crusted rock edges and orange cracks.",2
+fungus-giant.webp,"Giant fungus",dungeon,plant,object,2,2,soft,ellipse:1.4x1.4,1,"a huge pale cave mushroom with a wide spotted cap and drooping gills.",2
+slime-puddle.webp,"Slime puddle",dungeon,decor,decal,1,1,none,,,"a glistening green slime puddle with small bubbles.",2
+brazier-large.webp,"Large brazier",dungeon,light,object,2,2,soft,ellipse:1.4x1.4,,"a wide bronze fire bowl on a tripod with roaring flames and glowing embers.",2
+bone-pile-large.webp,"Large bone heap",dungeon,remains,decal,2,2,none,,,"a sprawling heap of bones, ribs and a few skulls.",2
+stone-sphinx.webp,"Stone sphinx",dungeon,structure,object,2,2,soft,rect:1.6x1.6,1,"a weathered stone sphinx statue lying with paws forward.",2
+sarcophagus-broken.webp,"Broken sarcophagus",dungeon,container,object,2,1,soft,rect:2x1,,"a cracked sarcophagus with its lid shattered on the floor.",2
+table-tavern-set.webp,"Tavern table set",building,furniture,object,2,2,soft,rect:1.6x1.6,,"a round wooden tavern table with four stools, mugs and a loaf of bread.",1
+carpet-ornate.webp,"Ornate carpet",building,decor,decal,2,2,none,,,"an ornate rectangular carpet with red and gold patterns and tasselled edges, flat on the floor.",1
+fireplace.webp,"Fireplace",building,structure,object,2,1,soft,rect:2x1,1,"a stone fireplace seen from above with a burning log fire and a chimney breast.",1
+bar-counter.webp,"Bar counter",building,furniture,object,2,1,soft,rect:2x1,,"a polished wooden bar counter with tankards and a bottle shelf behind.",1
+barrel-stack.webp,"Barrel stack",building,container,object,1,1,soft,rect:1x1,,"three oak barrels stacked in a pyramid with iron hoops.",1
+crate-stack.webp,"Crate stack",building,container,object,1,1,soft,rect:1x1,,"a stack of wooden crates with rope handles.",1
+wardrobe.webp,"Wardrobe",building,furniture,object,1,1,soft,rect:1x1,1,"a tall wooden wardrobe seen from above with carved top moulding.",1
+bed-double.webp,"Double bed",building,furniture,object,2,2,soft,rect:2x2,,"a wide double bed with a patterned quilt and two pillows.",1
+desk-writing.webp,"Writing desk",building,furniture,object,2,1,soft,rect:2x1,,"a writing desk with parchment, quill, inkpot and a candle.",1
+candle-stand.webp,"Candle stand",building,light,object,1,1,soft,ellipse:0.4x0.4,,"a tall brass candle stand with three lit candles.",1
+chandelier.webp,"Chandelier",building,light,canopy,2,2,soft,,,"a wrought-iron circular chandelier with many candles, seen from below the ceiling as a top-down ring.",1
+stove-kitchen.webp,"Kitchen stove",building,furniture,object,2,1,soft,rect:2x1,,"an iron kitchen stove with pots and a pan on top.",1
+sack-pile.webp,"Sack pile",building,container,object,1,1,soft,rect:0.9x0.9,,"a pile of burlap grain sacks tied with rope.",1
+rug-round.webp,"Round rug",building,decor,decal,2,2,none,,,"a round woven rug with concentric blue and cream rings.",1
+ladder-wood.webp,"Wooden ladder",building,structure,object,1,1,soft,rect:0.6x1,,"a wooden ladder lying along a floor opening seen from above.",1
+potted-plant.webp,"Potted plant",building,plant,object,1,1,soft,ellipse:0.5x0.5,,"a leafy green houseplant in a terracotta pot.",1
+bathtub.webp,"Bathtub",building,furniture,object,1,2,soft,rect:1x2,,"a copper bathtub filled with soapy water.",1
+armchair.webp,"Armchair",building,furniture,object,1,1,soft,rect:0.9x0.9,,"a cushioned red armchair with wooden legs.",2
+sofa.webp,"Sofa",building,furniture,object,2,1,soft,rect:2x1,,"a long upholstered sofa with two cushions.",2
+dining-table-long.webp,"Banquet table",building,furniture,object,2,2,soft,rect:2x1.6,,"a long banquet table laid with plates, goblets and roast food, benches either side.",2
+bench-wooden.webp,"Wooden bench",building,furniture,object,2,1,soft,rect:2x0.5,,"a plain long wooden bench.",2
+shelf-pots.webp,"Pantry shelf",building,furniture,object,2,1,soft,rect:2x0.6,,"a shelf of jars, bottles and hanging herbs seen from above.",2
+workbench.webp,"Workbench",building,furniture,object,2,1,soft,rect:2x1,,"a carpenter's workbench with tools, vise and wood shavings.",2
+loom.webp,"Loom",building,furniture,object,1,1,soft,rect:1x1,,"a wooden weaving loom with coloured threads.",2
+spinning-wheel.webp,"Spinning wheel",building,furniture,object,1,1,soft,ellipse:0.7x0.7,,"a wooden spinning wheel with wool on the spindle.",2
+cradle.webp,"Cradle",building,furniture,object,1,1,soft,rect:0.8x0.8,,"a small wooden baby cradle with a blanket.",2
+globe-stand.webp,"Globe on stand",building,decor,object,1,1,soft,ellipse:0.6x0.6,,"a brass-ringed world globe on a wooden tripod stand.",2
+alchemy-table.webp,"Alchemy table",building,furniture,object,2,1,soft,rect:2x1,,"a table with flasks, an alembic and coloured bubbling potions.",2
+chest-iron.webp,"Iron-bound chest",building,container,object,1,1,soft,rect:0.9x0.7,,"a large iron-banded wooden chest with a padlock.",2
+fireplace-small.webp,"Hearth",building,light,object,1,1,soft,rect:1x1,1,"a small hearth with a crackling fire and an iron pot hanging over it.",2
+rug-bear.webp,"Bearskin rug",building,decor,decal,2,2,none,,,"a brown bear pelt rug with its head and claws, flat on the floor.",2
+stairs-spiral.webp,"Spiral staircase",building,structure,object,2,2,soft,ellipse:1.6x1.6,1,"a spiral wooden staircase seen from above around a central post.",2
+cellar-hatch.webp,"Cellar hatch",building,structure,decal,1,1,none,,,"a wooden floor hatch with an iron ring handle, slightly open.",2
+banner-hanging.webp,"Hanging banner",building,decor,canopy,1,2,soft,,,"a long heraldic banner hung from a pole, seen from above as a tapering cloth.",2
+tapestry-floor.webp,"Floor tapestry",building,decor,decal,1,2,none,,,"a long narrow runner carpet with a woven hunting scene.",2
+vase-large.webp,"Large vase",building,decor,object,1,1,soft,ellipse:0.6x0.6,,"a tall painted porcelain vase with a dried flower bouquet.",2
+lamp-oil.webp,"Oil lamp stand",building,light,object,1,1,soft,ellipse:0.4x0.4,,"a brass oil lamp on a short wooden stand with a glowing glass shade.",2
+lantern-post.webp,"Lantern post",settlement,light,object,1,1,soft,ellipse:0.4x0.4,,"a wrought iron street lamp post with a glowing glass lantern, seen from above.",1
+market-stall.webp,"Market stall",settlement,market,object,2,1,soft,rect:2x1,,"a wooden market stall with a striped awning and baskets of fruit and vegetables.",1
+signpost.webp,"Signpost",settlement,decor,object,1,1,soft,ellipse:0.4x0.4,,"a wooden crossroads signpost with two arrow boards.",1
+hay-bale.webp,"Hay bale",settlement,market,object,1,1,soft,rect:0.9x0.9,,"a round golden hay bale tied with twine.",1
+wagon-covered.webp,"Covered wagon",settlement,vehicle,object,2,2,soft,rect:1.6x2,1,"a wooden covered wagon with a canvas hood and two large wheels, no horses.",1
+fence-section.webp,"Fence section",settlement,structure,object,2,1,soft,rect:2x0.3,,"a rustic wooden picket fence section, seen from above.",1
+haystack.webp,"Haystack",settlement,market,object,2,2,soft,ellipse:1.6x1.6,1,"a big conical haystack with a tidy thatched top.",1
+horse-trough.webp,"Horse trough",settlement,water,object,2,1,soft,rect:2x0.8,,"a long wooden water trough filled with water.",1
+flower-planter.webp,"Flower planter",settlement,plant,object,1,1,soft,rect:0.9x0.9,,"a raised wooden planter box full of colourful flowers.",1
+bench-street.webp,"Street bench",settlement,furniture,object,2,1,soft,rect:2x0.5,,"a stone and wood bench with iron armrests.",1
+obelisk.webp,"Monument obelisk",settlement,structure,object,1,1,soft,rect:0.7x0.7,1,"a tall stone memorial obelisk on a stepped base.",1
+dock-crate.webp,"Dock cargo",settlement,vehicle,object,2,1,soft,rect:2x1,,"a heap of rope-bound cargo crates and barrels under a tarp.",1
+rowboat.webp,"Rowboat",settlement,vehicle,object,1,2,soft,rect:1x2,,"a small wooden rowboat with two oars, seen from above.",1
+bucket-rope.webp,"Rope and bucket",settlement,decor,object,1,1,soft,ellipse:0.4x0.4,,"a wooden bucket beside a coiled rope.",1
+cart-hand.webp,"Handcart",settlement,vehicle,object,2,1,soft,rect:2x1,,"a two-wheeled wooden handcart loaded with sacks.",1
+statue-hero.webp,"Hero statue",settlement,structure,object,1,1,soft,ellipse:0.8x0.8,1,"a bronze statue of a hero on a stone plinth with a raised sword.",1
+market-stall-cloth.webp,"Cloth stall",settlement,market,object,2,1,soft,rect:2x1,,"a draper's stall with bolts of coloured fabric and an awning.",2
+market-stall-fish.webp,"Fish stall",settlement,market,object,2,1,soft,rect:2x1,,"a fishmonger stall with crates of fish on ice and a scale.",2
+market-stall-weapons.webp,"Weapon stall",settlement,market,object,2,1,soft,rect:2x1,,"an armourer stall with swords, shields and helmets.",2
+barrel-rain.webp,"Rain barrel",settlement,water,object,1,1,soft,ellipse:0.8x0.8,,"an open rain barrel with water inside and a wooden lid beside it.",2
+hand-pump.webp,"Village pump",settlement,water,object,1,1,soft,ellipse:0.6x0.6,,"a cast-iron hand pump with a stone trough.",2
+crates-market.webp,"Market crates",settlement,market,object,1,1,soft,rect:1x1,,"open crates of apples, onions and cabbages.",2
+bonfire-festival.webp,"Festival bonfire",settlement,light,object,2,2,soft,ellipse:1.4x1.4,,"a large log bonfire with roaring flames and a ring of stones.",2
+stage-wooden.webp,"Wooden stage",settlement,structure,object,2,2,soft,rect:2x2,,"a small wooden performance stage with steps and bunting.",2
+gallows.webp,"Gallows",settlement,structure,object,2,2,soft,rect:1.2x1.2,1,"a wooden gallows platform with a beam and noose, seen from above.",2
+pillory.webp,"Pillory",settlement,structure,object,1,1,soft,rect:0.8x0.6,,"a wooden pillory with locking boards and a small step.",2
+shrine-roadside.webp,"Roadside shrine",settlement,structure,object,1,1,soft,rect:0.7x0.7,,"a small stone roadside shrine with candles and flowers.",2
+cobble-patch.webp,"Cobbled patch",settlement,decor,decal,2,2,none,,,"a rounded patch of old cobblestones with gaps of mud.",2
+puddle-muddy.webp,"Muddy puddle",settlement,water,decal,1,1,none,,,"a brown muddy puddle with ripples and hoof prints.",2
+laundry-basket.webp,"Laundry basket",settlement,decor,object,1,1,soft,ellipse:0.7x0.7,,"a wicker basket full of folded laundry beside a washboard.",2
+flag-pole.webp,"Flagpole",settlement,structure,object,1,1,soft,ellipse:0.3x0.3,,"a tall flagpole with a waving banner, seen from above.",2
+forge-open.webp,"Forge stand",settlement,structure,object,2,1,soft,rect:2x1,1,"an open smith's forge with glowing coals, bellows and tongs.",2
+ship-wreck.webp,"Beached boat",settlement,vehicle,object,2,2,soft,rect:1.6x2,,"a half-wrecked wooden boat on its side with broken planks.",2
+goat-pen.webp,"Animal pen",settlement,structure,object,2,2,soft,rect:2x2,,"a small wooden animal pen with straw and a feed trough.",2
+bell-frame.webp,"Bell stand",settlement,structure,object,1,1,soft,rect:0.9x0.9,1,"a wooden bell frame holding a large bronze bell.",2
+scarecrow.webp,"Scarecrow",settlement,decor,object,1,1,soft,ellipse:0.4x0.4,,"a straw scarecrow in a ragged coat and hat on a post.",2
+tree-willow.webp,"Weeping willow",nature,tree,canopy,2,2,soft,ellipse:0.5x0.5,,"a large weeping willow tree crown seen from above with long drooping branches.",1
+rock-mossy.webp,"Mossy rock",nature,rock,object,1,1,soft,ellipse:0.9x0.9,,"a mossy grey boulder with lichen patches and small ferns at its base.",1
+tree-birch.webp,"Birch tree",nature,tree,canopy,2,2,soft,ellipse:0.4x0.4,,"a white-barked birch tree crown seen from above with light green leaves.",1
+tree-dead.webp,"Dead tree",nature,tree,canopy,2,2,soft,ellipse:0.4x0.4,,"a leafless gnarled dead tree seen from above with twisted bare branches.",1
+stump.webp,"Tree stump",nature,tree,object,1,1,soft,ellipse:0.6x0.6,,"a cut tree stump with visible rings and an axe stuck in it.",1
+log-fallen.webp,"Fallen log",nature,tree,object,2,1,soft,rect:2x0.6,,"a fallen mossy tree log with broken branches.",1
+bush-berry.webp,"Berry bush",nature,plant,object,1,1,soft,ellipse:0.8x0.8,,"a dense green bush with clusters of red berries.",1
+flowers-patch.webp,"Wildflower patch",nature,plant,decal,1,1,none,,,"a patch of mixed wildflowers in yellow, white and purple among grass.",1
+mushroom-ring.webp,"Mushroom ring",nature,plant,decal,2,2,none,,,"a fairy ring of red-capped mushrooms in grass.",1
+boulder-large.webp,"Large boulder",nature,rock,object,2,2,soft,ellipse:1.6x1.6,1,"a huge rounded grey boulder with cracks and moss.",1
+pond-small.webp,"Small pond",nature,water,decal,2,2,none,,,"a small clear pond with reeds and a muddy shore.",1
+reeds.webp,"Reeds",nature,plant,object,1,1,soft,,,"a tuft of tall green reeds and cattails.",1
+lily-pads.webp,"Lily pads",nature,plant,decal,1,1,none,,,"a few green lily pads with a pink flower on dark water.",1
+bedroll.webp,"Bedroll",nature,decor,decal,1,2,none,,,"a traveller's bedroll with a blanket and small pack.",1
+fern-cluster.webp,"Fern cluster",nature,plant,object,1,1,soft,,,"a clump of large green forest ferns.",1
+rock-spire.webp,"Rock spire",nature,rock,object,2,2,soft,ellipse:1.2x1.2,1,"a jagged tall rock spire seen from above with layered stone.",1
+tree-palm.webp,"Palm tree",nature,tree,canopy,2,2,soft,ellipse:0.4x0.4,,"a tropical palm tree crown seen from above with long fronds.",2
+tree-apple.webp,"Apple tree",nature,tree,canopy,2,2,soft,ellipse:0.5x0.5,,"a leafy apple tree crown with red apples.",2
+tree-oak-large.webp,"Ancient oak",nature,tree,canopy,2,2,soft,ellipse:0.8x0.8,,"a massive ancient oak tree crown with thick gnarled branches.",2
+tree-spruce-snow.webp,"Snowy spruce",nature,tree,canopy,2,2,soft,ellipse:0.4x0.4,,"a dark spruce tree crown covered with snow.",2
+tree-sapling.webp,"Sapling",nature,tree,object,1,1,soft,ellipse:0.3x0.3,,"a thin young sapling with a few bright leaves.",2
+bush-thorn.webp,"Thorn bush",nature,plant,object,1,1,soft,ellipse:0.8x0.8,,"a thorny dark bush with sharp spines.",2
+bush-flowering.webp,"Flowering bush",nature,plant,object,1,1,soft,ellipse:0.8x0.8,,"a green bush covered in pink blossoms.",2
+grass-tall.webp,"Tall grass",nature,plant,decal,1,1,none,,,"a tuft of tall golden grass blades.",2
+cactus.webp,"Cactus",nature,plant,object,1,1,soft,ellipse:0.5x0.5,,"a green saguaro cactus with arms and small flowers.",2
+rock-flat.webp,"Flat stone slab",nature,rock,decal,2,1,none,,,"a flat grey stone slab half sunk into the ground.",2
+rock-pile.webp,"Rock pile",nature,rock,object,2,1,soft,rect:1.8x0.8,,"a heap of grey stones and pebbles.",2
+rock-ice.webp,"Ice formation",nature,rock,object,1,1,soft,ellipse:0.8x0.8,,"a pale blue ice crystal outcrop with sharp edges.",2
+stream-bend.webp,"Stream bend",nature,water,decal,2,2,none,,,"a curved clear stream with pebbles on the banks.",2
+puddle-rain.webp,"Rain puddle",nature,water,decal,1,1,none,,,"a shallow puddle reflecting the sky.",2
+campfire-camp.webp,"Camp cooking fire",nature,light,object,1,1,soft,ellipse:0.8x0.8,,"a small campfire with a tripod and hanging pot.",2
+lean-to.webp,"Lean-to shelter",nature,structure,object,2,2,soft,rect:1.8x1.6,1,"a lean-to shelter made of branches and a leather sheet.",2
+bones-animal.webp,"Animal bones",nature,remains,decal,1,1,none,,,"the skeleton of a deer with scattered ribs.",2
+logs-pile.webp,"Log pile",nature,tree,object,1,1,soft,rect:1x1,,"a neat pile of cut firewood logs.",2
+nest-giant.webp,"Giant nest",nature,decor,decal,2,2,none,,,"a huge bird nest of woven branches with a few large pale eggs.",2
+beehive-wild.webp,"Wild beehive",nature,decor,object,1,1,soft,ellipse:0.5x0.5,,"a hollow log beehive with swarming bees.",2
+fallen-leaves.webp,"Fallen leaves",nature,decor,decal,2,2,none,,,"a drift of orange and brown autumn leaves.",2
+vines-hanging.webp,"Hanging vines",nature,plant,canopy,1,1,soft,,,"a tangle of green hanging jungle vines.",2
+hollow-log.webp,"Hollow log",nature,tree,object,2,1,soft,rect:2x0.7,,"a large hollow log with a dark opening.",2
+swamp-bog.webp,"Bog patch",nature,water,decal,2,2,none,,,"a green boggy swamp patch with algae, bubbles and floating twigs.",2
+mirror-standing.webp,"Standing mirror",building,furniture,object,1,1,soft,rect:0.7x0.4,,"a tall framed mirror on a stand, seen from above.",2
+coat-rack.webp,"Coat rack",building,furniture,object,1,1,soft,ellipse:0.4x0.4,,"a wooden coat stand with a cloak and a hat.",2
+piano.webp,"Harpsichord",building,furniture,object,2,1,soft,rect:2x1,,"a painted wooden harpsichord with open lid and keys.",2
+trader-wagon-open.webp,"Trader's wagon",settlement,vehicle,object,2,2,soft,rect:1.6x2,,"an open merchant wagon loaded with chests and bundles.",2
+water-barrels-row.webp,"Barrel row",settlement,market,object,2,1,soft,rect:2x0.9,,"a row of ale barrels on a low rack.",2
+well-wishing.webp,"Fountain basin",settlement,water,object,1,1,soft,ellipse:0.9x0.9,,"a small round stone basin with water and coins at the bottom.",2
+tent-merchant.webp,"Merchant tent",settlement,market,object,2,2,soft,rect:1.8x1.8,1,"a large striped merchant tent with open flaps and rugs.",2

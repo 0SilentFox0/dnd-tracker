@@ -11,12 +11,16 @@ import {
     renderStampsData,
 } from '@/scripts/assets/stamps/csv';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
+import enMaps from '@/messages/en/maps.json';
 import enNames from '@/messages/en/tileLabels.json';
+import ukMaps from '@/messages/uk/maps.json';
 import ukNames from '@/messages/uk/tileLabels.json';
 
 const ROOT = process.cwd();
 
 const read = (p: string) => readFileSync(join(ROOT, p), 'utf8');
+
+const LEGACY_FILE = /^tiles_.+\.png$/;
 
 const LEGACY = /^\/assets\/battle-tiles\/objects\/tiles_(.+)\.png$/;
 
@@ -72,6 +76,24 @@ describe('stamp registry', () => {
 
             expect(enNames).toHaveProperty([key]);
             expect(ukNames).toHaveProperty([key]);
+        }
+    });
+
+    it('every non-legacy CSV row has a name and category in both locales', () => {
+        const rows = parseStampsCsv(read('docs/assets/stamp-prompts/stamps.csv'));
+
+        for (const maps of [enMaps, ukMaps]) {
+            const stamps = maps.editor.stamps as {
+                name: Record<string, string>;
+                category: Record<string, string>;
+            };
+
+            for (const r of rows.filter((x) => !LEGACY_FILE.test(x.file))) {
+                const id = r.file.replace(/\.webp$/, '');
+
+                expect(stamps.name[id], id).toBeTruthy();
+                expect(stamps.category[r.category], r.category).toBeTruthy();
+            }
         }
     });
 });
