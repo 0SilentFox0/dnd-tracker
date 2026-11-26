@@ -9,10 +9,7 @@ import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings
 vi.mock('@/lib/hooks/characters', () => ({
     useArchetypeOptions: () => ({ options: [], universalLabel: 'any' }),
     useClassEntriesField: () => vi.fn(),
-}));
-
-vi.mock('@/components/common/fields/ImageUpload', () => ({
-    ImageUpload: ({ label }: { label: string }) => <div>{label}</div>,
+    useAlignmentLabel: () => (value: string | null) => value ?? '',
 }));
 
 afterEach(cleanup);
@@ -50,7 +47,6 @@ describe('CharacterBasicInfo', () => {
 
         expect(ids()).toEqual(
             [
-                'alignment',
                 'archetype',
                 'class',
                 'controlledBy',
@@ -59,7 +55,6 @@ describe('CharacterBasicInfo', () => {
                 'race',
                 'subclass',
                 'subrace',
-                'type',
             ].sort()
         );
     });
@@ -71,12 +66,36 @@ describe('CharacterBasicInfo', () => {
         expect(ids()).not.toContain('subclass');
     });
 
-    it('hides the portrait section in player view', () => {
-        const { container } = render(
-            <CharacterBasicInfo basicInfo={bindings} isPlayerView />
+    it('has no portrait section: the banner owns the portrait', () => {
+        const { container } = render(<CharacterBasicInfo basicInfo={bindings} />);
+
+        expect(container.querySelectorAll('section')).toHaveLength(3);
+        expect(screen.queryByText('characters.form.basic.avatar')).toBeNull();
+    });
+
+    it('type is a segmented radiogroup and alignment a radiogroup', () => {
+        render(<CharacterBasicInfo basicInfo={bindings} />);
+
+        expect(document.getElementById('type')?.getAttribute('role')).toBe(
+            'radiogroup'
+        );
+        expect(
+            document.getElementById('alignment')?.getAttribute('role')
+        ).toBe('radiogroup');
+    });
+
+    it('puts the slots into the class card row', () => {
+        render(
+            <CharacterBasicInfo
+                basicInfo={bindings}
+                slots={{
+                    classAction: <button>act</button>,
+                    classAside: <div>hp-tile</div>,
+                }}
+            />
         );
 
-        expect(container.querySelectorAll('section')).toHaveLength(2);
-        expect(screen.queryByText('characters.form.basic.avatar')).toBeNull();
+        expect(screen.getByText('act')).toBeTruthy();
+        expect(screen.getByText('hp-tile')).toBeTruthy();
     });
 });

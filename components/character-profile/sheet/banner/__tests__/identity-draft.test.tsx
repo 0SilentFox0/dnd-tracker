@@ -22,7 +22,7 @@ const saved = {
 
 const basic = {
     name: 'Нове',
-    type: 'PLAYER',
+    type: 'player',
     controlledBy: '',
     level: 5,
     class: 'Маг',

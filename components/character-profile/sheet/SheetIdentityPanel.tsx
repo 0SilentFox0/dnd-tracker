@@ -16,6 +16,7 @@ import { HudButton } from '@/components/hud';
 import { systemUiOf } from '@/components/systems';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cn } from '@/lib/utils';
+import { alignmentLabel } from '@/lib/utils/characters/alignment';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
@@ -52,6 +53,8 @@ export function SheetIdentityPanel({
 
     const tc = useTranslations('characterProfile.hero');
 
+    const tg = useTranslations('gameTerms');
+
     const [open, setOpen] = useState(false);
 
     const id = overlayIdentity(sheet.identity, useIdentityDraft());
@@ -75,7 +78,7 @@ export function SheetIdentityPanel({
               : null,
         `${id.race}${id.subrace ? ` (${id.subrace})` : ''}`,
         background,
-        system.identity.alignments ? id.alignment : null,
+        system.identity.alignments ? alignmentLabel(id.alignment, (key) => tg(key)) : null,
     ].filter(Boolean);
 
     const lead = excerpt(sheet.story.biography);

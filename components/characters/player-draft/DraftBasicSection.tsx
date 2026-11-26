@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { ALIGNMENTS } from '@/lib/constants/alignment';
 import type { RollKey, usePlayerDraftForm } from '@/lib/hooks/characters';
+import { alignmentLabel } from '@/lib/utils/characters/alignment';
 import type { DraftInput } from '@/types/characters';
 
 type Draft = ReturnType<typeof usePlayerDraftForm>;
@@ -28,6 +29,8 @@ export function DraftBasicSection({
     };
 }) {
     const t = useTranslations('characters.draft');
+
+    const tg = useTranslations('gameTerms');
 
     const { form, reveal, generate, ai } = draft;
 
@@ -171,7 +174,7 @@ export function DraftBasicSection({
                         placeholder={t('alignmentPlaceholder')}
                         options={ALIGNMENTS.map((a) => ({
                             value: a,
-                            label: a,
+                            label: alignmentLabel(a, (key) => tg(key)),
                         }))}
                         allowNone
                         triggerClassName="w-full"

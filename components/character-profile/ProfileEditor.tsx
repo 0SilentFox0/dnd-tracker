@@ -27,7 +27,7 @@ import { SystemFormFields } from '@/components/characters/stats/SystemFormFields
 import { CharacterChoicesPanel } from '@/components/choices/character/CharacterChoicesPanel';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
-import { HudSection } from '@/components/hud/form';
+import { HudFormMenu, HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -56,6 +56,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     const tc = useTranslations('common.tabs');
 
     const tca = useTranslations('common.actions');
+
+    const tf = useTranslations('common.form');
 
     const editor = useDmCharacterEditor({
         campaignId,
@@ -155,6 +157,21 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                     }
                     actions={
                         <>
+                            <HudFormMenu
+                                label={tf('more')}
+                                items={[
+                                    {
+                                        label: t('basic.delete'),
+                                        tone: 'danger',
+                                        onSelect: async () => {
+                                            if (await editor.dmActions.remove())
+                                                router.push(
+                                                    `/campaigns/${campaignId}/dm/characters`
+                                                );
+                                        },
+                                    },
+                                ]}
+                            />
                             <Button
                                 type="button"
                                 variant="outline"
@@ -192,14 +209,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                         id: 'basic',
                                         label: tc('basic'),
                                         content: (
-                                            <BasicEditTab
-                                                editor={editor}
-                                                onDeleted={() =>
-                                                    router.push(
-                                                        `/campaigns/${campaignId}/dm/characters`
-                                                    )
-                                                }
-                                            />
+                                            <BasicEditTab editor={editor} />
                                         ),
                                     },
                                     {

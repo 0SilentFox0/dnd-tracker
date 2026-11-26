@@ -391,5 +391,43 @@
       "name": "Opportunity attacks",
       "summary": "Leaving a melee reach provokes an attack of opportunity."
     }
+  },
+  "alignments": {
+    "lawfulGood": {
+      "name": "Lawful Good",
+      "short": "LG"
+    },
+    "neutralGood": {
+      "name": "Neutral Good",
+      "short": "NG"
+    },
+    "chaoticGood": {
+      "name": "Chaotic Good",
+      "short": "CG"
+    },
+    "lawfulNeutral": {
+      "name": "Lawful Neutral",
+      "short": "LN"
+    },
+    "trueNeutral": {
+      "name": "True Neutral",
+      "short": "N"
+    },
+    "chaoticNeutral": {
+      "name": "Chaotic Neutral",
+      "short": "CN"
+    },
+    "lawfulEvil": {
+      "name": "Lawful Evil",
+      "short": "LE"
+    },
+    "neutralEvil": {
+      "name": "Neutral Evil",
+      "short": "NE"
+    },
+    "chaoticEvil": {
+      "name": "Chaotic Evil",
+      "short": "CE"
+    }
   }
 }
