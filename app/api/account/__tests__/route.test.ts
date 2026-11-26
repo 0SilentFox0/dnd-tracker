@@ -12,6 +12,12 @@ vi.mock('@/lib/server/account/delete-account', () => ({
     deleteAccount: vi.fn(),
 }));
 
+const signOut = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/supabase/server', () => ({
+    createClient: async () => ({ auth: { signOut } }),
+}));
+
 const session = {
     userId: 'u1',
     authUser: { id: 'u1', email: 'Hero@Example.com' },
@@ -72,6 +78,7 @@ describe('DELETE /api/account', () => {
         expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ success: true });
         expect(deleteAccount).toHaveBeenCalledWith('u1');
+        expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
     });
 
     it('500 when the service fails unexpectedly', async () => {
