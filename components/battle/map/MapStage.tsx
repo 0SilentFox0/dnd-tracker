@@ -2,6 +2,8 @@
 
 import { memo, useMemo } from 'react';
 
+import { ArtCanvas } from './art/ArtCanvas';
+import { ArtLightsLayer } from './art/ArtLightsLayer';
 import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
 import { FogWindowContext } from './fog/fog-window-context';
@@ -55,6 +57,7 @@ function MapStageImpl({
         fog,
         fogActive,
         showDefaultBackground = true,
+        art,
     } = editing;
 
     const doorPress =
@@ -146,7 +149,8 @@ function MapStageImpl({
                 height: size.height * pxPerUnit,
             }}
         >
-            {(map.background || showDefaultBackground) && (
+            {art && <ArtCanvas map={map} art={art} cellPx={cellPx} />}
+            {!art && (map.background || showDefaultBackground) && (
                 <MapBackground
                     map={map}
                     cellPx={cellPx}
@@ -188,6 +192,12 @@ function MapStageImpl({
                         rotated={rotated}
                         showLock={doorsTool?.showLock ?? doorLocks ?? false}
                         onPress={doorPress}
+                    />
+                )}
+                {art?.lights && (
+                    <ArtLightsLayer
+                        lights={art.scene.lights}
+                        editing={art.lights}
                     />
                 )}
                 {ui?.MapLayers && (

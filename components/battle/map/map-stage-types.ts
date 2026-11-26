@@ -1,6 +1,7 @@
 import type { PointerEvent, RefObject } from 'react';
 
 import type { TileRenderState } from './tiles/TileCanvas';
+import type { ArtPreviewState } from './battle-map-types';
 
 import type { EdgeEditing, MapDoorsTool, ModeTools } from '@/lib/hooks/battle';
 import type { GridWindow } from '@/lib/utils/battle/grid';
@@ -31,6 +32,7 @@ export interface MapStageInteraction {
 }
 
 export interface MapStageEditing {
+    art?: ArtPreviewState | null;
     showDefaultBackground?: boolean;
     clickableBlocked?: boolean;
     showBlocked?: boolean;
