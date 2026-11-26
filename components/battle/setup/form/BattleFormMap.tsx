@@ -170,13 +170,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 {t('edgesDisabledMode')}
                             </p>
                         )}
-                        {grid === 'hex' && (
-                            <p className="text-sm text-hud-muted">
-                                {t('hexEdgesOff')}
-                            </p>
-                        )}
-                        {grid === 'square' &&
-                            !(mode && MAP_MODE_UI[mode].hidesTerrain) &&
+                        {!(mode && MAP_MODE_UI[mode].hidesTerrain) &&
                             (touch ? (
                                 <p className="text-sm text-hud-muted">
                                     {t('edgesDesktopOnly')}

@@ -400,5 +400,9 @@
   "2026-11-26-hex-grid": {
     "title": "Square or hex grid",
     "body": "When you create a battle map, pick its geometry: squares or hexes. On a hex map movement, range, spell templates, visibility and fog work over six neighbours, and every token takes one cell. The geometry cannot be changed after creation; maze, walls, doors and tiles are available on square grids only."
+  },
+  "2026-11-26-hex-edges": {
+    "title": "Walls, bars and doors on hex maps",
+    "body": "Hex battle maps now support walls, bars and doors: draw them along cell edges in the map editor and in battle setup, and they block movement, sight and fog just like on square grids. Maze and textures remain square-only."
   }
 }

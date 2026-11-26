@@ -7,9 +7,11 @@ import {
     mapBackgroundSchema,
     mapSide,
 } from '@/lib/schemas/battles';
-import { inBounds } from '@/lib/utils/battle/grid/geometry';
+import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
+import { gridOf, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { TILE_LAYERS } from '@/lib/utils/battle/tiles/types';
+import type { GridKind } from '@/types/battle-grid';
 
 const side = mapSide(MAP_LIMITS.tileMaxSide);
 
@@ -36,7 +38,8 @@ const edges = z.array(edgeKeySchema).max(MAP_LIMITS.libraryMaxEdges);
 
 const edgesValid = (
     list: readonly string[],
-    map: { cols: number; rows: number }
+    map: { cols: number; rows: number },
+    grid: GridKind
 ) => {
     const seen = new Set<string>();
 
@@ -47,7 +50,7 @@ const edgesValid = (
 
         const { a, b } = parseEdgeKey(edge);
 
-        return inBounds(map, a) && inBounds(map, b);
+        return inBounds(map, a) && inBounds(map, b) && edgeOnGrid(grid, edge);
     });
 };
 
@@ -63,13 +66,9 @@ const refineBattleMap = (
     m: z.infer<typeof battleMapBase>,
     ctx: z.RefinementCtx
 ) => {
-    if (
-        m.map.gridType === 'hex' &&
-        (m.map.maze ||
-            m.walls.length ||
-            m.bars.length ||
-            Object.keys(m.map.doors ?? {}).length)
-    )
+    const grid = gridOf(m.map);
+
+    if (grid === 'hex' && m.map.maze)
         ctx.addIssue({
             code: 'custom',
             message: 'battleSetup.validation.hexSquareOnly',
@@ -92,16 +91,16 @@ const refineBattleMap = (
 
     const walls = new Set(m.walls);
 
-    if (!edgesValid(m.walls, m.map)) badEdges('walls');
+    if (!edgesValid(m.walls, m.map, grid)) badEdges('walls');
 
-    if (!edgesValid(m.bars, m.map) || m.bars.some((e) => walls.has(e)))
+    if (!edgesValid(m.bars, m.map, grid) || m.bars.some((e) => walls.has(e)))
         badEdges('bars');
 
     const solid = new Set([...m.walls, ...m.bars]);
 
     const doors = Object.keys(m.map.doors ?? {});
 
-    if (!edgesValid(doors, m.map) || doors.some((e) => solid.has(e)))
+    if (!edgesValid(doors, m.map, grid) || doors.some((e) => solid.has(e)))
         ctx.addIssue({
             code: 'custom',
             message: 'battleSetup.validation.doorOnWall',

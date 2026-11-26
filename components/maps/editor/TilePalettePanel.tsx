@@ -22,19 +22,13 @@ const BRUSH_SIZES = ['1', '2', '3'].map((size) => ({
     label: size,
 }));
 
-const GROUND_LAYERS = ['ground', 'wallfill', 'objects', 'edge-art'] as const;
+const GROUND_LAYERS = ['ground', 'wallfill', 'objects'] as const;
 
 const EFFECT_LAYERS = ['effects'] as const;
 
 const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
 const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
-
-function tileImageClass(layer: string) {
-    return layer === 'edge-art'
-        ? 'h-full w-full object-fill'
-        : 'max-h-full max-w-full object-contain';
-}
 
 export function TilePalettePanel({
     workspace,
@@ -226,7 +220,7 @@ export function TilePalettePanel({
                             <TileAssetImage
                                 tile={selectedTile}
                                 alt={tileLabel(selectedTile.key)}
-                                className={tileImageClass(selectedTile.layer)}
+                                className={'max-h-full max-w-full object-contain'}
                             />
                         </div>
                     </div>
@@ -258,7 +252,7 @@ export function TilePalettePanel({
                                 <TileAssetImage
                                     tile={tile}
                                     alt=""
-                                    className={tileImageClass(tile.layer)}
+                                    className={'max-h-full max-w-full object-contain'}
                                 />
                             </span>
                             <span className="line-clamp-2 w-full text-[11px] leading-tight">

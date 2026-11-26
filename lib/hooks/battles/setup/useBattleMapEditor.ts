@@ -215,9 +215,9 @@ export function useBattleMapEditor(
         setMap((m) => {
             if (gridOf(m) === kind) return m;
 
-            if (kind === 'square') return { ...m, gridType: 'square' };
-
             const { walls, bars, doors, ...rest } = m;
+
+            if (kind === 'square') return { ...rest, gridType: 'square' };
 
             return MODE_KEYS.reduce(
                 (acc, key) => modeOf(key).withConfig(acc, null),

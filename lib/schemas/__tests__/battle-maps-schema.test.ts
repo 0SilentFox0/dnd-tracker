@@ -147,3 +147,48 @@ describe('battleMapSaveSchema', () => {
         ).toBe(false);
     });
 });
+
+describe('battle map library schemas on hex grids', () => {
+    const hex = { gridType: 'hex' };
+
+    it.each([battleMapInputSchema, battleMapSaveSchema])(
+        'accepts hex edges and rejects wrong or off-map keys',
+        (schema) => {
+            const parse = (body: object) =>
+                schema.safeParse({ expectedVersion: 1, ...body });
+
+            expect(
+                parse({
+                    ...input(hex),
+                    walls: ['1:1:n'],
+                    bars: ['2:2:se'],
+                    map: {
+                        ...input(hex).map,
+                        doors: { '3:3:ne': { open: false } },
+                    },
+                }).success
+            ).toBe(true);
+
+            const bad = (body: object) => {
+                const r = parse(body);
+
+                return r.success ? [] : r.error.issues.map((i) => i.message);
+            };
+
+            expect(bad({ ...input(hex), walls: ['1:1:e'] })).toContain(
+                'battleSetup.validation.badEdges'
+            );
+            expect(bad({ ...input(hex), walls: ['0:0:n'] })).toContain(
+                'battleSetup.validation.badEdges'
+            );
+            expect(bad({ ...input({}), walls: ['1:1:ne'] })).toContain(
+                'battleSetup.validation.badEdges'
+            );
+            expect(
+                bad({
+                    ...input({ ...hex, maze: { walls: [], exit: null, difficulty: 'easy', teleports: [], fog: [], marks: {}, dark: false } }),
+                })
+            ).toContain('battleSetup.validation.hexSquareOnly');
+        }
+    );
+});

@@ -17,7 +17,8 @@ import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { hexColorSchema } from '@/lib/schemas/common';
 import { STRIKE_RIDER_EFFECTS } from '@/lib/utils/abilities/schema';
 import { FOG_MAX_VISION_RADIUS } from '@/lib/utils/battle/fog/constants';
-import { inBounds } from '@/lib/utils/battle/grid/geometry';
+import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
+import { gridOf, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { REJECT } from '@/lib/utils/battle/store/reject';
@@ -40,7 +41,7 @@ export const mapCellSchema = z.object({
     y: z.number().int().min(0).max(59),
 });
 
-export const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
+export const edgeKeySchema = z.string().regex(/^\d+:\d+:(e|s|n|ne|se)$/);
 
 export const doorStateSchema = z.object({
     open: z.boolean(),
@@ -306,13 +307,9 @@ export const battleMapObject = z.object({
 
 export const battleMapSchema = battleMapObject
     .superRefine((m, ctx) => {
-        if (
-            m.gridType === 'hex' &&
-            (m.maze ||
-                m.walls?.length ||
-                m.bars?.length ||
-                Object.keys(m.doors ?? {}).length)
-        )
+        const grid = gridOf(m);
+
+        if (grid === 'hex' && m.maze)
             ctx.addIssue({
                 code: 'custom',
                 message: 'battleSetup.validation.hexSquareOnly',
@@ -331,6 +328,7 @@ export const battleMapSchema = battleMapObject
                     seen.has(edge) ||
                     !inBounds(m, a) ||
                     !inBounds(m, b) ||
+                    !edgeOnGrid(grid, edge) ||
                     (key === 'bars' && walls.has(edge));
 
                 if (bad) {
@@ -354,7 +352,12 @@ export const battleMapSchema = battleMapObject
         for (const edge of Object.keys(m.doors ?? {})) {
             const { a, b } = parseEdgeKey(edge);
 
-            if (solid.has(edge) || !inBounds(m, a) || !inBounds(m, b)) {
+            if (
+                solid.has(edge) ||
+                !inBounds(m, a) ||
+                !inBounds(m, b) ||
+                !edgeOnGrid(grid, edge)
+            ) {
                 ctx.addIssue({
                     code: 'custom',
                     message: 'battleSetup.validation.doorOnWall',

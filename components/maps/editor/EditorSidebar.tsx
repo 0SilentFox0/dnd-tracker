@@ -22,11 +22,7 @@ import type {
     useUvttImport,
 } from '@/lib/hooks/battle-maps';
 
-const HEX_HIDDEN: ReadonlySet<EditorPanel> = new Set([
-    'edges',
-    'tiles',
-    'effects',
-]);
+const HEX_HIDDEN: ReadonlySet<EditorPanel> = new Set(['tiles', 'effects']);
 
 const GROUP_LABEL =
     'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';
