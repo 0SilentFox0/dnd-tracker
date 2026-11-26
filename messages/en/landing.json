@@ -8,7 +8,9 @@
     "aria": "Sections",
     "items": {
       "combat": "Combat",
+      "features": "Features",
       "mechanics": "Mechanics",
+      "systems": "Systems",
       "prep": "Preparation",
       "ai": "AI",
       "faq": "FAQ"
@@ -69,6 +71,48 @@
       }
     },
     "hubTag": "all in one place"
+  },
+  "replace": {
+    "eyebrow": "One tab instead of six",
+    "title": "Everything you juggle now, in one place",
+    "text": "Most tables run on a map tool, a tracker, a notes app, sheets, a music player and a chat. Here they are one connected workspace.",
+    "caption": "What you use today compared with what you get here",
+    "headers": {
+      "category": "What you need",
+      "separate": "Separate tools"
+    },
+    "rows": {
+      "map": {
+        "category": "Maps",
+        "separate": "A map tool and a folder of images",
+        "ours": "Tactical battle maps and a world map with your party's trail"
+      },
+      "initiative": {
+        "category": "Initiative",
+        "separate": "A tracker plus a notebook",
+        "ours": "Turn order, damage and effects counted for you"
+      },
+      "scenario": {
+        "category": "Prep",
+        "separate": "Documents and scattered notes",
+        "ours": "Scenes, slides and DM notes linked to battles"
+      },
+      "sheets": {
+        "category": "Character sheets",
+        "separate": "PDFs and spreadsheets",
+        "ours": "Live sheets that players open on a phone"
+      },
+      "music": {
+        "category": "Music and sound",
+        "separate": "A separate player and playlists",
+        "ours": "Scene music and a soundboard at your fingertips"
+      },
+      "show": {
+        "category": "Handouts",
+        "separate": "Screen sharing and a group chat",
+        "ours": "Slides pushed to every player's screen at once"
+      }
+    }
   },
   "combat": {
     "eyebrow": "Tactical combat",
@@ -158,6 +202,41 @@
       "more": "and more"
     }
   },
+  "features": {
+    "eyebrow": "Features",
+    "title": "Built for the whole session",
+    "text": "The pieces a Dungeon Master reaches for, designed to work together.",
+    "items": {
+      "sheet": {
+        "title": "Character sheets",
+        "text": "Stats, spells and abilities that update with the battle, on any device."
+      },
+      "world": {
+        "title": "World map",
+        "text": "Markers, zones and a trail that shows where your party has been."
+      },
+      "mapEditor": {
+        "title": "Map editor",
+        "text": "Build battle maps with walls and doors, then drop tokens straight in."
+      },
+      "soundboard": {
+        "title": "Soundboard",
+        "text": "Ambience and effects one tap away, played for the whole table."
+      },
+      "scenarioGraph": {
+        "title": "Scenario graph",
+        "text": "See how scenes, characters and places connect across your story."
+      },
+      "contentCopy": {
+        "title": "Content copy",
+        "text": "Reuse monsters, spells and maps between your campaigns."
+      },
+      "mcp": {
+        "title": "AI assistant access",
+        "text": "Let your own AI assistant read and prepare your campaign through MCP."
+      }
+    }
+  },
   "mechanics": {
     "eyebrow": "Custom mechanics",
     "title": "Your rules, set up — not coded",
@@ -203,6 +282,34 @@
     "templatesNote": "Start from an official template, or from scratch.",
     "alt": "Spell library of a campaign: school and level groups, import, CSV export and a card for every spell",
     "footnote": "Built for D&D-style, turn-based tabletop RPGs. Imported rules are validated row by row; check results before play."
+  },
+  "systems": {
+    "eyebrow": "Rule systems",
+    "title": "Pick a system or build your own",
+    "text": "Start from a ready-made rule set, or shape the rules to fit your table.",
+    "count": {
+      "spells": "Spells: {n}",
+      "units": "Creatures: {n}",
+      "classes": "Classes: {n}",
+      "races": "Races: {n}"
+    },
+    "cards": {
+      "srd": {
+        "tag": "Built-in",
+        "name": "5e SRD 5.2",
+        "text": "The open D&D 5e rules: classes, races, spells and a bestiary, ready to play."
+      },
+      "grim": {
+        "tag": "Built-in",
+        "name": "Grim d100",
+        "text": "A grim fantasy d100 system with its own careers, spells and creatures."
+      },
+      "custom": {
+        "tag": "Yours",
+        "name": "Your own rules",
+        "text": "Use the constructor to define races, classes, abilities and rules, or import your own content."
+      }
+    }
   },
   "prep": {
     "eyebrow": "Campaign preparation",

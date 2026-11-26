@@ -1,19 +1,23 @@
 import {
     Boxes,
     Braces,
+    Copy,
     Crown,
     FileUp,
+    Globe,
     Image as ImageIcon,
     type LucideIcon,
     Map,
     MessageSquare,
     Music,
+    Network,
     NotebookPen,
     Package,
     ScrollText,
     Settings2,
     Sparkles,
     Swords,
+    UserRound,
     Wand2,
 } from 'lucide-react';
 
@@ -89,3 +93,16 @@ export const FX_SPRITES = [
         scale: 'scale-[3]',
     },
 ];
+
+export const FEATURE_ITEMS: Record<
+    string,
+    { icon: LucideIcon; shot?: ShowcaseId }
+> = {
+    sheet: { icon: UserRound, shot: 'hero' },
+    world: { icon: Globe, shot: 'world' },
+    mapEditor: { icon: Map },
+    soundboard: { icon: Music },
+    scenarioGraph: { icon: Network },
+    contentCopy: { icon: Copy },
+    mcp: { icon: Braces },
+};

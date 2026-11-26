@@ -12,6 +12,7 @@ import { PointerParallax } from '@/components/landing/PointerParallax';
 import { AiSection } from '@/components/landing/sections/AiSection';
 import { Combat } from '@/components/landing/sections/Combat';
 import { Faq } from '@/components/landing/sections/Faq';
+import { Features } from '@/components/landing/sections/Features';
 import { FinalCta } from '@/components/landing/sections/FinalCta';
 import { Hero } from '@/components/landing/sections/Hero';
 import { HowItWorks } from '@/components/landing/sections/HowItWorks';
@@ -19,6 +20,8 @@ import { Mechanics } from '@/components/landing/sections/Mechanics';
 import { Players } from '@/components/landing/sections/Players';
 import { Prep } from '@/components/landing/sections/Prep';
 import { Problem } from '@/components/landing/sections/Problem';
+import { Replace } from '@/components/landing/sections/Replace';
+import { Systems } from '@/components/landing/sections/Systems';
 import { SessionSwitch } from '@/components/landing/SessionSwitch';
 import { BRAND, LANDING_PATH } from '@/lib/constants/site';
 import type { Locale } from '@/lib/i18n/config';
@@ -139,8 +142,11 @@ export async function LandingPage({ locale }: { locale: Locale }) {
                 <main>
                     <Hero t={t} />
                     <Problem t={t} />
+                    <Replace t={t} />
                     <Combat t={t} />
+                    <Features t={t} />
                     <Mechanics t={t} />
+                    <Systems t={t} />
                     <Prep t={t} />
                     <AiSection t={t} />
                     <Players t={t} />

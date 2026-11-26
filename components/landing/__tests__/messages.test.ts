@@ -41,6 +41,7 @@ const PRODUCT_TERMS = [
     'Gemini',
     'XP',
     'SRD',
+    'Grim',
     'RPG',
     'PDF',
     '3D',
