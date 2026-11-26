@@ -10,6 +10,11 @@ import type { useMapArtEditor } from '@/lib/hooks/battle-maps';
 
 type Art = ReturnType<typeof useMapArtEditor>;
 
+const STAMP_TOOLS = [
+    { value: 'stamp', labelKey: 'tool' },
+    { value: 'stamp-select', labelKey: 'select' },
+] as const;
+
 const BRUSH_SIZES = ['1', '2', '3'].map((size) => ({
     value: size,
     label: size,
@@ -18,7 +23,14 @@ const BRUSH_SIZES = ['1', '2', '3'].map((size) => ({
 export function ArtToolBar({ art }: { art: Art }) {
     const t = useTranslations('maps.editor.art');
 
+    const ts = useTranslations('maps.editor.stamps');
+
     const { tool, brush } = art;
+
+    const toggle = (value: (typeof ART_TOOLS)[number] | 'stamp' | 'stamp-select') => {
+        art.clearNotice();
+        art.setTool(tool === value ? null : value);
+    };
 
     return (
         <div className="space-y-2">
@@ -33,12 +45,20 @@ export function ArtToolBar({ art }: { art: Art }) {
                         tall
                         active={tool === value}
                         title={t(`toolHint.${value}`)}
-                        onClick={() => {
-                            art.clearNotice();
-                            art.setTool(tool === value ? null : value);
-                        }}
+                        onClick={() => toggle(value)}
                     >
                         {t(`tool.${value}`)}
+                    </HudToggleChip>
+                ))}
+                {STAMP_TOOLS.map(({ value, labelKey }) => (
+                    <HudToggleChip
+                        key={value}
+                        tall
+                        active={tool === value}
+                        title={t(`toolHint.${value}`)}
+                        onClick={() => toggle(value)}
+                    >
+                        {ts(labelKey)}
                     </HudToggleChip>
                 ))}
             </div>

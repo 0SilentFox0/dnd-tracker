@@ -10,6 +10,7 @@ import type {
     GridPoint,
     RevealedRun,
 } from '@/types/battle-grid';
+import type { EditorStamps } from '@/lib/hooks/battle-maps';
 import type { MapArtScene } from '@/types/battle-map';
 
 export interface BattleMapProps {
@@ -36,6 +37,7 @@ export interface ArtPreviewState {
         select(id: string | null): void;
         move(id: string, at: { x: number; y: number }): void;
     };
+    stamps?: { mode: 'stamp' | 'stamp-select'; api: EditorStamps };
 }
 
 export interface BattleMapEditing {

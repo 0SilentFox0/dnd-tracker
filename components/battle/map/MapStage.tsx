@@ -4,6 +4,7 @@ import { memo, useMemo } from 'react';
 
 import { ArtCanvas } from './art/ArtCanvas';
 import { ArtLightsLayer } from './art/ArtLightsLayer';
+import { ArtStampsLayer } from './art/ArtStampsLayer';
 import { DoorMenu } from './edges/DoorMenu';
 import { EdgeEditor } from './edges/EdgeEditor';
 import { FogWindowContext } from './fog/fog-window-context';
@@ -198,6 +199,13 @@ function MapStageImpl({
                     <ArtLightsLayer
                         lights={art.scene.lights}
                         editing={art.lights}
+                    />
+                )}
+                {art?.stamps && (
+                    <ArtStampsLayer
+                        stamps={art.scene.stamps}
+                        map={map}
+                        editing={art.stamps}
                     />
                 )}
                 {ui?.MapLayers && (

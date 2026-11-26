@@ -17,6 +17,7 @@ import {
     useMapArtSave,
     useMapEditorDraft,
     useMapEditorWorkspace,
+    isStampTool,
     useTileSave,
     useUvttImport,
 } from '@/lib/hooks/battle-maps';
@@ -150,7 +151,8 @@ function EditorContent({
 
     const artTool = panel === 'art' ? artEditor.tool : null;
 
-    const artCellTool = artTool !== null && !isArtEdgeTool(artTool);
+    const artCellTool =
+        artTool !== null && !isArtEdgeTool(artTool) && !isStampTool(artTool);
 
     const cellPainting =
         paintingTiles ||
@@ -216,7 +218,7 @@ function EditorContent({
 
     const { edgeEditing } = editor;
 
-    const { lights, revision: artRevision } = artEditor;
+    const { lights, stamps: stampsApi, revision: artRevision } = artEditor;
 
     const artPreview = useMemo(
         () =>
@@ -226,9 +228,12 @@ function EditorContent({
                       scene: artScene,
                       revision: artRevision,
                       ...(artTool === 'light' && { lights }),
+                      ...((artTool === 'stamp' || artTool === 'stamp-select') && {
+                          stamps: { mode: artTool, api: stampsApi },
+                      }),
                   }
                 : null,
-        [artScene, artRevision, artTool, lights, source.id]
+        [artScene, artRevision, artTool, lights, stampsApi, source.id]
     );
 
     const artEdges = panel === 'art' ? artEditor.edgeEditing : null;

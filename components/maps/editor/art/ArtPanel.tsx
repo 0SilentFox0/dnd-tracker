@@ -7,6 +7,8 @@ import { ArtToolBar } from './ArtToolBar';
 import { FloorMaterialPicker } from './FloorMaterialPicker';
 import { LightControls } from './LightControls';
 import { OpeningOptions } from './OpeningOptions';
+import { StampControls } from './StampControls';
+import { StampPalette } from './StampPalette';
 import { WallMaterialPicker } from './WallMaterialPicker';
 
 import { HudToggleChip } from '@/components/hud';
@@ -101,6 +103,8 @@ export function ArtPanel({
 
     const detach = useDeleteMapArt(ids.campaignId, ids.mapId);
 
+    const ts = useTranslations('maps.editor.stamps');
+
     const { tool, materials } = art;
 
     if (!art.active)
@@ -167,6 +171,23 @@ export function ArtPanel({
                 <section className={SECTION}>
                     <h3 className={HEADING}>{t('lights')}</h3>
                     <LightControls art={art} />
+                </section>
+            )}
+            {(tool === 'stamp' || tool === 'stamp-select') && (
+                <section className={SECTION}>
+                    <h3 className={HEADING}>{ts('tool')}</h3>
+                    {tool === 'stamp' && (
+                        <StampPalette
+                            selected={art.stamps.asset}
+                            onSelect={art.stamps.setAsset}
+                        />
+                    )}
+                    <StampControls
+                        api={art.stamps}
+                        selected={art.scene?.stamps.find(
+                            (s) => s.id === art.stamps.selectedId
+                        )}
+                    />
                 </section>
             )}
             <section className={SECTION}>

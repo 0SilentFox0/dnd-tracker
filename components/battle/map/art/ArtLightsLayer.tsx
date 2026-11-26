@@ -1,8 +1,9 @@
 'use client';
 
-import { memo, type PointerEvent } from 'react';
+import { memo } from 'react';
 
 import type { ArtPreviewState } from '../battle-map-types';
+import { svgPoint } from './svg-point';
 
 import { unitOf } from '@/lib/utils/battle/grid';
 import type { MapArtLight } from '@/types/battle-map';
@@ -13,23 +14,6 @@ interface Props {
 }
 
 const HANDLE_R = unitOf(0.25);
-
-function svgPoint(e: PointerEvent<SVGElement>) {
-    const svg = e.currentTarget.ownerSVGElement;
-
-    const m = svg?.getScreenCTM();
-
-    if (!svg || !m) return null;
-
-    const p = svg.createSVGPoint();
-
-    p.x = e.clientX;
-    p.y = e.clientY;
-
-    const at = p.matrixTransform(m.inverse());
-
-    return { x: at.x, y: at.y };
-}
 
 export const ArtLightsLayer = memo(function ArtLightsLayer({ lights, editing }: Props) {
     const { selectedId, select, move } = editing;
