@@ -2,9 +2,10 @@ import Link from 'next/link';
 
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { PrimaryCta } from '@/components/landing/PrimaryCta';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
-export function Hero({ t }: { t: Translator }) {
+export function Hero({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section className="relative isolate overflow-hidden px-4 pt-28 pb-20 sm:pt-36">
             <div className="ld-container ld-panel max-w-3xl space-y-6 rounded-2xl p-6 text-center sm:p-10">
@@ -39,6 +40,7 @@ export function Hero({ t }: { t: Translator }) {
                     className="shadow-[0_40px_100px_-30px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.18),0_0_80px_-20px_rgba(230,140,60,.25)]"
                 >
                     <Screen
+                        locale={locale}
                         id="combat"
                         alt={t('hero.alt')}
                         priority

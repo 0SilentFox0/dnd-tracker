@@ -2,9 +2,10 @@ import { PREP_PANELS } from '@/components/landing/media';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { listOf } from '@/components/landing/messages';
 import { CheckList, SectionTitle } from '@/components/landing/parts';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
-export function Prep({ t }: { t: Translator }) {
+export function Prep({ t, locale }: { t: Translator; locale: Locale }) {
     const p = (id: string, key: string) => t(`prep.panels.${id}.${key}`);
 
     return (
@@ -22,6 +23,7 @@ export function Prep({ t }: { t: Translator }) {
                     >
                         <MediaFrame title={p(id, 'screen')}>
                             <Screen
+                                locale={locale}
                                 id={id}
                                 alt={p(id, 'alt')}
                                 sizes="(min-width: 1024px) 380px, 100vw"

@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
     FX_SPRITES,
     PREP_PANELS,
-    SHOWCASE_MEDIA,
+    type ShowcaseId,
+    showcaseMedia,
 } from '@/components/landing/media';
 import { BRAND } from '@/lib/constants/site';
 import { LOCALES } from '@/lib/i18n/config';
@@ -67,8 +68,8 @@ describe('landing messages', () => {
             for (const id of [
                 ...PREP_PANELS,
                 ...Object.keys(m.players.panels),
-            ] as (keyof typeof SHOWCASE_MEDIA)[])
-                expect(SHOWCASE_MEDIA[id]?.image, id).toBeTruthy();
+            ] as ShowcaseId[])
+                expect(showcaseMedia(locale)[id]?.image, id).toBeTruthy();
 
             expect(Object.keys(m.prep.panels)).toEqual([...PREP_PANELS]);
             expect(Object.keys(m.combat.fx.names)).toHaveLength(

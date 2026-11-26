@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Re-shoots public/landing/screen-*.webp from the local English demo campaign.
-// Usage: pnpm landing:screens [--login] [--only=battle,hero] [--base=http://localhost:3000]
+// Re-shoots public/landing/<locale>/screen-*.webp from a local database profile (scripts/landing/shots.json).
+// Usage: pnpm landing:screens --profile=en-srd [--only=battle,hero] [--base=http://localhost:3140] [--port=3140]
+//        pnpm landing:screens --login
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -10,27 +11,44 @@ import { chromium } from 'playwright';
 import sharp from 'sharp';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const OUT = path.join(ROOT, 'public/landing');
 const STATE = path.join(ROOT, '.landing-auth/state.json');
-const LOCAL_DB =
-    process.env.LANDING_DATABASE_URL ??
-    'postgresql://postgres:postgres@localhost:54322/landingshots';
 const arg = (name) =>
     process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
-const BASE = arg('base') ?? 'http://localhost:3000';
+const LOGIN = process.argv.includes('--login');
+const PORT = arg('port') ?? '3140';
+const BASE = arg('base') ?? `http://localhost:${PORT}`;
 const ONLY = arg('only')?.split(',');
-const CAMPAIGN = 'example-demo-5e';
-const c = (p) => `${BASE}/campaigns/${CAMPAIGN}${p}`;
+const LOGIN_DB = 'landingshots';
 
-const DESKTOP = { width: 1440, height: 900 };
-const MOBILE = { width: 390, height: 844 };
+const DESKTOP = { viewport: { width: 1920, height: 1200 }, dpr: 2, width: 3840 };
+const MOBILE = { viewport: { width: 390, height: 844 }, dpr: 3, width: 1170 };
+const KB_LIMIT = 450;
+const QUALITIES = [82, 76, 70];
+const OFFLINE_TEXTS = ['No connection', "Немає зв'язку"];
 
-const SHOTS = JSON.parse(
+const { profiles } = JSON.parse(
     await readFile(path.join(import.meta.dirname, 'shots.json'), 'utf8')
 );
+const profileName = arg('profile');
+const profile = LOGIN ? null : profiles[profileName];
+
+if (!LOGIN && !profile)
+    throw new Error(
+        `--profile=<name> is required, one of: ${Object.keys(profiles).join(', ')}`
+    );
 
 if (new URL(BASE).hostname !== 'localhost')
     throw new Error('Screens are captured on localhost only.');
+
+const uiLocale = profile ? (profile.uiLocale ?? profile.locale) : 'en';
+const OUT = profile ? path.join(ROOT, 'public/landing', profile.locale) : null;
+const dbUrl = (db) => `postgresql://postgres:postgres@localhost:54322/${db}`;
+const tx = (v) => (v && typeof v === 'object' ? v[uiLocale] : v);
+const fill = (str) =>
+    str.replace(/\{(\w+)\}/g, (_, k) => profile[k] ?? 'TODO');
+const c = (p) => `${BASE}/campaigns/${profile.campaignId}${p}`;
+const url = (shot) =>
+    shot.absolute ? `${BASE}${fill(shot.path)}` : c(fill(shot.path));
 
 async function alive() {
     try {
@@ -41,17 +59,21 @@ async function alive() {
 }
 
 async function startServer() {
-    if (await alive()) return null;
+    if (await alive())
+        throw new Error(
+            `${BASE} is already serving: stop it, the server must run on the profile database`
+        );
+    const db = dbUrl(profile?.db ?? LOGIN_DB);
     const server = spawn(
         'pnpm',
-        ['exec', 'next', 'start', '-p', new URL(BASE).port || '3000'],
+        ['exec', 'next', 'start', '-p', new URL(BASE).port],
         {
             cwd: ROOT,
             stdio: 'ignore',
             env: {
                 ...process.env,
-                DATABASE_URL: LOCAL_DB,
-                DIRECT_URL: LOCAL_DB,
+                DATABASE_URL: db,
+                DIRECT_URL: db,
                 RATE_LIMIT_ALLOW_MEMORY: '1',
             },
         }
@@ -89,7 +111,7 @@ async function login() {
 
 async function prepareBattle(browser) {
     const ctx = await browser.newContext({ storageState: STATE });
-    const api = `${BASE}/api/campaigns/${CAMPAIGN}/battles/demo-battle-grove`;
+    const api = `${BASE}/api/campaigns/${profile.campaignId}/battles/${profile.battleId}`;
     const headers = { Origin: BASE };
     const get = async () => (await ctx.request.get(api)).json();
     const post = (op, data) =>
@@ -102,10 +124,10 @@ async function prepareBattle(browser) {
     }
     if (scene.status !== 'active') {
         const page = await ctx.newPage();
-        await page.goto(c('/battles/demo-battle-grove'), {
+        await page.goto(c(`/battles/${profile.battleId}`), {
             waitUntil: 'networkidle',
         });
-        await page.getByRole('button', { name: /to battle/i }).click();
+        await page.getByRole('button', { name: tx({ en: 'TO BATTLE!', uk: 'ДО БОЮ!' }) }).click();
         await page.waitForTimeout(3000);
         await page.close();
         await post('initiative-roll', {});
@@ -131,27 +153,32 @@ async function prepareBattle(browser) {
     await ctx.close();
 }
 
+const resolved = (v) => !JSON.stringify(v).includes('TODO');
+
 async function shoot(browser, shot) {
-    const viewport = shot.mobile ? MOBILE : DESKTOP;
+    const kind = shot.mobile ? MOBILE : DESKTOP;
     const ctx = await browser.newContext({
         storageState: STATE,
-        viewport,
-        deviceScaleFactor: 2,
-        locale: 'en-US',
-        extraHTTPHeaders: { 'Accept-Language': 'en' },
+        viewport: kind.viewport,
+        deviceScaleFactor: kind.dpr,
+        locale: uiLocale === 'uk' ? 'uk-UA' : 'en-US',
+        extraHTTPHeaders: { 'Accept-Language': uiLocale },
     });
-    await ctx.addCookies([{ name: 'NEXT_LOCALE', value: 'en', url: BASE }]);
+    await ctx.addCookies([{ name: 'NEXT_LOCALE', value: uiLocale, url: BASE }]);
     const page = await ctx.newPage();
-    await page.goto(c(shot.path), { waitUntil: 'networkidle' });
+    await page.goto(url(shot), { waitUntil: 'networkidle' });
     if (shot.waitFor) await page.waitForSelector(shot.waitFor);
     for (const step of shot.steps ?? []) {
-        if (step.click) await page.click(step.click);
+        if (step.click) await page.click(fill(tx(step.click)));
         if (step.link)
-            await page.getByRole('link', { name: step.link }).first().click();
+            await page
+                .getByRole('link', { name: fill(tx(step.link)) })
+                .first()
+                .click();
         if (step.role)
             for (let i = 0; i < (step.times ?? 1); i++)
                 await page
-                    .getByRole('button', { name: step.role })
+                    .getByRole('button', { name: tx(step.role) })
                     .first()
                     .click();
         if (step.goto)
@@ -159,9 +186,14 @@ async function shoot(browser, shot) {
         if (step.wait) await page.waitForTimeout(step.wait);
     }
     for (const hint of await page
-        .getByRole('button', { name: 'Dismiss hint' })
+        .getByRole('button', {
+            name: uiLocale === 'uk' ? 'Закрити підказку' : 'Dismiss hint',
+        })
         .all())
         await hint.click();
+    await page.addStyleTag({
+        content: 'nextjs-portal, [data-nextjs-toast] { display: none !important; }',
+    });
     await page.waitForTimeout(400);
     await page.evaluate(
         (texts) => {
@@ -173,14 +205,20 @@ async function shoot(browser, shot) {
                 )
                     el.style.display = 'none';
         },
-        shot.hide ?? ['No connection']
+        shot.hide ?? OFFLINE_TEXTS
     );
     await page.waitForTimeout(shot.settle ?? 1500);
     const png = await page.screenshot({ type: 'png' });
-    const buf = await sharp(png)
-        .resize({ width: shot.mobile ? 780 : 2160 })
-        .webp({ quality: shot.quality ?? 82, effort: 6 })
-        .toBuffer();
+
+    let buf;
+    for (const quality of shot.quality ? [shot.quality] : QUALITIES) {
+        buf = await sharp(png)
+            .resize({ width: kind.width })
+            .webp({ quality, effort: 6 })
+            .toBuffer();
+        if (shot.mobile || buf.length / 1024 <= KB_LIMIT) break;
+        console.warn(`${shot.name}: ${(buf.length / 1024).toFixed(0)} KB > ${KB_LIMIT} KB at q${quality}, retrying lower`);
+    }
     await writeFile(path.join(OUT, `screen-${shot.name}.webp`), buf);
     console.log(`${shot.name}: ${(buf.length / 1024).toFixed(0)} KB`);
     await ctx.close();
@@ -197,9 +235,24 @@ try {
             throw new Error(
                 'No saved session: run pnpm landing:screens --login'
             );
-        await prepareBattle(browser);
-        for (const shot of SHOTS)
-            if (!ONLY || ONLY.includes(shot.name)) await shoot(browser, shot);
+        if (!resolved(profile.campaignId))
+            throw new Error(`Profile ${profileName} has no campaignId yet`);
+        await mkdir(OUT, { recursive: true });
+        if (profile.battleId && resolved(profile.battleId))
+            await prepareBattle(browser);
+        for (const shot of profile.shots) {
+            if (ONLY && !ONLY.includes(shot.name)) continue;
+            const pending = [
+                ...JSON.stringify([shot.path, shot.steps ?? '']).matchAll(/\{(\w+)\}/g),
+            ]
+                .map((m) => m[1])
+                .filter((k) => !profile[k] || !resolved(profile[k]));
+            if (pending.length) {
+                console.warn(`${shot.name}: skipped, profile has no ${[...new Set(pending)].join(', ')}`);
+                continue;
+            }
+            await shoot(browser, shot);
+        }
     }
 } finally {
     await browser?.close();

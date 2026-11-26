@@ -15,7 +15,7 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
 
     const html = {
         replace: renderToStaticMarkup(<Replace t={t} />),
-        features: renderToStaticMarkup(<Features t={t} />),
+        features: renderToStaticMarkup(<Features t={t} locale={locale} />),
         systems: renderToStaticMarkup(<Systems t={t} />),
     };
 

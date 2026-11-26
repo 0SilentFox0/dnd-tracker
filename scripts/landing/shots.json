@@ -1,9 +1,233 @@
-[
-  { "name": "battle", "path": "/battles/demo-battle-grove" },
-  { "name": "scenario", "path": "/dm/scenario/demo-bell-scene" },
-  { "name": "show", "path": "/dm/show/demo-deck-listening-grove", "steps": [{ "role": "Start show" }, { "wait": 2500 }, { "goto": "/show" }, { "wait": 2000 }] },
-  { "name": "world", "path": "/world" },
-  { "name": "hero", "path": "/dm/characters/demo-character-scout" },
-  { "name": "constructor", "path": "/dm/classes", "steps": [{ "link": "Ranger" }, { "wait": 1500 }] },
-  { "name": "player-mobile", "path": "/battles/demo-battle-grove", "mobile": true }
-]
+{
+  "profiles": {
+    "en-srd": {
+      "locale": "en",
+      "db": "landingshots",
+      "campaignId": "example-demo-5e",
+      "battleId": "demo-battle-grove",
+      "scenePageId": "demo-bell-scene",
+      "deckId": "demo-deck-listening-grove",
+      "heroId": "demo-character-scout",
+      "sheetId": "demo-character-scout",
+      "mapId": "TODO",
+      "classLink": "Ranger",
+      "shots": [
+        {
+          "name": "battle",
+          "path": "/battles/{battleId}"
+        },
+        {
+          "name": "scenario",
+          "path": "/dm/scenario/{scenePageId}"
+        },
+        {
+          "name": "show",
+          "path": "/dm/show/{deckId}",
+          "steps": [
+            {
+              "role": {
+                "en": "Start show",
+                "uk": "Почати показ"
+              }
+            },
+            {
+              "wait": 2500
+            },
+            {
+              "goto": "/show"
+            },
+            {
+              "wait": 2000
+            }
+          ]
+        },
+        {
+          "name": "world",
+          "path": "/world"
+        },
+        {
+          "name": "constructor",
+          "path": "/dm/classes",
+          "steps": [
+            {
+              "link": "{classLink}"
+            },
+            {
+              "wait": 1500
+            }
+          ]
+        },
+        {
+          "name": "player-mobile",
+          "path": "/battles/{battleId}",
+          "mobile": true
+        },
+        {
+          "name": "dashboard",
+          "path": ""
+        },
+        {
+          "name": "map-editor",
+          "path": "/dm/maps/{mapId}"
+        },
+        {
+          "name": "soundboard",
+          "path": "/library/sounds",
+          "absolute": true
+        },
+        {
+          "name": "sheet",
+          "path": "/dm/characters/{sheetId}"
+        },
+        {
+          "name": "scenario-graph",
+          "path": "/dm/graph"
+        },
+        {
+          "name": "content-copy",
+          "path": "/dm/maps",
+          "steps": [
+            {
+              "role": {
+                "en": "Copy to campaigns…",
+                "uk": "Копіювати в кампанії…"
+              }
+            },
+            {
+              "wait": 1200
+            }
+          ]
+        },
+        {
+          "name": "mcp",
+          "path": "/dm/ai"
+        }
+      ]
+    },
+    "en-homm": {
+      "locale": "en",
+      "db": "landing_homm_clone",
+      "campaignId": "TODO",
+      "heroId": "TODO",
+      "sheetId": "TODO",
+      "shots": [
+        {
+          "name": "hero",
+          "path": "/dm/characters/{heroId}"
+        },
+        {
+          "name": "sheet",
+          "path": "/dm/characters/{sheetId}"
+        }
+      ]
+    },
+    "uk-homm": {
+      "locale": "uk",
+      "db": "landing_homm",
+      "campaignId": "TODO",
+      "battleId": "TODO",
+      "scenePageId": "TODO",
+      "deckId": "TODO",
+      "heroId": "TODO",
+      "sheetId": "TODO",
+      "mapId": "TODO",
+      "classLink": "TODO",
+      "shots": [
+        {
+          "name": "battle",
+          "path": "/battles/{battleId}"
+        },
+        {
+          "name": "scenario",
+          "path": "/dm/scenario/{scenePageId}"
+        },
+        {
+          "name": "show",
+          "path": "/dm/show/{deckId}",
+          "steps": [
+            {
+              "role": {
+                "en": "Start show",
+                "uk": "Почати показ"
+              }
+            },
+            {
+              "wait": 2500
+            },
+            {
+              "goto": "/show"
+            },
+            {
+              "wait": 2000
+            }
+          ]
+        },
+        {
+          "name": "world",
+          "path": "/world"
+        },
+        {
+          "name": "hero",
+          "path": "/dm/characters/{heroId}"
+        },
+        {
+          "name": "constructor",
+          "path": "/dm/classes",
+          "steps": [
+            {
+              "link": "{classLink}"
+            },
+            {
+              "wait": 1500
+            }
+          ]
+        },
+        {
+          "name": "player-mobile",
+          "path": "/battles/{battleId}",
+          "mobile": true
+        },
+        {
+          "name": "dashboard",
+          "path": ""
+        },
+        {
+          "name": "map-editor",
+          "path": "/dm/maps/{mapId}"
+        },
+        {
+          "name": "soundboard",
+          "path": "/library/sounds",
+          "absolute": true
+        },
+        {
+          "name": "sheet",
+          "path": "/dm/characters/{sheetId}"
+        },
+        {
+          "name": "scenario-graph",
+          "path": "/dm/graph"
+        },
+        {
+          "name": "content-copy",
+          "path": "/dm/maps",
+          "steps": [
+            {
+              "role": {
+                "en": "Copy to campaigns…",
+                "uk": "Копіювати в кампанії…"
+              }
+            },
+            {
+              "wait": 1200
+            }
+          ]
+        },
+        {
+          "name": "mcp",
+          "path": "/dm/ai"
+        }
+      ]
+    }
+  }
+}

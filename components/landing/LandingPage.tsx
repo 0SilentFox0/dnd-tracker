@@ -31,16 +31,16 @@ export async function LandingPage({ locale }: { locale: Locale }) {
                 }}
             />
             <main>
-                <Hero t={t} />
+                <Hero t={t} locale={locale} />
                 <Problem t={t} />
                 <Replace t={t} />
                 <Combat t={t} />
-                <Features t={t} />
-                <Mechanics t={t} />
+                <Features t={t} locale={locale} />
+                <Mechanics t={t} locale={locale} />
                 <Systems t={t} />
-                <Prep t={t} />
+                <Prep t={t} locale={locale} />
                 <AiSection t={t} />
-                <Players t={t} />
+                <Players t={t} locale={locale} />
                 <HowItWorks t={t} />
                 <Faq t={t} />
                 <FinalCta t={t} />
