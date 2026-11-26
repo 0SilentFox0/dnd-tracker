@@ -9,3 +9,5 @@ export const ARTIFACT_FORM_TAB = {
 
 export type ArtifactFormTabId =
     (typeof ARTIFACT_FORM_TAB)[keyof typeof ARTIFACT_FORM_TAB];
+
+export const ARTIFACT_FORM_ID = 'artifact-form';

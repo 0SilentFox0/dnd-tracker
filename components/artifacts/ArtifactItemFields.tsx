@@ -102,7 +102,7 @@ export function ArtifactItemFields({
                             set({ attunement: v || undefined })
                         }
                     />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="ds-fields">
                         <div className="space-y-1">
                             <Label
                                 htmlFor="item-charges"
