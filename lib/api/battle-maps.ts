@@ -10,10 +10,13 @@ import type {
     BattleMapSaveInput,
     BattleMapTilePatchInput,
 } from '@/lib/schemas/battle-maps';
+import type { MapArtSaveInput } from '@/lib/schemas/map-art';
 import type {
     BattleMapBrief,
     BattleMapFull,
     BattleMapTileChunks,
+    MapArtRecord,
+    MapArtSaveResult,
 } from '@/types/battle-map';
 
 export const getBattleMaps = (campaignId: string) =>
@@ -64,3 +67,17 @@ export const cloneBattleMap = (
     mapId: string,
     name?: string
 ) => campaignPost<BattleMapBrief>(campaignId, `/maps/${mapId}/clone`, { name });
+
+export const getMapArt = (campaignId: string, mapId: string) =>
+    campaignGet<MapArtRecord>(campaignId, `/maps/${mapId}/art`, {
+        cache: 'no-store',
+    });
+
+export const saveMapArt = (
+    campaignId: string,
+    mapId: string,
+    data: MapArtSaveInput
+) => campaignPut<MapArtSaveResult>(campaignId, `/maps/${mapId}/art`, data);
+
+export const deleteMapArt = (campaignId: string, mapId: string) =>
+    campaignDelete<{ success: true }>(campaignId, `/maps/${mapId}/art`);

@@ -16,7 +16,7 @@ import { useNotify } from '@/lib/hooks/common';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { normalizeUvttBackground } from '@/lib/utils/battle/uvtt/normalize-background';
 import { errorMessage } from '@/lib/utils/common/error-message';
-import type { BattleMapFull } from '@/types/battle-map';
+import type { BattleMapFull, MapArtSaveResult } from '@/types/battle-map';
 
 export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
     const t = useTranslations('maps.editor');
@@ -132,6 +132,15 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         }
     };
 
+    const acceptArtSave = ({ brief, patch }: MapArtSaveResult) => {
+        editor.actions.applyArt(patch);
+        setVersion(brief.version);
+        setSaved(
+            JSON.stringify([name.trim(), { ...editor.state.map, ...patch }])
+        );
+        setJustSaved(true);
+    };
+
     return {
         editor,
         name: {
@@ -146,6 +155,7 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         isSaving: update.isPending || isUploading,
         version,
         acceptVersion: setVersion,
+        acceptArtSave,
         canSave:
             isDirty && name.trim() !== '' && !update.isPending && !isUploading,
         save,

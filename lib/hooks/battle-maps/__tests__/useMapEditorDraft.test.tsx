@@ -253,4 +253,19 @@ describe('useMapEditorDraft', () => {
             'https://x/other.png'
         );
     });
+
+    it('acceptArtSave applies the patch, follows the version and stays clean', () => {
+        const { result } = setup();
+
+        act(() =>
+            result.current.acceptArtSave({
+                brief: { version: 9 },
+                patch: { walls: ['1,1|2,1'], artBaked: true },
+            } as never)
+        );
+
+        expect(result.current.editor.state.map.walls).toEqual(['1,1|2,1']);
+        expect(result.current.version).toBe(9);
+        expect(result.current.isDirty).toBe(false);
+    });
 });

@@ -138,4 +138,33 @@ describe('useMapArtEditor', () => {
         act(() => result.current.onCellStroke([{ x: 3, y: 3 }]));
         expect(countFloor(sceneOf(result.current).floors)).toBe(7);
     });
+
+    it('coalesces consecutive moves of one light into a single undo step', () => {
+        const { result } = setup();
+
+        act(() => result.current.start());
+        act(() => result.current.setTool('light'));
+        act(() => result.current.onCellStroke([{ x: 1, y: 1 }]));
+
+        const id = sceneOf(result.current).lights[0].id;
+
+        act(() => result.current.lights.move(id, { x: 10, y: 10 }));
+        act(() => result.current.lights.move(id, { x: 20, y: 20 }));
+        act(() => result.current.lights.move(id, { x: 30, y: 30 }));
+
+        expect(sceneOf(result.current).lights[0]).toMatchObject({ x: 30, y: 30 });
+
+        act(() => result.current.undo());
+
+        const back = sceneOf(result.current).lights[0];
+
+        expect(back.x).not.toBe(30);
+        expect(back.x).not.toBe(10);
+
+        act(() => result.current.lights.move(id, { x: 5, y: 5 }));
+        act(() => result.current.lights.update(id, { intensity: 0.5 }));
+        act(() => result.current.lights.move(id, { x: 6, y: 6 }));
+        act(() => result.current.undo());
+        expect(sceneOf(result.current).lights[0]).toMatchObject({ x: 5, intensity: 0.5 });
+    });
 });

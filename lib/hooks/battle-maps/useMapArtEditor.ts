@@ -66,6 +66,7 @@ interface History {
     future: MapArtScene[];
     saved: MapArtScene | null;
     revision: number;
+    coalesceKey: string | null;
 }
 
 const HISTORY_LIMIT = 50;
@@ -103,6 +104,7 @@ export function useMapArtEditor({
         future: [],
         saved: initial,
         revision: 0,
+        coalesceKey: null,
     }));
 
     const [tool, setTool] = useState<ArtTool | null>(null);
@@ -147,23 +149,28 @@ export function useMapArtEditor({
         return chunks;
     }, []);
 
-    const commit = useCallback((next: MapArtScene, chunks?: FloorChunks) => {
-        if (chunks) chunkCache.current.set(next, chunks);
+    const commit = useCallback(
+        (next: MapArtScene, coalesceKey: string | null = null) => {
+            setHistory((h) => {
+                if (h.present === next) return h;
 
-        setHistory((h) =>
-            h.present === next
-                ? h
-                : {
-                      ...h,
-                      past: h.present
-                          ? [...h.past, h.present].slice(-HISTORY_LIMIT)
-                          : h.past,
-                      present: next,
-                      future: [],
-                      revision: h.revision + 1,
-                  }
-        );
-    }, []);
+                const merge = coalesceKey !== null && h.coalesceKey === coalesceKey;
+
+                return {
+                    ...h,
+                    past:
+                        h.present && !merge
+                            ? [...h.past, h.present].slice(-HISTORY_LIMIT)
+                            : h.past,
+                    present: next,
+                    future: [],
+                    revision: h.revision + 1,
+                    coalesceKey,
+                };
+            });
+        },
+        []
+    );
 
     const { cols, rows, gridType } = map;
 
@@ -181,6 +188,7 @@ export function useMapArtEditor({
             future: [],
             saved: next,
             revision: h.revision + 1,
+            coalesceKey: null,
         }));
     }, []);
 
@@ -191,11 +199,12 @@ export function useMapArtEditor({
             future: [],
             saved: record.scene,
             revision: h.revision + 1,
+            coalesceKey: null,
         }));
     }, []);
 
     const markSaved = useCallback((saved: MapArtScene) => {
-        setHistory((h) => ({ ...h, present: saved, saved }));
+        setHistory((h) => ({ ...h, present: saved, saved, coalesceKey: null }));
     }, []);
 
     const undo = useCallback(() => {
@@ -210,6 +219,7 @@ export function useMapArtEditor({
                 present: prev,
                 future: [h.present, ...h.future].slice(0, HISTORY_LIMIT),
                 revision: h.revision + 1,
+                coalesceKey: null,
             };
         });
     }, []);
@@ -226,6 +236,7 @@ export function useMapArtEditor({
                 present: next,
                 future: rest,
                 revision: h.revision + 1,
+                coalesceKey: null,
             };
         });
     }, []);
@@ -411,10 +422,10 @@ export function useMapArtEditor({
     }, [raw, tool, materials, commit]);
 
     const updateLights = useCallback(
-        (fn: (lights: MapArtLight[]) => MapArtLight[]) => {
+        (fn: (lights: MapArtLight[]) => MapArtLight[], coalesceKey?: string) => {
             const base = rawRef.current;
 
-            if (base) commit({ ...base, lights: fn(base.lights) });
+            if (base) commit({ ...base, lights: fn(base.lights) }, coalesceKey);
         },
         [commit]
     );
@@ -423,8 +434,12 @@ export function useMapArtEditor({
             selectedId: selectedLight,
             select: setSelectedLight,
             move: (id: string, at: Point) =>
-                updateLights((all) =>
-                    all.map((l) => (l.id === id ? { ...l, x: at.x, y: at.y } : l))
+                updateLights(
+                    (all) =>
+                        all.map((l) =>
+                            l.id === id ? { ...l, x: at.x, y: at.y } : l
+                        ),
+                    `move:${id}`
                 ),
             update: (id: string, patch: Partial<Omit<MapArtLight, 'id'>>) =>
                 updateLights((all) =>

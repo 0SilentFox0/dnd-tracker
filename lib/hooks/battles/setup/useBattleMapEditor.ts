@@ -39,6 +39,7 @@ import type {
     GridPoint,
     MapMotion,
 } from '@/types/battle-grid';
+import type { ArtMapPatch } from '@/types/battle-map';
 import type { LogLine } from '@/types/text';
 
 const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
@@ -174,6 +175,11 @@ export function useBattleMapEditor(
             setMarginsState(NO_MARGINS);
             setNotice(null);
         },
+        []
+    );
+
+    const applyArt = useCallback(
+        (patch: ArtMapPatch) => setMap((m) => ({ ...m, ...patch })),
         []
     );
 
@@ -317,6 +323,7 @@ export function useBattleMapEditor(
             setBackground,
             replaceBackground,
             replaceMapFromImport,
+            applyArt,
             setBrush,
             setMode,
             setGridType,

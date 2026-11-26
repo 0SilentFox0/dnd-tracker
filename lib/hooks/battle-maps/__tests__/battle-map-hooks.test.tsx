@@ -4,12 +4,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { battleMapKeys, useBattleMap, useBattleMapMutations } from '..';
+import {
+    battleMapKeys,
+    useBattleMap,
+    useBattleMapMutations,
+    useDeleteMapArt,
+    useMapArt,
+} from '..';
 
 import {
     cloneBattleMap,
     deleteBattleMap,
+    deleteMapArt,
     getBattleMap,
+    getMapArt,
     updateBattleMap,
 } from '@/lib/api/battle-maps';
 import { getCampaign } from '@/lib/api/campaigns';
@@ -22,6 +30,8 @@ vi.mock('@/lib/api/battle-maps', () => ({
     updateBattleMap: vi.fn(),
     deleteBattleMap: vi.fn(),
     cloneBattleMap: vi.fn(),
+    getMapArt: vi.fn(),
+    deleteMapArt: vi.fn(),
 }));
 vi.mock('@/lib/api/campaigns', () => ({ getCampaign: vi.fn() }));
 
@@ -129,5 +139,37 @@ describe('battle-map hooks', () => {
         });
 
         await waitFor(() => expect(result.current).toBe(true));
+    });
+
+    it('useMapArt loads the art record under the art key', async () => {
+        const { wrapper, client } = setup();
+
+        const rec = { scene: null, sceneVersion: 1 };
+
+        vi.mocked(getMapArt).mockResolvedValue(rec as never);
+
+        const { result } = renderHook(() => useMapArt('c1', 'm1'), { wrapper });
+
+        await waitFor(() => expect(result.current.data).toEqual(rec));
+        expect(client.getQueryData(battleMapKeys.art('c1', 'm1'))).toEqual(rec);
+    });
+
+    it('useDeleteMapArt deletes the art and refreshes the art query', async () => {
+        const { wrapper, client } = setup();
+
+        vi.mocked(deleteMapArt).mockResolvedValue({ success: true });
+
+        const spy = vi.spyOn(client, 'invalidateQueries');
+
+        const { result } = renderHook(() => useDeleteMapArt('c1', 'm1'), {
+            wrapper,
+        });
+
+        await act(() => result.current.mutateAsync());
+
+        expect(deleteMapArt).toHaveBeenCalledWith('c1', 'm1');
+        expect(spy).toHaveBeenCalledWith({
+            queryKey: battleMapKeys.art('c1', 'm1'),
+        });
     });
 });
