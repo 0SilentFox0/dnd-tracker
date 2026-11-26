@@ -31,6 +31,13 @@ export function tilesToScene(
     tileLayers: ChunkTileLayers,
     map: ConvertMap
 ): MapArtScene {
+    return convertTiles(tileLayers, map).scene;
+}
+
+export function convertTiles(
+    tileLayers: ChunkTileLayers,
+    map: ConvertMap
+): { scene: MapArtScene; wallsClipped: number } {
     const scene = sceneFromMap(map);
 
     const chunks: Record<string, Uint16Array> = {};
@@ -56,7 +63,13 @@ export function tilesToScene(
             .map(([k, cells]) => [k, encodeTileChunk(cells)])
     );
 
-    return clipScene({ ...scene, floors }, map);
+    const clipped = clipScene({ ...scene, floors }, map);
+
+    return {
+        scene: clipped,
+        wallsClipped:
+            Object.keys(scene.walls).length - Object.keys(clipped.walls).length,
+    };
 }
 
 /** Layers that stay on the current chunk row; null when nothing remains. */

@@ -2,7 +2,7 @@
 /**
  * One-off: converts ground/wallfill tile layers of current maps into a battle_map_art scene
  * (sceneVersion 1, not baked) and strips ground/wallfill/edge-art/effects from the CURRENT
- * battle_map_chunks.tile_layers (objects stay; versioned snapshots are never touched).
+ * chunk rows and a new snapshot (mapVersion +1; objects stay; older snapshots untouched).
  * Maps that already have an art row are skipped. Dry run by default; --apply runs one
  * transaction per map. Back up first (scripts/db/backup-database.sh); remote DB needs --allow-remote.
  *
@@ -10,22 +10,9 @@
  */
 import { Prisma } from '@prisma/client';
 
-import { mapArtSceneSchema } from '@/lib/schemas/map-art';
-import { storedRecord } from '@/lib/schemas/stored-json';
-import { assembleGeometry } from '@/lib/server/battle-maps/assemble';
-import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
-import type { EdgeChunks } from '@/lib/utils/battle/map-storage/edge-chunks';
-import { isRecord } from '@/lib/utils/common/is-record';
-import { toInputJsonObject } from '@/lib/utils/common/json';
-import {
-    type ChunkTileLayers,
-    countFloorCells,
-    hasFloorLayers,
-    stripArtLayers,
-    tilesToScene,
-} from '@/scripts/maps/lib/tiles-to-scene';
+import { applyConversionTx, buildConversion } from '@/scripts/maps/lib/convert-map';
+import { countFloorCells } from '@/scripts/maps/lib/tiles-to-scene';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
-import type { BattleMapFull } from '@/types/battle-map';
 
 const TX_OPTIONS = { timeout: 30_000, maxWait: 10_000 };
 
@@ -70,42 +57,17 @@ async function main() {
         let skipped = 0;
 
         for (const map of maps) {
-            const tileLayers: ChunkTileLayers = {};
-
-            for (const c of map.chunks)
-                if (isRecord(c.tileLayers))
-                    tileLayers[chunkKey(c.cx, c.cy)] = c.tileLayers;
-
-            if (!hasFloorLayers(tileLayers)) {
-                skipped++;
-
-                continue;
-            }
-
             try {
-                const header = storedRecord<BattleMapFull['map']>().parse(
-                    map.header
-                );
+                const conversion = buildConversion(map.header, map.chunks);
 
-                const edges: EdgeChunks = Object.fromEntries(
-                    map.chunks.map((c) => [chunkKey(c.cx, c.cy), c.data])
-                );
+                if (!conversion) {
+                    skipped++;
 
-                const geometry = assembleGeometry(header, edges);
-
-                const scene = tilesToScene(tileLayers, {
-                    ...geometry.map,
-                    walls: geometry.walls,
-                    bars: geometry.bars,
-                });
-
-                const parsed = mapArtSceneSchema.safeParse(scene);
-
-                if (!parsed.success)
-                    throw new Error('scene failed mapArtSceneSchema');
+                    continue;
+                }
 
                 console.log(
-                    `${map.id} "${map.name}" · floor cells ${countFloorCells(scene)} · walls ${Object.keys(scene.walls).length}`
+                    `${map.id} "${map.name}" · floor cells ${countFloorCells(conversion.scene)} · walls ${Object.keys(conversion.scene.walls).length} · walls clipped ${conversion.wallsClipped}`
                 );
 
                 if (!apply) {
@@ -114,47 +76,10 @@ async function main() {
                     continue;
                 }
 
-                const done = await prisma.$transaction(async (tx) => {
-                    if (
-                        await tx.battleMapArt.findUnique({
-                            where: { mapId: map.id },
-                        })
-                    )
-                        return false;
-
-                    await tx.battleMapArt.create({
-                        data: {
-                            mapId: map.id,
-                            scene: toInputJsonObject(scene),
-                            sceneVersion: 1,
-                        },
-                    });
-
-                    for (const c of map.chunks) {
-                        if (!isRecord(c.tileLayers)) continue;
-
-                        const rest = stripArtLayers(
-                            c.tileLayers as Record<string, string>
-                        );
-
-                        await tx.battleMapChunk.update({
-                            where: {
-                                mapId_cx_cy: {
-                                    mapId: map.id,
-                                    cx: c.cx,
-                                    cy: c.cy,
-                                },
-                            },
-                            data: {
-                                tileLayers: rest
-                                    ? toInputJsonObject(rest)
-                                    : Prisma.DbNull,
-                            },
-                        });
-                    }
-
-                    return true;
-                }, TX_OPTIONS);
+                const done = await prisma.$transaction(
+                    (tx) => applyConversionTx(tx, map.id),
+                    TX_OPTIONS
+                );
 
                 if (done) converted++;
                 else skipped++;
