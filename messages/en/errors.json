@@ -626,5 +626,7 @@
   "leadershipSkillMissing": "The hero has no Leadership skill",
   "fortuneConditionUnavailable": "A condition cannot be removed with Fortune",
   "battleMapHexSquareOnly": "Textures are not available on hex maps",
-  "battleMapGridLocked": "The grid type of a map cannot be changed after creation"
+  "battleMapGridLocked": "The grid type of a map cannot be changed after creation",
+  "accountDeleteBlocked": "Your templates are used by other people's campaigns, so the account cannot be deleted yet",
+  "accountEmailMismatch": "The email does not match your account"
 }

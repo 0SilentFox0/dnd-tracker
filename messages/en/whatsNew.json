@@ -1,4 +1,8 @@
 {
+  "2026-11-26-delete-account": {
+    "title": "Delete your account from the profile",
+    "body": "The new Danger zone at the bottom of your profile deletes your account, the campaigns you run and your personal files after you confirm with your email."
+  },
   "2026-11-26-codex": {
     "title": "Codex redesign",
     "body": "Library forms are now wide workbenches with a live preview. New /info reference, a compendium import wizard and a rules book. The hero page and the app header are refreshed."
