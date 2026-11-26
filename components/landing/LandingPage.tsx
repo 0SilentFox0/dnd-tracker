@@ -32,18 +32,20 @@ export async function LandingPage({ locale }: { locale: Locale }) {
             />
             <main>
                 <Hero t={t} />
-                <Problem t={t} />
-                <Replace t={t} />
-                <Combat t={t} />
-                <Features t={t} />
-                <Mechanics t={t} />
-                <Systems t={t} />
-                <Prep t={t} />
-                <AiSection t={t} />
-                <Players t={t} />
-                <HowItWorks t={t} />
-                <Faq t={t} />
-                <FinalCta t={t} />
+                <div className="ld-below">
+                    <Problem t={t} />
+                    <Replace t={t} />
+                    <Combat t={t} />
+                    <Features t={t} />
+                    <Mechanics t={t} />
+                    <Systems t={t} />
+                    <Prep t={t} />
+                    <AiSection t={t} />
+                    <Players t={t} />
+                    <HowItWorks t={t} />
+                    <Faq t={t} />
+                    <FinalCta t={t} />
+                </div>
             </main>
         </LandingShell>
     );

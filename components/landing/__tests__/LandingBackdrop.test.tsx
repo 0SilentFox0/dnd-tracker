@@ -14,6 +14,10 @@ describe('LandingBackdrop', () => {
         }
     });
 
+    it('renders three procedural cloud layers inside the fog', () => {
+        expect(html.match(/class="ld-cloud ld-cloud-[abc]"/g)).toHaveLength(3);
+    });
+
     it('preloads the 2k background', () => {
         expect(html).toContain('rel="preload"');
         expect(html).toContain('href="/bg/vey-strait-2k.webp"');
