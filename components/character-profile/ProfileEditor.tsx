@@ -8,6 +8,9 @@ import {
     type ClassLevelUpProps,
     LevelUpAction,
 } from './level-up/LevelUpAction';
+import { buildIdentityDraft } from './sheet/banner/build-identity-draft';
+import { IdentityDraftProvider } from './sheet/banner/IdentityDraft';
+import { PortraitDialog } from './sheet/banner/PortraitDialog';
 import { SheetIdentityPanel } from './sheet/SheetIdentityPanel';
 import { BiographyEditor } from './story/BiographyEditor';
 import { GoalList } from './story/GoalList';
@@ -38,6 +41,7 @@ import {
     useCharacterRoster,
     useDmCharacterEditor,
 } from '@/lib/hooks/characters';
+import { useClassMode } from '@/lib/hooks/classes';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
@@ -60,6 +64,10 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     });
 
     const [tab, setTab] = useState<ProfileTabId>('basic');
+
+    const [portraitOpen, setPortraitOpen] = useState(false);
+
+    const classMode = useClassMode(campaignId);
 
     const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
@@ -118,14 +126,21 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
               }
             : undefined;
 
+    const identityDraft = buildIdentityDraft(formData.basicInfo, {
+        races: editor.options.races,
+        classesById: classMode.byId,
+    });
+
     return (
         <form
             id="profile-edit"
             className="hud-form"
             onSubmit={form.actions.handleSubmit}
         >
+            <IdentityDraftProvider value={identityDraft}>
             <div className="sheet-root mx-auto w-full">
                 <SheetIdentityPanel
+                    onPortrait={() => setPortraitOpen(true)}
                     badge={
                         Ui.hideProgression ? undefined : (
                             <LevelUpAction
@@ -484,6 +499,13 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                     }
                 />
             </div>
+            </IdentityDraftProvider>
+            <PortraitDialog
+                open={portraitOpen}
+                onOpenChange={setPortraitOpen}
+                value={formData.basicInfo.avatar ?? null}
+                onChange={(url) => form.basicInfo.set('avatar', url ?? '')}
+            />
         </form>
     );
 }
