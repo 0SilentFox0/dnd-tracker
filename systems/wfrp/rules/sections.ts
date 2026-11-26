@@ -21,6 +21,7 @@ export const WFRP_SECTIONS: SectionsContribution = {
     sections: {
         advancement: {
             owner: 'wfrp',
+            group: 'characters',
             mechanic: true,
             items: itemsFromShape(
                 AdvancementRulesSchema.shape as never,
@@ -29,6 +30,7 @@ export const WFRP_SECTIONS: SectionsContribution = {
         },
         edition: {
             owner: 'wfrp',
+            group: 'world',
             mechanic: true,
             items: itemsFromShape(EditionRulesSchema.shape as never, {
                 preset: 'legacy',
@@ -36,6 +38,7 @@ export const WFRP_SECTIONS: SectionsContribution = {
         },
         tables: {
             owner: 'wfrp',
+            group: 'world',
             mechanic: true,
             playerHidden: true,
             items: itemsFromShape(TablesRulesSchema.shape as never, {}),
