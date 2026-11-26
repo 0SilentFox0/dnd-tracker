@@ -1,3 +1,5 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
@@ -5,64 +7,59 @@ import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
-export interface ReferenceRowProps<T> {
-    item: T;
+export interface ReferenceRowState {
     selected: boolean;
-    onSelect: (id: string) => void;
+    onSelect: () => void;
+    tabIndex?: 0 | -1;
+    register?: (el: HTMLElement | null) => void;
+}
+
+interface ReferenceRowShellProps {
+    icon: { src: string | null; fallback: ReactNode };
+    name: string;
+    meta: ReactNode;
+    tags?: ReactNode;
+    row: ReferenceRowState;
 }
 
 export function ReferenceRowShell({
-    entity,
-    fallback,
+    icon,
+    name,
     meta,
-    trailing,
-    selected,
-    onSelect,
-}: {
-    entity: { id: string; name: string; icon: string | null };
-    fallback: ReactNode;
-    meta?: ReactNode;
-    trailing?: ReactNode;
-    selected: boolean;
-    onSelect: (id: string) => void;
-}) {
+    tags,
+    row,
+}: ReferenceRowShellProps) {
+    const { selected, onSelect, tabIndex, register } = row;
+
     return (
         <HudButton
-            data-ref-row
+            ref={register}
+            tabIndex={tabIndex}
             aria-current={selected ? 'true' : undefined}
-            onClick={() => onSelect(entity.id)}
+            onClick={onSelect}
             className={cn(
-                'flex h-14 w-full touch-manipulation items-center gap-3 rounded-lg px-2 text-left [contain-intrinsic-size:auto_56px] [content-visibility:auto] hover:bg-hud-raised',
+                'flex h-14 w-full touch-manipulation items-center gap-3 px-3 text-left [contain-intrinsic-size:56px] [content-visibility:auto]',
                 selected &&
-                    'bg-hud-panel-2 shadow-[inset_3px_0_0_var(--hud-accent)]'
+                    'bg-hud-panel-2 shadow-[inset_2px_0_0_var(--hud-accent)]'
             )}
         >
             <EntityIcon
-                src={entity.icon}
-                name={entity.name}
+                src={icon.src}
+                name={name}
                 size={32}
-                className="size-8 shrink-0 rounded-lg bg-hud-field text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]"
-                fallback={fallback}
+                className="size-8 shrink-0 rounded-lg border border-hud-line bg-hud-field text-hud-muted"
+                fallback={icon.fallback}
             />
             <span className="min-w-0 flex-1">
                 <span className="hud-sc block truncate text-[15px] leading-tight text-hud-ink">
-                    {entity.name}
+                    {name}
                 </span>
-                {meta ? (
-                    <span className="block truncate text-xs text-hud-muted">
-                        {meta}
-                    </span>
-                ) : null}
+                <span className="block truncate text-xs text-hud-muted">
+                    {meta}
+                </span>
             </span>
-            {trailing ? (
-                <span className="shrink-0 text-xs text-hud-muted">
-                    {trailing}
-                </span>
-            ) : null}
-            <ChevronRight
-                className="size-4 shrink-0 text-hud-muted"
-                aria-hidden
-            />
+            {tags}
+            <ChevronRight className="size-4 shrink-0 text-hud-muted" />
         </HudButton>
     );
 }

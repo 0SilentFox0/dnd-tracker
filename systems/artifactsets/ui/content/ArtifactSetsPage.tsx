@@ -1,7 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-
 import { ArtifactSetForm, type ArtifactSetFormProps } from './ArtifactSetForm';
 import { ArtifactSetsList } from './ArtifactSetsList';
 
@@ -14,15 +12,8 @@ export interface ArtifactSetEditData {
 }
 
 export function ArtifactSetsPage({ campaignId, view, data }: DmPageProps) {
-    const t = useTranslations('artifacts.sets');
-
     if (view?.type === 'new')
-        return (
-            <ArtifactSetForm
-                campaignId={campaignId}
-                heading={{ title: t('new.title'), aside: t('new.aside') }}
-            />
-        );
+        return <ArtifactSetForm campaignId={campaignId} />;
 
     if (view?.type === 'edit') {
         const edit = data as ArtifactSetEditData;
@@ -30,9 +21,8 @@ export function ArtifactSetsPage({ campaignId, view, data }: DmPageProps) {
         return (
             <ArtifactSetForm
                 campaignId={campaignId}
-                heading={{ title: t('edit.title'), aside: edit.name }}
                 setId={edit.setId}
-                initial={edit.initial}
+                initial={{ ...edit.initial, name: edit.name }}
             />
         );
     }

@@ -158,16 +158,16 @@ export function CompendiumDependencies({
 
     return (
         <div className="space-y-3">
-            <p className="text-sm text-hud-ink">
+            <h3 className="hud-sc text-base text-hud-ink">
                 {hiddenCount > 0 && !showAll
                     ? t('dependencies.titleCountOf', {
                           shown: shown.length,
                           total: all.length,
                       })
                     : t('dependencies.titleCount', { shown: shown.length })}
-            </p>
-            <div className="space-y-3">
-                <div className="my-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            </h3>
+            <div>
+                <div className="my-3 grid grid-cols-1 gap-3 @2xl:grid-cols-2 @5xl:grid-cols-3">
                     {pager.pageItems.map((row) => (
                         <div
                             className="flex min-w-0 flex-col gap-2 rounded-lg bg-hud-panel p-3 break-words shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"

@@ -1,18 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { SKILL_FORM_TAB, type SkillFormTabId } from './skill-form-tabs';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
-import {
-    HudForm,
-    HudFormPage,
-    HudSection,
-    type HudTab,
-} from '@/components/hud/form';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
+import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { useSkillForm } from '@/systems/skilltrees/hooks';
 import { SkillBasicInfo } from '@/systems/skilltrees/ui/content/skills/form/basic';
@@ -46,22 +43,20 @@ export function SkillCreateForm({
         { initialData, initialMainSkills }
     );
 
-    const { isSaving, error, isEdit } = status;
+    const { isSaving, isDeleting, error, isEdit } = status;
 
     const tabs: HudTab<SkillFormTabId>[] = [
         {
             id: SKILL_FORM_TAB.basic,
             label: t('common.tabs.basic'),
             content: (
-                <HudSection panel>
-                    <div className="space-y-5">
-                        <SkillBasicInfo form={form} />
-                        <SkillMainSkillSection
-                            form={form}
-                            mainSkills={mainSkills}
-                        />
-                    </div>
-                </HudSection>
+                <div className="space-y-5">
+                    <SkillBasicInfo form={form} />
+                    <SkillMainSkillSection
+                        form={form}
+                        mainSkills={mainSkills}
+                    />
+                </div>
             ),
         },
         {
@@ -85,30 +80,40 @@ export function SkillCreateForm({
         },
     ];
 
+    const hasNotes = useHasSourceNotes(campaignId, 'skills', initialData?.id);
+
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={`/campaigns/${campaignId}/dm/skills`}
-                        className="text-hud-muted hover:text-hud-accent-fg"
-                    >
-                        {t('common.dmSections.skills')}
-                    </Link>
-                    <span aria-hidden className="text-hud-muted">
-                        {' › '}
-                    </span>
-                    {isEdit
-                        ? t('skills.form.editTitle')
-                        : t('skills.form.createTitle')}
-                </>
-            }
-            aside={
-                isEdit
+            header={{
+                title: isEdit
+                    ? t('skills.form.editTitle')
+                    : t('skills.form.createTitle'),
+                aside: isEdit
                     ? t('skills.form.editAside')
-                    : t('skills.form.createAside')
-            }
+                    : t('skills.form.createAside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/skills`,
+                    label: t('common.dmSections.skills'),
+                },
+                menu: isEdit && (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('common.actions.delete'),
+                                tone: 'danger',
+                                disabled: isSaving || isDeleting,
+                                confirm: {
+                                    title: t('skills.card.deleteTitle'),
+                                    confirmLabel: t('common.actions.delete'),
+                                    destructive: true,
+                                },
+                                onSelect: () => void actions.remove(),
+                            },
+                        ]}
+                    />
+                ),
+            }}
             actions={
                 <>
                     <Button
@@ -137,6 +142,15 @@ export function SkillCreateForm({
                               )}
                     </Button>
                 </>
+            }
+            side={
+                initialData && hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="skills"
+                        targetId={initialData.id}
+                    />
+                ) : undefined
             }
         >
             <HudForm

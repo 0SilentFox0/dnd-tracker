@@ -99,9 +99,10 @@
     "originFeat": "Origin feat: {names}",
     "manualGear": "Gear and money are manual",
     "title": "Summary",
-    "records": "Records: {count}",
-    "images": "Images: {count}",
-    "next": "Next"
+    "records": "Records",
+    "next": "Next",
+    "new": "New import",
+    "images": "Images: {count}"
   },
   "info": {
     "unsupportedCategories": "Skipped unsupported categories: {categories}",
@@ -163,7 +164,8 @@
   "file": {
     "intro": "One file → check → confirm. The campaign is not changed until you confirm. UTF-8 JSON up to 3 MiB; up to 2000 selected records per atomic import.",
     "csvHint": "CSV/TSV and plain table JSON are available through the “Import” button in the matching library.",
-    "drop": "Drop a JSON file here or choose one",
+    "label": "JSON compendium",
+    "drop": "Drop a JSON file or choose one",
     "replace": "Replace"
   },
   "categoriesStep": {
@@ -229,9 +231,6 @@
     "editionCount": "{edition}: {count}",
     "colCategory": "Category",
     "colPresent": "Present",
-    "colMapped": "Mapped",
-    "colPartial": "Partial",
-    "colSkipped": "Skipped",
     "rows": "Records and coverage",
     "openEditor": "Open the editor / description",
     "sourceNotes": "Source and notes",
@@ -240,11 +239,7 @@
     "rowsNext": "Next records",
     "next": "What next",
     "blocker": "Blocker",
-    "manualCheck": "Manual check",
     "goToAction": "Go to the action",
-    "actionsPager": "Action pages",
-    "actionsPrev": "Previous actions",
-    "actionsNext": "Next actions",
     "infoNote": "{summary}. No action is needed.",
     "omitted": "{count, plural, one {# more warning} other {# more warnings}}; count by code: {codes}",
     "codeCount": "{code} — {count}",
@@ -274,7 +269,8 @@
     "technical": "Technical categories ({count}): skipped, Foundry data is not loaded",
     "records": "Records",
     "noRows": "No records for this filter.",
-    "showUnchanged": "{count} unchanged — show"
+    "showUnchanged": "{count} unchanged — show",
+    "tabDeps": "Dependencies"
   },
   "rulesOffer": {
     "text": "Races, backgrounds and feats from the file are not assembled on the hero sheet while 5e classes mode is off in the campaign or there are no base classes.",
@@ -407,9 +403,24 @@
     "active": "● enabled"
   },
   "wizard": {
+    "resetNotice": "Changing the selection resets the check",
     "restart": "Start over",
-    "restartConfirm": "Clear the file and start the import over?",
-    "resetNotice": "Changing the categories resets the existing check."
+    "restartText": "The file, check and result will be cleared.",
+    "restartConfirm": "Clear the file and start the import over?"
+  },
+  "confirm": {
+    "until": "Check valid until {time}",
+    "expired": "The check has expired",
+    "recheck": "Check again",
+    "changes": "What will change",
+    "expiresIn": "The check is valid until {time}"
+  },
+  "history": {
+    "row": "Import #{id}",
+    "open": "Open report"
+  },
+  "result": {
+    "title": "Import complete"
   },
   "check": {
     "tabs": {
@@ -418,17 +429,5 @@
       "sources": "Sources and coverage",
       "media": "Images"
     }
-  },
-  "confirm": {
-    "expiresIn": "The check is valid until {time}",
-    "expired": "The check has expired. Check the import again.",
-    "recheck": "Check again"
-  },
-  "result": {
-    "title": "Import complete"
-  },
-  "history": {
-    "row": "Import #{id}",
-    "open": "Open report"
   }
 }

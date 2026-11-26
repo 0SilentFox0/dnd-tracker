@@ -1,30 +1,23 @@
 'use client';
-import { useTranslations } from 'next-intl';
-
 import { CompendiumMediaReport } from '../report/CompendiumMediaReport';
-import { CompendiumReport } from '../report/CompendiumReport';
+import { CompendiumReportTabs } from '../report/CompendiumReportTabs';
+import { CompendiumVerdict } from '../report/CompendiumVerdict';
 
-import { HudPanel } from '@/components/hud/page';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 
 export function ResultStep({
-    wizard,
     campaignId,
+    wizard,
 }: {
-    wizard: CompendiumImportController;
     campaignId: string;
+    wizard: CompendiumImportController;
 }) {
-    const t = useTranslations('compendium');
-
     const { result, media, phase, mediaPaused } = wizard.state;
 
     if (!result) return null;
 
     return (
-        <HudPanel className="space-y-3">
-            <h2 className="hud-sc text-base text-hud-accent-fg">
-                {t('result.title')}
-            </h2>
+        <div className="space-y-4">
             {media && (
                 <CompendiumMediaReport
                     media={media}
@@ -33,12 +26,13 @@ export function ResultStep({
                     actions={wizard.actions.media}
                 />
             )}
-            <CompendiumReport
+            <CompendiumVerdict report={result} committed />
+            <CompendiumReportTabs
                 key={result.runId}
                 campaignId={campaignId}
                 report={result}
                 committed
             />
-        </HudPanel>
+        </div>
     );
 }

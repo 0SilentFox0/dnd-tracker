@@ -75,7 +75,7 @@ export function ArtifactSetsList({ campaignId: id }: { campaignId: string }) {
                             onClear={() => search.query.set('')}
                         />
                     ) : (
-                        <div className="grid gap-3 md:grid-cols-2">
+                        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
                             {sets.map((s) => (
                                 <ArtifactSetCard
                                     key={s.id}

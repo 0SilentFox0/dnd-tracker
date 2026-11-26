@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { useNavigateFresh } from '@/lib/hooks/common';
-import { useUpdateMainSkill } from '@/lib/hooks/skills';
+import { useDeleteMainSkill, useUpdateMainSkill } from '@/lib/hooks/skills';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { MainSkill, MainSkillFormData } from '@/types/main-skills';
@@ -18,6 +18,8 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
     const navigateFresh = useNavigateFresh();
 
     const update = useUpdateMainSkill(campaignId);
+
+    const del = useDeleteMainSkill(campaignId);
 
     const { data: spellGroups = [] } = useSpellGroups(campaignId);
 
@@ -62,6 +64,10 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
         }
     };
 
+    const remove = async () => {
+        if (await del.mutateOk(mainSkill.id)) navigateFresh(listHref);
+    };
+
     return {
         form: {
             data: formData,
@@ -69,7 +75,11 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
                 setFormData((prev) => ({ ...prev, ...patch })),
         },
         spellGroups,
-        status: { isSaving: update.isPending, error },
-        actions: { submit, cancel: () => router.push(listHref) },
+        status: {
+            isSaving: update.isPending,
+            isDeleting: del.isPending,
+            error,
+        },
+        actions: { submit, remove, cancel: () => router.push(listHref) },
     };
 }

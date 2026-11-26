@@ -1,33 +1,36 @@
-import { useTranslations } from 'next-intl';
+'use client';
 
-import { DetailSection } from './ReferenceDetailShell';
+import { useTranslations } from 'next-intl';
+import { Gem } from 'lucide-react';
+
+import { DetailHeader, DetailRoot, DetailSection } from './DetailParts';
 
 import { AbilityFlowList } from '@/components/abilities/flow/AbilityFlow';
 import type { ArtifactSetForReference } from '@/types/info-reference';
 
 export function ArtifactSetBlock({ set }: { set: ArtifactSetForReference }) {
-    const t = useTranslations('artifacts.reference');
+    const t = useTranslations('reference.card');
 
     return (
-        <DetailSection title={`${t('set')}: ${set.name}`}>
-            <div className="space-y-2">
-                {set.description ? (
-                    <p className="whitespace-pre-line">{set.description}</p>
-                ) : null}
-                {set.artifactNames.length > 0 ? (
-                    <p className="text-hud-muted">
-                        {t('setItems', { names: set.artifactNames.join(', ') })}
-                    </p>
-                ) : null}
-                {set.bonuses.length > 0 ? (
-                    <div>
-                        <p className="hud-sc mb-1 text-xs text-hud-ink">
-                            {t('setBonuses')}
-                        </p>
-                        <AbilityFlowList lines={set.bonuses} />
-                    </div>
-                ) : null}
-            </div>
-        </DetailSection>
+        <DetailRoot>
+            <DetailHeader
+                icon={set.icon}
+                name={set.name}
+                fallback={<Gem className="size-7" />}
+            />
+            {set.description && (
+                <p className="text-sm text-hud-bone">{set.description}</p>
+            )}
+            {set.artifactNames.length > 0 && (
+                <p className="text-sm text-hud-muted">
+                    {t('setItems', { names: set.artifactNames.join(', ') })}
+                </p>
+            )}
+            {set.bonuses.length > 0 && (
+                <DetailSection title={t('setBonuses')}>
+                    <AbilityFlowList lines={set.bonuses} />
+                </DetailSection>
+            )}
+        </DetailRoot>
     );
 }

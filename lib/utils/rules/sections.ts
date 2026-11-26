@@ -15,25 +15,18 @@ export interface RulesItem<T = unknown> {
     upgrade?(legacy: unknown): T | undefined;
 }
 
-export const RULES_SECTION_GROUPS = [
-    'system',
-    'combat',
-    'characters',
-    'world',
-] as const;
-
-export type RulesSectionGroup = (typeof RULES_SECTION_GROUPS)[number];
+export type RulesGroup = 'system' | 'combat' | 'characters' | 'world';
 
 export interface RulesSection {
     /** Module id or "core" */
     owner: string;
-    /** Table-of-contents group in the rules form; none → "other" */
-    group?: RulesSectionGroup;
     items: Record<string, RulesItem>;
     /** Must tolerate missing items: it also runs on patches */
     refine?(value: Record<string, unknown>): boolean;
     refineMessage?: string;
     mechanic: boolean;
+    /** Table-of-contents group in the rule book; no group lands under "other" */
+    group?: RulesGroup;
     /** Namespace holding `label` and `description` of the section when it is not core (`rules.mechanics.<name>`) */
     labels?: string;
     /** Last touch on the value the form sends (e.g. fill blanks) */

@@ -59,7 +59,7 @@ export function ClassBasicsTab({
     const isCaster = data.caster !== 'none';
 
     return (
-        <div className="ds-fields ds-panel p-4">
+        <div className="ds-fields">
             <div className="space-y-2">
                 <Label htmlFor="class-name">{t('classes.basics.name')}</Label>
                 <Input
@@ -154,7 +154,7 @@ export function ClassBasicsTab({
                 }
             />
 
-            <div className="space-y-2">
+            <div className="ds-span space-y-2">
                 <Label htmlFor="class-skill-count">
                     {t('classes.basics.skillCount')}
                 </Label>

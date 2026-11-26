@@ -1,55 +1,67 @@
 'use client';
+import { useState } from 'react';
+
 import { RulesPatchOffer } from '../../shared/RulesPatchOffer';
 import { CompendiumDependencies } from '../CompendiumDependencies';
-import { CompendiumReport } from '../report/CompendiumReport';
+import {
+    CompendiumReportTabs,
+    type ReportTab,
+} from '../report/CompendiumReportTabs';
+import { CompendiumVerdict } from '../report/CompendiumVerdict';
 
-import { HudPanel } from '@/components/hud/page';
+import { LoadingState } from '@/components/common/states';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 
 export function CheckStep({
-    wizard,
     campaignId,
+    wizard,
 }: {
-    wizard: CompendiumImportController;
     campaignId: string;
+    wizard: CompendiumImportController;
 }) {
-    const { preview, busy, options } = wizard.state;
+    const { preview, options, busy, phase } = wizard.state;
 
-    const { applyOptions } = wizard.actions;
+    const [tab, setTab] = useState<ReportTab | null>(null);
 
-    if (!preview) return null;
+    if (!preview || phase === 'previewing') return <LoadingState rows={6} />;
 
-    const unresolved = preview.graph.some((row) =>
-        row.refs.some((ref) => ref.unresolved)
-    );
+    const { report } = preview;
+
+    const needsDeps =
+        !report.readyToImport ||
+        report.nextActions.some((issue) => issue.code === 'UNRESOLVED_REF');
+
+    const active = tab ?? (needsDeps ? 'deps' : 'records');
 
     return (
-        <HudPanel className="space-y-3">
-            <RulesPatchOffer wizard={wizard} />
-            <CompendiumReport
-                campaignId={campaignId}
-                report={preview.report}
-                initialTab={unresolved ? 'deps' : undefined}
-                dependencies={{
-                    count: preview.graph.length,
-                    node: (
-                        <CompendiumDependencies
-                            key={preview.token}
-                            wizard={wizard}
-                        />
-                    ),
-                }}
+        <div className="space-y-4">
+            <CompendiumVerdict
+                report={report}
                 blockerActions={{
                     busy,
+                    goToDependencies: () => setTab('deps'),
                     allowMixedEdition: options.allowMixedEdition
                         ? undefined
                         : () =>
-                              applyOptions({
+                              wizard.actions.applyOptions({
                                   ...options,
                                   allowMixedEdition: true,
                               }),
                 }}
             />
-        </HudPanel>
+            <RulesPatchOffer wizard={wizard} />
+            <CompendiumReportTabs
+                campaignId={campaignId}
+                report={report}
+                activeTab={active}
+                onTabChange={setTab}
+                deps={
+                    <CompendiumDependencies
+                        key={preview.token}
+                        wizard={wizard}
+                    />
+                }
+            />
+        </div>
     );
 }

@@ -393,6 +393,7 @@
     }
   },
   "alignments": {
+    "label": "Alignment",
     "lawfulGood": {
       "name": "Lawful Good",
       "short": "LG"

@@ -4,78 +4,78 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AlignmentGrid } from '@/components/characters/basic/AlignmentGrid';
 
-vi.mock('@/lib/hooks/characters', () => ({
-    useAlignmentLabel: () => (value: string, form?: string) =>
-        form === 'short' ? value.slice(0, 2) : value,
-}));
-
-afterEach(cleanup);
-
-const setup = (value: string | null, onChange = vi.fn()) => {
-    render(
-        <AlignmentGrid
-            id="alignment"
-            value={value}
-            onChange={onChange}
-            allowNone
-            noneLabel="None"
-        />
-    );
-
-    return onChange;
-};
-
 describe('AlignmentGrid', () => {
-    it('renders nine cells plus the none option', () => {
-        setup('Lawful Good');
-        expect(screen.getAllByRole('radio')).toHaveLength(10);
-    });
+    afterEach(cleanup);
 
-    it('click selects a cell with the canonical value', () => {
-        const onChange = setup(null);
-
-        fireEvent.click(screen.getByRole('radio', { name: 'Chaotic Good' }));
-        expect(onChange).toHaveBeenCalledWith('Chaotic Good');
-    });
-
-    it('none option sets null and is checked for an empty value', () => {
-        const onChange = setup(null);
-
-        expect(screen.getByRole('radio', { name: 'None' })).toHaveAttribute(
-            'aria-checked',
-            'true'
+    it('renders nine radios plus a none option', () => {
+        render(
+            <AlignmentGrid id="a" value={null} onChange={vi.fn()} allowNone />
         );
-        fireEvent.click(screen.getByRole('radio', { name: 'None' }));
-        expect(onChange).toHaveBeenCalledWith(null);
-    });
 
-    it('ArrowDown from Lawful Good moves to Lawful Neutral', () => {
-        const onChange = setup('Lawful Good');
-
-        fireEvent.keyDown(screen.getByRole('radio', { name: 'Lawful Good' }), {
-            key: 'ArrowDown',
-        });
-        expect(onChange).toHaveBeenCalledWith('Lawful Neutral');
-    });
-
-    it('aria-checked marks only the selected cell', () => {
-        setup('True Neutral');
-
-        const checked = screen
-            .getAllByRole('radio')
-            .filter((el) => el.getAttribute('aria-checked') === 'true');
-
-        expect(checked).toHaveLength(1);
-        expect(checked[0]).toHaveAccessibleName('True Neutral');
-    });
-
-    it('a free value keeps no cell checked and shows the raw text', () => {
-        setup('any alignment');
-        expect(screen.getByText('any alignment')).toBeTruthy();
+        expect(screen.getAllByRole('radio')).toHaveLength(10);
         expect(
             screen
                 .getAllByRole('radio')
-                .some((el) => el.getAttribute('aria-checked') === 'true')
-        ).toBe(false);
+                .filter((r) => r.getAttribute('aria-checked') === 'true')
+        ).toHaveLength(1);
+    });
+
+    it('omits none by default', () => {
+        render(<AlignmentGrid id="a" value={null} onChange={vi.fn()} />);
+
+        expect(screen.getAllByRole('radio')).toHaveLength(9);
+    });
+
+    it('selects a canonical value and clears it', () => {
+        const onChange = vi.fn();
+
+        render(
+            <AlignmentGrid id="a" value={null} onChange={onChange} allowNone />
+        );
+
+        fireEvent.click(screen.getAllByRole('radio')[0]);
+        expect(onChange).toHaveBeenCalledWith('Lawful Good');
+
+        fireEvent.click(screen.getAllByRole('radio')[9]);
+        expect(onChange).toHaveBeenCalledWith(null);
+    });
+
+    it('marks the stored value case-insensitively', () => {
+        render(
+            <AlignmentGrid id="a" value="chaotic evil" onChange={vi.fn()} />
+        );
+
+        expect(
+            screen.getAllByRole('radio')[8].getAttribute('aria-checked')
+        ).toBe('true');
+    });
+
+    it('moves selection down a row with the arrow key', () => {
+        const onChange = vi.fn();
+
+        render(
+            <AlignmentGrid id="a" value="Lawful Good" onChange={onChange} />
+        );
+
+        const radios = screen.getAllByRole('radio');
+
+        radios[0].focus();
+        fireEvent.keyDown(radios[0], { key: 'ArrowDown' });
+
+        expect(onChange).toHaveBeenCalledWith('Lawful Neutral');
+        expect(document.activeElement).toBe(radios[3]);
+    });
+
+    it('keeps a single tab stop', () => {
+        render(
+            <AlignmentGrid id="a" value="True Neutral" onChange={vi.fn()} />
+        );
+
+        const stops = screen
+            .getAllByRole('radio')
+            .filter((r) => r.tabIndex === 0);
+
+        expect(stops).toHaveLength(1);
+        expect(stops[0]).toBe(screen.getAllByRole('radio')[4]);
     });
 });

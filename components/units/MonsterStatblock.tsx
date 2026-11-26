@@ -48,7 +48,9 @@ export function MonsterStatblock({ block }: { block: UnitStatblock }) {
                     </span>
                 )}
                 {block.size && <span>{t(`sizes.${block.size}`)}</span>}
-                {block.alignment && <span>{alignmentLabel(block.alignment)}</span>}
+                {block.alignment && (
+                    <span>{alignmentLabel(block.alignment)}</span>
+                )}
             </div>
             {senses.length > 0 && <p>{senses.join(' · ')}</p>}
             {movement.length > 0 && <p>{movement.join(' · ')}</p>}

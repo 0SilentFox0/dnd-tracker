@@ -1,98 +1,86 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
+import { useIsCompact } from '@/lib/hooks/common';
+import type { SectionTab } from '@/types/info-reference';
 
-export type ReferenceKind = 'spell' | 'skill' | 'artifact' | 'class';
+export type RefKey = `${'spell' | 'skill' | 'artifact' | 'class'}:${string}`;
 
-export interface ReferenceRef {
-    kind: ReferenceKind;
-    id: string;
+const SECTIONS: readonly SectionTab[] = [
+    'all',
+    'skills',
+    'spells',
+    'artifacts',
+    'classes',
+];
+
+interface Options {
+    visible: RefKey[];
+    section: { value: SectionTab; set: (s: SectionTab) => void };
+    autoSelect: boolean;
 }
 
-const PARAM = 'e';
-
-const KINDS: readonly string[] = ['spell', 'skill', 'artifact', 'class'];
-
-export function parseReferenceRef(raw: string | null): ReferenceRef | null {
-    if (!raw) return null;
-
-    const at = raw.indexOf(':');
-
-    const kind = raw.slice(0, at);
-
-    const id = raw.slice(at + 1);
-
-    return at > 0 && id && KINDS.includes(kind)
-        ? { kind: kind as ReferenceKind, id }
-        : null;
-}
-
-const same = (a: ReferenceRef, b: ReferenceRef) =>
-    a.kind === b.kind && a.id === b.id;
-
-export function useReferenceSelection(
-    visible: readonly ReferenceRef[],
-    opts: { autoSelect: boolean }
-) {
+export function useReferenceSelection({
+    visible,
+    section,
+    autoSelect,
+}: Options) {
     const router = useRouter();
 
     const pathname = usePathname();
 
     const params = useSearchParams();
 
-    const isDesktop = useMediaQuery(DESKTOP_QUERY, true);
+    const isMobile = useIsCompact();
 
     const pushed = useRef(false);
 
-    const explicit = parseReferenceRef(params.get(PARAM));
+    const urlKey = params.get('e');
 
-    const explicitVisible =
-        explicit && visible.some((ref) => same(ref, explicit))
-            ? explicit
-            : null;
+    const urlSection = params.get('s');
 
-    const selected =
-        explicitVisible ?? (opts.autoSelect ? (visible[0] ?? null) : null);
+    useEffect(() => {
+        const s = SECTIONS.find((v) => v === urlSection);
 
-    const write = useCallback(
-        (ref: ReferenceRef | null, mode: 'push' | 'replace') => {
-            const next = new URLSearchParams(params.toString());
+        if (s && s !== section.value) section.set(s);
+        // initial URL only
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-            if (ref) next.set(PARAM, `${ref.kind}:${ref.id}`);
-            else next.delete(PARAM);
+    const urlFor = (key: RefKey | null) => {
+        const next = new URLSearchParams(params.toString());
 
-            const query = next.toString();
+        next.set('s', section.value);
 
-            router[mode](query ? `${pathname}?${query}` : pathname, {
-                scroll: false,
-            });
-        },
-        [params, pathname, router]
-    );
+        if (key) next.set('e', key);
+        else next.delete('e');
 
-    const select = useCallback(
-        (ref: ReferenceRef) => {
-            const push = !isDesktop && !explicit;
+        return `${pathname}?${next.toString()}`;
+    };
 
-            pushed.current = push;
-            write(ref, push ? 'push' : 'replace');
-        },
-        [explicit, isDesktop, write]
-    );
+    const fromUrl = visible.find((k) => k === urlKey) ?? null;
 
-    const clear = useCallback(() => {
+    const selected = fromUrl ?? (autoSelect ? (visible[0] ?? null) : null);
+
+    const select = (key: RefKey) => {
+        if (isMobile) {
+            pushed.current = true;
+            router.push(urlFor(key), { scroll: false });
+        } else {
+            router.replace(urlFor(key), { scroll: false });
+        }
+    };
+
+    const clear = () => {
         if (pushed.current) {
             pushed.current = false;
             router.back();
-
-            return;
+        } else {
+            router.replace(urlFor(null), { scroll: false });
         }
+    };
 
-        write(null, 'replace');
-    }, [router, write]);
-
-    return { selected, select, clear, isOpen: explicitVisible !== null };
+    return { selected, select, clear, isOpen: fromUrl !== null };
 }

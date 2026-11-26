@@ -75,10 +75,7 @@ export function WfrpDraftForm({
     const ids = characterId ? (['identity'] as const) : STEP_ORDER;
 
     return (
-        <HudFormPage
-            title={characterId ? t('titleEdit') : t('title')}
-            aside={t('aside')}
-        >
+        <HudFormPage header={{ title: characterId ? t('titleEdit') : t('title'), aside: t('aside') }}>
             <div className="flex flex-1 flex-col px-4 pt-4">
                 <div className="relative flex-1 pb-2">
                     {!characterId && (

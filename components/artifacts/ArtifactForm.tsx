@@ -1,11 +1,10 @@
 'use client';
 
-import { type ReactNode, useDeferredValue, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import {
-    ARTIFACT_FORM_ID,
     ARTIFACT_FORM_TAB,
     type ArtifactFormTabId,
 } from './artifact-form-tabs';
@@ -15,14 +14,10 @@ import { ArtifactWeaponFields } from './ArtifactWeaponFields';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ArtifactReferenceDetail } from '@/components/campaigns/info/detail/ArtifactReferenceDetail';
-import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
 import { IconUrlField } from '@/components/common/fields/IconUrlField';
-import {
-    HudForm,
-    HudFormMenu,
-    HudFormPage,
-    type HudTab,
-} from '@/components/hud/form';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
+import { HudFormMenu } from '@/components/hud';
+import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -41,7 +36,7 @@ import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import type { ArmorStats } from '@/lib/utils/artifacts/armor-stats';
 import type { ArtifactFormSubmitPayload } from '@/lib/utils/artifacts/artifact-form';
-import { toArtifactReferencePreview } from '@/lib/utils/artifacts/artifact-preview';
+import { toArtifactReferencePreview } from '@/lib/utils/artifacts/reference-preview';
 import { isWeaponSlot } from '@/lib/utils/artifacts/weapon-slot';
 import type { WeaponStats } from '@/lib/utils/artifacts/weapon-stats';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
@@ -49,6 +44,8 @@ import type { ItemStats } from '@/lib/utils/items/item-stats';
 import type { ArtifactSetOption } from '@/types/artifacts';
 
 export type { ArtifactFormSubmitPayload };
+
+const FORM_ID = 'artifact-form';
 
 export interface ArtifactFormInitial {
     name: string;
@@ -76,13 +73,13 @@ export interface ArtifactFormProps {
         submit: string;
         saving: string;
         iconHint: React.ReactNode;
-        side?: ReactNode;
     };
     actions: {
         onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
         onDelete?: () => Promise<void>;
+        cancelHref: string;
     };
-    cancelHref: string;
+    side?: React.ReactNode;
 }
 
 export function ArtifactForm({
@@ -92,21 +89,33 @@ export function ArtifactForm({
     mode,
     labels,
     actions,
-    cancelHref,
+    side,
 }: ArtifactFormProps) {
     const t = useTranslations();
 
     const ta = useTranslator('abilities');
 
-    const editor = useArtifactForm({ initial, mode, ...actions });
+    const { cancelHref, ...handlers } = actions;
+
+    const editor = useArtifactForm({ initial, mode, ...handlers });
 
     const { data, set } = editor.form;
-
-    const deferred = useDeferredValue(data);
 
     const hasWeapon = isWeaponSlot(data.slot);
 
     const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
+
+    const preview = useDeferredValue(
+        useMemo(
+            () =>
+                toArtifactReferencePreview(data, {
+                    setName:
+                        artifactSets.find((x) => x.id === data.setId)?.name ??
+                        null,
+                }),
+            [data, artifactSets]
+        )
+    );
 
     const rules = useCampaignRules(campaignId).data;
 
@@ -203,7 +212,7 @@ export function ArtifactForm({
                         </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="ds-span space-y-2">
                         <Label htmlFor="artifact-description">
                             {t('artifacts.form.description')}
                         </Label>
@@ -313,49 +322,31 @@ export function ArtifactForm({
         },
     ];
 
-    const busy = editor.status.isBusy;
-
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={cancelHref}
-                        className="hover:text-hud-accent-fg"
-                    >
-                        {t('common.dmSections.artifacts')}
-                    </Link>
-                    {' › '}
-                    {labels.title}
-                </>
-            }
-            aside={labels.description}
-            side={
-                <PlayerPreview notes={labels.side}>
-                    <ArtifactReferenceDetail
-                        item={toArtifactReferencePreview(deferred, {
-                            setName: artifactSets.find(
-                                (x) => x.id === deferred.setId
-                            )?.name,
-                        })}
+            header={{
+                title: labels.title,
+                aside: labels.description,
+                back: {
+                    href: cancelHref,
+                    label: t('common.dmSections.artifacts'),
+                },
+                menu: actions.onDelete && (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('common.actions.delete'),
+                                tone: 'danger',
+                                disabled: editor.status.isBusy,
+                                onSelect: () => void editor.actions.remove(),
+                            },
+                        ]}
                     />
-                </PlayerPreview>
-            }
+                ),
+            }}
             actions={
                 <>
-                    {actions.onDelete && (
-                        <HudFormMenu
-                            label={t('common.form.more')}
-                            items={[
-                                {
-                                    label: t('common.actions.delete'),
-                                    tone: 'danger',
-                                    onSelect: () => editor.actions.remove(),
-                                },
-                            ]}
-                        />
-                    )}
                     <Button type="button" variant="outline" asChild>
                         <Link href={cancelHref}>
                             {t('common.actions.cancel')}
@@ -363,9 +354,11 @@ export function ArtifactForm({
                     </Button>
                     <Button
                         type="submit"
-                        form={ARTIFACT_FORM_ID}
+                        form={FORM_ID}
                         disabled={
-                            busy || !editor.abilities.valid || !statsValid
+                            editor.status.isBusy ||
+                            !editor.abilities.valid ||
+                            !statsValid
                         }
                     >
                         {editor.status.isSaving
@@ -378,9 +371,21 @@ export function ArtifactForm({
                     </Button>
                 </>
             }
+            side={
+                <>
+                    <FormPreviewPanel>
+                        <ArtifactReferenceDetail
+                            campaignId={campaignId}
+                            item={preview}
+                            isDM={false}
+                        />
+                    </FormPreviewPanel>
+                    {side}
+                </>
+            }
         >
             <HudForm
-                id={ARTIFACT_FORM_ID}
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 error={editor.status.error}
                 tabs={tabs}

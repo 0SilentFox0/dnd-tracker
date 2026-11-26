@@ -1,7 +1,6 @@
 'use client';
 
-import { type ReactNode, useDeferredValue, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ClassBasicsTab } from './ClassBasicsTab';
@@ -12,14 +11,15 @@ import { SubclassesEditor } from './SubclassesEditor';
 
 import { withAbilityErrors } from '@/components/abilities';
 import { ClassReferenceDetail } from '@/components/campaigns/info/detail/ClassReferenceDetail';
-import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useClassForm } from '@/lib/hooks/classes';
 import { useErrorTotals } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { buildClassProgression } from '@/lib/utils/characters/classes';
-import { toClassReferencePreview } from '@/lib/utils/characters/classes/class-preview';
+import { toClassReferencePreview } from '@/lib/utils/characters/classes/reference-preview';
 import type { GameClassData } from '@/types/classes';
 
 const FORM_ID = 'class-form';
@@ -29,11 +29,9 @@ type ClassFormTabId = 'map' | 'basics' | 'table' | 'features' | 'subclasses';
 export function ClassForm({
     campaignId,
     gameClass,
-    side,
 }: {
     campaignId: string;
     gameClass: GameClassData;
-    side?: ReactNode;
 }) {
     const t = useTranslations();
 
@@ -59,20 +57,29 @@ export function ClassForm({
 
     const { data, set } = editor.form;
 
-    const deferred = useDeferredValue(data);
-
-    const [tab, setTab] = useState<ClassFormTabId>('map');
+    const [tab, setTab] = useState<ClassFormTabId>('basics');
 
     const progression = useMemo(
         () => buildClassProgression({ id, ...data }),
         [id, data]
     );
 
+    const preview = useDeferredValue(
+        useMemo(() => toClassReferencePreview(data, { id }), [data, id])
+    );
+
     const tabs: HudTab<ClassFormTabId>[] = [
         {
+            id: 'basics',
+            label: t('common.tabs.basic'),
+            content: (
+                <ClassBasicsTab form={editor.form} campaignId={campaignId} />
+            ),
+        },
+        {
             id: 'map',
-            label: t('classes.form.tabs.map'),
             wide: true,
+            label: t('classes.form.tabs.map'),
             content: (
                 <ClassProgressionMap
                     progression={progression}
@@ -88,16 +95,9 @@ export function ClassForm({
             ),
         },
         {
-            id: 'basics',
-            label: t('common.tabs.basic'),
-            content: (
-                <ClassBasicsTab form={editor.form} campaignId={campaignId} />
-            ),
-        },
-        {
             id: 'table',
-            label: t('classes.form.tabs.table'),
             wide: true,
+            label: t('classes.form.tabs.table'),
             content: (
                 <ClassColumnsEditor
                     value={data.columns ?? []}
@@ -140,30 +140,14 @@ export function ClassForm({
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={`/campaigns/${campaignId}/dm/classes`}
-                        className="text-hud-muted hover:text-hud-accent-fg"
-                    >
-                        {t('common.dmSections.classes')}
-                    </Link>
-                    <span aria-hidden className="text-hud-muted">
-                        {' › '}
-                    </span>
-                    {t('classes.form.title')}
-                </>
-            }
-            aside={t('classes.form.aside')}
-            side={
-                <PlayerPreview notes={side}>
-                    <ClassReferenceDetail
-                        item={toClassReferencePreview(deferred, { id })}
-                        campaignId={campaignId}
-                        isDM={false}
-                    />
-                </PlayerPreview>
-            }
+            header={{
+                title: t('classes.form.title'),
+                aside: t('classes.form.aside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/classes`,
+                    label: t('common.dmSections.classes'),
+                },
+            }}
             actions={
                 <>
                     <Button
@@ -188,6 +172,22 @@ export function ClassForm({
                                   ta
                               )}
                     </Button>
+                </>
+            }
+            side={
+                <>
+                    <FormPreviewPanel>
+                        <ClassReferenceDetail
+                            campaignId={campaignId}
+                            item={preview}
+                            isDM={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="classes"
+                        targetId={id}
+                    />
                 </>
             }
         >

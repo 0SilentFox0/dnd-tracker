@@ -1,89 +1,77 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { FileDropZone } from '@/components/common/fields/FileDropZone';
+import { FileDropZone } from '../FileDropZone';
 
 afterEach(cleanup);
 
-const png = (name: string) => new File(['x'], name, { type: 'image/png' });
+const json = new File(['{}'], 'a.json', { type: 'application/json' });
 
-function drop(files: File[]) {
-    fireEvent.drop(screen.getByTestId('file-drop-zone'), {
-        dataTransfer: { files },
-    });
-}
+const drop = (el: Element, files: File[]) => {
+    const event = createEvent.drop(el, { dataTransfer: { files } });
+
+    fireEvent(el, event);
+};
 
 describe('FileDropZone', () => {
-    it('passes only the first file when multiple is off', () => {
-        const onFiles = vi.fn();
+    it('passes a dropped file to onFile', () => {
+        const onFile = vi.fn();
 
-        render(<FileDropZone accept=".png" onFiles={onFiles} label="Pick" />);
-        drop([png('a.png'), png('b.png')]);
+        const { container } = render(
+            <FileDropZone accept=".json" onFile={onFile} label="Drop" />
+        );
 
-        expect(onFiles).toHaveBeenCalledWith([expect.objectContaining({ name: 'a.png' })]);
+        drop(container.firstElementChild as Element, [json]);
+
+        expect(onFile).toHaveBeenCalledWith(json);
     });
 
-    it('passes all files when multiple is on', () => {
-        const onFiles = vi.fn();
-
-        render(<FileDropZone accept=".png" onFiles={onFiles} label="Pick" multiple />);
-        drop([png('a.png'), png('b.png')]);
-
-        expect(onFiles.mock.calls[0][0]).toHaveLength(2);
-    });
-
-    it('drops files with a rejected extension', () => {
-        const onFiles = vi.fn();
-
-        render(<FileDropZone accept=".png" onFiles={onFiles} label="Pick" />);
-        drop([new File(['x'], 'a.exe', { type: 'application/x-msdownload' })]);
-
-        expect(onFiles).not.toHaveBeenCalled();
-    });
-
-    it('accepts by MIME wildcard', () => {
-        const onFiles = vi.fn();
-
-        render(<FileDropZone accept="image/*" onFiles={onFiles} label="Pick" />);
-        drop([png('a.png')]);
-
-        expect(onFiles).toHaveBeenCalledTimes(1);
-    });
-
-    it('ignores drops when disabled', () => {
-        const onFiles = vi.fn();
-
-        render(<FileDropZone accept=".png" onFiles={onFiles} label="Pick" disabled />);
-        drop([png('a.png')]);
-
-        expect(onFiles).not.toHaveBeenCalled();
-    });
-
-    it('opens the file picker from the keyboard-reachable button', () => {
+    it('is a button that opens the file input', () => {
         const click = vi.spyOn(HTMLInputElement.prototype, 'click');
 
-        render(<FileDropZone accept=".png" onFiles={vi.fn()} label="Pick" />);
-        fireEvent.click(screen.getByRole('button', { name: 'Pick' }));
+        render(<FileDropZone accept=".json" onFile={vi.fn()} label="Drop" />);
+
+        const zone = screen.getByRole('button', { name: 'Drop' });
+
+        expect(zone.tagName).toBe('BUTTON');
+
+        fireEvent.click(zone);
 
         expect(click).toHaveBeenCalled();
+
         click.mockRestore();
     });
 
-    it('shows a file card with a replace action', () => {
-        const onReplace = vi.fn();
+    it('ignores drops while disabled', () => {
+        const onFile = vi.fn();
 
+        const { container } = render(
+            <FileDropZone accept=".json" onFile={onFile} label="Drop" disabled />
+        );
+
+        drop(container.firstElementChild as Element, [json]);
+
+        expect(onFile).not.toHaveBeenCalled();
+    });
+
+    it('shows the file card with size and a replace action', () => {
         render(
             <FileDropZone
-                accept=".png"
-                onFiles={vi.fn()}
-                label="Pick"
-                file={{ name: 'map.png', size: 2048, replaceLabel: 'Replace', onReplace }}
+                accept=".json"
+                onFile={vi.fn()}
+                label="Drop"
+                file={{
+                    name: 'srd.json',
+                    size: 2048,
+                    meta: 'classic',
+                    replaceLabel: 'Replace',
+                }}
             />
         );
-        fireEvent.click(screen.getByRole('button', { name: 'Replace' }));
 
-        expect(screen.getByText('map.png')).toBeTruthy();
-        expect(onReplace).toHaveBeenCalled();
+        expect(screen.getByText('srd.json')).toBeTruthy();
+        expect(screen.getByText(/2KB/)).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Replace' })).toBeTruthy();
     });
 });

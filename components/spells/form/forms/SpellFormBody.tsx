@@ -6,11 +6,7 @@ import { SpellComponentsFields } from '../fields/SpellComponentsFields';
 import { SpellFormBasicFields } from '../fields/SpellFormBasicFields';
 import { SpellFormPowerFields } from '../fields/SpellFormPowerFields';
 import type { SpellFormData } from '../spell-form-defaults';
-import {
-    SPELL_FORM_ID,
-    SPELL_FORM_TAB,
-    type SpellFormTabId,
-} from '../spell-form-tabs';
+import { SPELL_FORM_TAB, type SpellFormTabId } from '../spell-form-tabs';
 import { SpellFormEffects } from './SpellFormEffects';
 
 import { HudForm, type HudTab } from '@/components/hud/form';
@@ -25,6 +21,7 @@ export interface SpellFormBodyProps {
     form: { data: SpellFormData; set: (data: SpellFormData) => void };
     spellGroups: IdName[];
     submit: {
+        id: string;
         onSubmit: (e: React.FormEvent) => void;
         error?: string | null;
     };
@@ -85,7 +82,6 @@ export function SpellFormBody({
         {
             id: SPELL_FORM_TAB.effects,
             label: t('spellEditor.tabs.effects'),
-            badge: formData.spellEffects.length || undefined,
             content: (
                 <div className="space-y-4">
                     <SpellFormEffects
@@ -100,27 +96,29 @@ export function SpellFormBody({
 
     return (
         <>
-            {formData.executionMode === 'manual' && (
-                <p role="status">{t('spellEditor.body.manualNotice')}</p>
-            )}
-            <label className="mx-4 my-3 flex items-center gap-2">
-                <Checkbox
-                    checked={formData.executionMode !== 'manual'}
-                    onCheckedChange={(v) =>
-                        setFormData({
-                            ...formData,
-                            executionMode: v === true ? 'native' : 'manual',
-                        })
-                    }
-                />{' '}
-                {t('spellEditor.body.verified')}
-            </label>
+            <div data-notice>
+                {formData.executionMode === 'manual' && (
+                    <p role="status">{t('spellEditor.body.manualNotice')}</p>
+                )}
+                <label className="mx-4 my-3 flex items-center gap-2">
+                    <Checkbox
+                        checked={formData.executionMode !== 'manual'}
+                        onCheckedChange={(v) =>
+                            setFormData({
+                                ...formData,
+                                executionMode: v === true ? 'native' : 'manual',
+                            })
+                        }
+                    />{' '}
+                    {t('spellEditor.body.verified')}
+                </label>
+            </div>
             <HudForm
-                id={SPELL_FORM_ID}
+                id={submit.id}
                 onSubmit={submit.onSubmit}
                 tabs={tabs}
-                tabStyles={{ variant: 'rail' }}
                 error={submit.error}
+                tabStyles={{ variant: 'rail' }}
             />
         </>
     );

@@ -1,114 +1,119 @@
 'use client';
 
-import { type KeyboardEvent, type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { HudButton } from '@/components/hud';
+import { Button } from '@/components/ui/button';
+import { useRovingIndex } from '@/lib/hooks/common';
 
-interface ReferenceGroup<T> {
-    key: string;
-    title: string;
-    accent?: string;
-    items: T[];
+interface RowRenderState {
+    selected: boolean;
+    onSelect: () => void;
+    tabIndex: 0 | -1;
+    ref: (el: HTMLElement | null) => void;
 }
 
-const HEX = /^#?[0-9A-Fa-f]{3,8}$/;
-
-const accentColor = (value?: string) =>
-    value && HEX.test(value)
-        ? value.startsWith('#')
-            ? value
-            : `#${value}`
-        : undefined;
-
-function moveFocus(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-
-    const rows = Array.from(
-        e.currentTarget.querySelectorAll<HTMLElement>('[data-ref-row]')
-    );
-
-    const at = rows.indexOf(document.activeElement as HTMLElement);
-
-    const next = rows[at + (e.key === 'ArrowDown' ? 1 : -1)];
-
-    if (!next) return;
-
-    e.preventDefault();
-    next.focus();
-}
-
-export function ReferenceList<T extends { id: string }>({
-    groups,
-    selected,
-    renderRow,
-    limit,
-    onShowAll,
-}: {
-    groups: ReferenceGroup<T>[];
+interface ReferenceListProps<T> {
+    groups: {
+        key: string;
+        title: ReactNode;
+        accent?: string;
+        items: T[];
+    }[];
     selected: string | null;
-    renderRow: (item: T, selected: boolean) => ReactNode;
+    onSelect: (key: string) => void;
+    renderRow: (item: T, row: RowRenderState) => ReactNode;
+    keyOf: (item: T) => string;
     limit?: number;
     onShowAll?: () => void;
-}) {
+}
+
+export function ReferenceList<T>({
+    groups,
+    selected,
+    onSelect,
+    renderRow,
+    keyOf,
+    limit,
+    onShowAll,
+}: ReferenceListProps<T>) {
     const t = useTranslations('dashboard.reference.list');
 
-    const total = groups.reduce((sum, g) => sum + g.items.length, 0);
+    const flat = groups.flatMap((g) => g.items);
 
-    const capped = limit !== undefined && total > limit;
+    const cap = limit ?? flat.length;
 
-    const shown = groups.map((g, i) => {
-        const before = groups
-            .slice(0, i)
-            .reduce((sum, prev) => sum + prev.items.length, 0);
+    const total = flat.length;
 
-        return g.items.slice(0, Math.max((capped ? limit : total) - before, 0));
+    const selectedIndex = flat.findIndex((it) => keyOf(it) === selected);
+
+    const [focus, setFocus] = useState<number | null>(null);
+
+    const active = Math.min(
+        focus ?? Math.max(selectedIndex, 0),
+        Math.max(cap - 1, 0)
+    );
+
+    const roving = useRovingIndex({
+        count: Math.min(cap, total),
+        active,
+        onMove: setFocus,
     });
 
+    let index = 0;
+
     return (
-        <div role="group" onKeyDown={moveFocus} className="space-y-1">
-            {groups.map((group, i) => {
-                const items = shown[i];
+        <div onKeyDown={roving.onKeyDown}>
+            {groups.map((g) => {
+                const items = g.items.filter(() => index++ < cap);
 
                 if (items.length === 0) return null;
 
-                const dot = accentColor(group.accent);
+                const start = index - g.items.length;
 
                 return (
-                    <section key={group.key}>
-                        <h3 className="hud-sc sticky top-[var(--shell-header-h,57px)] z-[1] flex items-center gap-2 bg-hud-page/95 px-2 py-1.5 text-[13px] tracking-[.1em] text-hud-muted uppercase">
-                            {dot ? (
-                                <span
-                                    aria-hidden
-                                    className="size-2 rounded-full"
-                                    style={{ backgroundColor: dot }}
-                                />
-                            ) : null}
-                            <span className="flex-1 truncate">
-                                {group.title}
-                            </span>
-                            <span className="tabular-nums">
-                                {group.items.length}
-                            </span>
+                    <section key={g.key}>
+                        <h3
+                            className="hud-sc sticky top-[var(--shell-header-h)] z-[1] bg-hud-page/97 px-3 py-1.5 text-xs text-hud-muted"
+                            style={
+                                g.accent
+                                    ? { boxShadow: `inset 2px 0 0 ${g.accent}` }
+                                    : undefined
+                            }
+                        >
+                            {g.title}
                         </h3>
-                        <div>
-                            {items.map((item) => (
-                                <div key={item.id}>
-                                    {renderRow(item, item.id === selected)}
+                        {items.map((item, i) => {
+                            const key = keyOf(item);
+
+                            const at = start + i;
+
+                            return (
+                                <div key={key}>
+                                    {renderRow(item, {
+                                        selected: key === selected,
+                                        onSelect: () => {
+                                            setFocus(at);
+                                            onSelect(key);
+                                        },
+                                        tabIndex: roving.tabIndex(at),
+                                        ref: roving.itemRef(at),
+                                    })}
                                 </div>
-                            ))}
-                        </div>
+                            );
+                        })}
                     </section>
                 );
             })}
-            {capped && onShowAll ? (
-                <HudButton
+            {total > cap && onShowAll && (
+                <Button
+                    variant="ghost"
                     onClick={onShowAll}
-                    className="w-full rounded-lg px-2 py-2 text-left text-sm text-hud-accent-fg hover:bg-hud-raised"
+                    className="mt-2 w-full"
                 >
                     {t('showAll', { count: total })}
-                </HudButton>
-            ) : null}
+                </Button>
+            )}
         </div>
     );
 }

@@ -22,41 +22,35 @@ vi.mock('@/lib/hooks/classes', async () => {
     };
 });
 
+vi.mock('@/components/content-import/shared/SourceNotes', () => ({
+    SourceNotes: () => null,
+}));
 vi.mock('@/systems/d20/ui/content/classes/ClassBasicsTab', () => ({
     ClassBasicsTab: () => <div>basics</div>,
 }));
 
+const form = () => document.querySelector('form') as HTMLFormElement;
+
 describe('ClassForm layout', () => {
     afterEach(cleanup);
 
-    it('renders one save button outside the form that targets it', () => {
+    it('marks the map and table tabs wide and the others not', () => {
         render(<ClassForm campaignId="c" gameClass={makeClass({ id: 'f' })} />);
 
-        const save = screen.getAllByRole('button', {
-            name: 'common.actions.save',
-        });
-
-        expect(save).toHaveLength(1);
-        expect(save[0].getAttribute('form')).toBe('class-form');
-        expect(save[0].closest('form')).toBeNull();
-    });
-
-    it('marks the map and table tabs wide and the others not', () => {
-        const { container } = render(
-            <ClassForm campaignId="c" gameClass={makeClass({ id: 'f' })} />
+        expect(form().dataset.wideTab).toBeUndefined();
+        expect(screen.getAllByRole('tab')[0]).toHaveTextContent(
+            'common.tabs.basic'
         );
-
-        const root = () =>
-            container.querySelector('[data-hud-tabs-root]') as HTMLElement;
-
-        expect(root().dataset.activeWide).toBe('true');
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'common.tabs.basic' }),
+            screen.getByRole('tab', { name: 'classes.form.tabs.map' }),
             { button: 0 }
         );
-        fireEvent.click(screen.getByRole('tab', { name: 'common.tabs.basic' }));
-        expect(root().dataset.activeWide).toBeUndefined();
+        fireEvent.click(
+            screen.getByRole('tab', { name: 'classes.form.tabs.map' })
+        );
+
+        expect(form().dataset.wideTab).toBe('true');
 
         fireEvent.mouseDown(
             screen.getByRole('tab', { name: 'classes.form.tabs.table' }),
@@ -65,6 +59,16 @@ describe('ClassForm layout', () => {
         fireEvent.click(
             screen.getByRole('tab', { name: 'classes.form.tabs.table' })
         );
-        expect(root().dataset.activeWide).toBe('true');
+
+        expect(form().dataset.wideTab).toBe('true');
+    });
+
+    it('renders one submit button outside the form bound by form id', () => {
+        render(<ClassForm campaignId="c" gameClass={makeClass({ id: 'f' })} />);
+
+        const save = screen.getByRole('button', { name: 'common.actions.save' });
+
+        expect(save).toHaveAttribute('form', 'class-form');
+        expect(form().contains(save)).toBe(false);
     });
 });

@@ -1,15 +1,15 @@
 'use client';
 
-import { type ReactNode, useDeferredValue, useState } from 'react';
-import Link from 'next/link';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { FeatBasicsTab } from './FeatBasicsTab';
+import { FeatCard } from './FeatCard';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ChoiceListEditor } from '@/components/choices/editor/ChoiceListEditor';
-import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
-import { FeatCard } from '@/components/feats/FeatCard';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useErrorTotals } from '@/lib/hooks/common';
@@ -24,11 +24,9 @@ type FeatFormTabId = 'basics' | 'abilities' | 'choices';
 export function FeatForm({
     campaignId,
     feat,
-    side,
 }: {
     campaignId: string;
     feat: FeatData;
-    side?: ReactNode;
 }) {
     const t = useTranslations('feats');
 
@@ -42,7 +40,9 @@ export function FeatForm({
 
     const { data, set } = editor.form;
 
-    const deferred = useDeferredValue(data);
+    const preview = useDeferredValue(
+        useMemo<FeatData>(() => ({ id, ...data }), [id, data])
+    );
 
     const [invalid, setInvalid] = useState({
         abilities: false,
@@ -107,30 +107,14 @@ export function FeatForm({
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={`/campaigns/${campaignId}/dm/feats`}
-                        className="text-hud-muted hover:text-hud-accent-fg"
-                    >
-                        {tc('dmSections.feats')}
-                    </Link>
-                    <span aria-hidden className="text-hud-muted">
-                        {' › '}
-                    </span>
-                    {t('form.editTitle')}
-                </>
-            }
-            aside={t('form.editAside')}
-            side={
-                <PlayerPreview notes={side}>
-                    <FeatCard
-                        feat={{ id, ...deferred }}
-                        campaignId={campaignId}
-                        canEdit={false}
-                    />
-                </PlayerPreview>
-            }
+            header={{
+                title: t('form.editTitle'),
+                aside: t('form.editAside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/feats`,
+                    label: tc('dmSections.feats'),
+                },
+            }}
             actions={
                 <>
                     <Button
@@ -155,6 +139,22 @@ export function FeatForm({
                                   ta
                               )}
                     </Button>
+                </>
+            }
+            side={
+                <>
+                    <FormPreviewPanel>
+                        <FeatCard
+                            feat={preview}
+                            campaignId={campaignId}
+                            canEdit={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="feats"
+                        targetId={id}
+                    />
                 </>
             }
         >

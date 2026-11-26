@@ -14,11 +14,10 @@ import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('next/navigation', () => ({
-    useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
-    usePathname: () => '/campaigns/c1/dm/rules',
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+    usePathname: () => '/rules',
     useSearchParams: () => new URLSearchParams(),
 }));
-
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),
@@ -55,7 +54,7 @@ describe('RulesForm (en)', () => {
     it('renders the morale section in English without raw keys', async () => {
         await renderWithIntl(
             <ConfirmProvider>
-                <RulesForm campaignId="c1" />
+                <RulesForm campaignId="c1" title="T" />
             </ConfirmProvider>,
             {
                 locale: 'en',
@@ -67,6 +66,7 @@ describe('RulesForm (en)', () => {
                     'rulesHeroScaling',
                     'rulesDeathSaves',
                     'rulesInspiration',
+                    'gameTerms',
                     'battleTerms',
                 ],
             }

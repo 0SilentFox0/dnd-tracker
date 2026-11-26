@@ -19,3 +19,28 @@ export const LANDING_PATH = { en: '/', uk: '/uk' } as const satisfies Record<
 >;
 
 export const LANDING_PATHS: string[] = Object.values(LANDING_PATH);
+
+// operator data is a placeholder until the owner fills it in: grep TODO-operator
+export const LEGAL = {
+    operatorName: 'TODO-operator-name',
+    operatorAddress: 'TODO-operator-address',
+    contactEmail: 'privacy@critnest.com',
+    jurisdiction: 'TODO-jurisdiction',
+    updatedAt: '2026-11-26',
+} as const;
+
+export const LEGAL_DOCS = ['privacy', 'terms', 'cookies'] as const;
+
+export type LegalDoc = (typeof LEGAL_DOCS)[number];
+
+export const LEGAL_PATH = {
+    en: { privacy: '/privacy', terms: '/terms', cookies: '/cookies' },
+    uk: { privacy: '/uk/privacy', terms: '/uk/terms', cookies: '/uk/cookies' },
+} as const satisfies Record<Locale, Record<LegalDoc, string>>;
+
+export const LEGAL_PATHS: string[] = Object.values(LEGAL_PATH).flatMap((p) =>
+    Object.values(p)
+);
+
+/** Statically rendered public pages: the proxy skips the Supabase round trip and the app header stays hidden. */
+export const STATIC_PUBLIC_PATHS: string[] = [...LANDING_PATHS, ...LEGAL_PATHS];

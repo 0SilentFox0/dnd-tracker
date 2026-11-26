@@ -5,9 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { buildIdentityDraft } from '@/components/character-profile/sheet/banner/build-identity-draft';
-import { PortraitDialog } from '@/components/character-profile/sheet/banner/PortraitDialog';
-import { SheetBanner } from '@/components/character-profile/sheet/banner/SheetBanner';
+import { PortraitDialog } from '@/components/character-profile/sheet/PortraitDialog';
+import { SheetBanner } from '@/components/character-profile/sheet/SheetBanner';
 import { CharacterAbilitiesSection } from '@/components/characters/abilities/CharacterAbilitiesSection';
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import {
@@ -38,6 +37,8 @@ import { useRaces } from '@/lib/hooks/races';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { pruneFormChoices } from '@/lib/utils/characters/choices/prune';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
+
+const FORM_ID = 'character-form';
 
 type NewCharacterFormProps = {
     campaignId: string;
@@ -70,9 +71,9 @@ export function NewCharacterForm({
 
     const hasClasses = statColumnsOf(system).has('classes');
 
-    const refsRef = useRef<ChoiceRefsView | null>(null);
-
     const [portraitOpen, setPortraitOpen] = useState(false);
+
+    const refsRef = useRef<ChoiceRefsView | null>(null);
 
     const {
         status: { isLoading, error },
@@ -195,16 +196,12 @@ export function NewCharacterForm({
             : []),
     ];
 
-    const hero = buildIdentityDraft(basicInfo.data, {
-        races,
-        classesById: classMode.byId,
-    });
+    const heroRace = races.find((r) => r.name === basicInfo.data.race);
 
     return (
         <HudFormPage
             width="wide"
-            title={t('form.title')}
-            aside={t('form.aside')}
+            header={{ title: t('form.title'), aside: t('form.aside') }}
             actions={
                 <>
                     <Button type="button" variant="outline" asChild>
@@ -214,7 +211,7 @@ export function NewCharacterForm({
                     </Button>
                     <Button
                         type="submit"
-                        form="character-form"
+                        form={FORM_ID}
                         disabled={isLoading || membersLoading}
                     >
                         {isLoading ? tc('actions.creating') : t('form.submit')}
@@ -222,38 +219,31 @@ export function NewCharacterForm({
                 </>
             }
         >
-            <div className="grid gap-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-8 col-span-full">
-                <div className="flex items-start gap-4 px-4 lg:contents lg:px-0">
-                    <div className="w-[104px] shrink-0 lg:contents">
-                        <SheetBanner
-                            hero={{
-                                name: hero.name,
-                                avatar: hero.avatar,
-                                raceColor: hero.raceColor,
-                                raceIcon: hero.raceIcon,
-                                level: Ui?.hideProgression
-                                    ? undefined
-                                    : hero.level,
-                            }}
-                            onPortrait={() => setPortraitOpen(true)}
-                        />
-                    </div>
-                    <p className="hud-title min-w-0 text-xl [overflow-wrap:anywhere] text-hud-ink lg:hidden">
-                        {hero.name}
-                    </p>
-                </div>
+            <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-6">
+                <SheetBanner
+                    hero={{
+                        name: basicInfo.data.name,
+                        avatar: basicInfo.data.avatar || null,
+                        raceColor: heroRace?.color ?? null,
+                        raceIcon: heroRace?.icon ?? null,
+                        race: basicInfo.data.race,
+                    }}
+                    onPortrait={() => setPortraitOpen(true)}
+                />
                 <HudForm
-                    id="character-form"
+                    id={FORM_ID}
                     onSubmit={handleSubmit}
                     error={error}
                     tabs={tabs}
+                    className="max-lg:col-span-2"
                 />
             </div>
             <PortraitDialog
                 open={portraitOpen}
                 onOpenChange={setPortraitOpen}
-                value={hero.avatar}
-                onChange={(url) => basicInfo.set('avatar', url ?? '')}
+                value={basicInfo.data.avatar || ''}
+                onChange={(value) => basicInfo.set('avatar', value)}
+                name={basicInfo.data.name}
             />
         </HudFormPage>
     );

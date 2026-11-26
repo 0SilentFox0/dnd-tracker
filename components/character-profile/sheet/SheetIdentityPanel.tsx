@@ -3,20 +3,20 @@
 import { type ReactNode, type Ref, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { useIdentityDraft } from '../IdentityDraft';
 import { useProfile } from '../ProfileContext';
 import { ArcaneRecoveryPanel } from '../rest/ArcaneRecoveryPanel';
 import { HitDicePanel } from '../rest/HitDicePanel';
 import { RestBadges } from '../rest/RestBadges';
-import { overlayIdentity } from './banner/build-identity-draft';
-import { useIdentityDraft } from './banner/IdentityDraft';
-import { SheetBanner } from './banner/SheetBanner';
+import { PortraitDialog } from './PortraitDialog';
+import { SheetBanner } from './SheetBanner';
 import { SheetXpBar } from './SheetPortraitStrip';
 
 import { HudButton } from '@/components/hud';
 import { systemUiOf } from '@/components/systems';
+import { useAlignmentLabel } from '@/lib/hooks/characters';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cn } from '@/lib/utils';
-import { alignmentLabel } from '@/lib/utils/characters/alignment';
 import { signed } from '@/lib/utils/common/format';
 import { stagger } from '@/lib/utils/common/motion';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
@@ -35,7 +35,7 @@ export function SheetIdentityPanel({
     actions,
     body,
     onHistory,
-    onPortrait,
+    onPortraitChange,
     children,
     ref,
 }: {
@@ -43,7 +43,7 @@ export function SheetIdentityPanel({
     actions?: ReactNode;
     body?: ReactNode;
     onHistory?: () => void;
-    onPortrait?: () => void;
+    onPortraitChange?: (value: string) => void;
     children?: ReactNode;
     ref?: Ref<HTMLElement>;
 }) {
@@ -53,11 +53,26 @@ export function SheetIdentityPanel({
 
     const tc = useTranslations('characterProfile.hero');
 
-    const tg = useTranslations('gameTerms');
-
     const [open, setOpen] = useState(false);
 
-    const id = overlayIdentity(sheet.identity, useIdentityDraft());
+    const [portraitOpen, setPortraitOpen] = useState(false);
+
+    const alignmentLabel = useAlignmentLabel();
+
+    const draft = useIdentityDraft();
+
+    const id = sheet.identity;
+
+    const shown = {
+        name: draft?.name ?? id.name,
+        race: draft?.race ?? id.race,
+        subrace: draft ? draft.subrace : id.subrace,
+        className: draft?.class || id.className,
+        subclass: draft ? draft.subclass : id.subclass,
+        alignment: draft ? draft.alignment : id.alignment,
+        avatar: (draft ? draft.avatar : id.avatar) || null,
+        level: draft?.level ?? id.level,
+    };
 
     const { def: system, system: current } = useCampaignSystem(
         campaignId,
@@ -72,13 +87,15 @@ export function SheetIdentityPanel({
 
     const who = [
         statColumnsOf(system).has('classes')
-            ? `${id.className}${id.subclass ? ` (${id.subclass})` : ''}`
+            ? `${shown.className}${shown.subclass ? ` (${shown.subclass})` : ''}`
             : sheet.hitDice === null && !Ui.hideProgression
               ? id.archetype
               : null,
-        `${id.race}${id.subrace ? ` (${id.subrace})` : ''}`,
+        shown.race
+            ? `${shown.race}${shown.subrace ? ` (${shown.subrace})` : ''}`
+            : null,
         background,
-        system.identity.alignments ? alignmentLabel(id.alignment, (key) => tg(key)) : null,
+        system.identity.alignments ? alignmentLabel(shown.alignment) : null,
     ].filter(Boolean);
 
     const lead = excerpt(sheet.story.biography);
@@ -90,7 +107,7 @@ export function SheetIdentityPanel({
             {actions && (
                 <div
                     data-testid="sheet-actions"
-                    className="sticky top-[calc(var(--shell-header-h,57px)/var(--sheet-zoom,1))] z-20 flex min-h-12 items-center justify-end gap-2 border-b border-hud-rule bg-hud-page/[.97] px-4 py-2 backdrop-blur"
+                    className="sticky top-[calc(var(--shell-header-h)/var(--sheet-zoom,1))] z-20 flex h-[var(--sheet-actions-h)] items-center justify-end gap-2 border-b border-hud-rule bg-hud-page/[.97] px-4 py-1 backdrop-blur"
                 >
                     {actions}
                 </div>
@@ -98,13 +115,18 @@ export function SheetIdentityPanel({
             <div className="motion-rise grid grid-cols-[104px_minmax(0,1fr)] px-4 pt-4 pb-4 max-lg:gap-x-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-x-8">
                 <SheetBanner
                     hero={{
-                        name: id.name,
-                        avatar: id.avatar,
+                        name: shown.name,
+                        avatar: shown.avatar,
                         raceColor: id.raceColor,
                         raceIcon: id.raceIcon,
-                        level: Ui.hideProgression ? undefined : id.level,
+                        race: shown.race,
+                        level: Ui.hideProgression ? undefined : shown.level,
                     }}
-                    onPortrait={onPortrait}
+                    onPortrait={
+                        onPortraitChange
+                            ? () => setPortraitOpen(true)
+                            : undefined
+                    }
                 />
                 <div className="contents lg:col-start-2 lg:row-start-1 lg:block lg:min-w-0">
                     <header
@@ -134,7 +156,7 @@ export function SheetIdentityPanel({
                             ))}
                         </p>
                         <h1 className="hud-title text-[28px] leading-none text-balance [overflow-wrap:anywhere] text-hud-ink lg:text-[clamp(40px,4.4vw,60px)] lg:leading-[.95]">
-                            {id.name}
+                            {shown.name}
                         </h1>
                         {lead && (
                             <div className="max-w-[48em] max-lg:hidden">
@@ -190,7 +212,7 @@ export function SheetIdentityPanel({
                     >
                         {xp && (
                             <SheetXpBar
-                                level={id.level}
+                                level={shown.level}
                                 xp={xp.value}
                                 ready={xp.levelUp}
                             />
@@ -213,6 +235,15 @@ export function SheetIdentityPanel({
                     )}
                 </div>
             </div>
+            {onPortraitChange && (
+                <PortraitDialog
+                    open={portraitOpen}
+                    onOpenChange={setPortraitOpen}
+                    value={shown.avatar ?? ''}
+                    onChange={onPortraitChange}
+                    name={shown.name}
+                />
+            )}
         </>
     );
 }

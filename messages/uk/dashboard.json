@@ -208,6 +208,7 @@
   },
   "reference": {
     "tabs": {
+      "label": "Розділ довідника",
       "all": "Усі",
       "skills": "Скіли",
       "classes": "Класи",
@@ -269,20 +270,21 @@
       },
       "artifacts": {
         "title": "Артефакти"
-      },
-      "sets": {
-        "title": "Сети"
       }
     },
     "detail": {
       "empty": "Оберіть запис зі списку"
     },
     "list": {
-      "showAll": "Показати всі {count} →",
-      "found": "{count, plural, one {# знайдено} other {# знайдено}}"
+      "showAll": "Показати всі ({count})",
+      "found": "Знайдено: {count}"
     },
     "rail": {
-      "sections": "Розділ довідника"
+      "sections": "Розділи"
+    },
+    "skill": {
+      "description": "Опис / механіка",
+      "how": "Як діє (бонуси, ефекти, тригери)"
     }
   },
   "prep": {

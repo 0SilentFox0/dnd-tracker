@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { useHasSessionCookie } from '@/lib/hooks/auth';
+import { useHasSessionCookie } from '@/lib/hooks/auth/useHasSessionCookie';
 
 export function SessionSwitch({
     guest,

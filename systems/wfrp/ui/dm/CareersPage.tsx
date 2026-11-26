@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Briefcase, Edit, Plus, Trash2 } from 'lucide-react';
 
@@ -9,14 +9,11 @@ import { EmptyState } from '@/components/common/states';
 import { ContentCopyButton } from '@/components/content-copy/ContentCopyButton';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { useCareers, useDeleteCareer } from '@/systems/wfrp/hooks/careers';
 import type { CareerData } from '@/systems/wfrp/rules/careers/types';
-import { CareerForm } from '@/systems/wfrp/ui/careers/CareerForm';
-
-const FORM_ID = 'career-form';
+import { CareerEditPage } from '@/systems/wfrp/ui/careers/CareerEditPage';
 
 export function CareersPage({
     campaignId,
@@ -37,11 +34,30 @@ export function CareersPage({
 
     const notify = useNotify();
 
-    const [editing, setEditing] = useState<CareerData | 'new' | null>(null);
+    const router = useRouter();
 
-    const [saving, setSaving] = useState(false);
+    const listHref = usePathname();
+
+    const selected = useSearchParams().get('career');
 
     const careers = list.data ?? [];
+
+    const open = (key: string) =>
+        router.push(`${listHref}?career=${encodeURIComponent(key)}`);
+
+    const editing = careers.find((c) => c.id === selected);
+
+    if (canEdit && selected === 'new')
+        return <CareerEditPage campaignId={campaignId} listHref={listHref} />;
+
+    if (canEdit && editing)
+        return (
+            <CareerEditPage
+                campaignId={campaignId}
+                career={editing}
+                listHref={listHref}
+            />
+        );
 
     const onDelete = async (career: CareerData) => {
         if (
@@ -74,7 +90,7 @@ export function CareersPage({
                                 kind="careers"
                             />
                             <Button
-                                onClick={() => setEditing('new')}
+                                onClick={() => open('new')}
                                 className="flex min-h-11 items-center gap-2"
                             >
                                 <Plus className="h-4 w-4" />
@@ -117,7 +133,7 @@ export function CareersPage({
                                         size="sm"
                                         variant="outline"
                                         className="min-h-11 flex-1"
-                                        onClick={() => setEditing(career)}
+                                        onClick={() => open(career.id)}
                                     >
                                         <Edit className="mr-1 h-4 w-4" />
                                         {tc('edit')}
@@ -138,50 +154,6 @@ export function CareersPage({
                     ))}
                 </DmCardGrid>
             </DmListBody>
-
-            <ResponsiveDialog
-                open={editing !== null}
-                onOpenChange={(open) => !open && setEditing(null)}
-                title={
-                    editing === 'new'
-                        ? t('form.createTitle')
-                        : t('form.editTitle')
-                }
-                size="lg"
-                hud
-                dismissible={!saving}
-                footer={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="min-h-11"
-                            onClick={() => setEditing(null)}
-                        >
-                            {tc('cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            form={FORM_ID}
-                            className="min-h-11"
-                            disabled={saving}
-                        >
-                            {tc('save')}
-                        </Button>
-                    </>
-                }
-            >
-                {editing && (
-                    <CareerForm
-                        key={editing === 'new' ? 'new' : editing.id}
-                        formId={FORM_ID}
-                        campaignId={campaignId}
-                        career={editing === 'new' ? undefined : editing}
-                        onSavingChange={setSaving}
-                        onDone={() => setEditing(null)}
-                    />
-                )}
-            </ResponsiveDialog>
         </HudPage>
     );
 }

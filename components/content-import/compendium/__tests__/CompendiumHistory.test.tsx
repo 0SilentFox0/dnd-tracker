@@ -1,61 +1,48 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
-import { CompendiumHistory } from '../history/CompendiumHistory';
+import { CompendiumHistory } from '../report/CompendiumHistory';
 
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
-import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 
-vi.unmock('next-intl');
 afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
 });
 
-it('lists short ids with a summary only when the run has a report and opens the run', async () => {
-    const report = {
-        counts: { created: 2, updated: 1, unchanged: 0, errors: 0 },
+it('shows a short run label with a summary and opens the report', async () => {
+    const run = {
+        id: 'abcdef123456789',
+        report: { counts: { created: 3, updated: 1, unchanged: 0, errors: 0 } },
     };
 
     vi.stubGlobal(
         'fetch',
         vi.fn(
             async () =>
-                new Response(
-                    JSON.stringify({
-                        runs: [
-                            { id: 'abcdef123456', report },
-                            { id: 'zzzzzz999999' },
-                        ],
-                        hasMore: false,
-                    })
-                )
+                new Response(JSON.stringify({ runs: [run], hasMore: false }))
         )
     );
 
     const openRun = vi.fn();
 
-    await renderWithIntl(
+    const { container } = render(
         <QueryClientProvider client={new QueryClient()}>
             <CompendiumHistory
                 campaignId="c"
                 wizard={
-                    {
-                        actions: { openRun },
-                    } as unknown as CompendiumImportController
+                    { actions: { openRun } } as unknown as CompendiumImportController
                 }
             />
-        </QueryClientProvider>,
-        { locale: 'uk', namespaces: ['common', 'validation', 'compendium'] }
+        </QueryClientProvider>
     );
 
-    await screen.findByText('Імпорт #abcdef');
-    expect(screen.getByText('Записів: 3')).toBeTruthy();
-    expect(screen.getAllByText(/Записів:/)).toHaveLength(1);
     fireEvent.click(
-        screen.getByRole('button', { name: 'Відкрити звіт: Імпорт #zzzzzz' })
+        await screen.findByRole('button', { name: 'compendium.history.open' })
     );
-    expect(openRun).toHaveBeenCalledWith({ id: 'zzzzzz999999' });
+    expect(openRun).toHaveBeenCalledWith(run);
+    expect(container.textContent).not.toContain('abcdef123456789');
+    expect(container.textContent).toContain('compendium.history.row');
 });

@@ -1,4 +1,3 @@
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { SpellEditForm } from '@/components/spells/form/forms/SpellEditForm';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
@@ -11,11 +10,5 @@ export default async function EditSpellPage({
 
     await requireCampaignDM(id);
 
-    return (
-        <SpellEditForm
-            campaignId={id}
-            spellId={spellId}
-            side={<SourceNotes campaignId={id} kind="spells" targetId={spellId} />}
-        />
-    );
+    return <SpellEditForm campaignId={id} spellId={spellId} />;
 }

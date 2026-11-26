@@ -4,6 +4,36 @@
 
 _Оновлено: 2026-11-26._
 
+**Лендінг v3 (`feat/landing-v3`, 2026-11-26, змерджено в main):** план [landing-v3](archive/superpowers/plans/2026-11-26-landing-v3.md), Task 1–4, 7–9 + хвилі за відгуком власника (перший екран над мапою світу, туман hero на WebGL2-шейдері мапи світу — виняток лише для цього шару, фінальний CTA — 2D; хореографія секцій; живе демо бою по мовах `SCENES`) + скріни `feat/landing-shots` (`public/landing/{en,uk}/`, hero = dashboard, картку редактора мап прибрано). Opus-рев'ю хвиль `review-waves.md` (0C/5I/12M) виправлено `2b6622b`, повторне рев'ю APPROVED. Гейти: tsc, cycles, eslint змінених файлів, повний test:run; `next build` у цій сесії не запускали (за рішенням власника; попередня збірка `.next-demo` — `/`, `/uk`, 6 legal статичні), живий прогін 390/1440/2560/3840 і Lighthouse не робили. **Відкрито:** Lighthouse (mobile ≥ 90, desktop ≥ 95), `/simplify`, перевірка Vercel preview після пушу; рев'ю-мінори M3 (пауза для безкінечних анімацій, WCAG 2.2.2), M11 (hero на телефоні здебільшого scrim), M12 (спільна шапка тягне ~60 KB gzip на лендинг), N2 (пензель туману ігнорує паралакс), N3 (тест release при прихованій вкладці); вигадані імена в демо (Elowen, Торвальд). Власнику: увімкнути Web Analytics у Vercel; `LEGAL` TODO-operator-*; `SITE_INDEXING` не вмикати. Частина 5 (видалення акаунта) — нижче.
+
+**Видалення акаунта — лендінг v3, Ч5 (`feat/account-delete`, ../dnd-tracker-account, 2026-11-26, не змерджено й не запушено):**
+- **Що зроблено:** Task 11–13 + legal; опис у [platform.md](architecture/platform.md#account-deletion). Профіль → «Небезпечна зона» → `DELETE /api/account` → сервіс із гардом шаблонів (409), транзакцією, Storage і Supabase admin. Privacy/Terms ведуть у профіль, email лишився запасним варіантом. Після коміту учасники видаленого користувача в незавершених боях чужих ДМів переходять до ДМа (`reassignUserParticipants`, мутація `reassign-controller` через pipeline, `controlledBy` = `dm`).
+- **Відхилення від плану:** `Character.controlledBy` у БД має NOT NULL, тому герої видаленого гравця в чужих кампаніях переходять до ДМа кампанії, а не стають `null`. Міграції немає.
+- **Гейти:** tsc, cycles, eslint змінених файлів, інтеграційні тести 6/6 на `deletetest_account`.
+- **Живий прогін:** `next start` :3140, БД `accountlive`, тестові акаунти `aspizhav+acc-*` (після прогону прибрано з Supabase). Пройдено:
+  - гравець через UI: вихід і редирект на `/`;
+  - заблокований ДМ: 409 і текст із контактом;
+  - неправильний email: 400;
+  - ДМ із гравцем: кампанія зникла, у гравця список без 500;
+  - повтор після частково невдалого видалення (рядка `users` нема, auth-користувач живий): 200, auth видалено;
+  - повтор після повного видалення: 401.
+  - За результатом прогону виправлено: сервер тепер чистить cookie сесії.
+- **Рев'ю Opus (0C/3I/8M):** виправлено в `2a7d9662b`:
+  - I1: гард шаблонів і вибірка власних кампаній тепер у транзакції з `FOR UPDATE`;
+  - I2: план Storage складається після коміту, а якщо впаде, id потрапляють у лог;
+  - I3: base-рядки шаблонів видаляються;
+  - M4, M5, M9, M10.
+- **Повторний API-прогін після правок:** 409, 200, 200; героя передано ДМу, base-рядки шаблону видалено, auth-користувачів видалено.
+- **Повний `test:run`:** 22593 passed, 3 падіння:
+  - `system-install-entries` через `scripts/maps/lib/convert-map.ts`: давнє, з main;
+  - `world-travel-api` і `route-scopes`: окремо проходять (флейки під навантаженням).
+- **Відкрито:**
+  - реальне видалення файлів зі Storage не перевірено: у тестових акаунтів не було файлів, перевірено лише листинг;
+  - Vercel preview;
+  - M8: перевірка email не є повторною автентифікацією, рішення власника;
+  - M11: файли, завантажені між плануванням і видаленням, лишаються;
+  - звичайне видалення кампанії-шаблону (`action-service.deleteCampaign`) усе ще лишає base-рядки.
+
 **Map-art Ч1b — арт-сцена й запікання (`feat/map-art`, ../dnd-tracker-mapart, код готовий до злиття, не змерджено й не запушено):** таблиця `battle_map_art`, `deriveMechanics` як єдине джерело механіки, запікання сцени в WebP у браузері ДМ, `artBaked` (SVG-стіни не малюються), конвертер тайлів. Гейти зелені (22509 тестів). Опис — [map-modes.md](architecture/map-modes.md#арт-карти-арт-ч1b).
 - **Відкриті хвости:** живі перевірки Ч1a на hex (шлях навколо стіни, туман, push, двері B6 для гравця); `pushAway` — footprint (`push.ts:39`); M4 — `erase` клітинки, заблокованої сценою, скасовується при збереженні; M6 — `edge-art`/`effects` конвертер відкидає (лишаються лише в старих знімках); M7 — живий прогін (hex-підлоги/стіни, м'які краї, світло на межах брудних чанків, запікання hex 200 колонок на реальному пристрої); M8 — `cloneMap` створює рядок арту поза транзакцією `createMap`.
 - **Runbook прод:** міграція `20261226000000_battle_map_art` їде з main → бекап → `scripts/maps/convert-tiles-to-art.ts` dry-run, потім `--apply` (2 карти з `ground`/`wallfill`, 17 чанків; конвертер піднімає `mapVersion` і знімок). Карти лишаються незапеченими, доки ДМ не відкриє й не збереже кожну вручну.
@@ -65,6 +95,15 @@ _Оновлено: 2026-11-26._
 **Передзлиттєве ревю, частина 2 закрита (2026-10-28, `feat/constructor`):** виправлено 86 знахідок реєстру (76 повністю, 8 частково, A22 і B27 у backlog, B04 довгостроково - epic D3), [Disposition і відкриті пункти](archive/superpowers/2026-10-27-constructor-premerge-findings.md); фінальне Opus-ревю без critical, I1-I3 виправлено. tsc, lint (0 errors), `test:run` 8475/8477 (2 таймаути під навантаженням, окремо зелені), integration 138/138, build пройшли. **Не виконано:** battle-sweep на prodcopy (потрібна перебудована prodcopy, рішення користувача), браузерна перевірка a11y діалогів, реальний Chrome `assistant-check --run`. Далі виконано частину 3 (HOMM-шлюз): [звіт](archive/superpowers/2026-10-27-homm-gate-report.md).
 
 ## У роботі
+
+**«Кодекс»: редизайн бібліотек, довідника й героя (змерджено й запушено в main 2026-11-26):** широкі форми бібліотек на `HudFormPage` (rail/main/side, дії, preview), довідник `/info` (rail, список, деталь), майстер імпорту компендіуму, «Книга правил», сторінка героя (вкладка «Основне», банер із кольором і гербом раси), єдина шапка `HudShellHeader` для ігрової й класичної оболонки, scrim док-панелі дій у бою. Архітектура — [ui-layers.md](architecture/ui-layers.md). Spec/план: `docs/superpowers/{specs,plans}/2026-11-26-*redesign-codex*`.
+Відкриті хвости: ревʼю (final-review.md) — M3 `useReferenceSelection` не пише `?s=` і не резолвить за `byKey`; M6 дрібні прогалини `/info`/правил (лічильник «знайдено», `aria-controls`, сирий ключ механіки в `RulesSide`, side на lg); M9 hud-kit імпортує barrel `@/lib/hooks/common` (ESLint забороняє deep); M10 банер: раса лишається збереженою, клас/рівень з legacy `draft`, порожнє імʼя без «?»; M11 `max-w-[1680px]` проти 1440 зі spec, нижня смуга дій фіксовані 72px, side монтується двічі на phone; M13 тонкі початкові дані демо правил (refetch гостя); M14 TTL превʼю з видачі, головна кнопка кроку 1 завжди «Перевірити», `Checkbox` без gold; M15 rail миготить горизонтально до першого ефекту (`useMediaQuery`). A9: вбудований summary — липка смуга в тілі діалогу, а не в footer; у summary майстра немає міні медіа-смуги. final-review-2: M3 тексти підтвердження видалення відрізняються від списку; M4 прогалини в тестах; M5 назва `isMobile`; M6 форми без side на desktop втратили завжди видимий «Зберегти» (рішення власника). Rail компендіуму горизонтальний на 1280 — прийнято. Далі: редизайн «Карта бою» (редагування бою) на HUD-kit за spec dm-battles-and-creation.
+### Landing v3 Ч3: скріни (2026-11-26, `feat/landing-shots`)
+- DONE: `public/landing/{en,uk}/` (en-srd 15 кадрів + en-homm `hero`; uk-homm 13 кадрів), старі `public/landing/screen-*.webp` видалено, `media.test.ts` перевіряє наявність файлів (виняток `mapEditor` — фічу не знімаємо, картка без мініатюри).
+- Тріптих «Бій» `combat-1/2/3` (`ShowcaseId` combat1–3; секція ще на `combat` = screen-battle). Бій знімається з дампа: `scripts/landing/battle-state.mjs --save|--restore`, шоти `restore: true`/`frames`. Профілі: `capture-screens.mjs --profile=<en-srd|en-homm|uk-homm> --port=3000 [--only=...]`; `replayBattle` не вмикати.
+- Сид демо `landingshots`: `seed-showcase-{heroes.ts,world.mjs,campaigns.mjs}` (campaigns не ідемпотентний). `landing_homm`: Зехіру дописано `knownSpells` у snapshot бою (кільце слотів).
+- **Слабке:** en world без сліду героїв (слід лише у вигляді ДМ), en combat-2 без снарядів FX, en scenario-graph дрібний, на dashboard плашка «Template updated»; uk mcp/show/player-mobile/world не переробляли; кадри >450 КБ стискаються зменшенням ширини (спільний скрипт); `.landing-auth/state.json` токен закінчується → `--login`.
+
 
 **Ч6 фінал: «ігровий» екран бою (`feat/game-ui-ch6`, ../dnd-tracker-ch6, HEAD 1c7265a3b; не змерджена й не запушена, чекає «так»):** батчі 5–7 правок власника, Opus-рев'ю з фіксами, simplify. Згортання HUD-блоків і `H`, кластер героя (кільце слотів, ≤5 рекомендованих; на phone лише аватар), hex «ДІЯ» + поповер/hotkeys, ініціатива (поточний раунд; ДМ — повна черга з reorder; на phone вертикальна), камера (десктоп cover + старт по bbox токенів; phone fit + завжди поворот 90° + відступ 44 px), рух ДМ = звичайна дальність. Деталі — [battle.md](architecture/battle.md#сцена-бою-ч6). **Відкриті хвости:** T10 не перевірено (hotkeys 1, 3–6, Q; disabled-стан hex; reduced-motion; ролі player/observer; fallen/reserve/PREPARED; wfrp/d6pool); давні падіння тестів на main: props-budget (`DashboardGroups`, `HudGameShell`), `system-install-entries` (journal), assistant coverage (quests); Minor 8 (`GridShapePicker`-заглушка Hex, до ch7c) відкладено; Minor 9 (дрібний текст на phone) — рішення власника; трек ініціативи для ДМ (I4 ревю) виправлено. Merge/push і `git mv` spec/plan в архів — у merge-коміті, після «так».
 

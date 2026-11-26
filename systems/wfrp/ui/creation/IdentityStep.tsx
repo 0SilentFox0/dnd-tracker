@@ -12,7 +12,7 @@ import { FormField } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { ALIGNMENTS } from '@/lib/constants/alignment';
-import { alignmentLabel } from '@/lib/utils/characters/alignment';
+import { useAlignmentLabel } from '@/lib/hooks/characters';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 
 export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
@@ -20,7 +20,7 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
 
     const te = useTranslations('wfrpCreation.errors');
 
-    const tg = useTranslations('gameTerms');
+    const alignmentLabel = useAlignmentLabel();
 
     const alignments = RULE_SYSTEM_REGISTRY.wfrp.identity.alignments;
 
@@ -83,7 +83,7 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
                         placeholder={t('alignmentPlaceholder')}
                         options={ALIGNMENTS.map((a) => ({
                             value: a,
-                            label: alignmentLabel(a, (key) => tg(key)),
+                            label: alignmentLabel(a),
                         }))}
                         allowNone
                         triggerClassName="min-h-11 w-full"

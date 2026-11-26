@@ -1,12 +1,14 @@
 'use client';
 
-import { type ReactNode, useDeferredValue } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { RaceFormFields } from './RaceFormFields';
+import { RACE_FORM_TAB } from './race-form-tabs';
+import { useRaceFormTabs } from './useRaceFormTabs';
 
 import { withAbilityErrors } from '@/components/abilities';
-import { PlayerPreview } from '@/components/common/entity/PlayerPreview';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { RaceCard } from '@/components/races/RaceCard';
 import { systemUiOf } from '@/components/systems';
@@ -16,6 +18,7 @@ import { useRuleSystem } from '@/lib/hooks/systems';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { getInitialRaceFormData } from '@/lib/utils/races/race-form';
+import { toRacePreview } from '@/lib/utils/races/reference-preview';
 import type { Race } from '@/types/races';
 
 const FORM_ID = 'race-form';
@@ -23,10 +26,9 @@ const FORM_ID = 'race-form';
 interface RaceEditFormProps {
     campaignId: string;
     race: Race;
-    side?: ReactNode;
 }
 
-export function RaceEditForm({ campaignId, race, side }: RaceEditFormProps) {
+export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
     const t = useTranslations('races');
 
     const ta = useTranslator('abilities');
@@ -43,22 +45,46 @@ export function RaceEditForm({ campaignId, race, side }: RaceEditFormProps) {
         getInitialRaceFormData(race)
     );
 
-    const deferred = useDeferredValue(editor.form.data);
+    const preview = useDeferredValue(
+        useMemo(
+            () => toRacePreview(race, editor.form.data),
+            [race, editor.form.data]
+        )
+    );
+
+    const tabs = useRaceFormTabs({
+        campaignId,
+        form: editor.form,
+        abilityIssues: race.abilityIssues,
+        onAbilitiesValidityChange: editor.abilities.onValidityChange,
+    }).map((tab) =>
+        tab.id === RACE_FORM_TAB.basic && ProfileEditor
+            ? {
+                  ...tab,
+                  content: (
+                      <div className="space-y-6">
+                          {tab.content}
+                          <ProfileEditor
+                              campaignId={campaignId}
+                              raceId={race.id}
+                          />
+                      </div>
+                  ),
+              }
+            : tab
+    );
 
     return (
         <HudFormPage
             width="wide"
-            title={t('edit.title')}
-            aside={t('edit.aside')}
-            side={
-                <PlayerPreview notes={side}>
-                    <RaceCard
-                        race={{ ...race, ...deferred }}
-                        campaignId={campaignId}
-                        canEdit={false}
-                    />
-                </PlayerPreview>
-            }
+            header={{
+                title: t('edit.title'),
+                aside: t('edit.aside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/races`,
+                    label: tc('dmSections.races'),
+                },
+            }}
             actions={
                 <>
                     <Button
@@ -85,33 +111,34 @@ export function RaceEditForm({ campaignId, race, side }: RaceEditFormProps) {
                     </Button>
                 </>
             }
+            side={
+                <>
+                    <FormPreviewPanel>
+                        <RaceCard
+                            race={preview}
+                            campaignId={campaignId}
+                            canEdit={false}
+                        />
+                    </FormPreviewPanel>
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="races"
+                        targetId={race.id}
+                    />
+                </>
+            }
         >
             <HudForm
                 id={FORM_ID}
                 onSubmit={editor.actions.submit}
+                tabs={tabs}
+                tabStyles={{ variant: 'rail' }}
                 error={
                     editor.status.error != null
                         ? errorMessage(editor.status.error, t('edit.error'))
                         : null
                 }
-            >
-                <div className="space-y-6">
-                    <RaceFormFields
-                        campaignId={campaignId}
-                        form={editor.form}
-                        abilityIssues={race.abilityIssues}
-                        onAbilitiesValidityChange={
-                            editor.abilities.onValidityChange
-                        }
-                    />
-                    {ProfileEditor && (
-                        <ProfileEditor
-                            campaignId={campaignId}
-                            raceId={race.id}
-                        />
-                    )}
-                </div>
-            </HudForm>
+            />
         </HudFormPage>
     );
 }

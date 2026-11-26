@@ -1,6 +1,17 @@
 import { ALIGNMENTS } from '@/lib/constants/alignment';
 
-export const ALIGNMENT_KEYS = [
+export type AlignmentKey =
+    | 'lawfulGood'
+    | 'neutralGood'
+    | 'chaoticGood'
+    | 'lawfulNeutral'
+    | 'trueNeutral'
+    | 'chaoticNeutral'
+    | 'lawfulEvil'
+    | 'neutralEvil'
+    | 'chaoticEvil';
+
+export const ALIGNMENT_KEYS: readonly AlignmentKey[] = [
     'lawfulGood',
     'neutralGood',
     'chaoticGood',
@@ -10,28 +21,29 @@ export const ALIGNMENT_KEYS = [
     'lawfulEvil',
     'neutralEvil',
     'chaoticEvil',
-] as const;
+];
 
-export type AlignmentKey = (typeof ALIGNMENT_KEYS)[number];
+const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();
 
-export type AlignmentTermKey = `alignments.${AlignmentKey}.${'name' | 'short'}`;
+const BY_NAME = new Map<string, AlignmentKey>([
+    ...ALIGNMENTS.map((name, i): [string, AlignmentKey] => [
+        normalize(name),
+        ALIGNMENT_KEYS[i],
+    ]),
+    ['neutral', 'trueNeutral'],
+]);
 
-export function alignmentKeyOf(
+export function alignmentKey(
     value: string | null | undefined
 ): AlignmentKey | null {
-    const index = ALIGNMENTS.findIndex((a) => a === value?.trim());
-
-    return ALIGNMENT_KEYS[index] ?? null;
+    return value ? (BY_NAME.get(normalize(value)) ?? null) : null;
 }
 
-export function alignmentLabel(
-    value: string | null | undefined,
-    t: (key: AlignmentTermKey) => string,
-    form: 'name' | 'short' = 'name'
-): string {
-    if (!value) return '';
+export function alignmentLabelKey(
+    value: string,
+    form: 'name' | 'short'
+): string | null {
+    const key = alignmentKey(value);
 
-    const key = alignmentKeyOf(value);
-
-    return key ? t(`alignments.${key}.${form}`) : value;
+    return key ? `alignments.${key}.${form}` : null;
 }

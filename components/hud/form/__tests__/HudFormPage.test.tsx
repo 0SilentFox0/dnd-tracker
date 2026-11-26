@@ -1,86 +1,155 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HudFormPage } from '@/components/hud/form';
-import { Button } from '@/components/ui/button';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 
+beforeEach(() => mockMatchMedia(false));
 afterEach(cleanup);
 
 describe('HudFormPage', () => {
-    it('keeps the narrow markup by default', () => {
+    it('narrow is the default, caps width and ignores side', () => {
         const { container } = render(
-            <HudFormPage title="T">
-                <p>body</p>
+            <HudFormPage header={{ title: 'T' }} side={<p>preview</p>}>
+                body
             </HudFormPage>
         );
 
-        const root = container.firstElementChild as HTMLElement;
-
-        expect(root.className).toContain('max-w-3xl');
-        expect(root.className).toContain('ornate');
-        expect(root.querySelector('aside')).toBeNull();
+        expect(container.firstElementChild?.className).toContain('max-w-3xl');
+        expect(screen.queryByText('preview')).toBeNull();
+        expect(screen.getByRole('heading', { name: 'T' })).toBeTruthy();
     });
 
-    it('renders actions once and they submit the form in children', () => {
+    it('wide renders the aside and exactly one actions node', () => {
+        render(
+            <HudFormPage
+                width="wide"
+                header={{ title: 'T' }}
+                side={<p>preview</p>}
+                actions={<button type="submit">save</button>}
+            >
+                body
+            </HudFormPage>
+        );
+
+        const aside = screen.getByRole('complementary', {
+            name: 'common.ui.preview',
+        });
+
+        expect(aside.textContent).toBe('preview');
+        expect(screen.getAllByRole('button', { name: 'save' })).toHaveLength(1);
+    });
+
+    it('submits a form from actions rendered outside it', () => {
         const onSubmit = vi.fn((e) => e.preventDefault());
 
         render(
             <HudFormPage
-                title="T"
                 width="wide"
+                header={{ title: 'T' }}
                 actions={
-                    <Button type="submit" form="f">
-                        Зберегти
-                    </Button>
+                    <button type="submit" form="f">
+                        save
+                    </button>
                 }
             >
-                <form id="f" onSubmit={onSubmit} />
+                <form id="f" onSubmit={onSubmit}>
+                    <input aria-label="x" />
+                </form>
             </HudFormPage>
         );
 
-        const buttons = screen.getAllByRole('button', { name: 'Зберегти' });
+        fireEvent.click(screen.getByRole('button', { name: 'save' }));
 
-        expect(buttons).toHaveLength(1);
-        fireEvent.click(buttons[0]);
         expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
-    it('wide with side renders a labelled aside; page has none', () => {
-        const { container, rerender } = render(
-            <HudFormPage title="T" width="wide" side={<p>preview</p>}>
-                <p>body</p>
+    it('renders the back link', () => {
+        render(
+            <HudFormPage
+                width="wide"
+                header={{
+                    title: 'T',
+                    back: { href: '/lib', label: 'Library' },
+                }}
+            >
+                body
             </HudFormPage>
         );
 
         expect(
-            screen.getByRole('complementary', {
-                name: 'common.form.previewTitle',
-            })
-        ).toBeTruthy();
-
-        rerender(
-            <HudFormPage title="T" width="page" side={<p>preview</p>}>
-                <p>body</p>
-            </HudFormPage>
-        );
-        expect(screen.queryByRole('complementary')).toBeNull();
-        expect(
-            (container.firstElementChild as HTMLElement).className
-        ).toContain('max-w-page');
+            screen.getByRole('link', { name: 'Library' }).getAttribute('href')
+        ).toBe('/lib');
     });
 
-    it('opens the preview dialog with the side content', () => {
+    it('opens the preview dialog from the header button', async () => {
         render(
-            <HudFormPage title="T" width="wide" side={<p>preview-node</p>}>
-                <p>body</p>
+            <HudFormPage
+                width="wide"
+                header={{ title: 'T' }}
+                side={<p>preview</p>}
+            >
+                body
             </HudFormPage>
         );
 
-        expect(screen.getAllByText('preview-node')).toHaveLength(1);
         fireEvent.click(
-            screen.getByRole('button', { name: 'common.form.preview' })
+            screen.getByRole('button', { name: 'common.ui.preview' })
         );
-        expect(screen.getAllByText('preview-node').length).toBeGreaterThan(1);
+
+        expect(await screen.findByRole('dialog')).toBeTruthy();
+        expect(screen.getAllByText('preview').length).toBe(2);
+    });
+
+    it('sidePreview={false} keeps the aside but drops the preview button', () => {
+        render(
+            <HudFormPage
+                width="wide"
+                header={{ title: 'T' }}
+                side={<p>preview</p>}
+                sidePreview={false}
+            >
+                body
+            </HudFormPage>
+        );
+
+        expect(document.querySelector('.hud-form-side')).not.toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'common.ui.preview' })
+        ).toBeNull();
+    });
+
+    it('css gives every wide template a notice row and a header bar without side', () => {
+        const css = readFileSync('components/hud/hud.css', 'utf8');
+
+        const areas = css.match(/grid-template-areas: [^;]+;/g) ?? [];
+
+        expect(areas.length).toBeGreaterThan(0);
+        expect(areas.every((a) => a.includes('notice'))).toBe(true);
+        expect(css).toMatch(
+            /:not\(:has\(> \.hud-form-side\)\)\) > \.hud-form-actions \{ grid-row: 1; position: static/
+        );
+    });
+
+    it('css gives the wide form a 16px phone gutter and an opaque lg+ actions bar', () => {
+        const css = readFileSync('components/hud/hud.css', 'utf8');
+
+        expect(css).toMatch(
+            /@media \(max-width: 639px\) \{\s*\.hud-form-wide \{ padding-inline: 16px; \}/
+        );
+        expect(css).toMatch(
+            /\.hud-form-wide > \.hud-form-actions \{ grid-row: 1 \/ -1; grid-column: 2;[^}]*backdrop-filter: blur\(6px\)/
+        );
+    });
+
+    it('css moves the lg-only rail page actions to column 3 and uses the palette page token', () => {
+        const css = readFileSync('components/hud/hud.css', 'utf8');
+
+        expect(css).toMatch(
+            /@media \(min-width: 1024px\) and \(max-width: 1279px\) \{[^@]*:has\(\[data-rail-from="lg"\]\) > \.hud-form-actions \{ grid-column: 3; \}/
+        );
+        expect(css).not.toContain('var(--hud-page');
     });
 });

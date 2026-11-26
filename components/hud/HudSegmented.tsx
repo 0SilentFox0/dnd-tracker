@@ -1,23 +1,13 @@
 'use client';
 
-import { type KeyboardEvent, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
+import {
+    HUD_CHIP_ACTIVE_CLASS,
+    HUD_CHIP_CLASS,
+} from '@/components/hud/page/HudChipTabs';
+import { useRovingIndex } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
-
-export interface HudSegmentedOption<T extends string> {
-    value: T;
-    label: ReactNode;
-    ariaLabel?: string;
-}
-
-interface HudSegmentedProps<T extends string> {
-    id: string;
-    value: T | null;
-    options: HudSegmentedOption<T>[];
-    onValueChange: (value: T) => void;
-    label: string;
-    disabled?: boolean;
-}
 
 export function HudSegmented<T extends string>({
     id,
@@ -26,71 +16,51 @@ export function HudSegmented<T extends string>({
     onValueChange,
     label,
     disabled,
-}: HudSegmentedProps<T>) {
-    const selected = options.findIndex((option) => option.value === value);
+}: {
+    id: string;
+    value: T | null;
+    options: { value: T; label: ReactNode }[];
+    onValueChange: (v: T) => void;
+    label: string;
+    disabled?: boolean;
+}) {
+    const selected = options.findIndex((o) => o.value === value);
 
-    const tabbable = selected >= 0 ? selected : 0;
-
-    function select(index: number) {
-        const target = options[(index + options.length) % options.length];
-
-        if (!target) return;
-
-        onValueChange(target.value);
-        document.getElementById(`${id}-${target.value}`)?.focus();
-    }
-
-    function onKeyDown(event: KeyboardEvent, index: number) {
-        if (disabled) return;
-
-        const next: Record<string, number> = {
-            ArrowRight: index + 1,
-            ArrowDown: index + 1,
-            ArrowLeft: index - 1,
-            ArrowUp: index - 1,
-            Home: 0,
-            End: options.length - 1,
-        };
-
-        if (!(event.key in next)) return;
-
-        event.preventDefault();
-        select(next[event.key]);
-    }
+    const roving = useRovingIndex({
+        count: options.length,
+        active: Math.max(selected, 0),
+        loop: true,
+        onMove: (i) => onValueChange(options[i].value),
+    });
 
     return (
         <div
             id={id}
             role="radiogroup"
             aria-label={label}
-            className="inline-flex gap-1 rounded-lg border border-hud-line p-1"
+            className="flex flex-wrap gap-1.5"
+            onKeyDown={disabled ? undefined : roving.onKeyDown}
         >
-            {options.map((option, index) => {
-                const checked = index === selected;
-
-                return (
-                    <button
-                        key={option.value}
-                        id={`${id}-${option.value}`}
-                        type="button"
-                        role="radio"
-                        aria-checked={checked}
-                        aria-label={option.ariaLabel}
-                        data-value={option.value}
-                        disabled={disabled}
-                        tabIndex={index === tabbable ? 0 : -1}
-                        onClick={() => onValueChange(option.value)}
-                        onKeyDown={(event) => onKeyDown(event, index)}
-                        className={cn(
-                            'ds-interactive h-10 rounded-md px-3 text-sm text-hud-muted hover:text-hud-ink disabled:opacity-50 max-sm:h-11',
-                            checked &&
-                                'bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-accent)]'
-                        )}
-                    >
-                        {option.label}
-                    </button>
-                );
-            })}
+            {options.map((o, i) => (
+                <button
+                    key={o.value}
+                    id={`${id}-${o.value}`}
+                    ref={roving.itemRef(i)}
+                    type="button"
+                    role="radio"
+                    aria-checked={i === selected}
+                    tabIndex={roving.tabIndex(i)}
+                    disabled={disabled}
+                    onClick={() => onValueChange(o.value)}
+                    className={cn(
+                        HUD_CHIP_CLASS,
+                        'cursor-pointer disabled:pointer-events-none disabled:opacity-50',
+                        i === selected && HUD_CHIP_ACTIVE_CLASS
+                    )}
+                >
+                    {o.label}
+                </button>
+            ))}
         </div>
     );
 }

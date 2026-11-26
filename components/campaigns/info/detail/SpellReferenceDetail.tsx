@@ -3,11 +3,14 @@
 import { useTranslations } from 'next-intl';
 import { Sparkles } from 'lucide-react';
 
-import { AppearanceSection } from './AppearanceSection';
-import { DetailSection, ReferenceDetailShell } from './ReferenceDetailShell';
-import type { ReferenceDetailProps } from './types';
+import { AppearanceBlock } from './AppearanceBlock';
+import {
+    DetailChip,
+    DetailHeader,
+    DetailRoot,
+    DetailSection,
+} from './DetailParts';
 
-import { HudPill } from '@/components/hud/page';
 import { SpellBattlePreview } from '@/components/spells/preview/SpellBattlePreview';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useUpdateSpellAppearance } from '@/lib/hooks/spells';
@@ -15,55 +18,64 @@ import { useTranslator } from '@/lib/i18n/use-translator';
 import { formatMechanicsSpell } from '@/lib/utils/campaigns/info-reference';
 import type { SpellForReference } from '@/types/info-reference';
 
+interface SpellReferenceDetailProps {
+    campaignId: string;
+    item: SpellForReference;
+    isDM: boolean;
+}
+
 export function SpellReferenceDetail({
     campaignId,
-    item: spell,
+    item,
     isDM,
-}: ReferenceDetailProps<SpellForReference>) {
-    const t = useTranslations('spells.reference');
+}: SpellReferenceDetailProps) {
+    const t = useTranslations('reference.card');
 
     const translate = useTranslator();
 
-    const appearance = useUpdateSpellAppearance(
+    const effects = useAbilityText().lines(item.effects);
+
+    const {
+        draft: { data: appearance, set: setAppearance },
+        saveText,
+    } = useUpdateSpellAppearance(
         campaignId,
-        spell.id,
-        spell.appearanceDescription ?? ''
+        item.id,
+        item.appearanceDescription ?? ''
     );
 
-    const effects = useAbilityText().lines(spell.effects);
-
     return (
-        <ReferenceDetailShell
-            icon={spell.icon}
-            fallback={<Sparkles className="size-7" />}
-            name={spell.name}
-            chips={
-                <>
-                    <HudPill tone="accent">
-                        {t('levelShort', { level: spell.level })}
-                    </HudPill>
-                    {spell.groupName ? (
-                        <HudPill>{spell.groupName}</HudPill>
-                    ) : null}
-                </>
-            }
-        >
-            <AppearanceSection
-                title={t('appearance')}
-                placeholder={t('appearancePlaceholder')}
-                saveLabel={t('saveAppearance')}
-                controller={appearance}
-                isDM={isDM}
+        <DetailRoot>
+            <DetailHeader
+                icon={item.icon}
+                name={item.name}
+                fallback={<Sparkles className="size-7" />}
+                chips={
+                    <>
+                        <DetailChip>
+                            {t('levelShort', { level: item.level })}
+                        </DetailChip>
+                        {item.groupName && (
+                            <DetailChip>{item.groupName}</DetailChip>
+                        )}
+                    </>
+                }
+            />
+            {item.description && (
+                <p className="text-sm text-hud-bone">{item.description}</p>
+            )}
+            <AppearanceBlock
+                text={isDM ? appearance : (item.appearanceDescription ?? '')}
+                canEdit={isDM}
+                onSave={async (text) => {
+                    setAppearance(text);
+                    saveText(text);
+                }}
             />
             <DetailSection title={t('mechanics')}>
-                <p>{formatMechanicsSpell(spell, translate)}</p>
+                {formatMechanicsSpell(item, translate)}
             </DetailSection>
-            {spell.description ? (
-                <DetailSection title={t('description')}>
-                    <p className="whitespace-pre-line">{spell.description}</p>
-                </DetailSection>
-            ) : null}
-            {spell.effects.length > 0 ? (
+            {item.effects.length > 0 && (
                 <DetailSection title={t('effects')}>
                     <ul className="list-inside list-disc space-y-0.5">
                         {effects.map((e, i) => (
@@ -71,19 +83,19 @@ export function SpellReferenceDetail({
                         ))}
                     </ul>
                 </DetailSection>
-            ) : null}
-            {spell.rules ? (
+            )}
+            {item.rules && (
                 <SpellBattlePreview
                     spell={{
-                        id: spell.id,
-                        name: spell.name,
-                        level: spell.level,
+                        id: item.id,
+                        name: item.name,
+                        level: item.level,
                         groupId: null,
-                        fx: spell.fx,
-                        rules: spell.rules,
+                        fx: item.fx,
+                        rules: item.rules,
                     }}
                 />
-            ) : null}
-        </ReferenceDetailShell>
+            )}
+        </DetailRoot>
     );
 }

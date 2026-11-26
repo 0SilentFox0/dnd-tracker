@@ -95,7 +95,7 @@ export function NewCampaignForm() {
     };
 
     return (
-        <HudFormPage title={t('form.title')} aside={t('form.aside')}>
+        <HudFormPage header={{ title: t('form.title'), aside: t('form.aside') }}>
             <HudForm
                 id="campaign-form"
                 onSubmit={handleSubmit}

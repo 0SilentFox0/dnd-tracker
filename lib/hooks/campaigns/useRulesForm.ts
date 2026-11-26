@@ -8,6 +8,7 @@ import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useNotify } from '@/lib/hooks/common';
 import { sameJson } from '@/lib/utils/common/json';
 import { type Ruleset, type RulesetPatch } from '@/lib/utils/rules';
+import type { CampaignRulesView } from '@/types/campaigns';
 
 export const HERO_LEVELS = Array.from(
     { length: MAX_CLASS_LEVEL },
@@ -22,12 +23,9 @@ export interface RulesFormState {
 
 export function useRulesForm(
     campaignId: string,
-    opts: { initial?: Ruleset } = {}
+    opts?: { initial?: CampaignRulesView }
 ) {
-    const { initial } = opts;
-
-    // An empty id disables the fetch: initial rules (demo guest) are the whole truth
-    const query = useCampaignRules(initial ? '' : campaignId);
+    const query = useCampaignRules(campaignId, opts);
 
     const update = useUpdateCampaignRules(campaignId);
 
@@ -37,7 +35,7 @@ export function useRulesForm(
 
     const [changes, setChanges] = useState<Partial<Ruleset>>({});
 
-    const server: Ruleset | undefined = initial ?? query.data;
+    const server = query.data;
 
     const merged = server && { ...server, ...changes };
 
@@ -49,20 +47,11 @@ export function useRulesForm(
         },
     };
 
-    const dirtyList = server
+    const dirtyKeys = server
         ? (Object.keys(changes) as (keyof Ruleset)[]).filter(
               (key) => !sameJson(changes[key], server[key])
           )
         : [];
-
-    const dirtyKeys: ReadonlySet<keyof Ruleset> = new Set(dirtyList);
-
-    const resetKey = (key: keyof Ruleset) =>
-        setChanges((prev) => {
-            const { [key]: _dropped, ...rest } = prev;
-
-            return rest;
-        });
 
     const form: RulesFormState | null =
         server && data
@@ -84,7 +73,7 @@ export function useRulesForm(
             : null;
 
     const save = async () => {
-        if (!data || dirtyKeys.size === 0) return true;
+        if (!data || dirtyKeys.length === 0) return true;
 
         // Lazy: the registry pulls every system's rules into the battle entry chunk
         const { ALL_SECTIONS } = await import(
@@ -106,7 +95,7 @@ export function useRulesForm(
         };
 
         const patch = Object.fromEntries(
-            dirtyList.map((key) => [key, patchValue(key)])
+            dirtyKeys.map((key) => [key, patchValue(key)])
         ) as RulesetPatch;
 
         try {
@@ -127,13 +116,20 @@ export function useRulesForm(
         form,
         save,
         isSaving: update.isPending,
-        isDirty: dirtyKeys.size > 0,
-        dirtyKeys,
-        resetKey,
+        isDirty: dirtyKeys.length > 0,
         systemLocked: query.data?.systemLocked ?? false,
-        isLoading: !initial && query.isLoading,
-        loadError: !initial && query.isError ? query.error : null,
+        isLoading: query.isLoading,
+        loadError: query.isError ? query.error : null,
         reload: () => void query.refetch(),
         reset: () => setChanges({}),
+        dirtyKeys,
+        resetKey: (key: keyof Ruleset) =>
+            setChanges((prev) => {
+                const next = { ...prev };
+
+                delete next[key];
+
+                return next;
+            }),
     };
 }

@@ -42,7 +42,6 @@
       "name": "Name",
       "namePlaceholder": "Character name",
       "type": "Type *",
-      "typePlaceholder": "Choose a type",
       "typePlayer": "Player",
       "typeNpcHero": "NPC hero",
       "controlledBy": "Controlled by *",
@@ -58,9 +57,7 @@
       "subclassPlaceholder": "For example: Oath of Vengeance",
       "archetype": "Archetype",
       "alignment": "Alignment",
-      "alignmentPlaceholder": "Choose an alignment",
-      "level": "Level",
-      "avatar": "Character portrait"
+      "level": "Level"
     },
     "classes": {
       "classN": "Class {n}",

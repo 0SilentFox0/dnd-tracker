@@ -74,8 +74,8 @@ export function BasicEditTab({ editor }: { editor: DmCharacterEditor }) {
                 archetype: !statColumnsOf(def).has('archetype'),
             }}
             classMode={classUi ? classMode : undefined}
-            slots={{
-                classAction:
+            classSlots={{
+                action:
                     classMode.enabled && !classUi && !ui.hideProgression ? (
                         <Button
                             type="button"
@@ -86,7 +86,11 @@ export function BasicEditTab({ editor }: { editor: DmCharacterEditor }) {
                             {t('toClasses')}
                         </Button>
                     ) : undefined,
-                classAside: <CharacterHpPreview hp={hp} />,
+                aside: (
+                    <div className="ds-inset p-2 @[56rem]:w-72">
+                        <CharacterHpPreview hp={hp} />
+                    </div>
+                ),
             }}
         />
     );

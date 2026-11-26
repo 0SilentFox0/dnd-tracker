@@ -1,82 +1,79 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { withAbilityErrors } from '@/components/abilities';
 import { LoadingState, QueryState } from '@/components/common/states';
-import { HudForm, HudFormMenu, HudFormPage } from '@/components/hud/form';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
+import { HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
-import { UNIT_FORM_ID } from '@/components/units/form/unit-form-tabs';
 import { unitFormTabs } from '@/components/units/form/UnitFormFields';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useUnitEditForm } from '@/lib/hooks/units';
 import { useTranslator } from '@/lib/i18n/use-translator';
+
+const FORM_ID = 'unit-form';
 
 export function UnitEditForm({
     campaignId: id,
     unitId,
-    side,
 }: {
     campaignId: string;
     unitId: string;
-    side?: ReactNode;
 }) {
     const ta = useTranslator('abilities');
 
     const t = useTranslations('units.form');
 
-    const tc = useTranslations('common.actions');
-
-    const tm = useTranslations('common.dmSections');
-
-    const tf = useTranslations('common.form');
+    const tc = useTranslations('common');
 
     const tr = useTranslator();
 
     const editor = useUnitEditForm(id, unitId);
 
+    const hasNotes = useHasSourceNotes(id, 'units', unitId);
+
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={editor.listHref}
-                        className="hover:text-hud-accent-fg"
-                    >
-                        {tm('units')}
-                    </Link>
-                    {' › '}
-                    {t('editTitle', { name: editor.form.data.name ?? '' })}
-                </>
-            }
-            aside={t('editAside')}
-            side={side}
-            actions={
-                <>
+            header={{
+                title: t('editTitle', { name: editor.form.data.name ?? '' }),
+                aside: t('editAside'),
+                back: {
+                    href: editor.listHref,
+                    label: tc('dmSections.units'),
+                },
+                menu: (
                     <HudFormMenu
-                        label={tf('more')}
                         items={[
                             {
-                                label: tc('delete'),
+                                label: tc('actions.delete'),
                                 tone: 'danger',
-                                onSelect: editor.actions.remove,
+                                disabled: editor.status.isDeleting,
+                                onSelect: () => void editor.actions.remove(),
                             },
                         ]}
                     />
+                ),
+            }}
+            actions={
+                <>
                     <Button type="button" variant="outline" asChild>
-                        <Link href={editor.listHref}>{tc('cancel')}</Link>
+                        <Link href={editor.listHref}>
+                            {tc('actions.cancel')}
+                        </Link>
                     </Button>
                     <Button
                         type="submit"
-                        form={UNIT_FORM_ID}
+                        form={FORM_ID}
                         disabled={
                             editor.status.isSaving || !editor.abilities.valid
                         }
                     >
                         {editor.status.isSaving
-                            ? tc('saving')
+                            ? tc('actions.saving')
                             : withAbilityErrors(
                                   t('submitSave'),
                                   editor.abilities.errors,
@@ -84,6 +81,15 @@ export function UnitEditForm({
                               )}
                     </Button>
                 </>
+            }
+            side={
+                hasNotes ? (
+                    <SourceNotes
+                        campaignId={id}
+                        kind="units"
+                        targetId={unitId}
+                    />
+                ) : undefined
             }
         >
             <QueryState
@@ -93,7 +99,7 @@ export function UnitEditForm({
                 {(unit) => (
                     <HudForm
                         key={unitId}
-                        id={UNIT_FORM_ID}
+                        id={FORM_ID}
                         onSubmit={editor.actions.submit}
                         tabs={unitFormTabs({
                             campaignId: id,

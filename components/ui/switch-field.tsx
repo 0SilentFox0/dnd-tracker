@@ -26,7 +26,10 @@ export function SwitchField({
     ariaLabel,
 }: SwitchFieldProps) {
     return (
-        <div className={cn('flex items-center gap-3', className)}>
+        <div
+            data-slot="switch-field"
+            className={cn('flex items-center gap-3', className)}
+        >
             <Switch
                 id={id}
                 aria-label={ariaLabel}

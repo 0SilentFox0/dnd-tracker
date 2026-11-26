@@ -63,6 +63,7 @@ describe('usePaletteState', () => {
     it('restores the profile, saves changes and updates document colors immediately', async () => {
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
+        await waitFor(() => expect(result.current.ready).toBe(true));
         await waitFor(() => expect(result.current.palette).toBe('tavern'));
 
         const save = deferred<PaletteSettings>();
@@ -103,6 +104,7 @@ describe('usePaletteState', () => {
     it('restores the old selection and reports failed writes', async () => {
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
+        await waitFor(() => expect(result.current.ready).toBe(true));
         await waitFor(() => expect(result.current.palette).toBe('tavern'));
         vi.mocked(themeApi.set).mockRejectedValue(new Error('offline'));
         await act(() => result.current.setPalette('parchment'));
@@ -125,6 +127,7 @@ describe('usePaletteState', () => {
 
         const { result } = renderHook(() => usePaletteState('/campaigns'));
 
+        await waitFor(() => expect(result.current.ready).toBe(true));
         await waitFor(() => expect(result.current.palette).toBe('tavern'));
         act(() => auth.changed?.('SIGNED_IN', { user: { id: 'b' } }));
         expect(result.current.palette).toBe('parchment');

@@ -1,8 +1,9 @@
+'use client';
+
 import { useTranslations } from 'next-intl';
 import { GraduationCap } from 'lucide-react';
 
-import { DetailSection, ReferenceDetailShell } from './ReferenceDetailShell';
-import type { ReadOnlyDetailProps } from './types';
+import { DetailHeader, DetailRoot, DetailSection } from './DetailParts';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -12,8 +13,14 @@ import type {
     ClassForReference,
 } from '@/types/info-reference';
 
+interface ClassReferenceDetailProps {
+    campaignId: string;
+    item: ClassForReference;
+    isDM: boolean;
+}
+
 function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
-    const t = useTranslations('classes.reference');
+    const t = useTranslations('reference.card');
 
     return (
         <ul className="space-y-2">
@@ -22,65 +29,78 @@ function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
                     <span className="hud-sc text-hud-ink">
                         {t('levelShort', { level: f.level })}
                     </span>
-                    {f.name ? (
+                    {f.name && (
                         <span className="ml-2 inline-flex items-center gap-1.5 align-middle font-medium text-hud-ink">
-                            {f.icon ? (
+                            {f.icon && (
                                 <EntityIcon
                                     src={f.icon}
                                     name={f.name}
                                     size={20}
                                     className="size-5 rounded text-xs"
                                 />
-                            ) : null}
+                            )}
                             {f.name}
                         </span>
-                    ) : null}
-                    {f.description ? (
+                    )}
+                    {f.description && (
                         <p className="mt-0.5 whitespace-pre-line text-hud-bone">
                             {f.description}
                         </p>
-                    ) : null}
+                    )}
                 </li>
             ))}
         </ul>
     );
 }
 
-export function ClassReferenceDetail({
-    item: gameClass,
-}: ReadOnlyDetailProps<ClassForReference>) {
-    const t = useTranslations('classes.reference');
+export function ClassReferenceDetail({ item }: ClassReferenceDetailProps) {
+    const t = useTranslations('reference.card');
 
     const translate = useTranslator();
 
-    const summary = gameClass.summary.map((line) =>
+    const summary = item.summary.map((line) =>
         classSummaryText(translate, line)
     );
 
     return (
-        <ReferenceDetailShell
-            icon={gameClass.icon}
-            fallback={<GraduationCap className="size-7" />}
-            name={gameClass.name}
-        >
-            <ul className="list-inside list-disc space-y-0.5 text-sm">
-                {summary.map((line) => (
-                    <li key={line}>{line}</li>
-                ))}
-            </ul>
-            {gameClass.features.length > 0 ? (
+        <DetailRoot>
+            <DetailHeader
+                icon={item.icon}
+                name={item.name}
+                fallback={<GraduationCap className="size-7" />}
+            />
+            {summary.length > 0 && (
+                <ul className="list-inside list-disc space-y-0.5 text-sm text-hud-bone">
+                    {summary.map((line) => (
+                        <li key={line}>{line}</li>
+                    ))}
+                </ul>
+            )}
+            {item.features.length > 0 && (
                 <DetailSection title={t('featuresByLevel')}>
-                    <FeatureList features={gameClass.features} />
+                    <FeatureList features={item.features} />
                 </DetailSection>
-            ) : null}
-            {gameClass.subclasses.map((s) => (
+            )}
+            {item.subclasses.map((s) => (
                 <DetailSection
                     key={s.id}
-                    title={t('subclass', { name: s.name })}
+                    title={
+                        <span className="flex items-center gap-1.5">
+                            {s.icon && (
+                                <EntityIcon
+                                    src={s.icon}
+                                    name={s.name}
+                                    size={20}
+                                    className="size-5 rounded text-xs"
+                                />
+                            )}
+                            {t('subclass', { name: s.name })}
+                        </span>
+                    }
                 >
                     <FeatureList features={s.features} />
                 </DetailSection>
             ))}
-        </ReferenceDetailShell>
+        </DetailRoot>
     );
 }

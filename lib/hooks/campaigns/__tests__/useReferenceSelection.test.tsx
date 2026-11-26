@@ -2,94 +2,91 @@
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useReferenceSelection } from '@/lib/hooks/campaigns';
+import { type RefKey, useReferenceSelection } from '@/lib/hooks/campaigns';
 
-const nav = vi.hoisted(() => ({
-    query: '',
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-    desktop: true,
-}));
+const replace = vi.fn();
+
+const push = vi.fn();
+
+const back = vi.fn();
+
+let query = '';
+
+let mobile = false;
 
 vi.mock('next/navigation', () => ({
-    useRouter: () => ({
-        push: nav.push,
-        replace: nav.replace,
-        back: nav.back,
-    }),
+    useRouter: () => ({ replace, push, back }),
     usePathname: () => '/campaigns/c1/info',
-    useSearchParams: () => new URLSearchParams(nav.query),
+    useSearchParams: () => new URLSearchParams(query),
 }));
-vi.mock('@/lib/hooks/common', () => ({
-    DESKTOP_QUERY: '(min-width: 1024px)',
-    useMediaQuery: () => nav.desktop,
-}));
+vi.mock('@/lib/hooks/common', () => ({ useIsCompact: () => mobile }));
 
-const VISIBLE = [
-    { kind: 'spell', id: 'a' },
-    { kind: 'spell', id: 'abc' },
-] as const;
+const visible: RefKey[] = ['spell:1', 'spell:2'];
+
+const setup = (over: { autoSelect?: boolean; visible?: RefKey[] } = {}) => {
+    const set = vi.fn();
+
+    const hook = renderHook(() =>
+        useReferenceSelection({
+            visible: over.visible ?? visible,
+            section: { value: 'all', set },
+            autoSelect: over.autoSelect ?? false,
+        })
+    );
+
+    return { ...hook, set };
+};
 
 describe('useReferenceSelection', () => {
     beforeEach(() => {
-        nav.query = '';
-        nav.desktop = true;
         vi.clearAllMocks();
+        query = '';
+        mobile = false;
     });
 
-    it('reads the selection from the URL on start', () => {
-        nav.query = 'e=spell:abc';
+    it('replaces the URL on desktop', () => {
+        const { result } = setup();
 
-        const { result } = renderHook(() =>
-            useReferenceSelection(VISIBLE, { autoSelect: true })
-        );
+        result.current.select('spell:1');
 
-        expect(result.current.selected).toEqual({ kind: 'spell', id: 'abc' });
+        expect(push).not.toHaveBeenCalled();
+        expect(replace.mock.calls[0][0]).toContain('e=spell%3A1');
+    });
+
+    it('pushes the URL on mobile and goes back on clear', () => {
+        mobile = true;
+
+        const { result } = setup();
+
+        result.current.select('spell:1');
+        expect(push.mock.calls[0][0]).toContain('e=spell%3A1');
+
+        result.current.clear();
+        expect(back).toHaveBeenCalled();
+    });
+
+    it('auto-selects the first visible without touching the URL', () => {
+        const { result } = setup({ autoSelect: true });
+
+        expect(result.current.selected).toBe('spell:1');
+        expect(result.current.isOpen).toBe(false);
+        expect(replace).not.toHaveBeenCalled();
+    });
+
+    it('reads section and entry from the initial URL', () => {
+        query = 's=spells&e=spell:2';
+
+        const { result, set } = setup();
+
+        expect(set).toHaveBeenCalledWith('spells');
+        expect(result.current.selected).toBe('spell:2');
         expect(result.current.isOpen).toBe(true);
     });
 
-    it('auto-picks the first entry without touching the URL', () => {
-        const { result } = renderHook(() =>
-            useReferenceSelection(VISIBLE, { autoSelect: true })
-        );
+    it('drops the selection when it is no longer visible', () => {
+        query = 'e=spell:9';
 
-        expect(result.current.selected).toEqual({ kind: 'spell', id: 'a' });
-        expect(result.current.isOpen).toBe(false);
-        expect(nav.replace).not.toHaveBeenCalled();
-        expect(nav.push).not.toHaveBeenCalled();
-    });
-
-    it('replaces the URL on desktop and pushes on phone', () => {
-        const desktop = renderHook(() =>
-            useReferenceSelection(VISIBLE, { autoSelect: true })
-        );
-
-        desktop.result.current.select({ kind: 'spell', id: 'abc' });
-        expect(nav.replace).toHaveBeenCalledWith(
-            '/campaigns/c1/info?e=spell%3Aabc',
-            { scroll: false }
-        );
-
-        nav.desktop = false;
-
-        const phone = renderHook(() =>
-            useReferenceSelection(VISIBLE, { autoSelect: false })
-        );
-
-        phone.result.current.select({ kind: 'spell', id: 'a' });
-        expect(nav.push).toHaveBeenCalledTimes(1);
-
-        phone.result.current.clear();
-        expect(nav.back).toHaveBeenCalledTimes(1);
-    });
-
-    it('ignores a reference that is not visible', () => {
-        nav.query = 'e=spell:gone';
-
-        const { result } = renderHook(() =>
-            useReferenceSelection(VISIBLE, { autoSelect: false })
-        );
+        const { result } = setup();
 
         expect(result.current.selected).toBeNull();
         expect(result.current.isOpen).toBe(false);

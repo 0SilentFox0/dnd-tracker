@@ -35,22 +35,26 @@ export function SideToggle({
                 options={[
                     {
                         value: ParticipantSide.ALLY,
-                        ariaLabel: t('ally'),
                         label: (
-                            <Shield
-                                className="size-4 text-hud-accent-fg"
-                                aria-hidden
-                            />
+                            <>
+                                <span className="sr-only">{t('ally')}</span>
+                                <Shield
+                                    className="size-4 text-hud-accent-fg"
+                                    aria-hidden
+                                />
+                            </>
                         ),
                     },
                     {
                         value: ParticipantSide.ENEMY,
-                        ariaLabel: t('enemy'),
                         label: (
-                            <Swords
-                                className="size-4 text-hud-crimson-fg"
-                                aria-hidden
-                            />
+                            <>
+                                <span className="sr-only">{t('enemy')}</span>
+                                <Swords
+                                    className="size-4 text-hud-crimson-fg"
+                                    aria-hidden
+                                />
+                            </>
                         ),
                     },
                 ]}

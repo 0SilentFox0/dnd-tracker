@@ -1,26 +1,20 @@
 'use client';
 
-import type { KeyboardEvent } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { HudButton } from '@/components/hud';
+import { OptionButton } from '@/components/hud/OptionButton';
 import { ALIGNMENTS } from '@/lib/constants/alignment';
-import { useAlignmentLabel } from '@/lib/hooks/characters';
-import { cn } from '@/lib/utils';
+import { useRovingIndex } from '@/lib/hooks/common';
+import { alignmentKey } from '@/lib/utils/characters/alignment';
 
 interface AlignmentGridProps {
     id: string;
     value: string | null;
     onChange: (value: string | null) => void;
     allowNone?: boolean;
-    noneLabel?: string;
+    noneLabel?: ReactNode;
 }
-
-const COLUMNS = 3;
-
-const CELL =
-    'flex min-h-11 items-center justify-center rounded-lg border border-hud-line text-sm text-hud-muted hover:text-hud-ink focus-visible:ring-2 focus-visible:outline-none lg:min-h-9';
-
-const CHECKED = 'border-hud-accent bg-hud-panel-2 text-hud-ink';
 
 export function AlignmentGrid({
     id,
@@ -29,80 +23,92 @@ export function AlignmentGrid({
     allowNone = false,
     noneLabel,
 }: AlignmentGridProps) {
-    const label = useAlignmentLabel();
+    const t = useTranslations('gameTerms.alignments');
 
-    const count = ALIGNMENTS.length + (allowNone ? 1 : 0);
+    const tc = useTranslations('common.ui');
 
-    const known = ALIGNMENTS.findIndex((a) => a === value);
+    const group = useRef<HTMLDivElement>(null);
 
-    const selected = known >= 0 ? known : value ? -1 : allowNone ? count - 1 : -1;
+    const selected = alignmentKey(value);
 
-    const tabbable = selected >= 0 ? selected : 0;
+    const selectedIndex = ALIGNMENTS.findIndex(
+        (name) => alignmentKey(name) === selected
+    );
 
-    const pick = (index: number) => {
-        onChange(ALIGNMENTS[index] ?? null);
-        document.getElementById(`${id}-${index}`)?.focus();
-    };
+    const roving = useRovingIndex({
+        count: ALIGNMENTS.length,
+        active: Math.max(selectedIndex, 0),
+        onMove: (i) => onChange(ALIGNMENTS[i]),
+        cols: 3,
+    });
 
-    const onKeyDown = (event: KeyboardEvent, index: number) => {
-        const target =
-            {
-                ArrowRight: index + 1,
-                ArrowLeft: index - 1,
-                ArrowDown: index + COLUMNS,
-                ArrowUp: index - COLUMNS,
-            }[event.key] ?? null;
-
-        if (target === null) return;
-
-        event.preventDefault();
-
-        if (target >= 0 && target < count) pick(target);
-    };
+    // OptionButton takes no tabIndex prop, so the roving stop is applied to its element
+    useEffect(() => {
+        group.current
+            ?.querySelectorAll<HTMLElement>('[data-cell]')
+            .forEach((el, i) => {
+                el.tabIndex = roving.tabIndex(i);
+            });
+    });
 
     return (
-        <div
-            id={id}
-            role="radiogroup"
-            aria-labelledby={`${id}-label`}
-            className="grid gap-2"
-        >
-            <div className="grid grid-cols-3 gap-1.5">
-                {ALIGNMENTS.map((alignment, index) => (
-                    <HudButton
-                        key={alignment}
-                        id={`${id}-${index}`}
-                        role="radio"
-                        aria-checked={index === selected}
-                        aria-label={label(alignment)}
-                        title={label(alignment)}
-                        tabIndex={index === tabbable ? 0 : -1}
-                        onClick={() => onChange(alignment)}
-                        onKeyDown={(e) => onKeyDown(e, index)}
-                        className={cn(CELL, index === selected && CHECKED)}
-                    >
-                        {label(alignment, 'short')}
-                    </HudButton>
-                ))}
+        <div className="grid gap-2">
+            <div
+                id={id}
+                ref={group}
+                role="radiogroup"
+                aria-label={t('label')}
+                onKeyDown={roving.onKeyDown}
+                className="grid grid-cols-3 gap-1.5"
+            >
+                {ALIGNMENTS.map((name, i) => {
+                    const key = alignmentKey(name) ?? 'trueNeutral';
+
+                    return (
+                        <span
+                            key={name}
+                            title={t(`${key}.name`)}
+                            ref={(el) => {
+                                const cell =
+                                    el?.querySelector<HTMLElement>('button');
+
+                                cell?.setAttribute('data-cell', '');
+                                roving.itemRef(i)(cell ?? null);
+                            }}
+                            className="contents"
+                        >
+                            <OptionButton
+                                role="radio"
+                                variant="form"
+                                checked={selected === key}
+                                onClick={() => onChange(name)}
+                                text={{
+                                    title: (
+                                        <>
+                                            <span aria-hidden>
+                                                {t(`${key}.short`)}
+                                            </span>
+                                            <span className="sr-only">
+                                                {t(`${key}.name`)}
+                                            </span>
+                                        </>
+                                    ),
+                                }}
+                                className="min-h-11 text-center"
+                            />
+                        </span>
+                    );
+                })}
             </div>
             {allowNone && (
-                <HudButton
-                    id={`${id}-${ALIGNMENTS.length}`}
+                <OptionButton
                     role="radio"
-                    aria-checked={selected === count - 1}
-                    tabIndex={tabbable === count - 1 ? 0 : -1}
+                    variant="form"
+                    checked={!value}
                     onClick={() => onChange(null)}
-                    onKeyDown={(e) => onKeyDown(e, count - 1)}
-                    className={cn(
-                        CELL,
-                        selected === count - 1 && CHECKED
-                    )}
-                >
-                    {noneLabel}
-                </HudButton>
-            )}
-            {value && known < 0 && (
-                <p className="text-xs text-hud-muted">{value}</p>
+                    text={{ title: noneLabel ?? tc('noneLabel') }}
+                    className="min-h-11 text-center"
+                />
             )}
         </div>
     );

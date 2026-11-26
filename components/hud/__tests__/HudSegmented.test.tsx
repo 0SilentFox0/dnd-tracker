@@ -1,73 +1,82 @@
 // @vitest-environment happy-dom
+import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { HudSegmented } from '@/components/hud/HudSegmented';
+import { HudSegmented } from '@/components/hud';
 
-afterEach(cleanup);
+const options = [
+    { value: 'a', label: 'Alpha' },
+    { value: 'b', label: 'Beta' },
+    { value: 'c', label: 'Gamma' },
+] as const;
 
-const OPTIONS = [
-    { value: 'a', label: 'A' },
-    { value: 'b', label: 'B' },
-    { value: 'c', label: 'C' },
-];
+function Harness({ disabled }: { disabled?: boolean }) {
+    const [v, setV] = useState<'a' | 'b' | 'c' | null>('a');
 
-function setup(props: { value?: string | null; disabled?: boolean } = {}) {
-    const onValueChange = vi.fn();
-
-    render(
+    return (
         <HudSegmented
             id="seg"
             label="Pick"
-            value={props.value === undefined ? 'a' : props.value}
-            options={OPTIONS}
-            onValueChange={onValueChange}
-            disabled={props.disabled}
+            value={v}
+            options={[...options]}
+            onValueChange={setV}
+            disabled={disabled}
         />
     );
-
-    return onValueChange;
 }
 
+afterEach(cleanup);
+
 describe('HudSegmented', () => {
-    it('selects an option on click', () => {
-        const onValueChange = setup();
+    it('is a labelled radiogroup with the active radio checked', () => {
+        render(<Harness />);
 
-        fireEvent.click(screen.getByRole('radio', { name: 'B' }));
-
-        expect(onValueChange).toHaveBeenCalledWith('b');
         expect(screen.getByRole('radiogroup', { name: 'Pick' })).toBeTruthy();
+        expect(screen.getByRole('radio', { name: 'Alpha' })).toHaveAttribute(
+            'aria-checked',
+            'true'
+        );
+        expect(screen.getByRole('radio', { name: 'Beta' })).toHaveAttribute(
+            'aria-checked',
+            'false'
+        );
     });
 
-    it('wraps from the last option to the first on ArrowRight', () => {
-        const onValueChange = setup({ value: 'c' });
+    it('selects on click', () => {
+        const onValueChange = vi.fn();
 
-        fireEvent.keyDown(screen.getByRole('radio', { name: 'C' }), {
+        render(
+            <HudSegmented
+                id="seg"
+                label="Pick"
+                value={null}
+                options={[...options]}
+                onValueChange={onValueChange}
+            />
+        );
+        fireEvent.click(screen.getByRole('radio', { name: 'Beta' }));
+        expect(onValueChange).toHaveBeenCalledWith('b');
+    });
+
+    it('moves focus and selection with the arrows', () => {
+        render(<Harness />);
+        fireEvent.keyDown(screen.getByRole('radio', { name: 'Alpha' }), {
             key: 'ArrowRight',
         });
-
-        expect(onValueChange).toHaveBeenCalledWith('a');
+        expect(screen.getByRole('radio', { name: 'Beta' })).toHaveFocus();
+        expect(screen.getByRole('radio', { name: 'Beta' })).toHaveAttribute(
+            'aria-checked',
+            'true'
+        );
     });
 
-    it('ignores keys and clicks when disabled', () => {
-        const onValueChange = setup({ disabled: true });
-
-        fireEvent.keyDown(screen.getByRole('radio', { name: 'A' }), {
-            key: 'ArrowRight',
-        });
-        fireEvent.click(screen.getByRole('radio', { name: 'B' }));
-
-        expect(onValueChange).not.toHaveBeenCalled();
-    });
-
-    it('puts tabindex 0 on the first option when value is null', () => {
-        setup({ value: null });
-
-        expect(
-            screen.getByRole('radio', { name: 'A' }).getAttribute('tabindex')
-        ).toBe('0');
-        expect(
-            screen.getByRole('radio', { name: 'B' }).getAttribute('tabindex')
-        ).toBe('-1');
+    it('blocks interaction when disabled', () => {
+        render(<Harness disabled />);
+        fireEvent.click(screen.getByRole('radio', { name: 'Beta' }));
+        expect(screen.getByRole('radio', { name: 'Alpha' })).toHaveAttribute(
+            'aria-checked',
+            'true'
+        );
     });
 });

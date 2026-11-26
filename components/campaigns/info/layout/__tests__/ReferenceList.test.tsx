@@ -1,53 +1,79 @@
 // @vitest-environment happy-dom
-import { fireEvent, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ReferenceList } from '../ReferenceList';
+import { ReferenceList } from '@/components/campaigns/info/layout/ReferenceList';
+import { render } from '@/lib/i18n/test/render-uk';
 
-import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+vi.unmock('next-intl');
 
-const items = [{ id: '1' }, { id: '2' }, { id: '3' }];
+afterEach(cleanup);
 
-function renderList(props: Partial<Parameters<typeof ReferenceList>[0]> = {}) {
-    return renderWithIntl(
-        <ReferenceList
-            groups={[{ key: 'g', title: 'Group', items }]}
-            selected="2"
-            renderRow={(item, selected) => (
+const groups = [
+    { key: 'a', title: 'Група A', items: ['a1', 'a2'] },
+    { key: 'b', title: 'Група B', items: ['b1', 'b2'] },
+];
+
+const setup = (props: Partial<Parameters<typeof ReferenceList<string>>[0]>) =>
+    render(
+        <ReferenceList<string>
+            groups={groups}
+            selected="a2"
+            onSelect={vi.fn()}
+            keyOf={(s) => s}
+            renderRow={(s, row) => (
                 <button
-                    data-ref-row
-                    aria-current={selected ? 'true' : undefined}
+                    ref={row.ref}
+                    tabIndex={row.tabIndex}
+                    aria-current={row.selected ? 'true' : undefined}
+                    onClick={row.onSelect}
                 >
-                    row-{item.id}
+                    {s}
                 </button>
             )}
             {...props}
-        />,
-        { locale: 'en', namespaces: ['common', 'dashboard'] }
+        />
     );
-}
 
 describe('ReferenceList', () => {
-    it('caps rows at the limit and offers show-all', async () => {
+    it('renders group headings and marks the selected row', () => {
+        setup({});
+
+        expect(screen.getByText('Група A')).toBeTruthy();
+        expect(screen.getByText('Група B')).toBeTruthy();
+        expect(screen.getByText('a2').getAttribute('aria-current')).toBe(
+            'true'
+        );
+        expect(screen.getByText('a1').getAttribute('aria-current')).toBeNull();
+    });
+
+    it('selects a row on click', () => {
+        const onSelect = vi.fn();
+
+        setup({ onSelect });
+        fireEvent.click(screen.getByText('b1'));
+
+        expect(onSelect).toHaveBeenCalledWith('b1');
+    });
+
+    it('limits rows and offers show all', () => {
         const onShowAll = vi.fn();
 
-        await renderList({ limit: 2, onShowAll });
+        setup({ limit: 2, onShowAll });
 
-        expect(screen.queryByText('row-3')).toBeNull();
+        expect(screen.queryByText('b1')).toBeNull();
 
-        fireEvent.click(screen.getByText(/3/, { selector: 'button' }));
+        fireEvent.click(screen.getByRole('button', { name: /Показати всі/ }));
+
         expect(onShowAll).toHaveBeenCalled();
     });
 
-    it('marks the selected row and moves focus with arrows', async () => {
-        await renderList();
+    it('moves focus with the arrow keys', () => {
+        setup({});
 
-        expect(screen.getByText('row-2').getAttribute('aria-current')).toBe(
-            'true'
-        );
+        screen.getByText('a2').focus();
+        fireEvent.keyDown(screen.getByText('a2'), { key: 'ArrowDown' });
 
-        screen.getByText('row-1').focus();
-        fireEvent.keyDown(screen.getByText('row-1'), { key: 'ArrowDown' });
-        expect(document.activeElement).toBe(screen.getByText('row-2'));
+        expect(document.activeElement).toBe(screen.getByText('b1'));
     });
 });

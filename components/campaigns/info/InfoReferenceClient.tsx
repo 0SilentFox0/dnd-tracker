@@ -1,14 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { groupSorted, singleGroup } from './layout/reference-groups';
-import type { ReferenceIndex } from './layout/ReferenceDetailPane';
-import {
-    ReferenceDetailPane,
-    referenceName,
-} from './layout/ReferenceDetailPane';
+import { ArtifactReferenceDetail } from './detail/ArtifactReferenceDetail';
+import { ArtifactSetBlock } from './detail/ArtifactSetBlock';
+import { ClassReferenceDetail } from './detail/ClassReferenceDetail';
+import { SkillReferenceDetail } from './detail/SkillReferenceDetail';
+import { SpellReferenceDetail } from './detail/SpellReferenceDetail';
 import { ReferenceLayout } from './layout/ReferenceLayout';
 import { ReferenceList } from './layout/ReferenceList';
 import { ReferenceRail } from './layout/ReferenceRail';
@@ -16,22 +14,21 @@ import { ArtifactReferenceRow } from './rows/ArtifactReferenceRow';
 import { ClassReferenceRow } from './rows/ClassReferenceRow';
 import { SkillReferenceRow } from './rows/SkillReferenceRow';
 import { SpellReferenceRow } from './rows/SpellReferenceRow';
-import { ReferenceSearchBar } from './ReferenceSearchBar';
 
 import { EmptyState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 import {
-    type ReferenceRef,
+    type ReferenceEntry,
+    type RefKey,
     useInfoReferenceFilters,
+    useReferenceGroups,
     useReferenceSelection,
 } from '@/lib/hooks/campaigns';
-import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
-import { ITEM_SET_KEY } from '@/lib/utils/artifacts/item-set-key';
+import { useIsCompact } from '@/lib/hooks/common';
 import type {
     ArtifactForReference,
     ArtifactSetForReference,
     ClassForReference,
-    SectionTab,
     SkillForReference,
     SpellForReference,
 } from '@/types/info-reference';
@@ -46,10 +43,35 @@ export interface InfoReferenceClientProps {
     isDM: boolean;
 }
 
-const ALL_LIMIT = 6;
+const ALL_PREVIEW = 6;
 
-const byId = <T extends { id: string }>(items: T[]) =>
-    new Map(items.map((item) => [item.id, item]));
+function rowOf(
+    entry: ReferenceEntry,
+    row: {
+        selected: boolean;
+        onSelect: () => void;
+        tabIndex: 0 | -1;
+        ref: (el: HTMLElement | null) => void;
+    }
+) {
+    const props = {
+        selected: row.selected,
+        onSelect: row.onSelect,
+        tabIndex: row.tabIndex,
+        register: row.ref,
+    };
+
+    switch (entry.kind) {
+        case 'spell':
+            return <SpellReferenceRow item={entry.item} {...props} />;
+        case 'skill':
+            return <SkillReferenceRow item={entry.item} {...props} />;
+        case 'artifact':
+            return <ArtifactReferenceRow item={entry.item} {...props} />;
+        case 'class':
+            return <ClassReferenceRow item={entry.item} {...props} />;
+    }
+}
 
 export function InfoReferenceClient({
     campaignId,
@@ -62,9 +84,7 @@ export function InfoReferenceClient({
 }: InfoReferenceClientProps) {
     const t = useTranslations('dashboard.reference');
 
-    const tu = useTranslations('gameTerms.ungrouped');
-
-    const isDesktop = useMediaQuery(DESKTOP_QUERY, true);
+    const isMobile = useIsCompact();
 
     const { filters, results } = useInfoReferenceFilters(
         skills,
@@ -73,217 +93,127 @@ export function InfoReferenceClient({
         classes
     );
 
-    const {
-        filteredClasses,
-        filteredSkills,
-        filteredSpells,
-        filteredArtifacts,
-    } = results;
+    const section = filters.section;
 
-    const section = filters.section.value;
-
-    const isAll = section === 'all';
-
-    const showClasses = filters.visible.classes;
-
-    const showSkills = filters.visible.skills;
-
-    const limit = isAll && !filters.search.value.trim() ? ALL_LIMIT : undefined;
-
-    const counts: Record<SectionTab, number> = {
-        classes: filteredClasses.length,
-        skills: filteredSkills.length,
-        spells: filteredSpells.length,
-        artifacts: filteredArtifacts.length,
-        all:
-            (classes ? filteredClasses.length : filteredSkills.length) +
-            filteredSpells.length +
-            filteredArtifacts.length,
-    };
-
-    const found = isAll ? counts.all : counts[section];
-
-    const refs = useMemo<ReferenceRef[]>(
-        () => [
-            ...(showClasses ? filteredClasses : []).map((c) => ({
-                kind: 'class' as const,
-                id: c.id,
-            })),
-            ...(showSkills ? filteredSkills : []).map((s) => ({
-                kind: 'skill' as const,
-                id: s.id,
-            })),
-            ...(filters.visible.spells ? filteredSpells : []).map((s) => ({
-                kind: 'spell' as const,
-                id: s.id,
-            })),
-            ...(filters.visible.artifacts ? filteredArtifacts : []).map(
-                (a) => ({ kind: 'artifact' as const, id: a.id })
-            ),
-        ],
-        [
-            showClasses,
-            showSkills,
-            filters.visible.spells,
-            filters.visible.artifacts,
-            filteredClasses,
-            filteredSkills,
-            filteredSpells,
-            filteredArtifacts,
-        ]
-    );
-
-    const { selected, select, clear, isOpen } = useReferenceSelection(refs, {
-        autoSelect: isDesktop,
+    const view = useReferenceGroups({
+        section: section.value,
+        skills: results.filteredSkills,
+        spells: results.filteredSpells,
+        artifacts: results.filteredArtifacts,
+        classes: results.filteredClasses,
+        limit:
+            section.value === 'all' && !filters.search.value.trim()
+                ? ALL_PREVIEW
+                : Number.POSITIVE_INFINITY,
     });
 
-    const index = useMemo<ReferenceIndex>(
-        () => ({
-            spell: byId(spells),
-            skill: byId(skills),
-            artifact: byId(artifacts),
-            class: byId(classes ?? []),
-        }),
-        [spells, skills, artifacts, classes]
+    const selection = useReferenceSelection({
+        visible: view.visible.map((e) => e.key),
+        section,
+        autoSelect: !isMobile,
+    });
+
+    const entry = selection.selected
+        ? view.byKey.get(selection.selected)
+        : undefined;
+
+    const emptyState =
+        view.totals.all === 0 ? (
+            <EmptyState
+                title={t('empty.nothing')}
+                description={t('empty.nothingHint')}
+                action={
+                    <Button variant="outline" onClick={filters.clearAll}>
+                        {t('empty.resetAll')}
+                    </Button>
+                }
+            />
+        ) : (
+            <EmptyState title={t('detail.empty')} />
+        );
+
+    const setOf =
+        entry?.kind === 'artifact' && entry.item.setName
+            ? artifactSets.find((s) => s.name === entry.item.setName)
+            : undefined;
+
+    const detail = entry ? (
+        <div className="space-y-4" key={entry.key}>
+            {entry.kind === 'spell' && (
+                <SpellReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
+            )}
+            {entry.kind === 'skill' && (
+                <SkillReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
+            )}
+            {entry.kind === 'artifact' && (
+                <ArtifactReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
+            )}
+            {entry.kind === 'class' && (
+                <ClassReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
+            )}
+            {setOf && <ArtifactSetBlock set={setOf} />}
+        </div>
+    ) : (
+        emptyState
     );
-
-    const classGroups = singleGroup(
-        'classes',
-        t('sections.classes.title'),
-        filteredClasses
-    );
-
-    const skillGroups = isAll
-        ? singleGroup('skills', t('sections.skills.title'), filteredSkills)
-        : groupSorted(
-              filteredSkills,
-              (s) => s.mainSkillName,
-              tu('branch'),
-              (s) => s.mainSkillColor
-          );
-
-    const spellGroups = isAll
-        ? singleGroup('spells', t('sections.spells.title'), filteredSpells)
-        : groupSorted(filteredSpells, (s) => s.groupName, tu('spellGroup'));
-
-    const artifactGroups = isAll
-        ? singleGroup(
-              'artifacts',
-              t('sections.artifacts.title'),
-              filteredArtifacts
-          )
-        : groupSorted(filteredArtifacts, (a) => a.setName, tu(ITEM_SET_KEY));
-
-    const pick = (kind: ReferenceRef['kind']) => (id: string) =>
-        select({ kind, id });
-
-    const chosen = (kind: ReferenceRef['kind']) =>
-        selected?.kind === kind ? selected.id : null;
-
-    const showAll = (value: SectionTab) =>
-        limit ? () => filters.section.set(value) : undefined;
-
-    const detailTitle = referenceName(index, selected) ?? t('detail.empty');
 
     return (
         <ReferenceLayout
-            rail={<ReferenceRail filters={filters} counts={counts} />}
+            rail={<ReferenceRail filters={filters} counts={view.totals} />}
             list={
-                <>
-                    <ReferenceSearchBar filters={filters} found={found} />
-                    {found === 0 && (
-                        <EmptyState
-                            title={t('empty.nothing')}
-                            description={t('empty.nothingHint')}
-                            action={
-                                <Button
-                                    variant="outline"
-                                    onClick={filters.clearAll}
-                                >
-                                    {t('empty.resetAll')}
-                                </Button>
-                            }
-                        />
-                    )}
-                    {showClasses && (
-                        <ReferenceList
-                            groups={classGroups}
-                            selected={chosen('class')}
-                            renderRow={(item, isSelected) => (
-                                <ClassReferenceRow
-                                    item={item}
-                                    selected={isSelected}
-                                    onSelect={pick('class')}
-                                />
-                            )}
-                            limit={limit}
-                            onShowAll={showAll('classes')}
-                        />
-                    )}
-                    {showSkills && (
-                        <ReferenceList
-                            groups={skillGroups}
-                            selected={chosen('skill')}
-                            renderRow={(item, isSelected) => (
-                                <SkillReferenceRow
-                                    item={item}
-                                    selected={isSelected}
-                                    onSelect={pick('skill')}
-                                />
-                            )}
-                            limit={limit}
-                            onShowAll={showAll('skills')}
-                        />
-                    )}
-                    {filters.visible.spells && (
-                        <ReferenceList
-                            groups={spellGroups}
-                            selected={chosen('spell')}
-                            renderRow={(item, isSelected) => (
-                                <SpellReferenceRow
-                                    item={item}
-                                    selected={isSelected}
-                                    onSelect={pick('spell')}
-                                />
-                            )}
-                            limit={limit}
-                            onShowAll={showAll('spells')}
-                        />
-                    )}
-                    {filters.visible.artifacts && (
-                        <ReferenceList
-                            groups={artifactGroups}
-                            selected={chosen('artifact')}
-                            renderRow={(item, isSelected) => (
-                                <ArtifactReferenceRow
-                                    item={item}
-                                    selected={isSelected}
-                                    onSelect={pick('artifact')}
-                                />
-                            )}
-                            limit={limit}
-                            onShowAll={showAll('artifacts')}
-                        />
-                    )}
-                </>
-            }
-            detail={
-                <ReferenceDetailPane
-                    campaignId={campaignId}
-                    isDM={isDM}
-                    selected={selected}
-                    index={index}
-                    sets={artifactSets}
-                    onReset={
-                        found === 0 && filters.hasActive
-                            ? filters.clearAll
-                            : undefined
-                    }
+                <ReferenceList<ReferenceEntry>
+                    groups={view.groups.map((g) => ({
+                        key: g.key,
+                        accent: g.accent,
+                        items: g.entries,
+                        title:
+                            g.total > g.entries.length ? (
+                                <span className="flex items-center justify-between gap-2">
+                                    {g.title}
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => section.set(g.section)}
+                                    >
+                                        {t('list.showAll', {
+                                            count: g.total,
+                                        })}
+                                    </Button>
+                                </span>
+                            ) : (
+                                g.title
+                            ),
+                    }))}
+                    selected={selection.selected}
+                    onSelect={(key) => selection.select(key as RefKey)}
+                    keyOf={(e) => e.key}
+                    renderRow={rowOf}
                 />
             }
-            detailOpen={isOpen}
-            onDetailClose={clear}
-            detailTitle={detailTitle}
+            detail={detail}
+            detailOpen={selection.isOpen}
+            onDetailClose={selection.clear}
+            detailTitle={entry?.item.name ?? ''}
         />
     );
 }

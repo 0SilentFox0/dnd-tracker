@@ -1,113 +1,163 @@
 'use client';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import type {
-    CompendiumImportController,
-    CompendiumWizardView,
+import {
+    compendiumFacts,
+    type CompendiumImportController,
+    type PreviewExpiry,
+    type WizardView,
 } from '@/lib/hooks/compendium-import';
-import { estimateRecords } from '@/lib/utils/compendium-import/categories';
+import { formatBytes } from '@/lib/utils/common/format';
+
+type Primary = { label: string; disabled: boolean; run: () => void };
+
+function primaryAction(
+    t: ReturnType<typeof useTranslations>,
+    wizard: CompendiumImportController,
+    view: WizardView,
+    expired: boolean
+): Primary {
+    const { root, preview, rights, busy, categories } = wizard.state;
+
+    const next = (): Primary => ({
+        label: t('summary.next'),
+        disabled: busy || view.step >= view.maxStep,
+        run: () => view.setStep(view.step + 1),
+    });
+
+    switch (view.step) {
+        case 0:
+            return { ...next(), disabled: busy || !root };
+        case 1:
+            return {
+                label: t('categoriesStep.preview'),
+                disabled: busy || !categories.length,
+                run: () => void wizard.actions.runPreview(),
+            };
+        case 2:
+            return { ...next(), disabled: busy || !preview };
+        case 3:
+            return expired
+                ? {
+                      label: t('confirm.recheck'),
+                      disabled: busy,
+                      run: () => void wizard.actions.runPreview(),
+                  }
+                : {
+                      label: t('import.confirm'),
+                      disabled:
+                          busy || !rights || !preview?.report.readyToImport,
+                      run: () => void wizard.actions.confirm(),
+                  };
+        default:
+            return {
+                label: t('summary.new'),
+                disabled: false,
+                run: wizard.actions.close,
+            };
+    }
+}
 
 export function CompendiumSummary({
     wizard,
     view,
-    expired = false,
+    expiry,
 }: {
     wizard: CompendiumImportController;
-    view: CompendiumWizardView;
-    expired?: boolean;
+    view: WizardView;
+    expiry: PreviewExpiry;
 }) {
     const t = useTranslations('compendium');
 
-    const {
-        root,
-        categories,
-        excludedChapters,
-        preview,
-        result,
-        rights,
-        busy,
-    } = wizard.state;
+    const locale = useLocale();
 
-    const { runPreview, confirm, close } = wizard.actions;
+    const { file, preview } = wizard.state;
 
-    const report = result ?? preview?.report ?? null;
+    const facts = compendiumFacts(wizard.state);
 
-    const records = root
-        ? estimateRecords(root, categories, excludedChapters)
-        : report
-          ? report.counts.created + report.counts.updated
-          : 0;
+    const primary = primaryAction(t, wizard, view, expiry.expired);
 
-    const main = {
-        1: view.maxStep > 1 && {
-            label: t('summary.next'),
-            disabled: busy,
-            run: () => view.setStep(2),
-        },
-        2: {
-            label: t('categoriesStep.preview'),
-            disabled: busy || !root || !categories.length,
-            run: () => void runPreview(),
-        },
-        3: {
-            label: t('summary.next'),
-            disabled: busy || !preview,
-            run: () => view.setStep(4),
-        },
-        4: {
-            label: t('import.confirm'),
-            disabled:
-                busy || expired || !rights || !preview?.report.readyToImport,
-            run: () => void confirm(),
-        },
-        5: { label: t('wizard.restart'), disabled: false, run: close },
-    }[view.step];
+    const checking = view.step === 2 || view.step === 3;
+
+    const rows: [string, number][] = [
+        [t('import.steps.categories'), facts.categories],
+        [t('summary.records'), facts.records],
+        ...(preview
+            ? ([
+                  [t('import.media.title'), facts.images],
+                  [t('report.blocker'), facts.blockers],
+              ] as [string, number][])
+            : []),
+    ];
 
     return (
-        <div className="flex flex-wrap items-center justify-between gap-3 @3xl:block @3xl:space-y-3">
-            <div className="min-w-0 space-y-1">
-                <h2 className="hud-sc hidden text-base text-hud-ink @3xl:block">
+        <aside
+            aria-label={t('summary.title')}
+            className="ds-panel space-y-3 p-3 @3xl:p-4"
+        >
+            <p
+                data-testid="import-summary"
+                className="text-sm text-hud-muted @3xl:hidden"
+            >
+                {t('categoriesStep.summary', {
+                    categories: facts.categories,
+                    records: facts.records,
+                })}
+            </p>
+            <div className="hidden space-y-3 @3xl:block">
+                <h2 className="hud-sc text-base text-hud-ink">
                     {t('summary.title')}
                 </h2>
-                {root && (
-                    <p
-                        className="text-sm text-hud-muted"
-                        data-testid="import-summary"
-                    >
-                        {t('categoriesStep.summary', {
-                            categories: categories.length,
-                            records,
-                        })}
+                {file && (
+                    <p className="text-sm break-all text-hud-ink">
+                        {file.name}
+                        <span className="block text-xs text-hud-muted">
+                            {formatBytes(file.size)}
+                        </span>
                     </p>
                 )}
-                {!root && report && (
-                    <p className="text-sm text-hud-muted">
-                        {t('summary.records', { count: records })}
-                    </p>
-                )}
-                {report?.media && (
-                    <p className="hidden text-sm text-hud-muted @3xl:block">
-                        {t('summary.images', { count: report.media.queued })}
-                    </p>
-                )}
-                {report && report.counts.errors > 0 && (
-                    <p className="hidden text-sm text-hud-bad @3xl:block">
-                        {t('report.blockersTitle', {
-                            count: report.counts.errors,
-                        })}
-                    </p>
-                )}
+                <dl className="space-y-1 text-sm">
+                    {rows.map(([label, value]) => (
+                        <div key={label} className="flex justify-between gap-2">
+                            <dt className="text-hud-muted">{label}</dt>
+                            <dd className="text-hud-ink tabular-nums">
+                                {value}
+                            </dd>
+                        </div>
+                    ))}
+                </dl>
             </div>
-            {main && (
-                <Button
-                    className="@3xl:w-full"
-                    disabled={main.disabled}
-                    onClick={main.run}
-                >
-                    {main.label}
-                </Button>
-            )}
-        </div>
+            {checking &&
+                expiry.expiresAt &&
+                !(expiry.expired && view.step === 3) && (
+                    <p
+                        role={expiry.expired ? 'alert' : undefined}
+                        className={
+                            expiry.expired
+                                ? 'text-sm text-hud-danger'
+                                : 'text-xs text-hud-muted'
+                        }
+                    >
+                        {expiry.expired
+                            ? t('confirm.expired')
+                            : t('confirm.until', {
+                                  time: new Date(
+                                      expiry.expiresAt
+                                  ).toLocaleTimeString(locale, {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                  }),
+                              })}
+                    </p>
+                )}
+            <Button
+                className="w-full"
+                disabled={primary.disabled}
+                onClick={primary.run}
+            >
+                {primary.label}
+            </Button>
+        </aside>
     );
 }

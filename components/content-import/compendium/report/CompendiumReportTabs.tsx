@@ -1,14 +1,10 @@
 'use client';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
+import Link from 'next/link';
 
 import { CompendiumCoverage } from './CompendiumCoverage';
 import { CompendiumMediaSummary } from './CompendiumMediaSummary';
-import {
-    DEPENDENCIES_ANCHOR,
-    IssueGroupCard,
-    RowCard,
-} from './CompendiumReportCards';
-import { useReportIssues } from './useReportIssues';
+import { IssueGroupCard, RowCard } from './CompendiumReportCards';
 
 import { PagerNav } from '@/components/common/shell/PagerNav';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
@@ -17,13 +13,16 @@ import { Button } from '@/components/ui/button';
 import { COMPENDIUM_PAGE_SIZES } from '@/lib/constants/compendium-import';
 import { usePager } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { downloadText } from '@/lib/utils/common/download-text';
 import { destination } from '@/lib/utils/compendium-import/flow';
 import {
     editionLabel,
+    groupIssues,
     infoSummary,
     REPORT_ROW_FILTERS,
     sourceLabel,
     splitCategories,
+    splitInfoIssues,
 } from '@/lib/utils/compendium-import/labels';
 import type { CompendiumReport as Report } from '@/types/compendium-import';
 
@@ -35,40 +34,41 @@ export function CompendiumReportTabs({
     campaignId,
     report,
     committed = false,
-    initialTab,
-    dependencies,
+    initialTab = 'records',
+    deps,
+    activeTab,
+    onTabChange,
 }: {
     campaignId: string;
     report: Report;
     committed?: boolean;
     initialTab?: ReportTab;
-    dependencies?: { count: number; node: ReactNode };
+    deps?: ReactNode;
+    activeTab?: ReportTab;
+    onTabChange?: (tab: ReportTab) => void;
 }) {
     const t = useTranslator('compendium');
 
-    const { groups, info } = useReportIssues(report);
+    const { actions: manualActions, info } = useMemo(
+        () => splitInfoIssues(report.nextActions),
+        [report.nextActions]
+    );
+
+    const groups = useMemo(
+        () =>
+            groupIssues(
+                t,
+                manualActions.filter((issue) => issue.severity !== 'error')
+            ),
+        [t, manualActions]
+    );
 
     const categories = useMemo(
         () => splitCategories(report.countsByCategory),
         [report.countsByCategory]
     );
 
-    const [tab, setTab] = useState<ReportTab>(
-        initialTab === 'deps' && !dependencies
-            ? 'records'
-            : (initialTab ?? 'records')
-    );
-
-    useEffect(() => {
-        const open = () => {
-            if (window.location.hash === `#${DEPENDENCIES_ANCHOR}`)
-                setTab('deps');
-        };
-
-        window.addEventListener('hashchange', open);
-
-        return () => window.removeEventListener('hashchange', open);
-    }, []);
+    const [ownTab, setOwnTab] = useState(initialTab);
 
     const [filter, setFilter] = useState<Filter>(() =>
         report.rows.some(REPORT_ROW_FILTERS.changed) ||
@@ -101,22 +101,35 @@ export function CompendiumReportTabs({
             code,
         });
 
-    const media = !committed ? report.media : undefined;
+    const unresolved = report.nextActions.filter(
+        (issue) => issue.code === 'UNRESOLVED_REF'
+    ).length;
 
-    const tabs = [
-        { key: 'records', label: t('check.tabs.records') },
-        dependencies && {
-            key: 'deps',
-            label: `${t('check.tabs.deps')} (${dependencies.count})`,
-        },
-        { key: 'sources', label: t('check.tabs.sources') },
-        media && {
-            key: 'media',
-            label: `${t('check.tabs.media')} (${media.queued})`,
-        },
-    ].filter((item) => !!item);
+    const withMedia = !committed && !!report.media;
 
-    const chips = (
+    const tabs: Array<[ReportTab, string]> = [['records', t('report.records')]];
+
+    if (deps && !committed)
+        tabs.push(['deps', `${t('report.tabDeps')} (${unresolved})`]);
+
+    tabs.push(['sources', t('report.sources')]);
+
+    if (withMedia)
+        tabs.push([
+            'media',
+            `${t('import.media.title')} (${report.media?.queued ?? 0})`,
+        ]);
+
+    const wanted = activeTab ?? ownTab;
+
+    const tab = tabs.some(([key]) => key === wanted) ? wanted : 'records';
+
+    const select = (next: ReportTab) => {
+        setOwnTab(next);
+        onTabChange?.(next);
+    };
+
+    const filterChips = (
         [
             ['changed', t('report.filterChanged')],
             ['manual', t('report.filterManual')],
@@ -132,53 +145,57 @@ export function CompendiumReportTabs({
     const hidden = report.rows.length - visible.length;
 
     return (
-        <div className="space-y-3">
-            <span id={DEPENDENCIES_ANCHOR} />
+        <div className="space-y-4 text-sm break-words">
             <HudChipTabs
                 ariaLabel={t('report.rows')}
-                items={tabs.map((item) => ({
-                    ...item,
-                    active: item.key === tab,
-                    onSelect: () => setTab(item.key as ReportTab),
+                items={tabs.map(([key, label]) => ({
+                    key,
+                    label,
+                    active: tab === key,
+                    onSelect: () => select(key),
                 }))}
             />
             {tab === 'records' && (
-                <div className="space-y-3">
-                    <HudChipTabs
-                        ariaLabel={t('report.filterLabel')}
-                        items={chips}
-                    />
-                    <ul className="grid grid-cols-1 items-start gap-3 @3xl:grid-cols-2 @6xl:grid-cols-3">
-                        {rows.pageItems.map((row, index) => (
-                            <RowCard
-                                key={`${row.canonicalKey}:${index}`}
-                                row={row}
-                                committed={committed}
-                                onNotes={setNotes}
-                                campaignId={campaignId}
-                            />
-                        ))}
-                    </ul>
-                    {visible.length === 0 && (
-                        <p className="text-hud-muted">{t('report.noRows')}</p>
-                    )}
-                    {filter !== 'all' && hidden > 0 && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setFilter('all')}
-                        >
-                            {t('report.showUnchanged', { count: hidden })}
-                        </Button>
-                    )}
-                    <PagerNav
-                        ariaLabel={t('report.rowsPager')}
-                        pager={rows}
-                        labels={{
-                            prev: t('report.rowsPrev'),
-                            next: t('report.rowsNext'),
-                        }}
-                    />
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <HudChipTabs
+                            ariaLabel={t('report.filterLabel')}
+                            items={filterChips}
+                        />
+                        <ul className="grid grid-cols-1 items-start gap-3 @2xl:grid-cols-2 @5xl:grid-cols-3">
+                            {rows.pageItems.map((row, index) => (
+                                <RowCard
+                                    key={`${row.canonicalKey}:${index}`}
+                                    row={row}
+                                    committed={committed}
+                                    onNotes={setNotes}
+                                    campaignId={campaignId}
+                                />
+                            ))}
+                        </ul>
+                        {visible.length === 0 && (
+                            <p className="text-hud-muted">
+                                {t('report.noRows')}
+                            </p>
+                        )}
+                        {filter !== 'all' && hidden > 0 && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setFilter('all')}
+                            >
+                                {t('report.showUnchanged', { count: hidden })}
+                            </Button>
+                        )}
+                        <PagerNav
+                            ariaLabel={t('report.rowsPager')}
+                            pager={rows}
+                            labels={{
+                                prev: t('report.rowsPrev'),
+                                next: t('report.rowsNext'),
+                            }}
+                        />
+                    </div>
                     {groups.length > 0 && (
                         <div className="space-y-2">
                             <h3 className="hud-sc text-base text-hud-ink">
@@ -189,35 +206,12 @@ export function CompendiumReportTabs({
                                     <IssueGroupCard
                                         key={group.code}
                                         group={group}
-                                        link={
-                                            committed ? actionLink : undefined
-                                        }
+                                        link={committed ? actionLink : undefined}
                                     />
                                 ))}
                             </ul>
                         </div>
                     )}
-                </div>
-            )}
-            {tab === 'deps' && dependencies?.node}
-            {tab === 'sources' && (
-                <div className="space-y-3">
-                    <ul className="text-hud-muted">
-                        {report.sources.map((source, index) => (
-                            <li key={index}>{sourceLabel(t, source)}</li>
-                        ))}
-                    </ul>
-                    <p>
-                        {Object.entries(report.editionSummary)
-                            .map(([key, value]) =>
-                                t('report.editionCount', {
-                                    edition: editionLabel(t, key),
-                                    count: value,
-                                })
-                            )
-                            .join('; ')}
-                    </p>
-                    <CompendiumCoverage categories={categories} />
                     {info.length > 0 && (
                         <p className="text-hud-muted">
                             {t('report.infoNote', {
@@ -242,9 +236,53 @@ export function CompendiumReportTabs({
                     )}
                 </div>
             )}
-            {tab === 'media' && media && (
-                <CompendiumMediaSummary media={media} />
+            {tab === 'deps' && deps}
+            {tab === 'sources' && (
+                <div className="space-y-4">
+                    <ul className="text-hud-muted">
+                        {report.sources.map((source, index) => (
+                            <li key={index}>{sourceLabel(t, source)}</li>
+                        ))}
+                    </ul>
+                    <p>
+                        {Object.entries(report.editionSummary)
+                            .map(([key, value]) =>
+                                t('report.editionCount', {
+                                    edition: editionLabel(t, key),
+                                    count: value,
+                                })
+                            )
+                            .join('; ')}
+                    </p>
+                    <CompendiumCoverage categories={categories} />
+                </div>
             )}
+            {tab === 'media' && report.media && (
+                <CompendiumMediaSummary media={report.media} />
+            )}
+            <p>{t('report.backstories')}</p>
+            <Button
+                variant="outline"
+                className="h-auto whitespace-normal"
+                asChild
+            >
+                <Link href={`/campaigns/${campaignId}/dm/characters`}>
+                    {t('report.createCharacters')}
+                </Link>
+            </Button>
+            <p>{t('report.dmMaterials')}</p>
+            <Button
+                variant="outline"
+                onClick={() =>
+                    downloadText(
+                        `compendium-report-${report.runId ?? 'preview'}.json`,
+                        JSON.stringify(report, null, 2),
+                        'application/json'
+                    )
+                }
+            >
+                {t('report.download')}
+            </Button>
             {notes && <SourceNotes campaignId={campaignId} {...notes} />}
         </div>
     );

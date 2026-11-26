@@ -61,7 +61,7 @@ export function SpellComponentsFields({
                         />
                     ))}
                     {c.canAdd && (
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="ds-fields">
                             <Button
                                 type="button"
                                 variant="outline"

@@ -35,6 +35,10 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
 
     const [root, setRoot] = useState<JsonRecord | null>(null);
 
+    const [file, setFile] = useState<{ name: string; size: number } | null>(
+        null
+    );
+
     const [options, setOptions] = useState<CompendiumOptions>({});
 
     const [preview, setPreview] = useState<CompendiumPreview | null>(null),
@@ -96,17 +100,18 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
     };
 
     const selectFile = useCallback(
-        async (file: File) => {
+        async (picked: File) => {
             const abort = startRequest();
 
             setReading(true);
             setFailure(null);
+            setFile({ name: picked.name, size: picked.size });
             setRoot(null);
             invalidate();
             setOptions({});
             setExcludedChapters([]);
             try {
-                const parsed = await readCompendiumFile(file, abort.signal);
+                const parsed = await readCompendiumFile(picked, abort.signal);
 
                 if (abort.signal.aborted) return;
 
@@ -117,8 +122,10 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
                         .map((row) => row.kind)
                 );
             } catch (e) {
-                if (!abort.signal.aborted)
+                if (!abort.signal.aborted) {
+                    setFile(null);
                     setFailure({ error: e, key: 'errors.readFailed' });
+                }
             } finally {
                 if (!abort.signal.aborted) setReading(false);
             }
@@ -186,6 +193,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
             setPreview(null);
             setInput(null);
             setRoot(null);
+            setFile(null);
             setOptions({});
 
             const queued = reportMediaProgress(report);
@@ -226,7 +234,10 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
     const openRun = compendiumRunOpener({
         media,
         invalidate,
-        reset: () => setRoot(null),
+        reset: () => {
+            setRoot(null);
+            setFile(null);
+        },
         setResult,
         setFailure,
         load: requests.openRun.mutateAsync,
@@ -236,7 +247,9 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
         controller.current?.abort();
         media.stop();
         setReading(false);
+        setFailure(null);
         setRoot(null);
+        setFile(null);
         setCategories([]);
         setOptions({});
         invalidate();
@@ -253,6 +266,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
     return {
         state: {
             root,
+            file,
             categories,
             excludedChapters,
             options,

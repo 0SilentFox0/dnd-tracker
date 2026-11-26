@@ -3,38 +3,32 @@ import { describe, expect, it } from 'vitest';
 import { ALIGNMENTS } from '@/lib/constants/alignment';
 import {
     ALIGNMENT_KEYS,
-    alignmentKeyOf,
-    alignmentLabel,
+    alignmentKey,
+    alignmentLabelKey,
 } from '@/lib/utils/characters/alignment';
 
-const t = (key: string) => `t:${key}`;
-
 describe('alignment', () => {
-    it('maps every canonical value to a key, in order', () => {
-        expect(ALIGNMENT_KEYS).toHaveLength(ALIGNMENTS.length);
-        ALIGNMENTS.forEach((value, i) =>
-            expect(alignmentKeyOf(value)).toBe(ALIGNMENT_KEYS[i])
-        );
-        expect(alignmentKeyOf('True Neutral')).toBe('trueNeutral');
-    });
-
-    it('translates a canonical value', () => {
-        expect(alignmentLabel('Lawful Good', t)).toBe(
-            't:alignments.lawfulGood.name'
-        );
-        expect(alignmentLabel('Chaotic Evil', t, 'short')).toBe(
-            't:alignments.chaoticEvil.short'
+    it('maps the nine canonical values in order', () => {
+        ALIGNMENTS.forEach((name, i) =>
+            expect(alignmentKey(name)).toBe(ALIGNMENT_KEYS[i])
         );
     });
 
-    it('falls back to the raw free value', () => {
-        expect(alignmentLabel('any alignment', t)).toBe('any alignment');
-        expect(alignmentKeyOf('any alignment')).toBeNull();
+    it('is case and space insensitive', () => {
+        expect(alignmentKey('  chaotic   EVIL ')).toBe('chaoticEvil');
     });
 
-    it('returns an empty string for null and empty', () => {
-        expect(alignmentLabel(null, t)).toBe('');
-        expect(alignmentLabel(undefined, t)).toBe('');
-        expect(alignmentLabel('', t)).toBe('');
+    it('returns null for free text and empty values', () => {
+        expect(alignmentKey('any alignment')).toBeNull();
+        expect(alignmentKey('')).toBeNull();
+        expect(alignmentKey(null)).toBeNull();
+        expect(alignmentKey(undefined)).toBeNull();
+    });
+
+    it('builds the message key', () => {
+        expect(alignmentLabelKey('Lawful Good', 'short')).toBe(
+            'alignments.lawfulGood.short'
+        );
+        expect(alignmentLabelKey('whatever', 'name')).toBeNull();
     });
 });

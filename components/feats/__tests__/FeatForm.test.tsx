@@ -12,6 +12,9 @@ vi.mock(
     () => import('@/components/ui/__tests__/select-field-mock')
 );
 
+vi.mock('@/components/content-import/shared/SourceNotes', () => ({
+    SourceNotes: () => null,
+}));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@/lib/hooks/common', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/lib/hooks/common')>()),
@@ -118,24 +121,5 @@ describe('FeatForm', () => {
             featId: 'f1',
             data: { xpCost: 100, maxRank: 3 },
         });
-    });
-
-    it('renders one save button outside the form that submits it, and side notes', () => {
-        render(
-            <FeatForm campaignId="c1" feat={feat} side={<p>notes</p>} />
-        );
-
-        const save = screen.getAllByRole('button', {
-            name: 'common.actions.save',
-        });
-
-        expect(save).toHaveLength(1);
-        expect(save[0].getAttribute('form')).toBe('feat-form');
-        expect(save[0].closest('form')).toBeNull();
-        expect(
-            screen.getByRole('complementary', {
-                name: 'common.form.previewTitle',
-            }).textContent
-        ).toContain('notes');
     });
 });

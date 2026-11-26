@@ -9,6 +9,8 @@ import { CareersPage } from '@/systems/wfrp/ui/dm/CareersPage';
 vi.unmock('next-intl');
 
 const mocks = vi.hoisted(() => ({
+    push: vi.fn(),
+    search: '',
     remove: vi.fn(),
     confirm: vi.fn(),
     notify: vi.fn(),
@@ -41,8 +43,15 @@ vi.mock('@/systems/wfrp/hooks/careers', () => ({
 vi.mock('@/components/content-copy/ContentCopyButton', () => ({
     ContentCopyButton: () => null,
 }));
-vi.mock('@/systems/wfrp/ui/careers/CareerForm', () => ({
-    CareerForm: () => null,
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: mocks.push }),
+    usePathname: () => '/campaigns/c/dm/system/careers',
+    useSearchParams: () => new URLSearchParams(mocks.search),
+}));
+vi.mock('@/systems/wfrp/ui/careers/CareerEditPage', () => ({
+    CareerEditPage: ({ career }: { career?: { name: string } }) => (
+        <p>{`editor:${career?.name ?? 'new'}`}</p>
+    ),
 }));
 vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),
@@ -51,6 +60,7 @@ vi.mock('@/lib/hooks/common', async (orig) => ({
 }));
 
 afterEach(() => {
+    mocks.search = '';
     cleanup();
     vi.clearAllMocks();
 });
@@ -86,5 +96,29 @@ describe('CareersPage', () => {
         await waitFor(() =>
             expect(mocks.notify).toHaveBeenCalledWith("Кар'єру мають герої")
         );
+    });
+
+    it('opens the editor through the url instead of a dialog', () => {
+        render(<CareersPage campaignId="c" />);
+        fireEvent.click(screen.getByRole('button', { name: "Нова кар'єра" }));
+
+        expect(mocks.push).toHaveBeenCalledWith(
+            '/campaigns/c/dm/system/careers?career=new'
+        );
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('renders the page editor for ?career=new and for a known id', () => {
+        mocks.search = 'career=new';
+
+        const view = render(<CareersPage campaignId="c" />);
+
+        expect(screen.getByText('editor:new')).toBeTruthy();
+        view.unmount();
+
+        mocks.search = 'career=c1';
+        render(<CareersPage campaignId="c" />);
+
+        expect(screen.getByText('editor:Воїн')).toBeTruthy();
     });
 });

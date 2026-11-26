@@ -42,7 +42,6 @@
       "name": "Ім'я",
       "namePlaceholder": "Ім'я персонажа",
       "type": "Тип *",
-      "typePlaceholder": "Виберіть тип",
       "typePlayer": "Гравець",
       "typeNpcHero": "NPC Герой",
       "controlledBy": "Контролюється *",
@@ -58,9 +57,7 @@
       "subclassPlaceholder": "Наприклад: Клятва Месника",
       "archetype": "Архетип",
       "alignment": "Світогляд",
-      "alignmentPlaceholder": "Виберіть світогляд",
-      "level": "Рівень",
-      "avatar": "Фото персонажа"
+      "level": "Рівень"
     },
     "classes": {
       "classN": "Клас {n}",

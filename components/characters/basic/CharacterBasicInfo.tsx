@@ -39,7 +39,7 @@ interface CharacterBasicInfoProps {
         classes: GameClassData[];
         byId: Record<string, GameClassData>;
     };
-    slots?: { classAction?: ReactNode; classAside?: ReactNode };
+    classSlots?: { action?: ReactNode; aside?: ReactNode };
 }
 
 export function CharacterBasicInfo({
@@ -49,7 +49,7 @@ export function CharacterBasicInfo({
     isPlayerView = false,
     hide = {},
     classMode,
-    slots = {},
+    classSlots,
 }: CharacterBasicInfoProps) {
     const {
         progression: hideProgression = false,
@@ -64,8 +64,6 @@ export function CharacterBasicInfo({
     const ts = useTranslations('characterProfile.basic.sections');
 
     const to = useTranslations('characterProfile.sheet.from');
-
-    const tc = useTranslations('common');
 
     const { options: archetypeOptions, universalLabel } = useArchetypeOptions();
 
@@ -91,13 +89,13 @@ export function CharacterBasicInfo({
     const showArchetype =
         !isPlayerView && !classMode && !hideProgression && !hideArchetype;
 
-    const showClassCard = !hideClass || showLevel || showArchetype;
+    const showClasses = showLevel || !hideClass || showArchetype;
 
     return (
         <div className="@container flex w-full flex-col gap-4">
-            <div className="grid items-start gap-4 @4xl:grid-cols-2">
+            <div className="grid gap-4 @[56rem]:grid-cols-2">
                 <BasicPanel title={ts('identity')}>
-                    <div className="ds-fields">
+                    <div className="grid gap-4">
                         <LabeledInput
                             id="name"
                             label={t('name')}
@@ -105,55 +103,61 @@ export function CharacterBasicInfo({
                             onChange={(e) => set('name', e.target.value)}
                             required
                             placeholder={t('namePlaceholder')}
-                            containerClassName="ds-span w-full min-w-0"
+                            containerClassName="w-full min-w-0"
                             className="hud-title w-full text-xl"
                         />
-
-                        <div className="w-full min-w-0">
-                            <Label id="type-label">{t('type')}</Label>
-                            <HudSegmented
-                                id="type"
-                                label={t('type')}
-                                value={type}
-                                onValueChange={(value) =>
-                                    set('type', value as CharacterTypeValue)
-                                }
-                                options={[
-                                    {
-                                        value: CharacterType.PLAYER,
-                                        label: t('typePlayer'),
-                                    },
-                                    {
-                                        value: CharacterType.NPC_HERO,
-                                        label: t('typeNpcHero'),
-                                    },
-                                ]}
-                            />
-                        </div>
-
-                        {type === CharacterType.PLAYER && (
-                            <div className="w-full min-w-0">
-                                <Label htmlFor="controlledBy">
-                                    {t('controlledBy')}
+                        <div className="ds-fields">
+                            <div className="flex min-w-0 flex-col gap-1.5">
+                                <Label htmlFor={`type-${type}`}>
+                                    {t('type')}
                                 </Label>
-                                <SelectField
-                                    id="controlledBy"
-                                    value={controlledBy}
+                                <HudSegmented
+                                    id="type"
+                                    label={t('type')}
+                                    value={type}
                                     onValueChange={(value) =>
-                                        set('controlledBy', value)
+                                        set('type', value as CharacterTypeValue)
                                     }
-                                    placeholder={t('controlledByPlaceholder')}
-                                    options={campaignMembers.map((member) => ({
-                                        value: member.id,
-                                        label: member.email
-                                            ? `${member.displayName} (${member.email})`
-                                            : member.displayName,
-                                    }))}
-                                    required
-                                    triggerClassName="w-full"
+                                    options={[
+                                        {
+                                            value: CharacterType.PLAYER,
+                                            label: t('typePlayer'),
+                                        },
+                                        {
+                                            value: CharacterType.NPC_HERO,
+                                            label: t('typeNpcHero'),
+                                        },
+                                    ]}
                                 />
                             </div>
-                        )}
+                            {type === CharacterType.PLAYER && (
+                                <div className="w-full min-w-0">
+                                    <Label htmlFor="controlledBy">
+                                        {t('controlledBy')}
+                                    </Label>
+                                    <SelectField
+                                        id="controlledBy"
+                                        value={controlledBy}
+                                        onValueChange={(value) =>
+                                            set('controlledBy', value)
+                                        }
+                                        placeholder={t(
+                                            'controlledByPlaceholder'
+                                        )}
+                                        options={campaignMembers.map(
+                                            (member) => ({
+                                                value: member.id,
+                                                label: member.email
+                                                    ? `${member.displayName} (${member.email})`
+                                                    : member.displayName,
+                                            })
+                                        )}
+                                        required
+                                        triggerClassName="w-full"
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </BasicPanel>
                 {!hideLineage && (
@@ -164,7 +168,9 @@ export function CharacterBasicInfo({
                                 <SelectField
                                     id="race"
                                     value={race}
-                                    onValueChange={(value) => set('race', value)}
+                                    onValueChange={(value) =>
+                                        set('race', value)
+                                    }
                                     placeholder={t('racePlaceholder')}
                                     options={races.map((r) => ({
                                         value: r.name,
@@ -174,12 +180,11 @@ export function CharacterBasicInfo({
                                     triggerClassName="w-full"
                                 />
                                 {races.length === 0 && (
-                                    <p className="text-muted-foreground mt-1 text-xs">
+                                    <p className="mt-1 text-xs text-muted-foreground">
                                         {t('noRaces')}
                                     </p>
                                 )}
                             </div>
-
                             <LabeledInput
                                 id="subrace"
                                 label={t('subrace')}
@@ -189,12 +194,9 @@ export function CharacterBasicInfo({
                                 containerClassName="w-full min-w-0"
                                 className="w-full"
                             />
-
                             {!hideAlignment && (
-                                <div className="ds-span w-full min-w-0">
-                                    <Label id="alignment-label">
-                                        {t('alignment')}
-                                    </Label>
+                                <div className="ds-span flex flex-col gap-1.5">
+                                    <Label>{t('alignment')}</Label>
                                     <AlignmentGrid
                                         id="alignment"
                                         value={alignment || null}
@@ -202,7 +204,6 @@ export function CharacterBasicInfo({
                                             set('alignment', value ?? '')
                                         }
                                         allowNone
-                                        noneLabel={tc('ui.noneLabel')}
                                     />
                                 </div>
                             )}
@@ -210,87 +211,98 @@ export function CharacterBasicInfo({
                     </BasicPanel>
                 )}
             </div>
-            {showClassCard && (
-                <div className="grid items-start gap-4 @4xl:grid-cols-[minmax(0,1fr)_16rem]">
-                    <BasicPanel
-                        title={ts('classLevel')}
-                        action={slots.classAction}
-                    >
-                        <div className="ds-fields">
-                            {hideClass ? null : classMode ? (
+            {(showClasses || classSlots?.aside) && (
+                <div className="grid gap-4 @[56rem]:grid-cols-[minmax(0,1fr)_auto] @[56rem]:items-start">
+                    {showClasses && (
+                        <BasicPanel
+                            title={ts('classes')}
+                            action={classSlots?.action}
+                        >
+                            {classMode && !hideClass && (
                                 <CharacterClassesField
                                     value={data.classes ?? []}
                                     classes={classMode.classes}
                                     onChange={setClasses}
                                 />
-                            ) : (
-                                <>
-                                    <LabeledInput
-                                        id="class"
-                                        label={t('class')}
-                                        value={className}
-                                        onChange={(e) =>
-                                            set('class', e.target.value)
-                                        }
-                                        required
-                                        placeholder={t('classPlaceholder')}
-                                        containerClassName="w-full min-w-0"
-                                        className="w-full"
-                                    />
-                                    <LabeledInput
-                                        id="subclass"
-                                        label={t('subclass')}
-                                        value={subclass || ''}
-                                        onChange={(e) =>
-                                            set('subclass', e.target.value)
-                                        }
-                                        placeholder={t('subclassPlaceholder')}
-                                        containerClassName="w-full min-w-0"
-                                        className="w-full"
-                                    />
-                                </>
                             )}
-                            {showLevel && (
-                                <div className="ds-span ds-fields ds-fields--num">
-                                    <LabeledInput
-                                        id="level"
-                                        label={t('level')}
-                                        type="number"
-                                        min="1"
-                                        max="30"
-                                        value={level}
-                                        onChange={(e) =>
-                                            set(
-                                                'level',
-                                                parseInt(e.target.value) || 1
-                                            )
-                                        }
-                                        containerClassName="w-full min-w-0"
-                                        className="w-full"
-                                    />
+                            {!classMode && (
+                                <div className="ds-fields ds-fields--num">
+                                    {showLevel && (
+                                        <LabeledInput
+                                            id="level"
+                                            label={t('level')}
+                                            type="number"
+                                            min="1"
+                                            max="30"
+                                            value={level}
+                                            onChange={(e) =>
+                                                set(
+                                                    'level',
+                                                    parseInt(e.target.value) ||
+                                                        1
+                                                )
+                                            }
+                                            containerClassName="w-full min-w-0"
+                                            className="w-full"
+                                        />
+                                    )}
+                                    {!hideClass && (
+                                        <>
+                                            <LabeledInput
+                                                id="class"
+                                                label={t('class')}
+                                                value={className}
+                                                onChange={(e) =>
+                                                    set('class', e.target.value)
+                                                }
+                                                required
+                                                placeholder={t(
+                                                    'classPlaceholder'
+                                                )}
+                                                containerClassName="w-full min-w-0"
+                                                className="w-full"
+                                            />
+                                            <LabeledInput
+                                                id="subclass"
+                                                label={t('subclass')}
+                                                value={subclass || ''}
+                                                onChange={(e) =>
+                                                    set(
+                                                        'subclass',
+                                                        e.target.value
+                                                    )
+                                                }
+                                                placeholder={t(
+                                                    'subclassPlaceholder'
+                                                )}
+                                                containerClassName="w-full min-w-0"
+                                                className="w-full"
+                                            />
+                                        </>
+                                    )}
+                                    {showArchetype && (
+                                        <div className="w-full min-w-0">
+                                            <Label htmlFor="archetype">
+                                                {t('archetype')}
+                                            </Label>
+                                            <SelectField
+                                                id="archetype"
+                                                value={archetype || ''}
+                                                onValueChange={(value) =>
+                                                    set('archetype', value)
+                                                }
+                                                options={archetypeOptions}
+                                                allowNone
+                                                noneLabel={universalLabel}
+                                                triggerClassName="w-full"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             )}
-                            {showArchetype && (
-                                <div className="w-full min-w-0">
-                                    <Label htmlFor="archetype">
-                                        {t('archetype')}
-                                    </Label>
-                                    <SelectField
-                                        id="archetype"
-                                        value={archetype || ''}
-                                        onValueChange={(value) =>
-                                            set('archetype', value)
-                                        }
-                                        options={archetypeOptions}
-                                        allowNone
-                                        noneLabel={universalLabel}
-                                        triggerClassName="w-full"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </BasicPanel>
-                    {slots.classAside}
+                        </BasicPanel>
+                    )}
+                    {classSlots?.aside}
                 </div>
             )}
         </div>

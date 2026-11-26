@@ -9,14 +9,13 @@ vi.mock('@/systems/artifactsets/ui/content/ArtifactSetsList', () => ({
 vi.mock('@/systems/artifactsets/ui/content/ArtifactSetForm', () => ({
     ArtifactSetForm: ({
         setId,
-        heading,
+        initial,
     }: {
         setId?: string;
-        heading: { title: string; aside?: string };
-    }) => (
-        <p>{`form:${setId ?? 'new'}:${heading.title}|${heading.aside}`}</p>
-    ),
+        initial?: { name?: string };
+    }) => <p>{`form:${setId ?? 'new'}:${initial?.name ?? ''}`}</p>,
 }));
+
 import { ARTIFACTSETS_META } from '@/systems/artifactsets/meta';
 import { ARTIFACTSETS_MODULE_UI } from '@/systems/artifactsets/ui';
 import { ArtifactSetsPage } from '@/systems/artifactsets/ui/content/ArtifactSetsPage';
@@ -34,7 +33,7 @@ describe('artifactsets content page', () => {
             <ArtifactSetsPage {...base} view={{ type: 'new' }} />
         );
 
-        expect(screen.getByText('form:new:new.title|new.aside')).toBeTruthy();
+        expect(screen.getByText('form:new:')).toBeTruthy();
         created.unmount();
 
         render(
@@ -45,7 +44,7 @@ describe('artifactsets content page', () => {
             />
         );
 
-        expect(screen.getByText('form:s:edit.title|Set')).toBeTruthy();
+        expect(screen.getByText('form:s:Set')).toBeTruthy();
     });
 
     it('declares a page for each of its dm sections', () => {

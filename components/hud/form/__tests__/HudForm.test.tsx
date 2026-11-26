@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HudForm } from '@/components/hud/form';
 import { findInvalidTab } from '@/components/hud/form/reveal-invalid-tab';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { Button } from '@/components/ui/button';
 
 afterEach(cleanup);
@@ -183,5 +184,88 @@ describe('findInvalidTab', () => {
             alert.compareDocumentPosition(list) &
                 Node.DOCUMENT_POSITION_FOLLOWING
         ).toBeTruthy();
+    });
+});
+
+describe('HudForm rail and layout', () => {
+    beforeEach(() => mockMatchMedia(false));
+
+    const tabs = [
+        {
+            id: 'a',
+            label: 'One',
+            content: <input aria-label="name" defaultValue="x" />,
+        },
+        {
+            id: 'b',
+            label: 'Two',
+            wide: true,
+            content: <input aria-label="ac" required defaultValue="" />,
+        },
+    ];
+
+    it('without actions renders no action bar and shows the error before the tablist', () => {
+        const { container } = render(
+            <HudForm id="f" onSubmit={() => {}} tabs={tabs} error="boom" />
+        );
+
+        expect(container.querySelector('[data-slot="action-bar"]')).toBeNull();
+
+        const alert = screen.getByRole('alert');
+
+        expect(alert.textContent).toBe('boom');
+        expect(alert).toHaveAttribute('data-notice');
+        expect(
+            alert.compareDocumentPosition(screen.getByRole('tablist')) &
+                Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+    });
+
+    it('marks the form when the active tab is wide', () => {
+        const { container } = render(
+            <HudForm id="f" onSubmit={() => {}} tabs={tabs} />
+        );
+
+        const form = container.querySelector('form');
+
+        expect(form?.getAttribute('data-wide-tab')).toBeNull();
+        fireEvent.invalid(screen.getByLabelText('ac'));
+        expect(form?.getAttribute('data-wide-tab')).toBe('true');
+    });
+
+    it('reveals the tab of an invalid field under the rail variant', () => {
+        render(
+            <HudForm
+                id="f"
+                onSubmit={() => {}}
+                tabs={tabs}
+                tabStyles={{ variant: 'rail' }}
+            />
+        );
+
+        fireEvent.invalid(screen.getByLabelText('ac'));
+        expect(
+            screen.getByRole('tab', { name: 'Two' }).getAttribute('data-state')
+        ).toBe('active');
+    });
+
+    it('reveals a tab whose trigger is hidden', () => {
+        render(
+            <HudForm
+                id="f"
+                onSubmit={() => {}}
+                tabs={tabs.map((tab) => ({ ...tab, hidden: tab.id === 'b' }))}
+                tabStyles={{ variant: 'rail' }}
+            />
+        );
+
+        expect(screen.queryByRole('tab', { name: 'Two' })).toBeNull();
+        fireEvent.invalid(screen.getByLabelText('ac'));
+        expect(
+            screen
+                .getByLabelText('ac')
+                .closest('[data-tab-id]')
+                ?.getAttribute('data-state')
+        ).toBe('active');
     });
 });

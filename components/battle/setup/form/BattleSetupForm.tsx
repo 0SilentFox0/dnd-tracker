@@ -19,9 +19,9 @@ import {
     battleFormId,
     type BattleFormTabId,
 } from '@/components/battle/setup/form/battle-form-tabs';
+import { HudFormMenu } from '@/components/hud';
 import {
     HudForm,
-    HudFormMenu,
     HudFormPage,
     type HudTab,
 } from '@/components/hud/form';
@@ -36,6 +36,8 @@ import {
 } from '@/lib/hooks/battles';
 
 // two submit buttons share one row on phones: zero basis keeps flex-wrap from wrapping them
+const PAGE_CLASS = 'max-w-page';
+
 const SUBMIT_FIT =
     'min-w-0 flex-1 basis-0 truncate px-3 sm:flex-none sm:basis-auto';
 
@@ -49,8 +51,8 @@ function SetupLoading({ isEdit }: { isEdit: boolean }) {
 
     return (
         <HudFormPage
-            width="page"
-            title={isEdit ? t('title.edit') : t('title.create')}
+            header={{ title: isEdit ? t('title.edit') : t('title.create') }}
+            className={PAGE_CLASS}
         >
             <div
                 role="status"
@@ -238,8 +240,22 @@ function BattleSetupLayout({
 
     return (
         <HudFormPage
-            width="page"
-            title={isEdit ? t('title.edit') : t('title.create')}
+            header={{
+                title: isEdit ? t('title.edit') : t('title.create'),
+                menu: isEdit && (
+                    <HudFormMenu
+                        label={t('more')}
+                        items={[
+                            {
+                                label: tActions('delete'),
+                                tone: 'danger',
+                                onSelect: form.actions.remove,
+                            },
+                        ]}
+                    />
+                ),
+            }}
+            className={PAGE_CLASS}
             actions={
                 <>
                     <SetupSummary
@@ -247,18 +263,6 @@ function BattleSetupLayout({
                         balance={balance}
                         map={map}
                     />
-                    {isEdit && (
-                        <HudFormMenu
-                            label={t('more')}
-                            items={[
-                                {
-                                    label: tActions('delete'),
-                                    tone: 'danger',
-                                    onSelect: form.actions.remove,
-                                },
-                            ]}
-                        />
-                    )}
                     <Button
                         type="button"
                         variant="outline"

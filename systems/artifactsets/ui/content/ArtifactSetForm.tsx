@@ -11,17 +11,14 @@ import { ArtifactSetMembersPicker } from './ArtifactSetMembersPicker';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
-import {
-    HudForm,
-    HudFormMenu,
-    HudFormPage,
-    HudSection,
-    type HudTab,
-} from '@/components/hud/form';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
+import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import {
@@ -33,18 +30,20 @@ const FORM_ID = 'artifact-set-form';
 
 export interface ArtifactSetFormProps {
     campaignId: string;
-    heading: { title: string; aside?: string };
     setId?: string;
     initial?: ArtifactSetFormInitial & { abilityIssues?: ConversionIssue[] };
 }
 
 export function ArtifactSetForm({
     campaignId,
-    heading,
     setId,
     initial = {},
 }: ArtifactSetFormProps) {
     const t = useTranslations('artifacts.sets.form');
+
+    const ts = useTranslations('artifacts.sets');
+
+    const listHref = `/campaigns/${campaignId}/dm/system/artifact-sets`;
 
     const ta = useTranslator('abilities');
 
@@ -61,8 +60,7 @@ export function ArtifactSetForm({
             id: ARTIFACT_SET_FORM_TAB.basic,
             label: tCommon('tabs.basic'),
             content: (
-                <HudSection panel>
-                <div className="ds-fields">
+                <div className="space-y-5">
                     <div className="space-y-2">
                         <Label htmlFor="set-name">{t('name')}</Label>
                         <Input
@@ -75,7 +73,7 @@ export function ArtifactSetForm({
                         />
                     </div>
 
-                    <div className="ds-span space-y-2">
+                    <div className="space-y-2">
                         <Label htmlFor="set-desc">{t('description')}</Label>
                         <Textarea
                             id="set-desc"
@@ -98,6 +96,7 @@ export function ArtifactSetForm({
                         </p>
                     </div>
 
+                    <div className="ds-fields">
                         <div className="space-y-2">
                             <Label htmlFor="set-bonus-name">
                                 {t('bonusName')}
@@ -124,8 +123,8 @@ export function ArtifactSetForm({
                                 rows={2}
                             />
                         </div>
+                    </div>
                 </div>
-                </HudSection>
             ),
         },
         {
@@ -155,44 +154,35 @@ export function ArtifactSetForm({
         },
     ];
 
+    const hasNotes = useHasSourceNotes(campaignId, 'artifact-sets', setId);
+
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
-                        className="text-hud-muted hover:text-hud-accent-fg"
-                    >
-                        {tCommon('dmSections.artifact-sets')}
-                    </Link>
-                    <span aria-hidden className="text-hud-muted">
-                        {' › '}
-                    </span>
-                    {heading.title}
-                </>
-            }
-            aside={heading.aside}
+            header={{
+                title: setId ? ts('edit.title') : ts('new.title'),
+                aside: setId ? initial.name : ts('new.aside'),
+                back: {
+                    href: listHref,
+                    label: tCommon('dmSections.artifact-sets'),
+                },
+                menu: setId ? (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('delete'),
+                                tone: 'danger',
+                                disabled: editor.status.isBusy,
+                                onSelect: () => void editor.actions.remove(),
+                            },
+                        ]}
+                    />
+                ) : undefined,
+            }}
             actions={
                 <>
-                    {setId && (
-                        <HudFormMenu
-                            label={tCommon('form.more')}
-                            items={[
-                                {
-                                    label: t('delete'),
-                                    tone: 'danger',
-                                    onSelect: editor.actions.remove,
-                                },
-                            ]}
-                        />
-                    )}
                     <Button type="button" variant="outline" asChild>
-                        <Link
-                            href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
-                        >
-                            {tCommon('actions.cancel')}
-                        </Link>
+                        <Link href={listHref}>{tCommon('actions.cancel')}</Link>
                     </Button>
                     <Button
                         type="submit"
@@ -210,6 +200,15 @@ export function ArtifactSetForm({
                               )}
                     </Button>
                 </>
+            }
+            side={
+                setId && hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="artifact-sets"
+                        targetId={setId}
+                    />
+                ) : undefined
             }
         >
             <HudForm

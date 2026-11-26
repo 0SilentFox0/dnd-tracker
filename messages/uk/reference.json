@@ -1,0 +1,42 @@
+{
+  "summary": {
+    "hitDie": "Кістка здоров'я: к{die}",
+    "savingThrows": "Рятівні кидки: {list}",
+    "caster": "{caster}",
+    "casterAbility": "{caster} ({ability})",
+    "armor": "Обладунки: {list}",
+    "weapons": "Зброя: {list}",
+    "tools": "Інструменти: {list}",
+    "skills": "Навички: {count} з {list}"
+  },
+  "mechanics": {
+    "branch": "Гілка: {name}",
+    "abilities": "Вміння: {list}",
+    "grantedSpell": "Додає заклинання: {name}",
+    "spell": "{level}, {type}",
+    "dice": "Кубики: {count}к",
+    "resolution": "Перевірка: {value}",
+    "cost": "Вартість: {value}"
+  },
+  "card": {
+    "levelShort": "рів. {level}",
+    "effects": "Ефекти",
+    "mechanics": "Механіка",
+    "appearanceSkill": "Опис вигляду (як виглядає в грі)",
+    "appearanceSpell": "Опис вигляду (як виглядає заклинання)",
+    "appearancePlaceholderSkill": "Наприклад: яскрава вогняна сфера, що летить до цілі...",
+    "appearancePlaceholderSpell": "Наприклад: вогняна куля, що вибухає яскравим полум'ям...",
+    "featuresByLevel": "Вміння за рівнями",
+    "subclass": "Підклас: {name}",
+    "gear": "спорядження",
+    "heldBy": "у {name}",
+    "free": "вільний",
+    "setItems": "Предмети: {names}",
+    "setBonuses": "Бонуси сету"
+  },
+  "filters": {
+    "set": {
+      "label": "Сет артефакту"
+    }
+  }
+}

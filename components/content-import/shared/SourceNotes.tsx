@@ -1,7 +1,7 @@
 'use client';
 import { PagerNav } from '@/components/common/shell/PagerNav';
 import { FormAlert } from '@/components/common/states';
-import { Disclosure } from '@/components/ui/disclosure';
+import { HudSection } from '@/components/hud/form';
 import { useSourceNotes } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { isRecord } from '@/lib/utils/common/is-record';
@@ -32,11 +32,7 @@ export function SourceNotes({
     if (!entries.length) return null;
 
     return (
-        <Disclosure
-            defaultOpen
-            className="my-3 rounded-lg border border-hud-rule p-3"
-            summary={<span>{t('notes.title')}</span>}
-        >
+        <HudSection panel title={t('notes.title')}>
             {entries.map((entry) => (
                 <article className="space-y-2" key={entry.canonicalKey}>
                     <h3>{entry.originalName}</h3>
@@ -57,6 +53,6 @@ export function SourceNotes({
                 pager={pager}
                 labels={{ prev: t('notes.prev'), next: t('notes.next') }}
             />
-        </Disclosure>
+        </HudSection>
     );
 }

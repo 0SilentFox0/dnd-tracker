@@ -1,27 +1,26 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { ArtifactForm } from './ArtifactForm';
 
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { ArtifactRarity } from '@/lib/constants/artifacts';
 import { useDeleteArtifact, useUpdateArtifact } from '@/lib/hooks/artifacts';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import type { ArtifactData, ArtifactSetOption } from '@/types/artifacts';
 
 interface ArtifactEditFormProps {
     campaignId: string;
     artifact: ArtifactData;
     artifactSets: ArtifactSetOption[];
-    side?: ReactNode;
 }
 
 export function ArtifactEditForm({
     campaignId,
     artifact,
     artifactSets,
-    side,
 }: ArtifactEditFormProps) {
     const t = useTranslations('artifacts.form');
 
@@ -32,6 +31,8 @@ export function ArtifactEditForm({
     const update = useUpdateArtifact(campaignId);
 
     const remove = useDeleteArtifact(campaignId);
+
+    const hasNotes = useHasSourceNotes(campaignId, 'artifacts', artifact.id);
 
     return (
         <ArtifactForm
@@ -44,9 +45,16 @@ export function ArtifactEditForm({
                 submit: tc('save'),
                 saving: tc('saving'),
                 iconHint: t('editIconHint', { bucket: 'artifact-icons' }),
-                side,
             }}
-            cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
+            side={
+                hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="artifacts"
+                        targetId={artifact.id}
+                    />
+                ) : undefined
+            }
             initial={{
                 name: artifact.name,
                 description: artifact.description || '',
@@ -62,6 +70,7 @@ export function ArtifactEditForm({
                 systemStats: artifact.systemStats ?? undefined,
             }}
             actions={{
+                cancelHref: `/campaigns/${campaignId}/dm/artifacts`,
                 onSubmit: async (payload) => {
                     await update.mutateAsync({
                         artifactId: artifact.id,

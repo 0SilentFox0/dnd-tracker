@@ -1,4 +1,3 @@
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { UnitEditForm } from '@/components/units/form/UnitEditForm';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
@@ -11,11 +10,5 @@ export default async function EditUnitPage({
 
     await requireCampaignDM(id);
 
-    return (
-        <UnitEditForm
-            campaignId={id}
-            unitId={unitId}
-            side={<SourceNotes campaignId={id} kind="units" targetId={unitId} />}
-        />
-    );
+    return <UnitEditForm campaignId={id} unitId={unitId} />;
 }

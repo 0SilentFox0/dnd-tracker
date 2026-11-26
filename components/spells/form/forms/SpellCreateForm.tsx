@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { SpellReferenceDetail } from '@/components/campaigns/info/detail/SpellReferenceDetail';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
 import { HudFormPage } from '@/components/hud/form';
 import { SpellFormBody } from '@/components/spells/form/forms/SpellFormBody';
 import type { SpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { getDefaultSpellFormData } from '@/components/spells/form/spell-form-defaults';
-import { SPELL_FORM_ID } from '@/components/spells/form/spell-form-tabs';
-import { SpellPlayerPreview } from '@/components/spells/form/SpellPlayerPreview';
 import { Button } from '@/components/ui/button';
 import { useNotify } from '@/lib/hooks/common';
 import {
@@ -19,19 +19,22 @@ import {
     useSpellIssueText,
 } from '@/lib/hooks/spells';
 import { formToPayload, spellFormIssue } from '@/lib/utils/spells/model/form';
+import { toSpellReferencePreview } from '@/lib/utils/spells/reference-preview';
+
+const FORM_ID = 'spell-form';
 
 export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     const t = useTranslations('spellEditor.page');
 
+    const tc = useTranslations('common');
+
     const notify = useNotify();
-
-    const tm = useTranslations('common.dmSections');
-
-    const tc = useTranslations('common.actions');
 
     const issueText = useSpellIssueText();
 
     const router = useRouter();
+
+    const listHref = `/campaigns/${id}/dm/spells`;
 
     const [formData, setFormData] = useState<SpellFormData>(
         getDefaultSpellFormData
@@ -40,6 +43,18 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     const { data: spellGroups = [] } = useSpellGroups(id);
 
     const createSpellMutation = useCreateSpell(id);
+
+    const preview = useDeferredValue(
+        useMemo(
+            () =>
+                toSpellReferencePreview(formData, {
+                    groupName:
+                        spellGroups.find((g) => g.id === formData.groupId)
+                            ?.name ?? null,
+                }),
+            [formData, spellGroups]
+        )
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +68,7 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
         }
 
         createSpellMutation.mutate(formToPayload(formData), {
-            onSuccess: () => router.push(`/campaigns/${id}/dm/spells`),
+            onSuccess: () => router.push(listHref),
             onError: (error) => console.error('Error creating spell:', error),
         });
     };
@@ -61,43 +76,35 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link
-                        href={`/campaigns/${id}/dm/spells`}
-                        className="hover:text-hud-accent-fg"
-                    >
-                        {tm('spells')}
-                    </Link>
-                    {' › '}
-                    {t('createTitle')}
-                </>
-            }
-            aside={t('createAside')}
-            side={
-                <SpellPlayerPreview
-                    campaignId={id}
-                    data={formData}
-                    groupName={spellGroups.find((g) => g.id === formData.groupId)?.name}
-                />
-            }
+            header={{
+                title: t('createTitle'),
+                aside: t('createAside'),
+                back: { href: listHref, label: tc('dmSections.spells') },
+            }}
             actions={
                 <>
                     <Button type="button" variant="outline" asChild>
-                        <Link href={`/campaigns/${id}/dm/spells`}>
-                            {tc('cancel')}
-                        </Link>
+                        <Link href={listHref}>{tc('actions.cancel')}</Link>
                     </Button>
                     <Button
                         type="submit"
-                        form={SPELL_FORM_ID}
+                        form={FORM_ID}
                         disabled={createSpellMutation.isPending}
                     >
                         {createSpellMutation.isPending
-                            ? tc('saving')
+                            ? tc('actions.saving')
                             : t('createSubmit')}
                     </Button>
                 </>
+            }
+            side={
+                <FormPreviewPanel>
+                    <SpellReferenceDetail
+                        campaignId={id}
+                        item={preview}
+                        isDM={false}
+                    />
+                </FormPreviewPanel>
             }
         >
             <SpellFormBody
@@ -105,6 +112,7 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
                 form={{ data: formData, set: setFormData }}
                 spellGroups={spellGroups}
                 submit={{
+                    id: FORM_ID,
                     onSubmit: handleSubmit,
                     error:
                         (createSpellMutation.error as Error)?.message ?? null,

@@ -3,79 +3,80 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { NewCharacterForm } from '@/components/characters/NewCharacterForm';
-import { defaultCharacterFormData } from '@/lib/utils/characters/form/defaults';
-
-const handleSubmit = vi.fn((e: { preventDefault: () => void }) =>
-    e.preventDefault()
-);
 
 const set = vi.fn();
 
-const basic = { name: '', race: '' };
+const state = vi.hoisted(() => ({
+    basic: { name: '', race: '', avatar: '' } as Record<string, string>,
+}));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock('next/link', () => ({
-    default: ({ href, children }: { href: string; children: unknown }) => (
-        <a href={href}>{children as never}</a>
-    ),
+
+vi.mock('@/components/characters/basic/CharacterBasicInfo', () => ({
+    CharacterBasicInfo: () => <div>basic-info</div>,
 }));
-vi.mock('@/lib/hooks/characters', () => ({
-    useCharacterForm: () => ({
-        status: { isLoading: false, error: null },
-        formData: defaultCharacterFormData,
-        basicInfo: {
-            data: { ...defaultCharacterFormData.basicInfo, ...basic },
-            set,
-        },
-        skills: {},
-        abilities: {},
-        combatStats: {},
-        actions: { handleSubmit, setFormData: vi.fn() },
-    }),
-    useChoiceRefs: () => ({ ready: false }),
-    useCreateCharacter: () => ({ mutateAsync: vi.fn() }),
+
+vi.mock('@/components/character-profile/sheet/PortraitDialog', () => ({
+    PortraitDialog: ({ open }: { open: boolean }) =>
+        open ? <div role="dialog">portrait-dialog</div> : null,
 }));
+
+vi.mock('@/components/characters/skills/CharacterSkillsSection', () => ({
+    CharacterSkillsSection: () => null,
+}));
+
+vi.mock('@/components/characters/abilities/CharacterAbilitiesSection', () => ({
+    CharacterAbilitiesSection: () => null,
+}));
+
+vi.mock('@/components/characters/stats/SystemFormFields', () => ({
+    SystemFormFields: () => null,
+}));
+
+vi.mock('@/components/systems', () => ({
+    systemUiOf: () => ({ hideProgression: false, StatsFields: () => null }),
+}));
+
 vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignMembers: () => ({ members: [], isLoading: false }),
 }));
-vi.mock('@/lib/hooks/classes', () => ({
-    useClassMode: () => ({ enabled: false, classes: [], byId: {} }),
-}));
+
 vi.mock('@/lib/hooks/races', () => ({ useRaces: () => ({ data: [] }) }));
+
+vi.mock('@/lib/hooks/classes', () => ({
+    useClassMode: () => ({ enabled: false, byId: {}, classes: [] }),
+}));
+
 vi.mock('@/lib/hooks/systems', () => ({
     useCampaignSystem: () => ({
         def: {
             lineage: true,
-            characteristics: { defaults: undefined },
             identity: { alignments: true },
+            characteristics: { defaults: {} },
+            stats: { columns: [] },
         },
         system: { key: 'd20', modules: [] },
     }),
 }));
+
 vi.mock('@/lib/utils/rules/systems/stats', () => ({
-    statColumnsOf: () => new Set(['classes']),
+    statColumnsOf: () => new Set<string>(),
 }));
-vi.mock('@/components/systems', () => ({
-    systemUiOf: () => ({ hideProgression: false, StatsFields: () => null }),
+
+vi.mock('@/lib/hooks/characters', () => ({
+    useCreateCharacter: () => ({ mutateAsync: vi.fn() }),
+    useChoiceRefs: () => ({ ready: false }),
+    useCharacterForm: () => ({
+        status: { isLoading: false, error: null },
+        formData: {},
+        basicInfo: { data: state.basic, set },
+        skills: {},
+        abilities: {},
+        actions: { handleSubmit: vi.fn(), setFormData: vi.fn() },
+    }),
 }));
-vi.mock('@/components/characters/basic/CharacterBasicInfo', () => ({
-    CharacterBasicInfo: () => <div>basic-tab</div>,
-}));
-vi.mock('@/components/characters/abilities/CharacterAbilitiesSection', () => ({
-    CharacterAbilitiesSection: () => null,
-}));
-vi.mock('@/components/characters/skills/CharacterSkillsSection', () => ({
-    CharacterSkillsSection: () => null,
-}));
-vi.mock('@/components/characters/stats/SystemFormFields', () => ({
-    SystemFormFields: () => null,
-}));
-vi.mock('@/components/choices/character/CharacterChoicesTab', () => ({
-    CharacterChoicesTab: () => null,
-}));
-vi.mock('@/components/common/fields/ImageUpload', () => ({
-    ImageUpload: () => <div>image-upload</div>,
-}));
+
+afterEach(cleanup);
 
 const renderForm = () =>
     render(
@@ -86,44 +87,34 @@ const renderForm = () =>
         />
     );
 
-afterEach(() => {
-    cleanup();
-    basic.name = '';
-    basic.race = '';
-});
-
 describe('NewCharacterForm', () => {
-    it('has no portrait section and edits the portrait only through the banner', () => {
+    it('shows the placeholder initial while the name is empty', () => {
         renderForm();
-        expect(screen.getByText('basic-tab')).toBeTruthy();
-        expect(screen.queryByText('image-upload')).toBeNull();
 
+        expect(screen.getByTestId('sheet-banner').textContent).toContain('?');
+    });
+
+    it('opens the portrait dialog from the banner and has no portrait section', () => {
+        renderForm();
+
+        expect(screen.queryByRole('dialog')).toBeNull();
         fireEvent.click(
             screen.getByRole('button', {
-                name: 'characterProfile.portrait.change',
+                name: /characterProfile\.portrait\.add/,
             })
         );
-        expect(screen.getByText('image-upload')).toBeTruthy();
+        expect(screen.getByRole('dialog')).toBeTruthy();
+        expect(screen.queryByText(/sections\.portrait/)).toBeNull();
     });
 
-    it('shows the question-mark placeholder on an empty form', () => {
-        renderForm();
-        expect(screen.getAllByText('?').length).toBeGreaterThan(0);
-    });
-
-    it('shows the typed name in the banner header', () => {
-        basic.name = 'Арвен';
-        renderForm();
-        expect(screen.getAllByText('Арвен').length).toBeGreaterThan(0);
-    });
-
-    it('renders one submit button that submits the form', () => {
+    it('keeps one submit button wired to the form', () => {
         renderForm();
 
-        const submit = screen.getByRole('button', { name: 'characters.form.submit' });
+        const submit = screen.getAllByRole('button', {
+            name: 'characters.form.submit',
+        });
 
-        expect(submit).toHaveAttribute('form', 'character-form');
-        fireEvent.click(submit);
-        expect(handleSubmit).toHaveBeenCalledTimes(1);
+        expect(submit).toHaveLength(1);
+        expect(submit[0].getAttribute('form')).toBe('character-form');
     });
 });

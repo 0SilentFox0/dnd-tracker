@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 
 import { ArtifactEditForm } from '@/components/artifacts/ArtifactEditForm';
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 import { readAbilities } from '@/lib/utils/abilities/read';
@@ -35,6 +34,7 @@ export default async function EditArtifactPage({
     const { abilities, issues } = readAbilities('artifact', artifact);
 
     return (
+        <>
             <ArtifactEditForm
                 campaignId={id}
                 artifact={{
@@ -52,13 +52,7 @@ export default async function EditArtifactPage({
                     item: itemStatsFromRow(artifact),
                 }}
                 artifactSets={artifactSets}
-                side={
-                    <SourceNotes
-                        campaignId={id}
-                        kind="artifacts"
-                        targetId={artifactId}
-                    />
-                }
             />
+        </>
     );
 }

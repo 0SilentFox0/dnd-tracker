@@ -23,12 +23,21 @@ describe('DS utilities', () => {
         }
     });
 
-    it('drops dead effects', () => {
-        for (const removed of [
-            'glass-card',
-            'neon-border',
-            'pulse-glow',
+    it('defines the wide form page and container utilities', () => {
+        for (const selector of [
+            '.hud-form-wide',
+            '.ds-fields',
+            '.ds-fields--num',
+            '.ds-span',
+            '.ds-list-grid',
+            '.ds-setting-rows',
         ]) {
+            expect(hud).toContain(selector);
+        }
+    });
+
+    it('drops dead effects', () => {
+        for (const removed of ['glass-card', 'neon-border', 'pulse-glow']) {
             expect(globals).not.toContain(removed);
         }
     });

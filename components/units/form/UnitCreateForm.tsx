@@ -6,19 +6,18 @@ import { useTranslations } from 'next-intl';
 import { withAbilityErrors } from '@/components/abilities';
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
-import { UNIT_FORM_ID } from '@/components/units/form/unit-form-tabs';
 import { unitFormTabs } from '@/components/units/form/UnitFormFields';
 import { useUnitCreateForm } from '@/lib/hooks/units';
 import { useTranslator } from '@/lib/i18n/use-translator';
+
+const FORM_ID = 'unit-form';
 
 export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
     const ta = useTranslator('abilities');
 
     const t = useTranslations('units.form');
 
-    const tc = useTranslations('common.actions');
-
-    const tm = useTranslations('common.dmSections');
+    const tc = useTranslations('common');
 
     const tr = useTranslator();
 
@@ -27,30 +26,30 @@ export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
     return (
         <HudFormPage
             width="wide"
-            title={
-                <>
-                    <Link href={editor.listHref} className="hud-link">
-                        {tm('units')}
-                    </Link>
-                    {' › '}
-                    {t('newTitle')}
-                </>
-            }
-            aside={t('newAside')}
+            header={{
+                title: t('newTitle'),
+                aside: t('newAside'),
+                back: {
+                    href: editor.listHref,
+                    label: tc('dmSections.units'),
+                },
+            }}
             actions={
                 <>
                     <Button type="button" variant="outline" asChild>
-                        <Link href={editor.listHref}>{tc('cancel')}</Link>
+                        <Link href={editor.listHref}>
+                            {tc('actions.cancel')}
+                        </Link>
                     </Button>
                     <Button
                         type="submit"
-                        form={UNIT_FORM_ID}
+                        form={FORM_ID}
                         disabled={
                             editor.status.isSaving || !editor.abilities.valid
                         }
                     >
                         {editor.status.isSaving
-                            ? tc('creating')
+                            ? tc('actions.creating')
                             : withAbilityErrors(
                                   t('submitCreate'),
                                   editor.abilities.errors,
@@ -61,7 +60,7 @@ export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
             }
         >
             <HudForm
-                id={UNIT_FORM_ID}
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 tabs={unitFormTabs({ campaignId: id, editor, t: tr })}
                 tabStyles={{ variant: 'rail' }}

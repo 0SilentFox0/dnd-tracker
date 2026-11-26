@@ -1,12 +1,19 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import { alignmentLabelKey } from '@/lib/utils/characters/alignment';
 
-import { alignmentLabel } from '@/lib/utils/characters/alignment';
+export function useAlignmentLabel(): (
+    value: string | null | undefined,
+    form?: 'name' | 'short'
+) => string {
+    const t = useTranslator('gameTerms');
 
-export function useAlignmentLabel() {
-    const t = useTranslations('gameTerms');
+    return (value, form = 'name') => {
+        if (!value) return '';
 
-    return (value: string | null | undefined, form?: 'name' | 'short') =>
-        alignmentLabel(value, (key) => t(key), form);
+        const key = alignmentLabelKey(value, form);
+
+        return key && t.has(key) ? t(key) : value;
+    };
 }

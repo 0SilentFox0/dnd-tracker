@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
@@ -42,13 +41,6 @@ export default async function EditBackgroundPage({
                 canEdit
                 view={{ type: 'edit', id: backgroundId }}
                 data={toBackgroundData(row)}
-                side={
-                    <SourceNotes
-                        campaignId={id}
-                        kind="backgrounds"
-                        targetId={backgroundId}
-                    />
-                }
             />
         </>
     );

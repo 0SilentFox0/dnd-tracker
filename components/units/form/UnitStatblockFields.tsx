@@ -92,7 +92,7 @@ export function UnitStatblockFields({
                     }
                 />
             </div>
-            <div className="col-span-2">
+            <div className="ds-span">
                 <Label htmlFor="creature-alignment">{t('alignment')}</Label>
                 <Input
                     id="creature-alignment"
@@ -142,7 +142,7 @@ export function UnitStatblockFields({
                 />
                 {tMonster('hover')}
             </label>
-            <div className="col-span-2">
+            <div className="ds-span">
                 <Label htmlFor="creature-languages">{t('languages')}</Label>
                 <Input
                     id="creature-languages"

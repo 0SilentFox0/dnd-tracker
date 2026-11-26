@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import '@/components/hud/hud.css';
-import { HUD_SURFACE } from '@/components/hud';
+import { HUD_SURFACE } from '@/components/hud/surface';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +20,7 @@ export function HudPage({
         <div
             className={cn(
                 HUD_SURFACE,
-                'hud-page mx-auto w-full space-y-3 px-3 py-4 sm:px-4',
+                'hud-page mx-auto w-full space-y-3 px-4 py-4',
                 WIDTH[width],
                 className
             )}

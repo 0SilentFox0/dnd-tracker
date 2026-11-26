@@ -208,6 +208,7 @@
   },
   "reference": {
     "tabs": {
+      "label": "Reference section",
       "all": "All",
       "skills": "Skills",
       "classes": "Classes",
@@ -269,20 +270,21 @@
       },
       "artifacts": {
         "title": "Artifacts"
-      },
-      "sets": {
-        "title": "Sets"
       }
     },
     "detail": {
-      "empty": "Pick an entry from the list"
+      "empty": "Select an entry from the list"
     },
     "list": {
-      "showAll": "Show all {count} →",
-      "found": "{count, plural, one {# found} other {# found}}"
+      "showAll": "Show all ({count})",
+      "found": "Found: {count}"
     },
     "rail": {
-      "sections": "Reference section"
+      "sections": "Sections"
+    },
+    "skill": {
+      "description": "Description / mechanics",
+      "how": "How it works (bonuses, effects, triggers)"
     }
   },
   "prep": {

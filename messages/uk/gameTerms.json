@@ -393,6 +393,7 @@
     }
   },
   "alignments": {
+    "label": "Світогляд",
     "lawfulGood": {
       "name": "Законно-добрий",
       "short": "ЗД"

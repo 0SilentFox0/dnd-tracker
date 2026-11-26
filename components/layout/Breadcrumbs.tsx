@@ -6,9 +6,10 @@ import { useTranslations } from 'next-intl';
 import { ChevronRight, Home } from 'lucide-react';
 
 import { DM_SECTIONS } from '@/lib/constants/campaigns';
-import { LANDING_PATHS } from '@/lib/constants/site';
+import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
 import type { Translator } from '@/lib/i18n/translator';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { cn } from '@/lib/utils';
 
 const SEGMENT_KEYS = [
     'campaigns',
@@ -75,7 +76,7 @@ export function Breadcrumbs() {
     if (
         pathname?.startsWith('/sign-in') ||
         pathname?.startsWith('/sign-up') ||
-        LANDING_PATHS.includes(pathname)
+        STATIC_PUBLIC_PATHS.includes(pathname)
     ) {
         return null;
     }
@@ -124,10 +125,10 @@ export function Breadcrumbs() {
     const homeCrumb = allSegments[0] !== 'campaigns' || allSegments.length > 1;
 
     return (
-        <nav aria-label={t('label')} className="h-6 text-xs text-hud-muted">
-            <ol className="flex h-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
+        <nav aria-label={t('label')} className="min-w-0 text-[13px] text-hud-muted">
+            <ol className="flex min-w-0 flex-nowrap items-center gap-1 whitespace-nowrap">
                 {homeCrumb && (
-                    <li className="flex items-center gap-1">
+                    <li className="hidden shrink-0 items-center gap-1 sm:flex">
                         <Link
                             href="/campaigns"
                             className="flex items-center text-hud-muted transition-colors hover:text-hud-ink"
@@ -138,20 +139,28 @@ export function Breadcrumbs() {
                         <ChevronRight className="h-3 w-3 text-hud-line" />
                     </li>
                 )}
-                {crumbs.map((crumb) => (
-                    <li key={crumb.href} className="flex items-center gap-1">
+                {crumbs.map((crumb, index) => (
+                    <li
+                        key={crumb.href}
+                        className={cn(
+                            'flex min-w-0 items-center gap-1',
+                            index < crumbs.length - 2 && 'hidden sm:flex'
+                        )}
+                    >
                         {crumb.isLast ? (
-                            <span className="text-hud-ink">{crumb.label}</span>
+                            <span className="truncate font-medium text-hud-ink">
+                                {crumb.label}
+                            </span>
                         ) : (
                             <Link
                                 href={crumb.href}
-                                className="transition-colors hover:text-hud-ink"
+                                className="truncate transition-colors hover:text-hud-ink"
                             >
                                 {crumb.label}
                             </Link>
                         )}
                         {!crumb.isLast && (
-                            <ChevronRight className="h-3 w-3 text-hud-line" />
+                            <ChevronRight className="h-3 w-3 shrink-0 text-hud-line" />
                         )}
                     </li>
                 ))}

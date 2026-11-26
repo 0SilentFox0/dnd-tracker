@@ -1,130 +1,138 @@
 'use client';
+import { type DragEvent, type ReactNode, useRef, useState } from 'react';
+import { FileJson, Loader2, Upload } from 'lucide-react';
 
-import { type DragEvent, type ReactNode, useState } from 'react';
-
-import { Button } from '@/components/ui/button';
-import { FileButton } from '@/components/ui/file-button';
+import { HudButton } from '@/components/hud/HudButton';
+import { FileButton, HiddenFileInput } from '@/components/ui/file-button';
 import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/common/format';
 
-interface FileDropZoneProps {
-    accept: string;
-    onFiles: (files: File[]) => void;
-    multiple?: boolean;
-    disabled?: boolean;
-    label: ReactNode;
-    hint?: ReactNode;
-    file?: {
-        name: string;
-        size: number;
-        meta?: ReactNode;
-        replaceLabel: ReactNode;
-        onReplace: () => void;
-    } | null;
-}
-
-export function acceptsFile(file: File, accept: string): boolean {
-    const rules = accept
-        .split(',')
-        .map((rule) => rule.trim().toLowerCase())
-        .filter(Boolean);
-
-    if (rules.length === 0) return true;
-
-    const name = file.name.toLowerCase();
-
-    const type = file.type.toLowerCase();
-
-    return rules.some((rule) => {
-        if (rule.startsWith('.')) return name.endsWith(rule);
-
-        if (rule.endsWith('/*')) return type.startsWith(rule.slice(0, -1));
-
-        return type === rule;
-    });
-}
-
-const SIZE = new Intl.NumberFormat(undefined, {
-    notation: 'compact',
-    style: 'unit',
-    unit: 'byte',
-    unitDisplay: 'narrow',
-});
+type DropFile = {
+    name: string;
+    size: number;
+    meta?: ReactNode;
+    replaceLabel: string;
+};
 
 export function FileDropZone({
     accept,
-    onFiles,
-    multiple,
-    disabled,
+    onFile,
     label,
     hint,
     file,
-}: FileDropZoneProps) {
+    disabled,
+    busy,
+}: {
+    accept: string;
+    onFile: (f: File) => void;
+    label: string;
+    hint?: ReactNode;
+    file?: DropFile | null;
+    disabled?: boolean;
+    busy?: boolean;
+}) {
+    const input = useRef<HTMLInputElement>(null);
+
     const [over, setOver] = useState(false);
 
-    function onDrop(event: DragEvent) {
-        event.preventDefault();
+    const locked = !!disabled || !!busy;
+
+    const over$ = (e: DragEvent) => {
+        e.preventDefault();
+
+        if (!locked) setOver(true);
+    };
+
+    const drop = (e: DragEvent) => {
+        e.preventDefault();
         setOver(false);
 
-        if (disabled) return;
+        const dropped = e.dataTransfer.files[0];
 
-        const accepted = Array.from(event.dataTransfer.files).filter((item) =>
-            acceptsFile(item, accept)
-        );
-
-        const files = multiple ? accepted : accepted.slice(0, 1);
-
-        if (files.length > 0) onFiles(files);
-    }
+        if (!locked && dropped) onFile(dropped);
+    };
 
     return (
         <div
-            data-testid="file-drop-zone"
-            onDragOver={(event) => {
-                event.preventDefault();
-
-                if (!disabled) setOver(true);
-            }}
-            onDragLeave={() => setOver(false)}
-            onDrop={onDrop}
+            data-slot="file-drop-zone"
+            data-over={over || undefined}
             className={cn(
-                'ds-inset ds-interactive flex flex-col items-center gap-2 rounded-xl border border-dashed border-hud-line p-4 text-center hover:border-hud-accent',
-                over && 'border-hud-accent',
-                disabled && 'opacity-50'
+                'ds-inset border-2 border-dashed transition-colors',
+                over || !locked
+                    ? 'border-hud-accent/40 hover:border-hud-accent'
+                    : 'border-hud-rule opacity-60',
+                over && 'border-hud-accent'
             )}
+            onDragEnter={over$}
+            onDragOver={over$}
+            onDragLeave={() => setOver(false)}
+            onDrop={drop}
         >
             {file ? (
-                <div className="flex w-full items-center justify-between gap-3 text-left">
-                    <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-3 p-4">
+                    {busy ? (
+                        <Loader2
+                            className="size-8 shrink-0 animate-spin text-hud-accent-fg"
+                            aria-hidden
+                        />
+                    ) : (
+                        <FileJson
+                            className="size-8 shrink-0 text-hud-accent-fg"
+                            aria-hidden
+                        />
+                    )}
+                    <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-hud-ink">
                             {file.name}
                         </p>
                         <p className="text-xs text-hud-muted">
-                            {SIZE.format(file.size)}
-                            {file.meta && <> · {file.meta}</>}
+                            {formatBytes(file.size)}
+                            {file.meta ? <> · {file.meta}</> : null}
                         </p>
                     </div>
-                    <Button
-                        type="button"
+                    <FileButton
                         variant="outline"
                         size="sm"
-                        disabled={disabled}
-                        onClick={file.onReplace}
+                        accept={accept}
+                        inputLabel={file.replaceLabel}
+                        disabled={locked}
+                        onFile={onFile}
                     >
                         {file.replaceLabel}
-                    </Button>
+                    </FileButton>
                 </div>
             ) : (
                 <>
-                    <FileButton
+                    <HiddenFileInput
+                        ref={input}
                         accept={accept}
-                        inputLabel={typeof label === 'string' ? label : accept}
-                        disabled={disabled}
-                        variant="outline"
-                        onFile={(picked) => onFiles([picked])}
+                        inputLabel={label}
+                        disabled={locked}
+                        onFile={onFile}
+                    />
+                    <HudButton
+                        disabled={locked}
+                        className="flex w-full flex-col items-center gap-2 rounded-xl p-8 text-center disabled:cursor-not-allowed"
+                        onClick={() => input.current?.click()}
                     >
-                        {label}
-                    </FileButton>
-                    {hint && <p className="text-xs text-hud-muted">{hint}</p>}
+                        {busy ? (
+                            <Loader2
+                                className="size-8 animate-spin text-hud-accent-fg"
+                                aria-hidden
+                            />
+                        ) : (
+                            <Upload
+                                className="size-8 text-hud-accent-fg"
+                                aria-hidden
+                            />
+                        )}
+                        <span className="text-sm text-hud-ink">{label}</span>
+                        {hint && (
+                            <span className="text-xs text-hud-muted">
+                                {hint}
+                            </span>
+                        )}
+                    </HudButton>
                 </>
             )}
         </div>

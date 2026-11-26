@@ -1,9 +1,16 @@
 // @vitest-environment happy-dom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { HudTabs } from '@/components/hud/form';
+import { type HudTab, HudTabs } from '@/components/hud/form';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 
 function Harness({ keepMounted }: { keepMounted?: boolean }) {
     const [v, setV] = useState<'a' | 'b'>('a');
@@ -173,7 +180,9 @@ describe('HudTabs', () => {
         const tab = (n: string) => screen.getByRole('tab', { name: n });
 
         tab('Перший').focus();
-        fireEvent.keyDown(document.activeElement as Element, { key: 'ArrowRight' });
+        fireEvent.keyDown(document.activeElement as Element, {
+            key: 'ArrowRight',
+        });
         await waitFor(() => expect(tab('Другий')).toHaveFocus());
         expect(tab('Другий')).toHaveAttribute('aria-selected', 'true');
         fireEvent.keyDown(document.activeElement as Element, { key: 'End' });
@@ -195,5 +204,82 @@ describe('HudTabs', () => {
         expect(screen.queryByLabelText('поле Б')).toBeNull();
         fireEvent.mouseDown(screen.getByRole('tab', { name: /Другий/ }));
         expect(screen.getByLabelText('поле Б')).toBeTruthy();
+    });
+});
+
+function Rail({ tabs }: { tabs: HudTab<'a' | 'b' | 'c'>[] }) {
+    const [v, setV] = useState<'a' | 'b' | 'c'>('a');
+
+    return (
+        <HudTabs
+            value={v}
+            onValueChange={setV}
+            styles={{ variant: 'rail' }}
+            tabs={tabs}
+        />
+    );
+}
+
+const railTabs: HudTab<'a' | 'b' | 'c'>[] = [
+    { id: 'a', label: 'One', content: 'A', group: 'First', badge: 3 },
+    { id: 'b', label: 'Two', content: 'B', group: 'First' },
+    { id: 'c', label: 'Three', content: 'C', group: 'Second' },
+];
+
+describe('HudTabs rail', () => {
+    beforeEach(() => mockMatchMedia(false));
+
+    it('is a vertical tablist with arrow navigation on wide viewports', async () => {
+        render(<Rail tabs={railTabs} />);
+
+        expect(screen.getByRole('tablist')).toHaveAttribute(
+            'aria-orientation',
+            'vertical'
+        );
+
+        screen.getByRole('tab', { name: /One/ }).focus();
+        fireEvent.keyDown(document.activeElement as Element, {
+            key: 'ArrowDown',
+        });
+        await waitFor(() =>
+            expect(screen.getByRole('tab', { name: 'Two' })).toHaveFocus()
+        );
+    });
+
+    it('renders the badge inside the trigger', () => {
+        render(<Rail tabs={railTabs} />);
+
+        expect(screen.getByRole('tab', { name: /One/ }).textContent).toContain(
+            '3'
+        );
+    });
+
+    it('renders a presentation heading when the group changes', () => {
+        const { container } = render(<Rail tabs={railTabs} />);
+
+        const headings = Array.from(
+            container.querySelectorAll('[role="presentation"]')
+        ).map((el) => el.textContent);
+
+        expect(headings).toEqual(['First', 'Second']);
+    });
+
+    it('does not render a trigger for hidden tabs but keeps the panel mounted', () => {
+        render(
+            <HudTabs
+                value="a"
+                keepMounted
+                onValueChange={() => undefined}
+                tabs={[
+                    { id: 'a', label: 'One', content: 'A' },
+                    { id: 'b', label: 'Two', content: 'B', hidden: true },
+                ]}
+            />
+        );
+
+        expect(screen.queryByRole('tab', { name: 'Two' })).toBeNull();
+        expect(document.querySelector('[data-tab-id="b"]')?.textContent).toBe(
+            'B'
+        );
     });
 });

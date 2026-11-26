@@ -114,7 +114,7 @@ export function UnitBasicInfo({
                         />
                     </div>
                 ))}
-                <div className="col-span-2 flex flex-col justify-end">
+                <div className="flex flex-col justify-end">
                     <Label htmlFor="gridSize" className="text-xs leading-tight">
                         {t('gridSize')}
                     </Label>

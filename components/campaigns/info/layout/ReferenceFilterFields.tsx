@@ -11,15 +11,17 @@ import {
 } from '@/lib/utils/artifacts/item-set-key';
 import type { ReferenceFilters } from '@/types/info-reference';
 
+type FilterName =
+    | 'mainSkill'
+    | 'spellLevel'
+    | 'spellGroup'
+    | 'spellType'
+    | 'rarity'
+    | 'slot'
+    | ItemSetKey;
+
 interface FilterSelectProps {
-    name:
-        | 'mainSkill'
-        | 'spellLevel'
-        | 'spellGroup'
-        | 'spellType'
-        | 'rarity'
-        | 'slot'
-        | ItemSetKey;
+    name: FilterName;
     value: string | null;
     onChange: (v: string | null) => void;
     options: { value: string; label: string }[];
@@ -28,24 +30,24 @@ interface FilterSelectProps {
 function FilterSelect({ name, value, onChange, options }: FilterSelectProps) {
     const t = useTranslations('dashboard.reference.filters');
 
-    const label = t(`${name}.label`);
-
-    const allLabel = t(`${name}.all`);
+    const all = t(`${name}.all`);
 
     if (options.length === 0) return null;
 
     return (
         <div className="w-full min-w-0 space-y-1.5">
-            <Label className="text-xs text-hud-muted">{label}</Label>
+            <Label className="text-xs text-hud-muted">
+                {t(`${name}.label`)}
+            </Label>
             <SelectField
                 value={value ?? ''}
                 onValueChange={(v) => onChange(v || null)}
                 options={options}
-                placeholder={allLabel}
+                placeholder={all}
                 allowNone
-                noneLabel={allLabel}
+                noneLabel={all}
                 noneValue="all"
-                triggerClassName="w-full h-10"
+                triggerClassName="h-10 w-full"
             />
         </div>
     );
@@ -54,90 +56,80 @@ function FilterSelect({ name, value, onChange, options }: FilterSelectProps) {
 const asOptions = (values: (string | number)[]) =>
     values.map((v) => ({ value: String(v), label: String(v) }));
 
-function SkillFilters({ filter }: { filter: ReferenceFilters['skill'] }) {
-    return (
-        <FilterSelect
-            name="mainSkill"
-            value={filter.mainSkill.value}
-            onChange={filter.mainSkill.set}
-            options={asOptions(filter.mainSkill.options)}
-        />
-    );
-}
-
-function SpellFilters({ filter }: { filter: ReferenceFilters['spell'] }) {
-    const { level, group, type } = filter;
-
-    return (
-        <>
-            <FilterSelect
-                name="spellLevel"
-                value={level.value != null ? String(level.value) : null}
-                onChange={(v) => level.set(v == null ? null : Number(v))}
-                options={asOptions(level.options)}
-            />
-            <FilterSelect
-                name="spellGroup"
-                value={group.value}
-                onChange={group.set}
-                options={asOptions(group.options)}
-            />
-            <FilterSelect
-                name="spellType"
-                value={type.value}
-                onChange={type.set}
-                options={type.options}
-            />
-        </>
-    );
-}
-
-function ArtifactFilters({ filter }: { filter: ReferenceFilters['artifact'] }) {
-    const t = useTranslator('artifacts');
-
-    const { rarity, slot } = filter;
-
-    const itemSet = filter[ITEM_SET_KEY];
-
-    return (
-        <>
-            <FilterSelect
-                name="rarity"
-                value={rarity.value}
-                onChange={rarity.set}
-                options={rarity.options.map((r) => ({
-                    value: r,
-                    label: t(`rarity.${r}`),
-                }))}
-            />
-            <FilterSelect
-                name="slot"
-                value={slot.value}
-                onChange={slot.set}
-                options={slot.options}
-            />
-            <FilterSelect
-                name={ITEM_SET_KEY}
-                value={itemSet.value}
-                onChange={itemSet.set}
-                options={asOptions(itemSet.options)}
-            />
-        </>
-    );
-}
-
 export function ReferenceFilterFields({
     filters,
 }: {
     filters: ReferenceFilters;
 }) {
-    const { visible } = filters;
+    const ta = useTranslator('artifacts');
+
+    const { visible, skill, spell, artifact } = filters;
+
+    const itemSet = artifact[ITEM_SET_KEY];
 
     return (
-        <div className="space-y-3">
-            {visible.skills && <SkillFilters filter={filters.skill} />}
-            {visible.spells && <SpellFilters filter={filters.spell} />}
-            {visible.artifacts && <ArtifactFilters filter={filters.artifact} />}
+        <div className="grid grid-cols-1 gap-4">
+            {visible.skills && (
+                <FilterSelect
+                    name="mainSkill"
+                    value={skill.mainSkill.value}
+                    onChange={skill.mainSkill.set}
+                    options={asOptions(skill.mainSkill.options)}
+                />
+            )}
+            {visible.spells && (
+                <>
+                    <FilterSelect
+                        name="spellLevel"
+                        value={
+                            spell.level.value != null
+                                ? String(spell.level.value)
+                                : null
+                        }
+                        onChange={(v) =>
+                            spell.level.set(v == null ? null : Number(v))
+                        }
+                        options={asOptions(spell.level.options)}
+                    />
+                    <FilterSelect
+                        name="spellGroup"
+                        value={spell.group.value}
+                        onChange={spell.group.set}
+                        options={asOptions(spell.group.options)}
+                    />
+                    <FilterSelect
+                        name="spellType"
+                        value={spell.type.value}
+                        onChange={spell.type.set}
+                        options={spell.type.options}
+                    />
+                </>
+            )}
+            {visible.artifacts && (
+                <>
+                    <FilterSelect
+                        name="rarity"
+                        value={artifact.rarity.value}
+                        onChange={artifact.rarity.set}
+                        options={artifact.rarity.options.map((r) => ({
+                            value: r,
+                            label: ta(`rarity.${r}`),
+                        }))}
+                    />
+                    <FilterSelect
+                        name="slot"
+                        value={artifact.slot.value}
+                        onChange={artifact.slot.set}
+                        options={artifact.slot.options}
+                    />
+                    <FilterSelect
+                        name={ITEM_SET_KEY}
+                        value={itemSet.value}
+                        onChange={itemSet.set}
+                        options={asOptions(itemSet.options)}
+                    />
+                </>
+            )}
         </div>
     );
 }

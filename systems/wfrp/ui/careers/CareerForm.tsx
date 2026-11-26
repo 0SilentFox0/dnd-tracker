@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { CareerTierFields } from './CareerTierFields';
 
+import { HudForm, type HudTab } from '@/components/hud/form';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';
 import { useFeats } from '@/lib/hooks/feats';
@@ -31,6 +32,8 @@ export function CareerForm({
     onSavingChange,
 }: CareerFormProps) {
     const t = useTranslations('wfrpCareers.form');
+
+    const tc = useTranslations('common.tabs');
 
     const feats = useFeats(campaignId);
 
@@ -66,51 +69,57 @@ export function CareerForm({
         }
     };
 
-    return (
-        <form
-            id={formId}
-            onSubmit={(e) => void onSubmit(e)}
-            className="space-y-4"
-        >
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <FormField label={t('name')} htmlFor="career-name" required>
-                    <Input
-                        id="career-name"
-                        className="min-h-11"
-                        value={form.data.name}
-                        onChange={(e) =>
-                            form.set((d) => ({ ...d, name: e.target.value }))
-                        }
-                    />
-                </FormField>
-                <FormField label={t('class')} htmlFor="career-class">
-                    <Input
-                        id="career-class"
-                        className="min-h-11"
-                        value={form.data.class ?? ''}
-                        onChange={(e) =>
-                            form.set((d) => ({
-                                ...d,
-                                class: e.target.value || null,
-                            }))
-                        }
-                    />
-                </FormField>
-            </div>
-            {form.data.tiers.map((tier, index) => (
+    const basic = (
+        <div className="ds-fields">
+            <FormField label={t('name')} htmlFor="career-name" required>
+                <Input
+                    id="career-name"
+                    className="min-h-11"
+                    value={form.data.name}
+                    onChange={(e) =>
+                        form.set((d) => ({ ...d, name: e.target.value }))
+                    }
+                />
+            </FormField>
+            <FormField label={t('class')} htmlFor="career-class">
+                <Input
+                    id="career-class"
+                    className="min-h-11"
+                    value={form.data.class ?? ''}
+                    onChange={(e) =>
+                        form.set((d) => ({
+                            ...d,
+                            class: e.target.value || null,
+                        }))
+                    }
+                />
+            </FormField>
+        </div>
+    );
+
+    const tabs: HudTab[] = [
+        { id: 'basic', label: tc('basic'), content: basic },
+        ...form.data.tiers.map((tier, index) => ({
+            id: `tier-${index}`,
+            label: t('tier', { n: index + 1 }),
+            content: (
                 <CareerTierFields
-                    key={index}
                     index={index}
                     tier={tier}
                     feats={feats.data ?? []}
                     onChange={(patch) => patchTier(index, patch)}
                 />
-            ))}
-            {error && (
-                <p role="alert" className="text-sm text-destructive">
-                    {error}
-                </p>
-            )}
-        </form>
+            ),
+        })),
+    ];
+
+    return (
+        <HudForm
+            id={formId}
+            onSubmit={(e) => void onSubmit(e)}
+            tabs={tabs}
+            tabStyles={{ variant: 'rail' }}
+            error={error}
+        />
     );
 }

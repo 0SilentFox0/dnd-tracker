@@ -55,8 +55,11 @@ export function useCreateSkill(campaignId: string) {
 }
 
 export function useDeleteSkill(campaignId: string) {
+    const t = useTranslations('skills.list');
+
     return useCrudMutation({
         mutationFn: (skillId: string) => deleteSkill(campaignId, skillId),
+        errorText: t('deleteFailed'),
         invalidateKeys: [skillKeys.list(campaignId)],
     });
 }

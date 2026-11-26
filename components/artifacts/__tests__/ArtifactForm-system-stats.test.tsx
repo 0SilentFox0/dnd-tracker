@@ -80,7 +80,6 @@ const mount = (
                         saving: '...',
                         iconHint: '',
                     }}
-                    cancelHref="/x"
                     initial={{
                         name: 'Gambeson',
                         description: '',
@@ -91,7 +90,7 @@ const mount = (
                         abilities: [],
                         abilityIssues: [],
                     }}
-                    actions={{ onSubmit }}
+                    actions={{ onSubmit, cancelHref: '/x' }}
                 />
             </ConfirmProvider>
         </QueryClientProvider>

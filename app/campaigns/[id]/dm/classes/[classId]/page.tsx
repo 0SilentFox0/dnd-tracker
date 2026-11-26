@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 
-import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
@@ -36,13 +35,6 @@ export default async function EditClassPage({
                 canEdit
                 view={{ type: 'edit', id: classId }}
                 data={toGameClassData(row)}
-                side={
-                    <SourceNotes
-                        campaignId={id}
-                        kind="classes"
-                        targetId={classId}
-                    />
-                }
             />
         </>
     );

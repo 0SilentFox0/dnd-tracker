@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
@@ -9,7 +9,7 @@ import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings
 vi.mock('@/lib/hooks/characters', () => ({
     useArchetypeOptions: () => ({ options: [], universalLabel: 'any' }),
     useClassEntriesField: () => vi.fn(),
-    useAlignmentLabel: () => (value: string | null) => value ?? '',
+    useAlignmentLabel: () => (v: string | null) => v ?? '',
 }));
 
 afterEach(cleanup);
@@ -60,42 +60,52 @@ describe('CharacterBasicInfo', () => {
     });
 
     it('omits the class field with hide.class', () => {
-        render(<CharacterBasicInfo basicInfo={bindings} hide={{ class: true }} />);
+        render(
+            <CharacterBasicInfo basicInfo={bindings} hide={{ class: true }} />
+        );
 
         expect(ids()).not.toContain('class');
         expect(ids()).not.toContain('subclass');
     });
 
-    it('has no portrait section: the banner owns the portrait', () => {
-        const { container } = render(<CharacterBasicInfo basicInfo={bindings} />);
+    it('has no portrait section or upload', () => {
+        render(<CharacterBasicInfo basicInfo={bindings} />);
 
-        expect(container.querySelectorAll('section')).toHaveLength(3);
+        expect(screen.queryByText(/sections\.portrait/)).toBeNull();
         expect(screen.queryByText('characters.form.basic.avatar')).toBeNull();
     });
 
-    it('type is a segmented radiogroup and alignment a radiogroup', () => {
+    it('renders type as a radiogroup with two radios', () => {
         render(<CharacterBasicInfo basicInfo={bindings} />);
 
-        expect(document.getElementById('type')?.getAttribute('role')).toBe(
-            'radiogroup'
-        );
-        expect(
-            document.getElementById('alignment')?.getAttribute('role')
-        ).toBe('radiogroup');
+        const group = screen.getByRole('radiogroup', {
+            name: 'characters.form.basic.type',
+        });
+
+        expect(within(group).getAllByRole('radio')).toHaveLength(2);
     });
 
-    it('puts the slots into the class card row', () => {
+    it('renders alignment as a radiogroup with 10 options', () => {
+        render(<CharacterBasicInfo basicInfo={bindings} />);
+
+        const group = screen
+            .getAllByRole('radiogroup')
+            .find((g) => g.id === 'alignment') as HTMLElement;
+
+        expect(
+            within(group.parentElement as HTMLElement).getAllByRole('radio')
+        ).toHaveLength(10);
+    });
+
+    it('renders the class slots', () => {
         render(
             <CharacterBasicInfo
                 basicInfo={bindings}
-                slots={{
-                    classAction: <button>act</button>,
-                    classAside: <div>hp-tile</div>,
-                }}
+                classSlots={{ action: <i>act</i>, aside: <i>side</i> }}
             />
         );
 
         expect(screen.getByText('act')).toBeTruthy();
-        expect(screen.getByText('hp-tile')).toBeTruthy();
+        expect(screen.getByText('side')).toBeTruthy();
     });
 });

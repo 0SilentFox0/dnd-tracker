@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useRef } from 'react';
+import { Fragment, type ReactNode, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { SheetTabList } from './SheetTabList';
@@ -22,13 +22,30 @@ export interface HudTab<T extends string = string> {
     icon?: ReactNode;
     badge?: ReactNode;
     wide?: boolean;
+    group?: string;
+    hidden?: boolean;
 }
 
 export interface HudTabsStyles {
     content?: string;
     trigger?: string;
     variant?: 'default' | 'sheet' | 'rail';
+    rail?: { from?: 'lg' | 'xl'; mobile?: 'row' | 'list' };
 }
+
+const RAIL_QUERY = {
+    lg: '(min-width: 1024px)',
+    xl: '(min-width: 1280px)',
+} as const;
+
+const RAIL_TRIGGER =
+    'h-10 justify-start rounded-md px-3 text-left hover:bg-hud-raised data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_2px_0_0_var(--hud-accent)]';
+
+const Badge = ({ children }: { children: ReactNode }) => (
+    <span className="ml-1.5 text-xs text-hud-soft tabular-nums">
+        {children}
+    </span>
+);
 
 interface HudTabsProps<T extends string> {
     tabs: HudTab<T>[];
@@ -53,11 +70,15 @@ export function HudTabs<T extends string>({
 
     const rail = styles.variant === 'rail';
 
-    const vertical = useMediaQuery('(min-width: 1280px)') && rail;
+    const railFrom = styles.rail?.from ?? 'xl';
 
-    const activeWide = tabs.find((tab) => tab.id === value)?.wide;
+    const railMobile = styles.rail?.mobile ?? 'row';
 
-    const order = tabs.map((tab) => tab.id);
+    const vertical = useMediaQuery(RAIL_QUERY[railFrom]) && rail;
+
+    const shown = tabs.filter((tab) => !tab.hidden);
+
+    const order = shown.map((tab) => tab.id);
 
     const dir = useTabDirection(order, value);
 
@@ -69,79 +90,117 @@ export function HudTabs<T extends string>({
 
     return (
         <Tabs
+            data-slot="hud-tabs"
             value={value}
             onValueChange={(v) => onValueChange(v as T)}
             orientation={vertical ? 'vertical' : 'horizontal'}
-            {...(rail && {
-                'data-hud-tabs-root': '',
-                'data-active-wide': activeWide ? 'true' : undefined,
-            })}
         >
-            <div
-                {...(rail && { 'data-hud-rail': '' })}
-                className={cn(
-                    'sticky z-20',
-                    rail &&
-                        'xl:top-[calc(var(--shell-header-h,57px)+16px)] xl:self-start xl:border-b-0 xl:bg-transparent',
-                    sheet
-                        ? 'top-[calc(var(--shell-header-h,57px)/var(--sheet-zoom,1))] px-4 py-2'
-                        : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule bg-hud-page/[.97]'
-                )}
-            >
-                {header}
-                {sheet ? (
-                    <SheetTabList
-                        tabs={tabs}
-                        value={value}
-                        trigger={styles.trigger}
-                        invalidLabel={t('ui.hasErrors')}
-                    />
-                ) : (
+            {rail ? (
+                <>
+                    {header}
                     <TabsList
+                        data-slot="hud-tabs-list"
+                        data-rail-from={railFrom}
                         className={cn(
-                            'hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent p-1.5 [mask-image:linear-gradient(90deg,transparent,#000_16px,#000_calc(100%-16px),transparent)] md:flex-wrap md:overflow-x-visible md:[mask-image:none]',
-                            vertical &&
-                                'flex-col flex-nowrap overflow-visible p-0 [mask-image:none]'
+                            'flex h-auto w-full justify-start bg-transparent p-1.5',
+                            vertical
+                                ? 'sticky top-[calc(var(--shell-header-h)+64px)] flex-col items-stretch gap-0.5 self-start p-0'
+                                : railMobile === 'list'
+                                  ? 'flex-col items-stretch gap-0.5 p-0'
+                                  : 'hud-scroll-x gap-1 overflow-x-auto'
                         )}
                     >
-                        {tabs.map((tab) => (
-                            <TabsTrigger
-                                key={tab.id}
-                                value={tab.id}
-                                className={cn(
-                                    'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[15px] text-hud-muted',
-                                    rail &&
-                                        'hover:bg-hud-raised data-[orientation=vertical]:w-full data-[orientation=vertical]:flex-none data-[orientation=vertical]:justify-start data-[orientation=vertical]:data-[state=active]:bg-transparent data-[orientation=vertical]:data-[state=active]:shadow-[inset_2px_0_0_var(--hud-accent)]',
-                                    styles.trigger
-                                )}
-                            >
-                                {tab.label}
-                                {tab.badge != null && (
-                                    <span className="hud-num ml-1.5 text-hud-muted">
-                                        {tab.badge}
-                                    </span>
-                                )}
-                                {tab.invalid && (
-                                    <span
-                                        data-invalid-dot
-                                        aria-label={t('ui.hasErrors')}
-                                        className={cn(
-                                            'ml-1.5 inline-block h-1.5 w-1.5 rounded-full',
-                                            rail
-                                                ? 'bg-hud-crimson'
-                                                : 'bg-hud-danger'
-                                        )}
-                                    />
-                                )}
-                            </TabsTrigger>
+                        {shown.map((tab, i) => (
+                            <Fragment key={tab.id}>
+                                {tab.group &&
+                                    tab.group !== shown[i - 1]?.group && (
+                                        <span
+                                            role="presentation"
+                                            className={cn(
+                                                'hud-sc px-3 pt-3 pb-1 text-xs text-hud-soft first:pt-0',
+                                                !vertical &&
+                                                    railMobile === 'row' &&
+                                                    'hidden'
+                                            )}
+                                        >
+                                            {tab.group}
+                                        </span>
+                                    )}
+                                <TabsTrigger
+                                    value={tab.id}
+                                    className={cn(
+                                        'hud-sc h-10 min-w-fit shrink-0 text-[15px] text-hud-muted',
+                                        vertical || railMobile === 'list'
+                                            ? RAIL_TRIGGER
+                                            : 'flex-1 px-2.5',
+                                        styles.trigger
+                                    )}
+                                >
+                                    {tab.label}
+                                    {tab.badge != null && (
+                                        <Badge>{tab.badge}</Badge>
+                                    )}
+                                    {tab.invalid && (
+                                        <span
+                                            data-invalid-dot
+                                            aria-label={t('ui.hasErrors')}
+                                            className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-hud-danger"
+                                        />
+                                    )}
+                                </TabsTrigger>
+                            </Fragment>
                         ))}
                     </TabsList>
-                )}
-            </div>
+                </>
+            ) : (
+                <div
+                    className={cn(
+                        'sticky z-20',
+                        sheet
+                            ? 'top-[calc(var(--shell-header-h)/var(--sheet-zoom,1)+var(--sheet-actions-h,0px))] px-4 py-2'
+                            : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule bg-hud-page/[.97]'
+                    )}
+                >
+                    {header}
+                    {sheet ? (
+                        <SheetTabList
+                            tabs={shown}
+                            value={value}
+                            trigger={styles.trigger}
+                            invalidLabel={t('ui.hasErrors')}
+                        />
+                    ) : (
+                        <TabsList className="hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none bg-transparent [mask-image:linear-gradient(90deg,transparent,#000_16px,#000_calc(100%-16px),transparent)] p-1.5 md:flex-wrap md:overflow-x-visible md:[mask-image:none]">
+                            {shown.map((tab) => (
+                                <TabsTrigger
+                                    key={tab.id}
+                                    value={tab.id}
+                                    className={cn(
+                                        'hud-sc h-10 min-w-fit flex-1 shrink-0 px-2.5 text-[15px] text-hud-muted',
+                                        styles.trigger
+                                    )}
+                                >
+                                    {tab.label}
+                                    {tab.badge != null && (
+                                        <Badge>{tab.badge}</Badge>
+                                    )}
+                                    {tab.invalid && (
+                                        <span
+                                            data-invalid-dot
+                                            aria-label={t('ui.hasErrors')}
+                                            className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-hud-danger"
+                                        />
+                                    )}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    )}
+                </div>
+            )}
             <div
                 ref={panels}
+                data-slot="hud-tabs-panels"
                 {...(sheet ? swipe : {})}
-                {...(rail && { 'data-hud-tabs-panels': '' })}
             >
                 {tabs.map((tab) => (
                     <TabsContent
@@ -151,7 +210,9 @@ export function HudTabs<T extends string>({
                         data-dir={sheet ? dir : undefined}
                         forceMount={keepMounted ? true : undefined}
                         className={cn(
-                            'mt-0 px-4 py-3',
+                            rail
+                                ? 'mt-0 py-1'
+                                : 'mt-0 px-4 py-3 [.hud-form-wide_&]:max-sm:px-0',
                             sheet && 'motion-panel',
                             keepMounted && 'data-[state=inactive]:hidden',
                             styles.content

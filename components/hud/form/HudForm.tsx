@@ -1,7 +1,6 @@
 'use client';
 
 import { type FormEvent, type ReactNode, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
 
 import { type HudTab, HudTabs, type HudTabsStyles } from './HudTabs';
 import { useRevealInvalidTab } from './reveal-invalid-tab';
@@ -38,6 +37,8 @@ export function HudForm<T extends string>({
 
     const active = tab ?? innerTab ?? tabs?.[0]?.id;
 
+    const wideTab = tabs?.find((tb) => tb.id === active)?.wide;
+
     const setActive = (next: T) => {
         setInnerTab(next);
         onTabChange?.(next);
@@ -53,14 +54,16 @@ export function HudForm<T extends string>({
             id={id}
             onSubmit={onSubmit}
             onInvalidCapture={onInvalidCapture}
+            data-layout={tabStyles?.variant === 'rail' ? 'rail' : undefined}
+            data-wide-tab={wideTab ? 'true' : undefined}
             className={cn('flex flex-1 flex-col', className)}
         >
-            {error && (
+            {!actions && error && (
                 <p
                     role="alert"
-                    className="flex items-center gap-1.5 px-4 pt-3 text-sm text-hud-crimson-fg"
+                    data-notice
+                    className="px-4 py-2 text-sm text-hud-danger [.hud-form-wide_&]:max-sm:px-0"
                 >
-                    <AlertCircle className="size-4 shrink-0" aria-hidden />
                     {error}
                 </p>
             )}
@@ -73,10 +76,13 @@ export function HudForm<T extends string>({
                     keepMounted
                 />
             ) : (
-                <div className="px-4 py-3">{children}</div>
+                <div className="px-4 py-3 [.hud-form-wide_&]:max-sm:px-0">{children}</div>
             )}
             {actions && (
-                <ActionBar className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit">
+                <ActionBar
+                    error={error}
+                    className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit"
+                >
                     {actions}
                 </ActionBar>
             )}
