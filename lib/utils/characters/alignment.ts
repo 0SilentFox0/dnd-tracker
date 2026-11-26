@@ -14,6 +14,8 @@ export const ALIGNMENT_KEYS = [
 
 export type AlignmentKey = (typeof ALIGNMENT_KEYS)[number];
 
+export type AlignmentTermKey = `alignments.${AlignmentKey}.${'name' | 'short'}`;
+
 export function alignmentKeyOf(
     value: string | null | undefined
 ): AlignmentKey | null {
@@ -24,7 +26,7 @@ export function alignmentKeyOf(
 
 export function alignmentLabel(
     value: string | null | undefined,
-    t: (key: string) => string,
+    t: (key: AlignmentTermKey) => string,
     form: 'name' | 'short' = 'name'
 ): string {
     if (!value) return '';
