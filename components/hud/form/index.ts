@@ -1,4 +1,5 @@
 export * from './HudForm';
+export * from './HudFormMenu';
 export * from './HudFormPage';
 export * from './HudSection';
 export * from './HudTabs';
