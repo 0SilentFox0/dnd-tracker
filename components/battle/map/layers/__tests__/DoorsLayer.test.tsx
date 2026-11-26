@@ -89,6 +89,10 @@ describe('DoorsLayer', () => {
             </svg>
         ).container.querySelector('[data-map-door="2:2:ne"] g[transform]');
 
-        expect(hex?.getAttribute('transform')).toMatch(/rotate\(60(\.\d+)?\)/);
+        const angle = /rotate\((-?[\d.]+)\)/.exec(
+            hex?.getAttribute('transform') ?? ''
+        );
+
+        expect(Number(angle?.[1])).toBeCloseTo(60, 5);
     });
 });

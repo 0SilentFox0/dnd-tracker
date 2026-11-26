@@ -43,6 +43,8 @@ export const mapCellSchema = z.object({
 
 export const edgeKeySchema = z.string().regex(/^\d+:\d+:(e|s|n|ne|se)$/);
 
+const squareEdgeKeySchema = edgeKeySchema.refine((k) => edgeOnGrid('square', k));
+
 export const doorStateSchema = z.object({
     open: z.boolean(),
     locked: z.boolean().optional(),
@@ -95,7 +97,7 @@ const illusionGroupSchema = z.object({
 const illusionGroupsSchema = z.array(illusionGroupSchema).max(8);
 
 export const mazeSchema = z.object({
-    walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges),
+    walls: z.array(squareEdgeKeySchema).max(MAP_LIMITS.inlineMaxEdges),
     exit: mapCellSchema.nullable(),
     difficulty: mazeDifficultySchema,
     teleports: z.array(z.tuple([mapCellSchema, mapCellSchema])).max(20),
@@ -128,7 +130,7 @@ const mazeFeatureCounts = {
     fogPatches: z.number().int().min(0).max(MAZE_LIMITS.fogPatches),
 };
 
-const edgeBatch = z.array(edgeKeySchema).max(MAZE_LIMITS.wallEdgesPerOp);
+const edgeBatch = z.array(squareEdgeKeySchema).max(MAZE_LIMITS.wallEdgesPerOp);
 
 export const mazeActionSchema = z.discriminatedUnion('op', [
     z.object({
