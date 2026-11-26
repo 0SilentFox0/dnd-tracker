@@ -1,111 +1,101 @@
 import { gzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 
-import { LOCALES, type Namespace } from '../config';
-import { loadMessages, loadStaticMessages } from '../messages';
+import { type Locale, LOCALES, type Namespace } from '../config';
+import { loadMessages, loadStaticMessages, trimWhatsNew } from '../messages';
 import {
-    BATTLE_NAMESPACES,
-    CAMPAIGN_NAMESPACES,
-    ROOT_NAMESPACES,
-} from '../scopes';
-import { logScope, systemScope } from '../system-scope';
+    CAMPAIGN_BASE,
+    CAMPAIGN_BASE_LIMIT_KB,
+    ROUTE_SCOPES,
+    type RouteKey,
+    routeNamespaces,
+} from '../route-scopes';
+import { ROOT_NAMESPACES } from '../scopes';
+import { logScope, systemPackScope, systemScope } from '../system-scope';
+import { ROUTE_BUDGETS_KB } from '../test/route-budgets';
+import { campaignPages, routeGraph } from '../test/route-namespaces';
 
-import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
+import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
-const LIMIT_KB = 112.9;
-
-// per-system budgets live in the system meta (i18n.budgetKb); limits keep ~0.5 KB headroom over the measured uk gzip
+// limits are the measured uk gzip + ~0.5 KB headroom, rounded up to 0.1
 const ROOT_LIMIT_KB = 20;
 
-const BASE = [...CAMPAIGN_NAMESPACES, ...BATTLE_NAMESPACES];
+const gzipKbOf = async (locale: Locale, namespaces: readonly Namespace[]) => {
+    const messages = trimWhatsNew(await loadMessages(locale, namespaces));
+
+    return gzipSync(JSON.stringify(messages), { level: 9 }).length / 1024;
+};
+
+const routeScopeOf = (declared: readonly string[]) => {
+    const keys = declared as RouteKey[];
+
+    return [
+        ...new Set<Namespace>([
+            ...CAMPAIGN_BASE,
+            'whatsNew',
+            ...keys.flatMap((key) => routeNamespaces(key, null)),
+        ]),
+    ];
+};
+
+const ROUTES = new Map<string, { namespaces: readonly Namespace[]; pages: string[] }>();
+
+for (const page of campaignPages()) {
+    const { declaredRoutes } = routeGraph(page);
+
+    const key = declaredRoutes.at(-1);
+
+    if (!key) continue;
+
+    const namespaces = routeScopeOf(declaredRoutes);
+
+    const hit = ROUTES.get(key);
+
+    ROUTES.set(key, {
+        namespaces: [...new Set([...(hit?.namespaces ?? []), ...namespaces])],
+        pages: [...(hit?.pages ?? []), page],
+    });
+}
 
 const systemScopes = SYSTEM_META.filter(
     (meta) => (meta.kind ?? 'base') === 'base'
 ).flatMap((meta) => {
     const key = meta.keys[0] as string;
 
-    const { budgetKb } = meta.i18n as {
-        budgetKb?: {
-            battle?: number;
-            member?: number;
-            dm?: number;
-            pages?: Record<string, number>;
-        };
-    };
+    const budgetKb = (meta as SystemMeta).i18n.budgetKb;
 
-    const battle = [...systemScope({ key }, 'battle'), ...logScope({ key })];
-
-    const member = [
-        ...BASE,
-        ...battle,
-        ...systemScope({ key }, 'campaign'),
-        ...systemScope({ key }, 'member'),
-    ];
-
-    const addons = SYSTEM_META.filter(
-        (m) =>
-            m.kind === 'addon' &&
-            (m.requires as readonly string[] | undefined)?.includes(meta.module)
-    ).map((m) => m.module);
-
-    return [
-        {
-            name: `${key} battle`,
-            namespaces: [
-                ...CAMPAIGN_NAMESPACES,
-                ...BATTLE_NAMESPACES,
-                ...battle,
-            ],
-            ...(budgetKb?.battle && { limit: budgetKb.battle }),
-        },
-        {
-            name: `${key} battle + modules`,
-            namespaces: [
-                ...CAMPAIGN_NAMESPACES,
-                ...BATTLE_NAMESPACES,
-                ...systemScope({ key, modules: addons }, 'battle'),
-                ...logScope({ key }),
-            ],
-            ...(budgetKb?.battle && { limit: budgetKb.battle }),
-        },
-        ...(budgetKb?.member
-            ? [
-                  {
-                      name: `${key} member`,
-                      namespaces: member,
-                      limit: budgetKb.member,
-                  },
-              ]
-            : []),
-        ...(budgetKb?.dm
-            ? [
-                  {
-                      name: `${key} DM`,
-                      namespaces: [...member, ...systemScope({ key }, 'dm')],
-                      limit: budgetKb.dm,
-                  },
-              ]
-            : []),
-        ...Object.entries(budgetKb?.pages ?? {}).map(([page, limit]) => ({
+    return Object.entries(budgetKb?.packs ?? {}).map(([pack, limit]) => ({
+        name: `${key} pack ${pack}`,
+        namespaces: [
+            ...systemPackScope({ key }, pack as Parameters<typeof systemPackScope>[1]),
+            ...(pack === 'battle' ? logScope({ key }) : []),
+        ] as readonly Namespace[],
+        limit,
+    })).concat(
+        Object.entries(budgetKb?.pages ?? {}).map(([page, limit]) => ({
             name: `${key} ${page} page extra`,
             namespaces: systemScope(
                 { key },
                 page as Parameters<typeof systemScope>[1]
-            ),
+            ) as readonly Namespace[],
             limit,
-        })),
-    ];
+        }))
+    );
 });
 
 const SCOPES = [
-    { name: 'campaign', namespaces: CAMPAIGN_NAMESPACES },
-    { name: 'campaign + battle', namespaces: BASE },
+    {
+        name: 'campaign base',
+        namespaces: CAMPAIGN_BASE as readonly Namespace[],
+        limit: CAMPAIGN_BASE_LIMIT_KB,
+    },
+    ...[...ROUTES.entries()].map(([route, { namespaces }]) => ({
+        name: `route ${route}`,
+        namespaces,
+        limit: ROUTE_BUDGETS_KB[route as RouteKey],
+    })),
     ...systemScopes,
-] as readonly {
-    name: string;
-    namespaces: readonly Namespace[];
-    limit?: number;
-}[];
+];
 
 describe('message scope size', () => {
     it.each(
@@ -113,55 +103,54 @@ describe('message scope size', () => {
             LOCALES.map((locale) => ({ ...scope, locale }))
         )
     )(
-        '$name $locale stays under the split threshold',
+        '$name $locale stays under its budget',
         async ({ name, namespaces, locale, limit }) => {
-            const json = JSON.stringify(await loadMessages(locale, namespaces));
+            const gzipKb = await gzipKbOf(locale, namespaces);
 
-            const gzipKb = gzipSync(json, { level: 9 }).length / 1024;
+            console.info(`${name} ${locale}: ${gzipKb.toFixed(1)} KB gzip`);
 
-            console.info(
-                `${name} scope ${locale}: ${(json.length / 1024).toFixed(1)} KB raw, ${gzipKb.toFixed(1)} KB gzip`
-            );
-
-            expect(gzipKb).toBeLessThan(limit ?? LIMIT_KB);
+            expect(limit, `${name} has no budget`).toBeDefined();
+            expect(gzipKb).toBeLessThan(limit as number);
         }
     );
+
+    it('every route key has a budget and every budget a route', () => {
+        expect(Object.keys(ROUTE_BUDGETS_KB).sort()).toEqual(
+            [...ROUTES.keys()].sort()
+        );
+
+        for (const key of ROUTES.keys())
+            expect(ROUTE_SCOPES).toHaveProperty([key]);
+    });
 
     it('root chunk (root namespaces, both locales) stays under the budget', async () => {
         const json = JSON.stringify(await loadStaticMessages(ROOT_NAMESPACES));
 
         const gzipKb = gzipSync(json, { level: 9 }).length / 1024;
 
-        console.info(
-            `root scope: ${(json.length / 1024).toFixed(1)} KB raw, ${gzipKb.toFixed(1)} KB gzip`
-        );
+        console.info(`root scope: ${gzipKb.toFixed(1)} KB gzip`);
 
         expect(gzipKb).toBeLessThan(ROOT_LIMIT_KB);
     });
 
     it('a d20 campaign gets only the namespaces of its modules', () => {
         for (const slot of [
-            'battle',
-            'campaign',
-            'member',
-            'dm',
             'character',
             'dmCharacters',
             'dmCharacter',
             'dmRules',
             'draft',
         ] as const) {
-            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual(
-                slot === 'battle' ? ['battleD20'] : []
-            );
-            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual(
-                slot === 'campaign'
-                    ? ['inspiration']
-                    : slot === 'battle'
-                      ? ['battleD20']
-                      : []
-            );
+            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual([]);
+            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual([]);
             expect(systemScope(null, slot)).toEqual([]);
         }
+
+        expect(
+            systemPackScope({ key: 'homm', modules: [] }, 'battle')
+        ).toContain('battleD20');
+        expect(systemPackScope({ key: 'dnd5e' }, 'characterSheet')).toEqual([
+            'inspiration',
+        ]);
     });
 });

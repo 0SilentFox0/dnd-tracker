@@ -32,6 +32,7 @@ import {
 import { CampaignKind } from '@/lib/constants/campaigns';
 import { onboardingKeys } from '@/lib/hooks/onboarding';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
+import { RouteScope } from '@/lib/i18n/route-scope';
 import { getTranslator } from '@/lib/i18n/translator';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignWithMembers } from '@/lib/server/campaigns/access';
@@ -373,13 +374,15 @@ export default async function CampaignDetailPage({
     );
 
     return (
-        <GameShell
-            items={navItems}
-            activeId="overview"
-            title={tCommon('gameNavigation.dashboard')}
-            breadcrumbRootLabel={tCommon('gameNavigation.campaign')}
-        >
-            {page}
-        </GameShell>
+        <RouteScope route="[id]" campaignId={id}>
+            <GameShell
+                items={navItems}
+                activeId="overview"
+                title={tCommon('gameNavigation.dashboard')}
+                breadcrumbRootLabel={tCommon('gameNavigation.campaign')}
+            >
+                {page}
+            </GameShell>
+        </RouteScope>
     );
 }

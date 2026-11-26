@@ -21,6 +21,7 @@ import {
 } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
+import { RouteScope } from '@/lib/i18n/route-scope';
 import { getTranslator } from '@/lib/i18n/translator';
 import { visibleTemplates } from '@/lib/server/templates/list-templates';
 import { safeParseRules } from '@/lib/utils/rules/schema';
@@ -53,13 +54,15 @@ export default async function CampaignsPage({
     ];
 
     const renderPage = (content: ReactNode) => (
-        <GameShell
-            items={navItems}
-            activeId="campaigns"
-            title={tCommon('gameNavigation.campaigns')}
-        >
-            {content}
-        </GameShell>
+        <RouteScope route="list">
+            <GameShell
+                items={navItems}
+                activeId="campaigns"
+                title={tCommon('gameNavigation.campaigns')}
+            >
+                {content}
+            </GameShell>
+        </RouteScope>
     );
 
     const userId = user.id;

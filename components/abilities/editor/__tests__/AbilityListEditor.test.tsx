@@ -82,7 +82,7 @@ describe('AbilityListEditor', () => {
             screen.getByRole('button', { name: 'abilities.chips.add' })
         );
         fireEvent.click(
-            screen.getByText('abilityRegistry.templates.damage.label')
+            screen.getByText('abilityEditor.templates.damage.label')
         );
         fireEvent.click(
             screen.getByRole('button', { name: 'abilities.templates.create' })
@@ -222,7 +222,7 @@ describe('AbilityListEditor', () => {
             screen.getByRole('button', { name: 'abilities.chips.add' })
         );
         fireEvent.click(
-            screen.getByText('abilityRegistry.templates.damage.label')
+            screen.getByText('abilityEditor.templates.damage.label')
         );
         fireEvent.click(
             screen.getByRole('button', { name: 'abilities.templates.create' })

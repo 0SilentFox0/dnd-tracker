@@ -1,4 +1,5 @@
 import type abilities from './messages/uk/abilities.json';
+import type abilityEditor from './messages/uk/abilityEditor.json';
 import type abilityRegistry from './messages/uk/abilityRegistry.json';
 import type abilityText from './messages/uk/abilityText.json';
 import type acquaintances from './messages/uk/acquaintances.json';
@@ -91,6 +92,7 @@ declare module 'next-intl' {
             editors: typeof editors;
             units: typeof units;
             abilities: typeof abilities;
+            abilityEditor: typeof abilityEditor;
             abilityRegistry: typeof abilityRegistry;
             rules: typeof rules;
             skillTree: typeof skillTree;

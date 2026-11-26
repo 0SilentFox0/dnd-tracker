@@ -129,30 +129,4 @@ describe('CampaignLayout', () => {
             expect(markup).not.toContain('campaign</main>');
         }
     });
-
-    it('adds the wfrpMagic scope only for wfrp campaigns', async () => {
-        mocks.kind = 'campaign';
-
-        expect(await html()).not.toContain('wfrpMagic');
-
-        mocks.wfrp = true;
-
-        expect(await html()).toContain(
-            'data-scope="wfrpMagic,wfrpAdvancement,wfrpEquipment"'
-        );
-    });
-
-    it('adds the careers scope for the DM of a wfrp campaign only', async () => {
-        mocks.kind = 'campaign';
-        mocks.wfrp = true;
-        mocks.role = 'dm';
-
-        expect(await html()).toContain(
-            'data-scope="wfrpMagic,wfrpAdvancement,wfrpEquipment,wfrpCareers,wfrpCreation,wfrpEquipmentEditor,wfrpTraits,wfrpTables"'
-        );
-
-        mocks.wfrp = false;
-
-        expect(await html()).not.toContain('wfrpCareers');
-    });
 });

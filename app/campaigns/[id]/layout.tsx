@@ -4,11 +4,10 @@ import { ErrorState } from '@/components/common/states';
 import { NotificationsHost } from '@/components/notifications/NotificationsHost';
 import { DemoTourCoordinator } from '@/components/onboarding/DemoTourCoordinator';
 import { getSessionUserId } from '@/lib/auth';
-import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
+import { isDemoKind } from '@/lib/constants/campaigns';
 import { campaignKeys } from '@/lib/hooks/campaigns';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
-import { systemScope } from '@/lib/i18n/system-scope';
 import { getTranslator } from '@/lib/i18n/translator';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { getCampaignForLayout } from '@/lib/server/campaigns/access';
@@ -39,8 +38,6 @@ export default async function CampaignLayout({
 
     const isDemo = isDemoKind(campaign?.kind);
 
-    const isDM = campaign?.members?.[0]?.role === CampaignRole.DM;
-
     const content = isDemo ? (
         <ExtendLocaleScope namespaces={['demoTours']}>
             <DemoTourCoordinator campaignId={id}>
@@ -53,21 +50,9 @@ export default async function CampaignLayout({
 
     const scope = campaign ? system : null;
 
-    const namespaces = [
-        ...systemScope(scope, 'campaign'),
-        ...systemScope(scope, 'member'),
-        ...(isDM ? systemScope(scope, 'dm') : []),
-    ];
-
     return (
         <PrefetchedQuery queryKey={campaignKeys.system(id)} data={scope}>
-            {namespaces.length ? (
-                <ExtendLocaleScope namespaces={namespaces}>
-                    {content}
-                </ExtendLocaleScope>
-            ) : (
-                content
-            )}
+            {content}
             {!isDemo && <NotificationsHost campaignId={id} userId={userId} />}
         </PrefetchedQuery>
     );

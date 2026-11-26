@@ -13,25 +13,11 @@ const requireCampaignMember = vi.hoisted(() => vi.fn());
 
 const findFirst = vi.hoisted(() => vi.fn());
 
-const wfrp = vi.hoisted(() => ({ is: false }));
-
 vi.mock('@/lib/server/characters/core/read-sheet', () => ({
     readCharacterSheet,
 }));
 vi.mock('@/lib/server/campaigns/access', () => ({ requireCampaignMember }));
 vi.mock('@/lib/db', () => ({ prisma: { character: { findFirst } } }));
-vi.mock('@/lib/server/systems/campaign-system', () => ({
-    systemOfCampaign: () => Promise.resolve({ key: wfrp.is ? 'wfrp' : 'homm' }),
-}));
-vi.mock('@/lib/i18n/extend-locale-scope', () => ({
-    ExtendLocaleScope: ({
-        children,
-        namespaces,
-    }: {
-        children: React.ReactNode;
-        namespaces: string[];
-    }) => <div data-scope={namespaces.join(',')}>{children}</div>,
-}));
 vi.mock('@/components/character-profile', () => ({
     CharacterProfile: () => null,
 }));
@@ -71,7 +57,6 @@ describe('CharacterPage (server)', () => {
             campaign: { maxLevel: 20, rules: { system: { key: 'homm' } } },
         });
         findFirst.mockResolvedValue({ id: 'ch1' });
-        wfrp.is = false;
     });
 
     it('кладе в кеш лист із GET-обробника під ключем useCharacterSheet', async () => {
@@ -118,26 +103,5 @@ describe('CharacterPage (server)', () => {
         await render();
 
         expect(readCharacterSheet).not.toHaveBeenCalled();
-    });
-
-    it('wfrp: профіль у scope wfrpDowntime+wfrpCorruption, homm: без нього', async () => {
-        readCharacterSheet.mockResolvedValue(NextResponse.json({}));
-        wfrp.is = true;
-
-        const scoped = (await render()) as unknown as ReactElement<{
-            namespaces: string[];
-            children: ReactElement;
-        }>;
-
-        expect(scoped.props.namespaces).toEqual([
-            'wfrpDowntime',
-            'wfrpCorruption',
-        ]);
-        expect(scoped.props.children.type).toBe(PrefetchedQuery);
-
-        wfrp.is = false;
-        readCharacterSheet.mockResolvedValue(NextResponse.json({}));
-
-        expect(((await render()) as ReactElement).type).toBe(PrefetchedQuery);
     });
 });

@@ -28,7 +28,7 @@ describe('FieldRenderer school field', () => {
                     owner="flags.spellTargeting"
                 />
             </AbilityEditorProvider>,
-            { locale: 'uk', namespaces: ['common', 'abilityRegistry'] }
+            { locale: 'uk', namespaces: ['common', 'abilityRegistry', 'abilityEditor'] }
         );
 
         expect(screen.getByRole('combobox')).toHaveTextContent('Хаос');

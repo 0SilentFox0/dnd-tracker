@@ -179,12 +179,12 @@ describe('systems index', () => {
         write(
             root,
             'systems/alpha/meta.ts',
-            `export const ALPHA_META = { i18n: { battle: ['zebra', 'apple'], pages: { draft: ['mango'] }, budgetKb: { battle: 5, pages: { draft: 3 } } } };\n`
+            `export const ALPHA_META = { i18n: { packs: { battle: ['zebra', 'apple'] }, pages: { draft: ['mango'] }, budgetKb: { packs: { battle: 5 }, pages: { draft: 3 } } } };\n`
         );
         write(
             root,
             'systems/beta/meta.ts',
-            `export const BETA_META = { i18n: { dm: ['apple', 'kiwi'] } };\n`
+            `export const BETA_META = { i18n: { packs: { contentLibrary: ['apple', 'kiwi'] } } };\n`
         );
 
         await syncSystemsIndex(root);
@@ -250,7 +250,7 @@ describe('systems index', () => {
         write(
             root,
             'systems/alpha/meta.ts',
-            `export const ALPHA_META = { i18n: { battle: ['spells'] } };\n`
+            `export const ALPHA_META = { i18n: { packs: { battle: ['spells'] } } };\n`
         );
 
         await expect(syncSystemsIndex(root)).rejects.toThrow(

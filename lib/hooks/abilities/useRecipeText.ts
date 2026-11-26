@@ -8,7 +8,7 @@ import type { Recipe } from '@/lib/utils/abilities/templates';
 export function useRecipeText(): (r: Recipe, suffix: string) => string {
     const root = useTranslator();
 
-    const tr = useTranslator('abilityRegistry');
+    const tr = useTranslator('abilityEditor');
 
     return useCallback(
         (r, suffix) =>

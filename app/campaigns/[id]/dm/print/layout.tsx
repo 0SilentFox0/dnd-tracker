@@ -1,9 +1,18 @@
 import './print.css';
+import { RouteScope } from '@/lib/i18n/route-scope';
 
-export default function PrintLayout({
+export default async function PrintLayout({
     children,
+    params,
 }: {
     children: React.ReactNode;
+    params: Promise<{ id: string }>;
 }) {
-    return <div className="print-page">{children}</div>;
+    const { id } = await params;
+
+    return (
+        <RouteScope route="[id]/dm/print" campaignId={id}>
+            <div className="print-page">{children}</div>
+        </RouteScope>
+    );
 }

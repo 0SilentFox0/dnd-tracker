@@ -1,11 +1,6 @@
 import { CampaignSystemGate } from '@/components/systems/CampaignSystemGate';
-import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
-import { BATTLE_NAMESPACES } from '@/lib/i18n/scopes';
-import { logScope, systemScope } from '@/lib/i18n/system-scope';
-import {
-    systemOfCampaign,
-    systemSelectionOfCampaign,
-} from '@/lib/server/systems/campaign-system';
+import { RouteScope } from '@/lib/i18n/route-scope';
+import { systemSelectionOfCampaign } from '@/lib/server/systems/campaign-system';
 
 export default async function Layout({
     children,
@@ -16,22 +11,14 @@ export default async function Layout({
 }) {
     const { id } = await params;
 
-    const system = await systemOfCampaign(id);
-
-    const namespaces = [
-        ...BATTLE_NAMESPACES,
-        ...systemScope(system, 'battle'),
-        ...logScope(system),
-    ];
-
     return (
-        <ExtendLocaleScope namespaces={namespaces}>
+        <RouteScope route="[id]/battles" campaignId={id}>
             <CampaignSystemGate
                 campaignId={id}
                 system={await systemSelectionOfCampaign(id)}
             >
                 {children}
             </CampaignSystemGate>
-        </ExtendLocaleScope>
+        </RouteScope>
     );
 }

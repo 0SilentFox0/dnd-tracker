@@ -7,5 +7,5 @@ import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 export const renderSkillTree = (ui: ReactElement, locale: Locale = 'uk') =>
     renderWithIntl(<ConfirmProvider>{ui}</ConfirmProvider>, {
         locale,
-        namespaces: ['common', 'skillTree', 'abilityRegistry'],
+        namespaces: ['common', 'skillTree', 'abilityRegistry', 'abilityEditor'],
     });

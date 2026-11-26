@@ -2,18 +2,19 @@ import { describe, expect, it } from 'vitest';
 
 import { TRIGGER_GROUPS, TRIGGER_REGISTRY } from '../triggers';
 
+import abilityEditorEn from '@/messages/en/abilityEditor.json';
 import abilityRegistryEn from '@/messages/en/abilityRegistry.json';
+import abilityEditorUk from '@/messages/uk/abilityEditor.json';
 import abilityRegistryUk from '@/messages/uk/abilityRegistry.json';
 
 type Catalog = {
     triggers: Record<string, { hint?: string }>;
-    triggerGroups: Record<string, string>;
 };
 
 describe('trigger groups', () => {
-    for (const [locale, catalog] of [
-        ['uk', abilityRegistryUk],
-        ['en', abilityRegistryEn],
+    for (const [locale, catalog, editor] of [
+        ['uk', abilityRegistryUk, abilityEditorUk],
+        ['en', abilityRegistryEn, abilityEditorEn],
     ] as const) {
         const messages = catalog as unknown as Catalog;
 
@@ -27,7 +28,7 @@ describe('trigger groups', () => {
             }
 
             for (const group of TRIGGER_GROUPS)
-                expect(messages.triggerGroups[group], group).toBeTruthy();
+                expect((editor.triggerGroups as Record<string, string>)[group], group).toBeTruthy();
         });
     }
 
