@@ -4,7 +4,8 @@ import {
     FX_SPRITES,
     HERO_SHOT,
     PREP_PANELS,
-    SHOWCASE_MEDIA,
+    type ShowcaseId,
+    showcaseMedia,
 } from '@/components/landing/media';
 import { BRAND } from '@/lib/constants/site';
 import { LOCALES } from '@/lib/i18n/config';
@@ -68,11 +69,11 @@ describe('landing messages', () => {
             for (const id of [
                 ...PREP_PANELS,
                 ...Object.keys(m.players.panels),
-            ] as (keyof typeof SHOWCASE_MEDIA)[])
-                expect(SHOWCASE_MEDIA[id]?.image, id).toBeTruthy();
+            ] as ShowcaseId[])
+                expect(showcaseMedia(locale)[id]?.image, id).toBeTruthy();
 
-            expect(SHOWCASE_MEDIA[HERO_SHOT].image).toBeTruthy();
-            expect(SHOWCASE_MEDIA.combat.image).toBeTruthy();
+            expect(showcaseMedia(locale)[HERO_SHOT].image).toBeTruthy();
+            expect(showcaseMedia(locale).combat.image).toBeTruthy();
 
             expect(Object.keys(m.prep.panels)).toEqual([...PREP_PANELS]);
             expect(Object.keys(m.combat.fx.names)).toHaveLength(

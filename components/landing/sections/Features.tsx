@@ -7,9 +7,10 @@ import {
     ScreenPlaceholder,
 } from '@/components/landing/MediaFrame';
 import { SectionTitle } from '@/components/landing/parts';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
-export function Features({ t }: { t: Translator }) {
+export function Features({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section
             id="features"
@@ -38,6 +39,7 @@ export function Features({ t }: { t: Translator }) {
                                     <MediaFrame title={title}>
                                         {shot ? (
                                             <Screen
+                                                locale={locale}
                                                 id={shot}
                                                 alt={title}
                                                 sizes="(min-width: 1024px) 380px, 100vw"

@@ -6,6 +6,7 @@ import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { BrandMark } from '@/components/landing/parts';
 import { PrimaryCta } from '@/components/landing/PrimaryCta';
 import { BRAND } from '@/lib/constants/site';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
 function Ornament() {
@@ -18,7 +19,7 @@ function Ornament() {
     );
 }
 
-export function Hero({ t }: { t: Translator }) {
+export function Hero({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section className="ld-hero relative isolate px-4">
             <LandingFog />
@@ -68,6 +69,7 @@ export function Hero({ t }: { t: Translator }) {
                         className="shadow-[0_50px_120px_-30px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.2)]"
                     >
                         <Screen
+                            locale={locale}
                             id={HERO_SHOT}
                             alt={t('hero.alt')}
                             priority

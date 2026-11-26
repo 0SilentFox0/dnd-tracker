@@ -16,9 +16,9 @@ describe.each(LOCALES)('new landing sections (%s)', async (locale) => {
 
     const html = {
         replace: renderToStaticMarkup(<Replace t={t} />),
-        features: renderToStaticMarkup(<Features t={t} />),
+        features: renderToStaticMarkup(<Features t={t} locale={locale} />),
         systems: renderToStaticMarkup(<Systems t={t} />),
-        demo: renderToStaticMarkup(<CombatDemo t={t} />),
+        demo: renderToStaticMarkup(<CombatDemo t={t} locale={locale} />),
     };
 
     it('CombatDemo plays one fight over a single battle frame', () => {

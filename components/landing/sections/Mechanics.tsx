@@ -2,9 +2,10 @@ import { LANDING_TEMPLATES } from '@/components/landing/flags';
 import { CAPABILITY_ICONS } from '@/components/landing/media';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { SectionTitle } from '@/components/landing/parts';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
-export function Mechanics({ t }: { t: Translator }) {
+export function Mechanics({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section
             id="mechanics"
@@ -27,7 +28,11 @@ export function Mechanics({ t }: { t: Translator }) {
                 </div>
                 <div className="ld-page-in">
                     <MediaFrame title={t('mechanics.eyebrow')}>
-                        <Screen id="mechanics" alt={t('mechanics.alt')} />
+                        <Screen
+                            locale={locale}
+                            id="mechanics"
+                            alt={t('mechanics.alt')}
+                        />
                     </MediaFrame>
                 </div>
             </div>

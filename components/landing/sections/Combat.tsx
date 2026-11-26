@@ -3,10 +3,11 @@ import { FX_SPRITES } from '@/components/landing/media';
 import { keysOf, listOf } from '@/components/landing/messages';
 import { SectionTitle } from '@/components/landing/parts';
 import { CombatDemo } from '@/components/landing/sections/CombatDemo';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 import { cn } from '@/lib/utils';
 
-export function Combat({ t }: { t: Translator }) {
+export function Combat({ t, locale }: { t: Translator; locale: Locale }) {
     return (
         <section
             id="combat"
@@ -18,7 +19,7 @@ export function Combat({ t }: { t: Translator }) {
                 text={t('combat.text')}
             />
             <div className="ld-container mt-14">
-                <CombatDemo t={t} />
+                <CombatDemo t={t} locale={locale} />
 
                 <ol className="mt-20 grid gap-x-10 gap-y-6 min-[2560px]:grid-cols-4 sm:grid-cols-2 lg:grid-cols-3">
                     {keysOf(t, 'combat.points').map((key, i) => (

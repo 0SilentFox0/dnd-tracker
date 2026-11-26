@@ -1,9 +1,10 @@
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { listOf } from '@/components/landing/messages';
 import { CheckList, SectionTitle } from '@/components/landing/parts';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 
-export function Players({ t }: { t: Translator }) {
+export function Players({ t, locale }: { t: Translator; locale: Locale }) {
     const p = (id: 'phone' | 'hero', key: string) =>
         t(`players.panels.${id}.${key}`);
 
@@ -22,6 +23,7 @@ export function Players({ t }: { t: Translator }) {
                     <div className="ld-phone-in w-44 shrink-0 rounded-[1.6rem] border-2 border-hud-rule bg-hud-page p-2 shadow-[0_30px_60px_-10px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.25)]">
                         <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-hud-raised" />
                         <Screen
+                            locale={locale}
                             id="phone"
                             alt={p('phone', 'alt')}
                             sizes="176px"
@@ -44,7 +46,11 @@ export function Players({ t }: { t: Translator }) {
                 <article className="space-y-4">
                     <div className="ld-sheet-in">
                         <MediaFrame title={p('hero', 'screen')}>
-                            <Screen id="hero" alt={p('hero', 'alt')} />
+                            <Screen
+                                locale={locale}
+                                id="hero"
+                                alt={p('hero', 'alt')}
+                            />
                         </MediaFrame>
                     </div>
                     <div className="space-y-3">

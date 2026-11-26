@@ -21,26 +21,49 @@ import {
     Wand2,
 } from 'lucide-react';
 
+import type { Locale } from '@/lib/i18n/config';
+
 export interface ShowcaseMedia {
     image?: string;
     ratio?: '16/10' | '9/16';
 }
 
-export const SHOWCASE_MEDIA = {
-    // the combat demo anchors (sections/CombatDemo.tsx) are tuned to this frame
-    combat: { image: '/landing/screen-battle.webp', ratio: '16/10' },
-    scenario: { image: '/landing/screen-scenario.webp', ratio: '16/10' },
-    show: { image: '/landing/screen-show.webp', ratio: '16/10' },
-    world: { image: '/landing/screen-world.webp', ratio: '16/10' },
-    phone: { image: '/landing/screen-player-mobile.webp', ratio: '9/16' },
-    hero: { image: '/landing/screen-hero.webp', ratio: '16/10' },
-    mechanics: { image: '/landing/screen-constructor.webp', ratio: '16/10' },
-} satisfies Record<string, ShowcaseMedia>;
+const SHOT_FILE = {
+    combat: 'battle',
+    combat1: 'combat-1',
+    combat2: 'combat-2',
+    combat3: 'combat-3',
+    scenario: 'scenario',
+    show: 'show',
+    world: 'world',
+    phone: 'player-mobile',
+    hero: 'hero',
+    mechanics: 'constructor',
+    dashboard: 'dashboard',
+    soundboard: 'soundboard',
+    sheet: 'sheet',
+    scenarioGraph: 'scenario-graph',
+    contentCopy: 'content-copy',
+    mcp: 'mcp',
+} as const;
 
-export type ShowcaseId = keyof typeof SHOWCASE_MEDIA;
+export type ShowcaseId = keyof typeof SHOT_FILE;
 
-// screenshot under the hero heading; switch to 'dashboard' once that shot exists (and update hero.alt)
-export const HERO_SHOT: ShowcaseId = 'world';
+export function showcaseMedia(
+    locale: Locale
+): Record<ShowcaseId, ShowcaseMedia> {
+    return Object.fromEntries(
+        (Object.keys(SHOT_FILE) as ShowcaseId[]).map((id) => [
+            id,
+            {
+                image: `/landing/${locale}/screen-${SHOT_FILE[id]}.webp`,
+                ratio: id === 'phone' ? '9/16' : '16/10',
+            },
+        ])
+    ) as Record<ShowcaseId, ShowcaseMedia>;
+}
+
+export const HERO_SHOT: ShowcaseId = 'dashboard';
 
 export const PREP_PANELS = [
     'scenario',
@@ -102,11 +125,11 @@ export const FEATURE_ITEMS: Record<
     string,
     { icon: LucideIcon; shot?: ShowcaseId }
 > = {
-    sheet: { icon: UserRound, shot: 'hero' },
+    sheet: { icon: UserRound, shot: 'sheet' },
     world: { icon: Globe, shot: 'world' },
     mapEditor: { icon: Map },
-    soundboard: { icon: Music },
-    scenarioGraph: { icon: Network },
-    contentCopy: { icon: Copy },
-    mcp: { icon: Braces },
+    soundboard: { icon: Music, shot: 'soundboard' },
+    scenarioGraph: { icon: Network, shot: 'scenarioGraph' },
+    contentCopy: { icon: Copy, shot: 'contentCopy' },
+    mcp: { icon: Braces, shot: 'mcp' },
 };

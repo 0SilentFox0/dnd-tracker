@@ -3,14 +3,18 @@ import type { CSSProperties, ReactNode } from 'react';
 import { D20 } from '@/components/landing/Dice';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { PlayInView } from '@/components/landing/PlayInView';
+import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 import { cn } from '@/lib/utils';
 
 type Point = { x: number; y: number };
 
-// % of the battle frame (SHOWCASE_MEDIA.combat); retune all of these whenever that screenshot changes
+// % of the battle frame (showcaseMedia(locale).combat); retune all of these whenever that screenshot changes
 const ANCHORS = {
-    initiative: { captain: { x: 9.54, y: 19.04 }, priest: { x: 25.7, y: 19.04 } },
+    initiative: {
+        captain: { x: 9.54, y: 19.04 },
+        priest: { x: 25.7, y: 19.04 },
+    },
     captain: { x: 32.2, y: 36.7 },
     priest: { x: 57.9, y: 36.7 },
     treant: { x: 37.5, y: 53 },
@@ -167,7 +171,7 @@ function Entry({
     );
 }
 
-export function CombatDemo({ t }: { t: Translator }) {
+export function CombatDemo({ t, locale }: { t: Translator; locale: Locale }) {
     const name = (k: 'captain' | 'priest' | 'treant' | 'spider1' | 'spider2') =>
         t(`combat.demo.names.${k}`);
 
@@ -180,7 +184,11 @@ export function CombatDemo({ t }: { t: Translator }) {
             <MediaFrame title={t('combat.demo.windowTitle')}>
                 <div className="ld-demo-screen">
                     <div className="relative">
-                        <Screen id="combat" alt={t('combat.demo.alt')} />
+                        <Screen
+                            locale={locale}
+                            id="combat"
+                            alt={t('combat.demo.alt')}
+                        />
                         <div aria-hidden className="ld-demo-map ld-demo-layer">
                             <span
                                 className="ld-demo-init"
@@ -271,7 +279,10 @@ export function CombatDemo({ t }: { t: Translator }) {
                     </div>
 
                     <div className="ld-demo-hud">
-                        <div aria-hidden className="ld-demo-chips ld-demo-layer">
+                        <div
+                            aria-hidden
+                            className="ld-demo-chips ld-demo-layer"
+                        >
                             <Chip
                                 p={ANCHORS.turnChip}
                                 t={T.turnA}

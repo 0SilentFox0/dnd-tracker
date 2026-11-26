@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 import Image from 'next/image';
 
 import {
-    SHOWCASE_MEDIA,
     type ShowcaseId,
     type ShowcaseMedia,
+    showcaseMedia,
 } from '@/components/landing/media';
+import type { Locale } from '@/lib/i18n/config';
 import { cn } from '@/lib/utils';
 
 const FRAME =
@@ -44,6 +45,7 @@ export const MEDIA_SIZES = {
 
 interface ScreenProps {
     id: ShowcaseId;
+    locale: Locale;
     alt: string;
     priority?: boolean;
     sizes?: string;
@@ -82,8 +84,15 @@ export function ScreenPlaceholder({
 }
 
 // a missing screenshot degrades to a styled placeholder, never to a broken image
-export function Screen({ id, alt, priority, sizes, className }: ScreenProps) {
-    const media: ShowcaseMedia = SHOWCASE_MEDIA[id];
+export function Screen({
+    id,
+    locale,
+    alt,
+    priority,
+    sizes,
+    className,
+}: ScreenProps) {
+    const media: ShowcaseMedia = showcaseMedia(locale)[id];
 
     const ratio = media.ratio === '9/16' ? 'aspect-[9/16]' : 'aspect-[16/10]';
 

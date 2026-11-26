@@ -1,10 +1,6 @@
 import type { Metadata } from 'next';
 
-import {
-    BRAND,
-    LEGAL_PATH,
-    type LegalDoc,
-} from '@/lib/constants/site';
+import { BRAND, LEGAL_PATH, type LegalDoc } from '@/lib/constants/site';
 import type { Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
 
