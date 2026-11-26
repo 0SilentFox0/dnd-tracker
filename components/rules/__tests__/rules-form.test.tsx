@@ -11,6 +11,11 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 const mutateAsync = vi.fn().mockResolvedValue(DEFAULT_RULES);
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+    usePathname: () => '/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),

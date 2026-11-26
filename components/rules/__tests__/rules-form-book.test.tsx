@@ -9,6 +9,11 @@ import '@/components/systems/registry';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+    usePathname: () => '/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),

@@ -11,7 +11,8 @@
     "changed": "Changed",
     "changedSections": "Changed sections: {count}",
     "resetSection": "Reset section",
-    "filter": "Filter sections"
+    "filter": "Filter sections",
+    "demoReadOnly": "View only"
   },
   "form": {
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",
@@ -185,7 +186,7 @@
     },
     "edition": {
       "label": "Edition",
-      "description": "Which Grim d100 edition the campaign plays by: the legacy values or the 5e canon (test success levels, opposed tests, initiative). Existing campaigns stay on legacy until switched."
+      "description": "Which Grim d100 edition the campaign plays by: legacy or 5e canon. Existing campaigns stay on legacy until switched."
     }
   },
   "customConditions": {

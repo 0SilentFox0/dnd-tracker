@@ -1,6 +1,6 @@
 'use client';
 
-import { type ComponentType, type FormEvent, useMemo, useState } from 'react';
+import { type ComponentType, type FormEvent, type ReactNode, useMemo } from 'react';
 
 import { DefaultAttacksSection } from './sections/DefaultAttacksSection';
 import { EncountersSection } from './sections/EncountersSection';
@@ -13,6 +13,7 @@ import { RulesChangesContext } from './RulesChanges';
 import { RulesPathsProvider } from './RulesPaths';
 import { RulesSide } from './RulesSide';
 import { RulesTocFilter } from './RulesTocFilter';
+import { useRulesSection } from './useRulesSection';
 
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
@@ -26,6 +27,7 @@ import {
 import { useSearch } from '@/lib/hooks/common';
 import { ruleSystemLabelKey } from '@/lib/i18n/system-scope';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { cn } from '@/lib/utils';
 import type { MechanicKey } from '@/lib/utils/rules';
 import { groupSectionKeys } from '@/lib/utils/rules/section-groups';
 import { sectionsOfComposition } from '@/lib/utils/rules/section-registry';
@@ -49,11 +51,13 @@ export function RulesBook({
     title,
     rules,
     form,
+    readOnly,
 }: {
     campaignId: string;
-    title: string;
+    title: ReactNode;
     rules: ReturnType<typeof useRulesForm>;
     form: RulesFormState;
+    readOnly: boolean;
 }) {
     const t = useTranslator('rules');
 
@@ -64,8 +68,6 @@ export function RulesBook({
     const text = useMechanicText();
 
     const modules = useCampaignModules(campaignId);
-
-    const [tab, setTab] = useState('system');
 
     const { save, reset, isSaving, isDirty, systemLocked, dirtyKeys } = rules;
 
@@ -84,6 +86,10 @@ export function RulesBook({
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [mechanicKeys.join(',')]
     );
+
+    const { section, setSection } = useRulesSection(keys);
+
+    const tab = section ?? 'system';
 
     const labelOf = (key: string) =>
         key === 'system' ? t('system.label') : text(key, 'label');
@@ -105,6 +111,15 @@ export function RulesBook({
         />
     );
 
+    const guard = (node: ReactNode) =>
+        readOnly ? (
+            <fieldset disabled className="contents">
+                {node}
+            </fieldset>
+        ) : (
+            node
+        );
+
     const tabs: HudTab<string>[] = groupSectionKeys(keys, active).flatMap(
         ({ group, keys: inGroup }) =>
             inGroup.map((key) => {
@@ -116,7 +131,7 @@ export function RulesBook({
                     group: t(`page.groups.${group}`),
                     badge: dirty.has(key) ? dot : undefined,
                     hidden: search.isActive && !shown.has(key),
-                    content:
+                    content: guard(
                         key === 'system' ? (
                             <SystemSection
                                 form={form}
@@ -126,7 +141,8 @@ export function RulesBook({
                             />
                         ) : (
                             Section && <Section form={form} />
-                        ),
+                        )
+                    ),
                 };
             })
     );
@@ -145,7 +161,8 @@ export function RulesBook({
 
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        void save();
+
+        if (!readOnly) void save();
     };
 
     const resetSection = (key: string) =>
@@ -165,14 +182,16 @@ export function RulesBook({
                                     onChange={search.query.set}
                                 />
                                 <span>{chip}</span>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setTab('system')}
-                                >
-                                    {tc('actions.edit')}
-                                </Button>
+                                {!readOnly && (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSection('system')}
+                                    >
+                                        {tc('actions.edit')}
+                                    </Button>
+                                )}
                             </>
                         ),
                     }}
@@ -183,6 +202,7 @@ export function RulesBook({
                         />
                     }
                     actions={
+                        readOnly ? undefined : (
                         <>
                             {isDirty && (
                                 <span className="text-sm text-hud-muted">
@@ -207,14 +227,39 @@ export function RulesBook({
                                 {tc('actions.save')}
                             </Button>
                         </>
+                        )
                     }
                 >
+                    {readOnly && (
+                        <p
+                            role="status"
+                            className="mb-3 rounded-xl border border-hud-rule px-4 py-2 text-sm text-hud-muted"
+                        >
+                            {t('page.demoReadOnly')}
+                        </p>
+                    )}
+                    {section && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="mb-2 lg:hidden"
+                            onClick={() => setSection(null)}
+                        >
+                            {`‹ ${tc('actions.back')}`}
+                        </Button>
+                    )}
                     <HudForm
                         id={FORM_ID}
+                        className={cn(
+                            section
+                                ? 'max-lg:[&_[data-slot=hud-tabs-list]]:hidden'
+                                : 'max-lg:[&_[data-slot=hud-tabs-panels]]:hidden'
+                        )}
                         onSubmit={onSubmit}
                         tabs={tabs}
                         tab={tab}
-                        onTabChange={setTab}
+                        onTabChange={setSection}
                         tabStyles={{
                             variant: 'rail',
                             rail: { from: 'lg', mobile: 'list' },

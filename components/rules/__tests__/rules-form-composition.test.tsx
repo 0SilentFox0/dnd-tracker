@@ -13,6 +13,11 @@ const mocks = vi.hoisted(() => ({
     system: { key: 'dnd5e' } as { key: string; modules?: string[] },
 }));
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+    usePathname: () => '/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),

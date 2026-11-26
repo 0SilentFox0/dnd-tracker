@@ -1,18 +1,25 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { RulesBook } from './RulesBook';
 
 import { ErrorState, LoadingState } from '@/components/common/states';
 import { useRulesForm } from '@/lib/hooks/campaigns';
+import type { Ruleset } from '@/lib/utils/rules';
 
 export function RulesForm({
     campaignId,
     title,
+    readOnly = false,
+    initial,
 }: {
     campaignId: string;
-    title: string;
+    title: ReactNode;
+    readOnly?: boolean;
+    initial?: Ruleset;
 }) {
-    const rules = useRulesForm(campaignId);
+    const rules = useRulesForm(campaignId, { initial });
 
     if (rules.loadError)
         return <ErrorState error={rules.loadError} onRetry={rules.reload} />;
@@ -25,6 +32,7 @@ export function RulesForm({
             title={title}
             rules={rules}
             form={rules.form}
+            readOnly={readOnly}
         />
     );
 }
