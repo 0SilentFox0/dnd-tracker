@@ -1,14 +1,18 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { LoadingState } from '@/components/common/states';
-import { HudFormPage } from '@/components/hud/form';
+import { HudFormMenu, HudFormPage } from '@/components/hud/form';
 import { SpellFormBody } from '@/components/spells/form/forms/SpellFormBody';
 import type { SpellFormData } from '@/components/spells/form/spell-form-defaults';
 import { getDefaultSpellFormData } from '@/components/spells/form/spell-form-defaults';
+import { SPELL_FORM_ID } from '@/components/spells/form/spell-form-tabs';
+import { Button } from '@/components/ui/button';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import {
     useDeleteSpell,
@@ -27,11 +31,15 @@ import {
 export function SpellEditForm({
     campaignId: id,
     spellId,
+    side,
 }: {
     campaignId: string;
     spellId: string;
+    side?: ReactNode;
 }) {
     const t = useTranslations();
+
+    const tm = useTranslations('common.dmSections');
 
     const confirm = useConfirm();
 
@@ -95,7 +103,7 @@ export function SpellEditForm({
 
     if (fetching) {
         return (
-            <HudFormPage title={t('spellEditor.page.editTitle')}>
+            <HudFormPage width="wide" title={t('spellEditor.page.editTitle')}>
                 <div className="px-4 py-3">
                     <LoadingState
                         rows={6}
@@ -108,10 +116,53 @@ export function SpellEditForm({
 
     return (
         <HudFormPage
-            title={t('spellEditor.page.editTitleNamed', {
-                name: formData.name ?? '',
-            })}
+            width="wide"
+            title={
+                <>
+                    <Link
+                        href={`/campaigns/${id}/dm/spells`}
+                        className="hover:text-hud-accent-fg"
+                    >
+                        {tm('spells')}
+                    </Link>
+                    {' › '}
+                    {t('spellEditor.page.editTitleNamed', {
+                        name: formData.name ?? '',
+                    })}
+                </>
+            }
             aside={t('spellEditor.page.editAside')}
+            side={side}
+            actions={
+                <>
+                    <HudFormMenu
+                        label={t('common.form.more')}
+                        items={[
+                            {
+                                label: deleteSpellMutation.isPending
+                                    ? t('spellEditor.page.deleting')
+                                    : t('common.actions.delete'),
+                                tone: 'danger',
+                                onSelect: handleDelete,
+                            },
+                        ]}
+                    />
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={`/campaigns/${id}/dm/spells`}>
+                            {t('common.actions.cancel')}
+                        </Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={SPELL_FORM_ID}
+                        disabled={updateSpellMutation.isPending}
+                    >
+                        {updateSpellMutation.isPending
+                            ? t('common.actions.saving')
+                            : t('spellEditor.page.editSubmit')}
+                    </Button>
+                </>
+            }
         >
             <SpellFormBody
                 campaignId={id}
@@ -119,16 +170,10 @@ export function SpellEditForm({
                 spellGroups={spellGroups}
                 submit={{
                     onSubmit: handleSubmit,
-                    isPending: updateSpellMutation.isPending,
-                    label: t('spellEditor.page.editSubmit'),
                     error:
                         (updateSpellMutation.error as Error)?.message ||
                         (deleteSpellMutation.error as Error)?.message ||
                         null,
-                }}
-                remove={{
-                    onDelete: handleDelete,
-                    isDeleting: deleteSpellMutation.isPending,
                 }}
             />
         </HudFormPage>
