@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { LandingFog } from '@/components/landing/LandingFog';
 import { MediaFrame, Screen } from '@/components/landing/MediaFrame';
 import { BrandMark } from '@/components/landing/parts';
 import { PrimaryCta } from '@/components/landing/PrimaryCta';
@@ -19,6 +20,7 @@ function Ornament() {
 export function Hero({ t }: { t: Translator }) {
     return (
         <section className="ld-hero relative isolate px-4">
+            <LandingFog />
             <div aria-hidden className="ld-hero-scrim" />
             <div className="ld-hero-stage ld-container">
                 <div className="ld-hero-copy">

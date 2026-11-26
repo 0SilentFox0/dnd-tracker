@@ -15,7 +15,7 @@ body:has([data-landing])::after { display: none; }
 @keyframes ld-reveal { from { transform: translateY(32px) scale(0.98); } }
 
 /* shared backdrop: fixed layers behind all sections; --mx/--my come from PointerParallax */
-.ld-bg, .ld-fog, .ld-light, .ld-vignette { position: fixed; pointer-events: none; z-index: -1; }
+.ld-bg, .ld-light, .ld-vignette { position: fixed; pointer-events: none; z-index: -1; }
 .ld-bg {
   inset: -6% -6% -16%;
   background: #0b0908 url(/bg/vey-strait-2k.webp) center / cover no-repeat;
@@ -24,22 +24,11 @@ body:has([data-landing])::after { display: none; }
 @media (min-width: 1921px) {
   .ld-bg { background-image: url(/bg/vey-strait-4k.webp); }
 }
-.ld-fog, .ld-light, .ld-vignette { inset: 0; }
-.ld-fog { overflow: hidden; }
+.ld-light, .ld-vignette { inset: 0; }
 .ld-light {
   background: radial-gradient(600px at calc(50% + var(--mx, 0) * 30%) calc(40% + var(--my, 0) * 30%), rgba(230, 194, 90, 0.08), transparent 70%);
 }
 .ld-vignette { background: radial-gradient(130% 100% at 60% 40%, transparent 45%, rgba(0, 0, 0, 0.55) 100%); }
-
-/* procedural clouds: noise is rasterised once as a tile, layers only move (outer = bank + scroll, inner = texture drift + pointer) */
-.ld-cloud { position: absolute; inset: 0; }
-.ld-cloud > i { position: absolute; inset: -20%; background-repeat: repeat; }
-.ld-cloud-a { -webkit-mask-image: radial-gradient(55% 75% at 12% 30%, #000 25%, transparent 75%), radial-gradient(70% 40% at 50% 0%, #000 10%, transparent 70%); mask-image: radial-gradient(55% 75% at 12% 30%, #000 25%, transparent 75%), radial-gradient(70% 40% at 50% 0%, #000 10%, transparent 70%); }
-.ld-cloud-a > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='800'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0026 0.0052' numOctaves='5' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .91 0 0 0 0 .93 2.6 0 0 0 -1.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"); opacity: 0.38; transform: translate3d(calc(var(--mx, 0) * 26px), calc(var(--my, 0) * 18px), 0); }
-.ld-cloud-b { -webkit-mask-image: radial-gradient(50% 70% at 88% 35%, #000 25%, transparent 75%); mask-image: radial-gradient(50% 70% at 88% 35%, #000 25%, transparent 75%); }
-.ld-cloud-b > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 0.0042' numOctaves='5' seed='29' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .91 0 0 0 0 .93 2.8 0 0 0 -1.25'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"); opacity: 0.36; transform: translate3d(calc(var(--mx, 0) * 44px), calc(var(--my, 0) * 30px), 0); }
-.ld-cloud-c { -webkit-mask-image: linear-gradient(to top, #000 0 20%, transparent 65%); mask-image: linear-gradient(to top, #000 0 20%, transparent 65%); }
-.ld-cloud-c > i { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0042 0.009' numOctaves='4' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .91 0 0 0 0 .93 2.4 0 0 0 -1.0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E"); opacity: 0.32; transform: translate3d(calc(var(--mx, 0) * 70px), calc(var(--my, 0) * 40px), 0); }
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: scroll()) {
@@ -48,27 +37,27 @@ body:has([data-landing])::after { display: none; }
 }
 @media (prefers-reduced-motion: no-preference) and (min-width: 769px) {
   .ld-bg { animation: ld-push 2.5s cubic-bezier(.16, .84, .3, 1) both; }
-  .ld-cloud > i { animation: ld-cloud-in 3s cubic-bezier(.16, .84, .3, 1) both, var(--ld-drift) ease-in-out infinite alternate; }
-  .ld-cloud-a > i { --ld-drift: ld-drift-a 70s; }
-  .ld-cloud-b > i { --ld-drift: ld-drift-b 95s; }
-  .ld-cloud-c > i { --ld-drift: ld-drift-c 48s; }
   @supports (animation-timeline: scroll()) {
     .ld-bg { animation: ld-push 2.5s cubic-bezier(.16, .84, .3, 1) both, ld-bg-scroll linear both; animation-timeline: auto, scroll(root); }
-    .ld-cloud { animation: linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
-    .ld-cloud-a { animation-name: ld-part-left; }
-    .ld-cloud-b { animation-name: ld-part-right; }
-    .ld-cloud-c { animation-name: ld-part-down; }
+    .ld-fog-wrap { animation: ld-fog-part linear both; animation-timeline: scroll(root); animation-range: 0 90vh; }
   }
 }
 @keyframes ld-bg-scroll { to { translate: 0 -8%; } }
 @keyframes ld-push { from { scale: 1.12; } }
-@keyframes ld-cloud-in { from { scale: 1.5; opacity: 0.7; } }
-@keyframes ld-drift-a { from { translate: -5% 0; } to { translate: 5% -1.5%; } }
-@keyframes ld-drift-b { from { translate: 4% 1%; } to { translate: -6% -1%; } }
-@keyframes ld-drift-c { from { translate: -7% 0; } to { translate: 7% 1%; } }
-@keyframes ld-part-left { to { translate: -45% 0; opacity: 0; } }
-@keyframes ld-part-right { to { translate: 45% 0; opacity: 0; } }
-@keyframes ld-part-down { to { translate: 0 30%; opacity: 0; } }
+@keyframes ld-fog-part { to { opacity: 0; scale: 1.25; } }
+
+/* canvas fog (LandingFog): fades in once painted, then parts as the page scrolls */
+.ld-fog-wrap {
+  position: absolute; inset: 0 0 auto; height: 100svh; z-index: -1; pointer-events: none;
+  transform: translate3d(calc(var(--mx, 0) * 30px), calc(var(--my, 0) * 20px), 0);
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+}
+.ld-fog-canvas { display: block; width: 100%; height: 100%; opacity: 0; }
+.ld-fog-canvas[data-ready] { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .ld-fog-canvas { transition: opacity 1.8s ease-out; }
+}
 
 /* hero: the map is the stage; darkening only behind the copy and towards the sections below */
 .ld-hero-scrim {
