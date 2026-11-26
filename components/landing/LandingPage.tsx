@@ -5,8 +5,10 @@ import '@/components/landing/landing.css';
 import { LocaleSwitcher } from '@/components/common/shell/LocaleSwitcher';
 import { HUD_SURFACE } from '@/components/hud';
 import { buildLandingJsonLd } from '@/components/landing/landing-metadata';
+import { LandingBackdrop } from '@/components/landing/LandingBackdrop';
 import { keysOf } from '@/components/landing/messages';
 import { Brand } from '@/components/landing/parts';
+import { PointerParallax } from '@/components/landing/PointerParallax';
 import { AiSection } from '@/components/landing/sections/AiSection';
 import { Combat } from '@/components/landing/sections/Combat';
 import { Faq } from '@/components/landing/sections/Faq';
@@ -129,8 +131,10 @@ export async function LandingPage({ locale }: { locale: Locale }) {
             <div
                 data-landing
                 lang={locale}
-                className={cn(HUD_SURFACE, 'min-h-screen bg-hud-page')}
+                className={cn(HUD_SURFACE, 'relative isolate min-h-screen bg-hud-page')}
             >
+                <LandingBackdrop />
+                <PointerParallax />
                 <LandingNav t={t} locale={locale} />
                 <main>
                     <Hero t={t} />

@@ -13,6 +13,41 @@ body:has([data-landing])::after { display: none; }
 
 @keyframes ld-reveal { from { transform: translateY(32px) scale(0.98); } }
 
+/* shared backdrop: fixed layers behind all sections; --mx/--my come from PointerParallax */
+.ld-bg, .ld-fog, .ld-light, .ld-vignette { position: fixed; pointer-events: none; z-index: -1; }
+.ld-bg {
+  inset: -6%;
+  background: #0b0908 image-set(url(/bg/vey-strait-2k.webp) 1x) center / cover no-repeat;
+  transform: translate3d(calc(var(--mx, 0) * -12px), calc(var(--my, 0) * -12px), 0);
+}
+@media (min-width: 1921px) {
+  .ld-bg { background-image: image-set(url(/bg/vey-strait-4k.webp) 1x); }
+}
+.ld-fog, .ld-light, .ld-vignette { inset: 0; }
+.ld-fog {
+  background:
+    radial-gradient(60% 40% at 25% 70%, rgba(200, 210, 220, 0.06), transparent 70%),
+    radial-gradient(50% 35% at 75% 30%, rgba(200, 210, 220, 0.05), transparent 70%);
+  transform: translate3d(calc(var(--mx, 0) * 24px), calc(var(--my, 0) * 24px), 0);
+}
+.ld-light {
+  background: radial-gradient(600px at calc(50% + var(--mx, 0) * 30%) calc(40% + var(--my, 0) * 30%), rgba(230, 194, 90, 0.1), transparent 70%);
+}
+.ld-vignette {
+  background:
+    radial-gradient(120% 90% at 50% 40%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ld-fog { animation: ld-fog-drift 50s ease-in-out infinite alternate; }
+  @supports (animation-timeline: scroll()) {
+    .ld-bg { animation: ld-bg-scroll linear both; animation-timeline: scroll(root); }
+  }
+}
+@keyframes ld-fog-drift { from { translate: -3% 0; } to { translate: 3% -2%; } }
+@keyframes ld-bg-scroll { to { translate: 0 -8%; } }
+
 /* Hero session demo: one 8s loop, every element keys off the same percentages */
 .ld-demo { --ld-t: 8s; }
 .ld-demo :is(.ld-tap, .ld-ripple, .ld-die, .ld-die-roll, .ld-die-result, .ld-check, .ld-orb, .ld-blast, .ld-ring, .ld-dmg-a, .ld-dmg-b, .ld-fall, .ld-hp-a, .ld-hp-b, .ld-turn-a, .ld-turn-b, .ld-log, .ld-step-1, .ld-step-2, .ld-step-3, .ld-step-4, .ld-progress) {

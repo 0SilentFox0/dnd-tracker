@@ -7,7 +7,6 @@ import type { Translator } from '@/lib/i18n/translator';
 export function Hero({ t }: { t: Translator }) {
     return (
         <section className="relative isolate overflow-hidden px-4 pt-28 pb-20 sm:pt-36">
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(230,194,90,.2),transparent_55%),radial-gradient(ellipse_at_50%_70%,rgba(200,90,40,.12),transparent_60%),#0b0908]" />
             <div className="mx-auto max-w-3xl space-y-6 text-center">
                 <p className="hud-sc text-sm tracking-[0.2em] text-[var(--ld-gold)]">
                     {t('hero.eyebrow')}
