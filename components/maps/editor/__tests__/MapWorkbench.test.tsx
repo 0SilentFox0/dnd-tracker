@@ -41,7 +41,7 @@ describe('MapWorkbench', () => {
 
         expect(aside().className).not.toContain('lg:order-first');
 
-        rerender(<MapWorkbench {...props} sidebarSide="left" />);
+        rerender(<MapWorkbench {...props} layout={{ sidebarSide: 'left' }} />);
 
         expect(aside().className).toContain('lg:order-first');
     });

@@ -33,6 +33,8 @@ import {
 
 const NO_PARTICIPANTS: never[] = [];
 
+const LEFT_RAIL = { sidebarSide: 'left' } as const;
+
 function MapCanvas({ editor }: { editor: BattleMapEditor }) {
     const { map, tool } = editor.state;
 
@@ -139,7 +141,7 @@ function OwnMap({
                 set: setFullscreen,
                 label: t('fullscreen'),
             }}
-            sidebarSide="left"
+            layout={LEFT_RAIL}
             onEscape={() => {
                 if (toolChip.onEscape()) return true;
 

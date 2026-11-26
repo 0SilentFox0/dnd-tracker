@@ -259,7 +259,10 @@ function EditorContent({
                 </p>
             )}
             <MapWorkbench
-                className="flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] lg:h-auto"
+                layout={{
+                    className:
+                        'flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] lg:h-auto',
+                }}
                 fullscreen={{
                     value: fullscreen,
                     set: setFullscreen,

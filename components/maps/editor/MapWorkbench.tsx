@@ -15,8 +15,7 @@ export function MapWorkbench({
     notice,
     fullscreen,
     onEscape,
-    sidebarSide = 'right',
-    className,
+    layout,
 }: {
     canvas: ReactNode;
     sidebar: ReactNode;
@@ -24,14 +23,13 @@ export function MapWorkbench({
     notice?: ReactNode;
     fullscreen: { value: boolean; set: (v: boolean) => void; label: string };
     onEscape?: () => boolean;
-    sidebarSide?: 'left' | 'right';
-    className?: string;
+    layout?: { sidebarSide?: 'left' | 'right'; className?: string };
 }) {
     const t = useTranslations('maps.editor.workbench');
 
     const full = fullscreen.value;
 
-    const left = sidebarSide === 'left';
+    const left = layout?.sidebarSide === 'left';
 
     const escape = useRef({ onEscape, fullscreen, full });
 
@@ -80,7 +78,7 @@ export function MapWorkbench({
                 'lg:h-[calc(100dvh-var(--app-header-h,89px)-var(--workbench-offset,0px))]',
                 full &&
                     'fixed inset-0 z-50 h-dvh! grid-rows-[60dvh_auto] overflow-y-auto bg-background p-3 lg:grid-rows-1 lg:overflow-hidden',
-                className
+                layout?.className
             )}
         >
             <div className="relative min-h-0 min-w-0 overflow-hidden">
