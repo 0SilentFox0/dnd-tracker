@@ -480,6 +480,13 @@
     "credits": "Фото — Unsplash. Силуети токенів та іконки дій у бою — game-icons.net (Delapouite, Lorc, Caro Asercion), CC BY 3.0.",
     "disclaimer": "{brand} — незалежний проєкт. Dungeons & Dragons — торгова марка Wizards of the Coast; проєкт не пов'язаний з нею.",
     "signIn": "Увійти",
-    "signUp": "Реєстрація"
+    "signUp": "Реєстрація",
+    "legalAria": "Юридична інформація",
+    "legal": {
+      "privacy": "Конфіденційність",
+      "terms": "Умови",
+      "cookies": "Файли cookie"
+    },
+    "srd": "Ця робота містить матеріали з SRD 5.2 від Wizards of the Coast LLC за ліцензією CC BY 4.0."
   }
 }

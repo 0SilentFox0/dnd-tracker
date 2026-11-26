@@ -480,6 +480,13 @@
     "credits": "Photos from Unsplash. Token silhouettes and battle action icons from game-icons.net (Delapouite, Lorc, Caro Asercion), CC BY 3.0.",
     "disclaimer": "{brand} is an independent project. Dungeons & Dragons is a trademark of Wizards of the Coast; this project is not affiliated with it.",
     "signIn": "Sign in",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "legalAria": "Legal",
+    "legal": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    },
+    "srd": "This work includes material from the SRD 5.2 by Wizards of the Coast LLC, licensed under CC BY 4.0."
   }
 }

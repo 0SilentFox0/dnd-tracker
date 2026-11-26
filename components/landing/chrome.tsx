@@ -9,7 +9,11 @@ import { keysOf } from '@/components/landing/messages';
 import { Brand } from '@/components/landing/parts';
 import { PointerParallax } from '@/components/landing/PointerParallax';
 import { SessionSwitch } from '@/components/landing/SessionSwitch';
-import { BRAND } from '@/lib/constants/site';
+import {
+    BRAND,
+    LEGAL_DOCS,
+    LEGAL_PATH,
+} from '@/lib/constants/site';
 import type { Locale } from '@/lib/i18n/config';
 import { FixedLocaleProvider } from '@/lib/i18n/fixed-locale-provider';
 import type { Translator } from '@/lib/i18n/translator';
@@ -106,8 +110,23 @@ export function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) 
                     </Link>
                 </nav>
             </div>
+            <nav
+                aria-label={t('footer.legalAria')}
+                className="ld-container mt-4 flex flex-wrap justify-center gap-4 sm:justify-start"
+            >
+                {LEGAL_DOCS.map((doc) => (
+                    <Link
+                        key={doc}
+                        prefetch={false}
+                        href={LEGAL_PATH[locale][doc]}
+                        className="hover:text-hud-ink"
+                    >
+                        {t(`footer.legal.${doc}`)}
+                    </Link>
+                ))}
+            </nav>
             <p className="ld-container mt-6 text-center text-xs sm:text-left">
-                {t('footer.credits')}{' '}
+                {t('footer.credits')} {t('footer.srd')}{' '}
                 {t('footer.disclaimer', { brand: BRAND.name })}
             </p>
         </footer>

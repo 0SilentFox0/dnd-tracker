@@ -51,6 +51,8 @@ const PRODUCT_TERMS = [
     'Lorc',
     'Caro Asercion',
     'CC BY',
+    'cookie',
+    'LLC',
     'Wizards of the Coast',
     'Dungeons & Dragons',
     BRAND.short,
