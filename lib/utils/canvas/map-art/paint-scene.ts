@@ -8,6 +8,7 @@ import {
 import { paintFloors } from './paint-floors';
 import { paintLight } from './paint-light';
 import { paintOpenings } from './paint-openings';
+import { paintStamps } from './paint-stamps';
 import { paintWalls } from './paint-walls';
 
 import { gridOf } from '@/lib/utils/battle/grid/geometry';
@@ -82,8 +83,11 @@ export function paintScene(ctx: ArtCtx, input: PaintInput): void {
     if (clip) clipTo(ctx, clip);
 
     paintFloors(env);
+    paintStamps(env, 'decal');
     paintWalls(env);
     paintOpenings(env);
+    paintStamps(env, 'object');
+    paintStamps(env, 'canopy');
     paintLight(env, area);
     ctx.restore();
 }

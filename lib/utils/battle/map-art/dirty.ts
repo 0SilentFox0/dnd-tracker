@@ -1,8 +1,12 @@
+import { stampAabb, stampBox } from './stamp-geometry';
+
+import { stampDef } from '@/lib/constants/map-art/stamps';
 import { edgeCellsOf, edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
 import { parseCellKey } from '@/lib/utils/battle/grid/geometry';
+import { gridMetrics } from '@/lib/utils/battle/grid/layout';
 import { CHUNK_SIDE, chunkKey, parseChunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { GridKind } from '@/types/battle-grid';
-import type { MapArtOpening, MapArtScene } from '@/types/battle-map';
+import type { MapArtOpening, MapArtScene, MapArtStamp } from '@/types/battle-map';
 
 const sameOpening = (a?: MapArtOpening, b?: MapArtOpening): boolean =>
     a === b ||
@@ -12,6 +16,15 @@ const sameOpening = (a?: MapArtOpening, b?: MapArtOpening): boolean =>
         a.material === b.material &&
         a.locked === b.locked &&
         a.open === b.open);
+
+const sameStamp = (a: MapArtStamp, b: MapArtStamp): boolean =>
+    a.asset === b.asset &&
+    a.x === b.x &&
+    a.y === b.y &&
+    a.rot === b.rot &&
+    a.scale === b.scale &&
+    a.flip === b.flip &&
+    a.z === b.z;
 
 function changedKeys<T>(
     prev: Record<string, T>,
@@ -63,6 +76,40 @@ export function dirtyChunks(
         const c = parseCellKey(key);
 
         addCell(c.x, c.y);
+    }
+
+    if (prev.stamps !== next.stamps) {
+        const { colStep, rowStep } = gridMetrics(grid);
+
+        const addStamp = (s: MapArtStamp) => {
+            const def = stampDef(s.asset);
+
+            const a = stampAabb(stampBox(s, def ?? { cols: 1, rows: 1 }));
+
+            const c0 = Math.floor(a.x0 / colStep / CHUNK_SIDE);
+            const c1 = Math.floor(a.x1 / colStep / CHUNK_SIDE);
+            const r0 = Math.floor(a.y0 / rowStep / CHUNK_SIDE);
+            const r1 = Math.floor(a.y1 / rowStep / CHUNK_SIDE);
+
+            for (let cy = r0; cy <= r1; cy++)
+                for (let cx = c0; cx <= c1; cx++) addAround(cx, cy);
+        };
+
+        const before = new Map(prev.stamps.map((s) => [s.id, s]));
+
+        const after = new Map(next.stamps.map((s) => [s.id, s]));
+
+        for (const id of new Set([...before.keys(), ...after.keys()])) {
+            const a = before.get(id);
+
+            const b = after.get(id);
+
+            if (a && b && sameStamp(a, b)) continue;
+
+            if (a) addStamp(a);
+
+            if (b) addStamp(b);
+        }
     }
 
     return dirty;

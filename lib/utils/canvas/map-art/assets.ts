@@ -4,6 +4,7 @@ import {
     OPENING_MATERIALS,
     WALL_MATERIALS,
 } from '@/lib/constants/map-art/materials';
+import { stampDef } from '@/lib/constants/map-art/stamps';
 import { gridMetrics } from '@/lib/utils/battle/grid/layout';
 import { decodeFloors } from '@/lib/utils/battle/map-art/floors';
 import type { MapDims } from '@/lib/utils/battle/map-art/scene';
@@ -90,6 +91,12 @@ export function artTextureUrls(scene: MapArtScene): string[] {
         const sprite = id ? blockedSprite(id) : undefined;
 
         if (sprite) urls.add(sprite);
+    }
+
+    for (const s of scene.stamps) {
+        const def = stampDef(s.asset);
+
+        if (def) urls.add(def.file);
     }
 
     return [...urls];
