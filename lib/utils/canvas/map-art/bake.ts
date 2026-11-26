@@ -112,7 +112,13 @@ export async function bakeScene(
             return null;
         }
 
-        paintScene(canvas.ctx, { ...input, cellPx: px, createLayer });
+        try {
+            paintScene(canvas.ctx, { ...input, cellPx: px, createLayer });
+        } catch (error) {
+            if (error instanceof BakeError && error.code === 'canvas') return null;
+
+            throw error;
+        }
 
         const blob = await canvas.toBlob('image/webp', quality);
 

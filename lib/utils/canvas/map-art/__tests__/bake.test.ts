@@ -50,6 +50,28 @@ function deps(sizes: number[], type = 'image/webp', failFirst = false) {
 
 const input = { scene: emptyScene(), map, seed: 's', assets };
 
+describe('bakeScene layer failures', () => {
+    it('retries smaller when a layer canvas cannot be created', async () => {
+        const { deps: d, sizesCalled } = deps([MB]);
+
+        const paint = await import('../paint-scene');
+
+        const spy = vi
+            .spyOn(paint, 'paintScene')
+            .mockImplementationOnce(() => {
+                throw new BakeError('canvas');
+            });
+
+        const result = await bakeScene(input, d);
+
+        spy.mockRestore();
+
+        expect(sizesCalled).toHaveLength(2);
+        expect(sizesCalled[1][0]).toBeLessThan(sizesCalled[0][0]);
+        expect(result.blob.size).toBe(MB);
+    });
+});
+
 describe('bakeScene', () => {
     it('shrinks the cell size when the first blob is too large', async () => {
         const { deps: d, sizesCalled } = deps([5 * MB, 3 * MB]);
