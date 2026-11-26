@@ -2,7 +2,7 @@
 
 import { type FormEvent, type ReactNode, useState } from 'react';
 
-import { type HudTab, HudTabs } from './HudTabs';
+import { type HudTab, HudTabs, type HudTabsStyles } from './HudTabs';
 import { useRevealInvalidTab } from './reveal-invalid-tab';
 
 import { ActionBar } from '@/components/ui/action-bar';
@@ -15,10 +15,10 @@ interface HudFormProps<T extends string> {
     tab?: T;
     onTabChange?: (tab: T) => void;
     children?: ReactNode;
-    actions: ReactNode;
+    actions?: ReactNode;
     error?: string | null;
     className?: string;
-    triggerClassName?: string;
+    tabStyles?: HudTabsStyles;
 }
 
 export function HudForm<T extends string>({
@@ -31,11 +31,13 @@ export function HudForm<T extends string>({
     actions,
     error,
     className,
-    triggerClassName,
+    tabStyles,
 }: HudFormProps<T>) {
     const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
 
     const active = tab ?? innerTab ?? tabs?.[0]?.id;
+
+    const wideTab = tabs?.find((tb) => tb.id === active)?.wide;
 
     const setActive = (next: T) => {
         setInnerTab(next);
@@ -52,25 +54,34 @@ export function HudForm<T extends string>({
             id={id}
             onSubmit={onSubmit}
             onInvalidCapture={onInvalidCapture}
+            data-layout={tabStyles?.variant === 'rail' ? 'rail' : undefined}
+            data-wide-tab={wideTab ? 'true' : undefined}
             className={cn('flex flex-1 flex-col', className)}
         >
+            {!actions && error && (
+                <p role="alert" className="px-4 py-2 text-sm text-hud-danger">
+                    {error}
+                </p>
+            )}
             {tabs && active ? (
                 <HudTabs
                     tabs={tabs}
                     value={active}
                     onValueChange={setActive}
-                    styles={{ trigger: triggerClassName }}
+                    styles={tabStyles}
                     keepMounted
                 />
             ) : (
                 <div className="px-4 py-3">{children}</div>
             )}
-            <ActionBar
-                error={error}
-                className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit"
-            >
-                {actions}
-            </ActionBar>
+            {actions && (
+                <ActionBar
+                    error={error}
+                    className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit"
+                >
+                    {actions}
+                </ActionBar>
+            )}
         </form>
     );
 }
