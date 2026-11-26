@@ -3,13 +3,14 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
+    edges: { walls: [], bars: [], doors: [] },
     tiles: { data: undefined as unknown, isPending: false, isError: false },
     deriveTileCells: vi.fn(() => ({ blocked: new Set<string>() })),
 }));
 
 vi.mock('@/lib/hooks/battle-maps', () => ({
     useBattleMapEdges: () => ({
-        data: { walls: [], bars: [], doors: [] },
+        data: h.edges,
         isPending: false,
         error: null,
         refetch: vi.fn(),

@@ -14,7 +14,7 @@ const kinds = (joints: { kind: string }[]) => joints.map((j) => j.kind).sort();
 describe('wallRuns on square', () => {
     it('makes one run with a corner for an L', () => {
         const { runs, joints } = wallRuns(
-            { walls: walls(['1:1:e', '1:1:s', '0:1:e']), openings: {} },
+            { walls: walls(['1:1:e', '1:1:s']), openings: {} },
             'square'
         );
 

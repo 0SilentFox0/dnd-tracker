@@ -14,12 +14,14 @@ const h = vi.hoisted(() => {
                     create: Record<string, unknown>;
                     update: Record<string, unknown>;
                 }) => {
-                    state.art = {
-                        bakedSceneVersion: null,
-                        bakedUrl: null,
-                        bakedAt: null,
-                        ...(state.art ? args.update : args.create),
-                    };
+                    state.art = state.art
+                        ? { ...state.art, ...args.update }
+                        : {
+                              bakedSceneVersion: null,
+                              bakedUrl: null,
+                              bakedAt: null,
+                              ...args.create,
+                          };
 
                     return state.art;
                 }

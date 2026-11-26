@@ -172,7 +172,7 @@ describe('battleMapSchema.backgroundRows', () => {
             battleMapSchema.safeParse({ ...map, backgroundRows: 0 }).success
         ).toBe(false);
         expect(
-            battleMapSchema.safeParse({ ...map, backgroundRows: 201 }).success
+            battleMapSchema.safeParse({ ...map, backgroundRows: 202 }).success
         ).toBe(false);
     });
 });
