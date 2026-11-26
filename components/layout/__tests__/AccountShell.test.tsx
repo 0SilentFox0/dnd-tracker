@@ -69,15 +69,16 @@ describe('AccountShell', () => {
         expect(current?.getAttribute('href')).toBe('/settings/password');
     });
 
-    it('pulls a form page flush so the phone gutter is not doubled', () => {
+    it('drops the form page own phone padding so the shell gutter is the only one', () => {
         const { container } = render(
             <AccountShell>
                 <div className="hud-form-page" />
             </AccountShell>
         );
 
-        expect(container.querySelector('main')?.className).toContain(
-            'max-sm:[&>.hud-form-page]:-mx-4'
-        );
+        const cls = container.querySelector('main')?.className ?? '';
+
+        expect(cls).not.toContain('-mx-4');
+        expect(cls).toContain('.hud-form-head>*]:!px-0');
     });
 });

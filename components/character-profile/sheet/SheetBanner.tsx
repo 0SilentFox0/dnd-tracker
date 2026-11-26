@@ -113,7 +113,7 @@ export function SheetBanner({
                                     className="size-full object-cover"
                                 />
                             ) : (
-                                <span className="hud-sc flex size-full flex-col items-center justify-center gap-1 px-1 text-5xl text-hud-muted">
+                                <span className="hud-sc flex size-full flex-col items-center justify-center gap-1 px-1 text-3xl text-hud-muted max-lg:pb-8 lg:text-5xl">
                                     {initial(hero.name)}
                                     {hero.name.trim() && (
                                         <span className="line-clamp-2 text-center text-xs [overflow-wrap:anywhere] text-hud-ink lg:text-base">

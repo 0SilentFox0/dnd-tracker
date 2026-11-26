@@ -62,7 +62,7 @@ export function HudForm<T extends string>({
                 <p
                     role="alert"
                     data-notice
-                    className="px-4 py-2 text-sm text-hud-danger"
+                    className="px-4 py-2 text-sm text-hud-danger [.hud-form-wide_&]:max-sm:px-0"
                 >
                     {error}
                 </p>
@@ -76,7 +76,7 @@ export function HudForm<T extends string>({
                     keepMounted
                 />
             ) : (
-                <div className="px-4 py-3">{children}</div>
+                <div className="px-4 py-3 [.hud-form-wide_&]:max-sm:px-0">{children}</div>
             )}
             {actions && (
                 <ActionBar

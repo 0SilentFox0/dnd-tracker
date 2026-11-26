@@ -34,7 +34,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
     return (
         <HudCard
             link={canEdit ? { href: editHref, label: set.name } : undefined}
-            className="space-y-4 p-4"
+            className="min-w-0 space-y-4 p-4"
         >
             <div className="flex items-start justify-between gap-2">
                 <div className="flex min-w-0 flex-1 gap-3">
@@ -44,7 +44,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
                         size="lg"
                     />
                     <div className="min-w-0 space-y-1">
-                        <h3 className="hud-sc text-lg leading-tight text-hud-ink">
+                        <h3 className="hud-sc text-lg leading-tight [overflow-wrap:anywhere] text-hud-ink">
                             {set.name}
                         </h3>
                         {props.variant === 'withArtifacts' && (
@@ -113,7 +113,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
                             {props.artifacts.map((a) => (
                                 <span
                                     key={a.id}
-                                    className="rounded-full px-2 py-0.5 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]"
+                                    className="rounded-full px-2 py-0.5 text-xs [overflow-wrap:anywhere] text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]"
                                 >
                                     {a.name}
                                 </span>
