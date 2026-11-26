@@ -4,10 +4,10 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Lock } from 'lucide-react';
 
-import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, DoorState } from '@/types/battle-grid';
+import { edgeBar } from '../edges/edge-geometry';
 
-const LEAF = UNIT;
+import { UNIT } from '@/lib/utils/battle/grid';
+import type { BattleMapConfig, DoorState, GridKind } from '@/types/battle-grid';
 
 const THICK = UNIT * 0.24;
 
@@ -15,22 +15,18 @@ const LOCK = UNIT * 0.3;
 
 const MIN_HIT_PX = 30;
 
-function edgeCentre(edge: string) {
-    const { a, side } = parseEdgeKey(edge);
+export function doorCentre(
+    edge: string,
+    grid: GridKind
+): { x: number; y: number } {
+    const { cx, cy } = edgeBar(grid, edge);
 
-    return side === 'e'
-        ? { x: (a.x + 1) * UNIT, y: (a.y + 0.5) * UNIT, side }
-        : { x: (a.x + 0.5) * UNIT, y: (a.y + 1) * UNIT, side };
-}
-
-export function doorCentre(edge: string): { x: number; y: number } {
-    const { x, y } = edgeCentre(edge);
-
-    return { x, y };
+    return { x: cx, y: cy };
 }
 
 interface DoorsLayerProps {
     doors: NonNullable<BattleMapConfig['doors']>;
+    grid: GridKind;
     pxPerUnit: number;
     rotated: boolean;
     showLock: boolean;
@@ -40,6 +36,7 @@ interface DoorsLayerProps {
 /** Door glyphs on cell edges; the hit circle is at least 30px wide so it works under a finger. */
 export const DoorsLayer = memo(function DoorsLayer({
     doors,
+    grid,
     pxPerUnit,
     rotated,
     showLock,
@@ -52,7 +49,11 @@ export const DoorsLayer = memo(function DoorsLayer({
     return (
         <g data-map-doors="" pointerEvents={onPress ? undefined : 'none'}>
             {Object.entries(doors).map(([edge, door]) => {
-                const { x, y, side } = edgeCentre(edge);
+                const bar = edgeBar(grid, edge);
+
+                const { cx: x, cy: y } = bar;
+
+                const LEAF = bar.length;
 
                 const locked = showLock && !door.open && door.locked;
 
@@ -69,7 +70,7 @@ export const DoorsLayer = memo(function DoorsLayer({
                         data-door-open={door.open ? '' : undefined}
                     >
                         <g
-                            transform={`translate(${x} ${y}) rotate(${side === 'e' ? 90 : 0})`}
+                            transform={`translate(${x} ${y}) rotate(${bar.angle})`}
                             pointerEvents="none"
                         >
                             <rect

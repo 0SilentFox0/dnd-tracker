@@ -22,6 +22,7 @@ const renderMenu = (door: { open: boolean; locked?: boolean }, t = tool()) => {
     render(
         <DoorMenu
             edge="1:1:e"
+            grid="square"
             door={door}
             pxPerUnit={1}
             rotated={false}

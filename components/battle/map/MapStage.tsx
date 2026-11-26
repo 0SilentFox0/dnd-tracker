@@ -183,6 +183,7 @@ function MapStageImpl({
                 {map.doors && Object.keys(map.doors).length > 0 && (
                     <DoorsLayer
                         doors={map.doors}
+                        grid={grid}
                         pxPerUnit={pxPerUnit}
                         rotated={rotated}
                         showLock={doorsTool?.showLock ?? doorLocks ?? false}
@@ -228,6 +229,7 @@ function MapStageImpl({
             {doorsTool?.menu && menuDoor && (
                 <DoorMenu
                     edge={doorsTool.menu}
+                    grid={grid}
                     door={menuDoor}
                     pxPerUnit={pxPerUnit}
                     rotated={rotated}

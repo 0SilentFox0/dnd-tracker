@@ -2,41 +2,24 @@
 
 import { memo } from 'react';
 
-import { edgeRect } from '../edges/edge-geometry';
+import { edgeBar, edgeBarProps } from '../edges/edge-geometry';
 
-import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
+import { EDGE_WALL_WIDTH } from '@/lib/constants/battle';
+import { gridOf } from '@/lib/utils/battle/grid';
+import { edgeSegment } from '@/lib/utils/battle/grid/edge-keys';
 import type { BattleMapConfig } from '@/types/battle-grid';
-
-function barsLine(edge: string) {
-    const { a, side } = parseEdgeKey(edge);
-
-    return side === 'e'
-        ? {
-              x1: (a.x + 1) * UNIT,
-              y1: a.y * UNIT,
-              x2: (a.x + 1) * UNIT,
-              y2: (a.y + 1) * UNIT,
-          }
-        : {
-              x1: a.x * UNIT,
-              y1: (a.y + 1) * UNIT,
-              x2: (a.x + 1) * UNIT,
-              y2: (a.y + 1) * UNIT,
-          };
-}
 
 const BRICKS_ROW_A = [0.5, 20.5];
 
 const BRICKS_ROW_B = [10.5, 30.5, -9.5];
 
-function BrickPattern({ id, rotate }: { id: string; rotate?: boolean }) {
+function BrickPattern({ id }: { id: string }) {
     return (
         <pattern
             id={id}
             width="40"
             height="10"
             patternUnits="userSpaceOnUse"
-            patternTransform={rotate ? 'rotate(90)' : undefined}
         >
             <rect
                 width="40"
@@ -67,26 +50,23 @@ function BrickPattern({ id, rotate }: { id: string; rotate?: boolean }) {
     );
 }
 
-function wallSide(edge: string) {
-    return parseEdgeKey(edge).side;
-}
-
 export const WallsLayer = memo(function WallsLayer({
     map,
     ghost,
 }: {
-    map: Pick<BattleMapConfig, 'walls' | 'bars'>;
+    map: Pick<BattleMapConfig, 'walls' | 'bars' | 'gridType'>;
     ghost?: ReadonlySet<string>;
 }) {
     const { walls, bars } = map;
+
+    const grid = gridOf(map);
 
     if (!walls?.length && !bars?.length && !ghost?.size) return null;
 
     return (
         <g pointerEvents="none" data-map-edges="">
             <defs>
-                <BrickPattern id="map-wall-brick-h" />
-                <BrickPattern id="map-wall-brick-v" rotate />
+                <BrickPattern id="map-wall-brick" />
                 <filter
                     id="map-wall-shadow"
                     x="-10%"
@@ -99,20 +79,18 @@ export const WallsLayer = memo(function WallsLayer({
             </defs>
             {!!walls?.length && (
                 <g filter="url(#map-wall-shadow)" opacity="0.55">
-                    {walls.map((edge) => {
-                        const r = edgeRect(edge);
-
-                        return (
+                    <g transform="translate(3 5)">
+                        {walls.map((edge) => (
                             <rect
                                 key={edge}
-                                x={r.x + 3}
-                                y={r.y + 5}
-                                width={r.width}
-                                height={r.height}
+                                {...edgeBarProps(
+                                    edgeBar(grid, edge),
+                                    EDGE_WALL_WIDTH
+                                )}
                                 fill="#000"
                             />
-                        );
-                    })}
+                        ))}
+                    </g>
                 </g>
             )}
             {ghost &&
@@ -121,38 +99,44 @@ export const WallsLayer = memo(function WallsLayer({
                         key={`g${edge}`}
                         data-map-ghost={edge}
                         className="map-edge-ghost"
-                        {...edgeRect(edge)}
+                        {...edgeBarProps(edgeBar(grid, edge), EDGE_WALL_WIDTH)}
                         rx={2}
                         ry={2}
                     />
                 ))}
-            {bars?.map((edge) => (
-                <line
-                    key={edge}
-                    className="map-bars"
-                    data-map-bars={edge}
-                    {...barsLine(edge)}
-                />
-            ))}
+            {bars?.map((edge) => {
+                const [p, q] = edgeSegment(grid, edge);
+
+                return (
+                    <line
+                        key={edge}
+                        className="map-bars"
+                        data-map-bars={edge}
+                        x1={p.x}
+                        y1={p.y}
+                        x2={q.x}
+                        y2={q.y}
+                    />
+                );
+            })}
             {walls?.map((edge) => {
-                const side = wallSide(edge);
+                const props = edgeBarProps(edgeBar(grid, edge), EDGE_WALL_WIDTH);
 
                 return (
                     <g key={edge}>
                         <rect
                             className="map-wall"
                             data-map-wall={edge}
-                            fill={`url(#map-wall-brick-${side === 'e' ? 'v' : 'h'})`}
-                            {...edgeRect(edge)}
+                            fill="url(#map-wall-brick)"
+                            {...props}
                             rx={2}
                             ry={2}
                         />
                         <rect
                             className="map-wall-light"
-                            {...edgeRect(edge, 2)}
-                            {...(side === 'e'
-                                ? { x: edgeRect(edge).x + 1 }
-                                : { y: edgeRect(edge).y + 1 })}
+                            {...props}
+                            y={-EDGE_WALL_WIDTH / 2 + 1}
+                            height={2}
                         />
                     </g>
                 );

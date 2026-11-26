@@ -36,4 +36,18 @@ describe('WallsLayer', () => {
         expect(line?.getAttribute('y1')).toBe('300');
         expect(line?.getAttribute('y2')).toBe('400');
     });
+
+    it('на гекс-мапі стіни повернуті вздовж ребер', () => {
+        const { container } = renderLayer({
+            gridType: 'hex',
+            walls: ['2:2:ne', '2:2:se'],
+        });
+
+        const walls = container.querySelectorAll('rect[data-map-wall]');
+
+        expect(walls).toHaveLength(2);
+        walls.forEach((w) =>
+            expect(w.getAttribute('transform')).toContain('rotate(')
+        );
+    });
 });
