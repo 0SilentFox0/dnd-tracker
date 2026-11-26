@@ -196,7 +196,10 @@
     "nameRequired": "Enter a name",
     "createFailed": "Failed to create",
     "updateFailed": "Failed to update",
-    "saveFailed": "Failed to save"
+    "saveFailed": "Failed to save",
+    "preview": "Preview",
+    "previewTitle": "As players see it",
+    "more": "More actions"
   },
   "dmSections": {
     "scenario": "Scenario",

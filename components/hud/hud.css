@@ -189,3 +189,25 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
   .hud-range:not(:disabled):hover::-moz-range-thumb { border-color: var(--hud-accent); }
 }
 .hud-range::-webkit-slider-thumb { transition: border-color .15s ease, transform .15s ease; }
+
+.ds-fields { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@container (min-width: 52rem) { .ds-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ds-fields--num { grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); }
+.ds-span { grid-column: 1 / -1; }
+.ds-list-grid { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+@container (min-width: 52rem) { .ds-list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ds-setting-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding-block: 12px; }
+.ds-setting-row + .ds-setting-row { border-top: 1px solid color-mix(in srgb, var(--hud-rule) 50%, transparent); }
+@container (max-width: 400px) { .ds-setting-row { grid-template-columns: 1fr; } }
+
+.hud-wide-body { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "main"; }
+@media (min-width: 1024px) { .hud-wide-body { grid-template-columns: minmax(0, 1fr) 320px; grid-template-areas: "rail rail" "main side"; } }
+@media (min-width: 1280px) { .hud-wide-body { grid-template-columns: 208px minmax(0, 1fr) 360px; grid-template-areas: "rail main side"; } }
+@media (min-width: 1600px) { .hud-wide-body { grid-template-columns: 208px minmax(0, 1fr) 400px; } }
+.hud-wide-body > form, .hud-wide-body [data-hud-tabs-root] { display: contents; }
+.hud-wide-body [data-hud-rail] { grid-area: rail; }
+.hud-wide-body [data-hud-main], .hud-wide-body [data-hud-tabs-panels] { grid-area: main; container-type: inline-size; }
+.hud-wide-side { grid-area: side; }
+@media (max-width: 1023px) { .hud-wide-side { display: none; } }
+.hud-wide-body:has([data-active-wide="true"]) .hud-wide-side { display: none; }
+@media (min-width: 1024px) { .hud-wide-body:has([data-active-wide="true"]) [data-hud-tabs-panels] { grid-column: main / side; } }

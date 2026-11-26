@@ -196,7 +196,10 @@
     "nameRequired": "Вкажіть назву",
     "createFailed": "Помилка створення",
     "updateFailed": "Помилка оновлення",
-    "saveFailed": "Помилка збереження"
+    "saveFailed": "Помилка збереження",
+    "preview": "Перегляд",
+    "previewTitle": "Як бачать гравці",
+    "more": "Ще дії"
   },
   "dmSections": {
     "scenario": "Сценарій",
