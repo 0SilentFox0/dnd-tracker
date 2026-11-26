@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Eye, EyeOff, Minus, Plus } from 'lucide-react';
+import { ArrowLeftRight, Eye, EyeOff, Minus, Plus, X } from 'lucide-react';
 
 import { EntityIcon } from '@/components/common/entity/EntityIcon';
 import { Button } from '@/components/ui/button';
@@ -33,30 +33,27 @@ export function SetupParticipantRow({
 
     const isAlly = side === ParticipantSide.ALLY;
 
-    const bgClass = isAlly
-        ? 'bg-green-50 dark:bg-green-950/20'
-        : 'bg-red-50 dark:bg-red-950/20';
-
     return (
         <div
             className={cn(
-                'flex items-center justify-between gap-2 rounded-lg border p-3',
-                bgClass,
+                'relative flex min-w-0 items-center justify-between gap-2 rounded-lg bg-hud-panel-2 py-1.5 pr-1.5 pl-3',
                 reserved > 0 && 'opacity-60'
             )}
         >
+            <span
+                aria-hidden
+                className={cn(
+                    'absolute inset-y-1.5 left-0 w-[3px] rounded-full',
+                    isAlly ? 'bg-hud-accent' : 'bg-hud-crimson'
+                )}
+            />
             <div className="flex min-w-0 flex-1 items-center gap-2">
                 <EntityIcon
                     src={avatar}
                     name={name}
-                    alt={name}
-                    size={36}
-                    className="size-9 rounded"
-                    fallback={
-                        <span>
-                            {side === ParticipantSide.ALLY ? '👤' : '⚔️'}
-                        </span>
-                    }
+                    alt=""
+                    size={32}
+                    className="size-8 rounded-md"
                 />
                 <span className="truncate text-sm font-medium">{name}</span>
                 {quantity != null && quantity > 1 && (
@@ -117,8 +114,9 @@ export function SetupParticipantRow({
                     size="sm"
                     onClick={actions.onMoveToOtherSide}
                     title={isAlly ? t('moveToEnemies') : t('moveToAllies')}
+                    aria-label={isAlly ? t('moveToEnemies') : t('moveToAllies')}
                 >
-                    {isAlly ? '→' : '←'}
+                    <ArrowLeftRight className="size-4" aria-hidden />
                 </Button>
                 <Button
                     type="button"
@@ -126,9 +124,9 @@ export function SetupParticipantRow({
                     size="sm"
                     onClick={actions.onRemove}
                     title={t('remove')}
-                    className="text-muted-foreground hover:text-destructive"
+                    aria-label={t('remove')}
                 >
-                    ✕
+                    <X className="size-4" aria-hidden />
                 </Button>
             </div>
         </div>
