@@ -11,7 +11,9 @@ import { ArtifactSetMembersPicker } from './ArtifactSetMembersPicker';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
-import { HudForm, type HudTab } from '@/components/hud/form';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
+import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +24,8 @@ import {
     type ArtifactSetFormInitial,
     useArtifactSetForm,
 } from '@/systems/artifactsets/hooks';
+
+const FORM_ID = 'artifact-set-form';
 
 export interface ArtifactSetFormProps {
     campaignId: string;
@@ -35,6 +39,10 @@ export function ArtifactSetForm({
     initial = {},
 }: ArtifactSetFormProps) {
     const t = useTranslations('artifacts.sets.form');
+
+    const ts = useTranslations('artifacts.sets');
+
+    const listHref = `/campaigns/${campaignId}/dm/system/artifact-sets`;
 
     const ta = useTranslator('abilities');
 
@@ -87,7 +95,7 @@ export function ArtifactSetForm({
                         </p>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="ds-fields">
                         <div className="space-y-2">
                             <Label htmlFor="set-bonus-name">
                                 {t('bonusName')}
@@ -146,48 +154,67 @@ export function ArtifactSetForm({
     ];
 
     return (
-        <>
+        <HudFormPage
+            width="wide"
+            header={{
+                title: setId ? ts('edit.title') : ts('new.title'),
+                aside: setId ? initial.name : ts('new.aside'),
+                back: {
+                    href: listHref,
+                    label: tCommon('dmSections.artifact-sets'),
+                },
+                menu: setId ? (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('delete'),
+                                tone: 'danger',
+                                disabled: editor.status.isBusy,
+                                onSelect: () => void editor.actions.remove(),
+                            },
+                        ]}
+                    />
+                ) : undefined,
+            }}
+            actions={
+                <>
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={listHref}>{tCommon('actions.cancel')}</Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isBusy || !editor.abilities.valid
+                        }
+                    >
+                        {editor.status.isBusy
+                            ? t('saving')
+                            : withAbilityErrors(
+                                  setId ? t('saveChanges') : t('create'),
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+            side={
+                setId ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="artifact-sets"
+                        targetId={setId}
+                    />
+                ) : undefined
+            }
+        >
             <HudForm
-                id="artifact-set-form"
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 error={editor.status.error}
                 tabs={tabs}
-                actions={
-                    <>
-                        {setId && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                disabled={editor.status.isBusy}
-                                onClick={() => void editor.actions.remove()}
-                            >
-                                {t('delete')}
-                            </Button>
-                        )}
-                        <Button type="button" variant="outline" asChild>
-                            <Link
-                                href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
-                            >
-                                {tCommon('actions.cancel')}
-                            </Link>
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isBusy || !editor.abilities.valid
-                            }
-                        >
-                            {editor.status.isBusy
-                                ? t('saving')
-                                : withAbilityErrors(
-                                      setId ? t('saveChanges') : t('create'),
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
+                tabStyles={{ variant: 'rail' }}
             />
-        </>
+        </HudFormPage>
     );
 }
