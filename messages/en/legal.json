@@ -26,7 +26,7 @@
       },
       "2": {
         "heading": "Data we process",
-        "body": "Account data: your email address, display name and avatar, and your sign-in method (email and password, or Google). Passwords are handled by our authentication provider and are never stored by us in readable form.\n\nContent you create: campaigns, characters, maps, battles, notes, scenarios and the files you upload (images, audio, imports) together with the technical records needed to run them.\n\nTechnical data: standard request data such as IP address and browser type, processed by our hosting providers to deliver the service, keep it secure and prevent abuse, plus aggregated page-view statistics without cookies.\n\nOptional AI features: if you add your own AI provider key, the text you send to the assistant is passed to that provider under your own account."
+        "body": "Account data: your email address, display name and avatar, and your sign-in method (email and password, or Google). Passwords are handled by our authentication provider and are never stored by us in readable form.\n\nContent you create: campaigns, characters, maps, battles, notes, scenarios and the files you upload (images, audio, imports) together with the technical records needed to run them.\n\nTechnical data: standard request data such as IP address and browser type, processed by our hosting providers to deliver the service, keep it secure and prevent abuse, plus aggregated page-view statistics without cookies. We keep the IP address, approximate country and browser/OS type of signed-in visits for 180 days to protect accounts against abuse and multi-account fraud.\n\nOptional AI features: if you add your own AI provider key, the text you send to the assistant is passed to that provider under your own account."
       },
       "3": {
         "heading": "Why we use it and on what basis",
@@ -115,10 +115,14 @@
         "body": "The cookie NEXT_LOCALE remembers your chosen language for up to one year. The cookie TZ stores your time zone for up to one year so that dates and times are shown correctly. Your colour palette and similar interface settings are kept in your browser's local storage on your device so that the interface looks the same on your next visit. None of these identify you to third parties."
       },
       "4": {
+        "heading": "Activity record",
+        "body": "The cookie cn_seen marks that we have already recorded your signed-in visit today. It is strictly technical, expires at the end of the current UTC day and is not shared with or read by any third party."
+      },
+      "5": {
         "heading": "Analytics",
         "body": "We measure aggregated page views with Vercel Web Analytics. It does not use cookies, does not track you across sites and does not build a profile of you."
       },
-      "5": {
+      "6": {
         "heading": "Control and contact",
         "body": "You can delete cookies and local storage in your browser settings; the service will then ask you to sign in again and reset your preferences. Questions: {contactEmail}. Operator: {operatorName}."
       }

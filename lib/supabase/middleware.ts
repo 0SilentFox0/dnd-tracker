@@ -1,7 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { waitUntil } from '@vercel/functions';
 
 import { STATIC_PUBLIC_PATHS } from '@/lib/constants/site';
+import { parseClientIp, parseCountry } from '@/lib/utils/admin/client-ip';
+import { parseDevice } from '@/lib/utils/admin/device';
+import {
+    secondsUntilUtcMidnight,
+    SEEN_COOKIE,
+    seenValue,
+    shouldTouch,
+} from '@/lib/utils/admin/seen-cookie';
 import { bearerToken } from '@/lib/utils/api/bearer';
 import {
     checkIpRateLimit,
@@ -182,6 +191,34 @@ export async function updateSession(request: NextRequest) {
         url.pathname = '/campaigns';
 
         return NextResponse.redirect(url);
+    }
+
+    if (
+        user &&
+        shouldTouch(request.cookies.get(SEEN_COOKIE)?.value, user, new Date())
+    ) {
+        const now = new Date();
+
+        // dynamic import keeps Prisma out of the proxy hot path
+        waitUntil(
+            import('@/lib/server/admin/record-activity').then((m) =>
+                m.recordActivity({
+                    userId: user,
+                    ip: parseClientIp(request.headers),
+                    country: parseCountry(request.headers),
+                    device: parseDevice(request.headers.get('user-agent')),
+                    now,
+                })
+            )
+        );
+
+        supabaseResponse.cookies.set(SEEN_COOKIE, seenValue(user, now), {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+            path: '/',
+            maxAge: secondsUntilUtcMidnight(now),
+        });
     }
 
     return supabaseResponse;
