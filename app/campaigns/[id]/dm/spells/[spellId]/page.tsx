@@ -12,9 +12,10 @@ export default async function EditSpellPage({
     await requireCampaignDM(id);
 
     return (
-        <>
-            <SourceNotes campaignId={id} kind="spells" targetId={spellId} />
-            <SpellEditForm campaignId={id} spellId={spellId} />
-        </>
+        <SpellEditForm
+            campaignId={id}
+            spellId={spellId}
+            side={<SourceNotes campaignId={id} kind="spells" targetId={spellId} />}
+        />
     );
 }

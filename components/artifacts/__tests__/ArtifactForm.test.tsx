@@ -175,7 +175,7 @@ describe('ArtifactForm', () => {
         expect(button).toBeDisabled();
     });
 
-    it('кнопки форми — у панелі дій, «Створити» остання', () => {
+    it('рівно одна кнопка «Створити» і вона сабмітить форму за id', () => {
         render(
             <QueryClientProvider client={new QueryClient()}>
                 <ConfirmProvider>
@@ -206,12 +206,57 @@ describe('ArtifactForm', () => {
             </QueryClientProvider>
         );
 
-        const bar = document.querySelector(
-            '[data-slot=action-bar]'
-        ) as HTMLElement;
+        const buttons = screen.getAllByRole('button', { name: 'Створити' });
 
-        expect(bar).not.toBeNull();
-        expect(bar.lastElementChild).toHaveTextContent('Створити');
+        expect(buttons).toHaveLength(1);
+        expect(buttons[0]).toHaveAttribute('form', 'artifact-form');
+        expect(document.querySelector('form#artifact-form')).not.toBeNull();
+    });
+
+    it('помилка збереження — role=alert над вкладками, не в ряду кнопок', async () => {
+        const onSubmit = vi.fn(async () => {
+            throw new Error('Не вдалося зберегти');
+        });
+
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <ConfirmProvider>
+                    <ArtifactForm
+                        campaignId="c1"
+                        artifactSets={[]}
+                        mode="edit"
+                        labels={{
+                            title: 'Ред.',
+                            submit: 'Зберегти',
+                            saving: '...',
+                            iconHint: '',
+                        }}
+                        cancelHref="/x"
+                        initial={{
+                            name: 'Меч',
+                            description: '',
+                            rarity: '',
+                            slot: 'ring',
+                            icon: '',
+                            setId: '',
+                            abilities: [],
+                            abilityIssues: [],
+                        }}
+                        actions={{ onSubmit }}
+                    />
+                </ConfirmProvider>
+            </QueryClientProvider>
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Зберегти' }));
+
+        const alert = await screen.findByRole('alert');
+
+        expect(alert).toHaveTextContent('Не вдалося зберегти');
+        expect(
+            alert.compareDocumentPosition(screen.getAllByRole('tab')[0]) &
+                Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
     });
 
     it('помилка видалення показується в діалозі підтвердження, діалог лишається', async () => {
@@ -249,8 +294,12 @@ describe('ArtifactForm', () => {
             </QueryClientProvider>
         );
 
+        fireEvent.pointerDown(
+            screen.getByRole('button', { name: 'common.form.more' }),
+            { button: 0, ctrlKey: false }
+        );
         fireEvent.click(
-            screen.getByRole('button', { name: 'common.actions.delete' })
+            screen.getByRole('menuitem', { name: 'common.actions.delete' })
         );
 
         const dialog = await screen.findByRole('alertdialog');

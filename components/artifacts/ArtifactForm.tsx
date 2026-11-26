@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { type ReactNode, useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import {
+    ARTIFACT_FORM_ID,
     ARTIFACT_FORM_TAB,
     type ArtifactFormTabId,
 } from './artifact-form-tabs';
@@ -14,7 +15,12 @@ import { ArtifactWeaponFields } from './ArtifactWeaponFields';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { IconUrlField } from '@/components/common/fields/IconUrlField';
-import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
+import {
+    HudForm,
+    HudFormMenu,
+    HudFormPage,
+    type HudTab,
+} from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -67,6 +73,7 @@ export interface ArtifactFormProps {
         submit: string;
         saving: string;
         iconHint: React.ReactNode;
+        side?: ReactNode;
     };
     actions: {
         onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
@@ -87,8 +94,6 @@ export function ArtifactForm({
     const t = useTranslations();
 
     const ta = useTranslator('abilities');
-
-    const router = useRouter();
 
     const editor = useArtifactForm({ initial, mode, ...actions });
 
@@ -127,7 +132,7 @@ export function ArtifactForm({
             label: t('common.tabs.basic'),
             content: (
                 <div className="space-y-5">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="ds-fields">
                         <LabeledInput
                             id="artifact-name"
                             label={t('artifacts.form.name')}
@@ -303,53 +308,70 @@ export function ArtifactForm({
         },
     ];
 
+    const busy = editor.status.isBusy;
+
     return (
-        <HudFormPage title={labels.title} aside={labels.description}>
+        <HudFormPage
+            width="wide"
+            title={
+                <>
+                    <Link
+                        href={cancelHref}
+                        className="hover:text-hud-accent-fg"
+                    >
+                        {t('common.dmSections.artifacts')}
+                    </Link>
+                    {' › '}
+                    {labels.title}
+                </>
+            }
+            aside={labels.description}
+            side={labels.side}
+            actions={
+                <>
+                    {actions.onDelete && (
+                        <HudFormMenu
+                            label={t('common.form.more')}
+                            items={[
+                                {
+                                    label: t('common.actions.delete'),
+                                    tone: 'danger',
+                                    onSelect: () => editor.actions.remove(),
+                                },
+                            ]}
+                        />
+                    )}
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={cancelHref}>
+                            {t('common.actions.cancel')}
+                        </Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={ARTIFACT_FORM_ID}
+                        disabled={
+                            busy || !editor.abilities.valid || !statsValid
+                        }
+                    >
+                        {editor.status.isSaving
+                            ? labels.saving
+                            : withAbilityErrors(
+                                  labels.submit,
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+        >
             <HudForm
-                id="artifact-form"
+                id={ARTIFACT_FORM_ID}
                 onSubmit={editor.actions.submit}
                 error={editor.status.error}
                 tabs={tabs}
                 tab={activeTab}
                 onTabChange={setTab}
-                actions={
-                    <>
-                        {actions.onDelete && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={() => void editor.actions.remove()}
-                                disabled={editor.status.isBusy}
-                            >
-                                {t('common.actions.delete')}
-                            </Button>
-                        )}
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => router.push(cancelHref)}
-                            disabled={editor.status.isBusy}
-                        >
-                            {t('common.actions.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isBusy ||
-                                !editor.abilities.valid ||
-                                !statsValid
-                            }
-                        >
-                            {editor.status.isSaving
-                                ? labels.saving
-                                : withAbilityErrors(
-                                      labels.submit,
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
+                tabStyles={{ variant: 'rail' }}
             />
         </HudFormPage>
     );

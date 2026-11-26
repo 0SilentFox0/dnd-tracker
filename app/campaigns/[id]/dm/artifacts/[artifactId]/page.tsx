@@ -35,12 +35,6 @@ export default async function EditArtifactPage({
     const { abilities, issues } = readAbilities('artifact', artifact);
 
     return (
-        <>
-            <SourceNotes
-                campaignId={id}
-                kind="artifacts"
-                targetId={artifactId}
-            />
             <ArtifactEditForm
                 campaignId={id}
                 artifact={{
@@ -58,7 +52,13 @@ export default async function EditArtifactPage({
                     item: itemStatsFromRow(artifact),
                 }}
                 artifactSets={artifactSets}
+                side={
+                    <SourceNotes
+                        campaignId={id}
+                        kind="artifacts"
+                        targetId={artifactId}
+                    />
+                }
             />
-        </>
     );
 }

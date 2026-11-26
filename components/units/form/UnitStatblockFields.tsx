@@ -59,7 +59,7 @@ export function UnitStatblockFields({
     );
 
     return (
-        <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
+        <div className="ds-fields [&>*]:min-w-0">
             <div>
                 <Label htmlFor="creature-type">{t('creatureType')}</Label>
                 <Input

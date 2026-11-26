@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -13,12 +14,14 @@ interface ArtifactEditFormProps {
     campaignId: string;
     artifact: ArtifactData;
     artifactSets: ArtifactSetOption[];
+    side?: ReactNode;
 }
 
 export function ArtifactEditForm({
     campaignId,
     artifact,
     artifactSets,
+    side,
 }: ArtifactEditFormProps) {
     const t = useTranslations('artifacts.form');
 
@@ -41,6 +44,7 @@ export function ArtifactEditForm({
                 submit: tc('save'),
                 saving: tc('saving'),
                 iconHint: t('editIconHint', { bucket: 'artifact-icons' }),
+                side,
             }}
             cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
             initial={{

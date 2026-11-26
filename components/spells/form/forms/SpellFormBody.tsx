@@ -1,18 +1,20 @@
 'use client';
 
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { SpellComponentsFields } from '../fields/SpellComponentsFields';
 import { SpellFormBasicFields } from '../fields/SpellFormBasicFields';
 import { SpellFormPowerFields } from '../fields/SpellFormPowerFields';
 import type { SpellFormData } from '../spell-form-defaults';
-import { SPELL_FORM_TAB, type SpellFormTabId } from '../spell-form-tabs';
+import {
+    SPELL_FORM_ID,
+    SPELL_FORM_TAB,
+    type SpellFormTabId,
+} from '../spell-form-tabs';
 import { SpellFormEffects } from './SpellFormEffects';
 
 import { HudForm, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useRuleSystem } from '@/lib/hooks/systems';
@@ -24,11 +26,8 @@ export interface SpellFormBodyProps {
     spellGroups: IdName[];
     submit: {
         onSubmit: (e: React.FormEvent) => void;
-        isPending: boolean;
-        label: string;
         error?: string | null;
     };
-    remove?: { onDelete: () => void; isDeleting: boolean };
 }
 
 export function SpellFormBody({
@@ -36,7 +35,6 @@ export function SpellFormBody({
     form,
     spellGroups,
     submit,
-    remove,
 }: SpellFormBodyProps) {
     const t = useTranslations();
 
@@ -87,6 +85,7 @@ export function SpellFormBody({
         {
             id: SPELL_FORM_TAB.effects,
             label: t('spellEditor.tabs.effects'),
+            badge: formData.spellEffects.length || undefined,
             content: (
                 <div className="space-y-4">
                     <SpellFormEffects
@@ -117,36 +116,11 @@ export function SpellFormBody({
                 {t('spellEditor.body.verified')}
             </label>
             <HudForm
-                id="spell-form"
+                id={SPELL_FORM_ID}
                 onSubmit={submit.onSubmit}
                 tabs={tabs}
+                tabStyles={{ variant: 'rail' }}
                 error={submit.error}
-                actions={
-                    <>
-                        <Button type="submit" disabled={submit.isPending}>
-                            {submit.isPending
-                                ? t('common.actions.saving')
-                                : submit.label}
-                        </Button>
-                        {remove && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={remove.onDelete}
-                                disabled={remove.isDeleting}
-                            >
-                                {remove.isDeleting
-                                    ? t('spellEditor.page.deleting')
-                                    : t('common.actions.delete')}
-                            </Button>
-                        )}
-                        <Button type="button" variant="outline" asChild>
-                            <Link href={`/campaigns/${campaignId}/dm/spells`}>
-                                {t('common.actions.cancel')}
-                            </Link>
-                        </Button>
-                    </>
-                }
             />
         </>
     );

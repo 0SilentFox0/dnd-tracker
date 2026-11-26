@@ -12,9 +12,10 @@ export default async function EditUnitPage({
     await requireCampaignDM(id);
 
     return (
-        <>
-            <SourceNotes campaignId={id} kind="units" targetId={unitId} />
-            <UnitEditForm campaignId={id} unitId={unitId} />
-        </>
+        <UnitEditForm
+            campaignId={id}
+            unitId={unitId}
+            side={<SourceNotes campaignId={id} kind="units" targetId={unitId} />}
+        />
     );
 }
