@@ -11,7 +11,13 @@ import { ArtifactSetMembersPicker } from './ArtifactSetMembersPicker';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { ImageUpload } from '@/components/common/fields/ImageUpload';
-import { HudForm, type HudTab } from '@/components/hud/form';
+import {
+    HudForm,
+    HudFormMenu,
+    HudFormPage,
+    HudSection,
+    type HudTab,
+} from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,14 +29,18 @@ import {
     useArtifactSetForm,
 } from '@/systems/artifactsets/hooks';
 
+const FORM_ID = 'artifact-set-form';
+
 export interface ArtifactSetFormProps {
     campaignId: string;
+    heading: { title: string; aside?: string };
     setId?: string;
     initial?: ArtifactSetFormInitial & { abilityIssues?: ConversionIssue[] };
 }
 
 export function ArtifactSetForm({
     campaignId,
+    heading,
     setId,
     initial = {},
 }: ArtifactSetFormProps) {
@@ -51,7 +61,8 @@ export function ArtifactSetForm({
             id: ARTIFACT_SET_FORM_TAB.basic,
             label: tCommon('tabs.basic'),
             content: (
-                <div className="space-y-5">
+                <HudSection panel>
+                <div className="ds-fields">
                     <div className="space-y-2">
                         <Label htmlFor="set-name">{t('name')}</Label>
                         <Input
@@ -64,7 +75,7 @@ export function ArtifactSetForm({
                         />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="ds-span space-y-2">
                         <Label htmlFor="set-desc">{t('description')}</Label>
                         <Textarea
                             id="set-desc"
@@ -87,7 +98,6 @@ export function ArtifactSetForm({
                         </p>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                             <Label htmlFor="set-bonus-name">
                                 {t('bonusName')}
@@ -114,8 +124,8 @@ export function ArtifactSetForm({
                                 rows={2}
                             />
                         </div>
-                    </div>
                 </div>
+                </HudSection>
             ),
         },
         {
@@ -146,48 +156,69 @@ export function ArtifactSetForm({
     ];
 
     return (
-        <>
+        <HudFormPage
+            width="wide"
+            title={
+                <>
+                    <Link
+                        href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
+                        className="text-hud-muted hover:text-hud-accent-fg"
+                    >
+                        {tCommon('dmSections.artifact-sets')}
+                    </Link>
+                    <span aria-hidden className="text-hud-muted">
+                        {' › '}
+                    </span>
+                    {heading.title}
+                </>
+            }
+            aside={heading.aside}
+            actions={
+                <>
+                    {setId && (
+                        <HudFormMenu
+                            label={tCommon('form.more')}
+                            items={[
+                                {
+                                    label: t('delete'),
+                                    tone: 'danger',
+                                    onSelect: editor.actions.remove,
+                                },
+                            ]}
+                        />
+                    )}
+                    <Button type="button" variant="outline" asChild>
+                        <Link
+                            href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
+                        >
+                            {tCommon('actions.cancel')}
+                        </Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isBusy || !editor.abilities.valid
+                        }
+                    >
+                        {editor.status.isBusy
+                            ? t('saving')
+                            : withAbilityErrors(
+                                  setId ? t('saveChanges') : t('create'),
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+        >
             <HudForm
-                id="artifact-set-form"
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 error={editor.status.error}
                 tabs={tabs}
-                actions={
-                    <>
-                        {setId && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                disabled={editor.status.isBusy}
-                                onClick={() => void editor.actions.remove()}
-                            >
-                                {t('delete')}
-                            </Button>
-                        )}
-                        <Button type="button" variant="outline" asChild>
-                            <Link
-                                href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
-                            >
-                                {tCommon('actions.cancel')}
-                            </Link>
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isBusy || !editor.abilities.valid
-                            }
-                        >
-                            {editor.status.isBusy
-                                ? t('saving')
-                                : withAbilityErrors(
-                                      setId ? t('saveChanges') : t('create'),
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
+                tabStyles={{ variant: 'rail' }}
             />
-        </>
+        </HudFormPage>
     );
 }

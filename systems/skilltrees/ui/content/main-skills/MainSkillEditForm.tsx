@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { useMainSkillForm } from '@/systems/skilltrees/hooks';
 import type { MainSkill } from '@/types/main-skills';
 
+const FORM_ID = 'main-skill-form';
+
 interface MainSkillEditFormProps {
     campaignId: string;
     mainSkill: MainSkill;
@@ -29,27 +31,31 @@ export function MainSkillEditForm({
         <HudFormPage
             title={t('skills.mainSkills.edit.title')}
             aside={t('skills.mainSkills.edit.aside')}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={actions.cancel}
+                    >
+                        {t('common.actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={status.isSaving}
+                    >
+                        {status.isSaving
+                            ? t('common.actions.saving')
+                            : t('skills.mainSkills.edit.submit')}
+                    </Button>
+                </>
+            }
         >
             <HudForm
-                id="main-skill-form"
+                id={FORM_ID}
                 onSubmit={actions.submit}
                 error={status.error}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={actions.cancel}
-                        >
-                            {t('common.actions.cancel')}
-                        </Button>
-                        <Button type="submit" disabled={status.isSaving}>
-                            {status.isSaving
-                                ? t('common.actions.saving')
-                                : t('skills.mainSkills.edit.submit')}
-                        </Button>
-                    </>
-                }
             >
                 <div className="space-y-6">
                     <MainSkillFormFields

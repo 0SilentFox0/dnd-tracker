@@ -1,11 +1,17 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { SKILL_FORM_TAB, type SkillFormTabId } from './skill-form-tabs';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
-import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
+import {
+    HudForm,
+    HudFormPage,
+    HudSection,
+    type HudTab,
+} from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { useSkillForm } from '@/systems/skilltrees/hooks';
@@ -15,6 +21,8 @@ import { SkillSpellSection } from '@/systems/skilltrees/ui/content/skills/form/s
 import type { IdName } from '@/types/common';
 import type { MainSkill } from '@/types/main-skills';
 import type { Skill } from '@/types/skills';
+
+const FORM_ID = 'skill-form';
 
 interface SkillCreateFormProps {
     campaignId: string;
@@ -45,13 +53,15 @@ export function SkillCreateForm({
             id: SKILL_FORM_TAB.basic,
             label: t('common.tabs.basic'),
             content: (
-                <div className="space-y-5">
-                    <SkillBasicInfo form={form} />
-                    <SkillMainSkillSection
-                        form={form}
-                        mainSkills={mainSkills}
-                    />
-                </div>
+                <HudSection panel>
+                    <div className="space-y-5">
+                        <SkillBasicInfo form={form} />
+                        <SkillMainSkillSection
+                            form={form}
+                            mainSkills={mainSkills}
+                        />
+                    </div>
+                </HudSection>
             ),
         },
         {
@@ -77,50 +87,64 @@ export function SkillCreateForm({
 
     return (
         <HudFormPage
+            width="wide"
             title={
-                isEdit
-                    ? t('skills.form.editTitle')
-                    : t('skills.form.createTitle')
+                <>
+                    <Link
+                        href={`/campaigns/${campaignId}/dm/skills`}
+                        className="text-hud-muted hover:text-hud-accent-fg"
+                    >
+                        {t('common.dmSections.skills')}
+                    </Link>
+                    <span aria-hidden className="text-hud-muted">
+                        {' › '}
+                    </span>
+                    {isEdit
+                        ? t('skills.form.editTitle')
+                        : t('skills.form.createTitle')}
+                </>
             }
             aside={
                 isEdit
                     ? t('skills.form.editAside')
                     : t('skills.form.createAside')
             }
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={actions.cancel}
+                        disabled={isSaving}
+                    >
+                        {t('common.actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={isSaving || !abilities.valid}
+                    >
+                        {isSaving
+                            ? isEdit
+                                ? t('common.actions.saving')
+                                : t('common.actions.creating')
+                            : withAbilityErrors(
+                                  isEdit
+                                      ? t('skills.form.submitEdit')
+                                      : t('skills.form.submitCreate'),
+                                  abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
         >
             <HudForm
-                id="skill-form"
+                id={FORM_ID}
                 onSubmit={actions.submit}
                 tabs={tabs}
+                tabStyles={{ variant: 'rail' }}
                 error={error}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={actions.cancel}
-                            disabled={isSaving}
-                        >
-                            {t('common.actions.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSaving || !abilities.valid}
-                        >
-                            {isSaving
-                                ? isEdit
-                                    ? t('common.actions.saving')
-                                    : t('common.actions.creating')
-                                : withAbilityErrors(
-                                      isEdit
-                                          ? t('skills.form.submitEdit')
-                                          : t('skills.form.submitCreate'),
-                                      abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
             />
         </HudFormPage>
     );

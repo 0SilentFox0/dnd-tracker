@@ -28,7 +28,7 @@ export function ArtifactSetMembersPicker({
             <p className="text-xs text-muted-foreground">
                 {t('sets.members.hint')}
             </p>
-            <div className="max-h-72 divide-y overflow-y-auto rounded-md border">
+            <div className="ds-list-grid max-h-72 overflow-y-auto">
                 {artifacts.length === 0 ? (
                     <p className="p-4 text-sm text-muted-foreground">
                         {t('sets.members.empty')}
@@ -37,7 +37,7 @@ export function ArtifactSetMembersPicker({
                     artifacts.map((a) => (
                         <label
                             key={a.id}
-                            className="flex cursor-pointer items-center gap-3 p-3 hover:bg-muted/50"
+                            className="flex cursor-pointer items-center gap-3 rounded-md border p-3 hover:bg-muted/50"
                         >
                             <Checkbox
                                 checked={selectedIds.has(a.id)}
