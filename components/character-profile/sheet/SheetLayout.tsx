@@ -1,6 +1,12 @@
 'use client';
 
-import { type ReactNode, type Ref, useEffect, useRef } from 'react';
+import {
+    type CSSProperties,
+    type ReactNode,
+    type Ref,
+    useEffect,
+    useRef,
+} from 'react';
 
 import {
     type ProfileTab,
@@ -70,7 +76,15 @@ export function SheetLayout({
 
     return (
         <SheetRollProvider>
-            <div ref={root} className="sheet-root mx-auto flex w-full flex-col">
+            <div
+                ref={root}
+                className="sheet-root mx-auto flex w-full flex-col [--sheet-actions-h:48px]"
+                style={
+                    identity.actions
+                        ? undefined
+                        : ({ '--sheet-actions-h': '0px' } as CSSProperties)
+                }
+            >
                 <SheetTopBar actions={identity.actions} />
                 <SheetIdentityPanel
                     ref={heroRef}

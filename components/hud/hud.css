@@ -214,17 +214,18 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 }
 .hud-form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .hud-form-page:not(.hud-form-wide) > .hud-form-actions { margin-top: 16px; padding-inline: 16px; padding-bottom: 16px; }
-.hud-form-wide > .hud-form-actions { border-top: 1px solid var(--hud-rule); background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+.hud-form-wide > .hud-form-actions { border-top: 1px solid var(--hud-rule); background: color-mix(in srgb, var(--palette-page, #0d0a08) 95%, transparent); backdrop-filter: blur(6px); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 1024px) {
   .hud-form-wide { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: none; grid-template-areas: "head actions" "rail side" "notice side" "main side"; }
   .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head actions" "rail rail" "notice notice" "main main"; }
   .hud-form-wide > .hud-form-side { display: block; position: sticky; top: calc(var(--shell-header-h) + 64px); align-self: start; }
-  .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h); bottom: auto; border-top: 0; background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 8px 0; justify-content: flex-end; }
+  .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h); bottom: auto; border-top: 0; background: color-mix(in srgb, var(--palette-page, #0d0a08) 95%, transparent); backdrop-filter: blur(6px); padding: 8px 0; justify-content: flex-end; }
   .hud-form-wide:has(> .hud-form-actions) { grid-template-rows: none; }
 }
 @media (min-width: 1024px) and (max-width: 1279px) {
   .hud-form-wide:has([data-rail-from="lg"]) { grid-template-columns: 200px minmax(0, 1fr) 320px; grid-template-areas: "head head actions" "rail notice side" "rail main side"; }
   .hud-form-wide:has([data-rail-from="lg"]):not(:has(> .hud-form-side)) { grid-template-areas: "head head actions" "rail notice notice" "rail main main"; }
+  .hud-form-wide:has([data-rail-from="lg"]) > .hud-form-actions { grid-column: 3; }
 }
 @media (min-width: 1280px) {
   .hud-form-wide { grid-template-columns: 208px minmax(0, 1fr) 360px; grid-template-areas: "head head actions" "rail notice side" "rail main side"; }

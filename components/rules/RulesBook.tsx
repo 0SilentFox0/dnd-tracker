@@ -187,19 +187,6 @@ export function RulesBook({
                                     onChange={search.query.set}
                                 />
                                 <span>{chip}</span>
-                                {!readOnly && (
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="max-lg:hidden"
-                                        onClick={() =>
-                                            setSection(section ?? 'system')
-                                        }
-                                    >
-                                        {tc('actions.edit')}
-                                    </Button>
-                                )}
                             </>
                         ),
                     }}

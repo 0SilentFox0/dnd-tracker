@@ -157,7 +157,7 @@ export function HudTabs<T extends string>({
                     className={cn(
                         'sticky z-20',
                         sheet
-                            ? 'top-[calc(var(--shell-header-h)/var(--sheet-zoom,1))] px-4 py-2'
+                            ? 'top-[calc(var(--shell-header-h)/var(--sheet-zoom,1)+var(--sheet-actions-h,0px))] px-4 py-2'
                             : 'top-[env(safe-area-inset-top,0px)] border-b border-hud-rule bg-hud-page/[.97]'
                     )}
                 >
@@ -210,7 +210,9 @@ export function HudTabs<T extends string>({
                         data-dir={sheet ? dir : undefined}
                         forceMount={keepMounted ? true : undefined}
                         className={cn(
-                            rail ? 'mt-0 py-1' : 'mt-0 px-4 py-3',
+                            rail
+                                ? 'mt-0 py-1'
+                                : 'mt-0 px-4 py-3 [.hud-form-wide_&]:max-sm:px-0',
                             sheet && 'motion-panel',
                             keepMounted && 'data-[state=inactive]:hidden',
                             styles.content

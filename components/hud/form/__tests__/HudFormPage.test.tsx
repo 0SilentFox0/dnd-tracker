@@ -143,4 +143,13 @@ describe('HudFormPage', () => {
             /\.hud-form-wide > \.hud-form-actions \{ grid-row: 1 \/ -1; grid-column: 2;[^}]*backdrop-filter: blur\(6px\)/
         );
     });
+
+    it('css moves the lg-only rail page actions to column 3 and uses the palette page token', () => {
+        const css = readFileSync('components/hud/hud.css', 'utf8');
+
+        expect(css).toMatch(
+            /@media \(min-width: 1024px\) and \(max-width: 1279px\) \{[^@]*:has\(\[data-rail-from="lg"\]\) > \.hud-form-actions \{ grid-column: 3; \}/
+        );
+        expect(css).not.toContain('var(--hud-page');
+    });
 });
