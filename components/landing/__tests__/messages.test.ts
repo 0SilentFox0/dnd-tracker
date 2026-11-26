@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    COMBAT_FRAMES,
     FX_SPRITES,
     PREP_PANELS,
     SHOWCASE_MEDIA,
@@ -69,6 +70,11 @@ describe('landing messages', () => {
                 ...Object.keys(m.players.panels),
             ] as (keyof typeof SHOWCASE_MEDIA)[])
                 expect(SHOWCASE_MEDIA[id]?.image, id).toBeTruthy();
+
+            for (const [i, id] of COMBAT_FRAMES.entries()) {
+                expect(SHOWCASE_MEDIA[id].image, id).toBeTruthy();
+                expect(m.combat.frames[String(i + 1) as '1'].caption).toBeTruthy();
+            }
 
             expect(Object.keys(m.prep.panels)).toEqual([...PREP_PANELS]);
             expect(Object.keys(m.combat.fx.names)).toHaveLength(

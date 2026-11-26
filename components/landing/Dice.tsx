@@ -1,6 +1,47 @@
-import { D20 } from '@/components/landing/SessionDemo';
-
 const INK = '#e6dccb';
+
+export function D20({
+    value,
+    className,
+}: {
+    value: string;
+    className?: string;
+}) {
+    return (
+        <svg viewBox="0 0 100 100" aria-hidden className={className}>
+            <polygon
+                points="50,3 93,27 93,73 50,97 7,73 7,27"
+                fill="#7a1b12"
+                stroke="#ffcf7a"
+                strokeWidth="3"
+            />
+            <polygon
+                points="50,22 78,68 22,68"
+                fill="#a3281b"
+                stroke="#ffcf7a"
+                strokeWidth="2"
+            />
+            <path
+                d="M50 3 50 22 M93 27 78 68 M7 27 22 68 M50 97 22 68 M50 97 78 68 M93 73 78 68 M7 73 22 68 M7 27 50 22 93 27"
+                stroke="#ffcf7a"
+                strokeWidth="1.5"
+                strokeOpacity=".6"
+                fill="none"
+            />
+            <text
+                x="50"
+                y="58"
+                textAnchor="middle"
+                fontSize="22"
+                fontWeight="700"
+                fill="#fff4dc"
+                fontFamily="Georgia, serif"
+            >
+                {value}
+            </text>
+        </svg>
+    );
+}
 
 function D10({ value, x, fill }: { value: string; x: number; fill: string }) {
     return (

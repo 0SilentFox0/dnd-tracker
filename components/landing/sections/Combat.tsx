@@ -1,33 +1,10 @@
-import type { CSSProperties } from 'react';
-
+import { D20 } from '@/components/landing/Dice';
 import { FX_SPRITES } from '@/components/landing/media';
 import { keysOf, listOf } from '@/components/landing/messages';
 import { SectionTitle } from '@/components/landing/parts';
-import { D20, SessionDemo } from '@/components/landing/SessionDemo';
+import { CombatFrames } from '@/components/landing/sections/CombatFrames';
 import type { Translator } from '@/lib/i18n/translator';
 import { cn } from '@/lib/utils';
-
-// decorative initiative chips floating at different depths around the demo
-const DEPTH_CHIPS = [
-    {
-        value: '18',
-        side: 'right-[-3.5rem] top-[8%]',
-        depth: 1.4,
-        tone: 'border-[#ff9a4d]/70',
-    },
-    {
-        value: '14',
-        side: 'right-[-5.5rem] top-[30%]',
-        depth: 0.8,
-        tone: 'border-hud-line',
-    },
-    {
-        value: '9',
-        side: 'right-[-3rem] top-[52%]',
-        depth: 1.1,
-        tone: 'border-hud-line',
-    },
-];
 
 export function Combat({ t }: { t: Translator }) {
     return (
@@ -41,38 +18,7 @@ export function Combat({ t }: { t: Translator }) {
                 text={t('combat.text')}
             />
             <div className="ld-container mt-14">
-                <div className="ld-stage relative">
-                    <div className="ld-stage-tilt">
-                        <SessionDemo t={t} />
-                    </div>
-                    <div
-                        aria-hidden
-                        className="ld-depth-layer pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-5xl -translate-x-1/2 xl:block"
-                    >
-                        <span
-                            className="ld-depth absolute top-[14%] -left-20 size-16"
-                            style={{ '--d': 1.6 } as CSSProperties}
-                        >
-                            <D20
-                                value="20"
-                                className="size-full drop-shadow-[0_18px_20px_rgba(0,0,0,.8)]"
-                            />
-                        </span>
-                        {DEPTH_CHIPS.map((chip) => (
-                            <span
-                                key={chip.value}
-                                className={cn(
-                                    'ld-depth hud-sc absolute grid size-12 place-items-center rounded-full border-2 bg-hud-page text-lg text-hud-ink shadow-[0_16px_24px_-8px_rgba(0,0,0,.9)]',
-                                    chip.side,
-                                    chip.tone
-                                )}
-                                style={{ '--d': chip.depth } as CSSProperties}
-                            >
-                                {chip.value}
-                            </span>
-                        ))}
-                    </div>
-                </div>
+                <CombatFrames t={t} />
 
                 <ol className="mt-20 grid gap-x-10 gap-y-6 min-[2560px]:grid-cols-4 sm:grid-cols-2 lg:grid-cols-3">
                     {keysOf(t, 'combat.points').map((key, i) => (

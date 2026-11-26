@@ -144,36 +144,21 @@
         "text": "Enemy strength scales to your party automatically, or follow an XP budget for 5e-style encounters."
       }
     },
-    "demoSteps": {
-      "1": "A player picks a spell",
-      "2": "The dice roll themselves",
-      "3": "Damage is calculated",
-      "4": "Everyone sees it at once"
-    },
-    "demo": {
-      "windowTitle": "DM screen · Tomb of the Nameless · round 2",
-      "tokens": {
-        "wizard": "Eldrin",
-        "dwarf": "Torvald",
-        "bard": "Lyra",
-        "goblin": "Goblin",
-        "orc": "Orc",
-        "owlbear": "Owlbear"
+    "frames": {
+      "label": "Three moments of one battle",
+      "windowTitle": "DM screen · battle",
+      "1": {
+        "caption": "Initiative is rolled and ordered automatically",
+        "alt": "The battle screen at the start: tokens placed on the map and the initiative order across the top"
       },
-      "check": "Goblin: Dexterity 7 + 2 < DC 15 · failed",
-      "logCaster": "Eldrin",
-      "logText": "Fireball → Goblin down, Orc −12",
-      "music": "♫ Battle in the tomb",
-      "phone": {
-        "role": "Wizard · level 5",
-        "slots": "Level 3 slots: ●●○",
-        "spells": {
-          "1": "Fireball",
-          "2": "Shield",
-          "3": "Magic Missile"
-        }
+      "2": {
+        "caption": "Pick an attack or spell, the dice and the rules do the rest",
+        "alt": "The battle screen mid-turn: an attack with its roll and visible effect on the map"
       },
-      "stepsLabel": "How a turn plays out: "
+      "3": {
+        "caption": "Damage and effects are applied, logged and synced to players",
+        "alt": "The battle screen after the attack: damage, conditions and a new entry in the combat log"
+      }
     },
     "fx": {
       "title": "Magic you can see",

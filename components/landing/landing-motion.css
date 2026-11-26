@@ -80,9 +80,6 @@
     .ld-note { animation: ld-tidy linear both; animation-timeline: view(); animation-range: entry 0% cover 48%; }
     .ld-hub { animation: ld-hub linear both; animation-timeline: view(); animation-range: entry 10% cover 45%; }
 
-    .ld-stage { perspective: 2200px; }
-    .ld-stage-tilt { transform-origin: 50% 85%; animation: ld-stage linear both; animation-timeline: view(); animation-range: entry 0% cover 40%; }
-    .ld-depth { animation: ld-depth linear both; animation-timeline: view(); animation-range: cover; }
 
     .ld-rise { animation: ld-rise linear both; animation-timeline: view(); animation-range: entry calc(var(--c, 0) * 12%) cover calc(28% + var(--c, 0) * 5%); }
     .ld-inner-par { animation: ld-inner linear both; animation-timeline: view(); animation-range: cover; }
@@ -143,8 +140,6 @@
 @keyframes ld-up { from { transform: translateY(28px); opacity: 0; } }
 @keyframes ld-tidy { from { transform: translate(var(--sx), var(--sy)) rotate(var(--sr)); } }
 @keyframes ld-hub { from { transform: translateY(48px) scale(0.92); opacity: 0; } }
-@keyframes ld-stage { from { transform: rotateX(22deg) translateY(4rem) scale(0.9); } to { transform: rotateX(0) translateY(0) scale(1); } }
-@keyframes ld-depth { from { translate: 0 calc(var(--d, 1) * 80px); } to { translate: 0 calc(var(--d, 1) * -80px); } }
 @keyframes ld-rise {
   from { transform: perspective(1200px) translateY(64px) rotateX(14deg) scale(0.95); opacity: 0; }
   to { transform: perspective(1200px) translateY(0) rotateX(0) scale(1); opacity: 1; }
@@ -164,3 +159,37 @@
   from { transform: perspective(1800px) rotateY(18deg) translateX(4rem); opacity: 0; }
   to { transform: perspective(1800px) rotateY(0) translateX(0); opacity: 1; }
 }
+
+/* Combat frames: static list by default; callouts sit under each frame on small screens */
+.ld-frames-list { display: grid; gap: 2.5rem; list-style: none; margin: 0; padding: 0; }
+.ld-frame { position: relative; }
+.ld-callout {
+  display: flex; align-items: center; gap: 0.6rem; margin-top: 0.75rem; min-height: 2.5rem;
+  color: var(--color-hud-ink, #f3ead8); font-size: 0.95rem;
+}
+.ld-callout-n {
+  display: grid; place-items: center; flex: none; width: 1.75rem; height: 1.75rem; border-radius: 50%;
+  border: 1px solid var(--ld-gold); color: var(--ld-gold-bright);
+}
+@media (min-width: 1024px) {
+  .ld-callout {
+    position: absolute; top: var(--cy); left: var(--cx); max-width: 22rem; margin: 0; padding: 0.5rem 0.9rem;
+    border-radius: 0.6rem; border: 1px solid var(--ld-gold); background: rgba(10, 8, 6, 0.9);
+    box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.9); transform: translateZ(40px);
+  }
+  .ld-callout[data-from="right"] { left: auto; right: var(--cx); }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+  @supports (animation-timeline: view()) {
+    .ld-frames { height: 320vh; view-timeline: --ld-frames block; }
+    .ld-frames-sticky { position: sticky; top: 5.5rem; perspective: 2200px; }
+    .ld-frames-list { display: grid; gap: 0; transform-origin: 50% 85%; transform-style: preserve-3d; animation: ld-frames-tilt linear both; animation-timeline: --ld-frames; animation-range: cover 0% cover 24%; }
+    .ld-frame { grid-area: 1 / 1; transform-style: preserve-3d; animation: ld-frame-b linear both; animation-timeline: --ld-frames; animation-range: cover 0% cover 100%; }
+    .ld-frame:first-child { animation-name: ld-frame-a; }
+    .ld-frame:last-child { animation-name: ld-frame-c; }
+  }
+}
+@keyframes ld-frames-tilt { from { transform: rotateX(22deg) translateY(3rem) scale(0.9); } to { transform: none; } }
+@keyframes ld-frame-a { 0%, 38% { opacity: 1; } 46%, 100% { opacity: 0; visibility: hidden; } }
+@keyframes ld-frame-b { 0%, 38% { opacity: 0; visibility: hidden; } 46%, 54% { opacity: 1; visibility: visible; } 62%, 100% { opacity: 0; visibility: hidden; } }
+@keyframes ld-frame-c { 0%, 54% { opacity: 0; visibility: hidden; } 62%, 100% { opacity: 1; visibility: visible; } }

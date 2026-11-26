@@ -26,6 +26,24 @@ export interface ShowcaseMedia {
     ratio?: '16/10' | '9/16';
 }
 
+// Combat frames: drop screen-combat-{1,2,3}.webp into public/landing and set `real` to true.
+const COMBAT_FALLBACK = '/landing/screen-battle.webp';
+
+const COMBAT_REAL = false;
+
+const combatFrame = (n: 1 | 2 | 3): ShowcaseMedia => ({
+    image: COMBAT_REAL ? `/landing/screen-combat-${n}.webp` : COMBAT_FALLBACK,
+    ratio: '16/10',
+});
+
+export const COMBAT_MEDIA = {
+    combat1: combatFrame(1),
+    combat2: combatFrame(2),
+    combat3: combatFrame(3),
+} satisfies Record<string, ShowcaseMedia>;
+
+export const COMBAT_FRAMES = ['combat1', 'combat2', 'combat3'] as const;
+
 export const SHOWCASE_MEDIA = {
     combat: { image: '/landing/screen-battle.webp', ratio: '16/10' },
     scenario: { image: '/landing/screen-scenario.webp', ratio: '16/10' },
@@ -34,6 +52,7 @@ export const SHOWCASE_MEDIA = {
     phone: { image: '/landing/screen-player-mobile.webp', ratio: '9/16' },
     hero: { image: '/landing/screen-hero.webp', ratio: '16/10' },
     mechanics: { image: '/landing/screen-constructor.webp', ratio: '16/10' },
+    ...COMBAT_MEDIA,
 } satisfies Record<string, ShowcaseMedia>;
 
 export type ShowcaseId = keyof typeof SHOWCASE_MEDIA;
