@@ -611,9 +611,23 @@ model BattleMap {
   campaign   Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   chunks     BattleMapChunk[]
   versions   BattleMapVersion[]
+  art        BattleMapArt?
 
   @@index([campaignId])
   @@map("battle_maps")
+}
+
+model BattleMapArt {
+  mapId             String    @id
+  scene             Json
+  sceneVersion      Int       @default(1) @map("scene_version")
+  bakedUrl          String?   @map("baked_url")
+  bakedAt           DateTime? @map("baked_at")
+  bakedSceneVersion Int?      @map("baked_scene_version")
+  updatedAt         DateTime  @default(now()) @map("updated_at")
+  map               BattleMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@map("battle_map_art")
 }
 
 model BattleMapChunk {

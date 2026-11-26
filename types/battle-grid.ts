@@ -98,6 +98,7 @@ export interface BattleMapConfig {
     spellZones?: Record<string, SpellZoneRuntime>;
     backgroundCols?: number;
     backgroundRows?: number;
+    artBaked?: boolean;
     gridOffset?: { x: number; y: number };
     maze?: MazeConfig | null;
     walls?: string[];

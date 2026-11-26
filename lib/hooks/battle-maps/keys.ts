@@ -3,6 +3,8 @@ export const battleMapKeys = {
     list: (campaignId: string) => ['battle-maps', campaignId, 'list'] as const,
     detail: (campaignId: string, mapId: string) =>
         ['battle-maps', campaignId, 'detail', mapId] as const,
+    art: (campaignId: string, mapId: string) =>
+        ['battle-maps', campaignId, 'art', mapId] as const,
     edges: (campaignId: string, ref?: { mapId: string; version: number }) =>
         ref
             ? ([

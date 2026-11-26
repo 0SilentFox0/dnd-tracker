@@ -421,6 +421,33 @@ describe('useBattleMapEditor', () => {
         });
     });
 
+    it('switching the grid either way clears walls, bars and doors', () => {
+        const { result } = renderHook(() =>
+            useBattleMapEditor({
+                ...DEFAULT_BATTLE_MAP,
+                walls: ['1:1:e'],
+                bars: ['2:2:s'],
+                doors: { '3:3:e': { open: false } },
+            })
+        );
+
+        const empty = () => {
+            const { walls, bars, doors } = result.current.state.map;
+
+            expect([walls, bars, doors]).toEqual([undefined, undefined, undefined]);
+        };
+
+        act(() => result.current.actions.setGridType('hex'));
+        empty();
+
+        act(() => result.current.actions.setTool('edge-wall'));
+        act(() => result.current.edgeEditing?.onCommit(['1:1:ne'], []));
+        expect(result.current.state.map.walls).toEqual(['1:1:ne']);
+
+        act(() => result.current.actions.setGridType('square'));
+        empty();
+    });
+
     it('ввімкнення лабіринту прибирає core-стіни й ґрати', () => {
         const { result } = renderHook(() =>
             useBattleMapEditor({

@@ -1,4 +1,8 @@
 {
+  "2026-11-26-map-art": {
+    "title": "Battle map art: floors, walls, lights and baking",
+    "body": "The map editor has a new Art tab: paint floors, walls, doors, rubble and lights, and the editor bakes it all into the map background. Walls and doors stay real battle mechanics."
+  },
   "2026-11-25-design-system": {
     "title": "A new look for the platform",
     "body": "One look across the whole platform: a new interface style, two themes (Tavern and Parchment), an updated profile with settings, the character sheet and the campaign dashboard."
@@ -399,6 +403,10 @@
   },
   "2026-11-26-hex-grid": {
     "title": "Square or hex grid",
-    "body": "When you create a battle map, pick its geometry: squares or hexes. On a hex map movement, range, spell templates, visibility and fog work over six neighbours, and every token takes one cell. The geometry cannot be changed after creation; maze, walls, doors and tiles are available on square grids only."
+    "body": "When you create a battle map, pick its geometry: squares or hexes. On a hex map movement, range, spell templates, visibility and fog work over six neighbours, and every token takes one cell. The geometry cannot be changed after creation; maze and tiles are available on square grids only."
+  },
+  "2026-11-26-hex-edges": {
+    "title": "Walls, bars and doors on hex maps",
+    "body": "Hex battle maps now support walls, bars and doors: draw them along cell edges in the map editor and in battle setup, and they block movement, sight and fog just like on square grids. Maze and textures remain square-only."
   }
 }

@@ -42,6 +42,9 @@ function decodeTileLayers(
     ) as TileLayerChunks;
 }
 
+const hasTileChunks = (chunks: TileLayerChunks) =>
+    Object.values(chunks).some((layer) => Object.keys(layer ?? {}).length > 0);
+
 export function useBattleSceneMap(
     campaignId: string,
     rawBattle: BattleScene | undefined
@@ -76,7 +79,8 @@ export function useBattleSceneMap(
     );
 
     const decodedTileFields = useMemo(() => {
-        if (!rawBattle?.map || !mapTiles.data) return null;
+        if (!rawBattle?.map || !mapTiles.data || !hasTileChunks(tileChunks))
+            return null;
 
         return deriveTileCells(
             {
@@ -128,7 +132,8 @@ export function useBattleSceneMap(
         loading: isMapPending && !mapEdges.isError,
         error: mapError,
         retry,
-        tiles: mapTiles.data
+        tiles:
+            mapTiles.data && hasTileChunks(tileChunks)
             ? { chunks: tileChunks, version: mapTiles.data.version }
             : null,
     };

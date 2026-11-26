@@ -116,4 +116,67 @@ describe('edge-chunks', () => {
             decodeEdges({ '0:0': btoa(String.fromCharCode(...reserved)) }, 4, 4)
         ).toThrow(EdgeChunkError);
     });
+
+    it('legacy square chunk reads and writes byte-identically', () => {
+        const legacy = new Uint8Array(128);
+
+        legacy[0] = 1;
+        legacy[1] = 0b1000;
+
+        const b64 = btoa(String.fromCharCode(...legacy));
+
+        const out = decodeEdges({ '0:0': b64 }, 4, 4);
+
+        expect(out).toEqual({ walls: ['0:0:e'], bars: ['2:0:s'] });
+        expect(encodeEdges(out, 4, 4)['0:0']).toBe(b64);
+        expect(atob(b64)).toHaveLength(128);
+    });
+
+    it('hex roundtrip, 193 bytes with version header', () => {
+        const walls = ['0:0:n', '5:3:ne', '15:15:se', '16:0:se'];
+
+        const bars = ['2:2:n'];
+
+        const chunks = encodeEdges({ walls, bars }, 20, 20, 'hex');
+
+        const raw = atob(chunks['0:0']);
+
+        expect(raw).toHaveLength(193);
+        expect(raw.charCodeAt(0)).toBe(2);
+
+        const out = decodeEdges(chunks, 20, 20, 'hex');
+
+        expect(sorted(out.walls)).toEqual(sorted(walls));
+        expect(out.bars).toEqual(bars);
+    });
+
+    it('hex: wall wins over bar on the same edge', () => {
+        const out = decodeEdges(
+            encodeEdges({ walls: ['1:1:ne'], bars: ['1:1:ne'] }, 4, 4, 'hex'),
+            4,
+            4,
+            'hex'
+        );
+
+        expect(out).toEqual({ walls: ['1:1:ne'], bars: [] });
+    });
+
+    it('format mismatch with grid throws', () => {
+        const square = encodeEdges({ walls: ['0:0:e'] }, 4, 4)['0:0'];
+
+        const hex = encodeEdges({ walls: ['0:0:n'] }, 4, 4, 'hex')['0:0'];
+
+        expect(() => decodeEdges({ '0:0': square }, 4, 4, 'hex')).toThrow(
+            'chunk 0:0: format does not match grid'
+        );
+        expect(() => decodeEdges({ '0:0': hex }, 4, 4, 'square')).toThrow(
+            EdgeChunkError
+        );
+        expect(() => encodeEdges({ walls: ['0:0:n'] }, 4, 4)).toThrow(
+            'invalid edge key'
+        );
+        expect(() => encodeEdges({ walls: ['0:0:e'] }, 4, 4, 'hex')).toThrow(
+            'invalid edge key'
+        );
+    });
 });

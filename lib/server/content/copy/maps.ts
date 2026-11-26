@@ -90,7 +90,7 @@ export async function copyMaps(args: {
 
     const sources = await prisma.battleMap.findMany({
         where: { campaignId: sourceCampaignId, id: { in: args.ids } },
-        include: { chunks: true },
+        include: { chunks: true, art: true },
         orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
 
@@ -170,6 +170,14 @@ export async function copyMaps(args: {
                 )
                     return null;
 
+                const sourceBackground = backgroundOf(map.header);
+
+                const bakedUrl =
+                    map.art?.bakedUrl &&
+                    map.art.bakedUrl === sourceBackground
+                        ? background.url
+                        : null;
+
                 return tx.battleMap.create({
                     data: {
                         campaignId: targetCampaignId,
@@ -180,6 +188,17 @@ export async function copyMaps(args: {
                             ? withBackground(map.header, background.url)
                             : map.header) as Prisma.InputJsonObject,
                         mapVersion: 1,
+                        ...(map.art && {
+                            art: {
+                                create: {
+                                    scene: map.art.scene as Prisma.InputJsonValue,
+                                    sceneVersion: 1,
+                                    bakedUrl,
+                                    bakedAt: bakedUrl ? new Date() : null,
+                                    bakedSceneVersion: bakedUrl ? 1 : null,
+                                },
+                            },
+                        }),
                         chunks: {
                             create: map.chunks.map((c) => ({
                                 cx: c.cx,

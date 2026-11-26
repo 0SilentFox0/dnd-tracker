@@ -1,3 +1,4 @@
+import { edgeBlocks } from './edges';
 import { gridOf } from './geometry';
 import { hexAwayStep } from './hex';
 import { canStand } from './occupancy';
@@ -34,6 +35,8 @@ export function pushAway(
         const next = awayStep(from, position, grid);
 
         if (next.x === position.x && next.y === position.y) break;
+
+        if (edgeBlocks(map, position, next, 'move')) break;
 
         if (!canStand(map, participants, target, next)) break;
 

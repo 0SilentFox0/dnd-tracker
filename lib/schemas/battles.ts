@@ -17,7 +17,8 @@ import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { hexColorSchema } from '@/lib/schemas/common';
 import { STRIKE_RIDER_EFFECTS } from '@/lib/utils/abilities/schema';
 import { FOG_MAX_VISION_RADIUS } from '@/lib/utils/battle/fog/constants';
-import { inBounds } from '@/lib/utils/battle/grid/geometry';
+import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
+import { gridOf, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { REJECT } from '@/lib/utils/battle/store/reject';
@@ -40,7 +41,9 @@ export const mapCellSchema = z.object({
     y: z.number().int().min(0).max(59),
 });
 
-export const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
+export const edgeKeySchema = z.string().regex(/^\d+:\d+:(e|s|n|ne|se)$/);
+
+const squareEdgeKeySchema = edgeKeySchema.refine((k) => edgeOnGrid('square', k));
 
 export const doorStateSchema = z.object({
     open: z.boolean(),
@@ -94,7 +97,7 @@ const illusionGroupSchema = z.object({
 const illusionGroupsSchema = z.array(illusionGroupSchema).max(8);
 
 export const mazeSchema = z.object({
-    walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges),
+    walls: z.array(squareEdgeKeySchema).max(MAP_LIMITS.inlineMaxEdges),
     exit: mapCellSchema.nullable(),
     difficulty: mazeDifficultySchema,
     teleports: z.array(z.tuple([mapCellSchema, mapCellSchema])).max(20),
@@ -127,7 +130,7 @@ const mazeFeatureCounts = {
     fogPatches: z.number().int().min(0).max(MAZE_LIMITS.fogPatches),
 };
 
-const edgeBatch = z.array(edgeKeySchema).max(MAZE_LIMITS.wallEdgesPerOp);
+const edgeBatch = z.array(squareEdgeKeySchema).max(MAZE_LIMITS.wallEdgesPerOp);
 
 export const mazeActionSchema = z.discriminatedUnion('op', [
     z.object({
@@ -285,8 +288,9 @@ export const battleMapObject = z.object({
             'validation.tooManySpellZones'
         )
         .optional(),
-    backgroundCols: z.number().positive().max(200).optional(),
-    backgroundRows: z.number().positive().max(200).optional(),
+    backgroundCols: z.number().positive().max(201).optional(),
+    backgroundRows: z.number().positive().max(201).optional(),
+    artBaked: z.literal(true).optional(),
     gridOffset: z
         .object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) })
         .optional(),
@@ -306,13 +310,9 @@ export const battleMapObject = z.object({
 
 export const battleMapSchema = battleMapObject
     .superRefine((m, ctx) => {
-        if (
-            m.gridType === 'hex' &&
-            (m.maze ||
-                m.walls?.length ||
-                m.bars?.length ||
-                Object.keys(m.doors ?? {}).length)
-        )
+        const grid = gridOf(m);
+
+        if (grid === 'hex' && m.maze)
             ctx.addIssue({
                 code: 'custom',
                 message: 'battleSetup.validation.hexSquareOnly',
@@ -331,6 +331,7 @@ export const battleMapSchema = battleMapObject
                     seen.has(edge) ||
                     !inBounds(m, a) ||
                     !inBounds(m, b) ||
+                    !edgeOnGrid(grid, edge) ||
                     (key === 'bars' && walls.has(edge));
 
                 if (bad) {
@@ -354,7 +355,12 @@ export const battleMapSchema = battleMapObject
         for (const edge of Object.keys(m.doors ?? {})) {
             const { a, b } = parseEdgeKey(edge);
 
-            if (solid.has(edge) || !inBounds(m, a) || !inBounds(m, b)) {
+            if (
+                solid.has(edge) ||
+                !inBounds(m, a) ||
+                !inBounds(m, b) ||
+                !edgeOnGrid(grid, edge)
+            ) {
                 ctx.addIssue({
                     code: 'custom',
                     message: 'battleSetup.validation.doorOnWall',

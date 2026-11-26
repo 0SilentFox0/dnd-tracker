@@ -23,6 +23,18 @@ const query = vi.hoisted(() => ({
 
 const tileSaveMutation = vi.hoisted(() => vi.fn());
 
+const artSave = vi.hoisted(() => vi.fn());
+
+const artRecord = vi.hoisted(() => ({
+    value: {
+        scene: null,
+        sceneVersion: 0,
+        bakedSceneVersion: null,
+        bakedUrl: null,
+        bakedAt: null,
+    } as Record<string, unknown>,
+}));
+
 const battleMapCapture = vi.hoisted(() => ({
     current: null as {
         map: {
@@ -67,6 +79,19 @@ vi.mock('@/lib/hooks/battle-maps/useBattleMaps', async (orig) => ({
         update: { mutate: vi.fn(), isPending: false },
     }),
 }));
+vi.mock('@/lib/hooks/battle-maps/useMapArt', () => ({
+    useMapArt: () => ({ isPending: false, isError: false, data: artRecord.value }),
+    useDeleteMapArt: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+vi.mock('@/lib/hooks/battle-maps/useMapArtSave', () => ({
+    useMapArtSave: () => ({
+        save: artSave,
+        phase: 'idle',
+        needsBake: false,
+        lastBake: null,
+        isSaving: false,
+    }),
+}));
 vi.mock('@/components/battle/map', () => ({
     BattleMap: (props: {
         map: {
@@ -97,6 +122,7 @@ vi.mock('next/link', () => ({
 afterEach(() => {
     cleanup();
     tileSaveMutation.mockReset();
+    artSave.mockReset();
 });
 
 function renderTileEditor() {
@@ -112,6 +138,43 @@ function renderTileEditor() {
             version: 1,
             updatedAt: '',
             map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
+            walls: [],
+            bars: [],
+        },
+    };
+
+    render(
+        <QueryClientProvider client={new QueryClient()}>
+            <ConfirmContext.Provider value={vi.fn() as never}>
+                <MapEditorScreen campaignId="c1" mapId="m1" />
+            </ConfirmContext.Provider>
+        </QueryClientProvider>
+    );
+
+    fireEvent.mouseDown(
+        screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
+    );
+}
+
+function renderArtEditor(map: Record<string, unknown> = {}) {
+    touch.value = false;
+    query.value = {
+        isPending: false,
+        isError: false,
+        data: {
+            id: 'm1',
+            name: 'Cave',
+            cols: 10,
+            rows: 8,
+            version: 1,
+            updatedAt: '',
+            map: {
+                cols: 10,
+                rows: 8,
+                background: null,
+                opacity: 0.35,
+                ...map,
+            },
             walls: [],
             bars: [],
         },
@@ -188,14 +251,17 @@ describe('MapEditorScreen', () => {
         expect(screen.getByText('maps.editor.edges')).toBeTruthy();
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
         );
-        expect(
-            screen.getByRole('group', { name: 'maps.editor.tiles.layers' })
-        ).toBeTruthy();
         expect(
             screen.getByRole('group', { name: 'maps.editor.tiles.tools' })
         ).toBeTruthy();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.tiles' })
+        ).toBeNull();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.effects' })
+        ).toBeNull();
     });
 
     it('disables edge editing and hides the photo while the tile panel is active', () => {
@@ -241,7 +307,7 @@ describe('MapEditorScreen', () => {
         expect(battleMapCapture.current?.editing.edges).toBeTruthy();
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
         );
 
         expect(battleMapCapture.current?.editing.edges).toBeFalsy();
@@ -275,10 +341,10 @@ describe('MapEditorScreen', () => {
         );
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
         );
 
-        const selectedTileName = "Кам'яна підлога";
+        const selectedTileName = 'Бочка';
 
         const selectedTileCard = screen.getByRole('button', {
             name: selectedTileName,
@@ -317,8 +383,11 @@ describe('MapEditorScreen', () => {
             </QueryClientProvider>
         );
 
+        fireEvent.mouseDown(
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
+        );
         expect(
-            screen.getByRole('group', { name: 'maps.editor.tiles.layers' })
+            screen.getByRole('group', { name: 'maps.editor.tiles.tools' })
         ).toBeTruthy();
         expect(battleMapCapture.current?.map.background).toBeNull();
 
@@ -361,10 +430,82 @@ describe('MapEditorScreen', () => {
         );
 
         expect(
-            screen.queryByRole('group', { name: 'maps.editor.tiles.layers' })
+            screen.queryByRole('group', { name: 'maps.editor.tiles.tools' })
         ).toBeNull();
         expect(screen.queryByText('maps.editor.tiles.save')).toBeNull();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.objects' })
+        ).toBeNull();
         expect(screen.getByText('maps.editor.hexHint')).toBeTruthy();
+        expect(
+            screen.getByRole('tab', { name: 'maps.editor.panels.art' })
+        ).toBeTruthy();
+    });
+
+    it('offers starting art on a map without a background and swaps the tabs once started', () => {
+        renderArtEditor();
+
+        expect(
+            screen
+                .getByRole('tab', { name: 'maps.editor.panels.art' })
+                .getAttribute('data-state')
+        ).toBe('active');
+
+        fireEvent.click(
+            screen.getByRole('button', { name: 'maps.editor.art.start' })
+        );
+
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.background' })
+        ).toBeNull();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.edges' })
+        ).toBeNull();
+        expect(
+            screen.getByRole('tab', { name: 'maps.editor.panels.cells' })
+        ).toBeTruthy();
+        expect(
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
+        ).toBeTruthy();
+    });
+
+    it('starts on the background panel for a photo map without art', () => {
+        renderArtEditor({
+            background:
+                'https://demo.supabase.co/storage/v1/object/public/battle-maps/cave.png',
+        });
+
+        expect(
+            screen
+                .getByRole('tab', { name: 'maps.editor.panels.background' })
+                .getAttribute('data-state')
+        ).toBe('active');
+    });
+
+    it('enables edge editing for the wall art tool and saves through the art hook', () => {
+        renderArtEditor();
+
+        fireEvent.click(
+            screen.getByRole('button', { name: 'maps.editor.art.start' })
+        );
+        fireEvent.click(
+            screen.getByRole('button', { name: 'maps.editor.art.tool.wall' })
+        );
+
+        expect(battleMapCapture.current?.editing.edges).toBeTruthy();
+
+        fireEvent.click(
+            screen.getByRole('button', { name: 'maps.editor.art.tool.floor' })
+        );
+        act(() => battleMapCapture.current?.actions.onStroke([{ x: 1, y: 1 }]));
+
+        const save = screen.getByRole('button', {
+            name: 'maps.editor.save',
+        }) as HTMLButtonElement;
+
+        expect(save.disabled).toBe(false);
+        fireEvent.click(save);
+        expect(artSave).toHaveBeenCalledTimes(1);
     });
 
     it('imports a UVTT file into the editor draft without saving it', async () => {
@@ -501,25 +642,24 @@ describe('MapEditorScreen', () => {
             name: 'maps.editor.tiles.search',
         });
 
-        fireEvent.change(search, { target: { value: 'ЛАВ' } });
+        fireEvent.change(search, { target: { value: 'БОЧ' } });
 
-        expect(screen.getByRole('button', { name: 'Лава · 1' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Бочка' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Лава · 1' })).toBeNull();
+    });
+
+    it('offers only the objects palette without layer switches', () => {
+        renderTileEditor();
+
+        expect(screen.getByRole('button', { name: 'Бочка' })).toBeTruthy();
+        expect(
+            screen.queryByRole('button', {
+                name: 'maps.editor.tiles.layer.ground',
+            })
+        ).toBeNull();
         expect(
             screen.queryByRole('button', { name: "Кам'яна підлога" })
         ).toBeNull();
-    });
-
-    it('updates the active layer and its selected texture accessibly', () => {
-        renderTileEditor();
-
-        const objects = screen.getByRole('button', {
-            name: 'maps.editor.tiles.layer.objects',
-        });
-
-        fireEvent.click(objects);
-
-        expect(objects.getAttribute('aria-pressed')).toBe('true');
-        expect(screen.getByRole('button', { name: 'Бочка' })).toBeTruthy();
     });
 
     it('supports keyboard undo and redo while preserving shortcuts in the search field', () => {
@@ -563,7 +703,7 @@ describe('MapEditorScreen', () => {
                 expectedVersion: 1,
                 patches: expect.arrayContaining([
                     expect.objectContaining({
-                        layer: 'ground',
+                        layer: 'objects',
                         cx: 0,
                         cy: 0,
                         data: expect.any(String),

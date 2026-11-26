@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import type { MapDoorsTool } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { UNIT } from '@/lib/utils/battle/grid';
-import type { DoorState } from '@/types/battle-grid';
+import type { DoorState, GridKind } from '@/types/battle-grid';
 
 const BUTTON =
     'h-8 border-hud-rule bg-black/80 px-2 text-xs text-hud-ink hover:bg-black';
@@ -17,12 +17,14 @@ const BUTTON =
 /** DM menu over a door: open/close and lock/unlock; positioned in map pixels, kept upright on a rotated map. */
 export function DoorMenu({
     edge,
+    grid,
     door,
     pxPerUnit,
     rotated,
     tool,
 }: {
     edge: string;
+    grid: GridKind;
     door: DoorState;
     pxPerUnit: number;
     rotated: boolean;
@@ -30,7 +32,7 @@ export function DoorMenu({
 }) {
     const t = useTranslations('battle.map.doors');
 
-    const c = doorCentre(edge);
+    const c = doorCentre(edge, grid);
 
     const root = useRef<HTMLDivElement>(null);
 

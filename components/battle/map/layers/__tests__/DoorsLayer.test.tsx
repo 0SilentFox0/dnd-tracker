@@ -16,6 +16,7 @@ const renderLayer = (over: Partial<Parameters<typeof DoorsLayer>[0]> = {}) =>
         <svg>
             <DoorsLayer
                 doors={doors}
+                grid="square"
                 pxPerUnit={0.1}
                 rotated={false}
                 showLock={false}
@@ -66,5 +67,32 @@ describe('DoorsLayer', () => {
         expect(
             renderLayer().container.querySelector('[data-door-hit]')
         ).toBeNull();
+    });
+
+    it('двері повертаються вздовж ребра: квадрат 90°, гекс — кут ребра', () => {
+        const sq = renderLayer().container.querySelector(
+            '[data-map-door="1:1:e"] g[transform]'
+        );
+
+        expect(sq?.getAttribute('transform')).toContain('rotate(90)');
+        cleanup();
+
+        const hex = render(
+            <svg>
+                <DoorsLayer
+                    doors={{ '2:2:ne': { open: false } }}
+                    grid="hex"
+                    pxPerUnit={0.1}
+                    rotated={false}
+                    showLock={false}
+                />
+            </svg>
+        ).container.querySelector('[data-map-door="2:2:ne"] g[transform]');
+
+        const angle = /rotate\((-?[\d.]+)\)/.exec(
+            hex?.getAttribute('transform') ?? ''
+        );
+
+        expect(Number(angle?.[1])).toBeCloseTo(60, 5);
     });
 });

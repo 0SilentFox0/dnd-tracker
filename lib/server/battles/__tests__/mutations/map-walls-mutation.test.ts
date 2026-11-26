@@ -93,6 +93,25 @@ describe('map-walls mutation', () => {
         expect(out.participants).toBe(c.participants);
     });
 
+    it('hex map: adds a hex edge, rejects a square key', () => {
+        const hex: BattleMapConfig = { ...map, gridType: 'hex', walls: [] };
+
+        const out = mapWallsMutation(ctx(hex), {
+            kind: 'walls',
+            add: ['1:1:ne'],
+            remove: [],
+        });
+
+        expect(out.scene?.map?.walls).toEqual(['1:1:ne']);
+        expect(() =>
+            mapWallsMutation(ctx(hex), {
+                kind: 'walls',
+                add: ['1:1:e'],
+                remove: [],
+            })
+        ).toThrow(expect.objectContaining({ message: REJECT.mapEdgeOutside }));
+    });
+
     it('ґрати на ребрі зі стіною замінюють її', () => {
         const out = mapWallsMutation(ctx(), {
             kind: 'bars',

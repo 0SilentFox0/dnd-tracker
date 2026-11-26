@@ -277,4 +277,44 @@ describe('copyMaps', () => {
         expect(h.copyObject).not.toHaveBeenCalled();
         expect(h.create).not.toHaveBeenCalled();
     });
+
+    it('copies the art scene and re-points bakedUrl to the copied background', async () => {
+        setup([
+            source({
+                art: { scene: { v: 1 }, sceneVersion: 4, bakedUrl: BG },
+            }),
+        ]);
+
+        await run();
+
+        const { art } = h.create.mock.calls[0][0].data;
+
+        expect(art.create).toMatchObject({
+            scene: { v: 1 },
+            sceneVersion: 1,
+            bakedSceneVersion: 1,
+        });
+        expect(art.create.bakedUrl).toBe(
+            h.create.mock.calls[0][0].data.header.background
+        );
+    });
+
+    it('drops bakedUrl when it no longer matches the background', async () => {
+        setup([
+            source({
+                art: {
+                    scene: { v: 1 },
+                    sceneVersion: 4,
+                    bakedUrl: 'https://x.test/old.png',
+                },
+            }),
+        ]);
+
+        await run();
+
+        expect(h.create.mock.calls[0][0].data.art.create).toMatchObject({
+            bakedUrl: null,
+            bakedSceneVersion: null,
+        });
+    });
 });

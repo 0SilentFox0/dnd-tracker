@@ -1,8 +1,9 @@
-import { cellKey, cellLine } from '@/lib/utils/battle/grid/geometry';
+import { cellKey, cellLine, stepNeighbors } from '@/lib/utils/battle/grid/geometry';
+import { hexDisk } from '@/lib/utils/battle/grid/hex';
 import { CHUNK_CELLS, CHUNK_SIDE, chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
-import type { GridPoint } from '@/types/battle-grid';
+import type { GridKind, GridPoint } from '@/types/battle-grid';
 
 export type TileEditTool =
     | 'brush'
@@ -37,7 +38,8 @@ export function tileAt(
 
 function operationPoints(
     tool: TileEditTool,
-    points: readonly GridPoint[]
+    points: readonly GridPoint[],
+    grid: GridKind
 ): GridPoint[] {
     if (points.length < 2 || (tool !== 'line' && tool !== 'rectangle'))
         return [...points];
@@ -46,7 +48,7 @@ function operationPoints(
 
     const end = points[points.length - 1];
 
-    if (tool === 'line') return cellLine(start, end);
+    if (tool === 'line') return cellLine(start, end, grid);
 
     const cells: GridPoint[] = [];
 
@@ -68,8 +70,11 @@ function fillPoints(
     chunks: TileLayerChunks,
     layer: TileLayer,
     start: GridPoint,
-    mapSize: { cols: number; rows: number }
+    mapSize: { cols: number; rows: number },
+    grid: GridKind
 ): GridPoint[] {
+    const dims = { ...mapSize, gridType: grid };
+
     const target = tileAt(chunks, layer, start.x, start.y);
 
     const queue = [start];
@@ -101,12 +106,7 @@ function fillPoints(
         if (tileAt(chunks, layer, point.x, point.y) !== target) continue;
 
         result.push(point);
-        queue.push(
-            { x: point.x + 1, y: point.y },
-            { x: point.x - 1, y: point.y },
-            { x: point.x, y: point.y + 1 },
-            { x: point.x, y: point.y - 1 }
-        );
+        queue.push(...stepNeighbors(dims, point));
     }
 
     return result;
@@ -120,8 +120,9 @@ export function applyTileStroke(input: {
     brushSize: number;
     tool: TileEditTool;
     mapSize: { cols: number; rows: number };
+    grid: GridKind;
 }): { chunks: TileLayerChunks; changes: TileCellChange[] } {
-    const { chunks, layer, tileId, brushSize, tool, mapSize } = input;
+    const { chunks, layer, tileId, brushSize, tool, mapSize, grid } = input;
 
     const startPoints = input.points;
 
@@ -132,23 +133,28 @@ export function applyTileStroke(input: {
 
     const points =
         tool === 'fill'
-            ? fillPoints(chunks, layer, startPoints[0], mapSize)
-            : operationPoints(tool, startPoints);
+            ? fillPoints(chunks, layer, startPoints[0], mapSize, grid)
+            : operationPoints(tool, startPoints, grid);
 
     const targets = new Map<string, GridPoint>();
 
     const offset = Math.floor((brushSize - 1) / 2);
 
+    const addTarget = (x: number, y: number) => {
+        if (x >= 0 && y >= 0 && x < mapSize.cols && y < mapSize.rows)
+            targets.set(cellKey({ x, y }), { x, y });
+    };
+
     for (const point of points) {
+        if (grid === 'hex') {
+            for (const c of hexDisk(point, brushSize - 1)) addTarget(c.x, c.y);
+
+            continue;
+        }
+
         for (let by = 0; by < brushSize; by++)
-            for (let bx = 0; bx < brushSize; bx++) {
-                const x = point.x + bx - offset;
-
-                const y = point.y + by - offset;
-
-                if (x >= 0 && y >= 0 && x < mapSize.cols && y < mapSize.rows)
-                    targets.set(cellKey({ x, y }), { x, y });
-            }
+            for (let bx = 0; bx < brushSize; bx++)
+                addTarget(point.x + bx - offset, point.y + by - offset);
     }
 
     const layerChunks = { ...(chunks[layer] ?? {}) };

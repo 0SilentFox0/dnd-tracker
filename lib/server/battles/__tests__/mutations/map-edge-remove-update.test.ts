@@ -45,6 +45,20 @@ const ctxWith = (
 const rejected = (key: string) => expect.objectContaining({ message: key });
 
 describe('map-edge-remove', () => {
+    it('hex map: removes an existing hex edge', () => {
+        const hex: BattleMapConfig = {
+            ...map,
+            gridType: 'hex',
+            walls: ['1:1:ne'],
+        };
+
+        const out = mapEdgeRemoveMutation(ctxWith(null, { map: hex }), {
+            edges: ['1:1:ne'],
+        });
+
+        expect(out.scene?.mapState?.removedEdges).toEqual(['1:1:ne']);
+    });
+
     it('remove: пише patch.mapState, карту не чіпає', () => {
         const out = mapEdgeRemoveMutation(ctxWith(null), {
             edges: ['1:1:e', '3:3:e'],

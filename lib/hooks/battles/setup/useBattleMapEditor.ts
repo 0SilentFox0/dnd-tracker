@@ -39,6 +39,7 @@ import type {
     GridPoint,
     MapMotion,
 } from '@/types/battle-grid';
+import type { ArtMapPatch } from '@/types/battle-map';
 import type { LogLine } from '@/types/text';
 
 const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
@@ -177,6 +178,11 @@ export function useBattleMapEditor(
         []
     );
 
+    const applyArt = useCallback(
+        (patch: ArtMapPatch) => setMap((m) => ({ ...m, ...patch })),
+        []
+    );
+
     const setMode = useCallback(
         (key: MapModeKey, on: boolean) => {
             const mode = modeOf(key);
@@ -215,9 +221,9 @@ export function useBattleMapEditor(
         setMap((m) => {
             if (gridOf(m) === kind) return m;
 
-            if (kind === 'square') return { ...m, gridType: 'square' };
-
             const { walls, bars, doors, ...rest } = m;
+
+            if (kind === 'square') return { ...rest, gridType: 'square' };
 
             return MODE_KEYS.reduce(
                 (acc, key) => modeOf(key).withConfig(acc, null),
@@ -317,6 +323,7 @@ export function useBattleMapEditor(
             setBackground,
             replaceBackground,
             replaceMapFromImport,
+            applyArt,
             setBrush,
             setMode,
             setGridType,

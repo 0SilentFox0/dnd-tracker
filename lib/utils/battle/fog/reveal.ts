@@ -3,7 +3,7 @@ import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
 import {
     cellKey,
     inBounds,
-    orthoNeighbors,
+    stepNeighbors,
 } from '@/lib/utils/battle/grid/geometry';
 import type {
     BattleMapConfig,
@@ -11,7 +11,7 @@ import type {
     RevealedRun,
 } from '@/types/battle-grid';
 
-/** Four-neighbour flood fill bounded by map cells and movement-blocking edges. */
+/** Step-neighbour flood fill bounded by map cells and movement-blocking edges. */
 export function floodRoom({
     map,
     start,
@@ -45,7 +45,7 @@ export function floodRoom({
     for (let index = 0; index < queue.length; index++) {
         const current = queue[index];
 
-        for (const next of orthoNeighbors(map, current)) {
+        for (const next of stepNeighbors(map, current)) {
             const key = cellKey(next);
 
             if (

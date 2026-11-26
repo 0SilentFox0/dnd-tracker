@@ -19,7 +19,8 @@ export const dynamic = 'force-dynamic';
 
 export const maxDuration = 60;
 
-const ADAPTER_TIMEOUT_MS = 8_000;
+// The ops watchdog aborts collect after 5 s; a slow provider API must not push it over.
+const ADAPTER_TIMEOUT_MS = 3_000;
 
 type AdapterStatus = 'ok' | 'unavailable' | 'error';
 

@@ -19,7 +19,7 @@ describe('useTileEditor', () => {
         act(() => result.current.onStroke([{ x: 2, y: 3 }]));
         expect(result.current.isDirty).toBe(true);
         expect(result.current.dirtyPatches).toMatchObject([
-            { layer: 'ground', cx: 0, cy: 0, data: expect.any(String) },
+            { layer: 'objects', cx: 0, cy: 0, data: expect.any(String) },
         ]);
 
         act(() => result.current.undo());
@@ -36,7 +36,7 @@ describe('useTileEditor', () => {
         expect(result.current.canUndo).toBe(false);
     });
 
-    it('keeps layer edits isolated and uses the picker tool', () => {
+    it('starts on the objects layer with the first object selected', () => {
         const { result } = renderHook(() =>
             useTileEditor({
                 initialChunks: {},
@@ -45,8 +45,19 @@ describe('useTileEditor', () => {
             })
         );
 
-        act(() => result.current.setActiveLayer('objects'));
+        expect(result.current.activeLayer).toBe('objects');
         expect(result.current.selectedTileId).toBe(5);
+    });
+
+    it('uses the picker tool on the objects layer', () => {
+        const { result } = renderHook(() =>
+            useTileEditor({
+                initialChunks: {},
+                version: 1,
+                mapSize: { cols: 8, rows: 8 },
+            })
+        );
+
         act(() => result.current.onStroke([{ x: 0, y: 0 }]));
         expect(result.current.dirtyPatches[0].layer).toBe('objects');
 

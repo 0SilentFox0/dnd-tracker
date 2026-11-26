@@ -12,6 +12,7 @@ describe('tile editing operations', () => {
             brushSize: 1,
             tool: 'brush',
             mapSize: { cols: 32, rows: 16 },
+            grid: 'square',
         });
 
         expect(Object.keys(first.chunks.ground ?? {})).toEqual(['0:0', '1:0']);
@@ -38,6 +39,7 @@ describe('tile editing operations', () => {
             brushSize: 1,
             tool: 'line',
             mapSize: { cols: 8, rows: 8 },
+            grid: 'square',
         });
 
         expect(line.changes).toHaveLength(4);
@@ -50,6 +52,7 @@ describe('tile editing operations', () => {
             brushSize: 1,
             tool: 'rectangle',
             mapSize: { cols: 8, rows: 8 },
+            grid: 'square',
         });
 
         expect(rect.changes).toHaveLength(4);
@@ -62,6 +65,7 @@ describe('tile editing operations', () => {
             brushSize: 1,
             tool: 'fill',
             mapSize: { cols: 8, rows: 8 },
+            grid: 'square',
         });
 
         expect(filled.changes).toHaveLength(4);
@@ -74,6 +78,7 @@ describe('tile editing operations', () => {
             brushSize: 1,
             tool: 'eraser',
             mapSize: { cols: 8, rows: 8 },
+            grid: 'square',
         });
 
         expect(erased.changes).toHaveLength(1);
@@ -89,9 +94,38 @@ describe('tile editing operations', () => {
             brushSize: 3,
             tool: 'brush',
             mapSize: { cols: 4, rows: 4 },
+            grid: 'square',
         });
 
         expect(painted.changes).toHaveLength(4);
         expect(painted.chunks.objects?.['0:0']?.[0]).toBe(5);
+    });
+
+    it('paints a 7-cell hex brush and fills across hex neighbours only', () => {
+        const brush = applyTileStroke({
+            chunks: {},
+            layer: 'ground',
+            points: [{ x: 3, y: 3 }],
+            tileId: 1,
+            brushSize: 2,
+            tool: 'brush',
+            mapSize: { cols: 8, rows: 8 },
+            grid: 'hex',
+        });
+
+        expect(brush.changes).toHaveLength(7);
+
+        const fill = applyTileStroke({
+            chunks: brush.chunks,
+            layer: 'ground',
+            points: [{ x: 3, y: 3 }],
+            tileId: 2,
+            brushSize: 1,
+            tool: 'fill',
+            mapSize: { cols: 8, rows: 8 },
+            grid: 'hex',
+        });
+
+        expect(fill.changes).toHaveLength(7);
     });
 });

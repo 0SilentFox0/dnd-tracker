@@ -60,6 +60,16 @@ export function orthoNeighbors(
     );
 }
 
+export function stepNeighbors(
+    map: Pick<BattleMapConfig, 'cols' | 'rows' | 'gridType'>,
+    p: GridPoint
+): GridPoint[] {
+    if (gridOf(map) === 'hex')
+        return hexNeighbors(p).filter((n) => inBounds(map, n));
+
+    return orthoNeighbors(map, p);
+}
+
 export function cellDistance(
     a: GridPoint,
     b: GridPoint,

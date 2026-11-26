@@ -31,7 +31,7 @@ const NO_EDGES: ReadonlySet<string> = new Set();
 
 const SAMPLE_STEP = UNIT / 5;
 
-type Dims = Pick<BattleMapConfig, 'cols' | 'rows'>;
+type Dims = Pick<BattleMapConfig, 'cols' | 'rows' | 'gridType'>;
 
 function unitPoint(e: PointerEvent) {
     const svg = (e.currentTarget as SVGGraphicsElement).ownerSVGElement;
@@ -67,7 +67,7 @@ function edgesBetween(
 }
 
 export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
-    const { cols, rows } = map;
+    const { cols, rows, gridType } = map;
 
     const strokeRef = useRef<Stroke | null>(null);
 
@@ -94,7 +94,11 @@ export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
             const point = unitPoint(e);
 
             const edge =
-                point && edgeAtScreenPoint({ cols, rows }, point.x, point.y);
+                point && edgeAtScreenPoint(
+                    { cols, rows, gridType },
+                    point.x,
+                    point.y
+                );
 
             if (!point || !edge) return;
 
@@ -112,7 +116,7 @@ export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
             setRemove(isRemove);
             setPending(new Set([edge]));
         },
-        [cols, rows]
+        [cols, rows, gridType]
     );
 
     const onPointerMove = useCallback(
@@ -127,14 +131,14 @@ export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
 
             const before = s.edges.size;
 
-            for (const edge of edgesBetween({ cols, rows }, s.last, point))
+            for (const edge of edgesBetween({ cols, rows, gridType }, s.last, point))
                 s.edges.add(edge);
 
             s.last = point;
 
             if (s.edges.size !== before) setPending(new Set(s.edges));
         },
-        [cols, rows]
+        [cols, rows, gridType]
     );
 
     const onPointerUp = useCallback(

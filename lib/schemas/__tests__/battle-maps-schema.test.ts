@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { battleMapInputSchema, battleMapSaveSchema } from '../battle-maps';
+import {
+    battleMapInputSchema,
+    battleMapSaveSchema,
+    battleMapTilePatchSchema,
+} from '../battle-maps';
 
 const input = (map: object) => ({
     name: 'Cave',
@@ -145,5 +149,89 @@ describe('battleMapSaveSchema', () => {
                 expectedVersion: 1,
             }).success
         ).toBe(false);
+    });
+});
+
+describe('battle map library schemas on hex grids', () => {
+    const hex = { gridType: 'hex' };
+
+    it.each([battleMapInputSchema, battleMapSaveSchema])(
+        'accepts hex edges and rejects wrong or off-map keys',
+        (schema) => {
+            const parse = (body: object) =>
+                schema.safeParse({ expectedVersion: 1, ...body });
+
+            expect(
+                parse({
+                    ...input(hex),
+                    walls: ['1:1:n'],
+                    bars: ['2:2:se'],
+                    map: {
+                        ...input(hex).map,
+                        doors: { '3:3:ne': { open: false } },
+                    },
+                }).success
+            ).toBe(true);
+
+            const bad = (body: object) => {
+                const r = parse(body);
+
+                return r.success ? [] : r.error.issues.map((i) => i.message);
+            };
+
+            expect(bad({ ...input(hex), walls: ['1:1:e'] })).toContain(
+                'battleSetup.validation.badEdges'
+            );
+            expect(bad({ ...input(hex), walls: ['0:0:n'] })).toContain(
+                'battleSetup.validation.badEdges'
+            );
+            expect(bad({ ...input({}), walls: ['1:1:ne'] })).toContain(
+                'battleSetup.validation.badEdges'
+            );
+            expect(
+                bad({
+                    ...input({ ...hex, maze: { walls: [], exit: null, difficulty: 'easy', teleports: [], fog: [], marks: {}, dark: false } }),
+                })
+            ).toContain('battleSetup.validation.hexSquareOnly');
+        }
+    );
+});
+
+describe('map art fields', () => {
+    const save = (map: object) => ({ ...input(map), expectedVersion: 1 });
+
+    it('allows hex background width 200 + 1/3', () => {
+        expect(
+            battleMapSaveSchema.safeParse(
+                save({ gridType: 'hex', cols: 200, backgroundCols: 200.34 })
+            ).success
+        ).toBe(true);
+    });
+
+    it('allows artBaked true only', () => {
+        expect(
+            battleMapSaveSchema.safeParse(save({ artBaked: true })).success
+        ).toBe(true);
+        expect(
+            battleMapSaveSchema.safeParse(save({ artBaked: false })).success
+        ).toBe(false);
+    });
+});
+
+describe('battleMapTilePatchSchema', () => {
+    const patch = (layer: string) => ({
+        expectedVersion: 1,
+        patches: [{ layer, cx: 0, cy: 0, data: null }],
+    });
+
+    it('accepts only the objects layer', () => {
+        expect(
+            battleMapTilePatchSchema.safeParse(patch('objects')).success
+        ).toBe(true);
+
+        for (const layer of ['ground', 'wallfill', 'edge-art', 'effects'])
+            expect(
+                battleMapTilePatchSchema.safeParse(patch(layer)).success
+            ).toBe(false);
     });
 });

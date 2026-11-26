@@ -241,6 +241,7 @@ export function BattleMap({
 
     const stageEditing = useMemo(
         () => ({
+            art: editing.art,
             clickableBlocked,
             showBlocked,
             mode: modeTools,
@@ -260,6 +261,7 @@ export function BattleMap({
             doorLocks,
             showDefaultBackground,
             editing.fog,
+            editing.art,
         ]
     );
 

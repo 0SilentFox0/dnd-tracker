@@ -172,7 +172,7 @@ describe('battleMapSchema.backgroundRows', () => {
             battleMapSchema.safeParse({ ...map, backgroundRows: 0 }).success
         ).toBe(false);
         expect(
-            battleMapSchema.safeParse({ ...map, backgroundRows: 201 }).success
+            battleMapSchema.safeParse({ ...map, backgroundRows: 202 }).success
         ).toBe(false);
     });
 });
@@ -355,6 +355,48 @@ describe('battleMapSchema.doors', () => {
 
         expect(battleMapSchema.safeParse({ ...map, doors: many }).success).toBe(
             false
+        );
+    });
+});
+
+describe('battleMapSchema on hex grids', () => {
+    const hex = { ...map, gridType: 'hex' as const };
+
+    const issues = (m: object) => {
+        const r = battleMapSchema.safeParse(m);
+
+        return r.success ? [] : r.error.issues.map((i) => i.message);
+    };
+
+    it('accepts hex walls, bars and doors', () => {
+        expect(
+            battleMapSchema.safeParse({
+                ...hex,
+                walls: ['1:1:n'],
+                bars: ['2:2:se'],
+                doors: { '3:3:ne': { open: false } },
+            }).success
+        ).toBe(true);
+    });
+
+    it('rejects a square key on hex and a hex key on square', () => {
+        expect(issues({ ...hex, walls: ['1:1:e'] })).toContain(
+            'battleSetup.validation.badEdges'
+        );
+        expect(issues({ ...map, walls: ['1:1:ne'] })).toContain(
+            'battleSetup.validation.badEdges'
+        );
+    });
+
+    it('rejects a maze on hex', () => {
+        expect(
+            issues({ ...hex, maze: { walls: [], exit: null, difficulty: 'easy', teleports: [], fog: [], marks: {}, dark: false } })
+        ).toContain('battleSetup.validation.hexSquareOnly');
+    });
+
+    it('rejects a hex edge whose neighbour is off the map', () => {
+        expect(issues({ ...hex, walls: ['0:0:n'] })).toContain(
+            'battleSetup.validation.badEdges'
         );
     });
 });

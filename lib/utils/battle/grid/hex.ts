@@ -150,15 +150,19 @@ export function hexCenter(p: GridPoint): { x: number; y: number } {
     return { x: R + 1.5 * R * p.x, y: H * (p.y + 0.5 + 0.5 * (p.x & 1)) };
 }
 
-export function hexPolygon(p: GridPoint): string {
+export function hexVertices(p: GridPoint): { x: number; y: number }[] {
     const c = hexCenter(p);
 
-    return [0, 1, 2, 3, 4, 5]
-        .map((i) => {
-            const a = (Math.PI / 3) * i;
+    return [0, 1, 2, 3, 4, 5].map((i) => {
+        const a = (Math.PI / 3) * i;
 
-            return `${(c.x + R * Math.cos(a)).toFixed(1)},${(c.y + R * Math.sin(a)).toFixed(1)}`;
-        })
+        return { x: c.x + R * Math.cos(a), y: c.y + R * Math.sin(a) };
+    });
+}
+
+export function hexPolygon(p: GridPoint): string {
+    return hexVertices(p)
+        .map((v) => `${v.x.toFixed(1)},${v.y.toFixed(1)}`)
         .join(' ');
 }
 

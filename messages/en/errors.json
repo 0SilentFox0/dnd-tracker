@@ -625,6 +625,6 @@
   "conditionTestEngaged": "Engaged: cannot rally from Broken",
   "leadershipSkillMissing": "The hero has no Leadership skill",
   "fortuneConditionUnavailable": "A condition cannot be removed with Fortune",
-  "battleMapHexSquareOnly": "Walls, doors and textures are not available on hex maps",
+  "battleMapHexSquareOnly": "Textures are not available on hex maps",
   "battleMapGridLocked": "The grid type of a map cannot be changed after creation"
 }

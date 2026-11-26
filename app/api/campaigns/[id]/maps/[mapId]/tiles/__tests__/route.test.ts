@@ -113,7 +113,7 @@ describe('tile chunk API', () => {
         const ok = await PUT(
             request('PUT', {
                 expectedVersion: 2,
-                patches: [{ layer: 'ground', cx: 0, cy: 0, data: null }],
+                patches: [{ layer: 'objects', cx: 0, cy: 0, data: null }],
             }),
             ctx
         );
@@ -121,7 +121,7 @@ describe('tile chunk API', () => {
         expect(ok.status).toBe(200);
         expect(await ok.json()).toEqual({ version: 3 });
         expect(service.patchTileChunks).toHaveBeenCalledWith('m1', 2, [
-            { layer: 'ground', cx: 0, cy: 0, data: null },
+            { layer: 'objects', cx: 0, cy: 0, data: null },
         ]);
     });
 
@@ -140,7 +140,7 @@ describe('tile chunk API', () => {
         const response = await PUT(
             request('PUT', {
                 expectedVersion: 2,
-                patches: [{ layer: 'ground', cx: 0, cy: 0, data: null }],
+                patches: [{ layer: 'objects', cx: 0, cy: 0, data: null }],
             }),
             ctx
         );

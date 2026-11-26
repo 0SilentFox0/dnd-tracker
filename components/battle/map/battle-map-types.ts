@@ -10,6 +10,7 @@ import type {
     GridPoint,
     RevealedRun,
 } from '@/types/battle-grid';
+import type { MapArtScene } from '@/types/battle-map';
 
 export interface BattleMapProps {
     map: BattleMapConfig;
@@ -26,7 +27,19 @@ export interface BattleMapLook {
     className?: string;
 }
 
+export interface ArtPreviewState {
+    mapId: string;
+    scene: MapArtScene;
+    revision: number;
+    lights?: {
+        selectedId: string | null;
+        select(id: string | null): void;
+        move(id: string, at: { x: number; y: number }): void;
+    };
+}
+
 export interface BattleMapEditing {
+    art?: ArtPreviewState | null;
     /** false: no fallback image when the map has no selected background */
     showDefaultBackground?: boolean;
     clickableBlocked?: boolean;
