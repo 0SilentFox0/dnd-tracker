@@ -22,9 +22,10 @@ export default async function EditFeatPage({
     if (!row) redirect(`/campaigns/${id}/dm/feats`);
 
     return (
-        <>
-            <SourceNotes campaignId={id} kind="feats" targetId={featId} />
-            <FeatForm campaignId={id} feat={toFeatData(row)} />
-        </>
+        <FeatForm
+            campaignId={id}
+            feat={toFeatData(row)}
+            side={<SourceNotes campaignId={id} kind="feats" targetId={featId} />}
+        />
     );
 }

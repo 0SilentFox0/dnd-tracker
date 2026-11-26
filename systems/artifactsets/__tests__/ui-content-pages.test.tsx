@@ -7,27 +7,16 @@ vi.mock('@/systems/artifactsets/ui/content/ArtifactSetsList', () => ({
     ArtifactSetsList: () => <p>sets-list</p>,
 }));
 vi.mock('@/systems/artifactsets/ui/content/ArtifactSetForm', () => ({
-    ArtifactSetForm: ({ setId }: { setId?: string }) => (
-        <p>{`form:${setId ?? 'new'}`}</p>
-    ),
-}));
-vi.mock('@/components/hud/form', () => ({
-    HudFormPage: ({
-        title,
-        aside,
-        children,
+    ArtifactSetForm: ({
+        setId,
+        heading,
     }: {
-        title: string;
-        aside: string;
-        children: React.ReactNode;
+        setId?: string;
+        heading: { title: string; aside?: string };
     }) => (
-        <section>
-            <h1>{`${title}|${aside}`}</h1>
-            {children}
-        </section>
+        <p>{`form:${setId ?? 'new'}:${heading.title}|${heading.aside}`}</p>
     ),
 }));
-
 import { ARTIFACTSETS_META } from '@/systems/artifactsets/meta';
 import { ARTIFACTSETS_MODULE_UI } from '@/systems/artifactsets/ui';
 import { ArtifactSetsPage } from '@/systems/artifactsets/ui/content/ArtifactSetsPage';
@@ -45,8 +34,7 @@ describe('artifactsets content page', () => {
             <ArtifactSetsPage {...base} view={{ type: 'new' }} />
         );
 
-        expect(screen.getByText('new.title|new.aside')).toBeTruthy();
-        expect(screen.getByText('form:new')).toBeTruthy();
+        expect(screen.getByText('form:new:new.title|new.aside')).toBeTruthy();
         created.unmount();
 
         render(
@@ -57,8 +45,7 @@ describe('artifactsets content page', () => {
             />
         );
 
-        expect(screen.getByText('edit.title|Set')).toBeTruthy();
-        expect(screen.getByText('form:s')).toBeTruthy();
+        expect(screen.getByText('form:s:edit.title|Set')).toBeTruthy();
     });
 
     it('declares a page for each of its dm sections', () => {
