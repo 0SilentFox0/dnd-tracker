@@ -71,11 +71,12 @@ export function SaveToLibraryButton({
                 type="button"
                 variant="outline"
                 size="sm"
+                aria-label={t('button')}
                 disabled={!value}
                 onClick={() => setOpen(true)}
             >
-                <LibraryBig aria-hidden="true" className="mr-2 h-4 w-4" />
-                {t('button')}
+                <LibraryBig aria-hidden="true" className="h-4 w-4 min-[540px]:mr-2" />
+                <span className="max-[539px]:sr-only">{t('button')}</span>
             </Button>
             <ResponsiveDialog
                 open={open}

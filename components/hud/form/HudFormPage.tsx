@@ -65,7 +65,7 @@ export function HudFormPage({
                 className={cn(
                     'contents',
                     actions &&
-                        'lg:sticky lg:top-[var(--shell-header-h,57px)] lg:z-20 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:bg-hud-page/80 lg:backdrop-blur'
+                        'lg:sticky lg:top-[var(--shell-header-h,57px)] lg:z-20 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:bg-hud-page'
                 )}
             >
                 <header

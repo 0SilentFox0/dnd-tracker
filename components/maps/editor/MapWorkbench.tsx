@@ -81,7 +81,7 @@ export function MapWorkbench({
                 layout?.className
             )}
         >
-            <div className="relative min-h-0 min-w-0 overflow-hidden">
+            <div className="relative isolate min-h-0 min-w-0 overflow-hidden">
                 {canvas}
                 <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start gap-2">
                     {full ? (
