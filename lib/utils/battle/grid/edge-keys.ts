@@ -27,6 +27,11 @@ const HEX_OPPOSITE: Record<'s' | 'sw' | 'nw', HexSide> = { s: 'n', sw: 'ne', nw:
 
 const HEX_VERTS: Record<HexSide, [number, number]> = { n: [4, 5], ne: [5, 0], se: [0, 1] };
 
+const ALL_DIRS: Record<GridKind, readonly (SquareDir | HexDir)[]> = {
+    hex: ['n', 'ne', 'se', 's', 'sw', 'nw'],
+    square: ['n', 'e', 's', 'w'],
+};
+
 const hexStep = (p: GridPoint, dir: HexDir): GridPoint =>
     fromCube(cubeStep(toCube(p), CUBE_DIRS[HEX_DIR_INDEX[dir]]));
 
@@ -84,10 +89,7 @@ export function canonicalEdge(grid: GridKind, cell: GridPoint, dir: SquareDir | 
 }
 
 export function edgeKeyBetween(grid: GridKind, a: GridPoint, b: GridPoint): string | null {
-    const dirs: readonly (SquareDir | HexDir)[] =
-        grid === 'hex' ? ['n', 'ne', 'se', 's', 'sw', 'nw'] : ['n', 'e', 's', 'w'];
-
-    for (const dir of dirs) {
+    for (const dir of ALL_DIRS[grid]) {
         const n =
             grid === 'hex'
                 ? hexStep(a, dir as HexDir)
@@ -137,8 +139,5 @@ export function edgeSegment(grid: GridKind, key: string): [Point, Point] {
 }
 
 export function edgesOfCell(grid: GridKind, cell: GridPoint): string[] {
-    const dirs: readonly (SquareDir | HexDir)[] =
-        grid === 'hex' ? ['n', 'ne', 'se', 's', 'sw', 'nw'] : ['n', 'e', 's', 'w'];
-
-    return dirs.map((d) => canonicalEdge(grid, cell, d));
+    return ALL_DIRS[grid].map((d) => canonicalEdge(grid, cell, d));
 }

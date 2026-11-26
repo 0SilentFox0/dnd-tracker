@@ -143,6 +143,8 @@ export function encodeEdges(
 ): EdgeChunks {
     const chunks = new Map<string, Uint8Array>();
 
+    const { header } = layoutOf(grid);
+
     for (const e of edges.bars ?? []) put(chunks, e, KIND_BAR, cols, rows, grid);
 
     for (const e of edges.walls ?? []) {
@@ -168,7 +170,8 @@ export function encodeEdges(
     for (const key of keys) {
         const bytes = chunks.get(key);
 
-        if (bytes && bytes.slice(layoutOf(grid).header).some((b) => b !== 0)) out[key] = toBase64(bytes);
+        if (bytes && bytes.slice(header).some((b) => b !== 0))
+            out[key] = toBase64(bytes);
     }
 
     return out;
