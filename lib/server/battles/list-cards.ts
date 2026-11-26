@@ -75,11 +75,11 @@ async function loadResults(battleIds: string[]) {
     if (battleIds.length === 0) return new Map<string, string | null>();
 
     const rows = await prisma.$queryRaw<ResultRow[]>`
-      SELECT DISTINCT ON ("battleId") "battleId", details->>'battleResult' AS result
+      SELECT DISTINCT ON ("battleId") "battleId", details->'actionDetails'->>'battleResult' AS result
       FROM battle_events
       WHERE "battleId" IN (${Prisma.join(battleIds)})
         AND "cancelledAt" IS NULL
-        AND details->>'battleResult' IS NOT NULL
+        AND details->'actionDetails'->>'battleResult' IS NOT NULL
       ORDER BY "battleId", seq DESC`;
 
     return new Map(rows.map((r) => [r.battleId, r.result]));
