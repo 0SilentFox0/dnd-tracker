@@ -101,6 +101,8 @@ function opaqueCells(
     for (const [key, terrain] of Object.entries(map.terrain ?? {}))
         if (terrain.obscured || terrain.blocksSight) opaque.add(key);
 
+    for (const key of map.sightBlocked ?? []) opaque.add(key);
+
     return opaque;
 }
 
@@ -174,11 +176,14 @@ export function visibleFromMany(
 const EMPTY_KEYS: ReadonlySet<string> = new Set();
 
 export function sightBlockingCells(
-    map: Pick<BattleMapConfig, 'terrain'>
+    map: Pick<BattleMapConfig, 'terrain' | 'sightBlocked'>
 ): ReadonlySet<string> {
-    const keys = Object.keys(map.terrain ?? {}).filter(
-        (k) => map.terrain?.[k].blocksSight
-    );
+    const keys = [
+        ...Object.keys(map.terrain ?? {}).filter(
+            (k) => map.terrain?.[k].blocksSight
+        ),
+        ...(map.sightBlocked ?? []),
+    ];
 
     return keys.length ? new Set(keys) : EMPTY_KEYS;
 }

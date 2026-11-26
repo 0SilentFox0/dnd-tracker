@@ -94,6 +94,7 @@ export interface BattleMapConfig {
     };
     opacity: number;
     blocked?: string[];
+    sightBlocked?: string[];
     terrain?: Record<string, TerrainCell>;
     spellZones?: Record<string, SpellZoneRuntime>;
     backgroundCols?: number;

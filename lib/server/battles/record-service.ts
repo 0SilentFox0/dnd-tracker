@@ -392,6 +392,7 @@ async function patchBattleRecord(
                   cols: pinned.cols,
                   rows: pinned.rows,
                   blocked: pinned.blocked,
+                  sightBlocked: pinned.sightBlocked,
               })
             : row.mapId && written
               ? toInputJson(withoutEdges(written))

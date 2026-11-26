@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { visibleFrom, visibleFromMany } from '../shadowcast';
+import { sightBlockingCells, visibleFrom, visibleFromMany } from '../shadowcast';
 
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -120,5 +120,26 @@ describe('blocksSight zone', () => {
         expect(visible.has('4:4')).toBe(true);
         expect(visible.has('6:4')).toBe(false);
         expect(visible.has('6:2')).toBe(true);
+    });
+});
+
+describe('sightBlocked cells', () => {
+    it('hides cells behind a sightBlocked cell', () => {
+        const visible = visibleFrom(map({ sightBlocked: ['4:4'] }), { x: 2, y: 4 }, 5);
+
+        expect(visible.has('4:4')).toBe(true);
+        expect(visible.has('6:4')).toBe(false);
+        expect(visible.has('6:2')).toBe(true);
+    });
+
+    it('does not hide cells behind a merely blocked cell', () => {
+        const visible = visibleFrom(map({ blocked: ['4:4'] }), { x: 2, y: 4 }, 5);
+
+        expect(visible.has('6:4')).toBe(true);
+    });
+
+    it('lists sightBlocked among sight-blocking cells', () => {
+        expect([...sightBlockingCells({ sightBlocked: ['1:1'] })]).toEqual(['1:1']);
+        expect(sightBlockingCells({}).size).toBe(0);
     });
 });

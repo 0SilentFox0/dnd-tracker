@@ -212,6 +212,10 @@ export const battleMapObject = z.object({
         .array(z.string().regex(/^\d+:\d+$/))
         .max(MAP_LIMITS.maxTerrainCells)
         .optional(),
+    sightBlocked: z
+        .array(z.string().regex(/^\d+:\d+$/))
+        .max(MAP_LIMITS.maxTerrainCells)
+        .optional(),
     terrain: z
         .record(
             z.string().regex(/^\d+:\d+$/),
