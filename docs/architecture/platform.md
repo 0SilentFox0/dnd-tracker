@@ -44,6 +44,27 @@ Upload goes through the signed-ticket flow into the public bucket `user-avatars`
 
 `/profile` (`app/profile`) is the account hub: `AvatarEditor` plus the list from the `PROFILE_MENU` registry (`components/layout/profile-menu.ts`), the same registry feeds the header dropdown, so a new entry is one row. Unauthenticated requests redirect to `/sign-in?next=/profile`.
 
+## Account deletion
+
+`/profile` → danger zone (`components/profile/DeleteAccountSection.tsx`): a dialog that enables the button only when the typed email matches (case-insensitive). `useDeleteAccount` (`lib/hooks/account`) → `DELETE /api/account` (`requireAuthUser` → `parseBody(deleteAccountSchema)` → session email check, 400 `accountEmailMismatch`) → `deleteAccount(userId)` (`lib/server/account/delete-account.ts`). On success the route clears the session cookies with a local `signOut`, the hook signs out and goes to `/`.
+
+Service order (all DB work in one transaction):
+1. Lock the user's template rows (`SELECT ... FOR UPDATE`; a concurrent clone takes a key-share on the template, so it waits), then the **template guard** (`template-guard.ts`): if a template the user DMs is the source of another user's campaign (`campaigns.createdFromId`, `campaign_source_syncs.sourceCampaignId`, `campaigns.baseSourceId`), it throws `AccountDeleteBlockedError` → 409 `accountDeleteBlocked`, and nothing is deleted. Support resolves it by hand via `LEGAL.contactEmail`.
+2. Collect the owned campaigns (`dmUserId`) inside the same transaction.
+3. Still in the transaction:
+   - delete each owned campaign through `deleteCampaignRows` (`lib/server/campaigns/delete-campaign-rows.ts`, shared with campaign delete; `Campaign.dm` is Restrict), then `deleteTemplateBaseRows` removes the published `*_base` rows of owned templates (keyed by `sourceCampaignId`, no FK; account path only);
+   - hand heroes the user controls in other campaigns to that campaign's DM (`Character.controlledBy` is NOT NULL);
+   - delete the rows keyed by a plain `userId` with no FK (`AiThread`, `ApiToken`, `AssistantIntent`, `AssistantReceipt`, `CompendiumImportRun`) and null `BattleScene.ownerUserId`;
+   - delete `users`, which cascades memberships, keys, notes, onboarding, sounds and quest tracking. A missing row is fine.
+4. After commit:
+   - invalidate the campaign lists of members, DMs of other campaigns the user joined and DMs of handed-over heroes, plus the reference caches of each deleted campaign;
+   - plan the storage cleanup from the ids captured in the transaction (`storage-cleanup.ts`: `user-avatars` and `soundboard` by `<userId>/`, and `avatars`, `battle-maps`, `battle-music`, `scene-slides`, `world-maps` by `<campaignId>/`; `compendium-media` is skipped because its paths are sha256-addressed and shared between campaigns) and remove the files; a failed plan is logged at error level with the user and campaign ids (no PII) so the files can be removed by hand, and cleanup errors do not block;
+   - delete the Supabase auth user. "user not found" counts as success.
+
+   A Supabase failure returns 500. A retry is idempotent: the `users` row is already gone, so only the auth user is removed (200). Once the auth user is gone, the session is invalid (401).
+
+Tests: `lib/server/account/__tests__/delete-account.integration.test.ts` runs on a scratch DB (`pnpm exec vitest run --config vitest.integration.config.mts lib/server/account`), plus the route, hook and UI tests. The legal pages (Privacy/Terms) point to deletion in the profile, with the email as a fallback.
+
 ## User palettes
 
 `User.palette` stores one of six validated IDs (`tavern`, `midnight`, `forest`, `parchment`, `amethyst`, `frost`). Authenticated `GET`/`PUT /api/theme` return private no-store responses and scope writes to `getSessionUserId()`. `lib/theme/palettes.ts` owns the allowed IDs and labels are in `messages/{uk,en}/common.json`. `ThemeProvider` uses an account-keyed local cache for first paint and cross-tab changes; the authenticated profile remains authoritative. The root layout stays static: a validated, path-aware bootstrap script applies the active cached preference before paint. Landing, authentication and print routes use their original colors. `app/palettes.css` defines the shared HUD and shadcn tokens, with `--book-*` tokens inherited by the shared spellbook used in profiles and battle. `User.palette` is nullable: null/unknown values use `tavern` during migration/backfill windows.
