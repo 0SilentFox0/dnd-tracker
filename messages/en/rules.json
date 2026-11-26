@@ -1,6 +1,24 @@
 {
   "page": {
-    "title": "Campaign rules"
+    "title": "Campaign rules",
+    "groups": {
+      "system": "System",
+      "combat": "Combat",
+      "characters": "Characters",
+      "world": "World",
+      "other": "Other"
+    },
+    "changed": "Changed: {count}",
+    "changedBadge": "changed",
+    "resetSection": "Reset section",
+    "filter": "Filter sections",
+    "demoReadOnly": "Demo: view only",
+    "toc": "Contents",
+    "changeSystem": "Change",
+    "aside": {
+      "composition": "System",
+      "changed": "Changed sections"
+    }
   },
   "form": {
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",

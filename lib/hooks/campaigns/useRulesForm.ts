@@ -20,8 +20,14 @@ export interface RulesFormState {
     set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
 }
 
-export function useRulesForm(campaignId: string) {
-    const query = useCampaignRules(campaignId);
+export function useRulesForm(
+    campaignId: string,
+    opts: { initial?: Ruleset } = {}
+) {
+    const { initial } = opts;
+
+    // An empty id disables the fetch: initial rules (demo guest) are the whole truth
+    const query = useCampaignRules(initial ? '' : campaignId);
 
     const update = useUpdateCampaignRules(campaignId);
 
@@ -31,7 +37,7 @@ export function useRulesForm(campaignId: string) {
 
     const [changes, setChanges] = useState<Partial<Ruleset>>({});
 
-    const server = query.data;
+    const server: Ruleset | undefined = initial ?? query.data;
 
     const merged = server && { ...server, ...changes };
 
@@ -43,11 +49,20 @@ export function useRulesForm(campaignId: string) {
         },
     };
 
-    const dirtyKeys = server
+    const dirtyList = server
         ? (Object.keys(changes) as (keyof Ruleset)[]).filter(
               (key) => !sameJson(changes[key], server[key])
           )
         : [];
+
+    const dirtyKeys: ReadonlySet<keyof Ruleset> = new Set(dirtyList);
+
+    const resetKey = (key: keyof Ruleset) =>
+        setChanges((prev) => {
+            const { [key]: _dropped, ...rest } = prev;
+
+            return rest;
+        });
 
     const form: RulesFormState | null =
         server && data
@@ -69,7 +84,7 @@ export function useRulesForm(campaignId: string) {
             : null;
 
     const save = async () => {
-        if (!data || dirtyKeys.length === 0) return true;
+        if (!data || dirtyKeys.size === 0) return true;
 
         // Lazy: the registry pulls every system's rules into the battle entry chunk
         const { ALL_SECTIONS } = await import(
@@ -91,7 +106,7 @@ export function useRulesForm(campaignId: string) {
         };
 
         const patch = Object.fromEntries(
-            dirtyKeys.map((key) => [key, patchValue(key)])
+            dirtyList.map((key) => [key, patchValue(key)])
         ) as RulesetPatch;
 
         try {
@@ -112,10 +127,12 @@ export function useRulesForm(campaignId: string) {
         form,
         save,
         isSaving: update.isPending,
-        isDirty: dirtyKeys.length > 0,
+        isDirty: dirtyKeys.size > 0,
+        dirtyKeys,
+        resetKey,
         systemLocked: query.data?.systemLocked ?? false,
-        isLoading: query.isLoading,
-        loadError: query.isError ? query.error : null,
+        isLoading: !initial && query.isLoading,
+        loadError: !initial && query.isError ? query.error : null,
         reload: () => void query.refetch(),
         reset: () => setChanges({}),
     };

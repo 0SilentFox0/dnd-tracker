@@ -32,11 +32,13 @@ export const CORE_SECTIONS: SectionsContribution = {
     sections: {
         system: {
             owner: 'core',
+            group: 'system',
             mechanic: false,
             items: sectionItems('system', ['key']),
         },
         defaultAttacks: {
             owner: 'core',
+            group: 'combat',
             mechanic: true,
             items: sectionItems('defaultAttacks', [
                 'meleeName',
@@ -46,22 +48,26 @@ export const CORE_SECTIONS: SectionsContribution = {
         },
         spellIngredients: {
             owner: 'core',
+            group: 'world',
             mechanic: true,
             items: sectionItems('spellIngredients', ['enabled', 'autoPay']),
         },
         outOfCombat: {
             owner: 'core',
+            group: 'world',
             mechanic: true,
             items: sectionItems('outOfCombat', ['persistResources', 'xp']),
         },
         encounters: {
             owner: 'core',
+            group: 'world',
             mechanic: true,
             items: sectionItems('encounters', ['balance', 'unitGroups']),
             merge: mergeEncounters,
         },
         items: {
             owner: 'core',
+            group: 'world',
             mechanic: true,
             items: sectionItems('items', ['enabled']),
         },

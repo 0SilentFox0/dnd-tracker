@@ -11,6 +11,12 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 const mocks = vi.hoisted(() => ({ system: 'homm' }));
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+    usePathname: () => '/campaigns/c1/dm/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
+
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),

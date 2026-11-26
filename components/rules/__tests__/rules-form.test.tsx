@@ -11,6 +11,12 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 const mutateAsync = vi.fn().mockResolvedValue(DEFAULT_RULES);
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+    usePathname: () => '/campaigns/c1/dm/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
+
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),
@@ -45,9 +51,7 @@ describe('RulesForm', () => {
     it('disabling morale locks the cap and saves only the morale section', async () => {
         renderWithConfirm(<RulesForm campaignId="c1" />);
 
-        expect(
-            screen.getByLabelText('rulesMorale.cap')
-        ).not.toBeDisabled();
+        expect(screen.getByLabelText('rulesMorale.cap')).not.toBeDisabled();
 
         fireEvent.click(
             screen.getByRole('switch', {
@@ -55,9 +59,7 @@ describe('RulesForm', () => {
             })
         );
 
-        expect(
-            screen.getByLabelText('rulesMorale.cap')
-        ).toBeDisabled();
+        expect(screen.getByLabelText('rulesMorale.cap')).toBeDisabled();
 
         fireEvent.click(
             screen.getByRole('button', { name: 'common.actions.save' })
