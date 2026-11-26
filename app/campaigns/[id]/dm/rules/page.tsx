@@ -1,13 +1,6 @@
-import { HudFormPage } from '@/components/hud/form';
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { RulesForm } from '@/components/rules/RulesForm';
-import type { Namespace } from '@/lib/i18n/config';
-import { getRequestLocale } from '@/lib/i18n/request-locale';
-import { getTranslator } from '@/lib/i18n/translator';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
-import { MECHANIC_REGISTRY } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
-import { ALL_SECTIONS } from '@/lib/utils/rules/section-registry';
 
 export default async function DMRulesPage({
     params,
@@ -18,56 +11,10 @@ export default async function DMRulesPage({
 
     const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-    const t = await getTranslator(await getRequestLocale(), 'rules');
-
-    if (isDemo) {
-        const rules = parseRules(campaign.rules);
-
-        const locale = await getRequestLocale();
-
-        const labels = Object.fromEntries(
-            await Promise.all(
-                Object.keys(MECHANIC_REGISTRY).map(async (key) => {
-                    const ns = ALL_SECTIONS[key]?.labels;
-
-                    return [
-                        key,
-                        ns
-                            ? (await getTranslator(locale, ns as Namespace))(
-                                  'label'
-                              )
-                            : t(`mechanics.${key}.label`),
-                    ];
-                })
-            )
-        );
-
-        return (
-            <HudPage>
-                <HudPageHeader title={t('page.title')} />
-                <div className="space-y-3">
-                    {Object.keys(MECHANIC_REGISTRY).map((key) => (
-                        <HudPanel key={key}>
-                            <h2 className="hud-sc mb-2 text-lg text-hud-ink">
-                                {labels[key]}
-                            </h2>
-                            <pre className="overflow-x-auto text-xs whitespace-pre-wrap text-hud-bone">
-                                {JSON.stringify(
-                                    rules[key as keyof typeof rules],
-                                    null,
-                                    2
-                                )}
-                            </pre>
-                        </HudPanel>
-                    ))}
-                </div>
-            </HudPage>
-        );
-    }
-
     return (
-        <HudFormPage title={t('page.title')}>
-            <RulesForm campaignId={id} />
-        </HudFormPage>
+        <RulesForm
+            campaignId={id}
+            initial={isDemo ? parseRules(campaign.rules) : undefined}
+        />
     );
 }
