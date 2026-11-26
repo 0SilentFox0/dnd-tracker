@@ -8,6 +8,20 @@ import { getCompendiumEntries } from '@/lib/api/compendium';
 import { COMPENDIUM_PAGE_SIZES } from '@/lib/constants/compendium-import';
 import { offsetPager } from '@/lib/hooks/common';
 
+export function useHasSourceNotes(
+    campaignId: string,
+    kind: string,
+    targetId: string | undefined
+) {
+    const { entries, isError } = useSourceNotes(
+        campaignId,
+        kind,
+        targetId ?? ''
+    );
+
+    return entries.length > 0 || isError;
+}
+
 export function useSourceNotes(
     campaignId: string,
     kind: string,
@@ -24,6 +38,7 @@ export function useSourceNotes(
                 signal
             ),
         placeholderData: keepPreviousData,
+        enabled: Boolean(targetId),
     });
 
     return {

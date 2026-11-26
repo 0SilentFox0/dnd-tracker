@@ -24,7 +24,9 @@
     "selectPlaceholder": "Виберіть опцію",
     "noneLabel": "Без вибору",
     "target": "Ціль",
-    "hasErrors": "є помилки"
+    "hasErrors": "є помилки",
+    "preview": "Перегляд",
+    "previewTitle": "Як бачать гравці"
   },
   "import": {
     "unsupportedType": "Підтримуються тільки CSV та JSON файли",
@@ -190,7 +192,8 @@
     "add": "Додати",
     "remove": "Прибрати",
     "zoomIcon": "Відкрити іконку: {name}",
-    "back": "Назад"
+    "back": "Назад",
+    "more": "Більше дій"
   },
   "form": {
     "nameRequired": "Вкажіть назву",

@@ -21,7 +21,7 @@ export default async function HelpPage() {
     ]);
 
     return (
-        <HudFormPage title={ui('ui.helpTitle')} aside={ui('ui.helpSubtitle')}>
+        <HudFormPage header={{ title: ui('ui.helpTitle'), aside: ui('ui.helpSubtitle') }}>
             {GROUPS.map((g) => (
                 <HudSection key={g.audience} title={ui(g.titleKey)}>
                     <ul className="space-y-3">

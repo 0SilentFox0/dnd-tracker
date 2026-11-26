@@ -4,6 +4,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
+    del: vi.fn(),
     mutateAsync: vi.fn(),
     navigate: vi.fn(),
     push: vi.fn(),
@@ -16,6 +17,7 @@ vi.mock('@/lib/hooks/skills', () => ({
         mutateAsync: h.mutateAsync,
         isPending: false,
     }),
+    useDeleteMainSkill: () => ({ mutateOk: h.del, isPending: false }),
 }));
 vi.mock('@/lib/hooks/spells', () => ({
     useSpellGroups: () => ({ data: [{ id: 'g', name: 'Fire' }] }),
@@ -109,5 +111,20 @@ describe('useMainSkillForm', () => {
         result.current.actions.cancel();
 
         expect(h.push).toHaveBeenCalledWith('/campaigns/c/dm/main-skills');
+    });
+
+    it('remove deletes and navigates only on success', async () => {
+        h.del.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+        const { result } = renderHook(() => useMainSkillForm('c', mainSkill));
+
+        await act(() => result.current.actions.remove());
+
+        expect(h.navigate).not.toHaveBeenCalled();
+
+        await act(() => result.current.actions.remove());
+
+        expect(h.del).toHaveBeenCalledWith('m1');
+        expect(h.navigate).toHaveBeenCalledWith('/campaigns/c/dm/main-skills');
     });
 });

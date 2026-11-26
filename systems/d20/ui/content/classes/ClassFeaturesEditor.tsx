@@ -133,6 +133,7 @@ export function ClassFeaturesEditor({
             {sorted.map((feature) => (
                 <div key={feature.level} hidden={feature.level !== current}>
                     <HudSection
+                        panel
                         title={t('features.level', { level: feature.level })}
                         action={
                             <Button
@@ -148,34 +149,39 @@ export function ClassFeaturesEditor({
                             </Button>
                         }
                     >
-                        <AbilityListEditor
-                            campaignId={campaignId}
-                            value={feature.abilities}
-                            onChange={(abilities) =>
-                                setAbilities(feature.level, abilities)
-                            }
-                            onValidityChange={(_, n) =>
-                                reportLevel(String(feature.level), n)
-                            }
-                            classColumns={classColumns}
-                            withIcon
-                        />
-                        <div className="mt-3 space-y-2">
-                            <p className="hud-sc text-xs text-hud-muted">
-                                {t('features.choices')}
-                            </p>
-                            <ChoiceListEditor
+                        <div className="ds-list-grid">
+                            <AbilityListEditor
                                 campaignId={campaignId}
-                                owner="class"
-                                value={feature.choices ?? []}
-                                onChange={(choices) =>
-                                    setChoices(feature.level, choices)
+                                value={feature.abilities}
+                                onChange={(abilities) =>
+                                    setAbilities(feature.level, abilities)
+                                }
+                                onValidityChange={(_, n) =>
+                                    reportLevel(String(feature.level), n)
                                 }
                                 classColumns={classColumns}
-                                onValidityChange={(_, n) =>
-                                    reportLevel(`choices-${feature.level}`, n)
-                                }
+                                withIcon
                             />
+                            <div className="space-y-2">
+                                <p className="hud-sc text-xs text-hud-muted">
+                                    {t('features.choices')}
+                                </p>
+                                <ChoiceListEditor
+                                    campaignId={campaignId}
+                                    owner="class"
+                                    value={feature.choices ?? []}
+                                    onChange={(choices) =>
+                                        setChoices(feature.level, choices)
+                                    }
+                                    classColumns={classColumns}
+                                    onValidityChange={(_, n) =>
+                                        reportLevel(
+                                            `choices-${feature.level}`,
+                                            n
+                                        )
+                                    }
+                                />
+                            </div>
                         </div>
                     </HudSection>
                 </div>

@@ -11,6 +11,11 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 const mocks = vi.hoisted(() => ({ system: 'homm' }));
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+    usePathname: () => '/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),
@@ -39,7 +44,7 @@ afterEach(cleanup);
 describe('RulesForm advancement tab', () => {
     it('is offered for wfrp only', () => {
         mocks.system = 'wfrp';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.getByRole('tab', {
@@ -49,7 +54,7 @@ describe('RulesForm advancement tab', () => {
 
         cleanup();
         mocks.system = 'homm';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.queryByRole('tab', {
@@ -60,7 +65,7 @@ describe('RulesForm advancement tab', () => {
 
     it('system sections come from the system ui; homm gets neither tab', () => {
         mocks.system = 'wfrp';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.getByRole('tab', { name: 'rules.mechanics.tables.label' })
@@ -68,7 +73,7 @@ describe('RulesForm advancement tab', () => {
 
         cleanup();
         mocks.system = 'homm';
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(
             screen.queryByRole('tab', { name: 'rules.mechanics.tables.label' })

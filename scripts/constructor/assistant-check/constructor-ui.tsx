@@ -215,7 +215,7 @@ export function ConstructorUiCheck({ flow }: { flow: string }) {
         <ConfirmProvider>
             <main style={{ maxWidth: 1000, margin: 'auto', padding: 12 }}>
                 {flow === 'rules' ? (
-                    <RulesForm campaignId="synthetic" />
+                    <RulesForm campaignId="synthetic" title="Rules" />
                 ) : flow === 'background' ? (
                     <SystemDmPage
                         campaignId="synthetic"

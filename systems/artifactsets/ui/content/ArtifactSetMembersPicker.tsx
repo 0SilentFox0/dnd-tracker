@@ -24,20 +24,20 @@ export function ArtifactSetMembersPicker({
     const t = useTranslations('artifacts');
 
     return (
-        <HudSection title={t('sets.members.title')} className="space-y-3">
+        <HudSection title={t('sets.members.title')} className="space-y-3" panel>
             <p className="text-xs text-muted-foreground">
                 {t('sets.members.hint')}
             </p>
-            <div className="max-h-72 divide-y overflow-y-auto rounded-md border">
+            <div className="ds-list-grid">
                 {artifacts.length === 0 ? (
-                    <p className="p-4 text-sm text-muted-foreground">
+                    <p className="ds-span p-4 text-sm text-muted-foreground">
                         {t('sets.members.empty')}
                     </p>
                 ) : (
                     artifacts.map((a) => (
                         <label
                             key={a.id}
-                            className="flex cursor-pointer items-center gap-3 p-3 hover:bg-muted/50"
+                            className="ds-interactive flex cursor-pointer items-center gap-3 rounded-lg border border-hud-rule p-3 hover:bg-hud-raised"
                         >
                             <Checkbox
                                 checked={selectedIds.has(a.id)}

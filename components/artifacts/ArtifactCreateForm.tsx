@@ -38,7 +38,6 @@ export function ArtifactCreateForm({
                 saving: tc('creating'),
                 iconHint: t('createIconHint', { bucket: 'artifact-icons' }),
             }}
-            cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
             initial={{
                 name: '',
                 description: '',
@@ -50,6 +49,7 @@ export function ArtifactCreateForm({
                 abilityIssues: [],
             }}
             actions={{
+                cancelHref: `/campaigns/${campaignId}/dm/artifacts`,
                 onSubmit: async (payload) => {
                     await create.mutateAsync({
                         ...payload,

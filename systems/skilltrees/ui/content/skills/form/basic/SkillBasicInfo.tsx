@@ -15,7 +15,7 @@ export function SkillBasicInfo({ form }: { form: SkillFormBinding }) {
     const { data, set } = form;
 
     return (
-        <div className="space-y-3">
+        <div className="ds-fields">
             <LabeledInput
                 id="skill-name"
                 label={t('name')}
@@ -26,7 +26,7 @@ export function SkillBasicInfo({ form }: { form: SkillFormBinding }) {
                 maxLength={SKILL_NAME_MAX}
             />
 
-            <div className="space-y-2">
+            <div className="ds-span space-y-2">
                 <Label htmlFor="skill-description">{t('description')}</Label>
                 <Textarea
                     id="skill-description"

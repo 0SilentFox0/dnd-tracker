@@ -151,3 +151,5 @@ export const COMPENDIUM_INFO_ISSUE_CODES: ReadonlySet<string> = new Set([
     'UNSUPPORTED_CATEGORY',
     'MEDIA_OR_FOUNDRY_SKIPPED',
 ]);
+
+export const COMPENDIUM_PREVIEW_TTL_MS = 15 * 60_000;

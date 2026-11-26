@@ -41,7 +41,6 @@ export const PACKS = {
         'choices',
         'spells',
         'spellEditor',
-        'scenario',
     ],
     abilityDisplay: [
         'abilityRegistry',
@@ -80,9 +79,13 @@ export const PACKS = {
     battle: [...BATTLE_NAMESPACES, 'maps', 'tileLabels', 'music'],
     ai: ['ai', 'scenario'],
     units: ['units'],
+    reference: ['reference'],
+    scenarioTexts: ['scenario'],
 } as const satisfies Record<PackKey, readonly Namespace[]>;
 
 const EDITOR = ['abilityDisplay', 'abilityEditor', 'characterSheet'] as const;
+
+const PREVIEW = [...EDITOR, 'reference'] as const;
 
 const CONTENT_LIST = ['contentLibrary', 'abilityDisplay'] as const;
 
@@ -114,8 +117,8 @@ export const ROUTE_SCOPES = {
     list: ['campaigns'],
     new: ['campaigns'],
     '[id]': ['dashboard', 'rules'],
-    '[id]/info': ['dashboard', 'rules', 'characterSheet', 'abilityDisplay'],
-    '[id]/character': ['characterSheet', 'abilityDisplay', 'rules'],
+    '[id]/info': ['dashboard', 'rules', 'characterSheet', 'abilityDisplay', 'reference'],
+    '[id]/character': ['characterSheet', 'abilityDisplay', 'rules', 'scenarioTexts'],
     '[id]/character/draft': ['characterSheet', 'contentLibrary'],
     '[id]/character/new': ['characterSheet', 'contentLibrary'],
     '[id]/character/edit': ['characterSheet', 'contentLibrary'],
@@ -130,20 +133,20 @@ export const ROUTE_SCOPES = {
     '[id]/show': ['story'],
     '[id]/acquaintances': ['story'],
     '[id]/dm/spells': CONTENT_LIST,
-    '[id]/dm/spells/[spellId]': EDITOR,
-    '[id]/dm/spells/new': EDITOR,
+    '[id]/dm/spells/[spellId]': PREVIEW,
+    '[id]/dm/spells/new': PREVIEW,
     '[id]/dm/spell-groups': CONTENT_LIST,
     '[id]/dm/races': CONTENT_EDIT,
     '[id]/dm/races/[raceId]': EDITOR,
-    '[id]/dm/classes': SYSTEM_SECTION,
-    '[id]/dm/classes/[classId]': CONTENT_EDIT,
+    '[id]/dm/classes': [...SYSTEM_SECTION, 'reference'],
+    '[id]/dm/classes/[classId]': [...CONTENT_EDIT, 'reference'],
     '[id]/dm/feats': CONTENT_LIST,
     '[id]/dm/feats/[featId]': EDITOR,
     '[id]/dm/backgrounds': SYSTEM_SECTION,
     '[id]/dm/backgrounds/[backgroundId]': CONTENT_EDIT,
     '[id]/dm/artifacts': CONTENT_LIST,
-    '[id]/dm/artifacts/[artifactId]': EDITOR,
-    '[id]/dm/artifacts/new': EDITOR,
+    '[id]/dm/artifacts/[artifactId]': PREVIEW,
+    '[id]/dm/artifacts/new': PREVIEW,
     '[id]/dm/skills': SYSTEM_SECTION,
     '[id]/dm/skills/[skillId]': SYSTEM_EDIT,
     '[id]/dm/skills/new': SYSTEM_EDIT,
@@ -159,6 +162,7 @@ export const ROUTE_SCOPES = {
         'characterSheet',
         'abilityDisplay',
         'contentLibrary',
+        'scenarioTexts',
     ],
     '[id]/dm/units': ['units', ...CONTENT_LIST],
     '[id]/dm/units/new': ['units', ...EDITOR],
@@ -175,7 +179,7 @@ export const ROUTE_SCOPES = {
     '[id]/dm/assistant': ['ai'],
     '[id]/dm/rules': ['rules', 'abilityDisplay'],
     '[id]/dm/print': CONSERVATIVE,
-    '[id]/dm/system': CONSERVATIVE,
+    '[id]/dm/system': [...CONSERVATIVE, 'reference'],
 } as const satisfies Record<string, readonly PackKey[]>;
 
 export type RouteKey = keyof typeof ROUTE_SCOPES;

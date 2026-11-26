@@ -31,7 +31,7 @@ describe('characters in en', () => {
         expect(
             screen.getByText('Create a race in the Races section first')
         ).toBeInTheDocument();
-        expect(screen.getByText('Character portrait')).toBeInTheDocument();
+        expect(screen.queryByText('Character portrait')).toBeNull();
     });
 
     it('hideLineage hides race, subrace and alignment', async () => {

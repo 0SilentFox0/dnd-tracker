@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useDeferredValue, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -13,7 +13,10 @@ import { ArtifactItemFields } from './ArtifactItemFields';
 import { ArtifactWeaponFields } from './ArtifactWeaponFields';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
+import { ArtifactReferenceDetail } from '@/components/campaigns/info/detail/ArtifactReferenceDetail';
 import { IconUrlField } from '@/components/common/fields/IconUrlField';
+import { FormPreviewPanel } from '@/components/common/shell/FormPreviewPanel';
+import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
@@ -33,6 +36,7 @@ import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import type { ArmorStats } from '@/lib/utils/artifacts/armor-stats';
 import type { ArtifactFormSubmitPayload } from '@/lib/utils/artifacts/artifact-form';
+import { toArtifactReferencePreview } from '@/lib/utils/artifacts/reference-preview';
 import { isWeaponSlot } from '@/lib/utils/artifacts/weapon-slot';
 import type { WeaponStats } from '@/lib/utils/artifacts/weapon-stats';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
@@ -40,6 +44,8 @@ import type { ItemStats } from '@/lib/utils/items/item-stats';
 import type { ArtifactSetOption } from '@/types/artifacts';
 
 export type { ArtifactFormSubmitPayload };
+
+const FORM_ID = 'artifact-form';
 
 export interface ArtifactFormInitial {
     name: string;
@@ -71,8 +77,9 @@ export interface ArtifactFormProps {
     actions: {
         onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
         onDelete?: () => Promise<void>;
+        cancelHref: string;
     };
-    cancelHref: string;
+    side?: React.ReactNode;
 }
 
 export function ArtifactForm({
@@ -82,21 +89,33 @@ export function ArtifactForm({
     mode,
     labels,
     actions,
-    cancelHref,
+    side,
 }: ArtifactFormProps) {
     const t = useTranslations();
 
     const ta = useTranslator('abilities');
 
-    const router = useRouter();
+    const { cancelHref, ...handlers } = actions;
 
-    const editor = useArtifactForm({ initial, mode, ...actions });
+    const editor = useArtifactForm({ initial, mode, ...handlers });
 
     const { data, set } = editor.form;
 
     const hasWeapon = isWeaponSlot(data.slot);
 
     const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
+
+    const preview = useDeferredValue(
+        useMemo(
+            () =>
+                toArtifactReferencePreview(data, {
+                    setName:
+                        artifactSets.find((x) => x.id === data.setId)?.name ??
+                        null,
+                }),
+            [data, artifactSets]
+        )
+    );
 
     const rules = useCampaignRules(campaignId).data;
 
@@ -127,7 +146,7 @@ export function ArtifactForm({
             label: t('common.tabs.basic'),
             content: (
                 <div className="space-y-5">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="ds-fields">
                         <LabeledInput
                             id="artifact-name"
                             label={t('artifacts.form.name')}
@@ -193,7 +212,7 @@ export function ArtifactForm({
                         </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="ds-span space-y-2">
                         <Label htmlFor="artifact-description">
                             {t('artifacts.form.description')}
                         </Label>
@@ -304,52 +323,75 @@ export function ArtifactForm({
     ];
 
     return (
-        <HudFormPage title={labels.title} aside={labels.description}>
+        <HudFormPage
+            width="wide"
+            header={{
+                title: labels.title,
+                aside: labels.description,
+                back: {
+                    href: cancelHref,
+                    label: t('common.dmSections.artifacts'),
+                },
+                menu: actions.onDelete && (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('common.actions.delete'),
+                                tone: 'danger',
+                                disabled: editor.status.isBusy,
+                                onSelect: () => void editor.actions.remove(),
+                            },
+                        ]}
+                    />
+                ),
+            }}
+            actions={
+                <>
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={cancelHref}>
+                            {t('common.actions.cancel')}
+                        </Link>
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isBusy ||
+                            !editor.abilities.valid ||
+                            !statsValid
+                        }
+                    >
+                        {editor.status.isSaving
+                            ? labels.saving
+                            : withAbilityErrors(
+                                  labels.submit,
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+            side={
+                <>
+                    <FormPreviewPanel>
+                        <ArtifactReferenceDetail
+                            campaignId={campaignId}
+                            item={preview}
+                            isDM={false}
+                        />
+                    </FormPreviewPanel>
+                    {side}
+                </>
+            }
+        >
             <HudForm
-                id="artifact-form"
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
                 error={editor.status.error}
                 tabs={tabs}
                 tab={activeTab}
                 onTabChange={setTab}
-                actions={
-                    <>
-                        {actions.onDelete && (
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={() => void editor.actions.remove()}
-                                disabled={editor.status.isBusy}
-                            >
-                                {t('common.actions.delete')}
-                            </Button>
-                        )}
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => router.push(cancelHref)}
-                            disabled={editor.status.isBusy}
-                        >
-                            {t('common.actions.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isBusy ||
-                                !editor.abilities.valid ||
-                                !statsValid
-                            }
-                        >
-                            {editor.status.isSaving
-                                ? labels.saving
-                                : withAbilityErrors(
-                                      labels.submit,
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
+                tabStyles={{ variant: 'rail' }}
             />
         </HudFormPage>
     );

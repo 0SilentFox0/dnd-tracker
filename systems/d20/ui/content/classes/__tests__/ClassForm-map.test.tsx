@@ -23,6 +23,10 @@ vi.mock('@/lib/hooks/classes', async () => {
     };
 });
 
+vi.mock('@/components/content-import/shared/SourceNotes', () => ({
+    SourceNotes: () => null,
+}));
+
 vi.mock('@/systems/d20/ui/content/classes/ClassBasicsTab', () => ({
     ClassBasicsTab: () => <div>basics</div>,
 }));

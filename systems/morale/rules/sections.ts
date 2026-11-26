@@ -25,6 +25,7 @@ export const MORALE_SECTIONS: SectionsContribution = {
     sections: {
         morale: {
             owner: 'morale',
+            group: 'combat',
             mechanic: true,
             labels: 'rulesMorale',
             items: itemsFromShape(

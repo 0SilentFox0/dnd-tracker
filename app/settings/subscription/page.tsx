@@ -12,7 +12,7 @@ export default async function SubscriptionPage() {
     const t = await getTranslator(await getRequestLocale(), 'auth');
 
     return (
-        <HudFormPage title={t('settings.subscription.title')}>
+        <HudFormPage header={{ title: t('settings.subscription.title') }}>
             <p className="px-4 py-3 text-hud-muted sm:px-0">
                 {t('settings.subscription.soon')}
             </p>

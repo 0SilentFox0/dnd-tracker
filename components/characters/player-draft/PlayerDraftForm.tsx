@@ -75,8 +75,10 @@ export function PlayerDraftForm({
 
     return (
         <HudFormPage
-            title={characterId ? t('titleEdit') : t('titleNew')}
-            aside={t('aside')}
+            header={{
+                title: characterId ? t('titleEdit') : t('titleNew'),
+                aside: t('aside'),
+            }}
         >
             <OnboardingHint id="player.draft" className="mb-3" />
             <HudForm

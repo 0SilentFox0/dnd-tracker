@@ -75,7 +75,7 @@ export function UnitSpellcastingFields({
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="ds-fields">
                 <div>
                     <Label htmlFor="spellcasting-ability">{t('ability')}</Label>
                     <SelectField
@@ -158,7 +158,7 @@ export function UnitSpellcastingFields({
                                 {tCommon('delete')}
                             </Button>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        <div className="ds-fields ds-fields--num">
                             <div>
                                 <Label htmlFor={`grant-limit-${i}`}>
                                     {t('usage')}

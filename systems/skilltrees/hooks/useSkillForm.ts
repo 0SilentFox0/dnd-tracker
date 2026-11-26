@@ -7,7 +7,11 @@ import { useTranslations } from 'next-intl';
 import { abilitySaveError, useAbilityValidity } from '@/lib/hooks/abilities';
 import { useNavigateFresh } from '@/lib/hooks/common';
 import { useMainSkills } from '@/lib/hooks/skills';
-import { useCreateSkill, useUpdateSkill } from '@/lib/hooks/skills';
+import {
+    useCreateSkill,
+    useDeleteSkill,
+    useUpdateSkill,
+} from '@/lib/hooks/skills';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { initialSkillFormValues } from '@/systems/skilltrees/rules/form/normalize';
 import { buildSkillFormPayload } from '@/systems/skilltrees/rules/form/payload';
@@ -38,6 +42,8 @@ export function useSkillForm(
     const create = useCreateSkill(campaignId);
 
     const update = useUpdateSkill(campaignId);
+
+    const del = useDeleteSkill(campaignId);
 
     const [values, setValues] = useState<SkillFormValues>(() =>
         initialSkillFormValues(initialData)
@@ -89,15 +95,21 @@ export function useSkillForm(
         }
     };
 
+    const remove = async () => {
+        if (initialData && (await del.mutateOk(initialData.id)))
+            navigateFresh(listHref);
+    };
+
     return {
         form: { data: values, set } satisfies SkillFormBinding,
         mainSkills,
         abilities: { ...validity, issues: initialData?.abilityIssues ?? [] },
         status: {
             isSaving: create.isPending || update.isPending,
+            isDeleting: del.isPending,
             error,
             isEdit: !!initialData,
         },
-        actions: { submit, cancel: () => router.push(listHref) },
+        actions: { submit, remove, cancel: () => router.push(listHref) },
     };
 }

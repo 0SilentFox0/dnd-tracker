@@ -13,12 +13,12 @@ interface ChipItem {
     onSelect?: () => void;
 }
 
-const CHIP =
+export const HUD_CHIP_CLASS =
     'flex h-8 shrink-0 items-center rounded-lg border border-hud-line px-3 text-[13px] text-hud-muted transition-[background-color,box-shadow,color,border-color] duration-150 hover:border-hud-muted hover:text-hud-ink';
 
 const CHIP_LG = 'h-11 min-h-11 px-4 text-sm';
 
-const ACTIVE =
+export const HUD_CHIP_ACTIVE_CLASS =
     'bg-hud-panel-2 text-hud-ink shadow-[inset_0_-2px_0_var(--hud-accent)]';
 
 const scrollActiveIntoView = (el: HTMLElement | null) =>
@@ -33,7 +33,7 @@ export function HudChipTabs({
     ariaLabel: string;
     size?: 'md' | 'lg';
 }) {
-    const chip = cn(CHIP, size === 'lg' && CHIP_LG);
+    const chip = cn(HUD_CHIP_CLASS, size === 'lg' && CHIP_LG);
 
     return (
         <nav
@@ -47,7 +47,7 @@ export function HudChipTabs({
                         href={it.href}
                         ref={it.active ? scrollActiveIntoView : undefined}
                         aria-current={it.active ? 'page' : undefined}
-                        className={cn(chip, it.active && ACTIVE)}
+                        className={cn(chip, it.active && HUD_CHIP_ACTIVE_CLASS)}
                     >
                         {it.label}
                     </Link>
@@ -58,7 +58,7 @@ export function HudChipTabs({
                         ref={it.active ? scrollActiveIntoView : undefined}
                         aria-pressed={it.active}
                         onClick={it.onSelect}
-                        className={cn(chip, it.active && ACTIVE)}
+                        className={cn(chip, it.active && HUD_CHIP_ACTIVE_CLASS)}
                     >
                         {it.label}
                     </button>

@@ -64,6 +64,7 @@
   },
   "list": {
     "duplicateFailed": "Could not duplicate the skill. Please try again.",
+    "deleteFailed": "Could not delete the skill. Please try again.",
     "appearanceSaveFailed": "Could not save the appearance description"
   },
   "print": {

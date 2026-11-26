@@ -31,9 +31,9 @@ export function SpellFormBasicFields({
     const t = useTranslator();
 
     return (
-        <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
+        <div className="ds-fields">
             <LabeledInput
-                containerClassName="col-span-2"
+                containerClassName="ds-span"
                 id="name"
                 label={t('spellEditor.basic.name')}
                 value={formData.name}
@@ -108,7 +108,7 @@ export function SpellFormBasicFields({
             )}
             {formData.cost === 'reaction' && (
                 <LabeledInput
-                    containerClassName="col-span-2"
+                    containerClassName="ds-span"
                     id="reaction-trigger"
                     label={t('spellEditor.basic.reactionTrigger')}
                     value={formData.casting?.trigger ?? ''}
@@ -123,7 +123,7 @@ export function SpellFormBasicFields({
                     }
                 />
             )}
-            <div className="col-span-2">
+            <div className="ds-span">
                 <Label htmlFor="groupId">{t('spellEditor.basic.school')}</Label>
                 <SelectField
                     id="groupId"
@@ -144,7 +144,7 @@ export function SpellFormBasicFields({
                 value={formData.fx}
                 onChange={(fx) => setFormData({ ...formData, fx })}
             />
-            <div className="col-span-2">
+            <div className="ds-span">
                 <Label htmlFor="description">
                     {t('spellEditor.basic.description')}
                 </Label>
@@ -161,7 +161,7 @@ export function SpellFormBasicFields({
                     rows={3}
                 />
             </div>
-            <div className="col-span-2">
+            <div className="ds-span">
                 <Label htmlFor="appearanceDescription">
                     {t('spellEditor.basic.appearance')}
                 </Label>
@@ -178,7 +178,7 @@ export function SpellFormBasicFields({
                     rows={3}
                 />
             </div>
-            <div className="col-span-2">
+            <div className="ds-span">
                 <IconUrlField
                     id="icon"
                     label={t('spellEditor.basic.icon')}

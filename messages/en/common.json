@@ -24,7 +24,9 @@
     "selectPlaceholder": "Select an option",
     "noneLabel": "None",
     "target": "Target",
-    "hasErrors": "has errors"
+    "hasErrors": "has errors",
+    "preview": "Preview",
+    "previewTitle": "How players see it"
   },
   "import": {
     "unsupportedType": "Only CSV and JSON files are supported",
@@ -190,7 +192,8 @@
     "add": "Add",
     "remove": "Remove",
     "zoomIcon": "Open icon: {name}",
-    "back": "Back"
+    "back": "Back",
+    "more": "More actions"
   },
   "form": {
     "nameRequired": "Enter a name",

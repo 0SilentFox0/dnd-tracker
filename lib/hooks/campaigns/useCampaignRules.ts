@@ -8,12 +8,17 @@ import { getCampaignRules, updateCampaignRules } from '@/lib/api/rules';
 import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
 import type { RulesetPatch } from '@/lib/utils/rules';
 import { preloadSystem } from '@/lib/utils/rules/systems/preload';
+import type { CampaignRulesView } from '@/types/campaigns';
 
-export function useCampaignRules(campaignId: string) {
+export function useCampaignRules(
+    campaignId: string,
+    opts?: { initial?: CampaignRulesView }
+) {
     return useQuery({
         queryKey: campaignKeys.rules(campaignId),
         queryFn: () => getCampaignRules(campaignId),
-        enabled: !!campaignId,
+        enabled: !!campaignId && !opts?.initial,
+        initialData: opts?.initial,
         staleTime: REFERENCE_STALE_MS,
     });
 }

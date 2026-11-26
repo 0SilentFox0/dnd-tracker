@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
+import { COMPENDIUM_PREVIEW_TTL_MS } from '@/lib/constants/compendium-import';
 import type { Actor } from '@/lib/utils/api/actor';
 import { isRecord } from '@/lib/utils/common/is-record';
 import {
@@ -34,7 +35,7 @@ export function tokenFor(
             campaign: actor.campaignId,
             fingerprint,
             planHash,
-            expires: Date.now() + 15 * 60_000,
+            expires: Date.now() + COMPENDIUM_PREVIEW_TTL_MS,
         })
     ).toString('base64url');
 

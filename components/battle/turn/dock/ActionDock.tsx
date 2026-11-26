@@ -75,7 +75,7 @@ export function ActionDock({
     return (
         <div
             data-slot="action-dock"
-            className="pointer-events-auto flex w-full flex-col items-stretch gap-2"
+            className="pointer-events-auto relative isolate flex w-full flex-col items-stretch gap-2 before:pointer-events-none before:absolute before:-inset-x-4 before:-inset-y-3 before:-z-10 before:bg-gradient-to-l before:from-black/60 before:via-black/35 before:to-transparent before:content-['']"
         >
             {children}
             {phase !== 'acting' && <DockHp />}

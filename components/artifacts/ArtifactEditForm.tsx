@@ -5,8 +5,10 @@ import { useTranslations } from 'next-intl';
 
 import { ArtifactForm } from './ArtifactForm';
 
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { ArtifactRarity } from '@/lib/constants/artifacts';
 import { useDeleteArtifact, useUpdateArtifact } from '@/lib/hooks/artifacts';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import type { ArtifactData, ArtifactSetOption } from '@/types/artifacts';
 
 interface ArtifactEditFormProps {
@@ -30,6 +32,8 @@ export function ArtifactEditForm({
 
     const remove = useDeleteArtifact(campaignId);
 
+    const hasNotes = useHasSourceNotes(campaignId, 'artifacts', artifact.id);
+
     return (
         <ArtifactForm
             campaignId={campaignId}
@@ -42,7 +46,15 @@ export function ArtifactEditForm({
                 saving: tc('saving'),
                 iconHint: t('editIconHint', { bucket: 'artifact-icons' }),
             }}
-            cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
+            side={
+                hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="artifacts"
+                        targetId={artifact.id}
+                    />
+                ) : undefined
+            }
             initial={{
                 name: artifact.name,
                 description: artifact.description || '',
@@ -58,6 +70,7 @@ export function ArtifactEditForm({
                 systemStats: artifact.systemStats ?? undefined,
             }}
             actions={{
+                cancelHref: `/campaigns/${campaignId}/dm/artifacts`,
                 onSubmit: async (payload) => {
                     await update.mutateAsync({
                         artifactId: artifact.id,

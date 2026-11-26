@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
     create: vi.fn(),
+    mutateOk: vi.fn(),
     update: vi.fn(),
     navigate: vi.fn(),
     push: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('@/lib/hooks/skills', () => ({
     },
     useCreateSkill: () => ({ mutateAsync: h.create, isPending: false }),
     useUpdateSkill: () => ({ mutateAsync: h.update, isPending: false }),
+    useDeleteSkill: () => ({ mutateOk: h.mutateOk, isPending: false }),
 }));
 
 import { useSkillForm } from '@/systems/skilltrees/hooks/useSkillForm';
@@ -161,5 +163,30 @@ describe('useSkillForm', () => {
             { id: 'api', name: 'From API' },
         ]);
         expect(h.mainSkillsEnabled.at(-1)).toBe(true);
+    });
+
+    it('remove navigates only when the delete succeeds', async () => {
+        h.mutateOk.mockResolvedValueOnce(true);
+
+        const { result } = renderHook(() =>
+            useSkillForm('c', { initialData: existing })
+        );
+
+        await act(() => result.current.actions.remove());
+
+        expect(h.mutateOk).toHaveBeenCalledWith('sk1');
+        expect(h.navigate).toHaveBeenCalledTimes(1);
+    });
+
+    it('remove stays on the page when the delete fails', async () => {
+        h.mutateOk.mockResolvedValueOnce(false);
+
+        const { result } = renderHook(() =>
+            useSkillForm('c', { initialData: existing })
+        );
+
+        await act(() => result.current.actions.remove());
+
+        expect(h.navigate).not.toHaveBeenCalled();
     });
 });

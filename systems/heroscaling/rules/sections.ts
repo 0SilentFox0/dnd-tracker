@@ -52,6 +52,7 @@ export const HEROSCALING_SECTIONS: SectionsContribution = {
     sections: {
         heroScaling: {
             owner: 'heroscaling',
+            group: 'characters',
             mechanic: true,
             labels: 'rulesHeroScaling',
             items: itemsFromShape(

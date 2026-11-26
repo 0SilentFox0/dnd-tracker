@@ -19,13 +19,15 @@ import type { CompendiumReport as Report } from '@/types/compendium-import';
 
 export type Row = Report['rows'][number];
 
-export type BlockerActions = { allowMixedEdition?: () => void; busy?: boolean };
+export type BlockerActions = {
+    allowMixedEdition?: () => void;
+    goToDependencies?: () => void;
+    busy?: boolean;
+};
 
 const GROUP_ITEMS_STEP = 20;
 
 const BLOCKER_PREVIEW = 5;
-
-export const DEPENDENCIES_ANCHOR = 'compendium-dependencies';
 
 export function Counts({ counts }: { counts: Report['counts'] }) {
     const t = useTranslator('compendium');
@@ -89,13 +91,14 @@ export function BlockerCard({
                         {t('report.allowMixed')}
                     </Button>
                 )}
-            {group.code === 'UNRESOLVED_REF' && (
-                <a
-                    className="inline-block text-hud-accent-fg underline"
-                    href={`#${DEPENDENCIES_ANCHOR}`}
+            {group.code === 'UNRESOLVED_REF' && actions?.goToDependencies && (
+                <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={actions.goToDependencies}
                 >
                     {t('report.goToBinding')}
-                </a>
+                </Button>
             )}
             <ul className="flex flex-wrap gap-1">
                 {group.items.slice(0, shown).map((item, index) => (

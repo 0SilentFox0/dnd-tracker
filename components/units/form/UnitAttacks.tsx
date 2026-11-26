@@ -64,7 +64,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
             }
         >
             {attacks.length > 0 ? (
-                <div className="space-y-3">
+                <div className="ds-list-grid">
                     {attacks.map((attack, index) => (
                         <UnitAttackEditor
                             key={index}

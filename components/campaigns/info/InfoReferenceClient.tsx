@@ -1,14 +1,30 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { ReferenceSearchBar } from './ReferenceSearchBar';
-import { ReferenceSectionAccordion } from './ReferenceSectionAccordion';
+import { ArtifactReferenceDetail } from './detail/ArtifactReferenceDetail';
+import { ArtifactSetBlock } from './detail/ArtifactSetBlock';
+import { ClassReferenceDetail } from './detail/ClassReferenceDetail';
+import { SkillReferenceDetail } from './detail/SkillReferenceDetail';
+import { SpellReferenceDetail } from './detail/SpellReferenceDetail';
+import { ReferenceLayout } from './layout/ReferenceLayout';
+import { ReferenceList } from './layout/ReferenceList';
+import { ReferenceRail } from './layout/ReferenceRail';
+import { ArtifactReferenceRow } from './rows/ArtifactReferenceRow';
+import { ClassReferenceRow } from './rows/ClassReferenceRow';
+import { SkillReferenceRow } from './rows/SkillReferenceRow';
+import { SpellReferenceRow } from './rows/SpellReferenceRow';
 
 import { EmptyState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
-import { useInfoReferenceFilters } from '@/lib/hooks/campaigns';
+import {
+    type ReferenceEntry,
+    type RefKey,
+    useInfoReferenceFilters,
+    useReferenceGroups,
+    useReferenceSelection,
+} from '@/lib/hooks/campaigns';
+import { useIsCompact } from '@/lib/hooks/common';
 import type {
     ArtifactForReference,
     ArtifactSetForReference,
@@ -27,9 +43,35 @@ export interface InfoReferenceClientProps {
     isDM: boolean;
 }
 
-const strong = (chunks: ReactNode) => (
-    <strong className="text-hud-ink">{chunks}</strong>
-);
+const ALL_PREVIEW = 6;
+
+function rowOf(
+    entry: ReferenceEntry,
+    row: {
+        selected: boolean;
+        onSelect: () => void;
+        tabIndex: 0 | -1;
+        ref: (el: HTMLElement | null) => void;
+    }
+) {
+    const props = {
+        selected: row.selected,
+        onSelect: row.onSelect,
+        tabIndex: row.tabIndex,
+        register: row.ref,
+    };
+
+    switch (entry.kind) {
+        case 'spell':
+            return <SpellReferenceRow item={entry.item} {...props} />;
+        case 'skill':
+            return <SkillReferenceRow item={entry.item} {...props} />;
+        case 'artifact':
+            return <ArtifactReferenceRow item={entry.item} {...props} />;
+        case 'class':
+            return <ClassReferenceRow item={entry.item} {...props} />;
+    }
+}
 
 export function InfoReferenceClient({
     campaignId,
@@ -42,160 +84,136 @@ export function InfoReferenceClient({
 }: InfoReferenceClientProps) {
     const t = useTranslations('dashboard.reference');
 
-    const { filters, results, ui } = useInfoReferenceFilters(
+    const isMobile = useIsCompact();
+
+    const { filters, results } = useInfoReferenceFilters(
         skills,
         spells,
         artifacts,
         classes
     );
 
-    const section = filters.section.value;
+    const section = filters.section;
 
-    return (
-        <div className="space-y-3">
-            <ReferenceSearchBar filters={filters} />
+    const view = useReferenceGroups({
+        section: section.value,
+        skills: results.filteredSkills,
+        spells: results.filteredSpells,
+        artifacts: results.filteredArtifacts,
+        classes: results.filteredClasses,
+        limit:
+            section.value === 'all' && !filters.search.value.trim()
+                ? ALL_PREVIEW
+                : Number.POSITIVE_INFINITY,
+    });
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-hud-panel px-3 py-2 text-sm text-hud-muted">
-                {section === 'all' && (
-                    <>
-                        {filters.classMode ? (
-                            <span>
-                                {t.rich('count.classes', {
-                                    count: results.filteredClasses.length,
-                                    strong,
-                                })}
-                            </span>
-                        ) : (
-                            <span>
-                                {t.rich('count.skills', {
-                                    count: results.filteredSkills.length,
-                                    strong,
-                                })}
-                            </span>
-                        )}
-                        <span>
-                            {t.rich('count.spells', {
-                                count: results.filteredSpells.length,
-                                strong,
-                            })}
-                        </span>
-                        <span>
-                            {t.rich('count.artifacts', {
-                                count: results.filteredArtifacts.length,
-                                strong,
-                            })}
-                        </span>
-                        {filters.visible.classes && !ui.classesEmpty && (
-                            <a
-                                href="#ref-classes"
-                                className="touch-manipulation text-hud-accent-fg underline-offset-2 hover:text-hud-ink hover:underline"
-                            >
-                                {t('jump.classes')}
-                            </a>
-                        )}
-                        {filters.visible.skills && !ui.skillsEmpty && (
-                            <a
-                                href="#ref-skills"
-                                className="touch-manipulation text-hud-accent-fg underline-offset-2 hover:text-hud-ink hover:underline"
-                            >
-                                {t('jump.skills')}
-                            </a>
-                        )}
-                        {!ui.spellsEmpty && (
-                            <a
-                                href="#ref-spells"
-                                className="touch-manipulation text-hud-accent-fg underline-offset-2 hover:text-hud-ink hover:underline"
-                            >
-                                {t('jump.spells')}
-                            </a>
-                        )}
-                        {!ui.artifactsEmpty && (
-                            <a
-                                href="#ref-artifacts"
-                                className="touch-manipulation text-hud-accent-fg underline-offset-2 hover:text-hud-ink hover:underline"
-                            >
-                                {t('jump.artifacts')}
-                            </a>
-                        )}
-                    </>
-                )}
-                {section === 'classes' && (
-                    <>
-                        {t.rich('shown.classes', {
-                            count: results.filteredClasses.length,
-                            strong,
-                        })}
-                    </>
-                )}
-                {section === 'classes' &&
-                    ui.classesEmpty &&
-                    !ui.nothingFound && (
-                        <EmptyState title={t('empty.classes')} />
-                    )}
-                {section === 'skills' && (
-                    <>
-                        {t.rich('shown.skills', {
-                            count: results.filteredSkills.length,
-                            strong,
-                        })}
-                    </>
-                )}
-                {section === 'artifacts' && (
-                    <>
-                        {t.rich('shown.artifacts', {
-                            count: results.filteredArtifacts.length,
-                            strong,
-                        })}
-                    </>
-                )}
-                {section === 'spells' && (
-                    <>
-                        {t.rich('shown.spells', {
-                            count: results.filteredSpells.length,
-                            strong,
-                        })}
-                    </>
-                )}
-            </div>
+    const selection = useReferenceSelection({
+        visible: view.visible.map((e) => e.key),
+        section,
+        autoSelect: !isMobile,
+    });
 
-            {ui.nothingFound && (
-                <EmptyState
-                    className="bg-hud-panel"
-                    title={t('empty.nothing')}
-                    description={t('empty.nothingHint')}
-                    action={
-                        <Button variant="outline" onClick={filters.clearAll}>
-                            {t('empty.resetAll')}
-                        </Button>
-                    }
+    const entry = selection.selected
+        ? view.byKey.get(selection.selected)
+        : undefined;
+
+    const emptyState =
+        view.totals.all === 0 ? (
+            <EmptyState
+                title={t('empty.nothing')}
+                description={t('empty.nothingHint')}
+                action={
+                    <Button variant="outline" onClick={filters.clearAll}>
+                        {t('empty.resetAll')}
+                    </Button>
+                }
+            />
+        ) : (
+            <EmptyState title={t('detail.empty')} />
+        );
+
+    const setOf =
+        entry?.kind === 'artifact' && entry.item.setName
+            ? artifactSets.find((s) => s.name === entry.item.setName)
+            : undefined;
+
+    const detail = entry ? (
+        <div className="space-y-4" key={entry.key}>
+            {entry.kind === 'spell' && (
+                <SpellReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
                 />
             )}
-
-            <ReferenceSectionAccordion
-                campaignId={campaignId}
-                isDM={isDM}
-                shown={ui.shown}
-                items={{
-                    skills: results.filteredSkills,
-                    spells: results.filteredSpells,
-                    artifacts: results.filteredArtifacts,
-                    artifactSets,
-                    classes: results.filteredClasses,
-                }}
-            />
-
-            {section === 'classes' && ui.classesEmpty && !ui.nothingFound && (
-                <EmptyState title={t('empty.classes')} />
+            {entry.kind === 'skill' && (
+                <SkillReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
             )}
-            {section === 'skills' && ui.skillsEmpty && !ui.nothingFound && (
-                <EmptyState title={t('empty.skills')} />
+            {entry.kind === 'artifact' && (
+                <ArtifactReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
             )}
-            {section === 'spells' && ui.spellsEmpty && !ui.nothingFound && (
-                <EmptyState title={t('empty.spells')} />
+            {entry.kind === 'class' && (
+                <ClassReferenceDetail
+                    key={entry.item.id}
+                    campaignId={campaignId}
+                    item={entry.item}
+                    isDM={isDM}
+                />
             )}
-            {section === 'artifacts' &&
-                ui.artifactsEmpty &&
-                !ui.nothingFound && <EmptyState title={t('empty.artifacts')} />}
+            {setOf && <ArtifactSetBlock set={setOf} />}
         </div>
+    ) : (
+        emptyState
+    );
+
+    return (
+        <ReferenceLayout
+            rail={<ReferenceRail filters={filters} counts={view.totals} />}
+            list={
+                <ReferenceList<ReferenceEntry>
+                    groups={view.groups.map((g) => ({
+                        key: g.key,
+                        accent: g.accent,
+                        items: g.entries,
+                        title:
+                            g.total > g.entries.length ? (
+                                <span className="flex items-center justify-between gap-2">
+                                    {g.title}
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => section.set(g.section)}
+                                    >
+                                        {t('list.showAll', {
+                                            count: g.total,
+                                        })}
+                                    </Button>
+                                </span>
+                            ) : (
+                                g.title
+                            ),
+                    }))}
+                    selected={selection.selected}
+                    onSelect={(key) => selection.select(key as RefKey)}
+                    keyOf={(e) => e.key}
+                    renderRow={rowOf}
+                />
+            }
+            detail={detail}
+            detailOpen={selection.isOpen}
+            onDetailClose={selection.clear}
+            detailTitle={entry?.item.name ?? ''}
+        />
     );
 }

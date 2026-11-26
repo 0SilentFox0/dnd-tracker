@@ -113,7 +113,7 @@ export function ChoiceListEditor({
     };
 
     return (
-        <div className="space-y-3">
+        <div className="ds-list-grid">
             {value.map((choice, i) => {
                 const onPatch = (patch: Partial<Choice>) => update(i, patch);
 

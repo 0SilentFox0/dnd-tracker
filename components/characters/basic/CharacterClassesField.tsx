@@ -38,15 +38,16 @@ export function CharacterClassesField({
     const hint = resolved.find((e) => e.class)?.class?.skillChoices;
 
     return (
-        <div className="col-span-2 space-y-3">
+        <div className="space-y-3">
             {resolved.length > 0 && (
                 <div
                     aria-hidden="true"
-                    className="grid grid-cols-[1fr_1fr_4.5rem_auto] gap-2 text-xs text-muted-foreground"
+                    className="grid grid-cols-[1fr_1fr_4.5rem_2.5rem_auto] gap-2 text-xs text-muted-foreground"
                 >
                     <span>{t('class')}</span>
                     <span>{t('subclass')}</span>
                     <span>{t('level')}</span>
+                    <span />
                     <span className="w-9" />
                 </div>
             )}
@@ -60,7 +61,7 @@ export function CharacterClassesField({
 
                 return (
                     <div key={i} className="space-y-1">
-                        <div className="grid grid-cols-[1fr_1fr_4.5rem_auto] items-center gap-2">
+                        <div className="grid grid-cols-[1fr_1fr_4.5rem_2.5rem_auto] items-center gap-2">
                             <SelectField
                                 aria-label={t('classN', { n: i + 1 })}
                                 value={entry.classId}
@@ -118,6 +119,9 @@ export function CharacterClassesField({
                                     })
                                 }
                             />
+                            <span className="hud-sc text-center text-xs text-hud-muted">
+                                {cls ? `d${cls.hitDie}` : ''}
+                            </span>
                             <Button
                                 type="button"
                                 variant="ghost"

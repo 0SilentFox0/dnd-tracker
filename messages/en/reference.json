@@ -1,0 +1,42 @@
+{
+  "summary": {
+    "hitDie": "Hit die: d{die}",
+    "savingThrows": "Saving throws: {list}",
+    "caster": "{caster}",
+    "casterAbility": "{caster} ({ability})",
+    "armor": "Armor: {list}",
+    "weapons": "Weapons: {list}",
+    "tools": "Tools: {list}",
+    "skills": "Skills: {count} from {list}"
+  },
+  "mechanics": {
+    "branch": "Branch: {name}",
+    "abilities": "Abilities: {list}",
+    "grantedSpell": "Grants spell: {name}",
+    "spell": "{level}, {type}",
+    "dice": "Dice: {count}d",
+    "resolution": "Check: {value}",
+    "cost": "Cost: {value}"
+  },
+  "card": {
+    "levelShort": "lvl {level}",
+    "effects": "Effects",
+    "mechanics": "Mechanics",
+    "appearanceSkill": "Appearance description (how it looks in the game)",
+    "appearanceSpell": "Appearance description (how the spell looks)",
+    "appearancePlaceholderSkill": "For example: a bright fire orb flying at the target...",
+    "appearancePlaceholderSpell": "For example: a fireball exploding in bright flames...",
+    "featuresByLevel": "Features by level",
+    "subclass": "Subclass: {name}",
+    "gear": "gear",
+    "heldBy": "held by {name}",
+    "free": "free",
+    "setItems": "Items: {names}",
+    "setBonuses": "Set bonuses"
+  },
+  "filters": {
+    "set": {
+      "label": "Artifact set"
+    }
+  }
+}

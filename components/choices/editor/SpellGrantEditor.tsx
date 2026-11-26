@@ -42,7 +42,7 @@ export function SpellGrantEditor({
                 {t('grant.freeCast')}
             </label>
             {value && (
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="ds-fields">
                     <label className="text-xs">
                         {t('grant.uses')}
                         <Input

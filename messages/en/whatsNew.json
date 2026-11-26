@@ -1,4 +1,8 @@
 {
+  "2026-11-26-codex": {
+    "title": "Codex redesign",
+    "body": "Library forms are now wide workbenches with a live preview. New /info reference, a compendium import wizard and a rules book. The hero page and the app header are refreshed."
+  },
   "2026-11-26-map-art": {
     "title": "Battle map art: floors, walls, lights and baking",
     "body": "The map editor has a new Art tab: paint floors, walls, doors, rubble and lights, and the editor bakes it all into the map background. Walls and doors stay real battle mechanics."

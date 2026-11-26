@@ -22,7 +22,7 @@ export function SkillSpellSection({
     return (
         <HudSection title={t('title')}>
             <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="ds-fields">
                     <SkillSpellSelector
                         spellId={data.spellId}
                         spells={spells}

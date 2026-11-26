@@ -28,7 +28,10 @@ export function FormField({
     children,
 }: FormFieldProps) {
     return (
-        <div className={cn('flex flex-col gap-1.5', className)}>
+        <div
+            data-slot="form-field"
+            className={cn('flex flex-col gap-1.5', className)}
+        >
             <Label htmlFor={htmlFor} className={cn('mb-0', labelClassName)}>
                 {label}
                 {labelExtra}

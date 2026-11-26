@@ -69,11 +69,8 @@ export function CareerTierFields({ index, tier, feats, onChange }: Props) {
     const featName = (id: string) => feats.find((f) => f.id === id)?.name ?? id;
 
     return (
-        <fieldset className="space-y-3 rounded border border-hud-line p-3">
-            <legend className="hud-sc px-1 text-sm text-hud-ink">
-                {t('tier', { n: index + 1 })}
-            </legend>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-4">
+            <div className="ds-fields">
                 <FormField
                     label={t('tierName')}
                     htmlFor={`career-tier-${index}-name`}
@@ -122,68 +119,73 @@ export function CareerTierFields({ index, tier, feats, onChange }: Props) {
                     ))}
                 </div>
             </div>
-            <div className="space-y-2">
-                <p className="text-xs text-hud-muted">{t('skills')}</p>
-                <ul className="flex flex-wrap gap-1">
-                    {tier.skills.map((key) => {
-                        const { key: skill, spec } = parseSkillAdvanceKey(key);
+            <div className="ds-list-grid">
+                <div className="space-y-2">
+                    <p className="text-xs text-hud-muted">{t('skills')}</p>
+                    <ul className="flex flex-wrap gap-1">
+                        {tier.skills.map((key) => {
+                            const { key: skill, spec } =
+                                parseSkillAdvanceKey(key);
 
-                        const label = skillLabel(tg, skill, spec);
+                            const label = skillLabel(tg, skill, spec);
 
-                        return (
+                            return (
+                                <Chip
+                                    key={key}
+                                    label={label}
+                                    removeLabel={t('remove', { name: label })}
+                                    onRemove={() =>
+                                        onChange({
+                                            skills: tier.skills.filter(
+                                                (k) => k !== key
+                                            ),
+                                        })
+                                    }
+                                />
+                            );
+                        })}
+                    </ul>
+                    <CareerSkillPicker
+                        onAdd={(key) =>
+                            !tier.skills.includes(key) &&
+                            onChange({ skills: [...tier.skills, key] })
+                        }
+                    />
+                </div>
+                <div className="space-y-2">
+                    <p className="text-xs text-hud-muted">{t('talents')}</p>
+                    <ul className="flex flex-wrap gap-1">
+                        {tier.talents.map((id) => (
                             <Chip
-                                key={key}
-                                label={label}
-                                removeLabel={t('remove', { name: label })}
+                                key={id}
+                                label={featName(id)}
+                                removeLabel={t('remove', {
+                                    name: featName(id),
+                                })}
                                 onRemove={() =>
                                     onChange({
-                                        skills: tier.skills.filter(
-                                            (k) => k !== key
+                                        talents: tier.talents.filter(
+                                            (k) => k !== id
                                         ),
                                     })
                                 }
                             />
-                        );
-                    })}
-                </ul>
-                <CareerSkillPicker
-                    onAdd={(key) =>
-                        !tier.skills.includes(key) &&
-                        onChange({ skills: [...tier.skills, key] })
-                    }
-                />
-            </div>
-            <div className="space-y-2">
-                <p className="text-xs text-hud-muted">{t('talents')}</p>
-                <ul className="flex flex-wrap gap-1">
-                    {tier.talents.map((id) => (
-                        <Chip
-                            key={id}
-                            label={featName(id)}
-                            removeLabel={t('remove', { name: featName(id) })}
-                            onRemove={() =>
-                                onChange({
-                                    talents: tier.talents.filter(
-                                        (k) => k !== id
-                                    ),
-                                })
-                            }
-                        />
-                    ))}
-                </ul>
-                <SelectField
-                    aria-label={t('talent')}
-                    value=""
-                    onValueChange={(id) =>
-                        !tier.talents.includes(id) &&
-                        onChange({ talents: [...tier.talents, id] })
-                    }
-                    options={feats
-                        .filter((f) => !tier.talents.includes(f.id))
-                        .map((f) => ({ value: f.id, label: f.name }))}
-                    placeholder={t('talent')}
-                    triggerClassName="min-h-11 w-full"
-                />
+                        ))}
+                    </ul>
+                    <SelectField
+                        aria-label={t('talent')}
+                        value=""
+                        onValueChange={(id) =>
+                            !tier.talents.includes(id) &&
+                            onChange({ talents: [...tier.talents, id] })
+                        }
+                        options={feats
+                            .filter((f) => !tier.talents.includes(f.id))
+                            .map((f) => ({ value: f.id, label: f.name }))}
+                        placeholder={t('talent')}
+                        triggerClassName="min-h-11 w-full"
+                    />
+                </div>
             </div>
             <FormField
                 label={t('trappings')}
@@ -196,6 +198,6 @@ export function CareerTierFields({ index, tier, feats, onChange }: Props) {
                     onChange={(trappings) => onChange({ trappings })}
                 />
             </FormField>
-        </fieldset>
+        </div>
     );
 }

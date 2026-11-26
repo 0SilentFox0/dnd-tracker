@@ -52,7 +52,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
             activeId={activeId}
             title={items.find((i) => i.id === activeId)?.label ?? t('profile')}
         >
-            <div className="hud-surface mx-auto w-full max-w-[1400px] px-3 pt-3 sm:px-4 md:hidden">
+            <div className="hud-surface mx-auto w-full max-w-[1400px] overflow-x-clip px-4 pt-3 md:hidden">
                 <HudChipTabs
                     size="lg"
                     ariaLabel={t('profile')}
@@ -64,13 +64,13 @@ export function AccountShell({ children }: { children: ReactNode }) {
                     }))}
                 />
             </div>
-            <div className="hud-surface mx-auto w-full max-w-[1400px] px-3 py-4 sm:px-4 md:flex md:items-start md:gap-6">
+            <div className="hud-surface mx-auto w-full max-w-[1400px] px-4 py-4 md:flex md:items-start md:gap-6">
                 <AccountSidebar
                     items={items}
                     activeId={activeId}
                     ariaLabel={t('profile')}
                 />
-                <main className="mx-auto min-w-0 w-full max-w-[960px] flex-1 md:mx-0">
+                <main className="mx-auto min-w-0 w-full max-w-[960px] flex-1 max-sm:[&>.hud-form-page>.hud-form-actions]:!px-0 max-sm:[&>.hud-form-page>.hud-form-head>*]:!px-0 md:mx-0">
                     {children}
                 </main>
             </div>

@@ -34,7 +34,7 @@ export function EditSkillClient({
 
     if (query.isError) {
         return (
-            <HudFormPage title={t('editTitle')}>
+            <HudFormPage header={{ title: t('editTitle') }}>
                 <ErrorState
                     error={query.error}
                     onRetry={() => void query.refetch()}
@@ -54,7 +54,7 @@ export function EditSkillClient({
         <QueryState
             query={query}
             loading={
-                <HudFormPage title={t('editTitle')}>
+                <HudFormPage header={{ title: t('editTitle') }}>
                     <LoadingState rows={6} label={t('loading')} />
                 </HudFormPage>
             }

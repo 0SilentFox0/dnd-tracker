@@ -42,8 +42,8 @@ export function SpellFormPowerFields({
     const zone = targeting.kind === 'template' ? targeting.zone : undefined;
 
     return (
-        <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
-            <div className="col-span-2">
+        <div className="ds-fields">
+            <div className="ds-span">
                 <Label htmlFor="dice">{tp('baseDice')}</Label>
                 <BoundedNumberInput
                     id="dice"
@@ -72,7 +72,7 @@ export function SpellFormPowerFields({
             >
                 {targeting.kind === 'template' && (
                     <>
-                        <div className="col-span-2 flex items-center gap-2">
+                        <div className="ds-span flex items-center gap-2">
                             <Switch
                                 id="zone-on"
                                 checked={!!targeting.zone}
@@ -149,10 +149,10 @@ export function SpellFormPowerFields({
                 (classesEnabled ||
                     formData.fixedDice !== undefined ||
                     formData.damageBonus != null) && (
-                    <div className="col-span-2">
+                    <div className="ds-span">
                         <HudSection title="5e">
-                            <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
-                                <label className="col-span-2 flex items-center gap-2">
+                            <div className="ds-fields">
+                                <label className="ds-span flex items-center gap-2">
                                     <Checkbox
                                         id="fixed-dice"
                                         checked={!!formData.fixedDice}
@@ -198,7 +198,7 @@ export function SpellFormPowerFields({
                                         }
                                     />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="ds-span">
                                     <Label htmlFor="spell-lists">
                                         {tp('lists')}
                                     </Label>
@@ -293,7 +293,7 @@ export function SpellFormPowerFields({
                                         className="w-24"
                                     />
                                 </div>
-                                <div className="col-span-2 flex items-center gap-2">
+                                <div className="ds-span flex items-center gap-2">
                                     <Checkbox
                                         id="add-ability-mod"
                                         checked={!!formData.addAbilityMod}

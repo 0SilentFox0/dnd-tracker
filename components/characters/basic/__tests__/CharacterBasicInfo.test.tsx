@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
@@ -9,10 +9,7 @@ import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings
 vi.mock('@/lib/hooks/characters', () => ({
     useArchetypeOptions: () => ({ options: [], universalLabel: 'any' }),
     useClassEntriesField: () => vi.fn(),
-}));
-
-vi.mock('@/components/common/fields/ImageUpload', () => ({
-    ImageUpload: ({ label }: { label: string }) => <div>{label}</div>,
+    useAlignmentLabel: () => (v: string | null) => v ?? '',
 }));
 
 afterEach(cleanup);
@@ -50,7 +47,6 @@ describe('CharacterBasicInfo', () => {
 
         expect(ids()).toEqual(
             [
-                'alignment',
                 'archetype',
                 'class',
                 'controlledBy',
@@ -59,24 +55,57 @@ describe('CharacterBasicInfo', () => {
                 'race',
                 'subclass',
                 'subrace',
-                'type',
             ].sort()
         );
     });
 
     it('omits the class field with hide.class', () => {
-        render(<CharacterBasicInfo basicInfo={bindings} hide={{ class: true }} />);
+        render(
+            <CharacterBasicInfo basicInfo={bindings} hide={{ class: true }} />
+        );
 
         expect(ids()).not.toContain('class');
         expect(ids()).not.toContain('subclass');
     });
 
-    it('hides the portrait section in player view', () => {
-        const { container } = render(
-            <CharacterBasicInfo basicInfo={bindings} isPlayerView />
+    it('has no portrait section or upload', () => {
+        render(<CharacterBasicInfo basicInfo={bindings} />);
+
+        expect(screen.queryByText(/sections\.portrait/)).toBeNull();
+        expect(screen.queryByText('characters.form.basic.avatar')).toBeNull();
+    });
+
+    it('renders type as a radiogroup with two radios', () => {
+        render(<CharacterBasicInfo basicInfo={bindings} />);
+
+        const group = screen.getByRole('radiogroup', {
+            name: 'characters.form.basic.type',
+        });
+
+        expect(within(group).getAllByRole('radio')).toHaveLength(2);
+    });
+
+    it('renders alignment as a radiogroup with 10 options', () => {
+        render(<CharacterBasicInfo basicInfo={bindings} />);
+
+        const group = screen
+            .getAllByRole('radiogroup')
+            .find((g) => g.id === 'alignment') as HTMLElement;
+
+        expect(
+            within(group.parentElement as HTMLElement).getAllByRole('radio')
+        ).toHaveLength(10);
+    });
+
+    it('renders the class slots', () => {
+        render(
+            <CharacterBasicInfo
+                basicInfo={bindings}
+                classSlots={{ action: <i>act</i>, aside: <i>side</i> }}
+            />
         );
 
-        expect(container.querySelectorAll('section')).toHaveLength(2);
-        expect(screen.queryByText('characters.form.basic.avatar')).toBeNull();
+        expect(screen.getByText('act')).toBeTruthy();
+        expect(screen.getByText('side')).toBeTruthy();
     });
 });

@@ -37,7 +37,9 @@ export type PackKey =
     | 'story'
     | 'battle'
     | 'ai'
-    | 'units';
+    | 'units'
+    | 'reference'
+    | 'scenarioTexts';
 
 export interface SystemI18n {
     /** Namespaces the module adds to a core namespace pack; a route loads them when it loads the pack */

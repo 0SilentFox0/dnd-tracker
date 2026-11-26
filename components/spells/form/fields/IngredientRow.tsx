@@ -49,7 +49,7 @@ export function IngredientRow({
             <FieldErrors
                 errors={duplicate ? ['spells.ingredients.duplicate'] : []}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="ds-fields ds-fields--num">
                 <LabeledInput
                     id={`${id}-qty`}
                     className="min-h-11"

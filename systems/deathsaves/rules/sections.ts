@@ -23,6 +23,7 @@ export const DEATHSAVES_SECTIONS: SectionsContribution = {
     sections: {
         deathSaves: {
             owner: 'deathsaves',
+            group: 'combat',
             mechanic: true,
             labels: 'rulesDeathSaves',
             items: itemsFromShape(

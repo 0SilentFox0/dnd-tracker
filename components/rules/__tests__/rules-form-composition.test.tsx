@@ -13,6 +13,11 @@ const mocks = vi.hoisted(() => ({
     system: { key: 'dnd5e' } as { key: string; modules?: string[] },
 }));
 
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+    usePathname: () => '/rules',
+    useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     useRemoveCustomCondition: () => ({
         remove: vi.fn(),
@@ -57,7 +62,7 @@ const tab = (key: string) =>
 describe('RulesForm tabs follow the composition sections', () => {
     it('homm preset: module sections are tabs', () => {
         mocks.system = { key: 'homm' };
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(tab('morale')).toBeTruthy();
         expect(tab('heroScaling')).toBeTruthy();
@@ -66,7 +71,7 @@ describe('RulesForm tabs follow the composition sections', () => {
 
     it('without the morale and heroscaling modules those tabs disappear', () => {
         mocks.system = { key: 'dnd5e', modules: [] };
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(tab('morale')).toBeNull();
         expect(tab('heroScaling')).toBeNull();
@@ -75,7 +80,7 @@ describe('RulesForm tabs follow the composition sections', () => {
 
     it('the retaliation switch needs the retaliation module', () => {
         mocks.system = { key: 'dnd5e', modules: ['retaliation'] };
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         fireEvent.mouseDown(tab('actions') as HTMLElement, { button: 0 });
         fireEvent.click(tab('actions') as HTMLElement);
@@ -88,7 +93,7 @@ describe('RulesForm tabs follow the composition sections', () => {
 
         cleanup();
         mocks.system = { key: 'dnd5e', modules: [] };
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
         fireEvent.mouseDown(tab('actions') as HTMLElement, { button: 0 });
         fireEvent.click(tab('actions') as HTMLElement);
 
@@ -101,7 +106,7 @@ describe('RulesForm tabs follow the composition sections', () => {
 
     it('wfrp shows no d20 tabs', () => {
         mocks.system = { key: 'wfrp' };
-        renderWithConfirm(<RulesForm campaignId="c1" />);
+        renderWithConfirm(<RulesForm campaignId="c1" title="T" />);
 
         expect(tab('criticals')).toBeNull();
         expect(tab('tables')).toBeTruthy();

@@ -2,25 +2,28 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { RulesPatchOffer } from '../shared/RulesPatchOffer';
-import { CompendiumMediaReport } from './report/CompendiumMediaReport';
-import {
-    CompendiumReport,
-    DEPENDENCIES_ANCHOR,
-} from './report/CompendiumReport';
-import { CompendiumRunsList } from './report/CompendiumRunsList';
-import { CompendiumCategories } from './CompendiumCategories';
-import { CompendiumDependencies } from './CompendiumDependencies';
-import { CompendiumFileStep } from './CompendiumFileStep';
-import { CompendiumProgress } from './CompendiumProgress';
-import { CompendiumSteps } from './CompendiumSteps';
+import { CompendiumStepRail } from './layout/CompendiumStepRail';
+import { CompendiumSummary } from './layout/CompendiumSummary';
+import { CompendiumWizardLayout } from './layout/CompendiumWizardLayout';
+import { CompendiumHistory } from './report/CompendiumHistory';
+import { CategoriesStep } from './steps/CategoriesStep';
+import { CheckStep } from './steps/CheckStep';
+import { ConfirmStep } from './steps/ConfirmStep';
+import { FileStep } from './steps/FileStep';
+import { ResultStep } from './steps/ResultStep';
+import { StepHeading } from './steps/StepHeading';
 
-import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
+import { FormAlert } from '@/components/common/states';
+import { HudFormMenu } from '@/components/hud';
+import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
-import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useCompendiumImport } from '@/lib/hooks/compendium-import';
+import {
+    COMPENDIUM_STEP_KEYS,
+    useCompendiumImport,
+    useCompendiumWizardView,
+    usePreviewExpiry,
+} from '@/lib/hooks/compendium-import';
 
 export function CompendiumImport({
     campaignId,
@@ -29,136 +32,100 @@ export function CompendiumImport({
     campaignId: string;
     initialFile?: File;
 }) {
-    const t = useTranslations('compendium.import');
+    const t = useTranslations('compendium');
 
     const wizard = useCompendiumImport(campaignId, initialFile);
 
-    const {
-        preview,
-        input,
-        result,
-        rights,
-        busy,
-        root,
-        options,
-        phase,
-        media,
-        mediaPaused,
-    } = wizard.state;
+    const view = useCompendiumWizardView(wizard.state);
 
-    const {
-        setRights,
-        confirm,
-        close,
-        applyOptions,
-        media: mediaActions,
-    } = wizard.actions;
+    const expiry = usePreviewExpiry(wizard.state.preview);
+
+    const { preview, input, result, busy, phase, media, error } = wizard.state;
+
+    const embedded = !!initialFile;
+
+    const title =
+        view.step === 4
+            ? t('result.title')
+            : t(`import.steps.${COMPENDIUM_STEP_KEYS[view.step]}`);
+
+    const body = (
+        <CompendiumWizardLayout
+            embedded={embedded}
+            rail={<CompendiumStepRail wizard={wizard} view={view} />}
+            summary={
+                <CompendiumSummary wizard={wizard} view={view} expiry={expiry} />
+            }
+            step={
+                <div key={view.step} className="motion-rise space-y-4">
+                    <StepHeading title={title} phase={phase} media={media} />
+                    {error && <FormAlert>{error}</FormAlert>}
+                    {view.step === 0 && (
+                        <>
+                            <FileStep wizard={wizard} />
+                            {!embedded && (
+                                <CompendiumHistory
+                                    campaignId={campaignId}
+                                    wizard={wizard}
+                                />
+                            )}
+                        </>
+                    )}
+                    {view.step === 1 && <CategoriesStep wizard={wizard} />}
+                    {view.step === 2 && (
+                        <CheckStep campaignId={campaignId} wizard={wizard} />
+                    )}
+                    {view.step === 3 && (
+                        <ConfirmStep wizard={wizard} expiry={expiry} />
+                    )}
+                    {view.step === 4 && (
+                        <ResultStep campaignId={campaignId} wizard={wizard} />
+                    )}
+                </div>
+            }
+        />
+    );
+
+    if (embedded) return body;
 
     return (
         <HudPage>
             <HudPageHeader
-                title={t('title')}
-                subtitle={t('subtitle')}
+                title={t('import.title')}
+                subtitle={t('import.subtitle')}
                 actions={
-                    <Button variant="outline" asChild>
-                        <Link href={`/campaigns/${campaignId}`}>
-                            {t('back')}
-                        </Link>
-                    </Button>
+                    <>
+                        <Button variant="outline" asChild>
+                            <Link href={`/campaigns/${campaignId}`}>
+                                {t('import.back')}
+                            </Link>
+                        </Button>
+                        <HudFormMenu
+                            items={[
+                                {
+                                    label: t('wizard.restart'),
+                                    onSelect: wizard.actions.close,
+                                    disabled: busy && !!input,
+                                    confirm:
+                                        preview || result
+                                            ? {
+                                                  title: t('wizard.restart'),
+                                                  description: t(
+                                                      'wizard.restartText'
+                                                  ),
+                                                  confirmLabel:
+                                                      t('wizard.restart'),
+                                                  destructive: true,
+                                              }
+                                            : undefined,
+                                },
+                            ]}
+                        />
+                    </>
                 }
             />
-            {!initialFile && <OnboardingHint id="dm.compendium-import" />}
-            <CompendiumProgress phase={phase} media={media} />
-            <CompendiumSteps wizard={wizard} />
-            <CompendiumFileStep wizard={wizard} />
-            {root && <CompendiumCategories wizard={wizard} />}
-            {preview && (
-                <>
-                    <HudPanel className="space-y-3">
-                        <RulesPatchOffer wizard={wizard} />
-                        <CompendiumReport
-                            campaignId={campaignId}
-                            report={preview.report}
-                            blockerActions={{
-                                busy,
-                                allowMixedEdition: options.allowMixedEdition
-                                    ? undefined
-                                    : () =>
-                                          applyOptions({
-                                              ...options,
-                                              allowMixedEdition: true,
-                                          }),
-                            }}
-                        />
-                    </HudPanel>
-                    <HudPanel className="space-y-3">
-                        <span id={DEPENDENCIES_ANCHOR} />
-                        <CompendiumDependencies
-                            key={preview.token}
-                            wizard={wizard}
-                        />
-                    </HudPanel>
-                    <HudPanel className="space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <label className="flex min-w-0 items-start gap-2 text-sm">
-                                <Checkbox
-                                    className="mt-0.5 h-4 w-4 shrink-0 accent-hud-accent"
-                                    checked={rights}
-                                    disabled={busy}
-                                    onCheckedChange={(v) =>
-                                        setRights(v === true)
-                                    }
-                                />{' '}
-                                {t('rights')}
-                            </label>
-                            <Button
-                                disabled={
-                                    busy ||
-                                    !rights ||
-                                    !preview.report.readyToImport
-                                }
-                                onClick={() => void confirm()}
-                            >
-                                {t('confirm')}
-                            </Button>
-                        </div>
-                        <p className="text-xs text-hud-muted">
-                            {t('previewTtl')}
-                        </p>
-                    </HudPanel>
-                </>
-            )}
-            {result && (
-                <HudPanel className="space-y-3">
-                    <p className="text-hud-good">
-                        {t('saved', { runId: result.runId ?? '' })}
-                    </p>
-                    {media && (
-                        <CompendiumMediaReport
-                            media={media}
-                            running={phase === 'media'}
-                            paused={mediaPaused}
-                            actions={mediaActions}
-                        />
-                    )}
-                    <CompendiumReport
-                        key={result.runId}
-                        campaignId={campaignId}
-                        report={result}
-                        committed
-                    />
-                </HudPanel>
-            )}
-            <CompendiumRunsList campaignId={campaignId} wizard={wizard} />
-            <ActionBar>
-                <Button
-                    variant="outline"
-                    disabled={busy && !!input}
-                    onClick={close}
-                >
-                    {t('close')}
-                </Button>
-            </ActionBar>
+            <OnboardingHint id="dm.compendium-import" />
+            {body}
         </HudPage>
     );
 }

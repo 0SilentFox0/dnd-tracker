@@ -34,7 +34,7 @@
 - `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`, `character-profile/RollableCell` (кнопка кидка або статична клітинка), `character-profile/RollResultView` (результат кидка в діалозі)
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`
 - `battle/hud/DiceInput`, `battle/wizards/attack/shared`, `battle/participants/Section`
-- `abilities`, `abilities/AbilityFlow`, `artifacts/ArtifactCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
+- `abilities`, `abilities/AbilityFlow`, `artifacts/ArtifactCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`, `content-import/shared/SourceNotes` (нотатки джерела в боковій колонці форми), `campaigns/info/detail/ClassReferenceDetail` (перегляд «Як бачать гравці» у формі класу)
 
 Новий пункт кіта = правка списку (видно в ревʼю) + рядок тут.
 
@@ -66,6 +66,24 @@ ESLint `raw-controls/no-raw-control` (`eslint/raw-controls.mjs`) заборон�
 - **Переходи:** `PageTransition` (`components/layout`) на зміну сторінки, фейд вкладок; `prefers-reduced-motion` вимикає все в `app/motion.css`.
 - **Акаунтна оболонка:** `AccountShell` + `AccountSidebar` (`components/layout`; ≥ md бічне меню, на телефоні смуга чіпів) для `/profile`, `/settings/*`, `/library/sounds`, `/help`; пункти — реєстр `PROFILE_MENU`. Дані сесії — через `AccountSeedProvider` ([platform.md](platform.md#account-pages-session-in-the-first-html)).
 - Нативні checkbox/radio «checked» теж accent; контраст accent-ink на accent і accent-fg на panel-2 перевіряє `lib/theme/__tests__/palette-contrast.test.ts` (парсить реальний `app/palettes.css`).
+
+## Широка форма-«верстак» (`HudFormPage width="wide"`)
+
+CSS у `components/hud/hud.css` (`.hud-form-wide`), сітка `head / rail / notice / main / side / actions`; `HudForm` і `HudTabs` самі колонок не задають.
+
+- **Колонки:** на телефоні одна; lg (≥ 1024) — main + side 320px; xl (≥ 1280) — rail 208px / main / side 360px, від 1600 side 400px. Rail — це `HudTabs` у режимі `rail`; `data-rail-from="lg"` на списку табів піднімає rail (200px) уже з lg. Без `side` main займає колонки 2–3.
+- **Широка вкладка:** `data-wide-tab="true"` ховає side і розтягує панель на main + side.
+- **Дії (`actions`):** з lg — рядок у шапці (колонка 3 / 2), якщо немає side або відкрита широка вкладка; зі side — sticky у колонці дій (`top: var(--shell-header-h)`); нижче lg — липка нижня смуга на всю ширину (рядок сітки 72px, safe-area).
+- **Phone-поля:** 16px бокові поля належать `.hud-form-wide` (`max-sm:padding-inline`); внутрішні `HudForm`/`HudTabs` на телефоні свого `px` не додають (`[.hud-form-wide_&]:max-sm:px-0`).
+- **Меню та вибір:** `HudFormMenu` — меню «⋯» (`header.menu`), пункт `tone: 'danger'` з `confirm` іде через `useConfirm`; `HudSegmented` — radiogroup із чіпів (roving-tabindex, `useRovingIndex`) для коротких enum-полів.
+
+## Утиліти `.ds-*`
+
+У `hud.css`: поверхні `ds-panel`/`ds-inset`/`ds-raised`, `ds-interactive` (transition), а також контейнерні сітки форм: `ds-fields` (авто-колонки від 15rem; `ds-fields--num` — від 7rem для числових), `ds-span` (на всю ширину сітки), `ds-list-grid` (1 колонка, 2 від ширини контейнера 52rem), `ds-setting-rows` (рядки налаштувань з роздільниками, перемикач/поле справа). Працюють від контейнера (`container-type` на main), а не від вʼюпорта. Тест — `components/hud/__tests__/ds-utilities.test.ts`.
+
+## Шапка оболонки
+
+`HudShellHeader` (`components/hud/shell`) — єдина рамка шапки (кнопка меню, breadcrumb, дії) для ігрової оболонки `GameShell` і класичного `components/layout/Header`. `--shell-header-h` (дефолт 57px) оголошено в `:root` у `hud.css`; sticky-елементи під шапкою (rail, side, дії, `ReferenceLayout`) рахують `top` від нього. `SheetLayout` перевизначає його на хості аркуша реальною висотою `header.sticky` (ResizeObserver) і знімає при демонтажі; `--sheet-actions-h` (48px, 0 без дій) — висота липкої панелі дій аркуша, від якої відраховують липкі таби.
 
 ## Допущене й відкладене
 

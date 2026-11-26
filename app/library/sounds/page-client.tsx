@@ -27,7 +27,7 @@ export function SoundLibraryPageClient() {
     const selected = presets.find((p) => p.id === selectedId) ?? presets[0];
 
     return (
-        <HudFormPage title={t('library.title')} aside={t('library.subtitle')}>
+        <HudFormPage header={{ title: t('library.title'), aside: t('library.subtitle') }}>
             {isLoading ? (
                 <LoadingState />
             ) : (

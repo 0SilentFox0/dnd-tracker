@@ -5,8 +5,11 @@ import { useTranslations } from 'next-intl';
 import { SKILL_FORM_TAB, type SkillFormTabId } from './skill-form-tabs';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
+import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
+import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { useSkillForm } from '@/systems/skilltrees/hooks';
 import { SkillBasicInfo } from '@/systems/skilltrees/ui/content/skills/form/basic';
@@ -15,6 +18,8 @@ import { SkillSpellSection } from '@/systems/skilltrees/ui/content/skills/form/s
 import type { IdName } from '@/types/common';
 import type { MainSkill } from '@/types/main-skills';
 import type { Skill } from '@/types/skills';
+
+const FORM_ID = 'skill-form';
 
 interface SkillCreateFormProps {
     campaignId: string;
@@ -38,7 +43,7 @@ export function SkillCreateForm({
         { initialData, initialMainSkills }
     );
 
-    const { isSaving, error, isEdit } = status;
+    const { isSaving, isDeleting, error, isEdit } = status;
 
     const tabs: HudTab<SkillFormTabId>[] = [
         {
@@ -75,52 +80,85 @@ export function SkillCreateForm({
         },
     ];
 
+    const hasNotes = useHasSourceNotes(campaignId, 'skills', initialData?.id);
+
     return (
         <HudFormPage
-            title={
-                isEdit
+            width="wide"
+            header={{
+                title: isEdit
                     ? t('skills.form.editTitle')
-                    : t('skills.form.createTitle')
-            }
-            aside={
-                isEdit
+                    : t('skills.form.createTitle'),
+                aside: isEdit
                     ? t('skills.form.editAside')
-                    : t('skills.form.createAside')
+                    : t('skills.form.createAside'),
+                back: {
+                    href: `/campaigns/${campaignId}/dm/skills`,
+                    label: t('common.dmSections.skills'),
+                },
+                menu: isEdit && (
+                    <HudFormMenu
+                        items={[
+                            {
+                                label: t('common.actions.delete'),
+                                tone: 'danger',
+                                disabled: isSaving || isDeleting,
+                                confirm: {
+                                    title: t('skills.card.deleteTitle'),
+                                    confirmLabel: t('common.actions.delete'),
+                                    destructive: true,
+                                },
+                                onSelect: () => void actions.remove(),
+                            },
+                        ]}
+                    />
+                ),
+            }}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={actions.cancel}
+                        disabled={isSaving}
+                    >
+                        {t('common.actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={isSaving || !abilities.valid}
+                    >
+                        {isSaving
+                            ? isEdit
+                                ? t('common.actions.saving')
+                                : t('common.actions.creating')
+                            : withAbilityErrors(
+                                  isEdit
+                                      ? t('skills.form.submitEdit')
+                                      : t('skills.form.submitCreate'),
+                                  abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+            side={
+                initialData && hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="skills"
+                        targetId={initialData.id}
+                    />
+                ) : undefined
             }
         >
             <HudForm
-                id="skill-form"
+                id={FORM_ID}
                 onSubmit={actions.submit}
                 tabs={tabs}
+                tabStyles={{ variant: 'rail' }}
                 error={error}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={actions.cancel}
-                            disabled={isSaving}
-                        >
-                            {t('common.actions.cancel')}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSaving || !abilities.valid}
-                        >
-                            {isSaving
-                                ? isEdit
-                                    ? t('common.actions.saving')
-                                    : t('common.actions.creating')
-                                : withAbilityErrors(
-                                      isEdit
-                                          ? t('skills.form.submitEdit')
-                                          : t('skills.form.submitCreate'),
-                                      abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
-                }
             />
         </HudFormPage>
     );

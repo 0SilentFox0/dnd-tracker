@@ -43,7 +43,7 @@ function SetupLoading({ isEdit }: { isEdit: boolean }) {
 
     return (
         <HudFormPage
-            title={isEdit ? t('title.edit') : t('title.create')}
+            header={{ title: isEdit ? t('title.edit') : t('title.create') }}
             className={PAGE_CLASS}
         >
             <div className="px-4 py-3">
@@ -222,8 +222,10 @@ function BattleSetupLayout({
 
     return (
         <HudFormPage
-            title={title}
-            aside={isEdit ? t('aside.edit') : t('aside.create')}
+            header={{
+                title: title,
+                aside: isEdit ? t('aside.edit') : t('aside.create'),
+            }}
             className={PAGE_CLASS}
         >
             <OnboardingHint id="dm.battle-setup" className="mb-3" />
