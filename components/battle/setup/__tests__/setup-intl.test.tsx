@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BattleListCard } from '@/components/battle/list/BattleListCard';
+import { BattleCard } from '@/components/battle/list/BattleCard';
 import { BalanceSummary } from '@/components/battle/setup/balance/BalanceSummary';
 import { XpBalanceSummary } from '@/components/battle/setup/balance/XpBalanceSummary';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
@@ -45,26 +45,28 @@ const battle = {
     id: 'b1',
     name: 'Ambush',
     description: null,
+    status: 'prepared' as const,
     currentRound: 3,
-    participants: [{ id: 'p1' }],
+    createdAt: '2026-11-20T10:00:00.000Z',
+    startedAt: null,
+    completedAt: null,
+    map: null,
+    sides: { ally: { count: 1, faces: [] }, enemy: { count: 2, faces: [] } },
+    result: null,
 };
 
 describe('battle setup and list on real catalogs', () => {
     it.each([
-        ['en', 'Battle balance', 'Too weak: add Orc ×2', 'Round:', 'Active'],
-        ['uk', 'Баланс бою', 'Слабко: додайте Orc ×2', 'Раунд:', 'Активний'],
+        ['en', 'Battle balance', 'Too weak: add Orc ×2', 'No map', 'Start'],
+        ['uk', 'Баланс бою', 'Слабко: додайте Orc ×2', 'Без мапи', 'Запустити'],
     ] as const)(
         '%s: balance summary and list card without raw keys',
-        async (locale, title, hint, round, status) => {
+        async (locale, title, hint, noMap, start) => {
             const { container } = await renderWithIntl(
                 <QueryClientProvider client={new QueryClient()}>
                     <ConfirmProvider>
                         <BalanceSummary fair={{ party, scaling }} />
-                        <BattleListCard
-                            battle={battle}
-                            campaignId="c1"
-                            kind="active"
-                        />
+                        <BattleCard battle={battle} campaignId="c1" />
                     </ConfirmProvider>
                 </QueryClientProvider>,
                 { locale, namespaces: NAMESPACES }
@@ -72,8 +74,8 @@ describe('battle setup and list on real catalogs', () => {
 
             expect(container.textContent).toContain(title);
             expect(container.textContent).toContain(hint);
-            expect(container.textContent).toContain(round);
-            expect(container.textContent).toContain(status);
+            expect(container.textContent).toContain(noMap);
+            expect(container.textContent).toContain(start);
             expect(container.textContent).not.toMatch(
                 /battleSetup\.|battleTerms\./
             );

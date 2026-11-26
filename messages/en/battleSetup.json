@@ -3,7 +3,7 @@
     "page": {
       "title": "Battle scenes",
       "subtitle": "Create and manage battles",
-      "create": "+ Create battle scene"
+      "create": "New battle"
     },
     "deleteAll": {
       "noun": "battles",
@@ -11,28 +11,33 @@
     },
     "sections": {
       "active": "Active battles",
-      "prepared": "Prepared battles",
       "completed": "Completed battles"
     },
-    "status": {
-      "active": "Active",
-      "prepared": "Prepared",
-      "completed": "Completed"
-    },
     "card": {
-      "round": "Round:",
-      "participants": "Participants:",
-      "play": "Go to battle",
       "edit": "Edit",
       "start": "Start",
       "view": "View",
       "delete": "Delete",
       "stop": "Stop",
-      "replay": "Play again"
+      "replay": "Play again",
+      "open": "Open",
+      "continue": "Continue battle",
+      "more": "Battle actions",
+      "noMap": "No map",
+      "sides": "Allies: {ally}, enemies: {enemy}",
+      "roundN": "Round {round}",
+      "rounds": "{count, plural, one {# round} other {# rounds}}",
+      "started": "started {date}",
+      "active": "In progress",
+      "result": {
+        "victory": "Allies won",
+        "defeat": "Defeat"
+      }
     },
     "empty": {
       "title": "No battle scenes yet",
-      "create": "Create the first battle scene"
+      "create": "Create the first battle scene",
+      "description": "Pick participants and a map and the battle is ready to start."
     },
     "search": "Search battles",
     "reset": {
@@ -46,7 +51,18 @@
         "description": "The battle returns to its pre-start state: the log and result are cleared.",
         "confirm": "Play again"
       }
-    }
+    },
+    "actions": {
+      "more": "Actions",
+      "deleteAll": "Delete all battles…"
+    },
+    "filter": {
+      "label": "Battle filter",
+      "all": "All",
+      "prepared": "Prepared",
+      "completed": "Completed"
+    },
+    "filterEmpty": "No battles in this filter."
   },
   "form": {
     "loading": "Loading...",
