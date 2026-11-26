@@ -107,5 +107,10 @@
     "poolNotNumber": "Pool “{label}”: level {level} is not a number",
     "columnMissing": "The class table has no column “{key}”",
     "choiceIdRepeated": "The choice id “{id}” is repeated"
+  },
+  "reference": {
+    "levelShort": "lvl {level}",
+    "featuresByLevel": "Features by level",
+    "subclass": "Subclass: {name}"
   }
 }

@@ -204,5 +204,15 @@
     "list": {
       "confirmDelete": "Delete the set? The artifacts stay in the campaign, their “Set” field will be cleared."
     }
+  },
+  "reference": {
+    "description": "Description",
+    "effects": "Effects",
+    "gear": "gear",
+    "heldBy": "held by {name}",
+    "free": "free",
+    "setItems": "Items: {names}",
+    "setBonuses": "Set bonuses",
+    "set": "Set"
   }
 }

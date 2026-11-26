@@ -218,7 +218,6 @@
       "skills": "Навички: {count} з {list}"
     },
     "tabs": {
-      "label": "Розділ довідника",
       "all": "Усі",
       "skills": "Скіли",
       "classes": "Класи",
@@ -231,7 +230,6 @@
       "ariaSkills": "Пошук по скілах, заклинаннях та артефактах",
       "clear": "Очистити пошук",
       "filters": "Фільтри",
-      "filtersActive": "увімкнено",
       "reset": "Скинути фільтри"
     },
     "filters": {
@@ -264,73 +262,27 @@
         "all": "Усі сети"
       }
     },
-    "count": {
-      "classes": "Класів: <strong>{count}</strong>",
-      "skills": "Скілів: <strong>{count}</strong>",
-      "spells": "Заклинань: <strong>{count}</strong>",
-      "artifacts": "Артефактів: <strong>{count}</strong>"
-    },
-    "shown": {
-      "classes": "Показано класів: <strong>{count}</strong>",
-      "skills": "Показано скілів: <strong>{count}</strong>",
-      "spells": "Показано заклинань: <strong>{count}</strong>",
-      "artifacts": "Показано артефактів: <strong>{count}</strong>"
-    },
-    "jump": {
-      "classes": "До класів",
-      "skills": "До скілів",
-      "spells": "До заклинань",
-      "artifacts": "До артефактів"
-    },
     "empty": {
       "nothing": "Нічого не знайдено",
       "nothingHint": "Змініть пошук або фільтри, або скиньте їх.",
-      "resetAll": "Скинути фільтри та пошук",
-      "classes": "Класів за цим пошуком не знайдено.",
-      "skills": "Скілів за цими фільтрами не знайдено.",
-      "spells": "Заклинань за цими фільтрами не знайдено.",
-      "artifacts": "Артефактів за цими фільтрами не знайдено."
+      "resetAll": "Скинути фільтри та пошук"
     },
     "sections": {
       "classes": {
-        "title": "Класи",
-        "intro": "Класи кампанії: особливості, вміння за рівнями та підкласи."
+        "title": "Класи"
       },
       "skills": {
-        "title": "Скіли",
-        "intro": "Як діють скіли та як вони виглядають у грі. Опис вигляду може редагувати лише DM."
+        "title": "Скіли"
       },
       "spells": {
-        "title": "Заклинання",
-        "intro": "Як діють заклинання та як вони виглядають. Опис вигляду може редагувати лише DM."
+        "title": "Заклинання"
       },
       "artifacts": {
-        "title": "Артефакти",
-        "intro": "Артефакти кампанії: що дають і хто їх носить. Кожен артефакт унікальний і належить одному герою."
+        "title": "Артефакти"
       },
       "sets": {
         "title": "Сети"
       }
-    },
-    "card": {
-      "levelShort": "рів. {level}",
-      "description": "Опис",
-      "effects": "Ефекти",
-      "mechanics": "Механіка",
-      "skillDescription": "Опис / механіка",
-      "skillHow": "Як діє (бонуси, ефекти, тригери)",
-      "appearanceSkill": "Опис вигляду (як виглядає в грі)",
-      "appearanceSpell": "Опис вигляду (як виглядає заклинання)",
-      "appearancePlaceholderSkill": "Наприклад: яскрава вогняна сфера, що летить до цілі...",
-      "appearancePlaceholderSpell": "Наприклад: вогняна куля, що вибухає яскравим полум'ям...",
-      "saveAppearance": "Зберегти опис вигляду",
-      "featuresByLevel": "Вміння за рівнями",
-      "subclass": "Підклас: {name}",
-      "gear": "спорядження",
-      "heldBy": "у {name}",
-      "free": "вільний",
-      "setItems": "Предмети: {names}",
-      "setBonuses": "Бонуси сету"
     },
     "mechanics": {
       "branch": "Гілка: {name}",
@@ -340,6 +292,16 @@
       "dice": "Кубики: {count}к",
       "resolution": "Перевірка: {value}",
       "cost": "Вартість: {value}"
+    },
+    "detail": {
+      "empty": "Оберіть запис зі списку"
+    },
+    "list": {
+      "showAll": "Показати всі {count} →",
+      "found": "{count, plural, one {# знайдено} other {# знайдено}}"
+    },
+    "rail": {
+      "sections": "Розділ довідника"
     }
   },
   "prep": {

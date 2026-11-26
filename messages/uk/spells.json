@@ -317,5 +317,14 @@
       "holySymbol": "Святий символ",
       "focus": "Матеріальний фокус"
     }
+  },
+  "reference": {
+    "levelShort": "рів. {level}",
+    "description": "Опис",
+    "effects": "Ефекти",
+    "mechanics": "Механіка",
+    "appearance": "Опис вигляду (як виглядає заклинання)",
+    "appearancePlaceholder": "Наприклад: вогняна куля, що вибухає яскравим полум'ям...",
+    "saveAppearance": "Зберегти опис вигляду"
   }
 }
