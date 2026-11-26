@@ -6,6 +6,7 @@ import type {
 
 import {
     AttackType,
+    type BattleStatus,
     type CombatStatusType,
     ParticipantSide,
     type ParticipantSourceTypeValue,
@@ -425,6 +426,39 @@ export interface BattleParticipant {
     spellcasting: BattleParticipantSpellcasting;
     battleData: BattleParticipantBattleData;
     actionFlags: BattleParticipantActionFlags;
+}
+
+export interface BattleFace {
+    id: string;
+    name: string;
+    avatar: string | null;
+}
+
+export interface BattleSideSummary {
+    count: number;
+    faces: BattleFace[];
+}
+
+export interface BattleListMap {
+    background: string | null;
+    cols: number;
+    rows: number;
+    gridType: 'square' | 'hex';
+    maze?: boolean;
+}
+
+export interface BattleListCardData {
+    id: string;
+    name: string;
+    description: string | null;
+    status: BattleStatus;
+    currentRound: number;
+    createdAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
+    map: BattleListMap | null;
+    sides: { ally: BattleSideSummary; enemy: BattleSideSummary };
+    result: 'victory' | 'defeat' | null;
 }
 
 export interface BattlePreparationParticipant {

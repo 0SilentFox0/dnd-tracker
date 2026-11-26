@@ -7,4 +7,7 @@ export const battleSceneListSelect = {
     status: true,
     participants: true,
     currentRound: true,
+    createdAt: true,
+    startedAt: true,
+    completedAt: true,
 } satisfies Prisma.BattleSceneSelect;
