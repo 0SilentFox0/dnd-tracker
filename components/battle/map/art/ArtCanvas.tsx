@@ -41,7 +41,9 @@ export const ArtCanvas = memo(function ArtCanvas({ map, art, cellPx }: Props) {
 
     const dpr = typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1;
 
-    const side = Math.max(mapSize(map, grid).width, mapSize(map, grid).height) / UNIT;
+    const size = mapSize(map, grid);
+
+    const side = Math.max(size.width, size.height) / UNIT;
 
     const px = Math.max(1, Math.min(cellPx * dpr, Math.floor(MAX_SIDE_PX / side)));
 

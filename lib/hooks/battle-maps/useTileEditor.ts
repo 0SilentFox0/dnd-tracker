@@ -18,8 +18,10 @@ import type { GridPoint } from '@/types/battle-grid';
 
 const HISTORY_LIMIT = 100;
 
+const ACTIVE_LAYER: TileLayer = 'objects';
+
 const FIRST_OBJECT_ID =
-    TILE_CATALOG.find((tile) => tile.layer === 'objects')?.id ?? 1;
+    TILE_CATALOG.find((tile) => tile.layer === ACTIVE_LAYER)?.id ?? 1;
 
 function decodeChunks(
     chunks: Partial<Record<TileLayer, Record<string, string>>>
@@ -53,8 +55,6 @@ export function useTileEditor(input: {
 
     const version = input.version;
 
-    const [activeLayer, setLayer] = useState<TileLayer>('objects');
-
     const [selectedTileId, setSelectedTile] = useState(FIRST_OBJECT_ID);
 
     const [tool, setTool] = useState<TileEditTool>('brush');
@@ -68,9 +68,9 @@ export function useTileEditor(input: {
     const dirtyPatches = useMemo(
         () =>
             diffTileChunks(
-                'objects',
-                baseChunks.objects ?? {},
-                chunks.objects ?? {}
+                ACTIVE_LAYER,
+                baseChunks[ACTIVE_LAYER] ?? {},
+                chunks[ACTIVE_LAYER] ?? {}
             ).map((patch) => ({ ...patch, layer: 'objects' as const })),
         [baseChunks, chunks]
     );
@@ -82,7 +82,7 @@ export function useTileEditor(input: {
             if (!first) return;
 
             if (tool === 'picker') {
-                const id = tileAt(chunks, activeLayer, first.x, first.y);
+                const id = tileAt(chunks, ACTIVE_LAYER, first.x, first.y);
 
                 if (id > 0) setSelectedTile(id);
 
@@ -91,7 +91,7 @@ export function useTileEditor(input: {
 
             const result = applyTileStroke({
                 chunks,
-                layer: activeLayer,
+                layer: ACTIVE_LAYER,
                 points,
                 tileId: selectedTileId,
                 brushSize,
@@ -108,7 +108,7 @@ export function useTileEditor(input: {
             );
             setRedoStack([]);
         },
-        [activeLayer, brushSize, chunks, input.mapSize, selectedTileId, tool]
+        [brushSize, chunks, input.mapSize, selectedTileId, tool]
     );
 
     const undo = useCallback(() => {
@@ -131,14 +131,6 @@ export function useTileEditor(input: {
         setUndoStack((stack) => [...stack, changes].slice(-HISTORY_LIMIT));
     }, [redoStack]);
 
-    const setActiveLayer = useCallback((layer: TileLayer) => {
-        setLayer(layer);
-
-        const firstTile = TILE_CATALOG.find((tile) => tile.layer === layer);
-
-        if (firstTile) setSelectedTile(firstTile.id);
-    }, []);
-
     const acceptSaved = useCallback(() => {
         setBaseChunks(chunks);
         setUndoStack([]);
@@ -148,8 +140,7 @@ export function useTileEditor(input: {
     return {
         chunks,
         version,
-        activeLayer,
-        setActiveLayer,
+        activeLayer: ACTIVE_LAYER,
         selectedTileId,
         setSelectedTile,
         tool,
