@@ -2,26 +2,32 @@
 
 import { memo } from 'react';
 
-import { edgeRect } from './edge-geometry';
+import { edgeBar, edgeBarProps } from './edge-geometry';
 
+import { EDGE_WALL_WIDTH } from '@/lib/constants/battle';
 import { type EdgeEditing, useEdgeStroke } from '@/lib/hooks/battle';
-import { mapSize } from '@/lib/utils/battle/grid';
+import { gridOf, mapSize } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 interface Props {
-    map: Pick<BattleMapConfig, 'cols' | 'rows'>;
+    map: Pick<BattleMapConfig, 'cols' | 'rows' | 'gridType'>;
     editing: EdgeEditing;
 }
 
 export const EdgeEditor = memo(function EdgeEditor({ map, editing }: Props) {
-    const { cols, rows } = map;
+    const { cols, rows, gridType } = map;
+
+    const grid = gridOf(map);
+
+    const bar = (edge: string) =>
+        edgeBarProps(edgeBar(grid, edge), EDGE_WALL_WIDTH);
 
     const { handlers, pending, remove } = useEdgeStroke(
-        { cols, rows },
+        { cols, rows, gridType },
         editing
     );
 
-    const { width, height } = mapSize({ cols, rows });
+    const { width, height } = mapSize({ cols, rows }, grid);
 
     return (
         <g data-edge-editor="">
@@ -41,7 +47,7 @@ export const EdgeEditor = memo(function EdgeEditor({ map, editing }: Props) {
                         <rect
                             key={`a${edge}`}
                             data-edge-committed={edge}
-                            {...edgeRect(edge)}
+                            {...bar(edge)}
                             rx={3}
                             className="map-edge-pending"
                         />
@@ -50,7 +56,7 @@ export const EdgeEditor = memo(function EdgeEditor({ map, editing }: Props) {
                         <rect
                             key={`r${edge}`}
                             data-edge-committed={edge}
-                            {...edgeRect(edge)}
+                            {...bar(edge)}
                             rx={3}
                             className="map-edge-pending-remove"
                         />
@@ -63,7 +69,7 @@ export const EdgeEditor = memo(function EdgeEditor({ map, editing }: Props) {
                         <rect
                             key={edge}
                             data-edge-pending={edge}
-                            {...edgeRect(edge)}
+                            {...bar(edge)}
                             rx={3}
                             className={
                                 remove

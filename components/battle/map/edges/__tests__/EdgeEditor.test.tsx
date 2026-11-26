@@ -1,10 +1,11 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { EdgeEditor } from '../EdgeEditor';
 
 import type { EdgeEditing } from '@/lib/hooks/battle';
+import { edgeSegment } from '@/lib/utils/battle/grid/edge-keys';
 
 afterEach(cleanup);
 
@@ -54,5 +55,44 @@ describe('EdgeEditor', () => {
                 .querySelector('[data-edge-committed="2:2:s"]')
                 ?.getAttribute('class')
         ).toBe('map-edge-pending-remove');
+    });
+
+    it('a stroke through the middle of two hex edges marks both as pending', () => {
+        const identity = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+
+        const spy = vi
+            .spyOn(SVGSVGElement.prototype, 'getScreenCTM')
+            .mockReturnValue(identity as unknown as DOMMatrix);
+
+        const mid = (edge: string) => {
+            const [p, q] = edgeSegment('hex', edge);
+
+            return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+        };
+
+        const a = mid('2:2:ne');
+
+        const b = mid('2:2:se');
+
+        const { container } = render(
+            <svg>
+                <EdgeEditor
+                    map={{ cols: 5, rows: 5, gridType: 'hex' }}
+                    editing={{ existing: new Set(), onCommit: vi.fn() }}
+                />
+            </svg>
+        );
+
+        const surface = container.querySelector('[data-edge-surface]');
+
+        if (!surface) throw new Error('no surface');
+
+        const init = { pointerId: 1, isPrimary: true, button: 0, pointerType: 'mouse' };
+
+        fireEvent.pointerDown(surface, { ...init, clientX: a.x, clientY: a.y });
+        fireEvent.pointerMove(surface, { ...init, clientX: b.x, clientY: b.y });
+
+        expect(container.querySelectorAll('[data-edge-pending]')).toHaveLength(2);
+        spy.mockRestore();
     });
 });

@@ -1,4 +1,5 @@
-import { blockedSet, cellKey, footprint } from './geometry';
+import { edgeCellsOf,edgeSegment, edgesOfCell } from './edge-keys';
+import { blockedSet, cellKey, footprint, inBounds } from './geometry';
 import {
     HEX_H,
     HEX_R,
@@ -170,11 +171,72 @@ export function cellScreenPoint(
 
 const EDGE_TOLERANCE = 0.35;
 
-export function edgeAtScreenPoint(
+const HEX_EDGE_TOLERANCE = (EDGE_TOLERANCE * HEX_H) / 2;
+
+function distToSegment(
+    p: { x: number; y: number },
+    a: { x: number; y: number },
+    b: { x: number; y: number }
+): number {
+    const dx = b.x - a.x;
+
+    const dy = b.y - a.y;
+
+    const t = Math.max(
+        0,
+        Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy))
+    );
+
+    return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+function hexEdgeAtPoint(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     x: number,
     y: number,
-    tolerance = EDGE_TOLERANCE
+    tolerance: number
+): string | null {
+    const cell = hexPointToCell(x, y);
+
+    let best: string | null = null;
+
+    let bestDist = tolerance;
+
+    for (const edge of edgesOfCell('hex', cell)) {
+        const [a, b] = edgeCellsOf('hex', edge);
+
+        if (!inBounds(map, a) || !inBounds(map, b)) continue;
+
+        const [p, q] = edgeSegment('hex', edge);
+
+        const d = distToSegment({ x, y }, p, q);
+
+        if (d <= bestDist) {
+            best = edge;
+            bestDist = d;
+        }
+    }
+
+    return best;
+}
+
+export function edgeAtScreenPoint(
+    map: Pick<BattleMapConfig, 'cols' | 'rows' | 'gridType'>,
+    x: number,
+    y: number,
+    tolerance?: number
+): string | null {
+    if (map.gridType === 'hex')
+        return hexEdgeAtPoint(map, x, y, tolerance ?? HEX_EDGE_TOLERANCE);
+
+    return squareEdgeAtPoint(map, x, y, tolerance ?? EDGE_TOLERANCE);
+}
+
+function squareEdgeAtPoint(
+    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    x: number,
+    y: number,
+    tolerance: number
 ): string | null {
     const fx = x / UNIT;
 

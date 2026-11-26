@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import { edgeSegment, edgesOfCell } from '../edge-keys';
 import {
     cellAtScreenPoint,
     cellCenter,
     cellPolygon,
     cellScreenPoint,
+    edgeAtScreenPoint,
     fitMapBox,
     gridMetrics,
     mapSize,
@@ -116,5 +118,41 @@ describe('layout with grid = hex', () => {
             })()
         );
         expect(tokenBox(big)?.size).toBeCloseTo(3 * UNIT * 0.86, 5);
+    });
+});
+
+describe('edgeAtScreenPoint on hex', () => {
+    const map = { cols: 5, rows: 5, gridType: 'hex' as const };
+
+    const mid = (edge: string) => {
+        const [p, q] = edgeSegment('hex', edge);
+
+        return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+    };
+
+    it('returns the canonical key at the middle of every edge of a cell', () => {
+        for (const edge of edgesOfCell('hex', { x: 2, y: 2 })) {
+            const m = mid(edge);
+
+            expect(edgeAtScreenPoint(map, m.x, m.y)).toBe(edge);
+        }
+    });
+
+    it('middle of 2:2:ne resolves to that key', () => {
+        const m = mid('2:2:ne');
+
+        expect(edgeAtScreenPoint(map, m.x, m.y)).toBe('2:2:ne');
+    });
+
+    it('a cell centre is not near any edge', () => {
+        const c = cellCenter({ x: 2, y: 2 }, 'hex');
+
+        expect(edgeAtScreenPoint(map, c.x, c.y)).toBeNull();
+    });
+
+    it('outer map edges are not editable', () => {
+        const m = mid('0:0:n');
+
+        expect(edgeAtScreenPoint(map, m.x, m.y)).toBeNull();
     });
 });
