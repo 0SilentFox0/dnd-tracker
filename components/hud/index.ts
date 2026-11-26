@@ -1,5 +1,6 @@
 export { HUD_PRELOAD_FONTS, hudFontClassName } from './fonts';
 export { HudButton, HudIconButton } from './HudButton';
+export { HudSegmented, type HudSegmentedOption } from './HudSegmented';
 export { HudToggleChip } from './HudToggleChip';
 export { HudToolbar } from './HudToolbar';
 export {
