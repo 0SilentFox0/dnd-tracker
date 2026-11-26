@@ -7,9 +7,10 @@ import {
     screen,
     within,
 } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArtifactForm } from '@/components/artifacts/ArtifactForm';
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 
@@ -18,6 +19,8 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('ArtifactForm', () => {
+    beforeEach(() => mockMatchMedia(false));
+
     afterEach(cleanup);
 
     it('шле abilities і не шле старі поля бонусів', async () => {
@@ -36,7 +39,6 @@ describe('ArtifactForm', () => {
                             saving: '...',
                             iconHint: '',
                         }}
-                        cancelHref="/x"
                         initial={{
                             name: 'Меч',
                             description: '',
@@ -60,7 +62,7 @@ describe('ArtifactForm', () => {
                             ],
                             abilityIssues: [],
                         }}
-                        actions={{ onSubmit }}
+                        actions={{ onSubmit, cancelHref: '/x' }}
                     />
                 </ConfirmProvider>
             </QueryClientProvider>
@@ -94,7 +96,6 @@ describe('ArtifactForm', () => {
                             saving: '...',
                             iconHint: '',
                         }}
-                        cancelHref="/x"
                         initial={{
                             name: 'Меч',
                             description: '',
@@ -106,7 +107,7 @@ describe('ArtifactForm', () => {
                             abilityIssues: [],
                             weapon: { damageDice: '1d8' },
                         }}
-                        actions={{ onSubmit }}
+                        actions={{ onSubmit, cancelHref: '/x' }}
                     />
                 </ConfirmProvider>
             </QueryClientProvider>
@@ -144,7 +145,6 @@ describe('ArtifactForm', () => {
                             saving: '...',
                             iconHint: '',
                         }}
-                        cancelHref="/x"
                         initial={{
                             name: 'Меч',
                             description: '',
@@ -162,7 +162,10 @@ describe('ArtifactForm', () => {
                             ],
                             abilityIssues: [],
                         }}
-                        actions={{ onSubmit: vi.fn(async () => {}) }}
+                        actions={{
+                            onSubmit: vi.fn(async () => {}),
+                            cancelHref: '/x',
+                        }}
                     />
                 </ConfirmProvider>
             </QueryClientProvider>
@@ -189,7 +192,6 @@ describe('ArtifactForm', () => {
                             saving: '...',
                             iconHint: '',
                         }}
-                        cancelHref="/x"
                         initial={{
                             name: 'Меч',
                             description: '',
@@ -200,18 +202,20 @@ describe('ArtifactForm', () => {
                             abilities: [],
                             abilityIssues: [],
                         }}
-                        actions={{ onSubmit: vi.fn(async () => {}) }}
+                        actions={{
+                            onSubmit: vi.fn(async () => {}),
+                            cancelHref: '/x',
+                        }}
                     />
                 </ConfirmProvider>
             </QueryClientProvider>
         );
 
-        const bar = document.querySelector(
-            '[data-slot=action-bar]'
-        ) as HTMLElement;
+        const bar = document.querySelector('.hud-form-actions') as HTMLElement;
 
         expect(bar).not.toBeNull();
         expect(bar.lastElementChild).toHaveTextContent('Створити');
+        expect(bar.lastElementChild).toHaveAttribute('form', 'artifact-form');
     });
 
     it('помилка видалення показується в діалозі підтвердження, діалог лишається', async () => {
@@ -232,7 +236,6 @@ describe('ArtifactForm', () => {
                             saving: '...',
                             iconHint: '',
                         }}
-                        cancelHref="/x"
                         initial={{
                             name: 'Меч',
                             description: '',
@@ -243,14 +246,24 @@ describe('ArtifactForm', () => {
                             abilities: [],
                             abilityIssues: [],
                         }}
-                        actions={{ onSubmit: vi.fn(async () => {}), onDelete }}
+                        actions={{
+                            onSubmit: vi.fn(async () => {}),
+                            onDelete,
+                            cancelHref: '/x',
+                        }}
                     />
                 </ConfirmProvider>
             </QueryClientProvider>
         );
 
+        fireEvent.pointerDown(
+            screen.getByRole('button', { name: 'common.actions.more' }),
+            { button: 0, ctrlKey: false }
+        );
         fireEvent.click(
-            screen.getByRole('button', { name: 'common.actions.delete' })
+            await screen.findByRole('menuitem', {
+                name: 'common.actions.delete',
+            })
         );
 
         const dialog = await screen.findByRole('alertdialog');
@@ -281,7 +294,6 @@ describe('ArtifactForm', () => {
                             saving: '...',
                             iconHint: '',
                         }}
-                        cancelHref="/x"
                         initial={{
                             name: 'Меч',
                             description: '',
@@ -292,7 +304,10 @@ describe('ArtifactForm', () => {
                             abilities: [],
                             abilityIssues: [],
                         }}
-                        actions={{ onSubmit: vi.fn(async () => {}) }}
+                        actions={{
+                            onSubmit: vi.fn(async () => {}),
+                            cancelHref: '/x',
+                        }}
                     />
                 </ConfirmProvider>
             </QueryClientProvider>
@@ -333,5 +348,47 @@ describe('ArtifactForm', () => {
         expect(
             screen.getByRole('tab', { name: 'common.tabs.basic' })
         ).toHaveAttribute('data-state', 'active');
+    });
+
+    it('rail tabs: vertical tablist at xl, no side without a preview', () => {
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <ConfirmProvider>
+                    <ArtifactForm
+                        campaignId="c1"
+                        artifactSets={[]}
+                        mode="create"
+                        labels={{
+                            title: 'New',
+                            submit: 'Create',
+                            saving: '...',
+                            iconHint: '',
+                        }}
+                        initial={{
+                            name: 'Sword',
+                            description: '',
+                            rarity: '',
+                            slot: 'ring',
+                            icon: '',
+                            setId: '',
+                            abilities: [],
+                            abilityIssues: [],
+                        }}
+                        actions={{
+                            onSubmit: vi.fn(async () => {}),
+                            cancelHref: '/x',
+                        }}
+                    />
+                </ConfirmProvider>
+            </QueryClientProvider>
+        );
+
+        const rail = document.querySelector('[data-slot=hud-tabs-list]');
+
+        expect(rail).toHaveAttribute('aria-orientation', 'vertical');
+        expect(
+            within(rail as HTMLElement).getAllByRole('tab').length
+        ).toBeGreaterThanOrEqual(3);
+        expect(document.querySelector('.hud-form-side')).toBeNull();
     });
 });
