@@ -8,6 +8,7 @@ import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { useSkillForm } from '@/systems/skilltrees/hooks';
 import { SkillBasicInfo } from '@/systems/skilltrees/ui/content/skills/form/basic';
@@ -78,6 +79,8 @@ export function SkillCreateForm({
         },
     ];
 
+    const hasNotes = useHasSourceNotes(campaignId, 'skills', initialData?.id);
+
     return (
         <HudFormPage
             width="wide"
@@ -123,7 +126,7 @@ export function SkillCreateForm({
                 </>
             }
             side={
-                initialData ? (
+                initialData && hasNotes ? (
                     <SourceNotes
                         campaignId={campaignId}
                         kind="skills"

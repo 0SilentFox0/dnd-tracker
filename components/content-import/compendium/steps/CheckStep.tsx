@@ -3,7 +3,10 @@ import { useState } from 'react';
 
 import { RulesPatchOffer } from '../../shared/RulesPatchOffer';
 import { CompendiumDependencies } from '../CompendiumDependencies';
-import { CompendiumReportTabs, type ReportTab } from '../report/CompendiumReportTabs';
+import {
+    CompendiumReportTabs,
+    type ReportTab,
+} from '../report/CompendiumReportTabs';
 import { CompendiumVerdict } from '../report/CompendiumVerdict';
 
 import { LoadingState } from '@/components/common/states';
@@ -20,8 +23,7 @@ export function CheckStep({
 
     const [tab, setTab] = useState<ReportTab | null>(null);
 
-    if (!preview || phase === 'previewing')
-        return <LoadingState rows={6} />;
+    if (!preview || phase === 'previewing') return <LoadingState rows={6} />;
 
     const { report } = preview;
 

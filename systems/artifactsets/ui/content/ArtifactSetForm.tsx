@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import {
@@ -153,6 +154,8 @@ export function ArtifactSetForm({
         },
     ];
 
+    const hasNotes = useHasSourceNotes(campaignId, 'artifact-sets', setId);
+
     return (
         <HudFormPage
             width="wide"
@@ -199,7 +202,7 @@ export function ArtifactSetForm({
                 </>
             }
             side={
-                setId ? (
+                setId && hasNotes ? (
                     <SourceNotes
                         campaignId={campaignId}
                         kind="artifact-sets"

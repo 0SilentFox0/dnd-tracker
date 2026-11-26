@@ -10,6 +10,7 @@ import { HudFormMenu } from '@/components/hud';
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { unitFormTabs } from '@/components/units/form/UnitFormFields';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useUnitEditForm } from '@/lib/hooks/units';
 import { useTranslator } from '@/lib/i18n/use-translator';
 
@@ -31,6 +32,8 @@ export function UnitEditForm({
     const tr = useTranslator();
 
     const editor = useUnitEditForm(id, unitId);
+
+    const hasNotes = useHasSourceNotes(id, 'units', unitId);
 
     return (
         <HudFormPage
@@ -80,7 +83,13 @@ export function UnitEditForm({
                 </>
             }
             side={
-                <SourceNotes campaignId={id} kind="units" targetId={unitId} />
+                hasNotes ? (
+                    <SourceNotes
+                        campaignId={id}
+                        kind="units"
+                        targetId={unitId}
+                    />
+                ) : undefined
             }
         >
             <QueryState

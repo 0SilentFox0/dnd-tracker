@@ -8,6 +8,7 @@ import { ArtifactForm } from './ArtifactForm';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { ArtifactRarity } from '@/lib/constants/artifacts';
 import { useDeleteArtifact, useUpdateArtifact } from '@/lib/hooks/artifacts';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import type { ArtifactData, ArtifactSetOption } from '@/types/artifacts';
 
 interface ArtifactEditFormProps {
@@ -31,6 +32,8 @@ export function ArtifactEditForm({
 
     const remove = useDeleteArtifact(campaignId);
 
+    const hasNotes = useHasSourceNotes(campaignId, 'artifacts', artifact.id);
+
     return (
         <ArtifactForm
             campaignId={campaignId}
@@ -44,11 +47,13 @@ export function ArtifactEditForm({
                 iconHint: t('editIconHint', { bucket: 'artifact-icons' }),
             }}
             side={
-                <SourceNotes
-                    campaignId={campaignId}
-                    kind="artifacts"
-                    targetId={artifact.id}
-                />
+                hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="artifacts"
+                        targetId={artifact.id}
+                    />
+                ) : undefined
             }
             initial={{
                 name: artifact.name,

@@ -7,6 +7,7 @@ import { MainSkillFormFields } from './MainSkillFormFields';
 import { SourceNotes } from '@/components/content-import/shared/SourceNotes';
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { useHasSourceNotes } from '@/lib/hooks/compendium-import';
 import { useMainSkillForm } from '@/systems/skilltrees/hooks';
 import type { MainSkill } from '@/types/main-skills';
 
@@ -27,6 +28,8 @@ export function MainSkillEditForm({
         campaignId,
         mainSkill
     );
+
+    const hasNotes = useHasSourceNotes(campaignId, 'main-skills', mainSkill.id);
 
     return (
         <HudFormPage
@@ -60,11 +63,13 @@ export function MainSkillEditForm({
                 </>
             }
             side={
-                <SourceNotes
-                    campaignId={campaignId}
-                    kind="main-skills"
-                    targetId={mainSkill.id}
-                />
+                hasNotes ? (
+                    <SourceNotes
+                        campaignId={campaignId}
+                        kind="main-skills"
+                        targetId={mainSkill.id}
+                    />
+                ) : undefined
             }
         >
             <HudForm

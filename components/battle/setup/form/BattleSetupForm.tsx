@@ -42,7 +42,10 @@ function SetupLoading({ isEdit }: { isEdit: boolean }) {
     const t = useTranslations('battleSetup.form');
 
     return (
-        <HudFormPage header={{ title: isEdit ? t('title.edit') : t('title.create') }} className={PAGE_CLASS}>
+        <HudFormPage
+            header={{ title: isEdit ? t('title.edit') : t('title.create') }}
+            className={PAGE_CLASS}
+        >
             <div className="px-4 py-3">
                 <LoadingState label={t('loading')} />
             </div>
@@ -218,7 +221,13 @@ function BattleSetupLayout({
     ];
 
     return (
-        <HudFormPage header={{ title: title, aside: isEdit ? t('aside.edit') : t('aside.create') }} className={PAGE_CLASS}>
+        <HudFormPage
+            header={{
+                title: title,
+                aside: isEdit ? t('aside.edit') : t('aside.create'),
+            }}
+            className={PAGE_CLASS}
+        >
             <OnboardingHint id="dm.battle-setup" className="mb-3" />
             <HudForm
                 id={isEdit ? 'battle-edit-form' : 'battle-form'}

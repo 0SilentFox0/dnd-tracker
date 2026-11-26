@@ -21,6 +21,7 @@ export function HudFormPage({
     width = 'narrow',
     actions,
     side,
+    sidePreview = true,
     children,
     className,
 }: {
@@ -28,6 +29,7 @@ export function HudFormPage({
     width?: 'narrow' | 'wide';
     actions?: ReactNode;
     side?: ReactNode;
+    sidePreview?: boolean;
     children: ReactNode;
     className?: string;
 }) {
@@ -58,10 +60,12 @@ export function HudFormPage({
                 )}
                 <header className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-0">
                     <h1 className="hud-sc text-[28px] text-hud-ink">{title}</h1>
-                    {(aside || menu || (wide && side)) && (
+                    {(aside || menu || (wide && side && sidePreview)) && (
                         <span className="flex items-center gap-2 text-xs text-hud-muted sm:text-sm sm:text-hud-soft">
                             {aside}
-                            {wide && side && <HudFormSide>{side}</HudFormSide>}
+                            {wide && side && sidePreview && (
+                                <HudFormSide>{side}</HudFormSide>
+                            )}
                             {menu}
                         </span>
                     )}

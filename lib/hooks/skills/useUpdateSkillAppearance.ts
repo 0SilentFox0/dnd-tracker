@@ -30,7 +30,6 @@ export function useUpdateSkillAppearance(
     return {
         draft: { data, set },
         status: { isSaving: mutation.isPending },
-        save: () => mutation.mutate(data),
         saveText: (value: string) => mutation.mutate(value),
     };
 }

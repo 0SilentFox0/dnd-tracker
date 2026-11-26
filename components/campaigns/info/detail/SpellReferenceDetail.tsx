@@ -65,7 +65,7 @@ export function SpellReferenceDetail({
                 <p className="text-sm text-hud-bone">{item.description}</p>
             )}
             <AppearanceBlock
-                text={appearance}
+                text={isDM ? appearance : (item.appearanceDescription ?? '')}
                 canEdit={isDM}
                 onSave={async (text) => {
                     setAppearance(text);

@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HudFormPage } from '@/components/hud/form';
@@ -100,5 +101,35 @@ describe('HudFormPage', () => {
 
         expect(await screen.findByRole('dialog')).toBeTruthy();
         expect(screen.getAllByText('preview').length).toBe(2);
+    });
+
+    it('sidePreview={false} keeps the aside but drops the preview button', () => {
+        render(
+            <HudFormPage
+                width="wide"
+                header={{ title: 'T' }}
+                side={<p>preview</p>}
+                sidePreview={false}
+            >
+                body
+            </HudFormPage>
+        );
+
+        expect(document.querySelector('.hud-form-side')).not.toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'common.ui.preview' })
+        ).toBeNull();
+    });
+
+    it('css gives every wide template a notice row and a bottom bar without side', () => {
+        const css = readFileSync('components/hud/hud.css', 'utf8');
+
+        const areas = css.match(/grid-template-areas: [^;]+;/g) ?? [];
+
+        expect(areas.length).toBeGreaterThan(0);
+        expect(areas.every((a) => a.includes('notice'))).toBe(true);
+        expect(css).toMatch(
+            /:not\(:has\(> \.hud-form-side\)\)\) > \.hud-form-actions \{ grid-column: 1 \/ -1/
+        );
     });
 });

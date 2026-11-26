@@ -16,4 +16,4 @@ export {
     type WizardView,
 } from './useCompendiumWizardView';
 export { type PreviewExpiry, usePreviewExpiry } from './usePreviewExpiry';
-export { useSourceNotes } from './useSourceNotes';
+export { useHasSourceNotes, useSourceNotes } from './useSourceNotes';

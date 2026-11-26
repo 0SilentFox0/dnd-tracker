@@ -204,17 +204,17 @@ export function NewCharacterForm({
             header={{ title: t('form.title'), aside: t('form.aside') }}
             actions={
                 <>
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={`/campaigns/${id}/dm/characters`}>
+                            {tc('actions.cancel')}
+                        </Link>
+                    </Button>
                     <Button
                         type="submit"
                         form={FORM_ID}
                         disabled={isLoading || membersLoading}
                     >
                         {isLoading ? tc('actions.creating') : t('form.submit')}
-                    </Button>
-                    <Button type="button" variant="outline" asChild>
-                        <Link href={`/campaigns/${id}/dm/characters`}>
-                            {tc('actions.cancel')}
-                        </Link>
                     </Button>
                 </>
             }
@@ -235,6 +235,7 @@ export function NewCharacterForm({
                     onSubmit={handleSubmit}
                     error={error}
                     tabs={tabs}
+                    className="max-lg:col-span-2"
                 />
             </div>
             <PortraitDialog

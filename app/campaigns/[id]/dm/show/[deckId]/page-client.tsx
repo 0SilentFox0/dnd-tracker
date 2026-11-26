@@ -63,11 +63,16 @@ export function DeckEditorPageClient({
     };
 
     return (
-        <HudFormPage header={{ title: t('deckEditor.title'), aside: 
-                <Link href={`${base}/dm/show`} className="underline">
-                    {t('deckEditor.back')}
-                </Link>
-             }}>
+        <HudFormPage
+            header={{
+                title: t('deckEditor.title'),
+                aside: (
+                    <Link href={`${base}/dm/show`} className="underline">
+                        {t('deckEditor.back')}
+                    </Link>
+                ),
+            }}
+        >
             <HudForm
                 id="deck-editor-form"
                 error={draft.title.trim() ? null : t('deckEditor.nameRequired')}

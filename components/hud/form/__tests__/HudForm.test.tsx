@@ -192,6 +192,7 @@ describe('HudForm rail and layout', () => {
         const alert = screen.getByRole('alert');
 
         expect(alert.textContent).toBe('boom');
+        expect(alert).toHaveAttribute('data-notice');
         expect(
             alert.compareDocumentPosition(screen.getByRole('tablist')) &
                 Node.DOCUMENT_POSITION_FOLLOWING

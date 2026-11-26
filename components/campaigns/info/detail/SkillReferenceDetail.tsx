@@ -56,7 +56,7 @@ export function SkillReferenceDetail({
             />
             <AppearanceBlock
                 kind="skill"
-                text={appearance}
+                text={isDM ? appearance : (item.appearanceDescription ?? '')}
                 canEdit={isDM}
                 onSave={async (text) => {
                     setAppearance(text);

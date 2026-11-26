@@ -59,7 +59,11 @@ export function HudForm<T extends string>({
             className={cn('flex flex-1 flex-col', className)}
         >
             {!actions && error && (
-                <p role="alert" className="px-4 py-2 text-sm text-hud-danger">
+                <p
+                    role="alert"
+                    data-notice
+                    className="px-4 py-2 text-sm text-hud-danger"
+                >
                     {error}
                 </p>
             )}

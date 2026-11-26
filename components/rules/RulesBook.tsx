@@ -1,6 +1,11 @@
 'use client';
 
-import { type ComponentType, type FormEvent, type ReactNode, useMemo } from 'react';
+import {
+    type ComponentType,
+    type FormEvent,
+    type ReactNode,
+    useMemo,
+} from 'react';
 
 import { DefaultAttacksSection } from './sections/DefaultAttacksSection';
 import { EncountersSection } from './sections/EncountersSection';
@@ -195,6 +200,7 @@ export function RulesBook({
                             </>
                         ),
                     }}
+                    sidePreview={false}
                     side={
                         <RulesSide
                             changed={dirtyKeys as string[]}
@@ -203,51 +209,55 @@ export function RulesBook({
                     }
                     actions={
                         readOnly ? undefined : (
-                        <>
-                            {isDirty && (
-                                <span className="text-sm text-hud-muted">
-                                    {t('page.changedSections', {
-                                        count: dirtyKeys.length,
-                                    })}
-                                </span>
-                            )}
-                            <Button
-                                type="button"
-                                variant="outline"
-                                disabled={!isDirty || isSaving}
-                                onClick={reset}
-                            >
-                                {tc('actions.cancel')}
-                            </Button>
-                            <Button
-                                type="submit"
-                                form={FORM_ID}
-                                disabled={!isDirty || isSaving}
-                            >
-                                {tc('actions.save')}
-                            </Button>
-                        </>
+                            <>
+                                {isDirty && (
+                                    <span className="text-sm text-hud-muted">
+                                        {t('page.changedSections', {
+                                            count: dirtyKeys.length,
+                                        })}
+                                    </span>
+                                )}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={!isDirty || isSaving}
+                                    onClick={reset}
+                                >
+                                    {tc('actions.cancel')}
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    form={FORM_ID}
+                                    disabled={!isDirty || isSaving}
+                                >
+                                    {tc('actions.save')}
+                                </Button>
+                            </>
                         )
                     }
                 >
-                    {readOnly && (
-                        <p
-                            role="status"
-                            className="mb-3 rounded-xl border border-hud-rule px-4 py-2 text-sm text-hud-muted"
-                        >
-                            {t('page.demoReadOnly')}
-                        </p>
-                    )}
-                    {section && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="mb-2 lg:hidden"
-                            onClick={() => setSection(null)}
-                        >
-                            {`‹ ${tc('actions.back')}`}
-                        </Button>
+                    {(readOnly || section) && (
+                        <div data-notice>
+                            {readOnly && (
+                                <p
+                                    role="status"
+                                    className="mb-3 rounded-xl border border-hud-rule px-4 py-2 text-sm text-hud-muted"
+                                >
+                                    {t('page.demoReadOnly')}
+                                </p>
+                            )}
+                            {section && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="mb-2 lg:hidden"
+                                    onClick={() => setSection(null)}
+                                >
+                                    {`‹ ${tc('actions.back')}`}
+                                </Button>
+                            )}
+                        </div>
                     )}
                     <HudForm
                         id={FORM_ID}

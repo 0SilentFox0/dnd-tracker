@@ -8,6 +8,8 @@ import { UnitEditForm } from '@/components/units/form/UnitEditForm';
 
 const remove = vi.fn();
 
+const notesState = { has: true };
+
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: vi.fn() }),
 }));
@@ -19,6 +21,7 @@ vi.mock('@/components/units/form/UnitFormFields', () => ({
 }));
 
 vi.mock('@/lib/hooks/compendium-import', () => ({
+    useHasSourceNotes: () => notesState.has,
     useSourceNotes: () => ({
         entries: [
             {
@@ -53,7 +56,10 @@ vi.mock('@/lib/hooks/units', () => ({
     }),
 }));
 
-beforeEach(() => mockMatchMedia(false));
+beforeEach(() => {
+    mockMatchMedia(false);
+    notesState.has = true;
+});
 afterEach(cleanup);
 
 describe('UnitEditForm layout', () => {
@@ -87,5 +93,15 @@ describe('UnitEditForm layout', () => {
             })
         );
         expect(remove).toHaveBeenCalledTimes(1);
+    });
+
+    it('reserves no side column and no preview button without source notes', () => {
+        notesState.has = false;
+        renderWithConfirm(<UnitEditForm campaignId="c1" unitId="u1" />);
+
+        expect(document.querySelector('.hud-form-side')).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'common.ui.preview' })
+        ).toBeNull();
     });
 });

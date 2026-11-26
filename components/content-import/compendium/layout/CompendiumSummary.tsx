@@ -128,25 +128,29 @@ export function CompendiumSummary({
                     ))}
                 </dl>
             </div>
-            {checking && expiry.expiresAt && !(expiry.expired && view.step === 3) && (
-                <p
-                    role={expiry.expired ? 'alert' : undefined}
-                    className={
-                        expiry.expired
-                            ? 'text-sm text-hud-danger'
-                            : 'text-xs text-hud-muted'
-                    }
-                >
-                    {expiry.expired
-                        ? t('confirm.expired')
-                        : t('confirm.until', {
-                              time: new Date(expiry.expiresAt).toLocaleTimeString(
-                                  locale,
-                                  { hour: '2-digit', minute: '2-digit' }
-                              ),
-                          })}
-                </p>
-            )}
+            {checking &&
+                expiry.expiresAt &&
+                !(expiry.expired && view.step === 3) && (
+                    <p
+                        role={expiry.expired ? 'alert' : undefined}
+                        className={
+                            expiry.expired
+                                ? 'text-sm text-hud-danger'
+                                : 'text-xs text-hud-muted'
+                        }
+                    >
+                        {expiry.expired
+                            ? t('confirm.expired')
+                            : t('confirm.until', {
+                                  time: new Date(
+                                      expiry.expiresAt
+                                  ).toLocaleTimeString(locale, {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                  }),
+                              })}
+                    </p>
+                )}
             <Button
                 className="w-full"
                 disabled={primary.disabled}

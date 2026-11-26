@@ -34,7 +34,7 @@
 - `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`, `character-profile/RollableCell` (кнопка кидка або статична клітинка), `character-profile/RollResultView` (результат кидка в діалозі)
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`
 - `battle/hud/DiceInput`, `battle/wizards/attack/shared`, `battle/participants/Section`
-- `abilities`, `abilities/AbilityFlow`, `artifacts/ArtifactCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
+- `abilities`, `abilities/AbilityFlow`, `artifacts/ArtifactCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`, `content-import/shared/SourceNotes` (нотатки джерела в боковій колонці форми), `campaigns/info/detail/ClassReferenceDetail` (перегляд «Як бачать гравці» у формі класу)
 
 Новий пункт кіта = правка списку (видно в ревʼю) + рядок тут.
 

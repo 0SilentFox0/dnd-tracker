@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { type HudTab, HudTabs } from '@/components/hud/form';
@@ -174,7 +180,9 @@ describe('HudTabs', () => {
         const tab = (n: string) => screen.getByRole('tab', { name: n });
 
         tab('Перший').focus();
-        fireEvent.keyDown(document.activeElement as Element, { key: 'ArrowRight' });
+        fireEvent.keyDown(document.activeElement as Element, {
+            key: 'ArrowRight',
+        });
         await waitFor(() => expect(tab('Другий')).toHaveFocus());
         expect(tab('Другий')).toHaveAttribute('aria-selected', 'true');
         fireEvent.keyDown(document.activeElement as Element, { key: 'End' });
@@ -270,8 +278,8 @@ describe('HudTabs rail', () => {
         );
 
         expect(screen.queryByRole('tab', { name: 'Two' })).toBeNull();
-        expect(
-            document.querySelector('[data-tab-id="b"]')?.textContent
-        ).toBe('B');
+        expect(document.querySelector('[data-tab-id="b"]')?.textContent).toBe(
+            'B'
+        );
     });
 });

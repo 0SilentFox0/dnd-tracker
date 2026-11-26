@@ -70,4 +70,16 @@ describe('SpellReferenceDetail', () => {
         expect(screen.queryByRole('button', { name: 'Редагувати' })).toBeNull();
         expect(screen.getByText('Куля')).toBeTruthy();
     });
+
+    it('non-DM preview shows the live appearance text, not the stale draft', () => {
+        render(
+            <SpellReferenceDetail
+                campaignId="c"
+                item={{ ...spell, appearanceDescription: 'Свіжий' }}
+                isDM={false}
+            />
+        );
+
+        expect(screen.getByText('Свіжий')).toBeTruthy();
+    });
 });

@@ -191,8 +191,11 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 .hud-range::-webkit-slider-thumb { transition: border-color .15s ease, transform .15s ease; }
 
 /* wide form page: head / rail / main / side / actions grid */
-.hud-form-wide { display: grid; gap: 16px 24px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "rail" "main"; }
-.hud-form-wide:has(> .hud-form-actions) { grid-template-rows: auto auto auto 72px; }
+.hud-form-wide { display: grid; gap: 0 24px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "rail" "notice" "main"; }
+.hud-form-wide:has(> .hud-form-actions) { grid-template-rows: auto auto auto auto 72px; }
+.hud-form-wide > .hud-form-head,
+.hud-form-wide [data-slot="hud-tabs-list"] { margin-bottom: 16px; }
+.hud-form-wide [data-notice] { grid-area: notice; min-width: 0; margin-bottom: 12px; }
 .hud-form-wide > .hud-form-head { grid-area: head; }
 .hud-form-wide > .hud-form-side { grid-area: side; display: none; }
 .hud-form-wide .hud-form-body,
@@ -206,25 +209,29 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 .hud-form-page:not(.hud-form-wide) > .hud-form-actions { margin-top: 16px; padding-inline: 16px; padding-bottom: 16px; }
 .hud-form-wide > .hud-form-actions { border-top: 1px solid var(--hud-rule); background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 1024px) {
-  .hud-form-wide { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: none; grid-template-areas: "head actions" "rail side" "main side"; }
-  .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head actions" "rail rail" "main main"; }
+  .hud-form-wide { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: none; grid-template-areas: "head actions" "rail side" "notice side" "main side"; }
+  .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head actions" "rail rail" "notice notice" "main main"; }
   .hud-form-wide > .hud-form-side { display: block; position: sticky; top: calc(var(--shell-header-h, 57px) + 64px); align-self: start; }
   .hud-form-wide > .hud-form-actions { grid-row: 1 / -1; grid-column: 2; align-self: start; top: var(--shell-header-h, 57px); bottom: auto; border-top: 0; background: transparent; backdrop-filter: none; padding: 0; justify-content: flex-end; }
   .hud-form-wide:has(> .hud-form-actions) { grid-template-rows: none; }
 }
 @media (min-width: 1024px) and (max-width: 1279px) {
-  .hud-form-wide:has([data-rail-from="lg"]) { grid-template-columns: 200px minmax(0, 1fr) 320px; grid-template-areas: "head head actions" "rail main side"; }
-  .hud-form-wide:has([data-rail-from="lg"]):not(:has(> .hud-form-side)) { grid-template-areas: "head head actions" "rail main main"; }
+  .hud-form-wide:has([data-rail-from="lg"]) { grid-template-columns: 200px minmax(0, 1fr) 320px; grid-template-areas: "head head actions" "rail notice side" "rail main side"; }
+  .hud-form-wide:has([data-rail-from="lg"]):not(:has(> .hud-form-side)) { grid-template-areas: "head head actions" "rail notice notice" "rail main main"; }
 }
 @media (min-width: 1280px) {
-  .hud-form-wide { grid-template-columns: 208px minmax(0, 1fr) 360px; grid-template-areas: "head head actions" "rail main side"; }
-  .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head head actions" "rail main main"; }
+  .hud-form-wide { grid-template-columns: 208px minmax(0, 1fr) 360px; grid-template-areas: "head head actions" "rail notice side" "rail main side"; }
+  .hud-form-wide:not(:has(> .hud-form-side)) { grid-template-areas: "head head actions" "rail notice notice" "rail main main"; }
   .hud-form-wide > .hud-form-actions { grid-column: 3; }
 }
 @media (min-width: 1600px) {
   .hud-form-wide { grid-template-columns: 208px minmax(0, 1fr) 400px; }
 }
 .hud-form-wide:has([data-wide-tab="true"]) > .hud-form-side { display: none; }
+@media (min-width: 1024px) {
+  .hud-form-wide:has(> .hud-form-actions):is(:has([data-wide-tab="true"]), :not(:has(> .hud-form-side))) { grid-template-rows: auto auto auto auto 72px; }
+  .hud-form-wide:is(:has([data-wide-tab="true"]), :not(:has(> .hud-form-side))) > .hud-form-actions { grid-column: 1 / -1; grid-row: 1 / -1; align-self: end; top: auto; bottom: 0; border-top: 1px solid var(--hud-rule); background: color-mix(in srgb, var(--hud-page, #14100c) 95%, transparent); backdrop-filter: blur(6px); padding: 12px 16px; }
+}
 .hud-form-wide:has([data-wide-tab="true"]) [data-slot="hud-tabs-panels"] { grid-column: main-start / -1; }
 
 /* container-driven field grids */
