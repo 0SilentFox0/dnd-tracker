@@ -74,7 +74,7 @@ export function HudFormPage({
                 )}
             </header>
             <div
-                className={cn('orn', actions && 'lg:col-span-2 lg:row-start-2')}
+                className={cn('orn', actions && 'lg:col-start-1 lg:row-start-2')}
                 aria-hidden
             />
             <HudPortalClassProvider value={HUD_SURFACE}>
@@ -82,7 +82,7 @@ export function HudFormPage({
                     <div
                         className={cn(
                             wide ? 'hud-wide-body' : 'flex flex-1 flex-col',
-                            actions && 'lg:col-span-2 lg:row-start-3'
+                            actions && 'lg:col-start-1 lg:row-start-3'
                         )}
                     >
                         {children}

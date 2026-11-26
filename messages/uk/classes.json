@@ -111,6 +111,16 @@
   "reference": {
     "levelShort": "рів. {level}",
     "featuresByLevel": "Вміння за рівнями",
-    "subclass": "Підклас: {name}"
+    "subclass": "Підклас: {name}",
+    "summary": {
+      "hitDie": "Кістка здоров'я: к{die}",
+      "savingThrows": "Рятівні кидки: {list}",
+      "caster": "{caster}",
+      "casterAbility": "{caster} ({ability})",
+      "armor": "Обладунки: {list}",
+      "weapons": "Зброя: {list}",
+      "tools": "Інструменти: {list}",
+      "skills": "Навички: {count} з {list}"
+    }
   }
 }

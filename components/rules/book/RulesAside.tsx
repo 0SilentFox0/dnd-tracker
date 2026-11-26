@@ -15,7 +15,7 @@ export function CompositionChip({ system }: { system: SystemSelection }) {
     const { base, modules } = composition(system);
 
     return (
-        <HudPill tone="gold">
+        <HudPill tone="bone" className="min-w-0 max-w-full shrink whitespace-normal rounded-md py-0.5">
             {[
                 tTerms(ruleSystemLabelKey(base)),
                 ...modules.map((id) => `+${tTerms(`module.${id}.name`)}`),

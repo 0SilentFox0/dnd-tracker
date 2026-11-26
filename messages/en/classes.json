@@ -111,6 +111,16 @@
   "reference": {
     "levelShort": "lvl {level}",
     "featuresByLevel": "Features by level",
-    "subclass": "Subclass: {name}"
+    "subclass": "Subclass: {name}",
+    "summary": {
+      "hitDie": "Hit die: d{die}",
+      "savingThrows": "Saving throws: {list}",
+      "caster": "{caster}",
+      "casterAbility": "{caster} ({ability})",
+      "armor": "Armor: {list}",
+      "weapons": "Weapons: {list}",
+      "tools": "Tools: {list}",
+      "skills": "Skills: {count} from {list}"
+    }
   }
 }

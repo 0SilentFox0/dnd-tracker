@@ -122,7 +122,7 @@ export function classSummaryText(
     if (params.ability)
         params.ability = t(`gameTerms.abilities.${params.ability}.label`);
 
-    return t(`dashboard.reference.summary.${line.key}`, params);
+    return t(`classes.reference.summary.${line.key}`, params);
 }
 
 export function classSearchText(c: ClassForReference, t: Translator): string {

@@ -205,6 +205,7 @@ html[data-palette="parchment"] .game-shell-mobile-actions a[data-slot="header-pi
 @media (min-width: 1280px) { .hud-wide-body { grid-template-columns: 208px minmax(0, 1fr) 360px; grid-template-areas: "rail main side"; } }
 @media (min-width: 1600px) { .hud-wide-body { grid-template-columns: 208px minmax(0, 1fr) 400px; } }
 .hud-wide-body > form, .hud-wide-body [data-hud-tabs-root] { display: contents; }
+.hud-wide-body > *, .hud-wide-body [data-hud-rail], .hud-wide-body [data-hud-tabs-panels] { min-width: 0; }
 .hud-wide-body [data-hud-rail] { grid-area: rail; }
 .hud-wide-body [data-hud-main], .hud-wide-body [data-hud-tabs-panels] { grid-area: main; container-type: inline-size; }
 .hud-wide-side { grid-area: side; }
