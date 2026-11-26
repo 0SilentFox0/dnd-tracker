@@ -1,5 +1,8 @@
 import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
-import type { DoorState, GridKind } from '@/types/battle-grid';
+import { gridOf } from '@/lib/utils/battle/grid/geometry';
+import type { MapDims } from '@/lib/utils/battle/map-art/scene';
+import { stampCells } from '@/lib/utils/battle/map-art/stamp-cells';
+import type { DoorState } from '@/types/battle-grid';
 import type { MapArtScene } from '@/types/battle-map';
 
 export interface DerivedMechanics {
@@ -7,6 +10,7 @@ export interface DerivedMechanics {
     bars: string[];
     doors: Record<string, DoorState>;
     blocked: string[];
+    sightBlocked: string[];
 }
 
 const sorted = (keys: Iterable<string>): string[] =>
@@ -14,8 +18,12 @@ const sorted = (keys: Iterable<string>): string[] =>
 
 export function deriveMechanics(
     scene: MapArtScene,
-    grid: GridKind
+    map: MapDims
 ): DerivedMechanics {
+    const grid = gridOf(map);
+
+    const { blocked, sight } = stampCells(scene.stamps, map);
+
     const walls: string[] = [];
 
     const bars: string[] = [];
@@ -41,6 +49,7 @@ export function deriveMechanics(
         walls: sorted(walls),
         bars: sorted(bars),
         doors: orderedDoors,
-        blocked: sorted(Object.keys(scene.blocked)),
+        blocked: sorted(new Set([...Object.keys(scene.blocked), ...blocked])),
+        sightBlocked: sorted(sight),
     };
 }

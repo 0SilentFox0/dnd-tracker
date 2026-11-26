@@ -60,4 +60,28 @@ describe('clipScene', () => {
 
         expect(clipScene(scene, map)).toBe(scene);
     });
+
+    it('drops stamps outside the map and keeps the reference otherwise', () => {
+        const st = (id: string, x: number, y: number) => ({
+            id,
+            asset: 'a',
+            x,
+            y,
+            rot: 0,
+            scale: 1,
+            flip: false,
+            z: 0,
+        });
+
+        const inside = { ...emptyScene(), stamps: [st('a', 100, 1000)] };
+
+        expect(clipScene(inside, map)).toBe(inside);
+
+        const out = clipScene(
+            { ...emptyScene(), stamps: [st('a', 100, 100), st('b', 1001, 5), st('c', 5, -1)] },
+            map
+        );
+
+        expect(out.stamps.map((s) => s.id)).toEqual(['a']);
+    });
 });

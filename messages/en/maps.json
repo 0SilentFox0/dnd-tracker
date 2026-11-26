@@ -220,6 +220,9 @@
         "openingWithoutWall": "An opening without a wall.",
         "tooManyDoors": "Too many doors on the map.",
         "outOfBounds": "An art element is outside the map.",
+        "unknownStamp": "Unknown stamp.",
+        "duplicateStamp": "Duplicate stamp id.",
+        "tooManyBlocked": "Too many blocked cells on the map.",
         "badFloor": "Invalid floor data."
       }
     }

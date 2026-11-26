@@ -165,8 +165,14 @@ function EditorContent({
 
     const derivedDoors = useMemo(
         () =>
-            artScene ? deriveMechanics(artScene, map.gridType ?? 'square').doors : null,
-        [artScene, map.gridType]
+            artScene
+                ? deriveMechanics(artScene, {
+                      cols: map.cols,
+                      rows: map.rows,
+                      gridType: map.gridType,
+                  }).doors
+                : null,
+        [artScene, map.cols, map.rows, map.gridType]
     );
 
     const previewMap = useMemo(() => {

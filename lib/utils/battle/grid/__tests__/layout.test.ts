@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     cellAtScreenPoint,
+    cellAtUnitPoint,
     cellCenter,
     cellPolygon,
     cellScreenPoint,
@@ -505,5 +506,16 @@ describe('viewCellPx', () => {
 
         expect(viewCellPx({ width: 400, rotated: false }, win)).toBe(10);
         expect(viewCellPx({ width: 400, rotated: true }, win)).toBe(20);
+    });
+});
+
+describe('cellAtUnitPoint', () => {
+    it('floors square points and picks the hex containing the point', () => {
+        expect(cellAtUnitPoint({ x: 299.9, y: 0 })).toEqual({ x: 2, y: 0 });
+        expect(cellAtUnitPoint({ x: 300, y: 250 })).toEqual({ x: 3, y: 2 });
+
+        const c = cellCenter({ x: 3, y: 4 }, 'hex');
+
+        expect(cellAtUnitPoint(c, 'hex')).toEqual({ x: 3, y: 4 });
     });
 });

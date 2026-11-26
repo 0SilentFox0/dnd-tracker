@@ -1,6 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { mapArtSaveSchema, mapArtSceneSchema } from '../map-art';
+vi.mock('@/lib/constants/map-art/stamps', () => {
+    const defs: Record<string, unknown> = {
+        deco: { id: 'deco', cols: 1, rows: 1 },
+        crate: {
+            id: 'crate',
+            cols: 1,
+            rows: 1,
+            blocks: { shape: 'rect', w: 1, h: 1 },
+        },
+    };
+
+    return {
+        stampDef: (id: string) => defs[id],
+        isStampId: (id: string) => id in defs,
+    };
+});
+
+import { MAP_ART_LIMITS, mapArtSaveSchema, mapArtSceneSchema } from '../map-art';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { encodeTileChunk } from '@/lib/utils/battle/tiles/rle';
@@ -14,6 +31,18 @@ const scene = (over: object = {}) => ({
     lights: [],
     ambient: { tint: '#000000', darkness: 0 },
     stamps: [],
+    ...over,
+});
+
+const stamp = (over: object = {}) => ({
+    id: 's1',
+    asset: 'deco',
+    x: 150,
+    y: 150,
+    rot: 0,
+    scale: 1,
+    flip: false,
+    z: 0,
     ...over,
 });
 
@@ -52,9 +81,43 @@ describe('mapArtSceneSchema', () => {
         ).toBe(false);
     });
 
-    it('rejects non-empty stamps', () => {
-        expect(mapArtSceneSchema.safeParse(scene({ stamps: [{}] })).success).toBe(
+    it('accepts a valid stamp and rejects out-of-range fields', () => {
+        const ok = mapArtSceneSchema.safeParse(scene({ stamps: [stamp()] }));
+
+        expect(ok.success).toBe(true);
+
+        for (const bad of [
+            { scale: 0.2 },
+            { scale: 4.1 },
+            { rot: 360 },
+            { rot: -1 },
+            { z: 1.5 },
+            { id: '' },
+            { id: 'x'.repeat(41) },
+        ])
+            expect(
+                mapArtSceneSchema.safeParse(scene({ stamps: [stamp(bad)] }))
+                    .success
+            ).toBe(false);
+    });
+
+    it('rejects more than the stamp limit', () => {
+        const many = Array.from({ length: MAP_ART_LIMITS.stamps + 1 }, (_, i) =>
+            stamp({ id: `s${i}` })
+        );
+
+        expect(mapArtSceneSchema.safeParse(scene({ stamps: many })).success).toBe(
             false
+        );
+    });
+
+    it('keeps the maximum stamp list under the body limit', () => {
+        const many = Array.from({ length: MAP_ART_LIMITS.stamps }, (_, i) =>
+            stamp({ id: `s${i}`, asset: 'a'.repeat(60) })
+        );
+
+        expect(JSON.stringify(many).length).toBeLessThan(
+            MAP_ART_LIMITS.bodyBytes
         );
     });
 
@@ -135,5 +198,41 @@ describe('mapArtSaveSchema', () => {
             mapArtSaveSchema.safeParse({ ...body(), expectedSceneVersion: -1 })
                 .success
         ).toBe(false);
+    });
+
+    it('rejects an unknown stamp asset and duplicate stamp ids', () => {
+        expect(messages(body({ stamps: [stamp({ asset: 'nope' })] }))).toContain(
+            `${P}unknownStamp`
+        );
+        expect(
+            messages(body({ stamps: [stamp(), stamp({ x: 250 })] }))
+        ).toContain(`${P}duplicateStamp`);
+    });
+
+    it('rejects a stamp centre outside the map', () => {
+        expect(messages(body({ stamps: [stamp({ x: 1001 })] }))).toContain(
+            `${P}outOfBounds`
+        );
+        expect(messages(body({ stamps: [stamp({ x: 1000, y: 0 })] }))).toEqual([]);
+    });
+
+    it('rejects too many blocked cells from scene.blocked and stamps together', () => {
+        const blocked: Record<string, null> = {};
+
+        for (let i = 0; i < MAP_LIMITS.maxTerrainCells; i++)
+            blocked[`${i % 100}:${Math.floor(i / 100)}`] = null;
+
+        const map = { cols: 100, rows: 100 };
+
+        expect(
+            messages(
+                body({ blocked, stamps: [stamp({ asset: 'crate', x: 3650, y: 3750 })] }, map)
+            )
+        ).toContain(`${P}tooManyBlocked`);
+        expect(
+            messages(
+                body({ blocked, stamps: [stamp({ asset: 'crate', x: 50, y: 50 })] }, map)
+            )
+        ).not.toContain(`${P}tooManyBlocked`);
     });
 });

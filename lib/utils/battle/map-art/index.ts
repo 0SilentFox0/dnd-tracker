@@ -6,4 +6,6 @@ export * from './floors';
 export * from './regions';
 export * from './room';
 export * from './scene';
+export * from './stamp-cells';
+export * from './stamp-geometry';
 export * from './wall-runs';

@@ -115,12 +115,17 @@ export function clipScene(scene: MapArtScene, map: MapDims): MapArtScene {
         (l) => l.x >= 0 && l.y >= 0 && l.x <= size.width && l.y <= size.height
     );
 
+    const stamps = scene.stamps.filter(
+        (s) => s.x >= 0 && s.y >= 0 && s.x <= size.width && s.y <= size.height
+    );
+
     if (
         walls === scene.walls &&
         openings === scene.openings &&
         blocked === scene.blocked &&
         !floorsChanged &&
-        lights.length === scene.lights.length
+        lights.length === scene.lights.length &&
+        stamps.length === scene.stamps.length
     )
         return scene;
 
@@ -131,5 +136,6 @@ export function clipScene(scene: MapArtScene, map: MapDims): MapArtScene {
         openings,
         blocked,
         lights,
+        stamps,
     };
 }

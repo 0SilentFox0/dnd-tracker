@@ -6,14 +6,16 @@ import {
     OPENING_MATERIALS,
     WALL_MATERIALS,
 } from '@/lib/constants/map-art/materials';
+import { isStampId } from '@/lib/constants/map-art/stamps';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { battleMapSaveSchema } from '@/lib/schemas/battle-maps';
 import { edgeKeySchema } from '@/lib/schemas/battles';
 import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
 import { gridOf, inBounds } from '@/lib/utils/battle/grid/geometry';
-import { unitOf } from '@/lib/utils/battle/grid/layout';
+import { mapSize, unitOf } from '@/lib/utils/battle/grid/layout';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
+import { stampCells } from '@/lib/utils/battle/map-art/stamp-cells';
 import { CHUNK_SIDE } from '@/lib/utils/battle/map-storage/chunk-key';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import type { MapArtScene } from '@/types/battle-map';
@@ -21,6 +23,7 @@ import type { MapArtScene } from '@/types/battle-map';
 export const MAP_ART_LIMITS = {
     lights: 64,
     floorChunkChars: 2_000,
+    stamps: 2000,
     bodyBytes: 2 * 1024 * 1024,
 } as const;
 
@@ -65,6 +68,17 @@ const lightSchema = z.object({
     intensity: z.number().min(0).max(1),
 });
 
+const stampSchema = z.object({
+    id: z.string().min(1).max(40),
+    asset: z.string().max(60),
+    x: z.number().finite(),
+    y: z.number().finite(),
+    rot: z.number().min(0).lt(360),
+    scale: z.number().min(0.25).max(4),
+    flip: z.boolean(),
+    z: z.number().int().min(-1000).max(1000),
+});
+
 const capped = <T extends z.ZodTypeAny>(schema: T, max: number) =>
     schema.refine((r) => Object.keys(r as object).length <= max);
 
@@ -91,7 +105,7 @@ export const mapArtSceneSchema = z.object({
         tint: z.string().regex(/^#[0-9a-f]{6}$/),
         darkness: z.number().min(0).max(0.9),
     }),
-    stamps: z.tuple([]),
+    stamps: z.array(stampSchema).max(MAP_ART_LIMITS.stamps),
 }) as unknown as z.ZodType<MapArtScene>;
 
 const PREFIX = 'maps.editor.art.validation.';
@@ -140,11 +154,36 @@ const refineSceneForMap = (
         if (!inBounds(map, { x, y })) issue('outOfBounds', ['scene', 'blocked', key]);
     }
 
+    const size = mapSize(map, grid);
+
+    const seen = new Set<string>();
+
+    scene.stamps.forEach((s, i) => {
+        const at = ['scene', 'stamps', i];
+
+        if (!isStampId(s.asset)) issue('unknownStamp', [...at, 'asset']);
+
+        if (seen.has(s.id)) issue('duplicateStamp', [...at, 'id']);
+
+        seen.add(s.id);
+
+        if (s.x < 0 || s.y < 0 || s.x > size.width || s.y > size.height)
+            issue('outOfBounds', at);
+    });
+
+    const blocked = new Set([
+        ...Object.keys(scene.blocked),
+        ...stampCells(scene.stamps, map).blocked,
+    ]);
+
+    if (blocked.size > MAP_LIMITS.maxTerrainCells)
+        issue('tooManyBlocked', ['scene', 'stamps']);
+
     if (
         !hasPlayableArea({
             cols: map.cols,
             rows: map.rows,
-            blocked: Object.keys(scene.blocked),
+            blocked: [...blocked],
             terrain: map.terrain,
         })
     )

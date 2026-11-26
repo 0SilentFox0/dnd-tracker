@@ -1,5 +1,4 @@
 import type { BattleMapSaveInput } from '@/lib/schemas/battle-maps';
-import { gridOf } from '@/lib/utils/battle/grid/geometry';
 import { bakedBackgroundSpan } from '@/lib/utils/battle/map-art/bake-size';
 import { deriveMechanics } from '@/lib/utils/battle/map-art/derive';
 import type { MapArtScene } from '@/types/battle-map';
@@ -11,12 +10,16 @@ export function composeArtSave(input: {
 }): BattleMapSaveInput {
     const { save, scene, bakedUrl } = input;
 
-    const { walls, bars, doors, blocked } = deriveMechanics(
+    const { walls, bars, doors, blocked, sightBlocked } = deriveMechanics(
         scene,
-        gridOf(save.map)
+        save.map
     );
 
-    const { blocked: _blocked, ...rest } = save.map;
+    const {
+        blocked: _blocked,
+        sightBlocked: _sightBlocked,
+        ...rest
+    } = save.map;
 
     const { gridOffset: _offset, ...noOffset } = rest;
 
@@ -24,6 +27,7 @@ export function composeArtSave(input: {
         ...(bakedUrl ? noOffset : rest),
         doors,
         ...(blocked.length ? { blocked } : {}),
+        ...(sightBlocked.length ? { sightBlocked } : {}),
         ...(bakedUrl
             ? {
                   background: bakedUrl,

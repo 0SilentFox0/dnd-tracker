@@ -39,6 +39,17 @@ export interface MapArtLight {
     intensity: number;
 }
 
+export interface MapArtStamp {
+    id: string;
+    asset: string;
+    x: number;
+    y: number;
+    rot: number;
+    scale: number;
+    flip: boolean;
+    z: number;
+}
+
 export interface MapArtScene {
     v: 1;
     floors: Record<string, string>;
@@ -47,7 +58,7 @@ export interface MapArtScene {
     blocked: Record<string, string | null>;
     lights: MapArtLight[];
     ambient: { tint: string; darkness: number };
-    stamps: [];
+    stamps: MapArtStamp[];
 }
 
 export interface MapArtRecord {
@@ -64,6 +75,7 @@ export type ArtMapPatch = Pick<
     | 'bars'
     | 'doors'
     | 'blocked'
+    | 'sightBlocked'
     | 'background'
     | 'backgroundCols'
     | 'backgroundRows'

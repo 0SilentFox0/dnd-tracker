@@ -137,6 +137,15 @@ export function cellAtScreenPoint(
     return x >= 0 && y >= 0 && x < map.cols && y < map.rows ? { x, y } : null;
 }
 
+export function cellAtUnitPoint(
+    p: { x: number; y: number },
+    grid: GridKind = 'square'
+): GridPoint {
+    if (grid === 'hex') return hexPointToCell(p.x, p.y);
+
+    return { x: Math.floor(p.x / UNIT), y: Math.floor(p.y / UNIT) };
+}
+
 export function screenToUnit(
     ctm: ScreenMatrix,
     clientX: number,
