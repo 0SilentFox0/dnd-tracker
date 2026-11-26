@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { LOCALE_COOKIE } from '@/lib/i18n/config';
-import { landingRewriteTarget } from '@/lib/i18n/landing-rewrite';
+import { landingRedirectTarget } from '@/lib/i18n/landing-redirect';
 import {
     newNonce,
     nonceCsp,
@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
         response.headers.set(nonceCspHeaderName(), nonceCsp(nonce));
     }
 
-    const target = landingRewriteTarget({
+    const target = landingRedirectTarget({
         pathname: request.nextUrl.pathname,
         cookie: request.cookies.get(LOCALE_COOKIE)?.value,
         acceptLanguage: request.headers.get('accept-language'),
@@ -32,11 +32,12 @@ export async function proxy(request: NextRequest) {
 
     if (!target || response.headers.has('location')) return response;
 
-    const rewrite = NextResponse.rewrite(new URL(target, request.url));
+    // a redirect, not a rewrite: `/` must never serve the uk page under the en canonical
+    const redirect = NextResponse.redirect(new URL(target, request.url), 307);
 
-    for (const cookie of response.cookies.getAll()) rewrite.cookies.set(cookie);
+    for (const cookie of response.cookies.getAll()) redirect.cookies.set(cookie);
 
-    return rewrite;
+    return redirect;
 }
 
 export const config = {

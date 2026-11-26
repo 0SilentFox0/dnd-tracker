@@ -3,7 +3,7 @@ import { negotiateLocale } from './resolve-locale';
 import { LANDING_PATH } from '@/lib/constants/site';
 
 // only an explicit preference moves `/` off English: crawlers without Accept-Language keep the x-default page
-export function landingRewriteTarget(input: {
+export function landingRedirectTarget(input: {
     pathname: string;
     cookie?: string | null;
     acceptLanguage?: string | null;
