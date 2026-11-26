@@ -284,15 +284,6 @@
         "title": "Сети"
       }
     },
-    "mechanics": {
-      "branch": "Гілка: {name}",
-      "abilities": "Вміння: {list}",
-      "grantedSpell": "Додає заклинання: {name}",
-      "spell": "{level}, {type}",
-      "dice": "Кубики: {count}к",
-      "resolution": "Перевірка: {value}",
-      "cost": "Вартість: {value}"
-    },
     "detail": {
       "empty": "Оберіть запис зі списку"
     },

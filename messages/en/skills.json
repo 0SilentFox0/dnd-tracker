@@ -133,6 +133,11 @@
     "how": "How it works (bonuses, effects, triggers)",
     "appearance": "Appearance description (how it looks in the game)",
     "appearancePlaceholder": "For example: a bright fire orb flying at the target...",
-    "saveAppearance": "Save appearance description"
+    "saveAppearance": "Save appearance description",
+    "mech": {
+      "branch": "Branch: {name}",
+      "abilities": "Abilities: {list}",
+      "grantedSpell": "Grants spell: {name}"
+    }
   }
 }

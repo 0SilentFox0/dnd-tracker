@@ -153,12 +153,12 @@ export function formatMechanicsSkill(
 
     if (s.mainSkillName)
         parts.push(
-            t('dashboard.reference.mechanics.branch', { name: s.mainSkillName })
+            t('skills.reference.mech.branch', { name: s.mainSkillName })
         );
 
     if (s.abilitySummary.length > 0)
         parts.push(
-            t('dashboard.reference.mechanics.abilities', {
+            t('skills.reference.mech.abilities', {
                 list: linesText(
                     abilityRegistryOf(t),
                     s.abilitySummary.map(flowSegments)
@@ -168,7 +168,7 @@ export function formatMechanicsSkill(
 
     if (s.grantedSpellName)
         parts.push(
-            t('dashboard.reference.mechanics.grantedSpell', {
+            t('skills.reference.mech.grantedSpell', {
                 name: s.grantedSpellName,
             })
         );
@@ -183,20 +183,20 @@ export function formatMechanicsSpell(
     const labels = spellLabelsOf(t);
 
     const parts: string[] = [
-        t('dashboard.reference.mechanics.spell', {
+        t('spells.reference.mech.spell', {
             level: t(`gameTerms.spellLevels.${s.level}`),
             type: labels.targeting(s.targeting),
         }),
     ];
 
     if (s.dice > 0)
-        parts.push(t('dashboard.reference.mechanics.dice', { count: s.dice }));
+        parts.push(t('spells.reference.mech.dice', { count: s.dice }));
 
     parts.push(
-        t('dashboard.reference.mechanics.resolution', {
+        t('spells.reference.mech.resolution', {
             value: labels.resolution(s.resolution),
         }),
-        t('dashboard.reference.mechanics.cost', { value: labels.cost(s.cost) })
+        t('spells.reference.mech.cost', { value: labels.cost(s.cost) })
     );
 
     return parts.join('. ');
