@@ -15,6 +15,8 @@ import { errorMessage } from '@/lib/utils/common/error-message';
 import { getInitialRaceFormData } from '@/lib/utils/races/race-form';
 import type { Race } from '@/types/races';
 
+const FORM_ID = 'race-form';
+
 interface RaceEditFormProps {
     campaignId: string;
     race: Race;
@@ -38,46 +40,43 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
     );
 
     return (
-        <HudFormPage title={t('edit.title')} aside={t('edit.aside')}>
+        <HudFormPage
+            title={t('edit.title')}
+            aside={t('edit.aside')}
+            actions={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={editor.actions.cancel}
+                    >
+                        {tc('actions.cancel')}
+                    </Button>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={
+                            editor.status.isSaving || !editor.abilities.valid
+                        }
+                    >
+                        {editor.status.isSaving
+                            ? tc('actions.saving')
+                            : withAbilityErrors(
+                                  tc('actions.save'),
+                                  editor.abilities.errors,
+                                  ta
+                              )}
+                    </Button>
+                </>
+            }
+        >
             <HudForm
-                id="race-form"
+                id={FORM_ID}
                 onSubmit={editor.actions.submit}
-                actions={
-                    <>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={editor.actions.cancel}
-                        >
-                            {tc('actions.cancel')}
-                        </Button>
-                        {editor.status.error != null && (
-                            <p
-                                role="alert"
-                                className="w-full text-sm text-destructive"
-                            >
-                                {errorMessage(
-                                    editor.status.error,
-                                    t('edit.error')
-                                )}
-                            </p>
-                        )}
-                        <Button
-                            type="submit"
-                            disabled={
-                                editor.status.isSaving ||
-                                !editor.abilities.valid
-                            }
-                        >
-                            {editor.status.isSaving
-                                ? tc('actions.saving')
-                                : withAbilityErrors(
-                                      tc('actions.save'),
-                                      editor.abilities.errors,
-                                      ta
-                                  )}
-                        </Button>
-                    </>
+                error={
+                    editor.status.error != null
+                        ? errorMessage(editor.status.error, t('edit.error'))
+                        : null
                 }
             >
                 <div className="space-y-6">
