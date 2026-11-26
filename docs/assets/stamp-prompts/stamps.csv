@@ -1,0 +1,36 @@
+file,name,biome,category,layer,cols,rows,shadow,blocks,sight,prompt,priority
+tiles_altar.png,"Altar",dungeon,altar,object,1,1,soft,rect:1x1,1,"a stone altar with a cloth and two candles, footprint 2x1 cells.",1
+tiles_bones.png,"Bones",dungeon,bones,decal,1,1,none,,,"a small pile of old bones and a skull.",1
+tiles_brazier.png,"Brazier",dungeon,brazier,object,1,1,soft,rect:1x1,1,"an iron brazier with burning coals and flames.",1
+tiles_cauldron.png,"Cauldron",dungeon,cauldron,object,1,1,soft,rect:1x1,1,"a black iron cauldron with bubbling green liquid.",1
+tiles_cobweb.png,"Cobweb",dungeon,cobweb,decal,1,1,none,,,"a thin cobweb spanning a corner, translucent white strands.",1
+tiles_grave.png,"Grave",dungeon,grave,object,1,1,soft,rect:1x1,1,"a stone gravestone with a mound of earth.",1
+tiles_pillar.png,"Pillar",dungeon,pillar,object,1,1,hard,rect:1x1,1,"a round stone pillar top, 1x1 cell footprint.",1
+tiles_rubble-pile.png,"Rubble pile",dungeon,rubble-pile,object,1,1,soft,rect:1x1,1,"a pile of fallen stones and dust.",1
+tiles_stairs-down.png,"Stairs down",dungeon,stairs-down,decal,1,1,none,,,"stone steps descending into darkness, 1x1 cell footprint, steps clearly visible from above.",1
+tiles_stairs-up.png,"Stairs up",dungeon,stairs-up,decal,1,1,none,,,"stone steps ascending, 1x1 cell footprint, steps visible from above.",1
+tiles_statue.png,"Statue",dungeon,statue,object,1,1,hard,rect:1x1,1,"a weathered stone statue of a hooded figure seen from above, 1x1 cell footprint.",1
+tiles_trapdoor.png,"Trapdoor",dungeon,trapdoor,decal,1,1,none,rect:1x1,1,"a wooden trapdoor with an iron ring.",1
+tiles_treasure-pile.png,"Treasure pile",dungeon,treasure-pile,object,1,1,soft,rect:1x1,1,"a heap of gold coins, gems and a goblet.",1
+tiles_blood-stain.png,"Blood stain",dungeon,blood-stain,decal,1,1,none,,,"a dark red splatter stain, flat on the floor.",1
+tiles_anvil.png,"Anvil",building,anvil,object,1,1,soft,rect:1x1,1,"an iron anvil on a stump.",1
+tiles_barrel.png,"Barrel",building,barrel,object,1,1,soft,rect:1x1,1,"a wooden barrel with iron hoops, lid visible.",1
+tiles_bed.png,"Bed",building,bed,object,2,1,soft,rect:2x1,1,"a single bed with a red blanket and pillow, footprint 1x2 cells, long side vertical.",1
+tiles_bookshelf.png,"Bookshelf",building,bookshelf,object,1,1,soft,rect:1x1,1,"a tall bookshelf full of books seen from above, showing the tops of the books and the shelf board, footprint 2x1 cells.",1
+tiles_chair.png,"Chair",building,chair,object,1,1,soft,rect:1x1,1,"a simple wooden chair, 1x1 cell footprint.",1
+tiles_chest-closed.png,"Chest closed",building,chest-closed,object,1,1,soft,rect:1x1,1,"a closed wooden treasure chest with iron bands and a lock.",1
+tiles_chest-open.png,"Chest open",building,chest-open,object,1,1,soft,rect:1x1,1,"an open wooden chest with gold coins and gems visible inside.",1
+tiles_crate.png,"Crate",building,crate,object,1,1,soft,rect:1x1,1,"a wooden shipping crate with plank lid and rope handles.",1
+tiles_stool.png,"Stool",building,stool,object,1,1,soft,rect:1x1,1,"a small round wooden stool.",1
+tiles_table-long.png,"Table long",building,table-long,object,1,1,soft,rect:1x1,1,"a long rectangular wooden table, footprint 2x1 cells, wide side horizontal.",1
+tiles_table-round.png,"Table round",building,table-round,object,1,1,soft,rect:1x1,1,"a round wooden tavern table, 1x1 cell footprint.",1
+tiles_boulder.png,"Boulder",nature,boulder,object,1,1,hard,rect:1x1,1,"a large grey boulder with moss, 1x1 cell footprint.",1
+tiles_bush.png,"Bush",nature,bush,object,1,1,soft,rect:1x1,1,"a round leafy green bush, 1x1 cell footprint.",1
+tiles_rock-small.png,"Rock small",nature,rock-small,object,1,1,soft,rect:1x1,1,"a small grey rock cluster.",1
+tiles_tree-oak.png,"Tree oak",nature,tree-oak,canopy,2,2,soft,rect:2x2,1,"a broad oak tree canopy seen from above, footprint 2x2 cells.",1
+tiles_tree-pine.png,"Tree pine",nature,tree-pine,canopy,2,2,soft,rect:2x2,1,"a dark green pine tree seen from above, star-shaped branches, footprint 2x2 cells.",1
+tiles_campfire.png,"Campfire",nature,campfire,object,1,1,soft,rect:1x1,1,"a campfire with a ring of stones and burning logs.",1
+tiles_cart.png,"Cart",settlement,cart,object,2,1,soft,rect:2x1,1,"a wooden hand cart with sacks, footprint 2x1 cells.",1
+tiles_fountain.png,"Fountain",settlement,fountain,object,2,2,soft,rect:2x2,1,"a round stone fountain with water, footprint 2x2 cells.",1
+tiles_tent.png,"Tent",settlement,tent,object,2,2,soft,rect:2x2,1,"a canvas adventurer tent seen from above, footprint 2x2 cells.",1
+tiles_well.png,"Well",settlement,well,object,1,1,soft,rect:1x1,1,"a round stone well with a wooden roof beam and a bucket, 1x1 cell footprint.",1
