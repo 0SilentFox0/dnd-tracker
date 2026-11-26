@@ -184,8 +184,7 @@ function EdgesPanel({
 }) {
     const t = useTranslations('battleSetup.map');
 
-    if (blocked)
-        return <p className="text-sm text-hud-muted">{t(blocked)}</p>;
+    if (blocked) return <p className="text-sm text-hud-muted">{t(blocked)}</p>;
 
     return (
         <div className="space-y-2">
@@ -229,8 +228,7 @@ export function BattleMapSidebar({
             : null;
 
     const hasModes = (Object.keys(MAP_MODE_UI) as MapModeKey[]).some(
-        (key) =>
-            MAP_MODE_UI[key].SetupToggle && editor.state.modeSupported(key)
+        (key) => MAP_MODE_UI[key].SetupToggle && editor.state.modeSupported(key)
     );
 
     const visible: Record<BattleMapPanel, boolean> = {
@@ -332,7 +330,9 @@ export function BattleMapSidebar({
             {current === 'edges' && (
                 <EdgesPanel editor={editor} blocked={edgesBlocked} />
             )}
-            {current === 'mode' && visible.mode && <ModePanel editor={editor} />}
+            {current === 'mode' && visible.mode && (
+                <ModePanel editor={editor} />
+            )}
             {current === 'motion' && editor.motionTool && (
                 <MapMotionPanel tool={editor.motionTool} />
             )}

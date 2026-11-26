@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { CatalogRow } from './CatalogRow';
@@ -13,6 +13,7 @@ import { ParticipantSourceType } from '@/lib/constants/battle';
 import { groupDisplayName } from '@/lib/constants/ungrouped';
 import {
     type BattleSetup,
+    type CatalogTab,
     type ParticipantActions,
     useSetupUnitsFilter,
 } from '@/lib/hooks/battles';
@@ -34,9 +35,8 @@ interface ParticipantCatalogProps {
     entityStats: SetupEntityStats;
     selection: BattlePreparationParticipant[];
     actions: ParticipantActions;
+    tab: { tab: CatalogTab; set: (tab: CatalogTab) => void };
 }
-
-type CatalogTab = 'heroes' | 'units';
 
 const collapsedStores = new Map<string, StorageValue<boolean>>();
 
@@ -83,14 +83,13 @@ export function ParticipantCatalog({
     entityStats,
     selection,
     actions,
+    tab: { tab, set: setTab },
 }: ParticipantCatalogProps) {
     const t = useTranslations('battleSetup.participants');
 
     const tGame = useTranslations('gameTerms.ungrouped');
 
     const locale = useLocale();
-
-    const [tab, setTab] = useState<CatalogTab>('heroes');
 
     const filter = useSetupUnitsFilter(data.units);
 

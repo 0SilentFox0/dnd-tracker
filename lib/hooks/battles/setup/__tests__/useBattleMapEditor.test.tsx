@@ -48,14 +48,18 @@ describe('useBattleMapEditor', () => {
         try {
             const small = { cols: 30, rows: 30, background: null, opacity: 1 };
 
-            const edges = allInteriorEdges(small).filter((e) => e.endsWith(':e'));
+            const edges = allInteriorEdges(small).filter((e) =>
+                e.endsWith(':e')
+            );
 
             const { result } = renderHook(() =>
                 useBattleMapEditor({ ...small, walls: edges.slice(0, 20) })
             );
 
             act(() => result.current.actions.setTool('edge-wall'));
-            act(() => result.current.edgeEditing?.onCommit(edges.slice(20, 21), []));
+            act(() =>
+                result.current.edgeEditing?.onCommit(edges.slice(20, 21), [])
+            );
             expect(result.current.state.notice).toBe(EDGE_LIMIT_NOTICE);
             expect(result.current.state.map.walls).toHaveLength(20);
         } finally {
@@ -434,7 +438,11 @@ describe('useBattleMapEditor', () => {
         const empty = () => {
             const { walls, bars, doors } = result.current.state.map;
 
-            expect([walls, bars, doors]).toEqual([undefined, undefined, undefined]);
+            expect([walls, bars, doors]).toEqual([
+                undefined,
+                undefined,
+                undefined,
+            ]);
         };
 
         act(() => result.current.actions.setGridType('hex'));

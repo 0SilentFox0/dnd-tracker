@@ -91,7 +91,9 @@ describe('SaveToLibraryButton', () => {
         fireEvent.change(screen.getByRole('textbox'), {
             target: { value: 'Cave' },
         });
-        fireEvent.submit(screen.getByRole('textbox').closest('form') as HTMLFormElement);
+        fireEvent.submit(
+            screen.getByRole('textbox').closest('form') as HTMLFormElement
+        );
 
         expect((await screen.findByRole('alert')).textContent).toBe(
             'terrain is runtime only'
@@ -103,7 +105,9 @@ describe('SaveToLibraryButton', () => {
         render(
             <SaveToLibraryButton
                 campaignId="c1"
-                editor={{ state: { value: null } } as unknown as BattleMapEditor}
+                editor={
+                    { state: { value: null } } as unknown as BattleMapEditor
+                }
             />
         );
 

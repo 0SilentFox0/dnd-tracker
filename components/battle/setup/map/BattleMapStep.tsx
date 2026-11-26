@@ -4,10 +4,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Grid3x3, Library } from 'lucide-react';
 
-import { type BattleMapPanel,BattleMapSidebar } from './BattleMapSidebar';
+import { type BattleMapPanel, BattleMapSidebar } from './BattleMapSidebar';
 import { LibraryMapGrid } from './LibraryMapGrid';
 import { MapQuickStart, type MapQuickStartAction } from './MapQuickStart';
-import { type MapSource,MapSourceChoice } from './MapSourceChoice';
+import { type MapSource, MapSourceChoice } from './MapSourceChoice';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 
 import { BattleMap } from '@/components/battle/map';

@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,7 +9,7 @@ import {
     type SetupData,
 } from '@/components/battle/setup/participants/ParticipantCatalog';
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
-import type { ParticipantActions } from '@/lib/hooks/battles';
+import type { CatalogTab, ParticipantActions } from '@/lib/hooks/battles';
 
 afterEach(() => {
     cleanup();
@@ -158,14 +159,21 @@ function renderCatalog(actions: Partial<ParticipantActions> = {}) {
         ...actions,
     } as unknown as ParticipantActions;
 
-    render(
-        <ParticipantCatalog
-            data={data}
-            entityStats={null}
-            selection={[]}
-            actions={all}
-        />
-    );
+    function Harness() {
+        const [tab, setTab] = useState<CatalogTab>('heroes');
+
+        return (
+            <ParticipantCatalog
+                data={data}
+                entityStats={null}
+                selection={[]}
+                actions={all}
+                tab={{ tab, set: setTab }}
+            />
+        );
+    }
+
+    render(<Harness />);
 
     return all;
 }

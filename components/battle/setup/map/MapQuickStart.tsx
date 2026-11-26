@@ -33,7 +33,10 @@ export function MapQuickStart({
                             className="h-auto min-h-11 justify-start gap-3 py-2 text-left whitespace-normal"
                             onClick={() => onPick(key)}
                         >
-                            <Icon aria-hidden="true" className="h-5 w-5 shrink-0" />
+                            <Icon
+                                aria-hidden="true"
+                                className="h-5 w-5 shrink-0"
+                            />
                             <span className="min-w-0">{t(key)}</span>
                         </Button>
                     ))}

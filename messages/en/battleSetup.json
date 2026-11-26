@@ -70,26 +70,33 @@
       "create": "Create battle scene",
       "edit": "Edit battle scene"
     },
-    "aside": {
-      "create": "Pick participants and split them into allies and enemies",
-      "edit": "Update the participants and their roles in the battle"
-    },
     "tabs": {
-      "basic": "Basics",
-      "map": "Map",
-      "heroes": "Heroes",
-      "units": "Units",
-      "roster": "Roster · {count}"
+      "participants": "Participants",
+      "map": "Map"
     },
-    "deleting": "Deleting...",
     "saveChanges": "Save changes",
     "confirmDelete": "Are you sure you want to delete this battle scene?",
     "notify": {
       "noParticipants": "Pick at least one participant",
       "updateFailed": "Failed to update the battle",
       "createFailed": "Failed to create the battle",
-      "deleteFailed": "Failed to delete the battle"
-    }
+      "deleteFailed": "Failed to delete the battle",
+      "startFailed": "The battle was created but could not be started"
+    },
+    "backToList": "Battles",
+    "details": {
+      "label": "Details",
+      "title": "Battle details"
+    },
+    "nameRequired": "Enter a battle name",
+    "summary": {
+      "noEnemies": "No enemies",
+      "map": "Map {cols}×{rows}",
+      "noMap": "No map"
+    },
+    "locked": "The battle has already started: participants and map cannot be changed.",
+    "createAndStart": "Create and start",
+    "more": "More actions"
   },
   "basic": {
     "title": "Basic information",
@@ -103,23 +110,6 @@
   },
   "map": {
     "title": "Battle map",
-    "mapChoice": {
-      "title": "How do you want to add a map?",
-      "none": {
-        "title": "No map",
-        "description": "Show the battle as a column based list."
-      },
-      "create": {
-        "title": "Create a map now",
-        "description": "Set up a grid, background, cells, and walls for this battle."
-      },
-      "prepared": {
-        "title": "Load a prepared map",
-        "description": "Choose a campaign map or add one from the catalog.",
-        "unavailable": "The map library is turned off for this campaign. Enable it in campaign settings to use prepared maps."
-      }
-    },
-    "enabled": "Battle on a map",
     "cols": "Columns",
     "rows": "Rows",
     "cellSize": "Cell size · {size} · {cols} × {rows}",
@@ -233,36 +223,11 @@
     },
     "fullscreen": "Full screen"
   },
-  "characters": {
-    "title": "Characters",
-    "hint": "Players and NPC heroes",
-    "players": "Players",
-    "npc": "NPC heroes",
-    "empty": "No characters available",
-    "dprHow": "How DPR is calculated",
-    "dprTitle": "DPR breakdown",
-    "dprSummary": "Physical: {physical} · Magic: {spell} · Skills: {nonMagic}"
-  },
   "dprBreakdown": {
     "physical": "Melee {melee}, ranged {ranged} → physical DPR = {physical}",
     "spell": "Magic school (highest level): +{value} DPR",
     "nonMagic": "Non-magic main skills (sum): +{value} DPR",
     "total": "Total DPR = {physical} + {spell} + {nonMagic} = {total}"
-  },
-  "units": {
-    "title": "Units",
-    "hintEmpty": "NPC units. Click to add as an ally; \"To enemies\" puts it in the enemy column.",
-    "hint": "Click a card to add it to the allies or remove it. \"To enemies\" puts it straight into the enemy column.",
-    "empty": "No units available",
-    "tier": "tier {level}",
-    "enemy": "Enemy",
-    "ally": "Ally",
-    "quantity": "Quantity:",
-    "alreadyEnemy": "Already an enemy",
-    "toEnemies": "To enemies",
-    "search": "Search units",
-    "raceFilter": "Filter by race",
-    "noMatches": "No units match"
   },
   "autopick": {
     "title": "Enemy picker",

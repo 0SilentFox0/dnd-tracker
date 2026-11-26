@@ -101,9 +101,11 @@ describe('BattleSetupForm', () => {
                 name: 'battleSetup.form.title.create',
             })
         ).toBeTruthy();
-        expect(screen.getByText('battleSetup.autopick.title')).toBeTruthy();
         expect(
-            screen.queryByRole('button', { name: 'common.actions.delete' })
+            screen.getByText('battleSetup.participants.autopick')
+        ).toBeTruthy();
+        expect(
+            screen.queryByRole('button', { name: 'battleSetup.form.more' })
         ).toBeNull();
         expect(
             screen.getByRole('button', {
@@ -115,7 +117,7 @@ describe('BattleSetupForm', () => {
     it('create mode: submitting without participants does not call the API', async () => {
         renderForm(<BattleSetupForm campaignId="c1" />);
 
-        await screen.findByText('battleSetup.autopick.title');
+        await screen.findByText('battleSetup.participants.autopick');
         fireEvent.change(screen.getByLabelText('battleSetup.basic.name'), {
             target: { value: 'Нова' },
         });
@@ -135,16 +137,16 @@ describe('BattleSetupForm', () => {
 
         expect(name.value).toBe('Засідка');
         expect(
-            (
-                screen.getByLabelText(
-                    'battleSetup.basic.description'
-                ) as HTMLTextAreaElement
-            ).value
-        ).toBe('Ніч');
-        expect(
-            screen.getByRole('tab', { name: /battleSetup\.form\.tabs\.roster/ })
+            screen.getByRole('tab', {
+                name: /battleSetup\.form\.tabs\.participants/,
+            })
         ).toBeTruthy();
-        expect(screen.queryByText('battleSetup.autopick.title')).toBeNull();
+        expect(
+            screen.getByRole('tab', { name: /battleSetup\.form\.tabs\.map/ })
+        ).toBeTruthy();
+        expect(
+            screen.queryByText('battleSetup.participants.autopick')
+        ).toBeNull();
 
         fireEvent.change(name, { target: { value: 'Нова' } });
         client.setQueryData(battleQueryKey('c1', 'b1'), {
@@ -169,7 +171,7 @@ describe('BattleSetupForm', () => {
         ).toBe('Нова');
     });
 
-    it('edit mode: does not poll the prepared battle and shows the delete button', async () => {
+    it('edit mode: does not poll the prepared battle and shows the actions menu', async () => {
         renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
         await screen.findByLabelText('battleSetup.basic.name');
@@ -184,7 +186,7 @@ describe('BattleSetupForm', () => {
             typeof interval === 'function' ? interval(query as never) : interval
         ).toBe(false);
         expect(
-            screen.getByRole('button', { name: 'common.actions.delete' })
+            screen.getByRole('button', { name: 'battleSetup.form.more' })
         ).toBeTruthy();
         expect(
             screen.getByRole('button', { name: 'battleSetup.form.saveChanges' })
@@ -208,5 +210,52 @@ describe('BattleSetupForm', () => {
             map: null,
             turnTimerSeconds: null,
         });
+    });
+
+    it('edit mode: a started battle shows the locked banner and disables saving', async () => {
+        const prev = battle.status;
+
+        battle.status = 'active';
+        renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
+
+        await screen.findByText('battleSetup.form.locked');
+        expect(
+            (
+                screen.getByRole('button', {
+                    name: 'battleSetup.form.saveChanges',
+                }) as HTMLButtonElement
+            ).disabled
+        ).toBe(true);
+
+        battle.status = prev;
+    });
+
+    it('invalid name marks the header input without switching tabs', async () => {
+        renderForm(<BattleSetupForm campaignId="c1" />);
+
+        const name = await screen.findByLabelText('battleSetup.basic.name');
+
+        fireEvent.invalid(name);
+
+        expect(name.getAttribute('aria-invalid')).toBe('true');
+        expect(
+            screen
+                .getByRole('tab', {
+                    name: /battleSetup\.form\.tabs\.participants/,
+                })
+                .getAttribute('data-state')
+        ).toBe('active');
+    });
+
+    it('create mode offers create-and-start next to the main action', async () => {
+        renderForm(<BattleSetupForm campaignId="c1" />);
+
+        await screen.findByText('battleSetup.participants.autopick');
+
+        expect(
+            screen.getByRole('button', {
+                name: 'battleSetup.form.createAndStart',
+            })
+        ).toBeTruthy();
     });
 });
