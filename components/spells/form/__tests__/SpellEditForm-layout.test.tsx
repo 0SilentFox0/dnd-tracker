@@ -48,7 +48,7 @@ describe('SpellEditForm layout', () => {
             'source-notes'
         );
         expect(document.querySelector('.hud-form-side')).toHaveTextContent(
-            'preview-Fireball'
+            'common.ui.previewTitle'
         );
         expect(
             document.querySelector('.hud-form-actions button[type=submit]')
