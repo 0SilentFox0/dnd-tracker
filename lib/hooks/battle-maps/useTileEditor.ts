@@ -97,6 +97,7 @@ export function useTileEditor(input: {
                 brushSize,
                 tool,
                 mapSize: input.mapSize,
+                grid: 'square',
             });
 
             if (result.changes.length === 0) return;
