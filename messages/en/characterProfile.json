@@ -230,7 +230,7 @@
     "delete": "Delete character",
     "sections": {
       "identity": "Identity",
-      "portrait": "Portrait"
+      "classes": "Class and level"
     }
   },
   "editor": {

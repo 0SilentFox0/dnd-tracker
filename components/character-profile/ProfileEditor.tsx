@@ -25,6 +25,7 @@ import { SystemFormFields } from '@/components/characters/stats/SystemFormFields
 import { CharacterChoicesPanel } from '@/components/choices/character/CharacterChoicesPanel';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
+import { HudFormMenu } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
@@ -83,6 +84,11 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
         return map;
     }, [roster.data, characterId]);
+
+    const remove = async () => {
+        if (await editor.dmActions.remove())
+            router.push(`/campaigns/${campaignId}/dm/characters`);
+    };
 
     if (!editor.ready)
         return <LoadingState rows={6} label={t('editor.loading')} />;
@@ -145,6 +151,15 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                         }
                         actions={
                             <>
+                                <HudFormMenu
+                                    items={[
+                                        {
+                                            label: t('basic.delete'),
+                                            tone: 'danger',
+                                            onSelect: () => void remove(),
+                                        },
+                                    ]}
+                                />
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -182,14 +197,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                             id: 'basic',
                                             label: tc('basic'),
                                             content: (
-                                                <BasicEditTab
-                                                    editor={editor}
-                                                    onDeleted={() =>
-                                                        router.push(
-                                                            `/campaigns/${campaignId}/dm/characters`
-                                                        )
-                                                    }
-                                                />
+                                                <BasicEditTab editor={editor} />
                                             ),
                                         },
                                         {
