@@ -10,6 +10,7 @@ import {
     useUpdateBattle,
 } from '../useBattles';
 
+import { startBattle } from '@/lib/api/battles';
 import { useConfirm, useNavigateFresh, useNotify } from '@/lib/hooks/common';
 import type { BattlePreparationParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
@@ -63,7 +64,7 @@ export function useBattleForm({
     const listHref = `/campaigns/${campaignId}/dm/battles`;
 
     const handleSubmit = useCallback(
-        (e: React.FormEvent) => {
+        (e: React.FormEvent, opts?: { start?: boolean }) => {
             e.preventDefault();
 
             if (participants.length === 0) {
@@ -101,7 +102,21 @@ export function useBattleForm({
             }
 
             create.mutate(body as CreateBattleData, {
-                onSuccess: (battle) => router.push(`${listHref}/${battle.id}`),
+                onSuccess: async (battle) => {
+                    if (opts?.start) {
+                        try {
+                            await startBattle(campaignId, battle.id, {});
+                        } catch (error) {
+                            void notify(
+                                error instanceof Error
+                                    ? error.message
+                                    : t('notify.startFailed')
+                            );
+                        }
+                    }
+
+                    router.push(`${listHref}/${battle.id}`);
+                },
                 onError: (error) =>
                     void notify(
                         error instanceof Error
@@ -111,6 +126,7 @@ export function useBattleForm({
             });
         },
         [
+            campaignId,
             battleId,
             formData.name,
             formData.description,
