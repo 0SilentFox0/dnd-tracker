@@ -28,6 +28,24 @@ function setup(over: { value?: boolean; onEscape?: () => boolean } = {}) {
 }
 
 describe('MapWorkbench', () => {
+    it('puts the sidebar on the right by default and on the left on request', () => {
+        const props = {
+            canvas: <p>canvas</p>,
+            sidebar: <p>sidebar</p>,
+            fullscreen: { value: false, set: vi.fn(), label: 'Full' },
+        };
+
+        const { container, rerender } = render(<MapWorkbench {...props} />);
+
+        const aside = () => container.querySelector('aside') as HTMLElement;
+
+        expect(aside().className).not.toContain('lg:order-first');
+
+        rerender(<MapWorkbench {...props} sidebarSide="left" />);
+
+        expect(aside().className).toContain('lg:order-first');
+    });
+
     it('enters fullscreen from the canvas button', () => {
         const set = setup();
 

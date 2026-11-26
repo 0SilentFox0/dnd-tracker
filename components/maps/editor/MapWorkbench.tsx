@@ -15,6 +15,7 @@ export function MapWorkbench({
     notice,
     fullscreen,
     onEscape,
+    sidebarSide = 'right',
     className,
 }: {
     canvas: ReactNode;
@@ -23,11 +24,14 @@ export function MapWorkbench({
     notice?: ReactNode;
     fullscreen: { value: boolean; set: (v: boolean) => void; label: string };
     onEscape?: () => boolean;
+    sidebarSide?: 'left' | 'right';
     className?: string;
 }) {
     const t = useTranslations('maps.editor.workbench');
 
     const full = fullscreen.value;
+
+    const left = sidebarSide === 'left';
 
     const escape = useRef({ onEscape, fullscreen, full });
 
@@ -69,7 +73,10 @@ export function MapWorkbench({
             aria-label={full ? fullscreen.label : undefined}
             data-workbench=""
             className={cn(
-                'grid min-h-0 grid-rows-[55dvh_auto] gap-3 lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-1',
+                'grid min-h-0 grid-rows-[55dvh_auto] gap-3 lg:grid-rows-1',
+                left
+                    ? 'lg:grid-cols-[minmax(20rem,22rem)_minmax(0,1fr)]'
+                    : 'lg:grid-cols-[minmax(0,1fr)_22rem]',
                 'lg:h-[calc(100dvh-var(--app-header-h,89px)-var(--workbench-offset,0px))]',
                 full &&
                     'fixed inset-0 z-50 h-dvh! grid-rows-[60dvh_auto] overflow-y-auto bg-background p-3 lg:grid-rows-1 lg:overflow-hidden',
@@ -112,7 +119,12 @@ export function MapWorkbench({
                     {notice}
                 </p>
             </div>
-            <aside className="min-h-0 min-w-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl bg-hud-panel p-2 pb-6 shadow-sm">
+            <aside
+                className={cn(
+                    'min-h-0 min-w-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl bg-hud-panel p-2 pb-6 shadow-sm',
+                    left && 'lg:order-first'
+                )}
+            >
                 {sidebar}
             </aside>
         </div>

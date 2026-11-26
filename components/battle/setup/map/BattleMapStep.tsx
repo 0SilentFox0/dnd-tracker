@@ -139,6 +139,7 @@ function OwnMap({
                 set: setFullscreen,
                 label: t('fullscreen'),
             }}
+            sidebarSide="left"
             onEscape={() => {
                 if (toolChip.onEscape()) return true;
 
