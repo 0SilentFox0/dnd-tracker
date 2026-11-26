@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { BackLink, EditorHeader } from './editor/EditorHeader';
@@ -79,7 +79,7 @@ function EditorContent({
 
     const { map, tool, notice } = editor.state;
 
-    const { panel, paintingTiles, tileEditor, effect } = workspace;
+    const { panel, paintingTiles, tileEditor } = workspace;
 
     const { selectPanel } = workspace;
 
@@ -180,15 +180,7 @@ function EditorContent({
                 {notice ? text(notice) : draft.justSaved ? t('saved') : ''}
             </p>
             <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-1">
-                <div
-                    className="relative min-h-0 min-w-0 overflow-hidden"
-                    style={
-                        {
-                            '--map-effect-intensity': effect.intensity,
-                            '--map-effect-size': effect.size,
-                        } as CSSProperties
-                    }
-                >
+                <div className="relative min-h-0 min-w-0 overflow-hidden">
                     <BattleMap
                         map={previewMap}
                         participants={NO_PARTICIPANTS}

@@ -3,14 +3,13 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { LAYER_ICONS, TILE_TOOLS } from './editor-icons';
+import { TILE_TOOLS } from './editor-icons';
 import { TileAssetImage } from './TileAssetImage';
 
 import { SearchInput } from '@/components/common/fields/SearchInput';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
-import { Slider } from '@/components/ui/slider';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import type { useMapEditorWorkspace } from '@/lib/hooks/battle-maps';
 import { useSearch } from '@/lib/hooks/common';
@@ -22,22 +21,16 @@ const BRUSH_SIZES = ['1', '2', '3'].map((size) => ({
     label: size,
 }));
 
-const GROUND_LAYERS = ['ground', 'wallfill', 'objects'] as const;
-
-const EFFECT_LAYERS = ['effects'] as const;
-
 const SECTION = 'space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3';
 
 const HEADING = 'text-xs font-semibold tracking-wide text-hud-muted uppercase';
 
 export function TilePalettePanel({
     workspace,
-    effects,
 }: {
-    workspace: Pick<Workspace, 'tileEditor' | 'effect'>;
-    effects: boolean;
+    workspace: Pick<Workspace, 'tileEditor'>;
 }) {
-    const { tileEditor, effect } = workspace;
+    const { tileEditor } = workspace;
 
     const t = useTranslations('maps.editor.tiles');
 
@@ -71,93 +64,6 @@ export function TilePalettePanel({
 
     return (
         <div className="space-y-4">
-            <section className={SECTION}>
-                <h3 className={HEADING}>{t('layers')}</h3>
-                <div
-                    className={
-                        effects
-                            ? 'grid grid-cols-1 gap-2'
-                            : 'grid grid-cols-2 gap-2'
-                    }
-                    role="group"
-                    aria-label={t('layers')}
-                >
-                    {(effects ? EFFECT_LAYERS : GROUND_LAYERS).map((layer) => {
-                        const Icon = LAYER_ICONS[layer];
-
-                        return (
-                            <Button
-                                key={layer}
-                                type="button"
-                                size="sm"
-                                className="h-auto min-h-10 min-w-0 justify-start gap-2 px-2 py-2 text-left text-xs whitespace-normal"
-                                aria-pressed={tileEditor.activeLayer === layer}
-                                variant={
-                                    tileEditor.activeLayer === layer
-                                        ? 'default'
-                                        : 'outline'
-                                }
-                                onClick={() => tileEditor.setActiveLayer(layer)}
-                            >
-                                <Icon
-                                    aria-hidden="true"
-                                    className="h-4 w-4 shrink-0"
-                                />
-                                {t(`layer.${layer}`)}
-                            </Button>
-                        );
-                    })}
-                </div>
-                {selectedTile && (
-                    <div className="sticky top-[4.25rem] z-10 flex items-center justify-between gap-2 rounded-md border border-hud-rule bg-background/95 px-3 py-2 text-xs shadow-sm backdrop-blur">
-                        <span className="truncate text-hud-muted">
-                            {t(`layer.${tileEditor.activeLayer}`)}
-                        </span>
-                        <span className="truncate font-medium text-hud-ink">
-                            {tileLabel(selectedTile.key)}
-                        </span>
-                    </div>
-                )}
-                <p className="rounded border border-hud-rule bg-black/20 p-2 text-xs text-hud-muted">
-                    {t(`description.${tileEditor.activeLayer}`)}
-                </p>
-                {effects && (
-                    <div className="grid grid-cols-2 gap-3">
-                        <label className="space-y-1 text-xs text-hud-muted">
-                            <span className="flex justify-between gap-2">
-                                <span>{t('effectSize')}</span>
-                                <span>{effect.size.toFixed(1)}×</span>
-                            </span>
-                            <Slider
-                                aria-label={t('effectSize')}
-                                min={0.6}
-                                max={1.8}
-                                step={0.1}
-                                value={effect.size}
-                                onValueChange={effect.setSize}
-                                className="w-full"
-                            />
-                        </label>
-                        <label className="space-y-1 text-xs text-hud-muted">
-                            <span className="flex justify-between gap-2">
-                                <span>{t('effectIntensity')}</span>
-                                <span>
-                                    {Math.round(effect.intensity * 100)}%
-                                </span>
-                            </span>
-                            <Slider
-                                aria-label={t('effectIntensity')}
-                                min={0.2}
-                                max={1}
-                                step={0.05}
-                                value={effect.intensity}
-                                onValueChange={effect.setIntensity}
-                                className="w-full"
-                            />
-                        </label>
-                    </div>
-                )}
-            </section>
             <section className={SECTION}>
                 <h3 className={HEADING}>{t('tools')}</h3>
                 <p className="text-xs text-hud-muted" aria-live="polite">

@@ -18,6 +18,9 @@ import type { GridPoint } from '@/types/battle-grid';
 
 const HISTORY_LIMIT = 100;
 
+const FIRST_OBJECT_ID =
+    TILE_CATALOG.find((tile) => tile.layer === 'objects')?.id ?? 1;
+
 function decodeChunks(
     chunks: Partial<Record<TileLayer, Record<string, string>>>
 ): TileLayerChunks {
@@ -50,9 +53,9 @@ export function useTileEditor(input: {
 
     const version = input.version;
 
-    const [activeLayer, setLayer] = useState<TileLayer>('ground');
+    const [activeLayer, setLayer] = useState<TileLayer>('objects');
 
-    const [selectedTileId, setSelectedTile] = useState(1);
+    const [selectedTileId, setSelectedTile] = useState(FIRST_OBJECT_ID);
 
     const [tool, setTool] = useState<TileEditTool>('brush');
 
@@ -64,14 +67,11 @@ export function useTileEditor(input: {
 
     const dirtyPatches = useMemo(
         () =>
-            ['ground', 'wallfill', 'objects', 'edge-art', 'effects'].flatMap(
-                (layer) =>
-                    diffTileChunks(
-                        layer as TileLayer,
-                        baseChunks[layer as TileLayer] ?? {},
-                        chunks[layer as TileLayer] ?? {}
-                    )
-            ),
+            diffTileChunks(
+                'objects',
+                baseChunks.objects ?? {},
+                chunks.objects ?? {}
+            ).map((patch) => ({ ...patch, layer: 'objects' as const })),
         [baseChunks, chunks]
     );
 

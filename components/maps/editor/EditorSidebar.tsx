@@ -22,7 +22,7 @@ import type {
     useUvttImport,
 } from '@/lib/hooks/battle-maps';
 
-const HEX_HIDDEN: ReadonlySet<EditorPanel> = new Set(['tiles', 'effects']);
+const HEX_HIDDEN: ReadonlySet<EditorPanel> = new Set(['objects']);
 
 const GROUP_LABEL =
     'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';
@@ -121,11 +121,8 @@ export function EditorSidebar({
                 </div>
             </TabsContent>
             {!hex && (
-                <TabsContent value={panel === 'effects' ? 'effects' : 'tiles'}>
-                    <TilePalettePanel
-                        workspace={workspace}
-                        effects={panel === 'effects'}
-                    />
+                <TabsContent value="objects">
+                    <TilePalettePanel workspace={workspace} />
                 </TabsContent>
             )}
         </Tabs>

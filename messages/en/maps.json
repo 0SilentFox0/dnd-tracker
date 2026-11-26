@@ -61,33 +61,16 @@
       "background": "Background",
       "cells": "Cells",
       "edges": "Edges",
-      "tiles": "Textures",
-      "effects": "Special effects"
+      "objects": "Objects"
     },
     "panelDescription": {
       "background": "Import a UVTT file or set the background image and grid scale.",
       "cells": "Mark blocked cells and hazardous areas.",
       "edges": "Draw walls, bars, and interactive doors along cell edges.",
-      "tiles": "Choose a layer, texture, and tool, then paint on the map.",
-      "effects": "Overlay spell effects: frost, fire, poison, blood, lightning, nature, and healing energy."
+      "objects": "Choose an object and a tool, then paint on the map."
     },
     "tiles": {
-      "layers": "Tile layers",
       "tools": "Tile tools",
-      "layer": {
-        "ground": "Ground",
-        "wallfill": "Wall fill",
-        "objects": "Objects",
-        "edge-art": "Doors and details",
-        "effects": "Special effects"
-      },
-      "description": {
-        "ground": "Floor textures cover the surface of cells.",
-        "wallfill": "Wall material is drawn along wall lines.",
-        "objects": "Objects sit above the floor and can cover a cell.",
-        "edge-art": "Decorative doors and details fill a cell.",
-        "effects": "11 animated spell effects overlay the map."
-      },
       "tool": {
         "brush": "Brush",
         "line": "Line",
@@ -97,8 +80,6 @@
         "picker": "Picker"
       },
       "brushSize": "Brush size",
-      "effectSize": "Effect size",
-      "effectIntensity": "Intensity",
       "search": "Search textures",
       "palette": "Texture palette",
       "paletteCount": "{count} available",

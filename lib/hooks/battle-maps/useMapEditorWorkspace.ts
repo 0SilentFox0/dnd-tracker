@@ -8,12 +8,7 @@ import { useUnsavedChangesGuard } from '@/lib/hooks/common';
 import { chordBlocked } from '@/lib/hooks/common/shortcut-guard';
 import type { BattleMapFull, BattleMapTileChunks } from '@/types/battle-map';
 
-export type EditorPanel =
-    | 'background'
-    | 'cells'
-    | 'edges'
-    | 'tiles'
-    | 'effects';
+export type EditorPanel = 'background' | 'cells' | 'edges' | 'objects';
 
 export function useMapEditorWorkspace(
     source: BattleMapFull,
@@ -33,14 +28,10 @@ export function useMapEditorWorkspace(
     const [panel, setPanel] = useState<EditorPanel>(() => {
         if (source.map.background) return 'background';
 
-        return hex ? 'cells' : 'tiles';
+        return hex ? 'cells' : 'objects';
     });
 
-    const [effectIntensity, setEffectIntensity] = useState(0.8);
-
-    const [effectSize, setEffectSize] = useState(1);
-
-    const paintingTiles = !hex && (panel === 'tiles' || panel === 'effects');
+    const paintingTiles = !hex && panel === 'objects';
 
     const { undo, redo } = tileEditor;
 
@@ -75,13 +66,9 @@ export function useMapEditorWorkspace(
     useUnsavedChangesGuard(draft.isDirty || tileEditor.isDirty);
 
     const selectPanel = (next: EditorPanel) => {
-        if (hex && (next === 'tiles' || next === 'effects')) return;
+        if (hex && next === 'objects') return;
 
         if (panel !== next) setTool(null);
-
-        if (next === 'effects') tileEditor.setActiveLayer('effects');
-        else if (next === 'tiles' && tileEditor.activeLayer === 'effects')
-            tileEditor.setActiveLayer('ground');
 
         setPanel(next);
     };
@@ -91,11 +78,5 @@ export function useMapEditorWorkspace(
         panel,
         selectPanel,
         paintingTiles,
-        effect: {
-            intensity: effectIntensity,
-            size: effectSize,
-            setIntensity: setEffectIntensity,
-            setSize: setEffectSize,
-        },
     };
 }

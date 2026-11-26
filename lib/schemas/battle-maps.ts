@@ -10,7 +10,6 @@ import {
 import { edgeOnGrid } from '@/lib/utils/battle/grid/edge-keys';
 import { gridOf, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
-import { TILE_LAYERS } from '@/lib/utils/battle/tiles/types';
 import type { GridKind } from '@/types/battle-grid';
 
 const side = mapSide(MAP_LIMITS.tileMaxSide);
@@ -122,10 +121,8 @@ export type BattleMapInput = z.infer<typeof battleMapInputSchema>;
 
 export type BattleMapSaveInput = z.infer<typeof battleMapSaveSchema>;
 
-const tileLayerSchema = z.enum(TILE_LAYERS);
-
 const tilePatchSchema = z.object({
-    layer: tileLayerSchema,
+    layer: z.literal('objects'),
     cx: z.number().int().nonnegative(),
     cy: z.number().int().nonnegative(),
     data: z.string().max(2_000).nullable(),

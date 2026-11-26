@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { battleMapInputSchema, battleMapSaveSchema } from '../battle-maps';
+import {
+    battleMapInputSchema,
+    battleMapSaveSchema,
+    battleMapTilePatchSchema,
+} from '../battle-maps';
 
 const input = (map: object) => ({
     name: 'Cave',
@@ -211,5 +215,23 @@ describe('map art fields', () => {
         expect(
             battleMapSaveSchema.safeParse(save({ artBaked: false })).success
         ).toBe(false);
+    });
+});
+
+describe('battleMapTilePatchSchema', () => {
+    const patch = (layer: string) => ({
+        expectedVersion: 1,
+        patches: [{ layer, cx: 0, cy: 0, data: null }],
+    });
+
+    it('accepts only the objects layer', () => {
+        expect(
+            battleMapTilePatchSchema.safeParse(patch('objects')).success
+        ).toBe(true);
+
+        for (const layer of ['ground', 'wallfill', 'edge-art', 'effects'])
+            expect(
+                battleMapTilePatchSchema.safeParse(patch(layer)).success
+            ).toBe(false);
     });
 });

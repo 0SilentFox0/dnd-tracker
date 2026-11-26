@@ -188,14 +188,17 @@ describe('MapEditorScreen', () => {
         expect(screen.getByText('maps.editor.edges')).toBeTruthy();
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
         );
-        expect(
-            screen.getByRole('group', { name: 'maps.editor.tiles.layers' })
-        ).toBeTruthy();
         expect(
             screen.getByRole('group', { name: 'maps.editor.tiles.tools' })
         ).toBeTruthy();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.tiles' })
+        ).toBeNull();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.effects' })
+        ).toBeNull();
     });
 
     it('disables edge editing and hides the photo while the tile panel is active', () => {
@@ -241,7 +244,7 @@ describe('MapEditorScreen', () => {
         expect(battleMapCapture.current?.editing.edges).toBeTruthy();
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
         );
 
         expect(battleMapCapture.current?.editing.edges).toBeFalsy();
@@ -275,10 +278,10 @@ describe('MapEditorScreen', () => {
         );
 
         fireEvent.mouseDown(
-            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+            screen.getByRole('tab', { name: 'maps.editor.panels.objects' })
         );
 
-        const selectedTileName = "Кам'яна підлога";
+        const selectedTileName = 'Бочка';
 
         const selectedTileCard = screen.getByRole('button', {
             name: selectedTileName,
@@ -318,7 +321,7 @@ describe('MapEditorScreen', () => {
         );
 
         expect(
-            screen.getByRole('group', { name: 'maps.editor.tiles.layers' })
+            screen.getByRole('group', { name: 'maps.editor.tiles.tools' })
         ).toBeTruthy();
         expect(battleMapCapture.current?.map.background).toBeNull();
 
@@ -361,9 +364,12 @@ describe('MapEditorScreen', () => {
         );
 
         expect(
-            screen.queryByRole('group', { name: 'maps.editor.tiles.layers' })
+            screen.queryByRole('group', { name: 'maps.editor.tiles.tools' })
         ).toBeNull();
         expect(screen.queryByText('maps.editor.tiles.save')).toBeNull();
+        expect(
+            screen.queryByRole('tab', { name: 'maps.editor.panels.objects' })
+        ).toBeNull();
         expect(screen.getByText('maps.editor.hexHint')).toBeTruthy();
     });
 
@@ -501,25 +507,24 @@ describe('MapEditorScreen', () => {
             name: 'maps.editor.tiles.search',
         });
 
-        fireEvent.change(search, { target: { value: 'ЛАВ' } });
+        fireEvent.change(search, { target: { value: 'БОЧ' } });
 
-        expect(screen.getByRole('button', { name: 'Лава · 1' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Бочка' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Лава · 1' })).toBeNull();
+    });
+
+    it('offers only the objects palette without layer switches', () => {
+        renderTileEditor();
+
+        expect(screen.getByRole('button', { name: 'Бочка' })).toBeTruthy();
+        expect(
+            screen.queryByRole('button', {
+                name: 'maps.editor.tiles.layer.ground',
+            })
+        ).toBeNull();
         expect(
             screen.queryByRole('button', { name: "Кам'яна підлога" })
         ).toBeNull();
-    });
-
-    it('updates the active layer and its selected texture accessibly', () => {
-        renderTileEditor();
-
-        const objects = screen.getByRole('button', {
-            name: 'maps.editor.tiles.layer.objects',
-        });
-
-        fireEvent.click(objects);
-
-        expect(objects.getAttribute('aria-pressed')).toBe('true');
-        expect(screen.getByRole('button', { name: 'Бочка' })).toBeTruthy();
     });
 
     it('supports keyboard undo and redo while preserving shortcuts in the search field', () => {
@@ -563,7 +568,7 @@ describe('MapEditorScreen', () => {
                 expectedVersion: 1,
                 patches: expect.arrayContaining([
                     expect.objectContaining({
-                        layer: 'ground',
+                        layer: 'objects',
                         cx: 0,
                         cy: 0,
                         data: expect.any(String),
