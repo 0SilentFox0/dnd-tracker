@@ -230,69 +230,78 @@ function BattleSetupLayout({
 
     const saving = form.status.isSaving;
 
+    const formId = battleFormId(isEdit);
+
     return (
         <HudFormPage
             width="page"
             title={isEdit ? t('title.edit') : t('title.create')}
+            actions={
+                <>
+                    <SetupSummary
+                        participants={participants.list}
+                        balance={balance}
+                        map={map}
+                    />
+                    {isEdit && (
+                        <HudFormMenu
+                            label={t('more')}
+                            items={[
+                                {
+                                    label: tActions('delete'),
+                                    tone: 'danger',
+                                    onSelect: form.actions.remove,
+                                },
+                            ]}
+                        />
+                    )}
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="hidden sm:inline-flex"
+                        asChild
+                    >
+                        <Link href={`/campaigns/${campaignId}/dm/battles`}>
+                            {tActions('cancel')}
+                        </Link>
+                    </Button>
+                    {!isEdit && (
+                        <Button
+                            type="submit"
+                            form={formId}
+                            name="intent"
+                            value="start"
+                            variant="outline"
+                            disabled={saving}
+                        >
+                            {t('createAndStart')}
+                        </Button>
+                    )}
+                    <Button
+                        type="submit"
+                        form={formId}
+                        disabled={saving || locked}
+                    >
+                        {isEdit
+                            ? saving
+                                ? tActions('saving')
+                                : t('saveChanges')
+                            : saving
+                              ? tActions('creating')
+                              : t('title.create')}
+                    </Button>
+                </>
+            }
         >
             <OnboardingHint id="dm.battle-setup" className="mx-4 mb-1" />
             <SetupHeader
                 details={details}
                 campaignId={campaignId}
                 isEdit={isEdit}
+                locked={locked}
             />
             {locked && <LockedBanner />}
-            <HudForm
-                id={battleFormId(isEdit)}
-                onSubmit={onSubmit}
-                tabs={tabs}
-                actions={
-                    <>
-                        <SetupSummary
-                            participants={participants.list}
-                            balance={balance}
-                            map={map}
-                        />
-                        {isEdit && (
-                            <HudFormMenu
-                                label={t('more')}
-                                items={[
-                                    {
-                                        label: tActions('delete'),
-                                        tone: 'danger',
-                                        onSelect: form.actions.remove,
-                                    },
-                                ]}
-                            />
-                        )}
-                        <Button type="button" variant="outline" asChild>
-                            <Link href={`/campaigns/${campaignId}/dm/battles`}>
-                                {tActions('cancel')}
-                            </Link>
-                        </Button>
-                        {!isEdit && (
-                            <Button
-                                type="submit"
-                                name="intent"
-                                value="start"
-                                variant="outline"
-                                disabled={saving}
-                            >
-                                {t('createAndStart')}
-                            </Button>
-                        )}
-                        <Button type="submit" disabled={saving || locked}>
-                            {isEdit
-                                ? saving
-                                    ? tActions('saving')
-                                    : t('saveChanges')
-                                : saving
-                                  ? tActions('creating')
-                                  : t('title.create')}
-                        </Button>
-                    </>
-                }
-            />
+            <HudForm id={formId} onSubmit={onSubmit} tabs={tabs} />
         </HudFormPage>
     );
 }

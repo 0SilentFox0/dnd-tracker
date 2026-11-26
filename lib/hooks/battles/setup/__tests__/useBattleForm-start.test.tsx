@@ -61,7 +61,7 @@ describe('useBattleForm create and start', () => {
 
         expect(h.start).toHaveBeenCalledTimes(1);
         expect(h.start).toHaveBeenCalledWith('c', 'b1', {});
-        expect(h.push).toHaveBeenCalledWith('/campaigns/c/dm/battles/b1');
+        expect(h.push).toHaveBeenCalledWith('/campaigns/c/battles/b1');
     });
 
     it('a failed start notifies and still navigates', async () => {

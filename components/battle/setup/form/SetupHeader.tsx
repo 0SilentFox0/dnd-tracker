@@ -23,6 +23,7 @@ interface SetupHeaderProps {
     details: SetupDetails;
     campaignId: string;
     isEdit: boolean;
+    locked?: boolean;
 }
 
 const DetailsButton = forwardRef<
@@ -93,7 +94,12 @@ function DetailsControl({ details }: { details: SetupDetails }) {
     );
 }
 
-export function SetupHeader({ details, campaignId, isEdit }: SetupHeaderProps) {
+export function SetupHeader({
+    details,
+    campaignId,
+    isEdit,
+    locked = false,
+}: SetupHeaderProps) {
     const t = useTranslations('battleSetup.form');
 
     const tBasic = useTranslations('battleSetup.basic');
@@ -113,7 +119,7 @@ export function SetupHeader({ details, campaignId, isEdit }: SetupHeaderProps) {
                 <ArrowLeft className="size-4" aria-hidden />
                 {t('backToList')}
             </Link>
-            <div className="flex min-w-0 items-start gap-3">
+            <div inert={locked} className="flex min-w-0 items-start gap-3">
                 <div className="min-w-0 flex-1">
                     <Input
                         id="name"

@@ -65,7 +65,7 @@ export function RosterPhoneBar({
         <>
             <div
                 data-testid="roster-phone-bar"
-                className="ds-raised sticky bottom-0 z-30 flex min-w-0 items-center gap-2 rounded-xl px-3 py-1.5 md:hidden"
+                className="ds-raised sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex min-w-0 items-center gap-2 rounded-xl px-3 py-1.5 md:hidden"
             >
                 <Scale className="size-4 shrink-0 text-hud-muted" aria-hidden />
                 <span className="min-w-0 flex-1 truncate text-sm">

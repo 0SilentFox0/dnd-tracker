@@ -103,9 +103,13 @@ export function useBattleForm({
 
             create.mutate(body as CreateBattleData, {
                 onSuccess: async (battle) => {
+                    let started = false;
+
                     if (opts?.start) {
                         try {
                             await startBattle(campaignId, battle.id, {});
+
+                            started = true;
                         } catch (error) {
                             void notify(
                                 error instanceof Error
@@ -115,7 +119,11 @@ export function useBattleForm({
                         }
                     }
 
-                    router.push(`${listHref}/${battle.id}`);
+                    router.push(
+                        started
+                            ? `/campaigns/${campaignId}/battles/${battle.id}`
+                            : `${listHref}/${battle.id}`
+                    );
                 },
                 onError: (error) =>
                     void notify(

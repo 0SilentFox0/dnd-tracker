@@ -36,7 +36,7 @@ function SelectedPreview({
         <div
             role="img"
             aria-label={t('preview')}
-            className="h-80 min-w-0 overflow-hidden rounded-lg"
+            className="h-80 w-full min-w-0 overflow-hidden rounded-lg"
         >
             <BattleMap
                 map={{ ...data.map, walls: data.walls, bars: data.bars }}
@@ -220,6 +220,7 @@ export function LibraryMapGrid({
                 {wide && chosen ? (
                     <div className="space-y-2">
                         <SelectedPreview
+                            key={chosen.id}
                             campaignId={campaignId}
                             mapId={chosen.id}
                         />

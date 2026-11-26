@@ -32,7 +32,7 @@ export function SetupSummary({
     return (
         <p
             data-testid="setup-summary"
-            className="mr-auto flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-sm"
+            className="mr-auto hidden min-w-0 flex-wrap md:flex items-center gap-x-3 gap-y-0.5 text-sm"
         >
             <span className="hud-num text-hud-muted tabular-nums">
                 {tParticipants('versus', counts)}

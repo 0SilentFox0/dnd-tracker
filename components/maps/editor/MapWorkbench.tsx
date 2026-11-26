@@ -1,6 +1,6 @@
 'use client';
 
-import { type KeyboardEvent, type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Maximize2 } from 'lucide-react';
 
@@ -29,16 +29,37 @@ export function MapWorkbench({
 
     const full = fullscreen.value;
 
-    function onKeyDown(e: KeyboardEvent) {
-        if (e.key !== 'Escape' || e.defaultPrevented) return;
+    const escape = useRef({ onEscape, fullscreen, full });
 
-        if (onEscape?.()) return e.stopPropagation();
+    useEffect(() => {
+        escape.current = { onEscape, fullscreen, full };
+    });
 
-        if (full) {
-            e.stopPropagation();
-            fullscreen.set(false);
+    useEffect(() => {
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key !== 'Escape' || e.defaultPrevented) return;
+
+            if (
+                document.querySelector(
+                    '[role="dialog"]:not([data-workbench]), [role="menu"], [role="listbox"]'
+                )
+            )
+                return;
+
+            const { onEscape, fullscreen, full } = escape.current;
+
+            if (onEscape?.()) return e.stopPropagation();
+
+            if (full) {
+                e.stopPropagation();
+                fullscreen.set(false);
+            }
         }
-    }
+
+        document.addEventListener('keydown', onKeyDown);
+
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
 
     // fullscreen only restyles the same tree, so canvas and editor state are never remounted
     return (
@@ -46,7 +67,7 @@ export function MapWorkbench({
             role={full ? 'dialog' : undefined}
             aria-modal={full ? 'true' : undefined}
             aria-label={full ? fullscreen.label : undefined}
-            onKeyDown={onKeyDown}
+            data-workbench=""
             className={cn(
                 'grid min-h-0 grid-rows-[55dvh_auto] gap-3 lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-1',
                 'lg:h-[calc(100dvh-var(--app-header-h,89px)-var(--workbench-offset,0px))]',
@@ -57,8 +78,7 @@ export function MapWorkbench({
         >
             <div className="relative min-h-0 min-w-0 overflow-hidden">
                 {canvas}
-                <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
-                    <div className="min-w-0">{toolbar}</div>
+                <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start gap-2">
                     {full ? (
                         <Button
                             type="button"
@@ -79,6 +99,7 @@ export function MapWorkbench({
                             <Maximize2 aria-hidden="true" className="h-4 w-4" />
                         </HudIconButton>
                     )}
+                    <div className="min-w-0">{toolbar}</div>
                 </div>
                 <p
                     role="status"
