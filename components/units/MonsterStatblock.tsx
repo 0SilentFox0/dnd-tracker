@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { MONSTER_SENSE_KEYS } from '@/lib/constants/monster';
+import { useAlignmentLabel } from '@/lib/hooks/characters';
 import { useCreatureTypeLabel } from '@/lib/i18n/use-creature-type';
 import type { UnitStatblock } from '@/types/units';
 
@@ -8,6 +9,8 @@ export function MonsterStatblock({ block }: { block: UnitStatblock }) {
     const t = useTranslations('gameTerms.monster');
 
     const creatureTypeLabel = useCreatureTypeLabel();
+
+    const alignmentLabel = useAlignmentLabel();
 
     const senses = MONSTER_SENSE_KEYS.flatMap((key) => {
         const value = block.senses?.[key];
@@ -45,7 +48,9 @@ export function MonsterStatblock({ block }: { block: UnitStatblock }) {
                     </span>
                 )}
                 {block.size && <span>{t(`sizes.${block.size}`)}</span>}
-                {block.alignment && <span>{block.alignment}</span>}
+                {block.alignment && (
+                    <span>{alignmentLabel(block.alignment)}</span>
+                )}
             </div>
             {senses.length > 0 && <p>{senses.join(' · ')}</p>}
             {movement.length > 0 && <p>{movement.join(' · ')}</p>}

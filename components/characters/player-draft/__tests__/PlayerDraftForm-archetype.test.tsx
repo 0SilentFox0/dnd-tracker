@@ -14,6 +14,7 @@ vi.mock('@/lib/hooks/systems', () => ({
 }));
 vi.mock('@/lib/hooks/races', () => ({ useRaces: () => ({ data: [] }) }));
 vi.mock('@/lib/hooks/characters', () => ({
+    useAlignmentLabel: () => (value: string | null | undefined) => value ?? '',
     useArchetypeOptions: () => ({ options: [] }),
     useChoiceRefs: () => ({ ready: false }),
     usePlayerDraftForm: () => ({
