@@ -4,10 +4,17 @@ import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { deleteAccount } from '@/lib/server/account/delete-account';
 import { AccountDeleteBlockedError } from '@/lib/server/account/template-guard';
+import { defaultPipelineDeps } from '@/lib/server/battles/pipeline-deps';
+import { reassignUserParticipants } from '@/lib/server/battles/reassign-user-participants';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
 import {
     isLocalDevDatabaseEnv,
     singleConnectionDatabaseUrl,
 } from '@/lib/server/test-support/local-db';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { splitParticipant } from '@/lib/utils/battle/store/split-participant';
+import { hashJson } from '@/lib/utils/battle/store/stable-json';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 const db = new PrismaClient({
     datasources: {
@@ -53,6 +60,9 @@ const deps = () => ({
     removeAuthUser: vi.fn().mockResolvedValue(undefined),
     removeFiles: vi.fn().mockResolvedValue(undefined),
     planStorage: vi.fn().mockResolvedValue([]),
+    reassignParticipants: vi
+        .fn()
+        .mockResolvedValue({ battleIds: [], failedBattleIds: [] }),
 });
 
 const cleanup = async () => {
@@ -152,6 +162,106 @@ describe.skipIf(!isLocalDevDatabaseEnv())('deleteAccount', () => {
             await db.campaign.findUnique({ where: { id: id('cc') } })
         ).not.toBeNull();
         expect(await db.user.findUnique({ where: { id: id('a') } })).toBeNull();
+    });
+
+    it('hands participants of the user in other active battles to the DM', async () => {
+        await user('a');
+        await user('c');
+        await campaign('cc', 'c', {
+            rules: parseRules({ system: { key: 'dnd5e' } }),
+        });
+        await member('cc', 'c', 'dm');
+        await member('cc', 'a', 'player');
+
+        const battle = await db.battleScene.create({
+            data: { campaignId: id('cc'), name: 'Fight', status: 'active' },
+        });
+
+        const base = createMockParticipant();
+
+        const mine = createMockParticipant({
+            basicInfo: {
+                ...base.basicInfo,
+                id: id('p-mine'),
+                battleId: battle.id,
+                name: 'Mine',
+                controlledBy: id('a'),
+            },
+        });
+
+        const theirs = createMockParticipant({
+            basicInfo: {
+                ...base.basicInfo,
+                id: id('p-other'),
+                battleId: battle.id,
+                name: 'Other',
+                controlledBy: id('c'),
+            },
+        });
+
+        const stored = [mine, theirs].map((p, i) =>
+            splitParticipant(p, { orderIndex: i, isPending: false })
+        );
+
+        for (const s of stored)
+            await db.battleParticipant.create({
+                data: {
+                    ...s.columns,
+                    battleId: battle.id,
+                    snapshot: s.snapshot as object,
+                    state: s.state as object,
+                    snapshotHash: s.snapshotHash,
+                },
+            });
+
+        const publish = vi.fn();
+
+        const d = {
+            ...deps(),
+            reassignParticipants: (userId: string) =>
+                reassignUserParticipants(userId, {
+                    ...defaultPipelineDeps,
+                    publish,
+                    onLeftActive: vi.fn(),
+                }),
+        };
+
+        await deleteAccount(id('a'), d);
+
+        const rows = await db.battleParticipant.findMany({
+            where: { battleId: battle.id },
+            orderBy: { orderIndex: 'asc' },
+        });
+
+        expect(rows.map((r) => r.controlledBy)).toEqual(['dm', id('c')]);
+
+        for (const [i, r] of rows.entries()) {
+            expect(r.snapshotHash).toBe(hashJson(r.snapshot));
+            expect(r.snapshotHash).toBe(stored[i].snapshotHash);
+        }
+
+        const scene = await db.battleScene.findUniqueOrThrow({
+            where: { id: battle.id },
+        });
+
+        expect(scene.status).toBe('active');
+        expect(scene.version).toBeGreaterThan(battle.version);
+        expect(publish).toHaveBeenCalled();
+
+        const loaded = await loadBattle(db as never, {
+            battleId: battle.id,
+            campaignId: id('cc'),
+            userId: id('c'),
+        });
+
+        expect(
+            loaded?.participants.map((p) => p.basicInfo.controlledBy)
+        ).toEqual(['dm', id('c')]);
+
+        await expect(reassignUserParticipants(id('a'))).resolves.toEqual({
+            battleIds: [],
+            failedBattleIds: [],
+        });
     });
 
     it('blocks when another user campaign depends on the template', async () => {

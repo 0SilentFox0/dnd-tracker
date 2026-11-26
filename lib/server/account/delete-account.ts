@@ -11,6 +11,7 @@ import {
     AccountDeleteBlockedError,
     findBlockingTemplates,
 } from '@/lib/server/account/template-guard';
+import { reassignUserParticipants } from '@/lib/server/battles/reassign-user-participants';
 import {
     deleteCampaignRows,
     deleteTemplateBaseRows,
@@ -21,6 +22,7 @@ type Deps = {
     removeAuthUser?: (id: string) => Promise<void>;
     removeFiles?: (plan: StoragePlan) => Promise<void>;
     planStorage?: typeof planUserStorage;
+    reassignParticipants?: typeof reassignUserParticipants;
 };
 
 const TX_OPTIONS = { timeout: 60_000, maxWait: 10_000 };
@@ -149,6 +151,14 @@ export async function deleteAccount(
 
     await removeFiles(plan).catch((e) =>
         console.warn('[account-delete] storage cleanup failed', errorName(e))
+    );
+
+    // keyed by userId (not the users row) so a retry after the commit still runs it
+    await (deps.reassignParticipants ?? reassignUserParticipants)(userId).catch(
+        (e) =>
+            console.error('[account-delete] battle reassign failed', {
+                error: errorName(e),
+            })
     );
 
     await removeAuthUser(userId);
