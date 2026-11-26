@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { PortraitDialog } from '@/components/character-profile/sheet/PortraitDialog';
+import { SheetBanner } from '@/components/character-profile/sheet/SheetBanner';
 import { CharacterAbilitiesSection } from '@/components/characters/abilities/CharacterAbilitiesSection';
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import {
@@ -36,6 +38,8 @@ import { useCampaignSystem } from '@/lib/hooks/systems';
 import { pruneFormChoices } from '@/lib/utils/characters/choices/prune';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
+const FORM_ID = 'character-form';
+
 type NewCharacterFormProps = {
     campaignId: string;
     characterType: CharacterTypeValue;
@@ -66,6 +70,8 @@ export function NewCharacterForm({
     const Ui = systemUiOf(current.key, current.modules);
 
     const hasClasses = statColumnsOf(system).has('classes');
+
+    const [portraitOpen, setPortraitOpen] = useState(false);
 
     const refsRef = useRef<ChoiceRefsView | null>(null);
 
@@ -190,30 +196,53 @@ export function NewCharacterForm({
             : []),
     ];
 
+    const heroRace = races.find((r) => r.name === basicInfo.data.race);
+
     return (
-        <HudFormPage header={{ title: t('form.title'), aside: t('form.aside') }}>
-            <HudForm
-                id="character-form"
-                onSubmit={handleSubmit}
-                error={error}
-                tabs={tabs}
-                actions={
-                    <>
-                        <Button
-                            type="submit"
-                            disabled={isLoading || membersLoading}
-                        >
-                            {isLoading
-                                ? tc('actions.creating')
-                                : t('form.submit')}
-                        </Button>
-                        <Button type="button" variant="outline" asChild>
-                            <Link href={`/campaigns/${id}/dm/characters`}>
-                                {tc('actions.cancel')}
-                            </Link>
-                        </Button>
-                    </>
-                }
+        <HudFormPage
+            width="wide"
+            header={{ title: t('form.title'), aside: t('form.aside') }}
+            actions={
+                <>
+                    <Button
+                        type="submit"
+                        form={FORM_ID}
+                        disabled={isLoading || membersLoading}
+                    >
+                        {isLoading ? tc('actions.creating') : t('form.submit')}
+                    </Button>
+                    <Button type="button" variant="outline" asChild>
+                        <Link href={`/campaigns/${id}/dm/characters`}>
+                            {tc('actions.cancel')}
+                        </Link>
+                    </Button>
+                </>
+            }
+        >
+            <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-6">
+                <SheetBanner
+                    hero={{
+                        name: basicInfo.data.name,
+                        avatar: basicInfo.data.avatar || null,
+                        raceColor: heroRace?.color ?? null,
+                        raceIcon: heroRace?.icon ?? null,
+                        race: basicInfo.data.race,
+                    }}
+                    onPortrait={() => setPortraitOpen(true)}
+                />
+                <HudForm
+                    id={FORM_ID}
+                    onSubmit={handleSubmit}
+                    error={error}
+                    tabs={tabs}
+                />
+            </div>
+            <PortraitDialog
+                open={portraitOpen}
+                onOpenChange={setPortraitOpen}
+                value={basicInfo.data.avatar || ''}
+                onChange={(value) => basicInfo.set('avatar', value)}
+                name={basicInfo.data.name}
             />
         </HudFormPage>
     );
